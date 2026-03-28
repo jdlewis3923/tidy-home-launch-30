@@ -5,7 +5,7 @@ const ThankYou = () => (
   <div className="min-h-screen bg-background flex items-center justify-center px-4 py-16">
     <div className="max-w-[540px] w-full text-center">
       <div className="animate-float inline-block mb-6">
-        <TidyLogo size="lg" />
+        <TidyLogo size="lg" withBackground />
       </div>
 
       <div className="text-5xl mb-4">🎉</div>
