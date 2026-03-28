@@ -20,7 +20,7 @@ const PricingTable = () => (
         </p>
       </FadeIn>
 
-      <FadeIn delay={200}>
+      <FadeIn delay={200} direction="up" scale>
         <div className="mt-12 overflow-x-auto rounded-xl border">
           <table className="w-full text-sm">
             <thead>
@@ -33,7 +33,7 @@ const PricingTable = () => (
             </thead>
             <tbody>
               {rows.map((r, i) => (
-                <tr key={r.service} className={`${i % 2 === 0 ? "bg-background" : "bg-section-alt"} border-t`}>
+                <tr key={r.service} className={`${i % 2 === 0 ? "bg-background" : "bg-section-alt"} border-t transition-colors duration-200 hover:bg-primary/5`}>
                   <td className="text-left px-6 py-4 font-medium text-foreground">{r.service}</td>
                   <td className="px-6 py-4 text-foreground/80">{r.monthly}</td>
                   <td className="px-6 py-4 text-foreground/80">{r.biweekly}</td>
