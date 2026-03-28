@@ -110,7 +110,7 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
       className={`relative py-20 px-4 overflow-hidden transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
     >
       <img src={testimonialsBg} alt="Luxury home interior" loading="lazy" width={1920} height={1080} className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-navy/70" />
+      <div className="absolute inset-0 bg-navy/75" />
 
       <div className="relative z-10 max-w-6xl mx-auto text-center">
         <span className="text-xs uppercase tracking-widest text-primary font-semibold">Reviews</span>
