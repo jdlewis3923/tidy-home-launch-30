@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Star, Check, Users, ChevronLeft, ChevronRight } from "lucide-react";
-import miamiWaterfront from "@/assets/miami-waterfront.jpg";
+import testimonialsBg from "@/assets/testimonials-bg.jpg";
 
 interface TestimonialsProps {
   onOpenPopup: () => void;
@@ -109,12 +109,12 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
       ref={sectionRef}
       className={`relative py-20 px-4 overflow-hidden transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
     >
-      <img src={miamiWaterfront} alt="Miami waterfront" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+      <img src={testimonialsBg} alt="Luxury home interior" loading="lazy" width={1920} height={1080} className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 bg-navy/60" />
 
       <div className="relative z-10 max-w-6xl mx-auto text-center">
         <span className="text-xs uppercase tracking-widest text-primary font-semibold">Reviews</span>
-        <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">Trusted by Miami homeowners</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">Trusted by homeowners</h2>
         <p className="text-primary-foreground/60 mt-4">Real homeowners. Real results.</p>
 
         <div className="flex flex-wrap justify-center gap-6 mt-8 mb-12">
