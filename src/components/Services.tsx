@@ -60,34 +60,32 @@ const Services = () => (
       </FadeIn>
 
       <div className="grid md:grid-cols-3 gap-8">
-        {services.map((s, i) => (
-          <FadeIn key={s.title} delay={i * 120}>
-            <div className={`bg-card border rounded-xl overflow-hidden border-t-4 ${s.accent} h-full flex flex-col hover-lift`}>
-              <div className="relative overflow-hidden">
-                <img src={s.image} alt={s.title} loading="lazy" className="w-full h-48 object-cover" />
-                {s.badge && (
-                  <span className="absolute top-3 left-3 bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full">{s.badge}</span>
-                )}
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <h3 className="text-xl font-bold text-foreground mb-1">{s.title}</h3>
-                <p className="text-xs italic text-text-light mb-3">{s.anchor}</p>
-                <div className="inline-flex gap-2 mb-4">
-                  <span className="bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full">{s.priceMain}</span>
-                  <span className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full">{s.priceSub}</span>
-                </div>
-                <p className="text-sm text-text-mid mb-4 flex-1">{s.description}</p>
-                <ul className="space-y-2">
-                  {s.checks.map((c) => (
-                    <li key={c} className="flex items-start gap-2 text-sm text-foreground/80">
-                      <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
-                      {c}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+        {services.map((s) => (
+          <div key={s.title} className={`bg-card border rounded-xl overflow-hidden border-t-4 ${s.accent} h-full flex flex-col hover-lift`}>
+            <div className="relative overflow-hidden">
+              <img src={s.image} alt={s.title} loading="lazy" className="w-full h-48 object-cover" />
+              {s.badge && (
+                <span className="absolute top-3 left-3 bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full">{s.badge}</span>
+              )}
             </div>
-          </FadeIn>
+            <div className="p-6 flex-1 flex flex-col">
+              <h3 className="text-xl font-bold text-foreground mb-1">{s.title}</h3>
+              <p className="text-xs italic text-text-light mb-3">{s.anchor}</p>
+              <div className="inline-flex gap-2 mb-4">
+                <span className="bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full">{s.priceMain}</span>
+                <span className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full">{s.priceSub}</span>
+              </div>
+              <p className="text-sm text-text-mid mb-4 flex-1">{s.description}</p>
+              <ul className="space-y-2">
+                {s.checks.map((c) => (
+                  <li key={c} className="flex items-start gap-2 text-sm text-foreground/80">
+                    <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         ))}
       </div>
     </div>

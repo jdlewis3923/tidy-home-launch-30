@@ -90,24 +90,17 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
     }, 300);
   }, [currentIndex, maxIndex, isAnimating]);
 
-  // Section fade-in on scroll
-  const sectionRef = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
+  // Auto-slideshow: advance every 4 seconds
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.15 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [maxIndex]);
 
   return (
     <section
-      ref={sectionRef}
-      className={`relative py-20 px-4 overflow-hidden transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      className="relative py-20 px-4 overflow-hidden"
     >
       <img src={testimonialsBg} alt="Luxury home interior" loading="lazy" width={1920} height={1080} className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 bg-navy/75" />
