@@ -19,7 +19,7 @@ const WhyTidy = () => (
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {reasons.map((r, i) => (
-          <FadeIn key={r.title} delay={i * 100} direction={i % 3 === 0 ? "left" : i % 3 === 2 ? "right" : "up"} scale>
+          <FadeIn key={r.title} delay={i * 100}>
             <div className="bg-card border rounded-xl p-6 text-left hover-lift h-full transition-all duration-300">
               <span className="text-2xl">{r.icon}</span>
               <h3 className="text-base font-bold text-foreground mt-3 mb-2">{r.title}</h3>

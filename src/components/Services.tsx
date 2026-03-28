@@ -61,10 +61,10 @@ const Services = () => (
 
       <div className="grid md:grid-cols-3 gap-8">
         {services.map((s, i) => (
-          <FadeIn key={s.title} delay={i * 150} direction={i === 0 ? "left" : i === 2 ? "right" : "up"} scale>
+          <FadeIn key={s.title} delay={i * 120}>
             <div className={`bg-card border rounded-xl overflow-hidden border-t-4 ${s.accent} h-full flex flex-col hover-lift`}>
               <div className="relative overflow-hidden">
-                <img src={s.image} alt={s.title} loading="lazy" className="w-full h-48 object-cover transition-transform duration-700 hover:scale-105" />
+                <img src={s.image} alt={s.title} loading="lazy" className="w-full h-48 object-cover" />
                 {s.badge && (
                   <span className="absolute top-3 left-3 bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full">{s.badge}</span>
                 )}
