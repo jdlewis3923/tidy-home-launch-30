@@ -23,8 +23,8 @@ const WhoItsFor = () => (
     <div className="max-w-5xl mx-auto text-center">
       <FadeIn>
         <span className="text-xs uppercase tracking-widest text-primary font-semibold">Who it's for</span>
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">Built for homeowners who want it handled.</h2>
-        <p className="text-text-mid mt-4 max-w-xl mx-auto">If you'd rather spend your weekend doing anything but managing vendors, Tidy is for you.</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">Built for homeowners who want it handled.</h2>
+        <p className="text-primary-foreground/50 mt-4 max-w-xl mx-auto">If you'd rather spend your weekend doing anything but managing vendors, Tidy is for you.</p>
       </FadeIn>
 
       <div className="grid md:grid-cols-3 gap-6 mt-12">
