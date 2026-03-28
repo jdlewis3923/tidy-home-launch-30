@@ -114,7 +114,7 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
 
       <div className="relative z-10 max-w-6xl mx-auto text-center">
         <span className="text-xs uppercase tracking-widest text-primary font-semibold">Reviews</span>
-        <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">Trusted by Miami homeowners</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">Trusted by homeowners</h2>
         <p className="text-primary-foreground/60 mt-4">Real homeowners. Real results.</p>
 
         <div className="flex flex-wrap justify-center gap-6 mt-8 mb-12">
