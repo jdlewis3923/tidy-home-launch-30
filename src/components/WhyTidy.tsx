@@ -10,7 +10,7 @@ const reasons = [
 ];
 
 const WhyTidy = () => (
-  <section className="relative py-20 px-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(222 47% 11%) 0%, hsl(217 60% 22%) 50%, hsl(224 76% 48%) 100%)' }}>
+  <section className="relative py-20 px-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(215 60% 28%) 0%, hsl(215 70% 42%) 50%, hsl(210 80% 55%) 100%)' }}>
     <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '60px 60px, 80px 80px' }} />
     <div className="relative z-10 max-w-6xl mx-auto text-center">
       <FadeIn>
