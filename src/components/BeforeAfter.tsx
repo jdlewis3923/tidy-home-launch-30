@@ -10,7 +10,7 @@ const BeforeAfter = () => (
       </FadeIn>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <FadeIn direction="left" scale>
+        <FadeIn delay={100}>
           <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-8 text-left h-full">
             <h3 className="text-lg font-bold text-foreground mb-6">❌ Before Tidy</h3>
             <ul className="space-y-4">
