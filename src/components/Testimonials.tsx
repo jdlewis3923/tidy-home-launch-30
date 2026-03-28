@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Star, Check, Users, ChevronLeft, ChevronRight } from "lucide-react";
-import miamiWaterfront from "@/assets/miami-waterfront.jpg";
+import testimonialsBg from "@/assets/testimonials-bg.jpg";
 
 interface TestimonialsProps {
   onOpenPopup: () => void;
