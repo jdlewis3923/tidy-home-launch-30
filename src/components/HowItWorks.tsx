@@ -44,8 +44,8 @@ const HowItWorks = ({ onOpenPopup }: HowItWorksProps) => (
         {steps.map((s, i) => {
           const Icon = s.icon;
           return (
-            <FadeIn key={s.num} delay={i * 150} className="relative flex flex-col items-center">
-              <div className={`w-[104px] h-[104px] rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-6 relative z-10 shadow-lg`}>
+            <FadeIn key={s.num} delay={i * 200} direction="up" scale className="relative flex flex-col items-center">
+              <div className={`w-[104px] h-[104px] rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-6 relative z-10 shadow-lg transition-transform duration-500 hover:scale-110 hover:rotate-3`}>
                 <Icon className="w-12 h-12 text-white" strokeWidth={1.5} />
                 <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gold text-gold-foreground text-xs font-bold flex items-center justify-center shadow">{s.num}</span>
               </div>
@@ -56,7 +56,7 @@ const HowItWorks = ({ onOpenPopup }: HowItWorksProps) => (
         })}
       </div>
 
-      <FadeIn delay={300}>
+      <FadeIn delay={400}>
         <button onClick={onOpenPopup} className="mt-12 bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-8 py-3.5 rounded-xl transition-colors text-base">
           Design Your Plan →
         </button>

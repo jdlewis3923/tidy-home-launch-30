@@ -2,7 +2,7 @@ import { Check } from "lucide-react";
 import cleaningImg from "@/assets/cleaning-interior.jpg";
 import lawnImg from "@/assets/lawn-care.jpg";
 import carImg from "@/assets/car-detailing.jpg";
-import { useRef, useEffect, useState } from "react";
+import FadeIn from "./FadeIn";
 
 const services = [
   {
@@ -40,42 +40,31 @@ const services = [
   },
 ];
 
-const FadeInSection = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const observer = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true); }, { threshold: 0.1 });
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-  return <div ref={ref} className={`${className} transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>{children}</div>;
-};
-
 const Services = () => (
   <section id="services" className="bg-background py-20 px-4">
     <div className="max-w-6xl mx-auto">
-      <FadeInSection className="text-center mb-12">
+      <FadeIn className="text-center mb-12">
         <span className="text-xs uppercase tracking-widest text-primary font-semibold">What's Included</span>
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">Everything your home needs. One simple plan.</h2>
         <p className="text-text-mid mt-4 max-w-2xl mx-auto">
           Three essential services. One subscription. Zero coordination required. Your schedule, your frequency — handled automatically every month.
         </p>
-      </FadeInSection>
+      </FadeIn>
 
-      <FadeInSection className="mb-12">
+      <FadeIn className="mb-12" delay={100}>
         <div className="bg-gradient-to-r from-primary/10 to-success/10 border border-primary/20 rounded-xl px-6 py-4 text-center">
           <span className="text-sm font-medium text-foreground">
             💡 Bundle services and save automatically — 2 services: <strong>15% off</strong> · 3 services: <strong>20% off</strong> — Applied at checkout automatically
           </span>
         </div>
-      </FadeInSection>
+      </FadeIn>
 
       <div className="grid md:grid-cols-3 gap-8">
         {services.map((s, i) => (
-          <FadeInSection key={s.title} className={`hover-lift`} >
-            <div className={`bg-card border rounded-xl overflow-hidden border-t-4 ${s.accent} h-full flex flex-col`}>
-              <div className="relative">
-                <img src={s.image} alt={s.title} loading="lazy" className="w-full h-48 object-cover" />
+          <FadeIn key={s.title} delay={i * 150} direction={i === 0 ? "left" : i === 2 ? "right" : "up"} scale>
+            <div className={`bg-card border rounded-xl overflow-hidden border-t-4 ${s.accent} h-full flex flex-col hover-lift`}>
+              <div className="relative overflow-hidden">
+                <img src={s.image} alt={s.title} loading="lazy" className="w-full h-48 object-cover transition-transform duration-700 hover:scale-105" />
                 {s.badge && (
                   <span className="absolute top-3 left-3 bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full">{s.badge}</span>
                 )}
@@ -98,7 +87,7 @@ const Services = () => (
                 </ul>
               </div>
             </div>
-          </FadeInSection>
+          </FadeIn>
         ))}
       </div>
     </div>
