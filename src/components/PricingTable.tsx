@@ -20,7 +20,7 @@ const PricingTable = () => (
         </p>
       </FadeIn>
 
-      <FadeIn delay={200} direction="up" scale>
+      <FadeIn delay={200}>
         <div className="mt-12 overflow-x-auto rounded-xl border">
           <table className="w-full text-sm">
             <thead>
