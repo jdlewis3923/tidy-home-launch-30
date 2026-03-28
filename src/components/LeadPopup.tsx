@@ -74,7 +74,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
   if (!isOpen) return null;
 
   const inputClass = (field: string) =>
-    `w-full bg-white border-2 ${errors[field] ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all`;
+    `w-full bg-white/10 border ${errors[field] ? "border-red-400" : "border-white/15"} rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-white/35 focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20 transition-all`;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
