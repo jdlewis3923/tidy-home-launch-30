@@ -19,7 +19,7 @@ const personas = [
 ];
 
 const WhoItsFor = () => (
-  <section className="bg-section-alt py-20 px-4">
+  <section className="bg-navy py-20 px-4">
     <div className="max-w-5xl mx-auto text-center">
       <FadeIn>
         <span className="text-xs uppercase tracking-widest text-primary font-semibold">Who it's for</span>
