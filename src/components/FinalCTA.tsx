@@ -7,16 +7,15 @@ interface FinalCTAProps {
 
 const FinalCTA = ({ onOpenPopup }: FinalCTAProps) => (
   <section className="bg-gradient-to-b from-navy to-primary-deep py-24 px-4 relative overflow-hidden">
-    <div className="relative z-10 max-w-2xl mx-auto text-center">
-      <div className="animate-float inline-block mb-8">
+    <div className="relative z-10 max-w-2xl mx-auto text-center flex flex-col items-center">
+      <div className="animate-float mb-8">
         <TidyLogo size="lg" withBackground />
       </div>
 
-      <span className="text-xs uppercase tracking-widest text-primary-foreground/40 font-semibold">Ready?</span>
-      <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mt-3 mb-4">You'll never book a home service again.</h2>
+      <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-4">You'll never book a home service again.</h2>
       <p className="text-primary-foreground/50 mb-8">Limited founding memberships available in your area. Takes 60 seconds. No commitment required.</p>
 
-      <button onClick={onOpenPopup} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl transition-all hover:scale-105 shadow-lg">
+      <button onClick={onOpenPopup} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]">
         Get Started — Request Early Access →
       </button>
 
