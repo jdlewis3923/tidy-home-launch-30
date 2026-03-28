@@ -86,11 +86,11 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
         </button>
 
         {/* Dark Header */}
-        <div className="bg-[#1e293b] rounded-t-3xl px-8 pt-10 pb-8 text-center">
+        <div className="bg-gradient-to-r from-[#0f172a] to-[#1e3a5f] rounded-t-3xl px-8 pt-10 pb-8 text-center">
           <div className="flex justify-center mb-5">
             <TidyLogo size="lg" withBackground />
           </div>
-          <span className="inline-block bg-yellow-400/20 text-yellow-300 text-xs font-bold px-5 py-2 rounded-full mb-4 tracking-wide uppercase border border-yellow-400/25">
+          <span className="inline-block bg-yellow-400 text-gray-900 text-xs font-bold px-5 py-2 rounded-full mb-4 tracking-wide uppercase">
             🎉 Founding Member Offer
           </span>
           <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
