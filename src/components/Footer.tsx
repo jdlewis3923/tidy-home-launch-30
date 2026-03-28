@@ -56,7 +56,7 @@ const Footer = () => (
         </div>
       </div>
       <p className="text-[10px] text-primary-foreground/20 mt-4 text-center">
-        Serving 33183 Kendall · 33186 Kendall West · 33156 Pinecrest & surrounding Miami neighborhoods with recurring house cleaning, lawn care, and car detailing subscriptions.
+        Serving 33183 Kendall · 33186 Kendall West · 33156 Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.
       </p>
     </div>
   </footer>
