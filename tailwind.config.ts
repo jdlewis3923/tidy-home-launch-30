@@ -91,10 +91,19 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "pulse-gold": {
+          "0%, 100%": {
+            boxShadow: "0 0 24px rgba(245,197,24,0.4)",
+          },
+          "50%": {
+            boxShadow: "0 0 48px rgba(245,197,24,0.7), 0 0 80px rgba(245,197,24,0.3)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-gold": "pulse-gold 2s ease-in-out infinite",
       },
     },
   },
