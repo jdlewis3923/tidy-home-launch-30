@@ -4,11 +4,6 @@ const zipData: Record<string, string> = {
   "33183": "Kendall",
   "33186": "Kendall West",
   "33156": "Pinecrest",
-  "33173": "South Kendall",
-  "33176": "Sunset",
-  "33146": "Coral Gables",
-  "33143": "South Miami",
-  "33178": "Doral",
 };
 
 const ZipChecker = () => {

@@ -8,7 +8,7 @@ interface FinalCTAProps {
 const FinalCTA = ({ onOpenPopup }: FinalCTAProps) => (
   <section className="bg-gradient-to-b from-navy to-primary-deep py-24 px-4 relative overflow-hidden">
     <div className="relative z-10 max-w-2xl mx-auto text-center flex flex-col items-center">
-      <div className="animate-float mb-8">
+      <div className="animate-bounce-float mb-8">
         <TidyLogo size="lg" withBackground />
       </div>
 

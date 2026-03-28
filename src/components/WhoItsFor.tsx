@@ -30,10 +30,10 @@ const WhoItsFor = () => (
       <div className="grid md:grid-cols-3 gap-6 mt-12">
         {personas.map((p, i) => (
           <FadeIn key={p.title} delay={i * 150}>
-            <div className="bg-card border rounded-xl p-8 text-left hover-lift h-full">
+            <div className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-xl p-8 text-left hover-lift h-full">
               <span className="text-3xl">{p.icon}</span>
-              <h3 className="text-lg font-bold text-foreground mt-4 mb-2">{p.title}</h3>
-              <p className="text-sm text-text-mid">{p.desc}</p>
+              <h3 className="text-lg font-bold text-primary-foreground mt-4 mb-2">{p.title}</h3>
+              <p className="text-sm text-primary-foreground/60">{p.desc}</p>
             </div>
           </FadeIn>
         ))}

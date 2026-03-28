@@ -6,7 +6,7 @@ const reasons = [
   { icon: "🛡️", title: "Licensed & Insured", desc: "Every professional is background-checked and fully insured. Photo verification submitted after every visit." },
   { icon: "📅", title: "Always on Schedule", desc: "Weekly, biweekly, or monthly service. No delays, no chasing vendors, no rescheduling headaches." },
   { icon: "💳", title: "One Simple Bill", desc: "All services under one monthly subscription. Transparent pricing, no surprise charges, secure payments via Stripe." },
-  { icon: "📍", title: "Miami-Local", desc: "Built for Florida homes. Serving Kendall, Pinecrest, Coral Gables, South Miami, Doral & surrounding neighborhoods." },
+  { icon: "📍", title: "Miami-Local", desc: "Built for Florida homes. Serving Kendall, Kendall West & Pinecrest neighborhoods." },
 ];
 
 const WhyTidy = () => (
