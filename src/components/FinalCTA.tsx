@@ -9,7 +9,7 @@ const FinalCTA = ({ onOpenPopup }: FinalCTAProps) => (
   <section className="bg-gradient-to-b from-navy to-primary-deep py-24 px-4 relative overflow-hidden">
     <div className="relative z-10 max-w-2xl mx-auto text-center">
       <div className="animate-float inline-block mb-8">
-        <TidyLogo size="lg" />
+        <TidyLogo size="lg" withBackground />
       </div>
 
       <span className="text-xs uppercase tracking-widest text-primary-foreground/40 font-semibold">Ready?</span>

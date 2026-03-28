@@ -5,7 +5,7 @@ const Footer = () => (
   <footer className="bg-navy-deep py-16 px-4">
     <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-12">
       <div>
-        <TidyLogo size="md" />
+        <TidyLogo size="md" withBackground />
         <p className="text-primary-foreground/50 text-sm mt-4 leading-relaxed">
           Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Kendall, Pinecrest & beyond.
         </p>
