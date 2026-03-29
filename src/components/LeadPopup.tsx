@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import TidyLogo from "./TidyLogo";
 
-const WEBHOOK_URL = "YOUR_ZAPIER_WEBHOOK_URL_HERE";
+const WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/26380119/un5oqdu/";
 
 interface LeadPopupProps {
   isOpen: boolean;
