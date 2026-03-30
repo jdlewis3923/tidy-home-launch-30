@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import TidyLogo from "./TidyLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pushEvent } from "@/lib/tracking";
 
 const WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/26380119/un5oqdu/";
 
