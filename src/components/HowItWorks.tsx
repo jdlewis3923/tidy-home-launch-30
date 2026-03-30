@@ -1,6 +1,7 @@
 import { CalendarCheck, ShieldCheck, Sofa } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pushEvent } from "@/lib/tracking";
 
 interface HowItWorksProps {
   onOpenPopup: () => void;
