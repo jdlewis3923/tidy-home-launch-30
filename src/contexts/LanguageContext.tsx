@@ -48,6 +48,7 @@ const translations: Record<string, string> = {
 
   // Services
   "What's Included": "Qué Incluye",
+  "Everything your home needs. One plan.": "Todo lo que tu hogar necesita. Un plan.",
   "Everything your home needs. One simple plan.": "Todo lo que tu hogar necesita. Un plan simple.",
   "Three essential services. One subscription. Zero coordination required. Your schedule, your frequency — handled automatically every month.": "Tres servicios esenciales. Una suscripción. Cero coordinación. Tu horario, tu frecuencia — gestionado automáticamente cada mes.",
   "House Cleaning": "Limpieza del Hogar",
