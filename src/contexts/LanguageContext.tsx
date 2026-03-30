@@ -246,7 +246,10 @@ const LanguageContext = createContext<LanguageContextType>({
 export const useLanguage = () => useContext(LanguageContext);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>(() => {
+    const browserLang = navigator.language || (navigator as any).userLanguage || "en";
+    return browserLang.startsWith("es") ? "es" : "en";
+  });
 
   const t = useCallback((text: string): string => {
     if (language === "en") return text;
