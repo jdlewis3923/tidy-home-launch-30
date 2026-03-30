@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import TidyLogo from "@/components/TidyLogo";
 import { Link } from "react-router-dom";
+import { pushEvent } from "@/lib/tracking";
 
 const ThankYou = () => (
   <div className="min-h-screen bg-background flex items-center justify-center px-4 py-16">
