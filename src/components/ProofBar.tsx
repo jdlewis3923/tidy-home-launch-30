@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const stats = [
   { value: 100, suffix: "+", label: "Miami Homeowners" },
@@ -8,10 +9,11 @@ const stats = [
   { value: 0, suffix: "", label: "Rebooking Required" },
 ];
 
-const AnimatedNumber = ({ target, suffix, isDecimal }: { target: number; suffix: string; isDecimal?: boolean }) => {
+const AnimatedNumber = ({ target, suffix, label, isDecimal }: { target: number; suffix: string; label: string; isDecimal?: boolean }) => {
   const [count, setCount] = useState(0);
   const [started, setStarted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -44,7 +46,7 @@ const AnimatedNumber = ({ target, suffix, isDecimal }: { target: number; suffix:
       <div className="text-3xl md:text-4xl font-extrabold text-primary-foreground">
         {isDecimal ? count.toFixed(1) : Math.floor(count)}{suffix}
       </div>
-      <div className="text-xs uppercase tracking-wider text-primary-foreground/50 mt-1 font-medium">{stats.find(s => s.value === target)?.label}</div>
+      <div className="text-xs uppercase tracking-wider text-primary-foreground/50 mt-1 font-medium">{t(label)}</div>
     </div>
   );
 };
@@ -53,7 +55,7 @@ const ProofBar = () => (
   <section className="bg-navy py-8">
     <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-8 md:gap-0 md:justify-between px-4">
       {stats.map((s) => (
-        <AnimatedNumber key={s.label} target={s.value} suffix={s.suffix} isDecimal={s.isDecimal} />
+        <AnimatedNumber key={s.label} target={s.value} suffix={s.suffix} label={s.label} isDecimal={s.isDecimal} />
       ))}
     </div>
   </section>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import TidyLogo from "./TidyLogo";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/26380119/un5oqdu/";
 
@@ -14,6 +15,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", zip: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useLanguage();
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -73,9 +75,6 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
 
   if (!isOpen) return null;
 
-  const inputClass = (field: string) =>
-    `w-full bg-white/10 border ${errors[field] ? "border-red-400" : "border-white/15"} rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-white/35 focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20 transition-all`;
-
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
@@ -85,43 +84,41 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Dark Header */}
         <div className="bg-gradient-to-r from-[#0f172a] to-[#1e3a5f] rounded-t-3xl px-8 pt-10 pb-8 text-center">
           <div className="flex justify-center mb-5">
             <TidyLogo size="lg" withBackground />
           </div>
           <span className="inline-block bg-yellow-400 text-gray-900 text-xs font-bold px-5 py-2 rounded-full mb-4 tracking-wide uppercase">
-            🎉 Founding Member Offer
+            {t("🎉 Founding Member Offer")}
           </span>
           <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
-            Get $50 Off Your<br />First Month
+            {t("Get $50 Off Your")}<br />{t("First Month")}
           </h3>
           <p className="text-slate-300/70 text-sm mt-3 max-w-sm mx-auto leading-relaxed">
-            Join Miami homeowners who have already simplified their home. Lock in founding pricing before we launch publicly.
+            {t("Join Miami homeowners who have already simplified their home. Lock in founding pricing before we launch publicly.")}
           </p>
         </div>
 
-        {/* White Form Area */}
         <form onSubmit={handleSubmit} className="bg-white rounded-b-3xl px-8 pb-8 pt-6 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <input className={`w-full bg-gray-100 border ${errors.firstName ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder="First Name" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+              <input className={`w-full bg-gray-100 border ${errors.firstName ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("First Name")} value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
               {errors.firstName && <p className="text-xs text-red-500 mt-1 font-medium">{errors.firstName}</p>}
             </div>
             <div>
-              <input className={`w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder="Last Name" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+              <input className={`w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("Last Name")} value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
             </div>
           </div>
           <div>
-            <input className={`w-full bg-gray-100 border ${errors.email ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder="Email Address" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <input className={`w-full bg-gray-100 border ${errors.email ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("Email Address")} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             {errors.email && <p className="text-xs text-red-500 mt-1 font-medium">{errors.email}</p>}
           </div>
           <div>
-            <input className={`w-full bg-gray-100 border ${errors.phone ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder="Phone Number" type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <input className={`w-full bg-gray-100 border ${errors.phone ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("Phone Number")} type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             {errors.phone && <p className="text-xs text-red-500 mt-1 font-medium">{errors.phone}</p>}
           </div>
           <div>
-            <input className={`w-full bg-gray-100 border ${errors.zip ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder="ZIP Code" value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value })} />
+            <input className={`w-full bg-gray-100 border ${errors.zip ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("ZIP Code")} value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value })} />
             {errors.zip && <p className="text-xs text-red-500 mt-1 font-medium">{errors.zip}</p>}
           </div>
 
@@ -130,19 +127,19 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
             disabled={isSubmitting}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 rounded-xl transition-all text-base disabled:opacity-50 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
           >
-            {isSubmitting ? "Submitting..." : "Claim My Founding Spot →"}
+            {isSubmitting ? t("Submitting...") : t("Claim My Founding Spot →")}
           </button>
 
           <p className="text-[11px] text-gray-400 leading-relaxed text-center">
             By submitting, you agree to receive SMS and email communications from Tidy Home Concierge LLC regarding your account, services, and promotions. Reply STOP to opt out anytime. Message & data rates may apply. View our{" "}
-            <a href="/privacy" className="text-blue-500 underline">Privacy Policy</a>.
+            <a href="/privacy" className="text-blue-500 underline">{t("Privacy Policy")}</a>.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 pt-1">
-            {["No commitment", "Cancel anytime", "Secure & private"].map((t) => (
-              <span key={t} className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+            {["No commitment", "Cancel anytime", "Secure & private"].map((item) => (
+              <span key={item} className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
                 <Check className="w-3.5 h-3.5 text-emerald-500" />
-                {t}
+                {t(item)}
               </span>
             ))}
           </div>

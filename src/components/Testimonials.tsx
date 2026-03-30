@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Star, Check, Users } from "lucide-react";
 import testimonialsBg from "@/assets/testimonials-bg.jpg";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TestimonialsProps {
   onOpenPopup: () => void;
@@ -26,6 +27,7 @@ const GAP = 24;
 const SPEED = 0.5;
 
 const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
+  const { t } = useLanguage();
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const animRef = useRef<number>(0);
@@ -56,19 +58,19 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
       <div className="absolute inset-0 bg-navy/75" />
 
       <div className="relative z-10 max-w-6xl mx-auto text-center">
-        <span className="text-xs uppercase tracking-widest text-primary font-semibold">Reviews</span>
-        <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">Trusted by homeowners</h2>
-        <p className="text-primary-foreground/60 mt-4">Real homeowners. Real results.</p>
+        <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Reviews")}</span>
+        <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">{t("Trusted by homeowners")}</h2>
+        <p className="text-primary-foreground/60 mt-4">{t("Real homeowners. Real results.")}</p>
 
         <div className="flex flex-wrap justify-center gap-6 mt-8 mb-12">
           <span className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-2 text-sm text-primary-foreground">
-            <Star className="w-4 h-4 text-gold fill-gold" /> Rated 4.9 by homeowners
+            <Star className="w-4 h-4 text-gold fill-gold" /> {t("Rated 4.9 by homeowners")}
           </span>
           <span className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-2 text-sm text-primary-foreground">
-            <Users className="w-4 h-4" /> 100+ Miami members
+            <Users className="w-4 h-4" /> {t("100+ Miami members")}
           </span>
           <span className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-2 text-sm text-primary-foreground">
-            <Check className="w-4 h-4 text-success" /> Licensed & Insured
+            <Check className="w-4 h-4 text-success" /> {t("Licensed & Insured")}
           </span>
         </div>
 
@@ -82,9 +84,9 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
             className="flex will-change-transform"
             style={{ gap: `${GAP}px` }}
           >
-            {doubledTestimonials.map((t, idx) => (
+            {doubledTestimonials.map((t_item, idx) => (
               <div
-                key={`${t.name}-${idx}`}
+                key={`${t_item.name}-${idx}`}
                 className="shrink-0"
                 style={{ width: `${CARD_WIDTH}px` }}
               >
@@ -95,8 +97,8 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
                       <Star key={i} className="w-4 h-4 text-gold fill-gold" />
                     ))}
                   </div>
-                  <p className="text-sm text-foreground/80 mb-6 italic">"{t.quote}"</p>
-                  <p className="text-sm font-semibold text-foreground">— {t.name}, {t.location}</p>
+                  <p className="text-sm text-foreground/80 mb-6 italic">"{t_item.quote}"</p>
+                  <p className="text-sm font-semibold text-foreground">— {t_item.name}, {t_item.location}</p>
                 </div>
               </div>
             ))}
@@ -104,7 +106,7 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
         </div>
 
         <button onClick={onOpenPopup} className="mt-12 bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-8 py-3.5 rounded-xl transition-colors">
-          Request Early Access →
+          {t("Request Early Access →")}
         </button>
       </div>
     </section>

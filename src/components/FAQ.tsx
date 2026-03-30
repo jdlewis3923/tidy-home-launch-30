@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import FadeIn from "./FadeIn";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const faqSections = [
   {
@@ -51,20 +52,21 @@ const faqSections = [
 
 const FAQ = () => {
   const [openItem, setOpenItem] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   return (
     <section id="faq" className="bg-section-alt py-20 px-4">
       <div className="max-w-3xl mx-auto text-center">
         <FadeIn>
-          <span className="text-xs uppercase tracking-widest text-primary font-semibold">FAQ</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3 mb-12">Common questions</h2>
+          <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("FAQ")}</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3 mb-12">{t("Common questions")}</h2>
         </FadeIn>
 
         <div className="space-y-8 text-left">
           {faqSections.map((section, si) => (
             <FadeIn key={section.title} delay={si * 100} direction="up">
               <div>
-                <h3 className="text-sm font-bold text-primary uppercase tracking-wide mb-4">{section.title}</h3>
+                <h3 className="text-sm font-bold text-primary uppercase tracking-wide mb-4">{t(section.title)}</h3>
                 <div className="space-y-2">
                   {section.items.map((item) => {
                     const key = `${section.title}-${item.q}`;
@@ -75,7 +77,7 @@ const FAQ = () => {
                           onClick={() => setOpenItem(isOpen ? null : key)}
                           className="w-full flex items-center justify-between px-5 py-4 text-left"
                         >
-                          <span className="text-sm font-medium text-foreground">{item.q}</span>
+                          <span className="text-sm font-medium text-foreground">{t(item.q)}</span>
                           <ChevronDown className={`w-4 h-4 text-text-light transition-transform duration-300 flex-shrink-0 ${isOpen ? "rotate-180" : ""}`} />
                         </button>
                         <div
@@ -86,7 +88,7 @@ const FAQ = () => {
                           }}
                         >
                           <div className="px-5 pb-4">
-                            <p className="text-sm text-text-mid">{item.a}</p>
+                            <p className="text-sm text-text-mid">{t(item.a)}</p>
                           </div>
                         </div>
                       </div>
