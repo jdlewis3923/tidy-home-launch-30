@@ -143,6 +143,7 @@ const translations: Record<string, string> = {
   "Bundle discount auto-applied at checkout · 2 services = 15% off · 3 services = 20% off · Cancel anytime": "Descuento por combo aplicado automáticamente · 2 servicios = 15% descuento · 3 servicios = 20% descuento · Cancela cuando quieras",
 
   // FAQ
+  "Most customers never need to think about any of this — but we've got you covered.": "La mayoría de los clientes nunca necesitan pensar en esto — pero te tenemos cubierto.",
   "Common questions": "Preguntas comunes",
   "Getting Started": "Primeros Pasos",
   "Services & Scheduling": "Servicios y Programación",
