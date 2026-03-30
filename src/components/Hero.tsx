@@ -1,5 +1,6 @@
 import heroImg from "@/assets/hero-miami-home.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pushEvent } from "@/lib/tracking";
 
 interface HeroProps {
   onOpenPopup: () => void;
