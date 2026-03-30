@@ -48,10 +48,7 @@ const Services = () => {
       <div className="max-w-6xl mx-auto">
         <FadeIn className="text-center mb-12">
           <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("What's Included")}</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Everything your home needs. One simple plan.")}</h2>
-          <p className="text-text-mid mt-4 max-w-2xl mx-auto">
-            {t("Three essential services. One subscription. Zero coordination required. Your schedule, your frequency — handled automatically every month.")}
-          </p>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Everything your home needs. One plan.")}</h2>
         </FadeIn>
 
         <FadeIn className="mb-12" delay={100}>

@@ -59,7 +59,8 @@ const FAQ = () => {
       <div className="max-w-3xl mx-auto text-center">
         <FadeIn>
           <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("FAQ")}</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3 mb-12">{t("Common questions")}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Common questions")}</h2>
+          <p className="text-text-mid mt-3 mb-12">{t("Most customers never need to think about any of this — but we've got you covered.")}</p>
         </FadeIn>
 
         <div className="space-y-8 text-left">

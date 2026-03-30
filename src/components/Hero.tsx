@@ -33,7 +33,9 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         </h1>
 
         <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-8 leading-relaxed">
-          {t("Cleaning, lawn care, and car detailing — fully managed for you. No booking, no vendors, no reminders. Ever.")}
+          {t("We handle scheduling, timing, and everything in between.")}
+          <br />
+          {t("Just set it — we'll take care of the rest.")}
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mb-8">

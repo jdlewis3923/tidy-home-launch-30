@@ -51,14 +51,18 @@ const AnimatedNumber = ({ target, suffix, label, isDecimal }: { target: number; 
   );
 };
 
-const ProofBar = () => (
-  <section className="bg-navy py-8">
-    <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-8 md:gap-0 md:justify-between px-4">
-      {stats.map((s) => (
-        <AnimatedNumber key={s.label} target={s.value} suffix={s.suffix} label={s.label} isDecimal={s.isDecimal} />
-      ))}
-    </div>
-  </section>
-);
+const ProofBar = () => {
+  const { t } = useLanguage();
+  return (
+    <section className="bg-navy py-8">
+      <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-8 md:gap-0 md:justify-between px-4">
+        {stats.map((s) => (
+          <AnimatedNumber key={s.label} target={s.value} suffix={s.suffix} label={s.label} isDecimal={s.isDecimal} />
+        ))}
+      </div>
+      <p className="text-center text-xs text-primary-foreground/40 mt-4 tracking-wide">{t("Consistent service. No follow-ups. No hassle.")}</p>
+    </section>
+  );
+};
 
 export default ProofBar;
