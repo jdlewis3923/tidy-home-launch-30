@@ -14,6 +14,7 @@ const ThankYou = () => {
   }, []);
 
   return (
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-16">
     <div className="max-w-[540px] w-full text-center">
       <div className="animate-float inline-block mb-6">
         <TidyLogo size="lg" withBackground />
