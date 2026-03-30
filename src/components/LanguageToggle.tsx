@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Globe } from "lucide-react";
 
-const translations: Record<string, Record<string, string>> = {
+const translations: Record<string, string> = {
   // Navbar
   "Services": "Servicios",
   "How It Works": "Cómo Funciona",
