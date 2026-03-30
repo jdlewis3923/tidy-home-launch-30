@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { initScrollTracking, pushEvent } from "@/lib/tracking";
 import Navbar from "@/components/Navbar";
 import AnnouncementTicker from "@/components/AnnouncementTicker";
 import Hero from "@/components/Hero";
