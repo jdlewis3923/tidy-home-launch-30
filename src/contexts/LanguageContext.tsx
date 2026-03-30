@@ -133,6 +133,7 @@ const translations: Record<string, string> = {
   "Built for Florida homes. Serving Kendall, Kendall West & Pinecrest neighborhoods.": "Hecho para hogares de Florida. Sirviendo las comunidades de Kendall, Kendall West y Pinecrest.",
 
   // Pricing
+  "Everything runs automatically — no coordination needed. Modify, skip, or adjust anytime.": "Todo funciona automáticamente — sin coordinación necesaria. Modifica, omite o ajusta en cualquier momento.",
   "Simple, transparent rates. No surprises.": "Tarifas simples y transparentes. Sin sorpresas.",
   "Pay monthly. Cancel anytime. Higher frequency = lower cost per visit. Bundle 2+ services for automatic discounts.": "Paga mensualmente. Cancela cuando quieras. Mayor frecuencia = menor costo por visita. Combina 2+ servicios para descuentos automáticos.",
   "Service": "Servicio",
