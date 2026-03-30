@@ -53,6 +53,7 @@ const ThankYou = () => {
       </Link>
     </div>
   </div>
-);
+  );
+};
 
 export default ThankYou;

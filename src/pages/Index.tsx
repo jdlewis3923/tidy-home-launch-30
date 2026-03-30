@@ -32,6 +32,17 @@ const Index = () => {
     return Date.now() - parseInt(dismissed) > DISMISS_DURATION;
   }, []);
 
+  // Scroll depth tracking
+  useEffect(() => {
+    const cleanup = initScrollTracking();
+    return cleanup;
+  }, []);
+
+  // Page view
+  useEffect(() => {
+    pushEvent("page_view", { page: "/" });
+  }, []);
+
   // Auto-fire after 8 seconds
   useEffect(() => {
     const timer = setTimeout(() => {

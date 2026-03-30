@@ -48,6 +48,17 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
           timestamp: new Date().toISOString(),
         }),
       });
+      // Fire lead submission + conversion event
+      pushEvent("lead_form_submit", {
+        source: "website_popup",
+        email: form.email,
+        zip: form.zip,
+      });
+      pushEvent("conversion", {
+        send_to: "AW-CONVERSION_ID/CONVERSION_LABEL",
+        event_category: "lead",
+        event_label: "early_access_signup",
+      });
     } catch (err) {
       console.error("Webhook error:", err);
     }

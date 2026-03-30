@@ -61,7 +61,7 @@ const HowItWorks = ({ onOpenPopup }: HowItWorksProps) => {
         </div>
 
         <FadeIn delay={400}>
-          <button onClick={onOpenPopup} className="mt-12 bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-8 py-3.5 rounded-xl transition-colors text-base">
+          <button id="cta-how-it-works" data-track="cta_how_it_works" onClick={() => { pushEvent("cta_click", { cta_id: "how_it_works", cta_text: "Design Your Plan" }); onOpenPopup(); }} className="mt-12 bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-8 py-3.5 rounded-xl transition-colors text-base">
             {t("Design Your Plan →")}
           </button>
         </FadeIn>

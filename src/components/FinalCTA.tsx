@@ -20,7 +20,7 @@ const FinalCTA = ({ onOpenPopup }: FinalCTAProps) => {
         <p className="text-primary-foreground/70 font-medium mb-2">{t("One setup. Everything handled.")}</p>
         <p className="text-primary-foreground/50 mb-8">{t("No contracts. No payments until launch.")}</p>
 
-        <button onClick={onOpenPopup} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)] animate-pulse-gold">
+        <button id="cta-final" data-track="cta_final" onClick={() => { pushEvent("cta_click", { cta_id: "final_cta", cta_text: "Get Started" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)] animate-pulse-gold">
           {t("Get Started — Request Early Access →")}
         </button>
 

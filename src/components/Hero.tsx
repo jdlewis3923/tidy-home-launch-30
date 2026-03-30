@@ -47,7 +47,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           ))}
         </div>
 
-        <button onClick={onOpenPopup} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-lg">
+        <button id="cta-hero" data-track="cta_hero" onClick={() => { pushEvent("cta_click", { cta_id: "hero", cta_text: "Request Early Access" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-lg">
           {t("Request Early Access — Get $50 Off →")}
         </button>
 
