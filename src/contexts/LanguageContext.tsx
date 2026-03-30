@@ -41,8 +41,7 @@ const translations: Record<string, string> = {
   "ZIP Codes Served": "Códigos Postales",
   "Rebooking Required": "Reagendamiento Necesario",
 
-  // Trust bar
-  "No Long-Term Contracts": "Sin Contratos a Largo Plazo",
+  // Services
 
   // Services
   "What's Included": "Qué Incluye",
