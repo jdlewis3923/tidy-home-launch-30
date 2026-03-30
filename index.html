@@ -50,5 +50,20 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Remove Lovable badge from DOM
+      (function() {
+        function removeBadge() {
+          document.querySelectorAll('#lovable-badge, a[href*="lovable.dev"], [data-lovable]').forEach(function(el) {
+            el.remove();
+          });
+        }
+        removeBadge();
+        var observer = new MutationObserver(function(mutations) {
+          removeBadge();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      })();
+    </script>
   </body>
 </html>
