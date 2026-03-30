@@ -1,8 +1,20 @@
+import { useEffect } from "react";
 import TidyLogo from "@/components/TidyLogo";
 import { Link } from "react-router-dom";
+import { pushEvent } from "@/lib/tracking";
 
-const ThankYou = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center px-4 py-16">
+const ThankYou = () => {
+  useEffect(() => {
+    pushEvent("page_view", { page: "/thank-you" });
+    pushEvent("conversion", {
+      send_to: "AW-CONVERSION_ID/CONVERSION_LABEL",
+      event_category: "lead",
+      event_label: "thank_you_page",
+    });
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-16">
     <div className="max-w-[540px] w-full text-center">
       <div className="animate-float inline-block mb-6">
         <TidyLogo size="lg" withBackground />
@@ -42,6 +54,7 @@ const ThankYou = () => (
       </Link>
     </div>
   </div>
-);
+  );
+};
 
 export default ThankYou;

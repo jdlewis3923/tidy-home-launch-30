@@ -3,6 +3,7 @@ import TidyLogo from "./TidyLogo";
 import LanguageToggle from "./LanguageToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Menu, X } from "lucide-react";
+import { pushEvent } from "@/lib/tracking";
 
 interface NavbarProps {
   onOpenPopup: () => void;
@@ -47,7 +48,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
             </button>
           ))}
           <LanguageToggle />
-          <button onClick={onOpenPopup} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
+          <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: "Request Early Access" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
             {t("Request Early Access")}
           </button>
         </div>
@@ -69,7 +70,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
               {t(l.label)}
             </button>
           ))}
-          <button onClick={() => { setMobileOpen(false); onOpenPopup(); }} className="w-full mt-3 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors">
+          <button id="cta-navbar-mobile" data-track="cta_navbar_mobile" onClick={() => { setMobileOpen(false); pushEvent("cta_click", { cta_id: "navbar_mobile", cta_text: "Request Early Access" }); onOpenPopup(); }} className="w-full mt-3 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors">
             {t("Request Early Access")}
           </button>
         </div>

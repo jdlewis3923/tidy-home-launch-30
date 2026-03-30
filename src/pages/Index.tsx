@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { initScrollTracking, pushEvent } from "@/lib/tracking";
 import Navbar from "@/components/Navbar";
 import AnnouncementTicker from "@/components/AnnouncementTicker";
 import Hero from "@/components/Hero";
@@ -29,6 +30,17 @@ const Index = () => {
     const dismissed = localStorage.getItem(POPUP_DISMISS_KEY);
     if (!dismissed) return true;
     return Date.now() - parseInt(dismissed) > DISMISS_DURATION;
+  }, []);
+
+  // Scroll depth tracking
+  useEffect(() => {
+    const cleanup = initScrollTracking();
+    return cleanup;
+  }, []);
+
+  // Page view
+  useEffect(() => {
+    pushEvent("page_view", { page: "/" });
   }, []);
 
   // Auto-fire after 8 seconds

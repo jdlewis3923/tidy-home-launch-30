@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import TidyLogo from "./TidyLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pushEvent } from "@/lib/tracking";
 
 const WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/26380119/un5oqdu/";
 
@@ -46,6 +47,17 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
           source: "website_popup",
           timestamp: new Date().toISOString(),
         }),
+      });
+      // Fire lead submission + conversion event
+      pushEvent("lead_form_submit", {
+        source: "website_popup",
+        email: form.email,
+        zip: form.zip,
+      });
+      pushEvent("conversion", {
+        send_to: "AW-CONVERSION_ID/CONVERSION_LABEL",
+        event_category: "lead",
+        event_label: "early_access_signup",
       });
     } catch (err) {
       console.error("Webhook error:", err);
