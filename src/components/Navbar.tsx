@@ -3,6 +3,7 @@ import TidyLogo from "./TidyLogo";
 import LanguageToggle from "./LanguageToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Menu, X } from "lucide-react";
+import { pushEvent } from "@/lib/tracking";
 
 interface NavbarProps {
   onOpenPopup: () => void;
