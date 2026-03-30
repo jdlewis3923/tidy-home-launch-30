@@ -26,6 +26,8 @@ const translations: Record<string, string> = {
   "Now accepting homes in Kendall & Pinecrest": "Ahora aceptando hogares en Kendall y Pinecrest",
   "Your Home. Handled.": "Tu Hogar. Resuelto.",
   "Every Month.": "Cada Mes.",
+  "We handle scheduling, timing, and everything in between.": "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
+  "Just set it — we'll take care of the rest.": "Solo configúralo — nosotros nos encargamos del resto.",
   "Cleaning, lawn care, and car detailing — fully managed for you. No booking, no vendors, no reminders. Ever.": "Limpieza, jardín y detallado de auto — totalmente gestionado. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
   "🏠 House Cleaning": "🏠 Limpieza del Hogar",
   "🌿 Lawn Care": "🌿 Cuidado del Jardín",
@@ -39,12 +41,14 @@ const translations: Record<string, string> = {
   "Average Rating": "Calificación Promedio",
   "Core Services": "Servicios Principales",
   "ZIP Codes Served": "Códigos Postales",
+  "Consistent service. No follow-ups. No hassle.": "Servicio consistente. Sin seguimientos. Sin complicaciones.",
   "Rebooking Required": "Reagendamiento Necesario",
 
   // Services
 
   // Services
   "What's Included": "Qué Incluye",
+  "Everything your home needs. One plan.": "Todo lo que tu hogar necesita. Un plan.",
   "Everything your home needs. One simple plan.": "Todo lo que tu hogar necesita. Un plan simple.",
   "Three essential services. One subscription. Zero coordination required. Your schedule, your frequency — handled automatically every month.": "Tres servicios esenciales. Una suscripción. Cero coordinación. Tu horario, tu frecuencia — gestionado automáticamente cada mes.",
   "House Cleaning": "Limpieza del Hogar",
@@ -129,6 +133,7 @@ const translations: Record<string, string> = {
   "Built for Florida homes. Serving Kendall, Kendall West & Pinecrest neighborhoods.": "Hecho para hogares de Florida. Sirviendo las comunidades de Kendall, Kendall West y Pinecrest.",
 
   // Pricing
+  "Everything runs automatically — no coordination needed. Modify, skip, or adjust anytime.": "Todo funciona automáticamente — sin coordinación necesaria. Modifica, omite o ajusta en cualquier momento.",
   "Simple, transparent rates. No surprises.": "Tarifas simples y transparentes. Sin sorpresas.",
   "Pay monthly. Cancel anytime. Higher frequency = lower cost per visit. Bundle 2+ services for automatic discounts.": "Paga mensualmente. Cancela cuando quieras. Mayor frecuencia = menor costo por visita. Combina 2+ servicios para descuentos automáticos.",
   "Service": "Servicio",
@@ -138,6 +143,7 @@ const translations: Record<string, string> = {
   "Bundle discount auto-applied at checkout · 2 services = 15% off · 3 services = 20% off · Cancel anytime": "Descuento por combo aplicado automáticamente · 2 servicios = 15% descuento · 3 servicios = 20% descuento · Cancela cuando quieras",
 
   // FAQ
+  "Most customers never need to think about any of this — but we've got you covered.": "La mayoría de los clientes nunca necesitan pensar en esto — pero te tenemos cubierto.",
   "Common questions": "Preguntas comunes",
   "Getting Started": "Primeros Pasos",
   "Services & Scheduling": "Servicios y Programación",
@@ -193,6 +199,8 @@ const translations: Record<string, string> = {
 
   // Final CTA
   "You'll never book a home service again.": "Nunca más reservarás un servicio del hogar.",
+  "One setup. Everything handled.": "Una configuración. Todo resuelto.",
+  "No contracts. No payments until launch.": "Sin contratos. Sin pagos hasta el lanzamiento.",
   "Limited founding memberships available in your area. Takes 60 seconds. No commitment required.": "Membresías fundadoras limitadas disponibles en tu área. Toma 60 segundos. Sin compromiso.",
   "Get Started — Request Early Access →": "Comienza — Solicitar Acceso →",
   "4.9★ Rating": "4.9★ Calificación",

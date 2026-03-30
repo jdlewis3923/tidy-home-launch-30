@@ -60,7 +60,6 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
       <div className="relative z-10 max-w-6xl mx-auto text-center">
         <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Reviews")}</span>
         <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">{t("Trusted by homeowners")}</h2>
-        <p className="text-primary-foreground/60 mt-4">{t("Real homeowners. Real results.")}</p>
 
         <div className="flex flex-wrap justify-center gap-6 mt-8 mb-12">
           <span className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-2 text-sm text-primary-foreground">

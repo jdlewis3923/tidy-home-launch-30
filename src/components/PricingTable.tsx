@@ -19,7 +19,7 @@ const PricingTable = () => {
           <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Pricing")}</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Simple, transparent rates. No surprises.")}</h2>
           <p className="text-text-mid mt-4 max-w-xl mx-auto">
-            {t("Pay monthly. Cancel anytime. Higher frequency = lower cost per visit. Bundle 2+ services for automatic discounts.")}
+            {t("Everything runs automatically — no coordination needed. Modify, skip, or adjust anytime.")}
           </p>
         </FadeIn>
 
