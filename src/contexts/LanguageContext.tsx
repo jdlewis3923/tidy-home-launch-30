@@ -41,6 +41,7 @@ const translations: Record<string, string> = {
   "Average Rating": "Calificación Promedio",
   "Core Services": "Servicios Principales",
   "ZIP Codes Served": "Códigos Postales",
+  "Consistent service. No follow-ups. No hassle.": "Servicio consistente. Sin seguimientos. Sin complicaciones.",
   "Rebooking Required": "Reagendamiento Necesario",
 
   // Services
