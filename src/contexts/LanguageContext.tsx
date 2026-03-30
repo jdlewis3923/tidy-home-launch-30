@@ -26,6 +26,8 @@ const translations: Record<string, string> = {
   "Now accepting homes in Kendall & Pinecrest": "Ahora aceptando hogares en Kendall y Pinecrest",
   "Your Home. Handled.": "Tu Hogar. Resuelto.",
   "Every Month.": "Cada Mes.",
+  "We handle scheduling, timing, and everything in between.": "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
+  "Just set it — we'll take care of the rest.": "Solo configúralo — nosotros nos encargamos del resto.",
   "Cleaning, lawn care, and car detailing — fully managed for you. No booking, no vendors, no reminders. Ever.": "Limpieza, jardín y detallado de auto — totalmente gestionado. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
   "🏠 House Cleaning": "🏠 Limpieza del Hogar",
   "🌿 Lawn Care": "🌿 Cuidado del Jardín",
