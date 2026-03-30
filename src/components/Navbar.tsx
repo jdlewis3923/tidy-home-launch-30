@@ -48,7 +48,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
             </button>
           ))}
           <LanguageToggle />
-          <button onClick={onOpenPopup} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
+          <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: "Request Early Access" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
             {t("Request Early Access")}
           </button>
         </div>
