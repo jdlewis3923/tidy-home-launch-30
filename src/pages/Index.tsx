@@ -1,23 +1,25 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { initScrollTracking, pushEvent } from "@/lib/tracking";
 import Navbar from "@/components/Navbar";
 import AnnouncementTicker from "@/components/AnnouncementTicker";
 import Hero from "@/components/Hero";
 import ProofBar from "@/components/ProofBar";
-import TrustBar from "@/components/TrustBar";
-import Services from "@/components/Services";
-import HowItWorks from "@/components/HowItWorks";
-import BeforeAfter from "@/components/BeforeAfter";
-import WhoItsFor from "@/components/WhoItsFor";
-import Testimonials from "@/components/Testimonials";
-import WhyTidy from "@/components/WhyTidy";
-import PricingTable from "@/components/PricingTable";
-import FAQ from "@/components/FAQ";
-import ZipChecker from "@/components/ZipChecker";
-import FinalCTA from "@/components/FinalCTA";
-import Footer from "@/components/Footer";
-import LeadPopup from "@/components/LeadPopup";
 import { useNavigate } from "react-router-dom";
+
+// Lazy-load below-fold sections
+const TrustBar = lazy(() => import("@/components/TrustBar"));
+const Services = lazy(() => import("@/components/Services"));
+const HowItWorks = lazy(() => import("@/components/HowItWorks"));
+const BeforeAfter = lazy(() => import("@/components/BeforeAfter"));
+const WhoItsFor = lazy(() => import("@/components/WhoItsFor"));
+const Testimonials = lazy(() => import("@/components/Testimonials"));
+const WhyTidy = lazy(() => import("@/components/WhyTidy"));
+const PricingTable = lazy(() => import("@/components/PricingTable"));
+const FAQ = lazy(() => import("@/components/FAQ"));
+const ZipChecker = lazy(() => import("@/components/ZipChecker"));
+const FinalCTA = lazy(() => import("@/components/FinalCTA"));
+const Footer = lazy(() => import("@/components/Footer"));
+const LeadPopup = lazy(() => import("@/components/LeadPopup"));
 
 const POPUP_DISMISS_KEY = "tidy_popup_dismissed";
 const DISMISS_DURATION = 24 * 60 * 60 * 1000; // 24 hours
@@ -70,27 +72,29 @@ const Index = () => {
       <AnnouncementTicker />
       <Hero onOpenPopup={openPopup} />
       <ProofBar />
-      <TrustBar />
-      <Services />
-      <HowItWorks onOpenPopup={openPopup} />
-      <BeforeAfter />
-      <WhoItsFor />
-      <Testimonials onOpenPopup={openPopup} />
-      <WhyTidy />
-      <PricingTable />
-      <FAQ />
-      <ZipChecker />
-      <FinalCTA onOpenPopup={openPopup} />
-      <Footer />
+      <Suspense fallback={null}>
+        <TrustBar />
+        <Services />
+        <HowItWorks onOpenPopup={openPopup} />
+        <BeforeAfter />
+        <WhoItsFor />
+        <Testimonials onOpenPopup={openPopup} />
+        <WhyTidy />
+        <PricingTable />
+        <FAQ />
+        <ZipChecker />
+        <FinalCTA onOpenPopup={openPopup} />
+        <Footer />
 
-      <LeadPopup
-        isOpen={popupOpen}
-        onClose={() => setPopupOpen(false)}
-        onSuccess={() => {
-          setPopupOpen(false);
-          navigate("/thank-you");
-        }}
-      />
+        <LeadPopup
+          isOpen={popupOpen}
+          onClose={() => setPopupOpen(false)}
+          onSuccess={() => {
+            setPopupOpen(false);
+            navigate("/thank-you");
+          }}
+        />
+      </Suspense>
     </div>
   );
 };
