@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import TidyLogo from "./TidyLogo";
+import LanguageToggle from "./LanguageToggle";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Menu, X } from "lucide-react";
 
 interface NavbarProps {
@@ -9,6 +11,7 @@ interface NavbarProps {
 const Navbar = ({ onOpenPopup }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 80);
@@ -37,21 +40,25 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
         </a>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
           {links.map((l) => (
             <button key={l.href} onClick={() => handleNavClick(l.href)} className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
-              {l.label}
+              {t(l.label)}
             </button>
           ))}
+          <LanguageToggle />
           <button onClick={onOpenPopup} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
-            Request Early Access
+            {t("Request Early Access")}
           </button>
         </div>
 
         {/* Mobile toggle */}
-        <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        <div className="flex md:hidden items-center gap-2">
+          <LanguageToggle />
+          <button className="p-2" onClick={() => setMobileOpen(!mobileOpen)}>
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -59,11 +66,11 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
         <div className="md:hidden bg-background border-t px-4 pb-4 animate-fade-up">
           {links.map((l) => (
             <button key={l.href} onClick={() => handleNavClick(l.href)} className="block w-full text-left py-3 text-sm font-medium text-foreground/80 border-b border-border/50">
-              {l.label}
+              {t(l.label)}
             </button>
           ))}
           <button onClick={() => { setMobileOpen(false); onOpenPopup(); }} className="w-full mt-3 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors">
-            Request Early Access
+            {t("Request Early Access")}
           </button>
         </div>
       )}

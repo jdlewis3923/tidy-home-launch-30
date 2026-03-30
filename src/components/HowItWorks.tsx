@@ -1,5 +1,6 @@
 import { CalendarCheck, ShieldCheck, Sofa } from "lucide-react";
 import FadeIn from "./FadeIn";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HowItWorksProps {
   onOpenPopup: () => void;
@@ -29,40 +30,43 @@ const steps = [
   },
 ];
 
-const HowItWorks = ({ onOpenPopup }: HowItWorksProps) => (
-  <section id="how-it-works" className="bg-section-alt py-20 px-4">
-    <div className="max-w-6xl mx-auto text-center">
-      <FadeIn>
-        <span className="text-xs uppercase tracking-widest text-primary font-semibold">Simple process</span>
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">Get 5–10 hours back every week</h2>
-        <p className="text-text-mid mt-4 max-w-xl mx-auto">How it works — three steps, then you never think about it again.</p>
-      </FadeIn>
+const HowItWorks = ({ onOpenPopup }: HowItWorksProps) => {
+  const { t } = useLanguage();
+  return (
+    <section id="how-it-works" className="bg-section-alt py-20 px-4">
+      <div className="max-w-6xl mx-auto text-center">
+        <FadeIn>
+          <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Simple process")}</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Get 5–10 hours back every week")}</h2>
+          <p className="text-text-mid mt-4 max-w-xl mx-auto">{t("How it works — three steps, then you never think about it again.")}</p>
+        </FadeIn>
 
-      <div className="mt-16 grid md:grid-cols-3 gap-8 relative">
-        <div className="hidden md:block absolute top-[52px] left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-primary/10 via-primary/30 to-primary/10" />
+        <div className="mt-16 grid md:grid-cols-3 gap-8 relative">
+          <div className="hidden md:block absolute top-[52px] left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-primary/10 via-primary/30 to-primary/10" />
 
-        {steps.map((s, i) => {
-          const Icon = s.icon;
-          return (
+          {steps.map((s, i) => {
+            const Icon = s.icon;
+            return (
               <FadeIn key={s.num} delay={i * 150} className="relative flex flex-col items-center">
-              <div className={`w-[104px] h-[104px] rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-6 relative z-10 shadow-lg`}>
-                <Icon className="w-12 h-12 text-white" strokeWidth={1.5} />
-                <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gold text-gold-foreground text-xs font-bold flex items-center justify-center shadow">{s.num}</span>
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">{s.title}</h3>
-              <p className="text-sm text-text-mid max-w-xs">{s.desc}</p>
-            </FadeIn>
-          );
-        })}
-      </div>
+                <div className={`w-[104px] h-[104px] rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-6 relative z-10 shadow-lg`}>
+                  <Icon className="w-12 h-12 text-white" strokeWidth={1.5} />
+                  <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gold text-gold-foreground text-xs font-bold flex items-center justify-center shadow">{s.num}</span>
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-2">{t(s.title)}</h3>
+                <p className="text-sm text-text-mid max-w-xs">{t(s.desc)}</p>
+              </FadeIn>
+            );
+          })}
+        </div>
 
-      <FadeIn delay={400}>
-        <button onClick={onOpenPopup} className="mt-12 bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-8 py-3.5 rounded-xl transition-colors text-base">
-          Design Your Plan →
-        </button>
-      </FadeIn>
-    </div>
-  </section>
-);
+        <FadeIn delay={400}>
+          <button onClick={onOpenPopup} className="mt-12 bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-8 py-3.5 rounded-xl transition-colors text-base">
+            {t("Design Your Plan →")}
+          </button>
+        </FadeIn>
+      </div>
+    </section>
+  );
+};
 
 export default HowItWorks;
