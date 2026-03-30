@@ -199,6 +199,8 @@ const translations: Record<string, string> = {
 
   // Final CTA
   "You'll never book a home service again.": "Nunca más reservarás un servicio del hogar.",
+  "One setup. Everything handled.": "Una configuración. Todo resuelto.",
+  "No contracts. No payments until launch.": "Sin contratos. Sin pagos hasta el lanzamiento.",
   "Limited founding memberships available in your area. Takes 60 seconds. No commitment required.": "Membresías fundadoras limitadas disponibles en tu área. Toma 60 segundos. Sin compromiso.",
   "Get Started — Request Early Access →": "Comienza — Solicitar Acceso →",
   "4.9★ Rating": "4.9★ Calificación",
