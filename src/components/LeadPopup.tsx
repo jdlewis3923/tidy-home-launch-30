@@ -128,6 +128,18 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
           <div>
             <input className={`w-full bg-gray-100 border ${errors.phone ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("Phone Number")} type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             {errors.phone && <p className="text-xs text-red-500 mt-1 font-medium">{errors.phone}</p>}
+            <label className="flex items-start gap-2 mt-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.smsConsent}
+                onChange={(e) => setForm({ ...form, smsConsent: e.target.checked })}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+              />
+              <span className="text-[11px] text-gray-500 leading-snug">
+                {t("I agree to receive SMS messages from Tidy Home Concierge LLC. Msg & data rates may apply. Reply STOP to opt out.")}
+              </span>
+            </label>
+            {errors.smsConsent && <p className="text-xs text-red-500 mt-1 font-medium">{errors.smsConsent}</p>}
           </div>
           <div>
             <input className={`w-full bg-gray-100 border ${errors.zip ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("ZIP Code")} value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value })} />
