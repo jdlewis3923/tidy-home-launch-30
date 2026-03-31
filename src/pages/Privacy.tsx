@@ -19,13 +19,15 @@ const Privacy = () => (
           <h2 className="text-lg font-bold text-foreground">How We Use It</h2>
           <p>To provide and manage services, schedule appointments, process payments, communicate with you, and improve our offerings.</p>
         </section>
-        <section>
-          <h2 className="text-lg font-bold text-foreground">SMS Communications</h2>
-          <p>By providing your phone number, you consent to receive SMS messages from Tidy including service updates, reminders, and promotional messages. Message frequency varies. Message and data rates may apply. Reply STOP to opt out anytime. Reply HELP or contact hello@jointidy.co for assistance.</p>
+        <section className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+          <h2 className="text-lg font-bold text-foreground">SMS Communications & Data Privacy</h2>
+          <p>By providing your phone number and checking the SMS consent box, you consent to receive recurring automated SMS messages from Tidy Home Concierge LLC, including service updates, appointment reminders, and promotional offers. Message frequency varies. Message and data rates may apply. Reply STOP to cancel or HELP for assistance. Contact <a href="mailto:hello@jointidy.co" className="text-primary underline">hello@jointidy.co</a> for support.</p>
+          <p className="mt-3 font-bold">Text messaging opt-in data and consent will not be shared with any third parties or affiliates for marketing or promotional purposes. All other data-sharing categories explicitly exclude SMS/text messaging opt-in information and consent data — this information will not be sold, rented, or disclosed to any third party under any circumstances.</p>
+          <p className="mt-2">Mobile information, including phone numbers collected for SMS communications, will not be shared with third parties or affiliates for marketing or promotional purposes. Consent to receive SMS is not a condition of purchase. Carriers are not liable for delayed or undelivered messages.</p>
         </section>
         <section>
           <h2 className="text-lg font-bold text-foreground">Information Sharing</h2>
-          <p>We do not sell your personal information. We share only with trusted third parties: Stripe (payments), Twilio (SMS), Simvoly (website), Jobber (scheduling), and analytics tools.</p>
+          <p>We do not sell your personal information. We share only with trusted third parties necessary to operate our services: Stripe (payments), Twilio (SMS delivery only), and analytics tools. These parties do not receive your SMS opt-in consent data or use your information for their own marketing purposes.</p>
         </section>
         <section>
           <h2 className="text-lg font-bold text-foreground">Security</h2>
