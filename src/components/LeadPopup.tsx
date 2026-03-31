@@ -13,7 +13,7 @@ interface LeadPopupProps {
 }
 
 const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", zip: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", zip: "", smsConsent: false });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useLanguage();
