@@ -44,8 +44,16 @@ const Terms = () => (
           <p>Notify us within 24 hours of any service issue. We will make reasonable efforts to resolve it.</p>
         </section>
         <section>
-          <h2 className="text-lg font-bold text-foreground">9. SMS Consent</h2>
-          <p>By providing your phone number, you consent to receive SMS messages from Tidy. Message and data rates may apply. Reply STOP to opt out. Contact hello@jointidy.co for help.</p>
+          <h2 className="text-lg font-bold text-foreground">9. SMS Communications</h2>
+          <div className="space-y-2">
+            <p>By checking the SMS consent box and providing your phone number, you expressly consent to receive recurring automated promotional and informational text messages from Tidy Home Concierge LLC, including service updates, appointment reminders, and exclusive offers, at the phone number provided. Message frequency varies.</p>
+            <p>Msg & data rates may apply. Consent to receive SMS messages is not a condition of any purchase. You may opt out at any time by replying STOP to any message. Reply HELP for assistance or contact <a href="mailto:hello@jointidy.co" className="text-primary underline">hello@jointidy.co</a>.</p>
+            <p>Carriers are not liable for delayed or undelivered messages.</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-3">
+              <p className="font-semibold text-foreground">SMS Data Privacy</p>
+              <p>Text messaging opt-in data and consent will not be shared with any third parties or affiliates for marketing or promotional purposes. All other data-sharing categories specifically exclude text messaging opt-in data and consent.</p>
+            </div>
+          </div>
         </section>
         <section>
           <h2 className="text-lg font-bold text-foreground">10. Limitation of Liability</h2>
