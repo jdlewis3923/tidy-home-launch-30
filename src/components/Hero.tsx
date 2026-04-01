@@ -10,7 +10,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
   const { t } = useLanguage();
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      <img src={heroImg} alt="Modern Miami home with pool and palm trees" className="absolute inset-0 w-full h-full object-cover" width={1920} height={1080} />
+      <img src={heroImg} alt="Modern Miami home with pool and palm trees" className="absolute inset-0 w-full h-full object-cover object-center" width={1920} height={1080} style={{ objectPosition: "center 40%" }} />
       <div className="absolute inset-0 bg-navy/65" />
 
       <div className="absolute top-20 left-[15%] animate-sparkle">
