@@ -10,7 +10,7 @@ const TidyLogo = ({ size = "md", withBackground = false }: { size?: "sm" | "md" 
 
   if (withBackground) {
     return (
-      <div className={`${s.bg} rounded-full bg-white flex items-center justify-center shadow-md`}>
+      <div className={`${s.bg} rounded-full bg-white flex items-center justify-center shadow-md overflow-hidden`}>
         <img src={tidyLogo} alt="Tidy Home Concierge" className={`${s.img} object-contain`} />
       </div>
     );
