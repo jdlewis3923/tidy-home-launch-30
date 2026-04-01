@@ -45,12 +45,9 @@ const Index = () => {
     pushEvent("page_view", { page: "/" });
   }, []);
 
-  // Auto-fire after 8 seconds
+  // Auto-fire immediately on page load
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (canShowPopup()) setPopupOpen(true);
-    }, 8000);
-    return () => clearTimeout(timer);
+    if (canShowPopup()) setPopupOpen(true);
   }, [canShowPopup]);
 
   // Exit intent
