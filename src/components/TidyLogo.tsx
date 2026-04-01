@@ -4,7 +4,7 @@ const TidyLogo = ({ size = "md", withBackground = false }: { size?: "sm" | "md" 
   const sizes = {
     sm: { img: "w-8 h-8", bg: "w-12 h-12" },
     md: { img: "w-11 h-11", bg: "w-16 h-16" },
-    lg: { img: "w-24 h-24", bg: "w-28 h-28" },
+    lg: { img: "w-26 h-26", bg: "w-32 h-32" },
   };
   const s = sizes[size];
 
