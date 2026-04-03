@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import TidyLogo from "./TidyLogo";
 import LanguageToggle from "./LanguageToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Menu, X } from "lucide-react";
 import { pushEvent } from "@/lib/tracking";
+import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 
 interface NavbarProps {
   onOpenPopup: () => void;
