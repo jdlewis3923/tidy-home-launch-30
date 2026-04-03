@@ -1,6 +1,7 @@
 import heroImg from "@/assets/hero-miami-home.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
+import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 
 interface HeroProps {
   onOpenPopup: () => void;
