@@ -29,11 +29,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
     { label: "FAQ", href: "#faq" },
   ];
 
-  const handleNavClick = (href: string) => {
-    setMobileOpen(false);
-    const el = document.querySelector(href);
-    el?.scrollIntoView({ behavior: "smooth" });
-  };
+  const ctaText = CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN" : "Request Early Access";
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 bg-background border-b transition-shadow duration-300 ${scrolled ? "shadow-md" : ""}`}>
@@ -44,7 +40,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-6">
-          {links.map((l) => (
+          {!CUSTOMER_DASHBOARD_ENABLED && links.map((l) => (
             <button key={l.href} onClick={() => handleNavClick(l.href)} className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
               {t(l.label)}
             </button>
@@ -52,11 +48,11 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
           <LanguageToggle />
           {CUSTOMER_DASHBOARD_ENABLED && (
             <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Customer Login
+              Login
             </Link>
           )}
-          <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: "Request Early Access" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
-            {t("Request Early Access")}
+          <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: ctaText }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
+            {t(ctaText)}
           </button>
         </div>
 
