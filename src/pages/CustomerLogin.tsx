@@ -27,14 +27,24 @@ export default function CustomerLogin() {
     setLoading(true);
 
     try {
-      // Import supabase client dynamically to avoid errors when Cloud isn't set up yet
       const { supabase } = await import('@/integrations/supabase/client');
-      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (authError) {
-        setError(authError.message);
+      if (isSignUp) {
+        const { error: signUpError } = await supabase.auth.signUp({ email, password });
+        if (signUpError) {
+          setError(signUpError.message);
+        } else {
+          setError('');
+          setIsSignUp(false);
+          alert('Check your email to confirm your account, then sign in.');
+        }
       } else {
-        navigate('/dashboard');
+        const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+        if (authError) {
+          setError(authError.message);
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch {
       setError('Authentication service is not available yet. Please try again later.');

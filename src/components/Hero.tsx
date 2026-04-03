@@ -48,12 +48,12 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           ))}
         </div>
 
-        <button id="cta-hero" data-track="cta_hero" onClick={() => { pushEvent("cta_click", { cta_id: "hero", cta_text: "Request Early Access" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-lg">
-          {t("Request Early Access — Get $50 Off →")}
+        <button id="cta-hero" data-track="cta_hero" onClick={() => { pushEvent("cta_click", { cta_id: "hero", cta_text: CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN" : "Request Early Access" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-lg">
+          {t(CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN →" : "Request Early Access — Get $50 Off →")}
         </button>
 
         <p className="mt-4 text-xs text-primary-foreground/50">
-          {t("Limited founding memberships · No commitment required · Starting at $85/mo")}
+          {t(CUSTOMER_DASHBOARD_ENABLED ? "No contracts · Cancel anytime · Starting at $85/mo" : "Limited founding memberships · No commitment required · Starting at $85/mo")}
         </p>
       </div>
     </section>
