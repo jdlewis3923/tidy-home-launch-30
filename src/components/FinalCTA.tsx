@@ -2,6 +2,7 @@ import TidyLogo from "./TidyLogo";
 import { Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
+import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 
 interface FinalCTAProps {
   onOpenPopup: () => void;
