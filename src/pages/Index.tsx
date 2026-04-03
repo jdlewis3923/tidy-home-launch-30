@@ -5,6 +5,7 @@ import AnnouncementTicker from "@/components/AnnouncementTicker";
 import Hero from "@/components/Hero";
 import ProofBar from "@/components/ProofBar";
 import { useNavigate } from "react-router-dom";
+import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 
 // Lazy-load below-fold sections
 const TrustBar = lazy(() => import("@/components/TrustBar"));
@@ -29,10 +30,20 @@ const Index = () => {
   const navigate = useNavigate();
 
   const canShowPopup = useCallback(() => {
+    if (CUSTOMER_DASHBOARD_ENABLED) return false;
     const dismissed = localStorage.getItem(POPUP_DISMISS_KEY);
     if (!dismissed) return true;
     return Date.now() - parseInt(dismissed) > DISMISS_DURATION;
   }, []);
+
+  // When dashboard is enabled, CTA actions navigate to login instead of opening popup
+  const handleCTA = useCallback(() => {
+    if (CUSTOMER_DASHBOARD_ENABLED) {
+      navigate("/login");
+    } else {
+      setPopupOpen(true);
+    }
+  }, [navigate]);
 
   // Scroll depth tracking
   useEffect(() => {
@@ -45,13 +56,14 @@ const Index = () => {
     pushEvent("page_view", { page: "/" });
   }, []);
 
-  // Auto-fire immediately on page load
+  // Auto-fire popup on page load (only when dashboard is OFF)
   useEffect(() => {
     if (canShowPopup()) setPopupOpen(true);
   }, [canShowPopup]);
 
-  // Exit intent
+  // Exit intent (only when dashboard is OFF)
   useEffect(() => {
+    if (CUSTOMER_DASHBOARD_ENABLED) return;
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0 && canShowPopup() && !popupOpen) {
         setPopupOpen(true);
@@ -61,36 +73,36 @@ const Index = () => {
     return () => document.removeEventListener("mouseleave", handleMouseLeave);
   }, [canShowPopup, popupOpen]);
 
-  const openPopup = () => setPopupOpen(true);
-
   return (
     <div className="min-h-screen">
-      <Navbar onOpenPopup={openPopup} />
+      <Navbar onOpenPopup={handleCTA} />
       <AnnouncementTicker />
-      <Hero onOpenPopup={openPopup} />
+      <Hero onOpenPopup={handleCTA} />
       <ProofBar />
       <Suspense fallback={null}>
         <TrustBar />
         <Services />
-        <HowItWorks onOpenPopup={openPopup} />
+        <HowItWorks onOpenPopup={handleCTA} />
         <BeforeAfter />
         <WhoItsFor />
-        <Testimonials onOpenPopup={openPopup} />
+        <Testimonials onOpenPopup={handleCTA} />
         <WhyTidy />
         <PricingTable />
         <FAQ />
         <ZipChecker />
-        <FinalCTA onOpenPopup={openPopup} />
+        <FinalCTA onOpenPopup={handleCTA} />
         <Footer />
 
-        <LeadPopup
-          isOpen={popupOpen}
-          onClose={() => setPopupOpen(false)}
-          onSuccess={() => {
-            setPopupOpen(false);
-            navigate("/thank-you");
-          }}
-        />
+        {!CUSTOMER_DASHBOARD_ENABLED && (
+          <LeadPopup
+            isOpen={popupOpen}
+            onClose={() => setPopupOpen(false)}
+            onSuccess={() => {
+              setPopupOpen(false);
+              navigate("/thank-you");
+            }}
+          />
+        )}
       </Suspense>
     </div>
   );

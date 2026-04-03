@@ -1,3 +1,4 @@
+import { Check, HelpCircle } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -8,6 +9,13 @@ const rows = [
   { service: "🔧 Cleaning Add-Ons", monthly: "$40–$95", biweekly: "one-time", weekly: "—" },
   { service: "🔧 Detailing Add-Ons", monthly: "$60–$90", biweekly: "one-time", weekly: "—" },
   { service: "🔧 Lawn Add-Ons", monthly: "$55–$80", biweekly: "one-time", weekly: "—" },
+];
+
+const pricingFAQ = [
+  { q: "What affects my price?", a: "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees." },
+  { q: "How do bundle discounts work?", a: "Pick 2 services and get 15% off automatically. Pick all 3 and get 20% off. The discount is applied at checkout — no code needed." },
+  { q: "Can I add services later?", a: "Yes. You can add or remove any service at any time. Changes take effect on your next billing cycle." },
+  { q: "Can I adjust my plan after signing up?", a: "Absolutely. Change your frequency, swap services, or pause anytime through your dashboard or by contacting us." },
 ];
 
 const PricingTable = () => {
@@ -50,6 +58,21 @@ const PricingTable = () => {
           <p className="mt-6 text-xs text-text-light">
             {t("Bundle discount auto-applied at checkout · 2 services = 15% off · 3 services = 20% off · Cancel anytime")}
           </p>
+        </FadeIn>
+
+        {/* Pricing clarity section */}
+        <FadeIn delay={300}>
+          <div className="mt-14 grid sm:grid-cols-2 gap-4 text-left">
+            {pricingFAQ.map((item) => (
+              <div key={item.q} className="bg-card border rounded-xl p-5">
+                <div className="flex items-start gap-2 mb-2">
+                  <HelpCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <h4 className="text-sm font-semibold text-foreground">{t(item.q)}</h4>
+                </div>
+                <p className="text-xs text-muted-foreground pl-6">{t(item.a)}</p>
+              </div>
+            ))}
+          </div>
         </FadeIn>
       </div>
     </section>
