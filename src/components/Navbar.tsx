@@ -22,6 +22,12 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleNavClick = (href: string) => {
+    setMobileOpen(false);
+    const el = document.querySelector(href);
+    el?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const links = [
     { label: "Services", href: "#services" },
     { label: "How It Works", href: "#how-it-works" },
