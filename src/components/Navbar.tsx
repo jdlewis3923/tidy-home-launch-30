@@ -22,6 +22,12 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleNavClick = (href: string) => {
+    setMobileOpen(false);
+    const el = document.querySelector(href);
+    el?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const links = [
     { label: "Services", href: "#services" },
     { label: "How It Works", href: "#how-it-works" },
@@ -29,11 +35,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
     { label: "FAQ", href: "#faq" },
   ];
 
-  const handleNavClick = (href: string) => {
-    setMobileOpen(false);
-    const el = document.querySelector(href);
-    el?.scrollIntoView({ behavior: "smooth" });
-  };
+  const ctaText = CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN" : "Request Early Access";
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 bg-background border-b transition-shadow duration-300 ${scrolled ? "shadow-md" : ""}`}>
@@ -44,7 +46,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-6">
-          {links.map((l) => (
+          {!CUSTOMER_DASHBOARD_ENABLED && links.map((l) => (
             <button key={l.href} onClick={() => handleNavClick(l.href)} className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
               {t(l.label)}
             </button>
@@ -52,11 +54,11 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
           <LanguageToggle />
           {CUSTOMER_DASHBOARD_ENABLED && (
             <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Customer Login
+              Login
             </Link>
           )}
-          <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: "Request Early Access" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
-            {t("Request Early Access")}
+          <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: ctaText }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
+            {t(ctaText)}
           </button>
         </div>
 
@@ -72,18 +74,18 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden bg-background border-t px-4 pb-4 animate-fade-up">
-          {links.map((l) => (
+          {!CUSTOMER_DASHBOARD_ENABLED && links.map((l) => (
             <button key={l.href} onClick={() => handleNavClick(l.href)} className="block w-full text-left py-3 text-sm font-medium text-foreground/80 border-b border-border/50">
               {t(l.label)}
             </button>
           ))}
           {CUSTOMER_DASHBOARD_ENABLED && (
             <Link to="/login" onClick={() => setMobileOpen(false)} className="block w-full text-left py-3 text-sm font-medium text-foreground/80 border-b border-border/50">
-              Customer Login
+              Login
             </Link>
           )}
-          <button id="cta-navbar-mobile" data-track="cta_navbar_mobile" onClick={() => { setMobileOpen(false); pushEvent("cta_click", { cta_id: "navbar_mobile", cta_text: "Request Early Access" }); onOpenPopup(); }} className="w-full mt-3 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors">
-            {t("Request Early Access")}
+          <button id="cta-navbar-mobile" data-track="cta_navbar_mobile" onClick={() => { setMobileOpen(false); pushEvent("cta_click", { cta_id: "navbar_mobile", cta_text: ctaText }); onOpenPopup(); }} className="w-full mt-3 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors">
+            {t(ctaText)}
           </button>
         </div>
       )}
