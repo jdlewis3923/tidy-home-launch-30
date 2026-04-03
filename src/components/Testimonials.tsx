@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Star, Check, Users } from "lucide-react";
+import { Star, Check, Users, ShieldCheck, Clock, ThumbsUp } from "lucide-react";
 import testimonialsBg from "@/assets/testimonials-bg.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pushEvent } from "@/lib/tracking";
+import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
+import FadeIn from "./FadeIn";
 
 interface TestimonialsProps {
   onOpenPopup: () => void;
@@ -25,6 +28,12 @@ const doubledTestimonials = [...testimonials, ...testimonials];
 const CARD_WIDTH = 360;
 const GAP = 24;
 const SPEED = 0.5;
+
+const trustPillars = [
+  { icon: ShieldCheck, title: "Vetted Professionals", desc: "Every pro is background-checked, licensed, and insured before their first visit." },
+  { icon: Clock, title: "Reliable & Recurring", desc: "Same schedule, same quality. Your services run automatically, every single time." },
+  { icon: ThumbsUp, title: "Satisfaction Guaranteed", desc: "Not happy? We'll make it right within 24 hours — re-service or credit, no questions." },
+];
 
 const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
   const { t } = useLanguage();
@@ -51,6 +60,8 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
   }, [paused, totalWidth]);
+
+  const ctaText = CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN →" : "Request Early Access →";
 
   return (
     <section className="relative py-20 px-4 overflow-hidden">
@@ -104,9 +115,31 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
           </div>
         </div>
 
-        <button onClick={onOpenPopup} className="mt-12 bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-8 py-3.5 rounded-xl transition-colors">
-          {t("Request Early Access →")}
+        <button
+          onClick={() => {
+            pushEvent("cta_click", { cta_id: "testimonials", cta_text: ctaText });
+            onOpenPopup();
+          }}
+          className="mt-12 bg-gold hover:bg-gold/90 text-gold-foreground font-bold px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,197,24,0.3)]"
+        >
+          {t(ctaText)}
         </button>
+
+        {/* Trust pillars */}
+        <div className="grid md:grid-cols-3 gap-6 mt-16">
+          {trustPillars.map((p, i) => {
+            const Icon = p.icon;
+            return (
+              <FadeIn key={p.title} delay={i * 100}>
+                <div className="bg-primary-foreground/5 backdrop-blur-sm border border-primary-foreground/10 rounded-xl p-6 text-left">
+                  <Icon className="w-6 h-6 text-primary mb-3" />
+                  <h4 className="text-sm font-bold text-primary-foreground mb-1">{t(p.title)}</h4>
+                  <p className="text-xs text-primary-foreground/60">{t(p.desc)}</p>
+                </div>
+              </FadeIn>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
