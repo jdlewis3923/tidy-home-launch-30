@@ -1,6 +1,7 @@
 import { Check, HelpCircle } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 
 const rows = [
   { service: "🏠 House Cleaning", monthly: "$159/mo", biweekly: "$275/mo", weekly: "$459/mo" },
@@ -60,20 +61,22 @@ const PricingTable = () => {
           </p>
         </FadeIn>
 
-        {/* Pricing clarity section */}
-        <FadeIn delay={300}>
-          <div className="mt-14 grid sm:grid-cols-2 gap-4 text-left">
-            {pricingFAQ.map((item) => (
-              <div key={item.q} className="bg-card border rounded-xl p-5">
-                <div className="flex items-start gap-2 mb-2">
-                  <HelpCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                  <h4 className="text-sm font-semibold text-foreground">{t(item.q)}</h4>
+        {/* Pricing clarity section - only when dashboard ON */}
+        {CUSTOMER_DASHBOARD_ENABLED && (
+          <FadeIn delay={300}>
+            <div className="mt-14 grid sm:grid-cols-2 gap-4 text-left">
+              {pricingFAQ.map((item) => (
+                <div key={item.q} className="bg-card border rounded-xl p-5">
+                  <div className="flex items-start gap-2 mb-2">
+                    <HelpCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <h4 className="text-sm font-semibold text-foreground">{t(item.q)}</h4>
+                  </div>
+                  <p className="text-xs text-muted-foreground pl-6">{t(item.a)}</p>
                 </div>
-                <p className="text-xs text-muted-foreground pl-6">{t(item.a)}</p>
-              </div>
-            ))}
-          </div>
-        </FadeIn>
+              ))}
+            </div>
+          </FadeIn>
+        )}
       </div>
     </section>
   );
