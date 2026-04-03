@@ -2,6 +2,7 @@ import { CalendarCheck, ShieldCheck, Sofa } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
+import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 
 interface HowItWorksProps {
   onOpenPopup: () => void;
