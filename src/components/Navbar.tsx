@@ -77,6 +77,11 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
               {t(l.label)}
             </button>
           ))}
+          {CUSTOMER_DASHBOARD_ENABLED && (
+            <Link to="/login" onClick={() => setMobileOpen(false)} className="block w-full text-left py-3 text-sm font-medium text-foreground/80 border-b border-border/50">
+              Customer Login
+            </Link>
+          )}
           <button id="cta-navbar-mobile" data-track="cta_navbar_mobile" onClick={() => { setMobileOpen(false); pushEvent("cta_click", { cta_id: "navbar_mobile", cta_text: "Request Early Access" }); onOpenPopup(); }} className="w-full mt-3 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors">
             {t("Request Early Access")}
           </button>
