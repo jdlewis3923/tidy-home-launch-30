@@ -62,6 +62,9 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
   }, [paused, totalWidth]);
 
   const ctaText = CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN →" : "Request Early Access →";
+  const btnClass = CUSTOMER_DASHBOARD_ENABLED
+    ? "mt-12 bg-gold hover:bg-gold/90 text-gold-foreground font-bold px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,197,24,0.3)]"
+    : "mt-12 bg-gold hover:bg-gold/90 text-gold-foreground font-bold px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,197,24,0.3)]";
 
   return (
     <section className="relative py-20 px-4 overflow-hidden">
@@ -120,26 +123,28 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
             pushEvent("cta_click", { cta_id: "testimonials", cta_text: ctaText });
             onOpenPopup();
           }}
-          className="mt-12 bg-gold hover:bg-gold/90 text-gold-foreground font-bold px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,197,24,0.3)]"
+          className={btnClass}
         >
           {t(ctaText)}
         </button>
 
-        {/* Trust pillars */}
-        <div className="grid md:grid-cols-3 gap-6 mt-16">
-          {trustPillars.map((p, i) => {
-            const Icon = p.icon;
-            return (
-              <FadeIn key={p.title} delay={i * 100}>
-                <div className="bg-primary-foreground/5 backdrop-blur-sm border border-primary-foreground/10 rounded-xl p-6 text-left">
-                  <Icon className="w-6 h-6 text-primary mb-3" />
-                  <h4 className="text-sm font-bold text-primary-foreground mb-1">{t(p.title)}</h4>
-                  <p className="text-xs text-primary-foreground/60">{t(p.desc)}</p>
-                </div>
-              </FadeIn>
-            );
-          })}
-        </div>
+        {/* Trust pillars - only when dashboard ON */}
+        {CUSTOMER_DASHBOARD_ENABLED && (
+          <div className="grid md:grid-cols-3 gap-6 mt-16">
+            {trustPillars.map((p, i) => {
+              const Icon = p.icon;
+              return (
+                <FadeIn key={p.title} delay={i * 100}>
+                  <div className="bg-primary-foreground/5 backdrop-blur-sm border border-primary-foreground/10 rounded-xl p-6 text-left">
+                    <Icon className="w-6 h-6 text-primary mb-3" />
+                    <h4 className="text-sm font-bold text-primary-foreground mb-1">{t(p.title)}</h4>
+                    <p className="text-xs text-primary-foreground/60">{t(p.desc)}</p>
+                  </div>
+                </FadeIn>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

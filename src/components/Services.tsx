@@ -1,9 +1,10 @@
-import { Check, X } from "lucide-react";
+import { Check, X as XIcon } from "lucide-react";
 import cleaningImg from "@/assets/cleaning-interior.jpg";
 import lawnImg from "@/assets/lawn-care.jpg";
 import carImg from "@/assets/car-detailing.jpg";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 
 const services = [
   {
@@ -81,8 +82,10 @@ const Services = () => {
                 </div>
                 <p className="text-sm text-text-mid mb-4">{s.description}</p>
 
-                {/* Included */}
-                <p className="text-xs font-semibold text-foreground/60 uppercase tracking-wide mb-2">{t("Included")}</p>
+                {/* Included - always shown */}
+                {CUSTOMER_DASHBOARD_ENABLED ? (
+                  <p className="text-xs font-semibold text-foreground/60 uppercase tracking-wide mb-2">{t("Included")}</p>
+                ) : null}
                 <ul className="space-y-1.5 mb-4">
                   {s.checks.map((c) => (
                     <li key={c} className="flex items-start gap-2 text-sm text-foreground/80">
@@ -92,23 +95,26 @@ const Services = () => {
                   ))}
                 </ul>
 
-                {/* Not Included */}
-                <p className="text-xs font-semibold text-foreground/60 uppercase tracking-wide mb-2">{t("Not Included")}</p>
-                <ul className="space-y-1.5 mb-4">
-                  {s.excludes.map((c) => (
-                    <li key={c} className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <X className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
-                      {t(c)}
-                    </li>
-                  ))}
-                </ul>
+                {/* Not Included & Add-ons - only when dashboard ON */}
+                {CUSTOMER_DASHBOARD_ENABLED && (
+                  <>
+                    <p className="text-xs font-semibold text-foreground/60 uppercase tracking-wide mb-2">{t("Not Included")}</p>
+                    <ul className="space-y-1.5 mb-4">
+                      {s.excludes.map((c) => (
+                        <li key={c} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <XIcon className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
+                          {t(c)}
+                        </li>
+                      ))}
+                    </ul>
 
-                {/* Add-ons */}
-                <div className="mt-auto pt-3 border-t">
-                  <p className="text-xs text-text-light">
-                    <span className="font-semibold text-foreground/70">{t("Add-ons:")}</span> {t(s.addOns)}
-                  </p>
-                </div>
+                    <div className="mt-auto pt-3 border-t">
+                      <p className="text-xs text-text-light">
+                        <span className="font-semibold text-foreground/70">{t("Add-ons:")}</span> {t(s.addOns)}
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           ))}
