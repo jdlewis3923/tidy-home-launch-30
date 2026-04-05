@@ -30,7 +30,6 @@ const Index = () => {
   const navigate = useNavigate();
 
   const canShowPopup = useCallback(() => {
-    if (CUSTOMER_DASHBOARD_ENABLED) return false;
     const dismissed = localStorage.getItem(POPUP_DISMISS_KEY);
     if (!dismissed) return true;
     return Date.now() - parseInt(dismissed) > DISMISS_DURATION;
@@ -63,7 +62,6 @@ const Index = () => {
 
   // Exit intent (only when dashboard is OFF)
   useEffect(() => {
-    if (CUSTOMER_DASHBOARD_ENABLED) return;
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0 && canShowPopup() && !popupOpen) {
         setPopupOpen(true);
@@ -93,7 +91,7 @@ const Index = () => {
         <FinalCTA onOpenPopup={handleCTA} />
         <Footer />
 
-        {!CUSTOMER_DASHBOARD_ENABLED && (
+        {(
           <LeadPopup
             isOpen={popupOpen}
             onClose={() => setPopupOpen(false)}
