@@ -91,7 +91,7 @@ const Index = () => {
         <FinalCTA onOpenPopup={handleCTA} />
         <Footer />
 
-        {!CUSTOMER_DASHBOARD_ENABLED && (
+        {(
           <LeadPopup
             isOpen={popupOpen}
             onClose={() => setPopupOpen(false)}
