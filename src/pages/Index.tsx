@@ -62,7 +62,6 @@ const Index = () => {
 
   // Exit intent (only when dashboard is OFF)
   useEffect(() => {
-    if (CUSTOMER_DASHBOARD_ENABLED) return;
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0 && canShowPopup() && !popupOpen) {
         setPopupOpen(true);
