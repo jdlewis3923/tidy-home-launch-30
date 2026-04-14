@@ -138,7 +138,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
                 className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
               />
               <span className="text-[11px] text-gray-500 leading-snug">
-                {t("I consent to receive recurring automated SMS messages from Tidy Home Concierge LLC regarding service updates, appointment reminders, and exclusive offers. Message frequency varies. Msg & data rates may apply. Consent is not a condition of purchase. Reply STOP to cancel or HELP for assistance.")}
+                {t("I consent to receive recurring automated SMS messages from Tidy Home Concierge LLC regarding service updates and appointment reminders. Message frequency varies. Msg & data rates may apply. Consent is not a condition of purchase. Reply STOP to cancel or HELP for assistance.")}
               </span>
             </label>
             {errors.smsConsent && <p className="text-xs text-red-500 mt-1 font-medium">{errors.smsConsent}</p>}
