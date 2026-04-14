@@ -138,7 +138,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
                 className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
               />
               <span className="text-[11px] text-gray-500 leading-snug">
-                {t("I consent to receive recurring automated SMS messages from Tidy Home Concierge LLC regarding service updates, appointment reminders, and exclusive offers. Message frequency varies. Msg & data rates may apply. Consent is not a condition of purchase. Reply STOP to cancel or HELP for assistance.")}
+                {t("I consent to receive recurring automated SMS messages from Tidy Home Concierge LLC regarding service updates and appointment reminders. Message frequency varies. Msg & data rates may apply. Consent is not a condition of purchase. Reply STOP to cancel or HELP for assistance.")}
               </span>
             </label>
             {errors.smsConsent && <p className="text-xs text-red-500 mt-1 font-medium">{errors.smsConsent}</p>}
@@ -157,7 +157,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
           </button>
 
           <p className="text-[11px] text-gray-400 leading-relaxed text-center">
-            {t("By submitting, you agree to receive email communications from Tidy Home Concierge LLC regarding your account and services. By checking the SMS consent box above, you also agree to receive recurring automated text messages at the phone number provided, including service updates, reminders, and promotional offers. Message frequency varies. Msg & data rates may apply. Consent to SMS is not a condition of any purchase. Reply STOP to cancel or HELP for assistance. Carriers are not liable for delayed or undelivered messages.")}{" "}
+            {t("By submitting, you agree to receive email communications from Tidy Home Concierge LLC regarding your account and services. By checking the SMS consent box above, you also agree to receive recurring automated text messages at the phone number provided, including service updates and reminders. Message frequency varies. Msg & data rates may apply. Consent to SMS is not a condition of any purchase. Reply STOP to cancel or HELP for assistance. Carriers are not liable for delayed or undelivered messages.")}{" "}
             <a href="/privacy" className="text-blue-500 underline">{t("Privacy Policy")}</a> | <a href="/terms" className="text-blue-500 underline">{t("Terms of Service")}</a>.
           </p>
 
