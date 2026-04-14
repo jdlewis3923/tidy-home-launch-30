@@ -45,7 +45,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
           email: form.email,
           phone: form.phone,
           zip: form.zip,
-          sms_consent: form.smsConsent,
+          sms_consent: true,
           source: "website_popup",
           timestamp: new Date().toISOString(),
         }),
