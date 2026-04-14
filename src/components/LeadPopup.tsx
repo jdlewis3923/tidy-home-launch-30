@@ -144,8 +144,8 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
             {isSubmitting ? t("Submitting...") : t("Claim My Founding Spot →")}
           </button>
 
-          <p className="text-[11px] text-gray-400 leading-relaxed text-center">
-            {t("By submitting, you agree to receive email communications from Tidy Home Concierge LLC regarding your account and services. By checking the SMS consent box above, you also agree to receive recurring automated transactional and informational text messages at the phone number provided, including account notifications, appointment reminders, service updates, and customer care communications. Message frequency varies. Msg & data rates may apply. Consent to SMS is not a condition of any purchase. Reply STOP to cancel or HELP for assistance. Carriers are not liable for delayed or undelivered messages.")}{" "}
+          <p className="text-[11px] text-gray-400 leading-relaxed text-center mt-1">
+            {t("By submitting, you agree to receive email communications and recurring automated transactional and informational SMS messages from Tidy Home Concierge LLC at the phone number provided, including account notifications, appointment reminders, service updates, and customer care communications. Message frequency varies. Msg & data rates may apply. Consent is not a condition of any purchase. Reply STOP to cancel or HELP for assistance. Carriers are not liable for delayed or undelivered messages.")}{" "}
             <a href="/privacy" className="text-blue-500 underline">{t("Privacy Policy")}</a> | <a href="/terms" className="text-blue-500 underline">{t("Terms of Service")}</a>.
           </p>
 
