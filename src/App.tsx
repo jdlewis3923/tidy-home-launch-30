@@ -16,6 +16,10 @@ import ResetPassword from "./pages/ResetPassword.tsx";
 import DashboardIndex from "./pages/DashboardIndex.tsx";
 import DashboardPlan from "./pages/DashboardPlan.tsx";
 import DashboardConfirmation from "./pages/DashboardConfirmation.tsx";
+import Account from "./pages/Account.tsx";
+import Billing from "./pages/Billing.tsx";
+import CheckoutSuccess from "./pages/CheckoutSuccess.tsx";
+import CheckoutCanceled from "./pages/CheckoutCanceled.tsx";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +61,16 @@ const App = () => (
               path="/dashboard/confirmation"
               element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardConfirmation /> : <Navigate to="/" replace />}
             />
+
+            {/* Stripe / customer account scaffolding —
+                gated internally by CUSTOMER_ACCOUNT_ENABLED + STRIPE_INTEGRATION_ENABLED.
+                Pre-launch: /account and /billing self-redirect to /.
+                Checkout success/cancel pages are always reachable so Stripe
+                returns never 404. */}
+            <Route path="/account" element={<Account />} />
+            <Route path="/billing" element={<Billing />} />
+            <Route path="/checkout/success" element={<CheckoutSuccess />} />
+            <Route path="/checkout/canceled" element={<CheckoutCanceled />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
