@@ -89,20 +89,30 @@ export default function StepReview({ state, onEdit }: Props) {
             )}
 
             <hr className="border-border" />
+            {referralDiscount > 0 && (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Services subtotal</span>
+                  <span className="text-foreground">${pricing.firstMonth.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-success">
+                  <span>Referral discount {promoCode ? `(${promoCode})` : ''}</span>
+                  <span>−${referralDiscount.toFixed(2)}</span>
+                </div>
+              </>
+            )}
             <div className="space-y-1">
               <div className="flex justify-between text-base font-bold">
                 <span className="text-foreground">First month</span>
-                <span className="text-primary">${pricing.firstMonth.toFixed(2)}</span>
+                <span className="text-primary">${firstMonthTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Ongoing</span>
                 <span>${pricing.ongoing.toFixed(2)}/mo</span>
               </div>
             </div>
-          </>
-        )}
 
-        <hr className="border-border" />
+            <hr className="border-border" />
         <div className="text-sm text-muted-foreground space-y-1">
           <p><strong>Service address:</strong> {state.address}, {state.city} {state.zip}</p>
           <p><strong>Preferred day:</strong> {state.preferredDay || 'No preference'} {state.preferredTime ? (state.preferredTime === 'morning' ? 'mornings' : 'afternoons') : ''}</p>
