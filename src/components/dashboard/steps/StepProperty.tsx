@@ -1,8 +1,54 @@
-import { ConfigState, HomeSize, YardSize, VehicleType, homeSizeLabels, yardSizeLabels, vehicleTypeLabels } from '@/lib/dashboard-pricing';
+import { ConfigState, SizeTier, ServiceType, sizeTierCopy } from '@/lib/dashboard-pricing';
 
 interface Props {
   state: ConfigState;
   onChange: (s: ConfigState) => void;
+}
+
+const tiers: SizeTier[] = ['standard', 'xl', 'custom'];
+
+function SizeTierGroup({
+  service,
+  value,
+  onSelect,
+  heading,
+}: {
+  service: ServiceType;
+  value: SizeTier | null;
+  onSelect: (v: SizeTier) => void;
+  heading: string;
+}) {
+  const copy = sizeTierCopy[service];
+  return (
+    <div className="space-y-3">
+      <h3 className="text-lg font-bold text-foreground">{heading}</h3>
+      <div className="grid gap-3 md:grid-cols-3">
+        {tiers.map(tier => {
+          const selected = value === tier;
+          return (
+            <button
+              key={tier}
+              type="button"
+              onClick={() => onSelect(tier)}
+              className={`text-left rounded-xl border-[1.5px] p-4 transition-all ${
+                selected
+                  ? 'border-primary bg-secondary shadow-sm'
+                  : 'border-border bg-card hover:border-primary/30'
+              }`}
+            >
+              <p className="text-sm font-bold text-foreground">{copy[tier].label}</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-snug">{copy[tier].helper}</p>
+            </button>
+          );
+        })}
+      </div>
+      {value === 'custom' && (
+        <p className="text-xs text-primary font-medium">
+          We'll reach out within one business day with a personal quote — no payment today.
+        </p>
+      )}
+    </div>
+  );
 }
 
 function SelectField({ label, value, options, onSelect }: { label: string; value: string | null; options: { value: string; label: string }[]; onSelect: (v: string) => void }) {
@@ -32,14 +78,13 @@ export default function StepProperty({ state, onChange }: Props) {
     <div className="space-y-8">
       {hasCleaning && (
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-foreground flex items-center gap-2">🏠 Your home</h3>
-          <div className="grid gap-4 md:grid-cols-3">
-            <SelectField
-              label="Home size"
-              value={state.homeSize}
-              options={Object.entries(homeSizeLabels).map(([v, l]) => ({ value: v, label: l }))}
-              onSelect={v => onChange({ ...state, homeSize: v as HomeSize })}
-            />
+          <SizeTierGroup
+            service="cleaning"
+            value={state.homeSize}
+            onSelect={v => onChange({ ...state, homeSize: v })}
+            heading="🏠 Home size"
+          />
+          <div className="grid gap-4 md:grid-cols-2">
             <SelectField
               label="Bedrooms"
               value={state.bedrooms}
@@ -57,27 +102,23 @@ export default function StepProperty({ state, onChange }: Props) {
       )}
 
       {hasLawn && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-bold text-foreground flex items-center gap-2">🌿 Your yard</h3>
-          <SelectField
-            label="Yard size"
-            value={state.yardSize}
-            options={Object.entries(yardSizeLabels).map(([v, l]) => ({ value: v, label: l }))}
-            onSelect={v => onChange({ ...state, yardSize: v as YardSize })}
-          />
-        </div>
+        <SizeTierGroup
+          service="lawn"
+          value={state.yardSize}
+          onSelect={v => onChange({ ...state, yardSize: v })}
+          heading="🌿 Yard size"
+        />
       )}
 
       {hasDetailing && (
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-foreground flex items-center gap-2">🚗 Your vehicle(s)</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            <SelectField
-              label="Vehicle type"
-              value={state.vehicleType}
-              options={Object.entries(vehicleTypeLabels).map(([v, l]) => ({ value: v, label: l }))}
-              onSelect={v => onChange({ ...state, vehicleType: v as VehicleType })}
-            />
+          <SizeTierGroup
+            service="detailing"
+            value={state.vehicleSize}
+            onSelect={v => onChange({ ...state, vehicleSize: v })}
+            heading="🚗 Vehicle size"
+          />
+          <div className="max-w-xs">
             <SelectField
               label="Number of vehicles"
               value={String(state.vehicleCount)}

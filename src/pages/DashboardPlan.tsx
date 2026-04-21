@@ -39,7 +39,7 @@ export default function DashboardPlan() {
     if (step === 2) {
       if (state.services.includes('cleaning') && !state.homeSize) return false;
       if (state.services.includes('lawn') && !state.yardSize) return false;
-      if (state.services.includes('detailing') && !state.vehicleType) return false;
+      if (state.services.includes('detailing') && !state.vehicleSize) return false;
       return true;
     }
     if (step === 3) return !!(state.firstName && state.lastName && state.email && state.phone && state.address && state.city && state.zip);
