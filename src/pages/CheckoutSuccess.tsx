@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { pushEvent } from "@/lib/tracking";
+import { clearPromo } from "@/lib/promo";
 import {
   CUSTOMER_ACCOUNT_ENABLED,
 } from "@/lib/dashboard-config";
