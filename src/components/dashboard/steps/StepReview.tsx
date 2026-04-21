@@ -1,5 +1,4 @@
 import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData } from '@/lib/dashboard-pricing';
-import PromoCodeEntry from '@/components/dashboard/PromoCodeEntry';
 
 interface Props {
   state: ConfigState;
@@ -85,10 +84,6 @@ export default function StepReview({ state, onEdit }: Props) {
         >
           ← Edit plan
         </button>
-      </div>
-
-      <div className="rounded-xl border-[1.5px] border-border bg-card p-4">
-        <PromoCodeEntry />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

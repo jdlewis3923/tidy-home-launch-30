@@ -1,26 +1,29 @@
 // Tidy — Stripe Create Checkout Session
 //
-// Single backend entry point for creating a Stripe Checkout Session from
-// the service builder. Promo-code-aware:
-//   - If `promoCode` is provided AND matches an active Stripe promotion code,
-//     the discount is pre-applied via `discounts: [{ promotion_code }]`.
-//   - Otherwise, `allow_promotion_codes: true` is passed so users can still
-//     type a code at Stripe's hosted checkout page.
-//   - `discounts` and `allow_promotion_codes` are mutually exclusive — we
-//     set exactly one, never both.
-//
-// All other Checkout Session params (line_items, mode, success_url,
-// cancel_url, metadata, customer_creation) are owned by this function and
-// safe to extend without re-touching the promo logic.
+// Creates a Stripe Checkout Session from the builder. Promo-code-aware:
+//   - If `promoCode` is provided AND matches an active Stripe promotion
+//     code, apply it via `discounts: [{ promotion_code }]`.
+//   - If the code is missing or invalid, silently proceed without a
+//     discount. NEVER pass `allow_promotion_codes: true` — per product
+//     spec, the ?promo= URL is the only entry point and we do not want
+//     Stripe Checkout to render its own promo input field.
+//   - The original promo code (whether valid or not) is recorded in
+//     metadata on BOTH the Checkout Session and the resulting
+//     Subscription (via subscription_data.metadata) for reporting.
 
 import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
-import { corsHeaders } from 'https://esm.sh/@supabase/supabase-js@2.95.0/cors';
 
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
+};
+
 interface CheckoutBody {
   promoCode?: string;
-  // The configurator state; opaque here. Extend as the builder evolves.
+  // Forwarded configurator state. Opaque here — extend as the builder evolves.
   config?: unknown;
 }
 
@@ -55,29 +58,9 @@ Deno.serve(async (req) => {
 
   const origin = req.headers.get('origin') ?? 'https://jointidy.co';
 
-  // Base session params. line_items / mode / customer_creation are placeholders
-  // and intended to be replaced when the real product/price is connected.
-  // Replace `price` below with the actual Stripe Price ID from the configurator
-  // before going live.
-  // deno-lint-ignore no-explicit-any
-  const sessionParams: any = {
-    mode: 'subscription',
-    success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/checkout/canceled`,
-    customer_creation: 'always',
-    line_items: [
-      // TODO: replace with real Price ID(s) computed from `body.config`.
-      // Kept here so the function is callable end-to-end once a Price exists.
-      // Example: { price: 'price_XXX', quantity: 1 }
-    ],
-    metadata: {
-      source: 'tidy-builder',
-      ...(promoCode ? { promo_code: promoCode } : {}),
-    },
-  };
-
-  // === PROMO CODE LOGIC ===
-  // discounts and allow_promotion_codes are mutually exclusive.
+  // Look up the promo code (if any) BEFORE building session params so we
+  // can attach `discounts` only when valid.
+  let promoId: string | null = null;
   if (promoCode) {
     try {
       const found = await stripe.promotionCodes.list({
@@ -85,18 +68,43 @@ Deno.serve(async (req) => {
         active: true,
         limit: 1,
       });
-      if (found.data.length > 0) {
-        sessionParams.discounts = [{ promotion_code: found.data[0].id }];
-      } else {
-        // Invalid/expired code — fall back to letting the user retry at Stripe.
-        sessionParams.allow_promotion_codes = true;
-      }
+      promoId = found.data[0]?.id ?? null;
     } catch (err) {
+      // Silent fallback — never block checkout on a promo lookup error.
       console.error('[stripe-create-checkout] promo lookup failed', err);
-      sessionParams.allow_promotion_codes = true;
+      promoId = null;
     }
-  } else {
-    sessionParams.allow_promotion_codes = true;
+  }
+
+  const referralMetadata = {
+    source: 'tidy-builder',
+    referral_promo: promoCode ?? '',
+  };
+
+  // deno-lint-ignore no-explicit-any
+  const sessionParams: any = {
+    mode: 'subscription',
+    success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+    // Preserve the promo on cancel so the user lands back in the builder
+    // with the discount still attached.
+    cancel_url: promoCode
+      ? `${origin}/dashboard/plan?promo=${encodeURIComponent(promoCode)}`
+      : `${origin}/checkout/canceled`,
+    customer_creation: 'always',
+    line_items: [
+      // TODO: replace with real Price ID(s) computed from `body.config`.
+    ],
+    metadata: referralMetadata,
+    subscription_data: {
+      metadata: referralMetadata,
+    },
+  };
+
+  // Apply the discount ONLY if we resolved a valid promotion code.
+  // We deliberately never set `allow_promotion_codes: true` — Stripe's
+  // hosted promo input must stay hidden.
+  if (promoId) {
+    sessionParams.discounts = [{ promotion_code: promoId }];
   }
 
   try {
