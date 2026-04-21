@@ -22,6 +22,8 @@ import Account from "./pages/Account.tsx";
 import Billing from "./pages/Billing.tsx";
 import CheckoutSuccess from "./pages/CheckoutSuccess.tsx";
 import CheckoutCanceled from "./pages/CheckoutCanceled.tsx";
+import SignupRedirect from "./pages/SignupRedirect.tsx";
+import ReferralRedirect from "./pages/ReferralRedirect.tsx";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +46,8 @@ const App = () => (
           <PromoCaptureWatcher />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/signup" element={<SignupRedirect />} />
+            <Route path="/referral" element={<ReferralRedirect />} />
             <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
