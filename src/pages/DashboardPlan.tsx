@@ -12,6 +12,7 @@ import StepAddOns from '@/components/dashboard/steps/StepAddOns';
 import StepReview from '@/components/dashboard/steps/StepReview';
 import StepPayment from '@/components/dashboard/steps/StepPayment';
 import PromoBanner from '@/components/dashboard/PromoBanner';
+import CustomQuoteModal from '@/components/dashboard/CustomQuoteModal';
 
 const STEPS = [
   { heading: 'What do you want handled?', sub: 'Pick one, two, or all three. The more you bundle, the more you save.', cta: 'Continue →' },
@@ -26,7 +27,9 @@ const STEPS = [
 export default function DashboardPlan() {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<ConfigState>(loadState);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const navigate = useNavigate();
+  const customQuote = hasCustomQuote(state);
 
   const updateState = useCallback((next: ConfigState) => {
     setState(next);
@@ -47,6 +50,12 @@ export default function DashboardPlan() {
   };
 
   const next = () => {
+    // Custom Quote: on Review step, intercept the CTA → open the modal
+    // instead of routing the user to Stripe checkout.
+    if (step === 5 && customQuote) {
+      setQuoteOpen(true);
+      return;
+    }
     if (step < STEPS.length - 1) setStep(step + 1);
     else {
       clearState();
@@ -90,13 +99,12 @@ export default function DashboardPlan() {
         {step === 5 && <StepReview state={state} onEdit={() => setStep(0)} />}
         {step === 6 && <StepPayment state={state} onChange={updateState} />}
 
-        {/* Custom-quote notice — shown alongside the normal flow on review/payment */}
-        {(step === 5 || step === 6) && hasCustomQuote(state) && (
+        {/* Custom-quote notice — replaces the Stripe path with a tailored-plan flow */}
+        {(step === 5 || step === 6) && customQuote && (
           <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm text-foreground">
-            <p className="font-semibold mb-1">Your plan needs a custom quote</p>
+            <p className="font-semibold mb-1">Custom Plan Required</p>
             <p className="text-muted-foreground text-xs leading-relaxed">
-              One of your services is above our standard size range, so we'll send you a personal quote within one
-              business day instead of charging you today. Click "Request my quote" below — we'll handle the rest.
+              We'll create a plan tailored to your home — no payment today. Tap "Get My Plan" and we'll reach out shortly.
             </p>
           </div>
         )}
@@ -130,11 +138,22 @@ export default function DashboardPlan() {
               disabled={!canAdvance()}
               className="ml-auto rounded-lg bg-gradient-to-br from-primary-deep to-primary px-6 py-3 text-sm font-extrabold text-primary-foreground shadow-[0_4px_16px_rgba(37,99,235,0.35)] transition-all hover:shadow-xl hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {hasCustomQuote(state) && step === 5 ? 'Request my quote →' : stepInfo.cta}
+              {customQuote && step === 5 ? 'Get My Plan →' : stepInfo.cta}
             </button>
           )}
         </div>
       </div>
+
+      <CustomQuoteModal
+        open={quoteOpen}
+        onOpenChange={setQuoteOpen}
+        state={state}
+        onSubmitted={() => {
+          setQuoteOpen(false);
+          clearState();
+          navigate('/dashboard/confirmation');
+        }}
+      />
 
       <StickyPriceBar state={state} currentStep={step} />
     </div>

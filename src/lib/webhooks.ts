@@ -15,7 +15,42 @@ export const WEBHOOK_URLS = {
     WEATHER_DELAY: "https://hooks.zapier.com/hooks/catch/26380119/u73ud7c/",
 } as const;
 
-type DashboardActionType = "skip" | "addon" | "pause" | "cancel" | "reschedule";
+type DashboardActionType = "skip" | "addon" | "pause" | "cancel" | "reschedule" | "custom_quote";
+
+interface CustomQuotePayload {
+    customer_name: string;
+    customer_phone: string;
+    customer_email: string;
+    address: string;
+    services: string[];           // e.g. ["cleaning","lawn"]
+    custom_services: string[];    // services that triggered custom tier
+    notes?: string;
+    timestamp?: string;
+}
+
+/**
+ * Fire a custom quote request to Zapier.
+ * Routes through the same Dashboard Actions Zap with action_type=custom_quote
+ * so ops can SMS/log/create an internal job.
+ */
+export async function fireCustomQuote(payload: CustomQuotePayload): Promise<void> {
+    try {
+        await fetch(WEBHOOK_URLS.DASHBOARD_ACTIONS, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            mode: "no-cors",
+            body: JSON.stringify({
+                action_type: "custom_quote",
+                tag: "custom_quote",
+                ...payload,
+                timestamp: payload.timestamp || new Date().toISOString(),
+                source: "customer_dashboard",
+            }),
+        });
+    } catch (err) {
+        console.error("[Tidy] Custom quote webhook error:", err);
+    }
+}
 
 interface DashboardActionPayload {
     action_type: DashboardActionType;
