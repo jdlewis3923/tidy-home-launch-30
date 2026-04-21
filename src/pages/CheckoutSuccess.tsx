@@ -25,6 +25,10 @@ export default function CheckoutSuccess() {
       session_id: sessionId ?? null,
       page: "/checkout/success",
     });
+    // Defense-in-depth: also clear any lingering promo state on the
+    // success landing (the redirect helper already clears, but if the
+    // user lands here directly we want a clean slate).
+    clearPromo();
   }, [sessionId]);
 
   const ctaTo = CUSTOMER_ACCOUNT_ENABLED ? "/account" : "/";
