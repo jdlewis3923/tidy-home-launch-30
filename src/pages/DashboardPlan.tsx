@@ -12,6 +12,7 @@ import StepAddOns from '@/components/dashboard/steps/StepAddOns';
 import StepReview from '@/components/dashboard/steps/StepReview';
 import StepPayment from '@/components/dashboard/steps/StepPayment';
 import PromoBanner from '@/components/dashboard/PromoBanner';
+import CustomQuoteModal from '@/components/dashboard/CustomQuoteModal';
 
 const STEPS = [
   { heading: 'What do you want handled?', sub: 'Pick one, two, or all three. The more you bundle, the more you save.', cta: 'Continue →' },
@@ -26,7 +27,9 @@ const STEPS = [
 export default function DashboardPlan() {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<ConfigState>(loadState);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const navigate = useNavigate();
+  const customQuote = hasCustomQuote(state);
 
   const updateState = useCallback((next: ConfigState) => {
     setState(next);
@@ -47,6 +50,12 @@ export default function DashboardPlan() {
   };
 
   const next = () => {
+    // Custom Quote: on Review step, intercept the CTA → open the modal
+    // instead of routing the user to Stripe checkout.
+    if (step === 5 && customQuote) {
+      setQuoteOpen(true);
+      return;
+    }
     if (step < STEPS.length - 1) setStep(step + 1);
     else {
       clearState();
