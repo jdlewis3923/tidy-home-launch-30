@@ -6,18 +6,21 @@ export const REFERRAL_DISCOUNT_CENTS = 5000;
 // Types
 export type ServiceType = 'cleaning' | 'lawn' | 'detailing';
 export type Frequency = 'monthly' | 'biweekly' | 'weekly';
-export type HomeSize = 'under1500' | '1500to2500' | '2500to3500' | 'over3500';
-export type YardSize = 'small' | 'medium' | 'large';
-export type VehicleType = 'sedan' | 'suv' | 'truck';
+
+// Final 3-tier size logic. Each service uses exactly:
+//   standard  → included in base price
+//   xl        → flat per-visit upcharge
+//   custom    → above max threshold; do NOT auto-price (manual quote)
+export type SizeTier = 'standard' | 'xl' | 'custom';
 
 export interface ConfigState {
   services: ServiceType[];
   frequencies: Partial<Record<ServiceType, Frequency>>;
-  homeSize: HomeSize | null;
+  homeSize: SizeTier | null;
   bedrooms: string | null;
   bathrooms: string | null;
-  yardSize: YardSize | null;
-  vehicleType: VehicleType | null;
+  yardSize: SizeTier | null;
+  vehicleSize: SizeTier | null;
   vehicleCount: number;
   firstName: string;
   lastName: string;
@@ -42,7 +45,7 @@ export const defaultState: ConfigState = {
   bedrooms: null,
   bathrooms: null,
   yardSize: null,
-  vehicleType: null,
+  vehicleSize: null,
   vehicleCount: 1,
   firstName: '',
   lastName: '',
@@ -60,37 +63,73 @@ export const defaultState: ConfigState = {
   outOfCoverage: false,
 };
 
-// Pricing tables
-const cleaningPrices: Record<HomeSize, Record<Frequency, number>> = {
-  under1500: { monthly: 159, biweekly: 275, weekly: 459 },
-  '1500to2500': { monthly: 199, biweekly: 345, weekly: 579 },
-  '2500to3500': { monthly: 239, biweekly: 415, weekly: 689 },
-  over3500: { monthly: 279, biweekly: 485, weekly: 799 },
+// Base recurring prices — flat per-visit, by frequency.
+// Size upgrades are applied as additive per-visit upcharges (see XL_UPCHARGE).
+const cleaningPrices: Record<Frequency, number> = {
+  monthly: 159,
+  biweekly: 275,
+  weekly: 459,
 };
 
-const lawnPrices: Record<YardSize, Record<Frequency, number>> = {
-  small: { monthly: 85, biweekly: 129, weekly: 195 },
-  medium: { monthly: 115, biweekly: 175, weekly: 259 },
-  large: { monthly: 149, biweekly: 229, weekly: 339 },
+const lawnPrices: Record<Frequency, number> = {
+  monthly: 85,
+  biweekly: 129,
+  weekly: 195,
 };
 
-const detailingPrices: Record<VehicleType, Record<'monthly' | 'biweekly', number>> = {
-  sedan: { monthly: 159, biweekly: 249 },
-  suv: { monthly: 179, biweekly: 279 },
-  truck: { monthly: 199, biweekly: 309 },
+const detailingPrices: Record<'monthly' | 'biweekly', number> = {
+  monthly: 159,
+  biweekly: 249,
 };
 
+// Extra Large per-visit upcharge by service.
+export const XL_UPCHARGE: Record<ServiceType, number> = {
+  cleaning: 60,
+  lawn: 30,
+  detailing: 30, // per vehicle
+};
+
+// Human-readable size tier copy (for dashboard helper text + summaries).
+export const sizeTierCopy: Record<ServiceType, Record<SizeTier, { label: string; helper: string }>> = {
+  cleaning: {
+    standard: { label: 'Standard', helper: 'Up to 2,500 sq ft interior livable space' },
+    xl: { label: 'Extra Large', helper: '2,501–4,000 sq ft · +$60/visit' },
+    custom: { label: 'Custom Quote', helper: 'Over 4,000 sq ft — we\'ll send a personal quote' },
+  },
+  lawn: {
+    standard: { label: 'Standard', helper: 'Up to 4,000 sq ft mowable turf' },
+    xl: { label: 'Extra Large', helper: '4,001–7,500 sq ft mowable turf · +$30/visit' },
+    custom: { label: 'Custom Quote', helper: 'Over 7,500 sq ft — we\'ll send a personal quote' },
+  },
+  detailing: {
+    standard: { label: 'Standard', helper: 'Sedan, coupe, hatchback, crossover, or 2-row SUV' },
+    xl: { label: 'Extra Large', helper: '3-row SUV, full-size truck, or large van · +$30/vehicle' },
+    custom: { label: 'Custom Quote', helper: 'Commercial van, lifted truck, or oversized vehicle' },
+  },
+};
+
+// Add-ons. Size upgrades are NOT add-ons — these are extra tasks only.
 export const addOnData: Record<string, { name: string; price: number; service: ServiceType; description: string }> = {
-  oven: { name: 'Oven cleaning', price: 45, service: 'cleaning', description: 'Deep clean inside your oven' },
-  fridge: { name: 'Fridge cleaning', price: 40, service: 'cleaning', description: 'Interior fridge scrub & organize' },
-  cabinet: { name: 'Cabinet cleaning', price: 55, service: 'cleaning', description: 'Inside all kitchen cabinets' },
-  deepClean: { name: 'Deep clean upgrade', price: 95, service: 'cleaning', description: 'First visit intensive — recommended' },
-  hedge: { name: 'Bush/hedge trimming', price: 65, service: 'lawn', description: 'Shape and trim all hedges' },
-  weed: { name: 'Weed removal', price: 55, service: 'lawn', description: 'Manual weed pulling & treatment' },
-  leaf: { name: 'Leaf cleanup', price: 80, service: 'lawn', description: 'Full yard leaf removal' },
-  shampoo: { name: 'Interior shampoo', price: 70, service: 'detailing', description: 'Deep carpet & upholstery clean' },
-  wax: { name: 'Wax & paint protection', price: 90, service: 'detailing', description: 'Hand wax & sealant coat' },
-  petHair: { name: 'Pet hair removal', price: 60, service: 'detailing', description: 'Thorough pet hair extraction' },
+  // House Cleaning
+  oven: { name: 'Inside Oven Clean', price: 45, service: 'cleaning', description: 'Deep clean inside your oven' },
+  fridge: { name: 'Inside Fridge Clean', price: 35, service: 'cleaning', description: 'Interior fridge scrub & wipe-down' },
+  interiorWindows: { name: 'Interior Windows', price: 55, service: 'cleaning', description: 'All interior glass cleaned' },
+  baseboards: { name: 'Deep Baseboard Scrub', price: 35, service: 'cleaning', description: 'Hand-detailed baseboards' },
+  laundry: { name: 'Laundry — Wash, Dry & Fold (1 load)', price: 30, service: 'cleaning', description: 'One load, washed, dried, and folded' },
+  cabinets: { name: 'Inside Kitchen Cabinets', price: 50, service: 'cleaning', description: 'Wipe inside all kitchen cabinets' },
+
+  // Lawn Care
+  hedge: { name: 'Hedge & Bush Trimming', price: 65, service: 'lawn', description: 'Shape and trim all hedges' },
+  weed: { name: 'Weed Removal — Garden Beds', price: 45, service: 'lawn', description: 'Manual weed pulling in beds' },
+  leaf: { name: 'Leaf & Debris Cleanup', price: 55, service: 'lawn', description: 'Full yard leaf and debris removal' },
+  fertilization: { name: 'Fertilization Treatment', price: 75, service: 'lawn', description: 'Seasonal turf fertilizer' },
+  pressureWash: { name: 'Driveway Pressure Wash', price: 150, service: 'lawn', description: 'Driveway and walkway pressure clean' },
+
+  // Car Detailing
+  ozone: { name: 'Ozone Odor Treatment', price: 75, service: 'detailing', description: 'Eliminates trapped odors' },
+  petHair: { name: 'Pet Hair Removal', price: 45, service: 'detailing', description: 'Thorough pet hair extraction' },
+  engineBay: { name: 'Engine Bay Clean', price: 85, service: 'detailing', description: 'Hand-cleaned engine bay' },
+  ceramicSpray: { name: 'Ceramic Spray Coat', price: 85, service: 'detailing', description: 'Hand spray coat & seal' },
 };
 
 export function getServicePrice(state: ConfigState, service: ServiceType): number {
@@ -98,17 +137,21 @@ export function getServicePrice(state: ConfigState, service: ServiceType): numbe
   if (!freq) return 0;
 
   if (service === 'cleaning') {
-    if (!state.homeSize) return 0;
-    return cleaningPrices[state.homeSize][freq];
+    if (!state.homeSize || state.homeSize === 'custom') return 0;
+    const base = cleaningPrices[freq];
+    return base + (state.homeSize === 'xl' ? XL_UPCHARGE.cleaning : 0);
   }
   if (service === 'lawn') {
-    if (!state.yardSize) return 0;
-    return lawnPrices[state.yardSize][freq];
+    if (!state.yardSize || state.yardSize === 'custom') return 0;
+    const base = lawnPrices[freq];
+    return base + (state.yardSize === 'xl' ? XL_UPCHARGE.lawn : 0);
   }
   if (service === 'detailing') {
-    if (!state.vehicleType) return 0;
+    if (!state.vehicleSize || state.vehicleSize === 'custom') return 0;
     if (freq === 'weekly') return 0;
-    return detailingPrices[state.vehicleType][freq as 'monthly' | 'biweekly'] * state.vehicleCount;
+    const base = detailingPrices[freq as 'monthly' | 'biweekly'];
+    const perVehicle = base + (state.vehicleSize === 'xl' ? XL_UPCHARGE.detailing : 0);
+    return perVehicle * state.vehicleCount;
   }
   return 0;
 }
@@ -117,6 +160,15 @@ export function getBundleDiscount(serviceCount: number): number {
   if (serviceCount >= 3) return 0.20;
   if (serviceCount >= 2) return 0.15;
   return 0;
+}
+
+// Returns true when ANY selected service has a Custom Quote tier — in this
+// case the dashboard hides auto-pricing and routes to the contact flow.
+export function hasCustomQuote(state: ConfigState): boolean {
+  if (state.services.includes('cleaning') && state.homeSize === 'custom') return true;
+  if (state.services.includes('lawn') && state.yardSize === 'custom') return true;
+  if (state.services.includes('detailing') && state.vehicleSize === 'custom') return true;
+  return false;
 }
 
 export function calculatePricing(state: ConfigState) {
@@ -151,25 +203,6 @@ export function calculatePricing(state: ConfigState) {
 }
 
 export const VALID_ZIPS = ['33183', '33186', '33156'];
-
-export const homeSizeLabels: Record<HomeSize, string> = {
-  under1500: 'Under 1,500 sq ft',
-  '1500to2500': '1,500–2,500 sq ft',
-  '2500to3500': '2,500–3,500 sq ft',
-  over3500: '3,500+ sq ft',
-};
-
-export const yardSizeLabels: Record<YardSize, string> = {
-  small: 'Small (< 5,000 sq ft)',
-  medium: 'Medium (5k–10k sq ft)',
-  large: 'Large (10k+ sq ft)',
-};
-
-export const vehicleTypeLabels: Record<VehicleType, string> = {
-  sedan: 'Sedan / Coupe',
-  suv: 'SUV / Minivan',
-  truck: 'Truck / Large SUV',
-};
 
 export const frequencyLabels: Record<Frequency, string> = {
   monthly: 'Monthly',

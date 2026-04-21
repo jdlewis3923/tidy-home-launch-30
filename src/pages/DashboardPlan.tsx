@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import tidyLogo from '@/assets/tidy-logo.png';
-import { ConfigState, loadState, saveState, clearState } from '@/lib/dashboard-pricing';
+import { ConfigState, loadState, saveState, clearState, hasCustomQuote } from '@/lib/dashboard-pricing';
 import ProgressBar from '@/components/dashboard/ProgressBar';
 import StickyPriceBar from '@/components/dashboard/StickyPriceBar';
 import StepServices from '@/components/dashboard/steps/StepServices';
@@ -39,7 +39,7 @@ export default function DashboardPlan() {
     if (step === 2) {
       if (state.services.includes('cleaning') && !state.homeSize) return false;
       if (state.services.includes('lawn') && !state.yardSize) return false;
-      if (state.services.includes('detailing') && !state.vehicleType) return false;
+      if (state.services.includes('detailing') && !state.vehicleSize) return false;
       return true;
     }
     if (step === 3) return !!(state.firstName && state.lastName && state.email && state.phone && state.address && state.city && state.zip);
@@ -90,6 +90,17 @@ export default function DashboardPlan() {
         {step === 5 && <StepReview state={state} onEdit={() => setStep(0)} />}
         {step === 6 && <StepPayment state={state} onChange={updateState} />}
 
+        {/* Custom-quote notice — shown alongside the normal flow on review/payment */}
+        {(step === 5 || step === 6) && hasCustomQuote(state) && (
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm text-foreground">
+            <p className="font-semibold mb-1">Your plan needs a custom quote</p>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              One of your services is above our standard size range, so we'll send you a personal quote within one
+              business day instead of charging you today. Click "Request my quote" below — we'll handle the rest.
+            </p>
+          </div>
+        )}
+
         {/* Navigation buttons */}
         <div className="flex items-center gap-3 pt-2">
           {step > 0 && (
@@ -119,7 +130,7 @@ export default function DashboardPlan() {
               disabled={!canAdvance()}
               className="ml-auto rounded-lg bg-gradient-to-br from-primary-deep to-primary px-6 py-3 text-sm font-extrabold text-primary-foreground shadow-[0_4px_16px_rgba(37,99,235,0.35)] transition-all hover:shadow-xl hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {stepInfo.cta}
+              {hasCustomQuote(state) && step === 5 ? 'Request my quote →' : stepInfo.cta}
             </button>
           )}
         </div>
