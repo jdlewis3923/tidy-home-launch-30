@@ -1,10 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
+import { capturePromoFromUrl } from "@/lib/promo";
 import Index from "./pages/Index.tsx";
 import ThankYou from "./pages/ThankYou.tsx";
 import Terms from "./pages/Terms.tsx";
@@ -23,6 +25,15 @@ import CheckoutCanceled from "./pages/CheckoutCanceled.tsx";
 
 const queryClient = new QueryClient();
 
+// Captures `?promo=CODE` from the URL on every route change (first-wins).
+const PromoCaptureWatcher = () => {
+  const location = useLocation();
+  useEffect(() => {
+    capturePromoFromUrl();
+  }, [location.pathname, location.search]);
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
@@ -30,6 +41,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <PromoCaptureWatcher />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/thank-you" element={<ThankYou />} />

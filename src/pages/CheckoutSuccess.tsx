@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { pushEvent } from "@/lib/tracking";
+import { clearPromo } from "@/lib/promo";
 import {
   CUSTOMER_ACCOUNT_ENABLED,
 } from "@/lib/dashboard-config";
@@ -24,6 +25,10 @@ export default function CheckoutSuccess() {
       session_id: sessionId ?? null,
       page: "/checkout/success",
     });
+    // Defense-in-depth: also clear any lingering promo state on the
+    // success landing (the redirect helper already clears, but if the
+    // user lands here directly we want a clean slate).
+    clearPromo();
   }, [sessionId]);
 
   const ctaTo = CUSTOMER_ACCOUNT_ENABLED ? "/account" : "/";

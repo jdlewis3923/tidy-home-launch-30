@@ -11,6 +11,7 @@ import StepDetails from '@/components/dashboard/steps/StepDetails';
 import StepAddOns from '@/components/dashboard/steps/StepAddOns';
 import StepReview from '@/components/dashboard/steps/StepReview';
 import StepPayment from '@/components/dashboard/steps/StepPayment';
+import PromoBanner from '@/components/dashboard/PromoBanner';
 
 const STEPS = [
   { heading: 'What do you want handled?', sub: 'Pick one, two, or all three. The more you bundle, the more you save.', cta: 'Continue →' },
@@ -71,6 +72,7 @@ export default function DashboardPlan() {
 
       <div className="mx-auto max-w-2xl px-4 pt-6 space-y-6">
         <ProgressBar currentStep={step} totalSteps={STEPS.length} />
+        <PromoBanner />
 
         <div>
           <h1 className="text-2xl md:text-3xl font-black tracking-tight text-foreground" style={{ letterSpacing: '-0.03em' }}>
