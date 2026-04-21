@@ -1,4 +1,5 @@
-import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, sizeTierCopy, hasCustomQuote } from '@/lib/dashboard-pricing';
+import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, sizeTierCopy, hasCustomQuote, REFERRAL_DISCOUNT_CENTS } from '@/lib/dashboard-pricing';
+import { usePromoState } from '@/hooks/usePromoCapture';
 
 interface Props {
   state: ConfigState;
@@ -8,6 +9,9 @@ interface Props {
 export default function StepReview({ state, onEdit }: Props) {
   const pricing = calculatePricing(state);
   const customQuote = hasCustomQuote(state);
+  const { code: promoCode } = usePromoState();
+  const referralDiscount = promoCode && !customQuote ? REFERRAL_DISCOUNT_CENTS / 100 : 0;
+  const firstMonthTotal = Math.max(0, pricing.firstMonth - referralDiscount);
 
   return (
     <div className="space-y-6">
