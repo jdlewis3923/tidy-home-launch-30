@@ -1,4 +1,5 @@
-import { ConfigState, calculatePricing } from '@/lib/dashboard-pricing';
+import { ConfigState, calculatePricing, REFERRAL_DISCOUNT_CENTS, serviceLabels, serviceIcons, frequencyLabels, addOnData } from '@/lib/dashboard-pricing';
+import { usePromoState } from '@/hooks/usePromoCapture';
 
 interface Props {
   state: ConfigState;
@@ -7,14 +8,71 @@ interface Props {
 
 export default function StepPayment({ state, onChange }: Props) {
   const pricing = calculatePricing(state);
+  const { code: promoCode } = usePromoState();
+
+  const referralDiscount = promoCode ? REFERRAL_DISCOUNT_CENTS / 100 : 0;
+  const totalToday = Math.max(0, pricing.firstMonth - referralDiscount);
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border-[1.5px] border-border bg-card p-5">
-        <div className="flex justify-between mb-2">
-          <span className="text-sm font-semibold text-foreground">Total today</span>
-          <span className="text-lg font-bold text-primary">${pricing.firstMonth.toFixed(2)}</span>
+      {/* Line-item breakdown */}
+      <div className="rounded-xl border-[1.5px] border-border bg-card p-5 space-y-3">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Order summary</h3>
+
+        <div className="space-y-2 text-sm">
+          {pricing.servicePrices.map(sp => (
+            <div key={sp.service} className="flex justify-between">
+              <span className="text-foreground">
+                {serviceIcons[sp.service]} {serviceLabels[sp.service]}
+                <span className="text-muted-foreground ml-1">— {frequencyLabels[state.frequencies[sp.service]!]}</span>
+              </span>
+              <span className="font-semibold text-foreground">${sp.price.toFixed(2)}</span>
+            </div>
+          ))}
+
+          {pricing.discountPercent > 0 && (
+            <div className="flex justify-between text-success">
+              <span>Bundle discount ({Math.round(pricing.discountPercent * 100)}%)</span>
+              <span>−${pricing.discountAmount.toFixed(2)}</span>
+            </div>
+          )}
+
+          {state.addOns.map(id => {
+            const addon = addOnData[id];
+            if (!addon) return null;
+            const price = addon.service === 'detailing' ? addon.price * state.vehicleCount : addon.price;
+            return (
+              <div key={id} className="flex justify-between">
+                <span className="text-foreground">{addon.name}</span>
+                <span className="text-foreground">${price.toFixed(2)}</span>
+              </div>
+            );
+          })}
+
+          {promoCode && (
+            <div className="flex justify-between text-success">
+              <span>Referral discount (${REFERRAL_DISCOUNT_CENTS / 100} off 1st mo)</span>
+              <span>−${(REFERRAL_DISCOUNT_CENTS / 100).toFixed(2)}</span>
+            </div>
+          )}
         </div>
+
+        <hr className="border-border" />
+
+        <div className="flex justify-between items-baseline">
+          <span className="text-sm font-semibold text-foreground">Total today</span>
+          <div className="text-right">
+            {promoCode && (
+              <div className="text-xs text-muted-foreground line-through">${pricing.firstMonth.toFixed(2)}</div>
+            )}
+            <span className="text-lg font-bold text-primary">${totalToday.toFixed(2)}</span>
+          </div>
+        </div>
+        {promoCode && (
+          <p className="text-xs text-success font-medium text-right">
+            You saved ${(REFERRAL_DISCOUNT_CENTS / 100).toFixed(2)} with code {promoCode}
+          </p>
+        )}
         <p className="text-xs text-muted-foreground">Then ${pricing.ongoing.toFixed(2)}/mo · Cancel anytime</p>
       </div>
 
@@ -70,7 +128,7 @@ export default function StepPayment({ state, onChange }: Props) {
       </button>
 
       <p className="text-center text-xs text-muted-foreground">
-        You'll be charged ${pricing.firstMonth.toFixed(2)} today · Renews monthly · Cancel anytime
+        You'll be charged ${totalToday.toFixed(2)} today · Renews monthly · Cancel anytime
       </p>
 
       <p className="text-xs text-muted-foreground/70 text-center">Billing is handled automatically based on your selected plan.</p>

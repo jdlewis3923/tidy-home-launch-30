@@ -1,3 +1,8 @@
+// Referral discount applied to first month when a valid promo code is present.
+// Stored in cents to mirror Stripe; UI converts to dollars for display.
+// Edit this single constant to change the displayed discount amount.
+export const REFERRAL_DISCOUNT_CENTS = 5000;
+
 // Types
 export type ServiceType = 'cleaning' | 'lawn' | 'detailing';
 export type Frequency = 'monthly' | 'biweekly' | 'weekly';
