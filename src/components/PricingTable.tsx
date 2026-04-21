@@ -5,11 +5,11 @@ import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 
 const rows = [
   { service: "🏠 House Cleaning", monthly: "$159/mo", biweekly: "$275/mo", weekly: "$459/mo" },
-  { service: "🌿 Lawn Care", monthly: "$75/mo", biweekly: "$119/mo", weekly: "$179/mo" },
-  { service: "🚗 Car Detailing", monthly: "$129/mo", biweekly: "$219/mo", weekly: "—" },
-  { service: "🔧 Cleaning Add-Ons", monthly: "$40–$95", biweekly: "one-time", weekly: "—" },
-  { service: "🔧 Detailing Add-Ons", monthly: "$60–$90", biweekly: "one-time", weekly: "—" },
-  { service: "🔧 Lawn Add-Ons", monthly: "$55–$80", biweekly: "one-time", weekly: "—" },
+  { service: "🌿 Lawn Care", monthly: "$85/mo", biweekly: "$129/mo", weekly: "$195/mo" },
+  { service: "🚗 Car Detailing", monthly: "$159/mo", biweekly: "$249/mo", weekly: "—" },
+  { service: "🔧 Cleaning Add-Ons", monthly: "$30–$55", biweekly: "one-time", weekly: "—" },
+  { service: "🔧 Lawn Add-Ons", monthly: "$45–$150", biweekly: "one-time", weekly: "—" },
+  { service: "🔧 Detailing Add-Ons", monthly: "$45–$85", biweekly: "one-time", weekly: "—" },
 ];
 
 const pricingFAQ = [
@@ -58,6 +58,9 @@ const PricingTable = () => {
 
           <p className="mt-6 text-xs text-text-light">
             {t("Bundle discount auto-applied at checkout · 2 services = 15% off · 3 services = 20% off · Cancel anytime")}
+          </p>
+          <p className="mt-2 text-xs text-text-light/80">
+            {t("Standard pricing covers most homes, yards, and vehicles. Larger properties or vehicles get a small upgrade fee — anything beyond is a quick custom quote.")}
           </p>
         </FadeIn>
 

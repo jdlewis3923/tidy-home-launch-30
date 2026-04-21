@@ -1,4 +1,4 @@
-import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData } from '@/lib/dashboard-pricing';
+import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, sizeTierCopy } from '@/lib/dashboard-pricing';
 
 interface Props {
   state: ConfigState;
@@ -13,15 +13,27 @@ export default function StepReview({ state, onEdit }: Props) {
       <div className="rounded-xl border-[1.5px] border-border bg-card p-6 space-y-4">
         <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Your Services</h3>
         <div className="space-y-2">
-          {pricing.servicePrices.map(sp => (
-            <div key={sp.service} className="flex justify-between text-sm">
-              <span className="text-foreground">
-                {serviceIcons[sp.service]} {serviceLabels[sp.service]}
-                <span className="text-muted-foreground ml-2">{frequencyLabels[state.frequencies[sp.service]!]}</span>
-              </span>
-              <span className="font-semibold text-foreground">${sp.price.toFixed(2)}/mo</span>
-            </div>
-          ))}
+          {pricing.servicePrices.map(sp => {
+            const tier =
+              sp.service === 'cleaning' ? state.homeSize
+              : sp.service === 'lawn' ? state.yardSize
+              : state.vehicleSize;
+            const tierLabel = tier ? sizeTierCopy[sp.service][tier].label : null;
+            return (
+              <div key={sp.service} className="flex justify-between text-sm">
+                <span className="text-foreground">
+                  {serviceIcons[sp.service]} {serviceLabels[sp.service]}
+                  <span className="text-muted-foreground ml-2">{frequencyLabels[state.frequencies[sp.service]!]}</span>
+                  {tierLabel && tierLabel !== 'Standard' && (
+                    <span className="ml-2 text-xs text-primary font-semibold">· {tierLabel}</span>
+                  )}
+                </span>
+                <span className="font-semibold text-foreground">
+                  {tier === 'custom' ? 'Custom quote' : `$${sp.price.toFixed(2)}/mo`}
+                </span>
+              </div>
+            );
+          })}
         </div>
         <hr className="border-border" />
         <div className="flex justify-between text-sm">
