@@ -111,8 +111,10 @@ export default function StepReview({ state, onEdit }: Props) {
                 <span>${pricing.ongoing.toFixed(2)}/mo</span>
               </div>
             </div>
+          </>
+        )}
 
-            <hr className="border-border" />
+        <hr className="border-border" />
         <div className="text-sm text-muted-foreground space-y-1">
           <p><strong>Service address:</strong> {state.address}, {state.city} {state.zip}</p>
           <p><strong>Preferred day:</strong> {state.preferredDay || 'No preference'} {state.preferredTime ? (state.preferredTime === 'morning' ? 'mornings' : 'afternoons') : ''}</p>
