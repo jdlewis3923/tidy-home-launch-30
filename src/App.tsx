@@ -25,6 +25,15 @@ import CheckoutCanceled from "./pages/CheckoutCanceled.tsx";
 
 const queryClient = new QueryClient();
 
+// Captures `?promo=CODE` from the URL on every route change (first-wins).
+const PromoCaptureWatcher = () => {
+  const location = useLocation();
+  useEffect(() => {
+    capturePromoFromUrl();
+  }, [location.pathname, location.search]);
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
@@ -32,6 +41,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <PromoCaptureWatcher />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/thank-you" element={<ThankYou />} />
