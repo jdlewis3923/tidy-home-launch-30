@@ -7,7 +7,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { getPromoCode, clearPromo } from '@/lib/promo';
+import { getPromoCode } from '@/lib/promo';
 import { STRIPE_FUNCTIONS } from '@/lib/stripe-config';
 
 interface CheckoutPayload {
@@ -40,7 +40,9 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     throw new Error('Checkout session did not return a redirect URL');
   }
 
-  // Clear all promo keys before leaving the app — Stripe will own the rest.
-  clearPromo();
+  // Do NOT clear promo state here — if the user cancels Stripe Checkout
+  // and returns via cancel_url, the code must still be in sessionStorage
+  // so the banner re-renders and the discount re-applies on retry.
+  // Clearing happens only on /checkout/success.
   window.location.href = data.url as string;
 }
