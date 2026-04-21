@@ -72,7 +72,7 @@ const ADDON_PRICE: Record<string, string> = {
   ozone:           'price_1TNCjsD7AxvAjJGviCx7ZE0B', // Ozone Odor Treatment $75
   petHair:         'price_1TNCl6D7AxvAjJGvxirYq3hZ', // Pet Hair Removal $45
   engineBay:       'price_1TNCjuD7AxvAjJGvKKqR021j', // Engine Bay Clean $85
-  ceramicSpray:    'price_1TNCjvD7AxvAjJGvAKQN2y7a', // Ceramic Spray Coat $85
+  ceramicSpray:    'price_1TNCjvD7AxvAjJGvQXVMBvpa', // Ceramic Spray Coat $85
 };
 
 // Add-ons that are charged per-vehicle (Detailing only).
