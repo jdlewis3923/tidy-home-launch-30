@@ -1,4 +1,5 @@
-import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, sizeTierCopy, hasCustomQuote } from '@/lib/dashboard-pricing';
+import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, sizeTierCopy, hasCustomQuote, REFERRAL_DISCOUNT_CENTS } from '@/lib/dashboard-pricing';
+import { usePromoState } from '@/hooks/usePromoCapture';
 
 interface Props {
   state: ConfigState;
@@ -8,6 +9,9 @@ interface Props {
 export default function StepReview({ state, onEdit }: Props) {
   const pricing = calculatePricing(state);
   const customQuote = hasCustomQuote(state);
+  const { code: promoCode } = usePromoState();
+  const referralDiscount = promoCode && !customQuote ? REFERRAL_DISCOUNT_CENTS / 100 : 0;
+  const firstMonthTotal = Math.max(0, pricing.firstMonth - referralDiscount);
 
   return (
     <div className="space-y-6">
@@ -85,10 +89,22 @@ export default function StepReview({ state, onEdit }: Props) {
             )}
 
             <hr className="border-border" />
+            {referralDiscount > 0 && (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Services subtotal</span>
+                  <span className="text-foreground">${pricing.firstMonth.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-success">
+                  <span>Referral discount {promoCode ? `(${promoCode})` : ''}</span>
+                  <span>−${referralDiscount.toFixed(2)}</span>
+                </div>
+              </>
+            )}
             <div className="space-y-1">
               <div className="flex justify-between text-base font-bold">
                 <span className="text-foreground">First month</span>
-                <span className="text-primary">${pricing.firstMonth.toFixed(2)}</span>
+                <span className="text-primary">${firstMonthTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Ongoing</span>
