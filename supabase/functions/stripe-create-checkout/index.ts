@@ -239,7 +239,6 @@ Deno.serve(async (req) => {
     cancel_url: promoCode
       ? `${origin}/dashboard/plan?promo=${encodeURIComponent(promoCode)}`
       : `${origin}/checkout/canceled`,
-    customer_creation: 'always',
     line_items,
     metadata: referralMetadata,
     subscription_data: {
