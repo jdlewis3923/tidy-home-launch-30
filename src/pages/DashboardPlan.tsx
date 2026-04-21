@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import tidyLogo from '@/assets/tidy-logo.png';
-import { ConfigState, loadState, saveState, clearState } from '@/lib/dashboard-pricing';
+import { ConfigState, loadState, saveState, clearState, hasCustomQuote } from '@/lib/dashboard-pricing';
 import ProgressBar from '@/components/dashboard/ProgressBar';
 import StickyPriceBar from '@/components/dashboard/StickyPriceBar';
 import StepServices from '@/components/dashboard/steps/StepServices';
