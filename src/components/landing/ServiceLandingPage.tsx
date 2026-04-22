@@ -10,6 +10,10 @@ import TrustSignalRow from "@/components/landing/TrustSignalRow";
 import HowItWorksStrip from "@/components/landing/HowItWorksStrip";
 import SavingsCallout from "@/components/landing/SavingsCallout";
 import NeighborhoodTrust from "@/components/landing/NeighborhoodTrust";
+import SparkleField from "@/components/landing/SparkleField";
+import SectionDecor from "@/components/landing/SectionDecor";
+import LandingTicker from "@/components/landing/LandingTicker";
+import LpFinalCta from "@/components/landing/LpFinalCta";
 import {
   PHONE_DISPLAY,
   PHONE_TEL,
