@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Check, Phone, MapPin, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -18,9 +18,9 @@ import {
   PHONE_DISPLAY,
   PHONE_TEL,
   SERVICE_AREA_TRUST,
-  buildSignupHref,
 } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
+import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 
 export interface PlanTier {
   name: string;
@@ -73,33 +73,47 @@ interface Props {
   config: ServiceLandingConfig;
 }
 
-const ServiceLandingPage = ({ config }: Props) => {
-  const location = useLocation();
+/**
+ * Outer wrapper — mounts the PrimaryCtaProvider so every CTA inside (hero,
+ * plan cards, sticky bar, bundle cross-sell, final CTA, navbar) routes
+ * through the same launch-toggle-aware handler.
+ */
+const ServiceLandingPage = ({ config }: Props) => (
+  <PrimaryCtaProvider>
+    <ServiceLandingPageInner config={config} />
+  </PrimaryCtaProvider>
+);
 
-  const ctaHref = (planSlug?: string) =>
-    buildSignupHref(location.search, {
+const ServiceLandingPageInner = ({ config }: Props) => {
+  const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
+
+  const ctaForPlan = (planSlug?: string, where = "hero") =>
+    getCtaProps({
+      trackingId: `lp_${config.serviceSlug}_${where}`,
+      ctaText: "Book in 60 seconds",
       service: config.signupServiceParam,
       plan: planSlug,
+      trackingMeta: {
+        service: config.signupServiceParam,
+        plan: planSlug ?? "",
+      },
     });
 
-  const trackBook = (where: string, planSlug?: string) => {
+  // Navbar's primary CTA slot — same target as the hero CTA.
+  const handleNavCta = () => {
     pushEvent("cta_click", {
-      cta_id: `lp_${config.serviceSlug}_${where}`,
+      cta_id: `lp_${config.serviceSlug}_nav`,
       cta_text: "Book in 60 seconds",
       service: config.signupServiceParam,
-      plan: planSlug ?? "",
     });
-    pushEvent("conversion_intent", {
-      service: config.signupServiceParam,
-      plan: planSlug ?? "",
-      surface: `lp_${config.serviceSlug}`,
-    });
+    if (popupMode) {
+      openPopup();
+    } else {
+      window.location.href = ctaForPlan(undefined, "nav").to;
+    }
   };
 
-  const handleNavCta = () => {
-    trackBook("nav");
-    window.location.href = ctaHref();
-  };
+  const heroCta = ctaForPlan(undefined, "hero");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -107,8 +121,8 @@ const ServiceLandingPage = ({ config }: Props) => {
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
         label={config.stickyLabel}
-        href={ctaHref()}
         surface={`lp_${config.serviceSlug}`}
+        service={config.signupServiceParam}
       />
 
       {/* HERO */}
@@ -146,8 +160,8 @@ const ServiceLandingPage = ({ config }: Props) => {
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              to={ctaHref()}
-              onClick={() => trackBook("hero")}
+              to={heroCta.to}
+              onClick={heroCta.onClick}
               className="cta-arrow cta-press animate-pulse-once bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
             >
               Book in 60 seconds <span className="arrow">→</span>
@@ -188,41 +202,44 @@ const ServiceLandingPage = ({ config }: Props) => {
           <SavingsCallout text={config.savingsCallout} />
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-5 items-stretch">
-            {config.plans.map((p, i) => (
-              <Reveal key={p.planSlug} delay={i * 80}>
-                <div
-                  className={`relative bg-card border rounded-xl p-6 h-full flex flex-col hover-lift transition-transform ${
-                    p.highlighted
-                      ? "border-2 border-primary shadow-[0_0_28px_-8px_hsl(var(--primary)/0.3)] md:scale-[1.04] md:-my-1 z-10"
-                      : ""
-                  }`}
-                >
-                  {p.highlighted && (
-                    <span className="most-popular-ribbon hidden md:inline-block">
-                      Most Popular
-                    </span>
-                  )}
-                  {p.highlighted && (
-                    <span className="md:hidden self-start bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                      Most Popular
-                    </span>
-                  )}
-                  <h3 className="text-lg font-bold text-foreground">{p.name}</h3>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-foreground">{p.price}</span>
-                    <span className="text-sm text-text-mid">{p.cadence}</span>
-                  </div>
-                  <p className="text-sm text-text-mid mt-3 flex-1">{p.description}</p>
-                  <Link
-                    to={ctaHref(p.planSlug)}
-                    onClick={() => trackBook(`plan_${p.planSlug}`, p.planSlug)}
-                    className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
+            {config.plans.map((p, i) => {
+              const planCta = ctaForPlan(p.planSlug, `plan_${p.planSlug}`);
+              return (
+                <Reveal key={p.planSlug} delay={i * 80}>
+                  <div
+                    className={`relative bg-card border rounded-xl p-6 h-full flex flex-col hover-lift transition-transform ${
+                      p.highlighted
+                        ? "border-2 border-primary shadow-[0_0_28px_-8px_hsl(var(--primary)/0.3)] md:scale-[1.04] md:-my-1 z-10"
+                        : ""
+                    }`}
                   >
-                    Choose {p.name} <span className="arrow">→</span>
-                  </Link>
-                </div>
-              </Reveal>
-            ))}
+                    {p.highlighted && (
+                      <span className="most-popular-ribbon hidden md:inline-block">
+                        Most Popular
+                      </span>
+                    )}
+                    {p.highlighted && (
+                      <span className="md:hidden self-start bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                        Most Popular
+                      </span>
+                    )}
+                    <h3 className="text-lg font-bold text-foreground">{p.name}</h3>
+                    <div className="mt-2 flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold text-foreground">{p.price}</span>
+                      <span className="text-sm text-text-mid">{p.cadence}</span>
+                    </div>
+                    <p className="text-sm text-text-mid mt-3 flex-1">{p.description}</p>
+                    <Link
+                      to={planCta.to}
+                      onClick={planCta.onClick}
+                      className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
+                    >
+                      Choose {p.name} <span className="arrow">→</span>
+                    </Link>
+                  </div>
+                </Reveal>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -328,46 +345,57 @@ const ServiceLandingPage = ({ config }: Props) => {
       </section>
 
       {/* BUNDLE CROSS-SELL */}
-      <section className="bg-background py-16 px-4">
-        <div className="max-w-3xl mx-auto">
-          <Reveal>
-            <div className="relative bg-gradient-to-r from-primary/10 to-success/10 border-2 border-primary/30 rounded-2xl p-6 md:p-8 text-center overflow-hidden">
-              <div className="absolute top-3 right-3 save-badge-rotate bg-gold text-gold-foreground text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                Save 10%
-              </div>
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/15 mb-3">
-                <Sparkles className="w-5 h-5 text-primary" aria-hidden="true" />
-              </div>
-              <h3 className="text-xl md:text-2xl font-bold text-foreground">
-                {config.bundleCta.title}
-              </h3>
-              <p className="text-sm text-text-mid mt-2">{config.bundleCta.body}</p>
-              <Link
-                to={buildSignupHref(location.search, {
-                  bundle: "true",
-                  services: config.bundleCta.targetServices,
-                })}
-                onClick={() => pushEvent("cta_click", { cta_id: `lp_${config.serviceSlug}_bundle`, cta_text: "Bundle & save" })}
-                className="cta-arrow cta-press mt-5 inline-block bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-colors"
-              >
-                Bundle &amp; save <span className="arrow">→</span>
-              </Link>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      <BundleCrossSell config={config} />
 
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
-        href={ctaHref()}
         headline={`Ready to lock in your ${config.eyebrow.toLowerCase()}?`}
         subhead="60-second signup. Same crew. Locked price."
         ctaLabel="Book in 60 seconds"
         trackingId={`lp_${config.serviceSlug}_final`}
+        service={config.signupServiceParam}
       />
 
       <Footer />
     </div>
+  );
+};
+
+const BundleCrossSell = ({ config }: Props) => {
+  const { getCtaProps } = usePrimaryCta();
+  const cta = getCtaProps({
+    trackingId: `lp_${config.serviceSlug}_bundle`,
+    ctaText: "Bundle & save",
+    bundle: "true",
+    services: config.bundleCta.targetServices,
+  });
+
+  return (
+    <section className="bg-background py-16 px-4">
+      <div className="max-w-3xl mx-auto">
+        <Reveal>
+          <div className="relative bg-gradient-to-r from-primary/10 to-success/10 border-2 border-primary/30 rounded-2xl p-6 md:p-8 text-center overflow-hidden">
+            <div className="absolute top-3 right-3 save-badge-rotate bg-gold text-gold-foreground text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+              Save 10%
+            </div>
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/15 mb-3">
+              <Sparkles className="w-5 h-5 text-primary" aria-hidden="true" />
+            </div>
+            <h3 className="text-xl md:text-2xl font-bold text-foreground">
+              {config.bundleCta.title}
+            </h3>
+            <p className="text-sm text-text-mid mt-2">{config.bundleCta.body}</p>
+            <Link
+              to={cta.to}
+              onClick={cta.onClick}
+              className="cta-arrow cta-press mt-5 inline-block bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-colors"
+            >
+              Bundle &amp; save <span className="arrow">→</span>
+            </Link>
+          </div>
+        </Reveal>
+      </div>
+    </section>
   );
 };
 
