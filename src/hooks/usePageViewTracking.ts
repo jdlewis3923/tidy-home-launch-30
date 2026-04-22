@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 
 declare global {
   interface Window {
-    dataLayer?: Array<Record<string, unknown>>;
+    dataLayer: Record<string, unknown>[];
   }
 }
 

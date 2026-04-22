@@ -6,7 +6,7 @@ type TrackPayload = Record<string, string | number | boolean | undefined>;
 
 declare global {
   interface Window {
-    dataLayer?: Array<Record<string, unknown>>;
+    dataLayer: Record<string, unknown>[];
   }
 }
 
