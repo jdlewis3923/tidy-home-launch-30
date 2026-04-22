@@ -20,6 +20,7 @@ import {
   SERVICE_AREA_TRUST,
 } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
+import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 
 export interface PlanTier {
@@ -87,8 +88,8 @@ const ServiceLandingPage = ({ config }: Props) => (
 const ServiceLandingPageInner = ({ config }: Props) => {
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
 
-  const ctaForPlan = (planSlug?: string, where = "hero") =>
-    getCtaProps({
+  const ctaForPlan = (planSlug: string | undefined, where: string) => {
+    const base = getCtaProps({
       trackingId: `lp_${config.serviceSlug}_${where}`,
       ctaText: "Book in 60 seconds",
       service: config.signupServiceParam,
@@ -99,12 +100,35 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       },
     });
 
+    // Normalize the surface to one of the 4 locations Google Ads cares about.
+    const location: "hero" | "plans" | "sticky_bar" | "final_banner" =
+      where.startsWith("plan_") ? "plans"
+      : where === "final" || where === "final_banner" ? "final_banner"
+      : where === "sticky_bar" ? "sticky_bar"
+      : "hero";
+
+    // Wrap the existing onClick so we ALSO emit the Google Ads conversion event.
+    const onClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      track("book_cta_click", {
+        service: config.serviceSlug,
+        plan: planSlug,
+        location,
+      });
+      base.onClick(e);
+    };
+    return { to: base.to, onClick };
+  };
+
   // Navbar's primary CTA slot — same target as the hero CTA.
   const handleNavCta = () => {
     pushEvent("cta_click", {
       cta_id: `lp_${config.serviceSlug}_nav`,
       cta_text: "Book in 60 seconds",
       service: config.signupServiceParam,
+    });
+    track("book_cta_click", {
+      service: config.serviceSlug,
+      location: "hero",
     });
     if (popupMode) {
       openPopup();
@@ -168,7 +192,10 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             </Link>
             <a
               href={`tel:${PHONE_TEL}`}
-              onClick={() => pushEvent("cta_click", { cta_id: `lp_${config.serviceSlug}_call_hero`, cta_text: "Call" })}
+              onClick={() => {
+                pushEvent("cta_click", { cta_id: `lp_${config.serviceSlug}_call_hero`, cta_text: "Call" });
+                track("phone_click", { service: config.serviceSlug });
+              }}
               className="inline-flex items-center gap-2 text-primary-foreground/90 hover:text-primary-foreground text-sm font-medium px-4 py-3"
             >
               <Phone className="w-4 h-4" />

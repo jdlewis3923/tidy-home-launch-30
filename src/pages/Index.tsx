@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from "react";
-import { initScrollTracking, pushEvent } from "@/lib/tracking";
+import { initScrollTracking } from "@/lib/tracking";
 import Navbar from "@/components/Navbar";
 import AnnouncementTicker from "@/components/AnnouncementTicker";
 import Hero from "@/components/Hero";
@@ -50,10 +50,7 @@ const Index = () => {
     return cleanup;
   }, []);
 
-  // Page view
-  useEffect(() => {
-    pushEvent("page_view", { page: "/" });
-  }, []);
+  // page_view is now fired globally by <RouteTracker> in App.tsx — no per-page push needed.
 
   // Auto-fire popup on page load (only when dashboard is OFF)
   useEffect(() => {

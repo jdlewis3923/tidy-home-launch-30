@@ -3,6 +3,7 @@ import TidyLogo from "@/components/TidyLogo";
 import SparkleField from "./SparkleField";
 import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { usePrimaryCta } from "@/hooks/usePrimaryCta";
+import { track } from "@/lib/track";
 
 interface Props {
   headline: string;
@@ -43,6 +44,25 @@ const LpFinalCta = ({
     services,
   });
 
+  // Map the trackingId surface to a service slug for the named conversion event.
+  // trackingId looks like "lp_house-cleaning_final" or "bundle_final_cta".
+  const reportedService = bundle
+    ? "bundle"
+    : trackingId.startsWith("lp_house-cleaning") ? "house-cleaning"
+    : trackingId.startsWith("lp_lawn-care") ? "lawn-care"
+    : trackingId.startsWith("lp_car-detailing") ? "car-detailing"
+    : trackingId.startsWith("bundle") ? "bundle"
+    : "site";
+
+  const onClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    track("book_cta_click", {
+      service: reportedService,
+      plan,
+      location: "final_banner",
+    });
+    ctaProps.onClick(e);
+  };
+
   return (
     <section className="relative bg-gradient-to-b from-navy to-primary-deep py-24 px-4 overflow-hidden">
       <SparkleField />
@@ -61,7 +81,7 @@ const LpFinalCta = ({
 
         <Link
           to={ctaProps.to}
-          onClick={ctaProps.onClick}
+          onClick={onClick}
           className="cta-arrow cta-press bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)] animate-pulse-gold"
         >
           {ctaLabel} <span className="arrow">→</span>

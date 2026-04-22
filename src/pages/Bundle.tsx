@@ -14,6 +14,7 @@ import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
+import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import heroImg from "@/assets/hero-miami-home.jpg";
 
@@ -66,6 +67,7 @@ const BundleInner = () => {
 
   const handleNavCta = () => {
     pushEvent("cta_click", { cta_id: "bundle_nav", cta_text: "Book in 60 seconds" });
+    track("book_cta_click", { service: "bundle", location: "hero" });
     if (popupMode) openPopup();
     else {
       window.location.href = getCtaProps({
@@ -197,7 +199,11 @@ const BundleInner = () => {
                 {twoBundle.valid ? (
                   <Link
                     to={twoBundleCta.to}
-                    onClick={twoBundleCta.onClick}
+                    onClick={(e) => {
+                      track("bundle_build_click", { services: twoBundle.services });
+                      track("book_cta_click", { service: "bundle", location: "plans" });
+                      twoBundleCta.onClick(e);
+                    }}
                     className="cta-arrow cta-press mt-auto block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                   >
                     Build my 2-service bundle <span className="arrow">→</span>
@@ -234,7 +240,10 @@ const BundleInner = () => {
                 </p>
                 <Link
                   to={threeBundleCta.to}
-                  onClick={threeBundleCta.onClick}
+                  onClick={(e) => {
+                    track("book_cta_click", { service: "bundle", location: "plans" });
+                    threeBundleCta.onClick(e);
+                  }}
                   className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                 >
                   Build my 3-service bundle <span className="arrow">→</span>
