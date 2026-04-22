@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Copy, Check, Gift, UserPlus, Sparkles, MapPin } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,20 +9,27 @@ import SparkleField from "@/components/landing/SparkleField";
 import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
-import { SERVICE_AREA_TRUST, buildSignupHref } from "@/lib/landing";
+import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { pushEvent } from "@/lib/tracking";
+import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 
 /**
  * /refer — public marketing surface for the existing
  * REFERRAL_50_OFF_FIRST_MONTH coupon flow. No new backend; if a user is
  * signed in we surface their referral code, otherwise we show a sign-in nudge.
  */
-const Refer = () => {
-  const location = useLocation();
+const Refer = () => (
+  <PrimaryCtaProvider>
+    <ReferInner />
+  </PrimaryCtaProvider>
+);
+
+const ReferInner = () => {
   const [code, setCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [authLoaded, setAuthLoaded] = useState(false);
+  const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
 
   // Lazy-load Supabase only if dashboard auth is on, to avoid touching
   // the bundle when this page is browsed pre-launch.
@@ -39,9 +46,6 @@ const Refer = () => {
         if (!active) return;
         const user = data.session?.user;
         if (user?.email) {
-          // Build a deterministic, sharable code from the user's email —
-          // the existing referral coupon REFERRAL_50_OFF_FIRST_MONTH is global,
-          // so this slug is purely for attribution via the ?promo= param.
           const slug = user.email.split("@")[0]
             .replace(/[^a-zA-Z0-9]/g, "")
             .slice(0, 8)
@@ -71,8 +75,12 @@ const Refer = () => {
     }
   };
 
+  const navCta = getCtaProps({ trackingId: "refer_nav", ctaText: "Book in 60 seconds" });
+  const becomeCustomerCta = getCtaProps({ trackingId: "refer_signup", ctaText: "Become a customer" });
+
   const handleNavCta = () => {
-    window.location.href = buildSignupHref(location.search);
+    if (popupMode) openPopup();
+    else window.location.href = navCta.to;
   };
 
   return (
@@ -188,8 +196,8 @@ const Refer = () => {
                       Log in to get your code <span className="arrow">→</span>
                     </Link>
                     <Link
-                      to={buildSignupHref(location.search)}
-                      onClick={() => pushEvent("cta_click", { cta_id: "refer_signup", cta_text: "Become a customer" })}
+                      to={becomeCustomerCta.to}
+                      onClick={becomeCustomerCta.onClick}
                       className="cta-arrow cta-press bg-card border hover:bg-muted text-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
                       Become a customer first <span className="arrow">→</span>
@@ -204,7 +212,6 @@ const Refer = () => {
 
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
-        href={buildSignupHref(location.search)}
         headline="Not a member yet? Start with a plan."
         subhead="Lock in your monthly price, then send your link to a neighbor."
         ctaLabel="Book in 60 seconds"
