@@ -88,8 +88,8 @@ const ServiceLandingPage = ({ config }: Props) => (
 const ServiceLandingPageInner = ({ config }: Props) => {
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
 
-  const ctaForPlan = (planSlug?: string, where = "hero") =>
-    getCtaProps({
+  const ctaForPlan = (planSlug: string | undefined, where: "hero" | "plans" | "sticky_bar" | "final_banner" | "nav") => {
+    const base = getCtaProps({
       trackingId: `lp_${config.serviceSlug}_${where}`,
       ctaText: "Book in 60 seconds",
       service: config.signupServiceParam,
@@ -100,12 +100,28 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       },
     });
 
+    // Wrap the existing onClick so we ALSO emit the Google Ads conversion event.
+    const onClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      track("book_cta_click", {
+        service: config.serviceSlug,
+        plan: planSlug,
+        location: where === "nav" ? "hero" : where,
+      });
+      base.onClick(e);
+    };
+    return { to: base.to, onClick };
+  };
+
   // Navbar's primary CTA slot — same target as the hero CTA.
   const handleNavCta = () => {
     pushEvent("cta_click", {
       cta_id: `lp_${config.serviceSlug}_nav`,
       cta_text: "Book in 60 seconds",
       service: config.signupServiceParam,
+    });
+    track("book_cta_click", {
+      service: config.serviceSlug,
+      location: "hero",
     });
     if (popupMode) {
       openPopup();
