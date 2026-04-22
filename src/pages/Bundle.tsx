@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Check, MapPin, Sparkles, Sparkle } from "lucide-react";
+import { Check, MapPin, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
@@ -8,6 +8,10 @@ import Reveal from "@/components/landing/Reveal";
 import StickyBookBar from "@/components/landing/StickyBookBar";
 import TrustSignalRow from "@/components/landing/TrustSignalRow";
 import NeighborhoodTrust from "@/components/landing/NeighborhoodTrust";
+import SparkleField from "@/components/landing/SparkleField";
+import SectionDecor from "@/components/landing/SectionDecor";
+import LandingTicker from "@/components/landing/LandingTicker";
+import LpFinalCta from "@/components/landing/LpFinalCta";
 import { SERVICE_AREA_TRUST, buildSignupHref } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
 import heroImg from "@/assets/hero-miami-home.jpg";
