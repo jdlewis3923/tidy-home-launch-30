@@ -81,7 +81,7 @@ const LpFinalCta = ({
 
         <Link
           to={ctaProps.to}
-          onClick={ctaProps.onClick}
+          onClick={onClick}
           className="cta-arrow cta-press bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)] animate-pulse-gold"
         >
           {ctaLabel} <span className="arrow">→</span>
