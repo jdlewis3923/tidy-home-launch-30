@@ -121,6 +121,7 @@ const ServiceLandingPage = ({ config }: Props) => {
           height={896}
         />
         <div className="absolute inset-0 bg-navy/65" />
+        <SparkleField />
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">
@@ -147,7 +148,7 @@ const ServiceLandingPage = ({ config }: Props) => {
             <Link
               to={ctaHref()}
               onClick={() => trackBook("hero")}
-              className="cta-arrow cta-press animate-pulse-once bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-lg"
+              className="cta-arrow cta-press animate-pulse-once bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
             >
               Book in 60 seconds <span className="arrow">→</span>
             </Link>
@@ -167,12 +168,16 @@ const ServiceLandingPage = ({ config }: Props) => {
         </div>
       </section>
 
+      {/* INFINITE TICKER (mirrors homepage energy) */}
+      <LandingTicker />
+
       {/* TRUST SIGNAL ROW */}
       <TrustSignalRow />
 
       {/* PLANS */}
-      <section className="bg-background py-20 px-4">
-        <div className="max-w-5xl mx-auto">
+      <section className="relative bg-background py-20 px-4 overflow-hidden">
+        <SectionDecor tone="primary" />
+        <div className="relative max-w-5xl mx-auto">
           <Reveal className="text-center mb-6">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">Plans</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
