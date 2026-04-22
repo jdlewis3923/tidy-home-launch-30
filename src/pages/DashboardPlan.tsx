@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import tidyLogo from '@/assets/tidy-logo.png';
-import { ConfigState, loadState, saveState, clearState, hasCustomQuote } from '@/lib/dashboard-pricing';
+import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote } from '@/lib/dashboard-pricing';
 import ProgressBar from '@/components/dashboard/ProgressBar';
 import StickyPriceBar from '@/components/dashboard/StickyPriceBar';
 import StepServices from '@/components/dashboard/steps/StepServices';
@@ -24,12 +24,82 @@ const STEPS = [
   { heading: 'Secure checkout', sub: 'Your payment is encrypted and processed securely by Stripe.', cta: 'Pay & start my plan →' },
 ];
 
+// Maps the LP/ad URL ?service= values to dashboard ServiceType.
+const SERVICE_PARAM_MAP: Record<string, ServiceType> = {
+  cleaning: 'cleaning',
+  lawn: 'lawn',
+  detailing: 'detailing',
+};
+
+// Maps the LP ?plan= values to a dashboard Frequency.
+// Detailing's "biweekly" plan slug = the Premium tier (also biweekly billing).
+// Detailing's "full" plan slug → biweekly + full-detail intent (closest auto-pick).
+const PLAN_PARAM_MAP: Record<string, Frequency> = {
+  monthly: 'monthly',
+  biweekly: 'biweekly',
+  weekly: 'weekly',
+  full: 'biweekly',
+};
+
 export default function DashboardPlan() {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<ConfigState>(loadState);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const customQuote = hasCustomQuote(state);
+
+  // Preselect service / plan / bundle from incoming ad URL params, once.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const serviceParam = params.get('service');
+    const planParam = params.get('plan');
+    const bundleParam = params.get('bundle');
+    const servicesParam = params.get('services'); // comma-separated for bundles
+
+    if (!serviceParam && !bundleParam && !servicesParam) return;
+
+    setState((prev) => {
+      const next: ConfigState = { ...prev, frequencies: { ...prev.frequencies } };
+
+      // Bundle: services=cleaning,lawn,detailing
+      if (servicesParam) {
+        const slugs = servicesParam
+          .split(',')
+          .map((s) => s.trim().toLowerCase())
+          .filter((s): s is keyof typeof SERVICE_PARAM_MAP => s in SERVICE_PARAM_MAP)
+          .map((s) => SERVICE_PARAM_MAP[s]);
+        if (slugs.length) {
+          const merged = Array.from(new Set([...prev.services, ...slugs]));
+          next.services = merged;
+          for (const svc of slugs) {
+            if (!next.frequencies[svc]) {
+              next.frequencies[svc] = svc === 'lawn' ? 'monthly' : 'biweekly';
+            }
+          }
+        }
+      }
+
+      // Single service preselect
+      if (serviceParam && SERVICE_PARAM_MAP[serviceParam]) {
+        const svc = SERVICE_PARAM_MAP[serviceParam];
+        if (!next.services.includes(svc)) next.services = [...next.services, svc];
+        const planFreq = planParam && PLAN_PARAM_MAP[planParam];
+        if (planFreq) {
+          // Detailing has no weekly — clamp to biweekly.
+          next.frequencies[svc] =
+            svc === 'detailing' && planFreq === 'weekly' ? 'biweekly' : planFreq;
+        } else if (!next.frequencies[svc]) {
+          next.frequencies[svc] = svc === 'lawn' ? 'monthly' : 'biweekly';
+        }
+      }
+
+      saveState(next);
+      return next;
+    });
+    // run once per pathname/search
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateState = useCallback((next: ConfigState) => {
     setState(next);

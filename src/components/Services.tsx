@@ -1,4 +1,5 @@
-import { Check, X as XIcon } from "lucide-react";
+import { Check, X as XIcon, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import cleaningImg from "@/assets/cleaning-interior.jpg";
 import lawnImg from "@/assets/lawn-care.jpg";
 import carImg from "@/assets/car-detailing.jpg";
@@ -11,6 +12,7 @@ const services = [
     title: "House Cleaning",
     badge: "⭐ Most Popular",
     image: cleaningImg,
+    lpHref: "/house-cleaning",
     anchor: "Most popular · Members often pair with lawn care",
     priceMain: "From $159/mo",
     priceSub: "Biweekly from $275/mo",
@@ -24,6 +26,7 @@ const services = [
     title: "Lawn Care",
     badge: null,
     image: lawnImg,
+    lpHref: "/lawn-care",
     anchor: "Best value · Pairs perfectly with cleaning",
     priceMain: "From $85/mo",
     priceSub: "Biweekly from $129/mo",
@@ -37,6 +40,7 @@ const services = [
     title: "Car Detailing",
     badge: null,
     image: carImg,
+    lpHref: "/car-detailing",
     anchor: "Comes to your driveway · No drop-off needed",
     priceMain: "From $159/mo",
     priceSub: "Biweekly from $249/mo",
@@ -108,13 +112,23 @@ const Services = () => {
                       ))}
                     </ul>
 
-                    <div className="mt-auto pt-3 border-t">
+                    <div className="pt-3 border-t">
                       <p className="text-xs text-text-light">
                         <span className="font-semibold text-foreground/70">{t("Add-ons:")}</span> {t(s.addOns)}
                       </p>
                     </div>
                   </>
                 )}
+
+                <div className="mt-auto pt-4">
+                  <Link
+                    to={s.lpHref}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-deep transition-colors"
+                  >
+                    {t("See plans & details")}
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
               </div>
             </div>
           ))}

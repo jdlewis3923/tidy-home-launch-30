@@ -98,6 +98,8 @@ interface ConfigState {
 interface CheckoutBody {
   promoCode?: string;
   config?: ConfigState;
+  /** UTM + gclid captured client-side; mirrored onto session metadata. */
+  attribution?: Record<string, string>;
 }
 
 function tierFor(state: ConfigState, svc: ServiceType): SizeTier | null {
@@ -227,9 +229,28 @@ Deno.serve(async (req) => {
 
   const origin = req.headers.get('origin') ?? 'https://jointidy.co';
 
+  // Whitelist + length-clamp attribution params so we don't blow past
+  // Stripe's metadata key/value limits or accept arbitrary keys from clients.
+  const ATTRIBUTION_KEYS = [
+    'utm_source',
+    'utm_medium',
+    'utm_campaign',
+    'utm_content',
+    'utm_term',
+    'gclid',
+  ] as const;
+  const safeAttribution: Record<string, string> = {};
+  for (const k of ATTRIBUTION_KEYS) {
+    const v = body.attribution?.[k];
+    if (typeof v === 'string' && v.trim()) {
+      safeAttribution[k] = v.trim().slice(0, 500);
+    }
+  }
+
   const referralMetadata = {
     source: 'tidy-builder',
     referral_promo: promoCode ?? '',
+    ...safeAttribution,
   };
 
   // deno-lint-ignore no-explicit-any

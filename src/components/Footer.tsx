@@ -28,9 +28,10 @@ const Footer = () => {
         <div>
           <h4 className="text-sm font-semibold text-primary-foreground mb-4">{t("Services")}</h4>
           <ul className="space-y-2 text-sm text-primary-foreground/40">
-            <li>{t("House Cleaning Miami")}</li>
-            <li>{t("Lawn Care Miami")}</li>
-            <li>{t("Car Detailing Miami")}</li>
+            <li><Link to="/house-cleaning" className="hover:text-primary-foreground/70 transition-colors">{t("House Cleaning Miami")}</Link></li>
+            <li><Link to="/lawn-care" className="hover:text-primary-foreground/70 transition-colors">{t("Lawn Care Miami")}</Link></li>
+            <li><Link to="/car-detailing" className="hover:text-primary-foreground/70 transition-colors">{t("Car Detailing Miami")}</Link></li>
+            <li><Link to="/bundle" className="hover:text-primary-foreground/70 transition-colors">Bundle &amp; Save</Link></li>
             <li><a href="#pricing" className="hover:text-primary-foreground/70 transition-colors">{t("Pricing")}</a></li>
             <li>{t("Referral Program")}</li>
           </ul>
