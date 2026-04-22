@@ -5,6 +5,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
 import Reveal from "@/components/landing/Reveal";
+import SparkleField from "@/components/landing/SparkleField";
+import SectionDecor from "@/components/landing/SectionDecor";
+import LandingTicker from "@/components/landing/LandingTicker";
+import LpFinalCta from "@/components/landing/LpFinalCta";
 import { SERVICE_AREA_TRUST, buildSignupHref } from "@/lib/landing";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { pushEvent } from "@/lib/tracking";
@@ -82,8 +86,9 @@ const Refer = () => {
       <Navbar onOpenPopup={handleNavCta} />
 
       {/* HERO */}
-      <section className="relative pt-32 pb-16 px-4 bg-gradient-to-b from-navy to-primary-deep">
-        <div className="max-w-3xl mx-auto text-center">
+      <section className="relative pt-32 pb-16 px-4 bg-gradient-to-b from-navy to-primary-deep overflow-hidden">
+        <SparkleField />
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">Refer & Earn</span>
           <h1 className="mt-3 text-3xl md:text-5xl font-extrabold text-primary-foreground leading-tight">
             Give $50, Get $50 — refer a neighbor in Pinecrest + Kendall
@@ -99,9 +104,12 @@ const Refer = () => {
         </div>
       </section>
 
+      <LandingTicker />
+
       {/* HOW IT WORKS */}
-      <section className="bg-background py-16 px-4">
-        <div className="max-w-5xl mx-auto">
+      <section className="relative bg-background py-16 px-4 overflow-hidden">
+        <SectionDecor tone="primary" />
+        <div className="relative max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">How it works</span>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mt-3">Three steps. Two rewards.</h2>
