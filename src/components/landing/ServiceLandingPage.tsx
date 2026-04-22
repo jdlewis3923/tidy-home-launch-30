@@ -414,7 +414,13 @@ const BundleCrossSell = ({ config }: Props) => {
             <p className="text-sm text-text-mid mt-2">{config.bundleCta.body}</p>
             <Link
               to={cta.to}
-              onClick={cta.onClick}
+              onClick={(e) => {
+                track("bundle_build_click", {
+                  location: `lp_${config.serviceSlug}_bundle`,
+                  service: "bundle",
+                });
+                cta.onClick(e);
+              }}
               className="cta-arrow cta-press mt-5 inline-block bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-colors"
             >
               Bundle &amp; save <span className="arrow">→</span>
