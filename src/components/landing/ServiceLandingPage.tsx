@@ -88,7 +88,7 @@ const ServiceLandingPage = ({ config }: Props) => (
 const ServiceLandingPageInner = ({ config }: Props) => {
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
 
-  const ctaForPlan = (planSlug: string | undefined, where: "hero" | "plans" | "sticky_bar" | "final_banner" | "nav") => {
+  const ctaForPlan = (planSlug: string | undefined, where: string) => {
     const base = getCtaProps({
       trackingId: `lp_${config.serviceSlug}_${where}`,
       ctaText: "Book in 60 seconds",
@@ -100,12 +100,19 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       },
     });
 
+    // Normalize the surface to one of the 4 locations Google Ads cares about.
+    const location: "hero" | "plans" | "sticky_bar" | "final_banner" =
+      where.startsWith("plan_") ? "plans"
+      : where === "final" || where === "final_banner" ? "final_banner"
+      : where === "sticky_bar" ? "sticky_bar"
+      : "hero";
+
     // Wrap the existing onClick so we ALSO emit the Google Ads conversion event.
     const onClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
       track("book_cta_click", {
         service: config.serviceSlug,
         plan: planSlug,
-        location: where === "nav" ? "hero" : where,
+        location,
       });
       base.onClick(e);
     };
