@@ -2,12 +2,14 @@
  * Tidy — Stripe Checkout client helper
  *
  * Single client-side entry point for kicking off Stripe Checkout from the
- * builder. Reads the captured promo code from sessionStorage, calls the
- * `stripe-create-checkout` edge function, clears promo state, and redirects.
+ * builder. Reads the captured promo code + UTM/gclid attribution from
+ * sessionStorage, calls the `stripe-create-checkout` edge function, and
+ * redirects to Stripe.
  */
 
 import { supabase } from '@/integrations/supabase/client';
 import { getPromoCode } from '@/lib/promo';
+import { getUtmAttribution } from '@/lib/utm';
 import { STRIPE_FUNCTIONS } from '@/lib/stripe-config';
 
 interface CheckoutPayload {
@@ -17,18 +19,14 @@ interface CheckoutPayload {
   config: unknown;
 }
 
-/**
- * Create a Stripe Checkout Session and redirect the browser to it.
- * Adds the captured promo code (if any) and clears local promo state
- * before redirecting so refresh/back doesn't re-apply it.
- */
 export async function startCheckout(payload: CheckoutPayload): Promise<void> {
   const promoCode = getPromoCode() ?? undefined;
+  const attribution = getUtmAttribution();
 
   const { data, error } = await supabase.functions.invoke(
     STRIPE_FUNCTIONS.CREATE_CHECKOUT,
     {
-      body: { ...payload, promoCode },
+      body: { ...payload, promoCode, attribution },
     }
   );
 
@@ -40,9 +38,7 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     throw new Error('Checkout session did not return a redirect URL');
   }
 
-  // Do NOT clear promo state here — if the user cancels Stripe Checkout
-  // and returns via cancel_url, the code must still be in sessionStorage
-  // so the banner re-renders and the discount re-applies on retry.
-  // Clearing happens only on /checkout/success.
+  // Promo state is intentionally NOT cleared here — see comment in
+  // /checkout/success for the lifecycle.
   window.location.href = data.url as string;
 }
