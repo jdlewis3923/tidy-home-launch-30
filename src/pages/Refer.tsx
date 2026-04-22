@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Copy, Check, Gift, UserPlus, Sparkles, MapPin } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,16 +9,23 @@ import SparkleField from "@/components/landing/SparkleField";
 import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
-import { SERVICE_AREA_TRUST, buildSignupHref } from "@/lib/landing";
+import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { pushEvent } from "@/lib/tracking";
+import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 
 /**
  * /refer — public marketing surface for the existing
  * REFERRAL_50_OFF_FIRST_MONTH coupon flow. No new backend; if a user is
  * signed in we surface their referral code, otherwise we show a sign-in nudge.
  */
-const Refer = () => {
+const Refer = () => (
+  <PrimaryCtaProvider>
+    <ReferInner />
+  </PrimaryCtaProvider>
+);
+
+const ReferInner = () => {
   const location = useLocation();
   const [code, setCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
