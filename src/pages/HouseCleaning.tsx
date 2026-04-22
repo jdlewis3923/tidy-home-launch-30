@@ -9,6 +9,9 @@ const config: ServiceLandingConfig = {
   subhead:
     "Same crew. Locked rate. No contracts. Handle your home on autopilot.",
   priceAnchor: "Starting at $159/mo",
+  stickyLabel: "House Cleaning · from $159/mo",
+  savingsCallout:
+    "One-off cleanings in Pinecrest average **$180–$260**. Our monthly plan locks you in at **$159** — with the same crew every visit.",
   heroImage: heroImg,
   heroAlt: "Bright, freshly cleaned modern Miami living room",
   plans: [

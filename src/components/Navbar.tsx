@@ -18,7 +18,7 @@ const NAV_ITEMS = [
   { label: "Lawn Care", to: "/lawn-care" },
   { label: "Car Detailing", to: "/car-detailing" },
   { label: "Bundle & Save", to: "/bundle" },
-  { label: "Refer", to: "/referral" },
+  { label: "Refer", to: "/refer" },
 ];
 
 const Navbar = ({ onOpenPopup }: NavbarProps) => {

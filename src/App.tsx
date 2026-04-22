@@ -30,6 +30,7 @@ import CheckoutSuccess from "./pages/CheckoutSuccess.tsx";
 import CheckoutCanceled from "./pages/CheckoutCanceled.tsx";
 import SignupRedirect from "./pages/SignupRedirect.tsx";
 import ReferralRedirect from "./pages/ReferralRedirect.tsx";
+import Refer from "./pages/Refer.tsx";
 
 const queryClient = new QueryClient();
 
@@ -61,7 +62,11 @@ const App = () => (
               <Route path="/bundle" element={<Bundle />} />
 
               <Route path="/signup" element={<SignupRedirect />} />
+              {/* /referral remains a query-preserving passthrough to homepage so
+                  legacy ?promo=... links keep working. /refer is the new public
+                  marketing page for the existing referral coupon. */}
               <Route path="/referral" element={<ReferralRedirect />} />
+              <Route path="/refer" element={<Refer />} />
               <Route path="/thank-you" element={<ThankYou />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />

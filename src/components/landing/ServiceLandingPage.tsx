@@ -1,10 +1,15 @@
 import { useLocation, Link } from "react-router-dom";
-import { Check, Phone, MapPin } from "lucide-react";
+import { Check, Phone, MapPin, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import FadeIn from "@/components/FadeIn";
 import SeoHead from "@/components/landing/SeoHead";
 import LandingFaq, { FaqItem } from "@/components/landing/LandingFaq";
+import Reveal from "@/components/landing/Reveal";
+import StickyBookBar from "@/components/landing/StickyBookBar";
+import TrustSignalRow from "@/components/landing/TrustSignalRow";
+import HowItWorksStrip from "@/components/landing/HowItWorksStrip";
+import SavingsCallout from "@/components/landing/SavingsCallout";
+import NeighborhoodTrust from "@/components/landing/NeighborhoodTrust";
 import {
   PHONE_DISPLAY,
   PHONE_TEL,
@@ -36,6 +41,10 @@ export interface ServiceLandingConfig {
   h1: string;
   subhead: string;
   priceAnchor: string;
+  /** Compact label for the sticky bar e.g. "House Cleaning · from $159/mo". */
+  stickyLabel: string;
+  /** Single line above the plans grid; wrap the price segment in **double asterisks**. */
+  savingsCallout: string;
   heroImage: string;
   heroAlt: string;
   plans: PlanTier[];
@@ -83,7 +92,6 @@ const ServiceLandingPage = ({ config }: Props) => {
     });
   };
 
-  // Navbar wants an onOpenPopup — on LPs we just send users straight to /signup.
   const handleNavCta = () => {
     trackBook("nav");
     window.location.href = ctaHref();
@@ -93,6 +101,11 @@ const ServiceLandingPage = ({ config }: Props) => {
     <div className="min-h-screen bg-background flex flex-col">
       <SeoHead {...config.seo} ogImage={config.heroImage} />
       <Navbar onOpenPopup={handleNavCta} />
+      <StickyBookBar
+        label={config.stickyLabel}
+        href={ctaHref()}
+        surface={`lp_${config.serviceSlug}`}
+      />
 
       {/* HERO */}
       <section className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden">
@@ -130,9 +143,9 @@ const ServiceLandingPage = ({ config }: Props) => {
             <Link
               to={ctaHref()}
               onClick={() => trackBook("hero")}
-              className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-lg"
+              className="cta-arrow cta-press animate-pulse-once bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-lg"
             >
-              Book in 60 seconds →
+              Book in 60 seconds <span className="arrow">→</span>
             </Link>
             <a
               href={`tel:${PHONE_TEL}`}
@@ -150,26 +163,38 @@ const ServiceLandingPage = ({ config }: Props) => {
         </div>
       </section>
 
+      {/* TRUST SIGNAL ROW */}
+      <TrustSignalRow />
+
       {/* PLANS */}
       <section className="bg-background py-20 px-4">
         <div className="max-w-5xl mx-auto">
-          <FadeIn className="text-center mb-12">
+          <Reveal className="text-center mb-6">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">Plans</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
               Pick your cadence. Lock your price.
             </h2>
-          </FadeIn>
+          </Reveal>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <SavingsCallout text={config.savingsCallout} />
+
+          <div className="grid md:grid-cols-3 gap-6 md:gap-5 items-stretch">
             {config.plans.map((p, i) => (
-              <FadeIn key={p.planSlug} delay={i * 80}>
+              <Reveal key={p.planSlug} delay={i * 80}>
                 <div
-                  className={`bg-card border rounded-xl p-6 h-full flex flex-col hover-lift ${
-                    p.highlighted ? "border-primary shadow-md ring-1 ring-primary/30" : ""
+                  className={`relative bg-card border rounded-xl p-6 h-full flex flex-col hover-lift transition-transform ${
+                    p.highlighted
+                      ? "border-2 border-primary shadow-[0_0_28px_-8px_hsl(var(--primary)/0.3)] md:scale-[1.04] md:-my-1 z-10"
+                      : ""
                   }`}
                 >
                   {p.highlighted && (
-                    <span className="self-start bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                    <span className="most-popular-ribbon hidden md:inline-block">
+                      Most Popular
+                    </span>
+                  )}
+                  {p.highlighted && (
+                    <span className="md:hidden self-start bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full mb-3">
                       Most Popular
                     </span>
                   )}
@@ -182,12 +207,12 @@ const ServiceLandingPage = ({ config }: Props) => {
                   <Link
                     to={ctaHref(p.planSlug)}
                     onClick={() => trackBook(`plan_${p.planSlug}`, p.planSlug)}
-                    className="mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
+                    className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                   >
-                    Choose {p.name} →
+                    Choose {p.name} <span className="arrow">→</span>
                   </Link>
                 </div>
-              </FadeIn>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -196,14 +221,14 @@ const ServiceLandingPage = ({ config }: Props) => {
       {/* INCLUDED */}
       <section className="bg-section-alt py-20 px-4">
         <div className="max-w-3xl mx-auto">
-          <FadeIn className="text-center mb-10">
+          <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">What's Included</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
               Every visit, every time.
             </h2>
-          </FadeIn>
+          </Reveal>
 
-          <FadeIn>
+          <Reveal>
             <ul className="grid sm:grid-cols-2 gap-3 bg-card border rounded-xl p-6">
               {config.included.map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm text-foreground/85">
@@ -212,24 +237,49 @@ const ServiceLandingPage = ({ config }: Props) => {
                 </li>
               ))}
             </ul>
-          </FadeIn>
+          </Reveal>
         </div>
       </section>
 
-      {/* LOCAL TRUST */}
+      {/* HOW IT WORKS */}
+      <HowItWorksStrip />
+
+      {/* NEIGHBORHOOD TRUST */}
+      <NeighborhoodTrust />
+
+      {/* LOCAL TRUST / TESTIMONIALS */}
       <section className="bg-background py-20 px-4">
         <div className="max-w-5xl mx-auto">
-          <FadeIn className="text-center mb-10">
+          <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">Local Reviews</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
               Trusted across {SERVICE_AREA_TRUST.replace("Serving ", "")}
             </h2>
-          </FadeIn>
+          </Reveal>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          {/* Mobile: snap-scroll carousel */}
+          <div className="md:hidden snap-row flex overflow-x-auto gap-4 -mx-4 px-4 pb-2">
+            {config.testimonials.map((t) => (
+              <div
+                key={t.name + t.zip}
+                className="bg-card border rounded-xl p-6 shrink-0"
+                style={{ width: "85%" }}
+              >
+                <div className="text-gold text-sm mb-3">★★★★★</div>
+                <p className="text-sm text-text-mid italic">"{t.quote}"</p>
+                <div className="mt-4 pt-4 border-t border-border/60">
+                  <p className="text-xs font-semibold text-foreground">{t.name}</p>
+                  <p className="text-xs text-text-light">ZIP {t.zip}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: 3-up grid with hover lift */}
+          <div className="hidden md:grid md:grid-cols-3 gap-6">
             {config.testimonials.map((t, i) => (
-              <FadeIn key={t.name} delay={i * 80}>
-                <div className="bg-card border rounded-xl p-6 h-full flex flex-col">
+              <Reveal key={t.name + t.zip} delay={i * 80}>
+                <div className="bg-card border rounded-xl p-6 h-full flex flex-col hover-lift">
                   <div className="text-gold text-sm mb-3">★★★★★</div>
                   <p className="text-sm text-text-mid italic flex-1">"{t.quote}"</p>
                   <div className="mt-4 pt-4 border-t border-border/60">
@@ -237,12 +287,13 @@ const ServiceLandingPage = ({ config }: Props) => {
                     <p className="text-xs text-text-light">ZIP {t.zip}</p>
                   </div>
                 </div>
-              </FadeIn>
+              </Reveal>
             ))}
           </div>
 
           <p className="text-center text-xs text-text-light mt-6">
-            Placeholder reviews shown while we collect verified customer quotes.
+            Placeholder reviews — verified customer reviews rolling out once we
+            clear 50 jobs. {SERVICE_AREA_TRUST}.
           </p>
         </div>
       </section>
@@ -255,21 +306,27 @@ const ServiceLandingPage = ({ config }: Props) => {
       {/* FAQ */}
       <section className="bg-section-alt py-20 px-4">
         <div className="max-w-3xl mx-auto">
-          <FadeIn className="text-center mb-10">
+          <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">FAQ</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">Questions, answered.</h2>
-          </FadeIn>
-          <FadeIn>
+          </Reveal>
+          <Reveal>
             <LandingFaq items={config.faqs} />
-          </FadeIn>
+          </Reveal>
         </div>
       </section>
 
       {/* BUNDLE CROSS-SELL */}
       <section className="bg-background py-16 px-4">
         <div className="max-w-3xl mx-auto">
-          <FadeIn>
-            <div className="bg-gradient-to-r from-primary/10 to-success/10 border border-primary/20 rounded-2xl p-6 md:p-8 text-center">
+          <Reveal>
+            <div className="relative bg-gradient-to-r from-primary/10 to-success/10 border-2 border-primary/30 rounded-2xl p-6 md:p-8 text-center overflow-hidden">
+              <div className="absolute top-3 right-3 save-badge-rotate bg-gold text-gold-foreground text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                Save 10%
+              </div>
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/15 mb-3">
+                <Sparkles className="w-5 h-5 text-primary" aria-hidden="true" />
+              </div>
               <h3 className="text-xl md:text-2xl font-bold text-foreground">
                 {config.bundleCta.title}
               </h3>
@@ -280,12 +337,12 @@ const ServiceLandingPage = ({ config }: Props) => {
                   services: config.bundleCta.targetServices,
                 })}
                 onClick={() => pushEvent("cta_click", { cta_id: `lp_${config.serviceSlug}_bundle`, cta_text: "Bundle & save" })}
-                className="mt-5 inline-block bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-colors"
+                className="cta-arrow cta-press mt-5 inline-block bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-colors"
               >
-                Bundle & save →
+                Bundle &amp; save <span className="arrow">→</span>
               </Link>
             </div>
-          </FadeIn>
+          </Reveal>
         </div>
       </section>
 
@@ -301,9 +358,9 @@ const ServiceLandingPage = ({ config }: Props) => {
           <Link
             to={ctaHref()}
             onClick={() => trackBook("final")}
-            className="mt-7 inline-block bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)]"
+            className="cta-arrow cta-press mt-7 inline-block bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)]"
           >
-            Book in 60 seconds →
+            Book in 60 seconds <span className="arrow">→</span>
           </Link>
           <p className="mt-4 text-xs text-primary-foreground/50">{SERVICE_AREA_TRUST}</p>
         </div>

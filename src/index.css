@@ -162,6 +162,81 @@
   box-shadow: 0 12px 24px -8px rgba(0,0,0,0.15);
 }
 
+/* ----- Landing-page polish (Pass 2) ----- */
+@keyframes pulse-once {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+.animate-pulse-once {
+  animation: pulse-once 2s ease-out 1;
+}
+
+@keyframes slide-down-bar {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+@keyframes slide-up-bar {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-slide-down-bar { animation: slide-down-bar 200ms ease-out forwards; }
+.animate-slide-up-bar   { animation: slide-up-bar   200ms ease-out forwards; }
+
+/* CTA arrow nudge on hover */
+.cta-arrow > .arrow {
+  display: inline-block;
+  transition: transform 200ms ease-out;
+}
+.cta-arrow:hover > .arrow {
+  transform: translateX(3px);
+}
+.cta-press:active { transform: scale(0.98); }
+
+/* Mobile horizontal snap-scroll for testimonials */
+.snap-row {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.snap-row::-webkit-scrollbar { display: none; }
+.snap-row > * { scroll-snap-align: start; }
+
+/* Subtle ribbon on Most Popular plan */
+.most-popular-ribbon {
+  position: absolute;
+  top: 14px;
+  right: -34px;
+  transform: rotate(35deg);
+  background: hsl(var(--gold));
+  color: hsl(var(--gold-foreground));
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 40px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Save 10% rotated badge for bundle card */
+.save-badge-rotate {
+  transform: rotate(6deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-once,
+  .animate-slide-down-bar,
+  .animate-slide-up-bar,
+  .animate-fade-up,
+  .animate-bounce-in,
+  .animate-bounce-float,
+  .animate-float,
+  .animate-sparkle {
+    animation: none !important;
+  }
+  .cta-arrow > .arrow { transition: none !important; }
+}
+
 /* Force-hide Edit with Lovable badge */
 #lovable-badge,
 a[href*="lovable.dev"],

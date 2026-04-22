@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { Plus } from "lucide-react";
 
 export interface FaqItem {
   q: string;
@@ -11,11 +11,11 @@ interface Props {
 }
 
 /**
- * Light wrapper around the existing FAQ accordion pattern (see
- * src/components/FAQ.tsx) — reused on the per-service LPs.
+ * FAQ accordion — smooth height animation, plus-to-x rotation, subtle
+ * brand-tinted active header. Matches existing card visuals.
  */
 const LandingFaq = ({ items }: Props) => {
-  const [open, setOpen] = useState<number | null>(0);
+  const [open, setOpen] = useState<number | null>(null);
 
   return (
     <div className="space-y-2">
@@ -24,16 +24,23 @@ const LandingFaq = ({ items }: Props) => {
         return (
           <div
             key={item.q}
-            className="bg-card border rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-md"
+            className={`bg-card border rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-md ${
+              isOpen ? "ring-1 ring-primary/20" : ""
+            }`}
           >
             <button
               onClick={() => setOpen(isOpen ? null : i)}
-              className="w-full flex items-center justify-between px-5 py-4 text-left"
+              className={`w-full flex items-center justify-between px-5 py-4 text-left transition-colors duration-200 ${
+                isOpen ? "bg-primary/[0.05]" : ""
+              }`}
               aria-expanded={isOpen}
             >
-              <span className="text-sm font-medium text-foreground">{item.q}</span>
-              <ChevronDown
-                className={`w-4 h-4 text-text-light transition-transform duration-300 flex-shrink-0 ${isOpen ? "rotate-180" : ""}`}
+              <span className="text-sm font-medium text-foreground pr-3">{item.q}</span>
+              <Plus
+                className={`w-4 h-4 text-text-light flex-shrink-0 transition-transform duration-300 ${
+                  isOpen ? "rotate-45 text-primary" : ""
+                }`}
+                aria-hidden="true"
               />
             </button>
             <div
