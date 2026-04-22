@@ -33,7 +33,7 @@ const Footer = () => {
             <li><Link to="/car-detailing" className="hover:text-primary-foreground/70 transition-colors">{t("Car Detailing Miami")}</Link></li>
             <li><Link to="/bundle" className="hover:text-primary-foreground/70 transition-colors">Bundle &amp; Save</Link></li>
             <li><a href="#pricing" className="hover:text-primary-foreground/70 transition-colors">{t("Pricing")}</a></li>
-            <li>{t("Referral Program")}</li>
+            <li><Link to="/refer" className="hover:text-primary-foreground/70 transition-colors">{t("Referral Program")}</Link></li>
           </ul>
         </div>
 
