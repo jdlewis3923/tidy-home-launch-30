@@ -245,6 +245,11 @@ const BundleInner = () => {
                 <Link
                   to={threeBundleCta.to}
                   onClick={(e) => {
+                    track("bundle_build_click", {
+                      location: "lp_bundle_3_service",
+                      service: "bundle",
+                      services: "cleaning,lawn,detailing",
+                    });
                     track("book_cta_click", { service: "bundle", location: "plans" });
                     threeBundleCta.onClick(e);
                   }}
