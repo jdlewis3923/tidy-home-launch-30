@@ -3,21 +3,30 @@ import { Link } from "react-router-dom";
 import { Phone } from "lucide-react";
 import { PHONE_TEL } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
+import { usePrimaryCta } from "@/hooks/usePrimaryCta";
 
 interface Props {
   label: string;            // "House Cleaning · from $159/mo"
-  href: string;             // /signup?service=...
   /** Tracking surface, e.g. "lp_house-cleaning" */
   surface: string;
+  /** Optional CTA overrides forwarded into /signup */
+  service?: string;
+  plan?: string;
+  bundle?: string;
+  services?: string;
 }
 
 /**
  * Slim sticky bar that appears once the user scrolls past the hero.
  * Desktop: top-anchored, slides down. Mobile: bottom-anchored, slides up,
  * 56px tall, safe-area inset aware, includes phone button.
+ *
+ * Routes through `usePrimaryCta` so the bar's main button works correctly
+ * in both the post-launch (dashboard) and pre-launch (lead popup) modes.
  */
-const StickyBookBar = ({ label, href, surface }: Props) => {
+const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Props) => {
   const [visible, setVisible] = useState(false);
+  const { getCtaProps } = usePrimaryCta();
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 600);
@@ -25,6 +34,24 @@ const StickyBookBar = ({ label, href, surface }: Props) => {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const desktopCta = getCtaProps({
+    trackingId: `${surface}_sticky_top`,
+    ctaText: "Book in 60 seconds",
+    service,
+    plan,
+    bundle,
+    services,
+  });
+
+  const mobileCta = getCtaProps({
+    trackingId: `${surface}_sticky_mobile`,
+    ctaText: "Book in 60 seconds",
+    service,
+    plan,
+    bundle,
+    services,
+  });
 
   return (
     <>
@@ -39,8 +66,8 @@ const StickyBookBar = ({ label, href, surface }: Props) => {
           <div className="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between gap-4">
             <span className="text-sm text-primary-foreground/90 font-medium truncate">{label}</span>
             <Link
-              to={href}
-              onClick={() => pushEvent("cta_click", { cta_id: `${surface}_sticky_top`, cta_text: "Book in 60 seconds" })}
+              to={desktopCta.to}
+              onClick={desktopCta.onClick}
               className="cta-arrow cta-press shrink-0 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-1.5 rounded-md text-sm transition-colors"
             >
               Book in 60 seconds <span className="arrow">→</span>
@@ -63,8 +90,8 @@ const StickyBookBar = ({ label, href, surface }: Props) => {
         <div className="bg-navy/95 backdrop-blur-sm border-t border-primary-foreground/10 shadow-lg">
           <div className="px-3 py-2 flex items-center gap-2" style={{ minHeight: 56 }}>
             <Link
-              to={href}
-              onClick={() => pushEvent("cta_click", { cta_id: `${surface}_sticky_mobile`, cta_text: "Book in 60 seconds" })}
+              to={mobileCta.to}
+              onClick={mobileCta.onClick}
               className="cta-arrow cta-press flex-1 text-center bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-3 rounded-lg text-sm"
             >
               Book in 60 seconds <span className="arrow">→</span>
