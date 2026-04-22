@@ -62,62 +62,64 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <PromoCaptureWatcher />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              {/* Google Ads landing pages — same project, same domain. */}
-              <Route path="/house-cleaning" element={<HouseCleaning />} />
-              <Route path="/lawn-care" element={<LawnCare />} />
-              <Route path="/car-detailing" element={<CarDetailing />} />
-              <Route path="/bundle" element={<Bundle />} />
+            <RouteTracker>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                {/* Google Ads landing pages — same project, same domain. */}
+                <Route path="/house-cleaning" element={<HouseCleaning />} />
+                <Route path="/lawn-care" element={<LawnCare />} />
+                <Route path="/car-detailing" element={<CarDetailing />} />
+                <Route path="/bundle" element={<Bundle />} />
 
-              <Route path="/signup" element={<SignupRedirect />} />
-              {/* /referral remains a query-preserving passthrough to homepage so
-                  legacy ?promo=... links keep working. /refer is the new public
-                  marketing page for the existing referral coupon. */}
-              <Route path="/referral" element={<ReferralRedirect />} />
-              <Route path="/refer" element={<Refer />} />
-              <Route path="/thank-you" element={<ThankYou />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
+                <Route path="/signup" element={<SignupRedirect />} />
+                {/* /referral remains a query-preserving passthrough to homepage so
+                    legacy ?promo=... links keep working. /refer is the new public
+                    marketing page for the existing referral coupon. */}
+                <Route path="/referral" element={<ReferralRedirect />} />
+                <Route path="/refer" element={<Refer />} />
+                <Route path="/thank-you" element={<ThankYou />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
 
-              {/* Customer Dashboard System — controlled by CUSTOMER_DASHBOARD_ENABLED */}
-              <Route
-                path="/login"
-                element={CUSTOMER_DASHBOARD_ENABLED ? <CustomerLogin /> : <Navigate to="/" replace />}
-              />
-              <Route
-                path="/forgot-password"
-                element={CUSTOMER_DASHBOARD_ENABLED ? <ForgotPassword /> : <Navigate to="/" replace />}
-              />
-              <Route
-                path="/reset-password"
-                element={CUSTOMER_DASHBOARD_ENABLED ? <ResetPassword /> : <Navigate to="/" replace />}
-              />
-              <Route
-                path="/dashboard"
-                element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardIndex /> : <Navigate to="/" replace />}
-              />
-              <Route
-                path="/dashboard/plan"
-                element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardPlan /> : <Navigate to="/" replace />}
-              />
-              <Route
-                path="/dashboard/confirmation"
-                element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardConfirmation /> : <Navigate to="/" replace />}
-              />
+                {/* Customer Dashboard System — controlled by CUSTOMER_DASHBOARD_ENABLED */}
+                <Route
+                  path="/login"
+                  element={CUSTOMER_DASHBOARD_ENABLED ? <CustomerLogin /> : <Navigate to="/" replace />}
+                />
+                <Route
+                  path="/forgot-password"
+                  element={CUSTOMER_DASHBOARD_ENABLED ? <ForgotPassword /> : <Navigate to="/" replace />}
+                />
+                <Route
+                  path="/reset-password"
+                  element={CUSTOMER_DASHBOARD_ENABLED ? <ResetPassword /> : <Navigate to="/" replace />}
+                />
+                <Route
+                  path="/dashboard"
+                  element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardIndex /> : <Navigate to="/" replace />}
+                />
+                <Route
+                  path="/dashboard/plan"
+                  element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardPlan /> : <Navigate to="/" replace />}
+                />
+                <Route
+                  path="/dashboard/confirmation"
+                  element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardConfirmation /> : <Navigate to="/" replace />}
+                />
 
-              {/* Stripe / customer account scaffolding —
-                  gated internally by CUSTOMER_ACCOUNT_ENABLED + STRIPE_INTEGRATION_ENABLED.
-                  Pre-launch: /account and /billing self-redirect to /.
-                  Checkout success/cancel pages are always reachable so Stripe
-                  returns never 404. */}
-              <Route path="/account" element={<Account />} />
-              <Route path="/billing" element={<Billing />} />
-              <Route path="/checkout/success" element={<CheckoutSuccess />} />
-              <Route path="/checkout/canceled" element={<CheckoutCanceled />} />
+                {/* Stripe / customer account scaffolding —
+                    gated internally by CUSTOMER_ACCOUNT_ENABLED + STRIPE_INTEGRATION_ENABLED.
+                    Pre-launch: /account and /billing self-redirect to /.
+                    Checkout success/cancel pages are always reachable so Stripe
+                    returns never 404. */}
+                <Route path="/account" element={<Account />} />
+                <Route path="/billing" element={<Billing />} />
+                <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                <Route path="/checkout/canceled" element={<CheckoutCanceled />} />
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </RouteTracker>
           </BrowserRouter>
         </TooltipProvider>
       </LanguageProvider>
