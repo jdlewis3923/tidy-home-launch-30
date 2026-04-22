@@ -20,6 +20,7 @@ import {
   SERVICE_AREA_TRUST,
 } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
+import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 
 export interface PlanTier {
