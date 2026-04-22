@@ -3,6 +3,7 @@ import TidyLogo from "@/components/TidyLogo";
 import SparkleField from "./SparkleField";
 import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { usePrimaryCta } from "@/hooks/usePrimaryCta";
+import { track } from "@/lib/track";
 
 interface Props {
   headline: string;
@@ -42,6 +43,25 @@ const LpFinalCta = ({
     bundle,
     services,
   });
+
+  // Map the trackingId surface to a service slug for the named conversion event.
+  // trackingId looks like "lp_house-cleaning_final" or "bundle_final_cta".
+  const reportedService = bundle
+    ? "bundle"
+    : trackingId.startsWith("lp_house-cleaning") ? "house-cleaning"
+    : trackingId.startsWith("lp_lawn-care") ? "lawn-care"
+    : trackingId.startsWith("lp_car-detailing") ? "car-detailing"
+    : trackingId.startsWith("bundle") ? "bundle"
+    : "site";
+
+  const onClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    track("book_cta_click", {
+      service: reportedService,
+      plan,
+      location: "final_banner",
+    });
+    ctaProps.onClick(e);
+  };
 
   return (
     <section className="relative bg-gradient-to-b from-navy to-primary-deep py-24 px-4 overflow-hidden">
