@@ -114,7 +114,10 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
             </Link>
             <a
               href={`tel:${PHONE_TEL}`}
-              onClick={() => pushEvent("cta_click", { cta_id: `${surface}_sticky_mobile_call`, cta_text: "Call" })}
+              onClick={() => {
+                pushEvent("cta_click", { cta_id: `${surface}_sticky_mobile_call`, cta_text: "Call" });
+                track("phone_click", { service: reportedService });
+              }}
               aria-label="Call now"
               className="shrink-0 bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground rounded-lg p-3 transition-colors"
             >
