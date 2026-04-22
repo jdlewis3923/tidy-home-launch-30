@@ -1,4 +1,5 @@
-import { Check, X as XIcon } from "lucide-react";
+import { Check, X as XIcon, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import cleaningImg from "@/assets/cleaning-interior.jpg";
 import lawnImg from "@/assets/lawn-care.jpg";
 import carImg from "@/assets/car-detailing.jpg";
