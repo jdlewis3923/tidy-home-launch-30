@@ -196,8 +196,8 @@ const ReferInner = () => {
                       Log in to get your code <span className="arrow">→</span>
                     </Link>
                     <Link
-                      to={buildSignupHref(location.search)}
-                      onClick={() => pushEvent("cta_click", { cta_id: "refer_signup", cta_text: "Become a customer" })}
+                      to={becomeCustomerCta.to}
+                      onClick={becomeCustomerCta.onClick}
                       className="cta-arrow cta-press bg-card border hover:bg-muted text-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
                       Become a customer first <span className="arrow">→</span>
@@ -212,7 +212,6 @@ const ReferInner = () => {
 
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
-        href={buildSignupHref(location.search)}
         headline="Not a member yet? Start with a plan."
         subhead="Lock in your monthly price, then send your link to a neighbor."
         ctaLabel="Book in 60 seconds"
