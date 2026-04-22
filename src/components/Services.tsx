@@ -112,13 +112,23 @@ const Services = () => {
                       ))}
                     </ul>
 
-                    <div className="mt-auto pt-3 border-t">
+                    <div className="pt-3 border-t">
                       <p className="text-xs text-text-light">
                         <span className="font-semibold text-foreground/70">{t("Add-ons:")}</span> {t(s.addOns)}
                       </p>
                     </div>
                   </>
                 )}
+
+                <div className="mt-auto pt-4">
+                  <Link
+                    to={s.lpHref}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-deep transition-colors"
+                  >
+                    {t("See plans & details")}
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
               </div>
             </div>
           ))}
