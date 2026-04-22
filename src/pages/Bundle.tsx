@@ -90,6 +90,7 @@ const Bundle = () => {
           height={1080}
         />
         <div className="absolute inset-0 bg-navy/70" />
+        <SparkleField />
         <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">Bundle &amp; Save</span>
           <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
@@ -106,11 +107,14 @@ const Bundle = () => {
         </div>
       </section>
 
+      <LandingTicker />
+
       <TrustSignalRow />
 
       {/* TIERS */}
-      <section className="bg-background py-20 px-4">
-        <div className="max-w-5xl mx-auto">
+      <section className="relative bg-background py-20 px-4 overflow-hidden">
+        <SectionDecor tone="primary" />
+        <div className="relative max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-6 items-stretch">
             {/* 2-Service — INTERACTIVE */}
             <Reveal>
