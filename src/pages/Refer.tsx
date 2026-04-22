@@ -5,6 +5,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
 import Reveal from "@/components/landing/Reveal";
+import SparkleField from "@/components/landing/SparkleField";
+import SectionDecor from "@/components/landing/SectionDecor";
+import LandingTicker from "@/components/landing/LandingTicker";
+import LpFinalCta from "@/components/landing/LpFinalCta";
 import { SERVICE_AREA_TRUST, buildSignupHref } from "@/lib/landing";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { pushEvent } from "@/lib/tracking";
@@ -82,8 +86,9 @@ const Refer = () => {
       <Navbar onOpenPopup={handleNavCta} />
 
       {/* HERO */}
-      <section className="relative pt-32 pb-16 px-4 bg-gradient-to-b from-navy to-primary-deep">
-        <div className="max-w-3xl mx-auto text-center">
+      <section className="relative pt-32 pb-16 px-4 bg-gradient-to-b from-navy to-primary-deep overflow-hidden">
+        <SparkleField />
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">Refer & Earn</span>
           <h1 className="mt-3 text-3xl md:text-5xl font-extrabold text-primary-foreground leading-tight">
             Give $50, Get $50 — refer a neighbor in Pinecrest + Kendall
@@ -99,9 +104,12 @@ const Refer = () => {
         </div>
       </section>
 
+      <LandingTicker />
+
       {/* HOW IT WORKS */}
-      <section className="bg-background py-16 px-4">
-        <div className="max-w-5xl mx-auto">
+      <section className="relative bg-background py-16 px-4 overflow-hidden">
+        <SectionDecor tone="primary" />
+        <div className="relative max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">How it works</span>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mt-3">Three steps. Two rewards.</h2>
@@ -130,8 +138,9 @@ const Refer = () => {
       </section>
 
       {/* REFERRAL CODE BLOCK */}
-      <section className="bg-section-alt py-16 px-4">
-        <div className="max-w-2xl mx-auto">
+      <section className="relative bg-section-alt py-16 px-4 overflow-hidden">
+        <SectionDecor tone="gold" />
+        <div className="relative max-w-2xl mx-auto">
           <Reveal>
             <div className="bg-card border rounded-2xl p-6 md:p-8 text-center shadow-sm">
               <Sparkles className="w-6 h-6 text-gold mx-auto mb-3" aria-hidden="true" />
@@ -193,25 +202,14 @@ const Refer = () => {
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="bg-gradient-to-b from-navy to-primary-deep py-16 px-4">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-primary-foreground">
-            Not a member yet? Start with a plan.
-          </h2>
-          <p className="text-primary-foreground/70 mt-3">
-            Lock in your monthly price, then send your link to a neighbor.
-          </p>
-          <Link
-            to={buildSignupHref(location.search)}
-            onClick={() => pushEvent("cta_click", { cta_id: "refer_final", cta_text: "Book in 60 seconds" })}
-            className="cta-arrow cta-press animate-pulse-once mt-7 inline-block bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl shadow-[0_0_24px_rgba(245,197,24,0.4)]"
-          >
-            Book in 60 seconds <span className="arrow">→</span>
-          </Link>
-          <p className="mt-4 text-xs text-primary-foreground/50">{SERVICE_AREA_TRUST}</p>
-        </div>
-      </section>
+      {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
+      <LpFinalCta
+        href={buildSignupHref(location.search)}
+        headline="Not a member yet? Start with a plan."
+        subhead="Lock in your monthly price, then send your link to a neighbor."
+        ctaLabel="Book in 60 seconds"
+        trackingId="refer_final"
+      />
 
       <Footer />
     </div>
