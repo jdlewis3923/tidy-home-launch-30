@@ -10,7 +10,7 @@ const Footer = () => {
         <div>
           <TidyLogo size="md" withBackground />
           <p className="text-primary-foreground/50 text-sm mt-4 leading-relaxed">
-            Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Kendall, Pinecrest & beyond.
+            Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Kendall + Pinecrest — 33156 · 33183 · 33186.
           </p>
           <p className="text-primary-foreground/40 text-sm mt-4">
             <a href="mailto:hello@jointidy.co" className="hover:text-primary transition-colors">hello@jointidy.co</a>
