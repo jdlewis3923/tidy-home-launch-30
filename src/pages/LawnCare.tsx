@@ -9,6 +9,9 @@ const config: ServiceLandingConfig = {
   subhead:
     "Mow, edge, blow. Same crew. Locked price. Never surprise-billed.",
   priceAnchor: "Starting at $85/mo",
+  stickyLabel: "Lawn Care · from $85/mo",
+  savingsCallout:
+    "Most Pinecrest lawn pros charge **$40–$60 per visit**. Monthly Tidy is **$85/mo flat**, same crew, no surprise invoices.",
   heroImage: heroImg,
   heroAlt: "Freshly mowed striped emerald lawn at a Pinecrest home",
   plans: [

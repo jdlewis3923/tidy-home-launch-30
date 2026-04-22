@@ -9,6 +9,9 @@ const config: ServiceLandingConfig = {
   subhead:
     "We come to your driveway. Ceramic-safe. Monthly interior + exterior.",
   priceAnchor: "Starting at $159/mo",
+  stickyLabel: "Car Detailing · from $159/mo",
+  savingsCallout:
+    "A good mobile detail runs **$120–$180 per appointment**. Our subscription is **$159/mo** — and we come to your driveway.",
   heroImage: heroImg,
   heroAlt: "Pristine freshly detailed black SUV in a Miami driveway",
   plans: [
