@@ -257,8 +257,9 @@ const ServiceLandingPage = ({ config }: Props) => {
       <NeighborhoodTrust />
 
       {/* LOCAL TRUST / TESTIMONIALS */}
-      <section className="bg-background py-20 px-4">
-        <div className="max-w-5xl mx-auto">
+      <section className="relative bg-background py-20 px-4 overflow-hidden">
+        <SectionDecor tone="gold" />
+        <div className="relative max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">Local Reviews</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
@@ -313,8 +314,9 @@ const ServiceLandingPage = ({ config }: Props) => {
       </section>
 
       {/* FAQ */}
-      <section className="bg-section-alt py-20 px-4">
-        <div className="max-w-3xl mx-auto">
+      <section className="relative bg-section-alt py-20 px-4 overflow-hidden">
+        <SectionDecor tone="primary" />
+        <div className="relative max-w-3xl mx-auto">
           <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">FAQ</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">Questions, answered.</h2>
@@ -355,25 +357,14 @@ const ServiceLandingPage = ({ config }: Props) => {
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="bg-gradient-to-b from-navy to-primary-deep py-20 px-4">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground">
-            Ready to lock in your {config.eyebrow.toLowerCase()}?
-          </h2>
-          <p className="text-primary-foreground/70 mt-3">
-            60-second signup. Same crew. Locked price.
-          </p>
-          <Link
-            to={ctaHref()}
-            onClick={() => trackBook("final")}
-            className="cta-arrow cta-press mt-7 inline-block bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)]"
-          >
-            Book in 60 seconds <span className="arrow">→</span>
-          </Link>
-          <p className="mt-4 text-xs text-primary-foreground/50">{SERVICE_AREA_TRUST}</p>
-        </div>
-      </section>
+      {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
+      <LpFinalCta
+        href={ctaHref()}
+        headline={`Ready to lock in your ${config.eyebrow.toLowerCase()}?`}
+        subhead="60-second signup. Same crew. Locked price."
+        ctaLabel="Book in 60 seconds"
+        trackingId={`lp_${config.serviceSlug}_final`}
+      />
 
       <Footer />
     </div>
