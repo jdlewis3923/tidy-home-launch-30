@@ -251,8 +251,9 @@ const Bundle = () => {
       </section>
 
       {/* WHY BUNDLE */}
-      <section className="bg-section-alt py-16 px-4">
-        <div className="max-w-3xl mx-auto">
+      <section className="relative bg-section-alt py-16 px-4 overflow-hidden">
+        <SectionDecor tone="gold" />
+        <div className="relative max-w-3xl mx-auto">
           <Reveal className="text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
               Why bundle?
@@ -285,34 +286,17 @@ const Bundle = () => {
         <div id="lsa-badge" className="max-w-3xl mx-auto" aria-label="Google Local Services badge slot" />
       </section>
 
-      {/* FINAL CTA */}
-      <section className="bg-gradient-to-b from-navy to-primary-deep py-20 px-4">
-        <div className="max-w-2xl mx-auto text-center">
-          <Sparkle className="w-6 h-6 text-gold mx-auto mb-3" aria-hidden="true" />
-          <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground">
-            Ready to bundle?
-          </h2>
-          <p className="text-primary-foreground/70 mt-3">
-            60-second signup. Locked price. Cancel anytime.
-          </p>
-          <Link
-            to={buildSignupHref(location.search, {
-              bundle: "true",
-              services: "cleaning,lawn,detailing",
-            })}
-            onClick={() =>
-              pushEvent("cta_click", { cta_id: "bundle_final_cta", cta_text: "Start saving" })
-            }
-            className="cta-arrow cta-press animate-pulse-once mt-7 inline-block bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl shadow-[0_0_24px_rgba(245,197,24,0.4)]"
-          >
-            Start saving <span className="arrow">→</span>
-          </Link>
-          <p className="mt-4 text-xs text-primary-foreground/50 inline-flex items-center gap-1.5 justify-center">
-            <Sparkles className="w-3 h-3" />
-            {SERVICE_AREA_TRUST}
-          </p>
-        </div>
-      </section>
+      {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
+      <LpFinalCta
+        href={buildSignupHref(location.search, {
+          bundle: "true",
+          services: "cleaning,lawn,detailing",
+        })}
+        headline="Ready to bundle?"
+        subhead="60-second signup. Locked price. Cancel anytime."
+        ctaLabel="Start saving"
+        trackingId="bundle_final_cta"
+      />
 
       <Footer />
     </div>
