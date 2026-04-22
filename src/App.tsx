@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { capturePromoFromUrl } from "@/lib/promo";
 import { captureUtmFromUrl } from "@/lib/utm";
+import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import Index from "./pages/Index.tsx";
 import HouseCleaning from "./pages/HouseCleaning.tsx";
 import LawnCare from "./pages/LawnCare.tsx";
@@ -42,6 +43,14 @@ const PromoCaptureWatcher = () => {
     captureUtmFromUrl();
   }, [location.pathname, location.search]);
   return null;
+};
+
+// Single source of truth for SPA page_view dataLayer events.
+// Mounted once inside <BrowserRouter> so every route change (incl. initial load)
+// pushes one and only one page_view to GTM. Replaces per-page duplicates.
+const RouteTracker = ({ children }: { children: React.ReactNode }) => {
+  usePageViewTracking();
+  return <>{children}</>;
 };
 
 const App = () => (
