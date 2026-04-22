@@ -192,7 +192,10 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             </Link>
             <a
               href={`tel:${PHONE_TEL}`}
-              onClick={() => pushEvent("cta_click", { cta_id: `lp_${config.serviceSlug}_call_hero`, cta_text: "Call" })}
+              onClick={() => {
+                pushEvent("cta_click", { cta_id: `lp_${config.serviceSlug}_call_hero`, cta_text: "Call" });
+                track("phone_click", { service: config.serviceSlug });
+              }}
               className="inline-flex items-center gap-2 text-primary-foreground/90 hover:text-primary-foreground text-sm font-medium px-4 py-3"
             >
               <Phone className="w-4 h-4" />
