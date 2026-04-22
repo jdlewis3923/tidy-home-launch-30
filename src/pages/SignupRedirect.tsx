@@ -1,9 +1,15 @@
 import { Navigate, useLocation } from "react-router-dom";
 
 /**
- * Pure passthrough: /signup → /login with query string preserved.
- * Allows legacy/external links to /signup?promo=CODE to land on
- * /login?promo=CODE so the promo capture hook fires on the destination.
+ * Pure passthrough: /signup → /login (or /dashboard/plan once authed) with
+ * the entire query string preserved. This carries:
+ *   - service / plan        → preselect in the dashboard builder
+ *   - bundle / services     → bundle preselect
+ *   - custom                → route to custom-quote flow
+ *   - utm_*, gclid, promo   → forwarded into Stripe metadata at checkout
+ *
+ * We intentionally do NOT strip or rename any params here. All consumers
+ * downstream read what they need from window.location.search.
  */
 const SignupRedirect = () => {
   const location = useLocation();
