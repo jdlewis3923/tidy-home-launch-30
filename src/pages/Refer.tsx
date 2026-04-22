@@ -26,10 +26,10 @@ const Refer = () => (
 );
 
 const ReferInner = () => {
-  const location = useLocation();
   const [code, setCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [authLoaded, setAuthLoaded] = useState(false);
+  const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
 
   // Lazy-load Supabase only if dashboard auth is on, to avoid touching
   // the bundle when this page is browsed pre-launch.
@@ -46,9 +46,6 @@ const ReferInner = () => {
         if (!active) return;
         const user = data.session?.user;
         if (user?.email) {
-          // Build a deterministic, sharable code from the user's email —
-          // the existing referral coupon REFERRAL_50_OFF_FIRST_MONTH is global,
-          // so this slug is purely for attribution via the ?promo= param.
           const slug = user.email.split("@")[0]
             .replace(/[^a-zA-Z0-9]/g, "")
             .slice(0, 8)
@@ -78,8 +75,12 @@ const ReferInner = () => {
     }
   };
 
+  const navCta = getCtaProps({ trackingId: "refer_nav", ctaText: "Book in 60 seconds" });
+  const becomeCustomerCta = getCtaProps({ trackingId: "refer_signup", ctaText: "Become a customer" });
+
   const handleNavCta = () => {
-    window.location.href = buildSignupHref(location.search);
+    if (popupMode) openPopup();
+    else window.location.href = navCta.to;
   };
 
   return (
