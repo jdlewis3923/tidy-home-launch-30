@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Phone } from "lucide-react";
 import { PHONE_TEL } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
+import { track } from "@/lib/track";
 import { usePrimaryCta } from "@/hooks/usePrimaryCta";
 
 interface Props {
@@ -35,7 +36,20 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const desktopCta = getCtaProps({
+  // Derive the service slug we report to GA. `bundle` LP passes "bundle" via surface.
+  const reportedService = bundle ? "bundle" : (service ?? "site");
+
+  const wrapBookCta = (origOnClick: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void) =>
+    (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      track("book_cta_click", {
+        service: reportedService,
+        plan,
+        location: "sticky_bar",
+      });
+      origOnClick(e);
+    };
+
+  const desktopRaw = getCtaProps({
     trackingId: `${surface}_sticky_top`,
     ctaText: "Book in 60 seconds",
     service,
@@ -43,8 +57,9 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
     bundle,
     services,
   });
+  const desktopCta = { to: desktopRaw.to, onClick: wrapBookCta(desktopRaw.onClick) };
 
-  const mobileCta = getCtaProps({
+  const mobileRaw = getCtaProps({
     trackingId: `${surface}_sticky_mobile`,
     ctaText: "Book in 60 seconds",
     service,
@@ -52,6 +67,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
     bundle,
     services,
   });
+  const mobileCta = { to: mobileRaw.to, onClick: wrapBookCta(mobileRaw.onClick) };
 
   return (
     <>
