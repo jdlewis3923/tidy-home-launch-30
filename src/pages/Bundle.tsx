@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Check, MapPin } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -12,8 +12,9 @@ import SparkleField from "@/components/landing/SparkleField";
 import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
-import { SERVICE_AREA_TRUST, buildSignupHref } from "@/lib/landing";
+import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
+import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import heroImg from "@/assets/hero-miami-home.jpg";
 
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
@@ -24,9 +25,15 @@ const SERVICES: { slug: ServiceSlug; label: string; basePrice: number }[] = [
   { slug: "detailing", label: "Car Detailing", basePrice: 159 },
 ];
 
-const Bundle = () => {
-  const location = useLocation();
+const Bundle = () => (
+  <PrimaryCtaProvider>
+    <BundleInner />
+  </PrimaryCtaProvider>
+);
+
+const BundleInner = () => {
   const [picked, setPicked] = useState<Set<ServiceSlug>>(new Set(["cleaning", "lawn"]));
+  const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
 
   const togglePick = (slug: ServiceSlug) => {
     setPicked((prev) => {
@@ -58,8 +65,36 @@ const Bundle = () => {
   }, []);
 
   const handleNavCta = () => {
-    window.location.href = buildSignupHref(location.search);
+    pushEvent("cta_click", { cta_id: "bundle_nav", cta_text: "Book in 60 seconds" });
+    if (popupMode) openPopup();
+    else {
+      window.location.href = getCtaProps({
+        trackingId: "bundle_nav_redirect",
+        ctaText: "Book in 60 seconds",
+      }).to;
+    }
   };
+
+  const twoBundleCta = getCtaProps({
+    trackingId: "bundle_2_service",
+    ctaText: "Build my 2-service bundle",
+    bundle: "true",
+    services: twoBundle.services,
+    trackingMeta: { services: twoBundle.services },
+  });
+
+  const threeBundleCta = getCtaProps({
+    trackingId: "bundle_3_service",
+    ctaText: "Build my 3-service bundle",
+    bundle: "true",
+    services: "cleaning,lawn,detailing",
+  });
+
+  const customCta = getCtaProps({
+    trackingId: "bundle_custom",
+    ctaText: "Request a custom plan",
+    custom: "true",
+  });
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -73,11 +108,9 @@ const Bundle = () => {
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
         label="Bundle & Save · 10–20% off"
-        href={buildSignupHref(location.search, {
-          bundle: "true",
-          services: "cleaning,lawn,detailing",
-        })}
         surface="lp_bundle"
+        bundle="true"
+        services="cleaning,lawn,detailing"
       />
 
       {/* HERO */}
@@ -163,17 +196,8 @@ const Bundle = () => {
 
                 {twoBundle.valid ? (
                   <Link
-                    to={buildSignupHref(location.search, {
-                      bundle: "true",
-                      services: twoBundle.services,
-                    })}
-                    onClick={() =>
-                      pushEvent("cta_click", {
-                        cta_id: "bundle_2_service",
-                        cta_text: "Build my 2-service bundle",
-                        services: twoBundle.services,
-                      })
-                    }
+                    to={twoBundleCta.to}
+                    onClick={twoBundleCta.onClick}
                     className="cta-arrow cta-press mt-auto block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                   >
                     Build my 2-service bundle <span className="arrow">→</span>
@@ -209,16 +233,8 @@ const Bundle = () => {
                   <span className="font-bold text-foreground">${threeBundle.discounted}/mo</span>
                 </p>
                 <Link
-                  to={buildSignupHref(location.search, {
-                    bundle: "true",
-                    services: "cleaning,lawn,detailing",
-                  })}
-                  onClick={() =>
-                    pushEvent("cta_click", {
-                      cta_id: "bundle_3_service",
-                      cta_text: "Build my 3-service bundle",
-                    })
-                  }
+                  to={threeBundleCta.to}
+                  onClick={threeBundleCta.onClick}
                   className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                 >
                   Build my 3-service bundle <span className="arrow">→</span>
@@ -236,10 +252,8 @@ const Bundle = () => {
                   plan and send you a personal quote.
                 </p>
                 <Link
-                  to={buildSignupHref(location.search, { custom: "true" })}
-                  onClick={() =>
-                    pushEvent("cta_click", { cta_id: "bundle_custom", cta_text: "Request a custom plan" })
-                  }
+                  to={customCta.to}
+                  onClick={customCta.onClick}
                   className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                 >
                   Request a custom plan <span className="arrow">→</span>
@@ -288,14 +302,12 @@ const Bundle = () => {
 
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
-        href={buildSignupHref(location.search, {
-          bundle: "true",
-          services: "cleaning,lawn,detailing",
-        })}
         headline="Ready to bundle?"
         subhead="60-second signup. Locked price. Cancel anytime."
         ctaLabel="Start saving"
         trackingId="bundle_final_cta"
+        bundle="true"
+        services="cleaning,lawn,detailing"
       />
 
       <Footer />
