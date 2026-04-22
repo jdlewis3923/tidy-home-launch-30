@@ -67,6 +67,7 @@ const BundleInner = () => {
 
   const handleNavCta = () => {
     pushEvent("cta_click", { cta_id: "bundle_nav", cta_text: "Book in 60 seconds" });
+    track("book_cta_click", { service: "bundle", location: "hero" });
     if (popupMode) openPopup();
     else {
       window.location.href = getCtaProps({
@@ -239,7 +240,10 @@ const BundleInner = () => {
                 </p>
                 <Link
                   to={threeBundleCta.to}
-                  onClick={threeBundleCta.onClick}
+                  onClick={(e) => {
+                    track("book_cta_click", { service: "bundle", location: "plans" });
+                    threeBundleCta.onClick(e);
+                  }}
                   className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                 >
                   Build my 3-service bundle <span className="arrow">→</span>
