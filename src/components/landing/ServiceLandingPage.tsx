@@ -51,6 +51,8 @@ export interface ServiceLandingConfig {
   /** Single line above the plans grid; wrap the price segment in **double asterisks**. */
   savingsCallout: string;
   heroImage: string;
+  /** Optional mobile-only hero image. Falls back to heroImage on desktop. */
+  heroImageMobile?: string;
   heroAlt: string;
   plans: PlanTier[];
   included: string[];
@@ -151,13 +153,32 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
       {/* HERO */}
       <section className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden">
-        <img
-          src={config.heroImage}
-          alt={config.heroAlt}
-          className="absolute inset-0 w-full h-full object-cover"
-          width={1600}
-          height={896}
-        />
+        {config.heroImageMobile ? (
+          <>
+            <img
+              src={config.heroImageMobile}
+              alt={config.heroAlt}
+              className="md:hidden absolute inset-0 w-full h-full object-cover"
+              width={1080}
+              height={1080}
+            />
+            <img
+              src={config.heroImage}
+              alt={config.heroAlt}
+              className="hidden md:block absolute inset-0 w-full h-full object-cover"
+              width={1600}
+              height={896}
+            />
+          </>
+        ) : (
+          <img
+            src={config.heroImage}
+            alt={config.heroAlt}
+            className="absolute inset-0 w-full h-full object-cover"
+            width={1600}
+            height={896}
+          />
+        )}
         <div className="absolute inset-0 bg-navy/65" />
         <SparkleField />
 
