@@ -1,5 +1,6 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
 import heroImg from "@/assets/lp-house-cleaning.jpg";
+import heroImgMobile from "@/assets/lp-house-cleaning-mobile.png";
 
 const config: ServiceLandingConfig = {
   serviceSlug: "house-cleaning",
@@ -13,6 +14,7 @@ const config: ServiceLandingConfig = {
   savingsCallout:
     "One-off cleanings in Pinecrest average **$180–$260**. Our monthly plan locks you in at **$159** — with the same crew every visit.",
   heroImage: heroImg,
+  heroImageMobile: heroImgMobile,
   heroAlt: "Bright, freshly cleaned modern Miami living room",
   plans: [
     {

@@ -1,5 +1,6 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
 import heroImg from "@/assets/lp-car-detailing.jpg";
+import heroImgMobile from "@/assets/lp-car-detailing-mobile.png";
 
 const config: ServiceLandingConfig = {
   serviceSlug: "car-detailing",
@@ -13,6 +14,7 @@ const config: ServiceLandingConfig = {
   savingsCallout:
     "A good mobile detail runs **$120–$180 per appointment**. Our subscription is **$159/mo** — and we come to your driveway.",
   heroImage: heroImg,
+  heroImageMobile: heroImgMobile,
   heroAlt: "Pristine freshly detailed black SUV in a Miami driveway",
   plans: [
     {
