@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Star, Check, Users, ShieldCheck, Clock, ThumbsUp } from "lucide-react";
 import testimonialsBg from "@/assets/testimonials-bg.jpg";
+import testimonialsBgMobile from "@/assets/testimonials-bg-mobile.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
@@ -68,7 +69,8 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
 
   return (
     <section className="relative py-20 px-4 overflow-hidden">
-      <img src={testimonialsBg} alt="Luxury home interior" loading="lazy" width={1920} height={1080} className="absolute inset-0 w-full h-full object-cover" />
+      <img src={testimonialsBgMobile} alt="Luxury Miami home" loading="lazy" width={1080} height={1920} className="absolute inset-0 w-full h-full object-cover md:hidden" />
+      <img src={testimonialsBg} alt="Luxury home interior" loading="lazy" width={1920} height={1080} className="absolute inset-0 w-full h-full object-cover hidden md:block" />
       <div className="absolute inset-0 bg-navy/75" />
 
       <div className="relative z-10 max-w-6xl mx-auto text-center">
