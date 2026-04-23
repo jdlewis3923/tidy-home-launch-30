@@ -1,5 +1,6 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
 import heroImg from "@/assets/lp-lawn-care.jpg";
+import heroImgMobile from "@/assets/lp-lawn-care-mobile.png";
 
 const config: ServiceLandingConfig = {
   serviceSlug: "lawn-care",
@@ -13,6 +14,7 @@ const config: ServiceLandingConfig = {
   savingsCallout:
     "Most Pinecrest lawn pros charge **$40–$60 per visit**. Monthly Tidy is **$85/mo flat**, same crew, no surprise invoices.",
   heroImage: heroImg,
+  heroImageMobile: heroImgMobile,
   heroAlt: "Freshly mowed striped emerald lawn at a Pinecrest home",
   plans: [
     {
