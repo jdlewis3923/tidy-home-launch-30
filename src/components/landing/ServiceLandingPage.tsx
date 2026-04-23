@@ -255,7 +255,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               return (
                 <Reveal key={p.planSlug} delay={i * 80}>
                   <div
-                    className={`relative bg-card border rounded-xl p-6 h-full flex flex-col hover-lift transition-transform ${
+                    className={`relative overflow-hidden bg-card border rounded-xl p-6 h-full flex flex-col hover-lift transition-transform ${
                       p.highlighted
                         ? "border-2 border-primary shadow-[0_0_28px_-8px_hsl(var(--primary)/0.3)] md:scale-[1.04] md:-my-1 z-10"
                         : ""
