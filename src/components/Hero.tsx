@@ -1,4 +1,5 @@
 import heroImg from "@/assets/hero-miami-home.jpg";
+import heroImgMobile from "@/assets/hero-miami-home-mobile.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
@@ -11,7 +12,8 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
   const { t } = useLanguage();
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      <img src={heroImg} alt="Modern Miami home with pool and palm trees" className="absolute inset-0 w-full h-full object-cover md:object-[center_60%] object-center" width={1920} height={1080} />
+      <img src={heroImgMobile} alt="Modern Miami home with pool and palm trees" className="absolute inset-0 w-full h-full object-cover object-center md:hidden" width={1080} height={1920} />
+      <img src={heroImg} alt="Modern Miami home with pool and palm trees" className="absolute inset-0 w-full h-full object-cover md:object-[center_60%] hidden md:block" width={1920} height={1080} />
       <div className="absolute inset-0 bg-navy/65" />
 
       <div className="absolute top-20 left-[15%] animate-sparkle">
