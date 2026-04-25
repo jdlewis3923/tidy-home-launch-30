@@ -253,6 +253,7 @@ const translations: Record<string, string> = {
   "Locked price · No contracts · Cancel anytime": "Precio fijo · Sin contratos · Cancela cuando quieras",
   "Plans": "Planes",
   "Pick your cadence. Lock your price.": "Elige tu frecuencia. Asegura tu precio.",
+  "Choose": "Elige",
   "Every visit, every time.": "Cada visita, todas las veces.",
   "Three steps. Then never think about it.": "Tres pasos. Y no piensas más en eso.",
   "Pick your plan": "Elige tu plan",
