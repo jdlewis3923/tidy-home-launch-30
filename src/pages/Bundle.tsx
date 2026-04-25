@@ -16,6 +16,7 @@ import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
+import { useLanguage } from "@/contexts/LanguageContext";
 import heroImg from "@/assets/hero-miami-home.jpg";
 
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
