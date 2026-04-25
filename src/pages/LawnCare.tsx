@@ -6,7 +6,7 @@ const config: ServiceLandingConfig = {
   serviceSlug: "lawn-care",
   signupServiceParam: "lawn",
   eyebrow: "Lawn Care",
-  h1: "Weekly Lawn Care in Pinecrest + Kendall",
+  h1: "Monthly Lawn Care in Pinecrest + Kendall",
   subhead:
     "Mow, edge, blow. Same crew. Locked price. Never surprise-billed.",
   priceAnchor: "Starting at $85/mo",
