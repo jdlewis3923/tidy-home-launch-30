@@ -5,6 +5,7 @@ import { PHONE_TEL } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { usePrimaryCta } from "@/hooks/usePrimaryCta";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   label: string;            // "House Cleaning · from $159/mo"
