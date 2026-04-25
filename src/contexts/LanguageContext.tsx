@@ -549,6 +549,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
         url.searchParams.delete("lang");
         window.history.replaceState(null, "", url.toString());
       }
+      // Sync <html lang> for SEO + Google Ads Quality Score on Spanish bids.
+      if (typeof document !== "undefined") {
+        document.documentElement.lang = language;
+      }
     } catch {
       /* no-op */
     }
