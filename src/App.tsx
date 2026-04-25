@@ -45,6 +45,14 @@ const PromoCaptureWatcher = () => {
   return null;
 };
 
+// Query-preserving redirect used for short-slug aliases like /cleaning → /house-cleaning.
+// React Router's <Navigate to=...> drops the search string by default; we forward it
+// verbatim so attribution params (?promo, utm_*, gclid) survive the redirect.
+const QueryPreservingRedirect = ({ to }: { to: string }) => {
+  const location = useLocation();
+  return <Navigate to={to + location.search} replace />;
+};
+
 // Single source of truth for SPA page_view dataLayer events.
 // Mounted once inside <BrowserRouter> so every route change (incl. initial load)
 // pushes one and only one page_view to GTM. Replaces per-page duplicates.
