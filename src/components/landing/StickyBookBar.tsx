@@ -82,7 +82,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
       >
         <div className="w-full bg-navy/95 backdrop-blur-sm border-b border-primary-foreground/10 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between gap-4">
-            <span className="text-sm text-primary-foreground/90 font-medium truncate">{label}</span>
+            <span className="text-sm text-primary-foreground/90 font-medium truncate">{t(label)}</span>
             <Link
               to={desktopCta.to}
               onClick={desktopCta.onClick}
