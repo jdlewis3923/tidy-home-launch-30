@@ -390,11 +390,13 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         <SectionDecor tone="primary" />
         <div className="relative max-w-3xl mx-auto">
           <Reveal className="text-center mb-10">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">FAQ</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">Questions, answered.</h2>
+            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("FAQ")}</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Questions, answered.")}</h2>
           </Reveal>
           <Reveal>
-            <LandingFaq items={config.faqs} />
+            <LandingFaq
+              items={config.faqs.map((f) => ({ q: t(f.q), a: t(f.a) }))}
+            />
           </Reveal>
         </div>
       </section>
@@ -404,9 +406,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
-        headline={`Ready to lock in your ${config.eyebrow.toLowerCase()}?`}
-        subhead="60-second signup. Same crew. Locked price."
-        ctaLabel="Book in 60 seconds"
+        headline={t(`Ready to lock in your ${config.eyebrow.toLowerCase()}?`)}
+        subhead={t("60-second signup. Same crew. Locked price.")}
+        ctaLabel={t("Book in 60 seconds")}
         trackingId={`lp_${config.serviceSlug}_final`}
         service={config.signupServiceParam}
       />
