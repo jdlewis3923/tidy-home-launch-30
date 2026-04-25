@@ -29,6 +29,7 @@ interface Props {
 const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Props) => {
   const [visible, setVisible] = useState(false);
   const { getCtaProps } = usePrimaryCta();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 600);
