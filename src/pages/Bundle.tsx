@@ -129,13 +129,12 @@ const BundleInner = () => {
         <div className="absolute inset-0 bg-navy/70" />
         <SparkleField />
         <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
-          <span className="text-xs uppercase tracking-widest text-gold font-semibold">Bundle &amp; Save</span>
+          <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Bundle & Save")}</span>
           <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
-            Bundle &amp; Save — Stack services, save 10–20%
+            {t("Bundle & Save — Stack services, save 10–20%")}
           </h1>
           <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            The more you stack, the more you save. Pinecrest + Kendall only
-            (33156 · 33183 · 33186).
+            {t("The more you stack, the more you save. Pinecrest + Kendall only (33156 · 33183 · 33186).")}
           </p>
           <div className="mt-6 inline-flex items-center gap-1.5 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground text-sm font-medium">
             <MapPin className="w-3.5 h-3.5" />
