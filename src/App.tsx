@@ -71,6 +71,14 @@ const App = () => (
                 <Route path="/car-detailing" element={<CarDetailing />} />
                 <Route path="/bundle" element={<Bundle />} />
 
+                {/* Short-slug aliases → canonical landing pages. SPA <Navigate replace>
+                    keeps the query string and emits a single history entry; combined
+                    with our SPA fallback this behaves as a permanent redirect for
+                    crawlers (no soft-404, canonical tag on target page does the rest). */}
+                <Route path="/cleaning" element={<QueryPreservingRedirect to="/house-cleaning" />} />
+                <Route path="/lawn" element={<QueryPreservingRedirect to="/lawn-care" />} />
+                <Route path="/detail" element={<QueryPreservingRedirect to="/car-detailing" />} />
+
                 <Route path="/signup" element={<SignupRedirect />} />
                 {/* /referral remains a query-preserving passthrough to homepage so
                     legacy ?promo=... links keep working. /refer is the new public
