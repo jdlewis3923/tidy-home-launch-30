@@ -36,6 +36,7 @@ const Bundle = () => (
 const BundleInner = () => {
   const [picked, setPicked] = useState<Set<ServiceSlug>>(new Set(["cleaning", "lawn"]));
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
+  const { t } = useLanguage();
 
   const togglePick = (slug: ServiceSlug) => {
     setPicked((prev) => {
