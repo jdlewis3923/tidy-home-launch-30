@@ -36,6 +36,7 @@ const LpFinalCta = ({
   services,
 }: Props) => {
   const { getCtaProps } = usePrimaryCta();
+  const { t } = useLanguage();
   const ctaProps = getCtaProps({
     trackingId,
     ctaText: ctaLabel,
