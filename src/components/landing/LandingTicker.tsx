@@ -1,3 +1,5 @@
+import { useLanguage } from "@/contexts/LanguageContext";
+
 const ITEMS = [
   "Licensed & Insured",
   "Background-Checked Pros",
@@ -11,11 +13,8 @@ const ITEMS = [
   "60-Second Signup",
 ];
 
-/**
- * Slim infinite marquee for landing pages — mirrors the homepage AnnouncementTicker
- * but is self-contained (no LanguageContext dependency) and routable across LPs.
- */
 const LandingTicker = () => {
+  const { t } = useLanguage();
   const doubled = [...ITEMS, ...ITEMS];
   return (
     <div className="bg-navy overflow-hidden whitespace-nowrap border-y border-primary-foreground/10">
@@ -26,7 +25,7 @@ const LandingTicker = () => {
             className="inline-flex items-center mx-5 text-xs text-primary-foreground/75 font-medium"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-gold mr-3 flex-shrink-0" />
-            {item}
+            {t(item)}
           </span>
         ))}
       </div>
