@@ -16,6 +16,7 @@ import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
+import { useLanguage } from "@/contexts/LanguageContext";
 import heroImg from "@/assets/hero-miami-home.jpg";
 
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
@@ -35,6 +36,7 @@ const Bundle = () => (
 const BundleInner = () => {
   const [picked, setPicked] = useState<Set<ServiceSlug>>(new Set(["cleaning", "lawn"]));
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
+  const { t } = useLanguage();
 
   const togglePick = (slug: ServiceSlug) => {
     setPicked((prev) => {
@@ -101,15 +103,15 @@ const BundleInner = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SeoHead
-        title="Bundle & Save in Pinecrest + Kendall | Tidy Home Services"
-        description="Stack home cleaning, lawn care, and car detailing on one plan. Save 10–20% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill."
+        title={t("Bundle & Save in Pinecrest + Kendall | Tidy Home Services")}
+        description={t("Stack home cleaning, lawn care, and car detailing on one plan. Save 10–20% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.")}
         canonical="https://jointidy.co/bundle"
         ogImage={heroImg}
         priceRange="$85–$859"
       />
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
-        label="Bundle & Save · 10–20% off"
+        label={t("Bundle & Save · 10–20% off")}
         surface="lp_bundle"
         bundle="true"
         services="cleaning,lawn,detailing"
@@ -127,13 +129,12 @@ const BundleInner = () => {
         <div className="absolute inset-0 bg-navy/70" />
         <SparkleField />
         <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
-          <span className="text-xs uppercase tracking-widest text-gold font-semibold">Bundle &amp; Save</span>
+          <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Bundle & Save")}</span>
           <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
-            Bundle &amp; Save — Stack services, save 10–20%
+            {t("Bundle & Save — Stack services, save 10–20%")}
           </h1>
           <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            The more you stack, the more you save. Pinecrest + Kendall only
-            (33156 · 33183 · 33186).
+            {t("The more you stack, the more you save. Pinecrest + Kendall only (33156 · 33183 · 33186).")}
           </p>
           <div className="mt-6 inline-flex items-center gap-1.5 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground text-sm font-medium">
             <MapPin className="w-3.5 h-3.5" />
@@ -154,10 +155,10 @@ const BundleInner = () => {
             {/* 2-Service — INTERACTIVE */}
             <Reveal>
               <div className="bg-card border rounded-xl p-6 h-full flex flex-col hover-lift">
-                <h3 className="text-lg font-bold text-foreground">2-Service Bundle</h3>
-                <div className="mt-2 text-3xl font-extrabold text-primary">10% off</div>
+                <h3 className="text-lg font-bold text-foreground">{t("2-Service Bundle")}</h3>
+                <div className="mt-2 text-3xl font-extrabold text-primary">{t("10% off")}</div>
                 <p className="text-sm text-text-mid mt-3">
-                  Pick any two — we coordinate everything and you save 10% every month.
+                  {t("Pick any two — we coordinate everything and you save 10% every month.")}
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -176,7 +177,7 @@ const BundleInner = () => {
                         }`}
                       >
                         {active && <Check className="inline w-3 h-3 mr-1 -mt-0.5" />}
-                        {s.label}
+                        {t(s.label)}
                       </button>
                     );
                   })}
@@ -187,11 +188,11 @@ const BundleInner = () => {
                     <p className="text-sm text-text-mid">
                       <span className="line-through text-text-light mr-1">${twoBundle.subtotal}/mo</span>
                       <span className="font-bold text-foreground">${twoBundle.discounted}/mo</span>
-                      <span className="text-text-light"> after 10% bundle discount</span>
+                      <span className="text-text-light"> {t("after 10% bundle discount")}</span>
                     </p>
                   ) : (
                     <p className="text-xs text-text-light italic">
-                      Pick exactly 2 services to see your bundled price.
+                      {t("Pick exactly 2 services to see your bundled price.")}
                     </p>
                   )}
                 </div>
@@ -210,7 +211,7 @@ const BundleInner = () => {
                     }}
                     className="cta-arrow cta-press mt-auto block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                   >
-                    Build my 2-service bundle <span className="arrow">→</span>
+                    {t("Build my 2-service bundle")} <span className="arrow">→</span>
                   </Link>
                 ) : (
                   <button
@@ -219,7 +220,7 @@ const BundleInner = () => {
                     aria-disabled="true"
                     className="mt-auto block w-full text-center bg-muted text-muted-foreground font-semibold px-5 py-3 rounded-lg text-sm cursor-not-allowed"
                   >
-                    Pick 2 services to continue
+                    {t("Pick 2 services to continue")}
                   </button>
                 )}
               </div>
@@ -228,15 +229,14 @@ const BundleInner = () => {
             {/* 3-Service — STATIC, HIGHLIGHTED */}
             <Reveal delay={80}>
               <div className="relative bg-card border-2 border-primary rounded-xl p-6 h-full flex flex-col hover-lift shadow-[0_0_28px_-8px_hsl(var(--primary)/0.3)] md:scale-[1.04] md:-my-1 z-10">
-                <span className="most-popular-ribbon hidden md:inline-block">Best Value</span>
+                <span className="most-popular-ribbon hidden md:inline-block">{t("Best Value")}</span>
                 <span className="md:hidden self-start bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                  Best Value
+                  {t("Best Value")}
                 </span>
-                <h3 className="text-lg font-bold text-foreground">3-Service Bundle</h3>
-                <div className="mt-2 text-3xl font-extrabold text-primary">20% off</div>
+                <h3 className="text-lg font-bold text-foreground">{t("3-Service Bundle")}</h3>
+                <div className="mt-2 text-3xl font-extrabold text-primary">{t("20% off")}</div>
                 <p className="text-sm text-text-mid mt-3 flex-1">
-                  All three services on one plan: cleaning, lawn care, and detailing.
-                  Lock in 20% off the combined monthly price.
+                  {t("All three services on one plan: cleaning, lawn care, and detailing. Lock in 20% off the combined monthly price.")}
                 </p>
                 <p className="text-sm text-text-mid mt-3">
                   <span className="line-through text-text-light mr-1">${threeBundle.subtotal}/mo</span>
@@ -255,7 +255,7 @@ const BundleInner = () => {
                   }}
                   className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                 >
-                  Build my 3-service bundle <span className="arrow">→</span>
+                  {t("Build my 3-service bundle")} <span className="arrow">→</span>
                 </Link>
               </div>
             </Reveal>
@@ -263,18 +263,17 @@ const BundleInner = () => {
             {/* CUSTOM */}
             <Reveal delay={160}>
               <div className="bg-card border rounded-xl p-6 h-full flex flex-col hover-lift">
-                <h3 className="text-lg font-bold text-foreground">Custom</h3>
-                <div className="mt-2 text-3xl font-extrabold text-primary">Tailored</div>
+                <h3 className="text-lg font-bold text-foreground">{t("Custom")}</h3>
+                <div className="mt-2 text-3xl font-extrabold text-primary">{t("Tailored")}</div>
                 <p className="text-sm text-text-mid mt-3 flex-1">
-                  Larger home, oversized lot, or fleet of vehicles? We'll build a custom
-                  plan and send you a personal quote.
+                  {t("Larger home, oversized lot, or fleet of vehicles? We'll build a custom plan and send you a personal quote.")}
                 </p>
                 <Link
                   to={customCta.to}
                   onClick={customCta.onClick}
                   className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                 >
-                  Request a custom plan <span className="arrow">→</span>
+                  {t("Request a custom plan")} <span className="arrow">→</span>
                 </Link>
               </div>
             </Reveal>

@@ -22,6 +22,7 @@ import {
 import { pushEvent } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface PlanTier {
   name: string;
@@ -89,6 +90,7 @@ const ServiceLandingPage = ({ config }: Props) => (
 
 const ServiceLandingPageInner = ({ config }: Props) => {
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
+  const { t } = useLanguage();
 
   const ctaForPlan = (planSlug: string | undefined, where: string) => {
     const base = getCtaProps({
@@ -143,10 +145,15 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <SeoHead {...config.seo} ogImage={config.heroImage} />
+      <SeoHead
+        {...config.seo}
+        title={t(config.seo.title)}
+        description={t(config.seo.description)}
+        ogImage={config.heroImage}
+      />
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
-        label={config.stickyLabel}
+        label={t(config.stickyLabel)}
         surface={`lp_${config.serviceSlug}`}
         service={config.signupServiceParam}
       />
@@ -184,18 +191,18 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">
-            {config.eyebrow}
+            {t(config.eyebrow)}
           </span>
           <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
-            {config.h1}
+            {t(config.h1)}
           </h1>
           <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            {config.subhead}
+            {t(config.subhead)}
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm">
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium">
-              {config.priceAnchor}
+              {t(config.priceAnchor)}
             </span>
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5" />
@@ -209,7 +216,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               onClick={heroCta.onClick}
               className="cta-arrow cta-press animate-pulse-once bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
             >
-              Book in 60 seconds <span className="arrow">→</span>
+              {t("Book in 60 seconds")} <span className="arrow">→</span>
             </Link>
             <a
               href={`tel:${PHONE_TEL}`}
@@ -225,7 +232,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           </div>
 
           <p className="mt-4 text-xs text-primary-foreground/60">
-            Locked price · No contracts · Cancel anytime
+            {t("Locked price · No contracts · Cancel anytime")}
           </p>
         </div>
       </section>
@@ -241,13 +248,13 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         <SectionDecor tone="primary" />
         <div className="relative max-w-5xl mx-auto">
           <Reveal className="text-center mb-6">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">Plans</span>
+            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Plans")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              Pick your cadence. Lock your price.
+              {t("Pick your cadence. Lock your price.")}
             </h2>
           </Reveal>
 
-          <SavingsCallout text={config.savingsCallout} />
+          <SavingsCallout text={t(config.savingsCallout)} />
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-5 items-stretch">
             {config.plans.map((p, i) => {
@@ -263,26 +270,26 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                   >
                     {p.highlighted && (
                       <span className="most-popular-ribbon hidden md:inline-block">
-                        Most Popular
+                        {t("Most Popular")}
                       </span>
                     )}
                     {p.highlighted && (
                       <span className="md:hidden self-start bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                        Most Popular
+                        {t("Most Popular")}
                       </span>
                     )}
-                    <h3 className="text-lg font-bold text-foreground">{p.name}</h3>
+                    <h3 className="text-lg font-bold text-foreground">{t(p.name)}</h3>
                     <div className="mt-2 flex items-baseline gap-1">
                       <span className="text-3xl font-extrabold text-foreground">{p.price}</span>
                       <span className="text-sm text-text-mid">{p.cadence}</span>
                     </div>
-                    <p className="text-sm text-text-mid mt-3 flex-1">{p.description}</p>
+                    <p className="text-sm text-text-mid mt-3 flex-1">{t(p.description)}</p>
                     <Link
                       to={planCta.to}
                       onClick={planCta.onClick}
                       className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
-                      Choose {p.name} <span className="arrow">→</span>
+                      {t("Choose")} {t(p.name)} <span className="arrow">→</span>
                     </Link>
                   </div>
                 </Reveal>
@@ -296,9 +303,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       <section className="bg-section-alt py-20 px-4">
         <div className="max-w-3xl mx-auto">
           <Reveal className="text-center mb-10">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">What's Included</span>
+            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("What's Included")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              Every visit, every time.
+              {t("Every visit, every time.")}
             </h2>
           </Reveal>
 
@@ -307,7 +314,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               {config.included.map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm text-foreground/85">
                   <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
-                  {item}
+                  {t(item)}
                 </li>
               ))}
             </ul>
@@ -326,25 +333,25 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         <SectionDecor tone="gold" />
         <div className="relative max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">Local Reviews</span>
+            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Local Reviews")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              Trusted across {SERVICE_AREA_TRUST.replace("Serving ", "")}
+              {t(`Trusted across ${SERVICE_AREA_TRUST.replace("Serving ", "")}`)}
             </h2>
           </Reveal>
 
           {/* Mobile: snap-scroll carousel */}
           <div className="md:hidden snap-row flex overflow-x-auto gap-4 -mx-4 px-4 pb-2">
-            {config.testimonials.map((t) => (
+            {config.testimonials.map((tm) => (
               <div
-                key={t.name + t.zip}
+                key={tm.name + tm.zip}
                 className="bg-card border rounded-xl p-6 shrink-0"
                 style={{ width: "85%" }}
               >
                 <div className="text-gold text-sm mb-3">★★★★★</div>
-                <p className="text-sm text-text-mid italic">"{t.quote}"</p>
+                <p className="text-sm text-text-mid italic">"{t(tm.quote)}"</p>
                 <div className="mt-4 pt-4 border-t border-border/60">
-                  <p className="text-xs font-semibold text-foreground">{t.name}</p>
-                  <p className="text-xs text-text-light">ZIP {t.zip}</p>
+                  <p className="text-xs font-semibold text-foreground">{t(tm.name)}</p>
+                  <p className="text-xs text-text-light">ZIP {tm.zip}</p>
                 </div>
               </div>
             ))}
@@ -352,14 +359,14 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
           {/* Desktop: 3-up grid with hover lift */}
           <div className="hidden md:grid md:grid-cols-3 gap-6">
-            {config.testimonials.map((t, i) => (
-              <Reveal key={t.name + t.zip} delay={i * 80}>
+            {config.testimonials.map((tm, i) => (
+              <Reveal key={tm.name + tm.zip} delay={i * 80}>
                 <div className="bg-card border rounded-xl p-6 h-full flex flex-col hover-lift">
                   <div className="text-gold text-sm mb-3">★★★★★</div>
-                  <p className="text-sm text-text-mid italic flex-1">"{t.quote}"</p>
+                  <p className="text-sm text-text-mid italic flex-1">"{t(tm.quote)}"</p>
                   <div className="mt-4 pt-4 border-t border-border/60">
-                    <p className="text-xs font-semibold text-foreground">{t.name}</p>
-                    <p className="text-xs text-text-light">ZIP {t.zip}</p>
+                    <p className="text-xs font-semibold text-foreground">{t(tm.name)}</p>
+                    <p className="text-xs text-text-light">ZIP {tm.zip}</p>
                   </div>
                 </div>
               </Reveal>
@@ -367,8 +374,8 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           </div>
 
           <p className="text-center text-xs text-text-light mt-6">
-            Placeholder reviews — verified customer reviews rolling out once we
-            clear 50 jobs. {SERVICE_AREA_TRUST}.
+            {t("Placeholder reviews — verified customer reviews rolling out once we clear 50 jobs.")}{" "}
+            {SERVICE_AREA_TRUST}.
           </p>
         </div>
       </section>
@@ -383,11 +390,13 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         <SectionDecor tone="primary" />
         <div className="relative max-w-3xl mx-auto">
           <Reveal className="text-center mb-10">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">FAQ</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">Questions, answered.</h2>
+            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("FAQ")}</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Questions, answered.")}</h2>
           </Reveal>
           <Reveal>
-            <LandingFaq items={config.faqs} />
+            <LandingFaq
+              items={config.faqs.map((f) => ({ q: t(f.q), a: t(f.a) }))}
+            />
           </Reveal>
         </div>
       </section>
@@ -397,9 +406,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
-        headline={`Ready to lock in your ${config.eyebrow.toLowerCase()}?`}
-        subhead="60-second signup. Same crew. Locked price."
-        ctaLabel="Book in 60 seconds"
+        headline={t(`Ready to lock in your ${config.eyebrow.toLowerCase()}?`)}
+        subhead={t("60-second signup. Same crew. Locked price.")}
+        ctaLabel={t("Book in 60 seconds")}
         trackingId={`lp_${config.serviceSlug}_final`}
         service={config.signupServiceParam}
       />
@@ -411,6 +420,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
 const BundleCrossSell = ({ config }: Props) => {
   const { getCtaProps } = usePrimaryCta();
+  const { t } = useLanguage();
   const cta = getCtaProps({
     trackingId: `lp_${config.serviceSlug}_bundle`,
     ctaText: "Bundle & save",
@@ -424,15 +434,15 @@ const BundleCrossSell = ({ config }: Props) => {
         <Reveal>
           <div className="relative bg-gradient-to-r from-primary/10 to-success/10 border-2 border-primary/30 rounded-2xl p-6 md:p-8 text-center overflow-hidden">
             <div className="absolute top-3 right-3 save-badge-rotate bg-gold text-gold-foreground text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-              Save 10%
+              {t("Save 10%")}
             </div>
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/15 mb-3">
               <Sparkles className="w-5 h-5 text-primary" aria-hidden="true" />
             </div>
             <h3 className="text-xl md:text-2xl font-bold text-foreground">
-              {config.bundleCta.title}
+              {t(config.bundleCta.title)}
             </h3>
-            <p className="text-sm text-text-mid mt-2">{config.bundleCta.body}</p>
+            <p className="text-sm text-text-mid mt-2">{t(config.bundleCta.body)}</p>
             <Link
               to={cta.to}
               onClick={(e) => {
@@ -444,7 +454,7 @@ const BundleCrossSell = ({ config }: Props) => {
               }}
               className="cta-arrow cta-press mt-5 inline-block bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-colors"
             >
-              Bundle &amp; save <span className="arrow">→</span>
+              {t("Bundle & save")} <span className="arrow">→</span>
             </Link>
           </div>
         </Reveal>

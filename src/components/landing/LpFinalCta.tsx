@@ -4,6 +4,7 @@ import SparkleField from "./SparkleField";
 import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { track } from "@/lib/track";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   headline: string;
@@ -35,6 +36,7 @@ const LpFinalCta = ({
   services,
 }: Props) => {
   const { getCtaProps } = usePrimaryCta();
+  const { t } = useLanguage();
   const ctaProps = getCtaProps({
     trackingId,
     ctaText: ctaLabel,
@@ -77,7 +79,7 @@ const LpFinalCta = ({
         {subhead && (
           <p className="text-primary-foreground/70 font-medium mb-2">{subhead}</p>
         )}
-        <p className="text-primary-foreground/50 mb-8">No contracts. Cancel anytime.</p>
+        <p className="text-primary-foreground/50 mb-8">{t("No contracts. Cancel anytime.")}</p>
 
         <Link
           to={ctaProps.to}

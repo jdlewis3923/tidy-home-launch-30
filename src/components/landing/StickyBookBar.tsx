@@ -5,6 +5,7 @@ import { PHONE_TEL } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { usePrimaryCta } from "@/hooks/usePrimaryCta";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   label: string;            // "House Cleaning · from $159/mo"
@@ -28,6 +29,7 @@ interface Props {
 const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Props) => {
   const [visible, setVisible] = useState(false);
   const { getCtaProps } = usePrimaryCta();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 600);
@@ -80,13 +82,13 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
       >
         <div className="w-full bg-navy/95 backdrop-blur-sm border-b border-primary-foreground/10 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between gap-4">
-            <span className="text-sm text-primary-foreground/90 font-medium truncate">{label}</span>
+            <span className="text-sm text-primary-foreground/90 font-medium truncate">{t(label)}</span>
             <Link
               to={desktopCta.to}
               onClick={desktopCta.onClick}
               className="cta-arrow cta-press shrink-0 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-1.5 rounded-md text-sm transition-colors"
             >
-              Book in 60 seconds <span className="arrow">→</span>
+              {t("Book in 60 seconds")} <span className="arrow">→</span>
             </Link>
           </div>
         </div>
@@ -110,7 +112,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
               onClick={mobileCta.onClick}
               className="cta-arrow cta-press flex-1 text-center bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-3 rounded-lg text-sm"
             >
-              Book in 60 seconds <span className="arrow">→</span>
+              {t("Book in 60 seconds")} <span className="arrow">→</span>
             </Link>
             <a
               href={`tel:${PHONE_TEL}`}
