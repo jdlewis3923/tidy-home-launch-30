@@ -90,6 +90,7 @@ const ServiceLandingPage = ({ config }: Props) => (
 
 const ServiceLandingPageInner = ({ config }: Props) => {
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
+  const { t } = useLanguage();
 
   const ctaForPlan = (planSlug: string | undefined, where: string) => {
     const base = getCtaProps({
