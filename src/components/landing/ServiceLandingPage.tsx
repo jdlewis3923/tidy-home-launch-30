@@ -191,18 +191,18 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">
-            {config.eyebrow}
+            {t(config.eyebrow)}
           </span>
           <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
-            {config.h1}
+            {t(config.h1)}
           </h1>
           <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            {config.subhead}
+            {t(config.subhead)}
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm">
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium">
-              {config.priceAnchor}
+              {t(config.priceAnchor)}
             </span>
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5" />
@@ -216,7 +216,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               onClick={heroCta.onClick}
               className="cta-arrow cta-press animate-pulse-once bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
             >
-              Book in 60 seconds <span className="arrow">→</span>
+              {t("Book in 60 seconds")} <span className="arrow">→</span>
             </Link>
             <a
               href={`tel:${PHONE_TEL}`}
@@ -232,7 +232,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           </div>
 
           <p className="mt-4 text-xs text-primary-foreground/60">
-            Locked price · No contracts · Cancel anytime
+            {t("Locked price · No contracts · Cancel anytime")}
           </p>
         </div>
       </section>
