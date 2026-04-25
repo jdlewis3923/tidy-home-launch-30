@@ -13,7 +13,11 @@ import { Navigate, useLocation } from "react-router-dom";
  */
 const SignupRedirect = () => {
   const location = useLocation();
-  const to = "/login" + location.search;
+  // Send users straight into the START MY PLAN builder. No login wall.
+  // Query string (promo, utm_*, gclid, service, plan, bundle, services, custom)
+  // is preserved verbatim — PromoCaptureWatcher + DashboardPlan's preselect
+  // effect read from it, and captured promo/UTM forward into Stripe metadata.
+  const to = "/dashboard/plan" + location.search;
   return <Navigate to={to} replace />;
 };
 
