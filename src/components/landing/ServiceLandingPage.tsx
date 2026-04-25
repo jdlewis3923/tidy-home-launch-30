@@ -248,13 +248,13 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         <SectionDecor tone="primary" />
         <div className="relative max-w-5xl mx-auto">
           <Reveal className="text-center mb-6">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">Plans</span>
+            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Plans")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              Pick your cadence. Lock your price.
+              {t("Pick your cadence. Lock your price.")}
             </h2>
           </Reveal>
 
-          <SavingsCallout text={config.savingsCallout} />
+          <SavingsCallout text={t(config.savingsCallout)} />
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-5 items-stretch">
             {config.plans.map((p, i) => {
@@ -270,26 +270,26 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                   >
                     {p.highlighted && (
                       <span className="most-popular-ribbon hidden md:inline-block">
-                        Most Popular
+                        {t("Most Popular")}
                       </span>
                     )}
                     {p.highlighted && (
                       <span className="md:hidden self-start bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                        Most Popular
+                        {t("Most Popular")}
                       </span>
                     )}
-                    <h3 className="text-lg font-bold text-foreground">{p.name}</h3>
+                    <h3 className="text-lg font-bold text-foreground">{t(p.name)}</h3>
                     <div className="mt-2 flex items-baseline gap-1">
                       <span className="text-3xl font-extrabold text-foreground">{p.price}</span>
                       <span className="text-sm text-text-mid">{p.cadence}</span>
                     </div>
-                    <p className="text-sm text-text-mid mt-3 flex-1">{p.description}</p>
+                    <p className="text-sm text-text-mid mt-3 flex-1">{t(p.description)}</p>
                     <Link
                       to={planCta.to}
                       onClick={planCta.onClick}
                       className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
-                      Choose {p.name} <span className="arrow">→</span>
+                      {t("Choose")} {t(p.name)} <span className="arrow">→</span>
                     </Link>
                   </div>
                 </Reveal>
