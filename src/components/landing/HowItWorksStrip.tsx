@@ -1,5 +1,6 @@
 import { Calendar, Truck, Settings } from "lucide-react";
 import Reveal from "./Reveal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Step {
   title: string;
