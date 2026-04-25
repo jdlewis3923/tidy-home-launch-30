@@ -303,9 +303,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       <section className="bg-section-alt py-20 px-4">
         <div className="max-w-3xl mx-auto">
           <Reveal className="text-center mb-10">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">What's Included</span>
+            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("What's Included")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              Every visit, every time.
+              {t("Every visit, every time.")}
             </h2>
           </Reveal>
 
@@ -314,7 +314,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               {config.included.map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm text-foreground/85">
                   <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
-                  {item}
+                  {t(item)}
                 </li>
               ))}
             </ul>
