@@ -333,25 +333,25 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         <SectionDecor tone="gold" />
         <div className="relative max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">Local Reviews</span>
+            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Local Reviews")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              Trusted across {SERVICE_AREA_TRUST.replace("Serving ", "")}
+              {t(`Trusted across ${SERVICE_AREA_TRUST.replace("Serving ", "")}`)}
             </h2>
           </Reveal>
 
           {/* Mobile: snap-scroll carousel */}
           <div className="md:hidden snap-row flex overflow-x-auto gap-4 -mx-4 px-4 pb-2">
-            {config.testimonials.map((t) => (
+            {config.testimonials.map((tm) => (
               <div
-                key={t.name + t.zip}
+                key={tm.name + tm.zip}
                 className="bg-card border rounded-xl p-6 shrink-0"
                 style={{ width: "85%" }}
               >
                 <div className="text-gold text-sm mb-3">★★★★★</div>
-                <p className="text-sm text-text-mid italic">"{t.quote}"</p>
+                <p className="text-sm text-text-mid italic">"{t(tm.quote)}"</p>
                 <div className="mt-4 pt-4 border-t border-border/60">
-                  <p className="text-xs font-semibold text-foreground">{t.name}</p>
-                  <p className="text-xs text-text-light">ZIP {t.zip}</p>
+                  <p className="text-xs font-semibold text-foreground">{t(tm.name)}</p>
+                  <p className="text-xs text-text-light">ZIP {tm.zip}</p>
                 </div>
               </div>
             ))}
@@ -359,14 +359,14 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
           {/* Desktop: 3-up grid with hover lift */}
           <div className="hidden md:grid md:grid-cols-3 gap-6">
-            {config.testimonials.map((t, i) => (
-              <Reveal key={t.name + t.zip} delay={i * 80}>
+            {config.testimonials.map((tm, i) => (
+              <Reveal key={tm.name + tm.zip} delay={i * 80}>
                 <div className="bg-card border rounded-xl p-6 h-full flex flex-col hover-lift">
                   <div className="text-gold text-sm mb-3">★★★★★</div>
-                  <p className="text-sm text-text-mid italic flex-1">"{t.quote}"</p>
+                  <p className="text-sm text-text-mid italic flex-1">"{t(tm.quote)}"</p>
                   <div className="mt-4 pt-4 border-t border-border/60">
-                    <p className="text-xs font-semibold text-foreground">{t.name}</p>
-                    <p className="text-xs text-text-light">ZIP {t.zip}</p>
+                    <p className="text-xs font-semibold text-foreground">{t(tm.name)}</p>
+                    <p className="text-xs text-text-light">ZIP {tm.zip}</p>
                   </div>
                 </div>
               </Reveal>
@@ -374,8 +374,8 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           </div>
 
           <p className="text-center text-xs text-text-light mt-6">
-            Placeholder reviews — verified customer reviews rolling out once we
-            clear 50 jobs. {SERVICE_AREA_TRUST}.
+            {t("Placeholder reviews — verified customer reviews rolling out once we clear 50 jobs.")}{" "}
+            {SERVICE_AREA_TRUST}.
           </p>
         </div>
       </section>
