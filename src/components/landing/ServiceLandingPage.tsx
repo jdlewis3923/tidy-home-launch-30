@@ -145,10 +145,15 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <SeoHead {...config.seo} ogImage={config.heroImage} />
+      <SeoHead
+        {...config.seo}
+        title={t(config.seo.title)}
+        description={t(config.seo.description)}
+        ogImage={config.heroImage}
+      />
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
-        label={config.stickyLabel}
+        label={t(config.stickyLabel)}
         surface={`lp_${config.serviceSlug}`}
         service={config.signupServiceParam}
       />
