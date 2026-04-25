@@ -440,7 +440,6 @@ const translations: Record<string, string> = {
   "Already booking detailing? Add monthly cleaning for $159/mo.": "¿Ya tienes detallado? Agrega limpieza mensual por $159/mes.",
 
   // Bundle page
-  "Bundle & Save": "Combo y Ahorra",
   "Bundle & Save — Stack services, save 10–20%": "Combo y Ahorra — Apila servicios, ahorra 10–20%",
   "The more you stack, the more you save. Pinecrest + Kendall only (33156 · 33183 · 33186).":
     "Mientras más combinas, más ahorras. Solo Pinecrest + Kendall (33156 · 33183 · 33186).",
