@@ -420,6 +420,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
 const BundleCrossSell = ({ config }: Props) => {
   const { getCtaProps } = usePrimaryCta();
+  const { t } = useLanguage();
   const cta = getCtaProps({
     trackingId: `lp_${config.serviceSlug}_bundle`,
     ctaText: "Bundle & save",
@@ -433,15 +434,15 @@ const BundleCrossSell = ({ config }: Props) => {
         <Reveal>
           <div className="relative bg-gradient-to-r from-primary/10 to-success/10 border-2 border-primary/30 rounded-2xl p-6 md:p-8 text-center overflow-hidden">
             <div className="absolute top-3 right-3 save-badge-rotate bg-gold text-gold-foreground text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-              Save 10%
+              {t("Save 10%")}
             </div>
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/15 mb-3">
               <Sparkles className="w-5 h-5 text-primary" aria-hidden="true" />
             </div>
             <h3 className="text-xl md:text-2xl font-bold text-foreground">
-              {config.bundleCta.title}
+              {t(config.bundleCta.title)}
             </h3>
-            <p className="text-sm text-text-mid mt-2">{config.bundleCta.body}</p>
+            <p className="text-sm text-text-mid mt-2">{t(config.bundleCta.body)}</p>
             <Link
               to={cta.to}
               onClick={(e) => {
@@ -453,7 +454,7 @@ const BundleCrossSell = ({ config }: Props) => {
               }}
               className="cta-arrow cta-press mt-5 inline-block bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-colors"
             >
-              Bundle &amp; save <span className="arrow">→</span>
+              {t("Bundle & save")} <span className="arrow">→</span>
             </Link>
           </div>
         </Reveal>
