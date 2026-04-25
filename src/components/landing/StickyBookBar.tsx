@@ -88,7 +88,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
               onClick={desktopCta.onClick}
               className="cta-arrow cta-press shrink-0 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-1.5 rounded-md text-sm transition-colors"
             >
-              Book in 60 seconds <span className="arrow">→</span>
+              {t("Book in 60 seconds")} <span className="arrow">→</span>
             </Link>
           </div>
         </div>
