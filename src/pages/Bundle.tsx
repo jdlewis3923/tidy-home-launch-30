@@ -103,15 +103,15 @@ const BundleInner = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SeoHead
-        title="Bundle & Save in Pinecrest + Kendall | Tidy Home Services"
-        description="Stack home cleaning, lawn care, and car detailing on one plan. Save 10–20% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill."
+        title={t("Bundle & Save in Pinecrest + Kendall | Tidy Home Services")}
+        description={t("Stack home cleaning, lawn care, and car detailing on one plan. Save 10–20% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.")}
         canonical="https://jointidy.co/bundle"
         ogImage={heroImg}
         priceRange="$85–$859"
       />
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
-        label="Bundle & Save · 10–20% off"
+        label={t("Bundle & Save · 10–20% off")}
         surface="lp_bundle"
         bundle="true"
         services="cleaning,lawn,detailing"
