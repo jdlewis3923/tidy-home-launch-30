@@ -37,3 +37,4 @@ Supabase auth, GTM tracking.
 - [Dashboard Feature Flag](mem://features/dashboard-feature-flag) — Toggling between pre-launch and functional platform modes
 - [Authentication](mem://auth/customer-authentication) — Supabase configuration, password rules, and route protection
 - [Launch Content Expansion](mem://features/launch-content-expansion) — Extra content layers shown when dashboard flag is enabled
+- [Customer Dashboard Home](mem://features/customer-dashboard-home) — Live state-aware command center at /dashboard with summary cards, calendar, recent photo proof, referral, quick action modals
