@@ -23,3 +23,8 @@ verify_jwt = false
 # plus we validate the `state` param to prevent CSRF.
 [functions.meta-oauth-callback]
 verify_jwt = false
+
+# Public read-only endpoint that returns the captured Meta Pixel ID so
+# the client-side Pixel snippet can self-configure. Returns no secrets.
+[functions.meta-pixel-id]
+verify_jwt = false
