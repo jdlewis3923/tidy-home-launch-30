@@ -216,9 +216,9 @@ export default function DashboardPlan() {
 
         {/* Custom-quote notice — replaces the Stripe path with a tailored-plan flow */}
         {(step === 5 || step === 6) && customQuote && (
-          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm text-foreground">
+          <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 text-sm text-white">
             <p className="font-semibold mb-1">Custom Plan Required</p>
-            <p className="text-muted-foreground text-xs leading-relaxed">
+            <p className="text-white/70 text-xs leading-relaxed">
               We'll create a plan tailored to your home — no payment today. Tap "Get My Plan" and we'll reach out shortly.
             </p>
           </div>
