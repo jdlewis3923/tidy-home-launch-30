@@ -140,24 +140,51 @@ export default function DashboardPlan() {
   const stepInfo = STEPS[step];
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="relative min-h-screen overflow-hidden pb-24">
+      {/* Layered background — replaces the flat white sides with depth */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        {/* Base soft gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(217,91%,97%)] via-background to-[hsl(217,91%,96%)]" />
+        {/* Gold warm-up at top-right */}
+        <div className="absolute -top-32 -right-40 h-[520px] w-[520px] rounded-full bg-gold/15 blur-[120px]" />
+        {/* Blue cool-down bottom-left */}
+        <div className="absolute -bottom-40 -left-40 h-[560px] w-[560px] rounded-full bg-primary/20 blur-[140px]" />
+        {/* Navy depth top-left */}
+        <div className="absolute top-1/3 -left-32 h-[380px] w-[380px] rounded-full bg-navy/10 blur-[120px]" />
+        {/* Subtle dot grid */}
+        <div
+          className="absolute inset-0 opacity-[0.18]"
+          style={{
+            backgroundImage:
+              'radial-gradient(hsl(var(--primary) / 0.35) 1px, transparent 1px)',
+            backgroundSize: '22px 22px',
+            maskImage:
+              'radial-gradient(ellipse at center, black 40%, transparent 75%)',
+            WebkitMaskImage:
+              'radial-gradient(ellipse at center, black 40%, transparent 75%)',
+          }}
+        />
+      </div>
+
       {/* Header */}
-      <header className="border-b border-border bg-card">
+      <header className="relative border-b border-border/60 bg-card/70 backdrop-blur-md">
         <div className="mx-auto max-w-2xl px-4 py-4 flex items-center justify-between">
           <img src={tidyLogo} alt="Tidy" className="h-[72px] w-auto" />
-          <span className="text-xs text-muted-foreground">Step {step + 1} of {STEPS.length}</span>
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary ring-1 ring-primary/20">
+            Step {step + 1} of {STEPS.length}
+          </span>
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl px-4 pt-6 space-y-6">
+      <div className="relative mx-auto max-w-2xl px-4 pt-6 space-y-6">
         <ProgressBar currentStep={step} totalSteps={STEPS.length} />
         <PromoBanner />
 
         <div>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-foreground" style={{ letterSpacing: '-0.03em' }}>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground" style={{ letterSpacing: '-0.035em', lineHeight: 0.98 }}>
             {stepInfo.heading}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{stepInfo.sub}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{stepInfo.sub}</p>
         </div>
 
         {/* Step content */}
