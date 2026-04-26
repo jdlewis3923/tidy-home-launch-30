@@ -14,7 +14,202 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      invoices: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          invoice_date: string
+          receipt_url: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          stripe_invoice_id: string | null
+          subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          invoice_date?: string
+          receipt_url?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          stripe_invoice_id?: string | null
+          subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          invoice_date?: string
+          receipt_url?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          stripe_invoice_id?: string | null
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
+          created_at: string
+          first_name: string | null
+          gate_code: string | null
+          id: string
+          last_name: string | null
+          parking_notes: string | null
+          pets: string | null
+          phone: string | null
+          preferred_day: string | null
+          preferred_time: string | null
+          special_instructions: string | null
+          updated_at: string
+          user_id: string
+          zip: string | null
+        }
+        Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          created_at?: string
+          first_name?: string | null
+          gate_code?: string | null
+          id?: string
+          last_name?: string | null
+          parking_notes?: string | null
+          pets?: string | null
+          phone?: string | null
+          preferred_day?: string | null
+          preferred_time?: string | null
+          special_instructions?: string | null
+          updated_at?: string
+          user_id: string
+          zip?: string | null
+        }
+        Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          created_at?: string
+          first_name?: string | null
+          gate_code?: string | null
+          id?: string
+          last_name?: string | null
+          parking_notes?: string | null
+          pets?: string | null
+          phone?: string | null
+          preferred_day?: string | null
+          preferred_time?: string | null
+          special_instructions?: string | null
+          updated_at?: string
+          user_id?: string
+          zip?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          frequency: Database["public"]["Enums"]["subscription_frequency"]
+          id: string
+          monthly_total_cents: number
+          next_billing_date: string | null
+          services: Database["public"]["Enums"]["service_type"][]
+          status: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          frequency?: Database["public"]["Enums"]["subscription_frequency"]
+          id?: string
+          monthly_total_cents?: number
+          next_billing_date?: string | null
+          services?: Database["public"]["Enums"]["service_type"][]
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          frequency?: Database["public"]["Enums"]["subscription_frequency"]
+          id?: string
+          monthly_total_cents?: number
+          next_billing_date?: string | null
+          services?: Database["public"]["Enums"]["service_type"][]
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      visits: {
+        Row: {
+          created_at: string
+          id: string
+          jobber_job_id: string | null
+          notes: string | null
+          service: Database["public"]["Enums"]["service_type"]
+          status: Database["public"]["Enums"]["visit_status"]
+          subscription_id: string | null
+          time_window: string | null
+          updated_at: string
+          user_id: string
+          visit_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jobber_job_id?: string | null
+          notes?: string | null
+          service: Database["public"]["Enums"]["service_type"]
+          status?: Database["public"]["Enums"]["visit_status"]
+          subscription_id?: string | null
+          time_window?: string | null
+          updated_at?: string
+          user_id: string
+          visit_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jobber_job_id?: string | null
+          notes?: string | null
+          service?: Database["public"]["Enums"]["service_type"]
+          status?: Database["public"]["Enums"]["visit_status"]
+          subscription_id?: string | null
+          time_window?: string | null
+          updated_at?: string
+          user_id?: string
+          visit_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +218,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      invoice_status: "paid" | "pending" | "failed" | "refunded"
+      service_type: "cleaning" | "lawn" | "detailing"
+      subscription_frequency: "weekly" | "biweekly" | "monthly"
+      subscription_status: "active" | "paused" | "canceled"
+      visit_status:
+        | "scheduled"
+        | "on_the_way"
+        | "in_progress"
+        | "complete"
+        | "canceled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +354,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      invoice_status: ["paid", "pending", "failed", "refunded"],
+      service_type: ["cleaning", "lawn", "detailing"],
+      subscription_frequency: ["weekly", "biweekly", "monthly"],
+      subscription_status: ["active", "paused", "canceled"],
+      visit_status: [
+        "scheduled",
+        "on_the_way",
+        "in_progress",
+        "complete",
+        "canceled",
+      ],
+    },
   },
 } as const
