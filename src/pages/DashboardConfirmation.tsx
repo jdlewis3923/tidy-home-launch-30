@@ -1,52 +1,81 @@
 import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import tidyLogo from '@/assets/tidy-logo.png';
 
+/**
+ * Calm "you're in." moment. Full-screen cream paper, sunlit blur, oversized
+ * logo, no clutter. Reinforces: the right decision is already made.
+ */
 export default function DashboardConfirmation() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="max-w-2xl w-full text-center space-y-8 py-16">
-        <div className="text-6xl">✅</div>
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground" style={{ letterSpacing: '-0.03em' }}>
-            You're all set! 🎉
+    <div className="relative min-h-screen overflow-hidden bg-cream text-ink">
+      {/* Warm sunlit background */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(36_70%_92%)_0%,hsl(36_27%_96%)_55%,hsl(35_22%_92%)_100%)]" />
+        <div
+          className="absolute -top-32 left-1/2 -translate-x-1/2 h-[640px] w-[640px] rounded-full opacity-60"
+          style={{
+            background: 'radial-gradient(circle, hsl(38 85% 86% / 0.9) 0%, transparent 65%)',
+            filter: 'blur(70px)',
+          }}
+        />
+        <div
+          className="absolute bottom-0 left-0 right-0 h-1/2 opacity-50"
+          style={{
+            background: 'radial-gradient(ellipse at bottom, hsl(217 60% 90% / 0.7) 0%, transparent 70%)',
+            filter: 'blur(80px)',
+          }}
+        />
+      </div>
+
+      <div className="relative mx-auto max-w-xl px-5 py-16 md:py-24 flex flex-col items-center text-center">
+        <img
+          src={tidyLogo}
+          alt="Tidy"
+          className="h-32 md:h-40 w-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)] animate-calm-rise"
+        />
+
+        <div className="mt-10 animate-calm-rise" style={{ animationDelay: '120ms' }}>
+          <h1 className="text-5xl md:text-6xl font-bold text-ink tracking-tight lowercase" style={{ letterSpacing: '-0.03em' }}>
+            you're in.
           </h1>
-          <p className="mt-2 text-muted-foreground">Welcome to Tidy. Your first service is being scheduled now.</p>
+          <p className="mt-4 text-base md:text-lg text-ink-soft lowercase">
+            your home is now on the schedule.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 text-left">
-          <div className="rounded-xl border-[1.5px] border-border bg-card p-6 space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">What happens next</h2>
-            <ol className="space-y-3 text-sm text-foreground">
-              <li className="flex gap-3"><span className="text-primary font-bold">1.</span> Check your email — your account login link is on its way</li>
-              <li className="flex gap-3"><span className="text-primary font-bold">2.</span> We'll text you 24 hours before your first visit with your pro's details</li>
-              <li className="flex gap-3"><span className="text-primary font-bold">3.</span> Your pro will text you when they're on the way</li>
-              <li className="flex gap-3"><span className="text-primary font-bold">4.</span> After the visit, you'll get a photo summary and a chance to rate</li>
-            </ol>
-          </div>
-
-          <div className="rounded-xl border-[1.5px] border-border bg-card p-6 space-y-3">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Your plan summary</h2>
-            <p className="text-sm text-muted-foreground">Your subscription details have been emailed to you.</p>
-
-            <div className="pt-2 space-y-1">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Service status</h3>
-              <div className="flex gap-3 text-xs text-muted-foreground">
-                <span className="text-primary">Scheduled</span>
-                <span>→ On the way</span>
-                <span>→ In progress</span>
-                <span>→ Completed</span>
-              </div>
-            </div>
-          </div>
+        <div
+          className="mt-10 w-full max-w-md rounded-2xl border border-hairline bg-white/80 p-6 backdrop-blur shadow-[0_8px_32px_-16px_hsl(var(--ink)/0.18)] animate-calm-rise"
+          style={{ animationDelay: '240ms' }}
+        >
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">what happens next</p>
+          <ol className="mt-4 space-y-3 text-sm text-ink-soft text-left">
+            {[
+              'check your email — your account login is on the way.',
+              'we\'ll text you 24 hours before your first visit.',
+              'your pro will text when they\'re on the way.',
+              'after every visit — photos, and a chance to rate.',
+            ].map((line, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="text-ink-faint tabular-nums w-4">{i + 1}.</span>
+                <span className="lowercase">{line}</span>
+              </li>
+            ))}
+          </ol>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            to="/dashboard"
-            className="rounded-lg bg-gradient-to-br from-primary-deep to-primary px-6 py-3 text-sm font-extrabold text-primary-foreground shadow-lg"
-          >
-            Back to your dashboard →
-          </Link>
-        </div>
+        <Link
+          to="/dashboard"
+          className="mt-10 group inline-flex items-center gap-2 rounded-xl bg-ink px-7 py-4 text-sm font-semibold text-white lowercase shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 animate-calm-rise"
+          style={{ animationDelay: '360ms' }}
+        >
+          view dashboard
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+
+        <p className="mt-6 text-[11px] text-ink-faint lowercase animate-calm-in" style={{ animationDelay: '480ms' }}>
+          we show up. done right.
+        </p>
       </div>
     </div>
   );
