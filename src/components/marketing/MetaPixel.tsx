@@ -31,7 +31,7 @@ async function loadPixelId(): Promise<string | null> {
       if (!res.ok) return null;
       const json = (await res.json()) as { pixel_id?: string | null };
       const id = json?.pixel_id;
-      if (!id || typeof id !== 'string' || id.startsWith('BLOCKED_')) return null;
+      if (!id || typeof id !== 'string' || /^BLOCKED/i.test(id)) return null;
       return id;
     } catch {
       return null;
