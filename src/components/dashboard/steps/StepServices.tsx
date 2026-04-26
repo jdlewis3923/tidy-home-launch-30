@@ -35,23 +35,23 @@ export default function StepServices({ state, onChange }: Props) {
               type="button"
               onClick={() => toggle(svc.id)}
               style={{ animationDelay: `${idx * 60}ms` }}
-              className={`group relative w-full overflow-hidden rounded-2xl border bg-white text-left transition-all duration-300 animate-calm-in ${
+              className={`group relative w-full overflow-hidden rounded-2xl border-2 text-left transition-all duration-300 animate-calm-in ${
                 selected
-                  ? 'border-ink shadow-[0_8px_24px_-12px_hsl(var(--ink)/0.25)]'
-                  : 'border-hairline hover:border-ink/40 hover:shadow-[0_6px_18px_-12px_hsl(var(--ink)/0.18)]'
+                  ? 'border-ink bg-ink text-white shadow-[0_12px_32px_-12px_hsl(var(--ink)/0.45)]'
+                  : 'border-hairline bg-white text-ink hover:border-ink/40 hover:shadow-[0_6px_18px_-12px_hsl(var(--ink)/0.18)]'
               }`}
             >
               <div className="flex items-center gap-4 p-5">
                 <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl transition-colors ${
-                  selected ? 'bg-ink text-white' : 'bg-cream-deep'
+                  selected ? 'bg-white/15 text-white' : 'bg-cream-deep'
                 }`}>
                   {svc.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-ink lowercase">{svc.name}</h3>
-                  <p className="text-xs text-ink-faint mt-0.5">{svc.whisper}</p>
+                  <h3 className={`text-lg font-semibold lowercase ${selected ? 'text-white' : 'text-ink'}`}>{svc.name}</h3>
+                  <p className={`text-xs mt-0.5 ${selected ? 'text-white/70' : 'text-ink-faint'}`}>{svc.whisper}</p>
                 </div>
-                <div className={`relative h-6 w-11 rounded-full transition-colors ${selected ? 'bg-ink' : 'bg-hairline'}`}>
+                <div className={`relative h-6 w-11 rounded-full transition-colors ${selected ? 'bg-white/25' : 'bg-hairline'}`}>
                   <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${selected ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
                 </div>
               </div>

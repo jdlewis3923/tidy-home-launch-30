@@ -44,15 +44,15 @@ export default function StepFrequency({ state, onChange }: Props) {
                   key={freq}
                   type="button"
                   onClick={() => setFreq(svc, freq)}
-                  className={`relative rounded-xl border bg-white px-3 py-3.5 text-sm transition-all ${
+                  className={`relative rounded-xl border-2 px-3 py-3.5 text-sm transition-all ${
                     selected
-                      ? 'border-ink text-ink shadow-[0_6px_18px_-10px_hsl(var(--ink)/0.3)]'
-                      : 'border-hairline text-ink-soft hover:border-ink/40'
+                      ? 'border-ink bg-ink text-white shadow-[0_8px_22px_-10px_hsl(var(--ink)/0.45)]'
+                      : 'border-hairline bg-white text-ink-soft hover:border-ink/40 hover:bg-cream-deep/40'
                   }`}
                 >
                   <span className="font-semibold lowercase block">{frequencyLabels[freq]}</span>
                   {popular && selected && (
-                    <span className="absolute inset-x-3 -bottom-[1px] h-[2px] rounded-full bg-ink animate-calm-in" />
+                    <span className="absolute inset-x-3 -bottom-[1px] h-[2px] rounded-full bg-white animate-calm-in" />
                   )}
                 </button>
               );
