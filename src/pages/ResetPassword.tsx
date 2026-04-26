@@ -11,110 +11,97 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if we have a recovery token in the URL hash
-    const hash = window.location.hash;
-    if (!hash.includes('type=recovery')) {
-      navigate('/login');
-    }
+    if (!window.location.hash.includes('type=recovery')) navigate('/login');
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
+    if (password.length < 8) { setError('password must be at least 8 characters.'); return; }
+    if (password !== confirmPassword) { setError('passwords do not match.'); return; }
     setLoading(true);
-
     try {
       const { supabase } = await import('@/integrations/supabase/client');
       const { error: updateError } = await supabase.auth.updateUser({ password });
-
-      if (updateError) {
-        setError(updateError.message);
-      } else {
-        setSuccess(true);
-        setTimeout(() => navigate('/dashboard'), 2000);
-      }
+      if (updateError) setError(updateError.message);
+      else { setSuccess(true); setTimeout(() => navigate('/dashboard'), 1500); }
     } catch {
-      setError('Password reset service is not available yet.');
+      setError('reset service is unavailable.');
     } finally {
       setLoading(false);
     }
   };
 
+  const Shell = ({ children }: { children: React.ReactNode }) => (
+    <div className="relative min-h-screen overflow-hidden bg-cream text-ink flex items-center justify-center px-5 py-12">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(36_60%_94%)_0%,hsl(36_27%_96%)_55%,hsl(35_22%_92%)_100%)]" />
+      </div>
+      <div className="w-full max-w-md space-y-8 animate-calm-rise">{children}</div>
+    </div>
+  );
+
   if (success) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="w-full max-w-md text-center space-y-6">
-          <img src={tidyLogo} alt="Tidy" className="h-20 w-auto mx-auto" />
-          <div className="text-5xl">✅</div>
-          <h1 className="text-2xl font-black tracking-tight text-foreground">Password updated!</h1>
-          <p className="text-sm text-muted-foreground">Redirecting you to your dashboard...</p>
+      <Shell>
+        <div className="text-center">
+          <img src={tidyLogo} alt="Tidy" className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]" />
+          <h1 className="mt-6 text-3xl font-bold text-ink lowercase tracking-tight">password updated.</h1>
+          <p className="mt-2 text-sm text-ink-faint lowercase">redirecting to your dashboard…</p>
         </div>
-      </div>
+      </Shell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <img src={tidyLogo} alt="Tidy" className="h-20 w-auto mx-auto mb-4" />
-          <h1 className="text-2xl font-black tracking-tight text-foreground" style={{ letterSpacing: '-0.03em' }}>
-            Set a new password
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">Choose a strong password with at least 8 characters</p>
+    <Shell>
+      <div className="text-center">
+        <img src={tidyLogo} alt="Tidy" className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]" />
+        <h1 className="mt-6 text-3xl font-bold text-ink lowercase tracking-tight" style={{ letterSpacing: '-0.025em' }}>
+          set a new password.
+        </h1>
+        <p className="mt-2 text-sm text-ink-faint lowercase">at least 8 characters.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">new password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="min. 8 characters"
+            autoComplete="new-password"
+            minLength={8}
+            className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+            required
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">New Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Minimum 8 characters"
-              minLength={8}
-              className="w-full rounded-lg border-[1.5px] border-border bg-card px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              required
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">confirm password</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
+            placeholder="re-enter password"
+            autoComplete="new-password"
+            minLength={8}
+            className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+            required
+          />
+        </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Confirm Password</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter your new password"
-              minLength={8}
-              className="w-full rounded-lg border-[1.5px] border-border bg-card px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              required
-            />
-          </div>
+        {error && <p className="text-xs text-destructive lowercase">{error}</p>}
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-gradient-to-br from-primary-deep to-primary px-6 py-3 text-sm font-extrabold text-primary-foreground shadow-[0_4px_16px_rgba(37,99,235,0.35)] transition-all hover:shadow-xl hover:scale-[1.01] disabled:opacity-50"
-          >
-            {loading ? 'Updating...' : 'Update Password'}
-          </button>
-        </form>
-      </div>
-    </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-xl bg-ink px-6 py-4 text-sm font-semibold text-white lowercase shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50"
+        >
+          {loading ? 'updating…' : 'update password'}
+        </button>
+      </form>
+    </Shell>
   );
 }
