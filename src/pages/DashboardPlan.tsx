@@ -172,7 +172,8 @@ export default function DashboardPlan() {
               type="button"
               onClick={next}
               disabled={!canAdvance()}
-              className="ml-auto group relative overflow-hidden rounded-xl bg-ink px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-12px_hsl(var(--ink)/0.5)] transition-all hover:shadow-[0_18px_40px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 lowercase"
+              style={{ backgroundColor: 'hsl(var(--ink))', color: '#ffffff' }}
+              className="ml-auto group relative overflow-hidden rounded-xl px-7 py-3.5 text-sm font-semibold shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] ring-1 ring-[hsl(var(--ink))] transition-all hover:shadow-[0_20px_44px_-10px_hsl(var(--ink)/0.7)] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 lowercase"
             >
               <span className="relative inline-flex items-center gap-1.5">
                 {customQuote && step === 5 ? 'get my plan' : stepInfo.cta}
