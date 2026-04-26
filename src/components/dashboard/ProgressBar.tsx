@@ -3,10 +3,15 @@ interface Props {
   totalSteps: number;
 }
 
+/**
+ * Calm, ultra-thin segmented progress. Filled segments use the navy ink
+ * color; current segment carries a subtle pulse so progress feels alive
+ * without being loud.
+ */
 export default function ProgressBar({ currentStep, totalSteps }: Props) {
   return (
     <div
-      className="flex gap-1.5"
+      className="flex gap-1"
       role="progressbar"
       aria-valuenow={currentStep + 1}
       aria-valuemin={1}
@@ -18,14 +23,18 @@ export default function ProgressBar({ currentStep, totalSteps }: Props) {
         return (
           <div
             key={i}
-            className={`relative h-1.5 flex-1 overflow-hidden rounded-full transition-colors duration-500 ${
-              filled ? 'bg-gradient-to-r from-gold to-gold/80' : 'bg-white/10'
-            }`}
+            className="relative h-[3px] flex-1 overflow-hidden rounded-full bg-hairline/70"
           >
+            <span
+              aria-hidden
+              className={`absolute inset-y-0 left-0 transition-all duration-700 ease-out rounded-full ${
+                filled ? 'w-full bg-ink' : 'w-0 bg-ink'
+              }`}
+            />
             {isCurrent && (
               <span
                 aria-hidden
-                className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-white/70 to-transparent animate-[shimmer_1.8s_ease-in-out_infinite]"
+                className="absolute inset-0 animate-soft-glow rounded-full bg-ink/10"
               />
             )}
           </div>
