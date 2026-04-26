@@ -5,3 +5,15 @@ project_id = "vcdhpsfuilrrrqfhfsjt"
 # HMAC signature (constructEventAsync) inside the handler.
 [functions.stripe-webhook]
 verify_jwt = false
+
+# Jobber redirects the operator's browser here after OAuth consent — no
+# Authorization header is sent. Safe because the ?code is single-use and
+# tied to our redirect_uri.
+[functions.jobber-oauth-callback]
+verify_jwt = false
+
+# Jobber posts webhooks without an Authorization header. We verify
+# authenticity via the X-Jobber-Hmac-SHA256 header inside the handler
+# using JOBBER_WEBHOOK_SECRET.
+[functions.jobber-webhook]
+verify_jwt = false
