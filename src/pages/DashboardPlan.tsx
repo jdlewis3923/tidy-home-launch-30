@@ -13,6 +13,7 @@ import StepReview from '@/components/dashboard/steps/StepReview';
 import StepPayment from '@/components/dashboard/steps/StepPayment';
 import PromoBanner from '@/components/dashboard/PromoBanner';
 import CustomQuoteModal from '@/components/dashboard/CustomQuoteModal';
+import ExistingAccountInline from '@/components/dashboard/ExistingAccountInline';
 
 const STEPS = [
   { heading: 'What do you want handled?', sub: 'Pick one, two, or all three. The more you bundle, the more you save.', cta: 'Continue →' },
@@ -140,37 +141,45 @@ export default function DashboardPlan() {
   const stepInfo = STEPS[step];
 
   return (
-    <div className="relative min-h-screen overflow-hidden pb-24">
-      {/* Layered background — replaces the flat white sides with depth */}
+    <div className="relative min-h-screen overflow-hidden pb-24 text-foreground">
+      {/* Premium dark layered background — replaces flat white sides */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        {/* Base soft gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(217,91%,97%)] via-background to-[hsl(217,91%,96%)]" />
-        {/* Gold warm-up at top-right */}
-        <div className="absolute -top-32 -right-40 h-[520px] w-[520px] rounded-full bg-gold/15 blur-[120px]" />
-        {/* Blue cool-down bottom-left */}
-        <div className="absolute -bottom-40 -left-40 h-[560px] w-[560px] rounded-full bg-primary/20 blur-[140px]" />
-        {/* Navy depth top-left */}
-        <div className="absolute top-1/3 -left-32 h-[380px] w-[380px] rounded-full bg-navy/10 blur-[120px]" />
-        {/* Subtle dot grid */}
+        {/* Deep navy base with vertical gradient for depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(217,91%,18%)_0%,hsl(222,47%,8%)_55%,hsl(224,71%,5%)_100%)]" />
+        {/* Animated gold warm-up at top-right */}
+        <div className="absolute -top-40 -right-40 h-[560px] w-[560px] rounded-full bg-gold/25 blur-[140px] animate-[float_9s_ease-in-out_infinite]" />
+        {/* Animated blue cool-down bottom-left */}
         <div
-          className="absolute inset-0 opacity-[0.18]"
+          className="absolute -bottom-48 -left-48 h-[620px] w-[620px] rounded-full bg-primary/30 blur-[150px] animate-[float_11s_ease-in-out_infinite]"
+          style={{ animationDelay: '-4s' }}
+        />
+        {/* Center primary highlight, slow drift */}
+        <div
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 h-[420px] w-[420px] rounded-full bg-primary-deep/25 blur-[140px] animate-[float_13s_ease-in-out_infinite]"
+          style={{ animationDelay: '-2s' }}
+        />
+        {/* Crisp dot grid for premium texture */}
+        <div
+          className="absolute inset-0 opacity-[0.22]"
           style={{
             backgroundImage:
-              'radial-gradient(hsl(var(--primary) / 0.35) 1px, transparent 1px)',
-            backgroundSize: '22px 22px',
+              'radial-gradient(hsl(0 0% 100% / 0.35) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
             maskImage:
-              'radial-gradient(ellipse at center, black 40%, transparent 75%)',
+              'radial-gradient(ellipse at center, black 30%, transparent 80%)',
             WebkitMaskImage:
-              'radial-gradient(ellipse at center, black 40%, transparent 75%)',
+              'radial-gradient(ellipse at center, black 30%, transparent 80%)',
           }}
         />
+        {/* Top vignette to anchor the header */}
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/40 to-transparent" />
       </div>
 
-      {/* Header */}
-      <header className="relative border-b border-border/60 bg-card/70 backdrop-blur-md">
+      {/* Header — glassmorphic on dark */}
+      <header className="relative border-b border-white/10 bg-white/5 backdrop-blur-xl">
         <div className="mx-auto max-w-2xl px-4 py-4 flex items-center justify-between">
-          <img src={tidyLogo} alt="Tidy" className="h-[72px] w-auto" />
-          <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary ring-1 ring-primary/20">
+          <img src={tidyLogo} alt="Tidy" className="h-[72px] w-auto drop-shadow-[0_4px_20px_rgba(245,197,24,0.35)]" />
+          <span className="rounded-full bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-gold ring-1 ring-gold/30 shadow-[0_0_20px_rgba(245,197,24,0.15)]">
             Step {step + 1} of {STEPS.length}
           </span>
         </div>
@@ -180,27 +189,37 @@ export default function DashboardPlan() {
         <ProgressBar currentStep={step} totalSteps={STEPS.length} />
         <PromoBanner />
 
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground" style={{ letterSpacing: '-0.035em', lineHeight: 0.98 }}>
+        <div className="animate-fade-in" key={`heading-${step}`}>
+          <h1
+            className="text-3xl md:text-4xl font-black tracking-tight text-white"
+            style={{ letterSpacing: '-0.035em', lineHeight: 0.98 }}
+          >
             {stepInfo.heading}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{stepInfo.sub}</p>
+          <p className="mt-2 text-sm text-white/70">{stepInfo.sub}</p>
         </div>
 
-        {/* Step content */}
-        {step === 0 && <StepServices state={state} onChange={updateState} />}
-        {step === 1 && <StepFrequency state={state} onChange={updateState} />}
-        {step === 2 && <StepProperty state={state} onChange={updateState} />}
-        {step === 3 && <StepDetails state={state} onChange={updateState} />}
-        {step === 4 && <StepAddOns state={state} onChange={updateState} />}
-        {step === 5 && <StepReview state={state} onEdit={() => setStep(0)} />}
-        {step === 6 && <StepPayment state={state} onChange={updateState} />}
+        {/* Returning customer affordance — only on the first two steps */}
+        {step <= 1 && (
+          <ExistingAccountInline />
+        )}
+
+        {/* Step content — wrapped in fade-in container, keyed to step for transitions */}
+        <div key={`step-${step}`} className="animate-fade-in">
+          {step === 0 && <StepServices state={state} onChange={updateState} />}
+          {step === 1 && <StepFrequency state={state} onChange={updateState} />}
+          {step === 2 && <StepProperty state={state} onChange={updateState} />}
+          {step === 3 && <StepDetails state={state} onChange={updateState} />}
+          {step === 4 && <StepAddOns state={state} onChange={updateState} />}
+          {step === 5 && <StepReview state={state} onEdit={() => setStep(0)} />}
+          {step === 6 && <StepPayment state={state} onChange={updateState} />}
+        </div>
 
         {/* Custom-quote notice — replaces the Stripe path with a tailored-plan flow */}
         {(step === 5 || step === 6) && customQuote && (
-          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm text-foreground">
+          <div className="rounded-xl border border-gold/30 bg-gold/5 p-4 text-sm text-white">
             <p className="font-semibold mb-1">Custom Plan Required</p>
-            <p className="text-muted-foreground text-xs leading-relaxed">
+            <p className="text-white/70 text-xs leading-relaxed">
               We'll create a plan tailored to your home — no payment today. Tap "Get My Plan" and we'll reach out shortly.
             </p>
           </div>
@@ -212,7 +231,7 @@ export default function DashboardPlan() {
             <button
               type="button"
               onClick={back}
-              className="rounded-lg border border-border px-5 py-3 text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors"
+              className="rounded-lg border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white/80 backdrop-blur transition-colors hover:bg-white/10 hover:text-white"
             >
               ← Back
             </button>
@@ -222,7 +241,7 @@ export default function DashboardPlan() {
             <button
               type="button"
               onClick={next}
-              className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm font-semibold text-white/60 hover:text-white transition-colors"
             >
               {stepInfo.skip}
             </button>
@@ -233,9 +252,15 @@ export default function DashboardPlan() {
               type="button"
               onClick={next}
               disabled={!canAdvance()}
-              className="ml-auto rounded-lg bg-gradient-to-br from-primary-deep to-primary px-6 py-3 text-sm font-extrabold text-primary-foreground shadow-[0_4px_16px_rgba(37,99,235,0.35)] transition-all hover:shadow-xl hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="group relative ml-auto overflow-hidden rounded-lg bg-gradient-to-br from-gold via-gold to-gold/85 px-7 py-3.5 text-sm font-extrabold text-foreground shadow-[0_8px_28px_-6px_hsl(var(--gold)/0.55)] transition-all hover:shadow-[0_14px_36px_-6px_hsl(var(--gold)/0.75)] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
-              {customQuote && step === 5 ? 'Get My Plan →' : stepInfo.cta}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-all duration-700 group-hover:translate-x-full group-hover:opacity-100"
+              />
+              <span className="relative">
+                {customQuote && step === 5 ? 'Get My Plan →' : stepInfo.cta}
+              </span>
             </button>
           )}
         </div>
