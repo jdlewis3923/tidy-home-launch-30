@@ -83,7 +83,7 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
             className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition hover:bg-cream"
           >
             <span className="grid h-9 w-9 place-items-center rounded-full bg-[hsl(var(--primary))]/10 text-sm font-semibold text-[hsl(var(--primary))]">
-              {initials}
+              {initials || <span className="h-2 w-2 animate-pulse rounded-full bg-[hsl(var(--primary))]/40" />}
             </span>
             <ChevronDown className="h-4 w-4 text-ink-faint" />
           </button>
