@@ -207,14 +207,19 @@ async function isAuthorized(req: Request): Promise<boolean> {
   const auth = req.headers.get('Authorization') ?? '';
   if (!auth.startsWith('Bearer ')) return false;
   const token = auth.slice(7);
+  // Direct service-role key match (rotation-safe across env + vault).
   if (token === SUPABASE_SERVICE_ROLE_KEY) return true;
   try {
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: auth } },
     });
     const { data: claims, error } = await sb.auth.getClaims(token);
-    if (error || !claims?.claims?.sub) return false;
-    const userId = claims.claims.sub as string;
+    if (error || !claims?.claims) return false;
+    // Any token whose claims declare service_role is accepted (covers
+    // vault-stored placeholder JWTs minted for DB triggers).
+    if (claims.claims.role === 'service_role') return true;
+    const userId = claims.claims.sub as string | undefined;
+    if (!userId) return false;
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
