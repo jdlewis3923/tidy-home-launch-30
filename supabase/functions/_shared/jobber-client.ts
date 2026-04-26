@@ -41,21 +41,23 @@ function getServiceClient(): SupabaseClient {
 /**
  * Pull the latest refresh token. Prefer vault (rotated value) and fall
  * back to env (initial bootstrap from the OAuth callback flow).
+ *
+ * NOTE: PostgREST does not expose the `vault` schema, so we read via a
+ * SECURITY DEFINER RPC (`admin_get_jobber_refresh_token`) instead of
+ * querying `vault.decrypted_secrets` directly.
  */
 async function getCurrentRefreshToken(): Promise<string> {
   const supabase = getServiceClient();
   try {
-    const { data, error } = await supabase
-      .schema('vault' as never)
-      .from('decrypted_secrets' as never)
-      .select('decrypted_secret' as never)
-      .eq('name' as never, 'jobber_refresh_token' as never)
-      .maybeSingle();
-    if (!error && data && (data as { decrypted_secret?: string }).decrypted_secret) {
-      return (data as { decrypted_secret: string }).decrypted_secret;
+    const { data, error } = await supabase.rpc('admin_get_jobber_refresh_token' as never);
+    if (!error && typeof data === 'string' && data.length > 0) {
+      return data;
+    }
+    if (error) {
+      console.warn('[jobber-client] vault RPC read failed, falling back to env', error.message);
     }
   } catch (err) {
-    console.warn('[jobber-client] vault read failed, falling back to env', err);
+    console.warn('[jobber-client] vault RPC threw, falling back to env', err);
   }
 
   const envToken = Deno.env.get('JOBBER_REFRESH_TOKEN');

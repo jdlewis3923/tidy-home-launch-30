@@ -30,16 +30,49 @@ const CLIENT_CREATE = `
   }
 `;
 
-function isAuthorized(req: Request): boolean {
+async function isAuthorized(req: Request): Promise<boolean> {
   const auth = req.headers.get('Authorization') ?? '';
-  return auth === `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`;
+  if (!auth.startsWith('Bearer ')) return false;
+  const token = auth.slice('Bearer '.length);
+  // Service role key — preferred path for server-to-server calls.
+  if (token === SUPABASE_SERVICE_ROLE_KEY) return true;
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  // Accept the legacy service-role key stored in vault (used by DB-triggered
+  // net.http_post calls that pre-date the signing-keys rotation).
+  try {
+    const { data: vaultKey } = await supabase.rpc('admin_get_service_role_key' as never);
+    if (typeof vaultKey === 'string' && vaultKey.length > 0 && token === vaultKey) {
+      return true;
+    }
+  } catch {
+    /* noop — fall through to JWT path */
+  }
+
+  // Otherwise accept admin user JWTs (for manual ops + testing).
+  try {
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data.user) return false;
+    const { data: roleRow } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', data.user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+    return Boolean(roleRow);
+  } catch {
+    return false;
+  }
 }
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ ok: false, error: 'method not allowed' }, 405);
-  if (!isAuthorized(req)) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+  if (!(await isAuthorized(req))) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
 
   let raw: unknown;
   try { raw = await req.json(); } catch { return jsonResponse({ ok: false, error: 'invalid JSON' }, 400); }
