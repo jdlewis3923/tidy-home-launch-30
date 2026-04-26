@@ -58,6 +58,30 @@ async function fireZap(eventName: string, payload: unknown) {
   }
 }
 
+/**
+ * Fire-and-log call into a Jobber edge function. We do not block the
+ * Stripe ack on Jobber success — failures are recorded in
+ * integration_logs and surfaced via /admin/health.
+ */
+async function callJobberFn(fn: 'jobber-sync-customer' | 'jobber-create-job', body: unknown) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/${fn}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      console.error(`[stripe-webhook] ${fn} failed`, res.status, text.slice(0, 200));
+    }
+  } catch (err) {
+    console.error(`[stripe-webhook] ${fn} dispatch threw`, err);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok');
   if (req.method !== 'POST') return new Response('method not allowed', { status: 405 });
@@ -259,6 +283,17 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Str
     lang: meta.lang,
     preferred_day: meta.preferred_day,
     preferred_time: meta.preferred_time,
+  });
+
+  // Phase 3 — Jobber field-service sync. Sequential: client must exist
+  // before we can attach jobs. Both calls log to integration_logs and
+  // never throw out of this handler so Stripe still gets its 200.
+  await callJobberFn('jobber-sync-customer', {
+    user_id: userId,
+    subscription_id: subRow.id,
+  });
+  await callJobberFn('jobber-create-job', {
+    subscription_id: subRow.id,
   });
 }
 
