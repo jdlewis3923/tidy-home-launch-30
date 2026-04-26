@@ -54,16 +54,16 @@ export default function Billing() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="max-w-lg w-full text-center space-y-4 py-16">
-        <h1
-          className="text-2xl md:text-3xl font-black tracking-tight text-foreground"
-          style={{ letterSpacing: "-0.03em" }}
-        >
-          {error ? "Billing unavailable" : "Opening billing portal…"}
+    <div className="relative min-h-screen overflow-hidden bg-cream text-ink flex items-center justify-center px-5">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(36_60%_94%)_0%,hsl(36_27%_96%)_55%,hsl(35_22%_92%)_100%)]" />
+      </div>
+      <div className="max-w-lg w-full text-center space-y-3 py-16 animate-calm-rise">
+        <h1 className="text-3xl font-bold text-ink lowercase tracking-tight" style={{ letterSpacing: "-0.025em" }}>
+          {error ? "billing unavailable." : "opening billing…"}
         </h1>
-        <p className="text-muted-foreground">
-          {error ?? "You'll be redirected to manage your subscription."}
+        <p className="text-sm text-ink-faint lowercase">
+          {error ?? "redirecting you in a moment."}
         </p>
       </div>
     </div>

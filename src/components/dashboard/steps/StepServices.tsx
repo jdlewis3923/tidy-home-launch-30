@@ -5,10 +5,10 @@ interface Props {
   onChange: (s: ConfigState) => void;
 }
 
-const services: { id: ServiceType; name: string; icon: string; anchor: string; gradient: string }[] = [
-  { id: 'cleaning', name: 'House Cleaning', icon: '🏠', anchor: 'Most popular · members pair with lawn care', gradient: 'from-[#1d4ed8] to-[#60a5fa]' },
-  { id: 'lawn', name: 'Lawn Care', icon: '🌿', anchor: 'Best value · pairs perfectly with cleaning', gradient: 'from-[#16a34a] to-[#4ade80]' },
-  { id: 'detailing', name: 'Car Detailing', icon: '🚗', anchor: 'We come to your driveway · no drop-off needed', gradient: 'from-[#7c3aed] to-[#c084fc]' },
+const services: { id: ServiceType; name: string; icon: string; whisper: string }[] = [
+  { id: 'cleaning', name: 'cleaning', icon: '🏠', whisper: 'every room. every visit.' },
+  { id: 'lawn',     name: 'lawn',     icon: '🌿', whisper: 'sharp lines. clean edges.' },
+  { id: 'detailing',name: 'detailing',icon: '🚗', whisper: 'we come to your driveway.' },
 ];
 
 export default function StepServices({ state, onChange }: Props) {
@@ -24,36 +24,35 @@ export default function StepServices({ state, onChange }: Props) {
     onChange({ ...state, services: next, frequencies: freqs });
   };
 
-  const count = state.services.length;
-
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
-        {services.map(svc => {
+    <div className="space-y-5">
+      <div className="space-y-3">
+        {services.map((svc, idx) => {
           const selected = state.services.includes(svc.id);
           return (
             <button
               key={svc.id}
               type="button"
               onClick={() => toggle(svc.id)}
-              className={`relative overflow-hidden rounded-xl border-[1.5px] bg-card text-left transition-all duration-200 hover:shadow-lg ${
+              style={{ animationDelay: `${idx * 60}ms` }}
+              className={`group relative w-full overflow-hidden rounded-2xl border bg-white text-left transition-all duration-300 animate-calm-in ${
                 selected
-                  ? 'border-primary shadow-[0_0_0_1px_hsl(var(--primary))] bg-secondary'
-                  : 'border-border hover:border-primary/30'
+                  ? 'border-ink shadow-[0_8px_24px_-12px_hsl(var(--ink)/0.25)]'
+                  : 'border-hairline hover:border-ink/40 hover:shadow-[0_6px_18px_-12px_hsl(var(--ink)/0.18)]'
               }`}
             >
-              <div className={`h-1 w-full bg-gradient-to-r ${svc.gradient}`} />
-              <div className="p-5">
-                <div className="text-3xl mb-2">{svc.icon}</div>
-                <h3 className="text-lg font-bold text-foreground">{svc.name}</h3>
-                <p className="text-sm italic text-muted-foreground mt-1">{svc.anchor}</p>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {selected ? 'Selected' : 'Add this'}
-                  </span>
-                  <div className={`w-11 h-6 rounded-full transition-colors ${selected ? 'bg-primary' : 'bg-border'} relative`}>
-                    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-card shadow transition-transform ${selected ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
-                  </div>
+              <div className="flex items-center gap-4 p-5">
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl transition-colors ${
+                  selected ? 'bg-ink text-white' : 'bg-cream-deep'
+                }`}>
+                  {svc.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-ink lowercase">{svc.name}</h3>
+                  <p className="text-xs text-ink-faint mt-0.5">{svc.whisper}</p>
+                </div>
+                <div className={`relative h-6 w-11 rounded-full transition-colors ${selected ? 'bg-ink' : 'bg-hairline'}`}>
+                  <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${selected ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
                 </div>
               </div>
             </button>
@@ -61,17 +60,9 @@ export default function StepServices({ state, onChange }: Props) {
         })}
       </div>
 
-      <div className="flex items-center justify-center">
-        <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm text-muted-foreground">
-          💡 Select 2 services for 15% off · All 3 for 20% off — applied automatically
-        </div>
-      </div>
-
-      {count === 0 && (
-        <p className="text-center text-sm text-destructive">
-          Pick at least one service to continue — you've got to start somewhere! 😄
-        </p>
-      )}
+      <p className="text-center text-xs text-ink-faint">
+        you can change this anytime.
+      </p>
     </div>
   );
 }

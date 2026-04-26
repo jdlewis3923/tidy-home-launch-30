@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import tidyLogo from '@/assets/tidy-logo.png';
 
+/**
+ * Calm Apple-style login. Cream paper, oversized logo, single column.
+ * Real <form> + autocomplete so password managers offer save/autofill.
+ */
 export default function CustomerLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,28 +20,29 @@ export default function CustomerLogin() {
     setError('');
 
     if (!email || !password) {
-      setError('Please enter both email and password.');
+      setError('please enter your email and password.');
       return;
     }
-
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError('password must be at least 8 characters.');
       return;
     }
 
     setLoading(true);
-
     try {
       const { supabase } = await import('@/integrations/supabase/client');
-
       if (isSignUp) {
-        const { error: signUpError } = await supabase.auth.signUp({ email, password });
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+        });
         if (signUpError) {
           setError(signUpError.message);
         } else {
           setError('');
           setIsSignUp(false);
-          alert('Check your email to confirm your account, then sign in.');
+          alert('check your email to confirm your account, then sign in.');
         }
       } else {
         const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
@@ -47,94 +53,111 @@ export default function CustomerLogin() {
         }
       }
     } catch {
-      setError('Authentication service is not available yet. Please try again later.');
+      setError('login service is unavailable. please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-8">
+    <div className="relative min-h-screen overflow-hidden bg-cream text-ink flex items-center justify-center px-5 py-12">
+      {/* Warm cream daylight */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(36_60%_94%)_0%,hsl(36_27%_96%)_55%,hsl(35_22%_92%)_100%)]" />
+        <div
+          className="absolute -top-40 left-1/2 -translate-x-1/2 h-[520px] w-[520px] rounded-full opacity-50"
+          style={{
+            background: 'radial-gradient(circle, hsl(38 80% 88% / 0.85) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+      </div>
+
+      <div className="w-full max-w-md space-y-8 animate-calm-rise">
         <div className="text-center">
-          <img src={tidyLogo} alt="Tidy" className="h-20 w-auto mx-auto mb-4" />
-          <h1 className="text-2xl font-black tracking-tight text-foreground" style={{ letterSpacing: '-0.03em' }}>
-            Login
+          <a href="/" aria-label="Tidy">
+            <img
+              src={tidyLogo}
+              alt="Tidy"
+              className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]"
+            />
+          </a>
+          <h1 className="mt-6 text-3xl font-bold text-ink lowercase tracking-tight" style={{ letterSpacing: '-0.025em' }}>
+            {isSignUp ? 'create your account.' : 'welcome back.'}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in to manage your Tidy plan</p>
+          <p className="mt-2 text-sm text-ink-faint lowercase">
+            {isSignUp ? 'one account. one home. handled.' : 'sign in to manage your plan.'}
+          </p>
         </div>
 
-        {isSignUp && (
-          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-center">
-            <p className="text-sm text-foreground font-medium">🎉 Creating your account</p>
-            <p className="text-xs text-muted-foreground mt-0.5">You'll set your password below — use at least 8 characters.</p>
-          </div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4" autoComplete="on">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Email Address</label>
+            <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">email</label>
             <input
               type="email"
+              name="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full rounded-lg border-[1.5px] border-border bg-card px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              autoComplete="email"
+              className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
               required
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              {isSignUp ? 'Create Password' : 'Password'}
+            <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">
+              {isSignUp ? 'create password' : 'password'}
             </label>
             <input
               type="password"
+              name="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder={isSignUp ? 'Create a strong password (min. 8 characters)' : 'Enter your password'}
+              placeholder={isSignUp ? 'min. 8 characters' : 'enter your password'}
+              autoComplete={isSignUp ? 'new-password' : 'current-password'}
               minLength={8}
-              className="w-full rounded-lg border-[1.5px] border-border bg-card px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
               required
             />
             {isSignUp && password.length > 0 && (
-              <div className="flex items-center gap-2 mt-1.5">
-                <div className={`h-1 flex-1 rounded-full ${password.length >= 8 ? 'bg-success' : 'bg-destructive/40'}`} />
-                <span className={`text-xs font-medium ${password.length >= 8 ? 'text-success' : 'text-muted-foreground'}`}>
-                  {password.length >= 8 ? '✓ Strong enough' : `${8 - password.length} more characters needed`}
-                </span>
-              </div>
+              <p className={`text-[11px] mt-1 ${password.length >= 8 ? 'text-ink' : 'text-ink-faint'}`}>
+                {password.length >= 8 ? 'strong enough.' : `${8 - password.length} more characters.`}
+              </p>
             )}
           </div>
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+          {error && <p className="text-xs text-destructive lowercase">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-gradient-to-br from-primary-deep to-primary px-6 py-3 text-sm font-extrabold text-primary-foreground shadow-[0_4px_16px_rgba(37,99,235,0.35)] transition-all hover:shadow-xl hover:scale-[1.01] disabled:opacity-50"
+            className="group w-full inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-6 py-4 text-sm font-semibold text-white lowercase shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50"
           >
-            {loading ? (isSignUp ? 'Creating account...' : 'Signing in...') : (isSignUp ? 'Create Account' : 'Sign In')}
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {loading ? (isSignUp ? 'creating…' : 'signing in…') : (isSignUp ? 'create account' : 'sign in')}
           </button>
 
-          <div className="text-center space-y-2">
-            <button type="button" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="text-sm text-primary hover:underline">
-              {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
+          <div className="text-center space-y-2 pt-2">
+            <button
+              type="button"
+              onClick={() => { setIsSignUp(!isSignUp); setError(''); }}
+              className="text-xs text-ink-faint hover:text-ink lowercase underline-offset-4 hover:underline"
+            >
+              {isSignUp ? 'already a member? sign in' : "new here? create an account"}
             </button>
             {!isSignUp && (
               <div>
-                <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                  Forgot your password?
+                <Link to="/forgot-password" className="text-xs text-ink-faint hover:text-ink lowercase underline-offset-4 hover:underline">
+                  forgot password?
                 </Link>
               </div>
             )}
           </div>
 
-          <div className="text-center pt-4 border-t border-border">
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-              ← Back to main site
+          <div className="text-center pt-6 border-t border-hairline">
+            <Link to="/" className="text-xs text-ink-faint hover:text-ink lowercase">
+              ← back to tidy
             </Link>
           </div>
         </form>

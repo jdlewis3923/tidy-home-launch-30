@@ -46,6 +46,18 @@
     --text-light: 215 16% 47%;
     --section-alt: 210 40% 98%;
 
+    /* ---- Apple-calm "control center" tokens (checkout + dashboard) ---- */
+    /* Cream paper background, navy ink, soft greys. Used by /dashboard/*,
+       /login, /forgot-password, /reset-password. Marketing site keeps the
+       white background via --background above. */
+    --cream: 36 27% 96%;          /* #F8F6F2 */
+    --cream-deep: 35 22% 92%;     /* slightly warmer card surface */
+    --ink: 222 47% 11%;           /* navy ink */
+    --ink-soft: 222 30% 28%;      /* muted body */
+    --ink-faint: 222 15% 50%;     /* helper / labels */
+    --hairline: 30 14% 86%;       /* warm grey divider */
+    --calm-shadow: 222 47% 11%;   /* shadow color base */
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -98,18 +110,17 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  /* Display headings: bolder, tighter, slightly taller feel — matches the
-     condensed-bold reference. Archivo's letterforms are taller than Poppins
-     so we lean into it with -0.03em tracking and 900-weight on h1/h2. */
+  /* Display headings: bolder, tighter. Inter has wider letterforms than
+     Archivo so we lean tracking slightly looser to avoid crunching. */
   h1, h2 {
     @apply font-display font-black;
-    letter-spacing: -0.035em;
-    line-height: 0.95;
+    letter-spacing: -0.025em;
+    line-height: 1.02;
   }
   h3, h4 {
     @apply font-display font-extrabold;
-    letter-spacing: -0.025em;
-    line-height: 1.05;
+    letter-spacing: -0.018em;
+    line-height: 1.1;
   }
 }
 
@@ -117,6 +128,38 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Apple-calm surfaces */
+  .bg-cream { background-color: hsl(var(--cream)); }
+  .bg-cream-deep { background-color: hsl(var(--cream-deep)); }
+  .text-ink { color: hsl(var(--ink)); }
+  .text-ink-soft { color: hsl(var(--ink-soft)); }
+  .text-ink-faint { color: hsl(var(--ink-faint)); }
+  .border-hairline { border-color: hsl(var(--hairline)); }
+
+  /* Calm motion */
+  .animate-calm-in {
+    animation: calm-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-calm-rise {
+    animation: calm-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-soft-glow {
+    animation: soft-glow 4.5s ease-in-out infinite;
+  }
+}
+
+@keyframes calm-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes calm-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes soft-glow {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 0.9; }
 }
 
 @keyframes ticker-scroll {
