@@ -26,7 +26,7 @@ import { useDashboardData } from "@/lib/dashboard-data";
 const FAQ = [
   {
     q: "How do I reschedule a visit?",
-    a: "Open the next visit on your dashboard and tap Reschedule, or text us at (305) 555-1234. We confirm within an hour.",
+    a: "Open the next visit on your dashboard and tap Reschedule, or text us at (786) 829-1141. We confirm within an hour.",
   },
   {
     q: "When will I be charged?",
@@ -91,8 +91,8 @@ export default function Help() {
           <ContactCard
             icon={<MessageSquare className="h-5 w-5" />}
             label="Text us"
-            value="(305) 555-1234"
-            href="sms:+13055551234"
+            value="(786) 829-1141"
+            href="sms:+17868291141"
             note="Avg reply: 8 min"
             primary
           />
@@ -106,9 +106,9 @@ export default function Help() {
           <ContactCard
             icon={<Phone className="h-5 w-5" />}
             label="Call"
-            value="(305) 555-1234"
-            href="tel:+13055551234"
-            note="Mon–Sat · 8a–7p"
+            value="(786) 829-1141"
+            href="tel:+17868291141"
+            note="Mon–Sat · 8a–6p"
           />
         </div>
 
@@ -119,7 +119,7 @@ export default function Help() {
           </span>
           <p className="text-ink-soft">
             <span className="font-semibold text-ink">We're open now.</span>{" "}
-            Support hours: Monday – Saturday, 8 AM – 7 PM ET.
+            Support hours: Monday – Saturday, 8 AM – 6 PM ET.
           </p>
         </div>
 
