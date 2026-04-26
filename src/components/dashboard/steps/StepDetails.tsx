@@ -45,6 +45,20 @@ export default function StepDetails({ state, onChange }: Props) {
         <Field label="last name"  value={state.lastName}  onChange={v => setField('lastName',  v)} required autoComplete="family-name" />
       </div>
       <Field label="email" value={state.email} onChange={v => setField('email', v)} type="email" required autoComplete="email" />
+      <Field
+        label="create password"
+        value={state.password}
+        onChange={v => setField('password', v)}
+        type="password"
+        required
+        autoComplete="new-password"
+        placeholder="min. 8 characters"
+        helpText={state.password.length === 0
+          ? "we'll create your tidy account so you can manage your plan anytime."
+          : state.password.length < 8
+            ? `${8 - state.password.length} more characters.`
+            : 'strong enough.'}
+      />
       <Field label="phone" value={state.phone} onChange={v => setField('phone', v)} type="tel"   required autoComplete="tel" />
 
       <div className="h-px bg-hairline" />
