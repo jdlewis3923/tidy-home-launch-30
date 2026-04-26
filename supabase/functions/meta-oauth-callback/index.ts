@@ -208,8 +208,9 @@ async function listOwnedPixels(businessId: string, longToken: string): Promise<P
   return (json.data ?? []) as PixelSummary[];
 }
 
-async function createPixel(businessId: string, longToken: string): Promise<string> {
-  const url = new URL(`${GRAPH}/${businessId}/owned_pixels`);
+async function createPixelOnBusiness(businessId: string, longToken: string): Promise<string> {
+  // CORRECT endpoint per Meta Graph API v19.0 — /adspixels (not /owned_pixels which is read-only).
+  const url = new URL(`${GRAPH}/${businessId}/adspixels`);
   const body = new URLSearchParams({ name: TARGET_PIXEL_NAME, access_token: longToken });
   const res = await fetch(url.toString(), {
     method: 'POST',
@@ -218,7 +219,49 @@ async function createPixel(businessId: string, longToken: string): Promise<strin
   });
   const json = await res.json();
   if (!res.ok || !json.id) {
-    throw new Error(`pixel create failed (${res.status}): ${JSON.stringify(json).slice(0, 300)}`);
+    throw new Error(`pixel create on business failed (${res.status}): ${JSON.stringify(json).slice(0, 400)}`);
+  }
+  return json.id as string;
+}
+
+interface AdAccountSummary {
+  id: string; // already prefixed with act_
+  account_id: string; // raw numeric
+  name?: string;
+}
+
+async function listAdAccounts(businessId: string, longToken: string): Promise<AdAccountSummary[]> {
+  // Try owned ad accounts first, then client ad accounts as a secondary set.
+  const out: AdAccountSummary[] = [];
+  for (const edge of ['owned_ad_accounts', 'client_ad_accounts']) {
+    const url = new URL(`${GRAPH}/${businessId}/${edge}`);
+    url.searchParams.set('access_token', longToken);
+    url.searchParams.set('fields', 'id,account_id,name');
+    url.searchParams.set('limit', '100');
+    const res = await fetch(url.toString());
+    const json = await res.json();
+    if (res.ok && Array.isArray(json.data)) {
+      out.push(...(json.data as AdAccountSummary[]));
+    } else {
+      console.warn(`[meta-oauth-callback] ${edge} list failed (${res.status}): ${JSON.stringify(json).slice(0, 200)}`);
+    }
+  }
+  return out;
+}
+
+async function createPixelOnAdAccount(adAccountId: string, longToken: string): Promise<string> {
+  // adAccountId may already be `act_...` or raw numeric.
+  const id = adAccountId.startsWith('act_') ? adAccountId : `act_${adAccountId}`;
+  const url = new URL(`${GRAPH}/${id}/adspixels`);
+  const body = new URLSearchParams({ name: TARGET_PIXEL_NAME, access_token: longToken });
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.id) {
+    throw new Error(`pixel create on ad account ${id} failed (${res.status}): ${JSON.stringify(json).slice(0, 400)}`);
   }
   return json.id as string;
 }
@@ -321,6 +364,11 @@ Deno.serve(async (req) => {
 
         // 3: discover business
         const businesses = await listBusinesses(longLived.access_token);
+        console.log(
+          `[meta-oauth-callback] /me/businesses returned ${businesses.length} businesses: ${businesses
+            .map((b) => `"${b.name}" (${b.id})`)
+            .join(', ')}`,
+        );
         let target = businesses.find(
           (b) => b.name?.toLowerCase().trim() === TARGET_BUSINESS_NAME.toLowerCase(),
         );
@@ -340,9 +388,17 @@ Deno.serve(async (req) => {
             );
           }
         }
+        console.log(
+          `[meta-oauth-callback] Selected business: "${target.name}" (id ${target.id}) from ${businesses.length} available businesses.`,
+        );
 
         // 4: find or create pixel
         const pixels = await listOwnedPixels(target.id, longLived.access_token);
+        console.log(
+          `[meta-oauth-callback] /${target.id}/owned_pixels returned ${pixels.length} pixels: ${pixels
+            .map((p) => `"${p.name}" (${p.id}${p.is_unavailable ? ', UNAVAILABLE' : ''})`)
+            .join(', ') || '(none)'}`,
+        );
         let pixelId: string;
         let pixelStatus: 'created' | 'reused';
         const existing = pixels.find(
@@ -351,9 +407,53 @@ Deno.serve(async (req) => {
         if (existing) {
           pixelId = existing.id;
           pixelStatus = 'reused';
+          console.log(`[meta-oauth-callback] Reusing existing pixel "${existing.name}" (id ${existing.id}).`);
         } else {
-          pixelId = await createPixel(target.id, longLived.access_token);
-          pixelStatus = 'created';
+          try {
+            pixelId = await createPixelOnBusiness(target.id, longLived.access_token);
+            pixelStatus = 'created';
+            console.log(`[meta-oauth-callback] Created new pixel via business endpoint (id ${pixelId}).`);
+          } catch (bizErr) {
+            const bizMsg = bizErr instanceof Error ? bizErr.message : String(bizErr);
+            console.warn(
+              `[meta-oauth-callback] Business pixel create failed; falling back to ad account. Error: ${bizMsg}`,
+            );
+            warnings.push(
+              `Pixel create on business failed (${bizMsg.slice(0, 200)}). Falling back to ad account create.`,
+            );
+            const adAccounts = await listAdAccounts(target.id, longLived.access_token);
+            console.log(
+              `[meta-oauth-callback] Found ${adAccounts.length} ad accounts under business: ${adAccounts
+                .map((a) => `"${a.name ?? '?'}" (${a.id})`)
+                .join(', ') || '(none)'}`,
+            );
+            if (adAccounts.length === 0) {
+              throw new Error(
+                `Pixel create on business failed and no ad accounts available as fallback. Original error: ${bizMsg}`,
+              );
+            }
+            let lastErr: string = '';
+            let createdId: string | null = null;
+            for (const acct of adAccounts) {
+              try {
+                createdId = await createPixelOnAdAccount(acct.id, longLived.access_token);
+                console.log(
+                  `[meta-oauth-callback] Created pixel via ad account ${acct.id} (id ${createdId}).`,
+                );
+                break;
+              } catch (adErr) {
+                lastErr = adErr instanceof Error ? adErr.message : String(adErr);
+                console.warn(`[meta-oauth-callback] Ad account ${acct.id} create failed: ${lastErr}`);
+              }
+            }
+            if (!createdId) {
+              throw new Error(
+                `Pixel create failed on business and on all ${adAccounts.length} ad account fallbacks. Last error: ${lastErr}`,
+              );
+            }
+            pixelId = createdId;
+            pixelStatus = 'created';
+          }
         }
 
         // 5: mint CAPI token
