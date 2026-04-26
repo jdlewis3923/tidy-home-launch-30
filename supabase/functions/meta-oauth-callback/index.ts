@@ -364,6 +364,11 @@ Deno.serve(async (req) => {
 
         // 3: discover business
         const businesses = await listBusinesses(longLived.access_token);
+        console.log(
+          `[meta-oauth-callback] /me/businesses returned ${businesses.length} businesses: ${businesses
+            .map((b) => `"${b.name}" (${b.id})`)
+            .join(', ')}`,
+        );
         let target = businesses.find(
           (b) => b.name?.toLowerCase().trim() === TARGET_BUSINESS_NAME.toLowerCase(),
         );
@@ -383,9 +388,17 @@ Deno.serve(async (req) => {
             );
           }
         }
+        console.log(
+          `[meta-oauth-callback] Selected business: "${target.name}" (id ${target.id}) from ${businesses.length} available businesses.`,
+        );
 
         // 4: find or create pixel
         const pixels = await listOwnedPixels(target.id, longLived.access_token);
+        console.log(
+          `[meta-oauth-callback] /${target.id}/owned_pixels returned ${pixels.length} pixels: ${pixels
+            .map((p) => `"${p.name}" (${p.id}${p.is_unavailable ? ', UNAVAILABLE' : ''})`)
+            .join(', ') || '(none)'}`,
+        );
         let pixelId: string;
         let pixelStatus: 'created' | 'reused';
         const existing = pixels.find(
@@ -394,9 +407,53 @@ Deno.serve(async (req) => {
         if (existing) {
           pixelId = existing.id;
           pixelStatus = 'reused';
+          console.log(`[meta-oauth-callback] Reusing existing pixel "${existing.name}" (id ${existing.id}).`);
         } else {
-          pixelId = await createPixel(target.id, longLived.access_token);
-          pixelStatus = 'created';
+          try {
+            pixelId = await createPixelOnBusiness(target.id, longLived.access_token);
+            pixelStatus = 'created';
+            console.log(`[meta-oauth-callback] Created new pixel via business endpoint (id ${pixelId}).`);
+          } catch (bizErr) {
+            const bizMsg = bizErr instanceof Error ? bizErr.message : String(bizErr);
+            console.warn(
+              `[meta-oauth-callback] Business pixel create failed; falling back to ad account. Error: ${bizMsg}`,
+            );
+            warnings.push(
+              `Pixel create on business failed (${bizMsg.slice(0, 200)}). Falling back to ad account create.`,
+            );
+            const adAccounts = await listAdAccounts(target.id, longLived.access_token);
+            console.log(
+              `[meta-oauth-callback] Found ${adAccounts.length} ad accounts under business: ${adAccounts
+                .map((a) => `"${a.name ?? '?'}" (${a.id})`)
+                .join(', ') || '(none)'}`,
+            );
+            if (adAccounts.length === 0) {
+              throw new Error(
+                `Pixel create on business failed and no ad accounts available as fallback. Original error: ${bizMsg}`,
+              );
+            }
+            let lastErr: string = '';
+            let createdId: string | null = null;
+            for (const acct of adAccounts) {
+              try {
+                createdId = await createPixelOnAdAccount(acct.id, longLived.access_token);
+                console.log(
+                  `[meta-oauth-callback] Created pixel via ad account ${acct.id} (id ${createdId}).`,
+                );
+                break;
+              } catch (adErr) {
+                lastErr = adErr instanceof Error ? adErr.message : String(adErr);
+                console.warn(`[meta-oauth-callback] Ad account ${acct.id} create failed: ${lastErr}`);
+              }
+            }
+            if (!createdId) {
+              throw new Error(
+                `Pixel create failed on business and on all ${adAccounts.length} ad account fallbacks. Last error: ${lastErr}`,
+              );
+            }
+            pixelId = createdId;
+            pixelStatus = 'created';
+          }
         }
 
         // 5: mint CAPI token
