@@ -94,6 +94,22 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Display headings: bolder, tighter, slightly taller feel — matches the
+     condensed-bold reference. Archivo's letterforms are taller than Poppins
+     so we lean into it with -0.03em tracking and 900-weight on h1/h2. */
+  h1, h2 {
+    @apply font-display font-black;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+  }
+  h3, h4 {
+    @apply font-display font-extrabold;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
   }
 }
 
