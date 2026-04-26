@@ -1,4 +1,6 @@
 import { ConfigState, calculatePricing } from '@/lib/dashboard-pricing';
+import { AnimatePresence, motion } from 'framer-motion';
+import AnimatedNumber from '@/components/motion/AnimatedNumber';
 
 interface Props {
   state: ConfigState;
@@ -8,41 +10,57 @@ interface Props {
 /**
  * Calm sticky footer summary. Cream/ink, hairline divider, no shouty
  * accents — matches the Apple-calm checkout shell.
+ *
+ * Slides up on first reveal; total ticks up via AnimatedNumber whenever
+ * pricing recalculates so the user feels the math respond.
  */
 export default function StickyPriceBar({ state, currentStep }: Props) {
-  if (currentStep < 1 || state.services.length === 0) return null;
-
+  const visible = currentStep >= 1 && state.services.length > 0;
   const pricing = calculatePricing(state);
   const hasFullPricing = pricing.subtotal > 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-hairline bg-cream/85 backdrop-blur-xl">
-      <div className="mx-auto max-w-2xl flex items-center justify-between px-5 py-3.5">
-        <div>
-          {hasFullPricing ? (
-            <>
-              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">
-                monthly
-              </p>
-              <p className="text-lg font-bold text-ink tabular-nums">
-                ${pricing.ongoing.toFixed(2)}
-                <span className="text-xs font-normal text-ink-faint">/mo</span>
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-ink-soft">
-              {state.services.length} service{state.services.length > 1 ? 's' : ''} selected
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ y: 60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 60, opacity: 0 }}
+          transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+          className="fixed bottom-0 left-0 right-0 z-50 border-t border-hairline bg-cream/85 backdrop-blur-xl"
+        >
+          <div className="mx-auto max-w-2xl flex items-center justify-between px-5 py-3.5">
+            <div>
+              {hasFullPricing ? (
+                <>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">
+                    monthly
+                  </p>
+                  <p className="text-lg font-bold text-ink tabular-nums">
+                    $
+                    <AnimatedNumber
+                      value={pricing.ongoing}
+                      format={(n) => n.toFixed(2)}
+                    />
+                    <span className="text-xs font-normal text-ink-faint">/mo</span>
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-ink-soft">
+                  {state.services.length} service{state.services.length > 1 ? 's' : ''} selected
+                </p>
+              )}
+            </div>
+            <p className="text-[11px] text-ink-faint">
+              {pricing.discountPercent > 0
+                ? `${Math.round(pricing.discountPercent * 100)}% bundle saving applied`
+                : state.services.length >= 2 && !hasFullPricing
+                  ? 'bundle saving will apply'
+                  : 'cancel anytime'}
             </p>
-          )}
-        </div>
-        <p className="text-[11px] text-ink-faint">
-          {pricing.discountPercent > 0
-            ? `${Math.round(pricing.discountPercent * 100)}% bundle saving applied`
-            : state.services.length >= 2 && !hasFullPricing
-              ? 'bundle saving will apply'
-              : 'cancel anytime'}
-        </p>
-      </div>
-    </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

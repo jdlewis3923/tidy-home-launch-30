@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote } from '@/lib/dashboard-pricing';
 import CalmShell from '@/components/dashboard/CalmShell';
 import ProgressBar from '@/components/dashboard/ProgressBar';
@@ -36,6 +37,7 @@ const PLAN_PARAM_MAP: Record<string, Frequency> = {
 
 export default function DashboardPlan() {
   const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState(0);
   const [state, setState] = useState<ConfigState>(loadState);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const navigate = useNavigate();
@@ -100,11 +102,19 @@ export default function DashboardPlan() {
 
   const next = () => {
     if (step === 5 && customQuote) { setQuoteOpen(true); return; }
-    if (step < STEPS.length - 1) setStep(step + 1);
+    if (step < STEPS.length - 1) {
+      setDirection(1);
+      setStep(step + 1);
+    }
     else { clearState(); navigate('/dashboard/confirmation'); }
   };
 
-  const back = () => { if (step > 0) setStep(step - 1); };
+  const back = () => {
+    if (step > 0) {
+      setDirection(-1);
+      setStep(step - 1);
+    }
+  };
 
   const stepInfo = STEPS[step];
 
@@ -126,14 +136,25 @@ export default function DashboardPlan() {
 
         {step <= 1 && <ExistingAccountInline />}
 
-        <div key={`step-${step}`} className="animate-calm-in">
-          {step === 0 && <StepServices  state={state} onChange={updateState} />}
-          {step === 1 && <StepFrequency state={state} onChange={updateState} />}
-          {step === 2 && <StepProperty  state={state} onChange={updateState} />}
-          {step === 3 && <StepDetails   state={state} onChange={updateState} />}
-          {step === 4 && <StepAddOns    state={state} onChange={updateState} />}
-          {step === 5 && <StepReview    state={state} onEdit={() => setStep(0)} />}
-          {step === 6 && <StepPayment   state={state} onChange={updateState} />}
+        <div className="relative overflow-x-hidden">
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
+            <motion.div
+              key={`step-${step}`}
+              custom={direction}
+              initial={{ opacity: 0, x: direction === 0 ? 0 : direction * 32 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: direction * -32 }}
+              transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+            >
+              {step === 0 && <StepServices  state={state} onChange={updateState} />}
+              {step === 1 && <StepFrequency state={state} onChange={updateState} />}
+              {step === 2 && <StepProperty  state={state} onChange={updateState} />}
+              {step === 3 && <StepDetails   state={state} onChange={updateState} />}
+              {step === 4 && <StepAddOns    state={state} onChange={updateState} />}
+              {step === 5 && <StepReview    state={state} onEdit={() => { setDirection(-1); setStep(0); }} />}
+              {step === 6 && <StepPayment   state={state} onChange={updateState} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {(step === 5 || step === 6) && customQuote && (
