@@ -76,6 +76,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <PromoCaptureWatcher />
+            <MetaPixel />
             <RouteTracker>
               <Suspense fallback={<RouteFallback />}>
                 <Routes>
