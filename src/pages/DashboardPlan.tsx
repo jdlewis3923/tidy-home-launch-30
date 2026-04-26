@@ -230,7 +230,7 @@ export default function DashboardPlan() {
             <button
               type="button"
               onClick={back}
-              className="rounded-lg border border-border px-5 py-3 text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors"
+              className="rounded-lg border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white/80 backdrop-blur transition-colors hover:bg-white/10 hover:text-white"
             >
               ← Back
             </button>
