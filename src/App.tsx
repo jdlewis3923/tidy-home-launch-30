@@ -40,6 +40,7 @@ const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess.tsx"));
 const CheckoutCanceled = lazy(() => import("./pages/CheckoutCanceled.tsx"));
 const AdminSetupCatalog = lazy(() => import("./pages/AdminSetupCatalog.tsx"));
 const AdminTestZapier = lazy(() => import("./pages/AdminTestZapier.tsx"));
+const AdminHealth = lazy(() => import("./pages/AdminHealth.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -135,6 +136,8 @@ const App = () => (
                   <Route path="/admin/setup-catalog" element={<AdminSetupCatalog />} />
                   {/* Phase 6 Zapier event tester. Remove after wiring complete. */}
                   <Route path="/admin/test-zapier" element={<AdminTestZapier />} />
+                  {/* Phase 8 integration health dashboard. */}
+                  <Route path="/admin/health" element={<AdminHealth />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
