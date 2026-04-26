@@ -53,6 +53,7 @@ export type Database = {
           created_at: string
           id: string
           invoice_date: string
+          paid_at: string | null
           receipt_url: string | null
           status: Database["public"]["Enums"]["invoice_status"]
           stripe_invoice_id: string | null
@@ -65,6 +66,7 @@ export type Database = {
           created_at?: string
           id?: string
           invoice_date?: string
+          paid_at?: string | null
           receipt_url?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           stripe_invoice_id?: string | null
@@ -77,6 +79,7 @@ export type Database = {
           created_at?: string
           id?: string
           invoice_date?: string
+          paid_at?: string | null
           receipt_url?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           stripe_invoice_id?: string | null
@@ -163,8 +166,63 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_catalog: {
+        Row: {
+          active: boolean
+          addon_name: string | null
+          bundle_discount_pct: number
+          created_at: string
+          description: string | null
+          frequency:
+            | Database["public"]["Enums"]["subscription_frequency"]
+            | null
+          id: string
+          is_addon: boolean
+          price_cents: number
+          service_type: Database["public"]["Enums"]["service_type"] | null
+          sort_order: number
+          stripe_price_id: string
+          stripe_product_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          addon_name?: string | null
+          bundle_discount_pct?: number
+          created_at?: string
+          description?: string | null
+          frequency?:
+            | Database["public"]["Enums"]["subscription_frequency"]
+            | null
+          id?: string
+          is_addon?: boolean
+          price_cents: number
+          service_type?: Database["public"]["Enums"]["service_type"] | null
+          sort_order?: number
+          stripe_price_id: string
+          stripe_product_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          addon_name?: string | null
+          bundle_discount_pct?: number
+          created_at?: string
+          description?: string | null
+          frequency?:
+            | Database["public"]["Enums"]["subscription_frequency"]
+            | null
+          id?: string
+          is_addon?: boolean
+          price_cents?: number
+          service_type?: Database["public"]["Enums"]["service_type"] | null
+          sort_order?: number
+          stripe_price_id?: string
+          stripe_product_id?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
+          bundle_discount_pct: number
           created_at: string
           frequency: Database["public"]["Enums"]["subscription_frequency"]
           id: string
@@ -172,11 +230,13 @@ export type Database = {
           next_billing_date: string | null
           services: Database["public"]["Enums"]["service_type"][]
           status: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id: string | null
           stripe_subscription_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          bundle_discount_pct?: number
           created_at?: string
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
@@ -184,11 +244,13 @@ export type Database = {
           next_billing_date?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          bundle_discount_pct?: number
           created_at?: string
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
@@ -196,6 +258,7 @@ export type Database = {
           next_billing_date?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
