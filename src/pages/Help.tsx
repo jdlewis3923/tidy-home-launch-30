@@ -26,7 +26,7 @@ import { useDashboardData } from "@/lib/dashboard-data";
 const FAQ = [
   {
     q: "How do I reschedule a visit?",
-    a: "Open the next visit on your dashboard and tap Reschedule, or text us at (305) 555-1234. We confirm within an hour.",
+    a: "Open the next visit on your dashboard and tap Reschedule, or text us at (786) 829-1141. We confirm within an hour.",
   },
   {
     q: "When will I be charged?",
