@@ -63,18 +63,12 @@ export default function StepPayment({ state, onChange }: Props) {
     setSubmitting(true);
     setError(null);
     try {
-      // 1) Create (or sign in) Tidy account first so the user is logged in
-      //    no matter what happens with Stripe. Then write the subscription
-      //    + provisional first visit so the dashboard has data.
       const result = await provisionAccount(state);
-      if (!result.ok) {
+      if (result.ok === false) {
         setError(result.message);
         setSubmitting(false);
         return;
       }
-
-      // 2) Either route to Stripe checkout (when wired) or land directly
-      //    on the calm confirmation moment.
       if (STRIPE_INTEGRATION_ENABLED) {
         await startCheckout({ config: state });
       } else {
