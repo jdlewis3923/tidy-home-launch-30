@@ -240,7 +240,7 @@ export default function DashboardPlan() {
             <button
               type="button"
               onClick={next}
-              className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm font-semibold text-white/60 hover:text-white transition-colors"
             >
               {stepInfo.skip}
             </button>
@@ -251,9 +251,15 @@ export default function DashboardPlan() {
               type="button"
               onClick={next}
               disabled={!canAdvance()}
-              className="ml-auto rounded-lg bg-gradient-to-br from-primary-deep to-primary px-6 py-3 text-sm font-extrabold text-primary-foreground shadow-[0_4px_16px_rgba(37,99,235,0.35)] transition-all hover:shadow-xl hover:scale-[1.01] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="group relative ml-auto overflow-hidden rounded-lg bg-gradient-to-br from-gold via-gold to-gold/85 px-7 py-3.5 text-sm font-extrabold text-foreground shadow-[0_8px_28px_-6px_hsl(var(--gold)/0.55)] transition-all hover:shadow-[0_14px_36px_-6px_hsl(var(--gold)/0.75)] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
-              {customQuote && step === 5 ? 'Get My Plan →' : stepInfo.cta}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-all duration-700 group-hover:translate-x-full group-hover:opacity-100"
+              />
+              <span className="relative">
+                {customQuote && step === 5 ? 'Get My Plan →' : stepInfo.cta}
+              </span>
             </button>
           )}
         </div>
