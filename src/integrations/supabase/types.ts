@@ -341,6 +341,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_set_service_role_key: { Args: { _key: string }; Returns: undefined }
       current_user_admin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
