@@ -46,6 +46,18 @@
     --text-light: 215 16% 47%;
     --section-alt: 210 40% 98%;
 
+    /* ---- Apple-calm "control center" tokens (checkout + dashboard) ---- */
+    /* Cream paper background, navy ink, soft greys. Used by /dashboard/*,
+       /login, /forgot-password, /reset-password. Marketing site keeps the
+       white background via --background above. */
+    --cream: 36 27% 96%;          /* #F8F6F2 */
+    --cream-deep: 35 22% 92%;     /* slightly warmer card surface */
+    --ink: 222 47% 11%;           /* navy ink */
+    --ink-soft: 222 30% 28%;      /* muted body */
+    --ink-faint: 222 15% 50%;     /* helper / labels */
+    --hairline: 30 14% 86%;       /* warm grey divider */
+    --calm-shadow: 222 47% 11%;   /* shadow color base */
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
