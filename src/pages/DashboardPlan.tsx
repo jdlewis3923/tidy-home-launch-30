@@ -204,15 +204,22 @@ export default function DashboardPlan() {
           <ExistingAccountInline />
         )}
 
-        {/* Step content — wrapped in fade-in container, keyed to step for transitions */}
+        {/* Step content — wrapped in a bright card for contrast against the
+            dark page background. StepPayment is exempt because it ships with
+            its own premium navy summary card. */}
         <div key={`step-${step}`} className="animate-fade-in">
-          {step === 0 && <StepServices state={state} onChange={updateState} />}
-          {step === 1 && <StepFrequency state={state} onChange={updateState} />}
-          {step === 2 && <StepProperty state={state} onChange={updateState} />}
-          {step === 3 && <StepDetails state={state} onChange={updateState} />}
-          {step === 4 && <StepAddOns state={state} onChange={updateState} />}
-          {step === 5 && <StepReview state={state} onEdit={() => setStep(0)} />}
-          {step === 6 && <StepPayment state={state} onChange={updateState} />}
+          {step === 6 ? (
+            <StepPayment state={state} onChange={updateState} />
+          ) : (
+            <div className="rounded-2xl border border-white/15 bg-card p-5 md:p-7 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/5">
+              {step === 0 && <StepServices state={state} onChange={updateState} />}
+              {step === 1 && <StepFrequency state={state} onChange={updateState} />}
+              {step === 2 && <StepProperty state={state} onChange={updateState} />}
+              {step === 3 && <StepDetails state={state} onChange={updateState} />}
+              {step === 4 && <StepAddOns state={state} onChange={updateState} />}
+              {step === 5 && <StepReview state={state} onEdit={() => setStep(0)} />}
+            </div>
+          )}
         </div>
 
         {/* Custom-quote notice — replaces the Stripe path with a tailored-plan flow */}
