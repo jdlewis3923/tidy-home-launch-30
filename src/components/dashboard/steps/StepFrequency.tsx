@@ -7,8 +7,14 @@ interface Props {
 
 const freqOptions: Record<ServiceType, Frequency[]> = {
   cleaning: ['monthly', 'biweekly', 'weekly'],
-  lawn: ['monthly', 'biweekly', 'weekly'],
-  detailing: ['monthly', 'biweekly'],
+  lawn:     ['monthly', 'biweekly', 'weekly'],
+  detailing:['monthly', 'biweekly'],
+};
+
+const popularBy: Record<ServiceType, Frequency> = {
+  cleaning: 'biweekly',
+  lawn:     'biweekly',
+  detailing:'biweekly',
 };
 
 export default function StepFrequency({ state, onChange }: Props) {
@@ -17,53 +23,51 @@ export default function StepFrequency({ state, onChange }: Props) {
   };
 
   return (
-    <div className="space-y-8">
-      {state.services.map(svc => (
-        <div key={svc} className="space-y-3">
-          <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <span>{serviceIcons[svc]}</span> {serviceLabels[svc]}
+    <div className="space-y-7">
+      {state.services.map((svc, idx) => (
+        <div
+          key={svc}
+          className="space-y-3 animate-calm-in"
+          style={{ animationDelay: `${idx * 70}ms` }}
+        >
+          <h3 className="text-sm font-semibold text-ink-soft flex items-center gap-2">
+            <span>{serviceIcons[svc]}</span>
+            <span className="lowercase">{serviceLabels[svc]}</span>
           </h3>
-          <div className="flex flex-wrap gap-3">
+
+          <div className="grid grid-cols-3 gap-2">
             {freqOptions[svc].map(freq => {
               const selected = state.frequencies[svc] === freq;
+              const popular = freq === popularBy[svc];
               return (
                 <button
                   key={freq}
                   type="button"
                   onClick={() => setFreq(svc, freq)}
-                  className={`rounded-lg border-[1.5px] px-5 py-3 text-sm font-semibold transition-all ${
+                  className={`relative rounded-xl border bg-white px-3 py-3.5 text-sm transition-all ${
                     selected
-                      ? 'border-primary bg-primary text-primary-foreground shadow-md'
-                      : 'border-border bg-card text-foreground hover:border-primary/40'
+                      ? 'border-ink text-ink shadow-[0_6px_18px_-10px_hsl(var(--ink)/0.3)]'
+                      : 'border-hairline text-ink-soft hover:border-ink/40'
                   }`}
                 >
-                  {frequencyLabels[freq]}
+                  <span className="font-semibold lowercase block">{frequencyLabels[freq]}</span>
+                  {popular && selected && (
+                    <span className="absolute inset-x-3 -bottom-[1px] h-[2px] rounded-full bg-ink animate-calm-in" />
+                  )}
                 </button>
               );
             })}
           </div>
-          <p className="text-xs text-muted-foreground">Exact price shown after you enter your home details</p>
+
+          {state.frequencies[svc] === popularBy[svc] && (
+            <p className="text-[11px] text-ink-faint animate-calm-in">
+              most members choose biweekly.
+            </p>
+          )}
         </div>
       ))}
 
-      <p className="text-xs text-muted-foreground/70">You can skip, reschedule, or modify your service anytime.</p>
-
-      <div className="flex gap-4">
-        <button
-          type="button"
-          className="text-xs text-primary hover:underline"
-          onClick={() => {/* skip logic placeholder */}}
-        >
-          Skip next service
-        </button>
-        <button
-          type="button"
-          className="text-xs text-primary hover:underline"
-          onClick={() => {/* reschedule logic placeholder */}}
-        >
-          Reschedule
-        </button>
-      </div>
+      <p className="text-xs text-ink-faint">change anytime — no lock-in.</p>
     </div>
   );
 }
