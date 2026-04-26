@@ -38,13 +38,13 @@ export default function Billing() {
   const data = useDashboardData();
   const [portalState, setPortalState] = useState<"idle" | "loading" | "error">("idle");
 
-  if (!CUSTOMER_ACCOUNT_ENABLED) return <Navigate to="/" replace />;
-
   useEffect(() => {
     if (!data.loading && !data.isAuthed) {
       navigate("/login", { replace: true });
     }
   }, [data.loading, data.isAuthed, navigate]);
+
+  if (!CUSTOMER_ACCOUNT_ENABLED) return <Navigate to="/" replace />;
 
   const openPortal = async () => {
     if (!STRIPE_INTEGRATION_ENABLED) {
