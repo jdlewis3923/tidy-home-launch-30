@@ -10,9 +10,7 @@ export const CUSTOMER_DASHBOARD_ENABLED = true;
 export const STRIPE_INTEGRATION_ENABLED = false;
 
 // Master flag for the post-launch authenticated experience.
-// Pre-launch: /account and /billing redirect to homepage.
-// Post-launch (set true): /account becomes the customer dashboard,
+// When true: /account redirects into /dashboard (the home OS),
 // /billing opens the Stripe billing portal for authenticated users.
-// This is intentionally separate from CUSTOMER_DASHBOARD_ENABLED so
-// the plan-builder can ship before the authenticated account area.
-export const CUSTOMER_ACCOUNT_ENABLED = false;
+// When false: those routes self-redirect to homepage.
+export const CUSTOMER_ACCOUNT_ENABLED = true;

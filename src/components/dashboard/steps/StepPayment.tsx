@@ -14,6 +14,9 @@ import {
 } from '@/lib/dashboard-pricing';
 import { usePromoState } from '@/hooks/usePromoCapture';
 import { startCheckout } from '@/lib/checkout';
+import { provisionAccount } from '@/lib/account-provisioning';
+import { STRIPE_INTEGRATION_ENABLED } from '@/lib/dashboard-config';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   state: ConfigState;
@@ -53,12 +56,24 @@ export default function StepPayment({ state, onChange }: Props) {
     })
     .filter((x): x is { svc: ServiceType; qty: number } => x !== null);
 
+  const navigate = useNavigate();
+
   const handlePay = async () => {
     if (customQuote || submitting) return;
     setSubmitting(true);
     setError(null);
     try {
-      await startCheckout({ config: state });
+      const result = await provisionAccount(state);
+      if (result.ok === false) {
+        setError(result.message);
+        setSubmitting(false);
+        return;
+      }
+      if (STRIPE_INTEGRATION_ENABLED) {
+        await startCheckout({ config: state });
+      } else {
+        navigate('/dashboard/confirmation');
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'checkout failed. please try again.');
       setSubmitting(false);

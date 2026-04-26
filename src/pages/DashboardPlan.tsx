@@ -94,7 +94,7 @@ export default function DashboardPlan() {
       if (state.services.includes('detailing') && !state.vehicleSize) return false;
       return true;
     }
-    if (step === 3) return !!(state.firstName && state.lastName && state.email && state.phone && state.address && state.city && state.zip);
+    if (step === 3) return !!(state.firstName && state.lastName && state.email && state.password && state.password.length >= 8 && state.phone && state.address && state.city && state.zip);
     return true;
   };
 

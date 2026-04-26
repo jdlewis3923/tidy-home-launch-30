@@ -42,7 +42,7 @@ export default function CalmShell({ step, totalSteps, microcopy, children }: Pro
             <img
               src={tidyLogo}
               alt="Tidy"
-              className="h-32 md:h-40 w-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]"
+              className="h-44 md:h-56 w-auto drop-shadow-[0_10px_28px_rgba(15,23,42,0.14)]"
             />
           </a>
           {totalSteps > 0 && (

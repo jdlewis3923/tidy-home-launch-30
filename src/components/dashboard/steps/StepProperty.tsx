@@ -27,14 +27,14 @@ function SizeTierGroup({
               key={tier}
               type="button"
               onClick={() => onSelect(tier)}
-              className={`text-left rounded-xl border bg-white p-4 transition-all ${
+              className={`text-left rounded-xl border-2 p-4 transition-all ${
                 selected
-                  ? 'border-ink shadow-[0_6px_18px_-10px_hsl(var(--ink)/0.3)]'
-                  : 'border-hairline hover:border-ink/40'
+                  ? 'border-ink bg-ink text-white shadow-[0_8px_22px_-10px_hsl(var(--ink)/0.45)]'
+                  : 'border-hairline bg-white hover:border-ink/40 hover:bg-cream-deep/40'
               }`}
             >
-              <p className="text-sm font-semibold text-ink lowercase">{copy[tier].label}</p>
-              <p className="text-[11px] text-ink-faint mt-1 leading-snug">{copy[tier].helper}</p>
+              <p className={`text-sm font-semibold lowercase ${selected ? 'text-white' : 'text-ink'}`}>{copy[tier].label}</p>
+              <p className={`text-[11px] mt-1 leading-snug ${selected ? 'text-white/70' : 'text-ink-faint'}`}>{copy[tier].helper}</p>
             </button>
           );
         })}
