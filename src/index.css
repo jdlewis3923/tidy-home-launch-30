@@ -132,9 +132,13 @@
   /* Apple-calm surfaces */
   .bg-cream { background-color: hsl(var(--cream)); }
   .bg-cream-deep { background-color: hsl(var(--cream-deep)); }
+  .bg-ink { background-color: hsl(var(--ink)); }
+  .bg-ink-soft { background-color: hsl(var(--ink-soft)); }
+  .hover\:bg-ink-soft:hover { background-color: hsl(var(--ink-soft)); }
   .text-ink { color: hsl(var(--ink)); }
   .text-ink-soft { color: hsl(var(--ink-soft)); }
   .text-ink-faint { color: hsl(var(--ink-faint)); }
+  .border-ink { border-color: hsl(var(--ink)); }
   .border-hairline { border-color: hsl(var(--hairline)); }
 
   /* Calm motion */
