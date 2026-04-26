@@ -20,7 +20,7 @@ const NAV = [
   { label: 'Help', href: '/help' },
 ];
 
-export default function DashboardTopNav({ initials = 'AK' }: { initials?: string }) {
+export default function DashboardTopNav({ initials = '' }: { initials?: string }) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [hasUnread] = useState(true);
