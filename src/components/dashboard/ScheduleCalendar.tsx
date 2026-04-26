@@ -164,48 +164,6 @@ export default function ScheduleCalendar({
           </motion.div>
         </AnimatePresence>
       </div>
-        {WEEK.map((w) => (
-          <div key={w} className="text-[10px] font-semibold tracking-[0.12em] text-ink-faint">
-            {w}
-          </div>
-        ))}
-
-        {cells.map((c) => {
-          const isSelected = c.iso === selectedDate;
-          const isToday = c.iso === todayISO;
-          const services = Array.from(visitsByDate.get(c.iso) ?? []);
-          return (
-            <button
-              key={c.iso}
-              type="button"
-              onClick={() => onSelect(c.iso)}
-              className={`relative mx-auto flex h-9 w-9 flex-col items-center justify-center rounded-full text-[13px] transition ${
-                isSelected
-                  ? 'bg-ink font-semibold text-white shadow-[0_6px_18px_-6px_hsl(var(--ink)/0.45)]'
-                  : isToday
-                    ? 'font-semibold text-[hsl(var(--primary))]'
-                    : c.inMonth
-                      ? 'text-ink hover:bg-cream'
-                      : 'text-ink-faint/50'
-              }`}
-            >
-              <span className="leading-none">{c.day}</span>
-              {services.length > 0 && (
-                <span className="absolute bottom-1 flex gap-0.5">
-                  {services.slice(0, 3).map((s) => (
-                    <span
-                      key={s}
-                      className={`h-1 w-1 rounded-full ${
-                        SERVICE_DOT[s] ?? 'bg-ink-faint'
-                      } ${isSelected ? 'opacity-90' : ''}`}
-                    />
-                  ))}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
 
       <div className="mt-4 flex items-center justify-center gap-5 text-[11px] text-ink-faint">
         <span className="flex items-center gap-1.5">
