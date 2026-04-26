@@ -17,7 +17,7 @@ const NAV = [
   { label: 'Services', href: '/dashboard/plan' },
   { label: 'Billing', href: '/billing' },
   { label: 'Account', href: '/account' },
-  { label: 'Help', href: '/dashboard#help' },
+  { label: 'Help', href: '/help' },
 ];
 
 export default function DashboardTopNav({ initials = 'AK' }: { initials?: string }) {
