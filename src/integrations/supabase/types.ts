@@ -351,9 +351,14 @@ export type Database = {
     }
     Functions: {
       admin_get_jobber_refresh_token: { Args: never; Returns: string }
+      admin_get_meta_secret: { Args: { _name: string }; Returns: string }
       admin_get_service_role_key: { Args: never; Returns: string }
       admin_set_jobber_refresh_token: {
         Args: { _token: string }
+        Returns: undefined
+      }
+      admin_set_meta_secret: {
+        Args: { _name: string; _value: string }
         Returns: undefined
       }
       admin_set_service_role_key: { Args: { _key: string }; Returns: undefined }
