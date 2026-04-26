@@ -26,8 +26,10 @@ const GA4_MEASUREMENT_ID = Deno.env.get('GA4_MEASUREMENT_ID') ?? '';
 const GA4_API_SECRET = Deno.env.get('GA4_API_SECRET') ?? ''; // optional, MP requires it
 const GOOGLE_ADS_CONVERSION_ID = Deno.env.get('GOOGLE_ADS_CONVERSION_ID') ?? '';
 const GOOGLE_ADS_CONVERSION_LABELS_RAW = Deno.env.get('GOOGLE_ADS_CONVERSION_LABELS') ?? '';
-const META_PIXEL_ID = Deno.env.get('META_PIXEL_ID') ?? '';
-const META_CAPI_ACCESS_TOKEN = Deno.env.get('META_CAPI_ACCESS_TOKEN') ?? '';
+// Meta env vars are an OPTIONAL bootstrap path. The vault values written
+// by meta-oauth-callback take precedence — see fetchMetaSecrets() below.
+const META_PIXEL_ID_ENV = Deno.env.get('META_PIXEL_ID') ?? '';
+const META_CAPI_ACCESS_TOKEN_ENV = Deno.env.get('META_CAPI_ACCESS_TOKEN') ?? '';
 const META_TEST_EVENT_CODE = Deno.env.get('META_TEST_EVENT_CODE') ?? ''; // optional
 
 // ---------- helpers ----------
@@ -152,12 +154,31 @@ async function sendGoogleAds(body: Body): Promise<PlatformResult> {
   };
 }
 
+/**
+ * Resolve Meta credentials. Vault wins (set by meta-oauth-callback);
+ * env vars are a fallback for the legacy bootstrap path. We re-read on
+ * every call so a fresh OAuth flow hot-enables CAPI without a redeploy.
+ */
+async function fetchMetaSecrets(): Promise<{ pixelId: string; capiToken: string }> {
+  const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const [pixelRes, tokenRes] = await Promise.all([
+    sb.rpc('admin_get_meta_secret', { _name: 'meta_pixel_id' }),
+    sb.rpc('admin_get_meta_secret', { _name: 'meta_capi_access_token' }),
+  ]);
+  const pixelId = (pixelRes.data as string | null) || META_PIXEL_ID_ENV;
+  const capiToken = (tokenRes.data as string | null) || META_CAPI_ACCESS_TOKEN_ENV;
+  return { pixelId: pixelId || '', capiToken: capiToken || '' };
+}
+
 async function sendMetaCAPI(body: Body): Promise<PlatformResult> {
-  if (!isUsable(META_PIXEL_ID)) {
-    return { status: 'skipped', reason: 'META_PIXEL_ID missing or blocked' };
+  const { pixelId, capiToken } = await fetchMetaSecrets();
+  if (!isUsable(pixelId)) {
+    return { status: 'skipped', reason: 'meta_pixel_id missing or blocked (run meta-oauth-callback)' };
   }
-  if (!isUsable(META_CAPI_ACCESS_TOKEN)) {
-    return { status: 'skipped', reason: 'META_CAPI_ACCESS_TOKEN missing or blocked' };
+  if (!isUsable(capiToken)) {
+    return { status: 'skipped', reason: 'meta_capi_access_token missing or blocked (run meta-oauth-callback)' };
   }
   const eventName =
     body.event === 'signup'
@@ -185,8 +206,8 @@ async function sendMetaCAPI(body: Body): Promise<PlatformResult> {
     event.custom_data = { value: body.value, currency: body.currency };
   }
   const url = `https://graph.facebook.com/v19.0/${encodeURIComponent(
-    META_PIXEL_ID,
-  )}/events?access_token=${encodeURIComponent(META_CAPI_ACCESS_TOKEN)}`;
+    pixelId,
+  )}/events?access_token=${encodeURIComponent(capiToken)}`;
   const payload: Record<string, unknown> = { data: [event] };
   if (META_TEST_EVENT_CODE) payload.test_event_code = META_TEST_EVENT_CODE;
   const res = await fetch(url, {
