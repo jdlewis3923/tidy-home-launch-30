@@ -36,10 +36,23 @@ async function isAuthorized(req: Request): Promise<boolean> {
   const token = auth.slice('Bearer '.length);
   // Service role key — preferred path for server-to-server calls.
   if (token === SUPABASE_SERVICE_ROLE_KEY) return true;
-  // Otherwise accept admin user JWTs (for manual ops + testing).
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  // Accept the legacy service-role key stored in vault (used by DB-triggered
+  // net.http_post calls that pre-date the signing-keys rotation).
+  try {
+    const { data: vaultKey } = await supabase.rpc('admin_get_service_role_key' as never);
+    if (typeof vaultKey === 'string' && vaultKey.length > 0 && token === vaultKey) {
+      return true;
+    }
+  } catch {
+    /* noop — fall through to JWT path */
+  }
+
+  // Otherwise accept admin user JWTs (for manual ops + testing).
   try {
     const { data, error } = await supabase.auth.getUser(token);
     if (error || !data.user) return false;
