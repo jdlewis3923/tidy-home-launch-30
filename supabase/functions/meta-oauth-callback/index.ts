@@ -208,8 +208,9 @@ async function listOwnedPixels(businessId: string, longToken: string): Promise<P
   return (json.data ?? []) as PixelSummary[];
 }
 
-async function createPixel(businessId: string, longToken: string): Promise<string> {
-  const url = new URL(`${GRAPH}/${businessId}/owned_pixels`);
+async function createPixelOnBusiness(businessId: string, longToken: string): Promise<string> {
+  // CORRECT endpoint per Meta Graph API v19.0 — /adspixels (not /owned_pixels which is read-only).
+  const url = new URL(`${GRAPH}/${businessId}/adspixels`);
   const body = new URLSearchParams({ name: TARGET_PIXEL_NAME, access_token: longToken });
   const res = await fetch(url.toString(), {
     method: 'POST',
@@ -218,7 +219,49 @@ async function createPixel(businessId: string, longToken: string): Promise<strin
   });
   const json = await res.json();
   if (!res.ok || !json.id) {
-    throw new Error(`pixel create failed (${res.status}): ${JSON.stringify(json).slice(0, 300)}`);
+    throw new Error(`pixel create on business failed (${res.status}): ${JSON.stringify(json).slice(0, 400)}`);
+  }
+  return json.id as string;
+}
+
+interface AdAccountSummary {
+  id: string; // already prefixed with act_
+  account_id: string; // raw numeric
+  name?: string;
+}
+
+async function listAdAccounts(businessId: string, longToken: string): Promise<AdAccountSummary[]> {
+  // Try owned ad accounts first, then client ad accounts as a secondary set.
+  const out: AdAccountSummary[] = [];
+  for (const edge of ['owned_ad_accounts', 'client_ad_accounts']) {
+    const url = new URL(`${GRAPH}/${businessId}/${edge}`);
+    url.searchParams.set('access_token', longToken);
+    url.searchParams.set('fields', 'id,account_id,name');
+    url.searchParams.set('limit', '100');
+    const res = await fetch(url.toString());
+    const json = await res.json();
+    if (res.ok && Array.isArray(json.data)) {
+      out.push(...(json.data as AdAccountSummary[]));
+    } else {
+      console.warn(`[meta-oauth-callback] ${edge} list failed (${res.status}): ${JSON.stringify(json).slice(0, 200)}`);
+    }
+  }
+  return out;
+}
+
+async function createPixelOnAdAccount(adAccountId: string, longToken: string): Promise<string> {
+  // adAccountId may already be `act_...` or raw numeric.
+  const id = adAccountId.startsWith('act_') ? adAccountId : `act_${adAccountId}`;
+  const url = new URL(`${GRAPH}/${id}/adspixels`);
+  const body = new URLSearchParams({ name: TARGET_PIXEL_NAME, access_token: longToken });
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.id) {
+    throw new Error(`pixel create on ad account ${id} failed (${res.status}): ${JSON.stringify(json).slice(0, 400)}`);
   }
   return json.id as string;
 }
