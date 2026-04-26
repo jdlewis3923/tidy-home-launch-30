@@ -14,6 +14,9 @@ import {
 } from '@/lib/dashboard-pricing';
 import { usePromoState } from '@/hooks/usePromoCapture';
 import { startCheckout } from '@/lib/checkout';
+import { provisionAccount } from '@/lib/account-provisioning';
+import { STRIPE_INTEGRATION_ENABLED } from '@/lib/dashboard-config';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   state: ConfigState;
@@ -53,12 +56,30 @@ export default function StepPayment({ state, onChange }: Props) {
     })
     .filter((x): x is { svc: ServiceType; qty: number } => x !== null);
 
+  const navigate = useNavigate();
+
   const handlePay = async () => {
     if (customQuote || submitting) return;
     setSubmitting(true);
     setError(null);
     try {
-      await startCheckout({ config: state });
+      // 1) Create (or sign in) Tidy account first so the user is logged in
+      //    no matter what happens with Stripe. Then write the subscription
+      //    + provisional first visit so the dashboard has data.
+      const result = await provisionAccount(state);
+      if (!result.ok) {
+        setError(result.message);
+        setSubmitting(false);
+        return;
+      }
+
+      // 2) Either route to Stripe checkout (when wired) or land directly
+      //    on the calm confirmation moment.
+      if (STRIPE_INTEGRATION_ENABLED) {
+        await startCheckout({ config: state });
+      } else {
+        navigate('/dashboard/confirmation');
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'checkout failed. please try again.');
       setSubmitting(false);
