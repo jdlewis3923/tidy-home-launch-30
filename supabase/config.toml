@@ -17,3 +17,9 @@ verify_jwt = false
 # using JOBBER_WEBHOOK_SECRET.
 [functions.jobber-webhook]
 verify_jwt = false
+
+# Meta redirects the operator's browser here after OAuth consent — no
+# Authorization header is sent. Same single-use ?code pattern as Jobber,
+# plus we validate the `state` param to prevent CSRF.
+[functions.meta-oauth-callback]
+verify_jwt = false
