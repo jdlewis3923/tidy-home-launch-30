@@ -182,11 +182,15 @@ export default function DashboardIndex() {
               >
                 {data.nextVisit ? (
                   <>
-                    <div className="mt-1 flex items-center gap-2 text-sm text-ink-soft">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-ink-soft">
                       <span>{formatLongDate(data.nextVisit.visit_date)}</span>
                       <span>·</span>
                       <span>{data.nextVisit.time_window || TIME_WINDOW_FALLBACK}</span>
-                      <span className="ml-1 inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                      <span className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                        <span className="relative inline-flex h-1.5 w-1.5">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 live-dot" />
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        </span>
                         Scheduled
                       </span>
                     </div>
@@ -628,7 +632,7 @@ function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-[hsl(var(--hairline))]/70 bg-white p-5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ${className}`}
+      className={`motion-card rounded-2xl border border-[hsl(var(--hairline))]/70 bg-white p-5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ${className}`}
     >
       {children}
     </div>
@@ -652,8 +656,8 @@ function SummaryCard({
     <button
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={`text-left rounded-2xl border border-[hsl(var(--hairline))]/70 bg-white p-5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition ${
-        onClick ? 'hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(15,23,42,0.07)]' : ''
+      className={`tactile motion-card text-left rounded-2xl border border-[hsl(var(--hairline))]/70 bg-white p-5 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ${
+        onClick ? 'cursor-pointer' : 'cursor-default'
       }`}
     >
       <div className="flex items-center gap-2 text-sm font-medium text-ink-soft">

@@ -286,6 +286,126 @@
   transform: rotate(6deg);
 }
 
+/* ============================================================
+   Global Motion System (Apple/Stripe/Tesla feel)
+   - Single timing curve, scoped tokens
+   - Button compress, hover lift+glow, reveal-on-scroll
+   ============================================================ */
+
+:root {
+  --ease-tidy: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --d-micro: 120ms;
+  --d-ui: 200ms;
+  --d-section: 360ms;
+}
+
+/* Universal smoother for interactive elements (without smashing existing
+   custom transitions). Buttons + links get a base motion contract. */
+button, a, [role="button"], .interactive {
+  transition:
+    transform var(--d-micro) var(--ease-tidy),
+    box-shadow var(--d-ui) var(--ease-tidy),
+    background-color var(--d-ui) var(--ease-tidy),
+    color var(--d-ui) var(--ease-tidy),
+    border-color var(--d-ui) var(--ease-tidy),
+    opacity var(--d-ui) var(--ease-tidy),
+    filter var(--d-ui) var(--ease-tidy);
+}
+
+/* Compress on press (iOS-style). Excludes nav links + form fields. */
+button:active:not(:disabled),
+[role="button"]:active,
+.tactile:active {
+  transform: scale(0.97);
+  transition-duration: 80ms;
+}
+
+/* Soft lift + brighter primary on hover for primary CTAs */
+.btn-primary,
+button.bg-\[hsl\(var\(--primary\)\)\],
+.tactile-primary {
+  will-change: transform, box-shadow, filter;
+}
+.btn-primary:hover:not(:disabled),
+.tactile-primary:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.015);
+  filter: brightness(1.04);
+  box-shadow: 0 14px 36px -12px hsl(var(--primary) / 0.55);
+}
+.btn-primary:active:not(:disabled),
+.tactile-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Card lift + ultra-subtle tilt — opt-in via .motion-card */
+.motion-card {
+  transition:
+    transform var(--d-ui) var(--ease-tidy),
+    box-shadow var(--d-ui) var(--ease-tidy);
+  will-change: transform;
+}
+.motion-card:hover {
+  transform: translateY(-3px) rotate(-0.3deg);
+  box-shadow: 0 18px 40px -18px hsl(var(--ink) / 0.18);
+}
+
+/* Reveal-on-scroll — applied via <Reveal> component */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(12px);
+  will-change: opacity, transform;
+}
+.reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--d-section) var(--ease-tidy),
+    transform var(--d-section) var(--ease-tidy);
+}
+
+/* Live-state pulsing dot (calmer than animate-ping) */
+@keyframes live-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.95; }
+  50%      { transform: scale(1.18); opacity: 0.6; }
+}
+.live-dot { animation: live-pulse 1.8s var(--ease-tidy) infinite; }
+.live-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  background: hsl(var(--primary) / 0.35);
+  animation: live-pulse 1.8s var(--ease-tidy) infinite;
+  z-index: -1;
+}
+
+/* Animated checkmark draw for success states */
+@keyframes draw-check {
+  to { stroke-dashoffset: 0; }
+}
+.draw-check path {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: draw-check 480ms var(--ease-tidy) 80ms forwards;
+}
+
+/* Subtle input focus highlight (glide, not snap) */
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.18);
+  border-color: hsl(var(--primary) / 0.6) !important;
+  transition: box-shadow var(--d-ui) var(--ease-tidy), border-color var(--d-ui) var(--ease-tidy);
+}
+
+/* Error shake — very subtle (3px) */
+@keyframes calm-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+.calm-shake { animation: calm-shake 220ms var(--ease-tidy); }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-once,
   .animate-slide-down-bar,
@@ -294,10 +414,18 @@
   .animate-bounce-in,
   .animate-bounce-float,
   .animate-float,
-  .animate-sparkle {
+  .animate-sparkle,
+  .live-dot,
+  .draw-check path,
+  .motion-card,
+  .reveal-init {
     animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
   .cta-arrow > .arrow { transition: none !important; }
+  button, a, [role="button"] { transition: none !important; }
 }
 
 /* Force-hide Edit with Lovable badge */
