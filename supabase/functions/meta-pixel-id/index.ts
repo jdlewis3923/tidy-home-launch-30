@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
       _name: 'meta_pixel_id',
     });
     let pixelId = (data as string | null) || ENV_FALLBACK;
-    if (pixelId && pixelId.startsWith('BLOCKED_')) pixelId = '';
+    if (pixelId && /^BLOCKED/i.test(pixelId)) pixelId = '';
     return jsonResponse(
       { pixel_id: pixelId || null },
       200,
