@@ -108,6 +108,10 @@ export default {
           "0%": { opacity: "0", transform: "translateY(8px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "billing-bounce": {
+          "0%, 80%, 100%": { transform: "translateY(0)", opacity: "0.5" },
+          "40%": { transform: "translateY(-6px)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -115,6 +119,7 @@ export default {
         "pulse-gold": "pulse-gold 2s ease-in-out infinite",
         shimmer: "shimmer 1.8s ease-in-out infinite",
         "fade-in": "fade-in 0.4s ease-out",
+        "billing-bounce": "billing-bounce 1.2s ease-in-out infinite",
       },
     },
   },

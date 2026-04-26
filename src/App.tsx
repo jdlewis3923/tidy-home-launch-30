@@ -27,6 +27,7 @@ import DashboardPlan from "./pages/DashboardPlan.tsx";
 import DashboardConfirmation from "./pages/DashboardConfirmation.tsx";
 import Account from "./pages/Account.tsx";
 import Billing from "./pages/Billing.tsx";
+import Help from "./pages/Help.tsx";
 import CheckoutSuccess from "./pages/CheckoutSuccess.tsx";
 import CheckoutCanceled from "./pages/CheckoutCanceled.tsx";
 import SignupRedirect from "./pages/SignupRedirect.tsx";
@@ -130,6 +131,10 @@ const App = () => (
                     returns never 404. */}
                 <Route path="/account" element={<Account />} />
                 <Route path="/billing" element={<Billing />} />
+                <Route
+                  path="/help"
+                  element={CUSTOMER_DASHBOARD_ENABLED ? <Help /> : <Navigate to="/" replace />}
+                />
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/checkout/canceled" element={<CheckoutCanceled />} />
 
