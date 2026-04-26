@@ -25,6 +25,7 @@ export interface ConfigState {
   firstName: string;
   lastName: string;
   email: string;
+  password: string;
   phone: string;
   address: string;
   city: string;
@@ -50,6 +51,7 @@ export const defaultState: ConfigState = {
   firstName: '',
   lastName: '',
   email: '',
+  password: '',
   phone: '',
   address: '',
   city: '',
