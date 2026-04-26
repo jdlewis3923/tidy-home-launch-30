@@ -16,7 +16,8 @@ import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-
 const JOBBER_TOKEN_URL = 'https://api.getjobber.com/api/oauth/token';
 const JOBBER_GRAPHQL_URL = 'https://api.getjobber.com/api/graphql';
 // Jobber API version pin — bump deliberately when upgrading.
-const JOBBER_API_VERSION = '2024-04-01';
+// Verified working 2026-04-26 against account "Tidy".
+const JOBBER_API_VERSION = '2026-04-16';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
