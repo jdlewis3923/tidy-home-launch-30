@@ -26,8 +26,10 @@ const GA4_MEASUREMENT_ID = Deno.env.get('GA4_MEASUREMENT_ID') ?? '';
 const GA4_API_SECRET = Deno.env.get('GA4_API_SECRET') ?? ''; // optional, MP requires it
 const GOOGLE_ADS_CONVERSION_ID = Deno.env.get('GOOGLE_ADS_CONVERSION_ID') ?? '';
 const GOOGLE_ADS_CONVERSION_LABELS_RAW = Deno.env.get('GOOGLE_ADS_CONVERSION_LABELS') ?? '';
-const META_PIXEL_ID = Deno.env.get('META_PIXEL_ID') ?? '';
-const META_CAPI_ACCESS_TOKEN = Deno.env.get('META_CAPI_ACCESS_TOKEN') ?? '';
+// Meta env vars are an OPTIONAL bootstrap path. The vault values written
+// by meta-oauth-callback take precedence — see fetchMetaSecrets() below.
+const META_PIXEL_ID_ENV = Deno.env.get('META_PIXEL_ID') ?? '';
+const META_CAPI_ACCESS_TOKEN_ENV = Deno.env.get('META_CAPI_ACCESS_TOKEN') ?? '';
 const META_TEST_EVENT_CODE = Deno.env.get('META_TEST_EVENT_CODE') ?? ''; // optional
 
 // ---------- helpers ----------
