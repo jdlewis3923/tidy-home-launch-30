@@ -13,6 +13,7 @@ import StepReview from '@/components/dashboard/steps/StepReview';
 import StepPayment from '@/components/dashboard/steps/StepPayment';
 import PromoBanner from '@/components/dashboard/PromoBanner';
 import CustomQuoteModal from '@/components/dashboard/CustomQuoteModal';
+import ExistingAccountInline from '@/components/dashboard/ExistingAccountInline';
 
 const STEPS = [
   { heading: 'What do you want handled?', sub: 'Pick one, two, or all three. The more you bundle, the more you save.', cta: 'Continue →' },
