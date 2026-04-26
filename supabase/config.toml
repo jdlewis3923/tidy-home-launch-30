@@ -1,1 +1,7 @@
 project_id = "vcdhpsfuilrrrqfhfsjt"
+
+# Stripe sends webhooks without an Authorization header — JWT verification
+# would 401 every event. We verify the request authenticity via Stripe's
+# HMAC signature (constructEventAsync) inside the handler.
+[functions.stripe-webhook]
+verify_jwt = false
