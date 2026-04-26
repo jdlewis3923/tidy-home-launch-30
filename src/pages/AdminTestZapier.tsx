@@ -113,6 +113,22 @@ export default function AdminTestZapier() {
     setRunning(null);
   };
 
+  const [configState, setConfigState] = useState<"idle" | "running" | "done" | "error">("idle");
+  const [configMsg, setConfigMsg] = useState<string>("");
+
+  const configureTrigger = async () => {
+    setConfigState("running");
+    setConfigMsg("");
+    const { data, error } = await supabase.functions.invoke("setup-welcome-trigger", { body: {} });
+    if (error || !data?.ok) {
+      setConfigState("error");
+      setConfigMsg(error?.message ?? data?.error ?? "Unknown error");
+      return;
+    }
+    setConfigState("done");
+    setConfigMsg("Trigger key stored in vault. welcome_signup trigger will now fire on new signups.");
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-16">
       <div className="mx-auto max-w-3xl">
@@ -122,6 +138,31 @@ export default function AdminTestZapier() {
           payload. Events without a configured <code>ZAP_*_URL</code> secret return{" "}
           <code>skipped: "no_url_configured"</code> — that's expected for events not yet wired.
         </p>
+
+        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
+          <p className="text-sm font-semibold text-slate-900">One-time: configure welcome_signup DB trigger</p>
+          <p className="mt-1 text-xs text-slate-600">
+            Stores the service role key in pg vault so the auth.users insert trigger can authenticate
+            its call to send-zapier-event. Idempotent.
+          </p>
+          <button
+            type="button"
+            onClick={configureTrigger}
+            disabled={configState === "running"}
+            className="mt-3 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+          >
+            {configState === "running" ? "Configuring…" : "Configure trigger key"}
+          </button>
+          {configState !== "idle" && (
+            <p
+              className={`mt-2 text-xs ${
+                configState === "done" ? "text-emerald-700" : configState === "error" ? "text-rose-700" : "text-slate-600"
+              }`}
+            >
+              {configMsg}
+            </p>
+          )}
+        </div>
 
         <div className="mt-6 flex items-center gap-3 text-sm">
           <span className="font-semibold text-slate-700">Lang:</span>
