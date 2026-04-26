@@ -1,22 +1,21 @@
 import tidyLogo from "@/assets/tidy-logo.png";
 
 const TidyLogo = ({ size = "md", withBackground = false }: { size?: "sm" | "md" | "lg"; withBackground?: boolean }) => {
+  // withBackground prop kept for API compatibility but no longer renders a white circle —
+  // the logo now floats directly on the surface for a cleaner, larger presence.
   const sizes = {
-    sm: { img: "w-8 h-8", bg: "w-12 h-12" },
-    md: { img: "w-11 h-11", bg: "w-16 h-16" },
-    lg: { img: "w-full h-full", bg: "w-32 h-32" },
+    sm: "w-16 h-16",
+    md: "w-24 h-24",
+    lg: "w-64 h-64 md:w-72 md:h-72",
   };
-  const s = sizes[size];
 
-  if (withBackground) {
-    return (
-      <div className={`${s.bg} rounded-full bg-white flex items-center justify-center shadow-md overflow-hidden`}>
-        <img src={tidyLogo} alt="Tidy Home Concierge" className={`${s.img} object-contain`} />
-      </div>
-    );
-  }
-
-  return <img src={tidyLogo} alt="Tidy Home Concierge" className={`${s.img} object-contain`} />;
+  return (
+    <img
+      src={tidyLogo}
+      alt="Tidy Home Concierge"
+      className={`${sizes[size]} object-contain drop-shadow-[0_8px_24px_rgba(15,23,42,0.18)]`}
+    />
+  );
 };
 
 export default TidyLogo;

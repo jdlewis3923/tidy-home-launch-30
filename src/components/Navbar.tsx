@@ -51,9 +51,9 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
   if (CUSTOMER_DASHBOARD_ENABLED) {
     return (
       <nav className={`fixed top-0 left-0 right-0 z-50 bg-background border-b transition-shadow duration-300 ${scrolled ? "shadow-md" : ""}`}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 h-24 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" aria-label="Tidy home">
+            <Link to="/" aria-label="Tidy home" className="flex items-center">
               <TidyLogo size="md" />
             </Link>
             <div className="relative">
@@ -98,8 +98,8 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
   // --- DASHBOARD OFF: pre-launch navbar with route-based links ---
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 bg-background border-b transition-shadow duration-300 ${scrolled ? "shadow-md" : ""}`}>
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" aria-label="Tidy home">
+      <div className="max-w-7xl mx-auto px-4 h-24 flex items-center justify-between">
+        <Link to="/" aria-label="Tidy home" className="flex items-center">
           <TidyLogo size="md" />
         </Link>
 

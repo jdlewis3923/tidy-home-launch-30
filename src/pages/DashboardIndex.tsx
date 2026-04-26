@@ -111,7 +111,7 @@ const DashboardIndex = () => {
       {/* Footer */}
       <footer className="border-t border-border py-8">
         <div className="mx-auto max-w-6xl px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <img src={tidyLogo} alt="Tidy" className="h-16 w-auto" />
+          <img src={tidyLogo} alt="Tidy" className="h-32 w-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.18)]" />
           <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Tidy Home Concierge. All rights reserved.</p>
         </div>
       </footer>
