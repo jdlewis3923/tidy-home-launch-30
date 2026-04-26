@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      integration_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          event: string
+          id: string
+          latency_ms: number | null
+          payload_hash: string | null
+          source: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          event: string
+          id?: string
+          latency_ms?: number | null
+          payload_hash?: string | null
+          source: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          event?: string
+          id?: string
+          latency_ms?: number | null
+          payload_hash?: string | null
+          source?: string
+          status?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount_cents: number
@@ -70,12 +103,15 @@ export type Database = {
           first_name: string | null
           gate_code: string | null
           id: string
+          language: string
           last_name: string | null
           parking_notes: string | null
           pets: string | null
           phone: string | null
           preferred_day: string | null
           preferred_time: string | null
+          sms_opt_in: boolean
+          sms_opt_out: boolean
           special_instructions: string | null
           updated_at: string
           user_id: string
@@ -89,12 +125,15 @@ export type Database = {
           first_name?: string | null
           gate_code?: string | null
           id?: string
+          language?: string
           last_name?: string | null
           parking_notes?: string | null
           pets?: string | null
           phone?: string | null
           preferred_day?: string | null
           preferred_time?: string | null
+          sms_opt_in?: boolean
+          sms_opt_out?: boolean
           special_instructions?: string | null
           updated_at?: string
           user_id: string
@@ -108,12 +147,15 @@ export type Database = {
           first_name?: string | null
           gate_code?: string | null
           id?: string
+          language?: string
           last_name?: string | null
           parking_notes?: string | null
           pets?: string | null
           phone?: string | null
           preferred_day?: string | null
           preferred_time?: string | null
+          sms_opt_in?: boolean
+          sms_opt_out?: boolean
           special_instructions?: string | null
           updated_at?: string
           user_id?: string
@@ -156,6 +198,27 @@ export type Database = {
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_subscription_id?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -215,9 +278,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_user_admin: { Args: never; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "customer" | "crew" | "admin"
       invoice_status: "paid" | "pending" | "failed" | "refunded"
       service_type: "cleaning" | "lawn" | "detailing"
       subscription_frequency: "weekly" | "biweekly" | "monthly"
@@ -355,6 +426,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["customer", "crew", "admin"],
       invoice_status: ["paid", "pending", "failed", "refunded"],
       service_type: ["cleaning", "lawn", "detailing"],
       subscription_frequency: ["weekly", "biweekly", "monthly"],
