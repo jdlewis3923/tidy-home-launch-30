@@ -7,6 +7,7 @@
  */
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Visit = Tables<'visits'>;
@@ -32,6 +33,12 @@ export default function ScheduleCalendar({
     const d = new Date(selectedDate + 'T12:00:00');
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
+  const [direction, setDirection] = useState(0);
+
+  const goMonth = (delta: number) => {
+    setDirection(delta);
+    setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + delta, 1));
+  };
 
   const visitsByDate = useMemo(() => {
     const map = new Map<string, Set<string>>();
@@ -84,29 +91,79 @@ export default function ScheduleCalendar({
         <button
           type="button"
           aria-label="Previous month"
-          onClick={() =>
-            setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))
-          }
+          onClick={() => goMonth(-1)}
           className="grid h-7 w-7 place-items-center rounded-full text-ink-faint transition hover:bg-cream hover:text-ink"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <span className="text-sm font-semibold tracking-tight text-ink">
+        <span className="text-sm font-semibold tracking-tight text-ink min-w-[140px] text-center">
           {cursor.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </span>
         <button
           type="button"
           aria-label="Next month"
-          onClick={() =>
-            setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))
-          }
+          onClick={() => goMonth(1)}
           className="grid h-7 w-7 place-items-center rounded-full text-ink-faint transition hover:bg-cream hover:text-ink"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-y-2 text-center">
+      <div className="relative overflow-hidden">
+        <AnimatePresence mode="wait" initial={false} custom={direction}>
+          <motion.div
+            key={cursor.toISOString().slice(0, 7)}
+            custom={direction}
+            initial={{ opacity: 0, x: direction === 0 ? 0 : direction * 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: direction * -24 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            className="grid grid-cols-7 gap-y-2 text-center"
+          >
+            {WEEK.map((w) => (
+              <div key={w} className="text-[10px] font-semibold tracking-[0.12em] text-ink-faint">
+                {w}
+              </div>
+            ))}
+
+            {cells.map((c) => {
+              const isSelected = c.iso === selectedDate;
+              const isToday = c.iso === todayISO;
+              const services = Array.from(visitsByDate.get(c.iso) ?? []);
+              return (
+                <button
+                  key={c.iso}
+                  type="button"
+                  onClick={() => onSelect(c.iso)}
+                  className={`relative mx-auto flex h-9 w-9 flex-col items-center justify-center rounded-full text-[13px] transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                    isSelected
+                      ? 'bg-ink font-semibold text-white shadow-[0_6px_18px_-6px_hsl(var(--ink)/0.45)] scale-110'
+                      : isToday
+                        ? 'font-semibold text-[hsl(var(--primary))]'
+                        : c.inMonth
+                          ? 'text-ink hover:bg-cream hover:scale-105'
+                          : 'text-ink-faint/50'
+                  }`}
+                >
+                  <span className="leading-none">{c.day}</span>
+                  {services.length > 0 && (
+                    <span className="absolute bottom-1 flex gap-0.5">
+                      {services.slice(0, 3).map((s) => (
+                        <span
+                          key={s}
+                          className={`h-1 w-1 rounded-full ${
+                            SERVICE_DOT[s] ?? 'bg-ink-faint'
+                          } ${isSelected ? 'opacity-90' : ''}`}
+                        />
+                      ))}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
+      </div>
         {WEEK.map((w) => (
           <div key={w} className="text-[10px] font-semibold tracking-[0.12em] text-ink-faint">
             {w}
