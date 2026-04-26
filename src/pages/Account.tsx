@@ -85,7 +85,7 @@ export default function Account() {
           >
             <Row k="Name" v={fullName} />
             <Row k="Phone" v={p?.phone || "—"} icon={<Phone className="h-3.5 w-3.5" />} />
-            <Row k="Email" v={data.email || "—"} icon={<Mail className="h-3.5 w-3.5" />} />
+            <Row k="ZIP" v={p?.zip || "—"} icon={<Mail className="h-3.5 w-3.5" />} />
           </AccountCard>
 
           <AccountCard
@@ -173,7 +173,7 @@ export default function Account() {
             ? "Update access & pets"
             : "Update preferences"
         }
-        description="Send us a quick note and we'll update your file within the hour."
+        subtitle="Send us a quick note and we'll update your file within the hour."
       >
         <p className="text-sm text-ink-soft">
           For now, please text us at{" "}
