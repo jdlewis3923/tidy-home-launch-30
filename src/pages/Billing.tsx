@@ -136,7 +136,7 @@ export default function Billing() {
                   </>
                 ) : (
                   <>
-                    Open billing portal
+                    Update payment method
                     <ExternalLink className="h-4 w-4" />
                   </>
                 )}
