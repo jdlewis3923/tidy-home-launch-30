@@ -226,6 +226,8 @@ export type Database = {
           created_at: string
           frequency: Database["public"]["Enums"]["subscription_frequency"]
           id: string
+          jobber_client_id: string | null
+          jobber_job_ids: Json
           monthly_total_cents: number
           next_billing_date: string | null
           services: Database["public"]["Enums"]["service_type"][]
@@ -240,6 +242,8 @@ export type Database = {
           created_at?: string
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
+          jobber_client_id?: string | null
+          jobber_job_ids?: Json
           monthly_total_cents?: number
           next_billing_date?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
@@ -254,6 +258,8 @@ export type Database = {
           created_at?: string
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
+          jobber_client_id?: string | null
+          jobber_job_ids?: Json
           monthly_total_cents?: number
           next_billing_date?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
@@ -291,6 +297,7 @@ export type Database = {
           created_at: string
           id: string
           jobber_job_id: string | null
+          jobber_visit_id: string | null
           notes: string | null
           service: Database["public"]["Enums"]["service_type"]
           status: Database["public"]["Enums"]["visit_status"]
@@ -304,6 +311,7 @@ export type Database = {
           created_at?: string
           id?: string
           jobber_job_id?: string | null
+          jobber_visit_id?: string | null
           notes?: string | null
           service: Database["public"]["Enums"]["service_type"]
           status?: Database["public"]["Enums"]["visit_status"]
@@ -317,6 +325,7 @@ export type Database = {
           created_at?: string
           id?: string
           jobber_job_id?: string | null
+          jobber_visit_id?: string | null
           notes?: string | null
           service?: Database["public"]["Enums"]["service_type"]
           status?: Database["public"]["Enums"]["visit_status"]
