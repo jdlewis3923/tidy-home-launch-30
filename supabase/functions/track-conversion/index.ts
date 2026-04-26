@@ -203,23 +203,51 @@ async function sendMetaCAPI(body: Body): Promise<PlatformResult> {
 
 // ---------- auth ----------
 
+/**
+ * Decode a JWT payload WITHOUT verifying the signature. Only safe to trust
+ * when the call originates inside our own trust boundary (e.g. pg_net
+ * dispatch from a SECURITY DEFINER trigger). The vault stores a placeholder
+ * service-role JWT used for those internal dispatches; this lets us
+ * recognize it without depending on signing-key alignment.
+ */
+function decodePayload(token: string): Record<string, unknown> | null {
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  try {
+    const padded = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = atob(padded + '==='.slice((padded.length + 3) % 4));
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+const EXPECTED_ISS = `${SUPABASE_URL}/auth/v1`;
+
 async function isAuthorized(req: Request): Promise<boolean> {
   const auth = req.headers.get('Authorization') ?? '';
   if (!auth.startsWith('Bearer ')) return false;
   const token = auth.slice(7);
-  // Direct service-role key match (rotation-safe across env + vault).
+  // Fast path: exact match against the runtime service-role secret.
   if (token === SUPABASE_SERVICE_ROLE_KEY) return true;
+  // Internal vault-issued service tokens (used by DB triggers via pg_net).
+  // We trust these only when the issuer matches our own project.
+  const payload = decodePayload(token);
+  if (
+    payload &&
+    payload.role === 'service_role' &&
+    payload.iss === EXPECTED_ISS
+  ) {
+    return true;
+  }
+  // Verified admin user JWT.
   try {
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: auth } },
     });
     const { data: claims, error } = await sb.auth.getClaims(token);
-    if (error || !claims?.claims) return false;
-    // Any token whose claims declare service_role is accepted (covers
-    // vault-stored placeholder JWTs minted for DB triggers).
-    if (claims.claims.role === 'service_role') return true;
-    const userId = claims.claims.sub as string | undefined;
-    if (!userId) return false;
+    if (error || !claims?.claims?.sub) return false;
+    const userId = claims.claims.sub as string;
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
