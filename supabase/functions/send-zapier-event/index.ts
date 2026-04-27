@@ -204,41 +204,49 @@ Deno.serve(async (req) => {
 
   const { event_name, payload, lang, user_id } = parsed.data;
 
-  try {
-    const result = await withLogging({
-      source: 'zapier',
-      event: event_name,
-      payload: { user_id, lang, payload },
-      fn: async () => {
-        const url = envUrlFor(event_name);
-        if (!url) {
-          console.log(`[send-zapier-event] no URL configured for ${event_name} — skipping`);
-          return { ok: true as const, skipped: 'no_url_configured' as const };
-        }
+  // Run Zapier dispatch + direct Twilio dispatch in parallel.
+  // Zapier feeds Brevo emails; Twilio handles SMS directly post-pivot.
+  const zapierPromise = withLogging({
+    source: 'zapier',
+    event: event_name,
+    payload: { user_id, lang, payload },
+    fn: async () => {
+      const url = envUrlFor(event_name);
+      if (!url) {
+        console.log(`[send-zapier-event] no URL configured for ${event_name} — skipping`);
+        return { ok: true as const, skipped: 'no_url_configured' as const };
+      }
 
-        const body = { event_name, lang, user_id, ...payload };
+      const body = { event_name, lang, user_id, ...payload };
 
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
 
-        // Drain body to avoid leaks.
-        const text = await res.text().catch(() => '');
+      const text = await res.text().catch(() => '');
 
-        if (!res.ok) {
-          throw new Error(`zapier ${event_name} returned ${res.status}: ${text.slice(0, 200)}`);
-        }
+      if (!res.ok) {
+        throw new Error(`zapier ${event_name} returned ${res.status}: ${text.slice(0, 200)}`);
+      }
 
-        return { ok: true as const, status: res.status, dispatched: true as const };
-      },
-    });
-
-    return jsonResponse(result, 200);
-  } catch (err) {
+      return { ok: true as const, status: res.status, dispatched: true as const };
+    },
+  }).catch((err) => {
     const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('[send-zapier-event] failed', event_name, message);
-    return jsonResponse({ ok: false, error: message }, 500);
-  }
+    console.error('[send-zapier-event] zapier failed', event_name, message);
+    return { ok: false as const, error: message };
+  });
+
+  const twilioPromise = isSmsEvent(event_name)
+    ? dispatchTwilioSms(event_name, payload, user_id)
+    : Promise.resolve({ attempted: false, ok: false, reason: 'event_not_sms' as const });
+
+  const [zapier, twilio] = await Promise.all([zapierPromise, twilioPromise]);
+
+  // Overall ok = zapier ok (twilio is best-effort and reported separately).
+  const overallOk = (zapier as { ok?: boolean }).ok !== false;
+  return jsonResponse({ ok: overallOk, zapier, twilio }, overallOk ? 200 : 500);
 });
+
