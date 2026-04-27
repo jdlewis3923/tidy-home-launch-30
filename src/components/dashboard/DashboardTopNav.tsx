@@ -48,7 +48,7 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
           />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           {NAV.map((item) => {
             const active =
               item.href === '/dashboard'
@@ -71,6 +71,40 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
               </Link>
             );
           })}
+
+          {isAdmin && (
+            <>
+              <span
+                aria-hidden
+                className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-faint"
+              >
+                <span className="h-px w-4 bg-[hsl(var(--hairline))]" />
+                Admin
+                <span className="h-px w-4 bg-[hsl(var(--hairline))]" />
+              </span>
+              {ADMIN_NAV.map((item) => {
+                const active = location.pathname.startsWith(item.href);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.href}
+                    className={`relative inline-flex items-center gap-1.5 text-sm font-medium tracking-tight transition-colors ${
+                      active
+                        ? 'text-[hsl(var(--primary))]'
+                        : 'text-ink-soft hover:text-ink'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                    {active && (
+                      <span className="absolute -bottom-[14px] left-0 right-0 h-[2px] rounded-full bg-[hsl(var(--primary))]" />
+                    )}
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
