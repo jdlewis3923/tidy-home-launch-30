@@ -316,16 +316,19 @@ export default function AdminSchedule() {
       </Helmet>
 
       <div className="mx-auto max-w-7xl px-4 py-6">
-        <header className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <header className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Social Scheduler</h1>
             <p className="text-sm text-muted-foreground">
-              30-day Instagram + Facebook auto-posts. Cron fires every minute.
+              30-day Instagram + Facebook auto-posts. Cron checks every minute (only fires when scheduler is ACTIVE).
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-sm">
             <Badge variant="default" className="gap-1">
               <CheckCircle2 className="h-3.5 w-3.5" /> {counts.posted} posted
+            </Badge>
+            <Badge variant="secondary" className="gap-1">
+              <PauseCircle className="h-3.5 w-3.5" /> {counts.paused} paused
             </Badge>
             <Badge variant="outline" className="gap-1">
               <Clock className="h-3.5 w-3.5" /> {counts.scheduled} scheduled
@@ -340,11 +343,65 @@ export default function AdminSchedule() {
                 <Loader2 className="h-3.5 w-3.5 animate-spin" /> {counts.posting} posting
               </Badge>
             )}
-            <Badge variant="destructive" className="gap-1">
-              <AlertTriangle className="h-3.5 w-3.5" /> {counts.failed} failed
-            </Badge>
+            {counts.failed > 0 && (
+              <Badge variant="destructive" className="gap-1">
+                <AlertTriangle className="h-3.5 w-3.5" /> {counts.failed} failed
+              </Badge>
+            )}
           </div>
         </header>
+
+        {/* Master kill-switch */}
+        <div
+          className={cn(
+            "mb-6 flex flex-col items-start justify-between gap-3 rounded-lg border-2 p-4 md:flex-row md:items-center",
+            schedulerPaused === false
+              ? "border-emerald-500/50 bg-emerald-500/5"
+              : "border-destructive bg-destructive/5",
+          )}
+        >
+          <div className="flex items-start gap-3">
+            <div
+              className={cn(
+                "mt-0.5 flex h-10 w-10 items-center justify-center rounded-full",
+                schedulerPaused === false ? "bg-emerald-500/15 text-emerald-700" : "bg-destructive/15 text-destructive",
+              )}
+            >
+              {schedulerPaused === false ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
+            </div>
+            <div>
+              <div className="text-base font-bold">
+                Scheduler is{" "}
+                {schedulerPaused === null
+                  ? "loading…"
+                  : schedulerPaused
+                    ? "PAUSED"
+                    : "ACTIVE"}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {schedulerPaused
+                  ? "No posts will fire until you resume. Use individual “Post now” to test single posts safely."
+                  : "Cron will publish every scheduled post when its time arrives. Pause to halt everything."}
+              </p>
+            </div>
+          </div>
+          <Button
+            size="lg"
+            variant={schedulerPaused ? "default" : "destructive"}
+            onClick={togglePause}
+            disabled={pauseBusy || schedulerPaused === null}
+            className="min-w-[180px] text-base font-bold"
+          >
+            {pauseBusy ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : schedulerPaused ? (
+              <Play className="mr-2 h-5 w-5" />
+            ) : (
+              <Pause className="mr-2 h-5 w-5" />
+            )}
+            {schedulerPaused ? "RESUME ALL" : "PAUSE ALL"}
+          </Button>
+        </div>
 
         {/* Upload zone */}
         <div
