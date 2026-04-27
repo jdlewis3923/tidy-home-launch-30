@@ -13,7 +13,7 @@ const TidyLogo = ({ size = "md", withBackground = false }: { size?: "sm" | "md" 
     <img
       src={tidyLogo}
       alt="Tidy Home Concierge"
-      className={`${sizes[size]} object-contain drop-shadow-[0_8px_24px_rgba(15,23,42,0.18)]`}
+      className={`${sizes[size]} object-contain`}
     />
   );
 };
