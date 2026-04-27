@@ -31,6 +31,7 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [hasUnread] = useState(true);
+  const isAdmin = useHasRole('admin');
 
   useEffect(() => {
     setOpen(false);
