@@ -43,6 +43,7 @@ const CheckoutCanceled = lazy(() => import("./pages/CheckoutCanceled.tsx"));
 const AdminSetupCatalog = lazy(() => import("./pages/AdminSetupCatalog.tsx"));
 const AdminTestZapier = lazy(() => import("./pages/AdminTestZapier.tsx"));
 const AdminHealth = lazy(() => import("./pages/AdminHealth.tsx"));
+const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.tsx"));
 
 const queryClient = new QueryClient();
 
