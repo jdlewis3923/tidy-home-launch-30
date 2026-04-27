@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-type Status = "scheduled" | "ready" | "posting" | "posted" | "failed";
+type Status = "scheduled" | "ready" | "posting" | "posted" | "failed" | "paused";
 
 type Post = {
   id: string;
@@ -45,7 +45,7 @@ type Post = {
   updated_at?: string;
 };
 
-type Filter = "all" | "scheduled" | "ready" | "posted" | "failed";
+type Filter = "all" | "scheduled" | "ready" | "posted" | "failed" | "paused";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
