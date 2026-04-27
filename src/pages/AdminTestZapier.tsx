@@ -244,3 +244,83 @@ export default function AdminTestZapier() {
     </div>
   );
 }
+
+// -----------------------------------------------------------------------------
+// Twilio direct-send self-test (Phase 6 pivot)
+// -----------------------------------------------------------------------------
+function TwilioSelfTest() {
+  const [to, setTo] = useState("+17868291141");
+  const [body, setBody] = useState(
+    "Tidy backend test — Phase 6 SMS now self-served via direct Twilio.",
+  );
+  const [key, setKey] = useState("phase6_self_test_001");
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+
+  const fire = async () => {
+    setRunning(true);
+    setResult(null);
+    const { data: sess } = await supabase.auth.getSession();
+    if (!sess.session) {
+      setResult({ ok: false, error: "Sign in as admin first." });
+      setRunning(false);
+      return;
+    }
+    const { data, error } = await supabase.functions.invoke("send-twilio-sms", {
+      body: { to_phone_e164: to, body, idempotency_key: key },
+    });
+    if (error) setResult({ ok: false, error: error.message });
+    else setResult(data as Record<string, unknown>);
+    setRunning(false);
+  };
+
+  return (
+    <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
+      <p className="text-sm font-semibold text-slate-900">Twilio direct SMS self-test</p>
+      <p className="mt-1 text-xs text-slate-600">
+        Calls <code>send-twilio-sms</code> directly. Quiet hours (9pm–9am ET) will return{" "}
+        <code>sent: false, reason: "quiet_hours"</code>. Same idempotency key within 24h dedupes.
+      </p>
+      <div className="mt-3 grid gap-2">
+        <input
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
+          placeholder="+17868291141"
+          className="rounded-md border border-slate-300 px-3 py-2 text-xs"
+        />
+        <input
+          value={key}
+          onChange={(e) => setKey(e.target.value)}
+          placeholder="idempotency_key"
+          className="rounded-md border border-slate-300 px-3 py-2 text-xs"
+        />
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          rows={2}
+          className="rounded-md border border-slate-300 px-3 py-2 text-xs"
+        />
+        <button
+          type="button"
+          onClick={fire}
+          disabled={running}
+          className="self-start rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-500 disabled:opacity-50"
+        >
+          {running ? "Sending…" : "Send test SMS"}
+        </button>
+      </div>
+      {result && (
+        <pre
+          className={`mt-3 overflow-x-auto whitespace-pre-wrap break-all rounded-lg border p-3 text-xs ${
+            result.ok
+              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+              : "border-rose-200 bg-rose-50 text-rose-800"
+          }`}
+        >
+          {JSON.stringify(result, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
+}
+
