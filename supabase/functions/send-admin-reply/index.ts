@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 const TIDY_FROM = "+17868291141";
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -83,19 +82,20 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-      const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
-      if (!LOVABLE_API_KEY || !TWILIO_API_KEY) {
+      const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
+      const TWILIO_AUTH_TOKEN_RAW = Deno.env.get("TWILIO_AUTH_TOKEN");
+      if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN_RAW) {
         return new Response(JSON.stringify({ error: "twilio not configured" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const sendResp = await fetch(`${GATEWAY_URL}/Messages.json`, {
+      const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+      const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN_RAW}`);
+      const sendResp = await fetch(url, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "X-Connection-Api-Key": TWILIO_API_KEY,
+          Authorization: `Basic ${basic}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({

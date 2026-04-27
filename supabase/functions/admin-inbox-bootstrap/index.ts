@@ -11,7 +11,6 @@ const corsHeaders = {
 };
 
 const TIDY_PHONE = "+17868291141";
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 const INBOUND_URL = "https://vcdhpsfuilrrrqfhfsjt.supabase.co/functions/v1/twilio-inbound-sms";
 
 Deno.serve(async (req) => {
@@ -45,35 +44,30 @@ Deno.serve(async (req) => {
   const action = new URL(req.url).searchParams.get("action") || "all";
   const out: Record<string, unknown> = {};
 
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
+  const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
   const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
 
   // 1. Configure number
   if (action === "all" || action === "configure") {
-    if (!LOVABLE_API_KEY || !TWILIO_API_KEY) {
-      out.configure = { ok: false, error: "TWILIO_API_KEY/LOVABLE_API_KEY missing" };
+    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
+      out.configure = { ok: false, error: "TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN missing" };
     } else {
       try {
-        const lookup = await fetch(
-          `${GATEWAY_URL}/IncomingPhoneNumbers.json?PhoneNumber=${encodeURIComponent(TIDY_PHONE)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${LOVABLE_API_KEY}`,
-              "X-Connection-Api-Key": TWILIO_API_KEY,
-            },
-          },
-        );
+        const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
+        const lookupUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/IncomingPhoneNumbers.json?PhoneNumber=${encodeURIComponent(TIDY_PHONE)}`;
+        const lookup = await fetch(lookupUrl, {
+          headers: { Authorization: `Basic ${basic}` },
+        });
         const lookupData = await lookup.json();
         const sid = lookupData?.incoming_phone_numbers?.[0]?.sid;
         if (!sid) {
           out.configure = { ok: false, error: "phone not found in account", lookup: lookupData };
         } else {
-          const upd = await fetch(`${GATEWAY_URL}/IncomingPhoneNumbers/${sid}.json`, {
+          const updUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/IncomingPhoneNumbers/${sid}.json`;
+          const upd = await fetch(updUrl, {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${LOVABLE_API_KEY}`,
-              "X-Connection-Api-Key": TWILIO_API_KEY,
+              Authorization: `Basic ${basic}`,
               "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams({ SmsUrl: INBOUND_URL, SmsMethod: "POST" }),
