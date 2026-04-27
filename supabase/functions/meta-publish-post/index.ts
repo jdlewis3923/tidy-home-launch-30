@@ -45,6 +45,12 @@ function publicImageUrl(image_path: string): string {
   return `${SUPABASE_URL}/storage/v1/object/public/social-images/${encodeURI(key)}`;
 }
 
+function resolveImageUrls(post: { image_path: string; image_paths: string[] | null }): string[] {
+  const arr = (post.image_paths ?? []).filter((s) => typeof s === "string" && s.length > 0);
+  if (arr.length > 0) return arr.map(publicImageUrl);
+  return [publicImageUrl(post.image_path)];
+}
+
 // ---------- vault helpers ----------
 
 async function vaultGet(sb: ReturnType<typeof createClient>, name: string): Promise<string | null> {
@@ -189,6 +195,58 @@ async function publishInstagram(
   return pJson.id as string;
 }
 
+async function publishInstagramCarousel(
+  igUserId: string,
+  userToken: string,
+  imageUrls: string[],
+  caption: string,
+): Promise<string> {
+  // Step 1: create child containers (is_carousel_item=true)
+  const childIds: string[] = [];
+  for (const imageUrl of imageUrls) {
+    const u = new URL(`${GRAPH}/${igUserId}/media`);
+    const b = new URLSearchParams({
+      image_url: imageUrl,
+      is_carousel_item: "true",
+      access_token: userToken,
+    });
+    const r = await fetch(u.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: b.toString(),
+    });
+    const j = await r.json();
+    if (!r.ok || !j.id) throw new Error(`IG carousel child failed (${r.status}): ${JSON.stringify(j).slice(0, 400)}`);
+    childIds.push(j.id as string);
+  }
+  // Step 2: create carousel parent
+  const parentUrl = new URL(`${GRAPH}/${igUserId}/media`);
+  const pBody = new URLSearchParams({
+    media_type: "CAROUSEL",
+    children: childIds.join(","),
+    caption,
+    access_token: userToken,
+  });
+  const pRes = await fetch(parentUrl.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: pBody.toString(),
+  });
+  const pJson = await pRes.json();
+  if (!pRes.ok || !pJson.id) throw new Error(`IG carousel parent failed (${pRes.status}): ${JSON.stringify(pJson).slice(0, 400)}`);
+  const creationId = pJson.id as string;
+  // Step 3: publish
+  const pubUrl = new URL(`${GRAPH}/${igUserId}/media_publish`);
+  const pub = await fetch(pubUrl.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ creation_id: creationId, access_token: userToken }).toString(),
+  });
+  const pubJson = await pub.json();
+  if (!pub.ok || !pubJson.id) throw new Error(`IG carousel publish failed (${pub.status}): ${JSON.stringify(pubJson).slice(0, 400)}`);
+  return pubJson.id as string;
+}
+
 // ---------- FB publish ----------
 
 async function publishFacebook(
@@ -213,8 +271,49 @@ async function publishFacebook(
   if (!res.ok || !(data.post_id ?? data.id)) {
     throw new Error(`FB /photos failed (${res.status}): ${JSON.stringify(data).slice(0, 500)}`);
   }
-  // Prefer post_id (links to feed post); fall back to id (photo id).
   return (data.post_id ?? data.id) as string;
+}
+
+async function publishFacebookMultiPhoto(
+  pageId: string,
+  pageToken: string,
+  imageUrls: string[],
+  message: string,
+): Promise<string> {
+  // Step 1: upload each photo unpublished, collect media_fbid
+  const mediaIds: string[] = [];
+  for (const imageUrl of imageUrls) {
+    const u = new URL(`${GRAPH}/${pageId}/photos`);
+    const b = new URLSearchParams({
+      url: imageUrl,
+      published: "false",
+      access_token: pageToken,
+    });
+    const r = await fetch(u.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: b.toString(),
+    });
+    const j = await r.json();
+    if (!r.ok || !j.id) throw new Error(`FB unpublished photo failed (${r.status}): ${JSON.stringify(j).slice(0, 400)}`);
+    mediaIds.push(j.id as string);
+  }
+  // Step 2: publish feed post with attached_media
+  const attached = mediaIds.map((id) => ({ media_fbid: id }));
+  const feedUrl = new URL(`${GRAPH}/${pageId}/feed`);
+  const fBody = new URLSearchParams({
+    message,
+    attached_media: JSON.stringify(attached),
+    access_token: pageToken,
+  });
+  const fRes = await fetch(feedUrl.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: fBody.toString(),
+  });
+  const fJson = await fRes.json();
+  if (!fRes.ok || !fJson.id) throw new Error(`FB /feed multi failed (${fRes.status}): ${JSON.stringify(fJson).slice(0, 400)}`);
+  return fJson.id as string;
 }
 
 // ---------- handler ----------
@@ -240,7 +339,7 @@ Deno.serve(async (req) => {
   // Lock row → 'posting'. Only proceed if it's currently in a postable state.
   const { data: post, error: loadErr } = await sb
     .from("social_posts")
-    .select("id, image_path, caption, status, day_number")
+    .select("id, image_path, image_paths, caption, status, day_number")
     .eq("id", postId)
     .maybeSingle();
   if (loadErr) return json({ error: `load failed: ${loadErr.message}` }, 500);
@@ -258,21 +357,26 @@ Deno.serve(async (req) => {
 
   try {
     const creds = await ensureCredentials(sb);
-    const imageUrl = publicImageUrl(post.image_path);
-    console.log(`[meta-publish-post] day=${post.day_number} image=${imageUrl}`);
+    const imageUrls = resolveImageUrls(post);
+    const isCarousel = imageUrls.length > 1;
+    console.log(`[meta-publish-post] day=${post.day_number} carousel=${isCarousel} count=${imageUrls.length}`);
 
     let igPostId: string | null = null;
     let fbPostId: string | null = null;
     const errors: string[] = [];
 
     try {
-      igPostId = await publishInstagram(creds.ig_user_id, creds.user_token, imageUrl, post.caption);
+      igPostId = isCarousel
+        ? await publishInstagramCarousel(creds.ig_user_id, creds.user_token, imageUrls, post.caption)
+        : await publishInstagram(creds.ig_user_id, creds.user_token, imageUrls[0], post.caption);
       console.log(`[meta-publish-post] IG ok day=${post.day_number} id=${igPostId}`);
     } catch (e) {
       errors.push(`IG: ${e instanceof Error ? e.message : String(e)}`);
     }
     try {
-      fbPostId = await publishFacebook(creds.fb_page_id, creds.fb_page_token, imageUrl, post.caption);
+      fbPostId = isCarousel
+        ? await publishFacebookMultiPhoto(creds.fb_page_id, creds.fb_page_token, imageUrls, post.caption)
+        : await publishFacebook(creds.fb_page_id, creds.fb_page_token, imageUrls[0], post.caption);
       console.log(`[meta-publish-post] FB ok day=${post.day_number} id=${fbPostId}`);
     } catch (e) {
       errors.push(`FB: ${e instanceof Error ? e.message : String(e)}`);

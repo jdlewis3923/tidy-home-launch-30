@@ -263,6 +263,7 @@ export type Database = {
           id: string
           ig_post_id: string | null
           image_path: string
+          image_paths: string[]
           posted_at: string | null
           scheduled_at: string
           status: Database["public"]["Enums"]["social_post_status"]
@@ -277,6 +278,7 @@ export type Database = {
           id?: string
           ig_post_id?: string | null
           image_path: string
+          image_paths?: string[]
           posted_at?: string | null
           scheduled_at: string
           status?: Database["public"]["Enums"]["social_post_status"]
@@ -291,6 +293,7 @@ export type Database = {
           id?: string
           ig_post_id?: string | null
           image_path?: string
+          image_paths?: string[]
           posted_at?: string | null
           scheduled_at?: string
           status?: Database["public"]["Enums"]["social_post_status"]
