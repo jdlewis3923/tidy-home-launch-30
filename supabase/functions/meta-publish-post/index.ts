@@ -198,22 +198,41 @@ async function publishInstagram(
   }
   const creationId = cJson.id as string;
 
-  // Step 2: publish
+  // Step 2: wait for container to finish processing (Meta race fix)
+  await waitForIgContainer(creationId, userToken);
+
+  // Step 3: publish (with one retry on transient "not ready")
   const pubUrl = new URL(`${GRAPH}/${igUserId}/media_publish`);
-  const pBody = new URLSearchParams({
-    creation_id: creationId,
-    access_token: userToken,
-  });
-  const pRes = await fetch(pubUrl.toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: pBody.toString(),
-  });
-  const pJson = await pRes.json();
+  const doPublish = async () => {
+    const r = await fetch(pubUrl.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ creation_id: creationId, access_token: userToken }).toString(),
+    });
+    return { res: r, json: await r.json() };
+  };
+  let { res: pRes, json: pJson } = await doPublish();
+  if (!pRes.ok && JSON.stringify(pJson).includes("2207027")) {
+    await new Promise((r) => setTimeout(r, 5000));
+    ({ res: pRes, json: pJson } = await doPublish());
+  }
   if (!pRes.ok || !pJson.id) {
     throw new Error(`IG media_publish failed (${pRes.status}): ${JSON.stringify(pJson).slice(0, 500)}`);
   }
   return pJson.id as string;
+}
+
+async function waitForIgContainer(creationId: string, token: string, maxMs = 25000) {
+  const started = Date.now();
+  while (Date.now() - started < maxMs) {
+    const r = await fetch(
+      `${GRAPH}/${creationId}?fields=status_code&access_token=${encodeURIComponent(token)}`,
+    );
+    const j = await r.json().catch(() => ({}));
+    if (j?.status_code === "FINISHED") return;
+    if (j?.status_code === "ERROR") throw new Error(`IG container processing ERROR: ${JSON.stringify(j)}`);
+    await new Promise((r) => setTimeout(r, 2000));
+  }
 }
 
 async function publishInstagramCarousel(
@@ -256,14 +275,22 @@ async function publishInstagramCarousel(
   const pJson = await pRes.json();
   if (!pRes.ok || !pJson.id) throw new Error(`IG carousel parent failed (${pRes.status}): ${JSON.stringify(pJson).slice(0, 400)}`);
   const creationId = pJson.id as string;
-  // Step 3: publish
+  // Step 3: wait for processing then publish (with one retry on transient race)
+  await waitForIgContainer(creationId, userToken);
   const pubUrl = new URL(`${GRAPH}/${igUserId}/media_publish`);
-  const pub = await fetch(pubUrl.toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ creation_id: creationId, access_token: userToken }).toString(),
-  });
-  const pubJson = await pub.json();
+  const doPub = async () => {
+    const r = await fetch(pubUrl.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ creation_id: creationId, access_token: userToken }).toString(),
+    });
+    return { res: r, json: await r.json() };
+  };
+  let { res: pub, json: pubJson } = await doPub();
+  if (!pub.ok && JSON.stringify(pubJson).includes("2207027")) {
+    await new Promise((r) => setTimeout(r, 5000));
+    ({ res: pub, json: pubJson } = await doPub());
+  }
   if (!pub.ok || !pubJson.id) throw new Error(`IG carousel publish failed (${pub.status}): ${JSON.stringify(pubJson).slice(0, 400)}`);
   return pubJson.id as string;
 }
