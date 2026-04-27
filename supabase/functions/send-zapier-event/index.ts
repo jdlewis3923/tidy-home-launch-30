@@ -30,6 +30,8 @@ const EventNameSchema = z.enum([
   'visit_scheduled',
   'visit_on_the_way',
   'visit_complete',
+  'visit_canceled',
+  'visit_rescheduled',
   'payment_failed',
   'password_reset',
 ]);
