@@ -266,22 +266,17 @@ async function createPixelOnAdAccount(adAccountId: string, longToken: string): P
   return json.id as string;
 }
 
-async function mintCapiToken(pixelId: string, longToken: string): Promise<string> {
-  const url = new URL(`${GRAPH}/${pixelId}/conversions_api_tokens`);
-  const body = new URLSearchParams({ access_token: longToken });
-  const res = await fetch(url.toString(), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
-  });
-  const json = await res.json();
-  if (!res.ok || !(json.access_token || json.data?.[0]?.access_token)) {
-    throw new Error(`capi token mint failed (${res.status}): ${JSON.stringify(json).slice(0, 300)}`);
-  }
-  // The response shape can be { access_token } or { data: [{ access_token }] }
-  // depending on Graph version — handle both.
-  return (json.access_token ?? json.data[0].access_token) as string;
-}
+// NOTE: Meta does not expose a public Graph API endpoint to programmatically
+// mint a pixel-scoped CAPI token (the "Generate Access Token" button in
+// Events Manager creates a System User token via an internal flow). For now
+// we alias the long-lived user access token as the CAPI token — Meta's CAPI
+// accepts user access tokens for authentication.
+//
+// Hardening note: META_CAPI_ACCESS_TOKEN currently aliases the user access
+// token (60-day expiry). For production scale, replace with a system user
+// token by (a) POST /{business_id}/system_users to create, (b) POST
+// /{business_id}/system_user_access_tokens to mint a permanent token.
+// Defer until billing volume justifies hardening.
 
 // ---------- vault persistence ----------
 
