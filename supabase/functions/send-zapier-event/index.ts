@@ -47,6 +47,102 @@ function envUrlFor(eventName: string): string | undefined {
   return Deno.env.get(`ZAP_${eventName.toUpperCase()}_URL`);
 }
 
+// ---------------------------------------------------------------------------
+// SMS templating + direct Twilio dispatch (Phase 6 architectural pivot)
+// ---------------------------------------------------------------------------
+//
+// Edge functions used to rely on Zapier to drive Twilio. The Zapier UI is
+// unworkable for SMS in our automation, so we now POST directly to Twilio via
+// the `send-twilio-sms` edge function. We KEEP the Zapier dispatch firing in
+// parallel because Brevo email Zaps still subscribe to the same webhooks.
+
+type SmsEventName =
+  | 'welcome_signup'
+  | 'subscription_confirmed'
+  | 'payment_failed'
+  | 'visit_complete'
+  | 'visit_canceled'
+  | 'visit_rescheduled';
+
+const SMS_TEMPLATES: Record<SmsEventName, (p: Record<string, unknown>) => string> = {
+  welcome_signup: (p) =>
+    `Hi ${str(p.first_name, 'there')}, welcome to Tidy! Your account is ready: https://jointidy.co/dashboard. Reply STOP to opt out.`,
+  subscription_confirmed: (p) =>
+    `Tidy: Subscription confirmed (${str(p.services_display, 'your services')}, ${str(p.frequency_display, 'your plan')}). First visit details emailed. Manage: ${str(p.dashboard_url, 'https://jointidy.co/dashboard')}`,
+  payment_failed: (p) =>
+    `Tidy: Card declined for ${str(p.amount_due_display, 'your latest invoice')}. Update payment to keep service: ${str(p.update_payment_url, 'https://jointidy.co/billing')}`,
+  visit_complete: (p) =>
+    `Tidy: ${str(p.service_display, 'Your service')} done. Thanks for trusting us, ${str(p.first_name, 'friend')}. Mind leaving a quick review? ${str(p.review_url, 'https://jointidy.co/refer')}`,
+  visit_canceled: (p) =>
+    `Tidy: Your ${str(p.service_display, 'visit')} on ${str(p.visit_date_display, 'your scheduled date')} was canceled (${str(p.cancel_reason, 'no reason given')}). Reschedule: ${str(p.reschedule_url, 'https://jointidy.co/dashboard')}`,
+  visit_rescheduled: (p) =>
+    `Tidy: Your ${str(p.service_display, 'visit')} moved from ${str(p.old_visit_date_display, 'previous date')} to ${str(p.new_visit_date_display, 'new date')} (${str(p.new_time_window, 'TBD')}). Manage: ${str(p.reschedule_url, 'https://jointidy.co/dashboard')}`,
+};
+
+function str(v: unknown, fallback: string): string {
+  return typeof v === 'string' && v.trim().length > 0 ? v : fallback;
+}
+
+function isSmsEvent(name: string): name is SmsEventName {
+  return name in SMS_TEMPLATES;
+}
+
+/**
+ * Fire a direct Twilio SMS via send-twilio-sms. Best-effort — never throws,
+ * never blocks the Zapier dispatch.
+ */
+async function dispatchTwilioSms(
+  eventName: SmsEventName,
+  payload: Record<string, unknown>,
+  userId: string | undefined,
+): Promise<{ attempted: boolean; ok: boolean; reason?: string; sid?: string | null }> {
+  const phone = typeof payload.phone === 'string' ? payload.phone.trim() : '';
+  if (!phone) {
+    return { attempted: false, ok: false, reason: 'no_phone' };
+  }
+
+  // Normalize to E.164 (assume US if 10 digits and no +).
+  let to = phone;
+  if (!to.startsWith('+')) {
+    const digits = to.replace(/\D/g, '');
+    if (digits.length === 10) to = `+1${digits}`;
+    else if (digits.length === 11 && digits.startsWith('1')) to = `+${digits}`;
+    else return { attempted: false, ok: false, reason: 'phone_not_e164' };
+  }
+
+  const body = SMS_TEMPLATES[eventName](payload);
+  const idempotency_key = `${eventName}:${userId ?? 'anon'}:${
+    (payload.idempotency_suffix as string | undefined) ??
+    (payload.visit_id as string | undefined) ??
+    (payload.invoice_id as string | undefined) ??
+    new Date().toISOString().slice(0, 10)
+  }`;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ to_phone_e164: to, body, idempotency_key }),
+    });
+    const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    if (!res.ok) {
+      return { attempted: true, ok: false, reason: `http_${res.status}` };
+    }
+    return {
+      attempted: true,
+      ok: !!json.ok,
+      reason: typeof json.reason === 'string' ? json.reason : undefined,
+      sid: (json.message_sid as string | undefined) ?? null,
+    };
+  } catch (err) {
+    console.error('[send-zapier-event] twilio dispatch failed', err);
+    return { attempted: true, ok: false, reason: 'fetch_error' };
+  }
+}
+
 async function isAuthorized(req: Request): Promise<boolean> {
   const auth = req.headers.get('Authorization') ?? '';
   if (!auth.startsWith('Bearer ')) return false;
@@ -108,41 +204,49 @@ Deno.serve(async (req) => {
 
   const { event_name, payload, lang, user_id } = parsed.data;
 
-  try {
-    const result = await withLogging({
-      source: 'zapier',
-      event: event_name,
-      payload: { user_id, lang, payload },
-      fn: async () => {
-        const url = envUrlFor(event_name);
-        if (!url) {
-          console.log(`[send-zapier-event] no URL configured for ${event_name} — skipping`);
-          return { ok: true as const, skipped: 'no_url_configured' as const };
-        }
+  // Run Zapier dispatch + direct Twilio dispatch in parallel.
+  // Zapier feeds Brevo emails; Twilio handles SMS directly post-pivot.
+  const zapierPromise = withLogging({
+    source: 'zapier',
+    event: event_name,
+    payload: { user_id, lang, payload },
+    fn: async () => {
+      const url = envUrlFor(event_name);
+      if (!url) {
+        console.log(`[send-zapier-event] no URL configured for ${event_name} — skipping`);
+        return { ok: true as const, skipped: 'no_url_configured' as const };
+      }
 
-        const body = { event_name, lang, user_id, ...payload };
+      const body = { event_name, lang, user_id, ...payload };
 
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
 
-        // Drain body to avoid leaks.
-        const text = await res.text().catch(() => '');
+      const text = await res.text().catch(() => '');
 
-        if (!res.ok) {
-          throw new Error(`zapier ${event_name} returned ${res.status}: ${text.slice(0, 200)}`);
-        }
+      if (!res.ok) {
+        throw new Error(`zapier ${event_name} returned ${res.status}: ${text.slice(0, 200)}`);
+      }
 
-        return { ok: true as const, status: res.status, dispatched: true as const };
-      },
-    });
-
-    return jsonResponse(result, 200);
-  } catch (err) {
+      return { ok: true as const, status: res.status, dispatched: true as const };
+    },
+  }).catch((err) => {
     const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('[send-zapier-event] failed', event_name, message);
-    return jsonResponse({ ok: false, error: message }, 500);
-  }
+    console.error('[send-zapier-event] zapier failed', event_name, message);
+    return { ok: false as const, error: message };
+  });
+
+  const twilioPromise = isSmsEvent(event_name)
+    ? dispatchTwilioSms(event_name, payload, user_id)
+    : Promise.resolve({ attempted: false, ok: false, reason: 'event_not_sms' as const });
+
+  const [zapier, twilio] = await Promise.all([zapierPromise, twilioPromise]);
+
+  // Overall ok = zapier ok (twilio is best-effort and reported separately).
+  const overallOk = (zapier as { ok?: boolean }).ok !== false;
+  return jsonResponse({ ok: overallOk, zapier, twilio }, overallOk ? 200 : 500);
 });
+
