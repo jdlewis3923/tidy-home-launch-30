@@ -18,6 +18,21 @@ const GREETING: Msg = {
     "Hi! I'm Tidy's concierge assistant 👋 Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.",
 };
 
+// Three-dot "assistant is typing" indicator. Pure CSS, respects reduced motion.
+function TypingDots() {
+  return (
+    <span
+      className="inline-flex items-center gap-1 py-1"
+      role="status"
+      aria-label="Assistant is typing"
+    >
+      <span className="h-1.5 w-1.5 animate-[chatbot-bounce_1.2s_ease-in-out_infinite] rounded-full bg-foreground/60" />
+      <span className="h-1.5 w-1.5 animate-[chatbot-bounce_1.2s_ease-in-out_0.15s_infinite] rounded-full bg-foreground/60" />
+      <span className="h-1.5 w-1.5 animate-[chatbot-bounce_1.2s_ease-in-out_0.3s_infinite] rounded-full bg-foreground/60" />
+    </span>
+  );
+}
+
 export default function ChatbotWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
