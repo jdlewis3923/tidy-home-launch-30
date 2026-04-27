@@ -195,6 +195,58 @@ async function publishInstagram(
   return pJson.id as string;
 }
 
+async function publishInstagramCarousel(
+  igUserId: string,
+  userToken: string,
+  imageUrls: string[],
+  caption: string,
+): Promise<string> {
+  // Step 1: create child containers (is_carousel_item=true)
+  const childIds: string[] = [];
+  for (const imageUrl of imageUrls) {
+    const u = new URL(`${GRAPH}/${igUserId}/media`);
+    const b = new URLSearchParams({
+      image_url: imageUrl,
+      is_carousel_item: "true",
+      access_token: userToken,
+    });
+    const r = await fetch(u.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: b.toString(),
+    });
+    const j = await r.json();
+    if (!r.ok || !j.id) throw new Error(`IG carousel child failed (${r.status}): ${JSON.stringify(j).slice(0, 400)}`);
+    childIds.push(j.id as string);
+  }
+  // Step 2: create carousel parent
+  const parentUrl = new URL(`${GRAPH}/${igUserId}/media`);
+  const pBody = new URLSearchParams({
+    media_type: "CAROUSEL",
+    children: childIds.join(","),
+    caption,
+    access_token: userToken,
+  });
+  const pRes = await fetch(parentUrl.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: pBody.toString(),
+  });
+  const pJson = await pRes.json();
+  if (!pRes.ok || !pJson.id) throw new Error(`IG carousel parent failed (${pRes.status}): ${JSON.stringify(pJson).slice(0, 400)}`);
+  const creationId = pJson.id as string;
+  // Step 3: publish
+  const pubUrl = new URL(`${GRAPH}/${igUserId}/media_publish`);
+  const pub = await fetch(pubUrl.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ creation_id: creationId, access_token: userToken }).toString(),
+  });
+  const pubJson = await pub.json();
+  if (!pub.ok || !pubJson.id) throw new Error(`IG carousel publish failed (${pub.status}): ${JSON.stringify(pubJson).slice(0, 400)}`);
+  return pubJson.id as string;
+}
+
 // ---------- FB publish ----------
 
 async function publishFacebook(
@@ -219,8 +271,49 @@ async function publishFacebook(
   if (!res.ok || !(data.post_id ?? data.id)) {
     throw new Error(`FB /photos failed (${res.status}): ${JSON.stringify(data).slice(0, 500)}`);
   }
-  // Prefer post_id (links to feed post); fall back to id (photo id).
   return (data.post_id ?? data.id) as string;
+}
+
+async function publishFacebookMultiPhoto(
+  pageId: string,
+  pageToken: string,
+  imageUrls: string[],
+  message: string,
+): Promise<string> {
+  // Step 1: upload each photo unpublished, collect media_fbid
+  const mediaIds: string[] = [];
+  for (const imageUrl of imageUrls) {
+    const u = new URL(`${GRAPH}/${pageId}/photos`);
+    const b = new URLSearchParams({
+      url: imageUrl,
+      published: "false",
+      access_token: pageToken,
+    });
+    const r = await fetch(u.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: b.toString(),
+    });
+    const j = await r.json();
+    if (!r.ok || !j.id) throw new Error(`FB unpublished photo failed (${r.status}): ${JSON.stringify(j).slice(0, 400)}`);
+    mediaIds.push(j.id as string);
+  }
+  // Step 2: publish feed post with attached_media
+  const attached = mediaIds.map((id) => ({ media_fbid: id }));
+  const feedUrl = new URL(`${GRAPH}/${pageId}/feed`);
+  const fBody = new URLSearchParams({
+    message,
+    attached_media: JSON.stringify(attached),
+    access_token: pageToken,
+  });
+  const fRes = await fetch(feedUrl.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: fBody.toString(),
+  });
+  const fJson = await fRes.json();
+  if (!fRes.ok || !fJson.id) throw new Error(`FB /feed multi failed (${fRes.status}): ${JSON.stringify(fJson).slice(0, 400)}`);
+  return fJson.id as string;
 }
 
 // ---------- handler ----------
