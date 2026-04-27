@@ -44,6 +44,7 @@ const AdminSetupCatalog = lazy(() => import("./pages/AdminSetupCatalog.tsx"));
 const AdminTestZapier = lazy(() => import("./pages/AdminTestZapier.tsx"));
 const AdminHealth = lazy(() => import("./pages/AdminHealth.tsx"));
 const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.tsx"));
+const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -145,6 +146,8 @@ const App = () => (
                   <Route path="/admin/health" element={<AdminHealth />} />
                   {/* Chatbot knowledge editor (admins only). */}
                   <Route path="/admin/chatbot-knowledge" element={<AdminChatbotKnowledge />} />
+                  {/* Unified support inbox (SMS + web), admins only. */}
+                  <Route path="/admin/inbox" element={<AdminInbox />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
