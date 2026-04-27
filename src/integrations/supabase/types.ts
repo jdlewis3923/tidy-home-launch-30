@@ -253,6 +253,51 @@ export type Database = {
         }
         Relationships: []
       }
+      social_posts: {
+        Row: {
+          caption: string
+          created_at: string
+          day_number: number
+          error_message: string | null
+          fb_post_id: string | null
+          id: string
+          ig_post_id: string | null
+          image_path: string
+          posted_at: string | null
+          scheduled_at: string
+          status: Database["public"]["Enums"]["social_post_status"]
+          updated_at: string
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          day_number: number
+          error_message?: string | null
+          fb_post_id?: string | null
+          id?: string
+          ig_post_id?: string | null
+          image_path: string
+          posted_at?: string | null
+          scheduled_at: string
+          status?: Database["public"]["Enums"]["social_post_status"]
+          updated_at?: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          day_number?: number
+          error_message?: string | null
+          fb_post_id?: string | null
+          id?: string
+          ig_post_id?: string | null
+          image_path?: string
+          posted_at?: string | null
+          scheduled_at?: string
+          status?: Database["public"]["Enums"]["social_post_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stripe_catalog: {
         Row: {
           active: boolean
@@ -588,6 +633,12 @@ export type Database = {
       app_role: "customer" | "crew" | "admin"
       invoice_status: "paid" | "pending" | "failed" | "refunded"
       service_type: "cleaning" | "lawn" | "detailing"
+      social_post_status:
+        | "scheduled"
+        | "ready"
+        | "posting"
+        | "posted"
+        | "failed"
       subscription_frequency: "weekly" | "biweekly" | "monthly"
       subscription_status: "active" | "paused" | "canceled"
       support_channel: "sms" | "web"
@@ -730,6 +781,7 @@ export const Constants = {
       app_role: ["customer", "crew", "admin"],
       invoice_status: ["paid", "pending", "failed", "refunded"],
       service_type: ["cleaning", "lawn", "detailing"],
+      social_post_status: ["scheduled", "ready", "posting", "posted", "failed"],
       subscription_frequency: ["weekly", "biweekly", "monthly"],
       subscription_status: ["active", "paused", "canceled"],
       support_channel: ["sms", "web"],
