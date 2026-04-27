@@ -269,12 +269,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                     }`}
                   >
                     {p.highlighted && (
-                      <span className="most-popular-ribbon hidden md:inline-block">
-                        {t("Most Popular")}
-                      </span>
-                    )}
-                    {p.highlighted && (
-                      <span className="md:hidden self-start bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                      <span className="most-popular-ribbon">
                         {t("Most Popular")}
                       </span>
                     )}
