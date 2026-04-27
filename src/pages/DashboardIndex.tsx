@@ -596,17 +596,35 @@ export default function DashboardIndex() {
       <CalmModal
         open={activeModal === 'reschedule'}
         title="Reschedule visit"
-        subtitle="Pick a new date and time window."
+        subtitle="Pick a new date and time window. We'll confirm by text within the hour."
         onClose={() => setActiveModal(null)}
-        primaryLabel="Update visit"
+        primaryLabel={
+          submitState === 'sending' ? 'Sending…' :
+          submitState === 'sent' ? 'Sent ✓' :
+          submitState === 'error' ? 'Try again' :
+          'Request reschedule'
+        }
+        onPrimary={() =>
+          submitSupportRequest('reschedule', {
+            current_visit_id: data.nextVisit?.id ?? null,
+            current_visit_date: data.nextVisit?.visit_date ?? null,
+            requested_date: rescheduleDate,
+            requested_window: rescheduleWindow,
+          })
+        }
       >
         <div className="space-y-3">
           <input
             type="date"
-            defaultValue={data.nextVisit?.visit_date ?? ''}
+            value={rescheduleDate}
+            onChange={(e) => setRescheduleDate(e.target.value)}
             className="w-full rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-sm text-ink"
           />
-          <select className="w-full rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-sm text-ink">
+          <select
+            value={rescheduleWindow}
+            onChange={(e) => setRescheduleWindow(e.target.value)}
+            className="w-full rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-sm text-ink"
+          >
             <option>8:00 AM – 12:00 PM</option>
             <option>12:00 PM – 5:00 PM</option>
           </select>
@@ -618,10 +636,23 @@ export default function DashboardIndex() {
         title="Add a note"
         subtitle="Anything our crew should know before they arrive?"
         onClose={() => setActiveModal(null)}
-        primaryLabel="Save note"
+        primaryLabel={
+          submitState === 'sending' ? 'Sending…' :
+          submitState === 'sent' ? 'Sent ✓' :
+          submitState === 'error' ? 'Try again' :
+          'Save note'
+        }
+        onPrimary={() =>
+          submitSupportRequest('note', {
+            visit_id: data.nextVisit?.id ?? null,
+            note: noteText,
+          })
+        }
       >
         <textarea
           rows={4}
+          value={noteText}
+          onChange={(e) => setNoteText(e.target.value)}
           placeholder="e.g. Gate code is 4827, dog will be inside."
           className="w-full resize-none rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-sm text-ink"
         />
@@ -632,12 +663,24 @@ export default function DashboardIndex() {
         title="Update access"
         subtitle="Gate codes, parking notes, pet info — keep us in the loop."
         onClose={() => setActiveModal(null)}
-        primaryLabel="Save changes"
+        primaryLabel={
+          submitState === 'sending' ? 'Sending…' :
+          submitState === 'sent' ? 'Sent ✓' :
+          submitState === 'error' ? 'Try again' :
+          'Save changes'
+        }
+        onPrimary={() =>
+          submitSupportRequest('access', {
+            gate_code: accessGate,
+            parking_notes: accessParking,
+            pets: accessPets,
+          })
+        }
       >
         <div className="space-y-3 text-sm">
-          <Field label="Gate code" defaultValue={data.profile?.gate_code ?? ''} />
-          <Field label="Parking notes" defaultValue={data.profile?.parking_notes ?? ''} />
-          <Field label="Pets" defaultValue={data.profile?.pets ?? ''} />
+          <Field label="Gate code" value={accessGate} onChange={setAccessGate} />
+          <Field label="Parking notes" value={accessParking} onChange={setAccessParking} />
+          <Field label="Pets" value={accessPets} onChange={setAccessPets} />
         </div>
       </CalmModal>
 
