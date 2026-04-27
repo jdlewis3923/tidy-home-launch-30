@@ -104,23 +104,30 @@
   * {
     @apply border-border;
   }
+  html {
+    /* Bumps default rem from 16px → 17px so all rem-based sizes (Tailwind
+       text-*, spacing) scale up slightly site-wide. */
+    font-size: 106.25%;
+  }
   body {
     @apply bg-background text-foreground font-sans;
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  /* Display headings: bolder, tighter. Inter has wider letterforms than
-     Archivo so we lean tracking slightly looser to avoid crunching. */
+  /* Display headings: bolder + larger. Nunito's rounded forms benefit from
+     extra weight at display sizes; clamp lifts the floor on mobile too. */
   h1, h2 {
-    @apply font-display font-black;
-    letter-spacing: -0.025em;
-    line-height: 1.02;
+    @apply font-display;
+    font-weight: 900;
+    letter-spacing: -0.028em;
+    line-height: 1.0;
   }
   h3, h4 {
-    @apply font-display font-extrabold;
-    letter-spacing: -0.018em;
-    line-height: 1.1;
+    @apply font-display;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
   }
 }
 
