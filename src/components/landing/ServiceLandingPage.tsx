@@ -6,7 +6,7 @@ import SeoHead from "@/components/landing/SeoHead";
 import LandingFaq, { FaqItem } from "@/components/landing/LandingFaq";
 import Reveal from "@/components/landing/Reveal";
 import StickyBookBar from "@/components/landing/StickyBookBar";
-import TrustSignalRow from "@/components/landing/TrustSignalRow";
+
 import HowItWorksStrip from "@/components/landing/HowItWorksStrip";
 import SavingsCallout from "@/components/landing/SavingsCallout";
 import NeighborhoodTrust from "@/components/landing/NeighborhoodTrust";
@@ -239,9 +239,6 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
       {/* INFINITE TICKER (mirrors homepage energy) */}
       <LandingTicker />
-
-      {/* TRUST SIGNAL ROW */}
-      <TrustSignalRow />
 
       {/* PLANS */}
       <section className="relative bg-background py-20 px-4 overflow-hidden">

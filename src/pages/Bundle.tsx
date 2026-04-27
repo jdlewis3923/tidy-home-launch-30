@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
 import Reveal from "@/components/landing/Reveal";
 import StickyBookBar from "@/components/landing/StickyBookBar";
-import TrustSignalRow from "@/components/landing/TrustSignalRow";
+
 import NeighborhoodTrust from "@/components/landing/NeighborhoodTrust";
 import SparkleField from "@/components/landing/SparkleField";
 import SectionDecor from "@/components/landing/SectionDecor";
@@ -144,8 +144,6 @@ const BundleInner = () => {
       </section>
 
       <LandingTicker />
-
-      <TrustSignalRow />
 
       {/* TIERS */}
       <section className="relative bg-background py-20 px-4 overflow-hidden">
