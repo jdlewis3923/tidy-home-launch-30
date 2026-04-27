@@ -126,29 +126,50 @@ async function ensureCredentials(
   sb: ReturnType<typeof createClient>,
 ): Promise<{
   user_token: string;
-  ig_user_id: string;
-  fb_page_id: string;
-  fb_page_token: string;
+  ig_user_id: string | null;
+  fb_page_id: string | null;
+  fb_page_token: string | null;
+  ig_error: string | null;
+  fb_error: string | null;
 }> {
   const userToken = await vaultGet(sb, "meta_user_access_token");
   if (!userToken) throw new Error("vault: meta_user_access_token missing — run /meta-oauth-callback first");
   const businessId = await vaultGet(sb, "meta_business_id");
 
   let igUserId = await vaultGet(sb, "meta_ig_user_id");
+  let igError: string | null = null;
   if (!igUserId) {
-    igUserId = await discoverIgUserId(userToken, businessId);
-    await vaultSet(sb, "meta_ig_user_id", igUserId);
+    try {
+      igUserId = await discoverIgUserId(userToken, businessId);
+      await vaultSet(sb, "meta_ig_user_id", igUserId);
+    } catch (e) {
+      igError = `IG discovery failed: ${e instanceof Error ? e.message : String(e)}`;
+      console.warn(`[meta-publish-post] ${igError}`);
+    }
   }
   let fbPageId = await vaultGet(sb, "meta_fb_page_id");
   let fbPageToken = await vaultGet(sb, "meta_fb_page_access_token");
+  let fbError: string | null = null;
   if (!fbPageId || !fbPageToken) {
-    const page = await discoverFbPage(userToken);
-    fbPageId = page.id;
-    fbPageToken = page.access_token;
-    await vaultSet(sb, "meta_fb_page_id", fbPageId);
-    await vaultSet(sb, "meta_fb_page_access_token", fbPageToken);
+    try {
+      const page = await discoverFbPage(userToken);
+      fbPageId = page.id;
+      fbPageToken = page.access_token;
+      await vaultSet(sb, "meta_fb_page_id", fbPageId);
+      await vaultSet(sb, "meta_fb_page_access_token", fbPageToken);
+    } catch (e) {
+      fbError = `FB discovery failed: ${e instanceof Error ? e.message : String(e)} — token likely missing pages_show_list/pages_manage_posts scopes; reconnect Meta or paste meta_fb_page_id + meta_fb_page_access_token via vault.`;
+      console.warn(`[meta-publish-post] ${fbError}`);
+    }
   }
-  return { user_token: userToken, ig_user_id: igUserId, fb_page_id: fbPageId, fb_page_token: fbPageToken };
+  return {
+    user_token: userToken,
+    ig_user_id: igUserId,
+    fb_page_id: fbPageId,
+    fb_page_token: fbPageToken,
+    ig_error: igError,
+    fb_error: fbError,
+  };
 }
 
 // ---------- IG publish ----------
