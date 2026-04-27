@@ -30,7 +30,7 @@ const Footer = () => {
               <Instagram className="w-5 h-5" />
             </a>
             <a
-              href="https://www.facebook.com/TidyHomeServices"
+              href="https://www.facebook.com/profile.php?id=61563166302138"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Tidy on Facebook"
