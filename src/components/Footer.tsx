@@ -1,6 +1,7 @@
 import TidyLogo from "./TidyLogo";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Instagram, Facebook, Music2 } from "lucide-react";
 
 const Footer = () => {
   const { t } = useLanguage();
@@ -18,10 +19,35 @@ const Footer = () => {
             <a href="https://jointidy.co" className="hover:text-primary transition-colors">jointidy.co</a>
             <br />Miami, Florida
           </p>
-          <div className="flex gap-4 mt-4">
-            {["Instagram", "Facebook", "TikTok", "LinkedIn"].map((s) => (
-              <span key={s} className="text-xs text-primary-foreground/30 hover:text-primary-foreground/60 transition-colors cursor-pointer">{s}</span>
-            ))}
+          <div className="flex gap-3 mt-4 items-center">
+            <a
+              href="https://instagram.com/jointidy"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Tidy on Instagram"
+              className="text-primary-foreground/40 hover:text-primary transition-colors"
+            >
+              <Instagram className="w-5 h-5" />
+            </a>
+            <a
+              href="https://www.facebook.com/TidyHomeServices"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Tidy on Facebook"
+              className="text-primary-foreground/40 hover:text-primary transition-colors"
+            >
+              <Facebook className="w-5 h-5" />
+            </a>
+            <span
+              title="Coming soon"
+              aria-label="TikTok coming soon"
+              className="relative inline-flex items-center text-primary-foreground/30 opacity-60 cursor-default group"
+            >
+              <Music2 className="w-5 h-5" />
+              <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-7 whitespace-nowrap rounded bg-primary-foreground/10 px-2 py-0.5 text-[10px] text-primary-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
+                Coming soon
+              </span>
+            </span>
           </div>
         </div>
 
