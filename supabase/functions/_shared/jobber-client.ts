@@ -121,7 +121,13 @@ async function refreshAccessToken(refreshToken: string): Promise<{
 
   const text = await res.text();
   if (!res.ok) {
-    throw new Error(`Jobber token refresh failed (${res.status}): ${text.slice(0, 300)}`);
+    // 401 = refresh token revoked/expired/already-rotated. Tag the error so
+    // callers can short-circuit retry loops and surface a re-auth prompt
+    // instead of hammering Jobber with the same dead token.
+    const tag = res.status === 401 ? 'JOBBER_REAUTH_REQUIRED' : 'JOBBER_REFRESH_FAILED';
+    throw new Error(
+      `${tag} (${res.status}): ${text.slice(0, 200)} — re-run the Jobber OAuth callback to mint a fresh refresh token.`,
+    );
   }
 
   const json = JSON.parse(text) as {
