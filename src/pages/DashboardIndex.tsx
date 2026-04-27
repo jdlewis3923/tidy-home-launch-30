@@ -453,7 +453,7 @@ export default function DashboardIndex() {
                           {data.lastCompleted.time_window || TIME_WINDOW_FALLBACK}
                         </span>
                         <span>·</span>
-                        <span>Pro: Daniel &amp; Team</span>
+                        <span>Pro: {data.lastCompleted.crew_name ?? 'Your Tidy crew'}</span>
                       </div>
                     </div>
                     <div className="mt-4 flex gap-2">
