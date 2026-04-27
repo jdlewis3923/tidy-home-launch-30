@@ -5,7 +5,7 @@ import { pushEvent } from "@/lib/tracking";
 
 const ThankYou = () => {
   useEffect(() => {
-    pushEvent("page_view", { page: "/thank-you" });
+    // page_view fires globally via <RouteTracker> in App.tsx — no per-page push.
     pushEvent("conversion", {
       send_to: "AW-CONVERSION_ID/CONVERSION_LABEL",
       event_category: "lead",
