@@ -8,9 +8,10 @@
  */
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Bell, ChevronDown } from 'lucide-react';
+import { Bell, ChevronDown, Inbox, Calendar, FlaskConical } from 'lucide-react';
 import tidyLogo from '@/assets/tidy-logo.png';
 import { supabase } from '@/integrations/supabase/client';
+import { useHasRole } from '@/hooks/useHasRole';
 
 const NAV = [
   { label: 'Dashboard', href: '/dashboard' },
@@ -18,6 +19,12 @@ const NAV = [
   { label: 'Billing', href: '/billing' },
   { label: 'Account', href: '/account' },
   { label: 'Help', href: '/help' },
+];
+
+const ADMIN_NAV = [
+  { label: 'Inbox', href: '/admin/inbox', icon: Inbox },
+  { label: 'Schedule', href: '/admin/schedule', icon: Calendar },
+  { label: 'Test events', href: '/admin/test-zapier', icon: FlaskConical },
 ];
 
 export default function DashboardTopNav({ initials = '' }: { initials?: string }) {
