@@ -143,6 +143,8 @@ const App = () => (
                   <Route path="/admin/test-zapier" element={<AdminTestZapier />} />
                   {/* Phase 8 integration health dashboard. */}
                   <Route path="/admin/health" element={<AdminHealth />} />
+                  {/* Chatbot knowledge editor (admins only). */}
+                  <Route path="/admin/chatbot-knowledge" element={<AdminChatbotKnowledge />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
