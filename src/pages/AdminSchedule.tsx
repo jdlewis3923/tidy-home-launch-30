@@ -63,6 +63,7 @@ function statusBadgeVariant(s: Status): "default" | "secondary" | "destructive" 
   if (s === "posted") return "default";
   if (s === "failed") return "destructive";
   if (s === "posting") return "secondary";
+  if (s === "paused") return "secondary";
   return "outline";
 }
 
@@ -70,6 +71,7 @@ function statusIcon(s: Status) {
   if (s === "posted") return <CheckCircle2 className="h-3.5 w-3.5" />;
   if (s === "failed") return <AlertTriangle className="h-3.5 w-3.5" />;
   if (s === "posting") return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
+  if (s === "paused") return <PauseCircle className="h-3.5 w-3.5" />;
   return <Clock className="h-3.5 w-3.5" />;
 }
 
