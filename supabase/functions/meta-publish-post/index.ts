@@ -45,6 +45,12 @@ function publicImageUrl(image_path: string): string {
   return `${SUPABASE_URL}/storage/v1/object/public/social-images/${encodeURI(key)}`;
 }
 
+function resolveImageUrls(post: { image_path: string; image_paths: string[] | null }): string[] {
+  const arr = (post.image_paths ?? []).filter((s) => typeof s === "string" && s.length > 0);
+  if (arr.length > 0) return arr.map(publicImageUrl);
+  return [publicImageUrl(post.image_path)];
+}
+
 // ---------- vault helpers ----------
 
 async function vaultGet(sb: ReturnType<typeof createClient>, name: string): Promise<string | null> {
