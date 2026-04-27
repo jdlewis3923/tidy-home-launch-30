@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      chatbot_knowledge: {
+        Row: {
+          content: string
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      chatbot_leads: {
+        Row: {
+          created_at: string
+          id: string
+          name: string | null
+          phone: string
+          question: string | null
+          source_page: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          phone: string
+          question?: string | null
+          source_page?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          phone?: string
+          question?: string | null
+          source_page?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       integration_logs: {
         Row: {
           created_at: string
