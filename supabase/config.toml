@@ -42,3 +42,9 @@ verify_jwt = false
 # Public web-chat ingest — anonymous visitors call this from the chatbot widget.
 [functions.chat-message]
 verify_jwt = false
+
+# Called by pg_cron (no JWT) and by admin "Post now" button. Auth-checked
+# in-handler by virtue of needing a valid post_id that exists in the
+# admin-only social_posts table; never accepts caption/image from caller.
+[functions.meta-publish-post]
+verify_jwt = false
