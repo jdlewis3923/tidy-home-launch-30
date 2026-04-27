@@ -101,9 +101,9 @@ function renderHtml(opts: {
     <p class="hint">Stored as vault secret <code>meta_pixel_id</code>.</p>
   </div>
   <div class="card">
-    <label>CAPI access token (system user, long-lived)</label>
+    <label>CAPI access token <span class="pill ok">ok</span></label>
     <div class="secret"><code>${escapeHtml(captured.capi_token_preview)}…</code></div>
-    <p class="hint">Stored as vault secret <code>meta_capi_access_token</code>. Backend conversion fan-out will pick this up automatically on the next request.</p>
+    <p class="hint">Stored as vault secret <code>meta_capi_access_token</code> (aliased from the long-lived user access token — Meta CAPI accepts user tokens). Backend conversion fan-out will pick this up automatically on the next request.</p>
   </div>
   <div class="card">
     <label>User access token (60-day, for future Graph calls)</label>
@@ -266,22 +266,17 @@ async function createPixelOnAdAccount(adAccountId: string, longToken: string): P
   return json.id as string;
 }
 
-async function mintCapiToken(pixelId: string, longToken: string): Promise<string> {
-  const url = new URL(`${GRAPH}/${pixelId}/conversions_api_tokens`);
-  const body = new URLSearchParams({ access_token: longToken });
-  const res = await fetch(url.toString(), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
-  });
-  const json = await res.json();
-  if (!res.ok || !(json.access_token || json.data?.[0]?.access_token)) {
-    throw new Error(`capi token mint failed (${res.status}): ${JSON.stringify(json).slice(0, 300)}`);
-  }
-  // The response shape can be { access_token } or { data: [{ access_token }] }
-  // depending on Graph version — handle both.
-  return (json.access_token ?? json.data[0].access_token) as string;
-}
+// NOTE: Meta does not expose a public Graph API endpoint to programmatically
+// mint a pixel-scoped CAPI token (the "Generate Access Token" button in
+// Events Manager creates a System User token via an internal flow). For now
+// we alias the long-lived user access token as the CAPI token — Meta's CAPI
+// accepts user access tokens for authentication.
+//
+// Hardening note: META_CAPI_ACCESS_TOKEN currently aliases the user access
+// token (60-day expiry). For production scale, replace with a system user
+// token by (a) POST /{business_id}/system_users to create, (b) POST
+// /{business_id}/system_user_access_tokens to mint a permanent token.
+// Defer until billing volume justifies hardening.
 
 // ---------- vault persistence ----------
 
@@ -456,8 +451,9 @@ Deno.serve(async (req) => {
           }
         }
 
-        // 5: mint CAPI token
-        const capiToken = await mintCapiToken(pixelId, longLived.access_token);
+        // 5: alias the long-lived user token as the CAPI token (see note above mintCapiToken removal).
+        const capiToken = longLived.access_token;
+        console.log('[meta-oauth-callback] CAPI token aliased from user access token (60-day expiry).');
 
         // 6: persist all 4 to vault
         await persistToVault({
