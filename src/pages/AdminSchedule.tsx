@@ -19,12 +19,15 @@ import {
   CheckCircle2,
   Clock,
   Save,
+  Pause,
+  Play,
+  PauseCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-type Status = "scheduled" | "ready" | "posting" | "posted" | "failed";
+type Status = "scheduled" | "ready" | "posting" | "posted" | "failed" | "paused";
 
 type Post = {
   id: string;
@@ -42,7 +45,7 @@ type Post = {
   updated_at?: string;
 };
 
-type Filter = "all" | "scheduled" | "ready" | "posted" | "failed";
+type Filter = "all" | "scheduled" | "ready" | "posted" | "failed" | "paused";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
@@ -60,6 +63,7 @@ function statusBadgeVariant(s: Status): "default" | "secondary" | "destructive" 
   if (s === "posted") return "default";
   if (s === "failed") return "destructive";
   if (s === "posting") return "secondary";
+  if (s === "paused") return "secondary";
   return "outline";
 }
 
@@ -67,6 +71,7 @@ function statusIcon(s: Status) {
   if (s === "posted") return <CheckCircle2 className="h-3.5 w-3.5" />;
   if (s === "failed") return <AlertTriangle className="h-3.5 w-3.5" />;
   if (s === "posting") return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
+  if (s === "paused") return <PauseCircle className="h-3.5 w-3.5" />;
   return <Clock className="h-3.5 w-3.5" />;
 }
 
@@ -79,6 +84,8 @@ export default function AdminSchedule() {
   const [editing, setEditing] = useState<Record<string, { caption: string; scheduled_at: string }>>({});
   const [uploading, setUploading] = useState(false);
   const [uploadBuster, setUploadBuster] = useState<string>("");
+  const [schedulerPaused, setSchedulerPaused] = useState<boolean | null>(null);
+  const [pauseBusy, setPauseBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ---------- auth ----------
@@ -121,9 +128,19 @@ export default function AdminSchedule() {
     setPosts((data ?? []) as Post[]);
   }, []);
 
+  const loadPauseFlag = useCallback(async () => {
+    const { data, error } = await supabase.rpc("admin_get_scheduler_paused");
+    if (error) {
+      console.warn("pause flag load failed", error);
+      return;
+    }
+    setSchedulerPaused(Boolean(data));
+  }, []);
+
   useEffect(() => {
     if (authed !== "yes") return;
     load();
+    loadPauseFlag();
     const ch = supabase
       .channel("social_posts_admin")
       .on(
@@ -135,11 +152,57 @@ export default function AdminSchedule() {
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [authed, load]);
+  }, [authed, load, loadPauseFlag]);
+
+  const togglePause = async () => {
+    if (schedulerPaused === null) return;
+    const next = !schedulerPaused;
+    if (!next && !confirm("Resume the scheduler? Cron will start firing scheduled posts every minute.")) return;
+    setPauseBusy(true);
+    const { data, error } = await supabase.rpc("admin_set_scheduler_paused", { _paused: next });
+    setPauseBusy(false);
+    if (error) {
+      toast.error("Toggle failed: " + error.message);
+      return;
+    }
+    setSchedulerPaused(Boolean(data));
+    toast.success(next ? "Scheduler PAUSED — no posts will fire" : "Scheduler RESUMED");
+  };
+
+  const rollbackPost = async (p: Post) => {
+    if (!p.ig_post_id && !p.fb_post_id) {
+      toast.error("Nothing to roll back (no live IG/FB post id).");
+      return;
+    }
+    if (!confirm(`Delete the live IG/FB posts for Day ${p.day_number}? This cannot be undone.`)) return;
+    setBusyId(p.id);
+    const { data, error } = await supabase.functions.invoke("meta-rollback-post", {
+      body: { post_id: p.id },
+    });
+    setBusyId(null);
+    if (error) {
+      toast.error("Rollback failed: " + error.message);
+      return;
+    }
+    if ((data as { ok?: boolean })?.ok === false) {
+      toast.error("Rollback partial — see row error message");
+      return;
+    }
+    toast.success(`Day ${p.day_number} rolled back`);
+  };
+
+  const setPostStatus = async (p: Post, status: Status) => {
+    const { error } = await supabase
+      .from("social_posts")
+      .update({ status, error_message: status === "scheduled" ? null : p.error_message })
+      .eq("id", p.id);
+    if (error) toast.error("Status update failed: " + error.message);
+    else toast.success(`Day ${p.day_number} → ${status}`);
+  };
 
   // ---------- counts ----------
   const counts = useMemo(() => {
-    const c: Record<Status, number> = { scheduled: 0, ready: 0, posting: 0, posted: 0, failed: 0 };
+    const c: Record<Status, number> = { scheduled: 0, ready: 0, posting: 0, posted: 0, failed: 0, paused: 0 };
     for (const p of posts) c[p.status]++;
     return c;
   }, [posts]);
@@ -253,16 +316,19 @@ export default function AdminSchedule() {
       </Helmet>
 
       <div className="mx-auto max-w-7xl px-4 py-6">
-        <header className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <header className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Social Scheduler</h1>
             <p className="text-sm text-muted-foreground">
-              30-day Instagram + Facebook auto-posts. Cron fires every minute.
+              30-day Instagram + Facebook auto-posts. Cron checks every minute (only fires when scheduler is ACTIVE).
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-sm">
             <Badge variant="default" className="gap-1">
               <CheckCircle2 className="h-3.5 w-3.5" /> {counts.posted} posted
+            </Badge>
+            <Badge variant="secondary" className="gap-1">
+              <PauseCircle className="h-3.5 w-3.5" /> {counts.paused} paused
             </Badge>
             <Badge variant="outline" className="gap-1">
               <Clock className="h-3.5 w-3.5" /> {counts.scheduled} scheduled
@@ -277,11 +343,65 @@ export default function AdminSchedule() {
                 <Loader2 className="h-3.5 w-3.5 animate-spin" /> {counts.posting} posting
               </Badge>
             )}
-            <Badge variant="destructive" className="gap-1">
-              <AlertTriangle className="h-3.5 w-3.5" /> {counts.failed} failed
-            </Badge>
+            {counts.failed > 0 && (
+              <Badge variant="destructive" className="gap-1">
+                <AlertTriangle className="h-3.5 w-3.5" /> {counts.failed} failed
+              </Badge>
+            )}
           </div>
         </header>
+
+        {/* Master kill-switch */}
+        <div
+          className={cn(
+            "mb-6 flex flex-col items-start justify-between gap-3 rounded-lg border-2 p-4 md:flex-row md:items-center",
+            schedulerPaused === false
+              ? "border-emerald-500/50 bg-emerald-500/5"
+              : "border-destructive bg-destructive/5",
+          )}
+        >
+          <div className="flex items-start gap-3">
+            <div
+              className={cn(
+                "mt-0.5 flex h-10 w-10 items-center justify-center rounded-full",
+                schedulerPaused === false ? "bg-emerald-500/15 text-emerald-700" : "bg-destructive/15 text-destructive",
+              )}
+            >
+              {schedulerPaused === false ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
+            </div>
+            <div>
+              <div className="text-base font-bold">
+                Scheduler is{" "}
+                {schedulerPaused === null
+                  ? "loading…"
+                  : schedulerPaused
+                    ? "PAUSED"
+                    : "ACTIVE"}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {schedulerPaused
+                  ? "No posts will fire until you resume. Use individual “Post now” to test single posts safely."
+                  : "Cron will publish every scheduled post when its time arrives. Pause to halt everything."}
+              </p>
+            </div>
+          </div>
+          <Button
+            size="lg"
+            variant={schedulerPaused ? "default" : "destructive"}
+            onClick={togglePause}
+            disabled={pauseBusy || schedulerPaused === null}
+            className="min-w-[180px] text-base font-bold"
+          >
+            {pauseBusy ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : schedulerPaused ? (
+              <Play className="mr-2 h-5 w-5" />
+            ) : (
+              <Pause className="mr-2 h-5 w-5" />
+            )}
+            {schedulerPaused ? "RESUME ALL" : "PAUSE ALL"}
+          </Button>
+        </div>
 
         {/* Upload zone */}
         <div
@@ -314,7 +434,7 @@ export default function AdminSchedule() {
 
         {/* Filters */}
         <div className="mb-4 flex flex-wrap gap-2">
-          {(["all", "scheduled", "ready", "posted", "failed"] as Filter[]).map((f) => (
+          {(["all", "paused", "scheduled", "ready", "posted", "failed"] as Filter[]).map((f) => (
             <Button
               key={f}
               size="sm"
@@ -468,7 +588,17 @@ export default function AdminSchedule() {
                       Edit
                     </Button>
                   )}
-                  {(p.status === "scheduled" || p.status === "ready" || p.status === "failed") && (
+                  {p.status === "paused" && (
+                    <Button size="sm" variant="outline" onClick={() => setPostStatus(p, "scheduled")}>
+                      <Play className="mr-1 h-3.5 w-3.5" /> Resume
+                    </Button>
+                  )}
+                  {(p.status === "scheduled" || p.status === "ready") && (
+                    <Button size="sm" variant="outline" onClick={() => setPostStatus(p, "paused")}>
+                      <Pause className="mr-1 h-3.5 w-3.5" /> Pause
+                    </Button>
+                  )}
+                  {(p.status === "scheduled" || p.status === "ready" || p.status === "failed" || p.status === "paused") && (
                     <Button
                       size="sm"
                       onClick={() => postNow(p)}
@@ -482,6 +612,16 @@ export default function AdminSchedule() {
                         <Send className="mr-1 h-3.5 w-3.5" />
                       )}
                       {p.status === "failed" ? "Retry" : "Post now"}
+                    </Button>
+                  )}
+                  {(p.ig_post_id || p.fb_post_id) && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => rollbackPost(p)}
+                      disabled={busyId === p.id}
+                    >
+                      Rollback
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" onClick={() => archive(p)} className="ml-auto text-muted-foreground">

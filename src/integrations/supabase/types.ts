@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       chatbot_knowledge: {
         Row: {
           content: string
@@ -612,6 +633,7 @@ export type Database = {
     Functions: {
       admin_get_jobber_refresh_token: { Args: never; Returns: string }
       admin_get_meta_secret: { Args: { _name: string }; Returns: string }
+      admin_get_scheduler_paused: { Args: never; Returns: boolean }
       admin_get_service_role_key: { Args: never; Returns: string }
       admin_set_jobber_refresh_token: {
         Args: { _token: string }
@@ -620,6 +642,10 @@ export type Database = {
       admin_set_meta_secret: {
         Args: { _name: string; _value: string }
         Returns: undefined
+      }
+      admin_set_scheduler_paused: {
+        Args: { _paused: boolean }
+        Returns: boolean
       }
       admin_set_service_role_key: { Args: { _key: string }; Returns: undefined }
       current_user_admin: { Args: never; Returns: boolean }
@@ -631,6 +657,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_scheduler_paused: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "customer" | "crew" | "admin"
@@ -642,6 +669,7 @@ export type Database = {
         | "posting"
         | "posted"
         | "failed"
+        | "paused"
       subscription_frequency: "weekly" | "biweekly" | "monthly"
       subscription_status: "active" | "paused" | "canceled"
       support_channel: "sms" | "web"
@@ -784,7 +812,14 @@ export const Constants = {
       app_role: ["customer", "crew", "admin"],
       invoice_status: ["paid", "pending", "failed", "refunded"],
       service_type: ["cleaning", "lawn", "detailing"],
-      social_post_status: ["scheduled", "ready", "posting", "posted", "failed"],
+      social_post_status: [
+        "scheduled",
+        "ready",
+        "posting",
+        "posted",
+        "failed",
+        "paused",
+      ],
       subscription_frequency: ["weekly", "biweekly", "monthly"],
       subscription_status: ["active", "paused", "canceled"],
       support_channel: ["sms", "web"],
