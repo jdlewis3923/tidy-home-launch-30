@@ -33,3 +33,12 @@ verify_jwt = false
 # Reads only the public chatbot_knowledge row; no secrets returned.
 [functions.chat-assistant]
 verify_jwt = false
+
+# Twilio inbound SMS webhook — Twilio does not send Authorization header.
+# Authenticity verified inside the handler via X-Twilio-Signature HMAC.
+[functions.twilio-inbound-sms]
+verify_jwt = false
+
+# Public web-chat ingest — anonymous visitors call this from the chatbot widget.
+[functions.chat-message]
+verify_jwt = false

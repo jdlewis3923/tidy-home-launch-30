@@ -11,6 +11,9 @@ type Msg = { role: "user" | "assistant"; content: string };
 
 const TIDY_PHONE = "(786) 829-1141";
 const TIDY_PHONE_TEL = "+17868291141";
+const VISITOR_KEY = "tidy_chat_visitor_id";
+const NAME_KEY = "tidy_chat_name";
+const EMAIL_KEY = "tidy_chat_email";
 
 const GREETING: Msg = {
   role: "assistant",
@@ -18,7 +21,16 @@ const GREETING: Msg = {
     "Hi! I'm Tidy's concierge assistant 👋 Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.",
 };
 
-// Three-dot "assistant is typing" indicator. Reuses billing-bounce keyframe.
+function getOrCreateVisitorId(): string {
+  if (typeof window === "undefined") return "ssr";
+  let v = localStorage.getItem(VISITOR_KEY);
+  if (!v) {
+    v = "v_" + crypto.randomUUID();
+    localStorage.setItem(VISITOR_KEY, v);
+  }
+  return v;
+}
+
 function TypingDots() {
   return (
     <span
@@ -43,30 +55,68 @@ export default function ChatbotWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
   const [input, setInput] = useState("");
-  const [streaming, setStreaming] = useState(false);
+  const [sending, setSending] = useState(false);
   const [showCallback, setShowCallback] = useState(false);
   const [cbName, setCbName] = useState("");
   const [cbPhone, setCbPhone] = useState("");
   const [cbSubmitting, setCbSubmitting] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [escalated, setEscalated] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const visitorIdRef = useRef<string>(getOrCreateVisitorId());
+
+  // Subscribe to admin replies for THIS conversation via Realtime.
+  useEffect(() => {
+    if (!conversationId) return;
+    const channel = supabase
+      .channel(`support_msg_${conversationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "support_messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const row = payload.new as {
+            sender_type: string;
+            body: string;
+            direction: string;
+          };
+          // Only render admin replies (AI replies already returned inline).
+          if (row.sender_type === "admin") {
+            setMessages((prev) => [...prev, { role: "assistant", content: row.body }]);
+          }
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, streaming, showCallback]);
+  }, [messages, sending, showCallback]);
 
   const send = useCallback(async () => {
     const text = input.trim();
-    if (!text || streaming) return;
+    if (!text || sending) return;
     setInput("");
     const userMsg: Msg = { role: "user", content: text };
-    const next = [...messages, userMsg];
-    setMessages([...next, { role: "assistant", content: "" }]);
-    setStreaming(true);
+    setMessages((prev) => [...prev, userMsg, { role: "assistant", content: "" }]);
+    setSending(true);
 
     try {
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-assistant`;
+      const storedName = typeof window !== "undefined" ? localStorage.getItem(NAME_KEY) : null;
+      const storedEmail = typeof window !== "undefined" ? localStorage.getItem(EMAIL_KEY) : null;
+      const { data: sess } = await supabase.auth.getUser();
+      const authedEmail = sess?.user?.email ?? null;
+
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-message`;
       const resp = await fetch(url, {
         method: "POST",
         headers: {
@@ -74,58 +124,26 @@ export default function ChatbotWidget() {
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
-          messages: next.filter((m) => m.content.trim().length > 0),
+          visitor_id: visitorIdRef.current,
+          message: text,
+          email: authedEmail || storedEmail,
+          name: storedName,
         }),
       });
 
-      if (!resp.ok || !resp.body) {
-        if (resp.status === 429) {
-          throw new Error("Lots of folks asking right now — try again in a moment.");
-        }
-        if (resp.status === 402) {
-          throw new Error("Service temporarily unavailable. Please call us at " + TIDY_PHONE);
-        }
-        throw new Error("Couldn't reach the assistant. Try again or call " + TIDY_PHONE);
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data?.error || "Couldn't reach Tidy. Try again or call " + TIDY_PHONE);
       }
 
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      let assistantText = "";
-      let done = false;
+      if (data.conversation_id) setConversationId(data.conversation_id);
+      if (data.escalated) setEscalated(true);
 
-      while (!done) {
-        const { done: chunkDone, value } = await reader.read();
-        if (chunkDone) break;
-        buffer += decoder.decode(value, { stream: true });
-        let nlIdx: number;
-        while ((nlIdx = buffer.indexOf("\n")) !== -1) {
-          let line = buffer.slice(0, nlIdx);
-          buffer = buffer.slice(nlIdx + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const json = line.slice(6).trim();
-          if (json === "[DONE]") {
-            done = true;
-            break;
-          }
-          try {
-            const parsed = JSON.parse(json);
-            const delta = parsed.choices?.[0]?.delta?.content;
-            if (delta) {
-              assistantText += delta;
-              setMessages((prev) => {
-                const copy = [...prev];
-                copy[copy.length - 1] = { role: "assistant", content: assistantText };
-                return copy;
-              });
-            }
-          } catch {
-            buffer = line + "\n" + buffer;
-            break;
-          }
-        }
-      }
+      setMessages((prev) => {
+        const copy = [...prev];
+        copy[copy.length - 1] = { role: "assistant", content: data.reply || "" };
+        return copy;
+      });
     } catch (e) {
       const errMsg = e instanceof Error ? e.message : "Something went wrong";
       setMessages((prev) => {
@@ -134,9 +152,9 @@ export default function ChatbotWidget() {
         return copy;
       });
     } finally {
-      setStreaming(false);
+      setSending(false);
     }
-  }, [input, messages, streaming]);
+  }, [input, sending]);
 
   const submitCallback = useCallback(async () => {
     if (!cbPhone.trim() || cbSubmitting) return;
@@ -153,6 +171,9 @@ export default function ChatbotWidget() {
       toast.error("Couldn't send — please call " + TIDY_PHONE);
       return;
     }
+    if (typeof window !== "undefined") {
+      if (cbName.trim()) localStorage.setItem(NAME_KEY, cbName.trim());
+    }
     toast.success("Thanks! We'll reach out shortly.");
     setShowCallback(false);
     setCbName("");
@@ -168,7 +189,6 @@ export default function ChatbotWidget() {
 
   return (
     <>
-      {/* Floating button */}
       <button
         type="button"
         aria-label={open ? "Close chat" : "Open chat with Tidy assistant"}
@@ -181,7 +201,6 @@ export default function ChatbotWidget() {
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
 
-      {/* Chat panel */}
       {open && (
         <div
           className={cn(
@@ -189,11 +208,12 @@ export default function ChatbotWidget() {
             "h-[min(560px,calc(100vh-8rem))] animate-in fade-in slide-in-from-bottom-4 duration-200",
           )}
         >
-          {/* Header */}
           <div className="flex items-center justify-between gap-2 bg-primary px-4 py-3 text-primary-foreground">
             <div>
               <div className="text-sm font-semibold">Tidy Concierge</div>
-              <div className="text-xs opacity-80">Usually replies instantly</div>
+              <div className="text-xs opacity-80">
+                {escalated ? "A teammate is on the way" : "Usually replies instantly"}
+              </div>
             </div>
             <a
               href={`tel:${TIDY_PHONE_TEL}`}
@@ -203,7 +223,6 @@ export default function ChatbotWidget() {
             </a>
           </div>
 
-          {/* Messages */}
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
             {messages.map((m, i) => (
               <div
@@ -222,23 +241,20 @@ export default function ChatbotWidget() {
                   )}
                 >
                   {m.content ||
-                    (m.role === "assistant" && streaming && i === messages.length - 1 ? (
+                    (m.role === "assistant" && sending && i === messages.length - 1 ? (
                       <TypingDots />
                     ) : (
                       <Loader2 className="h-4 w-4 animate-spin opacity-60" />
                     ))}
-                  {m.role === "assistant" &&
-                    streaming &&
-                    i === messages.length - 1 &&
-                    m.content && (
-                      <span
-                        className="ml-1 inline-block h-3.5 w-[2px] -mb-0.5 animate-pulse bg-foreground/60 align-middle"
-                        aria-hidden
-                      />
-                    )}
                 </div>
               </div>
             ))}
+
+            {escalated && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
+                A human will be with you soon. You can also call us at {TIDY_PHONE}.
+              </div>
+            )}
 
             {showCallback && (
               <div className="rounded-xl border bg-card p-3 shadow-sm">
@@ -278,7 +294,6 @@ export default function ChatbotWidget() {
             )}
           </div>
 
-          {/* Quick actions */}
           {!showCallback && (
             <div className="flex flex-wrap gap-1.5 border-t bg-muted/30 px-3 pt-2">
               <button
@@ -297,7 +312,6 @@ export default function ChatbotWidget() {
             </div>
           )}
 
-          {/* Input */}
           <form
             className="flex items-center gap-2 border-t bg-background p-3"
             onSubmit={(e) => {
@@ -317,12 +331,12 @@ export default function ChatbotWidget() {
               placeholder="Ask about pricing, areas, services..."
               rows={1}
               className="min-h-[40px] resize-none text-sm"
-              disabled={streaming}
+              disabled={sending}
             />
             <Button
               type="submit"
               size="icon"
-              disabled={!input.trim() || streaming}
+              disabled={!input.trim() || sending}
               aria-label="Send"
             >
               <Send className="h-4 w-4" />
