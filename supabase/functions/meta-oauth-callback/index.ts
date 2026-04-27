@@ -101,9 +101,9 @@ function renderHtml(opts: {
     <p class="hint">Stored as vault secret <code>meta_pixel_id</code>.</p>
   </div>
   <div class="card">
-    <label>CAPI access token (system user, long-lived)</label>
+    <label>CAPI access token <span class="pill ok">ok</span></label>
     <div class="secret"><code>${escapeHtml(captured.capi_token_preview)}…</code></div>
-    <p class="hint">Stored as vault secret <code>meta_capi_access_token</code>. Backend conversion fan-out will pick this up automatically on the next request.</p>
+    <p class="hint">Stored as vault secret <code>meta_capi_access_token</code> (aliased from the long-lived user access token — Meta CAPI accepts user tokens). Backend conversion fan-out will pick this up automatically on the next request.</p>
   </div>
   <div class="card">
     <label>User access token (60-day, for future Graph calls)</label>
