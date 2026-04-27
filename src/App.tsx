@@ -12,6 +12,7 @@ import { captureUtmFromUrl } from "@/lib/utm";
 import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
+import ChatbotMount from "@/components/chatbot/ChatbotMount";
 
 // Eager: homepage, terms/privacy, NotFound (small + always-needed)
 import Index from "./pages/Index.tsx";
