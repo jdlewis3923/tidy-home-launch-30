@@ -12,6 +12,7 @@ import { captureUtmFromUrl } from "@/lib/utm";
 import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
+import ChatbotMount from "@/components/chatbot/ChatbotMount";
 
 // Eager: homepage, terms/privacy, NotFound (small + always-needed)
 import Index from "./pages/Index.tsx";
@@ -42,6 +43,7 @@ const CheckoutCanceled = lazy(() => import("./pages/CheckoutCanceled.tsx"));
 const AdminSetupCatalog = lazy(() => import("./pages/AdminSetupCatalog.tsx"));
 const AdminTestZapier = lazy(() => import("./pages/AdminTestZapier.tsx"));
 const AdminHealth = lazy(() => import("./pages/AdminHealth.tsx"));
+const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -77,6 +79,7 @@ const App = () => (
           <BrowserRouter>
             <PromoCaptureWatcher />
             <MetaPixel />
+            <ChatbotMount />
             <RouteTracker>
               <Suspense fallback={<RouteFallback />}>
                 <Routes>
@@ -140,6 +143,8 @@ const App = () => (
                   <Route path="/admin/test-zapier" element={<AdminTestZapier />} />
                   {/* Phase 8 integration health dashboard. */}
                   <Route path="/admin/health" element={<AdminHealth />} />
+                  {/* Chatbot knowledge editor (admins only). */}
+                  <Route path="/admin/chatbot-knowledge" element={<AdminChatbotKnowledge />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>

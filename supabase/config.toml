@@ -28,3 +28,8 @@ verify_jwt = false
 # the client-side Pixel snippet can self-configure. Returns no secrets.
 [functions.meta-pixel-id]
 verify_jwt = false
+
+# Public chatbot endpoint — anonymous homepage visitors must be able to chat.
+# Reads only the public chatbot_knowledge row; no secrets returned.
+[functions.chat-assistant]
+verify_jwt = false
