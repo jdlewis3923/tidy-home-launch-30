@@ -434,7 +434,7 @@ export default function AdminSchedule() {
 
         {/* Filters */}
         <div className="mb-4 flex flex-wrap gap-2">
-          {(["all", "scheduled", "ready", "posted", "failed"] as Filter[]).map((f) => (
+          {(["all", "paused", "scheduled", "ready", "posted", "failed"] as Filter[]).map((f) => (
             <Button
               key={f}
               size="sm"
