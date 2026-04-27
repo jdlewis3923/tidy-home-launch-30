@@ -27,6 +27,7 @@ const Refer = () => (
 
 const ReferInner = () => {
   const [code, setCode] = useState<string | null>(null);
+  const [creditCents, setCreditCents] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [authLoaded, setAuthLoaded] = useState(false);
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
@@ -45,12 +46,40 @@ const ReferInner = () => {
         const { data } = await supabase.auth.getSession();
         if (!active) return;
         const user = data.session?.user;
-        if (user?.email) {
-          const slug = user.email.split("@")[0]
-            .replace(/[^a-zA-Z0-9]/g, "")
-            .slice(0, 8)
-            .toUpperCase();
-          setCode(`TIDY-${slug}`);
+        if (!user) return;
+
+        // Read or backfill referral_code on the profile.
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("referral_code")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (!active) return;
+
+        let resolvedCode = profile?.referral_code ?? null;
+        if (!resolvedCode) {
+          // Trigger normally seeds it; if a legacy profile is missing one,
+          // the SQL backfill in the migration handled it. Last-resort:
+          // re-read once after a small delay (handled below as fallback).
+          const { data: retry } = await supabase
+            .from("profiles")
+            .select("referral_code")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          resolvedCode = retry?.referral_code ?? null;
+        }
+        if (resolvedCode) setCode(resolvedCode);
+
+        // Sum unspent credits (status converted, not yet credited out).
+        const { data: refRows } = await supabase
+          .from("referrals")
+          .select("credit_cents,status")
+          .eq("referrer_user_id", user.id);
+        if (active && refRows) {
+          const sum = refRows
+            .filter((r) => r.status === "converted" || r.status === "credited")
+            .reduce((acc, r) => acc + (r.credit_cents ?? 0), 0);
+          setCreditCents(sum);
         }
       } catch {
         /* unauthenticated or auth not yet available — fall through */
