@@ -8,9 +8,10 @@
  */
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Bell, ChevronDown } from 'lucide-react';
+import { Bell, ChevronDown, Inbox, Calendar, FlaskConical } from 'lucide-react';
 import tidyLogo from '@/assets/tidy-logo.png';
 import { supabase } from '@/integrations/supabase/client';
+import { useHasRole } from '@/hooks/useHasRole';
 
 const NAV = [
   { label: 'Dashboard', href: '/dashboard' },
@@ -20,10 +21,17 @@ const NAV = [
   { label: 'Help', href: '/help' },
 ];
 
+const ADMIN_NAV = [
+  { label: 'Inbox', href: '/admin/inbox', icon: Inbox },
+  { label: 'Schedule', href: '/admin/schedule', icon: Calendar },
+  { label: 'Test events', href: '/admin/test-zapier', icon: FlaskConical },
+];
+
 export default function DashboardTopNav({ initials = '' }: { initials?: string }) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [hasUnread] = useState(true);
+  const isAdmin = useHasRole('admin');
 
   useEffect(() => {
     setOpen(false);
@@ -40,7 +48,7 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
           />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           {NAV.map((item) => {
             const active =
               item.href === '/dashboard'
@@ -63,6 +71,40 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
               </Link>
             );
           })}
+
+          {isAdmin && (
+            <>
+              <span
+                aria-hidden
+                className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-faint"
+              >
+                <span className="h-px w-4 bg-[hsl(var(--hairline))]" />
+                Admin
+                <span className="h-px w-4 bg-[hsl(var(--hairline))]" />
+              </span>
+              {ADMIN_NAV.map((item) => {
+                const active = location.pathname.startsWith(item.href);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.href}
+                    className={`relative inline-flex items-center gap-1.5 text-sm font-medium tracking-tight transition-colors ${
+                      active
+                        ? 'text-[hsl(var(--primary))]'
+                        : 'text-ink-soft hover:text-ink'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                    {active && (
+                      <span className="absolute -bottom-[14px] left-0 right-0 h-[2px] rounded-full bg-[hsl(var(--primary))]" />
+                    )}
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -85,6 +127,11 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
             <span className="grid h-9 w-9 place-items-center rounded-full bg-[hsl(var(--primary))]/10 text-sm font-semibold text-[hsl(var(--primary))]">
               {initials || <span className="h-2 w-2 animate-pulse rounded-full bg-[hsl(var(--primary))]/40" />}
             </span>
+            {isAdmin && (
+              <span className="hidden sm:inline-flex items-center rounded-full bg-[hsl(var(--primary))]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--primary))] ring-1 ring-[hsl(var(--primary))]/20">
+                Admin
+              </span>
+            )}
             <ChevronDown className="h-4 w-4 text-ink-faint" />
           </button>
 
