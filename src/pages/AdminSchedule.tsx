@@ -588,7 +588,17 @@ export default function AdminSchedule() {
                       Edit
                     </Button>
                   )}
-                  {(p.status === "scheduled" || p.status === "ready" || p.status === "failed") && (
+                  {p.status === "paused" && (
+                    <Button size="sm" variant="outline" onClick={() => setPostStatus(p, "scheduled")}>
+                      <Play className="mr-1 h-3.5 w-3.5" /> Resume
+                    </Button>
+                  )}
+                  {(p.status === "scheduled" || p.status === "ready") && (
+                    <Button size="sm" variant="outline" onClick={() => setPostStatus(p, "paused")}>
+                      <Pause className="mr-1 h-3.5 w-3.5" /> Pause
+                    </Button>
+                  )}
+                  {(p.status === "scheduled" || p.status === "ready" || p.status === "failed" || p.status === "paused") && (
                     <Button
                       size="sm"
                       onClick={() => postNow(p)}
@@ -602,6 +612,16 @@ export default function AdminSchedule() {
                         <Send className="mr-1 h-3.5 w-3.5" />
                       )}
                       {p.status === "failed" ? "Retry" : "Post now"}
+                    </Button>
+                  )}
+                  {(p.ig_post_id || p.fb_post_id) && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => rollbackPost(p)}
+                      disabled={busyId === p.id}
+                    >
+                      Rollback
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" onClick={() => archive(p)} className="ml-auto text-muted-foreground">
