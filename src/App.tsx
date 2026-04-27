@@ -46,6 +46,7 @@ const AdminHealth = lazy(() => import("./pages/AdminHealth.tsx"));
 const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.tsx"));
 const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
 const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
+const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -151,6 +152,8 @@ const App = () => (
                   <Route path="/admin/inbox" element={<AdminInbox />} />
                   {/* Social media auto-poster (IG + FB), admins only. */}
                   <Route path="/admin/schedule" element={<AdminSchedule />} />
+                  {/* Permanent KPI Command Center — admins only. */}
+                  <Route path="/admin/kpis" element={<AdminKpis />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
