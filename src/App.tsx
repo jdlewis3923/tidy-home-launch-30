@@ -45,6 +45,7 @@ const AdminTestZapier = lazy(() => import("./pages/AdminTestZapier.tsx"));
 const AdminHealth = lazy(() => import("./pages/AdminHealth.tsx"));
 const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.tsx"));
 const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
+const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -148,6 +149,8 @@ const App = () => (
                   <Route path="/admin/chatbot-knowledge" element={<AdminChatbotKnowledge />} />
                   {/* Unified support inbox (SMS + web), admins only. */}
                   <Route path="/admin/inbox" element={<AdminInbox />} />
+                  {/* Social media auto-poster (IG + FB), admins only. */}
+                  <Route path="/admin/schedule" element={<AdminSchedule />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
