@@ -451,8 +451,9 @@ Deno.serve(async (req) => {
           }
         }
 
-        // 5: mint CAPI token
-        const capiToken = await mintCapiToken(pixelId, longLived.access_token);
+        // 5: alias the long-lived user token as the CAPI token (see note above mintCapiToken removal).
+        const capiToken = longLived.access_token;
+        console.log('[meta-oauth-callback] CAPI token aliased from user access token (60-day expiry).');
 
         // 6: persist all 4 to vault
         await persistToVault({
