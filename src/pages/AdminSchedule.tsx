@@ -128,9 +128,19 @@ export default function AdminSchedule() {
     setPosts((data ?? []) as Post[]);
   }, []);
 
+  const loadPauseFlag = useCallback(async () => {
+    const { data, error } = await supabase.rpc("admin_get_scheduler_paused");
+    if (error) {
+      console.warn("pause flag load failed", error);
+      return;
+    }
+    setSchedulerPaused(Boolean(data));
+  }, []);
+
   useEffect(() => {
     if (authed !== "yes") return;
     load();
+    loadPauseFlag();
     const ch = supabase
       .channel("social_posts_admin")
       .on(
@@ -142,7 +152,53 @@ export default function AdminSchedule() {
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [authed, load]);
+  }, [authed, load, loadPauseFlag]);
+
+  const togglePause = async () => {
+    if (schedulerPaused === null) return;
+    const next = !schedulerPaused;
+    if (!next && !confirm("Resume the scheduler? Cron will start firing scheduled posts every minute.")) return;
+    setPauseBusy(true);
+    const { data, error } = await supabase.rpc("admin_set_scheduler_paused", { _paused: next });
+    setPauseBusy(false);
+    if (error) {
+      toast.error("Toggle failed: " + error.message);
+      return;
+    }
+    setSchedulerPaused(Boolean(data));
+    toast.success(next ? "Scheduler PAUSED — no posts will fire" : "Scheduler RESUMED");
+  };
+
+  const rollbackPost = async (p: Post) => {
+    if (!p.ig_post_id && !p.fb_post_id) {
+      toast.error("Nothing to roll back (no live IG/FB post id).");
+      return;
+    }
+    if (!confirm(`Delete the live IG/FB posts for Day ${p.day_number}? This cannot be undone.`)) return;
+    setBusyId(p.id);
+    const { data, error } = await supabase.functions.invoke("meta-rollback-post", {
+      body: { post_id: p.id },
+    });
+    setBusyId(null);
+    if (error) {
+      toast.error("Rollback failed: " + error.message);
+      return;
+    }
+    if ((data as { ok?: boolean })?.ok === false) {
+      toast.error("Rollback partial — see row error message");
+      return;
+    }
+    toast.success(`Day ${p.day_number} rolled back`);
+  };
+
+  const setPostStatus = async (p: Post, status: Status) => {
+    const { error } = await supabase
+      .from("social_posts")
+      .update({ status, error_message: status === "scheduled" ? null : p.error_message })
+      .eq("id", p.id);
+    if (error) toast.error("Status update failed: " + error.message);
+    else toast.success(`Day ${p.day_number} → ${status}`);
+  };
 
   // ---------- counts ----------
   const counts = useMemo(() => {
