@@ -144,7 +144,7 @@ export default function AdminSchedule() {
 
   // ---------- counts ----------
   const counts = useMemo(() => {
-    const c: Record<Status, number> = { scheduled: 0, ready: 0, posting: 0, posted: 0, failed: 0 };
+    const c: Record<Status, number> = { scheduled: 0, ready: 0, posting: 0, posted: 0, failed: 0, paused: 0 };
     for (const p of posts) c[p.status]++;
     return c;
   }, [posts]);
