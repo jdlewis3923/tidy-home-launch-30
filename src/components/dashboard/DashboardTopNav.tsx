@@ -127,6 +127,11 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
             <span className="grid h-9 w-9 place-items-center rounded-full bg-[hsl(var(--primary))]/10 text-sm font-semibold text-[hsl(var(--primary))]">
               {initials || <span className="h-2 w-2 animate-pulse rounded-full bg-[hsl(var(--primary))]/40" />}
             </span>
+            {isAdmin && (
+              <span className="hidden sm:inline-flex items-center rounded-full bg-[hsl(var(--primary))]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--primary))] ring-1 ring-[hsl(var(--primary))]/20">
+                Admin
+              </span>
+            )}
             <ChevronDown className="h-4 w-4 text-ink-faint" />
           </button>
 
