@@ -18,6 +18,27 @@ const GREETING: Msg = {
     "Hi! I'm Tidy's concierge assistant 👋 Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.",
 };
 
+// Three-dot "assistant is typing" indicator. Reuses billing-bounce keyframe.
+function TypingDots() {
+  return (
+    <span
+      className="inline-flex items-center gap-1 py-1"
+      role="status"
+      aria-label="Assistant is typing"
+    >
+      <span className="h-1.5 w-1.5 animate-billing-bounce rounded-full bg-foreground/60" />
+      <span
+        className="h-1.5 w-1.5 animate-billing-bounce rounded-full bg-foreground/60"
+        style={{ animationDelay: "0.15s" }}
+      />
+      <span
+        className="h-1.5 w-1.5 animate-billing-bounce rounded-full bg-foreground/60"
+        style={{ animationDelay: "0.3s" }}
+      />
+    </span>
+  );
+}
+
 export default function ChatbotWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
@@ -200,9 +221,21 @@ export default function ChatbotWidget() {
                       : "rounded-bl-sm bg-muted text-foreground",
                   )}
                 >
-                  {m.content || (
-                    <Loader2 className="h-4 w-4 animate-spin opacity-60" />
-                  )}
+                  {m.content ||
+                    (m.role === "assistant" && streaming && i === messages.length - 1 ? (
+                      <TypingDots />
+                    ) : (
+                      <Loader2 className="h-4 w-4 animate-spin opacity-60" />
+                    ))}
+                  {m.role === "assistant" &&
+                    streaming &&
+                    i === messages.length - 1 &&
+                    m.content && (
+                      <span
+                        className="ml-1 inline-block h-3.5 w-[2px] -mb-0.5 animate-pulse bg-foreground/60 align-middle"
+                        aria-hidden
+                      />
+                    )}
                 </div>
               </div>
             ))}
