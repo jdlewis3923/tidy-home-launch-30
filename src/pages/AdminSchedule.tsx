@@ -31,6 +31,7 @@ type Post = {
   day_number: number;
   scheduled_at: string;
   image_path: string;
+  image_paths: string[] | null;
   caption: string;
   status: Status;
   ig_post_id: string | null;
@@ -38,17 +39,21 @@ type Post = {
   error_message: string | null;
   posted_at: string | null;
   created_at: string;
+  updated_at?: string;
 };
 
 type Filter = "all" | "scheduled" | "ready" | "posted" | "failed";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
-function publicImageUrl(image_path: string): string {
-  const key = image_path.startsWith("social-images/")
-    ? image_path.slice("social-images/".length)
-    : image_path;
-  return `${SUPABASE_URL}/storage/v1/object/public/social-images/${encodeURI(key)}`;
+function publicImageUrl(image_path: string, buster?: string): string {
+  // image_path may be stored as "social-images/<filename>" (legacy) OR just "<filename>".
+  // Strip any leading bucket prefix and any leading slash so we always get the bucket key.
+  let key = image_path ?? "";
+  if (key.startsWith("social-images/")) key = key.slice("social-images/".length);
+  if (key.startsWith("/")) key = key.slice(1);
+  const url = `${SUPABASE_URL}/storage/v1/object/public/social-images/${encodeURI(key)}`;
+  return buster ? `${url}?v=${encodeURIComponent(buster)}` : url;
 }
 
 function statusBadgeVariant(s: Status): "default" | "secondary" | "destructive" | "outline" {
