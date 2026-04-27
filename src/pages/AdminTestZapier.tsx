@@ -164,10 +164,13 @@ export default function AdminTestZapier() {
           )}
         </div>
 
+        <TwilioSelfTest />
+
         <div className="mt-6 flex items-center gap-3 text-sm">
           <span className="font-semibold text-slate-700">Lang:</span>
           <button
             type="button"
+
             onClick={() => setLang("en")}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
               lang === "en" ? "bg-slate-900 text-white" : "bg-white text-slate-700 ring-1 ring-slate-300"
