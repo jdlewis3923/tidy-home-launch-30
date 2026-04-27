@@ -113,6 +113,7 @@ export type Database = {
           phone: string | null
           preferred_day: string | null
           preferred_time: string | null
+          referral_code: string | null
           sms_opt_in: boolean
           sms_opt_out: boolean
           special_instructions: string | null
@@ -135,6 +136,7 @@ export type Database = {
           phone?: string | null
           preferred_day?: string | null
           preferred_time?: string | null
+          referral_code?: string | null
           sms_opt_in?: boolean
           sms_opt_out?: boolean
           special_instructions?: string | null
@@ -157,12 +159,46 @@ export type Database = {
           phone?: string | null
           preferred_day?: string | null
           preferred_time?: string | null
+          referral_code?: string | null
           sms_opt_in?: boolean
           sms_opt_out?: boolean
           special_instructions?: string | null
           updated_at?: string
           user_id?: string
           zip?: string | null
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          converted_at: string | null
+          created_at: string
+          credit_cents: number
+          id: string
+          referee_email: string | null
+          referrer_user_id: string
+          status: string
+          stripe_credit_id: string | null
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string
+          credit_cents?: number
+          id?: string
+          referee_email?: string | null
+          referrer_user_id: string
+          status?: string
+          stripe_credit_id?: string | null
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string
+          credit_cents?: number
+          id?: string
+          referee_email?: string | null
+          referrer_user_id?: string
+          status?: string
+          stripe_credit_id?: string | null
         }
         Relationships: []
       }
@@ -223,6 +259,8 @@ export type Database = {
       subscriptions: {
         Row: {
           bundle_discount_pct: number
+          card_brand: string | null
+          card_last4: string | null
           created_at: string
           frequency: Database["public"]["Enums"]["subscription_frequency"]
           id: string
@@ -239,6 +277,8 @@ export type Database = {
         }
         Insert: {
           bundle_discount_pct?: number
+          card_brand?: string | null
+          card_last4?: string | null
           created_at?: string
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
@@ -255,6 +295,8 @@ export type Database = {
         }
         Update: {
           bundle_discount_pct?: number
+          card_brand?: string | null
+          card_last4?: string | null
           created_at?: string
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
@@ -266,6 +308,36 @@ export type Database = {
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_requests: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          status?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          status?: string
+          type?: string
           updated_at?: string
           user_id?: string
         }
@@ -295,6 +367,7 @@ export type Database = {
       visits: {
         Row: {
           created_at: string
+          crew_name: string | null
           id: string
           jobber_job_id: string | null
           jobber_visit_id: string | null
@@ -309,6 +382,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          crew_name?: string | null
           id?: string
           jobber_job_id?: string | null
           jobber_visit_id?: string | null
@@ -323,6 +397,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          crew_name?: string | null
           id?: string
           jobber_job_id?: string | null
           jobber_visit_id?: string | null
@@ -363,6 +438,7 @@ export type Database = {
       }
       admin_set_service_role_key: { Args: { _key: string }; Returns: undefined }
       current_user_admin: { Args: never; Returns: boolean }
+      generate_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

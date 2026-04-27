@@ -74,6 +74,61 @@ export default function DashboardIndex() {
   const [scheduleView, setScheduleView] = useState<'calendar' | 'list'>('calendar');
   const [activeModal, setActiveModal] = useState<null |
     'reschedule' | 'note' | 'access' | 'plan' | 'payment' | 'help' | 'visit'>(null);
+  const [submitState, setSubmitState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
+  // Controlled fields for support_requests modals.
+  const [rescheduleDate, setRescheduleDate] = useState<string>('');
+  const [rescheduleWindow, setRescheduleWindow] = useState<string>('8:00 AM – 12:00 PM');
+  const [noteText, setNoteText] = useState<string>('');
+  const [accessGate, setAccessGate] = useState<string>('');
+  const [accessParking, setAccessParking] = useState<string>('');
+  const [accessPets, setAccessPets] = useState<string>('');
+
+  // Hydrate access fields when profile arrives or modal opens.
+  useEffect(() => {
+    if (activeModal === 'access') {
+      setAccessGate(data.profile?.gate_code ?? '');
+      setAccessParking(data.profile?.parking_notes ?? '');
+      setAccessPets(data.profile?.pets ?? '');
+    }
+    if (activeModal === 'reschedule') {
+      setRescheduleDate(data.nextVisit?.visit_date ?? '');
+    }
+    if (activeModal === null) {
+      setSubmitState('idle');
+    }
+  }, [activeModal, data.profile, data.nextVisit]);
+
+  const submitSupportRequest = async (
+    type: 'reschedule' | 'note' | 'access',
+    payload: Record<string, unknown>
+  ) => {
+    setSubmitState('sending');
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData.session?.user?.id;
+      if (!userId) {
+        setSubmitState('error');
+        return;
+      }
+      const { error } = await supabase.from('support_requests').insert({
+        user_id: userId,
+        type,
+        payload: payload as never,
+      });
+      if (error) {
+        console.error('[support_requests insert]', error.message);
+        setSubmitState('error');
+        return;
+      }
+      setSubmitState('sent');
+      setTimeout(() => setActiveModal(null), 900);
+    } catch (err) {
+      console.error('[support_requests insert threw]', err);
+      setSubmitState('error');
+    }
+  };
 
   // Bounce unauthenticated visitors to login (after the auth state resolves).
   useEffect(() => {
@@ -453,7 +508,7 @@ export default function DashboardIndex() {
                           {data.lastCompleted.time_window || TIME_WINDOW_FALLBACK}
                         </span>
                         <span>·</span>
-                        <span>Pro: Daniel &amp; Team</span>
+                        <span>Pro: {data.lastCompleted.crew_name ?? 'Your Tidy crew'}</span>
                       </div>
                     </div>
                     <div className="mt-4 flex gap-2">
@@ -541,17 +596,35 @@ export default function DashboardIndex() {
       <CalmModal
         open={activeModal === 'reschedule'}
         title="Reschedule visit"
-        subtitle="Pick a new date and time window."
+        subtitle="Pick a new date and time window. We'll confirm by text within the hour."
         onClose={() => setActiveModal(null)}
-        primaryLabel="Update visit"
+        primaryLabel={
+          submitState === 'sending' ? 'Sending…' :
+          submitState === 'sent' ? 'Sent ✓' :
+          submitState === 'error' ? 'Try again' :
+          'Request reschedule'
+        }
+        onPrimary={() =>
+          submitSupportRequest('reschedule', {
+            current_visit_id: data.nextVisit?.id ?? null,
+            current_visit_date: data.nextVisit?.visit_date ?? null,
+            requested_date: rescheduleDate,
+            requested_window: rescheduleWindow,
+          })
+        }
       >
         <div className="space-y-3">
           <input
             type="date"
-            defaultValue={data.nextVisit?.visit_date ?? ''}
+            value={rescheduleDate}
+            onChange={(e) => setRescheduleDate(e.target.value)}
             className="w-full rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-sm text-ink"
           />
-          <select className="w-full rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-sm text-ink">
+          <select
+            value={rescheduleWindow}
+            onChange={(e) => setRescheduleWindow(e.target.value)}
+            className="w-full rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-sm text-ink"
+          >
             <option>8:00 AM – 12:00 PM</option>
             <option>12:00 PM – 5:00 PM</option>
           </select>
@@ -563,10 +636,23 @@ export default function DashboardIndex() {
         title="Add a note"
         subtitle="Anything our crew should know before they arrive?"
         onClose={() => setActiveModal(null)}
-        primaryLabel="Save note"
+        primaryLabel={
+          submitState === 'sending' ? 'Sending…' :
+          submitState === 'sent' ? 'Sent ✓' :
+          submitState === 'error' ? 'Try again' :
+          'Save note'
+        }
+        onPrimary={() =>
+          submitSupportRequest('note', {
+            visit_id: data.nextVisit?.id ?? null,
+            note: noteText,
+          })
+        }
       >
         <textarea
           rows={4}
+          value={noteText}
+          onChange={(e) => setNoteText(e.target.value)}
           placeholder="e.g. Gate code is 4827, dog will be inside."
           className="w-full resize-none rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-sm text-ink"
         />
@@ -577,12 +663,24 @@ export default function DashboardIndex() {
         title="Update access"
         subtitle="Gate codes, parking notes, pet info — keep us in the loop."
         onClose={() => setActiveModal(null)}
-        primaryLabel="Save changes"
+        primaryLabel={
+          submitState === 'sending' ? 'Sending…' :
+          submitState === 'sent' ? 'Sent ✓' :
+          submitState === 'error' ? 'Try again' :
+          'Save changes'
+        }
+        onPrimary={() =>
+          submitSupportRequest('access', {
+            gate_code: accessGate,
+            parking_notes: accessParking,
+            pets: accessPets,
+          })
+        }
       >
         <div className="space-y-3 text-sm">
-          <Field label="Gate code" defaultValue={data.profile?.gate_code ?? ''} />
-          <Field label="Parking notes" defaultValue={data.profile?.parking_notes ?? ''} />
-          <Field label="Pets" defaultValue={data.profile?.pets ?? ''} />
+          <Field label="Gate code" value={accessGate} onChange={setAccessGate} />
+          <Field label="Parking notes" value={accessParking} onChange={setAccessParking} />
+          <Field label="Pets" value={accessPets} onChange={setAccessPets} />
         </div>
       </CalmModal>
 
@@ -612,8 +710,18 @@ export default function DashboardIndex() {
         primaryLabel="Text us"
       >
         <ul className="space-y-2 text-sm text-ink-soft">
-          <li>📱 Text: (305) 555‑0142</li>
-          <li>📧 Email: hello@jointidy.co</li>
+          <li>
+            📱 Text:{' '}
+            <a href="tel:+17868291141" className="font-semibold text-[hsl(var(--primary))] hover:underline">
+              (786) 829-1141
+            </a>
+          </li>
+          <li>
+            📧 Email:{' '}
+            <a href="mailto:hello@jointidy.co" className="font-semibold text-[hsl(var(--primary))] hover:underline">
+              hello@jointidy.co
+            </a>
+          </li>
           <li>🕘 Mon–Sat, 8am–6pm</li>
         </ul>
       </CalmModal>
@@ -696,16 +804,23 @@ function QuickAction({
 function Field({
   label,
   defaultValue,
+  value,
+  onChange,
 }: {
   label: string;
   defaultValue?: string;
+  value?: string;
+  onChange?: (v: string) => void;
 }) {
+  const controlled = value !== undefined;
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-semibold text-ink-faint">{label}</span>
       <input
         type="text"
-        defaultValue={defaultValue}
+        {...(controlled
+          ? { value, onChange: (e) => onChange?.(e.target.value) }
+          : { defaultValue })}
         className="w-full rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-ink"
       />
     </label>

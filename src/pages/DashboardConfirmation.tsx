@@ -1,12 +1,25 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import tidyLogo from '@/assets/tidy-logo.png';
+import {
+  useDashboardData,
+  formatLongDate,
+} from '@/lib/dashboard-data';
 
 /**
  * Calm "you're in." moment. Full-screen cream paper, sunlit blur, oversized
  * logo, no clutter. Reinforces: the right decision is already made.
+ *
+ * Now personalized — pulls first_name + first scheduled visit from the
+ * just-created subscription so the screen feels like it's responding to
+ * the person, not playing back a static template.
  */
 export default function DashboardConfirmation() {
+  const data = useDashboardData();
+  const firstName = data.firstName && data.firstName !== 'friend' ? data.firstName : null;
+  const firstVisitISO = data.upcoming[0]?.visit_date ?? data.nextVisit?.visit_date ?? null;
+  const firstVisitDisplay = firstVisitISO ? formatLongDate(firstVisitISO) : null;
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-cream text-ink">
       {/* Warm sunlit background */}
@@ -37,11 +50,17 @@ export default function DashboardConfirmation() {
 
         <div className="mt-10 animate-calm-rise" style={{ animationDelay: '120ms' }}>
           <h1 className="text-5xl md:text-6xl font-bold text-ink tracking-tight lowercase" style={{ letterSpacing: '-0.03em' }}>
-            you're in.
+            {firstName ? `${firstName.toLowerCase()}, you're in.` : "you're in."}
           </h1>
           <p className="mt-4 text-base md:text-lg text-ink-soft lowercase">
             your home is now on the schedule.
           </p>
+          {firstVisitDisplay && (
+            <p className="mt-3 text-sm md:text-base text-ink-soft">
+              First visit:{' '}
+              <span className="font-semibold text-ink">{firstVisitDisplay}</span>
+            </p>
+          )}
         </div>
 
         <div

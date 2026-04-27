@@ -122,6 +122,12 @@ export default function Billing() {
                     ? `on ${formatLongDate(sub.next_billing_date)}`
                     : "no upcoming charge"}
                 </p>
+                {sub?.card_last4 && (
+                  <p className="mt-2 text-xs text-ink-faint">
+                    {(sub.card_brand ?? "Card").replace(/^./, (c) => c.toUpperCase())} ····{" "}
+                    {sub.card_last4}
+                  </p>
+                )}
               </div>
               <button
                 type="button"

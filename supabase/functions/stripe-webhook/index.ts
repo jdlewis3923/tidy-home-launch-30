@@ -346,6 +346,36 @@ async function handleInvoicePaid(supabase: any, event: Stripe.Event) {
       .update({ next_billing_date: next })
       .eq('id', localSubId);
   }
+
+  // Capture card_brand + card_last4 for Billing UI display.
+  // Stripe's Invoice expands payment_intent.payment_method on most APIs;
+  // here we read the charge directly which carries payment_method_details.
+  try {
+    const chargeId = (invoice as unknown as { charge?: string | { id: string } }).charge;
+    const cid = typeof chargeId === 'string' ? chargeId : chargeId?.id ?? null;
+    if (localSubId && cid) {
+      // Lazy-import: stripe was constructed in the outer handler. Re-create
+      // locally so we don't need to plumb it through every helper signature.
+      const { default: StripeCtor } = await import('https://esm.sh/stripe@17.5.0?target=deno');
+      const s = new StripeCtor(STRIPE_SECRET_KEY!, {
+        apiVersion: '2024-12-18.acacia',
+        httpClient: StripeCtor.createFetchHttpClient(),
+      });
+      const charge = await s.charges.retrieve(cid);
+      const card = charge.payment_method_details?.card;
+      if (card?.brand || card?.last4) {
+        await supabase
+          .from('subscriptions')
+          .update({
+            card_brand: card.brand ?? null,
+            card_last4: card.last4 ?? null,
+          })
+          .eq('id', localSubId);
+      }
+    }
+  } catch (err) {
+    console.warn('[stripe-webhook] card details capture failed', err);
+  }
 }
 
 // deno-lint-ignore no-explicit-any
