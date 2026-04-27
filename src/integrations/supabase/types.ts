@@ -364,6 +364,92 @@ export type Database = {
         }
         Relationships: []
       }
+      support_conversations: {
+        Row: {
+          ai_handled_count: number
+          channel: Database["public"]["Enums"]["support_channel"]
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone_e164: string | null
+          id: string
+          last_message_at: string
+          status: Database["public"]["Enums"]["support_status"]
+          updated_at: string
+          visitor_id: string | null
+        }
+        Insert: {
+          ai_handled_count?: number
+          channel: Database["public"]["Enums"]["support_channel"]
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone_e164?: string | null
+          id?: string
+          last_message_at?: string
+          status?: Database["public"]["Enums"]["support_status"]
+          updated_at?: string
+          visitor_id?: string | null
+        }
+        Update: {
+          ai_handled_count?: number
+          channel?: Database["public"]["Enums"]["support_channel"]
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone_e164?: string | null
+          id?: string
+          last_message_at?: string
+          status?: Database["public"]["Enums"]["support_status"]
+          updated_at?: string
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          ai_confidence: number | null
+          body: string
+          conversation_id: string
+          created_at: string
+          direction: Database["public"]["Enums"]["support_direction"]
+          id: string
+          sender_type: Database["public"]["Enums"]["support_sender_type"]
+          sender_user_id: string | null
+          twilio_sid: string | null
+        }
+        Insert: {
+          ai_confidence?: number | null
+          body: string
+          conversation_id: string
+          created_at?: string
+          direction: Database["public"]["Enums"]["support_direction"]
+          id?: string
+          sender_type: Database["public"]["Enums"]["support_sender_type"]
+          sender_user_id?: string | null
+          twilio_sid?: string | null
+        }
+        Update: {
+          ai_confidence?: number | null
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          direction?: Database["public"]["Enums"]["support_direction"]
+          id?: string
+          sender_type?: Database["public"]["Enums"]["support_sender_type"]
+          sender_user_id?: string | null
+          twilio_sid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_requests: {
         Row: {
           created_at: string
@@ -504,6 +590,10 @@ export type Database = {
       service_type: "cleaning" | "lawn" | "detailing"
       subscription_frequency: "weekly" | "biweekly" | "monthly"
       subscription_status: "active" | "paused" | "canceled"
+      support_channel: "sms" | "web"
+      support_direction: "inbound" | "outbound" | "auto_reply"
+      support_sender_type: "customer" | "ai" | "admin"
+      support_status: "open" | "resolved" | "escalated"
       visit_status:
         | "scheduled"
         | "on_the_way"
@@ -642,6 +732,10 @@ export const Constants = {
       service_type: ["cleaning", "lawn", "detailing"],
       subscription_frequency: ["weekly", "biweekly", "monthly"],
       subscription_status: ["active", "paused", "canceled"],
+      support_channel: ["sms", "web"],
+      support_direction: ["inbound", "outbound", "auto_reply"],
+      support_sender_type: ["customer", "ai", "admin"],
+      support_status: ["open", "resolved", "escalated"],
       visit_status: [
         "scheduled",
         "on_the_way",
