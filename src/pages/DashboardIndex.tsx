@@ -612,8 +612,18 @@ export default function DashboardIndex() {
         primaryLabel="Text us"
       >
         <ul className="space-y-2 text-sm text-ink-soft">
-          <li>📱 Text: (305) 555‑0142</li>
-          <li>📧 Email: hello@jointidy.co</li>
+          <li>
+            📱 Text:{' '}
+            <a href="tel:+17868291141" className="font-semibold text-[hsl(var(--primary))] hover:underline">
+              (786) 829-1141
+            </a>
+          </li>
+          <li>
+            📧 Email:{' '}
+            <a href="mailto:hello@jointidy.co" className="font-semibold text-[hsl(var(--primary))] hover:underline">
+              hello@jointidy.co
+            </a>
+          </li>
           <li>🕘 Mon–Sat, 8am–6pm</li>
         </ul>
       </CalmModal>

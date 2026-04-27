@@ -177,8 +177,8 @@ export default function Account() {
       >
         <p className="text-sm text-ink-soft">
           For now, please text us at{" "}
-          <a href="sms:+13055551234" className="font-semibold text-[hsl(var(--primary))]">
-            (305) 555-1234
+          <a href="tel:+17868291141" className="font-semibold text-[hsl(var(--primary))]">
+            (786) 829-1141
           </a>{" "}
           or email{" "}
           <a href="mailto:hello@jointidy.co" className="font-semibold text-[hsl(var(--primary))]">
