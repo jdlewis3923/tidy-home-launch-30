@@ -84,6 +84,8 @@ export default function AdminSchedule() {
   const [editing, setEditing] = useState<Record<string, { caption: string; scheduled_at: string }>>({});
   const [uploading, setUploading] = useState(false);
   const [uploadBuster, setUploadBuster] = useState<string>("");
+  const [schedulerPaused, setSchedulerPaused] = useState<boolean | null>(null);
+  const [pauseBusy, setPauseBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ---------- auth ----------
