@@ -339,7 +339,7 @@ Deno.serve(async (req) => {
   // Lock row → 'posting'. Only proceed if it's currently in a postable state.
   const { data: post, error: loadErr } = await sb
     .from("social_posts")
-    .select("id, image_path, caption, status, day_number")
+    .select("id, image_path, image_paths, caption, status, day_number")
     .eq("id", postId)
     .maybeSingle();
   if (loadErr) return json({ error: `load failed: ${loadErr.message}` }, 500);
@@ -357,21 +357,26 @@ Deno.serve(async (req) => {
 
   try {
     const creds = await ensureCredentials(sb);
-    const imageUrl = publicImageUrl(post.image_path);
-    console.log(`[meta-publish-post] day=${post.day_number} image=${imageUrl}`);
+    const imageUrls = resolveImageUrls(post);
+    const isCarousel = imageUrls.length > 1;
+    console.log(`[meta-publish-post] day=${post.day_number} carousel=${isCarousel} count=${imageUrls.length}`);
 
     let igPostId: string | null = null;
     let fbPostId: string | null = null;
     const errors: string[] = [];
 
     try {
-      igPostId = await publishInstagram(creds.ig_user_id, creds.user_token, imageUrl, post.caption);
+      igPostId = isCarousel
+        ? await publishInstagramCarousel(creds.ig_user_id, creds.user_token, imageUrls, post.caption)
+        : await publishInstagram(creds.ig_user_id, creds.user_token, imageUrls[0], post.caption);
       console.log(`[meta-publish-post] IG ok day=${post.day_number} id=${igPostId}`);
     } catch (e) {
       errors.push(`IG: ${e instanceof Error ? e.message : String(e)}`);
     }
     try {
-      fbPostId = await publishFacebook(creds.fb_page_id, creds.fb_page_token, imageUrl, post.caption);
+      fbPostId = isCarousel
+        ? await publishFacebookMultiPhoto(creds.fb_page_id, creds.fb_page_token, imageUrls, post.caption)
+        : await publishFacebook(creds.fb_page_id, creds.fb_page_token, imageUrls[0], post.caption);
       console.log(`[meta-publish-post] FB ok day=${post.day_number} id=${fbPostId}`);
     } catch (e) {
       errors.push(`FB: ${e instanceof Error ? e.message : String(e)}`);
