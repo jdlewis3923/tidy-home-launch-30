@@ -169,6 +169,267 @@ export type Database = {
           },
         ]
       }
+      kpi_action_log: {
+        Row: {
+          action_key: string | null
+          action_label: string
+          action_type: Database["public"]["Enums"]["kpi_action_type"]
+          alert_id: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          kpi_code: string
+          result: Json
+          status: string
+          triggered_by: string | null
+        }
+        Insert: {
+          action_key?: string | null
+          action_label: string
+          action_type: Database["public"]["Enums"]["kpi_action_type"]
+          alert_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          kpi_code: string
+          result?: Json
+          status?: string
+          triggered_by?: string | null
+        }
+        Update: {
+          action_key?: string | null
+          action_label?: string
+          action_type?: Database["public"]["Enums"]["kpi_action_type"]
+          alert_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          kpi_code?: string
+          result?: Json
+          status?: string
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpi_action_log_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "kpi_alerts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kpi_action_log_kpi_code_fkey"
+            columns: ["kpi_code"]
+            isOneToOne: false
+            referencedRelation: "kpi_definitions"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      kpi_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          channels_notified: string[]
+          context: Json
+          created_at: string
+          id: string
+          kpi_code: string
+          message: string
+          resolved_at: string | null
+          severity: Database["public"]["Enums"]["kpi_alert_severity"]
+          value: number | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          channels_notified?: string[]
+          context?: Json
+          created_at?: string
+          id?: string
+          kpi_code: string
+          message: string
+          resolved_at?: string | null
+          severity: Database["public"]["Enums"]["kpi_alert_severity"]
+          value?: number | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          channels_notified?: string[]
+          context?: Json
+          created_at?: string
+          id?: string
+          kpi_code?: string
+          message?: string
+          resolved_at?: string | null
+          severity?: Database["public"]["Enums"]["kpi_alert_severity"]
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpi_alerts_kpi_code_fkey"
+            columns: ["kpi_code"]
+            isOneToOne: false
+            referencedRelation: "kpi_definitions"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      kpi_definitions: {
+        Row: {
+          category: Database["public"]["Enums"]["kpi_category"]
+          code: string
+          created_at: string
+          critical_label: string | null
+          critical_threshold: number | null
+          direction: string
+          display_order: number
+          enabled: boolean
+          frequency: Database["public"]["Enums"]["kpi_frequency"]
+          id: string
+          name: string
+          playbook: Json
+          source: string | null
+          target_label: string | null
+          target_value: number | null
+          unit: string | null
+          updated_at: string
+          warn_label: string | null
+          warn_threshold: number | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["kpi_category"]
+          code: string
+          created_at?: string
+          critical_label?: string | null
+          critical_threshold?: number | null
+          direction?: string
+          display_order?: number
+          enabled?: boolean
+          frequency: Database["public"]["Enums"]["kpi_frequency"]
+          id?: string
+          name: string
+          playbook?: Json
+          source?: string | null
+          target_label?: string | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+          warn_label?: string | null
+          warn_threshold?: number | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["kpi_category"]
+          code?: string
+          created_at?: string
+          critical_label?: string | null
+          critical_threshold?: number | null
+          direction?: string
+          display_order?: number
+          enabled?: boolean
+          frequency?: Database["public"]["Enums"]["kpi_frequency"]
+          id?: string
+          name?: string
+          playbook?: Json
+          source?: string | null
+          target_label?: string | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+          warn_label?: string | null
+          warn_threshold?: number | null
+        }
+        Relationships: []
+      }
+      kpi_snapshots: {
+        Row: {
+          computed_at: string
+          context: Json
+          id: string
+          kpi_code: string
+          status: Database["public"]["Enums"]["kpi_status"]
+          value: number | null
+          value_text: string | null
+        }
+        Insert: {
+          computed_at?: string
+          context?: Json
+          id?: string
+          kpi_code: string
+          status?: Database["public"]["Enums"]["kpi_status"]
+          value?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          computed_at?: string
+          context?: Json
+          id?: string
+          kpi_code?: string
+          status?: Database["public"]["Enums"]["kpi_status"]
+          value?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpi_snapshots_kpi_code_fkey"
+            columns: ["kpi_code"]
+            isOneToOne: false
+            referencedRelation: "kpi_definitions"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      kpi_targets: {
+        Row: {
+          created_at: string
+          critical_threshold: number | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          kpi_code: string
+          notes: string | null
+          period_label: string
+          target_value: number | null
+          warn_threshold: number | null
+        }
+        Insert: {
+          created_at?: string
+          critical_threshold?: number | null
+          effective_from: string
+          effective_to?: string | null
+          id?: string
+          kpi_code: string
+          notes?: string | null
+          period_label: string
+          target_value?: number | null
+          warn_threshold?: number | null
+        }
+        Update: {
+          created_at?: string
+          critical_threshold?: number | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          kpi_code?: string
+          notes?: string | null
+          period_label?: string
+          target_value?: number | null
+          warn_threshold?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpi_targets_kpi_code_fkey"
+            columns: ["kpi_code"]
+            isOneToOne: false
+            referencedRelation: "kpi_definitions"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address_line1: string | null
@@ -662,6 +923,24 @@ export type Database = {
     Enums: {
       app_role: "customer" | "crew" | "admin"
       invoice_status: "paid" | "pending" | "failed" | "refunded"
+      kpi_action_type: "AUTO" | "MANUAL" | "INFO"
+      kpi_alert_severity: "warn" | "critical"
+      kpi_category:
+        | "acquisition"
+        | "conversion"
+        | "operations"
+        | "customer_health"
+        | "reviews"
+        | "financial"
+        | "system_health"
+      kpi_frequency:
+        | "realtime"
+        | "hourly"
+        | "daily"
+        | "weekly"
+        | "biweekly"
+        | "monthly"
+      kpi_status: "green" | "warn" | "critical" | "unknown"
       service_type: "cleaning" | "lawn" | "detailing"
       social_post_status:
         | "scheduled"
@@ -811,6 +1090,26 @@ export const Constants = {
     Enums: {
       app_role: ["customer", "crew", "admin"],
       invoice_status: ["paid", "pending", "failed", "refunded"],
+      kpi_action_type: ["AUTO", "MANUAL", "INFO"],
+      kpi_alert_severity: ["warn", "critical"],
+      kpi_category: [
+        "acquisition",
+        "conversion",
+        "operations",
+        "customer_health",
+        "reviews",
+        "financial",
+        "system_health",
+      ],
+      kpi_frequency: [
+        "realtime",
+        "hourly",
+        "daily",
+        "weekly",
+        "biweekly",
+        "monthly",
+      ],
+      kpi_status: ["green", "warn", "critical", "unknown"],
       service_type: ["cleaning", "lawn", "detailing"],
       social_post_status: [
         "scheduled",
