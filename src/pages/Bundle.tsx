@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
 import Reveal from "@/components/landing/Reveal";
 import StickyBookBar from "@/components/landing/StickyBookBar";
-import TrustSignalRow from "@/components/landing/TrustSignalRow";
+
 import NeighborhoodTrust from "@/components/landing/NeighborhoodTrust";
 import SparkleField from "@/components/landing/SparkleField";
 import SectionDecor from "@/components/landing/SectionDecor";
@@ -145,8 +145,6 @@ const BundleInner = () => {
 
       <LandingTicker />
 
-      <TrustSignalRow />
-
       {/* TIERS */}
       <section className="relative bg-background py-20 px-4 overflow-hidden">
         <SectionDecor tone="primary" />
@@ -229,10 +227,7 @@ const BundleInner = () => {
             {/* 3-Service — STATIC, HIGHLIGHTED */}
             <Reveal delay={80}>
               <div className="relative bg-card border-2 border-primary rounded-xl p-6 h-full flex flex-col hover-lift shadow-[0_0_28px_-8px_hsl(var(--primary)/0.3)] md:scale-[1.04] md:-my-1 z-10">
-                <span className="most-popular-ribbon hidden md:inline-block">{t("Best Value")}</span>
-                <span className="md:hidden self-start bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                  {t("Best Value")}
-                </span>
+                <span className="most-popular-ribbon">{t("Best Value")}</span>
                 <h3 className="text-lg font-bold text-foreground">{t("3-Service Bundle")}</h3>
                 <div className="mt-2 text-3xl font-extrabold text-primary">{t("20% off")}</div>
                 <p className="text-sm text-text-mid mt-3 flex-1">

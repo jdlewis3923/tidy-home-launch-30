@@ -6,7 +6,7 @@ import SeoHead from "@/components/landing/SeoHead";
 import LandingFaq, { FaqItem } from "@/components/landing/LandingFaq";
 import Reveal from "@/components/landing/Reveal";
 import StickyBookBar from "@/components/landing/StickyBookBar";
-import TrustSignalRow from "@/components/landing/TrustSignalRow";
+
 import HowItWorksStrip from "@/components/landing/HowItWorksStrip";
 import SavingsCallout from "@/components/landing/SavingsCallout";
 import NeighborhoodTrust from "@/components/landing/NeighborhoodTrust";
@@ -240,9 +240,6 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       {/* INFINITE TICKER (mirrors homepage energy) */}
       <LandingTicker />
 
-      {/* TRUST SIGNAL ROW */}
-      <TrustSignalRow />
-
       {/* PLANS */}
       <section className="relative bg-background py-20 px-4 overflow-hidden">
         <SectionDecor tone="primary" />
@@ -269,12 +266,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                     }`}
                   >
                     {p.highlighted && (
-                      <span className="most-popular-ribbon hidden md:inline-block">
-                        {t("Most Popular")}
-                      </span>
-                    )}
-                    {p.highlighted && (
-                      <span className="md:hidden self-start bg-gold text-gold-foreground text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                      <span className="most-popular-ribbon">
                         {t("Most Popular")}
                       </span>
                     )}
