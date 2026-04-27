@@ -204,7 +204,7 @@ const BundleInner = () => {
                         service: "bundle",
                         services: twoBundle.services,
                       });
-                      track("book_cta_click", { service: "bundle", location: "plans" });
+                      track("book_cta_click", { service: "bundle", plan: "2-service", location: "plans" });
                       twoBundleCta.onClick(e);
                     }}
                     className="cta-arrow cta-press mt-auto block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
@@ -245,7 +245,7 @@ const BundleInner = () => {
                       service: "bundle",
                       services: "cleaning,lawn,detailing",
                     });
-                    track("book_cta_click", { service: "bundle", location: "plans" });
+                    track("book_cta_click", { service: "bundle", plan: "3-service", location: "plans" });
                     threeBundleCta.onClick(e);
                   }}
                   className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
