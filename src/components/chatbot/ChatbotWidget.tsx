@@ -200,9 +200,21 @@ export default function ChatbotWidget() {
                       : "rounded-bl-sm bg-muted text-foreground",
                   )}
                 >
-                  {m.content || (
-                    <Loader2 className="h-4 w-4 animate-spin opacity-60" />
-                  )}
+                  {m.content ||
+                    (m.role === "assistant" && streaming && i === messages.length - 1 ? (
+                      <TypingDots />
+                    ) : (
+                      <Loader2 className="h-4 w-4 animate-spin opacity-60" />
+                    ))}
+                  {m.role === "assistant" &&
+                    streaming &&
+                    i === messages.length - 1 &&
+                    m.content && (
+                      <span
+                        className="ml-1 inline-block h-3.5 w-[2px] -mb-0.5 animate-pulse bg-foreground/60 align-middle"
+                        aria-hidden
+                      />
+                    )}
                 </div>
               </div>
             ))}
