@@ -79,6 +79,7 @@ const App = () => (
           <BrowserRouter>
             <PromoCaptureWatcher />
             <MetaPixel />
+            <ChatbotMount />
             <RouteTracker>
               <Suspense fallback={<RouteFallback />}>
                 <Routes>
