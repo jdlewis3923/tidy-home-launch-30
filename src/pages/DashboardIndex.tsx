@@ -115,7 +115,7 @@ export default function DashboardIndex() {
       const { error } = await supabase.from('support_requests').insert({
         user_id: userId,
         type,
-        payload,
+        payload: payload as never,
       });
       if (error) {
         console.error('[support_requests insert]', error.message);
