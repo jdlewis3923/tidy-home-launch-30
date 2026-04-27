@@ -18,7 +18,7 @@ const GREETING: Msg = {
     "Hi! I'm Tidy's concierge assistant 👋 Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.",
 };
 
-// Three-dot "assistant is typing" indicator. Pure CSS, respects reduced motion.
+// Three-dot "assistant is typing" indicator. Reuses billing-bounce keyframe.
 function TypingDots() {
   return (
     <span
@@ -26,9 +26,15 @@ function TypingDots() {
       role="status"
       aria-label="Assistant is typing"
     >
-      <span className="h-1.5 w-1.5 animate-[chatbot-bounce_1.2s_ease-in-out_infinite] rounded-full bg-foreground/60" />
-      <span className="h-1.5 w-1.5 animate-[chatbot-bounce_1.2s_ease-in-out_0.15s_infinite] rounded-full bg-foreground/60" />
-      <span className="h-1.5 w-1.5 animate-[chatbot-bounce_1.2s_ease-in-out_0.3s_infinite] rounded-full bg-foreground/60" />
+      <span className="h-1.5 w-1.5 animate-billing-bounce rounded-full bg-foreground/60" />
+      <span
+        className="h-1.5 w-1.5 animate-billing-bounce rounded-full bg-foreground/60"
+        style={{ animationDelay: "0.15s" }}
+      />
+      <span
+        className="h-1.5 w-1.5 animate-billing-bounce rounded-full bg-foreground/60"
+        style={{ animationDelay: "0.3s" }}
+      />
     </span>
   );
 }
