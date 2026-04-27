@@ -207,6 +207,13 @@ const ReferInner = () => {
                       {copied ? "Copied" : "Copy"}
                     </button>
                   </div>
+                  <p className="mt-4 text-xs text-text-mid">
+                    Credits earned:{" "}
+                    <span className="font-semibold text-foreground">
+                      ${(creditCents / 100).toFixed(2)}
+                    </span>
+                    {creditCents === 0 && " — your first referral starts the meter."}
+                  </p>
                 </>
               )}
 
