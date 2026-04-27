@@ -78,6 +78,7 @@ export default function AdminSchedule() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Record<string, { caption: string; scheduled_at: string }>>({});
   const [uploading, setUploading] = useState(false);
+  const [uploadBuster, setUploadBuster] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ---------- auth ----------
@@ -170,8 +171,9 @@ export default function AdminSchedule() {
     setUploading(false);
     if (okCount) toast.success(`Uploaded ${okCount} image${okCount === 1 ? "" : "s"}`);
     if (failCount) toast.error(`${failCount} upload(s) failed (see console)`);
-    // Force a refresh so previews update
-    setPosts((p) => [...p]);
+    // Force a refresh so previews update (cache-bust uses Date.now())
+    setUploadBuster(Date.now().toString());
+    load();
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -355,11 +357,12 @@ export default function AdminSchedule() {
                 </div>
 
                 {/* Image preview */}
-                <div className="mb-3 aspect-square w-full overflow-hidden rounded-md border bg-muted">
+                <div className="mb-3 relative aspect-square w-full overflow-hidden rounded-md border bg-muted">
                   <img
-                    src={publicImageUrl(p.image_path)}
+                    src={publicImageUrl(p.image_path, uploadBuster || p.updated_at)}
                     alt={`Day ${p.day_number}`}
                     className="h-full w-full object-cover"
+                    loading="lazy"
                     onError={(ev) => {
                       const t = ev.currentTarget;
                       t.style.display = "none";
@@ -373,10 +376,20 @@ export default function AdminSchedule() {
                   >
                     <ImageIcon className="h-8 w-8" />
                   </div>
+                  {p.image_paths && p.image_paths.length > 1 && (
+                    <Badge
+                      variant="secondary"
+                      className="absolute right-2 top-2 gap-1 text-[10px]"
+                    >
+                      Carousel · {p.image_paths.length}
+                    </Badge>
+                  )}
                 </div>
 
                 <div className="mb-2 text-[11px] text-muted-foreground">
-                  <code>{p.image_path}</code>
+                  <code>{p.image_paths && p.image_paths.length > 1
+                    ? p.image_paths.join(", ")
+                    : p.image_path}</code>
                 </div>
 
                 {/* Caption / edit */}
