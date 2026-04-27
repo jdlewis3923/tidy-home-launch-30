@@ -74,6 +74,61 @@ export default function DashboardIndex() {
   const [scheduleView, setScheduleView] = useState<'calendar' | 'list'>('calendar');
   const [activeModal, setActiveModal] = useState<null |
     'reschedule' | 'note' | 'access' | 'plan' | 'payment' | 'help' | 'visit'>(null);
+  const [submitState, setSubmitState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
+  // Controlled fields for support_requests modals.
+  const [rescheduleDate, setRescheduleDate] = useState<string>('');
+  const [rescheduleWindow, setRescheduleWindow] = useState<string>('8:00 AM – 12:00 PM');
+  const [noteText, setNoteText] = useState<string>('');
+  const [accessGate, setAccessGate] = useState<string>('');
+  const [accessParking, setAccessParking] = useState<string>('');
+  const [accessPets, setAccessPets] = useState<string>('');
+
+  // Hydrate access fields when profile arrives or modal opens.
+  useEffect(() => {
+    if (activeModal === 'access') {
+      setAccessGate(data.profile?.gate_code ?? '');
+      setAccessParking(data.profile?.parking_notes ?? '');
+      setAccessPets(data.profile?.pets ?? '');
+    }
+    if (activeModal === 'reschedule') {
+      setRescheduleDate(data.nextVisit?.visit_date ?? '');
+    }
+    if (activeModal === null) {
+      setSubmitState('idle');
+    }
+  }, [activeModal, data.profile, data.nextVisit]);
+
+  const submitSupportRequest = async (
+    type: 'reschedule' | 'note' | 'access',
+    payload: Record<string, unknown>
+  ) => {
+    setSubmitState('sending');
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData.session?.user?.id;
+      if (!userId) {
+        setSubmitState('error');
+        return;
+      }
+      const { error } = await supabase.from('support_requests').insert({
+        user_id: userId,
+        type,
+        payload,
+      });
+      if (error) {
+        console.error('[support_requests insert]', error.message);
+        setSubmitState('error');
+        return;
+      }
+      setSubmitState('sent');
+      setTimeout(() => setActiveModal(null), 900);
+    } catch (err) {
+      console.error('[support_requests insert threw]', err);
+      setSubmitState('error');
+    }
+  };
 
   // Bounce unauthenticated visitors to login (after the auth state resolves).
   useEffect(() => {
