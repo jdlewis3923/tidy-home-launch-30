@@ -387,6 +387,7 @@ Deno.serve(async (req) => {
     const errors: string[] = [];
 
     try {
+      if (!creds.ig_user_id) throw new Error(creds.ig_error ?? "no IG user id available");
       igPostId = isCarousel
         ? await publishInstagramCarousel(creds.ig_user_id, creds.user_token, imageUrls, post.caption)
         : await publishInstagram(creds.ig_user_id, creds.user_token, imageUrls[0], post.caption);
@@ -395,6 +396,7 @@ Deno.serve(async (req) => {
       errors.push(`IG: ${e instanceof Error ? e.message : String(e)}`);
     }
     try {
+      if (!creds.fb_page_id || !creds.fb_page_token) throw new Error(creds.fb_error ?? "no FB page credentials available");
       fbPostId = isCarousel
         ? await publishFacebookMultiPhoto(creds.fb_page_id, creds.fb_page_token, imageUrls, post.caption)
         : await publishFacebook(creds.fb_page_id, creds.fb_page_token, imageUrls[0], post.caption);
