@@ -37,10 +37,11 @@ const BodySchema = z.object({
   service: z.enum(['cleaning', 'lawn', 'detailing']).optional(),
 });
 
-const SUGGESTION: Record<string, { name: string; price: number }> = {
-  cleaning: { name: 'inside oven clean', price: 45 },
-  lawn:     { name: 'patio pressure wash', price: 60 },
-  detailing:{ name: 'engine bay clean', price: 85 },
+// Map customer-facing service to addon_catalog services key.
+const SERVICE_DB_KEY: Record<string, string> = {
+  cleaning: 'cleaning',
+  lawn: 'lawn',
+  detailing: 'detail',
 };
 
 function isAuthorized(req: Request): boolean {
