@@ -50,6 +50,7 @@ const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
 const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
 const AdminAgents = lazy(() => import("./pages/AdminAgents.tsx"));
 const AdminNotificationSettings = lazy(() => import("./pages/AdminNotificationSettings.tsx"));
+const AdminCosts = lazy(() => import("./pages/AdminCosts.tsx"));
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
 
@@ -162,6 +163,7 @@ const App = () => (
                   <Route path="/admin/kpis" element={<AdminKpis />} />
                   <Route path="/admin/agents" element={<AdminAgents />} />
                   <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
+                  <Route path="/admin/costs" element={<AdminCosts />} />
                   <Route
                     path="/dashboard/notifications"
                     element={CUSTOMER_DASHBOARD_ENABLED ? <CustomerNotifications /> : <Navigate to="/" replace />}

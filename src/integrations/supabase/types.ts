@@ -254,6 +254,78 @@ export type Database = {
         }
         Relationships: []
       }
+      cost_entries: {
+        Row: {
+          amount_cents: number
+          billing_cycle: string | null
+          campaign: string | null
+          category: string
+          channel: string | null
+          contractor_name: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          external_id: string | null
+          id: string
+          is_bonus: boolean
+          jobber_job_id: string | null
+          jobber_visit_id: string | null
+          notes: string | null
+          service_type: string | null
+          source: string
+          spent_on: string
+          subcategory: string | null
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          amount_cents: number
+          billing_cycle?: string | null
+          campaign?: string | null
+          category: string
+          channel?: string | null
+          contractor_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          external_id?: string | null
+          id?: string
+          is_bonus?: boolean
+          jobber_job_id?: string | null
+          jobber_visit_id?: string | null
+          notes?: string | null
+          service_type?: string | null
+          source?: string
+          spent_on?: string
+          subcategory?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          billing_cycle?: string | null
+          campaign?: string | null
+          category?: string
+          channel?: string | null
+          contractor_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          external_id?: string | null
+          id?: string
+          is_bonus?: boolean
+          jobber_job_id?: string | null
+          jobber_visit_id?: string | null
+          notes?: string | null
+          service_type?: string | null
+          source?: string
+          spent_on?: string
+          subcategory?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: []
+      }
       cron_runs: {
         Row: {
           context: Json
