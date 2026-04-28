@@ -164,7 +164,17 @@ Deno.serve(async (req) => {
     variables = { '1': firstName, '2': serviceLabel, '3': dayDate, '4': token };
     templateSid = TEMPLATE_A;
   } else if (variant === 'B') {
-    const sugg = SUGGESTION[service ?? 'cleaning'];
+    // Pick cheapest active add-on for this customer's service tier from addon_catalog.
+    const dbServiceKey = SERVICE_DB_KEY[service ?? 'cleaning'] ?? 'cleaning';
+    const { data: catRows } = await admin.from('addon_catalog')
+      .select('display_name, price_cents, services')
+      .eq('is_active', true)
+      .contains('services', [dbServiceKey])
+      .order('price_cents', { ascending: true })
+      .limit(1);
+    const sugg = catRows?.[0]
+      ? { name: (catRows[0].display_name as string).toLowerCase(), price: Math.round((catRows[0].price_cents as number) / 100) }
+      : { name: 'add-on', price: 45 };
     variables = {
       '1': firstName, '2': serviceLabel, '3': dayDate,
       '4': sugg.name, '5': String(sugg.price), '6': token,
