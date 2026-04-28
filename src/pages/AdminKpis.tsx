@@ -16,6 +16,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -215,6 +216,8 @@ export default function AdminKpis() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [forbidden, setForbidden] = useState(false);
+  // null = checking, false = not signed in, true = signed in
+  const [authed, setAuthed] = useState<null | boolean>(null);
   const [defs, setDefs] = useState<KpiDefinition[]>([]);
   const [snapshots, setSnapshots] = useState<Record<string, KpiSnapshot>>({});
   const [alerts, setAlerts] = useState<KpiAlert[]>([]);
@@ -226,6 +229,36 @@ export default function AdminKpis() {
       }, {} as Record<KpiCategory, boolean>),
   );
   const [drillCode, setDrillCode] = useState<string | null>(null);
+
+  // ─────── Auth + admin-role gate ───────
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      const user = sess.session?.user;
+      if (!user) {
+        if (active) setAuthed(false);
+        return;
+      }
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      const isAdmin = (roles ?? []).some((r) => r.role === "admin");
+      if (!active) return;
+      if (!isAdmin) {
+        setForbidden(true);
+        setAuthed(true);
+        setLoading(false);
+      } else {
+        setAuthed(true);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
 
   const load = useCallback(async () => {
     setRefreshing(true);
@@ -280,8 +313,8 @@ export default function AdminKpis() {
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (authed === true && !forbidden) load();
+  }, [load, authed, forbidden]);
 
   const grouped = useMemo(() => {
     const out: Record<KpiCategory, KpiDefinition[]> = {
@@ -317,18 +350,33 @@ export default function AdminKpis() {
 
   // ──────────── render ────────────
 
+  // Still checking session
+  if (authed === null) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+      </div>
+    );
+  }
+
+  // Not signed in → bounce to login, preserving destination
+  if (authed === false) {
+    return <Navigate to="/login?redirect=/admin/kpis" replace />;
+  }
+
   if (forbidden) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="max-w-md text-center">
           <h1 className="text-2xl font-semibold text-slate-900 mb-2">Admins only</h1>
           <p className="text-slate-600">
-            The KPI Command Center is restricted to admin accounts.
+            The KPI Command Center is restricted to admin accounts. Sign in with an admin account.
           </p>
         </div>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-slate-50">

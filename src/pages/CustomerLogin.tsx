@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import tidyLogo from '@/assets/tidy-logo.png';
 
@@ -14,6 +14,10 @@ export default function CustomerLogin() {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Only allow same-origin internal paths to prevent open-redirect abuse.
+  const rawRedirect = searchParams.get('redirect') || '/dashboard';
+  const redirectTo = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/dashboard';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +39,7 @@ export default function CustomerLogin() {
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+          options: { emailRedirectTo: `${window.location.origin}${redirectTo}` },
         });
         if (signUpError) {
           setError(signUpError.message);
@@ -49,7 +53,7 @@ export default function CustomerLogin() {
         if (authError) {
           setError(authError.message);
         } else {
-          navigate('/dashboard');
+          navigate(redirectTo);
         }
       }
     } catch {
