@@ -249,10 +249,19 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           </div>
 
           <p className="mt-4 text-xs text-primary-foreground/60">
-            {t("Locked price · No contracts · Cancel anytime")}
+            {t("Locked price · No contracts · Cancel anytime · Pause or reschedule anytime")}
           </p>
         </div>
       </section>
+
+      {/* SYSTEM BRIDGE — confirms intent then expands into Tidy's full-home system */}
+      {config.systemBridge && (
+        <section className="bg-section-alt border-y border-border/60 py-6 px-4">
+          <p className="max-w-3xl mx-auto text-center text-sm md:text-base text-foreground/85 font-medium">
+            {t(config.systemBridge)}
+          </p>
+        </section>
+      )}
 
       {/* INFINITE TICKER (mirrors homepage energy) */}
       <LandingTicker />
