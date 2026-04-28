@@ -27,8 +27,12 @@ const TWILIO_FROM = '+17868291141';
 
 const BodySchema = z.object({
   to_phone_e164: z.string().regex(/^\+[1-9]\d{6,14}$/, 'must be E.164 like +17865551234'),
-  body: z.string().min(1).max(1600),
+  body: z.string().min(1).max(1600).optional(),
+  content_sid: z.string().regex(/^HX[a-zA-Z0-9]+$/).optional(),
+  content_variables: z.record(z.string()).optional(),
   idempotency_key: z.string().min(1).max(200),
+}).refine((v) => !!v.body || !!v.content_sid, {
+  message: 'either body or content_sid required',
 });
 
 async function isAuthorized(req: Request): Promise<boolean> {
