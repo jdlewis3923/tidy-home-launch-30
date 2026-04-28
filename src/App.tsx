@@ -47,6 +47,8 @@ const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.t
 const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
 const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
 const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
+const AdminAgents = lazy(() => import("./pages/AdminAgents.tsx"));
+const AdminNotificationSettings = lazy(() => import("./pages/AdminNotificationSettings.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -154,6 +156,8 @@ const App = () => (
                   <Route path="/admin/schedule" element={<AdminSchedule />} />
                   {/* Permanent KPI Command Center — admins only. */}
                   <Route path="/admin/kpis" element={<AdminKpis />} />
+                  <Route path="/admin/agents" element={<AdminAgents />} />
+                  <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
