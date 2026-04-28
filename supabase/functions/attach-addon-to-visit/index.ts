@@ -114,11 +114,11 @@ Deno.serve(async (req) => {
     user_id: userId,
     jobber_visit_id: jobber_visit_id ?? null,
     stripe_invoice_item_id: stripeInvoiceItemId,
-    stripe_addon_price_id: addon_key, // we use catalog key as price id placeholder
+    stripe_addon_price_id: addon.stripe_price_id,
     addon_key,
-    addon_name: addon.name,
-    addon_price_cents: addon.price * 100,
-    service_type: addon.service,
+    addon_name: addonName,
+    addon_price_cents: addon.price_cents,
+    service_type: addonService,
     status,
   }).select('id').single();
 
@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
         await fetch(`${SUPABASE_URL}/functions/v1/add-jobber-line-item`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jobber_visit_id, addon_name: addon.name, addon_price: addon.price }),
+          body: JSON.stringify({ jobber_visit_id, addon_name: addonName, addon_price: addonPriceDollars }),
         });
       } catch (err) { console.error('[attach-addon] jobber call failed', err); }
     }
@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             attributes: {
               LAST_ADDON_DATE: new Date().toISOString().slice(0, 10),
-              LAST_ADDON_TYPE: addon.name,
+              LAST_ADDON_TYPE: addonName,
             },
           }),
         });
@@ -161,8 +161,8 @@ Deno.serve(async (req) => {
             templateId: ADDON_CONFIRMED_TEMPLATE_ID,
             to: [{ email: userEmail }],
             params: {
-              addon_name: addon.name,
-              addon_price: addon.price,
+              addon_name: addonName,
+              addon_price: addonPriceDollars,
               visit_date: visit_date ?? '',
             },
           }),
@@ -176,8 +176,8 @@ Deno.serve(async (req) => {
     attach_id: attachRow.id,
     stripe_invoice_item_id: stripeInvoiceItemId,
     stripe_error: stripeError,
-    addon_name: addon.name,
-    addon_price: addon.price,
+    addon_name: addonName,
+    addon_price: addonPriceDollars,
     status,
   });
 });
