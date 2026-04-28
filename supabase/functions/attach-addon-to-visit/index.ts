@@ -51,12 +51,24 @@ Deno.serve(async (req) => {
   }
   const { addon_key, jobber_visit_id, visit_date } = parsed.data;
 
-  const addon = CATALOG[addon_key];
-  if (!addon) return jsonResponse({ ok: false, error: 'unknown_addon' }, 400);
-
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  // Look up addon from catalog (single source of truth)
+  const { data: addon, error: addonErr } = await admin
+    .from('addon_catalog')
+    .select('addon_key, display_name, price_cents, services, stripe_price_id, is_active')
+    .eq('addon_key', addon_key)
+    .maybeSingle();
+  if (addonErr) return jsonResponse({ ok: false, error: 'catalog_fetch_failed', detail: addonErr.message }, 500);
+  if (!addon || !addon.is_active) return jsonResponse({ ok: false, error: 'unknown_addon' }, 404);
+  if (!addon.stripe_price_id) {
+    return jsonResponse({ ok: false, error: 'addon_missing_stripe_price', detail: 'Run sync-addon-stripe-catalog' }, 409);
+  }
+  const addonName = addon.display_name as string;
+  const addonPriceDollars = (addon.price_cents as number) / 100;
+  const addonService = (addon.services?.[0] as string | undefined) ?? null;
 
   // Look up subscription for stripe_customer_id
   const { data: sub } = await admin
@@ -72,9 +84,8 @@ Deno.serve(async (req) => {
     try {
       const form = new URLSearchParams({
         customer: sub.stripe_customer_id,
-        amount: String(addon.price * 100),
-        currency: 'usd',
-        description: `${addon.name} — add-on for visit ${visit_date ?? ''}`.trim(),
+        price: addon.stripe_price_id,
+        description: `${addonName} — add-on for visit ${visit_date ?? ''}`.trim(),
       });
       const resp = await fetch('https://api.stripe.com/v1/invoiceitems', {
         method: 'POST',
