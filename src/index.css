@@ -111,23 +111,27 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    font-feature-settings: "ss01", "cv11";
+    font-weight: 500;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  /* Display headings: Barlow is tall + condensed-feel — give it a touch more
-     tracking than the prior Poppins setup so it breathes. */
+  /* Default UI controls (buttons, links, labels) — chunkier than Fredoka 500
+     so small CTAs like "Start My Plan" feel hand-drawn, not computery. */
+  button, a, label, input, select, textarea {
+    font-weight: 600;
+  }
+  /* Display headings: Barlow Black, tightened for that punchy poster feel. */
   h1, h2 {
     @apply font-display;
     font-weight: 900;
-    letter-spacing: -0.015em;
-    line-height: 1.02;
+    letter-spacing: -0.025em;
+    line-height: 0.98;
   }
   h3, h4 {
     @apply font-display;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
+    font-weight: 900;
+    letter-spacing: -0.018em;
+    line-height: 1.05;
   }
 }
 
