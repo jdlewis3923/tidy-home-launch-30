@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Check, Phone, MapPin, Sparkles } from "lucide-react";
+import { Check, Phone, MapPin, Sparkles, ShieldCheck, BadgeCheck, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
@@ -46,6 +46,14 @@ export interface ServiceLandingConfig {
   eyebrow: string;
   h1: string;
   subhead: string;
+  /** Optional intent-confirmation line shown directly under the subhead. */
+  intentConfirm?: string;
+  /** Optional system-bridge line: e.g. "Tidy isn't just cleaning — it's a system for your entire home." */
+  systemBridge?: string;
+  /** Optional CTA label override per page (e.g. "Book your cleaning"). */
+  ctaPrimaryLabel?: string;
+  /** Optional secondary plan-CTA label tying to the system (e.g. "Start your plan"). */
+  ctaPlanLabel?: string;
   priceAnchor: string;
   /** Compact label for the sticky bar e.g. "House Cleaning · from $159/mo". */
   stickyLabel: string;
@@ -199,6 +207,11 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
             {t(config.subhead)}
           </p>
+          {config.intentConfirm && (
+            <p className="mt-3 text-base md:text-lg text-primary-foreground/80 max-w-2xl mx-auto">
+              {t(config.intentConfirm)}
+            </p>
+          )}
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm">
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium">
@@ -208,6 +221,10 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               <MapPin className="w-3.5 h-3.5" />
               {SERVICE_AREA_TRUST}
             </span>
+            <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {t("Vetted & insured pros")}
+            </span>
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -216,7 +233,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               onClick={heroCta.onClick}
               className="cta-arrow cta-press animate-pulse-once bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
             >
-              {t("Book in 60 seconds")} <span className="arrow">→</span>
+              {t(config.ctaPrimaryLabel ?? "Book in 60 seconds")} <span className="arrow">→</span>
             </Link>
             <a
               href={`tel:${PHONE_TEL}`}
@@ -232,10 +249,19 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           </div>
 
           <p className="mt-4 text-xs text-primary-foreground/60">
-            {t("Locked price · No contracts · Cancel anytime")}
+            {t("Locked price · No contracts · Cancel anytime · Pause or reschedule anytime")}
           </p>
         </div>
       </section>
+
+      {/* SYSTEM BRIDGE — confirms intent then expands into Tidy's full-home system */}
+      {config.systemBridge && (
+        <section className="bg-section-alt border-y border-border/60 py-6 px-4">
+          <p className="max-w-3xl mx-auto text-center text-sm md:text-base text-foreground/85 font-medium">
+            {t(config.systemBridge)}
+          </p>
+        </section>
+      )}
 
       {/* INFINITE TICKER (mirrors homepage energy) */}
       <LandingTicker />
@@ -249,6 +275,12 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
               {t("Pick your cadence. Lock your price.")}
             </h2>
+            <p className="mt-3 text-sm md:text-base text-text-mid max-w-xl mx-auto">
+              {t("No scheduling. No coordination. Everything handled — one simple plan for your home.")}
+            </p>
+            <p className="mt-2 text-xs text-text-light">
+              {t("Designed for ongoing care — not one-time jobs.")}
+            </p>
           </Reveal>
 
           <SavingsCallout text={t(config.savingsCallout)} />
@@ -281,12 +313,28 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                       onClick={planCta.onClick}
                       className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
-                      {t("Choose")} {t(p.name)} <span className="arrow">→</span>
+                      {t(config.ctaPlanLabel ?? "Choose")} {!config.ctaPlanLabel && t(p.name)} <span className="arrow">→</span>
                     </Link>
                   </div>
                 </Reveal>
               );
             })}
+          </div>
+
+          {/* Trust signal row directly under pricing */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-text-mid">
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              {t("Background-checked pros")}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <BadgeCheck className="w-4 h-4 text-primary" />
+              {t("Vetted & insured")}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Star className="w-4 h-4 text-gold" />
+              {t("Satisfaction guaranteed")}
+            </span>
           </div>
         </div>
       </section>
