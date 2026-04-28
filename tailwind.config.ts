@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "Arial", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["Barlow", "Inter", "Arial", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["Poppins", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
