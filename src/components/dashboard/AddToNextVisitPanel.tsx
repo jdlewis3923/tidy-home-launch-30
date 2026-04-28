@@ -82,7 +82,7 @@ export default function AddToNextVisitPanel({ userId, services, nextVisit, nextN
           .order('sort_order', { ascending: true }),
       ]);
       setAttaches((attachRes.data as AttachRow[]) ?? []);
-      setCatalog((catalogRes.data as CatalogRow[]) ?? []);
+      setCatalog(((catalogRes.data as unknown) as CatalogRow[]) ?? []);
       setLoading(false);
     };
     load();
