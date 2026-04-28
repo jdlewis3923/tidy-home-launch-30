@@ -8,7 +8,13 @@ const config: ServiceLandingConfig = {
   eyebrow: "Lawn Care",
   h1: "Monthly Lawn Care in Pinecrest + Kendall",
   subhead:
-    "Mow, edge, blow. Same crew. Locked price. Never surprise-billed.",
+    "Reliable lawn care, done right every time. Mow, edge, blow.",
+  intentConfirm:
+    "Part of your complete home care plan.",
+  systemBridge:
+    "Tidy isn't just lawn — it's a system for your entire home.",
+  ctaPrimaryLabel: "Start lawn care",
+  ctaPlanLabel: "Start your plan",
   priceAnchor: "Starting at $85/mo",
   stickyLabel: "Lawn Care · from $85/mo",
   savingsCallout:
