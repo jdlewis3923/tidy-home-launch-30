@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Nunito", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["Barlow", "Nunito", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Fredoka", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["Barlow", "Fredoka", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
