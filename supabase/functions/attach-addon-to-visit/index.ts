@@ -21,25 +21,6 @@ const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY');
 const ADDON_CONFIRMED_TEMPLATE_ID = 60;
 
-// Server-side mirror of src/lib/addon-catalog.ts.
-const CATALOG: Record<string, { name: string; price: number; service: string }> = {
-  inside_oven:        { name: 'Inside Oven Clean',     price: 45, service: 'cleaning' },
-  inside_fridge:      { name: 'Inside Fridge Clean',   price: 35, service: 'cleaning' },
-  interior_windows:   { name: 'Interior Windows',      price: 55, service: 'cleaning' },
-  baseboard_scrub:    { name: 'Deep Baseboard Scrub',  price: 35, service: 'cleaning' },
-  laundry_wdf:        { name: 'Laundry W/D/F',         price: 30, service: 'cleaning' },
-  inside_cabinets:    { name: 'Inside Kitchen Cabinets', price: 50, service: 'cleaning' },
-  hedge_trim:         { name: 'Hedge & Bush Trimming', price: 65, service: 'lawn' },
-  weed_removal:       { name: 'Weed Removal',          price: 45, service: 'lawn' },
-  leaf_cleanup:       { name: 'Leaf & Debris Cleanup', price: 55, service: 'lawn' },
-  fertilization:      { name: 'Fertilization Treatment', price: 75, service: 'lawn' },
-  driveway_pressure:  { name: 'Driveway Pressure Wash', price: 150, service: 'lawn' },
-  ozone_odor:         { name: 'Ozone Odor Treatment',  price: 75, service: 'detailing' },
-  pet_hair:           { name: 'Pet Hair Removal',      price: 45, service: 'detailing' },
-  engine_bay:         { name: 'Engine Bay Clean',      price: 85, service: 'detailing' },
-  ceramic_spray:      { name: 'Ceramic Spray Coat',    price: 85, service: 'detailing' },
-};
-
 const BodySchema = z.object({
   addon_key: z.string().min(1),
   jobber_visit_id: z.string().optional(),
