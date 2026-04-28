@@ -439,18 +439,10 @@ export default function AdminKpis() {
       {/* Hero status strip */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <HeroStat
-            label="On target"
-            count={heroCounts.green}
-            tone="green"
-          />
-          <HeroStat label="Warning" count={heroCounts.warn} tone="warn" />
-          <HeroStat label="Critical" count={heroCounts.critical} tone="critical" />
-          <HeroStat
-            label="Awaiting data"
-            count={heroCounts.unknown}
-            tone="unknown"
-          />
+          <HeroStat label="On target"     count={heroCounts.green}    tone="green"    onClick={() => setStatusListFor("green")} />
+          <HeroStat label="Warning"       count={heroCounts.warn}     tone="warn"     onClick={() => setStatusListFor("warn")} />
+          <HeroStat label="Critical"      count={heroCounts.critical} tone="critical" onClick={() => setStatusListFor("critical")} />
+          <HeroStat label="Awaiting data" count={heroCounts.unknown}  tone="unknown"  onClick={() => setStatusListFor("unknown")} />
         </div>
       </div>
 
@@ -588,22 +580,32 @@ function HeroStat({
   label,
   count,
   tone,
+  onClick,
 }: {
   label: string;
   count: number;
   tone: KpiStatus;
+  onClick?: () => void;
 }) {
   const t = statusTone(tone);
   return (
-    <div className={`rounded-lg border ${t.border} ${t.bg} px-4 py-3`}>
-      <div className="flex items-center gap-2">
-        <span className={`h-2.5 w-2.5 rounded-full ${t.dot}`} />
-        <span className={`text-xs font-semibold uppercase tracking-wide ${t.text}`}>
-          {label}
-        </span>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`text-left rounded-lg border ${t.border} ${t.bg} px-4 py-3 hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300`}
+      aria-label={`Show ${count} ${label} KPIs`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`h-2.5 w-2.5 rounded-full ${t.dot}`} />
+          <span className={`text-xs font-semibold uppercase tracking-wide ${t.text} truncate`}>
+            {label}
+          </span>
+        </div>
+        <ChevronRight className="h-3.5 w-3.5 text-slate-400 shrink-0" />
       </div>
       <div className="text-2xl font-bold text-slate-900 mt-1">{count}</div>
-    </div>
+    </button>
   );
 }
 
