@@ -85,7 +85,7 @@ export default function AdminHealth() {
       if (!resp?.ok || !resp?.authorize_url) {
         throw new Error(resp?.error ?? "No authorize_url returned");
       }
-      window.open(resp.authorize_url, "_blank", "noopener,noreferrer");
+      window.location.href = resp.authorize_url;
     } catch (err) {
       setReauthError(err instanceof Error ? err.message : "Failed to start re-auth");
     } finally {
