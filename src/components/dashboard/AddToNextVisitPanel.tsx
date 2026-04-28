@@ -290,6 +290,12 @@ export default function AddToNextVisitPanel({ userId, services, nextVisit, nextN
           </div>
         </div>
       )}
+
+      <AddonCelebration
+        show={celebration.show}
+        label={celebration.label}
+        onDone={() => setCelebration({ show: false, label: '' })}
+      />
     </section>
   );
 }
