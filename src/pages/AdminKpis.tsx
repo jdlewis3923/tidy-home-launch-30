@@ -16,7 +16,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -399,20 +399,28 @@ export default function AdminKpis() {
               {heroCounts.total} KPIs across 7 sections · Day-90 launch window
             </p>
           </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={load}
-            disabled={refreshing}
-            className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
-          >
-            {refreshing ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20">
+              <Link to="/">Home</Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20">
+              <Link to="/dashboard">Customer dashboard</Link>
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={load}
+              disabled={refreshing}
+              className="bg-[#f5c518] hover:bg-[#f5c518]/90 text-[#0f172a] border-0 font-semibold"
+            >
+              {refreshing ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Refresh
+            </Button>
+          </div>
         </div>
       </header>
 
