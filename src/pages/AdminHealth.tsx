@@ -199,6 +199,15 @@ export default function AdminHealth() {
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
+              onClick={handleSyncAddonCatalog}
+              disabled={syncing}
+              className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-900 hover:bg-emerald-100 disabled:opacity-50"
+              title="Creates Stripe Products + Prices for any addon_catalog row missing IDs."
+            >
+              {syncing ? "Syncing…" : "Sync Stripe catalog"}
+            </button>
+            <button
+              type="button"
               onClick={handleJobberReauth}
               disabled={reauthing}
               className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
@@ -216,6 +225,12 @@ export default function AdminHealth() {
             </button>
           </div>
         </div>
+
+        {syncResult && (
+          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+            <strong>Catalog sync:</strong> {syncResult}
+          </div>
+        )}
 
         {reauthError && (
           <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
