@@ -275,6 +275,12 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
               {t("Pick your cadence. Lock your price.")}
             </h2>
+            <p className="mt-3 text-sm md:text-base text-text-mid max-w-xl mx-auto">
+              {t("No scheduling. No coordination. Everything handled — one simple plan for your home.")}
+            </p>
+            <p className="mt-2 text-xs text-text-light">
+              {t("Designed for ongoing care — not one-time jobs.")}
+            </p>
           </Reveal>
 
           <SavingsCallout text={t(config.savingsCallout)} />
