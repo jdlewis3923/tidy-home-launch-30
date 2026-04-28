@@ -72,6 +72,29 @@ export default function AdminHealth() {
   const [lastFetch, setLastFetch] = useState<number>(0);
   const [reauthing, setReauthing] = useState(false);
   const [reauthError, setReauthError] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
+
+  const handleSyncAddonCatalog = useCallback(async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const { data: resp, error: invokeErr } = await supabase.functions.invoke(
+        "sync-addon-stripe-catalog",
+        { body: {} },
+      );
+      if (invokeErr) throw new Error(invokeErr.message);
+      if (!resp?.ok && (resp?.errors?.length ?? 0) > 0) {
+        setSyncResult(`Partial: created ${resp.created?.length ?? 0}, skipped ${resp.skipped?.length ?? 0}, errors ${resp.errors.length}`);
+        return;
+      }
+      setSyncResult(`✓ Created ${resp?.created?.length ?? 0}, skipped ${resp?.skipped?.length ?? 0}`);
+    } catch (err) {
+      setSyncResult(err instanceof Error ? err.message : 'Sync failed');
+    } finally {
+      setSyncing(false);
+    }
+  }, []);
 
   const handleJobberReauth = useCallback(async () => {
     setReauthing(true);
