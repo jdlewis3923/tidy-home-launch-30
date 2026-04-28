@@ -95,6 +95,51 @@ export type Database = {
         }
         Relationships: []
       }
+      addon_catalog: {
+        Row: {
+          addon_key: string
+          created_at: string
+          display_name: string
+          id: string
+          is_active: boolean
+          lucide_icon: string | null
+          price_cents: number
+          services: string[]
+          sort_order: number
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          addon_key: string
+          created_at?: string
+          display_name: string
+          id?: string
+          is_active?: boolean
+          lucide_icon?: string | null
+          price_cents: number
+          services?: string[]
+          sort_order?: number
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          addon_key?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          lucide_icon?: string | null
+          price_cents?: number
+          services?: string[]
+          sort_order?: number
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       addon_sms_log: {
         Row: {
           context: Json
