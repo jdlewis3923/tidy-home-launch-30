@@ -10,7 +10,7 @@ const config: ServiceLandingConfig = {
   subhead:
     "Professional car detailing at your home. Ceramic-safe, monthly.",
   intentConfirm:
-    "Included in your Tidy home service plan.",
+    "Same detailer every visit. Locked monthly price. Cancel anytime.",
   systemBridge:
     "Tidy isn't just detailing — it's a system for your entire home.",
   ctaPrimaryLabel: "Book detailing",

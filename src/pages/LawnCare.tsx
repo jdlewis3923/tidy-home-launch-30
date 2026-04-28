@@ -10,7 +10,7 @@ const config: ServiceLandingConfig = {
   subhead:
     "Reliable lawn care, done right every time. Mow, edge, blow.",
   intentConfirm:
-    "Part of your complete home care plan.",
+    "Same crew every visit. Locked monthly price. Cancel anytime.",
   systemBridge:
     "Tidy isn't just lawn — it's a system for your entire home.",
   ctaPrimaryLabel: "Start lawn care",
