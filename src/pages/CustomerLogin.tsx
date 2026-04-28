@@ -39,7 +39,7 @@ export default function CustomerLogin() {
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+          options: { emailRedirectTo: `${window.location.origin}${redirectTo}` },
         });
         if (signUpError) {
           setError(signUpError.message);
@@ -53,7 +53,7 @@ export default function CustomerLogin() {
         if (authError) {
           setError(authError.message);
         } else {
-          navigate('/dashboard');
+          navigate(redirectTo);
         }
       }
     } catch {
