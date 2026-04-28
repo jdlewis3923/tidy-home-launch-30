@@ -209,6 +209,30 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_runs: {
+        Row: {
+          context: Json
+          id: string
+          job_name: string
+          request_id: number | null
+          scheduled_at: string
+        }
+        Insert: {
+          context?: Json
+          id?: string
+          job_name: string
+          request_id?: number | null
+          scheduled_at?: string
+        }
+        Update: {
+          context?: Json
+          id?: string
+          job_name?: string
+          request_id?: number | null
+          scheduled_at?: string
+        }
+        Relationships: []
+      }
       integration_logs: {
         Row: {
           created_at: string
