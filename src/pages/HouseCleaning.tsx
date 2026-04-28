@@ -1,6 +1,6 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
 import heroImg from "@/assets/lp-house-cleaning.jpg";
-import heroImgMobile from "@/assets/lp-house-cleaning-mobile.png";
+import heroImgMobile from "@/assets/lp-house-cleaning-mobile.jpg";
 
 const config: ServiceLandingConfig = {
   serviceSlug: "house-cleaning",
