@@ -37,7 +37,7 @@ const config: ServiceLandingConfig = {
       price: "$459",
       cadence: "/mo",
       planSlug: "full",
-      description: "Quarterly full detail, monthly maintenance, up to 2 vehicles.",
+      description: "Quarterly full detail, one vehicle.",
     },
   ],
   included: [
