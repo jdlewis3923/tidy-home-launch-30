@@ -385,40 +385,46 @@ export default function AdminKpis() {
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
-      {/* Header — navy with gold accent */}
+      {/* Header — navy with gold accent. Stacks vertically on mobile so iPhone widths render correctly. */}
       <header className="bg-[#0f172a] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-widest text-[#f5c518] font-semibold">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs uppercase tracking-widest text-[#f5c518] font-semibold">
               Tidy · Operating System
             </p>
-            <h1 className="text-2xl sm:text-3xl font-semibold mt-1">
+            <h1 className="text-xl sm:text-3xl font-semibold mt-1 leading-tight">
               KPI Command Center
             </h1>
-            <p className="text-slate-300 text-sm mt-1">
-              {heroCounts.total} KPIs across 7 sections · Day-90 launch window
+            <p className="text-slate-300 text-xs sm:text-sm mt-1">
+              {heroCounts.total} KPIs · 7 sections · Day-90 window
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs">
               <Link to="/">Home</Link>
             </Button>
-            <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20">
-              <Link to="/dashboard">Customer dashboard</Link>
+            <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs">
+              <Link to="/dashboard">Dashboard</Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs">
+              <Link to="/admin/agents">Agents</Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs">
+              <Link to="/admin/settings/notifications">Alerts</Link>
             </Button>
             <Button
               variant="secondary"
               size="sm"
               onClick={load}
               disabled={refreshing}
-              className="bg-[#f5c518] hover:bg-[#f5c518]/90 text-[#0f172a] border-0 font-semibold"
+              className="bg-[#f5c518] hover:bg-[#f5c518]/90 text-[#0f172a] border-0 font-semibold h-8 px-3 text-xs ml-auto sm:ml-0"
             >
               {refreshing ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin sm:mr-1.5" />
               ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-3.5 w-3.5 sm:mr-1.5" />
               )}
-              Refresh
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
           </div>
         </div>
@@ -696,11 +702,11 @@ function DrillDown({
   return (
     <div className="fixed inset-0 z-50 flex">
       <div
-        className="flex-1 bg-black/40 backdrop-blur-sm"
+        className="hidden sm:block flex-1 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden
       />
-      <aside className="w-full max-w-xl bg-white h-full overflow-y-auto shadow-2xl">
+      <aside className="w-full sm:max-w-xl bg-white h-full overflow-y-auto shadow-2xl sm:ml-auto">
         <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-start justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">

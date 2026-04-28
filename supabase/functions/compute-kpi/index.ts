@@ -19,6 +19,7 @@
  */
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts';
+import { shouldAlert } from '../_shared/kpi-noise-filter.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -432,21 +433,53 @@ Deno.serve(async (req) => {
       if (snapErr) throw new Error(`snapshot insert failed: ${snapErr.message}`);
     }
 
-    // Fire alerts (async — don't block response)
+    // Fire alerts via smart filter (suppression + predictive lead-time)
+    let firedCount = 0;
+    let suppressedCount = 0;
     if (alertsToFire.length > 0) {
       await Promise.allSettled(
         alertsToFire.map(async (a) => {
-          await supabase.from('kpi_alerts').insert({
+          const def = defMap.get(a.code);
+          if (!def) return;
+          const decision = await shouldAlert(supabase, {
+            def: def as never,
+            current_value: a.value,
+            current_status: a.severity,
+            prev_status: priorStatus.get(a.code) ?? 'unknown',
+          });
+          // Always insert the alert row (with suppression metadata) for audit
+          const { data: inserted } = await supabase.from('kpi_alerts').insert({
             kpi_code: a.code,
-            severity: a.severity,
+            severity: decision.severity,
             value: a.value,
-            message: a.message,
-            channels_notified: ['dashboard'],
-          });
-          // Dispatcher (fire-and-forget; SMS only for critical)
-          await supabase.functions.invoke('kpi-alert-dispatcher', {
-            body: { kpi_code: a.code, severity: a.severity, message: a.message },
-          });
+            message: decision.prediction_tier
+              ? `${a.code} → ${decision.prediction_tier.toUpperCase()} predicted (~${Math.round(decision.hours_to_deadline ?? 0)}h to deadline)`
+              : a.message,
+            channels_notified: decision.fire ? ['dashboard'] : [],
+            prediction_tier: decision.prediction_tier ?? null,
+            hours_to_deadline: decision.hours_to_deadline ?? null,
+            top_actions: decision.top_actions,
+            suppressed: !decision.fire,
+            suppression_reason: decision.suppression_reason ?? null,
+            dedup_hash: decision.dedup_hash,
+          }).select('id').maybeSingle();
+
+          if (decision.fire) {
+            firedCount++;
+            await supabase.functions.invoke('kpi-alert-dispatcher', {
+              body: {
+                alert_id: inserted?.id,
+                kpi_code: a.code,
+                severity: decision.severity,
+                message: a.message,
+                prediction_tier: decision.prediction_tier,
+                hours_to_deadline: decision.hours_to_deadline,
+                top_actions: decision.top_actions,
+              },
+            });
+          } else {
+            suppressedCount++;
+          }
         }),
       );
     }
@@ -454,7 +487,8 @@ Deno.serve(async (req) => {
     return jsonResponse({
       ok: true,
       computed: snapRows.length,
-      alerts_fired: alertsToFire.length,
+      alerts_fired: firedCount,
+      alerts_suppressed: suppressedCount,
       timestamp: new Date().toISOString(),
     });
   } catch (err) {

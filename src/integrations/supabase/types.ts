@@ -233,40 +233,64 @@ export type Database = {
         Row: {
           acknowledged_at: string | null
           acknowledged_by: string | null
+          calendar_event_id: string | null
           channels_notified: string[]
           context: Json
           created_at: string
+          dedup_hash: string | null
+          estimated_impact_cents: number | null
+          hours_to_deadline: number | null
           id: string
           kpi_code: string
           message: string
+          prediction_tier: string | null
           resolved_at: string | null
           severity: Database["public"]["Enums"]["kpi_alert_severity"]
+          suppressed: boolean
+          suppression_reason: string | null
+          top_actions: Json
           value: number | null
         }
         Insert: {
           acknowledged_at?: string | null
           acknowledged_by?: string | null
+          calendar_event_id?: string | null
           channels_notified?: string[]
           context?: Json
           created_at?: string
+          dedup_hash?: string | null
+          estimated_impact_cents?: number | null
+          hours_to_deadline?: number | null
           id?: string
           kpi_code: string
           message: string
+          prediction_tier?: string | null
           resolved_at?: string | null
           severity: Database["public"]["Enums"]["kpi_alert_severity"]
+          suppressed?: boolean
+          suppression_reason?: string | null
+          top_actions?: Json
           value?: number | null
         }
         Update: {
           acknowledged_at?: string | null
           acknowledged_by?: string | null
+          calendar_event_id?: string | null
           channels_notified?: string[]
           context?: Json
           created_at?: string
+          dedup_hash?: string | null
+          estimated_impact_cents?: number | null
+          hours_to_deadline?: number | null
           id?: string
           kpi_code?: string
           message?: string
+          prediction_tier?: string | null
           resolved_at?: string | null
           severity?: Database["public"]["Enums"]["kpi_alert_severity"]
+          suppressed?: boolean
+          suppression_reason?: string | null
+          top_actions?: Json
           value?: number | null
         }
         Relationships: [
@@ -342,6 +366,39 @@ export type Database = {
           updated_at?: string
           warn_label?: string | null
           warn_threshold?: number | null
+        }
+        Relationships: []
+      }
+      kpi_noise_rules: {
+        Row: {
+          applies_to_kpis: string[]
+          config: Json
+          created_at: string
+          description: string
+          enabled: boolean
+          id: string
+          rule_key: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to_kpis?: string[]
+          config?: Json
+          created_at?: string
+          description: string
+          enabled?: boolean
+          id?: string
+          rule_key: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to_kpis?: string[]
+          config?: Json
+          created_at?: string
+          description?: string
+          enabled?: boolean
+          id?: string
+          rule_key?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -430,6 +487,51 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          calendar_enabled: boolean
+          created_at: string
+          id: string
+          notes_enabled: boolean
+          per_kpi_sensitivity: Json
+          pwa_push_enabled: boolean
+          quiet_hours_end: number
+          quiet_hours_start: number
+          snoozed_until: string | null
+          updated_at: string
+          user_id: string
+          vip_kpi_codes: string[]
+        }
+        Insert: {
+          calendar_enabled?: boolean
+          created_at?: string
+          id?: string
+          notes_enabled?: boolean
+          per_kpi_sensitivity?: Json
+          pwa_push_enabled?: boolean
+          quiet_hours_end?: number
+          quiet_hours_start?: number
+          snoozed_until?: string | null
+          updated_at?: string
+          user_id: string
+          vip_kpi_codes?: string[]
+        }
+        Update: {
+          calendar_enabled?: boolean
+          created_at?: string
+          id?: string
+          notes_enabled?: boolean
+          per_kpi_sensitivity?: Json
+          pwa_push_enabled?: boolean
+          quiet_hours_end?: number
+          quiet_hours_start?: number
+          snoozed_until?: string | null
+          updated_at?: string
+          user_id?: string
+          vip_kpi_codes?: string[]
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_line1: string | null
@@ -499,6 +601,39 @@ export type Database = {
           updated_at?: string
           user_id?: string
           zip?: string | null
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth_key: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_used_at: string | null
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth_key: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_used_at?: string | null
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth_key?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_used_at?: string | null
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
