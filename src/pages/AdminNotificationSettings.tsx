@@ -11,7 +11,7 @@ import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, ArrowLeft, BellOff, Bell, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, BellOff, Bell, CheckCircle2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 interface Prefs {
@@ -183,6 +183,9 @@ export default function AdminNotificationSettings() {
               </div>
             </section>
 
+            {/* VAPID push key bootstrap */}
+            <VapidBootstrapCard />
+
             {/* Quiet hours + snooze */}
             <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5">
               <h2 className="text-base font-semibold text-slate-900 mb-3">Quiet hours & snooze</h2>
@@ -277,5 +280,64 @@ function ToggleRow({ label, desc, checked, onChange }: { label: string; desc: st
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
     </div>
+  );
+}
+
+function VapidBootstrapCard() {
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; msg: string; pub?: string; generated?: boolean } | null>(null);
+
+  const run = async () => {
+    setBusy(true);
+    setResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("kpi-vapid-bootstrap", { body: {} });
+      if (error) throw error;
+      const r = data as { ok: boolean; public_key?: string; generated?: boolean; error?: string };
+      if (!r.ok) throw new Error(r.error ?? "Unknown error");
+      setResult({
+        ok: true,
+        msg: r.generated ? "VAPID keys generated and stored in vault." : "VAPID keys already exist — using saved values.",
+        pub: r.public_key,
+        generated: r.generated,
+      });
+      toast.success(r.generated ? "Push keys generated" : "Push keys already configured");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed";
+      setResult({ ok: false, msg });
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-5">
+      <h2 className="text-base font-semibold text-slate-900 mb-1 flex items-center gap-2">
+        <KeyRound className="h-4 w-4 text-[#2563eb]" />
+        Web Push keys (VAPID)
+      </h2>
+      <p className="text-xs text-slate-500 mb-3">
+        One-tap setup. Generates a P-256 key pair and stores it in the secure vault.
+        Required before iOS/Android can subscribe to push.
+      </p>
+      <Button size="sm" onClick={run} disabled={busy} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white h-8 text-xs">
+        {busy ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <KeyRound className="h-3 w-3 mr-1" />}
+        Generate / verify keys
+      </Button>
+      {result && (
+        <div className={`mt-3 text-xs rounded-md border px-3 py-2 ${result.ok ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-rose-200 bg-rose-50 text-rose-800"}`}>
+          <div className="flex items-start gap-1.5">
+            <CheckCircle2 className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${result.ok ? "text-emerald-600" : "text-rose-600"}`} />
+            <div className="min-w-0">
+              <p>{result.msg}</p>
+              {result.pub && (
+                <p className="font-mono text-[10px] text-slate-600 truncate mt-1">pub: {result.pub.slice(0, 24)}…</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
