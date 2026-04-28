@@ -17,23 +17,33 @@ async function isAdminCaller(req: Request): Promise<boolean> {
   if (!auth.startsWith('Bearer ')) return false;
   const token = auth.slice(7);
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: auth } },
-    });
-    const { data: claims, error } = await supabase.auth.getClaims(token);
-    if (error || !claims?.claims?.sub) return false;
-    const userId = claims.claims.sub as string;
+    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data: userData, error: userErr } = await userClient.auth.getUser(token);
+    if (userErr || !userData?.user?.id) {
+      console.error('[jobber-authorize-url] getUser failed', userErr?.message);
+      return false;
+    }
+    const userId = userData.user.id;
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: roleRow } = await admin
+    const { data: roleRow, error: roleErr } = await admin
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
       .eq('role', 'admin')
       .maybeSingle();
-    return !!roleRow;
-  } catch {
+    if (roleErr) {
+      console.error('[jobber-authorize-url] role lookup failed', roleErr.message);
+      return false;
+    }
+    if (!roleRow) {
+      console.warn('[jobber-authorize-url] user not admin', userId);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('[jobber-authorize-url] auth check threw', (e as Error).message);
     return false;
   }
 }
