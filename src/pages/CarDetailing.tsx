@@ -8,7 +8,13 @@ const config: ServiceLandingConfig = {
   eyebrow: "Car Detailing",
   h1: "Mobile Car Detailing in Pinecrest + Kendall",
   subhead:
-    "We come to your driveway. Ceramic-safe. Monthly interior + exterior.",
+    "Professional car detailing at your home. Ceramic-safe, monthly.",
+  intentConfirm:
+    "Included in your Tidy home service plan.",
+  systemBridge:
+    "Tidy isn't just detailing — it's a system for your entire home.",
+  ctaPrimaryLabel: "Book detailing",
+  ctaPlanLabel: "Start your plan",
   priceAnchor: "Starting at $159/mo",
   stickyLabel: "Car Detailing · from $159/mo",
   savingsCallout:
