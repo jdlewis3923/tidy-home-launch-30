@@ -78,6 +78,20 @@ function easternHour(now = new Date()): number {
   return Number.isFinite(h) ? h % 24 : 0;
 }
 
+/** Returns weekday in America/New_York. 0 = Sunday, 6 = Saturday. */
+function easternWeekday(now = new Date()): number {
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'short',
+  });
+  const map: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  return map[fmt.format(now)] ?? 0;
+}
+
+function isSundayET(): boolean {
+  return easternWeekday() === 0;
+}
+
 function isQuietHours(): boolean {
   const h = easternHour();
   return !(h >= 9 && h < 21);
@@ -146,6 +160,11 @@ Deno.serve(async (req) => {
   }
 
   const { to_phone_e164, body, content_sid, content_variables, idempotency_key } = parsed.data;
+
+  // Sunday quiet-day guard (America/New_York). Never send on Sundays.
+  if (isSundayET()) {
+    return jsonResponse({ ok: true, sent: false, reason: 'sunday_quiet_hours' }, 200);
+  }
 
   // Quiet hours guard.
   if (isQuietHours()) {
