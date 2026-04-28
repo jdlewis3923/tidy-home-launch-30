@@ -300,7 +300,7 @@ export default function AdminKpis() {
 
       // Group step details by KPI code
       const detailsByKpi: Record<string, PlaybookStepDetail[]> = {};
-      for (const row of (stepsRes.data ?? []) as Array<PlaybookStepDetail & { kpi_code: string }>) {
+      for (const row of (stepsRes.data ?? []) as unknown as Array<PlaybookStepDetail & { kpi_code: string }>) {
         (detailsByKpi[row.kpi_code] ??= []).push(row);
       }
       setStepDetails(detailsByKpi);
