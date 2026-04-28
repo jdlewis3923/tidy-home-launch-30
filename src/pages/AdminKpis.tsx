@@ -194,17 +194,7 @@ function formatValue(snap: KpiSnapshot | undefined, def: KpiDefinition): string 
   return `${Number(snap.value).toLocaleString()} ${unit}`.trim();
 }
 
-function actionTypeIcon(type: ActionType) {
-  if (type === "AUTO") return <Zap className="h-3.5 w-3.5" />;
-  if (type === "MANUAL") return <Hand className="h-3.5 w-3.5" />;
-  return <Info className="h-3.5 w-3.5" />;
-}
-
-function actionTypeColor(type: ActionType) {
-  if (type === "AUTO") return "bg-[#f5c518]/15 text-[#7a5a00] border-[#f5c518]/40";
-  if (type === "MANUAL") return "bg-slate-100 text-slate-700 border-slate-300";
-  return "bg-blue-50 text-blue-700 border-blue-200";
-}
+// (action_type icon/color helpers moved into PlaybookStepCard)
 
 // ────────────────────────────────────────────────────────────────────────────
 // Page
@@ -227,6 +217,9 @@ export default function AdminKpis() {
       }, {} as Record<KpiCategory, boolean>),
   );
   const [drillCode, setDrillCode] = useState<string | null>(null);
+  const [statusListFor, setStatusListFor] = useState<KpiStatus | null>(null);
+  const [stepDetails, setStepDetails] = useState<Record<string, PlaybookStepDetail[]>>({});
+  const [stepCompletions, setStepCompletions] = useState<Record<string, { id: string; step_index: number; notes: string | null; completed_at: string }[]>>({});
 
   // ─────── Auth + admin-role gate ───────
   useEffect(() => {
