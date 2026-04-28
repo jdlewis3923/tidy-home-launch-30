@@ -179,7 +179,7 @@ export default function AdminHealth() {
               onClick={handleJobberReauth}
               disabled={reauthing}
               className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
-              title="Opens Jobber OAuth in a new tab. The new refresh token is auto-saved to vault."
+              title="Opens Jobber OAuth in this tab. The new refresh token is auto-saved to vault."
             >
               {reauthing ? "Opening…" : "Re-authorize Jobber"}
             </button>
