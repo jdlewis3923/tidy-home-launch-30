@@ -70,6 +70,28 @@ export default function AdminHealth() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetch, setLastFetch] = useState<number>(0);
+  const [reauthing, setReauthing] = useState(false);
+  const [reauthError, setReauthError] = useState<string | null>(null);
+
+  const handleJobberReauth = useCallback(async () => {
+    setReauthing(true);
+    setReauthError(null);
+    try {
+      const { data: resp, error: invokeErr } = await supabase.functions.invoke(
+        "jobber-authorize-url",
+        { body: {} },
+      );
+      if (invokeErr) throw new Error(invokeErr.message);
+      if (!resp?.ok || !resp?.authorize_url) {
+        throw new Error(resp?.error ?? "No authorize_url returned");
+      }
+      window.open(resp.authorize_url, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      setReauthError(err instanceof Error ? err.message : "Failed to start re-auth");
+    } finally {
+      setReauthing(false);
+    }
+  }, []);
 
   const fetchHealth = useCallback(async () => {
     setLoading(true);
@@ -151,15 +173,32 @@ export default function AdminHealth() {
               Aggregated from <code className="rounded bg-slate-200 px-1.5 py-0.5 text-xs">integration_logs</code>.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={fetchHealth}
-            disabled={loading}
-            className="shrink-0 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
-          >
-            {loading ? "Refreshing…" : "Refresh"}
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={handleJobberReauth}
+              disabled={reauthing}
+              className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
+              title="Opens Jobber OAuth in a new tab. The new refresh token is auto-saved to vault."
+            >
+              {reauthing ? "Opening…" : "Re-authorize Jobber"}
+            </button>
+            <button
+              type="button"
+              onClick={fetchHealth}
+              disabled={loading}
+              className="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+            >
+              {loading ? "Refreshing…" : "Refresh"}
+            </button>
+          </div>
         </div>
+
+        {reauthError && (
+          <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+            <strong>Re-auth failed:</strong> {reauthError}
+          </div>
+        )}
 
         {error && (
           <div className="mt-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
