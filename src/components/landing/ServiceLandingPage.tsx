@@ -46,6 +46,14 @@ export interface ServiceLandingConfig {
   eyebrow: string;
   h1: string;
   subhead: string;
+  /** Optional intent-confirmation line shown directly under the subhead. */
+  intentConfirm?: string;
+  /** Optional system-bridge line: e.g. "Tidy isn't just cleaning — it's a system for your entire home." */
+  systemBridge?: string;
+  /** Optional CTA label override per page (e.g. "Book your cleaning"). */
+  ctaPrimaryLabel?: string;
+  /** Optional secondary plan-CTA label tying to the system (e.g. "Start your plan"). */
+  ctaPlanLabel?: string;
   priceAnchor: string;
   /** Compact label for the sticky bar e.g. "House Cleaning · from $159/mo". */
   stickyLabel: string;
