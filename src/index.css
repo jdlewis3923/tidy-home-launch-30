@@ -111,14 +111,14 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    font-weight: 500;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  /* Default UI controls (buttons, links, labels) — chunkier than Fredoka 500
-     so small CTAs like "Start My Plan" feel hand-drawn, not computery. */
-  button, a, label, input, select, textarea {
-    font-weight: 600;
+  /* CTAs / interactive controls — keep these visually punchy. */
+  button, a[role="button"], .btn {
+    font-weight: 700;
+    letter-spacing: -0.005em;
   }
   /* Display headings: Barlow Black, tightened for that punchy poster feel. */
   h1, h2 {

@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Fredoka", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["Barlow", "Fredoka", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Inter", "Arial", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["Barlow", "Inter", "Arial", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
