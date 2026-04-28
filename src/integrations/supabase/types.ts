@@ -402,6 +402,57 @@ export type Database = {
         }
         Relationships: []
       }
+      kpi_playbook_steps: {
+        Row: {
+          action_key: string | null
+          action_payload: Json
+          action_type: string
+          created_at: string
+          external_url: string | null
+          how_steps: Json
+          id: string
+          kpi_code: string
+          label: string
+          predicted_impact_cents: number | null
+          predicted_impact_text: string | null
+          step_index: number
+          updated_at: string
+          why_text: string
+        }
+        Insert: {
+          action_key?: string | null
+          action_payload?: Json
+          action_type?: string
+          created_at?: string
+          external_url?: string | null
+          how_steps?: Json
+          id?: string
+          kpi_code: string
+          label: string
+          predicted_impact_cents?: number | null
+          predicted_impact_text?: string | null
+          step_index: number
+          updated_at?: string
+          why_text?: string
+        }
+        Update: {
+          action_key?: string | null
+          action_payload?: Json
+          action_type?: string
+          created_at?: string
+          external_url?: string | null
+          how_steps?: Json
+          id?: string
+          kpi_code?: string
+          label?: string
+          predicted_impact_cents?: number | null
+          predicted_impact_text?: string | null
+          step_index?: number
+          updated_at?: string
+          why_text?: string
+        }
+        Relationships: []
+      }
       kpi_snapshots: {
         Row: {
           computed_at: string
@@ -439,6 +490,33 @@ export type Database = {
             referencedColumns: ["code"]
           },
         ]
+      }
+      kpi_step_completions: {
+        Row: {
+          completed_at: string
+          id: string
+          kpi_code: string
+          notes: string | null
+          step_index: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          kpi_code: string
+          notes?: string | null
+          step_index: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          kpi_code?: string
+          notes?: string | null
+          step_index?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       kpi_targets: {
         Row: {
@@ -1031,6 +1109,7 @@ export type Database = {
       admin_get_meta_secret: { Args: { _name: string }; Returns: string }
       admin_get_scheduler_paused: { Args: never; Returns: boolean }
       admin_get_service_role_key: { Args: never; Returns: string }
+      admin_get_vapid_public: { Args: never; Returns: string }
       admin_set_jobber_refresh_token: {
         Args: { _token: string }
         Returns: undefined
@@ -1044,6 +1123,10 @@ export type Database = {
         Returns: boolean
       }
       admin_set_service_role_key: { Args: { _key: string }; Returns: undefined }
+      admin_set_vapid_secret: {
+        Args: { _name: string; _value: string }
+        Returns: undefined
+      }
       current_user_admin: { Args: never; Returns: boolean }
       generate_referral_code: { Args: never; Returns: string }
       has_role: {
