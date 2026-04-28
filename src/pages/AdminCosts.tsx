@@ -161,7 +161,7 @@ export default function AdminCosts() {
   const submitForm = async (ev: React.FormEvent) => {
     ev.preventDefault();
     if (!form.description || !form.amount_cents || !form.spent_on || !form.category) return;
-    const payload: Partial<CostEntry> = {
+    const payload = {
       category: form.category as Category,
       subcategory: form.subcategory || null,
       vendor: form.vendor || null,
