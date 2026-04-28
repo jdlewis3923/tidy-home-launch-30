@@ -10,7 +10,7 @@ const config: ServiceLandingConfig = {
   subhead:
     "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.",
   intentConfirm:
-    "And more — your entire home, handled in one simple plan.",
+    "Same crew every visit. Locked monthly price. Cancel anytime.",
   systemBridge:
     "Tidy isn't just cleaning — it's a system for your entire home.",
   ctaPrimaryLabel: "Book your cleaning",

@@ -228,13 +228,16 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
-              to={heroCta.to}
-              onClick={heroCta.onClick}
-              className="cta-arrow cta-press animate-pulse-once bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
-            >
-              {t(config.ctaPrimaryLabel ?? "Book in 60 seconds")} <span className="arrow">→</span>
-            </Link>
+            <div className="flex flex-col items-center">
+              <Link
+                to={heroCta.to}
+                onClick={heroCta.onClick}
+                className="cta-arrow cta-press animate-pulse-once bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
+              >
+                {t(config.ctaPrimaryLabel ?? "Book in 60 seconds")} <span className="arrow">→</span>
+              </Link>
+              <span className="mt-2 text-xs text-primary-foreground/70">{t("Takes under 60 seconds · No card to start")}</span>
+            </div>
             <a
               href={`tel:${PHONE_TEL}`}
               onClick={() => {
@@ -276,10 +279,10 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               {t("Pick your cadence. Lock your price.")}
             </h2>
             <p className="mt-3 text-sm md:text-base text-text-mid max-w-xl mx-auto">
-              {t("No scheduling. No coordination. Everything handled — one simple plan for your home.")}
+              {t("Set it once. We handle the rest — scheduling, reminders, the same crew every visit.")}
             </p>
             <p className="mt-2 text-xs text-text-light">
-              {t("Designed for ongoing care — not one-time jobs.")}
+              {t("No contracts · Cancel, pause, or reschedule anytime")}
             </p>
           </Reveal>
 
