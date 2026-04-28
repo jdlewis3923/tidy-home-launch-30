@@ -204,7 +204,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
             {t(config.h1)}
           </h1>
-          <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-5 text-lg md:text-xl font-light text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
             {t(config.subhead)}
           </p>
           {config.intentConfirm && (
