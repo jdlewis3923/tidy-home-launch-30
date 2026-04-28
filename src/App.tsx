@@ -40,6 +40,7 @@ const Billing = lazy(() => import("./pages/Billing.tsx"));
 const Help = lazy(() => import("./pages/Help.tsx"));
 const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess.tsx"));
 const CheckoutCanceled = lazy(() => import("./pages/CheckoutCanceled.tsx"));
+const Welcome = lazy(() => import("./pages/Welcome.tsx"));
 const AdminSetupCatalog = lazy(() => import("./pages/AdminSetupCatalog.tsx"));
 const AdminTestZapier = lazy(() => import("./pages/AdminTestZapier.tsx"));
 const AdminHealth = lazy(() => import("./pages/AdminHealth.tsx"));
@@ -143,6 +144,7 @@ const App = () => (
                   />
                   <Route path="/checkout/success" element={<CheckoutSuccess />} />
                   <Route path="/checkout/canceled" element={<CheckoutCanceled />} />
+                  <Route path="/welcome" element={<Welcome />} />
 
                   {/* Phase 2 one-time admin bootstrap. Remove after use. */}
                   <Route path="/admin/setup-catalog" element={<AdminSetupCatalog />} />
