@@ -29,6 +29,7 @@ import {
   X,
 } from "lucide-react";
 import { StatusListDrawer } from "@/components/admin/StatusListDrawer";
+import SmsVolumeHealthCard from "@/components/admin/SmsVolumeHealthCard";
 import { PlaybookStepCard, type PlaybookStepDetail } from "@/components/admin/PlaybookStepCard";
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -435,6 +436,10 @@ export default function AdminKpis() {
           </div>
         </div>
       </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
+        <SmsVolumeHealthCard />
+      </div>
 
       {/* Hero status strip */}
       <div className="bg-white border-b border-slate-200">

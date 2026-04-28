@@ -27,8 +27,12 @@ const TWILIO_FROM = '+17868291141';
 
 const BodySchema = z.object({
   to_phone_e164: z.string().regex(/^\+[1-9]\d{6,14}$/, 'must be E.164 like +17865551234'),
-  body: z.string().min(1).max(1600),
+  body: z.string().min(1).max(1600).optional(),
+  content_sid: z.string().regex(/^HX[a-zA-Z0-9]+$/).optional(),
+  content_variables: z.record(z.string()).optional(),
   idempotency_key: z.string().min(1).max(200),
+}).refine((v) => !!v.body || !!v.content_sid, {
+  message: 'either body or content_sid required',
 });
 
 async function isAuthorized(req: Request): Promise<boolean> {
@@ -141,7 +145,7 @@ Deno.serve(async (req) => {
     );
   }
 
-  const { to_phone_e164, body, idempotency_key } = parsed.data;
+  const { to_phone_e164, body, content_sid, content_variables, idempotency_key } = parsed.data;
 
   // Quiet hours guard.
   if (isQuietHours()) {
@@ -163,8 +167,6 @@ Deno.serve(async (req) => {
     const result = await withLogging({
       source: 'twilio',
       event: 'sms.send',
-      // We hash the idempotency_key (not the message body) so future calls
-      // with the same key can be detected via payload_hash equality.
       payload: idempotency_key,
       fn: async () => {
         const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
@@ -173,8 +175,15 @@ Deno.serve(async (req) => {
         const form = new URLSearchParams({
           From: TWILIO_FROM,
           To: to_phone_e164,
-          Body: body,
         });
+        if (content_sid) {
+          form.set('ContentSid', content_sid);
+          if (content_variables && Object.keys(content_variables).length > 0) {
+            form.set('ContentVariables', JSON.stringify(content_variables));
+          }
+        } else if (body) {
+          form.set('Body', body);
+        }
 
         const res = await fetch(url, {
           method: 'POST',

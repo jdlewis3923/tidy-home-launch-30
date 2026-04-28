@@ -14,6 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
+      addon_attach_tokens: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          token: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at: string
+          token: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          token?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      addon_attaches: {
+        Row: {
+          addon_key: string
+          addon_name: string
+          addon_price_cents: number
+          attached_at: string
+          completed_at: string | null
+          id: string
+          jobber_job_id: string | null
+          jobber_line_item_id: string | null
+          jobber_visit_id: string | null
+          removed_at: string | null
+          service_type: string | null
+          status: string
+          stripe_addon_price_id: string
+          stripe_invoice_item_id: string | null
+          user_id: string
+        }
+        Insert: {
+          addon_key: string
+          addon_name: string
+          addon_price_cents: number
+          attached_at?: string
+          completed_at?: string | null
+          id?: string
+          jobber_job_id?: string | null
+          jobber_line_item_id?: string | null
+          jobber_visit_id?: string | null
+          removed_at?: string | null
+          service_type?: string | null
+          status?: string
+          stripe_addon_price_id: string
+          stripe_invoice_item_id?: string | null
+          user_id: string
+        }
+        Update: {
+          addon_key?: string
+          addon_name?: string
+          addon_price_cents?: number
+          attached_at?: string
+          completed_at?: string | null
+          id?: string
+          jobber_job_id?: string | null
+          jobber_line_item_id?: string | null
+          jobber_visit_id?: string | null
+          removed_at?: string | null
+          service_type?: string | null
+          status?: string
+          stripe_addon_price_id?: string
+          stripe_invoice_item_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      addon_sms_log: {
+        Row: {
+          context: Json
+          created_at: string
+          id: string
+          jobber_visit_id: string | null
+          sent_at: string | null
+          suppressed_at: string | null
+          suppression_reason: string | null
+          twilio_content_sid: string | null
+          twilio_message_id: string | null
+          user_id: string | null
+          variant: string | null
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          id?: string
+          jobber_visit_id?: string | null
+          sent_at?: string | null
+          suppressed_at?: string | null
+          suppression_reason?: string | null
+          twilio_content_sid?: string | null
+          twilio_message_id?: string | null
+          user_id?: string | null
+          variant?: string | null
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          id?: string
+          jobber_visit_id?: string | null
+          sent_at?: string | null
+          suppressed_at?: string | null
+          suppression_reason?: string | null
+          twilio_content_sid?: string | null
+          twilio_message_id?: string | null
+          user_id?: string | null
+          variant?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
@@ -620,7 +743,9 @@ export type Database = {
           gate_code: string | null
           id: string
           language: string
+          last_addon_attached_at: string | null
           last_name: string | null
+          last_pv4_review_request_at: string | null
           parking_notes: string | null
           pets: string | null
           phone: string | null
@@ -629,6 +754,7 @@ export type Database = {
           referral_code: string | null
           sms_opt_in: boolean
           sms_opt_out: boolean
+          sms_preference: string
           special_instructions: string | null
           updated_at: string
           user_id: string
@@ -643,7 +769,9 @@ export type Database = {
           gate_code?: string | null
           id?: string
           language?: string
+          last_addon_attached_at?: string | null
           last_name?: string | null
+          last_pv4_review_request_at?: string | null
           parking_notes?: string | null
           pets?: string | null
           phone?: string | null
@@ -652,6 +780,7 @@ export type Database = {
           referral_code?: string | null
           sms_opt_in?: boolean
           sms_opt_out?: boolean
+          sms_preference?: string
           special_instructions?: string | null
           updated_at?: string
           user_id: string
@@ -666,7 +795,9 @@ export type Database = {
           gate_code?: string | null
           id?: string
           language?: string
+          last_addon_attached_at?: string | null
           last_name?: string | null
+          last_pv4_review_request_at?: string | null
           parking_notes?: string | null
           pets?: string | null
           phone?: string | null
@@ -675,6 +806,7 @@ export type Database = {
           referral_code?: string | null
           sms_opt_in?: boolean
           sms_opt_out?: boolean
+          sms_preference?: string
           special_instructions?: string | null
           updated_at?: string
           user_id?: string
@@ -745,6 +877,42 @@ export type Database = {
           referrer_user_id?: string
           status?: string
           stripe_credit_id?: string | null
+        }
+        Relationships: []
+      }
+      sms_log: {
+        Row: {
+          context: Json
+          created_at: string
+          id: string
+          sent_at: string
+          sms_type: string
+          suppressed: boolean
+          suppression_reason: string | null
+          twilio_message_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          id?: string
+          sent_at?: string
+          sms_type: string
+          suppressed?: boolean
+          suppression_reason?: string | null
+          twilio_message_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          id?: string
+          sent_at?: string
+          sms_type?: string
+          suppressed?: boolean
+          suppression_reason?: string | null
+          twilio_message_id?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1041,6 +1209,51 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      visit_sms_state: {
+        Row: {
+          created_at: string
+          eta_sms_sent: boolean
+          eta_sms_sent_at: string | null
+          id: string
+          jobber_visit_id: string
+          morning_sms_sent: boolean
+          morning_sms_sent_at: string | null
+          morning_sms_suppressed: boolean
+          morning_sms_suppression_reason: string | null
+          updated_at: string
+          user_id: string | null
+          visit_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          eta_sms_sent?: boolean
+          eta_sms_sent_at?: string | null
+          id?: string
+          jobber_visit_id: string
+          morning_sms_sent?: boolean
+          morning_sms_sent_at?: string | null
+          morning_sms_suppressed?: boolean
+          morning_sms_suppression_reason?: string | null
+          updated_at?: string
+          user_id?: string | null
+          visit_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          eta_sms_sent?: boolean
+          eta_sms_sent_at?: string | null
+          id?: string
+          jobber_visit_id?: string
+          morning_sms_sent?: boolean
+          morning_sms_sent_at?: string | null
+          morning_sms_suppressed?: boolean
+          morning_sms_suppression_reason?: string | null
+          updated_at?: string
+          user_id?: string | null
+          visit_date?: string | null
         }
         Relationships: []
       }
