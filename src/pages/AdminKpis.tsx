@@ -21,17 +21,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   AlertTriangle,
-  CheckCircle2,
   ChevronDown,
   ChevronRight,
   Loader2,
   RefreshCw,
   Wrench,
-  Info,
-  Hand,
-  Zap,
   X,
 } from "lucide-react";
+import { StatusListDrawer } from "@/components/admin/StatusListDrawer";
+import { PlaybookStepCard, type PlaybookStepDetail } from "@/components/admin/PlaybookStepCard";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
