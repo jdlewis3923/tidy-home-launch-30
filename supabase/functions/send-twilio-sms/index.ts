@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
     );
   }
 
-  const { to_phone_e164, body, idempotency_key } = parsed.data;
+  const { to_phone_e164, body, content_sid, content_variables, idempotency_key } = parsed.data;
 
   // Quiet hours guard.
   if (isQuietHours()) {
@@ -167,8 +167,6 @@ Deno.serve(async (req) => {
     const result = await withLogging({
       source: 'twilio',
       event: 'sms.send',
-      // We hash the idempotency_key (not the message body) so future calls
-      // with the same key can be detected via payload_hash equality.
       payload: idempotency_key,
       fn: async () => {
         const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
@@ -177,7 +175,15 @@ Deno.serve(async (req) => {
         const form = new URLSearchParams({
           From: TWILIO_FROM,
           To: to_phone_e164,
-          Body: body,
+        });
+        if (content_sid) {
+          form.set('ContentSid', content_sid);
+          if (content_variables && Object.keys(content_variables).length > 0) {
+            form.set('ContentVariables', JSON.stringify(content_variables));
+          }
+        } else if (body) {
+          form.set('Body', body);
+        }
         });
 
         const res = await fetch(url, {
