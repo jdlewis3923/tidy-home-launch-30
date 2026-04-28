@@ -229,8 +229,21 @@ export default function DashboardIndex() {
         </section>
       ) : (
         <>
+          {/* Add-on attach panel (within 14 days of visit) */}
+          {data.subscription && (
+            <AddToNextVisitPanel
+              userId={data.subscription.user_id}
+              services={(data.subscription.services as AddonService[]) ?? []}
+              nextVisit={data.nextVisit as any}
+              nextNextVisit={(data.upcoming[1] ?? null) as any}
+            />
+          )}
+
           {/* Summary cards */}
           <section className="relative mx-auto max-w-[1280px] px-6">
+            <div className="mb-3">
+              {data.subscription && <AddonsYearStat userId={data.subscription.user_id} />}
+            </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <SummaryCard
                 icon={<Calendar className="h-4 w-4 text-[hsl(var(--primary))]" />}
