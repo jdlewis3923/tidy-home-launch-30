@@ -313,12 +313,28 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                       onClick={planCta.onClick}
                       className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
-                      {t("Choose")} {t(p.name)} <span className="arrow">→</span>
+                      {t(config.ctaPlanLabel ?? "Choose")} {!config.ctaPlanLabel && t(p.name)} <span className="arrow">→</span>
                     </Link>
                   </div>
                 </Reveal>
               );
             })}
+          </div>
+
+          {/* Trust signal row directly under pricing */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-text-mid">
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              {t("Background-checked pros")}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <BadgeCheck className="w-4 h-4 text-primary" />
+              {t("Vetted & insured")}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Star className="w-4 h-4 text-gold" />
+              {t("Satisfaction guaranteed")}
+            </span>
           </div>
         </div>
       </section>
