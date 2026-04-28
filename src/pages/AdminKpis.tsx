@@ -635,60 +635,44 @@ function DrillDown({
   def,
   snap,
   alerts,
+  details,
+  completions,
   onClose,
   onActionRan,
 }: {
   def: KpiDefinition;
   snap: KpiSnapshot | undefined;
   alerts: KpiAlert[];
+  details: PlaybookStepDetail[];
+  completions: { id: string; step_index: number; notes: string | null; completed_at: string }[];
   onClose: () => void;
   onActionRan: () => void;
 }) {
   const t = statusTone((snap?.status ?? "unknown") as KpiStatus);
-  const [running, setRunning] = useState<string | null>(null);
-  const [results, setResults] = useState<Record<string, { ok: boolean; msg: string }>>(
-    {},
-  );
 
-  const runAuto = async (step: PlaybookStep, idx: number) => {
-    if (!step.action_key) return;
-    const key = `${idx}:${step.action_key}`;
-    setRunning(key);
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        "kpi-recovery-action",
-        {
-          body: {
-            kpi_code: def.code,
-            action_key: step.action_key,
-            action_label: step.step,
-          },
-        },
-      );
-      if (error) throw error;
-      setResults((prev) => ({
-        ...prev,
-        [key]: {
-          ok: true,
-          msg: (data as { message?: string })?.message ?? "Action queued.",
-        },
-      }));
-      onActionRan();
-    } catch (err) {
-      setResults((prev) => ({
-        ...prev,
-        [key]: {
-          ok: false,
-          msg:
-            err instanceof Error
-              ? err.message
-              : "Handler not yet implemented (deploys next turn).",
-        },
-      }));
-    } finally {
-      setRunning(null);
+  // Merge: prefer detailed seed rows, fall back to def.playbook for any without seed.
+  const merged = (() => {
+    const out: Array<{
+      index: number;
+      label: string;
+      action_type: ActionType;
+      action_key?: string | null;
+      detail?: PlaybookStepDetail;
+    }> = [];
+    const maxLen = Math.max(def.playbook.length, details.length);
+    for (let i = 0; i < maxLen; i++) {
+      const fb = def.playbook[i];
+      const dt = details.find((d) => d.step_index === i);
+      out.push({
+        index: i,
+        label: dt?.label ?? fb?.step ?? `Step ${i + 1}`,
+        action_type: (dt?.action_type ?? fb?.action_type ?? "MANUAL") as ActionType,
+        action_key: dt?.action_key ?? fb?.action_key ?? null,
+        detail: dt,
+      });
     }
-  };
+    return out;
+  })();
 
   return (
     <div className="fixed inset-0 z-50 flex">
@@ -705,11 +689,7 @@ function DrillDown({
             </p>
             <h2 className="text-xl font-semibold text-slate-900 mt-0.5">{def.name}</h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600"
-          >
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -719,9 +699,7 @@ function DrillDown({
           <div className={`rounded-lg border ${t.border} ${t.bg} px-4 py-4`}>
             <div className="flex items-baseline justify-between">
               <div>
-                <p className="text-3xl font-bold text-slate-900">
-                  {formatValue(snap, def)}
-                </p>
+                <p className="text-3xl font-bold text-slate-900">{formatValue(snap, def)}</p>
                 <p className={`text-sm font-medium mt-0.5 ${t.text}`}>{t.label}</p>
               </div>
               <div className="text-right text-xs text-slate-600 space-y-0.5">
@@ -737,7 +715,6 @@ function DrillDown({
             )}
           </div>
 
-          {/* Open alerts */}
           {alerts.length > 0 && (
             <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3">
               <div className="flex items-center gap-2 mb-2">
@@ -749,85 +726,40 @@ function DrillDown({
               <ul className="text-xs text-rose-800 space-y-1">
                 {alerts.map((a) => (
                   <li key={a.id}>
-                    <span className="font-semibold uppercase">{a.severity}</span> ·{" "}
-                    {a.message}
+                    <span className="font-semibold uppercase">{a.severity}</span> · {a.message}
                   </li>
                 ))}
               </ul>
             </div>
           )}
 
-          {/* Playbook */}
           <div>
             <h3 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
               <Wrench className="h-4 w-4 text-[#2563eb]" />
               Recovery Playbook
+              <span className="text-[10px] font-normal text-slate-500">tap a step to expand</span>
             </h3>
             <ol className="space-y-2">
-              {def.playbook.map((step, idx) => {
-                const key = `${idx}:${step.action_key ?? ""}`;
-                const r = results[key];
-                return (
-                  <li
-                    key={idx}
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-3"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="flex-shrink-0 h-6 w-6 rounded-full bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">
-                        {idx + 1}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-900">{step.step}</p>
-                        <div className="mt-1.5 flex items-center gap-2 flex-wrap">
-                          <span
-                            className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded border ${actionTypeColor(step.action_type)}`}
-                          >
-                            {actionTypeIcon(step.action_type)}
-                            {step.action_type}
-                          </span>
-                          {step.action_type === "AUTO" && (
-                            <Button
-                              size="sm"
-                              variant="default"
-                              disabled={running === key}
-                              onClick={() => runAuto(step, idx)}
-                              className="h-7 px-2.5 text-xs bg-[#f5c518] hover:bg-[#e5b818] text-[#0f172a] font-semibold border-0"
-                            >
-                              {running === key ? (
-                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                              ) : (
-                                <Zap className="h-3 w-3 mr-1" />
-                              )}
-                              Fix This
-                            </Button>
-                          )}
-                        </div>
-                        {r && (
-                          <div
-                            className={`mt-2 text-xs flex items-start gap-1.5 ${
-                              r.ok ? "text-emerald-700" : "text-amber-700"
-                            }`}
-                          >
-                            {r.ok ? (
-                              <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                            ) : (
-                              <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                            )}
-                            <span>{r.msg}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
+              {merged.map((m) => (
+                <PlaybookStepCard
+                  key={m.index}
+                  kpiCode={def.code}
+                  index={m.index}
+                  fallbackLabel={m.label}
+                  fallbackActionType={m.action_type}
+                  fallbackActionKey={m.action_key}
+                  detail={m.detail}
+                  completion={completions.find((c) => c.step_index === m.index)}
+                  onAfterChange={onActionRan}
+                />
+              ))}
             </ol>
           </div>
 
           <div className="text-xs text-slate-500 pt-2 border-t border-slate-200">
-            Source: <span className="font-mono">{def.source ?? "—"}</span> ·
-            Frequency: <span className="font-mono">{def.frequency}</span> ·
-            Direction: <span className="font-mono">{def.direction}</span>
+            Source: <span className="font-mono">{def.source ?? "—"}</span> · Frequency:{" "}
+            <span className="font-mono">{def.frequency}</span> · Direction:{" "}
+            <span className="font-mono">{def.direction}</span>
           </div>
         </div>
       </aside>
