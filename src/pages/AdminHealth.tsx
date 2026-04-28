@@ -74,6 +74,10 @@ export default function AdminHealth() {
   const [reauthError, setReauthError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
+  const [brandingSyncing, setBrandingSyncing] = useState(false);
+  const [brandingResult, setBrandingResult] = useState<string | null>(null);
+  const [backfilling, setBackfilling] = useState(false);
+  const [backfillResult, setBackfillResult] = useState<string | null>(null);
 
   const handleSyncAddonCatalog = useCallback(async () => {
     setSyncing(true);
@@ -93,6 +97,47 @@ export default function AdminHealth() {
       setSyncResult(err instanceof Error ? err.message : 'Sync failed');
     } finally {
       setSyncing(false);
+    }
+  }, []);
+
+  const handleSyncBranding = useCallback(async () => {
+    setBrandingSyncing(true);
+    setBrandingResult(null);
+    try {
+      const { data: resp, error: invokeErr } = await supabase.functions.invoke(
+        "setup-stripe-branding",
+        { body: {} },
+      );
+      if (invokeErr) throw new Error(invokeErr.message);
+      if (!resp?.ok) throw new Error(resp?.error ?? 'Branding sync failed');
+      const dashItems = (resp.dashboard_only_items as string[] | undefined)?.length ?? 0;
+      setBrandingResult(
+        `✓ Branding ${resp.branding_set ? 'set' : 'skipped'} · portal config ${resp.portal_config_id ?? '—'} · ${resp.products_in_portal ?? 0} products · ${resp.webhook_events_added?.length ?? 0} events added · ${dashItems} dashboard-only items remaining`,
+      );
+    } catch (err) {
+      setBrandingResult(err instanceof Error ? err.message : 'Branding sync failed');
+    } finally {
+      setBrandingSyncing(false);
+    }
+  }, []);
+
+  const handleBackfill = useCallback(async () => {
+    setBackfilling(true);
+    setBackfillResult(null);
+    try {
+      const { data: resp, error: invokeErr } = await supabase.functions.invoke(
+        "backfill-stripe-customer-metadata",
+        { body: {} },
+      );
+      if (invokeErr) throw new Error(invokeErr.message);
+      if (!resp?.ok) throw new Error(resp?.error ?? 'Backfill failed');
+      setBackfillResult(
+        `✓ Scanned ${resp.scanned} · patched ${resp.patched} · skipped ${resp.skipped} · errors ${resp.errors?.length ?? 0}`,
+      );
+    } catch (err) {
+      setBackfillResult(err instanceof Error ? err.message : 'Backfill failed');
+    } finally {
+      setBackfilling(false);
     }
   }, []);
 
