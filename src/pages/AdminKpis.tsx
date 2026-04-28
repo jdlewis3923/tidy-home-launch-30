@@ -313,8 +313,8 @@ export default function AdminKpis() {
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (authed === true && !forbidden) load();
+  }, [load, authed, forbidden]);
 
   const grouped = useMemo(() => {
     const out: Record<KpiCategory, KpiDefinition[]> = {
