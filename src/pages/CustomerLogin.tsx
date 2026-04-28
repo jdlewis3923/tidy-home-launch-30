@@ -16,8 +16,11 @@ export default function CustomerLogin() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // Only allow same-origin internal paths to prevent open-redirect abuse.
-  const rawRedirect = searchParams.get('redirect') || '/dashboard';
-  const redirectTo = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/dashboard';
+  // If a redirect was explicitly requested (e.g. came from a protected route), honor it.
+  // Otherwise we'll route admins → /admin/kpis and customers → /dashboard after sign-in.
+  const rawRedirect = searchParams.get('redirect');
+  const safeRedirect =
+    rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : null;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +42,7 @@ export default function CustomerLogin() {
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}${redirectTo}` },
+          options: { emailRedirectTo: `${window.location.origin}${safeRedirect ?? '/dashboard'}` },
         });
         if (signUpError) {
           setError(signUpError.message);
@@ -49,11 +52,26 @@ export default function CustomerLogin() {
           alert('check your email to confirm your account, then sign in.');
         }
       } else {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
         if (authError) {
           setError(authError.message);
         } else {
-          navigate(redirectTo);
+          // Decide destination: explicit redirect wins; otherwise admins → KPI Command Center, others → dashboard.
+          let destination = safeRedirect;
+          if (!destination) {
+            const userId = authData.user?.id;
+            if (userId) {
+              const { data: roles } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', userId);
+              const isAdmin = (roles ?? []).some((r) => r.role === 'admin');
+              destination = isAdmin ? '/admin/kpis' : '/dashboard';
+            } else {
+              destination = '/dashboard';
+            }
+          }
+          navigate(destination);
         }
       }
     } catch {
