@@ -72,6 +72,29 @@ export default function AdminHealth() {
   const [lastFetch, setLastFetch] = useState<number>(0);
   const [reauthing, setReauthing] = useState(false);
   const [reauthError, setReauthError] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
+
+  const handleSyncAddonCatalog = useCallback(async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const { data: resp, error: invokeErr } = await supabase.functions.invoke(
+        "sync-addon-stripe-catalog",
+        { body: {} },
+      );
+      if (invokeErr) throw new Error(invokeErr.message);
+      if (!resp?.ok && (resp?.errors?.length ?? 0) > 0) {
+        setSyncResult(`Partial: created ${resp.created?.length ?? 0}, skipped ${resp.skipped?.length ?? 0}, errors ${resp.errors.length}`);
+        return;
+      }
+      setSyncResult(`✓ Created ${resp?.created?.length ?? 0}, skipped ${resp?.skipped?.length ?? 0}`);
+    } catch (err) {
+      setSyncResult(err instanceof Error ? err.message : 'Sync failed');
+    } finally {
+      setSyncing(false);
+    }
+  }, []);
 
   const handleJobberReauth = useCallback(async () => {
     setReauthing(true);
@@ -176,6 +199,15 @@ export default function AdminHealth() {
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
+              onClick={handleSyncAddonCatalog}
+              disabled={syncing}
+              className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-900 hover:bg-emerald-100 disabled:opacity-50"
+              title="Creates Stripe Products + Prices for any addon_catalog row missing IDs."
+            >
+              {syncing ? "Syncing…" : "Sync Stripe catalog"}
+            </button>
+            <button
+              type="button"
               onClick={handleJobberReauth}
               disabled={reauthing}
               className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
@@ -193,6 +225,12 @@ export default function AdminHealth() {
             </button>
           </div>
         </div>
+
+        {syncResult && (
+          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+            <strong>Catalog sync:</strong> {syncResult}
+          </div>
+        )}
 
         {reauthError && (
           <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
