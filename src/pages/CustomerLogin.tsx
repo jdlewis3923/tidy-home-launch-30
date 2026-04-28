@@ -14,6 +14,10 @@ export default function CustomerLogin() {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Only allow same-origin internal paths to prevent open-redirect abuse.
+  const rawRedirect = searchParams.get('redirect') || '/dashboard';
+  const redirectTo = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/dashboard';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
