@@ -8,7 +8,7 @@
  */
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Bell, ChevronDown, Inbox, Calendar, FlaskConical } from 'lucide-react';
+import { Bell, ChevronDown, Inbox, Calendar, FlaskConical, Gauge } from 'lucide-react';
 import tidyLogo from '@/assets/tidy-logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { useHasRole } from '@/hooks/useHasRole';
@@ -22,6 +22,7 @@ const NAV = [
 ];
 
 const ADMIN_NAV = [
+  { label: 'KPI Center', href: '/admin/kpis', icon: Gauge },
   { label: 'Inbox', href: '/admin/inbox', icon: Inbox },
   { label: 'Schedule', href: '/admin/schedule', icon: Calendar },
   { label: 'Test events', href: '/admin/test-zapier', icon: FlaskConical },
