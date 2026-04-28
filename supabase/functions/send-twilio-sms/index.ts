@@ -184,7 +184,6 @@ Deno.serve(async (req) => {
         } else if (body) {
           form.set('Body', body);
         }
-        });
 
         const res = await fetch(url, {
           method: 'POST',
