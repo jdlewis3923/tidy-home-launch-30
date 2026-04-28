@@ -63,10 +63,22 @@ Deno.serve(async (req) => {
           httpClient: Stripe.createFetchHttpClient(),
         });
 
-        const session = await stripe.billingPortal.sessions.create({
+        // Use configured portal config (created by setup-stripe-branding) when present.
+        const { data: cfgRow } = await supabase
+          .from('app_settings')
+          .select('value')
+          .eq('key', 'stripe_portal_config_id')
+          .maybeSingle();
+        const portalConfigId = (cfgRow?.value as { id?: string } | null)?.id ?? null;
+
+        // deno-lint-ignore no-explicit-any
+        const portalParams: any = {
           customer: subRow.stripe_customer_id,
           return_url: `${SITE_URL}/billing`,
-        });
+        };
+        if (portalConfigId) portalParams.configuration = portalConfigId;
+
+        const session = await stripe.billingPortal.sessions.create(portalParams);
 
         return { ok: true as const, portal_url: session.url, url: session.url };
       },
