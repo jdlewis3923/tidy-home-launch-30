@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Lock, ShieldCheck, CreditCard } from 'lucide-react';
 import {
   ConfigState,
@@ -17,6 +17,18 @@ import { startCheckout } from '@/lib/checkout';
 import { provisionAccount } from '@/lib/account-provisioning';
 import { STRIPE_INTEGRATION_ENABLED } from '@/lib/dashboard-config';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { getStripe, isEmbeddedCheckoutAvailable } from '@/lib/stripe-client';
+import EmbeddedPaymentForm from '@/components/dashboard/EmbeddedPaymentForm';
+import { getUtmAttribution } from '@/lib/utm';
+
+// Per-vehicle add-ons (keep in sync with src/lib/checkout.ts).
+const PER_VEHICLE_ADDONS = new Set(['ozone', 'petHair', 'engineBay', 'ceramicSpray']);
+const XL_ADDON_BY_SERVICE: Record<ServiceType, string> = {
+  cleaning: 'xl_cleaning',
+  lawn: 'xl_lawn',
+  detailing: 'xl_detailing',
+};
 
 interface Props {
   state: ConfigState;
@@ -57,6 +69,35 @@ export default function StepPayment({ state, onChange }: Props) {
     .filter((x): x is { svc: ServiceType; qty: number } => x !== null);
 
   const navigate = useNavigate();
+  const embedded = isEmbeddedCheckoutAvailable();
+  const stripePromise = useMemo(() => (embedded ? getStripe() : null), [embedded]);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [preparing, setPreparing] = useState(false);
+
+  // Translate ConfigState into the flat shape the edge fn expects.
+  const buildIntentBody = () => {
+    const vehicleCount = Math.max(1, Number(state.vehicleCount) || 1);
+    const services = state.services
+      .map((svc) => state.frequencies[svc] ? { service: svc, frequency: state.frequencies[svc]! } : null)
+      .filter((x): x is { service: ServiceType; frequency: 'monthly' | 'biweekly' | 'weekly' } => !!x);
+    const addons: Array<{ addon_name: string; qty: number }> = [];
+    for (const svc of state.services) {
+      const tier = svc === 'cleaning' ? state.homeSize : svc === 'lawn' ? state.yardSize : state.vehicleSize;
+      if (tier === 'xl') addons.push({ addon_name: XL_ADDON_BY_SERVICE[svc], qty: svc === 'detailing' ? vehicleCount : 1 });
+    }
+    for (const id of state.addOns ?? []) {
+      addons.push({ addon_name: id, qty: PER_VEHICLE_ADDONS.has(id) ? vehicleCount : 1 });
+    }
+    const attr = getUtmAttribution();
+    return {
+      services, addons, promo_code: promoCode ?? undefined,
+      zip: state.zip, preferred_day: state.preferredDay, preferred_time: state.preferredTime,
+      lang: 'en' as const,
+      idempotency_key: `cfg:${state.zip}:${services.map(s => s.service + ':' + s.frequency).sort().join(',')}:${addons.map(a => a.addon_name + 'x' + a.qty).sort().join(',')}`,
+      gclid: attr.gclid, utm_source: attr.utm_source, utm_medium: attr.utm_medium,
+      utm_campaign: attr.utm_campaign, utm_content: attr.utm_content, utm_term: attr.utm_term,
+    };
+  };
 
   const handlePay = async () => {
     if (customQuote || submitting) return;
@@ -69,7 +110,21 @@ export default function StepPayment({ state, onChange }: Props) {
         setSubmitting(false);
         return;
       }
-      if (STRIPE_INTEGRATION_ENABLED) {
+      if (STRIPE_INTEGRATION_ENABLED && embedded) {
+        // Embedded path — fetch client_secret then mount Payment Element.
+        setPreparing(true);
+        const { data, error: fnErr } = await supabase.functions.invoke('create-stripe-payment-intent', {
+          body: buildIntentBody(),
+        });
+        setPreparing(false);
+        if (fnErr || !data?.ok || !data?.client_secret) {
+          setError(data?.error ?? fnErr?.message ?? 'could not start checkout.');
+          setSubmitting(false);
+          return;
+        }
+        setClientSecret(data.client_secret as string);
+        // Keep submitting=true until the user finishes paying (UI shows form, no double-submit possible).
+      } else if (STRIPE_INTEGRATION_ENABLED) {
         await startCheckout({ config: state });
       } else {
         navigate('/dashboard/confirmation');
@@ -241,30 +296,40 @@ export default function StepPayment({ state, onChange }: Props) {
         </div>
       )}
 
-      {/* Calm CTA — navy ink, white text, soft lift */}
-      <button
-        type="button"
-        onClick={handlePay}
-        disabled={submitting || customQuote}
-        className={`group relative w-full overflow-hidden rounded-xl bg-ink px-6 py-5 text-base font-semibold text-white shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all duration-300 hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${reveal(0)}`}
-        style={{ transitionDelay: '340ms', letterSpacing: '-0.005em' }}
-      >
-        <span className="relative inline-flex items-center justify-center gap-2 lowercase">
-          {submitting ? (
-            <>
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              redirecting…
-            </>
-          ) : customQuote ? (
-            'custom quote required'
-          ) : (
-            <>
-              <Lock className="h-4 w-4" strokeWidth={2.25} />
-              confirm subscription
-            </>
-          )}
-        </span>
-      </button>
+      {/* Embedded Payment Element (mounts after we have a client_secret). */}
+      {clientSecret && stripePromise ? (
+        <EmbeddedPaymentForm
+          stripe={stripePromise}
+          clientSecret={clientSecret}
+          returnUrl={`${window.location.origin}/welcome`}
+          onError={(msg) => { setError(msg); setSubmitting(false); }}
+        />
+      ) : (
+        /* Calm CTA — navy ink, white text, soft lift */
+        <button
+          type="button"
+          onClick={handlePay}
+          disabled={submitting || customQuote || preparing}
+          className={`group relative w-full overflow-hidden rounded-xl bg-ink px-6 py-5 text-base font-semibold text-white shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all duration-300 hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${reveal(0)}`}
+          style={{ transitionDelay: '340ms', letterSpacing: '-0.005em' }}
+        >
+          <span className="relative inline-flex items-center justify-center gap-2 lowercase">
+            {submitting || preparing ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                {embedded ? 'preparing secure payment…' : 'redirecting…'}
+              </>
+            ) : customQuote ? (
+              'custom quote required'
+            ) : (
+              <>
+                <Lock className="h-4 w-4" strokeWidth={2.25} />
+                {embedded ? 'continue to payment' : 'confirm subscription'}
+              </>
+            )}
+          </span>
+        </button>
+      )}
 
       {!customQuote && (
         <p

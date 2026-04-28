@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { AddonService } from '@/lib/addon-catalog';
 import { SERVICE_LABELS } from '@/lib/addon-catalog';
 import { formatLongDate } from '@/lib/dashboard-data';
+import AddonCelebration from '@/components/dashboard/AddonCelebration';
 
 type Visit = { id: string; visit_date: string; service: string; time_window: string | null; jobber_visit_id: string | null };
 type AttachRow = { id: string; addon_key: string; status: string; attached_at: string };
@@ -63,6 +64,7 @@ export default function AddToNextVisitPanel({ userId, services, nextVisit, nextN
   const [pendingAddon, setPendingAddon] = useState<CatalogRow | null>(null);
   const [working, setWorking] = useState<string | null>(null);
   const [activeService, setActiveService] = useState<AddonService | null>(services[0] ?? null);
+  const [celebration, setCelebration] = useState<{ show: boolean; label: string }>({ show: false, label: '' });
 
   useEffect(() => {
     const load = async () => {
@@ -139,6 +141,7 @@ export default function AddToNextVisitPanel({ userId, services, nextVisit, nextN
     }
     toast({ title: 'Added ✓', description: `${pendingAddon.display_name} on your next invoice.` });
     setAttaches(prev => [...prev, { id: data.attach_id, addon_key: pendingAddon.addon_key, status: 'pending_visit', attached_at: new Date().toISOString() }]);
+    setCelebration({ show: true, label: pendingAddon.display_name });
   };
 
   const remove = async (addon: CatalogRow) => {
@@ -287,6 +290,12 @@ export default function AddToNextVisitPanel({ userId, services, nextVisit, nextN
           </div>
         </div>
       )}
+
+      <AddonCelebration
+        show={celebration.show}
+        label={celebration.label}
+        onDone={() => setCelebration({ show: false, label: '' })}
+      />
     </section>
   );
 }
