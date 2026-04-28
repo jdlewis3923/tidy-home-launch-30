@@ -31,6 +31,9 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import DashboardTopNav from '@/components/dashboard/DashboardTopNav';
+import AddToNextVisitPanel from '@/components/dashboard/AddToNextVisitPanel';
+import AddonsYearStat from '@/components/dashboard/AddonsYearStat';
+import type { AddonService } from '@/lib/addon-catalog';
 import ScheduleCalendar from '@/components/dashboard/ScheduleCalendar';
 import CalmModal from '@/components/dashboard/CalmModal';
 import {
