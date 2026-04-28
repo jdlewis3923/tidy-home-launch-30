@@ -555,8 +555,25 @@ export default function AdminKpis() {
           def={drillDef}
           snap={drillSnap}
           alerts={alerts.filter((a) => a.kpi_code === drillDef.code)}
+          details={stepDetails[drillDef.code] ?? []}
+          completions={stepCompletions[drillDef.code] ?? []}
           onClose={() => setDrillCode(null)}
           onActionRan={load}
+        />
+      )}
+
+      {/* Status drilldown drawer (clicked hero pill) */}
+      {statusListFor && (
+        <StatusListDrawer
+          status={statusListFor}
+          defs={defs}
+          snapshots={snapshots}
+          onClose={() => setStatusListFor(null)}
+          onOpenFix={(code) => {
+            setStatusListFor(null);
+            setDrillCode(code);
+          }}
+          onSnapshotsChange={setSnapshots}
         />
       )}
     </div>
