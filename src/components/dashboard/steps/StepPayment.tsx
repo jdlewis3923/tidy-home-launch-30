@@ -296,30 +296,40 @@ export default function StepPayment({ state, onChange }: Props) {
         </div>
       )}
 
-      {/* Calm CTA — navy ink, white text, soft lift */}
-      <button
-        type="button"
-        onClick={handlePay}
-        disabled={submitting || customQuote}
-        className={`group relative w-full overflow-hidden rounded-xl bg-ink px-6 py-5 text-base font-semibold text-white shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all duration-300 hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${reveal(0)}`}
-        style={{ transitionDelay: '340ms', letterSpacing: '-0.005em' }}
-      >
-        <span className="relative inline-flex items-center justify-center gap-2 lowercase">
-          {submitting ? (
-            <>
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              redirecting…
-            </>
-          ) : customQuote ? (
-            'custom quote required'
-          ) : (
-            <>
-              <Lock className="h-4 w-4" strokeWidth={2.25} />
-              confirm subscription
-            </>
-          )}
-        </span>
-      </button>
+      {/* Embedded Payment Element (mounts after we have a client_secret). */}
+      {clientSecret && stripePromise ? (
+        <EmbeddedPaymentForm
+          stripe={stripePromise}
+          clientSecret={clientSecret}
+          returnUrl={`${window.location.origin}/welcome`}
+          onError={(msg) => { setError(msg); setSubmitting(false); }}
+        />
+      ) : (
+        /* Calm CTA — navy ink, white text, soft lift */
+        <button
+          type="button"
+          onClick={handlePay}
+          disabled={submitting || customQuote || preparing}
+          className={`group relative w-full overflow-hidden rounded-xl bg-ink px-6 py-5 text-base font-semibold text-white shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all duration-300 hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${reveal(0)}`}
+          style={{ transitionDelay: '340ms', letterSpacing: '-0.005em' }}
+        >
+          <span className="relative inline-flex items-center justify-center gap-2 lowercase">
+            {submitting || preparing ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                {embedded ? 'preparing secure payment…' : 'redirecting…'}
+              </>
+            ) : customQuote ? (
+              'custom quote required'
+            ) : (
+              <>
+                <Lock className="h-4 w-4" strokeWidth={2.25} />
+                {embedded ? 'continue to payment' : 'confirm subscription'}
+              </>
+            )}
+          </span>
+        </button>
+      )}
 
       {!customQuote && (
         <p
