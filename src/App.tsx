@@ -163,6 +163,7 @@ const App = () => (
                   <Route path="/admin/kpis" element={<AdminKpis />} />
                   <Route path="/admin/agents" element={<AdminAgents />} />
                   <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
+                  <Route path="/admin/costs" element={<AdminCosts />} />
                   <Route
                     path="/dashboard/notifications"
                     element={CUSTOMER_DASHBOARD_ENABLED ? <CustomerNotifications /> : <Navigate to="/" replace />}
