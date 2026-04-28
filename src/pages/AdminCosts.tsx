@@ -181,7 +181,7 @@ export default function AdminCosts() {
     if (editing) {
       res = await supabase.from("cost_entries").update(payload).eq("id", editing.id);
     } else {
-      res = await supabase.from("cost_entries").insert(payload);
+      res = await supabase.from("cost_entries").insert([payload]);
     }
     if (res.error) { alert(res.error.message); return; }
     setShowForm(false);
