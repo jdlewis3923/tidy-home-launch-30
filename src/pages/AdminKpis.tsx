@@ -254,7 +254,7 @@ export default function AdminKpis() {
   const load = useCallback(async () => {
     setRefreshing(true);
     try {
-      const [defsRes, snapsRes, alertsRes] = await Promise.all([
+      const [defsRes, snapsRes, alertsRes, stepsRes, compsRes] = await Promise.all([
         supabase
           .from("kpi_definitions")
           .select("*")
@@ -297,6 +297,19 @@ export default function AdminKpis() {
       setSnapshots(latest);
 
       setAlerts((alertsRes.data ?? []) as unknown as KpiAlert[]);
+
+      // Group step details by KPI code
+      const detailsByKpi: Record<string, PlaybookStepDetail[]> = {};
+      for (const row of (stepsRes.data ?? []) as Array<PlaybookStepDetail & { kpi_code: string }>) {
+        (detailsByKpi[row.kpi_code] ??= []).push(row);
+      }
+      setStepDetails(detailsByKpi);
+
+      const compsByKpi: Record<string, { id: string; step_index: number; notes: string | null; completed_at: string }[]> = {};
+      for (const c of (compsRes.data ?? []) as Array<{ id: string; kpi_code: string; step_index: number; notes: string | null; completed_at: string }>) {
+        (compsByKpi[c.kpi_code] ??= []).push(c);
+      }
+      setStepCompletions(compsByKpi);
     } catch (err) {
       console.error("[AdminKpis] load failed", err);
     } finally {
