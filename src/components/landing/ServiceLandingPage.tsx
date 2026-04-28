@@ -207,6 +207,11 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
             {t(config.subhead)}
           </p>
+          {config.intentConfirm && (
+            <p className="mt-3 text-base md:text-lg text-primary-foreground/80 max-w-2xl mx-auto">
+              {t(config.intentConfirm)}
+            </p>
+          )}
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm">
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium">
@@ -215,6 +220,10 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5" />
               {SERVICE_AREA_TRUST}
+            </span>
+            <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {t("Vetted & insured pros")}
             </span>
           </div>
 
