@@ -76,11 +76,18 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
                       {t(l.label)}
                     </NavLink>
                   ))}
+                  <div className="border-t my-1" />
+                  <Link
+                    to="/login"
+                    className="block w-full text-left px-4 py-2.5 text-sm font-medium text-foreground/80 hover:bg-muted hover:text-primary transition-colors sm:hidden"
+                  >
+                    Login
+                  </Link>
                 </div>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <LanguageToggle />
             <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">
               Login
