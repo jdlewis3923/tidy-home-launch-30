@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Check, Phone, MapPin, Sparkles } from "lucide-react";
+import { Check, Phone, MapPin, Sparkles, ShieldCheck, BadgeCheck, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
