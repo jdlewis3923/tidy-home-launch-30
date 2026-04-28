@@ -14,8 +14,8 @@
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import {
   exchangeAuthorizationCode,
-  jobberGraphQL,
   JOBBER_REDIRECT_URI,
+  persistRefreshToken,
 } from '../_shared/jobber-client.ts';
 import { withLogging } from '../_shared/withLogging.ts';
 
@@ -31,12 +31,13 @@ function escapeHtml(s: string): string {
 function renderHtml(opts: {
   title: string;
   refreshToken?: string;
+  persisted?: boolean;
   accessTokenPreview?: string;
   expiresIn?: number;
   account?: { id: string; name: string };
   error?: string;
 }): string {
-  const { title, refreshToken, accessTokenPreview, expiresIn, account, error } = opts;
+  const { title, refreshToken, persisted, accessTokenPreview, expiresIn, account, error } = opts;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -49,6 +50,7 @@ function renderHtml(opts: {
     .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
     .ok { background: #ecfdf5; color: #065f46; }
     .err { background: #fef2f2; color: #991b1b; }
+    .warn { background: #fffbeb; color: #92400e; }
     .card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 20px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
     label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
     code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
@@ -61,20 +63,24 @@ function renderHtml(opts: {
 <body>
   <h1>Jobber OAuth ${error ? '<span class="pill err">failed</span>' : '<span class="pill ok">success</span>'}</h1>
   ${error ? `<div class="card"><p class="hint" style="color:#991b1b;">${escapeHtml(error)}</p></div>` : ''}
-  ${refreshToken ? `
+  ${refreshToken && persisted ? `
   <div class="card">
-    <label>Refresh token — copy into Lovable secret <code>JOBBER_REFRESH_TOKEN</code></label>
+    <label><span class="pill ok">Saved</span> Refresh token persisted to vault</label>
+    <p class="hint">No copy/paste needed — <code>jobber_refresh_token</code> in Lovable Cloud vault has been updated. Future Jobber calls will use it automatically.</p>
+  </div>
+  ` : ''}
+  ${refreshToken && !persisted ? `
+  <div class="card">
+    <label><span class="pill warn">Manual</span> Refresh token — copy into Lovable secret <code>JOBBER_REFRESH_TOKEN</code></label>
     <div class="secret"><code id="rt">${escapeHtml(refreshToken)}</code></div>
     <button onclick="navigator.clipboard.writeText(document.getElementById('rt').innerText)">Copy</button>
-    <p class="hint">This token will rotate on next use. Subsequent rotations are persisted automatically into pg vault — you only need to paste this initial value once.</p>
+    <p class="hint">Vault auto-persist failed (see logs). Paste this into the secret manually.</p>
   </div>
   ` : ''}
   ${account ? `
   <div class="card">
-    <label>Account / team ID — copy into Lovable secret <code>JOBBER_DEFAULT_TEAM_ID</code></label>
-    <div class="secret"><code id="aid">${escapeHtml(account.id)}</code></div>
-    <button onclick="navigator.clipboard.writeText(document.getElementById('aid').innerText)">Copy</button>
-    <p class="hint">Account name: <strong>${escapeHtml(account.name)}</strong></p>
+    <label>Account</label>
+    <p class="hint"><strong>${escapeHtml(account.name)}</strong> · <code>${escapeHtml(account.id)}</code></p>
   </div>
   ` : ''}
   ${accessTokenPreview ? `
@@ -83,7 +89,7 @@ function renderHtml(opts: {
     <p class="hint"><code>${escapeHtml(accessTokenPreview)}…</code> · expires in ${expiresIn ?? '?'}s</p>
   </div>
   ` : ''}
-  <p class="hint" style="margin-top:32px;">After pasting the secrets above, you can close this tab. The Jobber integration is now live.</p>
+  <p class="hint" style="margin-top:32px;">You can close this tab and re-run any Jobber-dependent action (e.g. <code>daily-addon-attach-scan</code>).</p>
 </body>
 </html>`;
 }
@@ -127,13 +133,19 @@ Deno.serve(async (req) => {
       fn: () => exchangeAuthorizationCode(code, JOBBER_REDIRECT_URI),
     });
 
+    // Auto-persist the new refresh token to vault — no copy/paste needed.
+    let persisted = false;
+    try {
+      await persistRefreshToken(tokens.refresh_token);
+      persisted = true;
+      console.log('[jobber-oauth-callback] refresh token persisted to vault');
+    } catch (err) {
+      console.error('[jobber-oauth-callback] vault persist failed', err);
+    }
+
     // Probe the API for account info — also confirms the access token works.
     let account: { id: string; name: string } | undefined;
     try {
-      // Temporarily inject the access token by making a one-off raw call —
-      // jobberGraphQL uses the cached/refreshed token, but we just got
-      // a fresh access token from the code exchange and the cache is empty
-      // on cold start. Hit the API directly with the new token.
       const acctRes = await fetch('https://api.getjobber.com/api/graphql', {
         method: 'POST',
         headers: {
@@ -155,6 +167,7 @@ Deno.serve(async (req) => {
       renderHtml({
         title: 'Jobber OAuth — success',
         refreshToken: tokens.refresh_token,
+        persisted,
         accessTokenPreview: tokens.access_token.slice(0, 24),
         expiresIn: tokens.expires_in,
         account,
