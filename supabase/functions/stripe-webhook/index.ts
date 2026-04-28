@@ -1,12 +1,24 @@
-// Tidy — Stripe Webhook Handler
+// Tidy — Stripe Webhook Handler (full lifecycle + dunning)
 //
-// Verifies Stripe signature using STRIPE_WEBHOOK_SECRET, enforces
-// idempotency through integration_logs (source='stripe', event=evt.id),
-// then dispatches by event type. All DB writes use service role.
+// Verifies Stripe signature using STRIPE_WEBHOOK_SECRET, then enforces
+// idempotency through public.stripe_events (unique on stripe_event_id).
+// All DB writes use service role.
 //
-// Always returns 200 unless signature verification fails (400) — Stripe
-// retries on non-2xx, and we want to swallow downstream errors after the
-// log row is recorded so retries don't double-process.
+// Always returns 200 unless signature verification fails (400). Stripe
+// retries on non-2xx — we want to swallow downstream errors after the
+// idempotency row is written so retries don't double-process.
+//
+// Event coverage:
+//   checkout.session.completed         → seed subscription + visits (legacy redirect Checkout)
+//   customer.subscription.created      → seed subscription + visits (embedded Payment Element flow)
+//   customer.subscription.updated      → status, pause_collection, cancel_at_period_end
+//   customer.subscription.deleted      → mark canceled
+//   invoice.paid                       → record invoice, push next_billing_date, capture card
+//   invoice.payment_failed             → dunning ladder (1st/2nd → recovery, 3rd → mark uncollectible + pause)
+//   invoice.payment_action_required    → SCA notice via Zap
+//   payment_method.attached            → card details refresh + auto-unpause if paused
+//
+// Dunning thresholds keyed off invoice.attempt_count (1-indexed).
 
 import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
@@ -16,11 +28,7 @@ const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-const FREQ_DAYS: Record<string, number> = {
-  weekly: 7,
-  biweekly: 14,
-  monthly: 30,
-};
+const FREQ_DAYS: Record<string, number> = { weekly: 7, biweekly: 14, monthly: 30 };
 
 function timeWindowFromPreferred(pref: string | null | undefined): string {
   if (pref === 'morning') return '8:00 AM – 12:00 PM';
@@ -58,11 +66,6 @@ async function fireZap(eventName: string, payload: unknown) {
   }
 }
 
-/**
- * Fire-and-log call into a Jobber edge function. We do not block the
- * Stripe ack on Jobber success — failures are recorded in
- * integration_logs and surfaced via /admin/health.
- */
 async function callJobberFn(fn: 'jobber-sync-customer' | 'jobber-create-job', body: unknown) {
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/${fn}`, {
@@ -102,11 +105,7 @@ Deno.serve(async (req) => {
 
   let event: Stripe.Event;
   try {
-    event = await stripe.webhooks.constructEventAsync(
-      rawBody,
-      sig,
-      STRIPE_WEBHOOK_SECRET,
-    );
+    event = await stripe.webhooks.constructEventAsync(rawBody, sig, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'verify failed';
     console.error('[stripe-webhook] signature verification failed', msg);
@@ -117,20 +116,29 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // ---------- Idempotency guard via integration_logs ----------
-  // event=event.id is unique per Stripe delivery. If we've seen it, ack.
-  const { data: existing } = await supabase
-    .from('integration_logs')
+  // ---------- Idempotency: stripe_events table (unique on stripe_event_id) ----------
+  const { data: insertedEvt, error: insErr } = await supabase
+    .from('stripe_events')
+    .insert({
+      stripe_event_id: event.id,
+      event_type: event.type,
+      livemode: event.livemode,
+      status: 'received',
+      payload_summary: { type: event.type, livemode: event.livemode },
+    })
     .select('id')
-    .eq('source', 'stripe')
-    .eq('event', event.id)
-    .limit(1)
     .maybeSingle();
 
-  if (existing) {
-    return new Response('replay', { status: 200 });
+  if (insErr) {
+    // Unique violation (23505) → we've seen this event. Ack happily.
+    if ((insErr as { code?: string }).code === '23505') {
+      return new Response('replay', { status: 200 });
+    }
+    console.error('[stripe-webhook] idempotency insert failed', insErr.message);
+    // Fall through and try to process anyway.
   }
 
+  const eventRowId: string | null = insertedEvt?.id ?? null;
   const start = performance.now();
 
   try {
@@ -138,11 +146,8 @@ Deno.serve(async (req) => {
       case 'checkout.session.completed':
         await handleCheckoutCompleted(stripe, supabase, event);
         break;
-      case 'invoice.paid':
-        await handleInvoicePaid(supabase, event);
-        break;
-      case 'invoice.payment_failed':
-        await handleInvoicePaymentFailed(supabase, event);
+      case 'customer.subscription.created':
+        await handleSubscriptionCreated(stripe, supabase, event);
         break;
       case 'customer.subscription.updated':
         await handleSubscriptionUpdated(supabase, event);
@@ -150,64 +155,92 @@ Deno.serve(async (req) => {
       case 'customer.subscription.deleted':
         await handleSubscriptionDeleted(supabase, event);
         break;
+      case 'invoice.paid':
+        await handleInvoicePaid(supabase, event);
+        break;
+      case 'invoice.payment_failed':
+        await handleInvoicePaymentFailed(stripe, supabase, event);
+        break;
+      case 'invoice.payment_action_required':
+        await handleInvoicePaymentActionRequired(supabase, event);
+        break;
+      case 'payment_method.attached':
+        await handlePaymentMethodAttached(stripe, supabase, event);
+        break;
+      case 'customer.updated':
+        // No-op for now; reserved for future profile sync.
+        break;
       default:
-        // Ignore unhandled types but still log them.
         break;
     }
 
+    const duration = Math.round(performance.now() - start);
+    if (eventRowId) {
+      await supabase
+        .from('stripe_events')
+        .update({ status: 'processed', processed_at: new Date().toISOString(), duration_ms: duration })
+        .eq('id', eventRowId);
+    }
+    // Mirror to integration_logs for /admin/health rollups (non-fatal).
     await supabase.from('integration_logs').insert({
-      source: 'stripe',
-      event: event.id,
-      status: 'success',
-      latency_ms: Math.round(performance.now() - start),
-      payload_hash: event.type,
+      source: 'stripe', event: event.id, status: 'success',
+      latency_ms: duration, payload_hash: event.type,
     });
 
     return new Response('ok', { status: 200 });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown';
+    const duration = Math.round(performance.now() - start);
     console.error('[stripe-webhook] handler failed', event.type, message);
+    if (eventRowId) {
+      await supabase
+        .from('stripe_events')
+        .update({ status: 'error', error_message: message.slice(0, 1000), duration_ms: duration })
+        .eq('id', eventRowId);
+    }
     await supabase.from('integration_logs').insert({
-      source: 'stripe',
-      event: event.id,
-      status: 'error',
-      latency_ms: Math.round(performance.now() - start),
-      payload_hash: event.type,
-      error_message: message.slice(0, 1000),
+      source: 'stripe', event: event.id, status: 'error',
+      latency_ms: duration, payload_hash: event.type, error_message: message.slice(0, 1000),
     });
     // Always ack so Stripe doesn't retry into a poisoned state.
     return new Response('ok', { status: 200 });
   }
 });
 
-// ---------- Handlers ----------
+// =====================================================================
+// Shared seed routine — used by both checkout.session.completed (legacy)
+// and customer.subscription.created (embedded Payment Element).
+// =====================================================================
 
 // deno-lint-ignore no-explicit-any
-async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Stripe.Event) {
-  const session = event.data.object as Stripe.Checkout.Session;
-  const meta = session.metadata ?? {};
-  const userId = meta.user_id;
-  if (!userId) {
-    console.error('[stripe-webhook] checkout.session.completed missing user_id metadata');
-    return;
+async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
+  userId: string;
+  meta: Record<string, string>;
+  stripeSubscriptionId: string | null;
+  stripeCustomerId: string | null;
+}) {
+  const { userId, meta, stripeSubscriptionId, stripeCustomerId } = opts;
+
+  // Skip if we've already seeded for this Stripe subscription.
+  if (stripeSubscriptionId) {
+    const { data: dup } = await supabase
+      .from('subscriptions')
+      .select('id')
+      .eq('stripe_subscription_id', stripeSubscriptionId)
+      .maybeSingle();
+    if (dup) return;
   }
 
   const services: Array<{ service: 'cleaning' | 'lawn' | 'detailing'; frequency: 'monthly' | 'biweekly' | 'weekly' }> =
     meta.services_json ? JSON.parse(meta.services_json) : [];
-  if (services.length === 0) return;
+  if (services.length === 0) {
+    console.warn('[stripe-webhook] seed skipped — no services_json in metadata for', stripeSubscriptionId);
+    return;
+  }
 
-  // Dominant frequency for the subscription row.
   const freqs = services.map((s) => s.frequency);
   const dominantFrequency: 'weekly' | 'biweekly' | 'monthly' =
     freqs.includes('weekly') ? 'weekly' : freqs.includes('biweekly') ? 'biweekly' : 'monthly';
-
-  // Pull the actual subscription from Stripe to get the canonical IDs + period end.
-  const stripeSubscriptionId = typeof session.subscription === 'string'
-    ? session.subscription
-    : session.subscription?.id ?? null;
-  const stripeCustomerId = typeof session.customer === 'string'
-    ? session.customer
-    : session.customer?.id ?? null;
 
   let nextBillingDate: string | null = null;
   let monthlyTotalCents = 0;
@@ -216,7 +249,6 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Str
     if (sub.current_period_end) {
       nextBillingDate = new Date(sub.current_period_end * 1000).toISOString().slice(0, 10);
     }
-    // Sum recurring item amounts (per-period amount in cents).
     for (const item of sub.items.data) {
       const amt = item.price.unit_amount ?? 0;
       monthlyTotalCents += amt * (item.quantity ?? 1);
@@ -225,7 +257,6 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Str
 
   const bundleDiscountPct = parseInt(meta.bundle_discount_pct ?? '0', 10) || 0;
 
-  // Insert one subscription row with services as array.
   const { data: subRow, error: subErr } = await supabase
     .from('subscriptions')
     .insert({
@@ -246,6 +277,18 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Str
     throw new Error(`subscriptions insert failed: ${subErr?.message ?? 'no row returned'}`);
   }
 
+  // Mirror service_tier + signup_source onto profile (best-effort).
+  const dominantService = services[0]?.service ?? null;
+  if (dominantService) {
+    await supabase
+      .from('profiles')
+      .update({
+        service_tier: dominantService,
+        signup_source: meta.signup_source || null,
+      })
+      .eq('user_id', userId);
+  }
+
   // Seed first 3 visits per service.
   const baseDate = nextVisitDate(meta.preferred_day);
   // deno-lint-ignore no-explicit-any
@@ -264,12 +307,9 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Str
       });
     }
   }
-
   if (visits.length > 0) {
     const { error: visitErr } = await supabase.from('visits').insert(visits);
-    if (visitErr) {
-      console.error('[stripe-webhook] visits insert failed', visitErr.message);
-    }
+    if (visitErr) console.error('[stripe-webhook] visits insert failed', visitErr.message);
   }
 
   await fireZap('subscription_confirmed', {
@@ -285,15 +325,48 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Str
     preferred_time: meta.preferred_time,
   });
 
-  // Phase 3 — Jobber field-service sync. Sequential: client must exist
-  // before we can attach jobs. Both calls log to integration_logs and
-  // never throw out of this handler so Stripe still gets its 200.
-  await callJobberFn('jobber-sync-customer', {
-    user_id: userId,
-    subscription_id: subRow.id,
+  await callJobberFn('jobber-sync-customer', { user_id: userId, subscription_id: subRow.id });
+  await callJobberFn('jobber-create-job', { subscription_id: subRow.id });
+}
+
+// =====================================================================
+// Handlers
+// =====================================================================
+
+// deno-lint-ignore no-explicit-any
+async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Stripe.Event) {
+  const session = event.data.object as Stripe.Checkout.Session;
+  const meta = (session.metadata ?? {}) as Record<string, string>;
+  const userId = meta.user_id;
+  if (!userId) {
+    console.error('[stripe-webhook] checkout.session.completed missing user_id metadata');
+    return;
+  }
+  const stripeSubscriptionId = typeof session.subscription === 'string'
+    ? session.subscription
+    : session.subscription?.id ?? null;
+  const stripeCustomerId = typeof session.customer === 'string'
+    ? session.customer
+    : session.customer?.id ?? null;
+
+  await seedSubscriptionAndVisits(stripe, supabase, {
+    userId, meta, stripeSubscriptionId, stripeCustomerId,
   });
-  await callJobberFn('jobber-create-job', {
-    subscription_id: subRow.id,
+}
+
+// deno-lint-ignore no-explicit-any
+async function handleSubscriptionCreated(stripe: Stripe, supabase: any, event: Stripe.Event) {
+  const sub = event.data.object as Stripe.Subscription;
+  const meta = (sub.metadata ?? {}) as Record<string, string>;
+  const userId = meta.user_id;
+  if (!userId) {
+    // Could be a subscription created via legacy Checkout; that path is
+    // handled by checkout.session.completed. Skip silently.
+    return;
+  }
+  const stripeCustomerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null;
+  await seedSubscriptionAndVisits(stripe, supabase, {
+    userId, meta, stripeSubscriptionId: sub.id, stripeCustomerId,
   });
 }
 
@@ -304,7 +377,6 @@ async function handleInvoicePaid(supabase: any, event: Stripe.Event) {
     ? invoice.subscription
     : invoice.subscription?.id ?? null;
 
-  // Find local subscription to grab user_id + subscription FK.
   let userId: string | null = null;
   let localSubId: string | null = null;
   if (stripeSubId) {
@@ -338,24 +410,20 @@ async function handleInvoicePaid(supabase: any, event: Stripe.Event) {
       { onConflict: 'stripe_invoice_id' },
     );
 
-  // Push next_billing_date forward.
-  if (localSubId && invoice.lines?.data?.[0]?.period?.end) {
-    const next = new Date(invoice.lines.data[0].period.end * 1000).toISOString().slice(0, 10);
-    await supabase
-      .from('subscriptions')
-      .update({ next_billing_date: next })
-      .eq('id', localSubId);
+  // Reset attempt count + clear any pause on successful payment.
+  if (localSubId) {
+    const updates: Record<string, unknown> = { latest_invoice_attempt_count: 0 };
+    if (invoice.lines?.data?.[0]?.period?.end) {
+      updates.next_billing_date = new Date(invoice.lines.data[0].period.end * 1000).toISOString().slice(0, 10);
+    }
+    await supabase.from('subscriptions').update(updates).eq('id', localSubId);
   }
 
   // Capture card_brand + card_last4 for Billing UI display.
-  // Stripe's Invoice expands payment_intent.payment_method on most APIs;
-  // here we read the charge directly which carries payment_method_details.
   try {
     const chargeId = (invoice as unknown as { charge?: string | { id: string } }).charge;
     const cid = typeof chargeId === 'string' ? chargeId : chargeId?.id ?? null;
     if (localSubId && cid) {
-      // Lazy-import: stripe was constructed in the outer handler. Re-create
-      // locally so we don't need to plumb it through every helper signature.
       const { default: StripeCtor } = await import('https://esm.sh/stripe@17.5.0?target=deno');
       const s = new StripeCtor(STRIPE_SECRET_KEY!, {
         apiVersion: '2024-12-18.acacia',
@@ -366,10 +434,7 @@ async function handleInvoicePaid(supabase: any, event: Stripe.Event) {
       if (card?.brand || card?.last4) {
         await supabase
           .from('subscriptions')
-          .update({
-            card_brand: card.brand ?? null,
-            card_last4: card.last4 ?? null,
-          })
+          .update({ card_brand: card.brand ?? null, card_last4: card.last4 ?? null })
           .eq('id', localSubId);
       }
     }
@@ -379,7 +444,7 @@ async function handleInvoicePaid(supabase: any, event: Stripe.Event) {
 }
 
 // deno-lint-ignore no-explicit-any
-async function handleInvoicePaymentFailed(supabase: any, event: Stripe.Event) {
+async function handleInvoicePaymentFailed(stripe: Stripe, supabase: any, event: Stripe.Event) {
   const invoice = event.data.object as Stripe.Invoice;
   const stripeSubId = typeof invoice.subscription === 'string'
     ? invoice.subscription
@@ -399,26 +464,82 @@ async function handleInvoicePaymentFailed(supabase: any, event: Stripe.Event) {
 
   if (!userId) return;
 
-  await supabase
-    .from('invoices')
-    .upsert(
-      {
-        user_id: userId,
-        subscription_id: localSubId,
-        stripe_invoice_id: invoice.id,
-        amount_cents: invoice.amount_due ?? 0,
-        status: 'failed',
-        invoice_date: new Date((invoice.created ?? Date.now() / 1000) * 1000).toISOString().slice(0, 10),
-        receipt_url: invoice.hosted_invoice_url ?? null,
-      },
-      { onConflict: 'stripe_invoice_id' },
-    );
+  const attemptCount = invoice.attempt_count ?? 1;
 
-  await fireZap('payment_failed', {
+  await supabase.from('invoices').upsert(
+    {
+      user_id: userId,
+      subscription_id: localSubId,
+      stripe_invoice_id: invoice.id,
+      amount_cents: invoice.amount_due ?? 0,
+      status: 'failed',
+      invoice_date: new Date((invoice.created ?? Date.now() / 1000) * 1000).toISOString().slice(0, 10),
+      receipt_url: invoice.hosted_invoice_url ?? null,
+    },
+    { onConflict: 'stripe_invoice_id' },
+  );
+
+  if (localSubId) {
+    await supabase
+      .from('subscriptions')
+      .update({ latest_invoice_attempt_count: attemptCount })
+      .eq('id', localSubId);
+  }
+
+  // Dunning ladder ----------------------------------------------------
+  // 1st & 2nd failure → recovery (BL2)
+  // 3rd+ failure → mark uncollectible + pause subscription (BL2-final)
+  const isFinal = attemptCount >= 3;
+
+  await fireZap(isFinal ? 'payment_failed_final' : 'payment_failed', {
     user_id: userId,
     stripe_subscription_id: stripeSubId,
     stripe_invoice_id: invoice.id,
     amount_cents: invoice.amount_due ?? 0,
+    attempt_count: attemptCount,
+    hosted_invoice_url: invoice.hosted_invoice_url,
+    update_payment_url: invoice.hosted_invoice_url, // also a CTA target
+  });
+
+  if (isFinal && stripeSubId) {
+    try {
+      await stripe.subscriptions.update(stripeSubId, {
+        pause_collection: { behavior: 'mark_uncollectible' },
+      });
+      if (localSubId) {
+        await supabase
+          .from('subscriptions')
+          .update({ pause_collection: 'mark_uncollectible', status: 'paused' })
+          .eq('id', localSubId);
+      }
+    } catch (err) {
+      console.error('[stripe-webhook] pause_collection failed', err);
+    }
+  }
+}
+
+// deno-lint-ignore no-explicit-any
+async function handleInvoicePaymentActionRequired(supabase: any, event: Stripe.Event) {
+  const invoice = event.data.object as Stripe.Invoice;
+  const stripeSubId = typeof invoice.subscription === 'string'
+    ? invoice.subscription
+    : invoice.subscription?.id ?? null;
+
+  let userId: string | null = null;
+  if (stripeSubId) {
+    const { data: subRow } = await supabase
+      .from('subscriptions')
+      .select('user_id')
+      .eq('stripe_subscription_id', stripeSubId)
+      .maybeSingle();
+    userId = subRow?.user_id ?? null;
+  }
+  if (!userId) return;
+
+  await fireZap('payment_action_required', {
+    user_id: userId,
+    stripe_subscription_id: stripeSubId,
+    stripe_invoice_id: invoice.id,
     hosted_invoice_url: invoice.hosted_invoice_url,
   });
 }
@@ -428,7 +549,7 @@ async function handleSubscriptionUpdated(supabase: any, event: Stripe.Event) {
   const sub = event.data.object as Stripe.Subscription;
   const status: 'active' | 'paused' | 'canceled' =
     sub.status === 'active' || sub.status === 'trialing'
-      ? 'active'
+      ? (sub.pause_collection ? 'paused' : 'active')
       : sub.status === 'paused'
         ? 'paused'
         : sub.status === 'canceled' || sub.status === 'incomplete_expired'
@@ -444,6 +565,9 @@ async function handleSubscriptionUpdated(supabase: any, event: Stripe.Event) {
     .update({
       status,
       next_billing_date: next,
+      pause_collection: sub.pause_collection?.behavior ?? null,
+      cancel_at_period_end: sub.cancel_at_period_end ?? false,
+      canceled_at: sub.canceled_at ? new Date(sub.canceled_at * 1000).toISOString() : null,
     })
     .eq('stripe_subscription_id', sub.id);
 }
@@ -453,6 +577,46 @@ async function handleSubscriptionDeleted(supabase: any, event: Stripe.Event) {
   const sub = event.data.object as Stripe.Subscription;
   await supabase
     .from('subscriptions')
-    .update({ status: 'canceled' })
+    .update({
+      status: 'canceled',
+      canceled_at: new Date().toISOString(),
+    })
     .eq('stripe_subscription_id', sub.id);
+}
+
+// deno-lint-ignore no-explicit-any
+async function handlePaymentMethodAttached(stripe: Stripe, supabase: any, event: Stripe.Event) {
+  const pm = event.data.object as Stripe.PaymentMethod;
+  const customerId = typeof pm.customer === 'string' ? pm.customer : pm.customer?.id ?? null;
+  if (!customerId) return;
+
+  // Find local subs on this customer and refresh card preview.
+  const { data: subs } = await supabase
+    .from('subscriptions')
+    .select('id, stripe_subscription_id, pause_collection, status')
+    .eq('stripe_customer_id', customerId);
+
+  if (!subs?.length) return;
+
+  for (const row of subs) {
+    if (pm.card?.brand || pm.card?.last4) {
+      await supabase
+        .from('subscriptions')
+        .update({ card_brand: pm.card.brand ?? null, card_last4: pm.card.last4 ?? null })
+        .eq('id', row.id);
+    }
+    // Reactivation: if Stripe paused us due to dunning, unpause now that
+    // the customer added a fresh card. Stripe will auto-retry the open invoice.
+    if (row.pause_collection === 'mark_uncollectible' && row.stripe_subscription_id) {
+      try {
+        await stripe.subscriptions.update(row.stripe_subscription_id, { pause_collection: '' });
+        await supabase
+          .from('subscriptions')
+          .update({ pause_collection: null, status: 'active' })
+          .eq('id', row.id);
+      } catch (err) {
+        console.error('[stripe-webhook] auto-unpause failed', err);
+      }
+    }
+  }
 }

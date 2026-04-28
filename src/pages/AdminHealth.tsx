@@ -74,6 +74,10 @@ export default function AdminHealth() {
   const [reauthError, setReauthError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
+  const [brandingSyncing, setBrandingSyncing] = useState(false);
+  const [brandingResult, setBrandingResult] = useState<string | null>(null);
+  const [backfilling, setBackfilling] = useState(false);
+  const [backfillResult, setBackfillResult] = useState<string | null>(null);
 
   const handleSyncAddonCatalog = useCallback(async () => {
     setSyncing(true);
@@ -93,6 +97,47 @@ export default function AdminHealth() {
       setSyncResult(err instanceof Error ? err.message : 'Sync failed');
     } finally {
       setSyncing(false);
+    }
+  }, []);
+
+  const handleSyncBranding = useCallback(async () => {
+    setBrandingSyncing(true);
+    setBrandingResult(null);
+    try {
+      const { data: resp, error: invokeErr } = await supabase.functions.invoke(
+        "setup-stripe-branding",
+        { body: {} },
+      );
+      if (invokeErr) throw new Error(invokeErr.message);
+      if (!resp?.ok) throw new Error(resp?.error ?? 'Branding sync failed');
+      const dashItems = (resp.dashboard_only_items as string[] | undefined)?.length ?? 0;
+      setBrandingResult(
+        `✓ Branding ${resp.branding_set ? 'set' : 'skipped'} · portal config ${resp.portal_config_id ?? '—'} · ${resp.products_in_portal ?? 0} products · ${resp.webhook_events_added?.length ?? 0} events added · ${dashItems} dashboard-only items remaining`,
+      );
+    } catch (err) {
+      setBrandingResult(err instanceof Error ? err.message : 'Branding sync failed');
+    } finally {
+      setBrandingSyncing(false);
+    }
+  }, []);
+
+  const handleBackfill = useCallback(async () => {
+    setBackfilling(true);
+    setBackfillResult(null);
+    try {
+      const { data: resp, error: invokeErr } = await supabase.functions.invoke(
+        "backfill-stripe-customer-metadata",
+        { body: {} },
+      );
+      if (invokeErr) throw new Error(invokeErr.message);
+      if (!resp?.ok) throw new Error(resp?.error ?? 'Backfill failed');
+      setBackfillResult(
+        `✓ Scanned ${resp.scanned} · patched ${resp.patched} · skipped ${resp.skipped} · errors ${resp.errors?.length ?? 0}`,
+      );
+    } catch (err) {
+      setBackfillResult(err instanceof Error ? err.message : 'Backfill failed');
+    } finally {
+      setBackfilling(false);
     }
   }, []);
 
@@ -196,7 +241,7 @@ export default function AdminHealth() {
               Aggregated from <code className="rounded bg-slate-200 px-1.5 py-0.5 text-xs">integration_logs</code>.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={handleSyncAddonCatalog}
@@ -205,6 +250,24 @@ export default function AdminHealth() {
               title="Creates Stripe Products + Prices for any addon_catalog row missing IDs."
             >
               {syncing ? "Syncing…" : "Sync Stripe catalog"}
+            </button>
+            <button
+              type="button"
+              onClick={handleSyncBranding}
+              disabled={brandingSyncing}
+              className="rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-900 hover:bg-indigo-100 disabled:opacity-50"
+              title="Sets Stripe brand colors, billing portal config (with all subscription products), and webhook event coverage."
+            >
+              {brandingSyncing ? "Syncing…" : "Sync Stripe config"}
+            </button>
+            <button
+              type="button"
+              onClick={handleBackfill}
+              disabled={backfilling}
+              className="rounded-lg border border-sky-300 bg-sky-50 px-4 py-2 text-xs font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50"
+              title="Patches Stripe Customer metadata (user_id, signup_source, service_tier, lang) for every existing subscription."
+            >
+              {backfilling ? "Patching…" : "Backfill customer metadata"}
             </button>
             <button
               type="button"
@@ -229,6 +292,18 @@ export default function AdminHealth() {
         {syncResult && (
           <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
             <strong>Catalog sync:</strong> {syncResult}
+          </div>
+        )}
+
+        {brandingResult && (
+          <div className="mt-2 rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-xs text-indigo-800">
+            <strong>Branding sync:</strong> {brandingResult}
+          </div>
+        )}
+
+        {backfillResult && (
+          <div className="mt-2 rounded-xl border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800">
+            <strong>Backfill:</strong> {backfillResult}
           </div>
         )}
 
