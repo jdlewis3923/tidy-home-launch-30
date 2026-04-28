@@ -241,7 +241,7 @@ export default function AdminHealth() {
               Aggregated from <code className="rounded bg-slate-200 px-1.5 py-0.5 text-xs">integration_logs</code>.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={handleSyncAddonCatalog}
@@ -250,6 +250,24 @@ export default function AdminHealth() {
               title="Creates Stripe Products + Prices for any addon_catalog row missing IDs."
             >
               {syncing ? "Syncing…" : "Sync Stripe catalog"}
+            </button>
+            <button
+              type="button"
+              onClick={handleSyncBranding}
+              disabled={brandingSyncing}
+              className="rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-900 hover:bg-indigo-100 disabled:opacity-50"
+              title="Sets Stripe brand colors, billing portal config (with all subscription products), and webhook event coverage."
+            >
+              {brandingSyncing ? "Syncing…" : "Sync Stripe config"}
+            </button>
+            <button
+              type="button"
+              onClick={handleBackfill}
+              disabled={backfilling}
+              className="rounded-lg border border-sky-300 bg-sky-50 px-4 py-2 text-xs font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50"
+              title="Patches Stripe Customer metadata (user_id, signup_source, service_tier, lang) for every existing subscription."
+            >
+              {backfilling ? "Patching…" : "Backfill customer metadata"}
             </button>
             <button
               type="button"
@@ -274,6 +292,18 @@ export default function AdminHealth() {
         {syncResult && (
           <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
             <strong>Catalog sync:</strong> {syncResult}
+          </div>
+        )}
+
+        {brandingResult && (
+          <div className="mt-2 rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-xs text-indigo-800">
+            <strong>Branding sync:</strong> {brandingResult}
+          </div>
+        )}
+
+        {backfillResult && (
+          <div className="mt-2 rounded-xl border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800">
+            <strong>Backfill:</strong> {backfillResult}
           </div>
         )}
 
