@@ -21,6 +21,7 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { preferenceAllows } from '../_shared/sms-policy.ts';
+import { isServiceOrZapAuthorized } from '../_shared/zap-auth.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -43,8 +44,7 @@ const SUGGESTION: Record<string, { name: string; price: number }> = {
 };
 
 function isAuthorized(req: Request): boolean {
-  const auth = req.headers.get('Authorization') ?? '';
-  return auth.startsWith('Bearer ') && auth.slice(7) === SUPABASE_SERVICE_ROLE_KEY;
+  return isServiceOrZapAuthorized(req);
 }
 
 async function logSuppress(admin: any, user_id: string, jobber_visit_id: string | undefined, reason: string, ctx: Record<string, unknown> = {}) {
