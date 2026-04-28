@@ -821,6 +821,8 @@ export type Database = {
           preferred_day: string | null
           preferred_time: string | null
           referral_code: string | null
+          service_tier: string | null
+          signup_source: string | null
           sms_opt_in: boolean
           sms_opt_out: boolean
           sms_preference: string
@@ -847,6 +849,8 @@ export type Database = {
           preferred_day?: string | null
           preferred_time?: string | null
           referral_code?: string | null
+          service_tier?: string | null
+          signup_source?: string | null
           sms_opt_in?: boolean
           sms_opt_out?: boolean
           sms_preference?: string
@@ -873,6 +877,8 @@ export type Database = {
           preferred_day?: string | null
           preferred_time?: string | null
           referral_code?: string | null
+          service_tier?: string | null
+          signup_source?: string | null
           sms_opt_in?: boolean
           sms_opt_out?: boolean
           sms_preference?: string
@@ -1087,9 +1093,50 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_events: {
+        Row: {
+          duration_ms: number | null
+          error_message: string | null
+          event_type: string
+          id: string
+          livemode: boolean
+          payload_summary: Json
+          processed_at: string | null
+          received_at: string
+          status: string
+          stripe_event_id: string
+        }
+        Insert: {
+          duration_ms?: number | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          livemode?: boolean
+          payload_summary?: Json
+          processed_at?: string | null
+          received_at?: string
+          status?: string
+          stripe_event_id: string
+        }
+        Update: {
+          duration_ms?: number | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          livemode?: boolean
+          payload_summary?: Json
+          processed_at?: string | null
+          received_at?: string
+          status?: string
+          stripe_event_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           bundle_discount_pct: number
+          cancel_at_period_end: boolean
+          canceled_at: string | null
           card_brand: string | null
           card_last4: string | null
           created_at: string
@@ -1097,8 +1144,10 @@ export type Database = {
           id: string
           jobber_client_id: string | null
           jobber_job_ids: Json
+          latest_invoice_attempt_count: number | null
           monthly_total_cents: number
           next_billing_date: string | null
+          pause_collection: string | null
           services: Database["public"]["Enums"]["service_type"][]
           status: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id: string | null
@@ -1108,6 +1157,8 @@ export type Database = {
         }
         Insert: {
           bundle_discount_pct?: number
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
           card_brand?: string | null
           card_last4?: string | null
           created_at?: string
@@ -1115,8 +1166,10 @@ export type Database = {
           id?: string
           jobber_client_id?: string | null
           jobber_job_ids?: Json
+          latest_invoice_attempt_count?: number | null
           monthly_total_cents?: number
           next_billing_date?: string | null
+          pause_collection?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
@@ -1126,6 +1179,8 @@ export type Database = {
         }
         Update: {
           bundle_discount_pct?: number
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
           card_brand?: string | null
           card_last4?: string | null
           created_at?: string
@@ -1133,8 +1188,10 @@ export type Database = {
           id?: string
           jobber_client_id?: string | null
           jobber_job_ids?: Json
+          latest_invoice_attempt_count?: number | null
           monthly_total_cents?: number
           next_billing_date?: string | null
+          pause_collection?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
