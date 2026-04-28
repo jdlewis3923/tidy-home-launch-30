@@ -271,6 +271,8 @@ export default function AdminKpis() {
           .select("id, kpi_code, severity, message, created_at")
           .is("resolved_at", null)
           .order("created_at", { ascending: false }),
+        supabase.from("kpi_playbook_steps").select("*").order("step_index", { ascending: true }),
+        supabase.from("kpi_step_completions").select("id, kpi_code, step_index, notes, completed_at"),
       ]);
 
       if (defsRes.error) {
