@@ -8,7 +8,13 @@ const config: ServiceLandingConfig = {
   eyebrow: "House Cleaning",
   h1: "Monthly House Cleaning in Pinecrest + Kendall",
   subhead:
-    "Same crew. Locked rate. No contracts. Handle your home on autopilot.",
+    "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.",
+  intentConfirm:
+    "And more — your entire home, handled in one simple plan.",
+  systemBridge:
+    "Tidy isn't just cleaning — it's a system for your entire home.",
+  ctaPrimaryLabel: "Book your cleaning",
+  ctaPlanLabel: "Start your plan",
   priceAnchor: "Starting at $159/mo",
   stickyLabel: "House Cleaning · from $159/mo",
   savingsCallout:
