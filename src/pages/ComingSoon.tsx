@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import tidyLogo from "@/assets/tidy-logo.png";
+import SparkleField from "@/components/landing/SparkleField";
 
 // Launch target: June 1, 2026 at 9:00 AM Eastern Time (UTC-4 in June, EDT).
 const LAUNCH_AT = new Date("2026-06-01T13:00:00Z").getTime();
@@ -74,6 +75,9 @@ const ComingSoon = () => {
           }}
         />
 
+        {/* Floating brand stars */}
+        <SparkleField />
+
         <div className="relative z-10 mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center px-6 py-16 text-center">
           <img
             src={tidyLogo}
@@ -81,7 +85,7 @@ const ComingSoon = () => {
             className="h-28 sm:h-36 w-auto mb-8 drop-shadow-[0_10px_30px_rgba(37,99,235,0.35)]"
           />
 
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#f5c518]/30 bg-[#f5c518]/10 px-4 py-1.5 text-xs sm:text-sm font-medium text-[#f5c518] tracking-wide">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#f5c518]/40 bg-[#f5c518]/10 px-5 py-2 text-xs sm:text-sm font-semibold text-[#f5c518] tracking-wide animate-pulse-gold">
             <span className="h-1.5 w-1.5 rounded-full bg-[#f5c518] animate-pulse" />
             Launching soon in Miami
           </span>

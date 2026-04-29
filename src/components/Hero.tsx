@@ -16,14 +16,35 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
       <img src={heroImg} alt="Modern Miami home with pool and palm trees" className="absolute inset-0 w-full h-full object-cover md:object-[center_60%] hidden md:block" width={1920} height={1080} fetchPriority="high" decoding="async" />
       <div className="absolute inset-0 bg-navy/65" />
 
-      <div className="absolute top-20 left-[15%] animate-sparkle">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.4"/></svg>
-      </div>
-      <div className="absolute top-40 right-[20%] animate-sparkle" style={{ animationDelay: "1.5s" }}>
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.3"/></svg>
-      </div>
-      <div className="absolute bottom-32 left-[25%] animate-sparkle" style={{ animationDelay: "3s" }}>
-        <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.35"/></svg>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div className="absolute top-20 left-[15%] animate-sparkle">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.4"/></svg>
+        </div>
+        <div className="absolute top-40 right-[20%] animate-sparkle" style={{ animationDelay: "1.5s" }}>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.3"/></svg>
+        </div>
+        <div className="absolute bottom-32 left-[25%] animate-sparkle" style={{ animationDelay: "3s" }}>
+          <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.35"/></svg>
+        </div>
+        {/* Added stars for richer movement */}
+        <div className="absolute top-16 right-[10%] animate-sparkle" style={{ animationDelay: "0.6s" }}>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.32"/></svg>
+        </div>
+        <div className="absolute top-[28%] left-[45%] animate-sparkle" style={{ animationDelay: "2.2s", animationDuration: "3.4s" }}>
+          <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.3"/></svg>
+        </div>
+        <div className="absolute top-[60%] left-[8%] animate-sparkle" style={{ animationDelay: "1.2s", animationDuration: "4.6s" }}>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.28"/></svg>
+        </div>
+        <div className="absolute top-[55%] right-[6%] animate-sparkle" style={{ animationDelay: "3.4s" }}>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.3"/></svg>
+        </div>
+        <div className="absolute bottom-20 right-[30%] animate-sparkle" style={{ animationDelay: "2.6s" }}>
+          <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.34"/></svg>
+        </div>
+        <div className="absolute bottom-[42%] left-[55%] animate-sparkle" style={{ animationDelay: "0.4s", animationDuration: "3.6s" }}>
+          <svg width="8" height="8" viewBox="0 0 16 16" fill="none"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5L8 0Z" fill="white" fillOpacity="0.26"/></svg>
+        </div>
       </div>
 
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
@@ -50,7 +71,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           ))}
         </div>
 
-        <button id="cta-hero" data-track="cta_hero" onClick={() => { pushEvent("cta_click", { cta_id: "hero", cta_text: CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN" : "Request Early Access" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-lg">
+        <button id="cta-hero" data-track="cta_hero" onClick={() => { pushEvent("cta_click", { cta_id: "hero", cta_text: CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN" : "Request Early Access" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)] animate-pulse-gold">
           {t(CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN →" : "Request Early Access — Get $50 Off →")}
         </button>
 

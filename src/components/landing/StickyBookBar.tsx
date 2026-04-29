@@ -86,7 +86,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
             <Link
               to={desktopCta.to}
               onClick={desktopCta.onClick}
-              className="cta-arrow cta-press shrink-0 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-1.5 rounded-md text-sm transition-colors"
+              className="cta-arrow cta-press shrink-0 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-1.5 rounded-md text-sm transition-colors animate-pulse-gold"
             >
               {t("Book in 60 seconds")} <span className="arrow">→</span>
             </Link>
@@ -110,7 +110,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
             <Link
               to={mobileCta.to}
               onClick={mobileCta.onClick}
-              className="cta-arrow cta-press flex-1 text-center bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-3 rounded-lg text-sm"
+              className="cta-arrow cta-press flex-1 text-center bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-3 rounded-lg text-sm animate-pulse-gold"
             >
               {t("Book in 60 seconds")} <span className="arrow">→</span>
             </Link>
