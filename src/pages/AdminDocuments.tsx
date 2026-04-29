@@ -52,15 +52,23 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 
+// Preferred display order. Any extra categories present in the data
+// (e.g. seeded "HR", "Operations", "Contracts", "Onboarding", "Brand")
+// are appended automatically so seeded rows are never hidden.
 const CATEGORIES = [
   "Contractor Onboarding",
-  "Email Templates",
+  "Onboarding",
+  "HR",
+  "Contracts",
   "Signed Contracts",
-  "Financial + Strategy",
+  "Operations",
   "Operational",
+  "Email Templates",
+  "Financial + Strategy",
+  "Brand",
   "Brand Assets",
 ] as const;
-type Category = (typeof CATEGORIES)[number];
+type Category = (typeof CATEGORIES)[number] | string;
 
 type Doc = {
   id: string;
@@ -129,13 +137,25 @@ const AdminDocuments = () => {
 
   const grouped = useMemo(() => {
     const map = new Map<string, Doc[]>();
+    // Seed with the preferred order
     for (const c of CATEGORIES) map.set(c, []);
+    // Add any categories actually present that aren't in the preferred list
     for (const d of filtered) {
       if (!map.has(d.category)) map.set(d.category, []);
       map.get(d.category)!.push(d);
     }
     return map;
   }, [filtered]);
+
+  // Render order: preferred categories first (only if they have docs OR are
+  // the canonical empty set), then any extras alphabetically.
+  const orderedCategories = useMemo(() => {
+    const preferred = CATEGORIES.filter((c) => (grouped.get(c)?.length ?? 0) > 0);
+    const extras = Array.from(grouped.keys())
+      .filter((k) => !CATEGORIES.includes(k as any) && (grouped.get(k)?.length ?? 0) > 0)
+      .sort();
+    return [...preferred, ...extras];
+  }, [grouped]);
 
   const handleView = useCallback(async (doc: Doc) => {
     const { data, error } = await supabase.storage
@@ -256,18 +276,20 @@ const AdminDocuments = () => {
           <div className="flex items-center gap-2">
             <Button
               onClick={async () => {
-                const { data, error } = await supabase.functions.invoke("seed-company-documents", { body: {} });
+                const { data, error } = await supabase.functions.invoke("seed-tidy-docs", { body: {} });
                 if (error || (data as any)?.error) {
-                  toast({ title: "Seed failed", description: error?.message ?? (data as any)?.error, variant: "destructive" });
+                  toast({ title: "Re-seed failed", description: error?.message ?? (data as any)?.error, variant: "destructive" });
                   return;
                 }
-                toast({ title: "Seeded", description: `${(data as any)?.inserted ?? 0} added · ${(data as any)?.skipped_existing ?? 0} already present` });
-                window.location.reload();
+                const inserted = (data as any)?.inserted ?? 0;
+                const skipped = (data as any)?.skipped_existing ?? 0;
+                toast({ title: `Seeded ${inserted} rows`, description: `${skipped} already present` });
+                await fetchDocs();
               }}
               variant="outline"
               className="border-white/20 text-white hover:bg-white/10"
             >
-              Seed Documents
+              Re-seed company docs
             </Button>
             <Button
               onClick={() => setUploadOpen(true)}
@@ -314,21 +336,27 @@ const AdminDocuments = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {CATEGORIES.map((cat) => {
-              const items = grouped.get(cat) ?? [];
-              return (
-                <CategoryCard
-                  key={cat}
-                  category={cat}
-                  docs={items}
-                  onView={handleView}
-                  onDownload={handleDownload}
-                  onPrint={handlePrint}
-                  onCopyLink={handleCopyLink}
-                  onArchive={handleArchive}
-                />
-              );
-            })}
+            {orderedCategories.length === 0 ? (
+              <p className="text-sm text-white/50 text-center py-12">
+                No documents match the current filter.
+              </p>
+            ) : (
+              orderedCategories.map((cat) => {
+                const items = grouped.get(cat) ?? [];
+                return (
+                  <CategoryCard
+                    key={cat}
+                    category={cat}
+                    docs={items}
+                    onView={handleView}
+                    onDownload={handleDownload}
+                    onPrint={handlePrint}
+                    onCopyLink={handleCopyLink}
+                    onArchive={handleArchive}
+                  />
+                );
+              })
+            )}
           </div>
         )}
       </main>
