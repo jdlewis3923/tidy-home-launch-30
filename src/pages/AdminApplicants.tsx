@@ -77,7 +77,7 @@ export default function AdminApplicants() {
   const [filter, setFilter] = useState<"all" | "active" | "rejected">("all");
   const [open, setOpen] = useState<Applicant | null>(null);
   const [bgNotes, setBgNotes] = useState("");
-  const [submitting, setSubmitting] = useState<null | "clear" | "consider" | "fail">(null);
+  const [submitting, setSubmitting] = useState<string | null>(null);
 
   const fetchRows = async () => {
     setLoading(true);
