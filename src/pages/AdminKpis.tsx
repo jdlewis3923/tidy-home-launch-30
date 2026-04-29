@@ -430,6 +430,69 @@ export default function AdminKpis() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
+            {/* Admin tools hamburger — quick access to HR docs, inbox, schedule, etc. */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setAdminMenuOpen((v) => !v)}
+                aria-label="Admin tools menu"
+                aria-expanded={adminMenuOpen}
+                className="inline-flex items-center gap-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs font-semibold transition"
+              >
+                <Menu className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Admin tools</span>
+                <ChevronDown className="h-3 w-3 opacity-70" />
+              </button>
+              {adminMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setAdminMenuOpen(false)}
+                    aria-hidden
+                  />
+                  <div className="absolute left-0 top-10 z-50 w-60 rounded-xl border border-slate-200 bg-white p-1.5 shadow-[0_12px_32px_-12px_rgba(15,23,42,0.35)]">
+                    <div className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      HR & Company
+                    </div>
+                    <Link to="/admin/documents" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
+                      Documents library
+                    </Link>
+                    <Link to="/admin/agents" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
+                      Agents & contractors
+                    </Link>
+                    <div className="my-1 h-px bg-slate-100" />
+                    <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      Operations
+                    </div>
+                    <Link to="/admin/inbox" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
+                      Unified inbox
+                    </Link>
+                    <Link to="/admin/schedule" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
+                      Social schedule
+                    </Link>
+                    <Link to="/admin/costs" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
+                      Costs
+                    </Link>
+                    <Link to="/admin/health" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
+                      Integration health
+                    </Link>
+                    <div className="my-1 h-px bg-slate-100" />
+                    <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      Settings
+                    </div>
+                    <Link to="/admin/site-status" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
+                      Site status
+                    </Link>
+                    <Link to="/admin/settings/notifications" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
+                      Notification alerts
+                    </Link>
+                    <Link to="/admin/chatbot-knowledge" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
+                      Chatbot knowledge
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
             <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs">
               <Link to="/">Home</Link>
             </Button>
