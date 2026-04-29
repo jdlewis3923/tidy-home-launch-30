@@ -31,6 +31,8 @@ import {
 import { StatusListDrawer } from "@/components/admin/StatusListDrawer";
 import SmsVolumeHealthCard from "@/components/admin/SmsVolumeHealthCard";
 import { PlaybookStepCard, type PlaybookStepDetail } from "@/components/admin/PlaybookStepCard";
+import { useSiteLive } from "@/hooks/useSiteLive";
+import { toast } from "@/hooks/use-toast";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -221,6 +223,25 @@ export default function AdminKpis() {
   const [statusListFor, setStatusListFor] = useState<KpiStatus | null>(null);
   const [stepDetails, setStepDetails] = useState<Record<string, PlaybookStepDetail[]>>({});
   const [stepCompletions, setStepCompletions] = useState<Record<string, { id: string; step_index: number; notes: string | null; completed_at: string }[]>>({});
+
+  // Site live master switch (mirrors /admin/site-status)
+  const { isLive: siteLive, isLoading: siteLiveLoading, refresh: refreshSiteLive } = useSiteLive();
+  const [siteToggleSaving, setSiteToggleSaving] = useState(false);
+  const toggleSiteLive = useCallback(async () => {
+    const next = !siteLive;
+    setSiteToggleSaving(true);
+    const { error } = await supabase.rpc("admin_set_site_live", { _live: next });
+    setSiteToggleSaving(false);
+    if (error) {
+      toast({ title: "Could not update site status", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: next ? "Site is now LIVE" : "Site is now OFF",
+      description: next ? "Public visitors can access the website." : "Public visitors see the Coming Soon page.",
+    });
+    refreshSiteLive();
+  }, [siteLive, refreshSiteLive]);
 
   // ─────── Auth + admin-role gate ───────
   useEffect(() => {
@@ -419,6 +440,21 @@ export default function AdminKpis() {
             <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs">
               <Link to="/admin/settings/notifications">Alerts</Link>
             </Button>
+            {/* Site live master switch — mirrors /admin/site-status */}
+            <button
+              type="button"
+              onClick={toggleSiteLive}
+              disabled={siteToggleSaving || siteLiveLoading}
+              title={siteLive ? "Public site is LIVE — click to take it offline" : "Public site is OFF — click to bring it live"}
+              className={`inline-flex items-center gap-1.5 rounded-md border h-8 px-2.5 text-xs font-semibold transition disabled:opacity-60 ${
+                siteLive
+                  ? "bg-emerald-500/15 border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/25"
+                  : "bg-rose-500/15 border-rose-400/40 text-rose-200 hover:bg-rose-500/25"
+              }`}
+            >
+              <span className={`h-2 w-2 rounded-full ${siteLive ? "bg-emerald-400" : "bg-rose-400"}`} />
+              <span>Site: {siteLiveLoading ? "…" : siteLive ? "Live" : "Off"}</span>
+            </button>
             <Button
               variant="secondary"
               size="sm"
