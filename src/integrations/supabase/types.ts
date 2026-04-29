@@ -205,10 +205,6 @@ export type Database = {
       }
       applicants: {
         Row: {
-          checkr_candidate_id: string | null
-          checkr_completed_at: string | null
-          checkr_report_id: string | null
-          checkr_status: string | null
           created_at: string
           current_stage: string | null
           email: string
@@ -222,13 +218,13 @@ export type Database = {
           service: string | null
           stage_entered_at: string | null
           updated_at: string
+          yardstik_candidate_id: string | null
+          yardstik_completed_at: string | null
+          yardstik_screening_id: string | null
+          yardstik_status: string | null
           zip: string | null
         }
         Insert: {
-          checkr_candidate_id?: string | null
-          checkr_completed_at?: string | null
-          checkr_report_id?: string | null
-          checkr_status?: string | null
           created_at?: string
           current_stage?: string | null
           email: string
@@ -242,13 +238,13 @@ export type Database = {
           service?: string | null
           stage_entered_at?: string | null
           updated_at?: string
+          yardstik_candidate_id?: string | null
+          yardstik_completed_at?: string | null
+          yardstik_screening_id?: string | null
+          yardstik_status?: string | null
           zip?: string | null
         }
         Update: {
-          checkr_candidate_id?: string | null
-          checkr_completed_at?: string | null
-          checkr_report_id?: string | null
-          checkr_status?: string | null
           created_at?: string
           current_stage?: string | null
           email?: string
@@ -262,6 +258,10 @@ export type Database = {
           service?: string | null
           stage_entered_at?: string | null
           updated_at?: string
+          yardstik_candidate_id?: string | null
+          yardstik_completed_at?: string | null
+          yardstik_screening_id?: string | null
+          yardstik_status?: string | null
           zip?: string | null
         }
         Relationships: []
