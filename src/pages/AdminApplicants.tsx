@@ -77,7 +77,7 @@ export default function AdminApplicants() {
   const [filter, setFilter] = useState<"all" | "active" | "rejected">("all");
   const [open, setOpen] = useState<Applicant | null>(null);
   const [bgNotes, setBgNotes] = useState("");
-  const [submitting, setSubmitting] = useState<null | "clear" | "consider" | "fail">(null);
+  const [submitting, setSubmitting] = useState<string | null>(null);
 
   const fetchRows = async () => {
     setLoading(true);
@@ -106,28 +106,28 @@ export default function AdminApplicants() {
     return rows.filter((r) => r.current_stage !== "rejected");
   }, [rows, filter]);
 
-  const runDecision = async (decision: "clear" | "consider" | "fail") => {
+  type AdvanceAction =
+    | "clear" | "consider" | "fail"
+    | "schedule_interview" | "send_offer" | "send_contract"
+    | "mark_demo_passed" | "activate" | "reject";
+
+  const runAction = async (action: AdvanceAction) => {
     if (!open) return;
-    setSubmitting(decision);
-    const { data, error } = await supabase.functions.invoke("manual-bg-check", {
-      body: { applicant_id: open.id, decision, notes: bgNotes || undefined },
+    setSubmitting(action);
+    const { data, error } = await supabase.functions.invoke("advance-applicant", {
+      body: { applicant_id: open.id, action, notes: bgNotes || undefined },
     });
     setSubmitting(null);
     if (error || (data as any)?.error) {
       toast({ title: "Failed", description: error?.message ?? (data as any)?.error ?? "unknown", variant: "destructive" });
       return;
     }
-    toast({
-      title: `Marked ${decision.toUpperCase()}`,
-      description: decision === "clear"
-        ? "Advanced to interview_pending."
-        : decision === "consider"
-          ? "Flagged for review. SMS sent to Justin."
-          : "Rejected. Applicant rejection email sent.",
-    });
+    toast({ title: `Action: ${action}`, description: `New stage: ${(data as any)?.current_stage ?? "updated"}` });
     setOpen(null);
     fetchRows();
   };
+
+  const runDecision = (decision: "clear" | "consider" | "fail") => runAction(decision);
 
   if (roleLoading) {
     return <main className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin h-6 w-6" /></main>;
@@ -256,8 +256,32 @@ export default function AdminApplicants() {
                   </Button>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-2">
-                  CLEAR → interview_pending. CONSIDER → flagged for review (SMS to Justin). FAIL → auto-reject + branded rejection email.
+                  CLEAR → interview. CONSIDER → stays in BG review. FAIL → reject.
                 </p>
+              </div>
+
+              <div className="pt-3 border-t">
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Pipeline actions</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("schedule_interview")}>
+                    {submitting === "schedule_interview" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Schedule interview"}
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("send_offer")}>
+                    {submitting === "send_offer" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send offer"}
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("send_contract")}>
+                    {submitting === "send_contract" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send contract"}
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("mark_demo_passed")}>
+                    {submitting === "mark_demo_passed" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Mark demo passed"}
+                  </Button>
+                  <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={!!submitting} onClick={() => runAction("activate")}>
+                    {submitting === "activate" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Activate"}
+                  </Button>
+                  <Button size="sm" variant="destructive" disabled={!!submitting} onClick={() => runAction("reject")}>
+                    {submitting === "reject" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reject"}
+                  </Button>
+                </div>
               </div>
             </div>
           )}

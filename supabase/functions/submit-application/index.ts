@@ -68,24 +68,13 @@ Deno.serve(async (req) => {
 
     const fullName = `${data.first_name} ${data.last_name}`;
     queueMicrotask(async () => {
-      const subject = `New application: ${fullName} for ${data.service}`;
-      const html = brandedEmailHtml({
-        heading: 'New contractor application',
-        bodyHtml: `
-          <p><strong>${fullName}</strong> just applied to be a Tidy <strong>${data.service}</strong> contractor.</p>
-          <ul style="padding-left:18px">
-            <li>Email: ${data.email}</li>
-            ${data.phone ? `<li>Phone: ${data.phone}</li>` : ''}
-            ${data.zip ? `<li>ZIP: ${data.zip}</li>` : ''}
-            <li>Stage: background_check_pending (manual review)</li>
-          </ul>
-          ${data.notes_for_admin ? `<p><em>Note from applicant:</em> ${data.notes_for_admin}</p>` : ''}
-          <p style="margin-top:14px">Open the pipeline to mark CLEAR / CONSIDER / FAIL.</p>
-        `,
-        ctaUrl: 'https://jointidy.co/admin/applicants',
-        ctaLabel: 'Open pipeline',
-      });
-      await sendBrevoEmail({ toEmail: 'admin@jointidy.co', toName: 'Justin', subject, htmlContent: html });
+      // Fire applicant-applied-trigger (sends applicant confirmation + admin alert)
+      await fetch(`${SUPABASE_URL}/functions/v1/applicant-applied-trigger`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicant_id: applicantId }),
+      }).catch((e) => console.error('[apply] trigger failed', e));
+      // PWA push to Justin
       await sendPwaPushToJustin('New application', `${fullName} applied for ${data.service}`, '/admin/applicants');
     });
 
