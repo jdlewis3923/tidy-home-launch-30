@@ -460,20 +460,27 @@ iframe[src*="lovable"] {
    Injected by <AdminChrome>. Activates when body.admin-hud is set.
    ============================================================ */
 
-/* Re-skin the page background for any admin route */
+/* Re-skin the page background for any admin route — lighter slate canvas
+   so cards and content breathe instead of drowning in navy. */
 body.admin-hud {
-  background: hsl(var(--navy-deep));
+  background: hsl(222 30% 14%);
   color: hsl(0 0% 95%);
 }
 
 /* Push admin page content right of the floating rail on desktop,
-   and below the slim top status bar on every viewport. */
+   below the slim top status bar, and add comfortable horizontal/vertical
+   padding so dashboards never feel bunched. */
 body.admin-hud > #root {
-  padding-top: 32px; /* topbar height */
+  padding-top: 48px; /* topbar + breathing room */
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: 32px;
 }
 @media (min-width: 1024px) {
   body.admin-hud > #root {
-    padding-left: 64px; /* nav rail width */
+    padding-left: 88px; /* nav rail width + gutter */
+    padding-right: 28px;
+    padding-top: 56px;
   }
 }
 
@@ -485,14 +492,14 @@ body.admin-hud > #root {
   pointer-events: none;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at top, hsl(var(--navy)) 0%, hsl(var(--navy-deep)) 60%);
+    radial-gradient(ellipse at top, hsl(222 30% 17%) 0%, hsl(222 30% 12%) 60%);
 }
 .admin-hud-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(hsl(var(--primary) / 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+    linear-gradient(hsl(var(--primary) / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.04) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
   -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
@@ -501,18 +508,18 @@ body.admin-hud > #root {
   position: absolute;
   border-radius: 9999px;
   filter: blur(80px);
-  opacity: 0.45;
+  opacity: 0.22;
 }
 .admin-hud-glow--blue {
   top: -200px; left: -160px;
   width: 640px; height: 640px;
-  background: radial-gradient(circle, hsl(var(--primary) / 0.55), transparent 65%);
+  background: radial-gradient(circle, hsl(var(--primary) / 0.4), transparent 65%);
   animation: hud-float 18s ease-in-out infinite;
 }
 .admin-hud-glow--gold {
   bottom: -180px; right: -140px;
   width: 520px; height: 520px;
-  background: radial-gradient(circle, hsl(var(--gold) / 0.45), transparent 65%);
+  background: radial-gradient(circle, hsl(var(--gold) / 0.28), transparent 65%);
   animation: hud-float 22s ease-in-out infinite reverse;
 }
 .admin-hud-scanline {
@@ -520,7 +527,7 @@ body.admin-hud > #root {
   inset: 0;
   background: repeating-linear-gradient(
     to bottom,
-    hsl(0 0% 100% / 0.012) 0 2px,
+    hsl(0 0% 100% / 0.008) 0 2px,
     transparent 2px 4px
   );
   mix-blend-mode: overlay;
@@ -528,7 +535,7 @@ body.admin-hud > #root {
 .admin-hud-vignette {
   position: absolute;
   inset: 0;
-  box-shadow: inset 0 0 220px hsl(var(--navy-deep));
+  box-shadow: inset 0 0 160px hsl(222 30% 8% / 0.6);
 }
 @keyframes hud-float {
   0%, 100% { transform: translate(0, 0) scale(1); }
@@ -675,17 +682,17 @@ body.admin-hud .bg-slate-50,
 body.admin-hud .bg-slate-100,
 body.admin-hud .bg-gray-50,
 body.admin-hud .bg-gray-100 {
-  background-color: hsl(222 47% 13% / 0.55) !important;
+  background-color: hsl(222 24% 19% / 0.85) !important;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border-color: hsl(var(--primary) / 0.18) !important;
+  border-color: hsl(var(--primary) / 0.14) !important;
   color: hsl(0 0% 92%);
 }
 body.admin-hud [class*="text-slate-"],
 body.admin-hud [class*="text-gray-"],
 body.admin-hud [class*="text-zinc-"],
 body.admin-hud [class*="text-neutral-"] {
-  color: hsl(0 0% 80%) !important;
+  color: hsl(0 0% 82%) !important;
 }
 body.admin-hud .text-slate-900,
 body.admin-hud .text-gray-900,
@@ -698,7 +705,7 @@ body.admin-hud .text-slate-500,
 body.admin-hud .text-slate-600,
 body.admin-hud .text-gray-500,
 body.admin-hud .text-gray-600 {
-  color: hsl(0 0% 68%) !important;
+  color: hsl(0 0% 70%) !important;
 }
 body.admin-hud .border-slate-200,
 body.admin-hud .border-slate-100,
@@ -706,19 +713,30 @@ body.admin-hud .border-gray-200,
 body.admin-hud .border-gray-100,
 body.admin-hud .border-input,
 body.admin-hud .border {
-  border-color: hsl(var(--primary) / 0.16) !important;
+  border-color: hsl(var(--primary) / 0.14) !important;
 }
 
 /* shadcn cards inside admin */
 body.admin-hud [data-sidebar],
 body.admin-hud .bg-card,
 body.admin-hud [class*="rounded-lg"][class*="border"][class*="bg-card"] {
-  background-color: hsl(222 47% 13% / 0.6) !important;
-  border-color: hsl(var(--primary) / 0.2) !important;
+  background-color: hsl(222 24% 19% / 0.88) !important;
+  border-color: hsl(var(--primary) / 0.16) !important;
   color: hsl(0 0% 92%);
   box-shadow:
     0 1px 0 hsl(0 0% 100% / 0.04) inset,
-    0 24px 48px -24px hsl(var(--primary) / 0.35);
+    0 18px 40px -28px hsl(222 60% 4% / 0.6);
+}
+
+/* Give admin cards/sections breathing room so dashboards don't feel bunched */
+body.admin-hud .bg-card,
+body.admin-hud [class*="rounded-lg"][class*="border"][class*="bg-card"] {
+  margin-bottom: 4px;
+}
+body.admin-hud main,
+body.admin-hud section {
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 /* Inputs / selects inside admin become glass */
