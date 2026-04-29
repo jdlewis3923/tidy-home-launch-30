@@ -48,3 +48,13 @@ verify_jwt = false
 # admin-only social_posts table; never accepts caption/image from caller.
 [functions.meta-publish-post]
 verify_jwt = false
+
+# Public application form — anonymous visitors submit /apply.
+[functions.submit-application]
+verify_jwt = false
+
+# Checkr posts webhooks without an Authorization header. Authenticity
+# verified inside the handler via X-Checkr-Signature HMAC using
+# CHECKR_WEBHOOK_SECRET.
+[functions.checkr-webhook]
+verify_jwt = false

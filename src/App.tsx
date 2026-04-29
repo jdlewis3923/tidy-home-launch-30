@@ -56,6 +56,8 @@ const AdminNotificationSettings = lazy(() => import("./pages/AdminNotificationSe
 const AdminCosts = lazy(() => import("./pages/AdminCosts.tsx"));
 const AdminSiteStatus = lazy(() => import("./pages/AdminSiteStatus.tsx"));
 const AdminDocuments = lazy(() => import("./pages/AdminDocuments.tsx"));
+const AdminApplicants = lazy(() => import("./pages/AdminApplicants.tsx"));
+const Apply = lazy(() => import("./pages/Apply.tsx"));
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
 
@@ -85,7 +87,7 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 
 // Routes that remain accessible when an admin has toggled the site OFF.
 // Admin can still log in and flip it back on; everything else shows ComingSoon.
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply"];
 
 const SiteGate = ({ children }: { children: React.ReactNode }) => {
   const { isLive, isLoading } = useSiteLive();
@@ -187,6 +189,8 @@ const App = () => (
                   <Route path="/admin/costs" element={<AdminCosts />} />
                   <Route path="/admin/site-status" element={<AdminSiteStatus />} />
                   <Route path="/admin/documents" element={<AdminDocuments />} />
+                  <Route path="/admin/applicants" element={<AdminApplicants />} />
+                  <Route path="/apply" element={<Apply />} />
                   <Route path="/coming-soon" element={<ComingSoon />} />
                   <Route
                     path="/dashboard/notifications"
