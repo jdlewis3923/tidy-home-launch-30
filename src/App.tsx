@@ -80,6 +80,19 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Routes that remain accessible when an admin has toggled the site OFF.
+// Admin can still log in and flip it back on; everything else shows ComingSoon.
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon"];
+
+const SiteGate = ({ children }: { children: React.ReactNode }) => {
+  const { isLive, isLoading } = useSiteLive();
+  const location = useLocation();
+  const isWhitelisted = ALWAYS_OPEN_PREFIXES.some((p) => location.pathname.startsWith(p));
+  if (isLoading) return <RouteFallback />;
+  if (!isLive && !isWhitelisted) return <ComingSoon />;
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <HelmetProvider>
@@ -92,8 +105,9 @@ const App = () => (
             <MetaPixel />
             <ChatbotMount />
             <RouteTracker>
-              <Suspense fallback={<RouteFallback />}>
-                <Routes>
+              <SiteGate>
+                <Suspense fallback={<RouteFallback />}>
+                  <Routes>
                   <Route path="/" element={<Index />} />
                   {/* Google Ads landing pages */}
                   <Route path="/house-cleaning" element={<HouseCleaning />} />
