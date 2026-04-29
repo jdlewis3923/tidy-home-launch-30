@@ -140,7 +140,7 @@ export default function AdminApplicants() {
       return;
     }
     toast({ title: `Action: ${action}`, description: `New stage: ${(data as any)?.current_stage ?? "updated"}` });
-    setOpen(null);
+    if (open) await fetchEvents(open.id);
     fetchRows();
   };
 
