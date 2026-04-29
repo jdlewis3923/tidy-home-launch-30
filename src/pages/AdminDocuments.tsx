@@ -253,12 +253,29 @@ const AdminDocuments = () => {
             <h1 className="text-xl font-semibold">Documents Library</h1>
             <Badge variant="outline" className="border-amber-400/40 text-amber-300">Admin</Badge>
           </div>
-          <Button
-            onClick={() => setUploadOpen(true)}
-            className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-semibold"
-          >
-            <Upload className="h-4 w-4 mr-2" /> Add Document
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={async () => {
+                const { data, error } = await supabase.functions.invoke("seed-company-documents", { body: {} });
+                if (error || (data as any)?.error) {
+                  toast({ title: "Seed failed", description: error?.message ?? (data as any)?.error, variant: "destructive" });
+                  return;
+                }
+                toast({ title: "Seeded", description: `${(data as any)?.inserted ?? 0} added · ${(data as any)?.skipped_existing ?? 0} already present` });
+                window.location.reload();
+              }}
+              variant="outline"
+              className="border-white/20 text-white hover:bg-white/10"
+            >
+              Seed Documents
+            </Button>
+            <Button
+              onClick={() => setUploadOpen(true)}
+              className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-semibold"
+            >
+              <Upload className="h-4 w-4 mr-2" /> Add Document
+            </Button>
+          </div>
         </div>
       </header>
 
