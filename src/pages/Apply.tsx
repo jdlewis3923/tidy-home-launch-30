@@ -2,11 +2,9 @@
  * Public Application Form — /apply
  *
  * Anonymous visitors submit. Calls the public submit-application edge function
- * which inserts the applicant row, kicks off Checkr, and notifies Justin.
- *
- * Phase A scope: capture core info + DOB/SSN-last4 (needed for Checkr). The
- * edge function still works without DOB/SSN (it just skips Checkr) so this
- * keeps the form usable for early test submissions.
+ * which inserts the applicant row and notifies Justin. No external background
+ * check provider is wired — Justin manually advances each applicant from
+ * /admin/applicants.
  */
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
@@ -15,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -25,12 +24,17 @@ import { Loader2, CheckCircle2 } from "lucide-react";
 type Form = {
   first_name: string; last_name: string; email: string; phone: string;
   service: "cleaning" | "lawn" | "detail" | "";
-  zip: string; dob: string; ssn_last4: string; notes_for_admin: string;
+  zip: "33156" | "33183" | "33186" | "";
+  experience_years: string;
+  has_vehicle: boolean;
+  has_supplies: boolean;
+  notes_for_admin: string;
 };
 
 const EMPTY: Form = {
   first_name: "", last_name: "", email: "", phone: "",
-  service: "", zip: "", dob: "", ssn_last4: "", notes_for_admin: "",
+  service: "", zip: "", experience_years: "",
+  has_vehicle: false, has_supplies: false, notes_for_admin: "",
 };
 
 export default function Apply() {
@@ -42,7 +46,8 @@ export default function Apply() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.service) { toast({ title: "Please pick a service", variant: "destructive" }); return; }
+    if (!form.service) { toast({ title: "Please pick a role", variant: "destructive" }); return; }
+    if (!form.zip)     { toast({ title: "Please pick your ZIP code", variant: "destructive" }); return; }
     setSubmitting(true);
     try {
       const payload: Record<string, unknown> = {
@@ -50,11 +55,12 @@ export default function Apply() {
         last_name: form.last_name.trim(),
         email: form.email.trim(),
         service: form.service,
+        zip: form.zip,
+        has_vehicle: form.has_vehicle,
+        has_supplies: form.has_supplies,
       };
       if (form.phone) payload.phone = form.phone.trim();
-      if (form.zip) payload.zip = form.zip.trim();
-      if (form.dob) payload.dob = form.dob;
-      if (form.ssn_last4) payload.ssn_last4 = form.ssn_last4;
+      if (form.experience_years) payload.experience_years = parseInt(form.experience_years, 10);
       if (form.notes_for_admin) payload.notes_for_admin = form.notes_for_admin.trim();
 
       const { error } = await supabase.functions.invoke("submit-application", { body: payload });
@@ -77,7 +83,7 @@ export default function Apply() {
             <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" />
             <h1 className="mt-4 text-2xl font-bold text-slate-900">Application received</h1>
             <p className="mt-3 text-slate-600">
-              Thanks for applying to Tidy. We've started your background check and will be in touch within 5 business days.
+              Thanks for applying to Tidy. We'll review and be in touch within 5 business days.
             </p>
           </CardContent>
         </Card>
@@ -95,9 +101,7 @@ export default function Apply() {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Apply to be a Tidy contractor</CardTitle>
-            <CardDescription>
-              Miami-based home-service pros only. We run a background check on every applicant.
-            </CardDescription>
+            <CardDescription>Miami-based home-service pros only.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={submit} className="space-y-4">
@@ -123,7 +127,7 @@ export default function Apply() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Service *</Label>
+                  <Label>Role *</Label>
                   <Select value={form.service} onValueChange={(v) => set("service", v as Form["service"])}>
                     <SelectTrigger><SelectValue placeholder="Pick one" /></SelectTrigger>
                     <SelectContent>
@@ -134,27 +138,33 @@ export default function Apply() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="zip">ZIP code</Label>
-                  <Input id="zip" value={form.zip} onChange={(e) => set("zip", e.target.value)} placeholder="33156" />
+                  <Label>ZIP code *</Label>
+                  <Select value={form.zip} onValueChange={(v) => set("zip", v as Form["zip"])}>
+                    <SelectTrigger><SelectValue placeholder="Pick one" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="33156">33156</SelectItem>
+                      <SelectItem value="33183">33183</SelectItem>
+                      <SelectItem value="33186">33186</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-
-              <div className="rounded-md border border-slate-200 p-4 bg-white">
-                <p className="text-sm font-medium text-slate-900">Background check info</p>
-                <p className="text-xs text-slate-500 mb-3">Required to start your Checkr background check. Encrypted in transit.</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="dob">Date of birth</Label>
-                    <Input id="dob" type="date" value={form.dob} onChange={(e) => set("dob", e.target.value)} />
-                  </div>
-                  <div>
-                    <Label htmlFor="ssn_last4">Last 4 of SSN</Label>
-                    <Input id="ssn_last4" inputMode="numeric" pattern="\d{4}" maxLength={4}
-                      value={form.ssn_last4} onChange={(e) => set("ssn_last4", e.target.value.replace(/\D/g, ""))} />
-                  </div>
-                </div>
+              <div>
+                <Label htmlFor="experience_years">Years of experience</Label>
+                <Input id="experience_years" type="number" min={0} max={60}
+                  value={form.experience_years}
+                  onChange={(e) => set("experience_years", e.target.value)} />
               </div>
-
+              <div className="flex flex-col gap-3 rounded-md border border-slate-200 p-4 bg-white">
+                <label className="flex items-center gap-3 text-sm">
+                  <Checkbox checked={form.has_vehicle} onCheckedChange={(v) => set("has_vehicle", !!v)} />
+                  I have my own vehicle
+                </label>
+                <label className="flex items-center gap-3 text-sm">
+                  <Checkbox checked={form.has_supplies} onCheckedChange={(v) => set("has_supplies", !!v)} />
+                  I have my own supplies / equipment
+                </label>
+              </div>
               <div>
                 <Label htmlFor="notes">Anything we should know? (optional)</Label>
                 <Textarea id="notes" rows={3} value={form.notes_for_admin} onChange={(e) => set("notes_for_admin", e.target.value)} />
@@ -164,7 +174,7 @@ export default function Apply() {
                 {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting…</> : "Submit application"}
               </Button>
               <p className="text-xs text-slate-500 text-center">
-                By submitting, you authorize Tidy to run a background check via Checkr.
+                By submitting, you authorize Tidy to run a standard background check.
               </p>
             </form>
           </CardContent>
