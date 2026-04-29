@@ -12,7 +12,7 @@
  */
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Bell, ChevronDown, Inbox, Calendar, FlaskConical, Gauge, Menu, X } from 'lucide-react';
+import { Bell, ChevronDown, Inbox, Calendar, FlaskConical, Gauge, Menu, X, Power } from 'lucide-react';
 import tidyLogo from '@/assets/tidy-logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { useHasRoleState } from '@/hooks/useHasRole';
