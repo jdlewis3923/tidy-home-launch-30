@@ -286,6 +286,11 @@ Deno.serve(async (req) => {
       subject: `${SUBJECTS[action]}: ${fullName}`, htmlContent: adminHtml,
       tags: [`admin-${tag}`],
     }).catch((e) => console.error('[advance] admin email failed', e));
+
+    // Sync transition to Tidy Master sheet (Applicants tab).
+    await admin.functions.invoke('sync-applicant-to-sheet', {
+      body: { applicant_id: row.id, last_event: action, last_event_at: new Date().toISOString() },
+    }).catch((e) => console.error('[advance] sheet sync failed', e));
   });
 
   return jsonResponse({
