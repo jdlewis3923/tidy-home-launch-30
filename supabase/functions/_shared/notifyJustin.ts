@@ -9,12 +9,15 @@ const ADMIN_EMAIL = 'admin@jointidy.co';
 const JUSTIN_PHONE = '+17868291141';
 const TIDY_LOGO = 'https://miami-home-simplify.lovable.app/icon-192.png';
 
+export type BrevoAttachment = { url?: string; content?: string; name: string };
+
 export async function sendBrevoEmail(opts: {
   toEmail: string;
   toName?: string;
   subject: string;
   htmlContent: string;
   tags?: string[];
+  attachments?: BrevoAttachment[];
 }) {
   if (!BREVO_API_KEY) { console.warn('[brevo] BREVO_API_KEY missing'); return null; }
   const r = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -26,6 +29,7 @@ export async function sendBrevoEmail(opts: {
       subject: opts.subject,
       htmlContent: opts.htmlContent,
       ...(opts.tags && opts.tags.length ? { tags: opts.tags } : {}),
+      ...(opts.attachments && opts.attachments.length ? { attachment: opts.attachments } : {}),
     }),
   });
   if (!r.ok) console.error('[brevo] send failed', r.status, await r.text().catch(()=>''));
