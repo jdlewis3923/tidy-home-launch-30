@@ -13,9 +13,11 @@ import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
 import ChatbotMount from "@/components/chatbot/ChatbotMount";
+import { useSiteLive } from "@/hooks/useSiteLive";
 
 // Eager: homepage, terms/privacy, NotFound (small + always-needed)
 import Index from "./pages/Index.tsx";
+import ComingSoon from "./pages/ComingSoon.tsx";
 import Terms from "./pages/Terms.tsx";
 import Privacy from "./pages/Privacy.tsx";
 import NotFound from "./pages/NotFound.tsx";
