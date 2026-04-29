@@ -1,15 +1,14 @@
-// Tidy — Checkr webhook receiver (Phase A)
+// Tidy — Yardstik webhook receiver (Phase A)
 //
-// Listens for Checkr report events. Validates HMAC signature using
-// CHECKR_WEBHOOK_SECRET (Checkr signs with the access token shared at
-// webhook subscription time — header `X-Checkr-Signature`, hex HMAC-SHA256
-// of the raw body). Updates the applicants row and routes notifications
-// based on report status:
-//   - clear      → interview_pending, notify Justin
-//   - consider   → background_check_review, Brevo + PWA + SMS to (786) 829-1141
-//   - suspended  → rejected, send applicant rejection email
+// Listens for Yardstik screening events. Validates HMAC signature using
+// YARDSTIK_WEBHOOK_SECRET — header `X-Yardstik-Signature`, hex HMAC-SHA256
+// of the raw body. Updates the applicants row and routes notifications
+// based on screening status:
+//   - clear     → interview_pending, notify Justin
+//   - consider  → background_check_review, Brevo + PWA + SMS to (786) 829-1141
+//   - suspended/failed → rejected, send applicant rejection email
 //
-// Endpoint: https://<project>.supabase.co/functions/v1/checkr-webhook
+// Endpoint: https://<project>.supabase.co/functions/v1/yardstik-webhook
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
@@ -22,29 +21,30 @@ import {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const CHECKR_WEBHOOK_SECRET = Deno.env.get('CHECKR_WEBHOOK_SECRET') ?? '';
+const YARDSTIK_WEBHOOK_SECRET = Deno.env.get('YARDSTIK_WEBHOOK_SECRET') ?? '';
 
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
 async function verifySignature(rawBody: string, signature: string): Promise<boolean> {
-  if (!CHECKR_WEBHOOK_SECRET) {
-    console.warn('[checkr-webhook] CHECKR_WEBHOOK_SECRET missing — accepting unverified');
+  if (!YARDSTIK_WEBHOOK_SECRET) {
+    console.warn('[yardstik-webhook] YARDSTIK_WEBHOOK_SECRET missing — accepting unverified');
     return true;
   }
   if (!signature) return false;
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
-    'raw', enc.encode(CHECKR_WEBHOOK_SECRET),
+    'raw', enc.encode(YARDSTIK_WEBHOOK_SECRET),
     { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
   );
   const sigBuf = await crypto.subtle.sign('HMAC', key, enc.encode(rawBody));
   const hex = Array.from(new Uint8Array(sigBuf)).map((b) => b.toString(16).padStart(2, '0')).join('');
-  // Constant-time compare
-  if (hex.length !== signature.length) return false;
+  // Strip optional "sha256=" prefix some providers send
+  const provided = signature.replace(/^sha256=/, '');
+  if (hex.length !== provided.length) return false;
   let diff = 0;
-  for (let i = 0; i < hex.length; i++) diff |= hex.charCodeAt(i) ^ signature.charCodeAt(i);
+  for (let i = 0; i < hex.length; i++) diff |= hex.charCodeAt(i) ^ provided.charCodeAt(i);
   return diff === 0;
 }
 
@@ -53,41 +53,43 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
 
   const raw = await req.text();
-  const sig = req.headers.get('X-Checkr-Signature') ?? '';
+  const sig = req.headers.get('X-Yardstik-Signature') ?? req.headers.get('x-yardstik-signature') ?? '';
   const ok = await verifySignature(raw, sig);
   if (!ok) {
-    console.warn('[checkr-webhook] invalid signature');
+    console.warn('[yardstik-webhook] invalid signature');
     return jsonResponse({ error: 'invalid_signature' }, 401);
   }
 
   let event: any;
   try { event = JSON.parse(raw); } catch { return jsonResponse({ error: 'bad_json' }, 400); }
 
-  const type: string = event?.type ?? '';
-  const data = event?.data?.object ?? event?.data ?? {};
-  const reportId: string | undefined = data?.id ?? event?.report_id;
-  const candidateId: string | undefined = data?.candidate_id;
-  const status: string | undefined = data?.status; // clear | consider | suspended | etc
+  const type: string = event?.type ?? event?.event ?? '';
+  const data = event?.data?.object ?? event?.data ?? event?.screening ?? event ?? {};
+  const screeningId: string | undefined = data?.id ?? data?.screening_id ?? event?.screening_id;
+  const candidateId: string | undefined = data?.candidate_id ?? data?.candidate?.id;
+  const status: string | undefined = data?.status ?? data?.result; // clear | consider | suspended | failed
 
-  // Only act on report.completed (or report.suspended). Others are acked.
-  if (!type.startsWith('report.')) return jsonResponse({ ok: true, ignored: type });
+  // Only act on screening.* events. Others are acked.
+  if (type && !type.startsWith('screening.')) {
+    return jsonResponse({ ok: true, ignored: type });
+  }
 
-  // Find applicant — prefer report id then candidate id.
-  let { data: applicant } = await admin
+  // Find applicant — prefer screening id then candidate id.
+  const { data: applicant } = await admin
     .from('applicants')
     .select('id, first_name, last_name, email, service, current_stage')
-    .or(`checkr_report_id.eq.${reportId ?? '__none__'},checkr_candidate_id.eq.${candidateId ?? '__none__'}`)
+    .or(`yardstik_screening_id.eq.${screeningId ?? '__none__'},yardstik_candidate_id.eq.${candidateId ?? '__none__'}`)
     .maybeSingle();
 
   if (!applicant) {
-    console.warn('[checkr-webhook] no matching applicant', { reportId, candidateId });
+    console.warn('[yardstik-webhook] no matching applicant', { screeningId, candidateId });
     return jsonResponse({ ok: true, matched: false });
   }
 
   const fullName = `${applicant.first_name} ${applicant.last_name}`;
   const baseUpdate: Record<string, any> = {
-    checkr_status: status ?? null,
-    checkr_completed_at: new Date().toISOString(),
+    yardstik_status: status ?? null,
+    yardstik_completed_at: new Date().toISOString(),
   };
 
   if (status === 'clear') {
@@ -121,10 +123,10 @@ Deno.serve(async (req) => {
       await sendPwaPushToJustin('BG check needs review', `${fullName} — CONSIDER result`, '/admin/applicants');
       await sendTwilioSmsToJustin(
         `Tidy: ${fullName} bg-check CONSIDER. Review at jointidy.co/admin/applicants`,
-        `checkr-consider-${applicant!.id}`,
+        `yardstik-consider-${applicant!.id}`,
       );
     });
-  } else if (status === 'suspended' || status === 'fail') {
+  } else if (status === 'suspended' || status === 'failed' || status === 'fail') {
     await admin.from('applicants').update({
       ...baseUpdate,
       current_stage: 'rejected',
@@ -133,7 +135,6 @@ Deno.serve(async (req) => {
     }).eq('id', applicant.id);
 
     queueMicrotask(async () => {
-      // Applicant rejection email (inline branded HTML, replaces Brevo template #50)
       const applicantHtml = brandedEmailHtml({
         heading: 'Update on your Tidy application',
         bodyHtml: `
@@ -150,7 +151,6 @@ Deno.serve(async (req) => {
         subject: 'Update on your Tidy application',
         htmlContent: applicantHtml,
       });
-      // Internal notice
       await sendPwaPushToJustin('Applicant auto-rejected', `${fullName} — bg check failed`, '/admin/applicants');
     });
   } else {
