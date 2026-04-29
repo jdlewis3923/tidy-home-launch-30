@@ -130,6 +130,8 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'update_failed', details: error?.message }, 500);
   }
 
+  const fullName = `${row.first_name} ${row.last_name}`;
+
   // Per-action Brevo template tag + applicant-facing copy.
   const TEMPLATE_TAG: Record<Action, string> = {
     clear: 'applicant-bg-clear',
