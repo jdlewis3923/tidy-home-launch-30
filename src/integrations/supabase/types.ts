@@ -212,7 +212,10 @@ export type Database = {
           created_at: string
           current_stage: string | null
           email: string
+          experience_years: number | null
           first_name: string
+          has_supplies: boolean | null
+          has_vehicle: boolean | null
           id: string
           last_name: string
           notes_for_admin: string | null
@@ -232,7 +235,10 @@ export type Database = {
           created_at?: string
           current_stage?: string | null
           email: string
+          experience_years?: number | null
           first_name: string
+          has_supplies?: boolean | null
+          has_vehicle?: boolean | null
           id?: string
           last_name: string
           notes_for_admin?: string | null
@@ -252,7 +258,10 @@ export type Database = {
           created_at?: string
           current_stage?: string | null
           email?: string
+          experience_years?: number | null
           first_name?: string
+          has_supplies?: boolean | null
+          has_vehicle?: boolean | null
           id?: string
           last_name?: string
           notes_for_admin?: string | null
