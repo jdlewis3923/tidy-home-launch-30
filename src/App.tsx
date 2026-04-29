@@ -14,6 +14,7 @@ import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
 import ChatbotMount from "@/components/chatbot/ChatbotMount";
 import { useSiteLive } from "@/hooks/useSiteLive";
+import { useHasRoleState } from "@/hooks/useHasRole";
 
 // Eager: homepage, terms/privacy, NotFound (small + always-needed)
 import Index from "./pages/Index.tsx";
@@ -88,10 +89,12 @@ const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-pa
 
 const SiteGate = ({ children }: { children: React.ReactNode }) => {
   const { isLive, isLoading } = useSiteLive();
+  const { hasRole: isAdmin, isLoading: roleLoading } = useHasRoleState("admin");
   const location = useLocation();
   const isWhitelisted = ALWAYS_OPEN_PREFIXES.some((p) => location.pathname.startsWith(p));
-  if (isLoading) return <RouteFallback />;
-  if (!isLive && !isWhitelisted) return <ComingSoon />;
+  if (isLoading || roleLoading) return <RouteFallback />;
+  // Admins always see the full site — toggle only affects everyone else.
+  if (!isLive && !isAdmin && !isWhitelisted) return <ComingSoon />;
   return <>{children}</>;
 };
 
