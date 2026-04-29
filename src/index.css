@@ -454,3 +454,302 @@ iframe[src*="lovable"] {
   position: absolute !important;
   overflow: hidden !important;
 }
+
+/* ============================================================
+   ADMIN HUD — Iron-Man "command center" skin for /admin/*
+   Injected by <AdminChrome>. Activates when body.admin-hud is set.
+   ============================================================ */
+
+/* Re-skin the page background for any admin route */
+body.admin-hud {
+  background: hsl(var(--navy-deep));
+  color: hsl(0 0% 95%);
+}
+
+/* Push admin page content right of the floating rail on desktop,
+   and below the slim top status bar on every viewport. */
+body.admin-hud > #root {
+  padding-top: 32px; /* topbar height */
+}
+@media (min-width: 1024px) {
+  body.admin-hud > #root {
+    padding-left: 64px; /* nav rail width */
+  }
+}
+
+/* ---- Background layers ---- */
+.admin-hud-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at top, hsl(var(--navy)) 0%, hsl(var(--navy-deep)) 60%);
+}
+.admin-hud-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(hsl(var(--primary) / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
+}
+.admin-hud-glow {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.45;
+}
+.admin-hud-glow--blue {
+  top: -200px; left: -160px;
+  width: 640px; height: 640px;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.55), transparent 65%);
+  animation: hud-float 18s ease-in-out infinite;
+}
+.admin-hud-glow--gold {
+  bottom: -180px; right: -140px;
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, hsl(var(--gold) / 0.45), transparent 65%);
+  animation: hud-float 22s ease-in-out infinite reverse;
+}
+.admin-hud-scanline {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    hsl(0 0% 100% / 0.012) 0 2px,
+    transparent 2px 4px
+  );
+  mix-blend-mode: overlay;
+}
+.admin-hud-vignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 220px hsl(var(--navy-deep));
+}
+@keyframes hud-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(40px, 30px) scale(1.06); }
+}
+
+/* ---- Slim top status rail ---- */
+.admin-hud-topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 32px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--navy-deep) / 0.95),
+    hsl(var(--navy-deep) / 0.75)
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid hsl(var(--primary) / 0.18);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(0 0% 80%);
+  box-shadow: 0 1px 0 hsl(var(--primary) / 0.08), 0 8px 24px -12px hsl(var(--primary) / 0.4);
+}
+.admin-hud-topbar__left,
+.admin-hud-topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.admin-hud-label {
+  font-weight: 700;
+  color: hsl(var(--gold));
+}
+.admin-hud-path {
+  color: hsl(0 0% 70%);
+}
+.admin-hud-divider {
+  width: 1px;
+  height: 12px;
+  background: hsl(0 0% 100% / 0.15);
+}
+.admin-hud-meta {
+  color: hsl(0 0% 65%);
+  font-weight: 500;
+}
+.admin-hud-time {
+  color: hsl(var(--primary-foreground));
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+.admin-hud-dot {
+  width: 7px; height: 7px;
+  border-radius: 9999px;
+  background: hsl(var(--success));
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.18), 0 0 12px hsl(var(--success) / 0.6);
+  animation: hud-pulse 2.4s ease-in-out infinite;
+}
+@keyframes hud-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.85); }
+}
+
+/* ---- Left nav rail (desktop only) ---- */
+.admin-hud-rail {
+  position: fixed;
+  top: 32px; bottom: 0; left: 0;
+  width: 64px;
+  z-index: 49;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 0;
+  background: linear-gradient(
+    to right,
+    hsl(var(--navy-deep) / 0.92),
+    hsl(var(--navy-deep) / 0.6)
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-right: 1px solid hsl(var(--primary) / 0.15);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.admin-hud-rail::-webkit-scrollbar { display: none; }
+@media (min-width: 1024px) {
+  .admin-hud-rail { display: flex; }
+}
+.admin-hud-rail__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 52px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  color: hsl(0 0% 60%);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 180ms var(--ease-tidy);
+}
+.admin-hud-rail__item:hover {
+  color: hsl(0 0% 95%);
+  background: hsl(var(--primary) / 0.08);
+}
+.admin-hud-rail__item.is-active {
+  color: hsl(var(--gold));
+  background: hsl(var(--primary) / 0.14);
+  box-shadow: inset 2px 0 0 hsl(var(--gold)), 0 0 24px -8px hsl(var(--primary) / 0.6);
+}
+.admin-hud-rail__item.is-active::before {
+  content: "";
+  position: absolute;
+  left: -1px; top: 8px; bottom: 8px;
+  width: 2px;
+  background: hsl(var(--gold));
+  box-shadow: 0 0 12px hsl(var(--gold) / 0.8);
+  border-radius: 2px;
+}
+.admin-hud-rail__label {
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* ---- Re-skin common surfaces inside admin pages ---- */
+/* Soften plain white backgrounds so existing pages instantly look HUD-native
+   without per-page edits. Targets surfaces with bg-white / slate / gray. */
+body.admin-hud .bg-white,
+body.admin-hud .bg-slate-50,
+body.admin-hud .bg-slate-100,
+body.admin-hud .bg-gray-50,
+body.admin-hud .bg-gray-100 {
+  background-color: hsl(222 47% 13% / 0.55) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: hsl(var(--primary) / 0.18) !important;
+  color: hsl(0 0% 92%);
+}
+body.admin-hud [class*="text-slate-"],
+body.admin-hud [class*="text-gray-"],
+body.admin-hud [class*="text-zinc-"],
+body.admin-hud [class*="text-neutral-"] {
+  color: hsl(0 0% 80%) !important;
+}
+body.admin-hud .text-slate-900,
+body.admin-hud .text-gray-900,
+body.admin-hud .text-zinc-900,
+body.admin-hud .text-neutral-900,
+body.admin-hud .text-black {
+  color: hsl(0 0% 98%) !important;
+}
+body.admin-hud .text-slate-500,
+body.admin-hud .text-slate-600,
+body.admin-hud .text-gray-500,
+body.admin-hud .text-gray-600 {
+  color: hsl(0 0% 68%) !important;
+}
+body.admin-hud .border-slate-200,
+body.admin-hud .border-slate-100,
+body.admin-hud .border-gray-200,
+body.admin-hud .border-gray-100,
+body.admin-hud .border-input,
+body.admin-hud .border {
+  border-color: hsl(var(--primary) / 0.16) !important;
+}
+
+/* shadcn cards inside admin */
+body.admin-hud [data-sidebar],
+body.admin-hud .bg-card,
+body.admin-hud [class*="rounded-lg"][class*="border"][class*="bg-card"] {
+  background-color: hsl(222 47% 13% / 0.6) !important;
+  border-color: hsl(var(--primary) / 0.2) !important;
+  color: hsl(0 0% 92%);
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.04) inset,
+    0 24px 48px -24px hsl(var(--primary) / 0.35);
+}
+
+/* Inputs / selects inside admin become glass */
+body.admin-hud input,
+body.admin-hud textarea,
+body.admin-hud select,
+body.admin-hud [role="combobox"] {
+  background-color: hsl(222 47% 9% / 0.7) !important;
+  border-color: hsl(var(--primary) / 0.24) !important;
+  color: hsl(0 0% 95%);
+}
+body.admin-hud input::placeholder,
+body.admin-hud textarea::placeholder {
+  color: hsl(0 0% 55%) !important;
+}
+
+/* Headings inside admin get a subtle gold underline accent on h1 */
+body.admin-hud h1 {
+  color: hsl(0 0% 98%);
+}
+
+/* Pin app's main content above the HUD background */
+body.admin-hud > #root > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .admin-hud-glow,
+  .admin-hud-dot {
+    animation: none !important;
+  }
+}
