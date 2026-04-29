@@ -30,6 +30,7 @@ const ADMIN_NAV = [
   { label: 'KPI Center', href: '/admin/kpis', icon: Gauge },
   { label: 'Inbox', href: '/admin/inbox', icon: Inbox },
   { label: 'Schedule', href: '/admin/schedule', icon: Calendar },
+  { label: 'Site status', href: '/admin/site-status', icon: Power },
   { label: 'Test events', href: '/admin/test-zapier', icon: FlaskConical },
 ];
 
