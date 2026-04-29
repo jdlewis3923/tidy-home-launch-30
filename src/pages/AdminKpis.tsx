@@ -228,6 +228,7 @@ export default function AdminKpis() {
   // Site live master switch (mirrors /admin/site-status)
   const { isLive: siteLive, isLoading: siteLiveLoading, refresh: refreshSiteLive } = useSiteLive();
   const [siteToggleSaving, setSiteToggleSaving] = useState(false);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
   const toggleSiteLive = useCallback(async () => {
     const next = !siteLive;
     setSiteToggleSaving(true);
