@@ -72,6 +72,7 @@ const Footer = () => {
             <li><Link to="/terms" className="hover:text-primary-foreground/70 transition-colors">{t("Terms of Service")}</Link></li>
             <li><Link to="/privacy" className="hover:text-primary-foreground/70 transition-colors">{t("Privacy Policy")}</Link></li>
             <li><a href="mailto:hello@jointidy.co" className="hover:text-primary-foreground/70 transition-colors">{t("Contact Us")}</a></li>
+            <li><Link to="/apply" className="hover:text-primary-foreground/70 transition-colors">Careers — Apply to Work With Us</Link></li>
           </ul>
         </div>
       </div>
