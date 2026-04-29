@@ -14,6 +14,7 @@ export async function sendBrevoEmail(opts: {
   toName?: string;
   subject: string;
   htmlContent: string;
+  tags?: string[];
 }) {
   if (!BREVO_API_KEY) { console.warn('[brevo] BREVO_API_KEY missing'); return null; }
   const r = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -24,6 +25,7 @@ export async function sendBrevoEmail(opts: {
       to: [{ email: opts.toEmail, name: opts.toName ?? opts.toEmail }],
       subject: opts.subject,
       htmlContent: opts.htmlContent,
+      ...(opts.tags && opts.tags.length ? { tags: opts.tags } : {}),
     }),
   });
   if (!r.ok) console.error('[brevo] send failed', r.status, await r.text().catch(()=>''));
