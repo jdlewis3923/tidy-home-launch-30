@@ -80,11 +80,11 @@ const HowItWorks = ({ onOpenPopup }: HowItWorksProps) => {
 
   return (
     <section id="how-it-works" className="bg-section-alt py-20 px-4">
-      <div className="max-w-6xl mx-auto text-center">
+      <div className="max-w-6xl mx-auto text-left">
         <FadeIn>
           <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Simple process")}</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Get 5–10 hours back every week")}</h2>
-          <p className="text-text-mid mt-4 max-w-xl mx-auto">{t(subtitle)}</p>
+          <p className="text-text-mid mt-4 max-w-xl">{t(subtitle)}</p>
         </FadeIn>
 
         <div className={`mt-16 grid ${gridCols} gap-6 relative`}>
@@ -96,7 +96,7 @@ const HowItWorks = ({ onOpenPopup }: HowItWorksProps) => {
             const innerIcon = CUSTOMER_DASHBOARD_ENABLED ? "w-10 h-10" : "w-12 h-12";
             const badgeSize = CUSTOMER_DASHBOARD_ENABLED ? "w-6 h-6 text-[10px]" : "w-7 h-7 text-xs";
             return (
-              <FadeIn key={s.num} delay={i * 100} className="relative flex flex-col items-center">
+              <FadeIn key={s.num} delay={i * 100} className="relative flex flex-col items-start text-left">
                 <div className={`${iconSize} rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-5 relative z-10 shadow-lg`}>
                   <Icon className={`${innerIcon} text-white`} strokeWidth={1.5} />
                   <span className={`absolute -top-2 -right-2 ${badgeSize} rounded-full bg-gold text-gold-foreground font-bold flex items-center justify-center shadow`}>{s.num}</span>
