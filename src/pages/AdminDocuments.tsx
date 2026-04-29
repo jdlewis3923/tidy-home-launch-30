@@ -391,6 +391,7 @@ const CategoryCard = ({
   onPrint,
   onCopyLink,
   onArchive,
+  onUploadFor,
 }: {
   category: string;
   docs: Doc[];
@@ -399,6 +400,7 @@ const CategoryCard = ({
   onPrint: (d: Doc) => void;
   onCopyLink: (d: Doc) => void;
   onArchive: (d: Doc) => void;
+  onUploadFor: (d: Doc) => void;
 }) => {
   const [open, setOpen] = useState(true);
   return (
