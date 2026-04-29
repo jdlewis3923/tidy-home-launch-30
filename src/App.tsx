@@ -14,6 +14,7 @@ import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
 import ChatbotMount from "@/components/chatbot/ChatbotMount";
 import { useSiteLive } from "@/hooks/useSiteLive";
+import { useHasRoleState } from "@/hooks/useHasRole";
 
 // Eager: homepage, terms/privacy, NotFound (small + always-needed)
 import Index from "./pages/Index.tsx";
