@@ -64,8 +64,8 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
 
   const ctaText = CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN →" : "Request Early Access →";
   const btnClass = CUSTOMER_DASHBOARD_ENABLED
-    ? "mt-12 bg-gold hover:bg-gold/90 text-gold-foreground font-bold px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,197,24,0.3)]"
-    : "mt-12 bg-gold hover:bg-gold/90 text-gold-foreground font-bold px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,197,24,0.3)]";
+    ? "mt-12 bg-gold hover:bg-gold/90 text-gold-foreground font-bold px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,197,24,0.3)] animate-pulse-gold"
+    : "mt-12 bg-gold hover:bg-gold/90 text-gold-foreground font-bold px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,197,24,0.3)] animate-pulse-gold";
 
   return (
     <section className="relative py-20 px-4 overflow-hidden">

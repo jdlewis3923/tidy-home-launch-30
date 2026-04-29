@@ -40,7 +40,7 @@ const ZipChecker = () => {
             className="flex-1 bg-navy-deep border border-primary-foreground/20 text-primary-foreground rounded-lg px-4 py-3 text-sm placeholder:text-primary-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
             onKeyDown={(e) => e.key === "Enter" && handleCheck()}
           />
-          <button onClick={handleCheck} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-all duration-300 hover:scale-105">
+          <button onClick={handleCheck} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-6 py-3 rounded-lg text-sm transition-all duration-300 hover:scale-105 animate-pulse-gold">
             {t("Check →")}
           </button>
         </div>

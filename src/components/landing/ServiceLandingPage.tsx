@@ -232,7 +232,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               <Link
                 to={heroCta.to}
                 onClick={heroCta.onClick}
-                className="cta-arrow cta-press animate-pulse-once bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
+                className="cta-arrow cta-press animate-pulse-gold bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
               >
                 {t(config.ctaPrimaryLabel ?? "Book in 60 seconds")} <span className="arrow">→</span>
               </Link>
