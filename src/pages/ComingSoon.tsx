@@ -112,6 +112,14 @@ const ComingSoon = () => {
           <div className="mt-16 text-[11px] uppercase tracking-[0.25em] text-white/30">
             Tidy Home Concierge LLC · Miami, FL
           </div>
+
+          <a
+            href="/login"
+            className="mt-6 text-[10px] uppercase tracking-[0.25em] text-white/20 hover:text-white/60 transition-colors"
+            aria-label="Admin login"
+          >
+            Admin
+          </a>
         </div>
       </main>
     </>
