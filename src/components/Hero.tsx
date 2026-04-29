@@ -54,7 +54,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         </div>
 
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-primary-foreground leading-tight mb-6">
-          {t("Your Home. Handled.")}<br />{t("Every Month.")}
+          {t("Your Home.")}<br />{t("On Autopilot.")}
         </h1>
 
         <p className="text-lg md:text-xl font-light text-primary-foreground/80 max-w-2xl mx-auto mb-8 leading-relaxed">
