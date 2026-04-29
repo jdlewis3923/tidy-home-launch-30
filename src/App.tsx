@@ -13,6 +13,7 @@ import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
 import ChatbotMount from "@/components/chatbot/ChatbotMount";
+import HomeButton from "@/components/HomeButton";
 import { useSiteLive } from "@/hooks/useSiteLive";
 import { useHasRoleState } from "@/hooks/useHasRole";
 
@@ -111,6 +112,7 @@ const App = () => (
             <PromoCaptureWatcher />
             <MetaPixel />
             <ChatbotMount />
+            <HomeButton />
             <RouteTracker>
               <SiteGate>
                 <Suspense fallback={<RouteFallback />}>
