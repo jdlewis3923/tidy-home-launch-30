@@ -440,6 +440,21 @@ export default function AdminKpis() {
             <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs">
               <Link to="/admin/settings/notifications">Alerts</Link>
             </Button>
+            {/* Site live master switch — mirrors /admin/site-status */}
+            <button
+              type="button"
+              onClick={toggleSiteLive}
+              disabled={siteToggleSaving || siteLiveLoading}
+              title={siteLive ? "Public site is LIVE — click to take it offline" : "Public site is OFF — click to bring it live"}
+              className={`inline-flex items-center gap-1.5 rounded-md border h-8 px-2.5 text-xs font-semibold transition disabled:opacity-60 ${
+                siteLive
+                  ? "bg-emerald-500/15 border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/25"
+                  : "bg-rose-500/15 border-rose-400/40 text-rose-200 hover:bg-rose-500/25"
+              }`}
+            >
+              <span className={`h-2 w-2 rounded-full ${siteLive ? "bg-emerald-400" : "bg-rose-400"}`} />
+              <span>Site: {siteLiveLoading ? "…" : siteLive ? "Live" : "Off"}</span>
+            </button>
             <Button
               variant="secondary"
               size="sm"
