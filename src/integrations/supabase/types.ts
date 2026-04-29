@@ -1534,6 +1534,7 @@ export type Database = {
         Returns: boolean
       }
       admin_set_service_role_key: { Args: { _key: string }; Returns: undefined }
+      admin_set_site_live: { Args: { _live: boolean }; Returns: boolean }
       admin_set_vapid_secret: {
         Args: { _name: string; _value: string }
         Returns: undefined
@@ -1548,6 +1549,7 @@ export type Database = {
         Returns: boolean
       }
       is_scheduler_paused: { Args: never; Returns: boolean }
+      is_site_live: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "customer" | "crew" | "admin"
