@@ -106,28 +106,28 @@ export default function AdminApplicants() {
     return rows.filter((r) => r.current_stage !== "rejected");
   }, [rows, filter]);
 
-  const runDecision = async (decision: "clear" | "consider" | "fail") => {
+  type AdvanceAction =
+    | "clear" | "consider" | "fail"
+    | "schedule_interview" | "send_offer" | "send_contract"
+    | "mark_demo_passed" | "activate" | "reject";
+
+  const runAction = async (action: AdvanceAction) => {
     if (!open) return;
-    setSubmitting(decision);
-    const { data, error } = await supabase.functions.invoke("manual-bg-check", {
-      body: { applicant_id: open.id, decision, notes: bgNotes || undefined },
+    setSubmitting(action);
+    const { data, error } = await supabase.functions.invoke("advance-applicant", {
+      body: { applicant_id: open.id, action, notes: bgNotes || undefined },
     });
     setSubmitting(null);
     if (error || (data as any)?.error) {
       toast({ title: "Failed", description: error?.message ?? (data as any)?.error ?? "unknown", variant: "destructive" });
       return;
     }
-    toast({
-      title: `Marked ${decision.toUpperCase()}`,
-      description: decision === "clear"
-        ? "Advanced to interview_pending."
-        : decision === "consider"
-          ? "Flagged for review. SMS sent to Justin."
-          : "Rejected. Applicant rejection email sent.",
-    });
+    toast({ title: `Action: ${action}`, description: `New stage: ${(data as any)?.current_stage ?? "updated"}` });
     setOpen(null);
     fetchRows();
   };
+
+  const runDecision = (decision: "clear" | "consider" | "fail") => runAction(decision);
 
   if (roleLoading) {
     return <main className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin h-6 w-6" /></main>;
