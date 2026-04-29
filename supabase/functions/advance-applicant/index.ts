@@ -130,9 +130,48 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'update_failed', details: error?.message }, 500);
   }
 
-  const fullName = `${row.first_name} ${row.last_name}`;
+  // Per-action Brevo template tag + applicant-facing copy.
+  const TEMPLATE_TAG: Record<Action, string> = {
+    clear: 'applicant-bg-clear',
+    consider: 'applicant-bg-consider',
+    fail: 'applicant-rejected',
+    schedule_interview: 'applicant-interview-scheduled',
+    send_offer: 'applicant-offer',
+    send_contract: 'applicant-contract-sent',
+    mark_demo_passed: 'applicant-demo-passed',
+    activate: 'applicant-activated',
+    reject: 'applicant-rejected',
+  };
+
+  const APPLICANT_COPY: Record<Action, { subject: string; body: string }> = {
+    clear: { subject: 'Your background check is clear', body: `<p>Hi ${row.first_name},</p><p>Great news — your background check came back clear. We'll reach out shortly to schedule your interview.</p>` },
+    consider: { subject: 'Quick question about your application', body: `<p>Hi ${row.first_name},</p><p>Your background check came back with something we'd like to chat about. Someone from Tidy will reach out shortly.</p>` },
+    fail: { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>Thanks for applying. After reviewing your background check, we're unable to move forward at this time.</p>` },
+    schedule_interview: { subject: 'Schedule your Tidy interview', body: `<p>Hi ${row.first_name},</p><p>Pick a time that works for you: <a href="https://calendly.com/jointidy/interview">Book your interview</a>.</p>` },
+    send_offer: { subject: 'Your Tidy offer', body: `<p>Hi ${row.first_name},</p><p>We'd love to have you on the team. Your offer details are attached.</p>` },
+    send_contract: { subject: 'Sign your Tidy contract', body: `<p>Hi ${row.first_name},</p><p>Your contract is ready — check your email for the HelloSign request.</p>` },
+    mark_demo_passed: { subject: 'You passed your Tidy demo', body: `<p>Hi ${row.first_name},</p><p>Nice work on the demo. We're moving you to activation now.</p>` },
+    activate: { subject: 'Welcome to Tidy', body: `<p>Hi ${row.first_name},</p><p>You're activated. Your onboarding packet is attached. Welcome aboard.</p>` },
+    reject: { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>Thanks for applying. We're unable to move forward at this time.</p>` },
+  };
+
+  const tag = TEMPLATE_TAG[action];
+  const applicantCopy = APPLICANT_COPY[action];
+
   queueMicrotask(async () => {
-    const html = brandedEmailHtml({
+    // 1. Email to applicant
+    const applicantHtml = brandedEmailHtml({
+      heading: applicantCopy.subject,
+      bodyHtml: applicantCopy.body,
+    });
+    await sendBrevoEmail({
+      toEmail: row.email, toName: fullName,
+      subject: applicantCopy.subject, htmlContent: applicantHtml,
+      tags: [tag],
+    }).catch((e) => console.error('[advance] applicant email failed', e));
+
+    // 2. Admin alert
+    const adminHtml = brandedEmailHtml({
       heading: SUBJECTS[action],
       bodyHtml: `
         <p><strong>${fullName}</strong> — ${row.service ?? 'unknown'} applicant</p>
@@ -148,8 +187,9 @@ Deno.serve(async (req) => {
     });
     await sendBrevoEmail({
       toEmail: 'admin@jointidy.co', toName: 'Justin',
-      subject: `${SUBJECTS[action]}: ${fullName}`, htmlContent: html,
-    });
+      subject: `${SUBJECTS[action]}: ${fullName}`, htmlContent: adminHtml,
+      tags: [`admin-${tag}`],
+    }).catch((e) => console.error('[advance] admin email failed', e));
   });
 
   return jsonResponse({ ok: true, id: row.id, current_stage: row.current_stage, bg_check_status: row.bg_check_status });
