@@ -438,6 +438,11 @@ const CategoryCard = ({
                           archived
                         </Badge>
                       )}
+                      {(!d.storage_path || d.storage_path.startsWith("pending/")) && !d.archived_at && (
+                        <Badge variant="outline" className="border-amber-400/40 text-amber-300 text-[10px]">
+                          No file uploaded yet
+                        </Badge>
+                      )}
                       {d.tags.map((t) => (
                         <Badge key={t} variant="secondary" className="text-[10px]">
                           {t}
@@ -449,18 +454,30 @@ const CategoryCard = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-1 no-print">
-                    <Button size="sm" variant="ghost" onClick={() => onView(d)} className="text-white/80 hover:text-white">
-                      <Eye className="h-4 w-4 mr-1" /> View
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => onDownload(d)} className="text-white/80 hover:text-white">
-                      <Download className="h-4 w-4 mr-1" /> Download
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => onPrint(d)} className="text-white/80 hover:text-white">
-                      <Printer className="h-4 w-4 mr-1" /> Print
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => onCopyLink(d)} className="text-white/80 hover:text-white">
-                      <LinkIcon className="h-4 w-4 mr-1" /> Link
-                    </Button>
+                    {(!d.storage_path || d.storage_path.startsWith("pending/")) && !d.archived_at ? (
+                      <Button
+                        size="sm"
+                        onClick={() => onUploadFor(d)}
+                        className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-semibold"
+                      >
+                        <Upload className="h-4 w-4 mr-1" /> Upload
+                      </Button>
+                    ) : (
+                      <>
+                        <Button size="sm" variant="ghost" onClick={() => onView(d)} className="text-white/80 hover:text-white">
+                          <Eye className="h-4 w-4 mr-1" /> View
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => onDownload(d)} className="text-white/80 hover:text-white">
+                          <Download className="h-4 w-4 mr-1" /> Download
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => onPrint(d)} className="text-white/80 hover:text-white">
+                          <Printer className="h-4 w-4 mr-1" /> Print
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => onCopyLink(d)} className="text-white/80 hover:text-white">
+                          <LinkIcon className="h-4 w-4 mr-1" /> Link
+                        </Button>
+                      </>
+                    )}
                     {!d.archived_at && (
                       <Button size="sm" variant="ghost" onClick={() => onArchive(d)} className="text-white/50 hover:text-amber-300">
                         <Archive className="h-4 w-4" />
