@@ -254,6 +254,63 @@ export type Database = {
         }
         Relationships: []
       }
+      company_documents: {
+        Row: {
+          archive_reason: string | null
+          archived_at: string | null
+          brevo_template_id: number | null
+          category: string
+          contractor_id: string | null
+          current_version: boolean
+          file_size_bytes: number | null
+          filename: string
+          hellosign_doc_id: string | null
+          id: string
+          mime_type: string | null
+          searchable_text: string | null
+          storage_path: string
+          tags: string[]
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          brevo_template_id?: number | null
+          category: string
+          contractor_id?: string | null
+          current_version?: boolean
+          file_size_bytes?: number | null
+          filename: string
+          hellosign_doc_id?: string | null
+          id?: string
+          mime_type?: string | null
+          searchable_text?: string | null
+          storage_path: string
+          tags?: string[]
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          brevo_template_id?: number | null
+          category?: string
+          contractor_id?: string | null
+          current_version?: boolean
+          file_size_bytes?: number | null
+          filename?: string
+          hellosign_doc_id?: string | null
+          id?: string
+          mime_type?: string | null
+          searchable_text?: string | null
+          storage_path?: string
+          tags?: string[]
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       cost_entries: {
         Row: {
           amount_cents: number
