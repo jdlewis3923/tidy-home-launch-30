@@ -17,9 +17,9 @@ const FinalCTA = ({ onOpenPopup }: FinalCTAProps) => {
           <TidyLogo size="lg" withBackground />
         </div>
 
-        <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-4">{t("You'll never book a home service again.")}</h2>
+        <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-4">{t("Never book a home service again.")}</h2>
         <p className="text-primary-foreground/70 font-medium mb-2">{t("Set it once. We handle the rest.")}</p>
-        <p className="text-primary-foreground/50 mb-8">{t("Takes under 60 seconds · No contracts · Cancel anytime")}</p>
+        <p className="text-primary-foreground/50 mb-8">{t("Under 60 seconds · No contracts · Cancel anytime")}</p>
 
         <button id="cta-final" data-track="cta_final" onClick={() => { pushEvent("cta_click", { cta_id: "final_cta", cta_text: CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN" : "Get Started" }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-10 py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)] animate-pulse-gold">
           {t(CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN →" : "Get Started — Request Early Access →")}

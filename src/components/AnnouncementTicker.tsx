@@ -4,13 +4,13 @@ const items = [
   "Licensed & Insured",
   "Background-Checked Pros",
   "Cancel Anytime",
-  "Photo Verified Every Visit",
+  "Photo-Verified Every Visit",
   "No Long-Term Contracts",
   "4.9★ Average Rating",
   "Serving Kendall & Pinecrest",
   "From $85/mo",
-  "One Simple Monthly Plan",
-  "Zero Rebooking Required",
+  "One Monthly Plan",
+  "No Rebooking",
 ];
 
 const AnnouncementTicker = () => {

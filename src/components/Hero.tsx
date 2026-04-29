@@ -50,7 +50,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <div className="inline-flex items-center bg-primary/20 border border-primary/30 rounded-full px-4 py-1.5 mb-6">
           <span className="w-2 h-2 rounded-full bg-success mr-2 animate-pulse-dot" />
-          <span className="text-xs font-medium text-primary-foreground">{t("Now accepting homes in Kendall & Pinecrest")}</span>
+          <span className="text-xs font-medium text-primary-foreground">{t("Now accepting homes in Kendall & Pinecrest · Limited spots")}</span>
         </div>
 
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-primary-foreground leading-tight mb-6">
@@ -58,9 +58,9 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         </h1>
 
         <p className="text-lg md:text-xl font-light text-primary-foreground/80 max-w-2xl mx-auto mb-8 leading-relaxed">
-          {t("We handle scheduling, timing, and everything in between.")}
+          {t("Scheduling, timing, and follow-through — handled.")}
           <br />
-          {t("Just set it — we'll take care of the rest.")}
+          {t("Set it once. We take care of the rest.")}
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mb-8">
@@ -76,7 +76,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         </button>
 
         <p className="mt-4 text-xs text-primary-foreground/50">
-          {t(CUSTOMER_DASHBOARD_ENABLED ? "No contracts · Cancel anytime · Starting at $85/mo" : "Limited founding memberships · No commitment required · Starting at $85/mo")}
+          {t(CUSTOMER_DASHBOARD_ENABLED ? "No contracts · Cancel anytime · From $85/mo" : "Founding memberships · No commitment · From $85/mo")}
         </p>
       </div>
     </section>
