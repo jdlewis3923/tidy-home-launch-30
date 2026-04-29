@@ -276,18 +276,20 @@ const AdminDocuments = () => {
           <div className="flex items-center gap-2">
             <Button
               onClick={async () => {
-                const { data, error } = await supabase.functions.invoke("seed-company-documents", { body: {} });
+                const { data, error } = await supabase.functions.invoke("seed-tidy-docs", { body: {} });
                 if (error || (data as any)?.error) {
-                  toast({ title: "Seed failed", description: error?.message ?? (data as any)?.error, variant: "destructive" });
+                  toast({ title: "Re-seed failed", description: error?.message ?? (data as any)?.error, variant: "destructive" });
                   return;
                 }
-                toast({ title: "Seeded", description: `${(data as any)?.inserted ?? 0} added · ${(data as any)?.skipped_existing ?? 0} already present` });
-                window.location.reload();
+                const inserted = (data as any)?.inserted ?? 0;
+                const skipped = (data as any)?.skipped_existing ?? 0;
+                toast({ title: `Seeded ${inserted} rows`, description: `${skipped} already present` });
+                await fetchDocs();
               }}
               variant="outline"
               className="border-white/20 text-white hover:bg-white/10"
             >
-              Seed Documents
+              Re-seed company docs
             </Button>
             <Button
               onClick={() => setUploadOpen(true)}
