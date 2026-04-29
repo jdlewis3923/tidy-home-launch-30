@@ -32,8 +32,16 @@ const translations: Record<string, string> = {
 
   // Hero
   "Now accepting homes in Kendall & Pinecrest": "Ahora aceptando hogares en Kendall y Pinecrest",
+  "Now accepting homes in Kendall & Pinecrest · Limited spots": "Ahora aceptando hogares en Kendall y Pinecrest · Cupos limitados",
   "Your Home. Handled.": "Tu Hogar. Resuelto.",
+  "Your Home.": "Tu Hogar.",
+  "On Autopilot.": "En Piloto Automático.",
   "Every Month.": "Cada Mes.",
+  "Scheduling, timing, and follow-through — handled.": "Programación, tiempos y seguimiento — resueltos.",
+  "Set it once. We take care of the rest.": "Configúralo una vez. Nosotros nos encargamos del resto.",
+  "No contracts · Cancel anytime · From $85/mo": "Sin contratos · Cancela cuando quieras · Desde $85/mes",
+  "Founding memberships · No commitment · From $85/mo": "Membresías fundadoras · Sin compromiso · Desde $85/mes",
+  "START MY PLAN →": "EMPEZAR MI PLAN →",
   "We handle scheduling, timing, and everything in between.": "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
   "Just set it — we'll take care of the rest.": "Solo configúralo — nosotros nos encargamos del resto.",
   "Cleaning, lawn care, and car detailing — fully managed for you. No booking, no vendors, no reminders. Ever.": "Limpieza, jardín y detallado de auto — totalmente gestionado. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
