@@ -27,13 +27,23 @@ const translations: Record<string, string> = {
   "4.9★ Average Rating": "4.9★ Calificación Promedio",
   "Serving Kendall & Pinecrest": "Sirviendo Kendall y Pinecrest",
   "From $85/mo": "Desde $85/mes",
+  "One Monthly Plan": "Un Plan Mensual",
+  "No Rebooking": "Sin Reagendar",
   "One Simple Monthly Plan": "Un Solo Plan Mensual",
   "Zero Rebooking Required": "Sin Necesidad de Reagendar",
 
   // Hero
   "Now accepting homes in Kendall & Pinecrest": "Ahora aceptando hogares en Kendall y Pinecrest",
+  "Now accepting homes in Kendall & Pinecrest · Limited spots": "Ahora aceptando hogares en Kendall y Pinecrest · Cupos limitados",
   "Your Home. Handled.": "Tu Hogar. Resuelto.",
+  "Your Home.": "Tu Hogar.",
+  "On Autopilot.": "En Piloto Automático.",
   "Every Month.": "Cada Mes.",
+  "Scheduling, timing, and follow-through — handled.": "Programación, tiempos y seguimiento — resueltos.",
+  "Set it once. We take care of the rest.": "Configúralo una vez. Nosotros nos encargamos del resto.",
+  "No contracts · Cancel anytime · From $85/mo": "Sin contratos · Cancela cuando quieras · Desde $85/mes",
+  "Founding memberships · No commitment · From $85/mo": "Membresías fundadoras · Sin compromiso · Desde $85/mes",
+  "START MY PLAN →": "EMPEZAR MI PLAN →",
   "We handle scheduling, timing, and everything in between.": "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
   "Just set it — we'll take care of the rest.": "Solo configúralo — nosotros nos encargamos del resto.",
   "Cleaning, lawn care, and car detailing — fully managed for you. No booking, no vendors, no reminders. Ever.": "Limpieza, jardín y detallado de auto — totalmente gestionado. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
@@ -204,6 +214,9 @@ const translations: Record<string, string> = {
 
   // Final CTA
   "You'll never book a home service again.": "Nunca más reservarás un servicio del hogar.",
+  "Never book a home service again.": "Nunca más reserves un servicio del hogar.",
+  "Set it once. We handle the rest.": "Configúralo una vez. Nosotros nos encargamos del resto.",
+  "Under 60 seconds · No contracts · Cancel anytime": "En menos de 60 segundos · Sin contratos · Cancela cuando quieras",
   "One setup. Everything handled.": "Una configuración. Todo resuelto.",
   "No contracts. No payments until launch.": "Sin contratos. Sin pagos hasta el lanzamiento.",
   "Limited founding memberships available in your area. Takes 60 seconds. No commitment required.": "Membresías fundadoras limitadas en tu área. Toma 60 segundos. Sin compromiso.",
