@@ -96,7 +96,7 @@ const HowItWorks = ({ onOpenPopup }: HowItWorksProps) => {
             const innerIcon = CUSTOMER_DASHBOARD_ENABLED ? "w-10 h-10" : "w-12 h-12";
             const badgeSize = CUSTOMER_DASHBOARD_ENABLED ? "w-6 h-6 text-[10px]" : "w-7 h-7 text-xs";
             return (
-              <FadeIn key={s.num} delay={i * 100} className="relative flex flex-col items-center">
+              <FadeIn key={s.num} delay={i * 100} className="relative flex flex-col items-start text-left">
                 <div className={`${iconSize} rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-5 relative z-10 shadow-lg`}>
                   <Icon className={`${innerIcon} text-white`} strokeWidth={1.5} />
                   <span className={`absolute -top-2 -right-2 ${badgeSize} rounded-full bg-gold text-gold-foreground font-bold flex items-center justify-center shadow`}>{s.num}</span>
