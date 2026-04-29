@@ -35,7 +35,7 @@ const HowItWorksStrip = ({ steps = DEFAULT_STEPS }: Props) => {
             const Icon = ICONS[i] ?? Calendar;
             return (
               <Reveal key={s.title} delay={i * 80}>
-                <div className="text-center md:text-left flex md:block items-start gap-4">
+                <div className="text-left flex md:block items-start gap-4">
                   <div className="shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground inline-flex items-center justify-center font-bold text-base shadow-sm md:mb-4">
                     {i + 1}
                   </div>
