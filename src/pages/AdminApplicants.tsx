@@ -300,6 +300,32 @@ export default function AdminApplicants() {
                   </Button>
                 </div>
               </div>
+
+              <div className="pt-3 border-t">
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Onboarding timeline</div>
+                {eventsLoading ? (
+                  <div className="text-slate-400 text-xs"><Loader2 className="h-3 w-3 animate-spin inline mr-1" /> loading…</div>
+                ) : events.length === 0 ? (
+                  <div className="text-slate-400 text-xs">No events yet.</div>
+                ) : (
+                  <ol className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {events.map((e) => (
+                      <li key={e.id} className="border-l-2 border-slate-200 pl-3 py-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-slate-900 text-xs">{e.event}</span>
+                          <span className="text-[10px] text-slate-400">{new Date(e.created_at).toLocaleString()}</span>
+                        </div>
+                        {e.metadata?.stage && (
+                          <div className="text-[11px] text-slate-500">→ {e.metadata.stage}{e.metadata.role ? ` · ${e.metadata.role}` : ""}</div>
+                        )}
+                        {e.metadata?.notes && (
+                          <div className="text-[11px] text-slate-600 italic mt-0.5">{e.metadata.notes}</div>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
