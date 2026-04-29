@@ -203,6 +203,69 @@ export type Database = {
         }
         Relationships: []
       }
+      applicants: {
+        Row: {
+          checkr_candidate_id: string | null
+          checkr_completed_at: string | null
+          checkr_report_id: string | null
+          checkr_status: string | null
+          created_at: string
+          current_stage: string | null
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          notes_for_admin: string | null
+          phone: string | null
+          rejected_at: string | null
+          rejection_reason: string | null
+          service: string | null
+          stage_entered_at: string | null
+          updated_at: string
+          zip: string | null
+        }
+        Insert: {
+          checkr_candidate_id?: string | null
+          checkr_completed_at?: string | null
+          checkr_report_id?: string | null
+          checkr_status?: string | null
+          created_at?: string
+          current_stage?: string | null
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          notes_for_admin?: string | null
+          phone?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          service?: string | null
+          stage_entered_at?: string | null
+          updated_at?: string
+          zip?: string | null
+        }
+        Update: {
+          checkr_candidate_id?: string | null
+          checkr_completed_at?: string | null
+          checkr_report_id?: string | null
+          checkr_status?: string | null
+          created_at?: string
+          current_stage?: string | null
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          notes_for_admin?: string | null
+          phone?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          service?: string | null
+          stage_entered_at?: string | null
+          updated_at?: string
+          zip?: string | null
+        }
+        Relationships: []
+      }
       chatbot_knowledge: {
         Row: {
           content: string
