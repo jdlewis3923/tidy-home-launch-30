@@ -187,8 +187,9 @@ const App = () => (
                   <Route path="/add/:token" element={<AddTokenLanding />} />
 
                   <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
+                  </Routes>
+                </Suspense>
+              </SiteGate>
             </RouteTracker>
           </BrowserRouter>
         </TooltipProvider>
