@@ -76,5 +76,10 @@ Deno.serve(async (req) => {
     tags: ['admin-new-applicant'],
   }).catch((e) => console.error('[applicant-applied] admin email failed', e));
 
+  // 3. Sync to Tidy Master sheet (Applicants tab) — non-blocking.
+  admin.functions.invoke('sync-applicant-to-sheet', {
+    body: { applicant_id: a.id, last_event: 'applied', last_event_at: new Date().toISOString() },
+  }).catch((e) => console.error('[applicant-applied] sheet sync failed', e));
+
   return jsonResponse({ ok: true });
 });
