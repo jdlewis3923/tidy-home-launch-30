@@ -224,6 +224,25 @@ export default function AdminKpis() {
   const [stepDetails, setStepDetails] = useState<Record<string, PlaybookStepDetail[]>>({});
   const [stepCompletions, setStepCompletions] = useState<Record<string, { id: string; step_index: number; notes: string | null; completed_at: string }[]>>({});
 
+  // Site live master switch (mirrors /admin/site-status)
+  const { isLive: siteLive, isLoading: siteLiveLoading, refresh: refreshSiteLive } = useSiteLive();
+  const [siteToggleSaving, setSiteToggleSaving] = useState(false);
+  const toggleSiteLive = useCallback(async () => {
+    const next = !siteLive;
+    setSiteToggleSaving(true);
+    const { error } = await supabase.rpc("admin_set_site_live", { _live: next });
+    setSiteToggleSaving(false);
+    if (error) {
+      toast({ title: "Could not update site status", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: next ? "Site is now LIVE" : "Site is now OFF",
+      description: next ? "Public visitors can access the website." : "Public visitors see the Coming Soon page.",
+    });
+    refreshSiteLive();
+  }, [siteLive, refreshSiteLive]);
+
   // ─────── Auth + admin-role gate ───────
   useEffect(() => {
     let active = true;
