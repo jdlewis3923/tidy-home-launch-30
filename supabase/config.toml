@@ -53,8 +53,4 @@ verify_jwt = false
 [functions.submit-application]
 verify_jwt = false
 
-# Yardstik posts webhooks without an Authorization header. Authenticity
-# verified inside the handler via X-Yardstik-Signature HMAC using
-# YARDSTIK_WEBHOOK_SECRET.
-[functions.yardstik-webhook]
-verify_jwt = false
+# (No external background-check provider wired yet — manual review only.)
