@@ -54,3 +54,8 @@ verify_jwt = false
 verify_jwt = false
 
 # (No external background-check provider wired yet — manual review only.)
+
+# Called fire-and-forget by submit-application; no Authorization header needed.
+[functions.applicant-applied-trigger]
+verify_jwt = false
+
