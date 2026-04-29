@@ -156,7 +156,7 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
           </button>
 
           {open && (
-            <div className="absolute right-4 top-16 z-50 w-48 rounded-xl border border-[hsl(var(--hairline))] bg-white p-2 shadow-[0_12px_32px_-12px_rgba(15,23,42,0.18)] sm:right-6">
+            <div className="absolute right-4 top-16 z-50 w-52 rounded-xl border border-[hsl(var(--hairline))] bg-white p-2 shadow-[0_12px_32px_-12px_rgba(15,23,42,0.18)] sm:right-6">
               <Link
                 to="/account"
                 className="block rounded-lg px-3 py-2 text-sm text-ink hover:bg-cream"
@@ -169,6 +169,19 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
               >
                 Billing
               </Link>
+              {isAdmin && (
+                <>
+                  <div className="my-1 h-px bg-[hsl(var(--hairline))]" />
+                  <Link
+                    to="/admin/site-status"
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink hover:bg-cream"
+                  >
+                    <Power className="h-4 w-4 text-ink-soft" />
+                    Site status
+                  </Link>
+                  <div className="my-1 h-px bg-[hsl(var(--hairline))]" />
+                </>
+              )}
               <button
                 type="button"
                 onClick={async () => {
