@@ -78,6 +78,8 @@ export default function AdminApplicants() {
   const [open, setOpen] = useState<Applicant | null>(null);
   const [bgNotes, setBgNotes] = useState("");
   const [submitting, setSubmitting] = useState<string | null>(null);
+  const [events, setEvents] = useState<Array<{ id: string; event: string; metadata: any; created_at: string }>>([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   const fetchRows = async () => {
     setLoading(true);
@@ -91,6 +93,19 @@ export default function AdminApplicants() {
     setLoading(false);
   };
 
+  const fetchEvents = async (applicantId: string) => {
+    setEventsLoading(true);
+    const { data, error } = await (supabase as any)
+      .from("onboarding_events")
+      .select("id, event, metadata, created_at")
+      .eq("applicant_id", applicantId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) console.error(error);
+    setEvents(data ?? []);
+    setEventsLoading(false);
+  };
+
   useEffect(() => {
     if (!hasRole) return;
     fetchRows();
@@ -98,6 +113,8 @@ export default function AdminApplicants() {
 
   useEffect(() => {
     setBgNotes(open?.bg_check_notes ?? "");
+    if (open?.id) fetchEvents(open.id);
+    else setEvents([]);
   }, [open?.id]);
 
   const filtered = useMemo(() => {
@@ -123,7 +140,7 @@ export default function AdminApplicants() {
       return;
     }
     toast({ title: `Action: ${action}`, description: `New stage: ${(data as any)?.current_stage ?? "updated"}` });
-    setOpen(null);
+    if (open) await fetchEvents(open.id);
     fetchRows();
   };
 
@@ -282,6 +299,32 @@ export default function AdminApplicants() {
                     {submitting === "reject" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reject"}
                   </Button>
                 </div>
+              </div>
+
+              <div className="pt-3 border-t">
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Onboarding timeline</div>
+                {eventsLoading ? (
+                  <div className="text-slate-400 text-xs"><Loader2 className="h-3 w-3 animate-spin inline mr-1" /> loading…</div>
+                ) : events.length === 0 ? (
+                  <div className="text-slate-400 text-xs">No events yet.</div>
+                ) : (
+                  <ol className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {events.map((e) => (
+                      <li key={e.id} className="border-l-2 border-slate-200 pl-3 py-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-slate-900 text-xs">{e.event}</span>
+                          <span className="text-[10px] text-slate-400">{new Date(e.created_at).toLocaleString()}</span>
+                        </div>
+                        {e.metadata?.stage && (
+                          <div className="text-[11px] text-slate-500">→ {e.metadata.stage}{e.metadata.role ? ` · ${e.metadata.role}` : ""}</div>
+                        )}
+                        {e.metadata?.notes && (
+                          <div className="text-[11px] text-slate-600 italic mt-0.5">{e.metadata.notes}</div>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                )}
               </div>
             </div>
           )}
