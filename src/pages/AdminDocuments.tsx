@@ -334,21 +334,27 @@ const AdminDocuments = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {CATEGORIES.map((cat) => {
-              const items = grouped.get(cat) ?? [];
-              return (
-                <CategoryCard
-                  key={cat}
-                  category={cat}
-                  docs={items}
-                  onView={handleView}
-                  onDownload={handleDownload}
-                  onPrint={handlePrint}
-                  onCopyLink={handleCopyLink}
-                  onArchive={handleArchive}
-                />
-              );
-            })}
+            {orderedCategories.length === 0 ? (
+              <p className="text-sm text-white/50 text-center py-12">
+                No documents match the current filter.
+              </p>
+            ) : (
+              orderedCategories.map((cat) => {
+                const items = grouped.get(cat) ?? [];
+                return (
+                  <CategoryCard
+                    key={cat}
+                    category={cat}
+                    docs={items}
+                    onView={handleView}
+                    onDownload={handleDownload}
+                    onPrint={handlePrint}
+                    onCopyLink={handleCopyLink}
+                    onArchive={handleArchive}
+                  />
+                );
+              })
+            )}
           </div>
         )}
       </main>
