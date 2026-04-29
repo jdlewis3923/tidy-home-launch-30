@@ -14,6 +14,7 @@ import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
 import ChatbotMount from "@/components/chatbot/ChatbotMount";
 import HomeButton from "@/components/HomeButton";
+import AdminChrome from "@/components/admin/AdminChrome";
 import { useSiteLive } from "@/hooks/useSiteLive";
 import { useHasRoleState } from "@/hooks/useHasRole";
 
@@ -113,6 +114,7 @@ const App = () => (
             <MetaPixel />
             <ChatbotMount />
             <HomeButton />
+            <AdminChrome />
             <RouteTracker>
               <SiteGate>
                 <Suspense fallback={<RouteFallback />}>
