@@ -1,19 +1,22 @@
 /**
  * Admin Applicants Pipeline — /admin/applicants (Phase A)
  *
- * Basic list view. Will be replaced by full pipeline dashboard in a later phase.
- * Columns: Name, Service, Current Stage, Days in Stage, Background Check Status.
- * Filter chips: All / Active / Rejected. Row click opens a detail modal.
+ * Basic list view + detail modal with Manual Background Check controls
+ * (CLEAR / CONSIDER / FAIL). No external provider wired yet — Justin
+ * triggers each decision manually; downstream notifications + stage
+ * transitions happen in the manual-bg-check edge function.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowLeft, Loader2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, ShieldAlert, ShieldX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -27,9 +30,10 @@ type Applicant = {
   service: string | null;
   current_stage: string | null;
   stage_entered_at: string | null;
-  yardstik_status: string | null;
-  yardstik_candidate_id: string | null;
-  yardstik_screening_id: string | null;
+  bg_check_status: string | null;
+  bg_check_provider: string | null;
+  bg_check_notes: string | null;
+  bg_check_completed_at: string | null;
   rejection_reason: string | null;
   rejected_at: string | null;
   created_at: string;
@@ -52,11 +56,10 @@ const STAGE_TONE: Record<string, string> = {
   rejected: "bg-rose-100 text-rose-800",
 };
 
-const YARDSTIK_TONE: Record<string, string> = {
+const BG_TONE: Record<string, string> = {
   pending: "bg-slate-100 text-slate-700",
   clear: "bg-emerald-100 text-emerald-800",
   consider: "bg-orange-100 text-orange-800",
-  suspended: "bg-rose-100 text-rose-800",
   fail: "bg-rose-100 text-rose-800",
 };
 
@@ -73,31 +76,58 @@ export default function AdminApplicants() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "active" | "rejected">("all");
   const [open, setOpen] = useState<Applicant | null>(null);
+  const [bgNotes, setBgNotes] = useState("");
+  const [submitting, setSubmitting] = useState<null | "clear" | "consider" | "fail">(null);
+
+  const fetchRows = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("applicants")
+      .select("id, first_name, last_name, email, phone, service, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, notes_for_admin")
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) console.error(error);
+    setRows((data as unknown as Applicant[]) ?? []);
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (!hasRole) return;
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("applicants")
-        .select("id, first_name, last_name, email, phone, service, current_stage, stage_entered_at, yardstik_status, yardstik_candidate_id, yardstik_screening_id, rejection_reason, rejected_at, created_at, notes_for_admin")
-        .order("created_at", { ascending: false })
-        .limit(500);
-      if (!cancelled) {
-        if (error) console.error(error);
-        setRows((data as Applicant[]) ?? []);
-        setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
+    fetchRows();
   }, [hasRole]);
+
+  useEffect(() => {
+    setBgNotes(open?.bg_check_notes ?? "");
+  }, [open?.id]);
 
   const filtered = useMemo(() => {
     if (filter === "all") return rows;
     if (filter === "rejected") return rows.filter((r) => r.current_stage === "rejected");
     return rows.filter((r) => r.current_stage !== "rejected");
   }, [rows, filter]);
+
+  const runDecision = async (decision: "clear" | "consider" | "fail") => {
+    if (!open) return;
+    setSubmitting(decision);
+    const { data, error } = await supabase.functions.invoke("manual-bg-check", {
+      body: { applicant_id: open.id, decision, notes: bgNotes || undefined },
+    });
+    setSubmitting(null);
+    if (error || (data as any)?.error) {
+      toast({ title: "Failed", description: error?.message ?? (data as any)?.error ?? "unknown", variant: "destructive" });
+      return;
+    }
+    toast({
+      title: `Marked ${decision.toUpperCase()}`,
+      description: decision === "clear"
+        ? "Advanced to interview_pending."
+        : decision === "consider"
+          ? "Flagged for review. SMS sent to Justin."
+          : "Rejected. Applicant rejection email sent.",
+    });
+    setOpen(null);
+    fetchRows();
+  };
 
   if (roleLoading) {
     return <main className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin h-6 w-6" /></main>;
@@ -153,8 +183,8 @@ export default function AdminApplicants() {
                         </td>
                         <td className="p-3 text-slate-700">{daysSince(a.stage_entered_at ?? a.created_at)}</td>
                         <td className="p-3">
-                          {a.yardstik_status ? (
-                            <Badge variant="outline" className={YARDSTIK_TONE[a.yardstik_status] ?? "bg-slate-100"}>{a.yardstik_status}</Badge>
+                          {a.bg_check_status ? (
+                            <Badge variant="outline" className={BG_TONE[a.bg_check_status] ?? "bg-slate-100"}>{a.bg_check_status}</Badge>
                           ) : <span className="text-slate-400">—</span>}
                         </td>
                       </tr>
@@ -171,30 +201,64 @@ export default function AdminApplicants() {
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{open?.first_name} {open?.last_name}</DialogTitle></DialogHeader>
           {open && (
-            <div className="space-y-3 text-sm">
-              <Row label="Email" value={open.email} />
-              <Row label="Phone" value={open.phone ?? "—"} />
-              <Row label="Service" value={open.service ?? "—"} />
-              <Row label="Stage" value={STAGE_LABEL[open.current_stage ?? ""] ?? open.current_stage ?? "—"} />
-              <Row label="Days in stage" value={daysSince(open.stage_entered_at ?? open.created_at)} />
-              <Row label="Yardstik status" value={open.yardstik_status ?? "—"} />
-              <Row label="Yardstik candidate" value={open.yardstik_candidate_id ?? "—"} />
-              <Row label="Checkr report" value={
-                open.yardstik_screening_id ? (
-                  <a className="text-blue-600 hover:underline inline-flex items-center gap-1"
-                     target="_blank" rel="noreferrer"
-                     href={`https://dashboard.yardstik.com/screenings/${open.yardstik_screening_id}`}>
-                    {open.yardstik_screening_id} <ExternalLink className="h-3 w-3" />
-                  </a>
-                ) : "—"
-              } />
-              {open.rejection_reason && <Row label="Rejection reason" value={open.rejection_reason} />}
+            <div className="space-y-4 text-sm">
+              <div className="space-y-3">
+                <Row label="Email" value={open.email} />
+                <Row label="Phone" value={open.phone ?? "—"} />
+                <Row label="Service" value={open.service ?? "—"} />
+                <Row label="Stage" value={STAGE_LABEL[open.current_stage ?? ""] ?? open.current_stage ?? "—"} />
+                <Row label="Days in stage" value={daysSince(open.stage_entered_at ?? open.created_at)} />
+                <Row label="BG status" value={open.bg_check_status ?? "—"} />
+                <Row label="BG provider" value={open.bg_check_provider ?? "—"} />
+                {open.bg_check_completed_at && (
+                  <Row label="BG completed" value={new Date(open.bg_check_completed_at).toLocaleString()} />
+                )}
+                {open.rejection_reason && <Row label="Rejection reason" value={open.rejection_reason} />}
+              </div>
+
               {open.notes_for_admin && (
                 <div className="pt-2 border-t">
                   <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">Notes from applicant</div>
                   <div className="text-slate-700 whitespace-pre-wrap">{open.notes_for_admin}</div>
                 </div>
               )}
+
+              <div className="pt-3 border-t">
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Manual background check</div>
+                <Textarea
+                  placeholder="Notes (e.g. 'Self-reported clean record, will verify with paid provider before activation')"
+                  value={bgNotes}
+                  onChange={(e) => setBgNotes(e.target.value)}
+                  className="mb-3"
+                  rows={3}
+                />
+                <div className="grid grid-cols-3 gap-2">
+                  <Button
+                    onClick={() => runDecision("clear")}
+                    disabled={!!submitting}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    {submitting === "clear" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldCheck className="h-4 w-4 mr-1" />CLEAR</>}
+                  </Button>
+                  <Button
+                    onClick={() => runDecision("consider")}
+                    disabled={!!submitting}
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    {submitting === "consider" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldAlert className="h-4 w-4 mr-1" />CONSIDER</>}
+                  </Button>
+                  <Button
+                    onClick={() => runDecision("fail")}
+                    disabled={!!submitting}
+                    variant="destructive"
+                  >
+                    {submitting === "fail" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldX className="h-4 w-4 mr-1" />FAIL</>}
+                  </Button>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-2">
+                  CLEAR → interview_pending. CONSIDER → flagged for review (SMS to Justin). FAIL → auto-reject + branded rejection email.
+                </p>
+              </div>
             </div>
           )}
         </DialogContent>
