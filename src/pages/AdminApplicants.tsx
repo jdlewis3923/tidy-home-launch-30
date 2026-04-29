@@ -27,9 +27,9 @@ type Applicant = {
   service: string | null;
   current_stage: string | null;
   stage_entered_at: string | null;
-  checkr_status: string | null;
-  checkr_candidate_id: string | null;
-  checkr_report_id: string | null;
+  yardstik_status: string | null;
+  yardstik_candidate_id: string | null;
+  yardstik_screening_id: string | null;
   rejection_reason: string | null;
   rejected_at: string | null;
   created_at: string;
@@ -52,7 +52,7 @@ const STAGE_TONE: Record<string, string> = {
   rejected: "bg-rose-100 text-rose-800",
 };
 
-const CHECKR_TONE: Record<string, string> = {
+const YARDSTIK_TONE: Record<string, string> = {
   pending: "bg-slate-100 text-slate-700",
   clear: "bg-emerald-100 text-emerald-800",
   consider: "bg-orange-100 text-orange-800",
@@ -81,7 +81,7 @@ export default function AdminApplicants() {
       setLoading(true);
       const { data, error } = await supabase
         .from("applicants")
-        .select("id, first_name, last_name, email, phone, service, current_stage, stage_entered_at, checkr_status, checkr_candidate_id, checkr_report_id, rejection_reason, rejected_at, created_at, notes_for_admin")
+        .select("id, first_name, last_name, email, phone, service, current_stage, stage_entered_at, yardstik_status, yardstik_candidate_id, yardstik_screening_id, rejection_reason, rejected_at, created_at, notes_for_admin")
         .order("created_at", { ascending: false })
         .limit(500);
       if (!cancelled) {
@@ -153,8 +153,8 @@ export default function AdminApplicants() {
                         </td>
                         <td className="p-3 text-slate-700">{daysSince(a.stage_entered_at ?? a.created_at)}</td>
                         <td className="p-3">
-                          {a.checkr_status ? (
-                            <Badge variant="outline" className={CHECKR_TONE[a.checkr_status] ?? "bg-slate-100"}>{a.checkr_status}</Badge>
+                          {a.yardstik_status ? (
+                            <Badge variant="outline" className={YARDSTIK_TONE[a.yardstik_status] ?? "bg-slate-100"}>{a.yardstik_status}</Badge>
                           ) : <span className="text-slate-400">—</span>}
                         </td>
                       </tr>
@@ -177,14 +177,14 @@ export default function AdminApplicants() {
               <Row label="Service" value={open.service ?? "—"} />
               <Row label="Stage" value={STAGE_LABEL[open.current_stage ?? ""] ?? open.current_stage ?? "—"} />
               <Row label="Days in stage" value={daysSince(open.stage_entered_at ?? open.created_at)} />
-              <Row label="Checkr status" value={open.checkr_status ?? "—"} />
-              <Row label="Checkr candidate" value={open.checkr_candidate_id ?? "—"} />
+              <Row label="Yardstik status" value={open.yardstik_status ?? "—"} />
+              <Row label="Yardstik candidate" value={open.yardstik_candidate_id ?? "—"} />
               <Row label="Checkr report" value={
-                open.checkr_report_id ? (
+                open.yardstik_screening_id ? (
                   <a className="text-blue-600 hover:underline inline-flex items-center gap-1"
                      target="_blank" rel="noreferrer"
-                     href={`https://dashboard.checkr.com/reports/${open.checkr_report_id}`}>
-                    {open.checkr_report_id} <ExternalLink className="h-3 w-3" />
+                     href={`https://dashboard.yardstik.com/screenings/${open.yardstik_screening_id}`}>
+                    {open.yardstik_screening_id} <ExternalLink className="h-3 w-3" />
                   </a>
                 ) : "—"
               } />
