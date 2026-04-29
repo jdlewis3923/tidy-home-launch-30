@@ -92,7 +92,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
             <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">
               Login
             </Link>
-            <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: ctaText }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
+            <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: ctaText }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors animate-pulse-gold">
               {t(ctaText)}
             </button>
           </div>
@@ -118,7 +118,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
             </NavLink>
           ))}
           <LanguageToggle />
-          <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: ctaText }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
+          <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: ctaText }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors animate-pulse-gold">
             {t(ctaText)}
           </button>
         </div>
@@ -149,7 +149,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
               {t(l.label)}
             </NavLink>
           ))}
-          <button id="cta-navbar-mobile" data-track="cta_navbar_mobile" onClick={() => { setMobileOpen(false); pushEvent("cta_click", { cta_id: "navbar_mobile", cta_text: ctaText }); onOpenPopup(); }} className="w-full mt-3 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors">
+          <button id="cta-navbar-mobile" data-track="cta_navbar_mobile" onClick={() => { setMobileOpen(false); pushEvent("cta_click", { cta_id: "navbar_mobile", cta_text: ctaText }); onOpenPopup(); }} className="w-full mt-3 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors animate-pulse-gold">
             {t(ctaText)}
           </button>
         </div>
