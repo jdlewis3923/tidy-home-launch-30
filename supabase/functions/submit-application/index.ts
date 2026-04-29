@@ -24,6 +24,9 @@ const Body = z.object({
   phone: z.string().trim().min(7).max(30).optional(),
   service: z.enum(['cleaning', 'lawn', 'detail']),
   zip: z.string().trim().max(10).optional(),
+  experience_years: z.number().int().min(0).max(60).optional(),
+  has_vehicle: z.boolean().optional(),
+  has_supplies: z.boolean().optional(),
   notes_for_admin: z.string().max(2000).optional(),
 });
 
