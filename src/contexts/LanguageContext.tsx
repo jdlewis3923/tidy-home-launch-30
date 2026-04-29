@@ -27,6 +27,8 @@ const translations: Record<string, string> = {
   "4.9★ Average Rating": "4.9★ Calificación Promedio",
   "Serving Kendall & Pinecrest": "Sirviendo Kendall y Pinecrest",
   "From $85/mo": "Desde $85/mes",
+  "One Monthly Plan": "Un Plan Mensual",
+  "No Rebooking": "Sin Reagendar",
   "One Simple Monthly Plan": "Un Solo Plan Mensual",
   "Zero Rebooking Required": "Sin Necesidad de Reagendar",
 
