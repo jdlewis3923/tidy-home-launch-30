@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import tidyLogo from "@/assets/tidy-logo.png";
+import SparkleField from "@/components/landing/SparkleField";
 
 // Launch target: June 1, 2026 at 9:00 AM Eastern Time (UTC-4 in June, EDT).
 const LAUNCH_AT = new Date("2026-06-01T13:00:00Z").getTime();
