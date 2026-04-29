@@ -460,6 +460,9 @@ export default function AdminKpis() {
                     <Link to="/admin/agents" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
                       Agents & contractors
                     </Link>
+                    <Link to="/admin/applicants" onClick={() => setAdminMenuOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-800 hover:bg-slate-100">
+                      Applicants pipeline
+                    </Link>
                     <div className="my-1 h-px bg-slate-100" />
                     <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                       Operations
