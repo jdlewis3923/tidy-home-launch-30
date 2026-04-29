@@ -353,6 +353,7 @@ const AdminDocuments = () => {
                     onPrint={handlePrint}
                     onCopyLink={handleCopyLink}
                     onArchive={handleArchive}
+                    onUploadFor={() => setUploadOpen(true)}
                   />
                 );
               })
