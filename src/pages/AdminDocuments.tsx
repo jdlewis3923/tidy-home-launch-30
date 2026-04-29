@@ -52,15 +52,23 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 
+// Preferred display order. Any extra categories present in the data
+// (e.g. seeded "HR", "Operations", "Contracts", "Onboarding", "Brand")
+// are appended automatically so seeded rows are never hidden.
 const CATEGORIES = [
   "Contractor Onboarding",
-  "Email Templates",
+  "Onboarding",
+  "HR",
+  "Contracts",
   "Signed Contracts",
-  "Financial + Strategy",
+  "Operations",
   "Operational",
+  "Email Templates",
+  "Financial + Strategy",
+  "Brand",
   "Brand Assets",
 ] as const;
-type Category = (typeof CATEGORIES)[number];
+type Category = (typeof CATEGORIES)[number] | string;
 
 type Doc = {
   id: string;
