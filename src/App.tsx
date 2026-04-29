@@ -13,9 +13,11 @@ import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
 import ChatbotMount from "@/components/chatbot/ChatbotMount";
+import { useSiteLive } from "@/hooks/useSiteLive";
 
 // Eager: homepage, terms/privacy, NotFound (small + always-needed)
 import Index from "./pages/Index.tsx";
+import ComingSoon from "./pages/ComingSoon.tsx";
 import Terms from "./pages/Terms.tsx";
 import Privacy from "./pages/Privacy.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -51,6 +53,7 @@ const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
 const AdminAgents = lazy(() => import("./pages/AdminAgents.tsx"));
 const AdminNotificationSettings = lazy(() => import("./pages/AdminNotificationSettings.tsx"));
 const AdminCosts = lazy(() => import("./pages/AdminCosts.tsx"));
+const AdminSiteStatus = lazy(() => import("./pages/AdminSiteStatus.tsx"));
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
 
@@ -78,6 +81,19 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Routes that remain accessible when an admin has toggled the site OFF.
+// Admin can still log in and flip it back on; everything else shows ComingSoon.
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon"];
+
+const SiteGate = ({ children }: { children: React.ReactNode }) => {
+  const { isLive, isLoading } = useSiteLive();
+  const location = useLocation();
+  const isWhitelisted = ALWAYS_OPEN_PREFIXES.some((p) => location.pathname.startsWith(p));
+  if (isLoading) return <RouteFallback />;
+  if (!isLive && !isWhitelisted) return <ComingSoon />;
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <HelmetProvider>
@@ -90,8 +106,9 @@ const App = () => (
             <MetaPixel />
             <ChatbotMount />
             <RouteTracker>
-              <Suspense fallback={<RouteFallback />}>
-                <Routes>
+              <SiteGate>
+                <Suspense fallback={<RouteFallback />}>
+                  <Routes>
                   <Route path="/" element={<Index />} />
                   {/* Google Ads landing pages */}
                   <Route path="/house-cleaning" element={<HouseCleaning />} />
@@ -164,6 +181,8 @@ const App = () => (
                   <Route path="/admin/agents" element={<AdminAgents />} />
                   <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
                   <Route path="/admin/costs" element={<AdminCosts />} />
+                  <Route path="/admin/site-status" element={<AdminSiteStatus />} />
+                  <Route path="/coming-soon" element={<ComingSoon />} />
                   <Route
                     path="/dashboard/notifications"
                     element={CUSTOMER_DASHBOARD_ENABLED ? <CustomerNotifications /> : <Navigate to="/" replace />}
@@ -171,8 +190,9 @@ const App = () => (
                   <Route path="/add/:token" element={<AddTokenLanding />} />
 
                   <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
+                  </Routes>
+                </Suspense>
+              </SiteGate>
             </RouteTracker>
           </BrowserRouter>
         </TooltipProvider>
