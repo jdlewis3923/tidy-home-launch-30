@@ -78,6 +78,8 @@ export default function AdminApplicants() {
   const [open, setOpen] = useState<Applicant | null>(null);
   const [bgNotes, setBgNotes] = useState("");
   const [submitting, setSubmitting] = useState<string | null>(null);
+  const [events, setEvents] = useState<Array<{ id: string; event: string; metadata: any; created_at: string }>>([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   const fetchRows = async () => {
     setLoading(true);
@@ -91,6 +93,19 @@ export default function AdminApplicants() {
     setLoading(false);
   };
 
+  const fetchEvents = async (applicantId: string) => {
+    setEventsLoading(true);
+    const { data, error } = await (supabase as any)
+      .from("onboarding_events")
+      .select("id, event, metadata, created_at")
+      .eq("applicant_id", applicantId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) console.error(error);
+    setEvents(data ?? []);
+    setEventsLoading(false);
+  };
+
   useEffect(() => {
     if (!hasRole) return;
     fetchRows();
@@ -98,6 +113,8 @@ export default function AdminApplicants() {
 
   useEffect(() => {
     setBgNotes(open?.bg_check_notes ?? "");
+    if (open?.id) fetchEvents(open.id);
+    else setEvents([]);
   }, [open?.id]);
 
   const filtered = useMemo(() => {
