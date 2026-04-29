@@ -1003,6 +1003,38 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_events: {
+        Row: {
+          applicant_id: string | null
+          created_at: string
+          event: string
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          applicant_id?: string | null
+          created_at?: string
+          event: string
+          id?: string
+          metadata?: Json
+        }
+        Update: {
+          applicant_id?: string | null
+          created_at?: string
+          event?: string
+          id?: string
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_events_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address_line1: string | null
@@ -1293,6 +1325,50 @@ export type Database = {
           stripe_product_id?: string | null
         }
         Relationships: []
+      }
+      stripe_connect_pending: {
+        Row: {
+          applicant_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          onboarding_url: string | null
+          role: string | null
+          status: string
+          stripe_account_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          applicant_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          onboarding_url?: string | null
+          role?: string | null
+          status?: string
+          stripe_account_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          onboarding_url?: string | null
+          role?: string | null
+          status?: string
+          stripe_account_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_connect_pending_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stripe_events: {
         Row: {
