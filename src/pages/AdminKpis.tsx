@@ -24,6 +24,7 @@ import {
   ChevronDown,
   ChevronRight,
   Loader2,
+  Menu,
   RefreshCw,
   Wrench,
   X,
