@@ -137,13 +137,25 @@ const AdminDocuments = () => {
 
   const grouped = useMemo(() => {
     const map = new Map<string, Doc[]>();
+    // Seed with the preferred order
     for (const c of CATEGORIES) map.set(c, []);
+    // Add any categories actually present that aren't in the preferred list
     for (const d of filtered) {
       if (!map.has(d.category)) map.set(d.category, []);
       map.get(d.category)!.push(d);
     }
     return map;
   }, [filtered]);
+
+  // Render order: preferred categories first (only if they have docs OR are
+  // the canonical empty set), then any extras alphabetically.
+  const orderedCategories = useMemo(() => {
+    const preferred = CATEGORIES.filter((c) => (grouped.get(c)?.length ?? 0) > 0);
+    const extras = Array.from(grouped.keys())
+      .filter((k) => !CATEGORIES.includes(k as any) && (grouped.get(k)?.length ?? 0) > 0)
+      .sort();
+    return [...preferred, ...extras];
+  }, [grouped]);
 
   const handleView = useCallback(async (doc: Doc) => {
     const { data, error } = await supabase.storage
