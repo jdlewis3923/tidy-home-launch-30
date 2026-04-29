@@ -256,8 +256,32 @@ export default function AdminApplicants() {
                   </Button>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-2">
-                  CLEAR → interview_pending. CONSIDER → flagged for review (SMS to Justin). FAIL → auto-reject + branded rejection email.
+                  CLEAR → interview. CONSIDER → stays in BG review. FAIL → reject.
                 </p>
+              </div>
+
+              <div className="pt-3 border-t">
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Pipeline actions</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("schedule_interview")}>
+                    {submitting === "schedule_interview" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Schedule interview"}
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("send_offer")}>
+                    {submitting === "send_offer" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send offer"}
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("send_contract")}>
+                    {submitting === "send_contract" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send contract"}
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("mark_demo_passed")}>
+                    {submitting === "mark_demo_passed" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Mark demo passed"}
+                  </Button>
+                  <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={!!submitting} onClick={() => runAction("activate")}>
+                    {submitting === "activate" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Activate"}
+                  </Button>
+                  <Button size="sm" variant="destructive" disabled={!!submitting} onClick={() => runAction("reject")}>
+                    {submitting === "reject" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reject"}
+                  </Button>
+                </div>
               </div>
             </div>
           )}
