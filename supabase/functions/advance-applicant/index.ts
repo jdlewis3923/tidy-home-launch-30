@@ -224,6 +224,28 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'notes_required_for_consider' }, 400);
   }
 
+  // ACTIVATE GATE: must be oriented AND compliance_complete=true.
+  if (action === 'activate') {
+    const { data: pre } = await admin
+      .from('applicants')
+      .select('current_stage, compliance_complete')
+      .eq('id', applicant_id)
+      .single();
+    if (!pre) return jsonResponse({ error: 'applicant_not_found' }, 404);
+    if (pre.current_stage !== 'oriented') {
+      return jsonResponse({
+        error: 'activation_blocked',
+        reason: `applicant must be in 'oriented' stage (currently '${pre.current_stage}')`,
+      }, 400);
+    }
+    if (!pre.compliance_complete) {
+      return jsonResponse({
+        error: 'activation_blocked',
+        reason: 'compliance_complete is false (COI / bond / auto / EIN missing)',
+      }, 400);
+    }
+  }
+
   const update = applyTransition(action);
   if (notes) update.bg_check_notes = notes;
 
