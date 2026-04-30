@@ -479,6 +479,51 @@ export type Database = {
         }
         Relationships: []
       }
+      email_send_log: {
+        Row: {
+          brevo_message_id: string | null
+          channel: string
+          delivered_at: string | null
+          error_message: string | null
+          id: string
+          payload: Json
+          recipient: string
+          status: string
+          template_name: string
+          triggered_at: string
+          triggered_by: string | null
+          twilio_sid: string | null
+        }
+        Insert: {
+          brevo_message_id?: string | null
+          channel: string
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          recipient: string
+          status: string
+          template_name: string
+          triggered_at?: string
+          triggered_by?: string | null
+          twilio_sid?: string | null
+        }
+        Update: {
+          brevo_message_id?: string | null
+          channel?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          recipient?: string
+          status?: string
+          template_name?: string
+          triggered_at?: string
+          triggered_by?: string | null
+          twilio_sid?: string | null
+        }
+        Relationships: []
+      }
       integration_logs: {
         Row: {
           created_at: string
