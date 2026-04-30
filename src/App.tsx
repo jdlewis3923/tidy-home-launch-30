@@ -196,6 +196,7 @@ const App = () => (
                   <Route path="/admin/site-status" element={<AdminSiteStatus />} />
                   <Route path="/admin/documents" element={<AdminDocuments />} />
                   <Route path="/admin/applicants" element={<AdminApplicants />} />
+                  <Route path="/admin/orientations" element={<AdminOrientations />} />
                   <Route path="/admin/email-health" element={<AdminEmailHealth />} />
                   <Route path="/apply" element={<Apply />} />
                   <Route path="/coming-soon" element={<ComingSoon />} />
