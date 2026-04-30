@@ -69,3 +69,8 @@ verify_jwt = false
 [functions.fire-email-test-suite]
 verify_jwt = false
 
+# Called by pg_cron every 5 min (no JWT) and by the admin "Test fire" button.
+# Reads only the admin-only social_launch_posts table; never accepts caption/image_url from caller.
+[functions.social-launch-publisher]
+verify_jwt = false
+
