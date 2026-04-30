@@ -31,9 +31,45 @@ const BodySchema = z.object({
   content_sid: z.string().regex(/^HX[a-zA-Z0-9]+$/).optional(),
   content_variables: z.record(z.string()).optional(),
   idempotency_key: z.string().min(1).max(200),
+  template_name: z.string().min(1).max(120).optional(),
+  triggered_by: z.string().min(1).max(120).optional(),
 }).refine((v) => !!v.body || !!v.content_sid, {
   message: 'either body or content_sid required',
 });
+
+async function logSmsSend(args: {
+  template_name: string;
+  recipient: string;
+  triggered_by?: string | null;
+  twilio_sid?: string | null;
+  status: 'queued' | 'sent' | 'failed';
+  error_message?: string | null;
+  payload?: Record<string, unknown>;
+}) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/email_send_log`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({
+        template_name: args.template_name,
+        channel: 'sms',
+        recipient: args.recipient,
+        triggered_by: args.triggered_by ?? null,
+        twilio_sid: args.twilio_sid ?? null,
+        status: args.status,
+        error_message: args.error_message ?? null,
+        payload: args.payload ?? {},
+      }),
+    });
+  } catch (e) {
+    console.warn('[email_send_log:sms] insert failed', (e as Error).message);
+  }
+}
 
 async function isAuthorized(req: Request): Promise<boolean> {
   const auth = req.headers.get('Authorization') ?? '';
