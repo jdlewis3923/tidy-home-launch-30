@@ -15,6 +15,8 @@ export default function TrustStrip() {
       <span className="mx-1.5 text-ink-faint">·</span>
       Insured
       <span className="mx-1.5 text-ink-faint">·</span>
+      Bilingual Pros (EN + ES)
+      <span className="mx-1.5 text-ink-faint">·</span>
       Same Pro Every Visit
       <span className="mx-1.5 text-ink-faint">·</span>
       Starting at $135/mo
