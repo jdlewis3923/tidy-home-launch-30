@@ -58,6 +58,16 @@ export default function AdminChrome() {
     hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
   });
 
+  // Days-to-launch badge — counts down to 2026-05-26.
+  const launchDate = new Date(2026, 4, 26); // May = month 4 (0-indexed)
+  const today = new Date(time.getFullYear(), time.getMonth(), time.getDate());
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const daysToLaunch = Math.ceil((launchDate.getTime() - today.getTime()) / msPerDay);
+  const launched = daysToLaunch <= 0;
+  const countdownLabel = launched
+    ? "LAUNCHED"
+    : `${daysToLaunch} day${daysToLaunch === 1 ? "" : "s"} to launch`;
+
   return (
     <>
       {/* === Fixed ambient HUD background === */}
@@ -78,6 +88,18 @@ export default function AdminChrome() {
           <span className="admin-hud-path">{pathname.replace("/admin", "ADMIN") || "ADMIN"}</span>
         </div>
         <div className="admin-hud-topbar__right">
+          {/* Days-to-launch countdown badge */}
+          <span
+            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]"
+            style={{
+              backgroundColor: "#0D1117",
+              color: "#F4C430",
+              border: "1px solid rgba(244,196,48,0.35)",
+            }}
+            title={launched ? "Tidy is live." : `Launching ${launchDate.toDateString()}`}
+          >
+            {countdownLabel}
+          </span>
           <span className="admin-hud-meta">SYS</span>
           <Activity className="h-3 w-3 text-[hsl(var(--gold))]" />
           <span className="admin-hud-meta">·</span>

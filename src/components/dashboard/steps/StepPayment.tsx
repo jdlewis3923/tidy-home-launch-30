@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Lock, ShieldCheck, CreditCard } from 'lucide-react';
+import { Lock, ShieldCheck, CreditCard, BadgeCheck, Banknote, X as XIcon } from 'lucide-react';
 import {
   ConfigState,
   calculatePricing,
@@ -239,10 +239,49 @@ export default function StepPayment({ state, onChange }: Props) {
         </div>
       </div>
 
-      {/* Trust strip */}
+      {/* 48-Hour Re-do Guarantee — prominent near price summary. */}
+      <div
+        className={`flex items-center gap-3 rounded-xl border-2 border-gold/40 bg-gold/10 px-4 py-3 ${reveal(0)}`}
+        style={{ transitionDelay: '180ms' }}
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold/20 ring-1 ring-gold/50">
+          <BadgeCheck className="h-5 w-5 text-gold" strokeWidth={2.25} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[13px] font-bold text-ink leading-tight">48-hour Re-do Guarantee</p>
+          <p className="text-[11px] text-ink-soft mt-0.5 leading-snug">
+            Not happy? We come back free within 48 hours.
+          </p>
+        </div>
+      </div>
+
+      {/* Pre-checkout trust badge row — bonded / insured / vetted / cancel anytime. */}
+      <div
+        className={`grid grid-cols-2 gap-2 sm:grid-cols-4 ${reveal(0)}`}
+        style={{ transitionDelay: '220ms' }}
+      >
+        {[
+          { icon: Banknote,    label: 'Bonded $25k' },
+          { icon: ShieldCheck, label: '$1M Insured' },
+          { icon: BadgeCheck,  label: 'Background Checked' },
+          { icon: XIcon,       label: 'Cancel Anytime' },
+        ].map(({ icon: Icon, label }) => (
+          <div
+            key={label}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-hairline bg-white px-2 py-2.5 text-center"
+          >
+            <Icon className="h-3.5 w-3.5 text-ink-soft" strokeWidth={2} />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-soft">
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Payment-security trust strip (encrypted / pci / stripe). */}
       <div
         className={`grid grid-cols-3 gap-2 ${reveal(0)}`}
-        style={{ transitionDelay: '220ms' }}
+        style={{ transitionDelay: '260ms' }}
       >
         {[
           { icon: Lock, label: 'encrypted' },
