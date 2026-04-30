@@ -171,8 +171,15 @@ Deno.serve(async (req) => {
 
   // AuthN: signed-in admin OR service-role bypass (for E2E + internal calls).
   const auth = req.headers.get('Authorization') ?? '';
-  if (!auth.startsWith('Bearer ')) return jsonResponse({ error: 'unauthorized' }, 401);
-  const token = auth.replace('Bearer ', '').trim();
+  const apiKeyHeader = req.headers.get('apikey') ?? '';
+  console.log('[advance-applicant] auth header present:', auth.length > 0, 'apikey header present:', apiKeyHeader.length > 0);
+  // Accept token from Authorization OR apikey header (Supabase platform may strip Authorization on certain configs).
+  const tokenSource = auth.startsWith('Bearer ') ? auth.replace('Bearer ', '').trim() : apiKeyHeader.trim();
+  if (!tokenSource) {
+    console.warn('[advance-applicant] no bearer or apikey');
+    return jsonResponse({ error: 'unauthorized', reason: 'no_token' }, 401);
+  }
+  const token = tokenSource;
 
   // Detect service-role token by inspecting the JWT 'role' claim.
   function jwtRole(t: string): string | null {
