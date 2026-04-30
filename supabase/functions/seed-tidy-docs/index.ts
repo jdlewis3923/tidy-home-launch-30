@@ -62,9 +62,19 @@ Deno.serve(async (req) => {
 
   const { data: existing } = await admin
     .from('company_documents').select('filename').is('archived_at', null);
-  const have = new Set((existing ?? []).map((r: any) => r.filename));
+  // Idempotency: dedupe by leading "NN_" sequence number so re-seeding never
+  // creates duplicate slots even if the descriptive part of the filename drifts.
+  const seqOf = (fn: string): string | null => (fn.match(/^(\d{1,3})_/)?.[1] ?? null);
+  const haveSeqs = new Set(
+    (existing ?? [])
+      .map((r: any) => seqOf(String(r.filename)))
+      .filter((s): s is string => !!s),
+  );
 
-  const toInsert = DOCS.filter((d) => !have.has(d.filename)).map((d) => ({
+  const toInsert = DOCS.filter((d) => {
+    const s = seqOf(d.filename);
+    return s ? !haveSeqs.has(s) : true;
+  }).map((d) => ({
     filename: d.filename,
     category: d.category,
     tags: ['tidy-docs', d.category.toLowerCase()],
