@@ -627,13 +627,21 @@ export default function AdminApplicants() {
                         <Button size="sm" disabled={!!submitting} onClick={() => runAction("send_contract")} className="bg-[#1FA1F0] hover:bg-[#1990da] text-white">Send contract</Button>
                       )}
                       {open.current_stage === "contract_signed" && (
-                        <Button size="sm" disabled={!!submitting} onClick={() => runAction("mark_demo_passed")} className="bg-teal-600 hover:bg-teal-700 text-white">Mark demo passed</Button>
+                        <Button size="sm" disabled={!!submitting} onClick={() => runAction("mark_oriented")} className="bg-teal-600 hover:bg-teal-700 text-white">Mark orientation complete</Button>
                       )}
-                      {open.current_stage === "demo_passed" && (
-                        <Button size="sm" disabled={!!submitting} onClick={() => runAction("activate")} className="bg-emerald-600 hover:bg-emerald-700 text-white">Activate</Button>
+                      {open.current_stage === "oriented" && (
+                        <Button
+                          size="sm"
+                          disabled={!!submitting || !open.compliance_complete}
+                          title={open.compliance_complete ? "" : "Compliance docs required (COI / bond / auto / EIN) before activation"}
+                          onClick={() => runAction("activate")}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                        >
+                          Activate{!open.compliance_complete ? " (compliance required)" : ""}
+                        </Button>
                       )}
                       {/* Always allow scheduling if not yet scheduled */}
-                      {!["interview_pending", "offer_sent", "contract_signed", "demo_passed", "active", "rejected"].includes(open.current_stage ?? "") && (
+                      {!["interview_pending", "offer_sent", "contract_signed", "oriented", "active", "rejected"].includes(open.current_stage ?? "") && (
                         <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("schedule_interview")}>Schedule interview</Button>
                       )}
                     </div>
