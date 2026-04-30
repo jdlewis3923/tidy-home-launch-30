@@ -110,12 +110,12 @@ function applyTransition(action: Action) {
       u.bg_check_status = 'clear';
       u.bg_check_provider = 'manual';
       u.bg_check_completed_at = new Date().toISOString();
-      u.current_stage = 'interview_pending';
+      u.current_stage = 'interview';
       break;
     case 'consider':
       u.bg_check_status = 'consider';
       u.bg_check_provider = 'manual';
-      u.current_stage = 'background_check_review';
+      u.current_stage = 'bg_check';
       break;
     case 'fail':
       u.bg_check_status = 'fail';
@@ -125,7 +125,7 @@ function applyTransition(action: Action) {
       u.rejected_at = new Date().toISOString();
       u.rejection_reason = 'Background check failed';
       break;
-    case 'schedule_interview': u.current_stage = 'interview_pending'; break;
+    case 'schedule_interview': u.current_stage = 'interview'; break;
     case 'send_offer':         u.current_stage = 'offer_sent'; break;
     case 'send_contract':      u.current_stage = 'contract_signed'; break;
     case 'mark_oriented':      u.current_stage = 'oriented'; break;

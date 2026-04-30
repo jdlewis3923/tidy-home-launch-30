@@ -210,9 +210,14 @@ export type Database = {
           bg_check_provider: string | null
           bg_check_status: string | null
           bilingual_fluency_confirmed: boolean
-          compliance_complete: boolean
+          bond_status: string | null
+          business_bank_account_confirmed: boolean
+          coi_auto_status: string | null
+          coi_general_liability_status: string | null
+          compliance_complete: boolean | null
           created_at: string
           current_stage: string | null
+          ein: string | null
           email: string
           experience_years: number | null
           first_name: string
@@ -224,6 +229,7 @@ export type Database = {
           phone: string | null
           rejected_at: string | null
           rejection_reason: string | null
+          role: string | null
           service: string | null
           stage_entered_at: string | null
           updated_at: string
@@ -235,9 +241,14 @@ export type Database = {
           bg_check_provider?: string | null
           bg_check_status?: string | null
           bilingual_fluency_confirmed?: boolean
-          compliance_complete?: boolean
+          bond_status?: string | null
+          business_bank_account_confirmed?: boolean
+          coi_auto_status?: string | null
+          coi_general_liability_status?: string | null
+          compliance_complete?: boolean | null
           created_at?: string
           current_stage?: string | null
+          ein?: string | null
           email: string
           experience_years?: number | null
           first_name: string
@@ -249,6 +260,7 @@ export type Database = {
           phone?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
+          role?: string | null
           service?: string | null
           stage_entered_at?: string | null
           updated_at?: string
@@ -260,9 +272,14 @@ export type Database = {
           bg_check_provider?: string | null
           bg_check_status?: string | null
           bilingual_fluency_confirmed?: boolean
-          compliance_complete?: boolean
+          bond_status?: string | null
+          business_bank_account_confirmed?: boolean
+          coi_auto_status?: string | null
+          coi_general_liability_status?: string | null
+          compliance_complete?: boolean | null
           created_at?: string
           current_stage?: string | null
+          ein?: string | null
           email?: string
           experience_years?: number | null
           first_name?: string
@@ -274,6 +291,7 @@ export type Database = {
           phone?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
+          role?: string | null
           service?: string | null
           stage_entered_at?: string | null
           updated_at?: string
