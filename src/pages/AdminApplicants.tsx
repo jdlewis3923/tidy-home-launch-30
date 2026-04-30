@@ -583,6 +583,15 @@ export default function AdminApplicants() {
                         BG: {open.bg_check_status ?? "pending"}
                       </span>
                       <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 capitalize ${ROLE_BADGE[role]}`}>{role}</span>
+                      {open.bilingual_fluency_confirmed ? (
+                        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200">
+                          Bilingual: ✅ Confirmed
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 bg-red-50 text-red-700 ring-red-200">
+                          Bilingual: ❌ NOT confirmed
+                        </span>
+                      )}
                     </div>
                     <div className="mt-2 text-[11px] text-slate-500">
                       Applied {relTime(open.created_at)} · Updated {relTime(open.updated_at ?? open.stage_entered_at ?? open.created_at)}
