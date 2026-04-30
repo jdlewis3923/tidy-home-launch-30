@@ -168,7 +168,7 @@ const STATUS_FILTERS: Array<{ key: string; label: string }> = [
   { key: "interview_pending", label: "Interview" },
   { key: "offer_sent", label: "Offer" },
   { key: "contract_signed", label: "Contract" },
-  { key: "demo_passed", label: "Demo" },
+  { key: "oriented", label: "Orientation" },
   { key: "active", label: "Active" },
   { key: "rejected", label: "Rejected" },
 ];
