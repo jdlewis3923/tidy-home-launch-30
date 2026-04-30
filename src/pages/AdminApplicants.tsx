@@ -68,7 +68,7 @@ type Applicant = {
 type AdvanceAction =
   | "clear" | "consider" | "fail"
   | "schedule_interview" | "send_offer" | "send_contract"
-  | "mark_demo_passed" | "activate" | "reject";
+  | "mark_oriented" | "activate" | "reject";
 
 // ---------- Visual maps ----------
 const STAGE_LABEL: Record<string, string> = {
