@@ -18,7 +18,7 @@ import { Link, Navigate } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Loader2, ShieldCheck, ShieldAlert, ShieldX,
   Search, Download, Plus, Copy, Check, MapPin, Briefcase, Clock,
-  Mail, Phone as PhoneIcon, FileText, UserPlus, AlertTriangle,
+  Mail, Phone as PhoneIcon, FileText, UserPlus, AlertTriangle, CalendarDays,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
