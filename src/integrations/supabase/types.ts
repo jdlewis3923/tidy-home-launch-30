@@ -1716,6 +1716,30 @@ export type Database = {
           },
         ]
       }
+      waitlist: {
+        Row: {
+          email: string
+          id: string
+          requested_at: string
+          source: string
+          zip: string
+        }
+        Insert: {
+          email: string
+          id?: string
+          requested_at?: string
+          source?: string
+          zip: string
+        }
+        Update: {
+          email?: string
+          id?: string
+          requested_at?: string
+          source?: string
+          zip?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
