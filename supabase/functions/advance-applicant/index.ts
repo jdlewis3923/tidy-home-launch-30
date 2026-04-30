@@ -174,9 +174,20 @@ Deno.serve(async (req) => {
   if (!auth.startsWith('Bearer ')) return jsonResponse({ error: 'unauthorized' }, 401);
   const token = auth.replace('Bearer ', '').trim();
 
+  // Detect service-role token by inspecting the JWT 'role' claim.
+  function jwtRole(t: string): string | null {
+    try {
+      const parts = t.split('.');
+      if (parts.length !== 3) return null;
+      const pad = (s: string) => s + '='.repeat((4 - (s.length % 4)) % 4);
+      const payload = JSON.parse(atob(pad(parts[1].replace(/-/g, '+').replace(/_/g, '/'))));
+      return payload?.role ?? null;
+    } catch { return null; }
+  }
+
   let userId: string | null = null;
-  if (token === SUPABASE_SERVICE_ROLE_KEY) {
-    // Service-role bypass — used by E2E test runner / internal pipelines.
+  const role = jwtRole(token);
+  if (role === 'service_role') {
     userId = '00000000-0000-0000-0000-000000000000';
     console.log('[advance-applicant] service-role bypass');
   } else {
@@ -186,7 +197,10 @@ Deno.serve(async (req) => {
     });
     const { data: userRes } = await userClient.auth.getUser();
     userId = userRes?.user?.id ?? null;
-    if (!userId) return jsonResponse({ error: 'unauthorized' }, 401);
+    if (!userId) {
+      console.warn('[advance-applicant] no user from token, role=', role);
+      return jsonResponse({ error: 'unauthorized' }, 401);
+    }
     const { data: roleRow } = await admin
       .from('user_roles').select('role').eq('user_id', userId).eq('role', 'admin').maybeSingle();
     if (!roleRow) return jsonResponse({ error: 'forbidden' }, 403);
