@@ -527,6 +527,15 @@ export default function AdminApplicants() {
                         <MapPin className="h-3 w-3" /> {a.zip}
                       </span>
                     )}
+                    {a.bilingual_fluency_confirmed ? (
+                      <span className="text-[11px] font-semibold px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" title="Confirmed bilingual">
+                        🌐 ES+EN
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-semibold px-2 py-1 rounded-md bg-red-50 text-red-700 ring-1 ring-red-200" title="Bilingual fluency NOT confirmed">
+                        ⚠ Not bilingual
+                      </span>
+                    )}
                   </div>
                   <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 shrink-0 ${STAGE_PILL[stage] ?? STAGE_PILL.applied}`}>
                     {STAGE_LABEL[stage] ?? stage}
