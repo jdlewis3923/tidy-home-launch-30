@@ -64,6 +64,7 @@ type Applicant = {
   updated_at: string | null;
   notes_for_admin: string | null;
   compliance_complete: boolean | null;
+  bilingual_fluency_confirmed: boolean | null;
 };
 
 type Orientation = {
