@@ -60,6 +60,10 @@ export default function Apply() {
     e.preventDefault();
     if (!form.service) { toast({ title: "Please pick a role", variant: "destructive" }); return; }
     if (!form.zip)     { toast({ title: "Please pick your ZIP code", variant: "destructive" }); return; }
+    if (!form.bilingual_fluency_confirmed) {
+      toast({ title: "Bilingual fluency required", description: "You must confirm full English + Spanish fluency to apply.", variant: "destructive" });
+      return;
+    }
     setSubmitting(true);
     try {
       const payload: Record<string, unknown> = {
@@ -70,6 +74,7 @@ export default function Apply() {
         zip: form.zip,
         has_vehicle: form.has_vehicle,
         has_supplies: form.has_supplies,
+        bilingual_fluency_confirmed: form.bilingual_fluency_confirmed,
       };
       if (form.phone) payload.phone = form.phone.trim();
       if (form.experience_years) payload.experience_years = parseInt(form.experience_years, 10);
