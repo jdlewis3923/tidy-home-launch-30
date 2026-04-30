@@ -209,6 +209,7 @@ export type Database = {
           bg_check_notes: string | null
           bg_check_provider: string | null
           bg_check_status: string | null
+          bilingual_fluency_confirmed: boolean
           compliance_complete: boolean
           created_at: string
           current_stage: string | null
@@ -233,6 +234,7 @@ export type Database = {
           bg_check_notes?: string | null
           bg_check_provider?: string | null
           bg_check_status?: string | null
+          bilingual_fluency_confirmed?: boolean
           compliance_complete?: boolean
           created_at?: string
           current_stage?: string | null
@@ -257,6 +259,7 @@ export type Database = {
           bg_check_notes?: string | null
           bg_check_provider?: string | null
           bg_check_status?: string | null
+          bilingual_fluency_confirmed?: boolean
           compliance_complete?: boolean
           created_at?: string
           current_stage?: string | null

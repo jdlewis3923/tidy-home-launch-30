@@ -64,6 +64,7 @@ type Applicant = {
   updated_at: string | null;
   notes_for_admin: string | null;
   compliance_complete: boolean | null;
+  bilingual_fluency_confirmed: boolean | null;
 };
 
 type Orientation = {
@@ -208,7 +209,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -329,6 +330,13 @@ export default function AdminApplicants() {
   // ----- Actions -----
   const runAction = async (action: AdvanceAction) => {
     if (!open) return;
+    // Bilingual gate — block APPROVE (clear) and SEND OFFER if not confirmed
+    if ((action === "clear" || action === "send_offer") && !open.bilingual_fluency_confirmed) {
+      toast.error("Bilingual fluency check failed", {
+        description: "This Pro cannot be advanced.",
+      });
+      return;
+    }
     setSubmitting(action);
     const { data, error } = await supabase.functions.invoke("advance-applicant", {
       body: { applicant_id: open.id, action, notes: bgNotes || undefined },
@@ -526,6 +534,15 @@ export default function AdminApplicants() {
                         <MapPin className="h-3 w-3" /> {a.zip}
                       </span>
                     )}
+                    {a.bilingual_fluency_confirmed ? (
+                      <span className="text-[11px] font-semibold px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" title="Confirmed bilingual">
+                        🌐 ES+EN
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-semibold px-2 py-1 rounded-md bg-red-50 text-red-700 ring-1 ring-red-200" title="Bilingual fluency NOT confirmed">
+                        ⚠ Not bilingual
+                      </span>
+                    )}
                   </div>
                   <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 shrink-0 ${STAGE_PILL[stage] ?? STAGE_PILL.applied}`}>
                     {STAGE_LABEL[stage] ?? stage}
@@ -573,6 +590,15 @@ export default function AdminApplicants() {
                         BG: {open.bg_check_status ?? "pending"}
                       </span>
                       <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 capitalize ${ROLE_BADGE[role]}`}>{role}</span>
+                      {open.bilingual_fluency_confirmed ? (
+                        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200">
+                          Bilingual: ✅ Confirmed
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 bg-red-50 text-red-700 ring-red-200">
+                          Bilingual: ❌ NOT confirmed
+                        </span>
+                      )}
                     </div>
                     <div className="mt-2 text-[11px] text-slate-500">
                       Applied {relTime(open.created_at)} · Updated {relTime(open.updated_at ?? open.stage_entered_at ?? open.created_at)}
@@ -608,7 +634,7 @@ export default function AdminApplicants() {
                       )}
                     </div>
                     <div className="grid grid-cols-3 gap-2">
-                      <Button onClick={() => runAction("clear")} disabled={!!submitting || open.bg_check_status === "clear"} className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50">
+                      <Button onClick={() => runAction("clear")} disabled={!!submitting || open.bg_check_status === "clear" || !open.bilingual_fluency_confirmed} title={!open.bilingual_fluency_confirmed ? "Bilingual fluency not confirmed — cannot approve" : ""} className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50">
                         {submitting === "clear" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldCheck className="h-4 w-4 mr-1" /> CLEAR</>}
                       </Button>
                       <Button onClick={() => runAction("consider")} disabled={!!submitting} className="bg-amber-500 hover:bg-amber-600 text-white">
@@ -654,7 +680,7 @@ export default function AdminApplicants() {
                     </ol>
                     <div className="pt-2 border-t border-slate-100 flex flex-wrap gap-2">
                       {open.current_stage === "interview_pending" && (
-                        <Button size="sm" disabled={!!submitting} onClick={() => runAction("send_offer")} className="bg-[#1FA1F0] hover:bg-[#1990da] text-white">Send offer</Button>
+                        <Button size="sm" disabled={!!submitting || !open.bilingual_fluency_confirmed} title={!open.bilingual_fluency_confirmed ? "Bilingual fluency not confirmed — cannot send offer" : ""} onClick={() => runAction("send_offer")} className="bg-[#1FA1F0] hover:bg-[#1990da] text-white disabled:opacity-50">Send offer</Button>
                       )}
                       {open.current_stage === "background_check_review" && (
                         <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("schedule_interview")}>Schedule interview</Button>
