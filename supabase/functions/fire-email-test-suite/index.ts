@@ -118,13 +118,21 @@ Deno.serve(async (req) => {
     if (!roleRow) return jsonResponse({ error: 'forbidden' }, 403);
   }
 
+  // Channel filter: ?channel=email | sms | all (default: all)
+  const url = new URL(req.url);
+  const channel = (url.searchParams.get('channel') ?? 'all').toLowerCase();
+  const runEmails = channel === 'all' || channel === 'email';
+  const runSms = channel === 'all' || channel === 'sms';
+
   const failures: Array<{ template: string; error: string }> = [];
   const log_ids: string[] = [];
   let succeeded = 0;
-  const total = EMAIL_TEMPLATES.length + SMS_TEMPLATES.length;
+  const total =
+    (runEmails ? EMAIL_TEMPLATES.length : 0) +
+    (runSms ? SMS_TEMPLATES.length : 0);
 
   // 1. Emails.
-  for (const tpl of EMAIL_TEMPLATES) {
+  if (runEmails) for (const tpl of EMAIL_TEMPLATES) {
     try {
       const attachments = tpl.attach ? await buildAttachments(tpl.attach) : [];
       const html = brandedEmailHtml({ heading: tpl.heading, bodyHtml: tpl.body });
