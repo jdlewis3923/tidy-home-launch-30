@@ -684,6 +684,37 @@ export default function AdminApplicants() {
                   </CardContent>
                 </Card>
 
+                {/* Group Orientation panel — visible at contract_signed */}
+                {open.current_stage === "contract_signed" && (
+                  <Card className="rounded-2xl border-amber-200 bg-amber-50/40">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CalendarDays className="h-4 w-4 text-amber-700" />
+                        <h3 className="font-semibold text-[#0D1117]">Group Orientation</h3>
+                      </div>
+                      {!nextOrientation ? (
+                        <div className="text-sm text-slate-500">No upcoming orientations scheduled. <Link to="/admin/orientations" className="text-[#1FA1F0] hover:underline">Schedule one →</Link></div>
+                      ) : (
+                        <div className="flex items-center justify-between gap-3 flex-wrap">
+                          <div className="text-sm text-slate-700">
+                            <div className="font-semibold">
+                              {new Date(nextOrientation.scheduled_at).toLocaleString(undefined, { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                            </div>
+                            <div className="text-xs text-slate-500">{nextOrientation.location ?? "Location TBD"} · capacity {nextOrientation.capacity}</div>
+                          </div>
+                          {registeredOrientationId === nextOrientation.id ? (
+                            <Badge className="bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200"><Check className="h-3 w-3 mr-1" /> Registered</Badge>
+                          ) : (
+                            <Button size="sm" disabled={registeringOrientation} onClick={registerForOrientation} className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold">
+                              {registeringOrientation ? <Loader2 className="h-3 w-3 animate-spin" /> : "Add to next orientation"}
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* Activity timeline */}
                 <Card className="rounded-2xl border-slate-200">
                   <CardContent className="p-4">
