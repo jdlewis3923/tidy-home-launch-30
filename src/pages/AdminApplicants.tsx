@@ -63,6 +63,14 @@ type Applicant = {
   created_at: string;
   updated_at: string | null;
   notes_for_admin: string | null;
+  compliance_complete: boolean | null;
+};
+
+type Orientation = {
+  id: string;
+  scheduled_at: string;
+  location: string | null;
+  capacity: number;
 };
 
 type AdvanceAction =
