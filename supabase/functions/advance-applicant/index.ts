@@ -145,7 +145,7 @@ const SUBJECTS: Record<Action, string> = {
   schedule_interview: 'Interview scheduled',
   send_offer: 'Offer sent',
   send_contract: 'Contract sent for signature',
-  mark_demo_passed: 'Demo passed',
+  mark_oriented: 'Group orientation complete',
   activate: 'Contractor activated',
   reject: 'Applicant rejected',
 };
@@ -157,7 +157,7 @@ const TEMPLATE_TAG: Record<Action, string> = {
   schedule_interview: 'applicant-interview-scheduled',
   send_offer: 'applicant-offer',
   send_contract: 'applicant-contract-sent',
-  mark_demo_passed: 'applicant-demo-passed',
+  mark_oriented: 'applicant-oriented',
   activate: 'applicant-activated',
   reject: 'applicant-rejected',
 };
