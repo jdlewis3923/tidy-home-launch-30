@@ -78,7 +78,7 @@ const STAGE_LABEL: Record<string, string> = {
   interview_pending: "Interview",
   offer_sent: "Offer Sent",
   contract_signed: "Contract Signed",
-  demo_passed: "Demo Passed",
+  oriented: "Oriented",
   active: "Active",
   rejected: "Rejected",
 };
