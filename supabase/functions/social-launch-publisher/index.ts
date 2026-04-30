@@ -53,12 +53,11 @@ async function vaultGet(sb: ReturnType<typeof createClient>, name: string): Prom
 }
 
 async function publishToMeta(post: Post, sb: ReturnType<typeof createClient>): Promise<{ ig?: string; fb?: string }> {
-  const pageToken =
-    Deno.env.get("META_PAGE_ACCESS_TOKEN") ||
-    (await vaultGet(sb, "meta_fb_page_access_token"));
+  // Reuse the existing CAPI vault entry — single source of truth for Meta page token.
+  const pageToken = await vaultGet(sb, "meta_fb_page_access_token");
   const igUserId = await vaultGet(sb, "meta_ig_user_id");
   const fbPageId = await vaultGet(sb, "meta_fb_page_id");
-  if (!pageToken) throw new Error("META_PAGE_ACCESS_TOKEN not configured");
+  if (!pageToken) throw new Error("meta_fb_page_access_token not set in vault (run Meta OAuth)");
   if (!post.image_url) throw new Error("post has no image_url");
 
   const result: { ig?: string; fb?: string } = {};
