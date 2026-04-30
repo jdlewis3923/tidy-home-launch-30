@@ -128,7 +128,7 @@ function applyTransition(action: Action) {
     case 'schedule_interview': u.current_stage = 'interview_pending'; break;
     case 'send_offer':         u.current_stage = 'offer_sent'; break;
     case 'send_contract':      u.current_stage = 'contract_signed'; break;
-    case 'mark_demo_passed':   u.current_stage = 'demo_passed'; break;
+    case 'mark_oriented':      u.current_stage = 'oriented'; break;
     case 'activate':           u.current_stage = 'active'; break;
     case 'reject':
       u.current_stage = 'rejected';
