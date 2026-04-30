@@ -292,6 +292,8 @@ Deno.serve(async (req) => {
       subject: applicantCopy.subject, htmlContent: applicantHtml,
       tags: [tag],
       attachments: attachments.length ? attachments : undefined,
+      templateName: tag,
+      triggeredBy: 'advance-applicant',
     }).catch((e) => console.error('[advance] applicant email failed', e));
 
     const adminHtml = brandedEmailHtml({
@@ -313,6 +315,8 @@ Deno.serve(async (req) => {
       toEmail: 'admin@jointidy.co', toName: 'Justin',
       subject: `${SUBJECTS[action]}: ${fullName}`, htmlContent: adminHtml,
       tags: [`admin-${tag}`],
+      templateName: `admin-${tag}`,
+      triggeredBy: 'advance-applicant',
     }).catch((e) => console.error('[advance] admin email failed', e));
 
     // Sync transition to Tidy Master sheet (Applicants tab).
