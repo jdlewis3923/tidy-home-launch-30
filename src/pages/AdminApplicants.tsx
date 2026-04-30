@@ -634,7 +634,7 @@ export default function AdminApplicants() {
                       )}
                     </div>
                     <div className="grid grid-cols-3 gap-2">
-                      <Button onClick={() => runAction("clear")} disabled={!!submitting || open.bg_check_status === "clear"} className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50">
+                      <Button onClick={() => runAction("clear")} disabled={!!submitting || open.bg_check_status === "clear" || !open.bilingual_fluency_confirmed} title={!open.bilingual_fluency_confirmed ? "Bilingual fluency not confirmed — cannot approve" : ""} className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50">
                         {submitting === "clear" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldCheck className="h-4 w-4 mr-1" /> CLEAR</>}
                       </Button>
                       <Button onClick={() => runAction("consider")} disabled={!!submitting} className="bg-amber-500 hover:bg-amber-600 text-white">
