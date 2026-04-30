@@ -193,8 +193,8 @@ Deno.serve(async (req) => {
   }
 
   let userId: string | null = null;
-  const role = jwtRole(token);
-  if (role === 'service_role') {
+  const tokenRoleClaim = jwtRole(token);
+  if (tokenRoleClaim === 'service_role') {
     userId = '00000000-0000-0000-0000-000000000000';
     console.log('[advance-applicant] service-role bypass');
   } else {
@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
     const { data: userRes } = await userClient.auth.getUser();
     userId = userRes?.user?.id ?? null;
     if (!userId) {
-      console.warn('[advance-applicant] no user from token, role=', role);
+      console.warn('[advance-applicant] no user from token, role=', tokenRoleClaim);
       return jsonResponse({ error: 'unauthorized' }, 401);
     }
     const { data: roleRow } = await admin
