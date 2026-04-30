@@ -11,6 +11,46 @@ const TIDY_LOGO = 'https://miami-home-simplify.lovable.app/icon-192.png';
 
 export type BrevoAttachment = { url?: string; content?: string; name: string };
 
+/** Best-effort write to public.email_send_log for /admin/email-health. */
+async function logEmailSend(row: {
+  template_name: string;
+  channel: 'email' | 'sms';
+  recipient: string;
+  triggered_by?: string | null;
+  brevo_message_id?: string | null;
+  twilio_sid?: string | null;
+  status: 'queued' | 'sent' | 'delivered' | 'failed' | 'bounced';
+  error_message?: string | null;
+  payload?: Record<string, unknown>;
+}) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/email_send_log`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({
+        template_name: row.template_name,
+        channel: row.channel,
+        recipient: row.recipient,
+        triggered_by: row.triggered_by ?? null,
+        brevo_message_id: row.brevo_message_id ?? null,
+        twilio_sid: row.twilio_sid ?? null,
+        status: row.status,
+        error_message: row.error_message ?? null,
+        payload: row.payload ?? {},
+      }),
+    });
+  } catch (e) {
+    console.warn('[email_send_log] insert failed', (e as Error).message);
+  }
+}
+
+export { logEmailSend };
+
 export async function sendBrevoEmail(opts: {
   toEmail: string;
   toName?: string;
@@ -18,26 +58,60 @@ export async function sendBrevoEmail(opts: {
   htmlContent: string;
   tags?: string[];
   attachments?: BrevoAttachment[];
+  templateName?: string;   // explicit template name for email_send_log
+  triggeredBy?: string;    // edge fn / cron name for email_send_log
 }) {
-  if (!BREVO_API_KEY) { console.warn('[brevo] BREVO_API_KEY missing'); return null; }
-  const r = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json', accept: 'application/json' },
-    body: JSON.stringify({
-      sender: { name: 'Tidy', email: 'no-reply@jointidy.co' },
-      to: [{ email: opts.toEmail, name: opts.toName ?? opts.toEmail }],
-      subject: opts.subject,
-      htmlContent: opts.htmlContent,
-      ...(opts.tags && opts.tags.length ? { tags: opts.tags } : {}),
-      ...(opts.attachments && opts.attachments.length ? { attachment: opts.attachments } : {}),
-    }),
-  });
+  const templateName = opts.templateName ?? opts.tags?.[0] ?? 'unknown';
+  if (!BREVO_API_KEY) {
+    console.warn('[brevo] BREVO_API_KEY missing');
+    await logEmailSend({
+      template_name: templateName, channel: 'email', recipient: opts.toEmail,
+      triggered_by: opts.triggeredBy ?? null, status: 'failed',
+      error_message: 'BREVO_API_KEY missing', payload: { subject: opts.subject },
+    });
+    return null;
+  }
+  let r: Response;
+  try {
+    r = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify({
+        sender: { name: 'Tidy', email: 'no-reply@jointidy.co' },
+        to: [{ email: opts.toEmail, name: opts.toName ?? opts.toEmail }],
+        subject: opts.subject,
+        htmlContent: opts.htmlContent,
+        ...(opts.tags && opts.tags.length ? { tags: opts.tags } : {}),
+        ...(opts.attachments && opts.attachments.length ? { attachment: opts.attachments } : {}),
+      }),
+    });
+  } catch (e) {
+    await logEmailSend({
+      template_name: templateName, channel: 'email', recipient: opts.toEmail,
+      triggered_by: opts.triggeredBy ?? null, status: 'failed',
+      error_message: (e as Error).message, payload: { subject: opts.subject },
+    });
+    return null;
+  }
   if (!r.ok) {
-    console.error('[brevo] send failed', r.status, await r.text().catch(()=>''));
+    const errText = await r.text().catch(() => '');
+    console.error('[brevo] send failed', r.status, errText);
+    await logEmailSend({
+      template_name: templateName, channel: 'email', recipient: opts.toEmail,
+      triggered_by: opts.triggeredBy ?? null, status: 'failed',
+      error_message: `HTTP ${r.status}: ${errText.slice(0, 500)}`,
+      payload: { subject: opts.subject, tags: opts.tags ?? [] },
+    });
     return null;
   }
   const json = await r.json().catch(() => ({})) as { messageId?: string };
   console.log('[brevo] sent', { to: opts.toEmail, subject: opts.subject, messageId: json.messageId });
+  await logEmailSend({
+    template_name: templateName, channel: 'email', recipient: opts.toEmail,
+    triggered_by: opts.triggeredBy ?? null,
+    brevo_message_id: json.messageId ?? null, status: 'sent',
+    payload: { subject: opts.subject, tags: opts.tags ?? [], hasAttachments: !!opts.attachments?.length },
+  });
   return json.messageId ?? null;
 }
 
