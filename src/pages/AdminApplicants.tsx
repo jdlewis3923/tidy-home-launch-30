@@ -18,7 +18,7 @@ import { Link, Navigate } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Loader2, ShieldCheck, ShieldAlert, ShieldX,
   Search, Download, Plus, Copy, Check, MapPin, Briefcase, Clock,
-  Mail, Phone as PhoneIcon, FileText, UserPlus, AlertTriangle,
+  Mail, Phone as PhoneIcon, FileText, UserPlus, AlertTriangle, CalendarDays,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -63,12 +63,20 @@ type Applicant = {
   created_at: string;
   updated_at: string | null;
   notes_for_admin: string | null;
+  compliance_complete: boolean | null;
+};
+
+type Orientation = {
+  id: string;
+  scheduled_at: string;
+  location: string | null;
+  capacity: number;
 };
 
 type AdvanceAction =
   | "clear" | "consider" | "fail"
   | "schedule_interview" | "send_offer" | "send_contract"
-  | "mark_demo_passed" | "activate" | "reject";
+  | "mark_oriented" | "activate" | "reject";
 
 // ---------- Visual maps ----------
 const STAGE_LABEL: Record<string, string> = {
@@ -78,7 +86,7 @@ const STAGE_LABEL: Record<string, string> = {
   interview_pending: "Interview",
   offer_sent: "Offer Sent",
   contract_signed: "Contract Signed",
-  demo_passed: "Demo Passed",
+  oriented: "Oriented",
   active: "Active",
   rejected: "Rejected",
 };
@@ -90,7 +98,7 @@ const STAGE_PILL: Record<string, string> = {
   interview_pending: "bg-blue-100 text-blue-800 ring-blue-200",
   offer_sent: "bg-purple-100 text-purple-800 ring-purple-200",
   contract_signed: "bg-indigo-100 text-indigo-800 ring-indigo-200",
-  demo_passed: "bg-teal-100 text-teal-800 ring-teal-200",
+  oriented: "bg-teal-100 text-teal-800 ring-teal-200",
   active: "bg-green-100 text-green-800 ring-green-200",
   rejected: "bg-gray-100 text-gray-700 ring-gray-200",
 };
@@ -114,7 +122,7 @@ const PIPELINE_STEPS: Array<{ key: string; label: string }> = [
   { key: "interview_pending", label: "Interview" },
   { key: "offer_sent", label: "Offer" },
   { key: "contract_signed", label: "Contract" },
-  { key: "demo_passed", label: "Demo" },
+  { key: "oriented", label: "Orientation" },
   { key: "active", label: "Active" },
 ];
 
@@ -168,7 +176,7 @@ const STATUS_FILTERS: Array<{ key: string; label: string }> = [
   { key: "interview_pending", label: "Interview" },
   { key: "offer_sent", label: "Offer" },
   { key: "contract_signed", label: "Contract" },
-  { key: "demo_passed", label: "Demo" },
+  { key: "oriented", label: "Orientation" },
   { key: "active", label: "Active" },
   { key: "rejected", label: "Rejected" },
 ];
@@ -192,12 +200,15 @@ export default function AdminApplicants() {
   const [eventsLoading, setEventsLoading] = useState(false);
   const [confirmReject, setConfirmReject] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [nextOrientation, setNextOrientation] = useState<Orientation | null>(null);
+  const [registeringOrientation, setRegisteringOrientation] = useState(false);
+  const [registeredOrientationId, setRegisteredOrientationId] = useState<string | null>(null);
 
   const fetchRows = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -227,7 +238,40 @@ export default function AdminApplicants() {
     else setEvents([]);
   }, [open?.id, fetchEvents, open?.bg_check_notes]);
 
-  // ----- Filtering -----
+  // Load next upcoming orientation + whether this applicant is already registered.
+  useEffect(() => {
+    if (!open?.id) { setNextOrientation(null); setRegisteredOrientationId(null); return; }
+    (async () => {
+      const { data: ori } = await (supabase as any)
+        .from("orientations")
+        .select("id, scheduled_at, location, capacity")
+        .gte("scheduled_at", new Date().toISOString())
+        .order("scheduled_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      setNextOrientation(ori ?? null);
+      const { data: att } = await (supabase as any)
+        .from("orientation_attendees")
+        .select("orientation_id")
+        .eq("applicant_id", open.id)
+        .order("registered_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setRegisteredOrientationId(att?.orientation_id ?? null);
+    })();
+  }, [open?.id]);
+
+  const registerForOrientation = useCallback(async () => {
+    if (!open?.id || !nextOrientation) return;
+    setRegisteringOrientation(true);
+    const { error } = await (supabase as any)
+      .from("orientation_attendees")
+      .insert({ orientation_id: nextOrientation.id, applicant_id: open.id });
+    setRegisteringOrientation(false);
+    if (error) { toast.error(`Could not register: ${error.message}`); return; }
+    setRegisteredOrientationId(nextOrientation.id);
+    toast.success("Added to next orientation");
+  }, [open?.id, nextOrientation]);
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
@@ -301,7 +345,7 @@ export default function AdminApplicants() {
       schedule_interview: "Interview scheduled",
       send_offer: "Offer sent",
       send_contract: "Contract sent",
-      mark_demo_passed: "Demo passed",
+      mark_oriented: "Group orientation complete",
       activate: "Contractor activated",
       reject: "Applicant rejected",
     };
@@ -619,18 +663,57 @@ export default function AdminApplicants() {
                         <Button size="sm" disabled={!!submitting} onClick={() => runAction("send_contract")} className="bg-[#1FA1F0] hover:bg-[#1990da] text-white">Send contract</Button>
                       )}
                       {open.current_stage === "contract_signed" && (
-                        <Button size="sm" disabled={!!submitting} onClick={() => runAction("mark_demo_passed")} className="bg-teal-600 hover:bg-teal-700 text-white">Mark demo passed</Button>
+                        <Button size="sm" disabled={!!submitting} onClick={() => runAction("mark_oriented")} className="bg-teal-600 hover:bg-teal-700 text-white">Mark orientation complete</Button>
                       )}
-                      {open.current_stage === "demo_passed" && (
-                        <Button size="sm" disabled={!!submitting} onClick={() => runAction("activate")} className="bg-emerald-600 hover:bg-emerald-700 text-white">Activate</Button>
+                      {open.current_stage === "oriented" && (
+                        <Button
+                          size="sm"
+                          disabled={!!submitting || !open.compliance_complete}
+                          title={open.compliance_complete ? "" : "Compliance docs required (COI / bond / auto / EIN) before activation"}
+                          onClick={() => runAction("activate")}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                        >
+                          Activate{!open.compliance_complete ? " (compliance required)" : ""}
+                        </Button>
                       )}
                       {/* Always allow scheduling if not yet scheduled */}
-                      {!["interview_pending", "offer_sent", "contract_signed", "demo_passed", "active", "rejected"].includes(open.current_stage ?? "") && (
+                      {!["interview_pending", "offer_sent", "contract_signed", "oriented", "active", "rejected"].includes(open.current_stage ?? "") && (
                         <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("schedule_interview")}>Schedule interview</Button>
                       )}
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Group Orientation panel — visible at contract_signed */}
+                {open.current_stage === "contract_signed" && (
+                  <Card className="rounded-2xl border-amber-200 bg-amber-50/40">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CalendarDays className="h-4 w-4 text-amber-700" />
+                        <h3 className="font-semibold text-[#0D1117]">Group Orientation</h3>
+                      </div>
+                      {!nextOrientation ? (
+                        <div className="text-sm text-slate-500">No upcoming orientations scheduled. <Link to="/admin/orientations" className="text-[#1FA1F0] hover:underline">Schedule one →</Link></div>
+                      ) : (
+                        <div className="flex items-center justify-between gap-3 flex-wrap">
+                          <div className="text-sm text-slate-700">
+                            <div className="font-semibold">
+                              {new Date(nextOrientation.scheduled_at).toLocaleString(undefined, { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                            </div>
+                            <div className="text-xs text-slate-500">{nextOrientation.location ?? "Location TBD"} · capacity {nextOrientation.capacity}</div>
+                          </div>
+                          {registeredOrientationId === nextOrientation.id ? (
+                            <Badge className="bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200"><Check className="h-3 w-3 mr-1" /> Registered</Badge>
+                          ) : (
+                            <Button size="sm" disabled={registeringOrientation} onClick={registerForOrientation} className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold">
+                              {registeringOrientation ? <Loader2 className="h-3 w-3 animate-spin" /> : "Add to next orientation"}
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Activity timeline */}
                 <Card className="rounded-2xl border-slate-200">

@@ -35,7 +35,7 @@ const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 const ACTIONS = [
   'clear', 'consider', 'fail',
   'schedule_interview', 'send_offer', 'send_contract',
-  'mark_demo_passed', 'activate', 'reject',
+  'mark_oriented', 'activate', 'reject',
 ] as const;
 
 const Body = z.object({
@@ -70,7 +70,7 @@ function filenamesFor(action: Action, role: Role): string[] {
   switch (action) {
     case 'send_offer':       return ['11_OfferLetter_Template.pdf'];
     case 'send_contract':    return [contract[role as keyof typeof contract] ?? contract.cleaning];
-    case 'mark_demo_passed': return [onboardingPacket[role as keyof typeof onboardingPacket] ?? onboardingPacket.cleaning];
+    case 'mark_oriented':    return [onboardingPacket[role as keyof typeof onboardingPacket] ?? onboardingPacket.cleaning];
     case 'activate':         return [onboardingPacket[role as keyof typeof onboardingPacket] ?? onboardingPacket.cleaning];
     default:                 return [];
   }
@@ -128,7 +128,7 @@ function applyTransition(action: Action) {
     case 'schedule_interview': u.current_stage = 'interview_pending'; break;
     case 'send_offer':         u.current_stage = 'offer_sent'; break;
     case 'send_contract':      u.current_stage = 'contract_signed'; break;
-    case 'mark_demo_passed':   u.current_stage = 'demo_passed'; break;
+    case 'mark_oriented':      u.current_stage = 'oriented'; break;
     case 'activate':           u.current_stage = 'active'; break;
     case 'reject':
       u.current_stage = 'rejected';
@@ -145,7 +145,7 @@ const SUBJECTS: Record<Action, string> = {
   schedule_interview: 'Interview scheduled',
   send_offer: 'Offer sent',
   send_contract: 'Contract sent for signature',
-  mark_demo_passed: 'Demo passed',
+  mark_oriented: 'Group orientation complete',
   activate: 'Contractor activated',
   reject: 'Applicant rejected',
 };
@@ -157,7 +157,7 @@ const TEMPLATE_TAG: Record<Action, string> = {
   schedule_interview: 'applicant-interview-scheduled',
   send_offer: 'applicant-offer',
   send_contract: 'applicant-contract-sent',
-  mark_demo_passed: 'applicant-demo-passed',
+  mark_oriented: 'applicant-oriented',
   activate: 'applicant-activated',
   reject: 'applicant-rejected',
 };
@@ -224,6 +224,28 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'notes_required_for_consider' }, 400);
   }
 
+  // ACTIVATE GATE: must be oriented AND compliance_complete=true.
+  if (action === 'activate') {
+    const { data: pre } = await admin
+      .from('applicants')
+      .select('current_stage, compliance_complete')
+      .eq('id', applicant_id)
+      .single();
+    if (!pre) return jsonResponse({ error: 'applicant_not_found' }, 404);
+    if (pre.current_stage !== 'oriented') {
+      return jsonResponse({
+        error: 'activation_blocked',
+        reason: `applicant must be in 'oriented' stage (currently '${pre.current_stage}')`,
+      }, 400);
+    }
+    if (!pre.compliance_complete) {
+      return jsonResponse({
+        error: 'activation_blocked',
+        reason: 'compliance_complete is false (COI / bond / auto / EIN missing)',
+      }, 400);
+    }
+  }
+
   const update = applyTransition(action);
   if (notes) update.bg_check_notes = notes;
 
@@ -274,7 +296,7 @@ Deno.serve(async (req) => {
     schedule_interview: { subject: 'Schedule your Tidy interview', body: `<p>Hi ${row.first_name},</p><p>Pick a time that works for you: <a href="${CALENDLY_URL}">Book your interview</a>.</p>` },
     send_offer: { subject: 'Your Tidy offer', body: `<p>Hi ${row.first_name},</p><p>We'd love to have you on the team. Your offer letter is attached.</p><p>Next step: pick a time to chat and sign — <a href="${CALENDLY_URL}">book here</a>.</p><!-- TODO(HelloSign): replace this with a HelloSign signature request via API --><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
     send_contract: { subject: 'Sign your Tidy contract', body: `<p>Hi ${row.first_name},</p><p>Your contract is attached. Please review and sign.</p><!-- TODO(HelloSign): replace attached PDF with a HelloSign signature request once API key is wired --><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
-    mark_demo_passed: { subject: 'You passed your Tidy demo 🎉', body: `<p>Hi ${row.first_name},</p><p>Nice work on the demo. Your onboarding packet is attached — review it before your first job.</p>` },
+    mark_oriented: { subject: 'Group orientation complete 🎉', body: `<p>Hi ${row.first_name},</p><p>Welcome to the team. Your role-specific onboarding packet is attached — review it before your first job. We'll send activation + payout setup next.</p>` },
     activate: { subject: 'Welcome to Tidy', body: `<p>Hi ${row.first_name},</p><p>You're activated and ready to take jobs. Your onboarding packet is attached.</p><p>Log in to your contractor portal: <a href="${LOGIN_URL_PLACEHOLDER}">${LOGIN_URL_PLACEHOLDER}</a></p>` },
     reject: { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>Thanks for taking the time to apply to Tidy. After review, we're not able to move forward right now — we wish you the best.</p>` },
   };

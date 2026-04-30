@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
-  Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail,
+  Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
 } from "lucide-react";
 
 /**
@@ -22,6 +22,7 @@ const NAV = [
   { to: "/admin/email-health", label: "Email",      icon: Mail },
   { to: "/admin/inbox",       label: "Inbox",       icon: Inbox },
   { to: "/admin/applicants",  label: "Applicants",  icon: Users },
+  { to: "/admin/orientations", label: "Orientations", icon: CalendarDays },
   { to: "/admin/documents",   label: "Docs",        icon: FileText },
   { to: "/admin/schedule",    label: "Schedule",    icon: Megaphone },
   { to: "/admin/agents",      label: "Agents",      icon: Bot },

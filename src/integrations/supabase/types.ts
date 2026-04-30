@@ -209,6 +209,7 @@ export type Database = {
           bg_check_notes: string | null
           bg_check_provider: string | null
           bg_check_status: string | null
+          compliance_complete: boolean
           created_at: string
           current_stage: string | null
           email: string
@@ -232,6 +233,7 @@ export type Database = {
           bg_check_notes?: string | null
           bg_check_provider?: string | null
           bg_check_status?: string | null
+          compliance_complete?: boolean
           created_at?: string
           current_stage?: string | null
           email: string
@@ -255,6 +257,7 @@ export type Database = {
           bg_check_notes?: string | null
           bg_check_provider?: string | null
           bg_check_status?: string | null
+          compliance_complete?: boolean
           created_at?: string
           current_stage?: string | null
           email?: string
@@ -1079,6 +1082,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      orientation_attendees: {
+        Row: {
+          applicant_id: string
+          attended: boolean
+          id: string
+          orientation_id: string
+          registered_at: string
+        }
+        Insert: {
+          applicant_id: string
+          attended?: boolean
+          id?: string
+          orientation_id: string
+          registered_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          attended?: boolean
+          id?: string
+          orientation_id?: string
+          registered_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orientation_attendees_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orientation_attendees_orientation_id_fkey"
+            columns: ["orientation_id"]
+            isOneToOne: false
+            referencedRelation: "orientations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orientations: {
+        Row: {
+          capacity: number
+          created_at: string
+          id: string
+          location: string | null
+          notes: string | null
+          scheduled_at: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          scheduled_at: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          scheduled_at?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
