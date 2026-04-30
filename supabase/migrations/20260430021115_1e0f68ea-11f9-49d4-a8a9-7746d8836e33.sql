@@ -1,0 +1,1 @@
+ALTER TABLE public.applicants ADD COLUMN IF NOT EXISTS bilingual_fluency_confirmed boolean NOT NULL DEFAULT false;
