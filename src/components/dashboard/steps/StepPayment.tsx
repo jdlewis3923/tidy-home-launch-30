@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Lock, ShieldCheck, CreditCard, BadgeCheck, Sparkles, Banknote, X as XIcon } from 'lucide-react';
+import { Lock, ShieldCheck, CreditCard, BadgeCheck, Banknote, X as XIcon } from 'lucide-react';
 import {
   ConfigState,
   calculatePricing,
