@@ -301,7 +301,7 @@ export default function AdminApplicants() {
       schedule_interview: "Interview scheduled",
       send_offer: "Offer sent",
       send_contract: "Contract sent",
-      mark_demo_passed: "Demo passed",
+      mark_oriented: "Group orientation complete",
       activate: "Contractor activated",
       reject: "Applicant rejected",
     };
