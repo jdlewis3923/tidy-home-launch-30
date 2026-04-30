@@ -136,18 +136,39 @@ export default function AdminEmailHealth() {
     if (!confirm("Fire test send for ALL backend-triggered templates? This sends ~20 emails/SMS to admin@jointidy.co.")) return;
     setRunning(true);
     setTestResult(null);
-    const { data, error } = await supabase.functions.invoke("fire-email-test-suite", { body: {} });
-    setRunning(false);
-    if (error) {
-      toast({ title: "Test suite failed", description: error.message, variant: "destructive" });
-      return;
+
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const { data: sessionRes } = await supabase.auth.getSession();
+    const token = sessionRes.session?.access_token;
+    const fireOnce = async (channel: "email" | "sms") => {
+      const r = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/fire-email-test-suite?channel=${channel}`,
+        { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: "{}" },
+      );
+      return r.ok ? await r.json() : { total_attempted: 0, total_succeeded: 0, total_failed: 0, failures: [{ template: `pass-${channel}`, error: `HTTP ${r.status}` }] };
+    };
+
+    try {
+      const emailRes = await fireOnce("email");
+      const smsRes = await fireOnce("sms");
+      const merged = {
+        total_attempted: (emailRes.total_attempted ?? 0) + (smsRes.total_attempted ?? 0),
+        total_succeeded: (emailRes.total_succeeded ?? 0) + (smsRes.total_succeeded ?? 0),
+        total_failed: (emailRes.total_failed ?? 0) + (smsRes.total_failed ?? 0),
+        failures: [...(emailRes.failures ?? []), ...(smsRes.failures ?? [])],
+        email_send_log_ids: [...(emailRes.email_send_log_ids ?? []), ...(smsRes.email_send_log_ids ?? [])],
+      };
+      setTestResult(merged as never);
+      await load();
+      toast({
+        title: "Test suite complete",
+        description: `${merged.total_succeeded}/${merged.total_attempted} succeeded`,
+      });
+    } catch (e) {
+      toast({ title: "Test suite failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setRunning(false);
     }
-    setTestResult(data as never);
-    await load();
-    toast({
-      title: "Test suite complete",
-      description: `${(data as { total_succeeded: number }).total_succeeded}/${(data as { total_attempted: number }).total_attempted} succeeded`,
-    });
   }
 
   if (roleLoading) return <div className="p-8 text-slate-300">Loading…</div>;
