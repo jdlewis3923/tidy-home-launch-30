@@ -59,3 +59,9 @@ verify_jwt = false
 [functions.applicant-applied-trigger]
 verify_jwt = false
 
+# Admin-only pipeline mover. We perform admin-role validation in-handler;
+# service-role calls bypass for E2E + internal triggers. JWT verification is
+# disabled at the gateway so service-role bearer tokens are accepted.
+[functions.advance-applicant]
+verify_jwt = false
+

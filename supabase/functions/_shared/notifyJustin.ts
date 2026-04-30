@@ -32,8 +32,13 @@ export async function sendBrevoEmail(opts: {
       ...(opts.attachments && opts.attachments.length ? { attachment: opts.attachments } : {}),
     }),
   });
-  if (!r.ok) console.error('[brevo] send failed', r.status, await r.text().catch(()=>''));
-  return r.ok;
+  if (!r.ok) {
+    console.error('[brevo] send failed', r.status, await r.text().catch(()=>''));
+    return null;
+  }
+  const json = await r.json().catch(() => ({})) as { messageId?: string };
+  console.log('[brevo] sent', { to: opts.toEmail, subject: opts.subject, messageId: json.messageId });
+  return json.messageId ?? null;
 }
 
 export async function sendPwaPushToJustin(title: string, body: string, url = '/admin/applicants') {
