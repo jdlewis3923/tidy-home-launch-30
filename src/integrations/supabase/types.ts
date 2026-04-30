@@ -182,6 +182,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_alerts: {
+        Row: {
+          alert_type: string
+          body: string | null
+          context: Json
+          created_at: string
+          id: string
+          resolved_at: string | null
+          title: string
+        }
+        Insert: {
+          alert_type: string
+          body?: string | null
+          context?: Json
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          body?: string | null
+          context?: Json
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
@@ -1364,6 +1394,7 @@ export type Database = {
       }
       social_launch_posts: {
         Row: {
+          armed_at: string | null
           caption: string
           channel: string
           created_at: string
@@ -1373,6 +1404,7 @@ export type Database = {
           notes: string | null
           post_number: number
           posted_at: string | null
+          publish_error: string | null
           scheduled_for: string
           scheduled_in_native_tool_at: string | null
           status: string
@@ -1380,6 +1412,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          armed_at?: string | null
           caption: string
           channel: string
           created_at?: string
@@ -1389,6 +1422,7 @@ export type Database = {
           notes?: string | null
           post_number: number
           posted_at?: string | null
+          publish_error?: string | null
           scheduled_for: string
           scheduled_in_native_tool_at?: string | null
           status?: string
@@ -1396,6 +1430,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          armed_at?: string | null
           caption?: string
           channel?: string
           created_at?: string
@@ -1405,6 +1440,7 @@ export type Database = {
           notes?: string | null
           post_number?: number
           posted_at?: string | null
+          publish_error?: string | null
           scheduled_for?: string
           scheduled_in_native_tool_at?: string | null
           status?: string
