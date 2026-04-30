@@ -30,13 +30,16 @@ type Form = {
   experience_years: string;
   has_vehicle: boolean;
   has_supplies: boolean;
+  bilingual_fluency_confirmed: boolean;
   notes_for_admin: string;
 };
 
 const EMPTY: Form = {
   first_name: "", last_name: "", email: "", phone: "",
   service: "", zip: "", experience_years: "",
-  has_vehicle: false, has_supplies: false, notes_for_admin: "",
+  has_vehicle: false, has_supplies: false,
+  bilingual_fluency_confirmed: false,
+  notes_for_admin: "",
 };
 
 const PERKS = [
