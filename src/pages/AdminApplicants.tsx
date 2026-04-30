@@ -90,7 +90,7 @@ const STAGE_PILL: Record<string, string> = {
   interview_pending: "bg-blue-100 text-blue-800 ring-blue-200",
   offer_sent: "bg-purple-100 text-purple-800 ring-purple-200",
   contract_signed: "bg-indigo-100 text-indigo-800 ring-indigo-200",
-  demo_passed: "bg-teal-100 text-teal-800 ring-teal-200",
+  oriented: "bg-teal-100 text-teal-800 ring-teal-200",
   active: "bg-green-100 text-green-800 ring-green-200",
   rejected: "bg-gray-100 text-gray-700 ring-gray-200",
 };
