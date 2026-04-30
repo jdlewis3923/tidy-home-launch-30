@@ -238,7 +238,40 @@ export default function AdminApplicants() {
     else setEvents([]);
   }, [open?.id, fetchEvents, open?.bg_check_notes]);
 
-  // ----- Filtering -----
+  // Load next upcoming orientation + whether this applicant is already registered.
+  useEffect(() => {
+    if (!open?.id) { setNextOrientation(null); setRegisteredOrientationId(null); return; }
+    (async () => {
+      const { data: ori } = await (supabase as any)
+        .from("orientations")
+        .select("id, scheduled_at, location, capacity")
+        .gte("scheduled_at", new Date().toISOString())
+        .order("scheduled_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      setNextOrientation(ori ?? null);
+      const { data: att } = await (supabase as any)
+        .from("orientation_attendees")
+        .select("orientation_id")
+        .eq("applicant_id", open.id)
+        .order("registered_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setRegisteredOrientationId(att?.orientation_id ?? null);
+    })();
+  }, [open?.id]);
+
+  const registerForOrientation = useCallback(async () => {
+    if (!open?.id || !nextOrientation) return;
+    setRegisteringOrientation(true);
+    const { error } = await (supabase as any)
+      .from("orientation_attendees")
+      .insert({ orientation_id: nextOrientation.id, applicant_id: open.id });
+    setRegisteringOrientation(false);
+    if (error) { toast.error(`Could not register: ${error.message}`); return; }
+    setRegisteredOrientationId(nextOrientation.id);
+    toast.success("Added to next orientation");
+  }, [open?.id, nextOrientation]);
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
