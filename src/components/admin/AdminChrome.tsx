@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
-  Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap,
+  Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail,
 } from "lucide-react";
 
 /**
@@ -19,6 +19,7 @@ import {
 const NAV = [
   { to: "/admin/kpis",        label: "KPIs",        icon: BarChart3 },
   { to: "/admin/health",      label: "Health",      icon: Heart },
+  { to: "/admin/email-health", label: "Email",      icon: Mail },
   { to: "/admin/inbox",       label: "Inbox",       icon: Inbox },
   { to: "/admin/applicants",  label: "Applicants",  icon: Users },
   { to: "/admin/documents",   label: "Docs",        icon: FileText },

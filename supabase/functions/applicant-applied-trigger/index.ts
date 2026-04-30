@@ -61,6 +61,8 @@ Deno.serve(async (req) => {
     subject: 'We received your Tidy application',
     htmlContent: applicantHtml,
     tags: ['applicant-applied'],
+    templateName: 'applicant-applied',
+    triggeredBy: 'applicant-applied-trigger',
   }).catch((e) => console.error('[applicant-applied] applicant email failed', e));
 
   // 2. Admin alert
@@ -82,6 +84,8 @@ Deno.serve(async (req) => {
     subject: `New applicant: ${fullName} (${a.service})`,
     htmlContent: adminHtml,
     tags: ['admin-new-applicant'],
+    templateName: 'admin-new-applicant',
+    triggeredBy: 'applicant-applied-trigger',
   }).catch((e) => console.error('[applicant-applied] admin email failed', e));
 
   // 3. Sync to Tidy Master sheet (Applicants tab) — non-blocking.
