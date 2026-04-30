@@ -52,7 +52,7 @@ const ComingSoon = () => {
     <>
       <Helmet>
         <title>Tidy — Launching June 1</title>
-        <meta name="description" content="Tidy Home Concierge launches June 1. Miami's first home-care concierge — cleaning, lawn, and detailing handled." />
+        <meta name="description" content="Tidy Home Services launches June 1. Miami's first home-care concierge — cleaning, lawn, and detailing handled." />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
@@ -81,7 +81,7 @@ const ComingSoon = () => {
         <div className="relative z-10 mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center px-6 py-16 text-center">
           <img
             src={tidyLogo}
-            alt="Tidy Home Concierge"
+            alt="Tidy Home Services"
             className="h-28 sm:h-36 w-auto mb-8 drop-shadow-[0_10px_30px_rgba(37,99,235,0.35)]"
           />
 
@@ -95,7 +95,7 @@ const ComingSoon = () => {
           </h1>
 
           <p className="mt-4 max-w-xl text-base sm:text-lg font-light text-white/70">
-            Tidy Home Concierge — one team handling cleaning, lawn, and detailing across Miami. Opening {launchLabel}.
+            Tidy Home Services — one team handling cleaning, lawn, and detailing across Miami. Opening {launchLabel}.
           </p>
 
           <div className="mt-10 grid grid-cols-4 gap-3 sm:gap-5">
@@ -110,7 +110,7 @@ const ComingSoon = () => {
           </div>
 
           <div className="mt-16 text-[11px] uppercase tracking-[0.25em] text-white/30">
-            Tidy Home Concierge LLC · Miami, FL
+            Tidy Home Services LLC · Miami, FL
           </div>
 
           <a
