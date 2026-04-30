@@ -70,7 +70,7 @@ function filenamesFor(action: Action, role: Role): string[] {
   switch (action) {
     case 'send_offer':       return ['11_OfferLetter_Template.pdf'];
     case 'send_contract':    return [contract[role as keyof typeof contract] ?? contract.cleaning];
-    case 'mark_demo_passed': return [onboardingPacket[role as keyof typeof onboardingPacket] ?? onboardingPacket.cleaning];
+    case 'mark_oriented':    return [onboardingPacket[role as keyof typeof onboardingPacket] ?? onboardingPacket.cleaning];
     case 'activate':         return [onboardingPacket[role as keyof typeof onboardingPacket] ?? onboardingPacket.cleaning];
     default:                 return [];
   }
