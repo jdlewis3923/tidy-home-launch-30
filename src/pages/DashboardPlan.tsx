@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote } from '@/lib/dashboard-pricing';
+import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote, VALID_ZIPS } from '@/lib/dashboard-pricing';
 import CalmShell from '@/components/dashboard/CalmShell';
 import ProgressBar from '@/components/dashboard/ProgressBar';
 import StickyPriceBar from '@/components/dashboard/StickyPriceBar';
+import StepZipGate from '@/components/dashboard/StepZipGate';
 import StepServices from '@/components/dashboard/steps/StepServices';
 import StepFrequency from '@/components/dashboard/steps/StepFrequency';
 import StepProperty from '@/components/dashboard/steps/StepProperty';
@@ -13,12 +14,14 @@ import StepAddOns from '@/components/dashboard/steps/StepAddOns';
 import StepReview from '@/components/dashboard/steps/StepReview';
 import StepPayment from '@/components/dashboard/steps/StepPayment';
 import PromoBanner from '@/components/dashboard/PromoBanner';
+import TrustStrip from '@/components/dashboard/TrustStrip';
+import BundleNudge from '@/components/dashboard/BundleNudge';
 import CustomQuoteModal from '@/components/dashboard/CustomQuoteModal';
 import ExistingAccountInline from '@/components/dashboard/ExistingAccountInline';
 
-// Quiet, lowercase Apple-tone microcopy. The headline does the lifting,
-// the subline is one short line — never two.
+// Quiet, lowercase Apple-tone microcopy. Step 0 is the new ZIP gate.
 const STEPS = [
+  { heading: 'first — where do you live?',      sub: "we'll confirm we're in your area before anything else.", cta: '',             micro: 'set it once.' },
   { heading: 'what should we handle?',          sub: 'one, two, or all three. bundle to save.',          cta: 'continue',     micro: 'set it once.' },
   { heading: 'how often?',                      sub: 'change anytime. no lock-in.',                      cta: 'continue',     micro: 'set it once.' },
   { heading: 'tell us about your home',         sub: 'so we match the right pro and the right price.',  cta: 'continue',     micro: 'set it once.' },
@@ -44,13 +47,20 @@ export default function DashboardPlan() {
   const location = useLocation();
   const customQuote = hasCustomQuote(state);
 
-  // Preselect from incoming ad URL params, once.
+  // Preselect from incoming ad URL params, once. If a valid ZIP is in
+  // localStorage already, skip the ZIP gate.
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const serviceParam = params.get('service');
     const planParam = params.get('plan');
     const servicesParam = params.get('services');
     const bundleParam = params.get('bundle');
+
+    // Skip ZIP gate if user already has a valid in-area zip stored.
+    if (state.zip && VALID_ZIPS.includes(state.zip)) {
+      setStep(1);
+    }
+
     if (!serviceParam && !bundleParam && !servicesParam) return;
 
     setState((prev) => {
@@ -88,20 +98,21 @@ export default function DashboardPlan() {
   }, []);
 
   const canAdvance = () => {
-    if (step === 0) return state.services.length > 0;
-    if (step === 1) return state.services.every(s => !!state.frequencies[s]);
-    if (step === 2) {
+    if (step === 0) return false; // gate has its own submit
+    if (step === 1) return state.services.length > 0;
+    if (step === 2) return state.services.every(s => !!state.frequencies[s]);
+    if (step === 3) {
       if (state.services.includes('cleaning') && !state.homeSize) return false;
       if (state.services.includes('lawn') && !state.yardSize) return false;
       if (state.services.includes('detailing') && !state.vehicleSize) return false;
       return true;
     }
-    if (step === 3) return !!(state.firstName && state.lastName && state.email && state.password && state.password.length >= 8 && state.phone && state.address && state.city && state.zip);
+    if (step === 4) return !!(state.firstName && state.lastName && state.email && state.password && state.password.length >= 8 && state.phone && state.address && state.city && state.zip);
     return true;
   };
 
   const next = () => {
-    if (step === 5 && customQuote) { setQuoteOpen(true); return; }
+    if (step === 6 && customQuote) { setQuoteOpen(true); return; }
     if (step < STEPS.length - 1) {
       setDirection(1);
       setStep(step + 1);
@@ -122,6 +133,10 @@ export default function DashboardPlan() {
     <CalmShell step={step} totalSteps={STEPS.length} microcopy={stepInfo.micro}>
       <div className="space-y-6">
         <ProgressBar currentStep={step} totalSteps={STEPS.length} />
+
+        {/* Above-the-fold trust strip — visible on every step. */}
+        <TrustStrip />
+
         <PromoBanner />
 
         <div className="animate-calm-in" key={`heading-${step}`}>
@@ -134,7 +149,7 @@ export default function DashboardPlan() {
           <p className="mt-2 text-sm text-ink-faint lowercase">{stepInfo.sub}</p>
         </div>
 
-        {step <= 1 && <ExistingAccountInline />}
+        {step >= 1 && step <= 2 && <ExistingAccountInline />}
 
         <div className="relative overflow-x-hidden">
           <AnimatePresence mode="wait" custom={direction} initial={false}>
@@ -146,18 +161,30 @@ export default function DashboardPlan() {
               exit={{ opacity: 0, x: direction * -32 }}
               transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
             >
-              {step === 0 && <StepServices  state={state} onChange={updateState} />}
-              {step === 1 && <StepFrequency state={state} onChange={updateState} />}
-              {step === 2 && <StepProperty  state={state} onChange={updateState} />}
-              {step === 3 && <StepDetails   state={state} onChange={updateState} />}
-              {step === 4 && <StepAddOns    state={state} onChange={updateState} />}
-              {step === 5 && <StepReview    state={state} onEdit={() => { setDirection(-1); setStep(0); }} />}
-              {step === 6 && <StepPayment   state={state} onChange={updateState} />}
+              {step === 0 && (
+                <StepZipGate
+                  state={state}
+                  onChange={updateState}
+                  onValid={() => { setDirection(1); setStep(1); }}
+                />
+              )}
+              {step === 1 && (
+                <div className="space-y-4">
+                  <StepServices state={state} onChange={updateState} />
+                  <BundleNudge state={state} onChange={updateState} />
+                </div>
+              )}
+              {step === 2 && <StepFrequency state={state} onChange={updateState} />}
+              {step === 3 && <StepProperty  state={state} onChange={updateState} />}
+              {step === 4 && <StepDetails   state={state} onChange={updateState} />}
+              {step === 5 && <StepAddOns    state={state} onChange={updateState} />}
+              {step === 6 && <StepReview    state={state} onEdit={() => { setDirection(-1); setStep(1); }} />}
+              {step === 7 && <StepPayment   state={state} onChange={updateState} />}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {(step === 5 || step === 6) && customQuote && (
+        {(step === 6 || step === 7) && customQuote && (
           <div className="rounded-xl border border-hairline bg-white/70 p-4 text-sm text-ink-soft animate-calm-in">
             <p className="font-semibold mb-1 text-ink">custom plan required</p>
             <p className="text-[11px] leading-relaxed text-ink-faint">
@@ -166,24 +193,24 @@ export default function DashboardPlan() {
           </div>
         )}
 
-        {/* Navigation — calm, ink-on-cream */}
-        {step < 6 && (
+        {/* Navigation — calm, ink-on-cream. ZIP gate (step 0) handles its own submit. */}
+        {step > 0 && step < 7 && (
           <div className="flex items-center gap-3 pt-2">
-            {step > 0 && (
-              <button
-                type="button"
-                onClick={back}
-                className="text-sm font-medium text-ink-faint hover:text-ink transition-colors"
-              >
-                ← back
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={back}
+              className="text-sm font-medium text-ink-faint hover:text-ink transition-colors"
+              style={{ minHeight: 44 }}
+            >
+              ← back
+            </button>
 
-            {step === 4 && (
+            {step === 5 && (
               <button
                 type="button"
                 onClick={next}
                 className="text-sm font-medium text-ink-faint hover:text-ink transition-colors"
+                style={{ minHeight: 44 }}
               >
                 {stepInfo.skip}
               </button>
@@ -193,13 +220,27 @@ export default function DashboardPlan() {
               type="button"
               onClick={next}
               disabled={!canAdvance()}
-              style={{ backgroundColor: 'hsl(var(--ink))', color: '#ffffff' }}
+              style={{ backgroundColor: 'hsl(var(--ink))', color: '#ffffff', minHeight: 44 }}
               className="ml-auto group relative overflow-hidden rounded-xl px-7 py-3.5 text-sm font-semibold shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] ring-1 ring-[hsl(var(--ink))] transition-all hover:shadow-[0_20px_44px_-10px_hsl(var(--ink)/0.7)] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 lowercase"
             >
               <span className="relative inline-flex items-center gap-1.5">
-                {customQuote && step === 5 ? 'get my plan' : stepInfo.cta}
+                {customQuote && step === 6 ? 'get my plan' : stepInfo.cta}
                 <span className="transition-transform group-hover:translate-x-0.5">→</span>
               </span>
+            </button>
+          </div>
+        )}
+
+        {/* Back button on payment step (no advance — payment form handles it). */}
+        {step === 7 && (
+          <div className="flex items-center pt-2">
+            <button
+              type="button"
+              onClick={back}
+              className="text-sm font-medium text-ink-faint hover:text-ink transition-colors"
+              style={{ minHeight: 44 }}
+            >
+              ← back
             </button>
           </div>
         )}
