@@ -37,6 +37,14 @@ Deno.serve(async (req) => {
 
   const fullName = `${a.first_name} ${a.last_name}`;
 
+  // Write the 'applied' onboarding_events row (audit trail).
+  const evt = await admin.from('onboarding_events').insert({
+    applicant_id: a.id,
+    event: 'applied',
+    metadata: { source: 'apply_form', service: a.service, zip: a.zip },
+  });
+  if (evt.error) console.error('[applicant-applied] onboarding_events insert failed', evt.error);
+
   // 1. Confirmation to applicant
   const applicantHtml = brandedEmailHtml({
     heading: 'Application received',
