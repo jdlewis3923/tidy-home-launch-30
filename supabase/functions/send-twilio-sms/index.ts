@@ -195,8 +195,96 @@ Deno.serve(async (req) => {
     );
   }
 
-  const { to_phone_e164, body, content_sid, content_variables, idempotency_key } = parsed.data;
+  const { to_phone_e164, body, content_sid, content_variables, idempotency_key, template_name, triggered_by } = parsed.data;
+  const tplName = template_name ?? content_sid ?? 'sms-adhoc';
 
+  // Sunday quiet-day guard (America/New_York). Never send on Sundays.
+  if (isSundayET()) {
+    return jsonResponse({ ok: true, sent: false, reason: 'sunday_quiet_hours' }, 200);
+  }
+
+  // Quiet hours guard.
+  if (isQuietHours()) {
+    return jsonResponse({ ok: true, sent: false, reason: 'quiet_hours' }, 200);
+  }
+
+  const idempotencyHash = await sha256(idempotency_key);
+
+  const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  // Dedupe check.
+  if (await isDuplicate(admin, idempotencyHash)) {
+    return jsonResponse({ ok: true, sent: false, reason: 'duplicate_idempotency_key' }, 200);
+  }
+
+  try {
+    const result = await withLogging({
+      source: 'twilio',
+      event: 'sms.send',
+      payload: idempotency_key,
+      fn: async () => {
+        const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+        const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
+
+        const form = new URLSearchParams({
+          From: TWILIO_FROM,
+          To: to_phone_e164,
+        });
+        if (content_sid) {
+          form.set('ContentSid', content_sid);
+          if (content_variables && Object.keys(content_variables).length > 0) {
+            form.set('ContentVariables', JSON.stringify(content_variables));
+          }
+        } else if (body) {
+          form.set('Body', body);
+        }
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Basic ${basic}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: form.toString(),
+        });
+
+        const text = await res.text();
+        let json: Record<string, unknown> = {};
+        try { json = JSON.parse(text); } catch { /* keep raw */ }
+
+        if (!res.ok) {
+          throw new Error(
+            `twilio ${res.status}: ${(json.message as string) ?? text.slice(0, 300)}`,
+          );
+        }
+
+        return {
+          ok: true as const,
+          sent: true as const,
+          message_sid: (json.sid as string) ?? null,
+          status: (json.status as string) ?? null,
+        };
+      },
+    });
+
+    await logSmsSend({
+      template_name: tplName, recipient: to_phone_e164, triggered_by,
+      twilio_sid: result.message_sid, status: 'sent',
+      payload: { has_body: !!body, has_content_sid: !!content_sid },
+    });
+    return jsonResponse(result, 200);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'unknown error';
+    console.error('[send-twilio-sms] failed', message);
+    await logSmsSend({
+      template_name: tplName, recipient: to_phone_e164, triggered_by,
+      status: 'failed', error_message: message,
+    });
+    return jsonResponse({ ok: false, sent: false, error: message }, 500);
+  }
+});
   // Sunday quiet-day guard (America/New_York). Never send on Sundays.
   if (isSundayET()) {
     return jsonResponse({ ok: true, sent: false, reason: 'sunday_quiet_hours' }, 200);
