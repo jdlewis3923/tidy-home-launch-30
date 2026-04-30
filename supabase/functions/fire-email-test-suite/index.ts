@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
   }
 
   // 2. SMS — use send-twilio-sms with template_name + triggered_by labels.
-  for (const sms of SMS_TEMPLATES) {
+  if (runSms) for (const sms of SMS_TEMPLATES) {
     try {
       const r = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
         method: 'POST',
