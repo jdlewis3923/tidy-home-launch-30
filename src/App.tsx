@@ -61,6 +61,7 @@ const AdminDocuments = lazy(() => import("./pages/AdminDocuments.tsx"));
 const AdminApplicants = lazy(() => import("./pages/AdminApplicants.tsx"));
 const AdminEmailHealth = lazy(() => import("./pages/AdminEmailHealth.tsx"));
 const AdminOrientations = lazy(() => import("./pages/AdminOrientations.tsx"));
+const AdminSocialLaunch = lazy(() => import("./pages/AdminSocialLaunch.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
@@ -197,6 +198,7 @@ const App = () => (
                   <Route path="/admin/documents" element={<AdminDocuments />} />
                   <Route path="/admin/applicants" element={<AdminApplicants />} />
                   <Route path="/admin/orientations" element={<AdminOrientations />} />
+                  <Route path="/admin/social-launch" element={<AdminSocialLaunch />} />
                   <Route path="/admin/email-health" element={<AdminEmailHealth />} />
                   <Route path="/apply" element={<Apply />} />
                   <Route path="/coming-soon" element={<ComingSoon />} />

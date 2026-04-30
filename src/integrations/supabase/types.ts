@@ -1362,6 +1362,57 @@ export type Database = {
         }
         Relationships: []
       }
+      social_launch_posts: {
+        Row: {
+          caption: string
+          channel: string
+          created_at: string
+          id: string
+          image_filename: string | null
+          image_url: string | null
+          notes: string | null
+          post_number: number
+          posted_at: string | null
+          scheduled_for: string
+          scheduled_in_native_tool_at: string | null
+          status: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          caption: string
+          channel: string
+          created_at?: string
+          id?: string
+          image_filename?: string | null
+          image_url?: string | null
+          notes?: string | null
+          post_number: number
+          posted_at?: string | null
+          scheduled_for: string
+          scheduled_in_native_tool_at?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          caption?: string
+          channel?: string
+          created_at?: string
+          id?: string
+          image_filename?: string | null
+          image_url?: string | null
+          notes?: string | null
+          post_number?: number
+          posted_at?: string | null
+          scheduled_for?: string
+          scheduled_in_native_tool_at?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_posts: {
         Row: {
           caption: string
