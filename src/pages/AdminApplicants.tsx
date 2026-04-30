@@ -200,6 +200,9 @@ export default function AdminApplicants() {
   const [eventsLoading, setEventsLoading] = useState(false);
   const [confirmReject, setConfirmReject] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [nextOrientation, setNextOrientation] = useState<Orientation | null>(null);
+  const [registeringOrientation, setRegisteringOrientation] = useState(false);
+  const [registeredOrientationId, setRegisteredOrientationId] = useState<string | null>(null);
 
   const fetchRows = useCallback(async () => {
     setLoading(true);
