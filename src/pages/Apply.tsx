@@ -281,11 +281,32 @@ export default function Apply() {
                 <Textarea id="notes" rows={3} value={form.notes_for_admin} onChange={(e) => set("notes_for_admin", e.target.value)} className="mt-1.5" />
               </div>
 
+              {/* Bilingual fluency — required, non-negotiable */}
+              <div className={`rounded-xl border-2 p-4 transition ${
+                form.bilingual_fluency_confirmed
+                  ? "border-emerald-300 bg-emerald-50/60"
+                  : "border-amber-300 bg-amber-50/60"
+              }`}>
+                <label className="flex items-start gap-3 text-sm text-ink cursor-pointer">
+                  <Checkbox
+                    checked={form.bilingual_fluency_confirmed}
+                    onCheckedChange={(v) => set("bilingual_fluency_confirmed", !!v)}
+                    required
+                    className="mt-0.5"
+                    aria-required="true"
+                  />
+                  <span className="leading-relaxed">
+                    <span className="font-semibold">Bilingual requirement (required) *</span><br />
+                    I am fully fluent in <strong>BOTH English and Spanish</strong> (full conversational fluency, not partial). I understand this is a non-negotiable requirement for every Tidy Pro and that fluency will be verified during the phone screen and interview. <span className="text-red-700 font-semibold">Misrepresenting fluency will result in immediate rejection.</span>
+                  </span>
+                </label>
+              </div>
+
               <Button
                 type="submit"
                 size="lg"
-                disabled={submitting}
-                className="w-full bg-gold text-navy-deep hover:bg-gold/90 font-bold text-base h-12 shadow-lg shadow-gold/20"
+                disabled={submitting || !form.bilingual_fluency_confirmed}
+                className="w-full bg-gold text-navy-deep hover:bg-gold/90 font-bold text-base h-12 shadow-lg shadow-gold/20 disabled:opacity-50"
               >
                 {submitting
                   ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting…</>
