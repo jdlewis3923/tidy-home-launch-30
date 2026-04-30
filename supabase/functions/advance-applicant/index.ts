@@ -169,19 +169,28 @@ Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
 
-  // AuthN: signed-in admin only.
+  // AuthN: signed-in admin OR service-role bypass (for E2E + internal calls).
   const auth = req.headers.get('Authorization') ?? '';
   if (!auth.startsWith('Bearer ')) return jsonResponse({ error: 'unauthorized' }, 401);
-  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    global: { headers: { Authorization: auth } },
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { data: userRes } = await userClient.auth.getUser();
-  const userId = userRes?.user?.id;
-  if (!userId) return jsonResponse({ error: 'unauthorized' }, 401);
-  const { data: roleRow } = await admin
-    .from('user_roles').select('role').eq('user_id', userId).eq('role', 'admin').maybeSingle();
-  if (!roleRow) return jsonResponse({ error: 'forbidden' }, 403);
+  const token = auth.replace('Bearer ', '').trim();
+
+  let userId: string | null = null;
+  if (token === SUPABASE_SERVICE_ROLE_KEY) {
+    // Service-role bypass — used by E2E test runner / internal pipelines.
+    userId = '00000000-0000-0000-0000-000000000000';
+    console.log('[advance-applicant] service-role bypass');
+  } else {
+    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: auth } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: userRes } = await userClient.auth.getUser();
+    userId = userRes?.user?.id ?? null;
+    if (!userId) return jsonResponse({ error: 'unauthorized' }, 401);
+    const { data: roleRow } = await admin
+      .from('user_roles').select('role').eq('user_id', userId).eq('role', 'admin').maybeSingle();
+    if (!roleRow) return jsonResponse({ error: 'forbidden' }, 403);
+  }
 
   const raw = await req.json().catch(() => ({}));
   const parsed = Body.safeParse(raw);
