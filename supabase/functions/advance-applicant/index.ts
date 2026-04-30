@@ -35,7 +35,7 @@ const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 const ACTIONS = [
   'clear', 'consider', 'fail',
   'schedule_interview', 'send_offer', 'send_contract',
-  'mark_demo_passed', 'activate', 'reject',
+  'mark_oriented', 'activate', 'reject',
 ] as const;
 
 const Body = z.object({
