@@ -28,6 +28,9 @@ const Body = z.object({
   has_vehicle: z.boolean().optional(),
   has_supplies: z.boolean().optional(),
   notes_for_admin: z.string().max(2000).optional(),
+  bilingual_fluency_confirmed: z.boolean().refine((v) => v === true, {
+    message: 'Bilingual fluency (English + Spanish) must be confirmed',
+  }),
 });
 
 Deno.serve(async (req) => {
