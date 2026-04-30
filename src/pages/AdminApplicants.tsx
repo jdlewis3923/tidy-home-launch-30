@@ -330,6 +330,13 @@ export default function AdminApplicants() {
   // ----- Actions -----
   const runAction = async (action: AdvanceAction) => {
     if (!open) return;
+    // Bilingual gate — block APPROVE (clear) and SEND OFFER if not confirmed
+    if ((action === "clear" || action === "send_offer") && !open.bilingual_fluency_confirmed) {
+      toast.error("Bilingual fluency check failed", {
+        description: "This Pro cannot be advanced.",
+      });
+      return;
+    }
     setSubmitting(action);
     const { data, error } = await supabase.functions.invoke("advance-applicant", {
       body: { applicant_id: open.id, action, notes: bgNotes || undefined },
