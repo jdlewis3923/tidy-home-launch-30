@@ -323,7 +323,7 @@ function CampaignSection({
 // ---------- Page ----------
 
 export default function AdminSocialLaunch() {
-  const { hasRole, loading: roleLoading } = useHasRoleState("admin");
+  const { hasRole, isLoading: roleLoading } = useHasRoleState("admin");
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [launchOpen, setLaunchOpen] = useState(false);
