@@ -65,3 +65,7 @@ verify_jwt = false
 [functions.advance-applicant]
 verify_jwt = false
 
+# Admin-only test-suite trigger; admin-role check happens in-handler.
+[functions.fire-email-test-suite]
+verify_jwt = false
+
