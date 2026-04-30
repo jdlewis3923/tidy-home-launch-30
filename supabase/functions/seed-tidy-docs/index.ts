@@ -1,8 +1,12 @@
-// Tidy — Seed 18 contractor PDFs into company_documents (admin-only, idempotent).
+// Tidy — Seed 19 contractor PDFs into company_documents (admin-only, idempotent).
 //
 // Inserts placeholder rows into `company_documents` for each known Tidy
 // contractor PDF. Files are uploaded later via /admin/documents — at which
 // point the storage_path / mime_type / file_size_bytes get filled in.
+//
+// Idempotency: filters out filenames that already exist (case-insensitive prefix
+// match on the leading "NN_" sequence number) to avoid duplicates regardless of
+// minor naming drift between seed batches.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
@@ -36,6 +40,7 @@ const DOCS: Seed[] = [
   { filename: '16_OnboardingPacket_Detail.pdf',   category: 'Onboarding', description: 'Detailing contractor onboarding packet.' },
   { filename: '17_HelloSignContract_ScheduleA.pdf', category: 'Contracts', description: 'HelloSign Schedule A — independent contractor contract.' },
   { filename: '18_InterviewGuide_ProConversation.pdf', category: 'HR',    description: 'Interview guide and pro conversation script.' },
+  { filename: '19_HiringPlaybook.pdf',            category: 'HR',          description: 'Tidy hiring process playbook — recruiter-ready SOP from application to first paid visit.' },
 ];
 
 Deno.serve(async (req) => {
