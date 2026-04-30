@@ -236,7 +236,7 @@ Deno.serve(async (req) => {
   }
 
   const fullName = `${row.first_name} ${row.last_name}`;
-  const role = roleKey(row.service);
+  const applicantRole = roleKey(row.service);
 
   // Insert onboarding_events row (best-effort, but we do await — it's the audit trail).
   const eventInsert = await admin.from('onboarding_events').insert({
@@ -245,7 +245,7 @@ Deno.serve(async (req) => {
     metadata: {
       stage: row.current_stage,
       bg_check_status: row.bg_check_status,
-      role,
+      role: applicantRole,
       notes: notes ?? null,
       triggered_by: userId,
     },
@@ -253,19 +253,17 @@ Deno.serve(async (req) => {
   if (eventInsert.error) console.error('[advance] onboarding_events insert failed', eventInsert.error);
 
   // Stripe Connect Express stub on activation.
-  // TODO: replace with real Stripe Connect API call (accounts.create + accountLinks.create)
-  // once STRIPE_SECRET_KEY for Connect is provisioned.
   if (action === 'activate') {
     const { error: stripeErr } = await admin.from('stripe_connect_pending').insert({
       applicant_id: row.id,
-      role,
+      role: applicantRole,
       status: 'pending_api_call',
     });
     if (stripeErr) console.error('[advance] stripe_connect_pending insert failed', stripeErr);
   }
 
   // Build attachments from documents → signed URLs.
-  const filenames = filenamesFor(action, role);
+  const filenames = filenamesFor(action, applicantRole);
   const attachments = await buildAttachments(filenames);
 
   // Per-action applicant-facing copy.
