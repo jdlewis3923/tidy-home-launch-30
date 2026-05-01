@@ -1,8 +1,9 @@
-// Tidy — Send Documenso envelope (replaces HelloSign)
+// Tidy — Send Documenso envelope (one bundled envelope per applicant)
 //
-// Sends 3 contractor docs (ICA, W-9, Direct Deposit) to the applicant via
-// Documenso's REST API. Stores returned documentId per doc_type in
-// applicants.documenso_document_ids. Auth: admin user JWT OR service role.
+// Each contractor signs ONE envelope keyed by their service role
+// (cleaning | lawn | detail). The envelope contains the service contract
+// + merged W-9/Direct Deposit form. Stores the returned Documenso documentId
+// on applicants.documenso_document_ids as { envelope: <id> }.
 //
 // Body: { applicant_id: uuid }
 
@@ -17,9 +18,18 @@ const DOCUMENSO_API_KEY = Deno.env.get("DOCUMENSO_API_KEY");
 const DOCUMENSO_BASE = "https://app.documenso.com/api/v1";
 
 const Body = z.object({ applicant_id: z.string().uuid() });
+const SERVICE_ROLES = ["cleaning", "lawn", "detail"] as const;
+type ServiceRole = (typeof SERVICE_ROLES)[number];
 
-const DOC_TYPES = ["ica", "w9", "direct_deposit"] as const;
-type DocType = (typeof DOC_TYPES)[number];
+function normalizeServiceRole(raw: string | null | undefined): ServiceRole | null {
+  if (!raw) return null;
+  const s = raw.toLowerCase().trim();
+  if (s.includes("clean")) return "cleaning";
+  if (s.includes("lawn") || s.includes("yard")) return "lawn";
+  if (s.includes("detail") || s.includes("car")) return "detail";
+  if ((SERVICE_ROLES as readonly string[]).includes(s)) return s as ServiceRole;
+  return null;
+}
 
 async function isAuthorized(req: Request): Promise<boolean> {
   const auth = req.headers.get("Authorization") ?? "";
@@ -70,9 +80,9 @@ async function generateDoc(
           },
         ],
         meta: {
-          subject: `Tidy — please sign your ${label}`,
+          subject: `Tidy — please sign your contractor envelope`,
           message:
-            `Hi ${applicant.first_name}, please review and sign your ${label} to finish onboarding with Tidy.`,
+            `Hi ${applicant.first_name}, please review and sign your contractor envelope to finish onboarding with Tidy.`,
         },
       }),
     },
@@ -83,7 +93,6 @@ async function generateDoc(
       `Documenso ${label} (${templateId}) failed (${res.status}): ${JSON.stringify(json).slice(0, 300)}`,
     );
   }
-  // Documenso returns { documentId, ... } or { id, ... } depending on version
   const id = (json.documentId ?? json.id ?? json.document?.id) as
     | string
     | number
@@ -119,62 +128,71 @@ Deno.serve(async (req) => {
 
   const { data: applicant, error: aErr } = await sb
     .from("applicants")
-    .select("id, first_name, last_name, email, documenso_document_ids")
+    .select("id, first_name, last_name, email, service, role, documenso_document_ids")
     .eq("id", parsed.data.applicant_id)
     .maybeSingle();
   if (aErr || !applicant) {
     return jsonResponse({ error: "applicant_not_found" }, 404);
   }
 
-  const { data: tpls, error: tErr } = await sb
-    .from("documenso_templates")
-    .select("doc_type, template_id, label");
-  if (tErr) return jsonResponse({ error: tErr.message }, 500);
-
-  const tplMap = new Map(
-    (tpls ?? []).map((t) => [t.doc_type as string, { id: t.template_id, label: t.label }]),
-  );
-  const missing = DOC_TYPES.filter((d) => !tplMap.get(d)?.id);
-  if (missing.length) {
+  const serviceRole =
+    normalizeServiceRole(applicant.service) ?? normalizeServiceRole(applicant.role);
+  if (!serviceRole) {
     return jsonResponse(
       {
-        error: "templates_not_configured",
-        missing,
-        hint: "Set template IDs at /admin/documenso-templates",
+        error: "unknown_service_role",
+        hint: "applicant.service must map to one of: cleaning, lawn, detail",
+        got: { service: applicant.service, role: applicant.role },
       },
       400,
     );
   }
 
-  const docIds: Record<DocType, string> = { ...((applicant.documenso_document_ids as Record<DocType, string>) ?? {}) } as Record<DocType, string>;
-  const errors: Array<{ doc_type: DocType; error: string }> = [];
-
-  for (const docType of DOC_TYPES) {
-    if (docIds[docType]) continue; // already sent — skip
-    const t = tplMap.get(docType)!;
-    try {
-      const id = await generateDoc(
-        t.id!,
-        { first_name: applicant.first_name, last_name: applicant.last_name, email: applicant.email },
-        t.label,
-      );
-      docIds[docType] = id;
-    } catch (err) {
-      errors.push({ doc_type: docType, error: err instanceof Error ? err.message : String(err) });
-    }
+  const { data: tpl, error: tErr } = await sb
+    .from("documenso_templates")
+    .select("doc_type, template_id, label")
+    .eq("doc_type", serviceRole)
+    .maybeSingle();
+  if (tErr) return jsonResponse({ error: tErr.message }, 500);
+  if (!tpl?.template_id) {
+    return jsonResponse(
+      {
+        error: "template_not_configured",
+        service_role: serviceRole,
+        hint: "Set the template ID at /admin/documenso-templates",
+      },
+      400,
+    );
   }
 
-  await sb
-    .from("applicants")
-    .update({
-      documenso_document_ids: docIds,
-      current_stage: "offer_sent",
-      stage_entered_at: new Date().toISOString(),
-    })
-    .eq("id", applicant.id);
+  // Idempotency: if already sent, return the stored id.
+  const existing = (applicant.documenso_document_ids ?? {}) as Record<string, string>;
+  if (existing.envelope) {
+    return jsonResponse({ ok: true, document_ids: existing, already_sent: true });
+  }
 
-  return jsonResponse(
-    { ok: errors.length === 0, document_ids: docIds, errors },
-    errors.length === 0 ? 200 : 207,
-  );
+  try {
+    const id = await generateDoc(
+      tpl.template_id,
+      {
+        first_name: applicant.first_name,
+        last_name: applicant.last_name,
+        email: applicant.email,
+      },
+      tpl.label,
+    );
+    const docIds = { envelope: id, service_role: serviceRole };
+    await sb
+      .from("applicants")
+      .update({
+        documenso_document_ids: docIds,
+        current_stage: "offer_sent",
+        stage_entered_at: new Date().toISOString(),
+      })
+      .eq("id", applicant.id);
+    return jsonResponse({ ok: true, document_ids: docIds });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return jsonResponse({ ok: false, error: msg }, 502);
+  }
 });

@@ -54,8 +54,9 @@ export default function AdminDocumensoTemplates() {
         <header>
           <h1 className="text-2xl font-bold text-foreground">Documenso Templates</h1>
           <p className="mt-1 text-sm text-muted-foreground">
+            One bundled envelope per service role (cleaning, lawn, detail).
+            Each applicant signs the single envelope matching their service.
             Paste the template ID from Documenso (Templates → ⋯ → Copy template ID).
-            All 3 must be set before "Send Documenso envelope" will work.
           </p>
         </header>
 
