@@ -26,7 +26,7 @@ const ONBOARDING: SeedRow[] = [
   '07_Handbook_HouseCleaning.pdf', '08_Handbook_LawnCare.pdf', '09_Handbook_CarDetailing.pdf',
   '10_ICA_IndependentContractorAgreement.pdf', '11_OfferLetter_Template.pdf',
   '12_OnboardingPacket_Cleaning.pdf', '13_OnboardingPacket_Lawn.pdf', '14_OnboardingPacket_Detail.pdf',
-  '15_HelloSign_Contract_Cleaning.pdf', '16_HelloSign_Contract_Lawn.pdf', '17_HelloSign_Contract_Detail.pdf',
+  '15_Contract_Cleaning.pdf', '16_Contract_Lawn.pdf', '17_Contract_Detail.pdf',
   '18_InterviewGuide.pdf',
 ].map((f) => ({ filename: f, category: 'Contractor Onboarding', tags: ['contractor'] }));
 

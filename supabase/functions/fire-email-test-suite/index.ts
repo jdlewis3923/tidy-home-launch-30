@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: EmailTpl[] = [
   { template_name: 'applicant-rejected', subject: '[TEST] Application not moving forward', heading: 'Rejected', body: '<p>Test send.</p>' },
   { template_name: 'applicant-interview-scheduled', subject: '[TEST] Interview scheduled', heading: 'Interview', body: '<p>Test send.</p>' },
   { template_name: 'applicant-offer', subject: '[TEST] Offer letter', heading: 'Offer', body: '<p>Test send with offer letter PDF.</p>', attach: ['11_OfferLetter_Template.pdf'] },
-  { template_name: 'applicant-contract-sent', subject: '[TEST] Contract for signature', heading: 'Contract', body: '<p>Test send with contract PDF.</p>', attach: ['15_HelloSign_Contract_Cleaning.pdf'] },
+  { template_name: 'applicant-contract-sent', subject: '[TEST] Contract for signature', heading: 'Contract', body: '<p>Test send with contract PDF.</p>', attach: ['15_Contract_Cleaning.pdf'] },
   { template_name: 'applicant-demo-passed', subject: '[TEST] Demo passed', heading: 'Demo passed', body: '<p>Test send with onboarding packet.</p>', attach: ['12_OnboardingPacket_Cleaning.pdf'] },
   { template_name: 'applicant-activated', subject: '[TEST] Welcome to Tidy', heading: 'Activated', body: '<p>Test send with welcome packet.</p>', attach: ['12_OnboardingPacket_Cleaning.pdf'] },
   { template_name: 'customer-welcome', subject: '[TEST] Welcome to Tidy 🏡', heading: 'Welcome', body: '<p>Test customer welcome flow (Stripe subscription created).</p>' },
