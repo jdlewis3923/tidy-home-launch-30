@@ -38,7 +38,7 @@ const DOCS: Seed[] = [
   { filename: '14_OnboardingPacket_Cleaning.pdf', category: 'Onboarding', description: 'Cleaning contractor onboarding packet.' },
   { filename: '15_OnboardingPacket_Lawn.pdf',     category: 'Onboarding', description: 'Lawn contractor onboarding packet.' },
   { filename: '16_OnboardingPacket_Detail.pdf',   category: 'Onboarding', description: 'Detailing contractor onboarding packet.' },
-  { filename: '17_HelloSignContract_ScheduleA.pdf', category: 'Contracts', description: 'HelloSign Schedule A — independent contractor contract.' },
+  { filename: '17_Contract_ScheduleA.pdf', category: 'Contracts', description: 'Documenso Schedule A — independent contractor contract.' },
   { filename: '18_InterviewGuide_ProConversation.pdf', category: 'HR',    description: 'Interview guide and pro conversation script.' },
   { filename: '19_HiringPlaybook.pdf',            category: 'HR',          description: 'Tidy hiring process playbook — recruiter-ready SOP from application to first paid visit.' },
 ];

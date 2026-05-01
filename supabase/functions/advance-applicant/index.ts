@@ -12,12 +12,12 @@
 //   5. Send Brevo admin alert.
 //   6. For 'activate', also enqueue a stripe_connect_pending row.
 //
-// TODO(HelloSign): When Justin provides HELLOSIGN_API_KEY, replace the
-// 'send_offer' / 'send_contract' attachment-only flow with a real HelloSign
-// signature request via the HelloSign API (templates + signer).
-// TODO(Stripe Connect): When STRIPE_SECRET_KEY for Connect is wired, replace
-// the stripe_connect_pending stub with a real Stripe Accounts API call and
-// store the returned account.id + onboarding link.
+// Signing is now handled by Documenso (REST API). On 'send_offer' we
+// fire-and-forget the `send-documenso-envelope` edge function which creates
+// the ICA, W-9, and Direct Deposit envelopes. The applicant gets signing
+// emails directly from Documenso; the Brevo email below is just a heads-up.
+// TODO(Stripe Connect): When STRIPE_CONNECT_API_KEY work begins, replace the
+// stripe_connect_pending stub with a real Stripe Accounts API call.
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
@@ -63,9 +63,9 @@ function filenamesFor(action: Action, role: Role): string[] {
     detail:   '14_OnboardingPacket_Detail.pdf',
   } as const;
   const contract = {
-    cleaning: '15_HelloSign_Contract_Cleaning.pdf',
-    lawn:     '16_HelloSign_Contract_Lawn.pdf',
-    detail:   '17_HelloSign_Contract_Detail.pdf',
+    cleaning: '15_Contract_Cleaning.pdf',
+    lawn:     '16_Contract_Lawn.pdf',
+    detail:   '17_Contract_Detail.pdf',
   } as const;
   switch (action) {
     case 'send_offer':       return ['11_OfferLetter_Template.pdf'];
@@ -284,6 +284,25 @@ Deno.serve(async (req) => {
     if (stripeErr) console.error('[advance] stripe_connect_pending insert failed', stripeErr);
   }
 
+  // Documenso envelope dispatch on send_offer (fire-and-forget).
+  if (action === 'send_offer') {
+    queueMicrotask(async () => {
+      try {
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/send-documenso-envelope`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ applicant_id: row.id }),
+        });
+        if (!r.ok) console.error('[advance] documenso dispatch http', r.status, await r.text().catch(() => ''));
+      } catch (e) {
+        console.error('[advance] documenso dispatch failed', e);
+      }
+    });
+  }
+
   // Build attachments from documents → signed URLs.
   const filenames = filenamesFor(action, applicantRole);
   const attachments = await buildAttachments(filenames);
@@ -294,8 +313,8 @@ Deno.serve(async (req) => {
     consider: { subject: 'Quick question about your application', body: `<p>Hi ${row.first_name},</p><p>Your background check came back with something we'd like to chat about. Someone from Tidy will reach out shortly.</p>` },
     fail: { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>Thanks for applying. After reviewing your background check, we're unable to move forward at this time.</p>` },
     schedule_interview: { subject: 'Schedule your Tidy interview', body: `<p>Hi ${row.first_name},</p><p>Pick a time that works for you: <a href="${CALENDLY_URL}">Book your interview</a>.</p>` },
-    send_offer: { subject: 'Your Tidy offer', body: `<p>Hi ${row.first_name},</p><p>We'd love to have you on the team. Your offer letter is attached.</p><p>Next step: pick a time to chat and sign — <a href="${CALENDLY_URL}">book here</a>.</p><!-- TODO(HelloSign): replace this with a HelloSign signature request via API --><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
-    send_contract: { subject: 'Sign your Tidy contract', body: `<p>Hi ${row.first_name},</p><p>Your contract is attached. Please review and sign.</p><!-- TODO(HelloSign): replace attached PDF with a HelloSign signature request once API key is wired --><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
+    send_offer: { subject: 'Your Tidy offer — please sign', body: `<p>Hi ${row.first_name},</p><p>We'd love to have you on the team. You'll receive 3 separate emails from Documenso to sign your ICA, W-9, and Direct Deposit form.</p><p>Pick a time to chat: <a href="${CALENDLY_URL}">book here</a>.</p><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
+    send_contract: { subject: 'Sign your Tidy contract', body: `<p>Hi ${row.first_name},</p><p>Your contract is attached. Please review and sign.</p><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
     mark_oriented: { subject: 'Group orientation complete 🎉', body: `<p>Hi ${row.first_name},</p><p>Welcome to the team. Your role-specific onboarding packet is attached — review it before your first job. We'll send activation + payout setup next.</p>` },
     activate: { subject: 'Welcome to Tidy', body: `<p>Hi ${row.first_name},</p><p>You're activated and ready to take jobs. Your onboarding packet is attached.</p><p>Log in to your contractor portal: <a href="${LOGIN_URL_PLACEHOLDER}">${LOGIN_URL_PLACEHOLDER}</a></p>` },
     reject: { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>Thanks for taking the time to apply to Tidy. After review, we're not able to move forward right now — we wish you the best.</p>` },
