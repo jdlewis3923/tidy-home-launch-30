@@ -1,0 +1,2 @@
+ALTER TABLE public.applicants DROP CONSTRAINT IF EXISTS applicants_status_valid;
+ALTER TABLE public.applicants ADD CONSTRAINT applicants_status_valid CHECK (current_stage = ANY (ARRAY['applied'::text, 'bg_check'::text, 'interview'::text, 'offer_sent'::text, 'contract_signed'::text, 'CONTRACTS_DONE'::text, 'oriented'::text, 'active'::text, 'rejected'::text]));
