@@ -284,6 +284,25 @@ Deno.serve(async (req) => {
     if (stripeErr) console.error('[advance] stripe_connect_pending insert failed', stripeErr);
   }
 
+  // Documenso envelope dispatch on send_offer (fire-and-forget).
+  if (action === 'send_offer') {
+    queueMicrotask(async () => {
+      try {
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/send-documenso-envelope`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ applicant_id: row.id }),
+        });
+        if (!r.ok) console.error('[advance] documenso dispatch http', r.status, await r.text().catch(() => ''));
+      } catch (e) {
+        console.error('[advance] documenso dispatch failed', e);
+      }
+    });
+  }
+
   // Build attachments from documents → signed URLs.
   const filenames = filenamesFor(action, applicantRole);
   const attachments = await buildAttachments(filenames);
