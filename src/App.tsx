@@ -201,6 +201,7 @@ const App = () => (
                   <Route path="/admin/applicants" element={<AdminApplicants />} />
                   <Route path="/admin/orientations" element={<AdminOrientations />} />
                   <Route path="/admin/social-launch" element={<AdminSocialLaunch />} />
+                  <Route path="/admin/nextdoor-verify" element={<AdminNextdoorVerify />} />
                   <Route path="/admin/documenso-templates" element={<AdminDocumensoTemplates />} />
                   <Route path="/admin/email-health" element={<AdminEmailHealth />} />
                   <Route path="/apply" element={<Apply />} />
