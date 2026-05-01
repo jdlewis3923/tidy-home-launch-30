@@ -245,8 +245,11 @@ export type Database = {
           coi_auto_status: string | null
           coi_general_liability_status: string | null
           compliance_complete: boolean | null
+          contracts_signed: boolean
+          contracts_signed_at: string | null
           created_at: string
           current_stage: string | null
+          documenso_document_ids: Json
           ein: string | null
           email: string
           experience_years: number | null
@@ -276,8 +279,11 @@ export type Database = {
           coi_auto_status?: string | null
           coi_general_liability_status?: string | null
           compliance_complete?: boolean | null
+          contracts_signed?: boolean
+          contracts_signed_at?: string | null
           created_at?: string
           current_stage?: string | null
+          documenso_document_ids?: Json
           ein?: string | null
           email: string
           experience_years?: number | null
@@ -307,8 +313,11 @@ export type Database = {
           coi_auto_status?: string | null
           coi_general_liability_status?: string | null
           compliance_complete?: boolean | null
+          contracts_signed?: boolean
+          contracts_signed_at?: string | null
           created_at?: string
           current_stage?: string | null
+          documenso_document_ids?: Json
           ein?: string | null
           email?: string
           experience_years?: number | null
@@ -388,9 +397,9 @@ export type Database = {
           category: string
           contractor_id: string | null
           current_version: boolean
+          documenso_doc_id: string | null
           file_size_bytes: number | null
           filename: string
-          hellosign_doc_id: string | null
           id: string
           mime_type: string | null
           searchable_text: string | null
@@ -406,9 +415,9 @@ export type Database = {
           category: string
           contractor_id?: string | null
           current_version?: boolean
+          documenso_doc_id?: string | null
           file_size_bytes?: number | null
           filename: string
-          hellosign_doc_id?: string | null
           id?: string
           mime_type?: string | null
           searchable_text?: string | null
@@ -424,9 +433,9 @@ export type Database = {
           category?: string
           contractor_id?: string | null
           current_version?: boolean
+          documenso_doc_id?: string | null
           file_size_bytes?: number | null
           filename?: string
-          hellosign_doc_id?: string | null
           id?: string
           mime_type?: string | null
           searchable_text?: string | null
@@ -530,6 +539,30 @@ export type Database = {
           job_name?: string
           request_id?: number | null
           scheduled_at?: string
+        }
+        Relationships: []
+      }
+      documenso_templates: {
+        Row: {
+          doc_type: string
+          label: string
+          template_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          doc_type: string
+          label: string
+          template_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          doc_type?: string
+          label?: string
+          template_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
