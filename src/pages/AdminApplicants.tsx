@@ -680,7 +680,7 @@ export default function AdminApplicants() {
                     </ol>
                     <div className="pt-2 border-t border-slate-100 flex flex-wrap gap-2">
                       {open.current_stage === "interview_pending" && (
-                        <Button size="sm" disabled={!!submitting || !open.bilingual_fluency_confirmed} title={!open.bilingual_fluency_confirmed ? "Bilingual fluency not confirmed — cannot send offer" : ""} onClick={() => runAction("send_offer")} className="bg-[#1FA1F0] hover:bg-[#1990da] text-white disabled:opacity-50">Send offer</Button>
+                        <Button size="sm" disabled={!!submitting || !open.bilingual_fluency_confirmed} title={!open.bilingual_fluency_confirmed ? "Bilingual fluency not confirmed — cannot send envelope" : ""} onClick={() => runAction("send_offer")} className="bg-[#1FA1F0] hover:bg-[#1990da] text-white disabled:opacity-50">Send Documenso envelope</Button>
                       )}
                       {open.current_stage === "background_check_review" && (
                         <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("schedule_interview")}>Schedule interview</Button>
