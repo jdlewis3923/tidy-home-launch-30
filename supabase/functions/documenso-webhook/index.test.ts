@@ -41,8 +41,10 @@ await import("./index.ts");
 // deno-lint-ignore no-explicit-any
 (Deno as any).serve = realServe;
 
-assert(captured, "documenso-webhook did not register a Deno.serve handler");
-const handler = captured!;
+if (!captured) {
+  throw new Error("documenso-webhook did not register a Deno.serve handler");
+}
+const handler: Handler = captured;
 
 const sb = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
