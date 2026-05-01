@@ -1,8 +1,8 @@
 // Tidy — Documenso webhook receiver
 //
-// Listens for `document.completed` events. When an applicant has signed all
-// 3 contractor envelopes (ICA, W-9, Direct Deposit), flips
-// applicants.contracts_signed=true and current_stage='CONTRACTS_DONE'.
+// Each applicant signs ONE bundled envelope (cleaning | lawn | detail).
+// On `document.completed` we flip applicants.contracts_signed = true and
+// applicants.current_stage = 'CONTRACTS_DONE'.
 //
 // Configure in Documenso → Webhooks pointing at:
 //   https://<project>.supabase.co/functions/v1/documenso-webhook
@@ -12,7 +12,6 @@ import { handleCors, jsonResponse } from "../_shared/cors.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const REQUIRED = ["ica", "w9", "direct_deposit"];
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
@@ -26,7 +25,6 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // Best-effort log
   await sb.from("integration_logs").insert({
     source: "internal",
     event: "documenso.webhook",
@@ -47,12 +45,12 @@ Deno.serve(async (req) => {
 
   const docIdStr = String(docId);
 
-  // Find the applicant whose documenso_document_ids contains this id
+  // Find the applicant whose documenso_document_ids.envelope == this id
   const { data: applicants, error } = await sb
     .from("applicants")
     .select("id, documenso_document_ids, contracts_signed")
     .filter("documenso_document_ids", "cs", JSON.stringify({}))
-    .limit(1000); // small table; fine
+    .limit(1000);
 
   if (error) return jsonResponse({ error: error.message }, 500);
 
@@ -65,36 +63,14 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: true, no_match: true, document_id: docIdStr });
   }
 
-  // Track which doc just completed in admin_alerts (lightweight audit)
-  const ids = (match.documenso_document_ids ?? {}) as Record<string, string>;
-  const completedType = Object.keys(ids).find((k) => String(ids[k]) === docIdStr);
-
   await sb.from("admin_alerts").insert({
-    alert_type: "documenso_doc_signed",
-    title: `${completedType ?? "doc"} signed by applicant ${match.id}`,
+    alert_type: "documenso_envelope_signed",
+    title: `Contractor envelope signed by applicant ${match.id}`,
     body: null,
-    context: { applicant_id: match.id, doc_type: completedType, document_id: docIdStr },
+    context: { applicant_id: match.id, document_id: docIdStr },
   });
 
-  // To know whether ALL 3 are signed we need cross-doc state. Documenso doesn't
-  // tell us in a single event, so we maintain a `signed_doc_types` set in
-  // documenso_document_ids by appending to a parallel jsonb key. Simplest:
-  // query admin_alerts for distinct doc_types signed for this applicant.
-  const { data: signedAlerts } = await sb
-    .from("admin_alerts")
-    .select("context")
-    .eq("alert_type", "documenso_doc_signed")
-    .contains("context", { applicant_id: match.id });
-
-  const signedTypes = new Set<string>();
-  for (const r of signedAlerts ?? []) {
-    const t = (r.context as Record<string, unknown>)?.doc_type;
-    if (typeof t === "string") signedTypes.add(t);
-  }
-
-  const allSigned = REQUIRED.every((t) => signedTypes.has(t));
-
-  if (allSigned && !match.contracts_signed) {
+  if (!match.contracts_signed) {
     await sb
       .from("applicants")
       .update({
@@ -109,7 +85,6 @@ Deno.serve(async (req) => {
   return jsonResponse({
     ok: true,
     applicant_id: match.id,
-    completed_doc_type: completedType,
-    all_signed: allSigned,
+    contracts_signed: true,
   });
 });
