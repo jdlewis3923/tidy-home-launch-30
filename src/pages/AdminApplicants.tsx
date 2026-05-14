@@ -78,7 +78,7 @@ type Applicant = {
   contractor_cancel_rate: number | null;
   complaint_rate: number | null;
   photo_compliance_rate: number | null;
-  open_quality_escalations: number | null;
+  open_escalations_count: number | null;
   tier_readiness_status: TierReadiness | null;
   tier_offer_sent_at: string | null;
 };
@@ -90,7 +90,7 @@ function tierCriteria(a: Applicant): TierCriterion[] {
   const cr = a.contractor_cancel_rate;
   const cm = a.complaint_rate;
   const pc = a.photo_compliance_rate;
-  const esc = a.open_quality_escalations ?? 0;
+  const esc = a.open_escalations_count ?? 0;
   return [
     { label: "50+ completed visits",            met: v >= 50,                       actual: `${v}` },
     { label: "4.8+ avg customer rating",        met: r >= 4.8,                      actual: r ? r.toFixed(2) : "—" },
@@ -254,7 +254,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_quality_escalations, tier_readiness_status, tier_offer_sent_at")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);

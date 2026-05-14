@@ -25,7 +25,7 @@ type ProRow = {
   contractor_cancel_rate: number | null;
   complaint_rate: number | null;
   photo_compliance_rate: number | null;
-  open_quality_escalations: number;
+  open_escalations_count: number;
 };
 
 type Criterion = {
@@ -42,7 +42,7 @@ function buildCriteria(p: ProRow): Criterion[] {
   const cancel = p.contractor_cancel_rate ?? 1;
   const complaint = p.complaint_rate ?? 1;
   const photo = p.photo_compliance_rate ?? 0;
-  const esc = p.open_quality_escalations ?? 0;
+  const esc = p.open_escalations_count ?? 0;
   return [
     {
       icon: <TrendingUp className="h-3.5 w-3.5" />,
@@ -71,7 +71,7 @@ export default function MyTierWidget() {
       if (!email) { setLoading(false); return; }
       const { data } = await supabase
         .from("applicants")
-        .select("id, first_name, tier, tier_advanced_at, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_quality_escalations")
+        .select("id, first_name, tier, tier_advanced_at, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count")
         .eq("email", email.toLowerCase())
         .maybeSingle();
       if (!cancelled) {
@@ -110,7 +110,7 @@ export default function MyTierWidget() {
     contractor_cancel_rate: 0.01,
     complaint_rate: 0,
     photo_compliance_rate: 0.99,
-    open_quality_escalations: 0,
+    open_escalations_count: 0,
   } : {
     id: "demo",
     first_name: "Pro",
@@ -121,7 +121,7 @@ export default function MyTierWidget() {
     contractor_cancel_rate: 0.02,
     complaint_rate: 0,
     photo_compliance_rate: 0.98,
-    open_quality_escalations: 0,
+    open_escalations_count: 0,
   });
 
   if (data.tier === "tier_2_pro_partner") {
