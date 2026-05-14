@@ -320,7 +320,7 @@ export default function AdminApplicants() {
   }, [open?.id, nextOrientation]);
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return rows.filter((r) => {
+    const out = rows.filter((r) => {
       if (q) {
         const hay = `${r.first_name} ${r.last_name} ${r.email} ${r.phone ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
@@ -332,9 +332,14 @@ export default function AdminApplicants() {
       }
       if (roleFilter !== "all" && roleOf(r.service) !== roleFilter) return false;
       if (zipFilter !== "all" && r.zip !== zipFilter) return false;
+      if (tierFilter !== "all" && (r.tier ?? "tier_1_verified") !== tierFilter) return false;
       return true;
     });
-  }, [rows, search, statusFilter, roleFilter, zipFilter]);
+    if (sortBy === "visits_desc") {
+      out.sort((a, b) => (b.completed_visits ?? 0) - (a.completed_visits ?? 0));
+    }
+    return out;
+  }, [rows, search, statusFilter, roleFilter, zipFilter, tierFilter, sortBy]);
 
   // ----- Stat cards -----
   const stats = useMemo(() => {
