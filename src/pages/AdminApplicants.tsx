@@ -233,6 +233,10 @@ export default function AdminApplicants() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [zipFilter, setZipFilter] = useState<string>("all");
+  const [tierFilter, setTierFilter] = useState<"all" | TierKey>("all");
+  const [sortBy, setSortBy] = useState<"recent" | "visits_desc">("recent");
+  const [tierActionLoading, setTierActionLoading] = useState<string | null>(null);
+  const [confirmReturnTier1, setConfirmReturnTier1] = useState(false);
 
   const [open, setOpen] = useState<Applicant | null>(null);
   const [bgNotes, setBgNotes] = useState("");
