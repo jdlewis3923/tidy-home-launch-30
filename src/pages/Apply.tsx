@@ -223,6 +223,31 @@ export default function Apply() {
             </div>
 
             <form onSubmit={submit} className="px-6 sm:px-8 py-7 space-y-5">
+              {/* Tier 1 informational callout */}
+              <div
+                className="rounded-xl p-5 border-l-4"
+                style={{ background: "#FAFAF7", borderLeftColor: "#F4C430", color: "#0D1117" }}
+              >
+                <h3 className="font-display text-base font-black tracking-tight">
+                  You're applying for Tier 1 — Tidy Verified Pro
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed">
+                  Tidy operates a two-tier contractor structure. Every Pro starts at Tier 1 — we provide commercial general liability coverage during your active Tidy assignments, so you don't need to obtain your own business insurance to get started. After 50+ visits at a 4.8+ rating and clean compliance, you'll qualify to advance to Tier 2 Pro Partner — 45% per visit, $30 floor, premium routes in $2M+ homes, $300 annual gear stipend. Full path published in our contractor agreement.
+                </p>
+              </div>
+
+              {/* What you'll need */}
+              <div className="rounded-xl border border-hairline bg-cream/40 p-5">
+                <h3 className="font-display text-sm font-bold text-ink tracking-tight uppercase">What you'll need</h3>
+                <ul className="mt-3 space-y-1.5 text-sm text-ink leading-relaxed">
+                  {REQUIREMENTS.map((r) => (
+                    <li key={r} className="flex gap-2">
+                      <span className="text-gold font-bold">•</span><span>{r}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="first_name" className="text-ink">First name *</Label>
