@@ -321,6 +321,29 @@ export default function Apply() {
                 <Textarea id="notes" rows={3} value={form.notes_for_admin} onChange={(e) => set("notes_for_admin", e.target.value)} className="mt-1.5" />
               </div>
 
+              {/* Pro Partner Ambition — optional */}
+              <div className="rounded-xl border border-hairline bg-cream/40 p-4">
+                <Label className="text-ink font-semibold">Pro Partner Ambition <span className="text-ink-faint font-normal">(optional)</span></Label>
+                <p className="text-xs text-ink-faint mt-1 mb-3">Tier 2 unlocks 45% pay split, $30 floor, premium routes, and a $300 gear stipend.</p>
+                <RadioGroup
+                  value={form.pro_partner_interest}
+                  onValueChange={(v) => set("pro_partner_interest", v as Form["pro_partner_interest"])}
+                  className="space-y-2"
+                >
+                  {[
+                    { v: "yes",   l: "Yes — I want to grow into Pro Partner status within 90 days" },
+                    { v: "maybe", l: "Maybe — tell me more during the screening call" },
+                    { v: "no",    l: "Not right now — I want steady Tier 1 work" },
+                  ].map((o) => (
+                    <label key={o.v} className="flex items-start gap-3 text-sm text-ink cursor-pointer">
+                      <RadioGroupItem value={o.v} id={`ppi-${o.v}`} className="mt-0.5" />
+                      <span>{o.l}</span>
+                    </label>
+                  ))}
+                </RadioGroup>
+              </div>
+
+
               {/* Bilingual fluency — required, non-negotiable */}
               <div className={`rounded-xl border-2 p-4 transition ${
                 form.bilingual_fluency_confirmed
