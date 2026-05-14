@@ -952,6 +952,23 @@ function QuickInfo({ icon, label, value }: { icon: React.ReactNode; label: strin
   );
 }
 
+function TierBadge({ tier }: { tier: TierKey }) {
+  const isT2 = tier === "tier_2_pro_partner";
+  return (
+    <span
+      className={`hidden md:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-md ring-1 shrink-0 ${
+        isT2
+          ? "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 ring-amber-300"
+          : "bg-slate-100 text-slate-700 ring-slate-200"
+      }`}
+      title={isT2 ? "Tier 2 — Tidy Pro Partner" : "Tier 1 — Tidy Verified Pro"}
+    >
+      {isT2 ? <Award className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
+      {isT2 ? "Tier 2" : "Tier 1"}
+    </span>
+  );
+}
+
 function EmptyState({ hasAny }: { hasAny: boolean }) {
   return (
     <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-12 text-center">
