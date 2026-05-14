@@ -1,0 +1,1 @@
+ALTER TABLE public.applicants ADD COLUMN IF NOT EXISTS pro_partner_interest text CHECK (pro_partner_interest IN ('yes','maybe','no'));
