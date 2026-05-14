@@ -235,6 +235,7 @@ export type Database = {
       }
       applicants: {
         Row: {
+          avg_customer_rating: number | null
           bg_check_completed_at: string | null
           bg_check_notes: string | null
           bg_check_provider: string | null
@@ -244,7 +245,10 @@ export type Database = {
           business_bank_account_confirmed: boolean
           coi_auto_status: string | null
           coi_general_liability_status: string | null
+          complaint_rate: number | null
+          completed_visits: number
           compliance_complete: boolean | null
+          contractor_cancel_rate: number | null
           contracts_signed: boolean
           contracts_signed_at: string | null
           created_at: string
@@ -259,17 +263,25 @@ export type Database = {
           id: string
           last_name: string
           notes_for_admin: string | null
+          open_quality_escalations: number
           phone: string | null
+          photo_compliance_rate: number | null
           pro_partner_interest: string | null
           rejected_at: string | null
           rejection_reason: string | null
           role: string | null
           service: string | null
           stage_entered_at: string | null
+          tier: string
+          tier_advanced_at: string | null
+          tier_offer_sent_at: string | null
+          tier_offered_by: string | null
+          tier_readiness_status: string
           updated_at: string
           zip: string | null
         }
         Insert: {
+          avg_customer_rating?: number | null
           bg_check_completed_at?: string | null
           bg_check_notes?: string | null
           bg_check_provider?: string | null
@@ -279,7 +291,10 @@ export type Database = {
           business_bank_account_confirmed?: boolean
           coi_auto_status?: string | null
           coi_general_liability_status?: string | null
+          complaint_rate?: number | null
+          completed_visits?: number
           compliance_complete?: boolean | null
+          contractor_cancel_rate?: number | null
           contracts_signed?: boolean
           contracts_signed_at?: string | null
           created_at?: string
@@ -294,17 +309,25 @@ export type Database = {
           id?: string
           last_name: string
           notes_for_admin?: string | null
+          open_quality_escalations?: number
           phone?: string | null
+          photo_compliance_rate?: number | null
           pro_partner_interest?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
           role?: string | null
           service?: string | null
           stage_entered_at?: string | null
+          tier?: string
+          tier_advanced_at?: string | null
+          tier_offer_sent_at?: string | null
+          tier_offered_by?: string | null
+          tier_readiness_status?: string
           updated_at?: string
           zip?: string | null
         }
         Update: {
+          avg_customer_rating?: number | null
           bg_check_completed_at?: string | null
           bg_check_notes?: string | null
           bg_check_provider?: string | null
@@ -314,7 +337,10 @@ export type Database = {
           business_bank_account_confirmed?: boolean
           coi_auto_status?: string | null
           coi_general_liability_status?: string | null
+          complaint_rate?: number | null
+          completed_visits?: number
           compliance_complete?: boolean | null
+          contractor_cancel_rate?: number | null
           contracts_signed?: boolean
           contracts_signed_at?: string | null
           created_at?: string
@@ -329,13 +355,20 @@ export type Database = {
           id?: string
           last_name?: string
           notes_for_admin?: string | null
+          open_quality_escalations?: number
           phone?: string | null
+          photo_compliance_rate?: number | null
           pro_partner_interest?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
           role?: string | null
           service?: string | null
           stage_entered_at?: string | null
+          tier?: string
+          tier_advanced_at?: string | null
+          tier_offer_sent_at?: string | null
+          tier_offered_by?: string | null
+          tier_readiness_status?: string
           updated_at?: string
           zip?: string | null
         }
