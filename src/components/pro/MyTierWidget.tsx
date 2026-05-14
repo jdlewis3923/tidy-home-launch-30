@@ -132,46 +132,42 @@ export default function MyTierWidget() {
       ? Math.max(0, Math.floor((Date.now() - new Date(data.tier_advanced_at).getTime()) / 86400000))
       : 0;
     return (
-      <Card className="overflow-hidden border-0 shadow-lg">
-        <CardContent
-          className="p-0"
-          style={{
-            background: "linear-gradient(135deg, #f5c518 0%, #fde68a 50%, #f5c518 100%)",
-          }}
-        >
-          <div className="p-6 sm:p-7 text-slate-900">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-slate-900/90 p-2.5 shadow-md">
-                  <Award className="h-6 w-6 text-amber-300" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-700">
-                    My Tier
-                  </p>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
-                    Tidy Pro Partner
-                  </h2>
-                  <p className="text-sm text-slate-800/90 mt-0.5">
-                    Tier 2 — earned {advancedDate}
-                  </p>
-                </div>
+      <div className="relative overflow-hidden rounded-2xl shadow-[0_30px_80px_-20px_rgba(245,197,24,0.5)]">
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(135deg, #f5c518 0%, #fde68a 45%, #f5c518 100%)" }}
+        />
+        <div aria-hidden className="absolute inset-0 opacity-30" style={{
+          backgroundImage: "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.6), transparent 40%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.4), transparent 40%)",
+        }} />
+        <div className="relative p-6 sm:p-8 text-navy">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-navy p-3 shadow-lg">
+                <Award className="h-6 w-6 text-gold" />
               </div>
-            </div>
-            <div className="mt-5 grid grid-cols-3 gap-3">
-              <Stat label="Total visits" value={`${data.completed_visits}`} />
-              <Stat label="Rating" value={(data.avg_customer_rating ?? 0).toFixed(1)} />
-              <Stat label="Days at T2" value={`${days}`} />
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-navy/80">My Tier · Elite</p>
+                <h2 className="font-display text-3xl sm:text-4xl font-bold leading-tight">
+                  Tidy Pro Partner
+                </h2>
+                <p className="text-sm font-medium text-navy/70 mt-0.5">Earned {advancedDate}</p>
+              </div>
             </div>
             <Link
               to="/pro/tier-progression"
-              className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-900 hover:underline"
+              className="inline-flex items-center gap-1.5 rounded-full bg-navy px-4 py-2 text-xs font-bold uppercase tracking-wider text-gold hover:bg-navy-deep transition"
             >
-              View my Pro Partner perks <ArrowRight className="h-4 w-4" />
+              Pro Partner perks <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-        </CardContent>
-      </Card>
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            <Stat label="Total visits" value={`${data.completed_visits}`} />
+            <Stat label="Rating" value={(data.avg_customer_rating ?? 0).toFixed(1)} />
+            <Stat label="Days at T2" value={`${days}`} />
+          </div>
+        </div>
+      </div>
     );
   }
 
