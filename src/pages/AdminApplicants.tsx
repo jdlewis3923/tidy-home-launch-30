@@ -1026,6 +1026,26 @@ export default function AdminApplicants() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Confirm return-to-tier-1 */}
+      <AlertDialog open={confirmReturnTier1} onOpenChange={setConfirmReturnTier1}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" /> Return Pro to Tier 1?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {open ? `${open.first_name} ${open.last_name} will lose Pro Partner status, pay split returns to 40%, and the visit floor returns to $25.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={returnToTier1} className="bg-red-600 hover:bg-red-700 text-white">
+              Return to Tier 1
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
