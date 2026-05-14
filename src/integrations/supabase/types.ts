@@ -245,10 +245,13 @@ export type Database = {
           business_bank_account_confirmed: boolean
           coi_auto_status: string | null
           coi_general_liability_status: string | null
+          complaint_count: number
           complaint_rate: number | null
           completed_visits: number
           compliance_complete: boolean | null
+          contractor_cancel_count: number
           contractor_cancel_rate: number | null
+          contractor_id: string | null
           contracts_signed: boolean
           contracts_signed_at: string | null
           created_at: string
@@ -258,14 +261,21 @@ export type Database = {
           email: string
           experience_years: number | null
           first_name: string
+          google_review_match_name: string | null
           has_supplies: boolean | null
           has_vehicle: boolean | null
           id: string
+          jobber_id: string | null
+          last_jobber_event_at: string | null
           last_name: string
+          last_review_match_at: string | null
+          last_visit_at: string | null
           notes_for_admin: string | null
-          open_quality_escalations: number
+          open_escalations_count: number
           phone: string | null
           photo_compliance_rate: number | null
+          photos_expected_count: number
+          photos_uploaded_count: number
           pro_partner_interest: string | null
           rejected_at: string | null
           rejection_reason: string | null
@@ -277,6 +287,7 @@ export type Database = {
           tier_offer_sent_at: string | null
           tier_offered_by: string | null
           tier_readiness_status: string
+          total_ratings_count: number
           updated_at: string
           zip: string | null
         }
@@ -291,10 +302,13 @@ export type Database = {
           business_bank_account_confirmed?: boolean
           coi_auto_status?: string | null
           coi_general_liability_status?: string | null
+          complaint_count?: number
           complaint_rate?: number | null
           completed_visits?: number
           compliance_complete?: boolean | null
+          contractor_cancel_count?: number
           contractor_cancel_rate?: number | null
+          contractor_id?: string | null
           contracts_signed?: boolean
           contracts_signed_at?: string | null
           created_at?: string
@@ -304,14 +318,21 @@ export type Database = {
           email: string
           experience_years?: number | null
           first_name: string
+          google_review_match_name?: string | null
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
           id?: string
+          jobber_id?: string | null
+          last_jobber_event_at?: string | null
           last_name: string
+          last_review_match_at?: string | null
+          last_visit_at?: string | null
           notes_for_admin?: string | null
-          open_quality_escalations?: number
+          open_escalations_count?: number
           phone?: string | null
           photo_compliance_rate?: number | null
+          photos_expected_count?: number
+          photos_uploaded_count?: number
           pro_partner_interest?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
@@ -323,6 +344,7 @@ export type Database = {
           tier_offer_sent_at?: string | null
           tier_offered_by?: string | null
           tier_readiness_status?: string
+          total_ratings_count?: number
           updated_at?: string
           zip?: string | null
         }
@@ -337,10 +359,13 @@ export type Database = {
           business_bank_account_confirmed?: boolean
           coi_auto_status?: string | null
           coi_general_liability_status?: string | null
+          complaint_count?: number
           complaint_rate?: number | null
           completed_visits?: number
           compliance_complete?: boolean | null
+          contractor_cancel_count?: number
           contractor_cancel_rate?: number | null
+          contractor_id?: string | null
           contracts_signed?: boolean
           contracts_signed_at?: string | null
           created_at?: string
@@ -350,14 +375,21 @@ export type Database = {
           email?: string
           experience_years?: number | null
           first_name?: string
+          google_review_match_name?: string | null
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
           id?: string
+          jobber_id?: string | null
+          last_jobber_event_at?: string | null
           last_name?: string
+          last_review_match_at?: string | null
+          last_visit_at?: string | null
           notes_for_admin?: string | null
-          open_quality_escalations?: number
+          open_escalations_count?: number
           phone?: string | null
           photo_compliance_rate?: number | null
+          photos_expected_count?: number
+          photos_uploaded_count?: number
           pro_partner_interest?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
@@ -369,6 +401,7 @@ export type Database = {
           tier_offer_sent_at?: string | null
           tier_offered_by?: string | null
           tier_readiness_status?: string
+          total_ratings_count?: number
           updated_at?: string
           zip?: string | null
         }
