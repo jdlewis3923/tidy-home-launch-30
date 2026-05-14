@@ -176,7 +176,7 @@ export default function ProDashboard() {
             icon={<Users className="h-5 w-5" />}
             kicker="Refer a Pro"
             title="Earn $150 per hire"
-            body="Your invite code: TIDY-{firstName.slice(0, 4).toUpperCase()}"
+            body={`Your invite code: TIDY-${firstName.slice(0, 4).toUpperCase()}`}
             cta="Share invite"
             href="/pro"
           />
