@@ -19,6 +19,7 @@ import {
   ArrowLeft, ArrowRight, Loader2, ShieldCheck, ShieldAlert, ShieldX,
   Search, Download, Plus, Copy, Check, MapPin, Briefcase, Clock,
   Mail, Phone as PhoneIcon, FileText, UserPlus, AlertTriangle, CalendarDays,
+  Award, X as XIcon, TrendingUp,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
