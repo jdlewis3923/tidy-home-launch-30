@@ -97,8 +97,21 @@ export default function MyTierWidget() {
   }
 
   // Demo fallback so the widget still tells a story when the logged-in
-  // user isn't yet linked to an applicants row.
-  const data: ProRow = pro ?? {
+  // user isn't yet linked to an applicants row. ?demo=tier2 forces the
+  // Pro Partner state for screenshots / previews.
+  const demoTier2 = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("demo") === "tier2";
+  const data: ProRow = pro ?? (demoTier2 ? {
+    id: "demo",
+    first_name: "Pro",
+    tier: "tier_2_pro_partner",
+    tier_advanced_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 47).toISOString(),
+    completed_visits: 128,
+    avg_customer_rating: 4.9,
+    contractor_cancel_rate: 0.01,
+    complaint_rate: 0,
+    photo_compliance_rate: 0.99,
+    open_quality_escalations: 0,
+  } : {
     id: "demo",
     first_name: "Pro",
     tier: "tier_1_verified",
@@ -109,7 +122,7 @@ export default function MyTierWidget() {
     complaint_rate: 0,
     photo_compliance_rate: 0.98,
     open_quality_escalations: 0,
-  };
+  });
 
   if (data.tier === "tier_2_pro_partner") {
     const advancedDate = data.tier_advanced_at
