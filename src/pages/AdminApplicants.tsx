@@ -19,6 +19,7 @@ import {
   ArrowLeft, ArrowRight, Loader2, ShieldCheck, ShieldAlert, ShieldX,
   Search, Download, Plus, Copy, Check, MapPin, Briefcase, Clock,
   Mail, Phone as PhoneIcon, FileText, UserPlus, AlertTriangle, CalendarDays,
+  Award, X as XIcon, TrendingUp,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -41,6 +42,9 @@ import {
 } from "@/components/ui/select";
 
 // ---------- Types ----------
+type TierKey = "tier_1_verified" | "tier_2_pro_partner";
+type TierReadiness = "not_eligible" | "eligible" | "offered" | "declined" | "promoted";
+
 type Applicant = {
   id: string;
   first_name: string;
@@ -65,7 +69,44 @@ type Applicant = {
   notes_for_admin: string | null;
   compliance_complete: boolean | null;
   bilingual_fluency_confirmed: boolean | null;
+  // Tier progression
+  tier: TierKey | null;
+  tier_advanced_at: string | null;
+  pro_partner_interest: "yes" | "maybe" | "no" | null;
+  completed_visits: number | null;
+  avg_customer_rating: number | null;
+  contractor_cancel_rate: number | null;
+  complaint_rate: number | null;
+  photo_compliance_rate: number | null;
+  open_quality_escalations: number | null;
+  tier_readiness_status: TierReadiness | null;
+  tier_offer_sent_at: string | null;
 };
+
+type TierCriterion = { label: string; met: boolean; actual: string };
+function tierCriteria(a: Applicant): TierCriterion[] {
+  const v = a.completed_visits ?? 0;
+  const r = a.avg_customer_rating ?? 0;
+  const cr = a.contractor_cancel_rate;
+  const cm = a.complaint_rate;
+  const pc = a.photo_compliance_rate;
+  const esc = a.open_quality_escalations ?? 0;
+  return [
+    { label: "50+ completed visits",            met: v >= 50,                       actual: `${v}` },
+    { label: "4.8+ avg customer rating",        met: r >= 4.8,                      actual: r ? r.toFixed(2) : "—" },
+    { label: "<5% Pro-initiated cancel rate",   met: cr != null && cr < 0.05,       actual: cr != null ? `${(cr*100).toFixed(1)}%` : "—" },
+    { label: "<2% complaint rate",              met: cm != null && cm < 0.02,       actual: cm != null ? `${(cm*100).toFixed(1)}%` : "—" },
+    { label: "95%+ photo-verification compliance", met: pc != null && pc >= 0.95,   actual: pc != null ? `${(pc*100).toFixed(1)}%` : "—" },
+    { label: "Zero open quality / SOP escalations", met: esc === 0,                 actual: `${esc}` },
+  ];
+}
+function isEligibleForTier2(a: Applicant): boolean {
+  return tierCriteria(a).every((c) => c.met);
+}
+function tierBlockReason(a: Applicant): string {
+  const miss = tierCriteria(a).find((c) => !c.met);
+  return miss ? `needs ${miss.label.toLowerCase()}` : "";
+}
 
 type Orientation = {
   id: string;
@@ -192,6 +233,10 @@ export default function AdminApplicants() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [zipFilter, setZipFilter] = useState<string>("all");
+  const [tierFilter, setTierFilter] = useState<"all" | TierKey>("all");
+  const [sortBy, setSortBy] = useState<"recent" | "visits_desc">("recent");
+  const [tierActionLoading, setTierActionLoading] = useState<string | null>(null);
+  const [confirmReturnTier1, setConfirmReturnTier1] = useState(false);
 
   const [open, setOpen] = useState<Applicant | null>(null);
   const [bgNotes, setBgNotes] = useState("");
@@ -209,7 +254,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_quality_escalations, tier_readiness_status, tier_offer_sent_at")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -275,7 +320,7 @@ export default function AdminApplicants() {
   }, [open?.id, nextOrientation]);
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return rows.filter((r) => {
+    const out = rows.filter((r) => {
       if (q) {
         const hay = `${r.first_name} ${r.last_name} ${r.email} ${r.phone ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
@@ -287,9 +332,14 @@ export default function AdminApplicants() {
       }
       if (roleFilter !== "all" && roleOf(r.service) !== roleFilter) return false;
       if (zipFilter !== "all" && r.zip !== zipFilter) return false;
+      if (tierFilter !== "all" && (r.tier ?? "tier_1_verified") !== tierFilter) return false;
       return true;
     });
-  }, [rows, search, statusFilter, roleFilter, zipFilter]);
+    if (sortBy === "visits_desc") {
+      out.sort((a, b) => (b.completed_visits ?? 0) - (a.completed_visits ?? 0));
+    }
+    return out;
+  }, [rows, search, statusFilter, roleFilter, zipFilter, tierFilter, sortBy]);
 
   // ----- Stat cards -----
   const stats = useMemo(() => {
@@ -372,6 +422,31 @@ export default function AdminApplicants() {
     }
     setBgNotesDirty(false);
     toast.success("Notes saved");
+  };
+
+  const offerTier2 = async () => {
+    if (!open) return;
+    setTierActionLoading("offer");
+    const { error } = await supabase.functions.invoke("offer-tier-2-promotion", { body: { applicant_id: open.id } });
+    setTierActionLoading(null);
+    if (error) { toast.error("Could not send offer", { description: error.message }); return; }
+    toast.success("Tier 2 offer sent");
+    await fetchEvents(open.id);
+    fetchRows();
+    setOpen({ ...open, tier_readiness_status: "offered", tier_offer_sent_at: new Date().toISOString() });
+  };
+
+  const returnToTier1 = async () => {
+    if (!open) return;
+    setConfirmReturnTier1(false);
+    setTierActionLoading("return");
+    const { error } = await supabase.functions.invoke("return-to-tier-1", { body: { applicant_id: open.id } });
+    setTierActionLoading(null);
+    if (error) { toast.error("Could not revert", { description: error.message }); return; }
+    toast.success("Pro returned to Tier 1");
+    await fetchEvents(open.id);
+    fetchRows();
+    setOpen({ ...open, tier: "tier_1_verified", tier_advanced_at: null, tier_readiness_status: "not_eligible" });
   };
 
   const copyToClipboard = (val: string, key: string) => {
@@ -475,6 +550,21 @@ export default function AdminApplicants() {
                   {uniqueZips.map((z) => <SelectItem key={z} value={z}>{z}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <Select value={tierFilter} onValueChange={(v) => setTierFilter(v as any)}>
+                <SelectTrigger className="w-[150px]"><SelectValue placeholder="Tier" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All tiers</SelectItem>
+                  <SelectItem value="tier_1_verified">Tier 1 Verified</SelectItem>
+                  <SelectItem value="tier_2_pro_partner">Tier 2 Pro Partner</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                <SelectTrigger className="w-[160px]"><SelectValue placeholder="Sort" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most recent</SelectItem>
+                  <SelectItem value="visits_desc">Most visits</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -544,6 +634,7 @@ export default function AdminApplicants() {
                       </span>
                     )}
                   </div>
+                  <TierBadge tier={(a.tier ?? "tier_1_verified") as TierKey} />
                   <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 shrink-0 ${STAGE_PILL[stage] ?? STAGE_PILL.applied}`}>
                     {STAGE_LABEL[stage] ?? stage}
                   </span>
