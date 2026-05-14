@@ -424,7 +424,30 @@ export default function AdminApplicants() {
     toast.success("Notes saved");
   };
 
-  const copyToClipboard = (val: string, key: string) => {
+  const offerTier2 = async () => {
+    if (!open) return;
+    setTierActionLoading("offer");
+    const { error } = await supabase.functions.invoke("offer-tier-2-promotion", { body: { applicant_id: open.id } });
+    setTierActionLoading(null);
+    if (error) { toast.error("Could not send offer", { description: error.message }); return; }
+    toast.success("Tier 2 offer sent");
+    await fetchEvents(open.id);
+    fetchRows();
+    setOpen({ ...open, tier_readiness_status: "offered", tier_offer_sent_at: new Date().toISOString() });
+  };
+
+  const returnToTier1 = async () => {
+    if (!open) return;
+    setConfirmReturnTier1(false);
+    setTierActionLoading("return");
+    const { error } = await supabase.functions.invoke("return-to-tier-1", { body: { applicant_id: open.id } });
+    setTierActionLoading(null);
+    if (error) { toast.error("Could not revert", { description: error.message }); return; }
+    toast.success("Pro returned to Tier 1");
+    await fetchEvents(open.id);
+    fetchRows();
+    setOpen({ ...open, tier: "tier_1_verified", tier_advanced_at: null, tier_readiness_status: "not_eligible" });
+  };
     navigator.clipboard.writeText(val);
     setCopiedField(key);
     setTimeout(() => setCopiedField(null), 1200);
