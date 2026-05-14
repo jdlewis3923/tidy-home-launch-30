@@ -65,6 +65,8 @@ const AdminSocialLaunch = lazy(() => import("./pages/AdminSocialLaunch.tsx"));
 const AdminNextdoorVerify = lazy(() => import("./pages/AdminNextdoorVerify.tsx"));
 const AdminDocumensoTemplates = lazy(() => import("./pages/AdminDocumensoTemplates.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
+const ProDashboard = lazy(() => import("./pages/ProDashboard.tsx"));
+const ProTierProgression = lazy(() => import("./pages/ProTierProgression.tsx"));
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
 
@@ -205,6 +207,8 @@ const App = () => (
                   <Route path="/admin/documenso-templates" element={<AdminDocumensoTemplates />} />
                   <Route path="/admin/email-health" element={<AdminEmailHealth />} />
                   <Route path="/apply" element={<Apply />} />
+                  <Route path="/pro" element={<ProDashboard />} />
+                  <Route path="/pro/tier-progression" element={<ProTierProgression />} />
                   <Route path="/coming-soon" element={<ComingSoon />} />
                   <Route
                     path="/dashboard/notifications"
