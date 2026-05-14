@@ -122,8 +122,7 @@ export default function Apply() {
           </div>
           <h1 className="mt-6 font-display text-3xl font-black text-white tracking-tight">Application received</h1>
           <p className="mt-3 text-white/70 leading-relaxed">
-            Thanks for applying to Tidy. Our team reviews every submission personally —
-            expect to hear from us within <span className="text-white font-semibold">5 business days</span>.
+            We'll review your application within <span className="text-white font-semibold">24 hours</span>. If you're a fit, we'll text you a link to a quick screening questionnaire from <span className="text-white font-semibold">(786) 829-1141</span>, then invite you to our paid Group Orientation.
           </p>
           <Link
             to="/"
