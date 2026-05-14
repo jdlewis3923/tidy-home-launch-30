@@ -94,6 +94,7 @@ export default function Apply() {
       if (form.phone) payload.phone = form.phone.trim();
       if (form.experience_years) payload.experience_years = parseInt(form.experience_years, 10);
       if (form.notes_for_admin) payload.notes_for_admin = form.notes_for_admin.trim();
+      if (form.pro_partner_interest) payload.pro_partner_interest = form.pro_partner_interest;
 
       const { error } = await supabase.functions.invoke("submit-application", { body: payload });
       if (error) throw error;
