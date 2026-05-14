@@ -260,6 +260,7 @@ export type Database = {
           last_name: string
           notes_for_admin: string | null
           phone: string | null
+          pro_partner_interest: string | null
           rejected_at: string | null
           rejection_reason: string | null
           role: string | null
@@ -294,6 +295,7 @@ export type Database = {
           last_name: string
           notes_for_admin?: string | null
           phone?: string | null
+          pro_partner_interest?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
           role?: string | null
@@ -328,6 +330,7 @@ export type Database = {
           last_name?: string
           notes_for_admin?: string | null
           phone?: string | null
+          pro_partner_interest?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
           role?: string | null

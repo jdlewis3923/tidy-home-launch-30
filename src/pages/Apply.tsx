@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -31,6 +32,7 @@ type Form = {
   has_vehicle: boolean;
   has_supplies: boolean;
   bilingual_fluency_confirmed: boolean;
+  pro_partner_interest: "yes" | "maybe" | "no" | "";
   notes_for_admin: string;
 };
 
@@ -39,8 +41,21 @@ const EMPTY: Form = {
   service: "", zip: "", experience_years: "",
   has_vehicle: false, has_supplies: false,
   bilingual_fluency_confirmed: false,
+  pro_partner_interest: "",
   notes_for_admin: "",
 };
+
+const REQUIREMENTS = [
+  "Bilingual English + Spanish (required)",
+  "Valid US work authorization",
+  "At least 1 year paid experience in your service category",
+  "Reliable vehicle + valid driver's license",
+  "Personal auto insurance (FL state-minimum at minimum)",
+  "Smartphone for the Jobber app",
+  "Willingness to pass a Checkr background check",
+  "Age 18+",
+  "All your own professional tools/supplies for your service category",
+];
 
 const PERKS = [
   { icon: DollarSign,    title: "Weekly direct deposit",   body: "Paid every Friday — no chasing invoices." },
@@ -79,6 +94,7 @@ export default function Apply() {
       if (form.phone) payload.phone = form.phone.trim();
       if (form.experience_years) payload.experience_years = parseInt(form.experience_years, 10);
       if (form.notes_for_admin) payload.notes_for_admin = form.notes_for_admin.trim();
+      if (form.pro_partner_interest) payload.pro_partner_interest = form.pro_partner_interest;
 
       const { error } = await supabase.functions.invoke("submit-application", { body: payload });
       if (error) throw error;
@@ -106,8 +122,7 @@ export default function Apply() {
           </div>
           <h1 className="mt-6 font-display text-3xl font-black text-white tracking-tight">Application received</h1>
           <p className="mt-3 text-white/70 leading-relaxed">
-            Thanks for applying to Tidy. Our team reviews every submission personally —
-            expect to hear from us within <span className="text-white font-semibold">5 business days</span>.
+            We'll review your application within <span className="text-white font-semibold">24 hours</span>. If you're a fit, we'll text you a link to a quick screening questionnaire from <span className="text-white font-semibold">(786) 829-1141</span>, then invite you to our paid Group Orientation.
           </p>
           <Link
             to="/"
@@ -208,6 +223,31 @@ export default function Apply() {
             </div>
 
             <form onSubmit={submit} className="px-6 sm:px-8 py-7 space-y-5">
+              {/* Tier 1 informational callout */}
+              <div
+                className="rounded-xl p-5 border-l-4"
+                style={{ background: "#FAFAF7", borderLeftColor: "#F4C430", color: "#0D1117" }}
+              >
+                <h3 className="font-display text-base font-black tracking-tight">
+                  You're applying for Tier 1 — Tidy Verified Pro
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed">
+                  Tidy operates a two-tier contractor structure. Every Pro starts at Tier 1 — we provide commercial general liability coverage during your active Tidy assignments, so you don't need to obtain your own business insurance to get started. After 50+ visits at a 4.8+ rating and clean compliance, you'll qualify to advance to Tier 2 Pro Partner — 45% per visit, $30 floor, premium routes in $2M+ homes, $300 annual gear stipend. Full path published in our contractor agreement.
+                </p>
+              </div>
+
+              {/* What you'll need */}
+              <div className="rounded-xl border border-hairline bg-cream/40 p-5">
+                <h3 className="font-display text-sm font-bold text-ink tracking-tight uppercase">What you'll need</h3>
+                <ul className="mt-3 space-y-1.5 text-sm text-ink leading-relaxed">
+                  {REQUIREMENTS.map((r) => (
+                    <li key={r} className="flex gap-2">
+                      <span className="text-gold font-bold">•</span><span>{r}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="first_name" className="text-ink">First name *</Label>
@@ -280,6 +320,29 @@ export default function Apply() {
                 <Label htmlFor="notes" className="text-ink">Anything we should know? <span className="text-ink-faint font-normal">(optional)</span></Label>
                 <Textarea id="notes" rows={3} value={form.notes_for_admin} onChange={(e) => set("notes_for_admin", e.target.value)} className="mt-1.5" />
               </div>
+
+              {/* Pro Partner Ambition — optional */}
+              <div className="rounded-xl border border-hairline bg-cream/40 p-4">
+                <Label className="text-ink font-semibold">Pro Partner Ambition <span className="text-ink-faint font-normal">(optional)</span></Label>
+                <p className="text-xs text-ink-faint mt-1 mb-3">Tier 2 unlocks 45% pay split, $30 floor, premium routes, and a $300 gear stipend.</p>
+                <RadioGroup
+                  value={form.pro_partner_interest}
+                  onValueChange={(v) => set("pro_partner_interest", v as Form["pro_partner_interest"])}
+                  className="space-y-2"
+                >
+                  {[
+                    { v: "yes",   l: "Yes — I want to grow into Pro Partner status within 90 days" },
+                    { v: "maybe", l: "Maybe — tell me more during the screening call" },
+                    { v: "no",    l: "Not right now — I want steady Tier 1 work" },
+                  ].map((o) => (
+                    <label key={o.v} className="flex items-start gap-3 text-sm text-ink cursor-pointer">
+                      <RadioGroupItem value={o.v} id={`ppi-${o.v}`} className="mt-0.5" />
+                      <span>{o.l}</span>
+                    </label>
+                  ))}
+                </RadioGroup>
+              </div>
+
 
               {/* Bilingual fluency — required, non-negotiable */}
               <div className={`rounded-xl border-2 p-4 transition ${
