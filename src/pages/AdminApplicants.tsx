@@ -634,6 +634,7 @@ export default function AdminApplicants() {
                       </span>
                     )}
                   </div>
+                  <TierBadge tier={(a.tier ?? "tier_1_verified") as TierKey} />
                   <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 shrink-0 ${STAGE_PILL[stage] ?? STAGE_PILL.applied}`}>
                     {STAGE_LABEL[stage] ?? stage}
                   </span>
