@@ -801,7 +801,117 @@ export default function AdminApplicants() {
                   </CardContent>
                 </Card>
 
+                {/* Tier Progression Readiness — only for active contractors */}
+                {open.current_stage === "active" && (() => {
+                  const currentTier = (open.tier ?? "tier_1_verified") as TierKey;
+                  const isT2 = currentTier === "tier_2_pro_partner";
+                  const crit = tierCriteria(open);
+                  const metCount = crit.filter((c) => c.met).length;
+                  const eligible = isEligibleForTier2(open);
+                  const readiness = open.tier_readiness_status ?? "not_eligible";
+                  return (
+                    <Card className={`rounded-2xl ${isT2 ? "border-amber-300 bg-gradient-to-br from-amber-50/60 to-yellow-50/40" : "border-slate-200"}`}>
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2">
+                            <Award className={`h-4 w-4 ${isT2 ? "text-amber-600" : "text-slate-500"}`} />
+                            <h3 className="font-semibold text-[#0D1117]">Tier Progression Readiness</h3>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <TierBadge tier={currentTier} />
+                            {isT2 && open.tier_advanced_at && (
+                              <span className="text-[11px] text-amber-700">since {relTime(open.tier_advanced_at)}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {!isT2 && (
+                          <>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-slate-600">Rolling 90-day eligibility · {metCount}/6 criteria met</span>
+                              {open.pro_partner_interest && (
+                                <span className="text-slate-500">
+                                  Interest: <span className="font-semibold capitalize text-slate-700">{open.pro_partner_interest}</span>
+                                </span>
+                              )}
+                            </div>
+                            <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${eligible ? "bg-emerald-500" : "bg-amber-400"}`}
+                                style={{ width: `${(metCount / 6) * 100}%` }}
+                              />
+                            </div>
+
+                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+                              {crit.map((c) => (
+                                <li key={c.label} className="flex items-center gap-2 text-xs">
+                                  {c.met ? (
+                                    <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                                  ) : (
+                                    <XIcon className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                                  )}
+                                  <span className={c.met ? "text-slate-700" : "text-slate-500"}>{c.label}</span>
+                                  <span className="ml-auto font-mono text-[11px] text-slate-500">{c.actual}</span>
+                                </li>
+                              ))}
+                            </ul>
+
+                            <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                              {readiness === "offered" ? (
+                                <Badge className="bg-blue-100 text-blue-800 ring-1 ring-blue-200">
+                                  Offer sent {open.tier_offer_sent_at ? relTime(open.tier_offer_sent_at) : ""}
+                                </Badge>
+                              ) : readiness === "declined" ? (
+                                <Badge className="bg-slate-100 text-slate-700 ring-1 ring-slate-200">Declined</Badge>
+                              ) : eligible ? (
+                                <Badge className="bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200">
+                                  <TrendingUp className="h-3 w-3 mr-1" /> Eligible
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-slate-100 text-slate-600 ring-1 ring-slate-200">
+                                  Not yet eligible — {tierBlockReason(open)}
+                                </Badge>
+                              )}
+                              <Button
+                                size="sm"
+                                disabled={!eligible || readiness === "offered" || tierActionLoading === "offer"}
+                                onClick={offerTier2}
+                                className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold disabled:opacity-50"
+                                title={!eligible ? `Blocked: ${tierBlockReason(open)}` : ""}
+                              >
+                                {tierActionLoading === "offer"
+                                  ? <Loader2 className="h-3 w-3 animate-spin" />
+                                  : <><Award className="h-3 w-3 mr-1" /> Offer Tier 2 promotion</>}
+                              </Button>
+                            </div>
+                          </>
+                        )}
+
+                        {isT2 && (
+                          <div className="space-y-2">
+                            <p className="text-sm text-slate-700">
+                              This Pro is on <span className="font-semibold text-amber-800">Tier 2 — Pro Partner</span> with 45% pay split and a $30 visit floor.
+                            </p>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={tierActionLoading === "return"}
+                              onClick={() => setConfirmReturnTier1(true)}
+                              className="border-red-200 text-red-700 hover:bg-red-50"
+                            >
+                              {tierActionLoading === "return"
+                                ? <Loader2 className="h-3 w-3 animate-spin" />
+                                : "Return to Tier 1"}
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+
                 {/* Group Orientation panel — visible at contract_signed */}
+
                 {open.current_stage === "contract_signed" && (
                   <Card className="rounded-2xl border-amber-200 bg-amber-50/40">
                     <CardContent className="p-4">
