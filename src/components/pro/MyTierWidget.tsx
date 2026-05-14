@@ -227,29 +227,28 @@ export default function MyTierWidget() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-slate-900/10 backdrop-blur px-3 py-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-700">{label}</p>
-      <p className="text-lg font-bold text-slate-900 leading-tight">{value}</p>
+    <div className="rounded-xl bg-navy/10 backdrop-blur px-3 py-2.5 border border-navy/15">
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-navy/70">{label}</p>
+      <p className="font-display text-2xl font-bold text-navy leading-tight tabular-nums">{value}</p>
     </div>
   );
 }
 
 function CriterionBadge({ icon, label, value, met, progressing }: Criterion) {
   const tone = met
-    ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+    ? "bg-emerald-400/10 border-emerald-400/30 text-emerald-300"
     : progressing
-      ? "bg-amber-50 border-amber-200 text-amber-800"
-      : "bg-slate-50 border-slate-200 text-slate-600";
-  const Icon = met ? Check : progressing ? Clock : icon;
+      ? "bg-gold/10 border-gold/30 text-gold"
+      : "bg-white/5 border-white/10 text-white/60";
   return (
-    <div className={`flex items-center justify-between gap-2 rounded-md border px-2.5 py-2 ${tone}`}>
+    <div className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 backdrop-blur transition hover:scale-[1.02] ${tone}`}>
       <div className="flex items-center gap-1.5 min-w-0">
         <span className="shrink-0">
           {met ? <Check className="h-3.5 w-3.5" /> : progressing ? <Clock className="h-3.5 w-3.5" /> : icon}
         </span>
-        <span className="text-[11px] font-medium truncate">{label}</span>
+        <span className="text-[11px] font-semibold truncate">{label}</span>
       </div>
-      <span className="text-[11px] font-bold tabular-nums shrink-0">{value}</span>
+      <span className="text-xs font-bold tabular-nums shrink-0">{value}</span>
     </div>
   );
 }
