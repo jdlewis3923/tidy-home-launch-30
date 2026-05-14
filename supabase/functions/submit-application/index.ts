@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
         has_supplies: data.has_supplies ?? null,
         notes_for_admin: data.notes_for_admin ?? null,
         bilingual_fluency_confirmed: data.bilingual_fluency_confirmed,
+        pro_partner_interest: data.pro_partner_interest ?? null,
         current_stage: 'background_check_pending',
         bg_check_status: 'pending',
       })
