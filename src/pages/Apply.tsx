@@ -31,6 +31,7 @@ type Form = {
   has_vehicle: boolean;
   has_supplies: boolean;
   bilingual_fluency_confirmed: boolean;
+  pro_partner_interest: "yes" | "maybe" | "no" | "";
   notes_for_admin: string;
 };
 
@@ -39,8 +40,21 @@ const EMPTY: Form = {
   service: "", zip: "", experience_years: "",
   has_vehicle: false, has_supplies: false,
   bilingual_fluency_confirmed: false,
+  pro_partner_interest: "",
   notes_for_admin: "",
 };
+
+const REQUIREMENTS = [
+  "Bilingual English + Spanish (required)",
+  "Valid US work authorization",
+  "At least 1 year paid experience in your service category",
+  "Reliable vehicle + valid driver's license",
+  "Personal auto insurance (FL state-minimum at minimum)",
+  "Smartphone for the Jobber app",
+  "Willingness to pass a Checkr background check",
+  "Age 18+",
+  "All your own professional tools/supplies for your service category",
+];
 
 const PERKS = [
   { icon: DollarSign,    title: "Weekly direct deposit",   body: "Paid every Friday — no chasing invoices." },
