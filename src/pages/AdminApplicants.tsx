@@ -42,6 +42,9 @@ import {
 } from "@/components/ui/select";
 
 // ---------- Types ----------
+type TierKey = "tier_1_verified" | "tier_2_pro_partner";
+type TierReadiness = "not_eligible" | "eligible" | "offered" | "declined" | "promoted";
+
 type Applicant = {
   id: string;
   first_name: string;
@@ -66,7 +69,44 @@ type Applicant = {
   notes_for_admin: string | null;
   compliance_complete: boolean | null;
   bilingual_fluency_confirmed: boolean | null;
+  // Tier progression
+  tier: TierKey | null;
+  tier_advanced_at: string | null;
+  pro_partner_interest: "yes" | "maybe" | "no" | null;
+  completed_visits: number | null;
+  avg_customer_rating: number | null;
+  contractor_cancel_rate: number | null;
+  complaint_rate: number | null;
+  photo_compliance_rate: number | null;
+  open_quality_escalations: number | null;
+  tier_readiness_status: TierReadiness | null;
+  tier_offer_sent_at: string | null;
 };
+
+type TierCriterion = { label: string; met: boolean; actual: string };
+function tierCriteria(a: Applicant): TierCriterion[] {
+  const v = a.completed_visits ?? 0;
+  const r = a.avg_customer_rating ?? 0;
+  const cr = a.contractor_cancel_rate;
+  const cm = a.complaint_rate;
+  const pc = a.photo_compliance_rate;
+  const esc = a.open_quality_escalations ?? 0;
+  return [
+    { label: "50+ completed visits",            met: v >= 50,                       actual: `${v}` },
+    { label: "4.8+ avg customer rating",        met: r >= 4.8,                      actual: r ? r.toFixed(2) : "—" },
+    { label: "<5% Pro-initiated cancel rate",   met: cr != null && cr < 0.05,       actual: cr != null ? `${(cr*100).toFixed(1)}%` : "—" },
+    { label: "<2% complaint rate",              met: cm != null && cm < 0.02,       actual: cm != null ? `${(cm*100).toFixed(1)}%` : "—" },
+    { label: "95%+ photo-verification compliance", met: pc != null && pc >= 0.95,   actual: pc != null ? `${(pc*100).toFixed(1)}%` : "—" },
+    { label: "Zero open quality / SOP escalations", met: esc === 0,                 actual: `${esc}` },
+  ];
+}
+function isEligibleForTier2(a: Applicant): boolean {
+  return tierCriteria(a).every((c) => c.met);
+}
+function tierBlockReason(a: Applicant): string {
+  const miss = tierCriteria(a).find((c) => !c.met);
+  return miss ? `needs ${miss.label.toLowerCase()}` : "";
+}
 
 type Orientation = {
   id: string;
