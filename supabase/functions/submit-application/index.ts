@@ -31,6 +31,7 @@ const Body = z.object({
   bilingual_fluency_confirmed: z.boolean().refine((v) => v === true, {
     message: 'Bilingual fluency (English + Spanish) must be confirmed',
   }),
+  pro_partner_interest: z.enum(['yes', 'maybe', 'no']).optional(),
 });
 
 Deno.serve(async (req) => {
