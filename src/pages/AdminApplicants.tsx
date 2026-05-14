@@ -448,6 +448,8 @@ export default function AdminApplicants() {
     fetchRows();
     setOpen({ ...open, tier: "tier_1_verified", tier_advanced_at: null, tier_readiness_status: "not_eligible" });
   };
+
+  const copyToClipboard = (val: string, key: string) => {
     navigator.clipboard.writeText(val);
     setCopiedField(key);
     setTimeout(() => setCopiedField(null), 1200);
