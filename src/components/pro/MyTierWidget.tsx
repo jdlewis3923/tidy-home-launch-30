@@ -84,15 +84,15 @@ export default function MyTierWidget() {
 
   if (loading) {
     return (
-      <Card className="border-slate-200">
-        <CardContent className="p-6 space-y-4">
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-3 w-full" />
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-48 bg-white/10" />
+          <Skeleton className="h-3 w-full bg-white/10" />
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-9 w-full" />)}
+            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-9 w-full bg-white/10" />)}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
