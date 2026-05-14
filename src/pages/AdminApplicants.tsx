@@ -550,6 +550,21 @@ export default function AdminApplicants() {
                   {uniqueZips.map((z) => <SelectItem key={z} value={z}>{z}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <Select value={tierFilter} onValueChange={(v) => setTierFilter(v as any)}>
+                <SelectTrigger className="w-[150px]"><SelectValue placeholder="Tier" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All tiers</SelectItem>
+                  <SelectItem value="tier_1_verified">Tier 1 Verified</SelectItem>
+                  <SelectItem value="tier_2_pro_partner">Tier 2 Pro Partner</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                <SelectTrigger className="w-[160px]"><SelectValue placeholder="Sort" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most recent</SelectItem>
+                  <SelectItem value="visits_desc">Most visits</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
