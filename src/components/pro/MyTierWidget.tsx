@@ -236,12 +236,12 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function CriterionBadge({ icon, label, value, met, progressing }: Criterion) {
   const tone = met
-    ? "bg-emerald-400/10 border-emerald-400/30 text-emerald-300"
+    ? "bg-emerald-50 border-emerald-200 text-emerald-800"
     : progressing
-      ? "bg-gold/10 border-gold/30 text-gold"
-      : "bg-white/5 border-white/10 text-white/60";
+      ? "bg-amber-50 border-amber-200 text-amber-800"
+      : "bg-slate-50 border-slate-200 text-slate-600";
   return (
-    <div className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 backdrop-blur transition hover:scale-[1.02] ${tone}`}>
+    <div className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 transition hover:scale-[1.02] hover:shadow-sm ${tone}`}>
       <div className="flex items-center gap-1.5 min-w-0">
         <span className="shrink-0">
           {met ? <Check className="h-3.5 w-3.5" /> : progressing ? <Clock className="h-3.5 w-3.5" /> : icon}
