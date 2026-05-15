@@ -263,7 +263,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
