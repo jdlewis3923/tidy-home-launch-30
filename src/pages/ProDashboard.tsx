@@ -34,6 +34,7 @@ type DashboardData = {
   nextPayoutDay: string;
   photosPending: number;
   referralCount: number;
+  referralBonusCents: number;
 };
 
 function fmtTime(d: Date) {
@@ -115,7 +116,12 @@ export default function ProDashboard() {
           supabase.from("pro_referrals")
             .select("id", { count: "exact", head: true })
             .eq("referrer_contractor_id", userId).eq("status", "completed"),
+          supabase.from("app_settings")
+            .select("value").eq("key", "referral_bonus_amount_cents").maybeSingle(),
         ]);
+        // Destructure the extra setting result without breaking existing names.
+        const bonusRes: any = (arguments as any); // no-op placeholder
+        
 
         if (cancelled) return;
 
