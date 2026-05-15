@@ -244,7 +244,15 @@ export type Database = {
           bond_status: string | null
           business_bank_account_confirmed: boolean
           coi_auto_status: string | null
+          coi_carrier_name: string | null
+          coi_effective_date: string | null
+          coi_expires_at: string | null
           coi_general_liability_status: string | null
+          coi_pdf_url: string | null
+          coi_policy_number: string | null
+          coi_review_notes: string | null
+          coi_review_status: string
+          coi_uploaded_at: string | null
           complaint_count: number
           complaint_rate: number | null
           completed_visits: number
@@ -301,7 +309,15 @@ export type Database = {
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
           coi_auto_status?: string | null
+          coi_carrier_name?: string | null
+          coi_effective_date?: string | null
+          coi_expires_at?: string | null
           coi_general_liability_status?: string | null
+          coi_pdf_url?: string | null
+          coi_policy_number?: string | null
+          coi_review_notes?: string | null
+          coi_review_status?: string
+          coi_uploaded_at?: string | null
           complaint_count?: number
           complaint_rate?: number | null
           completed_visits?: number
@@ -358,7 +374,15 @@ export type Database = {
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
           coi_auto_status?: string | null
+          coi_carrier_name?: string | null
+          coi_effective_date?: string | null
+          coi_expires_at?: string | null
           coi_general_liability_status?: string | null
+          coi_pdf_url?: string | null
+          coi_policy_number?: string | null
+          coi_review_notes?: string | null
+          coi_review_status?: string
+          coi_uploaded_at?: string | null
           complaint_count?: number
           complaint_rate?: number | null
           completed_visits?: number
@@ -512,6 +536,39 @@ export type Database = {
           tags?: string[]
           uploaded_at?: string
           uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      complaints: {
+        Row: {
+          closed_at: string | null
+          contractor_id: string | null
+          id: string
+          notes: string | null
+          opened_at: string
+          opened_by: string | null
+          severity: string
+          source: string
+        }
+        Insert: {
+          closed_at?: string | null
+          contractor_id?: string | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by?: string | null
+          severity: string
+          source: string
+        }
+        Update: {
+          closed_at?: string | null
+          contractor_id?: string | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by?: string | null
+          severity?: string
+          source?: string
         }
         Relationships: []
       }
@@ -680,6 +737,87 @@ export type Database = {
         }
         Relationships: []
       }
+      escalations: {
+        Row: {
+          contractor_id: string | null
+          id: string
+          opened_at: string
+          opened_by: string | null
+          reason: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          source: string
+        }
+        Insert: {
+          contractor_id?: string | null
+          id?: string
+          opened_at?: string
+          opened_by?: string | null
+          reason: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          source: string
+        }
+        Update: {
+          contractor_id?: string | null
+          id?: string
+          opened_at?: string
+          opened_by?: string | null
+          reason?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          source?: string
+        }
+        Relationships: []
+      }
+      google_reviews: {
+        Row: {
+          bonus_paid_at: string | null
+          contractor_id: string | null
+          contractor_name_matched: string | null
+          created_at: string
+          id: string
+          posted_at: string | null
+          rating: number
+          raw_payload: Json
+          review_id: string
+          review_text: string | null
+          reviewer_name: string | null
+        }
+        Insert: {
+          bonus_paid_at?: string | null
+          contractor_id?: string | null
+          contractor_name_matched?: string | null
+          created_at?: string
+          id?: string
+          posted_at?: string | null
+          rating: number
+          raw_payload?: Json
+          review_id: string
+          review_text?: string | null
+          reviewer_name?: string | null
+        }
+        Update: {
+          bonus_paid_at?: string | null
+          contractor_id?: string | null
+          contractor_name_matched?: string | null
+          created_at?: string
+          id?: string
+          posted_at?: string | null
+          rating?: number
+          raw_payload?: Json
+          review_id?: string
+          review_text?: string | null
+          reviewer_name?: string | null
+        }
+        Relationships: []
+      }
       integration_logs: {
         Row: {
           created_at: string
@@ -762,6 +900,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      jobber_webhook_log: {
+        Row: {
+          contractor_id: string | null
+          created_at: string
+          error_message: string | null
+          event_type: string
+          id: string
+          jobber_visit_id: string | null
+          payload: Json
+          processed_at: string | null
+          signature_valid: boolean | null
+        }
+        Insert: {
+          contractor_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          id?: string
+          jobber_visit_id?: string | null
+          payload: Json
+          processed_at?: string | null
+          signature_valid?: boolean | null
+        }
+        Update: {
+          contractor_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          jobber_visit_id?: string | null
+          payload?: Json
+          processed_at?: string | null
+          signature_valid?: boolean | null
+        }
+        Relationships: []
       }
       kpi_action_log: {
         Row: {
@@ -1305,6 +1479,96 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_referrals: {
+        Row: {
+          bonus_cents: number
+          bonus_paid_at: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          referee_contractor_id: string | null
+          referee_email: string | null
+          referral_code: string
+          referrer_contractor_id: string
+          status: string
+        }
+        Insert: {
+          bonus_cents?: number
+          bonus_paid_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referee_contractor_id?: string | null
+          referee_email?: string | null
+          referral_code: string
+          referrer_contractor_id: string
+          status?: string
+        }
+        Update: {
+          bonus_cents?: number
+          bonus_paid_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referee_contractor_id?: string | null
+          referee_email?: string | null
+          referral_code?: string
+          referrer_contractor_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      pro_visits: {
+        Row: {
+          amount_cents: number | null
+          cancellation_reason: string | null
+          completed_at: string | null
+          contractor_id: string | null
+          created_at: string
+          customer_name: string | null
+          customer_rating: number | null
+          id: string
+          jobber_visit_id: string | null
+          photos_count: number
+          photos_expected: number
+          scheduled_at: string | null
+          service_type: string | null
+          status: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          cancellation_reason?: string | null
+          completed_at?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          customer_name?: string | null
+          customer_rating?: number | null
+          id?: string
+          jobber_visit_id?: string | null
+          photos_count?: number
+          photos_expected?: number
+          scheduled_at?: string | null
+          service_type?: string | null
+          status?: string
+        }
+        Update: {
+          amount_cents?: number | null
+          cancellation_reason?: string | null
+          completed_at?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          customer_name?: string | null
+          customer_rating?: number | null
+          id?: string
+          jobber_visit_id?: string | null
+          photos_count?: number
+          photos_expected?: number
+          scheduled_at?: string | null
+          service_type?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_line1: string | null
@@ -1736,6 +2000,45 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_payouts: {
+        Row: {
+          amount_cents: number
+          contractor_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          paid_at: string | null
+          scheduled_at: string | null
+          status: string
+          stripe_transfer_id: string | null
+          week_ending_date: string
+        }
+        Insert: {
+          amount_cents: number
+          contractor_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          paid_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          stripe_transfer_id?: string | null
+          week_ending_date: string
+        }
+        Update: {
+          amount_cents?: number
+          contractor_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          paid_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          stripe_transfer_id?: string | null
+          week_ending_date?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           bundle_discount_pct: number
@@ -1918,6 +2221,95 @@ export type Database = {
           type?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      tier_audit_log: {
+        Row: {
+          action: string
+          applicant_id: string | null
+          contractor_id: string | null
+          created_at: string
+          from_tier: string | null
+          id: string
+          performed_by: string | null
+          reason: string | null
+          to_tier: string | null
+        }
+        Insert: {
+          action: string
+          applicant_id?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          from_tier?: string | null
+          id?: string
+          performed_by?: string | null
+          reason?: string | null
+          to_tier?: string | null
+        }
+        Update: {
+          action?: string
+          applicant_id?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          from_tier?: string | null
+          id?: string
+          performed_by?: string | null
+          reason?: string | null
+          to_tier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tier_audit_log_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      today_visits: {
+        Row: {
+          address_line1: string | null
+          city: string | null
+          contractor_id: string | null
+          created_at: string
+          customer_name: string | null
+          distance_miles: number | null
+          estimated_duration_minutes: number | null
+          id: string
+          jobber_visit_id: string | null
+          scheduled_at: string
+          service_type: string | null
+          status: string
+        }
+        Insert: {
+          address_line1?: string | null
+          city?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          customer_name?: string | null
+          distance_miles?: number | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          jobber_visit_id?: string | null
+          scheduled_at: string
+          service_type?: string | null
+          status?: string
+        }
+        Update: {
+          address_line1?: string | null
+          city?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          customer_name?: string | null
+          distance_miles?: number | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          jobber_visit_id?: string | null
+          scheduled_at?: string
+          service_type?: string | null
+          status?: string
         }
         Relationships: []
       }
