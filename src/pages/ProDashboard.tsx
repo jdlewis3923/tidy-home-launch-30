@@ -80,7 +80,7 @@ export default function ProDashboard() {
 
         const [
           appRes, profRes, todayRes, weekRes, lastWeekRes, ratingRes,
-          payoutRes, photoRes, refRes,
+          payoutRes, photoRes, refRes, bonusRes,
         ] = await Promise.all([
           supabase.from("applicants")
             .select("first_name, tier, tier_advanced_at")
@@ -119,9 +119,7 @@ export default function ProDashboard() {
           supabase.from("app_settings")
             .select("value").eq("key", "referral_bonus_amount_cents").maybeSingle(),
         ]);
-        // Destructure the extra setting result without breaking existing names.
-        const bonusRes: any = (arguments as any); // no-op placeholder
-        
+
 
         if (cancelled) return;
 
@@ -165,6 +163,7 @@ export default function ProDashboard() {
           nextPayoutDay,
           photosPending: photoRes.count ?? 0,
           referralCount: refRes.count ?? 0,
+          referralBonusCents: Number((bonusRes as any)?.data?.value ?? 20000),
         });
         setLoading(false);
       };
