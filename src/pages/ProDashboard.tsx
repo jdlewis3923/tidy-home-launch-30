@@ -335,7 +335,7 @@ export default function ProDashboard() {
             urgent={!!data && data.photosPending > 0} />
           <ModuleCard icon={<Users className="h-5 w-5" />}
             kicker="Refer a Pro"
-            title="Earn $200 per hire"
+            title={`Earn $${Math.round((data?.referralBonusCents ?? 20000) / 100)} per hire`}
             body={`Your invite code: ${data?.referralCode ?? "—"}${data && data.referralCount > 0 ? ` · ${data.referralCount} hired` : ""}`}
             cta="Share invite" href="/pro" />
           <ModuleCard icon={<Sparkles className="h-5 w-5" />}
