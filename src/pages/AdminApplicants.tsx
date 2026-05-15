@@ -954,6 +954,28 @@ export default function AdminApplicants() {
                   </Card>
                 )}
 
+                {/* Live Data Status — Jobber + Reviews counters */}
+                <Card className="rounded-2xl border-slate-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-[#0D1117]">Live Data Status</h3>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">realtime</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <LiveStat label="Last Jobber event" value={open.last_jobber_event_at ? relTime(open.last_jobber_event_at) : "never"} />
+                      <LiveStat label="Last review match" value={open.last_review_match_at ? relTime(open.last_review_match_at) : "never"} />
+                      <LiveStat label="Last visit" value={open.last_visit_at ? relTime(open.last_visit_at) : "—"} />
+                      <LiveStat label="Total ratings" value={String(open.total_ratings_count ?? 0)} />
+                      <LiveStat label="Completed visits" value={String(open.completed_visits ?? 0)} />
+                      <LiveStat label="Pro cancels" value={String(open.contractor_cancel_count ?? 0)} />
+                      <LiveStat label="Complaints" value={String(open.complaint_count ?? 0)} />
+                      <LiveStat label="Photos" value={`${open.photos_uploaded_count ?? 0} / ${open.photos_expected_count ?? 0}`} />
+                      <LiveStat label="Avg rating" value={open.avg_customer_rating != null ? `${Number(open.avg_customer_rating).toFixed(2)}★` : "—"} />
+                      <LiveStat label="Open escalations" value={String(open.open_escalations_count ?? 0)} tone={(open.open_escalations_count ?? 0) > 0 ? "warn" : undefined} />
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Activity timeline */}
                 <Card className="rounded-2xl border-slate-200">
                   <CardContent className="p-4">
