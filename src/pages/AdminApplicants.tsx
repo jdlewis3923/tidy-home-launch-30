@@ -879,7 +879,6 @@ export default function AdminApplicants() {
                                   const { data, error } = await supabase.functions.invoke("recalc-applicant-readiness", { body: { applicant_id: open.id } });
                                   if (error || (data as any)?.error) { toast.error(error?.message ?? (data as any)?.error ?? "Failed"); return; }
                                   toast.success("Readiness recalculated");
-                                  loadList?.();
                                 }}
                                 title="Pull latest counts from visits/reviews/complaints and recompute readiness"
                               >
