@@ -81,6 +81,15 @@ type Applicant = {
   open_escalations_count: number | null;
   tier_readiness_status: TierReadiness | null;
   tier_offer_sent_at: string | null;
+  // Live data status (Jobber + Google Reviews counters)
+  last_jobber_event_at: string | null;
+  last_review_match_at: string | null;
+  last_visit_at: string | null;
+  total_ratings_count: number | null;
+  contractor_cancel_count: number | null;
+  complaint_count: number | null;
+  photos_uploaded_count: number | null;
+  photos_expected_count: number | null;
 };
 
 type TierCriterion = { label: string; met: boolean; actual: string };
@@ -254,7 +263,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -954,6 +963,28 @@ export default function AdminApplicants() {
                   </Card>
                 )}
 
+                {/* Live Data Status — Jobber + Reviews counters */}
+                <Card className="rounded-2xl border-slate-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-[#0D1117]">Live Data Status</h3>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">realtime</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <LiveStat label="Last Jobber event" value={open.last_jobber_event_at ? relTime(open.last_jobber_event_at) : "never"} />
+                      <LiveStat label="Last review match" value={open.last_review_match_at ? relTime(open.last_review_match_at) : "never"} />
+                      <LiveStat label="Last visit" value={open.last_visit_at ? relTime(open.last_visit_at) : "—"} />
+                      <LiveStat label="Total ratings" value={String(open.total_ratings_count ?? 0)} />
+                      <LiveStat label="Completed visits" value={String(open.completed_visits ?? 0)} />
+                      <LiveStat label="Pro cancels" value={String(open.contractor_cancel_count ?? 0)} />
+                      <LiveStat label="Complaints" value={String(open.complaint_count ?? 0)} />
+                      <LiveStat label="Photos" value={`${open.photos_uploaded_count ?? 0} / ${open.photos_expected_count ?? 0}`} />
+                      <LiveStat label="Avg rating" value={open.avg_customer_rating != null ? `${Number(open.avg_customer_rating).toFixed(2)}★` : "—"} />
+                      <LiveStat label="Open escalations" value={String(open.open_escalations_count ?? 0)} tone={(open.open_escalations_count ?? 0) > 0 ? "warn" : undefined} />
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Activity timeline */}
                 <Card className="rounded-2xl border-slate-200">
                   <CardContent className="p-4">
@@ -1090,6 +1121,15 @@ function QuickInfo({ icon, label, value }: { icon: React.ReactNode; label: strin
         {icon} {label}
       </div>
       <div className="mt-1 text-sm font-semibold text-[#0D1117] capitalize truncate">{value}</div>
+    </div>
+  );
+}
+
+function LiveStat({ label, value, tone }: { label: string; value: string; tone?: "warn" }) {
+  return (
+    <div className={`rounded-lg border px-2.5 py-2 ${tone === "warn" ? "border-amber-300 bg-amber-50" : "border-slate-200 bg-white"}`}>
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</div>
+      <div className={`mt-0.5 text-sm font-semibold tabular-nums ${tone === "warn" ? "text-amber-800" : "text-[#0D1117]"}`}>{value}</div>
     </div>
   );
 }

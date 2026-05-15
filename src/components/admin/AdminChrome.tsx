@@ -3,7 +3,9 @@ import { useLocation, Link } from "react-router-dom";
 import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
   Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
+  Award, ShieldCheck, RefreshCw,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * AdminChrome — Iron-Man HUD shell injected on every /admin/* route.
@@ -22,6 +24,8 @@ const NAV = [
   { to: "/admin/email-health", label: "Email",      icon: Mail },
   { to: "/admin/inbox",       label: "Inbox",       icon: Inbox },
   { to: "/admin/applicants",  label: "Applicants",  icon: Users },
+  { to: "/admin/tier-progression", label: "Tier",   icon: Award },
+  { to: "/admin/coi-review",  label: "COI",         icon: ShieldCheck },
   { to: "/admin/orientations", label: "Orientations", icon: CalendarDays },
   { to: "/admin/documents",   label: "Docs",        icon: FileText },
   { to: "/admin/schedule",    label: "Schedule",    icon: Megaphone },
@@ -33,6 +37,17 @@ const NAV = [
   { to: "/admin/test-zapier", label: "Zapier",      icon: Zap },
 ];
 
+function syncRel(iso: string | null) {
+  if (!iso) return "—";
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
 export default function AdminChrome() {
   const { pathname } = useLocation();
   const [time, setTime] = useState(() => new Date());
@@ -42,6 +57,22 @@ export default function AdminChrome() {
     if (!isAdminRoute) return;
     const id = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(id);
+  }, [isAdminRoute]);
+
+  // Last successful sheets-master-sync — refreshes every 60s.
+  const [lastSync, setLastSync] = useState<string | null>(null);
+  useEffect(() => {
+    if (!isAdminRoute) return;
+    let cancelled = false;
+    const fetchSync = async () => {
+      const { data } = await supabase.from("app_settings").select("value").eq("key", "sheets_master_sync_last_at").maybeSingle();
+      if (cancelled) return;
+      const v = data?.value as { at?: string } | null;
+      setLastSync(v?.at ?? null);
+    };
+    fetchSync();
+    const id = setInterval(fetchSync, 60_000);
+    return () => { cancelled = true; clearInterval(id); };
   }, [isAdminRoute]);
 
   // Toggle a body class so CSS can re-skin admin surfaces site-wide
@@ -101,6 +132,14 @@ export default function AdminChrome() {
             title={launched ? "Tidy is live." : `Launching ${launchDate.toDateString()}`}
           >
             {countdownLabel}
+          </span>
+          <span
+            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]"
+            style={{ backgroundColor: "#0D1117", color: "#9CA3AF", border: "1px solid rgba(148,163,184,0.25)" }}
+            title={lastSync ? `sheets-master-sync last ran ${new Date(lastSync).toLocaleString()}` : "sheets-master-sync has not run yet"}
+          >
+            <RefreshCw className="h-2.5 w-2.5" />
+            Sync · {syncRel(lastSync)}
           </span>
           <span className="admin-hud-meta">SYS</span>
           <Activity className="h-3 w-3 text-[hsl(var(--gold))]" />
