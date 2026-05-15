@@ -177,24 +177,24 @@ export default function MyTierWidget() {
   const criteria = buildCriteria(data);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] via-white/[0.04] to-transparent p-6 sm:p-7 backdrop-blur-md shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
-      <div aria-hidden className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-gold/10 blur-3xl" />
+    <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-blue-50 via-white to-white p-6 sm:p-7 shadow-[0_10px_40px_-15px_rgba(37,99,235,0.3)]">
+      <div aria-hidden className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
       <div className="relative flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="rounded-2xl bg-gradient-to-br from-gold to-amber-400 p-3 shadow-[0_8px_24px_rgba(245,197,24,0.4)]">
-            <ShieldCheck className="h-6 w-6 text-navy" />
+          <div className="rounded-2xl bg-gradient-to-br from-primary to-primary-deep p-3 shadow-[0_8px_24px_rgba(37,99,235,0.4)]">
+            <ShieldCheck className="h-6 w-6 text-white" />
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold">My Tier · 1 of 2</p>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white leading-tight">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">My Tier · 1 of 2</p>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-navy leading-tight">
               Tidy Verified Pro
             </h2>
-            <p className="text-sm text-white/60 mt-0.5">On the path to Pro Partner</p>
+            <p className="text-sm text-slate-600 mt-0.5">On the path to Pro Partner</p>
           </div>
         </div>
         <Link
           to="/pro/tier-progression"
-          className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-gold hover:bg-gold hover:text-navy transition"
+          className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary hover:text-white transition shadow-sm"
         >
           Pro Partner playbook <ArrowRight className="h-3.5 w-3.5" />
         </Link>
@@ -202,17 +202,17 @@ export default function MyTierWidget() {
 
       <div className="relative mt-6">
         <div className="flex items-baseline justify-between mb-2">
-          <span className="text-xs font-medium text-white/70">
+          <span className="text-xs font-medium text-slate-700">
             {visits} / 50 visits to Pro Partner readiness
           </span>
-          <span className="font-display text-lg font-bold text-gold tabular-nums">{pct}%</span>
+          <span className="font-display text-lg font-bold text-primary tabular-nums">{pct}%</span>
         </div>
-        <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-gold via-amber-300 to-gold transition-[width] duration-1000 ease-out shadow-[0_0_20px_rgba(245,197,24,0.6)]"
+            className="h-full rounded-full bg-gradient-to-r from-primary via-blue-400 to-primary-deep transition-[width] duration-1000 ease-out shadow-[0_0_16px_rgba(37,99,235,0.5)]"
             style={{ width: `${pct}%` }}
           />
-          <div className="pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_2.4s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_2.4s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/70 to-transparent" />
         </div>
       </div>
 
@@ -236,12 +236,12 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function CriterionBadge({ icon, label, value, met, progressing }: Criterion) {
   const tone = met
-    ? "bg-emerald-400/10 border-emerald-400/30 text-emerald-300"
+    ? "bg-emerald-50 border-emerald-200 text-emerald-800"
     : progressing
-      ? "bg-gold/10 border-gold/30 text-gold"
-      : "bg-white/5 border-white/10 text-white/60";
+      ? "bg-amber-50 border-amber-200 text-amber-800"
+      : "bg-slate-50 border-slate-200 text-slate-600";
   return (
-    <div className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 backdrop-blur transition hover:scale-[1.02] ${tone}`}>
+    <div className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 transition hover:scale-[1.02] hover:shadow-sm ${tone}`}>
       <div className="flex items-center gap-1.5 min-w-0">
         <span className="shrink-0">
           {met ? <Check className="h-3.5 w-3.5" /> : progressing ? <Clock className="h-3.5 w-3.5" /> : icon}
