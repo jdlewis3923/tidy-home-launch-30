@@ -34,6 +34,7 @@ type DashboardData = {
   nextPayoutDay: string;
   photosPending: number;
   referralCount: number;
+  referralBonusCents: number;
 };
 
 function fmtTime(d: Date) {
@@ -79,7 +80,7 @@ export default function ProDashboard() {
 
         const [
           appRes, profRes, todayRes, weekRes, lastWeekRes, ratingRes,
-          payoutRes, photoRes, refRes,
+          payoutRes, photoRes, refRes, bonusRes,
         ] = await Promise.all([
           supabase.from("applicants")
             .select("first_name, tier, tier_advanced_at")
@@ -115,7 +116,10 @@ export default function ProDashboard() {
           supabase.from("pro_referrals")
             .select("id", { count: "exact", head: true })
             .eq("referrer_contractor_id", userId).eq("status", "completed"),
+          supabase.from("app_settings")
+            .select("value").eq("key", "referral_bonus_amount_cents").maybeSingle(),
         ]);
+
 
         if (cancelled) return;
 
@@ -159,6 +163,7 @@ export default function ProDashboard() {
           nextPayoutDay,
           photosPending: photoRes.count ?? 0,
           referralCount: refRes.count ?? 0,
+          referralBonusCents: Number((bonusRes as any)?.data?.value ?? 20000),
         });
         setLoading(false);
       };
@@ -330,7 +335,7 @@ export default function ProDashboard() {
             urgent={!!data && data.photosPending > 0} />
           <ModuleCard icon={<Users className="h-5 w-5" />}
             kicker="Refer a Pro"
-            title="Earn $200 per hire"
+            title={`Earn $${Math.round((data?.referralBonusCents ?? 20000) / 100)} per hire`}
             body={`Your invite code: ${data?.referralCode ?? "—"}${data && data.referralCount > 0 ? ` · ${data.referralCount} hired` : ""}`}
             cta="Share invite" href="/pro" />
           <ModuleCard icon={<Sparkles className="h-5 w-5" />}
