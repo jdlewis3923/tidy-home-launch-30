@@ -97,6 +97,20 @@ export default function MyTierWidget() {
     };
   }, []);
 
+  if (loading) {
+    return <Skeleton className="h-48 w-full rounded-2xl" />;
+  }
+  if (!pro) {
+    return (
+      <Card className="border-dashed">
+        <CardContent className="p-6 text-sm text-slate-500">
+          We couldn't find your Pro profile yet. Once your application is linked, your tier dashboard will appear here.
+        </CardContent>
+      </Card>
+    );
+  }
+  const data = pro;
+
   if (data.tier === "tier_2_pro_partner") {
     const advancedDate = data.tier_advanced_at
       ? new Date(data.tier_advanced_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
