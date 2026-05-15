@@ -2268,6 +2268,54 @@ export type Database = {
           },
         ]
       }
+      tier_offers: {
+        Row: {
+          accepted_at: string | null
+          applicant_id: string | null
+          brevo_template_id: number | null
+          contractor_id: string
+          created_at: string
+          declined_at: string | null
+          expires_at: string | null
+          id: string
+          notes: string | null
+          offer_type: string
+          sent_at: string
+          sent_by: string | null
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          applicant_id?: string | null
+          brevo_template_id?: number | null
+          contractor_id: string
+          created_at?: string
+          declined_at?: string | null
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          offer_type?: string
+          sent_at?: string
+          sent_by?: string | null
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          applicant_id?: string | null
+          brevo_template_id?: number | null
+          contractor_id?: string
+          created_at?: string
+          declined_at?: string | null
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          offer_type?: string
+          sent_at?: string
+          sent_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       today_visits: {
         Row: {
           address_line1: string | null
