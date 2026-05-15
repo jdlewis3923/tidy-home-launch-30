@@ -3,7 +3,9 @@ import { useLocation, Link } from "react-router-dom";
 import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
   Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
+  Award, ShieldCheck, RefreshCw,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * AdminChrome — Iron-Man HUD shell injected on every /admin/* route.

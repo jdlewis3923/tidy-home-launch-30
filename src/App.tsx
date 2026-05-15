@@ -69,6 +69,7 @@ const ProDashboard = lazy(() => import("./pages/ProDashboard.tsx"));
 const ProTierProgression = lazy(() => import("./pages/ProTierProgression.tsx"));
 const ProUploadCoi = lazy(() => import("./pages/ProUploadCoi.tsx"));
 const AdminCoiReview = lazy(() => import("./pages/AdminCoiReview.tsx"));
+const AdminTierProgression = lazy(() => import("./pages/AdminTierProgression.tsx"));
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
 
@@ -213,6 +214,7 @@ const App = () => (
                   <Route path="/pro/tier-progression" element={<ProTierProgression />} />
                   <Route path="/pro/upload-coi" element={<ProUploadCoi />} />
                   <Route path="/admin/coi-review" element={<AdminCoiReview />} />
+                  <Route path="/admin/tier-progression" element={<AdminTierProgression />} />
                   <Route path="/coming-soon" element={<ComingSoon />} />
                   <Route
                     path="/dashboard/notifications"
