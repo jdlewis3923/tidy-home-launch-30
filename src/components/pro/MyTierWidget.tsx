@@ -65,64 +65,37 @@ export default function MyTierWidget() {
 
   useEffect(() => {
     let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
     (async () => {
       const { data: sess } = await supabase.auth.getSession();
-      const email = sess.session?.user?.email;
-      if (!email) { setLoading(false); return; }
-      const { data } = await supabase
-        .from("applicants")
-        .select("id, first_name, tier, tier_advanced_at, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count")
-        .eq("email", email.toLowerCase())
-        .maybeSingle();
-      if (!cancelled) {
-        setPro((data as ProRow | null) ?? null);
-        setLoading(false);
-      }
+      const userId = sess.session?.user?.id;
+      if (!userId) { setLoading(false); return; }
+
+      const fetchRow = async () => {
+        const { data } = await supabase
+          .from("applicants")
+          .select("id, first_name, tier, tier_advanced_at, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count")
+          .eq("contractor_id", userId)
+          .maybeSingle();
+        if (!cancelled) setPro((data as ProRow | null) ?? null);
+      };
+
+      await fetchRow();
+      if (!cancelled) setLoading(false);
+
+      // Realtime: refetch on any update to my applicants row
+      channel = supabase
+        .channel(`applicants:${userId}`)
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "applicants", filter: `contractor_id=eq.${userId}` }, () => { fetchRow(); })
+        .subscribe();
     })();
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
   }, []);
-
-  if (loading) {
-    return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
-        <div className="space-y-4">
-          <Skeleton className="h-6 w-48 bg-white/10" />
-          <Skeleton className="h-3 w-full bg-white/10" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-9 w-full bg-white/10" />)}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Demo fallback so the widget still tells a story when the logged-in
-  // user isn't yet linked to an applicants row. ?demo=tier2 forces the
-  // Pro Partner state for screenshots / previews.
-  const demoTier2 = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("demo") === "tier2";
-  const data: ProRow = pro ?? (demoTier2 ? {
-    id: "demo",
-    first_name: "Pro",
-    tier: "tier_2_pro_partner",
-    tier_advanced_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 47).toISOString(),
-    completed_visits: 128,
-    avg_customer_rating: 4.9,
-    contractor_cancel_rate: 0.01,
-    complaint_rate: 0,
-    photo_compliance_rate: 0.99,
-    open_escalations_count: 0,
-  } : {
-    id: "demo",
-    first_name: "Pro",
-    tier: "tier_1_verified",
-    tier_advanced_at: null,
-    completed_visits: 42,
-    avg_customer_rating: 4.9,
-    contractor_cancel_rate: 0.02,
-    complaint_rate: 0,
-    photo_compliance_rate: 0.98,
-    open_escalations_count: 0,
-  });
 
   if (data.tier === "tier_2_pro_partner") {
     const advancedDate = data.tier_advanced_at
