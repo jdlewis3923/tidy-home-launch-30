@@ -1,11 +1,11 @@
 /**
  * referral-bonus-check
  *
- * Daily cron. For each pro_referrals row where the referred contractor has
- * completed >= 10 visits and bonus has not been paid, transfers the configured
- * referral bonus (app_settings.referral_bonus_amount_cents) to the referrer's
- * Stripe Connect account and marks the row paid. Single source of truth — the
- * same value powers the /pro widget so display + payout never drift.
+ * Daily cron. For each pro_referrals row where the referee has completed
+ * >= 10 visits and bonus has not been paid, transfers the configured referral
+ * bonus (app_settings.referral_bonus_amount_cents) to the referrer's Stripe
+ * Connect account and marks the row paid. Single source of truth — the same
+ * value powers the /pro widget so display + payout never drift.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -33,10 +33,9 @@ Deno.serve(async (req) => {
     .maybeSingle();
   const bonusCents = Number(setting?.value ?? 20000);
 
-  // Pending referrals: completed by Jobber events but not yet paid.
   const { data: pending, error } = await supabase
     .from("pro_referrals")
-    .select("id, referrer_contractor_id, referred_contractor_id, status, bonus_paid_at")
+    .select("id, referrer_contractor_id, referee_contractor_id, status")
     .is("bonus_paid_at", null)
     .neq("status", "void");
 
@@ -51,10 +50,15 @@ Deno.serve(async (req) => {
   const results: Array<Record<string, unknown>> = [];
 
   for (const row of pending ?? []) {
+    if (!row.referee_contractor_id) {
+      results.push({ id: row.id, skipped: "no_referee" });
+      continue;
+    }
+
     const { count } = await supabase
       .from("pro_visits")
       .select("id", { count: "exact", head: true })
-      .eq("contractor_id", row.referred_contractor_id)
+      .eq("contractor_id", row.referee_contractor_id)
       .eq("status", "complete");
 
     if ((count ?? 0) < REFERRAL_THRESHOLD_VISITS) {
@@ -62,13 +66,15 @@ Deno.serve(async (req) => {
       continue;
     }
 
-    // Look up the referrer's Stripe Connect account.
-    const { data: app } = await supabase
-      .from("applicants")
-      .select("stripe_connect_account_id")
+    // Look up referrer's Stripe Connect account from stripe_payouts metadata
+    // (best-effort — not every Pro has a stored account yet).
+    const { data: payoutRow } = await supabase
+      .from("stripe_payouts")
+      .select("stripe_account_id")
       .eq("contractor_id", row.referrer_contractor_id)
+      .limit(1)
       .maybeSingle();
-    const acct = (app as any)?.stripe_connect_account_id;
+    const acct = (payoutRow as any)?.stripe_account_id ?? null;
 
     let transferId: string | null = null;
     if (stripeKey && acct) {
@@ -102,12 +108,11 @@ Deno.serve(async (req) => {
     await supabase.from("pro_referrals").update({
       status: "paid",
       bonus_paid_at: new Date().toISOString(),
-      bonus_amount_cents: bonusCents,
-      stripe_transfer_id: transferId,
+      bonus_cents: bonusCents,
     }).eq("id", row.id);
 
     paid += 1;
-    results.push({ id: row.id, paid: true, bonusCents, transferId });
+    results.push({ id: row.id, paid: true, bonusCents, transferId, acct });
   }
 
   return new Response(JSON.stringify({ ok: true, bonusCents, paid, results }), {
