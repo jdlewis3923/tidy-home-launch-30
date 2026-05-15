@@ -874,6 +874,19 @@ export default function AdminApplicants() {
                               )}
                               <Button
                                 size="sm"
+                                variant="outline"
+                                onClick={async () => {
+                                  const { data, error } = await supabase.functions.invoke("recalc-applicant-readiness", { body: { applicant_id: open.id } });
+                                  if (error || (data as any)?.error) { toast.error(error?.message ?? (data as any)?.error ?? "Failed"); return; }
+                                  toast.success("Readiness recalculated");
+                                  loadList?.();
+                                }}
+                                title="Pull latest counts from visits/reviews/complaints and recompute readiness"
+                              >
+                                Recalculate
+                              </Button>
+                              <Button
+                                size="sm"
                                 disabled={!eligible || readiness === "offered" || tierActionLoading === "offer"}
                                 onClick={offerTier2}
                                 className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold disabled:opacity-50"
