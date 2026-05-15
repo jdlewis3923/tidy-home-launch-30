@@ -128,5 +128,12 @@ Deno.serve(async (req) => {
   await clearRange(token, 'Tier Audit Log!A:Z');
   await writeRange(token, 'Tier Audit Log!A1', [eHeader, ...eRows]);
 
+  // Stamp last successful sync so admin chrome can display it.
+  await admin.from('app_settings').upsert({
+    key: 'sheets_master_sync_last_at',
+    value: { at: new Date().toISOString(), applicants: aRows.length, visits: vRows.length, snapshots: sRows.length, audit: eRows.length },
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'key' });
+
   return jsonResponse({ ok: true, applicants: aRows.length, visits: vRows.length, snapshots: sRows.length, audit: eRows.length });
 });
