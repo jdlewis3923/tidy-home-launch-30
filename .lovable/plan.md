@@ -1,43 +1,65 @@
-This is a large, multi-system change spanning schema, three external integrations (Jobber, Google Business Profile, Google Sheets), edge functions, cron jobs, admin UI, and the Pro dashboard with a full animation system. Before writing any code I need to confirm a few things and split the work into shippable phases — trying to do all 11 parts (A–K) in one shot will produce something that compiles but isn't actually wired to live data.
+# Pro Dashboard live data + COI + sheet sync
 
-## What I'll need from you before I can finish parts B, C, H
+This is a large multi-system build that depends on credentials I don't have yet. I'll ship it in 3 phases so the UI side is usable immediately while the integrations come online as their secrets are provided.
 
-These three integrations require credentials/setup that only you can do. I can scaffold the code, but it won't function until these exist:
+## Phase 1 — Schema + UI wiring (ship now, no external creds needed)
 
-1. **Jobber webhooks** — `JOBBER_WEBHOOK_SECRET` is not in the project secrets list. I see `JOBBER_CLIENT_ID`, `JOBBER_CLIENT_SECRET`, `JOBBER_REFRESH_TOKEN` already, but no signing secret. Also: Jobber doesn't natively emit `cancellation_initiated_by` — we'll need to infer "contractor-initiated <24h cancel" from the visit's `assignedUsers` and the audit log. I need to confirm the exact payload shape (there's already a `jobber-webhook` function in this project — is that the one to extend, or do you want a new one?).
-2. **Google Business Profile API** — needs `GOOGLE_GBP_SERVICE_ACCOUNT_JSON`, `GBP_ACCOUNT_ID`, `GBP_LOCATION_ID`. None are set. GBP also requires the service account to be added as a Location Manager in the GBP dashboard.
-3. **Master Google Sheet** — needs `GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON` and `MASTER_SHEET_ID`. Neither is set. The service account email also needs Editor access on the sheet.
-4. **`canvas-confetti`** package — not currently installed; I'll add it.
-5. **Review-bonus payout** — you reference "the existing review-bonus edge function." I don't see one in the project. Do you want me to create it, or is it under a different name?
+**Database migration** (single migration):
+- Add to `applicants`: `coi_uploaded_at`, `coi_pdf_url`, `coi_effective_date`, `coi_expires_at`, `coi_carrier_name`, `coi_policy_number`, `coi_review_status`, `coi_review_notes` (skip generated `dashboard_url` — derive client-side; Postgres generated columns can't reference `gen_random_uuid()`-derived columns reliably, and we'd risk breaking existing rows).
+- Convert `contractor_cancel_rate`, `complaint_rate`, `photo_compliance_rate` to **regular columns updated by trigger** (not GENERATED — Postgres generated columns can't reference other generated values cleanly; trigger keeps the same UX with more flexibility).
+- New tables: `visits`, `google_reviews`, `complaints`, `escalations`, `today_visits`, `stripe_payouts`, `referrals`, `jobber_webhook_log`, `tier_audit_log`.
+- Storage bucket `contractor-coi-pdfs` (private, 10MB, PDF-only) with RLS: Pro can upload to `/{contractor_id}/...`, admin can read all.
+- RLS on every new table: Pro reads own row by `contractor_id = auth.uid()`; admin reads all.
+- Seed Justin's row + 42 fake visits + 38 fake ratings + 3 today_visits + 1 stripe_payouts ($640).
 
-## Proposed phased delivery
+**Frontend**:
+- Apply Part J design tokens to `index.css` (Inter + JetBrains Mono, exact hex tokens, criterion badge variants, tier badges, navy hero band w/ 3px yellow stripe).
+- Rewrite `MyTierWidget` to read from `applicants` for `auth.uid()`, remove all hardcoded fallbacks (show "0 / required" gray when null/0).
+- Rewrite the 8 dashboard widgets to read from the new tables. Skeletons while loading.
+- Animations: progress bar fill (1200ms ease-out), criterion stagger fade-in (80ms), AnimatedNumber for stats, shimmer pulse, hover lifts, prefers-reduced-motion guard.
+- Realtime: subscribe to `applicants`/`today_visits`/`stripe_payouts`/`google_reviews` UPDATE channels for the current user; toast on +1 visit / +5★ review.
+- Confetti celebration (`canvas-confetti`) when readiness flips to ready, persisted via `localStorage` key per advancement.
+- Fix referral copy from `$150` → `$200` everywhere (`MyTierWidget`, `ProDashboard` ref card, `ProTierProgression`).
+- New page `/pro/upload-coi` (JWT-gated, 3-step indicator, drop zone, PDF.js preview, carrier/policy/dates form, submits to storage + edge fn).
+- New page `/admin/coi-review` (queue of `pending_admin_review`, inline PDF viewer, Approve/Reject).
 
-**Phase 1 — Ship now (no external creds needed):**
-- Part A: Schema migration (all columns + helper tables `visits`, `google_reviews`, `complaints`, `escalations`, `jobber_webhook_log`) with RLS so a Pro can only `SELECT` their own `applicants` row.
-- Part D: photo_compliance_rate generated column (free, in the migration).
-- Part G: Rewrite `MyTierWidget` to read live from `applicants` for the logged-in user, remove all hardcoded sample numbers, render "0 / required" gray badges when null/0, full Tidy design system.
-- Part J: Apply locked design system to the widget + new admin sections — navy/yellow, Inter/JetBrains Mono, criterion badges, Tier badges, **all 8 animations** (progress fill, criterion stagger, number counter via existing `AnimatedNumber`, tier-promotion confetti once per advancement, hover states, skeletons, realtime toast slide-in, tier-badge 360° flip), all respecting `prefers-reduced-motion`.
-- Part E: "Log Complaint" modal in `/admin/applicants` drawer → inserts into `complaints`, increments `complaint_count`.
-- Part F: "Open Escalation" button → inserts into `escalations`, increments `open_escalations_count`. Resolve action decrements.
-- Part I: "Live Data Status" drawer section + "Recalculate Readiness" button.
-- Seed row for `jdlewis3923@gmail.com` (visits=42, rating=4.9, cancels=1, photos 240/246, escalations=0).
+## Phase 2 — Edge functions (ship now, gated on secrets per integration)
 
-**Phase 2 — After you provide creds:**
-- Part B: Extend the existing `jobber-webhook` function (or create new) with HMAC verification using `JOBBER_WEBHOOK_SECRET`, handlers for `visit.completed`, `visit.cancelled`, `visit.rescheduled`, with photos_expected by service_type (cleaning=6, lawn=4, detail=8). Logs every payload to `jobber_webhook_log`.
-- Part C: New `google-reviews-poller` edge function + `pg_cron` schedule every 60 min. Name-match logic, rating recompute, $25 review-bonus trigger when 5★ + matched.
-- Part H: `master-sheet-sync` edge function (insert/update trigger via `pg_net` or DB webhook → edge function), backfill script, magic-link generation in `offer-contract` flow.
+| Function | Purpose | Secret needed |
+|---|---|---|
+| `jobber-webhook` | HMAC verify, ingest visit events, update counts | `JOBBER_WEBHOOK_SECRET` |
+| `jobber-schedule-sync` (CRON 15min) | Pull next-24h visits → `today_visits` | already have `JOBBER_*` |
+| `google-reviews-poller` (CRON 60min) | Poll GBP, dedupe, name-match, $25 bonus | `GOOGLE_GBP_SERVICE_ACCOUNT_JSON`, `GBP_ACCOUNT_ID`, `GBP_LOCATION_ID` |
+| `stripe-payout-sync` | Webhook for `transfer.created`/`transfer.paid` | already have `STRIPE_*` |
+| `upload-coi-submitted` | Email Justin + flip status | already have `BREVO_API_KEY` |
+| `coi-expiry-check` (CRON daily 9am ET) | 30/14/0/+7 day reminders | needs Brevo template IDs |
+| `referral-bonus-check` (CRON daily 6am ET) | Pay $200 after 10 visits | already have Stripe |
+| `master-sheet-sync` | Upsert applicants/visits/audit log to sheet | `MASTER_SHEET_ID`, `GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON` |
+| `tier-readiness-snapshot` (CRON daily 6am ET) | Refresh snapshot tab | same as above |
+| `recalculate-readiness` | Manual admin button | none |
 
-## Technical notes (for your reference)
+I'll scaffold every function. Ones whose secrets exist will be live; others return 503 until the secret arrives, and I'll prompt for them in batches.
 
-- The `applicants` table already has many of these columns from earlier migrations (`tier`, `completed_visits`, `avg_customer_rating`, `contractor_cancel_rate`, `complaint_rate`, `photo_compliance_rate`, `open_quality_escalations`, `tier_readiness_status`, `tier_advanced_at`, `pro_partner_interest`). I'll add only what's missing: `contractor_id`, `jobber_id`, `google_review_match_name`, `last_visit_at`, `total_ratings_count`, `contractor_cancel_count`, `complaint_count`, `photos_uploaded_count`, `photos_expected_count`, `open_escalations_count`, `dashboard_url` (generated), and **convert** existing `contractor_cancel_rate`/`complaint_rate`/`photo_compliance_rate` numeric columns to GENERATED — that requires DROP + ADD, which I'll do in the migration.
-- Existing `open_quality_escalations` column will be aliased / kept in sync with new `open_escalations_count` (or we rename — your call). Default plan: rename to `open_escalations_count` and update existing references in `MyTierWidget`, `AdminApplicants`, the three tier edge functions.
-- RLS on `applicants` currently only allows admin SELECT and public INSERT. I'll add a `pro select own` policy: `auth.uid() = contractor_id`.
-- Realtime: enable `applicants` on the `supabase_realtime` publication so the widget can subscribe.
-- `canvas-confetti` (~7kb) for the celebration burst.
+## Phase 3 — Admin polish
 
-## Questions before I start
+- `/admin/applicants` drawer: "Live Data Status" panel (last webhook, last review match, totals with drilldown links), "Recalculate Readiness" button, "Log Complaint" + "Open Escalation" modals.
+- Tier badge column in the table.
 
-1. **Confirm Phase 1 scope is what you want shipped first**, with Phase 2 (the three live integrations) following once you provide the 5 secrets/answers above? Or do you want me to scaffold Phase 2 code now (non-functional until secrets land) so the wiring is in place?
-2. For the existing `jobber-webhook` function — extend it or create a parallel one?
-3. Is there an existing `review-bonus` edge function I'm missing, or should I create it (Stripe Connect transfer of $2500 cents to the Pro's connected account)?
-4. Confirm renaming `open_quality_escalations` → `open_escalations_count` is OK (one column, no data loss).
+## What I need from you to ship Phase 2 in the same session
+
+These secrets — drop them and I'll wire each function the moment they're set:
+
+1. **`JOBBER_WEBHOOK_SECRET`** (Jobber → Settings → Integrations → Webhooks → reveal signing secret)
+2. **`GOOGLE_GBP_SERVICE_ACCOUNT_JSON`** + **`GBP_ACCOUNT_ID`** + **`GBP_LOCATION_ID`** (Google Cloud → service account JSON, GBP account/location IDs from your business profile)
+3. **`MASTER_SHEET_ID`** = `13WGFqOTt_ccRwVVR_FU2VKKE1N91HASZHdhHpMjgunc` (I'll set this)
+4. **`GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON`** (same service account is fine — share the sheet with that service account email as Editor)
+5. **Brevo template IDs** for `COI-RENEWAL-30`, `COI-RENEWAL-14`, `COI-REJECTED` (I can scaffold the function with placeholder IDs and you swap in real numbers later)
+
+## Decisions I'd like you to confirm before I start
+
+1. **Generated columns**: I want to use a **trigger** to maintain `*_rate` columns instead of Postgres `GENERATED` columns — same outcome from your perspective, but lets webhooks update one number atomically and avoids nasty migration failures with existing rows. OK?
+2. **`dashboard_url`**: derive client-side as a constant `https://jointidy.co/pro` (Pros only see their own data via RLS — no `?as=` needed, that's actually a security smell). The `dashboard_url` written to the sheet is just the static URL. OK?
+3. **Phase 2 strategy**: ship all edge function code now, gate each behind a secret check (returns 503 with a helpful message if its secret is missing) so you can light them up one by one without me touching code again. OR wait until you have all secrets ready and ship them in one pass. Which do you prefer?
+4. **COI test JWT**: I'll generate a test JWT for `jdlewis3923@gmail.com` and link it in the screenshot. OK?
+
+Reply with answers (or just "go ahead, your call on all four") and I'll start Phase 1 immediately.
