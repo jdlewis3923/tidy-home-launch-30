@@ -81,6 +81,15 @@ type Applicant = {
   open_escalations_count: number | null;
   tier_readiness_status: TierReadiness | null;
   tier_offer_sent_at: string | null;
+  // Live data status (Jobber + Google Reviews counters)
+  last_jobber_event_at: string | null;
+  last_review_match_at: string | null;
+  last_visit_at: string | null;
+  total_ratings_count: number | null;
+  contractor_cancel_count: number | null;
+  complaint_count: number | null;
+  photos_uploaded_count: number | null;
+  photos_expected_count: number | null;
 };
 
 type TierCriterion = { label: string; met: boolean; actual: string };
@@ -1112,6 +1121,15 @@ function QuickInfo({ icon, label, value }: { icon: React.ReactNode; label: strin
         {icon} {label}
       </div>
       <div className="mt-1 text-sm font-semibold text-[#0D1117] capitalize truncate">{value}</div>
+    </div>
+  );
+}
+
+function LiveStat({ label, value, tone }: { label: string; value: string; tone?: "warn" }) {
+  return (
+    <div className={`rounded-lg border px-2.5 py-2 ${tone === "warn" ? "border-amber-300 bg-amber-50" : "border-slate-200 bg-white"}`}>
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</div>
+      <div className={`mt-0.5 text-sm font-semibold tabular-nums ${tone === "warn" ? "text-amber-800" : "text-[#0D1117]"}`}>{value}</div>
     </div>
   );
 }
