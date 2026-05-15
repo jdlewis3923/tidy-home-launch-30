@@ -59,6 +59,22 @@ export default function AdminChrome() {
     return () => clearInterval(id);
   }, [isAdminRoute]);
 
+  // Last successful sheets-master-sync — refreshes every 60s.
+  const [lastSync, setLastSync] = useState<string | null>(null);
+  useEffect(() => {
+    if (!isAdminRoute) return;
+    let cancelled = false;
+    const fetchSync = async () => {
+      const { data } = await supabase.from("app_settings").select("value").eq("key", "sheets_master_sync_last_at").maybeSingle();
+      if (cancelled) return;
+      const v = data?.value as { at?: string } | null;
+      setLastSync(v?.at ?? null);
+    };
+    fetchSync();
+    const id = setInterval(fetchSync, 60_000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [isAdminRoute]);
+
   // Toggle a body class so CSS can re-skin admin surfaces site-wide
   useEffect(() => {
     if (isAdminRoute) {
