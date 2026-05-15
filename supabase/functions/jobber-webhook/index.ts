@@ -97,6 +97,52 @@ Deno.serve(async (req) => {
 
   const start = performance.now();
   try {
+    // Helper: also reflect Jobber events into pro_visits + bump applicant counters.
+    async function reflectToProVisits(action: 'complete' | 'cancel' | 'schedule', startAt?: string | null) {
+      if (!itemId) return;
+      // Find the assigned contractor via applicants.jobber_id (provided by payload if present).
+      const assignedJobberUserId =
+        (evt.data?.webHookEvent as { assignedUserId?: string } | undefined)?.assignedUserId ?? null;
+      let contractorId: string | null = null;
+      if (assignedJobberUserId) {
+        const { data: app } = await supabase
+          .from('applicants')
+          .select('id, contractor_id')
+          .eq('jobber_id', assignedJobberUserId)
+          .maybeSingle();
+        contractorId = app?.contractor_id ?? null;
+      }
+
+      const status = action === 'complete' ? 'complete' : action === 'cancel' ? 'cancelled' : 'scheduled';
+      const update: Record<string, unknown> = { status };
+      if (action === 'complete') update.completed_at = new Date().toISOString();
+      if (startAt) update.scheduled_at = startAt;
+
+      const { data: pv } = await supabase
+        .from('pro_visits')
+        .upsert({ jobber_visit_id: itemId, contractor_id: contractorId, ...update }, { onConflict: 'jobber_visit_id' })
+        .select('contractor_id')
+        .maybeSingle();
+
+      const cid = pv?.contractor_id ?? contractorId;
+      if (!cid) return;
+      // Bump counters on applicants for that contractor.
+      const { data: a } = await supabase
+        .from('applicants')
+        .select('id, completed_visits, contractor_cancel_count, last_jobber_event_at')
+        .eq('contractor_id', cid)
+        .maybeSingle();
+      if (!a) return;
+      const patch: Record<string, unknown> = { last_jobber_event_at: new Date().toISOString() };
+      if (action === 'complete') {
+        patch.completed_visits = (a.completed_visits ?? 0) + 1;
+        patch.last_visit_at = new Date().toISOString();
+      } else if (action === 'cancel') {
+        patch.contractor_cancel_count = (a.contractor_cancel_count ?? 0) + 1;
+      }
+      await supabase.from('applicants').update(patch).eq('id', a.id);
+    }
+
     switch (topic) {
       case 'JOB_UPDATE':
         // Bookkeeping log only — visit-level changes arrive via VISIT_RESCHEDULED.
@@ -117,12 +163,10 @@ Deno.serve(async (req) => {
               visit_date: vRow.visit_date,
             });
           }
+          await reflectToProVisits('complete');
         }
         break;
       case 'VISIT_RESCHEDULED':
-        // Best-effort: Jobber payloads vary by topic. We extract a date if
-        // present in the data envelope; otherwise the JOB_UPDATE listener
-        // will pick it up via the next sync cycle.
         if (itemId) {
           const newDate = (evt.data?.webHookEvent as { startAt?: string } | undefined)?.startAt
             ?? null;
@@ -144,6 +188,7 @@ Deno.serve(async (req) => {
               });
             }
           }
+          await reflectToProVisits('schedule', newDate);
         }
         break;
       case 'INVOICE_CREATE':

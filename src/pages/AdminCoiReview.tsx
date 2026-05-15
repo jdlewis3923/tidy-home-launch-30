@@ -58,18 +58,18 @@ export default function AdminCoiReview() {
   }, []);
 
   const decide = async (id: string, status: "approved" | "rejected") => {
-    const { error } = await supabase
-      .from("applicants")
-      .update({
-        coi_review_status: status,
-        coi_review_notes: notes[id] ?? null,
-      })
-      .eq("id", id);
-    if (error) {
-      toast.error(error.message);
+    const { data, error } = await supabase.functions.invoke("coi-decision", {
+      body: { applicant_id: id, decision: status, notes: notes[id] ?? undefined },
+    });
+    if (error || (data && (data as any).error)) {
+      toast.error(error?.message ?? (data as any)?.error ?? "Failed");
       return;
     }
-    toast.success(`COI ${status}`);
+    toast.success(
+      status === "approved"
+        ? "COI approved · Pro promoted to Tier 2 · T2-CONFIRMED sent"
+        : "COI rejected · Notice email sent",
+    );
     load();
   };
 
