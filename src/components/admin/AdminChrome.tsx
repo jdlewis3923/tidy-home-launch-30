@@ -133,6 +133,14 @@ export default function AdminChrome() {
           >
             {countdownLabel}
           </span>
+          <span
+            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]"
+            style={{ backgroundColor: "#0D1117", color: "#9CA3AF", border: "1px solid rgba(148,163,184,0.25)" }}
+            title={lastSync ? `sheets-master-sync last ran ${new Date(lastSync).toLocaleString()}` : "sheets-master-sync has not run yet"}
+          >
+            <RefreshCw className="h-2.5 w-2.5" />
+            Sync · {syncRel(lastSync)}
+          </span>
           <span className="admin-hud-meta">SYS</span>
           <Activity className="h-3 w-3 text-[hsl(var(--gold))]" />
           <span className="admin-hud-meta">·</span>
