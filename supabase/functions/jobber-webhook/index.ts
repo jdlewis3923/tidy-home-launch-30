@@ -57,6 +57,12 @@ async function fireZap(eventName: string, payload: unknown) {
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
+  if (req.method === 'GET' && new URL(req.url).searchParams.get('debug') === 'secret-fingerprint') {
+    const s = Deno.env.get('JOBBER_WEBHOOK_SECRET') ?? '';
+    const fp = s ? `${s.slice(0, 8)}...${s.slice(-5)} (len=${s.length})` : 'MISSING';
+    console.log('[jobber-webhook] secret fingerprint', fp);
+    return new Response(JSON.stringify({ fingerprint: fp }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
   if (req.method !== 'POST') {
     return new Response('method not allowed', { status: 405, headers: corsHeaders });
   }
