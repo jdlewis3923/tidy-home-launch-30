@@ -6,7 +6,7 @@ const items = [
   "Cancel Anytime",
   "Photo-Verified Every Visit",
   "No Long-Term Contracts",
-  "4.9★ Average Rating",
+  
   "Serving Kendall & Pinecrest",
   "From $85/mo",
   "One Monthly Plan",
