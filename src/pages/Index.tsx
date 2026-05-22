@@ -35,10 +35,10 @@ const Index = () => {
     return Date.now() - parseInt(dismissed) > DISMISS_DURATION;
   }, []);
 
-  // When dashboard is enabled, CTA actions navigate to login instead of opening popup
+  // When dashboard is enabled, CTA actions navigate to login (signup view) instead of opening popup
   const handleCTA = useCallback(() => {
     if (CUSTOMER_DASHBOARD_ENABLED) {
-      navigate("/login");
+      navigate("/login?mode=signup");
     } else {
       setPopupOpen(true);
     }

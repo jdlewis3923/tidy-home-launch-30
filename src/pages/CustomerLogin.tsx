@@ -12,9 +12,12 @@ export default function CustomerLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  // Default view: signup if entry point signals it (?mode=signup from START MY PLAN),
+  // otherwise sign-in (top-nav Login link).
+  const initialIsSignUp = searchParams.get('mode') === 'signup';
+  const [isSignUp, setIsSignUp] = useState(initialIsSignUp);
   // Only allow same-origin internal paths to prevent open-redirect abuse.
   // If a redirect was explicitly requested (e.g. came from a protected route), honor it.
   // Otherwise we'll route admins → /admin/kpis and customers → /dashboard after sign-in.
@@ -108,7 +111,7 @@ export default function CustomerLogin() {
             {isSignUp ? 'create your account.' : 'welcome back.'}
           </h1>
           <p className="mt-2 text-sm text-ink-faint lowercase">
-            {isSignUp ? 'one account. one home. handled.' : 'sign in to manage your plan.'}
+            {isSignUp ? "you're seconds from your plan." : 'sign in to manage your plan.'}
           </p>
         </div>
 
