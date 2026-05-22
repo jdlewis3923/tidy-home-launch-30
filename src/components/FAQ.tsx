@@ -10,7 +10,7 @@ const preLaunchFAQ = [
     items: [
       { q: "What is Tidy?", a: "Great question! Tidy is Miami's first all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless." },
       { q: "How do I sign up?", a: "Super easy — just tap the 'Get Early Access' button, fill out a quick 60-second form with your name and contact info, and we'll reach out to confirm your spot and lock in your schedule. That's it!" },
-      { q: "Where is Tidy available?", a: "We're currently serving some of Miami's best neighborhoods: Kendall (33183, 33186), Pinecrest (33156), South Kendall (33173), Sunset (33176), Coral Gables (33146), South Miami (33143), and Doral (33178). More areas are coming soon — grab your spot now!" },
+      { q: "Where is Tidy available?", a: "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one — more areas coming soon." },
       { q: "Is there a commitment?", a: "Nope — zero commitment! There are no contracts and no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month." },
     ],
   },
@@ -57,7 +57,7 @@ const launchFAQ = [
     items: [
       { q: "What is Tidy?", a: "Tidy is Miami's first all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless." },
       { q: "How do I sign up?", a: "Tap 'Start My Plan,' choose your services and schedule, and complete checkout. Your first visit is confirmed within 24 hours." },
-      { q: "Where is Tidy available?", a: "We currently serve Kendall (33183, 33186), Pinecrest (33156), South Kendall (33173), Sunset (33176), Coral Gables (33146), South Miami (33143), and Doral (33178). More areas coming soon." },
+      { q: "Where is Tidy available?", a: "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one — more areas coming soon." },
       { q: "Is there a commitment?", a: "No contracts, no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month." },
     ],
   },
