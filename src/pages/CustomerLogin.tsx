@@ -111,7 +111,7 @@ export default function CustomerLogin() {
             {isSignUp ? 'create your account.' : 'welcome back.'}
           </h1>
           <p className="mt-2 text-sm text-ink-faint lowercase">
-            {isSignUp ? 'one account. one home. handled.' : 'sign in to manage your plan.'}
+            {isSignUp ? "you're seconds from your plan." : 'sign in to manage your plan.'}
           </p>
         </div>
 
