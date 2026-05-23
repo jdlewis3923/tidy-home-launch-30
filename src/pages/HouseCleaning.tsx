@@ -32,7 +32,7 @@ const config: ServiceLandingConfig = {
     },
     {
       name: "Biweekly",
-      price: "$279",
+      price: "$275",
       cadence: "/mo",
       planSlug: "biweekly",
       description: "Two visits per month, priority scheduling.",
