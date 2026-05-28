@@ -123,7 +123,7 @@ export default function Apply() {
     <main className="min-h-screen bg-navy-deep relative overflow-hidden">
       <Helmet>
         <title>Careers at Tidy — Apply to join Miami's home-service crew</title>
-        <meta name="description" content="Join Tidy's contractor network in Kendall, Pinecrest & Kendall West. Cleaning, lawn care, and car detailing pros — weekly pay, predictable routes." />
+        <meta name="description" content="Join Tidy's contractor network in Kendall, Pinecrest, Palmetto Bay, and South Miami. Cleaning, lawn care, and car detailing pros — weekly pay, predictable routes." />
       </Helmet>
 
       <div className="absolute inset-0 pointer-events-none">
@@ -153,7 +153,7 @@ export default function Apply() {
           </h1>
           <p className="mt-5 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed">
             Tidy is Miami's subscription home-service brand. We're hiring vetted
-            cleaners, lawn pros, and detailers in Kendall, Pinecrest, and Kendall West.
+            cleaners, lawn pros, and detailers in Kendall, Pinecrest, Palmetto Bay, and South Miami.
           </p>
 
           <div className="mt-10 grid sm:grid-cols-2 gap-4">
