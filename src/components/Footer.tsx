@@ -132,7 +132,7 @@ const Footer = () => {
                   to="/apply"
                   className="group inline-flex items-center gap-1.5 text-gold/90 hover:text-gold font-semibold transition"
                 >
-                  Careers — Apply to work with us
+                  Join our team
                   <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
               </li>

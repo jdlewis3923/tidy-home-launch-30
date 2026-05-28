@@ -1,12 +1,11 @@
 // Tidy — Applicant Applied Trigger (public)
 //
-// Called by /apply right after submit-application inserts the row.
+// Called by submit-application right after the applicants row is inserted.
 // Sends two Brevo emails:
-//   1. "applicant-applied" → confirmation to the applicant
-//   2. "admin-new-applicant" → alert to admin@jointidy.co
-//
-// Brevo template names are sent as `tags` so a Brevo automation can route on
-// them. Body is inline branded HTML (matches existing project pattern).
+//   1. "Thanks for applying to Tidy" → confirmation to the applicant
+//      (signed Justin Lewis, Tidy Home Concierge)
+//   2. Admin alert to admin@jointidy.co with applicant snapshot + direct
+//      link to /admin/applicants
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
@@ -37,28 +36,22 @@ Deno.serve(async (req) => {
 
   const fullName = `${a.first_name} ${a.last_name}`;
 
-  // Write the 'applied' onboarding_events row (audit trail).
-  const evt = await admin.from('onboarding_events').insert({
-    applicant_id: a.id,
-    event: 'applied',
-    metadata: { source: 'apply_form', service: a.service, zip: a.zip },
-  });
-  if (evt.error) console.error('[applicant-applied] onboarding_events insert failed', evt.error);
-
   // 1. Confirmation to applicant
   const applicantHtml = brandedEmailHtml({
-    heading: 'Application received',
+    heading: 'Thanks for applying to Tidy',
     bodyHtml: `
       <p>Hi ${a.first_name},</p>
-      <p>Thanks for applying to be a Tidy <strong>${a.service}</strong> contractor in Miami.
-      We've received your application and our team will review it within 5 business days.</p>
-      <p>Next steps: a quick background check, then a short interview if you're a fit.</p>
-      <p>— The Tidy team</p>
+      <p>Thanks for applying to join the Tidy team as a <strong>${a.service}</strong> pro in Miami.
+      We've received your application and will review it within <strong>2–3 business days</strong>.</p>
+      <p>If you're a fit, we'll reach out by email or phone to schedule a short conversation
+      and start the background check (at Tidy's expense).</p>
+      <p>In the meantime, no action needed on your end.</p>
+      <p style="margin-top:24px">— Justin Lewis<br/>Tidy Home Concierge</p>
     `,
   });
   await sendBrevoEmail({
     toEmail: a.email, toName: fullName,
-    subject: 'We received your Tidy application',
+    subject: 'Thanks for applying to Tidy',
     htmlContent: applicantHtml,
     tags: ['applicant-applied'],
     templateName: 'applicant-applied',
@@ -66,18 +59,20 @@ Deno.serve(async (req) => {
   }).catch((e) => console.error('[applicant-applied] applicant email failed', e));
 
   // 2. Admin alert
+  const drawerUrl = `https://jointidy.co/admin/applicants?id=${a.id}`;
   const adminHtml = brandedEmailHtml({
     heading: 'New contractor application',
     bodyHtml: `
       <p><strong>${fullName}</strong> just applied for <strong>${a.service}</strong>.</p>
-      <ul style="padding-left:18px">
-        <li>Email: ${a.email}</li>
-        <li>Phone: ${a.phone ?? '—'}</li>
-        <li>ZIP: ${a.zip ?? '—'}</li>
+      <ul style="padding-left:18px;line-height:1.7">
+        <li><strong>Email:</strong> ${a.email}</li>
+        <li><strong>Phone:</strong> ${a.phone ?? '—'}</li>
+        <li><strong>ZIP:</strong> ${a.zip ?? '—'}</li>
+        <li><strong>Service:</strong> ${a.service}</li>
       </ul>
     `,
-    ctaUrl: 'https://jointidy.co/admin/applicants',
-    ctaLabel: 'Open pipeline',
+    ctaUrl: drawerUrl,
+    ctaLabel: 'Open applicant in admin',
   });
   await sendBrevoEmail({
     toEmail: 'admin@jointidy.co', toName: 'Justin',
@@ -90,7 +85,7 @@ Deno.serve(async (req) => {
 
   // 3. Sync to Tidy Master sheet (Applicants tab) — non-blocking.
   admin.functions.invoke('sync-applicant-to-sheet', {
-    body: { applicant_id: a.id, last_event: 'applied', last_event_at: new Date().toISOString() },
+    body: { applicant_id: a.id, last_event: 'applicant_submitted', last_event_at: new Date().toISOString() },
   }).catch((e) => console.error('[applicant-applied] sheet sync failed', e));
 
   return jsonResponse({ ok: true });
