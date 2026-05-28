@@ -748,6 +748,34 @@ export default function AdminApplicants() {
                         {submitting === "fail" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldX className="h-4 w-4 mr-1" /> FAIL</>}
                       </Button>
                     </div>
+
+                    {/* Checkr integration */}
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="text-[11px] uppercase tracking-wide font-semibold text-slate-600">Checkr</div>
+                        <span className="text-[11px] text-slate-500">
+                          {open.bg_check_provider === "checkr" ? `Status: ${open.bg_check_status ?? "pending"}` : "Not invited"}
+                        </span>
+                      </div>
+                      {open.checkr_candidate_id && (
+                        <div className="text-[11px] text-slate-500 font-mono break-all">
+                          candidate: {open.checkr_candidate_id}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={!!submitting}
+                          onClick={() => runAction("send_to_bg_check")}
+                        >
+                          {submitting === "send_to_bg_check"
+                            ? <Loader2 className="h-4 w-4 animate-spin" />
+                            : open.checkr_invitation_id ? "Resend invitation" : "Send Checkr invitation"}
+                        </Button>
+                      </div>
+                    </div>
+
                     <Textarea
                       placeholder="Notes (auto-saves on blur)…"
                       value={bgNotes}
