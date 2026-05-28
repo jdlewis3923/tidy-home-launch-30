@@ -243,6 +243,8 @@ export type Database = {
           bilingual_fluency_confirmed: boolean
           bond_status: string | null
           business_bank_account_confirmed: boolean
+          checkr_candidate_id: string | null
+          checkr_invitation_id: string | null
           coi_auto_status: string | null
           coi_carrier_name: string | null
           coi_effective_date: string | null
@@ -308,6 +310,8 @@ export type Database = {
           bilingual_fluency_confirmed?: boolean
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
+          checkr_candidate_id?: string | null
+          checkr_invitation_id?: string | null
           coi_auto_status?: string | null
           coi_carrier_name?: string | null
           coi_effective_date?: string | null
@@ -373,6 +377,8 @@ export type Database = {
           bilingual_fluency_confirmed?: boolean
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
+          checkr_candidate_id?: string | null
+          checkr_invitation_id?: string | null
           coi_auto_status?: string | null
           coi_carrier_name?: string | null
           coi_effective_date?: string | null
