@@ -126,6 +126,7 @@ function applyTransition(action: Action) {
       u.rejected_at = new Date().toISOString();
       u.rejection_reason = 'Background check failed';
       break;
+    case 'send_to_bg_check':   u.current_stage = 'bg_check'; u.bg_check_provider = 'checkr'; u.bg_check_status = 'pending'; break;
     case 'schedule_interview': u.current_stage = 'interview'; break;
     case 'send_offer':         u.current_stage = 'offer_sent'; break;
     case 'send_contract':      u.current_stage = 'contract_signed'; break;
