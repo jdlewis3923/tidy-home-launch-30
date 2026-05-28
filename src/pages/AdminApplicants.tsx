@@ -90,6 +90,8 @@ type Applicant = {
   complaint_count: number | null;
   photos_uploaded_count: number | null;
   photos_expected_count: number | null;
+  checkr_candidate_id: string | null;
+  checkr_invitation_id: string | null;
 };
 
 type TierCriterion = { label: string; met: boolean; actual: string };
