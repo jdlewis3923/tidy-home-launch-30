@@ -90,6 +90,8 @@ type Applicant = {
   complaint_count: number | null;
   photos_uploaded_count: number | null;
   photos_expected_count: number | null;
+  checkr_candidate_id: string | null;
+  checkr_invitation_id: string | null;
 };
 
 type TierCriterion = { label: string; met: boolean; actual: string };
@@ -126,6 +128,7 @@ type Orientation = {
 
 type AdvanceAction =
   | "clear" | "consider" | "fail"
+  | "send_to_bg_check"
   | "schedule_interview" | "send_offer" | "send_contract"
   | "mark_oriented" | "activate" | "reject";
 
@@ -263,7 +266,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -407,6 +410,7 @@ export default function AdminApplicants() {
     }
     const friendly: Record<AdvanceAction, string> = {
       clear: "Background marked clear",
+      send_to_bg_check: "Background check invitation sent",
       consider: "Marked for review",
       fail: "Background failed — applicant rejected",
       schedule_interview: "Interview scheduled",
@@ -744,6 +748,34 @@ export default function AdminApplicants() {
                         {submitting === "fail" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldX className="h-4 w-4 mr-1" /> FAIL</>}
                       </Button>
                     </div>
+
+                    {/* Checkr integration */}
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="text-[11px] uppercase tracking-wide font-semibold text-slate-600">Checkr</div>
+                        <span className="text-[11px] text-slate-500">
+                          {open.bg_check_provider === "checkr" ? `Status: ${open.bg_check_status ?? "pending"}` : "Not invited"}
+                        </span>
+                      </div>
+                      {open.checkr_candidate_id && (
+                        <div className="text-[11px] text-slate-500 font-mono break-all">
+                          candidate: {open.checkr_candidate_id}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={!!submitting}
+                          onClick={() => runAction("send_to_bg_check")}
+                        >
+                          {submitting === "send_to_bg_check"
+                            ? <Loader2 className="h-4 w-4 animate-spin" />
+                            : open.checkr_invitation_id ? "Resend invitation" : "Send Checkr invitation"}
+                        </Button>
+                      </div>
+                    </div>
+
                     <Textarea
                       placeholder="Notes (auto-saves on blur)…"
                       value={bgNotes}
