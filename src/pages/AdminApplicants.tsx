@@ -410,6 +410,7 @@ export default function AdminApplicants() {
     }
     const friendly: Record<AdvanceAction, string> = {
       clear: "Background marked clear",
+      send_to_bg_check: "Background check invitation sent",
       consider: "Marked for review",
       fail: "Background failed — applicant rejected",
       schedule_interview: "Interview scheduled",
