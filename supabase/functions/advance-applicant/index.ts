@@ -307,6 +307,25 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Checkr invitation dispatch on send_to_bg_check (fire-and-forget; safe if key unset).
+  if (action === 'send_to_bg_check') {
+    queueMicrotask(async () => {
+      try {
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/checkr-invite`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ applicant_id: row.id }),
+        });
+        if (!r.ok) console.error('[advance] checkr-invite dispatch http', r.status, await r.text().catch(() => ''));
+      } catch (e) {
+        console.error('[advance] checkr-invite dispatch failed', e);
+      }
+    });
+  }
+
   // Build attachments from documents → signed URLs.
   const filenames = filenamesFor(action, applicantRole);
   const attachments = await buildAttachments(filenames);
@@ -316,6 +335,7 @@ Deno.serve(async (req) => {
     clear: { subject: 'Your background check is clear', body: `<p>Hi ${row.first_name},</p><p>Great news — your background check came back clear. We'll reach out shortly to schedule your interview.</p>` },
     consider: { subject: 'Quick question about your application', body: `<p>Hi ${row.first_name},</p><p>Your background check came back with something we'd like to chat about. Someone from Tidy will reach out shortly.</p>` },
     fail: { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>Thanks for applying. After reviewing your background check, we're unable to move forward at this time.</p>` },
+    send_to_bg_check: { subject: 'Your background check from Tidy', body: `<p>Hi ${row.first_name},</p><p>Thanks for moving forward with Tidy. Within the next few minutes you'll get a separate email from <strong>Checkr</strong> — our background-check partner — with a secure link to complete your screening (criminal, identity, SSN, and sex-offender). It usually takes 3–5 minutes.</p><p><strong>Tidy covers the full cost</strong> of this check. You won't be asked to pay anything.</p><p>If you don't see the Checkr email, check spam, then reply here and we'll resend.</p><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
     schedule_interview: { subject: 'Schedule your Tidy interview', body: `<p>Hi ${row.first_name},</p><p>Pick a time that works for you: <a href="${CALENDLY_URL}">Book your interview</a>.</p>` },
     send_offer: { subject: 'Your Tidy offer — please sign', body: `<p>Hi ${row.first_name},</p><p>We'd love to have you on the team. You'll receive 3 separate emails from Documenso to sign your ICA, W-9, and Direct Deposit form.</p><p>Pick a time to chat: <a href="${CALENDLY_URL}">book here</a>.</p><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
     send_contract: { subject: 'Sign your Tidy contract', body: `<p>Hi ${row.first_name},</p><p>Your contract is attached. Please review and sign.</p><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
