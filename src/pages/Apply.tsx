@@ -1,8 +1,7 @@
 /**
  * Public Application Form — /apply
  *
- * Editorial recruiting page. Two-column layout: left = brand pitch + perks,
- * right = the application card. Same submit logic, same edge function.
+ * Tidy-branded, mobile-first contractor intake.
  */
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
@@ -12,11 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import {
   Loader2, CheckCircle2, ArrowLeft, Sparkles, DollarSign,
@@ -24,38 +19,30 @@ import {
 } from "lucide-react";
 import TidyLogo from "@/components/TidyLogo";
 
+type ServiceChoice = "cleaning" | "lawn" | "detail" | "multiple";
+type ExpBucket = "1-2" | "3-5" | "5+";
+type YesNo = "yes" | "no";
+
 type Form = {
-  first_name: string; last_name: string; email: string; phone: string;
-  service: "cleaning" | "lawn" | "detail" | "";
-  zip: "33156" | "33183" | "33186" | "";
-  experience_years: string;
-  has_vehicle: boolean;
-  has_supplies: boolean;
-  bilingual_fluency_confirmed: boolean;
-  pro_partner_interest: "yes" | "maybe" | "no" | "";
-  notes_for_admin: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  zip: string;
+  service: ServiceChoice | "";
+  experience: ExpBucket | "";
+  has_vehicle: YesNo | "";
+  has_supplies: YesNo | "";
+  work_authorized: YesNo | "";
+  description: string;
 };
 
 const EMPTY: Form = {
-  first_name: "", last_name: "", email: "", phone: "",
-  service: "", zip: "", experience_years: "",
-  has_vehicle: false, has_supplies: false,
-  bilingual_fluency_confirmed: false,
-  pro_partner_interest: "",
-  notes_for_admin: "",
+  first_name: "", last_name: "", email: "", phone: "", zip: "",
+  service: "", experience: "",
+  has_vehicle: "", has_supplies: "", work_authorized: "",
+  description: "",
 };
-
-const REQUIREMENTS = [
-  "Bilingual English + Spanish (required)",
-  "Valid US work authorization",
-  "At least 1 year paid experience in your service category",
-  "Reliable vehicle + valid driver's license",
-  "Personal auto insurance (FL state-minimum at minimum)",
-  "Smartphone for the Jobber app",
-  "Willingness to pass a Checkr background check",
-  "Age 18+",
-  "All your own professional tools/supplies for your service category",
-];
 
 const PERKS = [
   { icon: DollarSign,    title: "Weekly direct deposit",   body: "Paid every Friday — no chasing invoices." },
@@ -63,6 +50,8 @@ const PERKS = [
   { icon: ShieldCheck,   title: "We handle the admin",     body: "Booking, billing, and customer support — all on us." },
   { icon: Sparkles,      title: "Grow with the brand",     body: "Bonus rates for top-rated pros and bilingual crews." },
 ];
+
+const EXP_TO_YEARS: Record<ExpBucket, number> = { "1-2": 2, "3-5": 5, "5+": 6 };
 
 export default function Apply() {
   const [form, setForm] = useState<Form>(EMPTY);
@@ -73,29 +62,28 @@ export default function Apply() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.service) { toast({ title: "Please pick a role", variant: "destructive" }); return; }
-    if (!form.zip)     { toast({ title: "Please pick your ZIP code", variant: "destructive" }); return; }
-    if (!form.bilingual_fluency_confirmed) {
-      toast({ title: "Bilingual fluency required", description: "You must confirm full English + Spanish fluency to apply.", variant: "destructive" });
-      return;
-    }
+    if (!form.service)        { toast({ title: "Please pick a role",            variant: "destructive" }); return; }
+    if (!form.experience)     { toast({ title: "Please pick experience range",  variant: "destructive" }); return; }
+    if (!form.has_vehicle)    { toast({ title: "Reliable transportation?",      variant: "destructive" }); return; }
+    if (!form.has_supplies)   { toast({ title: "Professional equipment?",       variant: "destructive" }); return; }
+    if (!form.work_authorized){ toast({ title: "US work authorization?",        variant: "destructive" }); return; }
+
     setSubmitting(true);
     try {
-      const payload: Record<string, unknown> = {
+      const payload = {
         first_name: form.first_name.trim(),
-        last_name: form.last_name.trim(),
-        email: form.email.trim(),
-        service: form.service,
-        zip: form.zip,
-        has_vehicle: form.has_vehicle,
-        has_supplies: form.has_supplies,
-        bilingual_fluency_confirmed: form.bilingual_fluency_confirmed,
+        last_name:  form.last_name.trim(),
+        email:      form.email.trim(),
+        phone:      form.phone.trim() || undefined,
+        zip:        form.zip.trim() || undefined,
+        service:    form.service,
+        experience_bucket: form.experience,
+        experience_years:  EXP_TO_YEARS[form.experience as ExpBucket],
+        has_vehicle:       form.has_vehicle === "yes",
+        has_supplies:      form.has_supplies === "yes",
+        work_authorized:   form.work_authorized === "yes",
+        description:       form.description.trim() || undefined,
       };
-      if (form.phone) payload.phone = form.phone.trim();
-      if (form.experience_years) payload.experience_years = parseInt(form.experience_years, 10);
-      if (form.notes_for_admin) payload.notes_for_admin = form.notes_for_admin.trim();
-      if (form.pro_partner_interest) payload.pro_partner_interest = form.pro_partner_interest;
-
       const { error } = await supabase.functions.invoke("submit-application", { body: payload });
       if (error) throw error;
       setDone(true);
@@ -111,7 +99,6 @@ export default function Apply() {
     return (
       <main className="min-h-screen bg-navy-deep relative overflow-hidden flex items-center justify-center p-6">
         <Helmet><title>Application received | Tidy</title></Helmet>
-        {/* ambient glow */}
         <div className="absolute inset-0 opacity-60 pointer-events-none"
              style={{ background: "radial-gradient(60% 50% at 50% 0%, hsl(var(--primary)/0.25), transparent 70%)" }} />
         <div className="absolute inset-0 opacity-40 pointer-events-none"
@@ -122,12 +109,9 @@ export default function Apply() {
           </div>
           <h1 className="mt-6 font-display text-3xl font-black text-white tracking-tight">Application received</h1>
           <p className="mt-3 text-white/70 leading-relaxed">
-            We'll review your application within <span className="text-white font-semibold">24 hours</span>. If you're a fit, we'll text you a link to a quick screening questionnaire from <span className="text-white font-semibold">(786) 829-1141</span>, then invite you to our paid Group Orientation.
+            Thanks for applying. We'll review and be in touch within <span className="text-white font-semibold">2–3 business days</span>.
           </p>
-          <Link
-            to="/"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-gold text-navy-deep font-bold px-6 py-3 hover:brightness-110 transition"
-          >
+          <Link to="/" className="mt-8 inline-flex items-center gap-2 rounded-full bg-gold text-navy-deep font-bold px-6 py-3 hover:brightness-110 transition">
             <ArrowLeft className="h-4 w-4" /> Back to Tidy
           </Link>
         </div>
@@ -142,21 +126,13 @@ export default function Apply() {
         <meta name="description" content="Join Tidy's contractor network in Kendall, Pinecrest & Kendall West. Cleaning, lawn care, and car detailing pros — weekly pay, predictable routes." />
       </Helmet>
 
-      {/* Ambient brand light */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
              style={{ background: "radial-gradient(circle, hsl(var(--primary)/0.55), transparent 60%)" }} />
         <div className="absolute -bottom-40 -right-32 h-[480px] w-[480px] rounded-full opacity-30 blur-3xl"
              style={{ background: "radial-gradient(circle, hsl(var(--gold)/0.55), transparent 60%)" }} />
-        <div className="absolute inset-0 opacity-[0.04]"
-             style={{
-               backgroundImage:
-                 "linear-gradient(hsl(0 0% 100% / 0.6) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.6) 1px, transparent 1px)",
-               backgroundSize: "48px 48px",
-             }} />
       </div>
 
-      {/* Slim top bar */}
       <header className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-white/80 hover:text-white transition text-sm font-semibold">
           <ArrowLeft className="h-4 w-4" /> Back to site
@@ -165,13 +141,12 @@ export default function Apply() {
       </header>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-20 pt-6 grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-start">
-        {/* LEFT: Editorial pitch */}
         <section className="text-white animate-calm-rise">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs font-semibold tracking-wide uppercase text-white/80 ring-1 ring-white/15">
             <Sparkles className="h-3.5 w-3.5 text-gold" /> Now hiring · Miami
           </span>
           <h1 className="mt-5 font-display text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[0.98] text-balance">
-            Build a steady book of business —
+            Join our team —
             <span className="block bg-gradient-to-r from-gold via-gold to-amber-200 bg-clip-text text-transparent">
               we bring the customers.
             </span>
@@ -179,17 +154,11 @@ export default function Apply() {
           <p className="mt-5 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed">
             Tidy is Miami's subscription home-service brand. We're hiring vetted
             cleaners, lawn pros, and detailers in Kendall, Pinecrest, and Kendall West.
-            Apply once — we handle bookings, billing, and customer support so you can
-            focus on the work.
           </p>
 
-          {/* perks grid */}
           <div className="mt-10 grid sm:grid-cols-2 gap-4">
             {PERKS.map(({ icon: Icon, title, body }) => (
-              <div
-                key={title}
-                className="group rounded-xl bg-white/[0.04] backdrop-blur border border-white/10 p-5 hover:bg-white/[0.07] hover:border-white/20 transition"
-              >
+              <div key={title} className="rounded-xl bg-white/[0.04] backdrop-blur border border-white/10 p-5 hover:bg-white/[0.07] hover:border-white/20 transition">
                 <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 ring-1 ring-primary/30 flex items-center justify-center">
                   <Icon className="h-5 w-5 text-primary-foreground" />
                 </div>
@@ -199,55 +168,22 @@ export default function Apply() {
             ))}
           </div>
 
-          {/* trust strip */}
           <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/55">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-gold" /> 33156 · 33183 · 33186
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Star className="h-4 w-4 text-gold fill-gold" /> 5.0 average customer rating
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-gold" /> Background check on every hire
-            </span>
+            <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-gold" /> 33156 · 33183 · 33186</span>
+            <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 text-gold fill-gold" /> 5.0 average customer rating</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-gold" /> Background check on every hire</span>
           </div>
         </section>
 
-        {/* RIGHT: Premium application card */}
         <section className="relative">
           <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-transparent to-gold/20 opacity-60 blur-lg pointer-events-none" />
           <div className="relative rounded-2xl bg-white shadow-2xl border border-white/40 overflow-hidden animate-calm-rise">
             <div className="px-6 sm:px-8 pt-7 pb-5 border-b border-hairline bg-cream">
               <h2 className="font-display text-2xl font-black text-ink tracking-tight">Apply to join Tidy</h2>
-              <p className="mt-1 text-sm text-ink-faint">Takes about 2 minutes. Miami-based pros only.</p>
+              <p className="mt-1 text-sm text-ink-faint">Takes about 2 minutes.</p>
             </div>
 
             <form onSubmit={submit} className="px-6 sm:px-8 py-7 space-y-5">
-              {/* Tier 1 informational callout */}
-              <div
-                className="rounded-xl p-5 border-l-4"
-                style={{ background: "#FAFAF7", borderLeftColor: "#F4C430", color: "#0D1117" }}
-              >
-                <h3 className="font-display text-base font-black tracking-tight">
-                  You're applying for Tier 1 — Tidy Verified Pro
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed">
-                  Tidy operates a two-tier contractor structure. Every Pro starts at Tier 1 — we provide commercial general liability coverage during your active Tidy assignments, so you don't need to obtain your own business insurance to get started. After 50+ visits at a 4.8+ rating and clean compliance, you'll qualify to advance to Tier 2 Pro Partner — 45% per visit, $30 floor, premium routes in $2M+ homes, $300 annual gear stipend. Full path published in our contractor agreement.
-                </p>
-              </div>
-
-              {/* What you'll need */}
-              <div className="rounded-xl border border-hairline bg-cream/40 p-5">
-                <h3 className="font-display text-sm font-bold text-ink tracking-tight uppercase">What you'll need</h3>
-                <ul className="mt-3 space-y-1.5 text-sm text-ink leading-relaxed">
-                  {REQUIREMENTS.map((r) => (
-                    <li key={r} className="flex gap-2">
-                      <span className="text-gold font-bold">•</span><span>{r}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="first_name" className="text-ink">First name *</Label>
@@ -259,129 +195,110 @@ export default function Apply() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="email" className="text-ink">Email *</Label>
-                  <Input id="email" type="email" required value={form.email} onChange={(e) => set("email", e.target.value)} className="mt-1.5" />
-                </div>
-                <div>
-                  <Label htmlFor="phone" className="text-ink">Phone</Label>
-                  <Input id="phone" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="(786) 555-1234" className="mt-1.5" />
-                </div>
+              <div>
+                <Label htmlFor="email" className="text-ink">Email *</Label>
+                <Input id="email" type="email" required value={form.email} onChange={(e) => set("email", e.target.value)} className="mt-1.5" />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-ink">Role *</Label>
-                  <Select value={form.service} onValueChange={(v) => set("service", v as Form["service"])}>
-                    <SelectTrigger className="mt-1.5"><SelectValue placeholder="Pick one" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cleaning">House cleaning</SelectItem>
-                      <SelectItem value="lawn">Lawn care</SelectItem>
-                      <SelectItem value="detail">Car detailing</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="phone" className="text-ink">Phone *</Label>
+                  <Input id="phone" required value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="(786) 555-1234" className="mt-1.5" />
                 </div>
                 <div>
-                  <Label className="text-ink">ZIP code *</Label>
-                  <Select value={form.zip} onValueChange={(v) => set("zip", v as Form["zip"])}>
-                    <SelectTrigger className="mt-1.5"><SelectValue placeholder="Pick one" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="33156">33156 — Pinecrest</SelectItem>
-                      <SelectItem value="33183">33183 — Kendall</SelectItem>
-                      <SelectItem value="33186">33186 — Kendall West</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="zip" className="text-ink">ZIP code *</Label>
+                  <Input id="zip" required maxLength={10} value={form.zip} onChange={(e) => set("zip", e.target.value)} placeholder="33183" className="mt-1.5" />
                 </div>
               </div>
 
+              <RadioBlock
+                label="Which service are you applying for? *"
+                value={form.service}
+                onChange={(v) => set("service", v as ServiceChoice)}
+                options={[
+                  { v: "cleaning", l: "House Cleaning" },
+                  { v: "lawn",     l: "Lawn Care" },
+                  { v: "detail",   l: "Car Detailing" },
+                  { v: "multiple", l: "Multiple" },
+                ]}
+                name="service"
+              />
+
+              <RadioBlock
+                label="Years of relevant experience *"
+                value={form.experience}
+                onChange={(v) => set("experience", v as ExpBucket)}
+                options={[
+                  { v: "1-2", l: "1–2 years" },
+                  { v: "3-5", l: "3–5 years" },
+                  { v: "5+",  l: "5+ years" },
+                ]}
+                name="experience"
+                inline
+              />
+
+              <YesNoBlock label="Do you have your own reliable transportation? *" value={form.has_vehicle}     onChange={(v) => set("has_vehicle", v)}     name="vehicle" />
+              <YesNoBlock label="Do you have your own professional equipment in working condition? *" value={form.has_supplies} onChange={(v) => set("has_supplies", v)} name="supplies" />
+              <YesNoBlock label="Are you authorized to work in the United States? *" value={form.work_authorized} onChange={(v) => set("work_authorized", v)} name="workauth" />
+
               <div>
-                <Label htmlFor="experience_years" className="text-ink">Years of experience</Label>
-                <Input
-                  id="experience_years" type="number" min={0} max={60}
-                  value={form.experience_years}
-                  onChange={(e) => set("experience_years", e.target.value)}
-                  className="mt-1.5"
-                />
+                <Label htmlFor="description" className="text-ink">Brief description of your relevant experience</Label>
+                <Textarea id="description" rows={4} maxLength={500} value={form.description} onChange={(e) => set("description", e.target.value)} className="mt-1.5" placeholder="Tell us about your background in this service…" />
+                <p className="mt-1 text-xs text-ink-faint text-right">{form.description.length}/500</p>
               </div>
 
-              <div className="rounded-xl border border-hairline bg-cream/60 p-4 space-y-3">
-                <label className="flex items-start gap-3 text-sm text-ink cursor-pointer">
-                  <Checkbox checked={form.has_vehicle} onCheckedChange={(v) => set("has_vehicle", !!v)} className="mt-0.5" />
-                  <span>I have my own vehicle</span>
-                </label>
-                <label className="flex items-start gap-3 text-sm text-ink cursor-pointer">
-                  <Checkbox checked={form.has_supplies} onCheckedChange={(v) => set("has_supplies", !!v)} className="mt-0.5" />
-                  <span>I have my own supplies / equipment</span>
-                </label>
-              </div>
-
-              <div>
-                <Label htmlFor="notes" className="text-ink">Anything we should know? <span className="text-ink-faint font-normal">(optional)</span></Label>
-                <Textarea id="notes" rows={3} value={form.notes_for_admin} onChange={(e) => set("notes_for_admin", e.target.value)} className="mt-1.5" />
-              </div>
-
-              {/* Pro Partner Ambition — optional */}
-              <div className="rounded-xl border border-hairline bg-cream/40 p-4">
-                <Label className="text-ink font-semibold">Pro Partner Ambition <span className="text-ink-faint font-normal">(optional)</span></Label>
-                <p className="text-xs text-ink-faint mt-1 mb-3">Tier 2 unlocks 45% pay split, $30 floor, premium routes, and a $300 gear stipend.</p>
-                <RadioGroup
-                  value={form.pro_partner_interest}
-                  onValueChange={(v) => set("pro_partner_interest", v as Form["pro_partner_interest"])}
-                  className="space-y-2"
-                >
-                  {[
-                    { v: "yes",   l: "Yes — I want to grow into Pro Partner status within 90 days" },
-                    { v: "maybe", l: "Maybe — tell me more during the screening call" },
-                    { v: "no",    l: "Not right now — I want steady Tier 1 work" },
-                  ].map((o) => (
-                    <label key={o.v} className="flex items-start gap-3 text-sm text-ink cursor-pointer">
-                      <RadioGroupItem value={o.v} id={`ppi-${o.v}`} className="mt-0.5" />
-                      <span>{o.l}</span>
-                    </label>
-                  ))}
-                </RadioGroup>
-              </div>
-
-
-              {/* Bilingual fluency — required, non-negotiable */}
-              <div className={`rounded-xl border-2 p-4 transition ${
-                form.bilingual_fluency_confirmed
-                  ? "border-emerald-300 bg-emerald-50/60"
-                  : "border-amber-300 bg-amber-50/60"
-              }`}>
-                <label className="flex items-start gap-3 text-sm text-ink cursor-pointer">
-                  <Checkbox
-                    checked={form.bilingual_fluency_confirmed}
-                    onCheckedChange={(v) => set("bilingual_fluency_confirmed", !!v)}
-                    required
-                    className="mt-0.5"
-                    aria-required="true"
-                  />
-                  <span className="leading-relaxed">
-                    <span className="font-semibold">Bilingual requirement (required) *</span><br />
-                    I am fully fluent in <strong>BOTH English and Spanish</strong> (full conversational fluency, not partial). I understand this is a non-negotiable requirement for every Tidy Pro and that fluency will be verified during the phone screen and interview. <span className="text-red-700 font-semibold">Misrepresenting fluency will result in immediate rejection.</span>
-                  </span>
-                </label>
+              <div className="rounded-xl border border-hairline bg-cream/60 p-4 text-xs text-ink leading-relaxed">
+                By submitting, you confirm Tidy may contact you about this role. You will undergo a background check at Tidy's expense if we move forward.
               </div>
 
               <Button
                 type="submit"
                 size="lg"
-                disabled={submitting || !form.bilingual_fluency_confirmed}
-                className="w-full bg-gold text-navy-deep hover:bg-gold/90 font-bold text-base h-12 shadow-lg shadow-gold/20 disabled:opacity-50"
+                disabled={submitting}
+                className="w-full bg-gradient-to-b from-navy-deep to-[#0b1226] text-white hover:brightness-110 font-bold text-base h-12 shadow-lg disabled:opacity-50"
               >
                 {submitting
                   ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting…</>
                   : "Submit application"}
               </Button>
-              <p className="text-xs text-ink-faint text-center leading-relaxed">
-                By submitting, you authorize Tidy to run a standard background check.
-              </p>
             </form>
           </div>
         </section>
       </div>
     </main>
+  );
+}
+
+function RadioBlock({ label, value, onChange, options, name, inline }: {
+  label: string; value: string; onChange: (v: string) => void;
+  options: { v: string; l: string }[]; name: string; inline?: boolean;
+}) {
+  return (
+    <div>
+      <Label className="text-ink">{label}</Label>
+      <RadioGroup value={value} onValueChange={onChange} className={inline ? "mt-2 flex flex-wrap gap-3" : "mt-2 grid sm:grid-cols-2 gap-2"}>
+        {options.map((o) => (
+          <label key={o.v} htmlFor={`${name}-${o.v}`} className={`flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-sm cursor-pointer transition ${value === o.v ? "border-primary bg-primary/5 text-ink" : "border-hairline text-ink hover:bg-cream/60"}`}>
+            <RadioGroupItem id={`${name}-${o.v}`} value={o.v} />
+            <span>{o.l}</span>
+          </label>
+        ))}
+      </RadioGroup>
+    </div>
+  );
+}
+
+function YesNoBlock({ label, value, onChange, name }: {
+  label: string; value: string; onChange: (v: YesNo) => void; name: string;
+}) {
+  return (
+    <RadioBlock
+      label={label}
+      value={value}
+      onChange={(v) => onChange(v as YesNo)}
+      options={[{ v: "yes", l: "Yes" }, { v: "no", l: "No" }]}
+      name={name}
+      inline
+    />
   );
 }

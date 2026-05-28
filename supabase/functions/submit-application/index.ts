@@ -1,14 +1,14 @@
-// Tidy — Submit Application (Phase A, manual BG check)
+// Tidy — Submit Application (public)
 //
-// Public endpoint called by /apply. Creates an applicants row in
-// `background_check_pending`, then notifies Justin via Brevo + PWA push.
-// No external background-check provider is wired yet — Justin advances each
-// applicant manually from /admin/applicants via the manual-bg-check edge fn.
+// Public endpoint called by /apply. Creates an applicants row at stage='applied',
+// logs an onboarding_events row with the full form payload, then fires applicant
+// confirmation + admin alert via applicant-applied-trigger. No external BG check
+// is invoked here — Checkr is invited later via /admin/applicants.
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
-import { sendBrevoEmail, sendPwaPushToJustin, brandedEmailHtml } from '../_shared/notifyJustin.ts';
+import { sendPwaPushToJustin } from '../_shared/notifyJustin.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -19,19 +19,17 @@ const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 
 const Body = z.object({
   first_name: z.string().trim().min(1).max(100),
-  last_name: z.string().trim().min(1).max(100),
-  email: z.string().email().max(200),
-  phone: z.string().trim().min(7).max(30).optional(),
-  service: z.enum(['cleaning', 'lawn', 'detail']),
-  zip: z.string().trim().max(10).optional(),
-  experience_years: z.number().int().min(0).max(60).optional(),
-  has_vehicle: z.boolean().optional(),
-  has_supplies: z.boolean().optional(),
-  notes_for_admin: z.string().max(2000).optional(),
-  bilingual_fluency_confirmed: z.boolean().refine((v) => v === true, {
-    message: 'Bilingual fluency (English + Spanish) must be confirmed',
-  }),
-  pro_partner_interest: z.enum(['yes', 'maybe', 'no']).optional(),
+  last_name:  z.string().trim().min(1).max(100),
+  email:      z.string().email().max(200),
+  phone:      z.string().trim().min(7).max(30).optional(),
+  zip:        z.string().trim().max(10).optional(),
+  service:    z.enum(['cleaning', 'lawn', 'detail', 'multiple']),
+  experience_bucket: z.enum(['1-2', '3-5', '5+']).optional(),
+  experience_years:  z.number().int().min(0).max(60).optional(),
+  has_vehicle:     z.boolean(),
+  has_supplies:    z.boolean(),
+  work_authorized: z.boolean(),
+  description: z.string().max(500).optional(),
 });
 
 Deno.serve(async (req) => {
@@ -50,19 +48,16 @@ Deno.serve(async (req) => {
       .from('applicants')
       .insert({
         first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email.toLowerCase(),
-        phone: data.phone ?? null,
-        zip: data.zip ?? null,
-        service: data.service,
+        last_name:  data.last_name,
+        email:      data.email.toLowerCase(),
+        phone:      data.phone ?? null,
+        zip:        data.zip ?? null,
+        service:    data.service,
         experience_years: data.experience_years ?? null,
-        has_vehicle: data.has_vehicle ?? null,
-        has_supplies: data.has_supplies ?? null,
-        notes_for_admin: data.notes_for_admin ?? null,
-        bilingual_fluency_confirmed: data.bilingual_fluency_confirmed,
-        pro_partner_interest: data.pro_partner_interest ?? null,
-        current_stage: 'background_check_pending',
-        bg_check_status: 'pending',
+        has_vehicle:  data.has_vehicle,
+        has_supplies: data.has_supplies,
+        notes_for_admin: data.description ?? null,
+        current_stage: 'applied',
       })
       .select('id')
       .single();
@@ -72,19 +67,38 @@ Deno.serve(async (req) => {
     }
     const applicantId = row.id;
 
+    // Log onboarding event with full form payload.
+    await admin.from('onboarding_events').insert({
+      applicant_id: applicantId,
+      event: 'applicant_submitted',
+      metadata: {
+        source: 'apply_form',
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email.toLowerCase(),
+        phone: data.phone ?? null,
+        zip: data.zip ?? null,
+        service: data.service,
+        experience_bucket: data.experience_bucket ?? null,
+        experience_years: data.experience_years ?? null,
+        has_vehicle: data.has_vehicle,
+        has_supplies: data.has_supplies,
+        work_authorized: data.work_authorized,
+        description: data.description ?? null,
+      },
+    });
+
     const fullName = `${data.first_name} ${data.last_name}`;
     queueMicrotask(async () => {
-      // Fire applicant-applied-trigger (sends applicant confirmation + admin alert)
       await fetch(`${SUPABASE_URL}/functions/v1/applicant-applied-trigger`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ applicant_id: applicantId }),
       }).catch((e) => console.error('[apply] trigger failed', e));
-      // PWA push to Justin
       await sendPwaPushToJustin('New application', `${fullName} applied for ${data.service}`, '/admin/applicants');
     });
 
-    return jsonResponse({ id: applicantId, current_stage: 'background_check_pending' }, 200);
+    return jsonResponse({ id: applicantId, current_stage: 'applied' }, 200);
   } catch (e: any) {
     console.error('[submit-application] error', e);
     return jsonResponse({ error: e?.message ?? 'unknown' }, 500);
