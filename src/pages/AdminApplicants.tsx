@@ -124,11 +124,11 @@ type Orientation = {
   scheduled_at: string;
   location: string | null;
   capacity: number;
+};
+
 type AdvanceAction =
   | "clear" | "consider" | "fail"
   | "send_to_bg_check"
-  | "schedule_interview" | "send_offer" | "send_contract"
-  | "mark_oriented" | "activate" | "reject";
   | "schedule_interview" | "send_offer" | "send_contract"
   | "mark_oriented" | "activate" | "reject";
 
