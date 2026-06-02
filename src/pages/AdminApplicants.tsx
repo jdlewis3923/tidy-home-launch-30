@@ -1130,6 +1130,13 @@ export default function AdminApplicants() {
                 {/* Equipment Photos Review */}
                 <EquipmentReviewPanel applicantId={open.id} service={open.service} />
 
+                {/* Schedule Training + No-show */}
+                <TrainingSchedulePanel
+                  applicant={open}
+                  onAction={(action, extra) => runAction(action, extra)}
+                  submitting={submitting}
+                />
+
                 {/* Email Log + Resend */}
                 <EmailLogPanel recipient={open.email} />
 
