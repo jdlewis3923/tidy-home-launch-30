@@ -170,7 +170,6 @@ export default function Apply() {
 
           <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/55">
             <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-gold" /> 33156 · 33183 · 33186</span>
-            <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 text-gold fill-gold" /> 5.0 average customer rating</span>
             <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-gold" /> Background check on every hire</span>
           </div>
         </section>

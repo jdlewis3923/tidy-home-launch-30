@@ -51,8 +51,8 @@ const ComingSoon = () => {
   return (
     <>
       <Helmet>
-        <title>Tidy — Launching June 1</title>
-        <meta name="description" content="Tidy Home Services launches June 1. Miami's first home-care concierge — cleaning, lawn, and detailing handled." />
+        <title>Tidy — Launching July 2</title>
+        <meta name="description" content="Tidy Home Services launches July 2. Miami's first home-care concierge — cleaning, lawn, and detailing handled." />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
