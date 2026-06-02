@@ -399,7 +399,7 @@ export default function AdminApplicants() {
   }, [rows]);
 
   // ----- Actions -----
-  const runAction = async (action: AdvanceAction) => {
+  const runAction = async (action: AdvanceAction, extra?: { scheduled_at?: string }) => {
     if (!open) return;
     // Bilingual gate — block APPROVE (clear) and SEND OFFER if not confirmed
     if ((action === "clear" || action === "send_offer") && !open.bilingual_fluency_confirmed) {
@@ -410,7 +410,7 @@ export default function AdminApplicants() {
     }
     setSubmitting(action);
     const { data, error } = await supabase.functions.invoke("advance-applicant", {
-      body: { applicant_id: open.id, action, notes: bgNotes || undefined },
+      body: { applicant_id: open.id, action, notes: bgNotes || undefined, ...extra },
     });
     setSubmitting(null);
     if (error || (data as any)?.error) {
