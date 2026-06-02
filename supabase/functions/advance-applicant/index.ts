@@ -407,6 +407,34 @@ Deno.serve(async (req) => {
 
   const paymentSetupHref = paymentSetupUrl ?? 'https://jointidy.co/onboarding';
 
+  // Build a .ics calendar invite for schedule_training.
+  let trainingIcsAttachment: BrevoAttachment | null = null;
+  let trainingHumanWhen = '';
+  if (action === 'schedule_training' && row.training_scheduled_at) {
+    const start = new Date(row.training_scheduled_at);
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const uid = `tidy-training-${row.id}@jointidy.co`;
+    const ics = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Tidy Home Concierge//Training//EN',
+      'BEGIN:VEVENT', `UID:${uid}`, `DTSTAMP:${fmt(new Date())}`,
+      `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
+      'SUMMARY:Tidy Live Training',
+      'DESCRIPTION:Live training with Justin. Bring your equipment.',
+      'LOCATION:Miami\\, FL (details to follow)',
+      'END:VEVENT', 'END:VCALENDAR',
+    ].join('\r\n');
+    trainingIcsAttachment = {
+      name: 'tidy-training.ics',
+      content: btoa(ics),
+    };
+    trainingHumanWhen = start.toLocaleString('en-US', {
+      timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short',
+    });
+  }
+
+  const noShowCount = (row as any).training_no_show_count ?? 0;
+
   // Per-action applicant-facing copy.
   const APPLICANT_COPY: Record<Action, { subject: string; body: string }> = {
     clear: { subject: 'Your background check is clear', body: `<p>Hi ${row.first_name},</p><p>Great news — your background check came back clear. We'll reach out shortly to schedule your interview.</p>` },
@@ -420,6 +448,10 @@ Deno.serve(async (req) => {
     activate: { subject: 'Welcome to Tidy', body: `<p>Hi ${row.first_name},</p><p>You're activated and ready to take jobs. Your onboarding packet is attached.</p><p>Log in to your contractor portal: <a href="${LOGIN_URL_PLACEHOLDER}">${LOGIN_URL_PLACEHOLDER}</a></p>` },
     reject: { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>Thanks for taking the time to apply to Tidy. After review, we're not able to move forward right now — we wish you the best.</p>` },
     send_payment_setup: { subject: 'Set up your Tidy payouts', body: `<p>Hi ${row.first_name},</p><p>Last step before activation: set up your payouts. Tidy uses <strong>Stripe Connect</strong> to pay contractors directly into your bank account after each job — no invoices, no waiting.</p><p>Click below to complete your payout setup (about 3 minutes; you'll need your SSN/EIN and a bank routing/account number).</p><p style="margin:18px 0"><a href="${paymentSetupHref}" style="display:inline-block;background:#f5c518;color:#0f172a;font-weight:700;padding:12px 22px;border-radius:8px;text-decoration:none">Set up payouts</a></p><p style="color:#64748b;font-size:13px">This secure link expires in a few minutes. If it expires, just reply to this email and we'll send a fresh one.</p><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
+    schedule_training: { subject: 'Your Tidy live training is scheduled', body: `<p>Hi ${row.first_name},</p><p>Your live training is scheduled for <strong>${trainingHumanWhen} (Miami time)</strong>. A calendar invite is attached.</p><p>Bring all your equipment. We'll send a reminder 24 hours before.</p>` },
+    mark_no_show: autoRejectedForNoShow
+      ? { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>You missed your second scheduled live training, so we've closed your application. If circumstances change, you're welcome to re-apply down the road.</p>` }
+      : { subject: 'Let’s reschedule your Tidy training', body: `<p>Hi ${row.first_name},</p><p>We didn't see you at your scheduled live training. No worries — reply to this email and we'll set up a new time. (Heads up: a second no-show closes the application.)</p>` },
   };
 
 
@@ -431,11 +463,15 @@ Deno.serve(async (req) => {
       heading: applicantCopy.subject,
       bodyHtml: applicantCopy.body,
     });
+    const allAttachments = [
+      ...attachments,
+      ...(trainingIcsAttachment ? [trainingIcsAttachment] : []),
+    ];
     await sendBrevoEmail({
       toEmail: row.email, toName: fullName,
       subject: applicantCopy.subject, htmlContent: applicantHtml,
       tags: [tag],
-      attachments: attachments.length ? attachments : undefined,
+      attachments: allAttachments.length ? allAttachments : undefined,
       templateName: tag,
       triggeredBy: 'advance-applicant',
     }).catch((e) => console.error('[advance] applicant email failed', e));
