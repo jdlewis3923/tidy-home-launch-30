@@ -96,6 +96,9 @@ type Applicant = {
   stripe_connect_complete: boolean | null;
   training_passed: boolean | null;
   equipment_approved: boolean | null;
+  training_scheduled_at: string | null;
+  training_no_show_count: number | null;
+  out_of_service_area: boolean | null;
 };
 
 type TierCriterion = { label: string; met: boolean; actual: string };
