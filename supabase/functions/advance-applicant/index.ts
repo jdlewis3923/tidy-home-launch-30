@@ -228,11 +228,11 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'notes_required_for_consider' }, 400);
   }
 
-  // ACTIVATE GATE: must be oriented AND compliance_complete=true.
+  // ACTIVATE GATE: must be oriented AND compliance_complete=true AND all 3 onboarding gates true.
   if (action === 'activate') {
     const { data: pre } = await admin
       .from('applicants')
-      .select('current_stage, compliance_complete')
+      .select('current_stage, compliance_complete, stripe_connect_complete, training_passed, equipment_approved')
       .eq('id', applicant_id)
       .single();
     if (!pre) return jsonResponse({ error: 'applicant_not_found' }, 404);
@@ -248,7 +248,19 @@ Deno.serve(async (req) => {
         reason: 'compliance_complete is false (COI / bond / auto / EIN missing)',
       }, 400);
     }
+    const unmet: string[] = [];
+    if (!pre.stripe_connect_complete) unmet.push('stripe_connect_complete (payouts not set up)');
+    if (!pre.training_passed)         unmet.push('training_passed (SOP quiz not cleared)');
+    if (!pre.equipment_approved)      unmet.push('equipment_approved (equipment photos not approved)');
+    if (unmet.length) {
+      return jsonResponse({
+        error: 'activation_blocked',
+        reason: `onboarding gates not met: ${unmet.join(', ')}`,
+        unmet_gates: unmet,
+      }, 400);
+    }
   }
+
 
   const update = applyTransition(action);
   if (notes) update.bg_check_notes = notes;
