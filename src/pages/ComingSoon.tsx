@@ -3,8 +3,8 @@ import { Helmet } from "react-helmet-async";
 import tidyLogo from "@/assets/tidy-logo.png";
 import SparkleField from "@/components/landing/SparkleField";
 
-// Launch target: June 1, 2026 at 9:00 AM Eastern Time (UTC-4 in June, EDT).
-const LAUNCH_AT = new Date("2026-06-01T13:00:00Z").getTime();
+// Launch target: July 2, 2026 at 9:00 AM Eastern Time (UTC-4 in July, EDT).
+const LAUNCH_AT = new Date("2026-07-02T13:00:00Z").getTime();
 
 function useCountdown(target: number) {
   const [now, setNow] = useState(() => Date.now());
@@ -51,8 +51,8 @@ const ComingSoon = () => {
   return (
     <>
       <Helmet>
-        <title>Tidy — Launching June 1</title>
-        <meta name="description" content="Tidy Home Services launches June 1. Miami's first home-care concierge — cleaning, lawn, and detailing handled." />
+        <title>Tidy — Launching July 2</title>
+        <meta name="description" content="Tidy Home Services launches July 2. Miami's first home-care concierge — cleaning, lawn, and detailing handled." />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
