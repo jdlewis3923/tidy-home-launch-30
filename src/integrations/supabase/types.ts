@@ -233,6 +233,53 @@ export type Database = {
         }
         Relationships: []
       }
+      applicant_equipment_photos: {
+        Row: {
+          applicant_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          photo_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          storage_path: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photo_type: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          storage_path: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photo_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          storage_path?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applicant_equipment_photos_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       applicants: {
         Row: {
           avg_customer_rating: number | null
@@ -269,6 +316,7 @@ export type Database = {
           documenso_document_ids: Json
           ein: string | null
           email: string
+          equipment_approved: boolean
           experience_years: number | null
           first_name: string
           google_review_match_name: string | null
@@ -282,6 +330,7 @@ export type Database = {
           last_visit_at: string | null
           notes_for_admin: string | null
           open_escalations_count: number
+          out_of_service_area: boolean
           phone: string | null
           photo_compliance_rate: number | null
           photos_expected_count: number
@@ -292,12 +341,17 @@ export type Database = {
           role: string | null
           service: string | null
           stage_entered_at: string | null
+          stripe_account_id: string | null
+          stripe_connect_complete: boolean
           tier: string
           tier_advanced_at: string | null
           tier_offer_sent_at: string | null
           tier_offered_by: string | null
           tier_readiness_status: string
           total_ratings_count: number
+          training_no_show_count: number
+          training_passed: boolean
+          training_scheduled_at: string | null
           updated_at: string
           zip: string | null
         }
@@ -336,6 +390,7 @@ export type Database = {
           documenso_document_ids?: Json
           ein?: string | null
           email: string
+          equipment_approved?: boolean
           experience_years?: number | null
           first_name: string
           google_review_match_name?: string | null
@@ -349,6 +404,7 @@ export type Database = {
           last_visit_at?: string | null
           notes_for_admin?: string | null
           open_escalations_count?: number
+          out_of_service_area?: boolean
           phone?: string | null
           photo_compliance_rate?: number | null
           photos_expected_count?: number
@@ -359,12 +415,17 @@ export type Database = {
           role?: string | null
           service?: string | null
           stage_entered_at?: string | null
+          stripe_account_id?: string | null
+          stripe_connect_complete?: boolean
           tier?: string
           tier_advanced_at?: string | null
           tier_offer_sent_at?: string | null
           tier_offered_by?: string | null
           tier_readiness_status?: string
           total_ratings_count?: number
+          training_no_show_count?: number
+          training_passed?: boolean
+          training_scheduled_at?: string | null
           updated_at?: string
           zip?: string | null
         }
@@ -403,6 +464,7 @@ export type Database = {
           documenso_document_ids?: Json
           ein?: string | null
           email?: string
+          equipment_approved?: boolean
           experience_years?: number | null
           first_name?: string
           google_review_match_name?: string | null
@@ -416,6 +478,7 @@ export type Database = {
           last_visit_at?: string | null
           notes_for_admin?: string | null
           open_escalations_count?: number
+          out_of_service_area?: boolean
           phone?: string | null
           photo_compliance_rate?: number | null
           photos_expected_count?: number
@@ -426,12 +489,17 @@ export type Database = {
           role?: string | null
           service?: string | null
           stage_entered_at?: string | null
+          stripe_account_id?: string | null
+          stripe_connect_complete?: boolean
           tier?: string
           tier_advanced_at?: string | null
           tier_offer_sent_at?: string | null
           tier_offered_by?: string | null
           tier_readiness_status?: string
           total_ratings_count?: number
+          training_no_show_count?: number
+          training_passed?: boolean
+          training_scheduled_at?: string | null
           updated_at?: string
           zip?: string | null
         }
