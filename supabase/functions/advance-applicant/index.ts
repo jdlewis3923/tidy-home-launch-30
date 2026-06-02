@@ -140,7 +140,9 @@ function applyTransition(action: Action) {
       u.rejected_at = new Date().toISOString();
       break;
     case 'send_payment_setup':
-      // No stage change — emits a payment-setup email side-effect only.
+    case 'schedule_training':
+    case 'mark_no_show':
+      // No stage change — side-effects only (handled in main handler).
       break;
   }
   return u;
