@@ -409,3 +409,39 @@ function ModuleCard({ icon, kicker, title, body, cta, href, featured, urgent }: 
     </Link>
   );
 }
+
+// =================== Onboarding Banner ===================
+// Shows a gold strip on the dashboard if any Phase-3 onboarding gate
+// is still open, linking the contractor to /pro/onboarding.
+function OnboardingBanner() {
+  const [needs, setNeeds] = useState<null | { stripe: boolean; training: boolean; equipment: boolean }>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      const user = sess.session?.user;
+      if (!user) return;
+      const { data } = await supabase.from("applicants")
+        .select("stripe_connect_complete, training_passed, equipment_approved")
+        .eq("contractor_id", user.id).maybeSingle();
+      if (cancelled || !data) return;
+      const n = {
+        stripe: !data.stripe_connect_complete,
+        training: !data.training_passed,
+        equipment: !data.equipment_approved,
+      };
+      if (n.stripe || n.training || n.equipment) setNeeds(n);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+  if (!needs) return null;
+  const open = [needs.stripe && "payouts", needs.training && "training", needs.equipment && "equipment"]
+    .filter(Boolean).join(" · ");
+  return (
+    <div className="relative z-10 bg-gold text-navy text-sm px-4 py-2.5 flex items-center justify-center gap-3 font-semibold">
+      <Bell className="h-4 w-4" />
+      <span>Finish your onboarding to start receiving jobs ({open}).</span>
+      <Link to="/pro/onboarding" className="underline font-bold">Open checklist</Link>
+    </div>
+  );
+}
