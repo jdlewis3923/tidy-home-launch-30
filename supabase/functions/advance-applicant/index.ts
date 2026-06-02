@@ -433,7 +433,6 @@ Deno.serve(async (req) => {
     });
   }
 
-  const noShowCount = (row as any).training_no_show_count ?? 0;
 
   // Per-action applicant-facing copy.
   const APPLICANT_COPY: Record<Action, { subject: string; body: string }> = {
