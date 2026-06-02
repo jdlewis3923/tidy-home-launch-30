@@ -242,7 +242,13 @@ const STATUS_FILTERS: Array<{ key: string; label: string }> = [
   { key: "oriented", label: "Orientation" },
   { key: "active", label: "Active" },
   { key: "rejected", label: "Rejected" },
+  { key: "stale", label: "Stale (14+d)" },
 ];
+
+function daysSince(iso?: string | null): number {
+  if (!iso) return 0;
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+}
 
 // ---------- Component ----------
 export default function AdminApplicants() {
