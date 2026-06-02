@@ -355,6 +355,9 @@ export default function AdminApplicants() {
       if (statusFilter !== "all") {
         if (statusFilter === "bg") {
           if (!["background_check_pending", "background_check_review"].includes(r.current_stage ?? "")) return false;
+        } else if (statusFilter === "stale") {
+          const inactive = !["active", "rejected"].includes(r.current_stage ?? "");
+          if (!inactive || daysSince(r.stage_entered_at) < 14) return false;
         } else if (r.current_stage !== statusFilter) return false;
       }
       if (roleFilter !== "all" && roleOf(r.service) !== roleFilter) return false;
