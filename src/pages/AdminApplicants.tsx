@@ -848,6 +848,38 @@ export default function AdminApplicants() {
                   </CardContent>
                 </Card>
 
+                {/* Stripe Connect (payouts) */}
+                <Card className="rounded-2xl border-slate-200">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-[#0D1117]">Payouts — Stripe Connect</h3>
+                      {open.stripe_connect_complete ? (
+                        <span className="text-[11px] font-semibold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200">✓ Complete</span>
+                      ) : open.stripe_account_id ? (
+                        <span className="text-[11px] font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700 ring-1 ring-amber-200">In progress</span>
+                      ) : (
+                        <span className="text-[11px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600 ring-1 ring-slate-200">Not started</span>
+                      )}
+                    </div>
+                    {open.stripe_account_id && (
+                      <div className="text-[11px] font-mono text-slate-500 break-all">account: {open.stripe_account_id}</div>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!!submitting}
+                      onClick={() => runAction("send_payment_setup")}
+                    >
+                      {submitting === "send_payment_setup"
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : open.stripe_account_id ? "Resend payout setup link" : "Send payout setup link"}
+                    </Button>
+                    <p className="text-[11px] text-slate-500">Activation is blocked until Stripe reports details_submitted + charges_enabled + payouts_enabled.</p>
+                  </CardContent>
+                </Card>
+
+
+
                 {/* Tier Progression Readiness — only for active contractors */}
                 {open.current_stage === "active" && (() => {
                   const currentTier = (open.tier ?? "tier_1_verified") as TierKey;
