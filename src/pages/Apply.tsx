@@ -15,7 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
 import {
   Loader2, CheckCircle2, ArrowLeft, Sparkles, DollarSign,
-  CalendarClock, ShieldCheck, MapPin, Star,
+  CalendarClock, ShieldCheck, MapPin,
 } from "lucide-react";
 import TidyLogo from "@/components/TidyLogo";
 
