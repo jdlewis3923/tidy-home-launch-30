@@ -37,6 +37,7 @@ const ACTIONS = [
   'send_to_bg_check',
   'schedule_interview', 'send_offer', 'send_contract',
   'mark_oriented', 'activate', 'reject',
+  'send_payment_setup',
 ] as const;
 
 const Body = z.object({
@@ -136,6 +137,9 @@ function applyTransition(action: Action) {
       u.current_stage = 'rejected';
       u.rejected_at = new Date().toISOString();
       break;
+    case 'send_payment_setup':
+      // No stage change — emits a payment-setup email side-effect only.
+      break;
   }
   return u;
 }
@@ -151,6 +155,7 @@ const SUBJECTS: Record<Action, string> = {
   mark_oriented: 'Group orientation complete',
   activate: 'Contractor activated',
   reject: 'Applicant rejected',
+  send_payment_setup: 'Payment setup link sent',
 };
 
 const TEMPLATE_TAG: Record<Action, string> = {
@@ -164,6 +169,7 @@ const TEMPLATE_TAG: Record<Action, string> = {
   mark_oriented: 'applicant-oriented',
   activate: 'applicant-activated',
   reject: 'applicant-rejected',
+  send_payment_setup: 'applicant-payment-setup',
 };
 
 const CALENDLY_URL = 'https://calendly.com/jointidy/interview';
@@ -342,6 +348,30 @@ Deno.serve(async (req) => {
   const filenames = filenamesFor(action, applicantRole);
   const attachments = await buildAttachments(filenames);
 
+  // For send_payment_setup: synchronously mint a Stripe Connect onboarding
+  // link so we can embed it in the email body. If Stripe is not configured
+  // we still send a heads-up email pointing at the contractor portal.
+  let paymentSetupUrl: string | null = null;
+  if (action === 'send_payment_setup') {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/stripe-connect-create`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ applicant_id: row.id }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j?.url) paymentSetupUrl = j.url as string;
+      else console.error('[advance] stripe-connect-create failed', r.status, j);
+    } catch (e) {
+      console.error('[advance] stripe-connect-create dispatch failed', e);
+    }
+  }
+
+  const paymentSetupHref = paymentSetupUrl ?? 'https://jointidy.co/onboarding';
+
   // Per-action applicant-facing copy.
   const APPLICANT_COPY: Record<Action, { subject: string; body: string }> = {
     clear: { subject: 'Your background check is clear', body: `<p>Hi ${row.first_name},</p><p>Great news — your background check came back clear. We'll reach out shortly to schedule your interview.</p>` },
@@ -354,7 +384,9 @@ Deno.serve(async (req) => {
     mark_oriented: { subject: 'Group orientation complete 🎉', body: `<p>Hi ${row.first_name},</p><p>Welcome to the team. Your role-specific onboarding packet is attached — review it before your first job. We'll send activation + payout setup next.</p>` },
     activate: { subject: 'Welcome to Tidy', body: `<p>Hi ${row.first_name},</p><p>You're activated and ready to take jobs. Your onboarding packet is attached.</p><p>Log in to your contractor portal: <a href="${LOGIN_URL_PLACEHOLDER}">${LOGIN_URL_PLACEHOLDER}</a></p>` },
     reject: { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>Thanks for taking the time to apply to Tidy. After review, we're not able to move forward right now — we wish you the best.</p>` },
+    send_payment_setup: { subject: 'Set up your Tidy payouts', body: `<p>Hi ${row.first_name},</p><p>Last step before activation: set up your payouts. Tidy uses <strong>Stripe Connect</strong> to pay contractors directly into your bank account after each job — no invoices, no waiting.</p><p>Click below to complete your payout setup (about 3 minutes; you'll need your SSN/EIN and a bank routing/account number).</p><p style="margin:18px 0"><a href="${paymentSetupHref}" style="display:inline-block;background:#f5c518;color:#0f172a;font-weight:700;padding:12px 22px;border-radius:8px;text-decoration:none">Set up payouts</a></p><p style="color:#64748b;font-size:13px">This secure link expires in a few minutes. If it expires, just reply to this email and we'll send a fresh one.</p><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
   };
+
 
   const tag = TEMPLATE_TAG[action];
   const applicantCopy = APPLICANT_COPY[action];

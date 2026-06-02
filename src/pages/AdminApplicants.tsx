@@ -92,6 +92,10 @@ type Applicant = {
   photos_expected_count: number | null;
   checkr_candidate_id: string | null;
   checkr_invitation_id: string | null;
+  stripe_account_id: string | null;
+  stripe_connect_complete: boolean | null;
+  training_passed: boolean | null;
+  equipment_approved: boolean | null;
 };
 
 type TierCriterion = { label: string; met: boolean; actual: string };
@@ -130,7 +134,8 @@ type AdvanceAction =
   | "clear" | "consider" | "fail"
   | "send_to_bg_check"
   | "schedule_interview" | "send_offer" | "send_contract"
-  | "mark_oriented" | "activate" | "reject";
+  | "mark_oriented" | "activate" | "reject"
+  | "send_payment_setup";
 
 // ---------- Visual maps ----------
 const STAGE_LABEL: Record<string, string> = {
@@ -266,7 +271,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -419,6 +424,7 @@ export default function AdminApplicants() {
       mark_oriented: "Group orientation complete",
       activate: "Contractor activated",
       reject: "Applicant rejected",
+      send_payment_setup: "Payment setup link sent",
     };
     toast.success(friendly[action]);
     if (open) await fetchEvents(open.id);
@@ -500,6 +506,8 @@ export default function AdminApplicants() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <Helmet><title>Applicants | Tidy Admin</title></Helmet>
+
+      <SetupCheckBanner />
 
       {/* ---------- Header bar ---------- */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
@@ -842,6 +850,38 @@ export default function AdminApplicants() {
                   </CardContent>
                 </Card>
 
+                {/* Stripe Connect (payouts) */}
+                <Card className="rounded-2xl border-slate-200">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-[#0D1117]">Payouts — Stripe Connect</h3>
+                      {open.stripe_connect_complete ? (
+                        <span className="text-[11px] font-semibold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200">✓ Complete</span>
+                      ) : open.stripe_account_id ? (
+                        <span className="text-[11px] font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700 ring-1 ring-amber-200">In progress</span>
+                      ) : (
+                        <span className="text-[11px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600 ring-1 ring-slate-200">Not started</span>
+                      )}
+                    </div>
+                    {open.stripe_account_id && (
+                      <div className="text-[11px] font-mono text-slate-500 break-all">account: {open.stripe_account_id}</div>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!!submitting}
+                      onClick={() => runAction("send_payment_setup")}
+                    >
+                      {submitting === "send_payment_setup"
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : open.stripe_account_id ? "Resend payout setup link" : "Send payout setup link"}
+                    </Button>
+                    <p className="text-[11px] text-slate-500">Activation is blocked until Stripe reports details_submitted + charges_enabled + payouts_enabled.</p>
+                  </CardContent>
+                </Card>
+
+
+
                 {/* Tier Progression Readiness — only for active contractors */}
                 {open.current_stage === "active" && (() => {
                   const currentTier = (open.tier ?? "tier_1_verified") as TierKey;
@@ -1065,6 +1105,9 @@ export default function AdminApplicants() {
                   </CardContent>
                 </Card>
 
+                {/* Email Log + Resend */}
+                <EmailLogPanel recipient={open.email} />
+
                 {/* Reject footer */}
                 <div className="pt-4 border-t border-slate-200">
                   <button
@@ -1200,6 +1243,145 @@ function EmptyState({ hasAny }: { hasAny: boolean }) {
           <Button className="bg-[#1FA1F0] hover:bg-[#1990da] text-white">View /apply page</Button>
         </Link>
       )}
+    </div>
+  );
+}
+
+function SetupCheckBanner() {
+  const [fails, setFails] = useState<number | null>(null);
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase.functions.invoke("admin-setup-check", { body: {} });
+      if (error || (data as any)?.error) return;
+      setFails((data as any)?.summary?.fail ?? 0);
+    })();
+  }, []);
+  if (!fails) return null;
+  return (
+    <div className="bg-red-600 text-white text-sm px-4 py-2.5 flex items-center justify-center gap-3">
+      <AlertTriangle className="h-4 w-4 shrink-0" />
+      <span><strong>{fails}</strong> launch-readiness check{fails === 1 ? "" : "s"} failing.</span>
+      <Link to="/admin/setup-check" className="underline font-semibold">Review</Link>
+    </div>
+  );
+}
+
+
+type EmailLogRow = {
+  id: string;
+  template_name: string;
+  recipient: string;
+  brevo_message_id: string | null;
+  status: string;
+  error_message: string | null;
+  payload: any;
+  triggered_at: string;
+};
+
+function EmailLogPanel({ recipient }: { recipient: string }) {
+  const [rows, setRows] = useState<EmailLogRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await (supabase as any)
+      .from("email_send_log")
+      .select("id, template_name, recipient, brevo_message_id, status, error_message, payload, triggered_at")
+      .eq("recipient", recipient)
+      .order("triggered_at", { ascending: false })
+      .limit(50);
+    if (error) console.error("[email_send_log] fetch failed", error);
+    setRows((data as EmailLogRow[]) ?? []);
+    setLoading(false);
+  }, [recipient]);
+
+  useEffect(() => { if (recipient) load(); }, [recipient, load]);
+
+  const resend = async (id: string) => {
+    setResending(id);
+    const { data, error } = await supabase.functions.invoke("resend-applicant-email", { body: { email_log_id: id } });
+    setResending(null);
+    if (error || (data as any)?.error) {
+      toast.error("Resend failed", { description: error?.message ?? (data as any)?.error ?? "unknown" });
+      return;
+    }
+    toast.success("Resent");
+    load();
+  };
+
+  const statusTone = (s: string) =>
+    s === "sent" || s === "delivered" ? "bg-emerald-100 text-emerald-700 ring-emerald-200"
+    : s === "failed" || s === "bounced" ? "bg-red-100 text-red-700 ring-red-200"
+    : "bg-slate-100 text-slate-600 ring-slate-200";
+
+  return (
+    <Card className="rounded-2xl border-slate-200">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-[#0D1117]">Email Log</h3>
+          <button onClick={load} className="text-xs text-[#1FA1F0] hover:underline" disabled={loading}>
+            {loading ? "Loading…" : "Refresh"}
+          </button>
+        </div>
+        {loading && rows.length === 0 ? (
+          <div className="text-xs text-slate-400"><Loader2 className="h-3 w-3 animate-spin inline mr-1" />loading…</div>
+        ) : rows.length === 0 ? (
+          <div className="text-sm text-slate-400">No emails sent to this applicant yet.</div>
+        ) : (
+          <ul className="space-y-2 max-h-80 overflow-y-auto pr-1">
+            {rows.map((r) => (
+              <li key={r.id} className="rounded-lg border border-slate-200 p-2.5 flex items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-semibold text-[#0D1117] font-mono truncate">{r.template_name}</span>
+                    <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ring-1 ${statusTone(r.status)}`}>{r.status}</span>
+                    <span className="text-[10px] text-slate-400 ml-auto">{relTime(r.triggered_at)}</span>
+                  </div>
+                  {r.payload?.subject && (
+                    <div className="text-xs text-slate-600 truncate mt-0.5">{r.payload.subject}</div>
+                  )}
+                  {r.brevo_message_id && (
+                    <div className="text-[10px] text-slate-400 font-mono truncate">msg: {r.brevo_message_id}</div>
+                  )}
+                  {r.error_message && (
+                    <div className="text-[10px] text-red-600 mt-0.5">{r.error_message}</div>
+                  )}
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                  onClick={() => resend(r.id)}
+                  disabled={resending === r.id}
+                >
+                  {resending === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Resend"}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+
+function SetupCheckBanner() {
+  const [fails, setFails] = useState<number | null>(null);
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase.functions.invoke("admin-setup-check", { body: {} });
+      if (error || (data as any)?.error) return;
+      setFails((data as any)?.summary?.fail ?? 0);
+    })();
+  }, []);
+  if (!fails) return null;
+  return (
+    <div className="bg-red-600 text-white text-sm px-4 py-2.5 flex items-center justify-center gap-3">
+      <AlertTriangle className="h-4 w-4 shrink-0" />
+      <span><strong>{fails}</strong> launch-readiness check{fails === 1 ? "" : "s"} failing.</span>
+      <Link to="/admin/setup-check" className="underline font-semibold">Review</Link>
     </div>
   );
 }
