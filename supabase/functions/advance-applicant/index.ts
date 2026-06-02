@@ -236,10 +236,13 @@ Deno.serve(async (req) => {
   if (!parsed.success) {
     return jsonResponse({ error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
   }
-  const { applicant_id, action, notes } = parsed.data;
+  const { applicant_id, action, notes, scheduled_at } = parsed.data;
 
   if (action === 'consider' && !notes) {
     return jsonResponse({ error: 'notes_required_for_consider' }, 400);
+  }
+  if (action === 'schedule_training' && !scheduled_at) {
+    return jsonResponse({ error: 'scheduled_at_required' }, 400);
   }
 
   // ACTIVATE GATE: must be oriented AND compliance_complete=true AND all 3 onboarding gates true.
