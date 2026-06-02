@@ -1,58 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import tidyLogo from "@/assets/tidy-logo.png";
 import SparkleField from "@/components/landing/SparkleField";
 
-// Launch target: July 2, 2026 at 9:00 AM Eastern Time (UTC-4 in July, EDT).
-const LAUNCH_AT = new Date("2026-07-02T13:00:00Z").getTime();
-
-function useCountdown(target: number) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
-  const diff = Math.max(0, target - now);
-  const days = Math.floor(diff / 86_400_000);
-  const hours = Math.floor((diff % 86_400_000) / 3_600_000);
-  const minutes = Math.floor((diff % 3_600_000) / 60_000);
-  const seconds = Math.floor((diff % 60_000) / 1000);
-  return { days, hours, minutes, seconds, done: diff === 0 };
-}
-
-const Cell = ({ value, label }: { value: number; label: string }) => (
-  <div className="flex flex-col items-center">
-    <div className="rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 px-4 sm:px-6 py-4 sm:py-5 min-w-[78px] sm:min-w-[110px] shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
-      <div className="font-poppins text-4xl sm:text-6xl font-semibold tabular-nums text-white tracking-tight">
-        {String(value).padStart(2, "0")}
-      </div>
-    </div>
-    <div className="mt-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/60">
-      {label}
-    </div>
-  </div>
-);
-
 const ComingSoon = () => {
-  const { days, hours, minutes, seconds } = useCountdown(LAUNCH_AT);
-
-  const launchLabel = useMemo(
-    () =>
-      new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/New_York",
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      }).format(new Date(LAUNCH_AT)),
-    []
-  );
-
   return (
     <>
       <Helmet>
-        <title>Tidy — Launching July 2</title>
-        <meta name="description" content="Tidy Home Services launches July 2. Miami's first home-care concierge — cleaning, lawn, and detailing handled." />
+        <title>Tidy Home Concierge — Coming soon to Miami</title>
+        <meta
+          name="description"
+          content="Tidy Home Concierge — one team handling cleaning, lawn, and detailing across Miami. Coming soon."
+        />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
@@ -95,14 +53,14 @@ const ComingSoon = () => {
           </h1>
 
           <p className="mt-4 max-w-xl text-base sm:text-lg font-light text-white/70">
-            Tidy Home Services — one team handling cleaning, lawn, and detailing across Miami. Opening {launchLabel}.
+            Tidy Home Services — one team handling cleaning, lawn, and detailing across Miami. Hiring our founding crew now.
           </p>
 
-          <div className="mt-10 grid grid-cols-4 gap-3 sm:gap-5">
-            <Cell value={days} label="Days" />
-            <Cell value={hours} label="Hours" />
-            <Cell value={minutes} label="Minutes" />
-            <Cell value={seconds} label="Seconds" />
+          <div className="mt-10">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#f5c518]/40 bg-[#f5c518]/10 px-5 py-2 text-xs sm:text-sm font-semibold text-[#f5c518] tracking-wide">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#f5c518]" />
+              Opening soon in Miami
+            </span>
           </div>
 
           <div className="mt-12 text-xs sm:text-sm text-white/50">
