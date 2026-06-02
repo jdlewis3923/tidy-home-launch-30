@@ -424,6 +424,7 @@ export default function AdminApplicants() {
       mark_oriented: "Group orientation complete",
       activate: "Contractor activated",
       reject: "Applicant rejected",
+      send_payment_setup: "Payment setup link sent",
     };
     toast.success(friendly[action]);
     if (open) await fetchEvents(open.id);
