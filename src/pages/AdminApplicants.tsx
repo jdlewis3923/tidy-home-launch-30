@@ -1103,6 +1103,9 @@ export default function AdminApplicants() {
                   </CardContent>
                 </Card>
 
+                {/* Email Log + Resend */}
+                <EmailLogPanel recipient={open.email} />
+
                 {/* Reject footer */}
                 <div className="pt-4 border-t border-slate-200">
                   <button
