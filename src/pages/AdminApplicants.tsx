@@ -429,6 +429,8 @@ export default function AdminApplicants() {
       activate: "Contractor activated",
       reject: "Applicant rejected",
       send_payment_setup: "Payment setup link sent",
+      schedule_training: "Live training scheduled",
+      mark_no_show: "Marked as no-show",
     };
     toast.success(friendly[action]);
     if (open) await fetchEvents(open.id);
