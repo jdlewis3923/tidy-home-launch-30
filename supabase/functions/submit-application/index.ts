@@ -44,6 +44,11 @@ Deno.serve(async (req) => {
     }
     const data = parsed.data;
 
+    // Service-area ZIP gate (Tidy Miami: 33156 / 33183 / 33186).
+    const SERVICE_ZIPS = ['33156', '33183', '33186'];
+    const normalizedZip = (data.zip ?? '').trim().slice(0, 5);
+    const outOfArea = normalizedZip.length === 5 && !SERVICE_ZIPS.includes(normalizedZip);
+
     const { data: row, error: insertErr } = await admin
       .from('applicants')
       .insert({
@@ -58,6 +63,7 @@ Deno.serve(async (req) => {
         has_supplies: data.has_supplies,
         notes_for_admin: data.description ?? null,
         current_stage: 'applied',
+        out_of_service_area: outOfArea,
       })
       .select('id')
       .single();
