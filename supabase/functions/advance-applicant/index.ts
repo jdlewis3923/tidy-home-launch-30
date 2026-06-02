@@ -37,6 +37,7 @@ const ACTIONS = [
   'send_to_bg_check',
   'schedule_interview', 'send_offer', 'send_contract',
   'mark_oriented', 'activate', 'reject',
+  'send_payment_setup',
 ] as const;
 
 const Body = z.object({
@@ -136,6 +137,9 @@ function applyTransition(action: Action) {
       u.current_stage = 'rejected';
       u.rejected_at = new Date().toISOString();
       break;
+    case 'send_payment_setup':
+      // No stage change — emits a payment-setup email side-effect only.
+      break;
   }
   return u;
 }
@@ -151,6 +155,7 @@ const SUBJECTS: Record<Action, string> = {
   mark_oriented: 'Group orientation complete',
   activate: 'Contractor activated',
   reject: 'Applicant rejected',
+  send_payment_setup: 'Payment setup link sent',
 };
 
 const TEMPLATE_TAG: Record<Action, string> = {
@@ -164,6 +169,7 @@ const TEMPLATE_TAG: Record<Action, string> = {
   mark_oriented: 'applicant-oriented',
   activate: 'applicant-activated',
   reject: 'applicant-rejected',
+  send_payment_setup: 'applicant-payment-setup',
 };
 
 const CALENDLY_URL = 'https://calendly.com/jointidy/interview';
