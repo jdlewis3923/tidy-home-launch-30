@@ -9,7 +9,7 @@ const ComingSoon = () => {
         <title>Tidy Home Concierge — Coming soon to Miami</title>
         <meta
           name="description"
-          content="Tidy Home Concierge — one team handling cleaning, lawn, and detailing across Miami. Coming soon."
+          content="Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, car detailing. Opening soon."
         />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
