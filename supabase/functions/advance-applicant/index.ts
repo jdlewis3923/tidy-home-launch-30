@@ -282,9 +282,33 @@ Deno.serve(async (req) => {
   const update = applyTransition(action);
   if (notes) update.bg_check_notes = notes;
 
+  // Schedule training: persist datetime.
+  if (action === 'schedule_training' && scheduled_at) {
+    update.training_scheduled_at = scheduled_at;
+  }
+
+  // Mark no-show: increment counter; if >=2 auto-reject.
+  let autoRejectedForNoShow = false;
+  if (action === 'mark_no_show') {
+    const { data: pre } = await admin
+      .from('applicants')
+      .select('training_no_show_count')
+      .eq('id', applicant_id)
+      .single();
+    const nextCount = ((pre as any)?.training_no_show_count ?? 0) + 1;
+    update.training_no_show_count = nextCount;
+    update.training_scheduled_at = null;
+    if (nextCount >= 2) {
+      autoRejectedForNoShow = true;
+      update.current_stage = 'rejected';
+      update.rejected_at = new Date().toISOString();
+      update.rejection_reason = 'Two training no-shows';
+    }
+  }
+
   const { data: row, error } = await admin
     .from('applicants').update(update).eq('id', applicant_id)
-    .select('id, first_name, last_name, email, service, current_stage, bg_check_status').single();
+    .select('id, first_name, last_name, email, service, current_stage, bg_check_status, training_scheduled_at, training_no_show_count').single();
   if (error || !row) {
     console.error('[advance-applicant] update failed', error);
     return jsonResponse({ error: 'update_failed', details: error?.message }, 500);
