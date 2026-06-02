@@ -1105,6 +1105,9 @@ export default function AdminApplicants() {
                   </CardContent>
                 </Card>
 
+                {/* Equipment Photos Review */}
+                <EquipmentReviewPanel applicantId={open.id} service={open.service} />
+
                 {/* Email Log + Resend */}
                 <EmailLogPanel recipient={open.email} />
 
