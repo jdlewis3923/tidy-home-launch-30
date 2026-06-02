@@ -84,6 +84,7 @@ Deno.serve(async (req) => {
         email: data.email.toLowerCase(),
         phone: data.phone ?? null,
         zip: data.zip ?? null,
+        out_of_service_area: outOfArea,
         service: data.service,
         experience_bucket: data.experience_bucket ?? null,
         experience_years: data.experience_years ?? null,
