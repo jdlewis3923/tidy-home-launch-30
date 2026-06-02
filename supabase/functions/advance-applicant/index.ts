@@ -38,12 +38,14 @@ const ACTIONS = [
   'schedule_interview', 'send_offer', 'send_contract',
   'mark_oriented', 'activate', 'reject',
   'send_payment_setup',
+  'schedule_training', 'mark_no_show',
 ] as const;
 
 const Body = z.object({
   applicant_id: z.string().uuid(),
   action: z.enum(ACTIONS),
   notes: z.string().max(2000).optional(),
+  scheduled_at: z.string().datetime().optional(),
 });
 
 type Action = (typeof ACTIONS)[number];
