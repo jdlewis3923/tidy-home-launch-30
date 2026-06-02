@@ -69,6 +69,9 @@ const Apply = lazy(() => import("./pages/Apply.tsx"));
 const ProDashboard = lazy(() => import("./pages/ProDashboard.tsx"));
 const ProTierProgression = lazy(() => import("./pages/ProTierProgression.tsx"));
 const ProUploadCoi = lazy(() => import("./pages/ProUploadCoi.tsx"));
+const ProOnboarding = lazy(() => import("./pages/ProOnboarding.tsx"));
+const ProTraining = lazy(() => import("./pages/ProTraining.tsx"));
+const ProEquipment = lazy(() => import("./pages/ProEquipment.tsx"));
 const AdminCoiReview = lazy(() => import("./pages/AdminCoiReview.tsx"));
 const AdminTierProgression = lazy(() => import("./pages/AdminTierProgression.tsx"));
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
@@ -215,6 +218,9 @@ const App = () => (
                   <Route path="/pro" element={<ProDashboard />} />
                   <Route path="/pro/tier-progression" element={<ProTierProgression />} />
                   <Route path="/pro/upload-coi" element={<ProUploadCoi />} />
+                  <Route path="/pro/onboarding" element={<ProOnboarding />} />
+                  <Route path="/pro/training" element={<ProTraining />} />
+                  <Route path="/pro/equipment" element={<ProEquipment />} />
                   <Route path="/admin/coi-review" element={<AdminCoiReview />} />
                   <Route path="/admin/tier-progression" element={<AdminTierProgression />} />
                   <Route path="/coming-soon" element={<ComingSoon />} />
