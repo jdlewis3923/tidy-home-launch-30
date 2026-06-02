@@ -1244,3 +1244,103 @@ function EmptyState({ hasAny }: { hasAny: boolean }) {
     </div>
   );
 }
+
+type EmailLogRow = {
+  id: string;
+  template_name: string;
+  recipient: string;
+  brevo_message_id: string | null;
+  status: string;
+  error_message: string | null;
+  payload: any;
+  triggered_at: string;
+};
+
+function EmailLogPanel({ recipient }: { recipient: string }) {
+  const [rows, setRows] = useState<EmailLogRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await (supabase as any)
+      .from("email_send_log")
+      .select("id, template_name, recipient, brevo_message_id, status, error_message, payload, triggered_at")
+      .eq("recipient", recipient)
+      .order("triggered_at", { ascending: false })
+      .limit(50);
+    if (error) console.error("[email_send_log] fetch failed", error);
+    setRows((data as EmailLogRow[]) ?? []);
+    setLoading(false);
+  }, [recipient]);
+
+  useEffect(() => { if (recipient) load(); }, [recipient, load]);
+
+  const resend = async (id: string) => {
+    setResending(id);
+    const { data, error } = await supabase.functions.invoke("resend-applicant-email", { body: { email_log_id: id } });
+    setResending(null);
+    if (error || (data as any)?.error) {
+      toast.error("Resend failed", { description: error?.message ?? (data as any)?.error ?? "unknown" });
+      return;
+    }
+    toast.success("Resent");
+    load();
+  };
+
+  const statusTone = (s: string) =>
+    s === "sent" || s === "delivered" ? "bg-emerald-100 text-emerald-700 ring-emerald-200"
+    : s === "failed" || s === "bounced" ? "bg-red-100 text-red-700 ring-red-200"
+    : "bg-slate-100 text-slate-600 ring-slate-200";
+
+  return (
+    <Card className="rounded-2xl border-slate-200">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-[#0D1117]">Email Log</h3>
+          <button onClick={load} className="text-xs text-[#1FA1F0] hover:underline" disabled={loading}>
+            {loading ? "Loading…" : "Refresh"}
+          </button>
+        </div>
+        {loading && rows.length === 0 ? (
+          <div className="text-xs text-slate-400"><Loader2 className="h-3 w-3 animate-spin inline mr-1" />loading…</div>
+        ) : rows.length === 0 ? (
+          <div className="text-sm text-slate-400">No emails sent to this applicant yet.</div>
+        ) : (
+          <ul className="space-y-2 max-h-80 overflow-y-auto pr-1">
+            {rows.map((r) => (
+              <li key={r.id} className="rounded-lg border border-slate-200 p-2.5 flex items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-semibold text-[#0D1117] font-mono truncate">{r.template_name}</span>
+                    <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ring-1 ${statusTone(r.status)}`}>{r.status}</span>
+                    <span className="text-[10px] text-slate-400 ml-auto">{relTime(r.triggered_at)}</span>
+                  </div>
+                  {r.payload?.subject && (
+                    <div className="text-xs text-slate-600 truncate mt-0.5">{r.payload.subject}</div>
+                  )}
+                  {r.brevo_message_id && (
+                    <div className="text-[10px] text-slate-400 font-mono truncate">msg: {r.brevo_message_id}</div>
+                  )}
+                  {r.error_message && (
+                    <div className="text-[10px] text-red-600 mt-0.5">{r.error_message}</div>
+                  )}
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                  onClick={() => resend(r.id)}
+                  disabled={resending === r.id}
+                >
+                  {resending === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Resend"}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
