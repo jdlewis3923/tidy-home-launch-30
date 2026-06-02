@@ -640,11 +640,18 @@ export default function AdminApplicants() {
               const r = roleOf(a.service);
               const stage = a.current_stage ?? "applied";
               const bg = a.bg_check_status ?? "pending";
+              const days = daysSince(a.stage_entered_at);
+              const inactive = !["active", "rejected"].includes(stage);
+              const staleTone =
+                inactive && days >= 30 ? "bg-red-50/60 border-red-200 hover:bg-red-50"
+                : inactive && days >= 14 ? "bg-yellow-50/60 border-yellow-200 hover:bg-yellow-50"
+                : a.out_of_service_area ? "bg-slate-100/70 border-slate-300 hover:bg-slate-100"
+                : "bg-white border-slate-200 hover:bg-blue-50/40 hover:border-blue-200";
               return (
                 <button
                   key={a.id}
                   onClick={() => setOpen(a)}
-                  className="group w-full text-left bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-4 shadow-sm hover:shadow-md hover:bg-blue-50/40 hover:border-blue-200 transition-all"
+                  className={`group w-full text-left rounded-2xl border p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-all ${staleTone}`}
                 >
                   <div className={`h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0 ${avatarColor(a.id)}`}>
                     {initials(a.first_name, a.last_name)}
@@ -656,8 +663,8 @@ export default function AdminApplicants() {
                   <div className="hidden sm:flex items-center gap-2 shrink-0">
                     <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 capitalize ${ROLE_BADGE[r]}`}>{r}</span>
                     {a.zip && (
-                      <span className="text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {a.zip}
+                      <span className={`text-[11px] font-medium px-2 py-1 rounded-md flex items-center gap-1 ${a.out_of_service_area ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300" : "text-slate-600 bg-slate-100"}`} title={a.out_of_service_area ? "Out of service area" : ""}>
+                        <MapPin className="h-3 w-3" /> {a.zip}{a.out_of_service_area ? " · OOSA" : ""}
                       </span>
                     )}
                     {a.bilingual_fluency_confirmed ? (
