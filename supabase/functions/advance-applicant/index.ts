@@ -160,6 +160,8 @@ const SUBJECTS: Record<Action, string> = {
   activate: 'Contractor activated',
   reject: 'Applicant rejected',
   send_payment_setup: 'Payment setup link sent',
+  schedule_training: 'Live training scheduled',
+  mark_no_show: 'Marked as no-show for training',
 };
 
 const TEMPLATE_TAG: Record<Action, string> = {
@@ -174,6 +176,8 @@ const TEMPLATE_TAG: Record<Action, string> = {
   activate: 'applicant-activated',
   reject: 'applicant-rejected',
   send_payment_setup: 'applicant-payment-setup',
+  schedule_training: 'applicant-training-scheduled',
+  mark_no_show: 'applicant-training-no-show',
 };
 
 const CALENDLY_URL = 'https://calendly.com/jointidy/interview';
