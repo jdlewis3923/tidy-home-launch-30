@@ -138,7 +138,8 @@ type AdvanceAction =
   | "send_to_bg_check"
   | "schedule_interview" | "send_offer" | "send_contract"
   | "mark_oriented" | "activate" | "reject"
-  | "send_payment_setup";
+  | "send_payment_setup"
+  | "schedule_training" | "mark_no_show";
 
 // ---------- Visual maps ----------
 const STAGE_LABEL: Record<string, string> = {
