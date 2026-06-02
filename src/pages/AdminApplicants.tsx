@@ -1370,3 +1370,175 @@ function EmailLogPanel({ recipient }: { recipient: string }) {
 }
 
 
+
+// =================== Equipment Photo Review ===================
+
+import { getRequiredItems as _getReq, REJECTION_REASONS as _REASONS } from "@/lib/equipmentChecklist";
+
+type EquipPhoto = {
+  id: string;
+  photo_type: string;
+  storage_path: string;
+  status: "pending" | "approved" | "rejected";
+  notes: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+};
+
+function EquipmentReviewPanel({ applicantId, service }: { applicantId: string; service: string | null }) {
+  const [photos, setPhotos] = useState<EquipPhoto[]>([]);
+  const [urls, setUrls] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [acting, setActing] = useState<string | null>(null);
+  const [rejectFor, setRejectFor] = useState<EquipPhoto | null>(null);
+  const [reason, setReason] = useState<string>(_REASONS[0]);
+  const [note, setNote] = useState("");
+
+  const required = useMemo(() => _getReq(service), [service]);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase.from("applicant_equipment_photos")
+      .select("id, photo_type, storage_path, status, notes, created_at, reviewed_at")
+      .eq("applicant_id", applicantId)
+      .order("created_at", { ascending: false });
+    const rows = (data as EquipPhoto[]) ?? [];
+    setPhotos(rows);
+
+    // Signed URLs for thumbnails (60-min expiry).
+    const u: Record<string, string> = {};
+    await Promise.all(rows.map(async (p) => {
+      const { data: s } = await supabase.storage
+        .from("contractor-equipment-photos")
+        .createSignedUrl(p.storage_path, 3600);
+      if (s?.signedUrl) u[p.id] = s.signedUrl;
+    }));
+    setUrls(u);
+    setLoading(false);
+  }, [applicantId]);
+
+  useEffect(() => { if (applicantId) load(); }, [applicantId, load]);
+
+  const decide = async (photoId: string, decision: "approved" | "rejected", reasonStr?: string, noteStr?: string) => {
+    setActing(photoId);
+    const { data, error } = await supabase.functions.invoke("equipment-photo-review", {
+      body: { photo_id: photoId, decision, reason: reasonStr, notes: noteStr },
+    });
+    setActing(null);
+    if (error || (data as any)?.error) {
+      toast.error("Review failed", { description: error?.message ?? (data as any)?.error });
+      return;
+    }
+    toast.success(`Photo ${decision}`);
+    setRejectFor(null); setNote(""); setReason(_REASONS[0]);
+    load();
+  };
+
+  // Group by photo_type with latest first.
+  const latestByType: Record<string, EquipPhoto> = {};
+  for (const p of photos) if (!latestByType[p.photo_type]) latestByType[p.photo_type] = p;
+  const approvedCount = required.filter((r) => latestByType[r.key]?.status === "approved").length;
+
+  return (
+    <Card className="rounded-2xl border-slate-200">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-[#0D1117]">Equipment Photos</h3>
+          <span className="text-xs text-slate-500">
+            {approvedCount}/{required.length} approved
+          </span>
+        </div>
+
+        {loading && photos.length === 0 ? (
+          <div className="text-xs text-slate-400"><Loader2 className="h-3 w-3 animate-spin inline mr-1" />loading…</div>
+        ) : required.length === 0 ? (
+          <div className="text-sm text-slate-400">No equipment required for this service.</div>
+        ) : (
+          <ul className="space-y-3">
+            {required.map((item) => {
+              const latest = latestByType[item.key];
+              const attempts = photos.filter((p) => p.photo_type === item.key).length;
+              const flagged = attempts >= 3 && latest?.status !== "approved";
+              return (
+                <li key={item.key} className="rounded-lg border border-slate-200 p-3">
+                  <div className="flex items-start gap-3">
+                    {latest && urls[latest.id] ? (
+                      <a href={urls[latest.id]} target="_blank" rel="noopener noreferrer">
+                        <img src={urls[latest.id]} alt={item.label}
+                          className="h-20 w-20 rounded-md object-cover border border-slate-200" />
+                      </a>
+                    ) : (
+                      <div className="h-20 w-20 rounded-md bg-slate-100 flex items-center justify-center text-slate-400 text-[10px]">
+                        No photo
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-sm text-[#0D1117]">{item.label}</span>
+                        {latest && (
+                          <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ring-1 ${
+                            latest.status === "approved" ? "bg-emerald-100 text-emerald-700 ring-emerald-200"
+                            : latest.status === "rejected" ? "bg-red-100 text-red-700 ring-red-200"
+                            : "bg-amber-100 text-amber-700 ring-amber-200"
+                          }`}>
+                            {latest.status}
+                          </span>
+                        )}
+                        {flagged && (
+                          <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-red-600 text-white">
+                            Flagged · {attempts} attempts
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                      {latest?.status === "rejected" && latest.notes && (
+                        <p className="text-[11px] text-red-700 mt-1">Reject reason: {latest.notes}</p>
+                      )}
+                      {latest && latest.status === "pending" && (
+                        <div className="mt-2 flex gap-2">
+                          <Button size="sm" className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700"
+                            onClick={() => decide(latest.id, "approved")}
+                            disabled={acting === latest.id}>
+                            {acting === latest.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Approve"}
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-7 text-xs border-red-300 text-red-700 hover:bg-red-50"
+                            onClick={() => setRejectFor(latest)}>
+                            Reject
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        {rejectFor && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setRejectFor(null)}>
+            <div className="bg-white rounded-2xl p-5 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+              <h4 className="font-semibold text-navy mb-3">Reject photo</h4>
+              <label className="text-xs font-semibold text-slate-600">Reason</label>
+              <select value={reason} onChange={(e) => setReason(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                {_REASONS.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
+              <label className="text-xs font-semibold text-slate-600 mt-3 block">Note to applicant</label>
+              <Textarea value={note} onChange={(e) => setNote(e.target.value)}
+                placeholder="What specifically needs to change?" className="mt-1 text-sm" rows={3} maxLength={2000} />
+              <div className="mt-4 flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setRejectFor(null)}>Cancel</Button>
+                <Button className="bg-red-600 hover:bg-red-700"
+                  onClick={() => decide(rejectFor.id, "rejected", reason, note)}
+                  disabled={acting === rejectFor.id}>
+                  {acting === rejectFor.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm reject"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
