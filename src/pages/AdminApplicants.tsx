@@ -1571,3 +1571,84 @@ function EquipmentReviewPanel({ applicantId, service }: { applicantId: string; s
     </Card>
   );
 }
+
+// ---------- TrainingSchedulePanel ----------
+function TrainingSchedulePanel({
+  applicant, onAction, submitting,
+}: {
+  applicant: Applicant;
+  onAction: (action: AdvanceAction, extra?: { scheduled_at?: string }) => void | Promise<void>;
+  submitting: string | null;
+}) {
+  const [when, setWhen] = useState<string>("");
+  const equipmentOk = !!applicant.equipment_approved;
+  const scheduled = applicant.training_scheduled_at ? new Date(applicant.training_scheduled_at) : null;
+  const inPast = scheduled ? scheduled.getTime() < Date.now() : false;
+  const noShowCount = applicant.training_no_show_count ?? 0;
+
+  return (
+    <Card className="rounded-2xl border-slate-200">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-[#0D1117] flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-[#1FA1F0]" /> Live Training
+          </h3>
+          {noShowCount > 0 && (
+            <span className="text-[11px] font-semibold px-2 py-1 rounded-md bg-red-50 text-red-700 ring-1 ring-red-200">
+              {noShowCount} no-show{noShowCount > 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+
+        {!equipmentOk && (
+          <p className="text-xs text-slate-500">Equipment must be approved before scheduling live training.</p>
+        )}
+
+        {scheduled && (
+          <div className="text-sm rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
+            <div className="text-slate-500 text-xs uppercase tracking-wide">Scheduled</div>
+            <div className="font-medium text-[#0D1117]">
+              {scheduled.toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })}
+            </div>
+          </div>
+        )}
+
+        {equipmentOk && (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              type="datetime-local"
+              value={when}
+              onChange={(e) => setWhen(e.target.value)}
+              className="flex-1"
+            />
+            <Button
+              size="sm"
+              disabled={!when || submitting === "schedule_training"}
+              onClick={() => {
+                if (!when) return;
+                const iso = new Date(when).toISOString();
+                onAction("schedule_training", { scheduled_at: iso });
+              }}
+              className="bg-[#1FA1F0] hover:bg-[#1990da] text-white"
+            >
+              {submitting === "schedule_training" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Schedule"}
+            </Button>
+          </div>
+        )}
+
+        {scheduled && inPast && applicant.current_stage !== "rejected" && (
+          <Button
+            size="sm" variant="outline"
+            disabled={submitting === "mark_no_show"}
+            onClick={() => onAction("mark_no_show")}
+            className="border-red-300 text-red-700 hover:bg-red-50"
+          >
+            {submitting === "mark_no_show"
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : (noShowCount >= 1 ? "Mark no-show (auto-rejects)" : "Mark no-show")}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
