@@ -1366,3 +1366,22 @@ function EmailLogPanel({ recipient }: { recipient: string }) {
   );
 }
 
+
+function SetupCheckBanner() {
+  const [fails, setFails] = useState<number | null>(null);
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase.functions.invoke("admin-setup-check", { body: {} });
+      if (error || (data as any)?.error) return;
+      setFails((data as any)?.summary?.fail ?? 0);
+    })();
+  }, []);
+  if (!fails) return null;
+  return (
+    <div className="bg-red-600 text-white text-sm px-4 py-2.5 flex items-center justify-center gap-3">
+      <AlertTriangle className="h-4 w-4 shrink-0" />
+      <span><strong>{fails}</strong> launch-readiness check{fails === 1 ? "" : "s"} failing.</span>
+      <Link to="/admin/setup-check" className="underline font-semibold">Review</Link>
+    </div>
+  );
+}
