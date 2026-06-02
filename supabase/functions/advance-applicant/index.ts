@@ -38,12 +38,14 @@ const ACTIONS = [
   'schedule_interview', 'send_offer', 'send_contract',
   'mark_oriented', 'activate', 'reject',
   'send_payment_setup',
+  'schedule_training', 'mark_no_show',
 ] as const;
 
 const Body = z.object({
   applicant_id: z.string().uuid(),
   action: z.enum(ACTIONS),
   notes: z.string().max(2000).optional(),
+  scheduled_at: z.string().datetime().optional(),
 });
 
 type Action = (typeof ACTIONS)[number];
@@ -138,7 +140,9 @@ function applyTransition(action: Action) {
       u.rejected_at = new Date().toISOString();
       break;
     case 'send_payment_setup':
-      // No stage change — emits a payment-setup email side-effect only.
+    case 'schedule_training':
+    case 'mark_no_show':
+      // No stage change — side-effects only (handled in main handler).
       break;
   }
   return u;
@@ -156,6 +160,8 @@ const SUBJECTS: Record<Action, string> = {
   activate: 'Contractor activated',
   reject: 'Applicant rejected',
   send_payment_setup: 'Payment setup link sent',
+  schedule_training: 'Live training scheduled',
+  mark_no_show: 'Marked as no-show for training',
 };
 
 const TEMPLATE_TAG: Record<Action, string> = {
@@ -170,6 +176,8 @@ const TEMPLATE_TAG: Record<Action, string> = {
   activate: 'applicant-activated',
   reject: 'applicant-rejected',
   send_payment_setup: 'applicant-payment-setup',
+  schedule_training: 'applicant-training-scheduled',
+  mark_no_show: 'applicant-training-no-show',
 };
 
 const CALENDLY_URL = 'https://calendly.com/jointidy/interview';
@@ -228,10 +236,13 @@ Deno.serve(async (req) => {
   if (!parsed.success) {
     return jsonResponse({ error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
   }
-  const { applicant_id, action, notes } = parsed.data;
+  const { applicant_id, action, notes, scheduled_at } = parsed.data;
 
   if (action === 'consider' && !notes) {
     return jsonResponse({ error: 'notes_required_for_consider' }, 400);
+  }
+  if (action === 'schedule_training' && !scheduled_at) {
+    return jsonResponse({ error: 'scheduled_at_required' }, 400);
   }
 
   // ACTIVATE GATE: must be oriented AND compliance_complete=true AND all 3 onboarding gates true.
@@ -271,9 +282,33 @@ Deno.serve(async (req) => {
   const update = applyTransition(action);
   if (notes) update.bg_check_notes = notes;
 
+  // Schedule training: persist datetime.
+  if (action === 'schedule_training' && scheduled_at) {
+    update.training_scheduled_at = scheduled_at;
+  }
+
+  // Mark no-show: increment counter; if >=2 auto-reject.
+  let autoRejectedForNoShow = false;
+  if (action === 'mark_no_show') {
+    const { data: pre } = await admin
+      .from('applicants')
+      .select('training_no_show_count')
+      .eq('id', applicant_id)
+      .single();
+    const nextCount = ((pre as any)?.training_no_show_count ?? 0) + 1;
+    update.training_no_show_count = nextCount;
+    update.training_scheduled_at = null;
+    if (nextCount >= 2) {
+      autoRejectedForNoShow = true;
+      update.current_stage = 'rejected';
+      update.rejected_at = new Date().toISOString();
+      update.rejection_reason = 'Two training no-shows';
+    }
+  }
+
   const { data: row, error } = await admin
     .from('applicants').update(update).eq('id', applicant_id)
-    .select('id, first_name, last_name, email, service, current_stage, bg_check_status').single();
+    .select('id, first_name, last_name, email, service, current_stage, bg_check_status, training_scheduled_at, training_no_show_count').single();
   if (error || !row) {
     console.error('[advance-applicant] update failed', error);
     return jsonResponse({ error: 'update_failed', details: error?.message }, 500);
@@ -372,6 +407,33 @@ Deno.serve(async (req) => {
 
   const paymentSetupHref = paymentSetupUrl ?? 'https://jointidy.co/onboarding';
 
+  // Build a .ics calendar invite for schedule_training.
+  let trainingIcsAttachment: BrevoAttachment | null = null;
+  let trainingHumanWhen = '';
+  if (action === 'schedule_training' && row.training_scheduled_at) {
+    const start = new Date(row.training_scheduled_at);
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const uid = `tidy-training-${row.id}@jointidy.co`;
+    const ics = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Tidy Home Concierge//Training//EN',
+      'BEGIN:VEVENT', `UID:${uid}`, `DTSTAMP:${fmt(new Date())}`,
+      `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
+      'SUMMARY:Tidy Live Training',
+      'DESCRIPTION:Live training with Justin. Bring your equipment.',
+      'LOCATION:Miami\\, FL (details to follow)',
+      'END:VEVENT', 'END:VCALENDAR',
+    ].join('\r\n');
+    trainingIcsAttachment = {
+      name: 'tidy-training.ics',
+      content: btoa(ics),
+    };
+    trainingHumanWhen = start.toLocaleString('en-US', {
+      timeZone: 'America/New_York', dateStyle: 'full', timeStyle: 'short',
+    });
+  }
+
+
   // Per-action applicant-facing copy.
   const APPLICANT_COPY: Record<Action, { subject: string; body: string }> = {
     clear: { subject: 'Your background check is clear', body: `<p>Hi ${row.first_name},</p><p>Great news — your background check came back clear. We'll reach out shortly to schedule your interview.</p>` },
@@ -385,6 +447,10 @@ Deno.serve(async (req) => {
     activate: { subject: 'Welcome to Tidy', body: `<p>Hi ${row.first_name},</p><p>You're activated and ready to take jobs. Your onboarding packet is attached.</p><p>Log in to your contractor portal: <a href="${LOGIN_URL_PLACEHOLDER}">${LOGIN_URL_PLACEHOLDER}</a></p>` },
     reject: { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>Thanks for taking the time to apply to Tidy. After review, we're not able to move forward right now — we wish you the best.</p>` },
     send_payment_setup: { subject: 'Set up your Tidy payouts', body: `<p>Hi ${row.first_name},</p><p>Last step before activation: set up your payouts. Tidy uses <strong>Stripe Connect</strong> to pay contractors directly into your bank account after each job — no invoices, no waiting.</p><p>Click below to complete your payout setup (about 3 minutes; you'll need your SSN/EIN and a bank routing/account number).</p><p style="margin:18px 0"><a href="${paymentSetupHref}" style="display:inline-block;background:#f5c518;color:#0f172a;font-weight:700;padding:12px 22px;border-radius:8px;text-decoration:none">Set up payouts</a></p><p style="color:#64748b;font-size:13px">This secure link expires in a few minutes. If it expires, just reply to this email and we'll send a fresh one.</p><p style="color:#64748b;font-size:13px">— The Tidy team</p>` },
+    schedule_training: { subject: 'Your Tidy live training is scheduled', body: `<p>Hi ${row.first_name},</p><p>Your live training is scheduled for <strong>${trainingHumanWhen} (Miami time)</strong>. A calendar invite is attached.</p><p>Bring all your equipment. We'll send a reminder 24 hours before.</p>` },
+    mark_no_show: autoRejectedForNoShow
+      ? { subject: 'Your Tidy application', body: `<p>Hi ${row.first_name},</p><p>You missed your second scheduled live training, so we've closed your application. If circumstances change, you're welcome to re-apply down the road.</p>` }
+      : { subject: 'Let’s reschedule your Tidy training', body: `<p>Hi ${row.first_name},</p><p>We didn't see you at your scheduled live training. No worries — reply to this email and we'll set up a new time. (Heads up: a second no-show closes the application.)</p>` },
   };
 
 
@@ -396,11 +462,15 @@ Deno.serve(async (req) => {
       heading: applicantCopy.subject,
       bodyHtml: applicantCopy.body,
     });
+    const allAttachments = [
+      ...attachments,
+      ...(trainingIcsAttachment ? [trainingIcsAttachment] : []),
+    ];
     await sendBrevoEmail({
       toEmail: row.email, toName: fullName,
       subject: applicantCopy.subject, htmlContent: applicantHtml,
       tags: [tag],
-      attachments: attachments.length ? attachments : undefined,
+      attachments: allAttachments.length ? allAttachments : undefined,
       templateName: tag,
       triggeredBy: 'advance-applicant',
     }).catch((e) => console.error('[advance] applicant email failed', e));

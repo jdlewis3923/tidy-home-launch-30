@@ -96,6 +96,9 @@ type Applicant = {
   stripe_connect_complete: boolean | null;
   training_passed: boolean | null;
   equipment_approved: boolean | null;
+  training_scheduled_at: string | null;
+  training_no_show_count: number | null;
+  out_of_service_area: boolean | null;
 };
 
 type TierCriterion = { label: string; met: boolean; actual: string };
@@ -135,7 +138,8 @@ type AdvanceAction =
   | "send_to_bg_check"
   | "schedule_interview" | "send_offer" | "send_contract"
   | "mark_oriented" | "activate" | "reject"
-  | "send_payment_setup";
+  | "send_payment_setup"
+  | "schedule_training" | "mark_no_show";
 
 // ---------- Visual maps ----------
 const STAGE_LABEL: Record<string, string> = {
@@ -238,7 +242,13 @@ const STATUS_FILTERS: Array<{ key: string; label: string }> = [
   { key: "oriented", label: "Orientation" },
   { key: "active", label: "Active" },
   { key: "rejected", label: "Rejected" },
+  { key: "stale", label: "Stale (14+d)" },
 ];
+
+function daysSince(iso?: string | null): number {
+  if (!iso) return 0;
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+}
 
 // ---------- Component ----------
 export default function AdminApplicants() {
@@ -271,7 +281,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved, training_scheduled_at, training_no_show_count, out_of_service_area")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -345,6 +355,9 @@ export default function AdminApplicants() {
       if (statusFilter !== "all") {
         if (statusFilter === "bg") {
           if (!["background_check_pending", "background_check_review"].includes(r.current_stage ?? "")) return false;
+        } else if (statusFilter === "stale") {
+          const inactive = !["active", "rejected"].includes(r.current_stage ?? "");
+          if (!inactive || daysSince(r.stage_entered_at) < 14) return false;
         } else if (r.current_stage !== statusFilter) return false;
       }
       if (roleFilter !== "all" && roleOf(r.service) !== roleFilter) return false;
@@ -395,7 +408,7 @@ export default function AdminApplicants() {
   }, [rows]);
 
   // ----- Actions -----
-  const runAction = async (action: AdvanceAction) => {
+  const runAction = async (action: AdvanceAction, extra?: { scheduled_at?: string }) => {
     if (!open) return;
     // Bilingual gate — block APPROVE (clear) and SEND OFFER if not confirmed
     if ((action === "clear" || action === "send_offer") && !open.bilingual_fluency_confirmed) {
@@ -406,7 +419,7 @@ export default function AdminApplicants() {
     }
     setSubmitting(action);
     const { data, error } = await supabase.functions.invoke("advance-applicant", {
-      body: { applicant_id: open.id, action, notes: bgNotes || undefined },
+      body: { applicant_id: open.id, action, notes: bgNotes || undefined, ...extra },
     });
     setSubmitting(null);
     if (error || (data as any)?.error) {
@@ -425,6 +438,8 @@ export default function AdminApplicants() {
       activate: "Contractor activated",
       reject: "Applicant rejected",
       send_payment_setup: "Payment setup link sent",
+      schedule_training: "Live training scheduled",
+      mark_no_show: "Marked as no-show",
     };
     toast.success(friendly[action]);
     if (open) await fetchEvents(open.id);
@@ -625,11 +640,18 @@ export default function AdminApplicants() {
               const r = roleOf(a.service);
               const stage = a.current_stage ?? "applied";
               const bg = a.bg_check_status ?? "pending";
+              const days = daysSince(a.stage_entered_at);
+              const inactive = !["active", "rejected"].includes(stage);
+              const staleTone =
+                inactive && days >= 30 ? "bg-red-50/60 border-red-200 hover:bg-red-50"
+                : inactive && days >= 14 ? "bg-yellow-50/60 border-yellow-200 hover:bg-yellow-50"
+                : a.out_of_service_area ? "bg-slate-100/70 border-slate-300 hover:bg-slate-100"
+                : "bg-white border-slate-200 hover:bg-blue-50/40 hover:border-blue-200";
               return (
                 <button
                   key={a.id}
                   onClick={() => setOpen(a)}
-                  className="group w-full text-left bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-4 shadow-sm hover:shadow-md hover:bg-blue-50/40 hover:border-blue-200 transition-all"
+                  className={`group w-full text-left rounded-2xl border p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-all ${staleTone}`}
                 >
                   <div className={`h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0 ${avatarColor(a.id)}`}>
                     {initials(a.first_name, a.last_name)}
@@ -641,8 +663,8 @@ export default function AdminApplicants() {
                   <div className="hidden sm:flex items-center gap-2 shrink-0">
                     <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 capitalize ${ROLE_BADGE[r]}`}>{r}</span>
                     {a.zip && (
-                      <span className="text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {a.zip}
+                      <span className={`text-[11px] font-medium px-2 py-1 rounded-md flex items-center gap-1 ${a.out_of_service_area ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300" : "text-slate-600 bg-slate-100"}`} title={a.out_of_service_area ? "Out of service area" : ""}>
+                        <MapPin className="h-3 w-3" /> {a.zip}{a.out_of_service_area ? " · OOSA" : ""}
                       </span>
                     )}
                     {a.bilingual_fluency_confirmed ? (
@@ -1108,6 +1130,13 @@ export default function AdminApplicants() {
                 {/* Equipment Photos Review */}
                 <EquipmentReviewPanel applicantId={open.id} service={open.service} />
 
+                {/* Schedule Training + No-show */}
+                <TrainingSchedulePanel
+                  applicant={open}
+                  onAction={(action, extra) => runAction(action, extra)}
+                  submitting={submitting}
+                />
+
                 {/* Email Log + Resend */}
                 <EmailLogPanel recipient={open.email} />
 
@@ -1537,6 +1566,87 @@ function EquipmentReviewPanel({ applicantId, service }: { applicantId: string; s
               </div>
             </div>
           </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------- TrainingSchedulePanel ----------
+function TrainingSchedulePanel({
+  applicant, onAction, submitting,
+}: {
+  applicant: Applicant;
+  onAction: (action: AdvanceAction, extra?: { scheduled_at?: string }) => void | Promise<void>;
+  submitting: string | null;
+}) {
+  const [when, setWhen] = useState<string>("");
+  const equipmentOk = !!applicant.equipment_approved;
+  const scheduled = applicant.training_scheduled_at ? new Date(applicant.training_scheduled_at) : null;
+  const inPast = scheduled ? scheduled.getTime() < Date.now() : false;
+  const noShowCount = applicant.training_no_show_count ?? 0;
+
+  return (
+    <Card className="rounded-2xl border-slate-200">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-[#0D1117] flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-[#1FA1F0]" /> Live Training
+          </h3>
+          {noShowCount > 0 && (
+            <span className="text-[11px] font-semibold px-2 py-1 rounded-md bg-red-50 text-red-700 ring-1 ring-red-200">
+              {noShowCount} no-show{noShowCount > 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+
+        {!equipmentOk && (
+          <p className="text-xs text-slate-500">Equipment must be approved before scheduling live training.</p>
+        )}
+
+        {scheduled && (
+          <div className="text-sm rounded-lg bg-slate-50 border border-slate-200 px-3 py-2">
+            <div className="text-slate-500 text-xs uppercase tracking-wide">Scheduled</div>
+            <div className="font-medium text-[#0D1117]">
+              {scheduled.toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })}
+            </div>
+          </div>
+        )}
+
+        {equipmentOk && (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              type="datetime-local"
+              value={when}
+              onChange={(e) => setWhen(e.target.value)}
+              className="flex-1"
+            />
+            <Button
+              size="sm"
+              disabled={!when || submitting === "schedule_training"}
+              onClick={() => {
+                if (!when) return;
+                const iso = new Date(when).toISOString();
+                onAction("schedule_training", { scheduled_at: iso });
+              }}
+              className="bg-[#1FA1F0] hover:bg-[#1990da] text-white"
+            >
+              {submitting === "schedule_training" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Schedule"}
+            </Button>
+          </div>
+        )}
+
+        {scheduled && inPast && applicant.current_stage !== "rejected" && (
+          <Button
+            size="sm" variant="outline"
+            disabled={submitting === "mark_no_show"}
+            onClick={() => onAction("mark_no_show")}
+            className="border-red-300 text-red-700 hover:bg-red-50"
+          >
+            {submitting === "mark_no_show"
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : (noShowCount >= 1 ? "Mark no-show (auto-rejects)" : "Mark no-show")}
+          </Button>
         )}
       </CardContent>
     </Card>

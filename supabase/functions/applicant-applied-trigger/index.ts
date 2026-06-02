@@ -30,31 +30,39 @@ Deno.serve(async (req) => {
 
   const { data: a, error } = await admin
     .from('applicants')
-    .select('id, first_name, last_name, email, phone, service, zip')
+    .select('id, first_name, last_name, email, phone, service, zip, out_of_service_area')
     .eq('id', parsed.data.applicant_id).single();
   if (error || !a) return jsonResponse({ error: 'not_found' }, 404);
 
   const fullName = `${a.first_name} ${a.last_name}`;
+  const oosa = (a as any).out_of_service_area === true;
 
-  // 1. Confirmation to applicant
+  // 1. Confirmation to applicant — different copy for out-of-service-area.
   const applicantHtml = brandedEmailHtml({
-    heading: 'Thanks for applying to Tidy',
-    bodyHtml: `
-      <p>Hi ${a.first_name},</p>
-      <p>Thanks for applying to join the Tidy team as a <strong>${a.service}</strong> pro in Miami.
-      We've received your application and will review it within <strong>2–3 business days</strong>.</p>
-      <p>If you're a fit, we'll reach out by email or phone to schedule a short conversation
-      and start the background check (at Tidy's expense).</p>
-      <p>In the meantime, no action needed on your end.</p>
-      <p style="margin-top:24px">— Justin Lewis<br/>Tidy Home Concierge</p>
-    `,
+    heading: oosa ? 'Thanks for applying — we’re not in your area yet' : 'Thanks for applying to Tidy',
+    bodyHtml: oosa
+      ? `
+        <p>Hi ${a.first_name},</p>
+        <p>Thanks for applying to join Tidy as a <strong>${a.service}</strong> pro. Your ZIP (<strong>${a.zip}</strong>) is outside our current Miami service area (33156, 33183, 33186), so we can't bring you onboard right now.</p>
+        <p>We've saved your application and will reach out the moment we expand into your neighborhood.</p>
+        <p style="margin-top:24px">— Justin Lewis<br/>Tidy Home Concierge</p>
+      `
+      : `
+        <p>Hi ${a.first_name},</p>
+        <p>Thanks for applying to join the Tidy team as a <strong>${a.service}</strong> pro in Miami.
+        We've received your application and will review it within <strong>2–3 business days</strong>.</p>
+        <p>If you're a fit, we'll reach out by email or phone to schedule a short conversation
+        and start the background check (at Tidy's expense).</p>
+        <p>In the meantime, no action needed on your end.</p>
+        <p style="margin-top:24px">— Justin Lewis<br/>Tidy Home Concierge</p>
+      `,
   });
   await sendBrevoEmail({
     toEmail: a.email, toName: fullName,
-    subject: 'Thanks for applying to Tidy',
+    subject: oosa ? 'Thanks for applying — we’re not in your area yet' : 'Thanks for applying to Tidy',
     htmlContent: applicantHtml,
-    tags: ['applicant-applied'],
-    templateName: 'applicant-applied',
+    tags: [oosa ? 'applicant-applied-oosa' : 'applicant-applied'],
+    templateName: oosa ? 'applicant-applied-oosa' : 'applicant-applied',
     triggeredBy: 'applicant-applied-trigger',
   }).catch((e) => console.error('[applicant-applied] applicant email failed', e));
 
