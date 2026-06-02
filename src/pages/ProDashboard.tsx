@@ -257,6 +257,7 @@ export default function ProDashboard() {
           </div>
         </div>
       </header>
+      <OnboardingBanner />
 
       <section className="relative z-10 mx-auto max-w-7xl px-4 pt-10 pb-6 sm:px-8 animate-fade-in">
         <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-primary">{dateLabel}</p>
