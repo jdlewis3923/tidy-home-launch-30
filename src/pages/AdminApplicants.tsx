@@ -536,7 +536,35 @@ export default function AdminApplicants() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const t = toast.loading("Running stale-applicant nudge…");
+                const { data, error } = await supabase.functions.invoke("applicant-stale-nudge");
+                toast.dismiss(t);
+                if (error) toast.error(`Nudge failed: ${error.message}`);
+                else toast.success(`Nudge: ${data?.day_7 ?? 0} d7 · ${data?.day_14 ?? 0} d14 · ${data?.day_30 ?? 0} auto-rejected`);
+              }}
+              title="Manually trigger the daily stale-applicant nudge cron"
+            >
+              <Clock className="h-4 w-4 mr-1" /> Run nudges
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const t = toast.loading("Sending training reminders…");
+                const { data, error } = await supabase.functions.invoke("training-reminder");
+                toast.dismiss(t);
+                if (error) toast.error(`Reminder failed: ${error.message}`);
+                else toast.success(`Reminders sent: ${data?.sent ?? 0} (skipped ${data?.skipped ?? 0})`);
+              }}
+              title="Manually trigger the 24h training reminder cron"
+            >
+              <CalendarDays className="h-4 w-4 mr-1" /> Send reminders
+            </Button>
             <Button variant="outline" size="sm" onClick={exportCsv} disabled={!filtered.length}>
               <Download className="h-4 w-4 mr-1" /> Export CSV
             </Button>
@@ -545,6 +573,7 @@ export default function AdminApplicants() {
               <Plus className="h-4 w-4 mr-1" /> Add manually
             </Button>
           </div>
+
         </div>
       </header>
 
