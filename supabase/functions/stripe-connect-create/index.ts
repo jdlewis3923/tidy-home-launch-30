@@ -63,8 +63,9 @@ Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method_not_allowed' }, 405);
 
-  if (!STRIPE_CONNECT_API_KEY) {
-    return jsonResponse({ error: 'stripe_connect_not_configured', reason: 'STRIPE_CONNECT_API_KEY is not set' }, 503);
+  if (!isValidStripeSecretKey(STRIPE_CONNECT_API_KEY)) {
+    const { reason } = stripeSecretKeyError('STRIPE_CONNECT_API_KEY');
+    return jsonResponse({ error: 'stripe_connect_invalid_key', reason }, 503);
   }
 
   const auth = req.headers.get('Authorization') ?? '';

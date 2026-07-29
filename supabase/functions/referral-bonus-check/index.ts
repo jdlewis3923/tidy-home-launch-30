@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
     const acct = (payoutRow as any)?.stripe_account_id ?? null;
 
     let transferId: string | null = null;
-    if (stripeKey && acct) {
+    if (isValidStripeSecretKey(stripeKey) && acct) {
       try {
         const body = new URLSearchParams({
           amount: String(bonusCents),
