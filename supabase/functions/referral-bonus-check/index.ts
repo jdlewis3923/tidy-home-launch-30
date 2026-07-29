@@ -8,6 +8,7 @@
  * value powers the /pro widget so display + payout never drift.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { isValidStripeSecretKey } from "../_shared/stripe-keys.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
