@@ -8,6 +8,7 @@
  * value powers the /pro widget so display + payout never drift.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { isValidStripeSecretKey } from "../_shared/stripe-keys.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -77,7 +78,7 @@ Deno.serve(async (req) => {
     const acct = (payoutRow as any)?.stripe_account_id ?? null;
 
     let transferId: string | null = null;
-    if (stripeKey && acct) {
+    if (isValidStripeSecretKey(stripeKey) && acct) {
       try {
         const body = new URLSearchParams({
           amount: String(bonusCents),

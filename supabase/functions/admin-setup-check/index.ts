@@ -15,6 +15,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { isValidStripeSecretKey, stripeSecretKeyError } from '../_shared/stripe-keys.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -32,10 +33,11 @@ type Status = 'pass' | 'fail' | 'warn';
 type Check = { id: string; label: string; status: Status; detail: string; remediation?: string };
 
 async function checkStripe(): Promise<Check> {
-  if (!STRIPE_CONNECT_API_KEY) {
+  if (!isValidStripeSecretKey(STRIPE_CONNECT_API_KEY)) {
+    const { reason } = stripeSecretKeyError('STRIPE_CONNECT_API_KEY');
     return { id: 'stripe_connect', label: 'Stripe Connect API key', status: 'fail',
-      detail: 'STRIPE_CONNECT_API_KEY is not set',
-      remediation: 'Add the Connect platform secret key (sk_live_… or sk_test_…) in Lovable Cloud secrets.' };
+      detail: reason,
+      remediation: 'Paste a valid Stripe Connect secret key (sk_live_… or sk_test_…) in Lovable Cloud secrets. Publishable/restricted/malformed keys are not accepted.' };
   }
   try {
     const r = await fetch('https://api.stripe.com/v1/accounts?limit=1', {
