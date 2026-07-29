@@ -113,13 +113,14 @@ async function checkBrevo(): Promise<{ key: Check; plan: Check }> {
 
 async function checkDocuments(): Promise<Check> {
   const required = [
+    '10_ICA_IndependentContractorAgreement.pdf',
     '11_OfferLetter_Template.pdf',
     '12_OnboardingPacket_Cleaning.pdf',
     '13_OnboardingPacket_Lawn.pdf',
     '14_OnboardingPacket_Detail.pdf',
-    '15_Contract_Cleaning.pdf',
-    '16_Contract_Lawn.pdf',
-    '17_Contract_Detail.pdf',
+    '15_HelloSign_Contract_Cleaning.pdf',
+    '16_HelloSign_Contract_Lawn.pdf',
+    '17_HelloSign_Contract_Detail.pdf',
   ];
   const { data: rows } = await admin
     .from('company_documents')
