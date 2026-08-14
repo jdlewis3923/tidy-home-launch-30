@@ -124,25 +124,55 @@ async function checkDocuments(): Promise<Check> {
     '16_HelloSign_Contract_Lawn.pdf',
     '17_HelloSign_Contract_Detail.pdf',
   ];
+
+  // 1. Row must exist and point at a real (non-pending) storage path.
   const { data: rows } = await admin
     .from('company_documents')
     .select('filename, storage_path')
     .in('filename', required)
     .is('archived_at', null);
-  const present = new Set((rows ?? [])
-    .filter((r: any) => r.storage_path && !String(r.storage_path).startsWith('pending/'))
-    .map((r: any) => r.filename));
-  const missing = required.filter((f) => !present.has(f));
-  if (missing.length === 0) {
-    return { id: 'docs', label: 'Contractor PDFs uploaded', status: 'pass',
-      detail: `All ${required.length} required PDFs present in tidy-docs bucket` };
+  const pathByName = new Map<string, string>();
+  for (const r of rows ?? []) {
+    const p = String((r as any).storage_path ?? '');
+    if (p && !p.startsWith('pending/')) pathByName.set((r as any).filename, p);
   }
+
+  // 2. REAL storage existence check — list the bucket and confirm every object
+  //    is actually there. A row marked uploaded is not proof (ghost uploads).
+  const { data: objects, error: listErr } = await admin.storage
+    .from('tidy-docs')
+    .list('', { limit: 1000 });
+  if (listErr) {
+    return { id: 'docs', label: 'Contractor PDFs uploaded', status: 'fail',
+      detail: `Could not list tidy-docs bucket: ${listErr.message}`,
+      remediation: 'Verify the tidy-docs storage bucket exists and the service role can read it.' };
+  }
+  const inStorage = new Set((objects ?? []).map((o) => o.name));
+
+  const missingRow: string[] = [];
+  const missingFile: string[] = [];
+  for (const f of required) {
+    const path = pathByName.get(f);
+    if (!path) { missingRow.push(f); continue; }
+    // storage_path is a bucket-root key for these rows; compare the leaf name too.
+    const leaf = path.split('/').pop() ?? path;
+    if (!inStorage.has(path) && !inStorage.has(leaf)) missingFile.push(f);
+  }
+
+  if (missingRow.length === 0 && missingFile.length === 0) {
+    return { id: 'docs', label: 'Contractor PDFs uploaded', status: 'pass',
+      detail: `All ${required.length} required PDFs verified present in the tidy-docs bucket via a live storage listing` };
+  }
+  const parts: string[] = [];
+  if (missingRow.length) parts.push(`no uploaded record: ${missingRow.join(', ')}`);
+  if (missingFile.length) parts.push(`record exists but file is NOT in storage (ghost upload): ${missingFile.join(', ')}`);
   return {
     id: 'docs', label: 'Contractor PDFs uploaded', status: 'fail',
-    detail: `Missing or unuploaded: ${missing.join(', ')}`,
-    remediation: 'Upload the missing PDFs at /admin/documents — rows still marked pending/ won\'t attach to emails.',
+    detail: parts.join(' — '),
+    remediation: 'Re-upload the missing PDFs at /admin/documents. Ghost-upload rows must be re-uploaded so the file lands in the tidy-docs bucket.',
   };
 }
+
 
 async function checkDocumenso(): Promise<Check> {
   if (!DOCUMENSO_API_KEY) {
