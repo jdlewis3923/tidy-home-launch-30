@@ -778,6 +778,42 @@ export default function AdminApplicants() {
                   <QuickInfo icon={<Clock className="h-4 w-4" />} label="Experience" value={open.experience_years != null ? `${open.experience_years}y` : "—"} />
                 </div>
 
+                {/* Application Answers — what they claimed on /apply */}
+                {(() => {
+                  const submitted = events.find((e) => e.event === "applicant_submitted")?.metadata ?? {};
+                  const yn = (v: any) => (v === true ? "Yes" : v === false ? "No" : null);
+                  const answers: Array<{ label: string; value: string | null }> = [
+                    { label: "Service applied for", value: open.service ?? submitted?.service ?? null },
+                    {
+                      label: "Years of experience",
+                      value: open.experience_years != null
+                        ? `${open.experience_years}`
+                        : (submitted?.experience_bucket ?? null),
+                    },
+                    { label: "Has transportation", value: yn(open.has_vehicle ?? submitted?.has_vehicle) },
+                    { label: "Has equipment", value: yn(open.has_supplies ?? submitted?.has_supplies) },
+                    { label: "US work authorized", value: yn(submitted?.work_authorized) },
+                  ];
+                  return (
+                    <Card className="rounded-2xl border-slate-200">
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold text-[#0D1117] mb-2">Application Answers</h3>
+                        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                          {answers.map((a) => (
+                            <div key={a.label} className="flex items-baseline justify-between gap-3 text-sm">
+                              <dt className="text-slate-500">{a.label}</dt>
+                              <dd className={a.value ? "font-semibold text-[#0D1117] capitalize" : "text-slate-400 italic"}>
+                                {a.value ?? "— not provided"}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+
+
                 {open.notes_for_admin && (
                   <Card className="rounded-2xl border-slate-200">
                     <CardContent className="p-4">
