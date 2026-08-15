@@ -871,13 +871,52 @@ export default function AdminApplicants() {
                       </div>
                     </div>
 
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const stamp = new Date().toLocaleString();
+                          const tpl = [
+                            `--- Phone screen ${stamp} ---`,
+                            "Q1 Experience:",
+                            "Q2 Current work situation:",
+                            "Q3 Verification (specific past job):",
+                            "Q4 Transportation:",
+                            "Q5 US work auth:",
+                            "Q6 Equipment:",
+                            "Q7 Difficult customer:",
+                            "Q8 Access scenario:",
+                            "Q9 Professionalism:",
+                            "",
+                          ].join("\n");
+                          setBgNotes(`${tpl}${bgNotes ? `\n${bgNotes}` : ""}`);
+                          setBgNotesDirty(true);
+                        }}
+                      >
+                        Insert phone-screen template
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const stamp = new Date().toLocaleString();
+                          setBgNotes(`${bgNotes ? `${bgNotes}\n` : ""}[${stamp}]`);
+                          setBgNotesDirty(true);
+                        }}
+                      >
+                        Log timestamp
+                      </Button>
+                    </div>
+
                     <Textarea
                       placeholder="Notes (auto-saves on blur)…"
                       value={bgNotes}
                       onChange={(e) => { setBgNotes(e.target.value); setBgNotesDirty(true); }}
                       onBlur={saveBgNotes}
-                      rows={3}
+                      rows={8}
                     />
+
                   </CardContent>
                 </Card>
 
