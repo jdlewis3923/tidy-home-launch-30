@@ -3,7 +3,7 @@
  *
  * Tidy-branded, mobile-first contractor intake.
  */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,13 +18,7 @@ import {
   CalendarClock, ShieldCheck, MapPin,
 } from "lucide-react";
 import TidyLogo from "@/components/TidyLogo";
-import InsuranceStep, { type InsuranceApplicant } from "@/components/apply/InsuranceStep";
 
-/**
- * Lets a contractor who left /apply to buy coverage come back and finish the
- * Insurance step without restarting the application.
- */
-const RESUME_KEY = "tidy_apply_insurance_resume";
 
 
 type ServiceChoice = "cleaning" | "lawn" | "detail" | "multiple";
@@ -65,26 +59,9 @@ export default function Apply() {
   const [form, setForm] = useState<Form>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
-  // Insurance is step 2: it needs the applicant record created by step 1.
-  const [insuranceFor, setInsuranceFor] = useState<InsuranceApplicant | null>(null);
-
-  useEffect(() => {
-    // Returning from the insurance provider → resume at the Insurance step.
-    try {
-      const raw = localStorage.getItem(RESUME_KEY);
-      if (!raw) return;
-      const saved = JSON.parse(raw) as InsuranceApplicant;
-      if (saved?.id && saved?.email) setInsuranceFor(saved);
-    } catch { /* ignore */ }
-  }, []);
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
-  const finishInsurance = () => {
-    try { localStorage.removeItem(RESUME_KEY); } catch { /* ignore */ }
-    setInsuranceFor(null);
-    setDone(true);
-  };
 
 
   const submit = async (e: React.FormEvent) => {
@@ -113,19 +90,8 @@ export default function Apply() {
       };
       const { data, error } = await supabase.functions.invoke("submit-application", { body: payload });
       if (error) throw error;
-      const applicantId = (data as { id?: string } | null)?.id;
-      if (applicantId) {
-        const resume: InsuranceApplicant = {
-          id: applicantId,
-          email: payload.email,
-          first_name: payload.first_name,
-          service_category: form.service || null,
-        };
-        try { localStorage.setItem(RESUME_KEY, JSON.stringify(resume)); } catch { /* ignore */ }
-        setInsuranceFor(resume);
-      } else {
-        setDone(true);
-      }
+      setDone(true);
+
 
     } catch (err: any) {
       console.error(err);
@@ -216,12 +182,8 @@ export default function Apply() {
 
         <section className="relative">
           <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-transparent to-gold/20 opacity-60 blur-lg pointer-events-none" />
-          {insuranceFor ? (
-            <InsuranceStep applicant={insuranceFor} onDone={finishInsurance} />
-          ) : (
           <div className="relative rounded-2xl bg-white shadow-2xl border border-white/40 overflow-hidden animate-calm-rise">
             <div className="px-6 sm:px-8 pt-7 pb-5 border-b border-hairline bg-cream">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">Step 1 of 2</p>
               <h2 className="mt-1 font-display text-2xl font-black text-ink tracking-tight">Apply to join Tidy</h2>
               <p className="mt-1 text-sm text-ink-faint">Takes about 2 minutes.</p>
             </div>
@@ -307,7 +269,6 @@ export default function Apply() {
               </Button>
             </form>
           </div>
-          )}
         </section>
 
       </div>

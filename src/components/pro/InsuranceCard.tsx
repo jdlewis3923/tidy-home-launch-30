@@ -40,6 +40,9 @@ const AI_LABEL: Record<string, string> = {
 export default function InsuranceCard() {
   const [row, setRow] = useState<Row | null>(null);
   const [loading, setLoading] = useState(true);
+  // Tier 1 contractors are covered by Tidy's LLC commercial GL policy (ICA §7),
+  // so this card only appears at Tier 2 or once a Tier 2 offer has been sent.
+  const [visible, setVisible] = useState(false);
   const [config, setConfig] = useState<InsuranceConfig>(FALLBACK_CONFIG);
 
   useEffect(() => {
@@ -48,6 +51,15 @@ export default function InsuranceCard() {
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth?.user?.id;
       if (!uid) { if (alive) setLoading(false); return; }
+      const { data: appl } = await supabase
+        .from("applicants")
+        .select("tier, tier_offer_sent_at")
+        .eq("contractor_id", uid)
+        .maybeSingle();
+      const show = appl ? (String(appl.tier) === "2" || !!appl.tier_offer_sent_at) : false;
+      if (!alive) return;
+      setVisible(show);
+      if (!show) { setLoading(false); return; }
       const { data } = await supabase
         .from("contractor_insurance")
         .select("id, carrier_name, policy_number, coverage_type, per_occurrence_limit_cents, effective_date, expiration_date, additional_insured_status, verification_status")
@@ -69,6 +81,7 @@ export default function InsuranceCard() {
       </div>
     );
   }
+  if (!visible) return null;
 
   const status: InsuranceStatus = row?.verification_status ?? "not_started";
   const expiring = status === "expiring_soon";
@@ -124,7 +137,7 @@ export default function InsuranceCard() {
 
       <div className="mt-4 flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm">
-          <Link to="/apply">
+          <Link to="/pro/upload-coi">
             {expired ? "Restore Coverage" : expiring ? "Renew Coverage" : verified ? "View / Update Coverage" : "Add Coverage"}
           </Link>
         </Button>
