@@ -924,6 +924,49 @@ export default function AdminApplicants() {
                 <Card className="rounded-2xl border-slate-200">
                   <CardContent className="p-4 space-y-3">
                     <h3 className="font-semibold text-[#0D1117]">Pipeline</h3>
+
+                    {/* Advance Stage — contextual to current stage */}
+                    {(() => {
+                      const stage = open.current_stage ?? "applied";
+                      const bgPassed = open.bg_check_status === "clear";
+                      const acts: Array<{ label: string; action: AdvanceAction }> = [];
+                      if (stage === "applied") {
+                        acts.push({ label: "Schedule Interview", action: "schedule_interview" });
+                        acts.push({ label: "Send to BG Check", action: "send_to_bg_check" });
+                      } else if (stage === "interview_pending") {
+                        acts.push({ label: "Send to BG Check", action: "send_to_bg_check" });
+                      } else if (
+                        (stage === "background_check_pending" || stage === "background_check_review") && bgPassed
+                      ) {
+                        acts.push({ label: "Send Offer", action: "send_offer" });
+                      } else if (stage === "offer_sent") {
+                        acts.push({ label: "Send Contract", action: "send_contract" });
+                      } else if (stage === "contract_signed") {
+                        acts.push({ label: "Schedule Orientation", action: "mark_oriented" });
+                      } else if (stage === "oriented") {
+                        acts.push({ label: "Activate", action: "activate" });
+                      }
+                      if (!acts.length) return null;
+                      return (
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                          <div className="text-[11px] uppercase tracking-wide font-semibold text-slate-600 mb-2">Advance Stage</div>
+                          <div className="flex flex-wrap gap-2">
+                            {acts.map((a) => (
+                              <Button
+                                key={a.action}
+                                size="sm"
+                                disabled={!!submitting}
+                                onClick={() => runAction(a.action)}
+                                className="bg-[#1FA1F0] hover:bg-[#1990da] text-white disabled:opacity-50"
+                              >
+                                {submitting === a.action ? <Loader2 className="h-4 w-4 animate-spin" /> : a.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     <ol className="space-y-2">
                       {PIPELINE_STEPS.map((step, i) => {
                         const done = i < stepIdx;
