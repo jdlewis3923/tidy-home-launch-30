@@ -16,7 +16,20 @@ const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY');
 const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false } });
 
-const MILESTONES = [30, 14, 7];
+const DEFAULT_MILESTONES = [30, 14, 7];
+
+// Reminder intervals are admin-configurable per service category
+// (public.insurance_requirements.reminder_days) — no code change needed to alter them.
+async function milestonesFor(serviceCategory?: string | null): Promise<number[]> {
+  if (!serviceCategory) return DEFAULT_MILESTONES;
+  const { data } = await admin
+    .from('insurance_requirements')
+    .select('reminder_days')
+    .eq('service_category', serviceCategory)
+    .maybeSingle();
+  const days = (data?.reminder_days ?? []) as number[];
+  return days.length ? [...days].sort((a, b) => b - a) : DEFAULT_MILESTONES;
+}
 
 async function templateId(key: string): Promise<number> {
   const { data } = await admin.from('app_settings').select('value').eq('key', key).maybeSingle();
@@ -47,7 +60,7 @@ Deno.serve(async (req) => {
 
   const { data: rows } = await admin
     .from('contractor_insurance')
-    .select('id, applicant_id, expiration_date, verification_status, reminders_sent, carrier_name')
+    .select('id, applicant_id, expiration_date, verification_status, reminders_sent, carrier_name, service_category')
     .in('verification_status', ['verified', 'expiring_soon'])
     .not('expiration_date', 'is', null)
     .lte('expiration_date', horizon);
@@ -81,7 +94,8 @@ Deno.serve(async (req) => {
     }
 
     const sent: number[] = Array.isArray(r.reminders_sent) ? (r.reminders_sent as number[]) : [];
-    const due = MILESTONES.find((m) => daysLeft <= m && !sent.includes(m));
+    const milestones = await milestonesFor((r as { service_category?: string | null }).service_category);
+    const due = milestones.find((m) => daysLeft <= m && !sent.includes(m));
 
     await admin
       .from('contractor_insurance')

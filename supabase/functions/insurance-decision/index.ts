@@ -1,9 +1,11 @@
 // insurance-decision — ADMIN ONLY.
 //
-// Approve / request update / reject a contractor's General Liability coverage.
-// Records who acted and when, requires an internal reason for update+reject,
-// mirrors the status onto applicants.insurance_status, and logs an
-// onboarding_events row. Best-effort Brevo notice via the existing gateway.
+// Approve / request update / reject / waive a contractor's General Liability
+// coverage. Records who acted and when, requires an internal reason for
+// update+reject+waive, mirrors the status onto applicants.insurance_status,
+// writes an insurance_audit_log row and an onboarding_events row. Best-effort
+// Brevo notice via the existing gateway. Internal reasons are never surfaced to
+// contractors by this function.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
@@ -18,7 +20,7 @@ const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: fals
 
 const Body = z.object({
   insurance_id: z.string().uuid(),
-  decision: z.enum(['approve', 'request_update', 'reject']),
+  decision: z.enum(['approve', 'request_update', 'reject', 'waive']),
   reason: z.string().trim().max(2000).optional(),
 });
 
@@ -26,6 +28,7 @@ const STATUS: Record<string, string> = {
   approve: 'verified',
   request_update: 'update_requested',
   reject: 'rejected',
+  waive: 'waived',
 };
 
 async function fireBrevo(templateKey: string, to: { email: string; name: string }, params: Record<string, unknown>) {
@@ -68,7 +71,7 @@ Deno.serve(async (req) => {
 
   const { data: rec } = await admin
     .from('contractor_insurance')
-    .select('id, applicant_id, expiration_date, carrier_name')
+    .select('id, applicant_id, contractor_id, expiration_date, carrier_name, verification_status')
     .eq('id', insurance_id)
     .maybeSingle();
   if (!rec) return jsonResponse({ error: 'not_found' }, 404);
@@ -82,10 +85,27 @@ Deno.serve(async (req) => {
       verification_status: status,
       verified_at: decision === 'approve' ? now : null,
       verified_by: u.user.id,
+      verification_method: decision === 'waive' ? 'admin_waiver' : 'manual_admin',
       rejection_reason: decision === 'approve' ? null : reason,
+      waived_reason: decision === 'waive' ? reason : null,
+      waived_by: decision === 'waive' ? u.user.id : null,
+      waived_at: decision === 'waive' ? now : null,
+      last_checked_at: now,
     })
     .eq('id', insurance_id);
   if (updErr) return jsonResponse({ error: 'update_failed', details: updErr.message }, 500);
+
+  await admin.from('insurance_audit_log').insert({
+    insurance_id: rec.id,
+    applicant_id: rec.applicant_id,
+    contractor_id: rec.contractor_id,
+    action: decision,
+    from_status: rec.verification_status,
+    to_status: status,
+    reason: reason || null,
+    performed_by: u.user.id,
+    metadata: { carrier_name: rec.carrier_name ?? null },
+  });
 
   if (rec.applicant_id) {
     await admin
@@ -101,8 +121,9 @@ Deno.serve(async (req) => {
       event:
         decision === 'approve' ? 'insurance_verified'
         : decision === 'reject' ? 'insurance_rejected'
+        : decision === 'waive' ? 'insurance_waived'
         : 'insurance_update_requested',
-      metadata: { reason: reason || null, acted_by: u.user.id, carrier_name: rec.carrier_name ?? null },
+      metadata: { acted_by: u.user.id, carrier_name: rec.carrier_name ?? null },
     });
 
     const { data: a } = await admin
@@ -110,7 +131,8 @@ Deno.serve(async (req) => {
       .select('email, first_name, last_name')
       .eq('id', rec.applicant_id)
       .maybeSingle();
-    if (a?.email) {
+    // Waivers are internal — no contractor-facing email, no internal reason shared.
+    if (a?.email && decision !== 'waive') {
       const key = decision === 'approve'
         ? 'brevo_template_insurance_verified'
         : decision === 'reject'
@@ -118,7 +140,7 @@ Deno.serve(async (req) => {
         : 'brevo_template_insurance_update_requested';
       await fireBrevo(key, { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
         first_name: a.first_name,
-        reason: reason || null,
+        reason: decision === 'approve' ? null : reason,
         expiration_date: rec.expiration_date,
       });
     }

@@ -26,6 +26,7 @@ const NAV = [
   { to: "/admin/applicants",  label: "Applicants",  icon: Users },
   { to: "/admin/tier-progression", label: "Tier",   icon: Award },
   { to: "/admin/coi-review",  label: "COI",         icon: ShieldCheck },
+  { to: "/admin/insurance",   label: "Insurance",   icon: ShieldCheck },
   { to: "/admin/orientations", label: "Orientations", icon: CalendarDays },
   { to: "/admin/documents",   label: "Docs",        icon: FileText },
   { to: "/admin/schedule",    label: "Schedule",    icon: Megaphone },
