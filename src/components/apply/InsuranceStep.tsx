@@ -1,14 +1,16 @@
 /**
- * Insurance — step 2 of the existing /apply flow.
+ * Insurance — a step inside the existing /apply flow.
  *
  * Uses the same white card / cream header / navy CTA styling as the details step.
  * Two paths:
  *   1. "I already have insurance" → inline verification form + private COI upload
- *   2. "I need insurance"         → Tidy's preferred provider (Thimble), then
- *                                    return to /apply and upload proof of coverage
+ *   2. "I need insurance"         → Tidy's preferred provider (embedded when the
+ *                                    provider officially supports it, otherwise a
+ *                                    new tab), then upload proof of coverage
  *
  * An upload only ever produces `pending_verification` — verification is a Tidy
- * admin action.
+ * admin action. Requirements and the provider list come from the backend, so Tidy
+ * can change limits or insurers without a rebuild.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -22,11 +24,16 @@ import {
 } from "lucide-react";
 import {
   COI_ACCEPT, COI_MAX_BYTES, FALLBACK_CONFIG, fetchInsuranceConfig,
-  fileToBase64, trackInsurance, usd,
+  fileToBase64, preferredProvider, requirementFor, trackInsurance, usd,
   type AdditionalInsuredStatus, type InsuranceConfig,
 } from "@/lib/insurance";
 
-export type InsuranceApplicant = { id: string; email: string; first_name?: string };
+export type InsuranceApplicant = {
+  id: string;
+  email: string;
+  first_name?: string;
+  service_category?: string | null;
+};
 
 type Choice = "" | "has" | "needs";
 
@@ -41,6 +48,7 @@ export default function InsuranceStep({
   const [choice, setChoice] = useState<Choice>("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [embedFailed, setEmbedFailed] = useState(false);
 
   const [carrier, setCarrier] = useState("");
   const [policy, setPolicy] = useState("");
@@ -52,15 +60,19 @@ export default function InsuranceStep({
   const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
-    trackInsurance("insurance_step_viewed");
+    trackInsurance("insurance_step_viewed", { service_category: applicant.service_category ?? undefined });
     fetchInsuranceConfig().then(setConfig);
-  }, []);
+  }, [applicant.service_category]);
 
-  const req = config.requirements;
+  const provider = useMemo(() => preferredProvider(config), [config]);
+  const req = useMemo(() => requirementFor(config, applicant.service_category), [config, applicant.service_category]);
   const limits = useMemo(
     () => ({ occ: usd(req.per_occurrence_cents), agg: usd(req.aggregate_cents) }),
     [req.per_occurrence_cents, req.aggregate_cents],
   );
+  const providerEnabled = Boolean(provider?.enabled);
+  const canEmbed = Boolean(provider?.embed_supported && provider?.embed_url) && !embedFailed;
+  const providerUrl = provider?.embed_url || provider?.referral_url || "";
 
   const pickFile = (f: File | null) => {
     if (f && f.size > COI_MAX_BYTES) {
@@ -68,32 +80,48 @@ export default function InsuranceStep({
       return;
     }
     setFile(f);
-    if (f) trackInsurance("insurance_coi_uploaded", { file_type: f.type });
+    if (f) trackInsurance("insurance_document_uploaded", { file_type: f.type });
+  };
+
+  const toCents = (v: string) => {
+    const n = Number(String(v).replace(/[^0-9.]/g, ""));
+    return Number.isFinite(n) && n > 0 ? Math.round(n * 100) : undefined;
   };
 
   const submitCoverage = async () => {
     if (!carrier.trim()) { toast({ title: "Insurance company is required", variant: "destructive" }); return; }
     if (!policy.trim()) { toast({ title: "Policy number is required", variant: "destructive" }); return; }
     if (!effective || !expiration) { toast({ title: "Policy dates are required", variant: "destructive" }); return; }
+    if (expiration <= new Date().toISOString().slice(0, 10)) {
+      toast({ title: "That policy has expired", description: "Please upload current coverage.", variant: "destructive" });
+      return;
+    }
     if (!file) { toast({ title: "Please attach your Certificate of Insurance", variant: "destructive" }); return; }
+
+    const occCents = toCents(perOcc);
+    const aggCents = toCents(aggregate);
+    if (occCents && occCents < req.per_occurrence_cents) {
+      toast({
+        title: "Coverage may be below our requirement",
+        description: `Tidy asks for ${limits.occ} per occurrence. You can still submit — our team will review.`,
+      });
+    }
 
     setSubmitting(true);
     try {
       const data_base64 = await fileToBase64(file);
-      const toCents = (v: string) => {
-        const n = Number(String(v).replace(/[^0-9.]/g, ""));
-        return Number.isFinite(n) && n > 0 ? Math.round(n * 100) : undefined;
-      };
       const { error } = await supabase.functions.invoke("submit-insurance", {
         body: {
           applicant_id: applicant.id,
           email: applicant.email,
           intent: "has_insurance",
           provider: "other",
+          service_category: applicant.service_category ?? undefined,
+          coverage_type: "general_liability",
           carrier_name: carrier.trim(),
           policy_number: policy.trim(),
-          per_occurrence_limit_cents: toCents(perOcc),
-          aggregate_limit_cents: toCents(aggregate),
+          per_occurrence_limit_cents: occCents,
+          aggregate_limit_cents: aggCents,
           effective_date: effective,
           expiration_date: expiration,
           additional_insured_status: addlInsured,
@@ -101,7 +129,7 @@ export default function InsuranceStep({
         },
       });
       if (error) throw error;
-      trackInsurance("insurance_submitted", { provider: "other" });
+      trackInsurance("insurance_verification_submitted", { provider: "other" });
       setSubmitted(true);
     } catch (err: any) {
       console.error(err);
@@ -111,29 +139,39 @@ export default function InsuranceStep({
     }
   };
 
-  const chooseThimble = async () => {
-    trackInsurance("insurance_thimble_selected");
+  const chooseProvider = async () => {
+    trackInsurance("needs_insurance_selected", { provider: provider?.provider_key });
     try {
       await supabase.functions.invoke("submit-insurance", {
-        body: { applicant_id: applicant.id, email: applicant.email, intent: "needs_insurance", provider: "thimble" },
+        body: {
+          applicant_id: applicant.id,
+          email: applicant.email,
+          intent: "needs_insurance",
+          provider: provider?.provider_key ?? "thimble",
+          service_category: applicant.service_category ?? undefined,
+        },
       });
     } catch (e) { console.error(e); }
-    if (config.thimble.enabled && config.thimble.partner_url) {
-      window.open(config.thimble.partner_url, "_blank", "noopener,noreferrer");
+    if (providerEnabled && providerUrl && !canEmbed) {
+      trackInsurance("thimble_quote_started", { provider: provider?.provider_key, mode: "new_tab" });
+      window.open(providerUrl, "_blank", "noopener,noreferrer");
+    } else if (providerEnabled && canEmbed) {
+      trackInsurance("thimble_quote_started", { provider: provider?.provider_key, mode: "embed" });
     }
     setChoice("needs");
   };
 
   if (submitted) {
     return (
-      <Shell title="Coverage submitted" subtitle="Nothing else needed right now.">
+      <Shell title="Insurance verification submitted" subtitle="Nothing else needed right now.">
         <div className="text-center py-4">
           <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 ring-1 ring-primary/25 flex items-center justify-center">
             <Clock className="h-7 w-7 text-primary" />
           </div>
-          <h3 className="mt-5 font-display text-xl font-black text-ink">Coverage submitted</h3>
+          <h3 className="mt-5 font-display text-xl font-black text-ink">Insurance verification submitted</h3>
           <p className="mt-2 text-sm text-ink-faint leading-relaxed">
-            We're verifying that your insurance meets Tidy's requirements.
+            Tidy will verify your coverage and let you know. Uploading a certificate doesn't
+            complete verification on its own.
           </p>
           <Button onClick={onDone} size="lg" className="mt-7 w-full bg-gradient-to-b from-navy-deep to-[#0b1226] text-white font-bold h-12">
             Finish
@@ -146,9 +184,12 @@ export default function InsuranceStep({
   return (
     <Shell title="Insurance" subtitle="Last step — about 1 minute.">
       <div>
-        <h3 className="font-display text-xl font-black text-ink tracking-tight">Protect your business.</h3>
+        <h3 className="font-display text-xl font-black text-ink tracking-tight">
+          Protect your business. Protect our customers.
+        </h3>
         <p className="mt-2 text-sm text-ink-faint leading-relaxed">
-          Active Tidy Pros maintain liability coverage while performing services through Tidy.
+          Active Tidy Pros are required to maintain qualifying liability coverage while providing
+          services through Tidy.
         </p>
       </div>
 
@@ -157,19 +198,19 @@ export default function InsuranceStep({
           <OptionCard
             icon={<FileText className="h-5 w-5 text-primary" />}
             title="I already have insurance"
-            body="Upload your existing coverage for quick verification."
+            body="Provide your existing coverage for verification."
             cta="Verify My Coverage"
-            onClick={() => { trackInsurance("insurance_already_covered_selected"); setChoice("has"); }}
+            onClick={() => { trackInsurance("already_insured_selected"); setChoice("has"); }}
           />
           <OptionCard
             icon={<ShieldCheck className="h-5 w-5 text-primary" />}
             title="I need insurance"
             badge="Recommended"
-            body="Get qualifying business insurance through Tidy's preferred insurance provider."
-            cta={config.thimble.enabled ? "Get Covered with Thimble" : "Thimble — coming soon"}
-            disabled={!config.thimble.enabled}
-            note="Pricing and eligibility are determined by the insurance provider."
-            onClick={chooseThimble}
+            body={`Get qualifying business insurance through Tidy's preferred insurance provider${provider && providerEnabled ? ` (${provider.display_name})` : ""}.`}
+            cta={providerEnabled ? "Get Covered" : "Get Covered — coming soon"}
+            disabled={!providerEnabled}
+            note="Pricing and eligibility are determined by the insurance provider and vary by business and coverage."
+            onClick={chooseProvider}
           />
           <button type="button" onClick={onDone} className="w-full text-center text-xs font-semibold text-ink-faint hover:text-ink underline underline-offset-4 pt-1">
             I'll handle insurance later
@@ -181,21 +222,32 @@ export default function InsuranceStep({
         <div className="mt-6 space-y-4">
           <div className="rounded-xl border border-hairline bg-cream/60 p-4">
             <p className="text-xs font-bold uppercase tracking-wide text-ink-faint">Tidy Preferred Insurance</p>
-            <p className="text-sm font-semibold text-ink">Powered by Thimble</p>
+            <p className="text-sm font-semibold text-ink">
+              Powered by {provider?.display_name ?? "our preferred provider"}
+            </p>
             <p className="mt-2 text-xs text-ink-faint leading-relaxed">
-              Insurance is provided by third-party licensed insurance providers. Tidy is not an
-              insurer and does not determine eligibility, premiums, coverage decisions, or claims.
+              {provider?.disclosure_text ||
+                "Insurance products are offered and administered by the applicable licensed insurance provider. Tidy is not the insurer and does not determine eligibility, premiums or claims."}
             </p>
           </div>
 
-          {config.thimble.enabled ? (
-            <Button variant="outline" className="w-full h-11" onClick={() => window.open(config.thimble.partner_url, "_blank", "noopener,noreferrer")}>
-              Open Thimble <ExternalLink className="ml-2 h-4 w-4" />
+          {providerEnabled && canEmbed ? (
+            <div className="rounded-xl border border-hairline overflow-hidden bg-white">
+              <iframe
+                title={`${provider?.display_name} coverage`}
+                src={provider?.embed_url}
+                className="w-full h-[560px] block"
+                onError={() => setEmbedFailed(true)}
+              />
+            </div>
+          ) : providerEnabled && providerUrl ? (
+            <Button variant="outline" className="w-full h-11" onClick={() => window.open(providerUrl, "_blank", "noopener,noreferrer")}>
+              Open {provider?.display_name} <ExternalLink className="ml-2 h-4 w-4" />
             </Button>
           ) : (
             <div className="rounded-xl border border-hairline bg-white p-4 text-sm text-ink leading-relaxed">
-              Our Thimble link isn't live yet. You can get qualifying coverage from any insurer and
-              upload your certificate below — or call us at{" "}
+              Our preferred provider link isn't live yet. You can get qualifying coverage from any
+              insurer and upload your certificate below — or call us at{" "}
               <a href="tel:+17868291141" className="font-semibold text-primary">(786) 829-1141</a>.
             </div>
           )}
@@ -204,7 +256,7 @@ export default function InsuranceStep({
             <p className="text-sm font-semibold text-ink">Already have your new policy?</p>
             <p className="mt-1 text-xs text-ink-faint">Upload proof of coverage to finish this step.</p>
             <Button className="mt-3 w-full h-11 bg-gradient-to-b from-navy-deep to-[#0b1226] text-white font-bold" onClick={() => setChoice("has")}>
-              <Upload className="mr-2 h-4 w-4" /> Upload Proof of Coverage
+              <Upload className="mr-2 h-4 w-4" /> Use Existing Insurance
             </Button>
           </div>
 
@@ -221,13 +273,13 @@ export default function InsuranceStep({
 
       {choice === "has" && (
         <div className="mt-6 space-y-4">
-          <div className="rounded-xl border border-hairline bg-cream/60 p-4 text-xs text-ink leading-relaxed">
-            <p className="font-bold uppercase tracking-wide text-ink-faint">Tidy's requirement</p>
-            <p className="mt-1">
-              General Liability of at least <span className="font-semibold">{limits.occ} per occurrence</span> and{" "}
-              <span className="font-semibold">{limits.agg} aggregate</span>.
+          <div className="rounded-xl border border-hairline bg-cream/60 p-4 text-xs text-ink-faint leading-relaxed">
+            <p>
+              Tidy currently asks for General Liability coverage of at least{" "}
+              <span className="font-semibold text-ink">{limits.occ}</span> per occurrence and{" "}
+              <span className="font-semibold text-ink">{limits.agg}</span> aggregate.
             </p>
-            {config.additional_insured?.required && (
+            {req.additional_insured_required && (
               <p className="mt-2">
                 {config.additional_insured.entity_name
                   ? <>Tidy may require <span className="font-semibold">{config.additional_insured.entity_name}</span> to be listed as <span className="font-semibold">Additional Insured</span> (not Certificate Holder).</>
@@ -292,7 +344,6 @@ export default function InsuranceStep({
               id="ins_file"
               type="file"
               accept={COI_ACCEPT}
-              capture={undefined}
               onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
               className="mt-1.5 block w-full text-sm text-ink file:mr-3 file:rounded-lg file:border-0 file:bg-navy-deep file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white"
             />
