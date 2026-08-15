@@ -137,7 +137,7 @@ export default function InsuranceCard() {
 
       <div className="mt-4 flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm">
-          <Link to="/apply">
+          <Link to="/pro/upload-coi">
             {expired ? "Restore Coverage" : expiring ? "Renew Coverage" : verified ? "View / Update Coverage" : "Add Coverage"}
           </Link>
         </Button>
