@@ -81,6 +81,7 @@ export default function InsuranceCard() {
       </div>
     );
   }
+  if (!visible) return null;
 
   const status: InsuranceStatus = row?.verification_status ?? "not_started";
   const expiring = status === "expiring_soon";
