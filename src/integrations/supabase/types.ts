@@ -323,6 +323,8 @@ export type Database = {
           has_supplies: boolean | null
           has_vehicle: boolean | null
           id: string
+          insurance_expires_at: string | null
+          insurance_status: string
           jobber_id: string | null
           last_jobber_event_at: string | null
           last_name: string
@@ -397,6 +399,8 @@ export type Database = {
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
           id?: string
+          insurance_expires_at?: string | null
+          insurance_status?: string
           jobber_id?: string | null
           last_jobber_event_at?: string | null
           last_name: string
@@ -471,6 +475,8 @@ export type Database = {
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
           id?: string
+          insurance_expires_at?: string | null
+          insurance_status?: string
           jobber_id?: string | null
           last_jobber_event_at?: string | null
           last_name?: string
@@ -645,6 +651,83 @@ export type Database = {
           source?: string
         }
         Relationships: []
+      }
+      contractor_insurance: {
+        Row: {
+          additional_insured_status: string
+          aggregate_limit_cents: number | null
+          applicant_id: string | null
+          carrier_name: string | null
+          certificate_mime: string | null
+          certificate_path: string | null
+          contractor_id: string | null
+          created_at: string
+          effective_date: string | null
+          expiration_date: string | null
+          id: string
+          per_occurrence_limit_cents: number | null
+          policy_number: string | null
+          provider: string
+          rejection_reason: string | null
+          reminders_sent: Json
+          updated_at: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          additional_insured_status?: string
+          aggregate_limit_cents?: number | null
+          applicant_id?: string | null
+          carrier_name?: string | null
+          certificate_mime?: string | null
+          certificate_path?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          effective_date?: string | null
+          expiration_date?: string | null
+          id?: string
+          per_occurrence_limit_cents?: number | null
+          policy_number?: string | null
+          provider?: string
+          rejection_reason?: string | null
+          reminders_sent?: Json
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          additional_insured_status?: string
+          aggregate_limit_cents?: number | null
+          applicant_id?: string | null
+          carrier_name?: string | null
+          certificate_mime?: string | null
+          certificate_path?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          effective_date?: string | null
+          expiration_date?: string | null
+          id?: string
+          per_occurrence_limit_cents?: number | null
+          policy_number?: string | null
+          provider?: string
+          rejection_reason?: string | null
+          reminders_sent?: Json
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contractor_insurance_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cost_entries: {
         Row: {
@@ -2616,6 +2699,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_contractor_job_eligible: {
+        Args: { _contractor_id: string }
         Returns: boolean
       }
       is_scheduler_paused: { Args: never; Returns: boolean }
