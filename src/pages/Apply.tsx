@@ -3,7 +3,7 @@
  *
  * Tidy-branded, mobile-first contractor intake.
  */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
