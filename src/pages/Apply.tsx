@@ -59,26 +59,9 @@ export default function Apply() {
   const [form, setForm] = useState<Form>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
-  // Insurance is step 2: it needs the applicant record created by step 1.
-  const [insuranceFor, setInsuranceFor] = useState<InsuranceApplicant | null>(null);
-
-  useEffect(() => {
-    // Returning from the insurance provider → resume at the Insurance step.
-    try {
-      const raw = localStorage.getItem(RESUME_KEY);
-      if (!raw) return;
-      const saved = JSON.parse(raw) as InsuranceApplicant;
-      if (saved?.id && saved?.email) setInsuranceFor(saved);
-    } catch { /* ignore */ }
-  }, []);
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
-  const finishInsurance = () => {
-    try { localStorage.removeItem(RESUME_KEY); } catch { /* ignore */ }
-    setInsuranceFor(null);
-    setDone(true);
-  };
 
 
   const submit = async (e: React.FormEvent) => {
