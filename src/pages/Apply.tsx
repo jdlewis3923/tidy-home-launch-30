@@ -215,11 +215,16 @@ export default function Apply() {
 
         <section className="relative">
           <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-transparent to-gold/20 opacity-60 blur-lg pointer-events-none" />
+          {insuranceFor ? (
+            <InsuranceStep applicant={insuranceFor} onDone={finishInsurance} />
+          ) : (
           <div className="relative rounded-2xl bg-white shadow-2xl border border-white/40 overflow-hidden animate-calm-rise">
             <div className="px-6 sm:px-8 pt-7 pb-5 border-b border-hairline bg-cream">
-              <h2 className="font-display text-2xl font-black text-ink tracking-tight">Apply to join Tidy</h2>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">Step 1 of 2</p>
+              <h2 className="mt-1 font-display text-2xl font-black text-ink tracking-tight">Apply to join Tidy</h2>
               <p className="mt-1 text-sm text-ink-faint">Takes about 2 minutes.</p>
             </div>
+
 
             <form onSubmit={submit} className="px-6 sm:px-8 py-7 space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
