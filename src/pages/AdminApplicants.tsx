@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
+import InsurancePanel from "@/components/admin/InsurancePanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -900,6 +901,9 @@ export default function AdminApplicants() {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Insurance (General Liability) */}
+                <InsurancePanel applicantId={open.id} />
 
                 {/* Stripe Connect (payouts) */}
                 <Card className="rounded-2xl border-slate-200">
