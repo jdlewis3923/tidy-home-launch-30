@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
 
   const { data: rows } = await admin
     .from('contractor_insurance')
-    .select('id, applicant_id, expiration_date, verification_status, reminders_sent, carrier_name')
+    .select('id, applicant_id, expiration_date, verification_status, reminders_sent, carrier_name, service_category')
     .in('verification_status', ['verified', 'expiring_soon'])
     .not('expiration_date', 'is', null)
     .lte('expiration_date', horizon);
@@ -94,7 +94,8 @@ Deno.serve(async (req) => {
     }
 
     const sent: number[] = Array.isArray(r.reminders_sent) ? (r.reminders_sent as number[]) : [];
-    const due = MILESTONES.find((m) => daysLeft <= m && !sent.includes(m));
+    const milestones = await milestonesFor((r as { service_category?: string | null }).service_category);
+    const due = milestones.find((m) => daysLeft <= m && !sent.includes(m));
 
     await admin
       .from('contractor_insurance')
