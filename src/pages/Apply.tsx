@@ -3,7 +3,7 @@
  *
  * Tidy-branded, mobile-first contractor intake.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,14 @@ import {
   CalendarClock, ShieldCheck, MapPin,
 } from "lucide-react";
 import TidyLogo from "@/components/TidyLogo";
+import InsuranceStep, { type InsuranceApplicant } from "@/components/apply/InsuranceStep";
+
+/**
+ * Lets a contractor who left /apply to buy coverage come back and finish the
+ * Insurance step without restarting the application.
+ */
+const RESUME_KEY = "tidy_apply_insurance_resume";
+
 
 type ServiceChoice = "cleaning" | "lawn" | "detail" | "multiple";
 type ExpBucket = "1-2" | "3-5" | "5+";
