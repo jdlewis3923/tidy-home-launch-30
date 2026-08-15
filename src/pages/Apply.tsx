@@ -90,19 +90,8 @@ export default function Apply() {
       };
       const { data, error } = await supabase.functions.invoke("submit-application", { body: payload });
       if (error) throw error;
-      const applicantId = (data as { id?: string } | null)?.id;
-      if (applicantId) {
-        const resume: InsuranceApplicant = {
-          id: applicantId,
-          email: payload.email,
-          first_name: payload.first_name,
-          service_category: form.service || null,
-        };
-        try { localStorage.setItem(RESUME_KEY, JSON.stringify(resume)); } catch { /* ignore */ }
-        setInsuranceFor(resume);
-      } else {
-        setDone(true);
-      }
+      setDone(true);
+
 
     } catch (err: any) {
       console.error(err);
