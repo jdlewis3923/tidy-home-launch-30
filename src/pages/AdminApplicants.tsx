@@ -778,6 +778,42 @@ export default function AdminApplicants() {
                   <QuickInfo icon={<Clock className="h-4 w-4" />} label="Experience" value={open.experience_years != null ? `${open.experience_years}y` : "—"} />
                 </div>
 
+                {/* Application Answers — what they claimed on /apply */}
+                {(() => {
+                  const submitted = events.find((e) => e.event === "applicant_submitted")?.metadata ?? {};
+                  const yn = (v: any) => (v === true ? "Yes" : v === false ? "No" : null);
+                  const answers: Array<{ label: string; value: string | null }> = [
+                    { label: "Service applied for", value: open.service ?? submitted?.service ?? null },
+                    {
+                      label: "Years of experience",
+                      value: open.experience_years != null
+                        ? `${open.experience_years}`
+                        : (submitted?.experience_bucket ?? null),
+                    },
+                    { label: "Has transportation", value: yn(open.has_vehicle ?? submitted?.has_vehicle) },
+                    { label: "Has equipment", value: yn(open.has_supplies ?? submitted?.has_supplies) },
+                    { label: "US work authorized", value: yn(submitted?.work_authorized) },
+                  ];
+                  return (
+                    <Card className="rounded-2xl border-slate-200">
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold text-[#0D1117] mb-2">Application Answers</h3>
+                        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                          {answers.map((a) => (
+                            <div key={a.label} className="flex items-baseline justify-between gap-3 text-sm">
+                              <dt className="text-slate-500">{a.label}</dt>
+                              <dd className={a.value ? "font-semibold text-[#0D1117] capitalize" : "text-slate-400 italic"}>
+                                {a.value ?? "— not provided"}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+
+
                 {open.notes_for_admin && (
                   <Card className="rounded-2xl border-slate-200">
                     <CardContent className="p-4">
@@ -835,13 +871,52 @@ export default function AdminApplicants() {
                       </div>
                     </div>
 
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const stamp = new Date().toLocaleString();
+                          const tpl = [
+                            `--- Phone screen ${stamp} ---`,
+                            "Q1 Experience:",
+                            "Q2 Current work situation:",
+                            "Q3 Verification (specific past job):",
+                            "Q4 Transportation:",
+                            "Q5 US work auth:",
+                            "Q6 Equipment:",
+                            "Q7 Difficult customer:",
+                            "Q8 Access scenario:",
+                            "Q9 Professionalism:",
+                            "",
+                          ].join("\n");
+                          setBgNotes(`${tpl}${bgNotes ? `\n${bgNotes}` : ""}`);
+                          setBgNotesDirty(true);
+                        }}
+                      >
+                        Insert phone-screen template
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const stamp = new Date().toLocaleString();
+                          setBgNotes(`${bgNotes ? `${bgNotes}\n` : ""}[${stamp}]`);
+                          setBgNotesDirty(true);
+                        }}
+                      >
+                        Log timestamp
+                      </Button>
+                    </div>
+
                     <Textarea
                       placeholder="Notes (auto-saves on blur)…"
                       value={bgNotes}
                       onChange={(e) => { setBgNotes(e.target.value); setBgNotesDirty(true); }}
                       onBlur={saveBgNotes}
-                      rows={3}
+                      rows={8}
                     />
+
                   </CardContent>
                 </Card>
 
@@ -849,6 +924,49 @@ export default function AdminApplicants() {
                 <Card className="rounded-2xl border-slate-200">
                   <CardContent className="p-4 space-y-3">
                     <h3 className="font-semibold text-[#0D1117]">Pipeline</h3>
+
+                    {/* Advance Stage — contextual to current stage */}
+                    {(() => {
+                      const stage = open.current_stage ?? "applied";
+                      const bgPassed = open.bg_check_status === "clear";
+                      const acts: Array<{ label: string; action: AdvanceAction }> = [];
+                      if (stage === "applied") {
+                        acts.push({ label: "Schedule Interview", action: "schedule_interview" });
+                        acts.push({ label: "Send to BG Check", action: "send_to_bg_check" });
+                      } else if (stage === "interview_pending") {
+                        acts.push({ label: "Send to BG Check", action: "send_to_bg_check" });
+                      } else if (
+                        (stage === "background_check_pending" || stage === "background_check_review") && bgPassed
+                      ) {
+                        acts.push({ label: "Send Offer", action: "send_offer" });
+                      } else if (stage === "offer_sent") {
+                        acts.push({ label: "Send Contract", action: "send_contract" });
+                      } else if (stage === "contract_signed") {
+                        acts.push({ label: "Schedule Orientation", action: "mark_oriented" });
+                      } else if (stage === "oriented") {
+                        acts.push({ label: "Activate", action: "activate" });
+                      }
+                      if (!acts.length) return null;
+                      return (
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                          <div className="text-[11px] uppercase tracking-wide font-semibold text-slate-600 mb-2">Advance Stage</div>
+                          <div className="flex flex-wrap gap-2">
+                            {acts.map((a) => (
+                              <Button
+                                key={a.action}
+                                size="sm"
+                                disabled={!!submitting}
+                                onClick={() => runAction(a.action)}
+                                className="bg-[#1FA1F0] hover:bg-[#1990da] text-white disabled:opacity-50"
+                              >
+                                {submitting === a.action ? <Loader2 className="h-4 w-4 animate-spin" /> : a.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     <ol className="space-y-2">
                       {PIPELINE_STEPS.map((step, i) => {
                         const done = i < stepIdx;
