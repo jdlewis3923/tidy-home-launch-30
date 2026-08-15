@@ -23,10 +23,11 @@ const ALLOWED_MIME = ['application/pdf', 'image/jpeg', 'image/png', 'image/heic'
 const Body = z.object({
   applicant_id: z.string().uuid(),
   email: z.string().email().max(200),
-  // 'thimble'  → applicant chose Tidy's preferred provider (no policy data yet)
-  // 'other'    → applicant already has qualifying coverage elsewhere
-  provider: z.enum(['thimble', 'other', 'unknown']).default('unknown'),
+  // provider_key from public.insurance_providers ('thimble', 'other', or a future partner)
+  provider: z.string().trim().max(40).default('unknown'),
   intent: z.enum(['needs_insurance', 'has_insurance']),
+  service_category: z.string().trim().max(40).optional(),
+  coverage_type: z.string().trim().max(60).default('general_liability'),
   carrier_name: z.string().trim().max(200).optional(),
   policy_number: z.string().trim().max(120).optional(),
   per_occurrence_limit_cents: z.number().int().min(0).max(10_000_000_000).optional(),
@@ -64,12 +65,22 @@ Deno.serve(async (req) => {
   // Identity check — applicant_id must belong to the supplied email.
   const { data: applicant } = await admin
     .from('applicants')
-    .select('id, email, first_name, last_name, contractor_id')
+    .select('id, email, first_name, last_name, contractor_id, service')
     .eq('id', b.applicant_id)
     .maybeSingle();
   if (!applicant || applicant.email.toLowerCase() !== b.email.trim().toLowerCase()) {
     return jsonResponse({ error: 'applicant_not_found' }, 404);
   }
+
+  const serviceCategory = b.service_category ?? applicant.service ?? null;
+
+  // Resolve the provider against the registry so unknown keys never land in the DB.
+  const { data: providerRow } = await admin
+    .from('insurance_providers')
+    .select('provider_key')
+    .eq('provider_key', b.provider)
+    .maybeSingle();
+  const providerKey = providerRow?.provider_key ?? (b.intent === 'needs_insurance' ? 'thimble' : 'other');
 
   // "I need insurance" with nothing uploaded yet: record the intent only.
   if (b.intent === 'needs_insurance' && !b.certificate) {
@@ -78,21 +89,31 @@ Deno.serve(async (req) => {
       .insert({
         applicant_id: applicant.id,
         contractor_id: applicant.contractor_id ?? null,
-        provider: 'thimble',
-        verification_status: 'not_started',
+        provider: providerKey,
+        service_category: serviceCategory,
+        coverage_type: b.coverage_type,
+        verification_status: 'coverage_needed',
         additional_insured_status: b.additional_insured_status,
       })
       .select('id')
       .single();
     if (error) return jsonResponse({ error: 'insert_failed', details: error.message }, 500);
 
-    await admin.from('applicants').update({ insurance_status: 'not_started' }).eq('id', applicant.id);
+    await admin.from('applicants').update({ insurance_status: 'coverage_needed' }).eq('id', applicant.id);
     await admin.from('onboarding_events').insert({
       applicant_id: applicant.id,
-      event: 'insurance_thimble_selected',
-      metadata: { provider: 'thimble' },
+      event: 'needs_insurance_selected',
+      metadata: { provider: providerKey, service_category: serviceCategory },
     });
-    return jsonResponse({ ok: true, id: row.id, insurance_status: 'not_started' });
+    await admin.from('insurance_audit_log').insert({
+      insurance_id: row.id,
+      applicant_id: applicant.id,
+      contractor_id: applicant.contractor_id ?? null,
+      action: 'coverage_needed_selected',
+      to_status: 'coverage_needed',
+      metadata: { provider: providerKey },
+    });
+    return jsonResponse({ ok: true, id: row.id, insurance_status: 'coverage_needed' });
   }
 
   // Coverage submission — a certificate is required.
@@ -111,6 +132,12 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'file_too_large', max_bytes: MAX_BYTES }, 400);
   }
 
+  // Expired coverage is rejected up front instead of queueing an admin review.
+  const todayStr = new Date().toISOString().slice(0, 10);
+  if (b.expiration_date && b.expiration_date <= todayStr) {
+    return jsonResponse({ error: 'policy_expired' }, 400);
+  }
+
   const ext = b.certificate.mime_type === 'application/pdf'
     ? 'pdf'
     : (b.certificate.filename.split('.').pop() ?? 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5) || 'jpg';
@@ -126,7 +153,10 @@ Deno.serve(async (req) => {
     .insert({
       applicant_id: applicant.id,
       contractor_id: applicant.contractor_id ?? null,
-      provider: b.provider === 'unknown' ? 'other' : b.provider,
+      provider: providerKey,
+      service_category: serviceCategory,
+      coverage_type: b.coverage_type,
+      verification_method: 'manual_admin',
       carrier_name: b.carrier_name ?? null,
       policy_number: b.policy_number ?? null,
       per_occurrence_limit_cents: b.per_occurrence_limit_cents ?? null,
@@ -137,6 +167,7 @@ Deno.serve(async (req) => {
       certificate_mime: b.certificate.mime_type,
       additional_insured_status: b.additional_insured_status,
       verification_status: 'pending_verification',
+      last_checked_at: new Date().toISOString(),
     })
     .select('id')
     .single();
@@ -150,13 +181,23 @@ Deno.serve(async (req) => {
   // No policy numbers in analytics/event metadata.
   await admin.from('onboarding_events').insert({
     applicant_id: applicant.id,
-    event: 'insurance_submitted',
+    event: 'insurance_verification_submitted',
     metadata: {
-      provider: b.provider,
+      provider: providerKey,
       carrier_name: b.carrier_name ?? null,
       expiration_date: b.expiration_date ?? null,
       additional_insured_status: b.additional_insured_status,
+      service_category: serviceCategory,
     },
+  });
+
+  await admin.from('insurance_audit_log').insert({
+    insurance_id: row.id,
+    applicant_id: applicant.id,
+    contractor_id: applicant.contractor_id ?? null,
+    action: 'verification_submitted',
+    to_status: 'pending_verification',
+    metadata: { provider: providerKey, service_category: serviceCategory },
   });
 
   return jsonResponse({ ok: true, id: row.id, insurance_status: 'pending_verification' });
