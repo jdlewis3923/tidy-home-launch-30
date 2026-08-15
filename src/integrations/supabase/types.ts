@@ -661,19 +661,26 @@ export type Database = {
           certificate_mime: string | null
           certificate_path: string | null
           contractor_id: string | null
+          coverage_type: string
           created_at: string
           effective_date: string | null
           expiration_date: string | null
           id: string
+          last_checked_at: string | null
           per_occurrence_limit_cents: number | null
           policy_number: string | null
           provider: string
           rejection_reason: string | null
           reminders_sent: Json
+          service_category: string | null
           updated_at: string
+          verification_method: string
           verification_status: string
           verified_at: string | null
           verified_by: string | null
+          waived_at: string | null
+          waived_by: string | null
+          waived_reason: string | null
         }
         Insert: {
           additional_insured_status?: string
@@ -683,19 +690,26 @@ export type Database = {
           certificate_mime?: string | null
           certificate_path?: string | null
           contractor_id?: string | null
+          coverage_type?: string
           created_at?: string
           effective_date?: string | null
           expiration_date?: string | null
           id?: string
+          last_checked_at?: string | null
           per_occurrence_limit_cents?: number | null
           policy_number?: string | null
           provider?: string
           rejection_reason?: string | null
           reminders_sent?: Json
+          service_category?: string | null
           updated_at?: string
+          verification_method?: string
           verification_status?: string
           verified_at?: string | null
           verified_by?: string | null
+          waived_at?: string | null
+          waived_by?: string | null
+          waived_reason?: string | null
         }
         Update: {
           additional_insured_status?: string
@@ -705,19 +719,26 @@ export type Database = {
           certificate_mime?: string | null
           certificate_path?: string | null
           contractor_id?: string | null
+          coverage_type?: string
           created_at?: string
           effective_date?: string | null
           expiration_date?: string | null
           id?: string
+          last_checked_at?: string | null
           per_occurrence_limit_cents?: number | null
           policy_number?: string | null
           provider?: string
           rejection_reason?: string | null
           reminders_sent?: Json
+          service_category?: string | null
           updated_at?: string
+          verification_method?: string
           verification_status?: string
           verified_at?: string | null
           verified_by?: string | null
+          waived_at?: string | null
+          waived_by?: string | null
+          waived_reason?: string | null
         }
         Relationships: [
           {
@@ -972,6 +993,159 @@ export type Database = {
           review_id?: string
           review_text?: string | null
           reviewer_name?: string | null
+        }
+        Relationships: []
+      }
+      insurance_audit_log: {
+        Row: {
+          action: string
+          applicant_id: string | null
+          contractor_id: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          insurance_id: string | null
+          metadata: Json
+          performed_by: string | null
+          reason: string | null
+          to_status: string | null
+        }
+        Insert: {
+          action: string
+          applicant_id?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          insurance_id?: string | null
+          metadata?: Json
+          performed_by?: string | null
+          reason?: string | null
+          to_status?: string | null
+        }
+        Update: {
+          action?: string
+          applicant_id?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          insurance_id?: string | null
+          metadata?: Json
+          performed_by?: string | null
+          reason?: string | null
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_audit_log_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_audit_log_insurance_id_fkey"
+            columns: ["insurance_id"]
+            isOneToOne: false
+            referencedRelation: "contractor_insurance"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insurance_providers: {
+        Row: {
+          created_at: string
+          disclosure_text: string | null
+          display_name: string
+          display_order: number
+          embed_supported: boolean
+          embed_url: string | null
+          enabled: boolean
+          id: string
+          integration_type: string
+          is_preferred: boolean
+          provider_key: string
+          provider_type: string
+          referral_url: string | null
+          supported_service_categories: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          disclosure_text?: string | null
+          display_name: string
+          display_order?: number
+          embed_supported?: boolean
+          embed_url?: string | null
+          enabled?: boolean
+          id?: string
+          integration_type?: string
+          is_preferred?: boolean
+          provider_key: string
+          provider_type?: string
+          referral_url?: string | null
+          supported_service_categories?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          disclosure_text?: string | null
+          display_name?: string
+          display_order?: number
+          embed_supported?: boolean
+          embed_url?: string | null
+          enabled?: boolean
+          id?: string
+          integration_type?: string
+          is_preferred?: boolean
+          provider_key?: string
+          provider_type?: string
+          referral_url?: string | null
+          supported_service_categories?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      insurance_requirements: {
+        Row: {
+          accepted_policy_types: string[]
+          additional_insured_required: boolean
+          aggregate_limit_cents: number
+          created_at: string
+          enabled: boolean
+          id: string
+          manual_verification_required: boolean
+          per_occurrence_limit_cents: number
+          reminder_days: number[]
+          service_category: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_policy_types?: string[]
+          additional_insured_required?: boolean
+          aggregate_limit_cents?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          manual_verification_required?: boolean
+          per_occurrence_limit_cents?: number
+          reminder_days?: number[]
+          service_category: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_policy_types?: string[]
+          additional_insured_required?: boolean
+          aggregate_limit_cents?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          manual_verification_required?: boolean
+          per_occurrence_limit_cents?: number
+          reminder_days?: number[]
+          service_category?: string
+          updated_at?: string
         }
         Relationships: []
       }
