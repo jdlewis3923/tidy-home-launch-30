@@ -273,7 +273,6 @@ export default function Apply() {
               </Button>
             </form>
           </div>
-          )}
         </section>
 
       </div>
