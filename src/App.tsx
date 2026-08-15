@@ -73,6 +73,7 @@ const ProOnboarding = lazy(() => import("./pages/ProOnboarding.tsx"));
 const ProTraining = lazy(() => import("./pages/ProTraining.tsx"));
 const ProEquipment = lazy(() => import("./pages/ProEquipment.tsx"));
 const AdminCoiReview = lazy(() => import("./pages/AdminCoiReview.tsx"));
+const AdminInsurance = lazy(() => import("./pages/AdminInsurance.tsx"));
 const AdminTierProgression = lazy(() => import("./pages/AdminTierProgression.tsx"));
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
