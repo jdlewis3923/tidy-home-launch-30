@@ -111,9 +111,21 @@ export default function Apply() {
         work_authorized:   form.work_authorized === "yes",
         description:       form.description.trim() || undefined,
       };
-      const { error } = await supabase.functions.invoke("submit-application", { body: payload });
+      const { data, error } = await supabase.functions.invoke("submit-application", { body: payload });
       if (error) throw error;
-      setDone(true);
+      const applicantId = (data as { id?: string } | null)?.id;
+      if (applicantId) {
+        const resume: InsuranceApplicant = {
+          id: applicantId,
+          email: payload.email,
+          first_name: payload.first_name,
+        };
+        try { localStorage.setItem(RESUME_KEY, JSON.stringify(resume)); } catch { /* ignore */ }
+        setInsuranceFor(resume);
+      } else {
+        setDone(true);
+      }
+
     } catch (err: any) {
       console.error(err);
       toast({ title: "Could not submit", description: err?.message ?? "Please try again", variant: "destructive" });
