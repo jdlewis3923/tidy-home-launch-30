@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import MyTierWidget from "@/components/pro/MyTierWidget";
+import InsuranceCard from "@/components/pro/InsuranceCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import AnimatedNumber from "@/components/motion/AnimatedNumber";
 import tidyLogo from "@/assets/tidy-logo.png";
@@ -297,6 +298,9 @@ export default function ProDashboard() {
 
       <section className="relative z-10 mx-auto max-w-7xl px-4 pb-6 sm:px-8">
         <MyTierWidget />
+        <div className="mt-4">
+          <InsuranceCard />
+        </div>
       </section>
 
       <section className="relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:px-8">
