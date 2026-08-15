@@ -119,6 +119,7 @@ export default function Apply() {
           id: applicantId,
           email: payload.email,
           first_name: payload.first_name,
+          service_category: form.service || null,
         };
         try { localStorage.setItem(RESUME_KEY, JSON.stringify(resume)); } catch { /* ignore */ }
         setInsuranceFor(resume);
