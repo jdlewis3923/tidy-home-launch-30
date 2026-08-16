@@ -1,6 +1,11 @@
+import { formatMonthly, getLowestStartingPrice } from '@/lib/dashboard-pricing';
+
 /**
  * Above-the-fold trust strip for the /signup builder.
  * One short line. Calm cream surface. No icons — pure typography.
+ *
+ * The starting price is derived from dashboard-pricing.ts (the same source
+ * checkout math uses) so it can never drift from real pricing.
  */
 export default function TrustStrip() {
   return (
@@ -19,7 +24,7 @@ export default function TrustStrip() {
       <span className="mx-1.5 text-ink-faint">·</span>
       Same Pro Every Visit
       <span className="mx-1.5 text-ink-faint">·</span>
-      Starting at $135/mo
+      Starting at {formatMonthly(getLowestStartingPrice())}
     </div>
   );
 }
