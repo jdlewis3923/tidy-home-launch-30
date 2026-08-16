@@ -64,7 +64,7 @@ export default function BundleNudge({ state, onChange }: Props) {
           Add {meta.name} for {meta.price} more
         </p>
         <p className="text-[11px] text-ink-soft mt-0.5">
-          Save 10% on your bundle — {meta.saving} discount
+          Save {meta.percentLabel} on your bundle — {meta.saving} discount
         </p>
       </div>
       <span className="shrink-0 rounded-lg bg-ink px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-white transition-transform group-hover:translate-x-0.5">
