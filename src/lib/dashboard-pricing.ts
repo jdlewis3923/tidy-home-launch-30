@@ -158,6 +158,48 @@ export function getServicePrice(state: ConfigState, service: ServiceType): numbe
   return 0;
 }
 
+// ---------------------------------------------------------------------------
+// Display helpers — single source of truth for all "starting at" / per-service
+// price labels in the UI. Never hardcode a price string in a component; read
+// it from here so marketing copy can never drift from checkout math.
+// ---------------------------------------------------------------------------
+
+/** Base per-visit price for a service at a given frequency (no size upcharge). */
+export function getBasePrice(service: ServiceType, frequency: Frequency): number {
+  if (service === 'cleaning') return cleaningPrices[frequency];
+  if (service === 'lawn') return lawnPrices[frequency];
+  if (frequency === 'weekly') return 0; // detailing has no weekly tier
+  return detailingPrices[frequency as 'monthly' | 'biweekly'];
+}
+
+/** Frequency the bundle nudge pre-selects when adding a service. */
+export const defaultBundleFrequency: Record<ServiceType, Frequency> = {
+  cleaning: 'biweekly',
+  lawn: 'monthly',
+  detailing: 'biweekly',
+};
+
+/** Cheapest recurring price for a service (its entry-level tier). */
+export function getServiceStartingPrice(service: ServiceType): number {
+  const freqs: Frequency[] = ['monthly', 'biweekly', 'weekly'];
+  const prices = freqs
+    .map((f) => getBasePrice(service, f))
+    .filter((p) => p > 0);
+  return Math.min(...prices);
+}
+
+/** Lowest entry price across all services — used for "Starting at $X/mo". */
+export function getLowestStartingPrice(): number {
+  const services: ServiceType[] = ['cleaning', 'lawn', 'detailing'];
+  return Math.min(...services.map(getServiceStartingPrice));
+}
+
+/** Formats a price as a whole-dollar monthly label, e.g. "$85/mo". */
+export function formatMonthly(amount: number): string {
+  return `$${Number.isInteger(amount) ? amount : amount.toFixed(2)}/mo`;
+}
+
+
 export function getBundleDiscount(serviceCount: number): number {
   if (serviceCount >= 3) return 0.20;
   if (serviceCount >= 2) return 0.15;
