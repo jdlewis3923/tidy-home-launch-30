@@ -33,11 +33,11 @@ export interface PlanTier {
   highlighted?: boolean;
 }
 
-export interface Testimonial {
-  quote: string;
-  name: string;
-  zip: string;
+export interface TrustCard {
+  title: string;
+  body: string;
 }
+
 
 export interface ServiceLandingConfig {
   serviceSlug: "house-cleaning" | "lawn-care" | "car-detailing";
@@ -65,7 +65,7 @@ export interface ServiceLandingConfig {
   heroAlt: string;
   plans: PlanTier[];
   included: string[];
-  testimonials: Testimonial[];
+  trustCards: TrustCard[];
   faqs: FaqItem[];
   bundleCta: {
     title: string;
@@ -371,12 +371,12 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       {/* NEIGHBORHOOD TRUST */}
       <NeighborhoodTrust />
 
-      {/* LOCAL TRUST / TESTIMONIALS */}
+      {/* WHY TIDY / LOCAL TRUST */}
       <section className="relative bg-background py-20 px-4 overflow-hidden">
         <SectionDecor tone="gold" />
         <div className="relative max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Local Reviews")}</span>
+            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Why Tidy")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
               {t(`Trusted across ${SERVICE_AREA_TRUST.replace("Serving ", "")}`)}
             </h2>
@@ -384,44 +384,36 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
           {/* Mobile: snap-scroll carousel */}
           <div className="md:hidden snap-row flex overflow-x-auto gap-4 -mx-4 px-4 pb-2">
-            {config.testimonials.map((tm) => (
+            {config.trustCards.map((card) => (
               <div
-                key={tm.name + tm.zip}
+                key={card.title}
                 className="bg-card border rounded-xl p-6 shrink-0"
                 style={{ width: "85%" }}
               >
-                <div className="text-gold text-sm mb-3">★★★★★</div>
-                <p className="text-sm text-text-mid italic">"{t(tm.quote)}"</p>
-                <div className="mt-4 pt-4 border-t border-border/60">
-                  <p className="text-xs font-semibold text-foreground">{t(tm.name)}</p>
-                  <p className="text-xs text-text-light">ZIP {tm.zip}</p>
-                </div>
+                <h3 className="text-sm font-semibold text-foreground mb-2">{t(card.title)}</h3>
+                <p className="text-sm text-text-mid">{t(card.body)}</p>
               </div>
             ))}
           </div>
 
           {/* Desktop: 3-up grid with hover lift */}
           <div className="hidden md:grid md:grid-cols-3 gap-6">
-            {config.testimonials.map((tm, i) => (
-              <Reveal key={tm.name + tm.zip} delay={i * 80}>
+            {config.trustCards.map((card, i) => (
+              <Reveal key={card.title} delay={i * 80}>
                 <div className="bg-card border rounded-xl p-6 h-full flex flex-col hover-lift">
-                  <div className="text-gold text-sm mb-3">★★★★★</div>
-                  <p className="text-sm text-text-mid italic flex-1">"{t(tm.quote)}"</p>
-                  <div className="mt-4 pt-4 border-t border-border/60">
-                    <p className="text-xs font-semibold text-foreground">{t(tm.name)}</p>
-                    <p className="text-xs text-text-light">ZIP {tm.zip}</p>
-                  </div>
+                  <h3 className="text-sm font-semibold text-foreground mb-2">{t(card.title)}</h3>
+                  <p className="text-sm text-text-mid flex-1">{t(card.body)}</p>
                 </div>
               </Reveal>
             ))}
           </div>
 
           <p className="text-center text-xs text-text-light mt-6">
-            {t("Placeholder reviews — verified customer reviews rolling out once we clear 50 jobs.")}{" "}
             {SERVICE_AREA_TRUST}.
           </p>
         </div>
       </section>
+
 
       {/* GOOGLE GUARANTEED SLOT */}
       <section className="bg-section-alt py-12 px-4">
