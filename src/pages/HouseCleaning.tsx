@@ -81,7 +81,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "Plans start at $159/mo for a monthly visit, $279/mo biweekly, $459/mo weekly. Pricing is based on cadence and home size. Standard pricing covers most homes up to 2,500 sq ft — larger homes have a small flat upgrade.",
+      a: "Plans start at $159/mo for a monthly visit, $275/mo biweekly, $459/mo weekly. Pricing is based on cadence and home size. Standard pricing covers most homes up to 2,500 sq ft — larger homes have a small flat upgrade.",
     },
     {
       q: "Can I cancel anytime?",
