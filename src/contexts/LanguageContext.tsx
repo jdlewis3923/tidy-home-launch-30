@@ -394,8 +394,8 @@ const translations: Record<string, string> = {
   "They show up rain or shine. Locked price, never a surprise invoice.":
     "Llegan llueva o truene. Precio fijo, nunca una factura sorpresa.",
   // Lawn Care FAQs
-  "Plans start at $85/mo monthly, $149/mo biweekly, $239/mo weekly. Pricing is based on cadence and yard size. Standard pricing covers most yards up to 4,000 sq ft of mowable turf.":
-    "Los planes empiezan en $85/mes mensual, $149/mes quincenal y $239/mes semanal. El precio depende de la frecuencia y el tamaño del jardín. El precio estándar cubre la mayoría de los jardines hasta 4,000 pies cuadrados de césped cortable.",
+  "Plans start at $85/mo monthly, $129/mo biweekly, $195/mo weekly. Pricing is based on cadence and yard size. Standard pricing covers most yards up to 4,000 sq ft of mowable turf.":
+    "Los planes empiezan en $85/mes mensual, $129/mes quincenal y $195/mes semanal. El precio depende de la frecuencia y el tamaño del jardín. El precio estándar cubre la mayoría de los jardines hasta 4,000 pies cuadrados de césped cortable.",
   "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.":
     "Corte a altura precisa, bordeado de todos los contornos, soplado de áreas pavimentadas, desbroce a lo largo de las cercas y embolsar o triturar el césped. Los planes semanales incluyen poda de arbustos.",
   "Who does the work?": "¿Quién hace el trabajo?",
