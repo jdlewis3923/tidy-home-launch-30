@@ -51,7 +51,7 @@ const BundleInner = () => {
     const chosen = SERVICES.filter((s) => picked.has(s.slug));
     const valid = chosen.length === 2;
     const subtotal = chosen.reduce((sum, s) => sum + s.basePrice, 0);
-    const discounted = Math.round(subtotal * 0.9);
+    const discounted = (subtotal * 0.9).toFixed(2);
     return {
       valid,
       chosen,
@@ -63,7 +63,7 @@ const BundleInner = () => {
 
   const threeBundle = useMemo(() => {
     const subtotal = SERVICES.reduce((sum, s) => sum + s.basePrice, 0);
-    const discounted = Math.round(subtotal * 0.8);
+    const discounted = (subtotal * 0.85).toFixed(2);
     return { subtotal, discounted };
   }, []);
 
