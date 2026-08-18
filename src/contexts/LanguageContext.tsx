@@ -344,8 +344,8 @@ const translations: Record<string, string> = {
     "Reservé en menos de un minuto. El equipo es puntual, amable y minucioso.",
   // House Cleaning FAQs
   "What's the price and what's it based on?": "¿Cuál es el precio y de qué depende?",
-  "Plans start at $159/mo for a monthly visit, $279/mo biweekly, $459/mo weekly. Pricing is based on cadence and home size. Standard pricing covers most homes up to 2,500 sq ft — larger homes have a small flat upgrade.":
-    "Los planes empiezan en $159/mes para una visita mensual, $279/mes quincenal y $459/mes semanal. El precio depende de la frecuencia y el tamaño de la casa. El precio estándar cubre la mayoría de las casas hasta 2,500 pies cuadrados — las casas más grandes tienen un pequeño cargo adicional fijo.",
+  "Plans start at $159/mo for a monthly visit, $275/mo biweekly, $459/mo weekly. Pricing is based on cadence and home size. Standard pricing covers most homes up to 2,500 sq ft — larger homes have a small flat upgrade.":
+    "Los planes empiezan en $159/mes para una visita mensual, $275/mes quincenal y $459/mes semanal. El precio depende de la frecuencia y el tamaño de la casa. El precio estándar cubre la mayoría de las casas hasta 2,500 pies cuadrados — las casas más grandes tienen un pequeño cargo adicional fijo.",
   "Yes. No contracts, no cancellation fees. Pause, skip, or cancel from your dashboard anytime.":
     "Sí. Sin contratos, sin cargos por cancelación. Pausa, omite o cancela desde tu panel cuando quieras.",
   "What's your service area?": "¿Cuál es su área de servicio?",
@@ -405,7 +405,7 @@ const translations: Record<string, string> = {
     "Reprogramamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa y tu precio no cambia.",
   "Reach out within 24 hours and we'll send the crew back or credit your account — no questions asked.":
     "Avísanos en 24 horas y mandamos al equipo de vuelta o te acreditamos a tu cuenta — sin preguntas.",
-  "Already booking lawn? Add biweekly cleaning for $279/mo.": "¿Ya tienes jardín? Agrega limpieza quincenal por $279/mes.",
+  "Already booking lawn? Add biweekly cleaning for $275/mo.": "¿Ya tienes jardín? Agrega limpieza quincenal por $275/mes.",
 
   // Car Detailing LP
   "Mobile Car Detailing in Pinecrest + Kendall": "Detallado Móvil de Auto en Pinecrest + Kendall",

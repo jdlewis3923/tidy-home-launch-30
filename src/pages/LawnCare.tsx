@@ -109,7 +109,7 @@ const config: ServiceLandingConfig = {
     },
   ],
   bundleCta: {
-    title: "Already booking lawn? Add biweekly cleaning for $279/mo.",
+    title: "Already booking lawn? Add biweekly cleaning for $275/mo.",
     body: "Save 10% when you stack — and never coordinate two providers again.",
     targetServices: "lawn,cleaning",
   },
