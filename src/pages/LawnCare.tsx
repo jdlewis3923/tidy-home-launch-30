@@ -113,7 +113,7 @@ const config: ServiceLandingConfig = {
     description:
       "Weekly lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Locked price from $85/mo. Same crew, no contracts. Book in 60 seconds.",
     canonical: "https://jointidy.co/lawn-care",
-    priceRange: "$85–$239",
+    priceRange: "$85–$195",
   },
 };
 
