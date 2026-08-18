@@ -104,14 +104,14 @@ const BundleInner = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <SeoHead
         title={t("Bundle & Save in Pinecrest + Kendall | Tidy Home Services")}
-        description={t("Stack home cleaning, lawn care, and car detailing on one plan. Save 10–20% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.")}
+        description={t("Stack home cleaning, lawn care, and car detailing on one plan. Save 10–15% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.")}
         canonical="https://jointidy.co/bundle"
         ogImage={heroImg}
         priceRange="$85–$859"
       />
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
-        label={t("Bundle & Save · 10–20% off")}
+        label={t("Bundle & Save · 10–15% off")}
         surface="lp_bundle"
         bundle="true"
         services="cleaning,lawn,detailing"
@@ -131,7 +131,7 @@ const BundleInner = () => {
         <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Bundle & Save")}</span>
           <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
-            {t("Bundle & Save — Stack services, save 10–20%")}
+            {t("Bundle & Save — Stack services, save 10–15%")}
           </h1>
           <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
             {t("The more you stack, the more you save. Pinecrest + Kendall only (33156 · 33183 · 33186).")}
@@ -229,9 +229,9 @@ const BundleInner = () => {
               <div className="relative bg-card border-2 border-primary rounded-xl p-6 h-full flex flex-col hover-lift shadow-[0_0_28px_-8px_hsl(var(--primary)/0.3)] md:scale-[1.04] md:-my-1 z-10">
                 <span className="most-popular-ribbon">{t("Best Value")}</span>
                 <h3 className="text-lg font-bold text-foreground">{t("3-Service Bundle")}</h3>
-                <div className="mt-2 text-3xl font-extrabold text-primary">{t("20% off")}</div>
+                <div className="mt-2 text-3xl font-extrabold text-primary">{t("15% off")}</div>
                 <p className="text-sm text-text-mid mt-3 flex-1">
-                  {t("All three services on one plan: cleaning, lawn care, and detailing. Lock in 20% off the combined monthly price.")}
+                  {t("All three services on one plan: cleaning, lawn care, and detailing. Lock in 15% off the combined monthly price.")}
                 </p>
                 <p className="text-sm text-text-mid mt-3">
                   <span className="line-through text-text-light mr-1">${threeBundle.subtotal}/mo</span>

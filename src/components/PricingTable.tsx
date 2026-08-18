@@ -14,7 +14,7 @@ const rows = [
 
 const pricingFAQ = [
   { q: "What affects my price?", a: "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees." },
-  { q: "How do bundle discounts work?", a: "Pick 2 services and get 15% off automatically. Pick all 3 and get 20% off. The discount is applied at checkout — no code needed." },
+  { q: "How do bundle discounts work?", a: "Pick 2 services and get 10% off automatically. Pick all 3 and get 15% off. The discount is applied at checkout — no code needed." },
   { q: "Can I add services later?", a: "Yes. You can add or remove any service at any time. Changes take effect on your next billing cycle." },
   { q: "Can I adjust my plan after signing up?", a: "Absolutely. Change your frequency, swap services, or pause anytime through your dashboard or by contacting us." },
 ];
@@ -57,7 +57,7 @@ const PricingTable = () => {
           </div>
 
           <p className="mt-6 text-xs text-text-light">
-            {t("Bundle discount auto-applied at checkout · 2 services = 15% off · 3 services = 20% off · Cancel anytime")}
+            {t("Bundle discount auto-applied at checkout · 2 services = 10% off · 3 services = 15% off · Cancel anytime")}
           </p>
           <p className="mt-2 text-xs text-text-light/80">
             {t("Standard pricing covers most homes, yards, and vehicles. Larger properties or vehicles get a small upgrade fee — anything beyond is a quick custom quote.")}
