@@ -279,8 +279,8 @@ const translations: Record<string, string> = {
   "Your same pro every visit, not a rotating marketplace crew.": "Tu mismo profesional en cada visita, no un equipo rotativo de la app.",
   "Photo-Verified": "Verificado con Fotos",
   "Before-and-after photos from every visit, sent to your phone.": "Fotos antes y después de cada visita, enviadas a tu teléfono.",
-  "Licensed & Insured": "Licenciado y Asegurado",
   "Background-checked pros, insured on every Tidy job.": "Profesionales verificados y asegurados en cada trabajo de Tidy.",
+
 
   "Questions, answered.": "Respuestas a tus preguntas.",
   "60-second signup. Same crew. Locked price.": "Inscripción en 60 segundos. El mismo equipo. Precio fijo.",
