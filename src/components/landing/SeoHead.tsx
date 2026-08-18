@@ -36,11 +36,6 @@ const SeoHead = ({ title, description, canonical, ogImage, priceRange = "$$" }: 
       addressCountry: "US",
     },
     sameAs: ["https://jointidy.co"],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.9",
-      reviewCount: "100",
-    },
   };
 
   return (

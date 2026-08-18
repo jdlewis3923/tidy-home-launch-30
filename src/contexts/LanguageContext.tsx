@@ -24,7 +24,7 @@ const translations: Record<string, string> = {
   "Cancel Anytime": "Cancela Cuando Quieras",
   "Photo Verified Every Visit": "Fotos Verificadas en Cada Visita",
   "No Long-Term Contracts": "Sin Contratos a Largo Plazo",
-  "4.9★ Average Rating": "4.9★ Calificación Promedio",
+  
   "Serving Kendall & Pinecrest": "Sirviendo Kendall y Pinecrest",
   "From $85/mo": "Desde $85/mes",
   "One Monthly Plan": "Un Plan Mensual",
@@ -128,7 +128,7 @@ const translations: Record<string, string> = {
   "Reviews": "Reseñas",
   "Trusted by homeowners": "Confiado por propietarios",
   "Real homeowners. Real results.": "Propietarios reales. Resultados reales.",
-  "Rated 4.9 by homeowners": "Calificado 4.9 por propietarios",
+  
   "100+ Miami members": "100+ miembros en Miami",
   "Request Early Access →": "Solicitar Acceso →",
 
@@ -221,7 +221,7 @@ const translations: Record<string, string> = {
   "No contracts. No payments until launch.": "Sin contratos. Sin pagos hasta el lanzamiento.",
   "Limited founding memberships available in your area. Takes 60 seconds. No commitment required.": "Membresías fundadoras limitadas en tu área. Toma 60 segundos. Sin compromiso.",
   "Get Started — Request Early Access →": "Comienza — Solicitar Acceso →",
-  "4.9★ Rating": "4.9★ Calificación",
+  
   "Miami-Based": "Basado en Miami",
 
   // Lead popup

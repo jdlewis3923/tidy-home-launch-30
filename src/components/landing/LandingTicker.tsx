@@ -8,7 +8,6 @@ const ITEMS = [
   "Cancel Anytime",
   "Photo Verified Visits",
   "Serving 33156 · 33183 · 33186",
-  "4.9★ Average Rating",
   "Eco-Safe Products",
   "60-Second Signup",
 ];
