@@ -104,7 +104,9 @@ const BundleInner = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <SeoHead
         title={t("Bundle & Save in Pinecrest + Kendall | Tidy Home Services")}
-        description={t("Stack home cleaning, lawn care, and car detailing on one plan. Save 10–15% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.")}
+        description={t(
+          "Stack home cleaning, lawn care, and car detailing on one plan. Save 10–15% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.",
+        )}
         canonical="https://jointidy.co/bundle"
         ogImage={heroImg}
         priceRange="$85–$859"
@@ -231,7 +233,9 @@ const BundleInner = () => {
                 <h3 className="text-lg font-bold text-foreground">{t("3-Service Bundle")}</h3>
                 <div className="mt-2 text-3xl font-extrabold text-primary">{t("15% off")}</div>
                 <p className="text-sm text-text-mid mt-3 flex-1">
-                  {t("All three services on one plan: cleaning, lawn care, and detailing. Lock in 15% off the combined monthly price.")}
+                  {t(
+                    "All three services on one plan: cleaning, lawn care, and detailing. Lock in 15% off the combined monthly price.",
+                  )}
                 </p>
                 <p className="text-sm text-text-mid mt-3">
                   <span className="line-through text-text-light mr-1">${threeBundle.subtotal}/mo</span>
@@ -261,7 +265,9 @@ const BundleInner = () => {
                 <h3 className="text-lg font-bold text-foreground">{t("Custom")}</h3>
                 <div className="mt-2 text-3xl font-extrabold text-primary">{t("Tailored")}</div>
                 <p className="text-sm text-text-mid mt-3 flex-1">
-                  {t("Larger home, oversized lot, or fleet of vehicles? We'll build a custom plan and send you a personal quote.")}
+                  {t(
+                    "Larger home, oversized lot, or fleet of vehicles? We'll build a custom plan and send you a personal quote.",
+                  )}
                 </p>
                 <Link
                   to={customCta.to}
@@ -281,15 +287,13 @@ const BundleInner = () => {
         <SectionDecor tone="gold" />
         <div className="relative max-w-3xl mx-auto">
           <Reveal className="text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-              Why bundle?
-            </h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">Why bundle?</h2>
           </Reveal>
           <Reveal>
             <ul className="mt-8 grid sm:grid-cols-2 gap-3 bg-card border rounded-xl p-6">
               {[
                 "10% off any 2 services — applied automatically",
-                "20% off all 3 services — applied automatically",
+                "15% off all 3 services — applied automatically",
                 "One subscription, one bill, one crew",
                 "Same locked price every month",
                 "Cancel or adjust anytime",
