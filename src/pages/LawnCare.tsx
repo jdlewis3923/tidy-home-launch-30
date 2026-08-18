@@ -32,7 +32,7 @@ const config: ServiceLandingConfig = {
     },
     {
       name: "Biweekly",
-      price: "$149",
+      price: "$129",
       cadence: "/mo",
       planSlug: "biweekly",
       description: "Two visits per month.",
@@ -40,7 +40,7 @@ const config: ServiceLandingConfig = {
     },
     {
       name: "Weekly",
-      price: "$239",
+      price: "$195",
       cadence: "/mo",
       planSlug: "weekly",
       description: "Four visits per month, bush trim included.",
@@ -81,7 +81,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "Plans start at $85/mo monthly, $149/mo biweekly, $239/mo weekly. Pricing is based on cadence and yard size. Standard pricing covers most yards up to 4,000 sq ft of mowable turf.",
+      a: "Plans start at $85/mo monthly, $129/mo biweekly, $195/mo weekly. Pricing is based on cadence and yard size. Standard pricing covers most yards up to 4,000 sq ft of mowable turf.",
     },
     {
       q: "Can I cancel anytime?",
