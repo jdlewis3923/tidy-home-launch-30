@@ -58,26 +58,21 @@ const config: ServiceLandingConfig = {
     "Same crew every visit",
     "Fully insured",
   ],
-  testimonials: [
+  trustCards: [
     {
-      quote:
-        "Kitchen and bathrooms look reset every time. Same crew, same standard — feels effortless.",
-      name: "Placeholder Customer",
-      zip: "33156",
+      title: "Same Crew",
+      body: "Your same pro every visit, not a rotating marketplace crew.",
     },
     {
-      quote:
-        "I haven't touched a mop in months. Locked monthly price, no surprise bills.",
-      name: "Placeholder Customer",
-      zip: "33183",
+      title: "Photo-Verified",
+      body: "Before-and-after photos from every visit, sent to your phone.",
     },
     {
-      quote:
-        "Booked in under a minute. The crew is on time, polite, and thorough.",
-      name: "Placeholder Customer",
-      zip: "33186",
+      title: "Licensed & Insured",
+      body: "Background-checked pros, insured on every Tidy job.",
     },
   ],
+
   faqs: [
     {
       q: "What's the price and what's it based on?",

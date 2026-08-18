@@ -58,26 +58,21 @@ const config: ServiceLandingConfig = {
     "In your driveway",
     "Fully insured",
   ],
-  testimonials: [
+  trustCards: [
     {
-      quote:
-        "They come to my driveway every month — car looks showroom-fresh, no drop-off needed.",
-      name: "Placeholder Customer",
-      zip: "33156",
+      title: "Same Crew",
+      body: "Your same pro every visit, not a rotating marketplace crew.",
     },
     {
-      quote:
-        "Ceramic-safe process protects the coating. Interior is spotless every time.",
-      name: "Placeholder Customer",
-      zip: "33183",
+      title: "Photo-Verified",
+      body: "Before-and-after photos from every visit, sent to your phone.",
     },
     {
-      quote:
-        "Locked monthly price. Same detailer every visit. Best routine I've added all year.",
-      name: "Placeholder Customer",
-      zip: "33186",
+      title: "Licensed & Insured",
+      body: "Background-checked pros, insured on every Tidy job.",
     },
   ],
+
   faqs: [
     {
       q: "What's the price and what's it based on?",
