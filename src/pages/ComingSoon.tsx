@@ -53,7 +53,7 @@ const ComingSoon = () => {
           </h1>
 
           <p className="mt-4 max-w-xl text-base sm:text-lg font-light text-white/70">
-            Tidy Home Services — one team handling cleaning, lawn, and detailing across Miami. Hiring our founding crew now.
+            Subscription home care in Kendall &amp; Pinecrest — house cleaning, lawn care, and mobile car detailing. Hiring our founding crew now.
           </p>
 
           <div className="mt-10">
@@ -68,7 +68,7 @@ const ComingSoon = () => {
           </div>
 
           <div className="mt-16 text-[11px] uppercase tracking-[0.25em] text-white/30">
-            Tidy Home Services LLC · Miami, FL
+            Tidy Home Concierge LLC · Miami, FL
           </div>
 
           <a
