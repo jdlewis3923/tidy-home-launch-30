@@ -201,10 +201,11 @@ export function formatMonthly(amount: number): string {
 
 
 export function getBundleDiscount(serviceCount: number): number {
-  if (serviceCount >= 3) return 0.20;
-  if (serviceCount >= 2) return 0.15;
+  if (serviceCount >= 3) return 0.15;
+  if (serviceCount >= 2) return 0.10;
   return 0;
 }
+
 
 // Returns true when ANY selected service has a Custom Quote tier — in this
 // case the dashboard hides auto-pricing and routes to the contact flow.

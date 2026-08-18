@@ -154,7 +154,8 @@ Deno.serve(async (req) => {
         // ---------- Bundle discount (metadata only) ----------
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
         const bundle_discount_pct =
-          uniqueServices >= 3 ? 20 : uniqueServices === 2 ? 15 : 0;
+          uniqueServices >= 3 ? 15 : uniqueServices === 2 ? 10 : 0;
+
 
         // ---------- Promo code lookup ----------
         let promoId: string | null = null;
