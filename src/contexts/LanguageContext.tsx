@@ -155,7 +155,7 @@ const translations: Record<string, string> = {
   "Monthly": "Mensual",
   "Biweekly": "Quincenal",
   "Weekly": "Semanal",
-  "Bundle discount auto-applied at checkout · 2 services = 15% off · 3 services = 20% off · Cancel anytime": "Descuento por combo aplicado automáticamente · 2 servicios = 15% descuento · 3 servicios = 20% descuento · Cancela cuando quieras",
+  "Bundle discount auto-applied at checkout · 2 services = 10% off · 3 services = 15% off · Cancel anytime": "Descuento por combo aplicado automáticamente · 2 servicios = 10% descuento · 3 servicios = 15% descuento · Cancela cuando quieras",
 
   // FAQ
   "Most customers never need to think about any of this — but we've got you covered.": "La mayoría de los clientes nunca necesitan pensar en esto — pero te tenemos cubierto.",
@@ -254,7 +254,7 @@ const translations: Record<string, string> = {
   "Privacy": "Privacidad",
 
   // Bundle banner
-  "💡 Bundle services and save automatically — 2 services: <strong>15% off</strong> · 3 services: <strong>20% off</strong> — Applied at checkout automatically": "💡 Combina servicios y ahorra automáticamente — 2 servicios: <strong>15% descuento</strong> · 3 servicios: <strong>20% descuento</strong> — Aplicado automáticamente",
+  "💡 Bundle services and save automatically — 2 services: <strong>10% off</strong> · 3 services: <strong>15% off</strong> — Applied at checkout automatically": "💡 Combina servicios y ahorra automáticamente — 2 servicios: <strong>10% descuento</strong> · 3 servicios: <strong>15% descuento</strong> — Aplicado automáticamente",
 
   // ============================================================
   // LANDING PAGES (LPs) — /house-cleaning, /lawn-care, /car-detailing, /bundle
@@ -312,7 +312,7 @@ const translations: Record<string, string> = {
   "House Cleaning · from $159/mo": "Limpieza del Hogar · desde $159/mes",
   "Lawn Care · from $85/mo": "Cuidado del Jardín · desde $85/mes",
   "Car Detailing · from $159/mo": "Detallado de Auto · desde $159/mes",
-  "Bundle & Save · 10–20% off": "Combo y Ahorra · 10–20% descuento",
+  "Bundle & Save · 10–15% off": "Combo y Ahorra · 10–15% descuento",
 
   // House Cleaning LP
   "Monthly House Cleaning in Pinecrest + Kendall": "Limpieza Mensual del Hogar en Pinecrest + Kendall",
@@ -454,7 +454,7 @@ const translations: Record<string, string> = {
   "Already booking detailing? Add monthly cleaning for $159/mo.": "¿Ya tienes detallado? Agrega limpieza mensual por $159/mes.",
 
   // Bundle page
-  "Bundle & Save — Stack services, save 10–20%": "Combo y Ahorra — Apila servicios, ahorra 10–20%",
+  "Bundle & Save — Stack services, save 10–15%": "Combo y Ahorra — Apila servicios, ahorra 10–15%",
   "The more you stack, the more you save. Pinecrest + Kendall only (33156 · 33183 · 33186).":
     "Mientras más combinas, más ahorras. Solo Pinecrest + Kendall (33156 · 33183 · 33186).",
   "2-Service Bundle": "Combo de 2 Servicios",
@@ -466,9 +466,9 @@ const translations: Record<string, string> = {
   "Build my 2-service bundle": "Arma mi combo de 2 servicios",
   "Pick 2 services to continue": "Elige 2 servicios para continuar",
   "3-Service Bundle": "Combo de 3 Servicios",
-  "20% off": "20% descuento",
-  "All three services on one plan: cleaning, lawn care, and detailing. Lock in 20% off the combined monthly price.":
-    "Los tres servicios en un solo plan: limpieza, jardín y detallado. Asegura 20% de descuento sobre el precio mensual combinado.",
+  "15% off": "15% descuento",
+  "All three services on one plan: cleaning, lawn care, and detailing. Lock in 15% off the combined monthly price.":
+    "Los tres servicios en un solo plan: limpieza, jardín y detallado. Asegura 15% de descuento sobre el precio mensual combinado.",
   "Build my 3-service bundle": "Arma mi combo de 3 servicios",
   "Custom": "Personalizado",
   "Tailored": "A Medida",
@@ -477,7 +477,7 @@ const translations: Record<string, string> = {
   "Request a custom plan": "Solicita un plan personalizado",
   "Why bundle?": "¿Por qué combinar?",
   "10% off any 2 services — applied automatically": "10% de descuento en cualquier 2 servicios — aplicado automáticamente",
-  "20% off all 3 services — applied automatically": "20% de descuento en los 3 servicios — aplicado automáticamente",
+  "15% off all 3 services — applied automatically": "15% de descuento en los 3 servicios — aplicado automáticamente",
   "One subscription, one bill, one crew": "Una suscripción, una factura, un equipo",
   "Same locked price every month": "El mismo precio fijo cada mes",
   "Cancel or adjust anytime": "Cancela o ajusta cuando quieras",
