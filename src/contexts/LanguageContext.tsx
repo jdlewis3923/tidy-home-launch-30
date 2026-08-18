@@ -275,9 +275,13 @@ const translations: Record<string, string> = {
   "Same crew every visit. ETA reminder 30 min before.": "El mismo equipo cada visita. Aviso de llegada 30 min antes.",
   "Set it and forget it": "Configúralo y olvídate",
   "Pause, skip, or cancel anytime from your dashboard.": "Pausa, omite o cancela cuando quieras desde tu panel.",
-  "Local Reviews": "Reseñas Locales",
-  "Placeholder Customer": "Cliente",
-  "Placeholder reviews — verified customer reviews rolling out once we clear 50 jobs.": "Reseñas de muestra — reseñas verificadas próximamente al cumplir 50 trabajos.",
+  "Same Crew": "El Mismo Equipo",
+  "Your same pro every visit, not a rotating marketplace crew.": "Tu mismo profesional en cada visita, no un equipo rotativo de la app.",
+  "Photo-Verified": "Verificado con Fotos",
+  "Before-and-after photos from every visit, sent to your phone.": "Fotos antes y después de cada visita, enviadas a tu teléfono.",
+  "Background-checked pros, insured on every Tidy job.": "Profesionales verificados y asegurados en cada trabajo de Tidy.",
+
+
   "Questions, answered.": "Respuestas a tus preguntas.",
   "60-second signup. Same crew. Locked price.": "Inscripción en 60 segundos. El mismo equipo. Precio fijo.",
   "60-second signup. Locked price. Cancel anytime.": "Inscripción en 60 segundos. Precio fijo. Cancela cuando quieras.",

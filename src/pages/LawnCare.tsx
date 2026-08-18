@@ -58,26 +58,21 @@ const config: ServiceLandingConfig = {
     "Fully insured",
     "Locked $85 — never surprise-priced",
   ],
-  testimonials: [
+  trustCards: [
     {
-      quote:
-        "Lawn looks sharp every week without me lifting a finger. Best $85 I spend monthly.",
-      name: "Placeholder Customer",
-      zip: "33156",
+      title: "Same Crew",
+      body: "Your same pro every visit, not a rotating marketplace crew.",
     },
     {
-      quote:
-        "Edges are crisp, beds are clean, no debris left behind. Pure consistency.",
-      name: "Placeholder Customer",
-      zip: "33183",
+      title: "Photo-Verified",
+      body: "Before-and-after photos from every visit, sent to your phone.",
     },
     {
-      quote:
-        "They show up rain or shine. Locked price, never a surprise invoice.",
-      name: "Placeholder Customer",
-      zip: "33186",
+      title: "Licensed & Insured",
+      body: "Background-checked pros, insured on every Tidy job.",
     },
   ],
+
   faqs: [
     {
       q: "What's the price and what's it based on?",
