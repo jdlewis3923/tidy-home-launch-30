@@ -7,12 +7,9 @@ const config: ServiceLandingConfig = {
   signupServiceParam: "detailing",
   eyebrow: "Car Detailing",
   h1: "Mobile Car Detailing in Pinecrest + Kendall",
-  subhead:
-    "Professional car detailing at your home. Ceramic-safe, monthly.",
-  intentConfirm:
-    "Same detailer every visit. Locked monthly price. Cancel anytime.",
-  systemBridge:
-    "Tidy isn't just detailing — it's a system for your entire home.",
+  subhead: "Professional car detailing at your home. Ceramic-safe, monthly.",
+  intentConfirm: "Same detailer every visit. Locked monthly price. Cancel anytime.",
+  systemBridge: "Tidy isn't just detailing — it's a system for your entire home.",
   ctaPrimaryLabel: "Book detailing",
   ctaPlanLabel: "Start your plan",
   priceAnchor: "Starting at $159/mo",
@@ -24,26 +21,19 @@ const config: ServiceLandingConfig = {
   heroAlt: "Pristine freshly detailed black SUV in a Miami driveway",
   plans: [
     {
-      name: "Basic Monthly",
+      name: "Monthly",
       price: "$159",
       cadence: "/mo",
       planSlug: "monthly",
       description: "Interior + exterior, one vehicle.",
     },
     {
-      name: "Premium Monthly",
-      price: "$239",
+      name: "Biweekly",
+      price: "$249",
       cadence: "/mo",
       planSlug: "biweekly",
-      description: "Full interior + exterior + wax, one vehicle.",
+      description: "Interior + exterior, every two weeks, one vehicle.",
       highlighted: true,
-    },
-    {
-      name: "Full Detail",
-      price: "$459",
-      cadence: "/mo",
-      planSlug: "full",
-      description: "Quarterly full detail, one vehicle.",
     },
   ],
   included: [
@@ -76,7 +66,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "Plans start at $159/mo for Basic, $239/mo Premium, and $459/mo Full Detail. Pricing is based on plan and vehicle size. Standard pricing covers sedans, coupes, crossovers, and 2-row SUVs.",
+      a: "Plans start at $159/mo for Monthly and $249/mo for Biweekly. Pricing is based on plan and vehicle size. Standard pricing covers sedans, coupes, crossovers, and 2-row SUVs.",
     },
     {
       q: "Can I cancel anytime?",
@@ -113,7 +103,7 @@ const config: ServiceLandingConfig = {
     description:
       "Mobile car detailing in Pinecrest and Kendall (33156, 33183, 33186). We come to your driveway. Ceramic-safe, locked price from $159/mo. Book in 60 seconds.",
     canonical: "https://jointidy.co/car-detailing",
-    priceRange: "$159–$459",
+    priceRange: "$159–$249",
   },
 };
 
