@@ -20,7 +20,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SITE_URL = Deno.env.get("SITE_URL") ?? "https://jointidy.co";
 
 // Service-area ZIP allowlist (Phase 2 hardening).
-const SERVICE_ZIPS = new Set(["33156", "33157", "33176", "33183", "33186"]);
+const SERVICE_ZIPS = new Set(["33156", "33183", "33186"]);
 
 // ---------- Input schema (flat, server-side) ----------
 const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
