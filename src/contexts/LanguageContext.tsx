@@ -471,8 +471,7 @@ const translations: Record<string, string> = {
   "A good mobile detail runs **$120–$180 per appointment**. Our subscription is **$159/mo** — and we come to your driveway.":
     "Un buen detallado móvil cuesta **$120–$180 por cita**. Nuestra suscripción es **$159/mes** — y vamos a tu garaje.",
   // Car Detailing plans
-  Monthly: "Mensual",
-  Biweekly: "Quincenal",
+
   "Interior + exterior, one vehicle.": "Interior + exterior, un vehículo.",
   "Interior + exterior, every two weeks, one vehicle.": "Interior + exterior, cada dos semanas, un vehículo.",
   "Quarterly full detail, monthly maintenance, up to 2 vehicles.":
