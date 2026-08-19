@@ -1,12 +1,14 @@
 import { Helmet } from "react-helmet-async";
 import tidyLogo from "@/assets/tidy-logo.png";
 import SparkleField from "@/components/landing/SparkleField";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ComingSoon = () => {
+  const { t } = useLanguage();
   return (
     <>
       <Helmet>
-        <title>Tidy Home Concierge — Coming soon to Miami</title>
+        <title>{t("Tidy Home Concierge — Coming soon to Miami")}</title>
         <meta
           name="description"
           content="Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, car detailing. Opening soon."
@@ -45,30 +47,35 @@ const ComingSoon = () => {
 
           <span className="inline-flex items-center gap-2 rounded-full border border-[#f5c518]/40 bg-[#f5c518]/10 px-5 py-2 text-xs sm:text-sm font-semibold text-[#f5c518] tracking-wide animate-pulse-gold">
             <span className="h-1.5 w-1.5 rounded-full bg-[#f5c518] animate-pulse" />
-            Launching soon in Miami
+            {t("Launching soon in Miami")}
           </span>
 
           <h1 className="font-poppins mt-6 text-4xl sm:text-6xl font-semibold tracking-tight">
-            We're almost ready.
+            {t("We're almost ready.")}
           </h1>
 
           <p className="mt-4 max-w-xl text-base sm:text-lg font-light text-white/70">
-            Subscription home care in Kendall &amp; Pinecrest — house cleaning, lawn care, and mobile car detailing. Hiring our founding crew now.
+            {t(
+              "Subscription home care in Kendall & Pinecrest — house cleaning, lawn care, and mobile car detailing. Hiring our founding crew now.",
+            )}
           </p>
 
           <div className="mt-10">
             <span className="inline-flex items-center gap-2 rounded-full border border-[#f5c518]/40 bg-[#f5c518]/10 px-5 py-2 text-xs sm:text-sm font-semibold text-[#f5c518] tracking-wide">
               <span className="h-1.5 w-1.5 rounded-full bg-[#f5c518]" />
-              Opening soon in Miami
+              {t("Opening soon in Miami")}
             </span>
           </div>
 
           <div className="mt-12 text-xs sm:text-sm text-white/50">
-            Questions? <a className="text-white/80 underline-offset-4 hover:underline" href="mailto:hello@jointidy.co">hello@jointidy.co</a>
+            {t("Questions?")}{" "}
+            <a className="text-white/80 underline-offset-4 hover:underline" href="mailto:hello@jointidy.co">
+              {t("hello@jointidy.co")}
+            </a>
           </div>
 
           <div className="mt-16 text-[11px] uppercase tracking-[0.25em] text-white/30">
-            Tidy Home Concierge LLC · Miami, FL
+            {t("Tidy Home Concierge LLC · Miami, FL")}
           </div>
 
           <a
@@ -76,7 +83,7 @@ const ComingSoon = () => {
             className="mt-6 text-[10px] uppercase tracking-[0.25em] text-white/20 hover:text-white/60 transition-colors"
             aria-label="Admin login"
           >
-            Admin
+            {t("Admin")}
           </a>
         </div>
       </main>
