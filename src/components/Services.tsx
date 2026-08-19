@@ -79,12 +79,12 @@ const Services = () => {
               </div>
               <div className="p-6 flex-1 flex flex-col">
                 <h3 className="text-xl font-bold text-foreground mb-1">{t(s.title)}</h3>
-                <p className="text-xs italic text-text-light mb-3">{s.anchor}</p>
+                <p className="text-xs italic text-text-light mb-3">{t(s.anchor)}</p>
                 <div className="inline-flex gap-2 mb-4">
-                  <span className="bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full">{s.priceMain}</span>
-                  <span className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full">{s.priceSub}</span>
+                  <span className="bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full">{t(s.priceMain)}</span>
+                  <span className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full">{t(s.priceSub)}</span>
                 </div>
-                <p className="text-sm text-text-mid mb-4">{s.description}</p>
+                <p className="text-sm text-text-mid mb-4">{t(s.description)}</p>
 
                 {/* Included - always shown */}
                 {CUSTOMER_DASHBOARD_ENABLED ? (
