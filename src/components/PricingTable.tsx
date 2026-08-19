@@ -13,10 +13,22 @@ const rows = [
 ];
 
 const pricingFAQ = [
-  { q: "What affects my price?", a: "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees." },
-  { q: "How do bundle discounts work?", a: "Pick 2 services and get 10% off automatically. Pick all 3 and get 15% off. The discount is applied at checkout — no code needed." },
-  { q: "Can I add services later?", a: "Yes. You can add or remove any service at any time. Changes take effect on your next billing cycle." },
-  { q: "Can I adjust my plan after signing up?", a: "Absolutely. Change your frequency, swap services, or pause anytime through your dashboard or by contacting us." },
+  {
+    q: "What affects my price?",
+    a: "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees.",
+  },
+  {
+    q: "How do bundle discounts work?",
+    a: "Pick 2 services and get 10% off automatically. Pick all 3 and get 15% off. The discount is applied at checkout — no code needed.",
+  },
+  {
+    q: "Can I add services later?",
+    a: "Yes. You can add or remove any service at any time. Changes take effect on your next billing cycle.",
+  },
+  {
+    q: "Can I adjust my plan after signing up?",
+    a: "Absolutely. Change your frequency, swap services, or pause anytime through your dashboard or by contacting us.",
+  },
 ];
 
 const PricingTable = () => {
@@ -26,7 +38,9 @@ const PricingTable = () => {
       <div className="max-w-4xl mx-auto text-center">
         <FadeIn>
           <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Pricing")}</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Simple, transparent rates. No surprises.")}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
+            {t("Simple, transparent rates. No surprises.")}
+          </h2>
           <p className="text-text-mid mt-4 max-w-xl mx-auto">
             {t("Everything runs automatically — no coordination needed. Modify, skip, or adjust anytime.")}
           </p>
@@ -45,11 +59,14 @@ const PricingTable = () => {
               </thead>
               <tbody>
                 {rows.map((r, i) => (
-                  <tr key={r.service} className={`${i % 2 === 0 ? "bg-background" : "bg-section-alt"} border-t transition-colors duration-200 hover:bg-primary/5`}>
+                  <tr
+                    key={r.service}
+                    className={`${i % 2 === 0 ? "bg-background" : "bg-section-alt"} border-t transition-colors duration-200 hover:bg-primary/5`}
+                  >
                     <td className="text-left px-6 py-4 font-medium text-foreground">{t(r.service)}</td>
-                    <td className="px-6 py-4 text-foreground/80">{r.monthly}</td>
-                    <td className="px-6 py-4 text-foreground/80">{r.biweekly === "one-time" ? t(r.biweekly) : r.biweekly}</td>
-                    <td className="px-6 py-4 text-foreground/80">{r.weekly}</td>
+                    <td className="px-6 py-4 text-foreground/80">{t(r.monthly)}</td>
+                    <td className="px-6 py-4 text-foreground/80">{t(r.biweekly)}</td>
+                    <td className="px-6 py-4 text-foreground/80">{t(r.weekly)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -57,10 +74,14 @@ const PricingTable = () => {
           </div>
 
           <p className="mt-6 text-xs text-text-light">
-            {t("Bundle discount auto-applied at checkout · 2 services = 10% off · 3 services = 15% off · Cancel anytime")}
+            {t(
+              "Bundle discount auto-applied at checkout · 2 services = 10% off · 3 services = 15% off · Cancel anytime",
+            )}
           </p>
           <p className="mt-2 text-xs text-text-light/80">
-            {t("Standard pricing covers most homes, yards, and vehicles. Larger properties or vehicles get a small upgrade fee — anything beyond is a quick custom quote.")}
+            {t(
+              "Standard pricing covers most homes, yards, and vehicles. Larger properties or vehicles get a small upgrade fee — anything beyond is a quick custom quote.",
+            )}
           </p>
         </FadeIn>
 
