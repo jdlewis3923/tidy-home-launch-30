@@ -125,6 +125,11 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
               "Join Miami homeowners who have already simplified their home. Lock in founding pricing before we launch publicly.",
             )}
           </p>
+          <p className="text-slate-300/70 text-sm mt-3 max-w-sm mx-auto leading-relaxed">
+            {t(
+              "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP",
+            )}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-b-3xl px-8 pb-8 pt-6 space-y-4">
