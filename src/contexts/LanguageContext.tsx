@@ -895,6 +895,51 @@ const translations: Record<string, string> = {
   "Vetted & insured": "Verificados y asegurados",
   "Satisfaction guaranteed": "Garantía de satisfacción",
   "Serving ": "Sirviendo ",
+
+  // Terms of Service page
+  "Effective Date: March 25, 2026": "Fecha de vigencia: 25 de marzo de 2026",
+  "1. Service Type": "1. Tipo de Servicio",
+  "Tidy provides recurring maintenance services including house cleaning, lawn care, and car detailing. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately.":
+    "Tidy ofrece servicios de mantenimiento recurrente que incluyen limpieza del hogar, cuidado del jardín y detallado de autos. Tidy NO ofrece servicios de restauración, limpieza de materiales peligrosos ni servicios en condiciones extremas, a menos que se compren por separado.",
+  "2. Service Scope Limitations": "2. Limitaciones del Alcance del Servicio",
+  "Standard services include routine maintenance only. Not included: extreme buildup or neglect, hazardous materials, mold remediation, biohazard cleanup, heavy stain restoration, paint correction, construction debris cleanup.":
+    "Los servicios estándar incluyen únicamente mantenimiento de rutina. No se incluye: acumulación extrema o abandono, materiales peligrosos, remediación de moho, limpieza de riesgo biológico, restauración de manchas severas, corrección de pintura ni limpieza de escombros de construcción.",
+  "3. Access Requirements": "3. Requisitos de Acceso",
+  "Customer must provide safe and unobstructed access. Service may be skipped or rescheduled if contractors cannot safely access the property.":
+    "El cliente debe proporcionar acceso seguro y sin obstrucciones. El servicio puede omitirse o reagendarse si los contratistas no pueden acceder a la propiedad de forma segura.",
+  "4. Weather Conditions": "4. Condiciones Climáticas",
+  "Outdoor services may be rescheduled due to unsafe weather. Subscription remains active.":
+    "Los servicios exteriores pueden reagendarse por clima inseguro. La suscripción permanece activa.",
+  "5. Subscription Billing": "5. Facturación de la Suscripción",
+  "All services are billed on a recurring monthly basis via Stripe. By signing up, you authorize Tidy to charge your payment method automatically on a recurring basis.":
+    "Todos los servicios se facturan de forma mensual recurrente vía Stripe. Al inscribirte, autorizas a Tidy a cobrar tu método de pago automáticamente de forma recurrente.",
+  "6. Failed Payments": "6. Pagos Fallidos",
+  "If payment fails, service may be paused until resolved. You will be notified immediately.":
+    "Si el pago falla, el servicio puede pausarse hasta que se resuelva. Se te notificará de inmediato.",
+  "7. Cancellation": "7. Cancelación",
+  "Cancel anytime. No refunds for completed services.":
+    "Cancela cuando quieras. No hay reembolsos por servicios ya completados.",
+  "8. Satisfaction": "8. Satisfacción",
+  "Notify us within 24 hours of any service issue. We will make reasonable efforts to resolve it.":
+    "Notifícanos dentro de 24 horas sobre cualquier problema con el servicio. Haremos esfuerzos razonables para resolverlo.",
+  "9. SMS Communications": "9. Comunicaciones por SMS",
+  "By checking the SMS consent box and providing your phone number, you expressly consent to receive recurring automated promotional and informational text messages from Tidy Home Concierge LLC, including service updates, appointment reminders, and exclusive offers, at the phone number provided. Message frequency varies.":
+    "Al marcar la casilla de consentimiento de SMS y proporcionar tu número de teléfono, aceptas expresamente recibir mensajes de texto automatizados recurrentes, promocionales e informativos, de Tidy Home Concierge LLC, incluidos avisos de servicio, recordatorios de citas y ofertas exclusivas, al número proporcionado. La frecuencia de los mensajes varía.",
+  "Msg & data rates may apply. Consent to receive SMS messages is not a condition of any purchase. You may opt out at any time by replying STOP to any message. Reply HELP for assistance or contact":
+    "Pueden aplicar tarifas de mensajes y datos. El consentimiento para recibir mensajes SMS no es condición para ninguna compra. Puedes darte de baja en cualquier momento respondiendo STOP a cualquier mensaje. Responde HELP para obtener ayuda o contacta a",
+  "Carriers are not liable for delayed or undelivered messages.":
+    "Los operadores no son responsables por mensajes retrasados o no entregados.",
+  "SMS Data Privacy": "Privacidad de Datos de SMS",
+  "Text messaging opt-in data and consent will not be shared with any third parties or affiliates for marketing or promotional purposes. All other data-sharing categories specifically exclude text messaging opt-in data and consent.":
+    "Los datos de suscripción y consentimiento para mensajes de texto no se compartirán con terceros ni afiliados con fines de marketing o promoción. Todas las demás categorías de intercambio de datos excluyen específicamente los datos de suscripción y consentimiento para mensajes de texto.",
+  "10. Limitation of Liability": "10. Limitación de Responsabilidad",
+  "Tidy's liability is limited to the amount paid for the specific service in question.":
+    "La responsabilidad de Tidy se limita al monto pagado por el servicio específico en cuestión.",
+  "11. Governing Law": "11. Ley Aplicable",
+  "These Terms are governed by the laws of the State of Florida.":
+    "Estos Términos se rigen por las leyes del Estado de Florida.",
+  "12. Contact": "12. Contacto",
+  "← Back to the site": "← Volver al sitio",
 };
 
 interface LanguageContextType {
