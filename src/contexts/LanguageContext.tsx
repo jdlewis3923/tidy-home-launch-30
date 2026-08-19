@@ -731,6 +731,67 @@ const translations: Record<string, string> = {
   "Tidy on Facebook": "Tidy en Facebook",
   "TikTok coming soon": "TikTok próximamente",
   "Call now": "Llamar ahora",
+
+  // FAQ — homepage
+  "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one — more areas coming soon.":
+    "Actualmente servimos Pinecrest (33156), Kendall (33183) y Kendall West (33186). Estamos lanzando primero en códigos postales selectos de Miami para asegurar un servicio de alta calidad desde el día uno — más áreas próximamente.",
+  "Tidy is Miami's first all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
+    "Tidy es la primera suscripción todo en uno de servicios del hogar en Miami — nos encargamos de la limpieza de tu casa, el cuidado del jardín y el detallado de tu auto bajo un solo plan mensual. Sin coordinar varios proveedores, sin perseguir cotizaciones. Una sola suscripción y todo se mantiene impecable.",
+  "Tap 'Start My Plan,' choose your services and schedule, and complete checkout. Your first visit is confirmed within 24 hours.":
+    "Toca 'Empezar Mi Plan', elige tus servicios y tu horario, y completa el pago. Tu primera visita se confirma dentro de 24 horas.",
+  "No contracts, no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month.":
+    "Sin contratos, sin cargos por cancelación. Puedes cancelar cuando quieras, sin preguntas. Nos ganamos tu preferencia cada mes.",
+  "Choose weekly, biweekly, or monthly for each service — and mix and match freely. Want weekly lawn care but biweekly cleaning? Done.":
+    "Elige semanal, quincenal o mensual para cada servicio — y combínalos libremente. ¿Quieres jardín semanal pero limpieza quincenal? Listo.",
+  "Not at all. Provide access via a lockbox, gate code, or smart lock and our team handles everything. You'll get photo confirmation when each service is complete.":
+    "Para nada. Danos acceso con una caja de llaves, un código de portón o una cerradura inteligente y nuestro equipo se encarga de todo. Recibirás confirmación con fotos cuando cada servicio esté completo.",
+  "Yes — reschedule, pause for vacation, or skip a visit anytime through your dashboard or by contacting us. No penalties.":
+    "Sí — reagenda, pausa por vacaciones u omite una visita cuando quieras desde tu panel o contactándonos. Sin penalizaciones.",
+  "If weather impacts an outdoor service, we automatically reschedule for the next available day. Your subscription stays active.":
+    "Si el clima afecta un servicio exterior, reagendamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa.",
+  "How does scheduling actually work?": "¿Cómo funciona la programación en la práctica?",
+  "After signup, Tidy assigns a recurring day and time window for each service. You'll receive a confirmation and an ETA reminder before every visit. No rebooking needed — it just repeats automatically.":
+    "Después de inscribirte, Tidy asigna un día y una ventana de horario recurrentes para cada servicio. Recibirás una confirmación y un recordatorio con la hora estimada antes de cada visita. No necesitas reagendar — se repite automáticamente.",
+  "Kitchen surfaces, full bathroom cleaning, dusting throughout, vacuuming and mopping all floors, and trash removal with fresh liners.":
+    "Superficies de cocina, limpieza completa de baños, desempolvado en toda la casa, aspirado y trapeado de todos los pisos, y retiro de basura con bolsas nuevas.",
+  "Professional mowing to standard height, clean edging along walkways and beds, and debris blowing off walkways and driveways.":
+    "Corte profesional a altura estándar, bordeado limpio en caminos y jardineras, y soplado de residuos en caminos y entradas.",
+  "Full exterior hand wash with wheel cleaning, interior vacuum with floor mats, and dashboard and surface wipe-down — right in your driveway.":
+    "Lavado exterior completo a mano con limpieza de ruedas, aspirado interior con tapetes, y limpieza del tablero y superficies — en tu propia entrada.",
+  "Can I add extra services or upgrades?": "¿Puedo agregar servicios adicionales o mejoras?",
+  "Yes. Add-ons like deep cleaning, hedge trimming, leather conditioning, and more are available as one-time or recurring extras. You can add them anytime through your dashboard.":
+    "Sí. Los servicios adicionales como limpieza profunda, poda de setos, acondicionamiento de cuero y más están disponibles como extras únicos o recurrentes. Puedes agregarlos cuando quieras desde tu panel.",
+  "Tidy is designed for consistent ongoing maintenance. Deep cleans and restoration work are available as add-ons — just ask.":
+    "Tidy está diseñado para mantenimiento continuo y constante. Las limpiezas profundas y los trabajos de restauración están disponibles como servicios adicionales — solo pídelos.",
+  "Billing & Account": "Facturación y Cuenta",
+  "You're billed monthly via Stripe — automatic, fully secure, with a receipt every time. No surprise charges.":
+    "Se te cobra mensualmente vía Stripe — automático, totalmente seguro y con recibo cada vez. Sin cargos sorpresa.",
+  "When am I charged?": "¿Cuándo se me cobra?",
+  "Your first charge happens at signup. After that, billing recurs on the same date each month. You can view your billing history in your dashboard.":
+    "Tu primer cargo ocurre al inscribirte. Después, la facturación se repite en la misma fecha cada mes. Puedes ver tu historial de facturación en tu panel.",
+  "Yes, 100%. No cancellation fees, no contracts. Let us know and we'll take care of it immediately.":
+    "Sí, 100%. Sin cargos por cancelación, sin contratos. Avísanos y lo resolvemos de inmediato.",
+  "We'll pause your services and notify you via SMS and email so you can update your payment info. Once resolved, you're back on schedule.":
+    "Pausaremos tus servicios y te notificaremos por SMS y correo para que actualices tu información de pago. Una vez resuelto, vuelves a tu programación.",
+  "Of course. Add, remove, or change frequency for any service anytime. Changes kick in at your next billing cycle.":
+    "Por supuesto. Agrega, elimina o cambia la frecuencia de cualquier servicio cuando quieras. Los cambios aplican en tu siguiente ciclo de facturación.",
+  "Are professionals vetted?": "¿Los profesionales están verificados?",
+  "Every professional is fully background-checked, licensed, and insured. We require photo documentation after every visit for accountability.":
+    "Cada profesional está completamente verificado con antecedentes, licenciado y asegurado. Exigimos documentación con fotos después de cada visita para garantizar responsabilidad.",
+  "Reach out within 24 hours and we'll make it right — re-service or credit, no questions asked. Your satisfaction is our top priority.":
+    "Contáctanos dentro de 24 horas y lo resolvemos — repetimos el servicio o te damos un crédito, sin preguntas. Tu satisfacción es nuestra prioridad.",
+  "What if something goes wrong during a visit?": "¿Qué pasa si algo sale mal durante una visita?",
+  "Every professional carries liability insurance. If there's ever an issue, contact us immediately and we'll resolve it — including damage claims if applicable.":
+    "Cada profesional cuenta con seguro de responsabilidad civil. Si alguna vez hay un problema, contáctanos de inmediato y lo resolveremos — incluyendo reclamos por daños si aplica.",
+  "Email hello@jointidy.co and we'll respond within 1 hour during business hours. Real people, real answers.":
+    "Escríbenos a hello@jointidy.co y responderemos dentro de 1 hora en horario laboral. Personas reales, respuestas reales.",
+  "Your Dashboard": "Tu Panel",
+  "What can I do from the dashboard?": "¿Qué puedo hacer desde el panel?",
+  "View upcoming visits, manage your services and schedule, update payment info, skip or pause visits, and review service history — all in one place.":
+    "Ver próximas visitas, gestionar tus servicios y horario, actualizar tu información de pago, omitir o pausar visitas, y revisar el historial de servicios — todo en un solo lugar.",
+  "Can I manage everything without calling?": "¿Puedo gestionar todo sin llamar?",
+  "Yes. The dashboard gives you full control over your plan. No phone calls, no emails required for routine changes.":
+    "Sí. El panel te da control total sobre tu plan. Sin llamadas ni correos para los cambios de rutina.",
 };
 
 interface LanguageContextType {
