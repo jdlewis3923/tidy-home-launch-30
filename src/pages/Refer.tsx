@@ -13,6 +13,7 @@ import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { pushEvent } from "@/lib/tracking";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 /**
  * /refer — public marketing surface for the existing
@@ -31,6 +32,7 @@ const ReferInner = () => {
   const [copied, setCopied] = useState(false);
   const [authLoaded, setAuthLoaded] = useState(false);
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
+  const { t } = useLanguage();
 
   // Lazy-load Supabase only if dashboard auth is on, to avoid touching
   // the bundle when this page is browsed pre-launch.
@@ -115,8 +117,8 @@ const ReferInner = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SeoHead
-        title="Refer a Neighbor — Give $50, Get $50 | Tidy Home Concierge"
-        description="Refer a neighbor in Pinecrest or Kendall (33156 · 33183 · 33186). They get $50 off their first month, you get $50 off yours. No limit, no fine print."
+        title={t("Refer a Neighbor — Give $50, Get $50 | Tidy Home Concierge")}
+        description={t("Refer a neighbor in Pinecrest or Kendall (33156 · 33183 · 33186). They get $50 off their first month, you get $50 off yours. No limit, no fine print.")}
         canonical="https://jointidy.co/refer"
         priceRange="$85–$459"
       />
@@ -126,13 +128,12 @@ const ReferInner = () => {
       <section className="relative pt-32 pb-16 px-4 bg-gradient-to-b from-navy to-primary-deep overflow-hidden">
         <SparkleField />
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <span className="text-xs uppercase tracking-widest text-gold font-semibold">Refer & Earn</span>
+          <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Refer & Earn")}</span>
           <h1 className="mt-3 text-3xl md:text-5xl font-extrabold text-primary-foreground leading-tight">
-            Give $50, Get $50 — refer a neighbor in Pinecrest + Kendall
+            {t("Give $50, Get $50 — refer a neighbor in Pinecrest + Kendall")}
           </h1>
           <p className="mt-5 text-lg text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            Send a neighbor your link. They get $50 off their first month. You
-            get $50 off yours. No cap, no expiration, no fine print.
+            {t("Send a neighbor your link. They get $50 off their first month. You get $50 off yours. No cap, no expiration, no fine print.")}
           </p>
           <div className="mt-6 inline-flex items-center gap-1.5 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground text-sm font-medium">
             <MapPin className="w-3.5 h-3.5" />
@@ -148,8 +149,8 @@ const ReferInner = () => {
         <SectionDecor tone="primary" />
         <div className="relative max-w-5xl mx-auto">
           <Reveal className="text-center mb-10">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">How it works</span>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mt-3">Three steps. Two rewards.</h2>
+            <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("How it works")}</span>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mt-3">{t("Three steps. Two rewards.")}</h2>
           </Reveal>
           <div className="grid md:grid-cols-3 gap-6">
             {[
@@ -164,9 +165,9 @@ const ReferInner = () => {
                   </div>
                   <div className="flex items-center gap-2 mb-2">
                     <Icon className="w-4 h-4 text-primary" aria-hidden="true" />
-                    <h3 className="text-base font-bold text-foreground">{title}</h3>
+                    <h3 className="text-base font-bold text-foreground">{t(title)}</h3>
                   </div>
-                  <p className="text-sm text-text-mid leading-relaxed">{body}</p>
+                  <p className="text-sm text-text-mid leading-relaxed">{t(body)}</p>
                 </div>
               </Reveal>
             ))}
@@ -182,17 +183,17 @@ const ReferInner = () => {
             <div className="bg-card border rounded-2xl p-6 md:p-8 text-center shadow-sm">
               <Sparkles className="w-6 h-6 text-gold mx-auto mb-3" aria-hidden="true" />
               <h2 className="text-xl md:text-2xl font-bold text-foreground">
-                {code ? "Your referral link" : "Sign in to get your link"}
+                {code ? t("Your referral link") : t("Sign in to get your link")}
               </h2>
 
               {!authLoaded && (
-                <p className="text-sm text-text-mid mt-3">Loading…</p>
+                <p className="text-sm text-text-mid mt-3">{t("Loading…")}</p>
               )}
 
               {authLoaded && code && (
                 <>
                   <p className="text-sm text-text-mid mt-2">
-                    Share this link with a neighbor. They save $50, you save $50.
+                    {t("Share this link with a neighbor. They save $50, you save $50.")}
                   </p>
                   <div className="mt-5 flex items-center gap-2 bg-muted rounded-lg p-2">
                     <code className="flex-1 text-left text-sm font-mono text-foreground truncate px-2">
@@ -204,15 +205,15 @@ const ReferInner = () => {
                       aria-label="Copy referral link"
                     >
                       {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      {copied ? "Copied" : "Copy"}
+                      {copied ? t("Copied") : t("Copy")}
                     </button>
                   </div>
                   <p className="mt-4 text-xs text-text-mid">
-                    Credits earned:{" "}
+                    {t("Credits earned:")}{" "}
                     <span className="font-semibold text-foreground">
                       ${(creditCents / 100).toFixed(2)}
                     </span>
-                    {creditCents === 0 && " — your first referral starts the meter."}
+                    {creditCents === 0 && ` ${t("— your first referral starts the meter.")}`}
                   </p>
                 </>
               )}
@@ -220,8 +221,7 @@ const ReferInner = () => {
               {authLoaded && !code && (
                 <>
                   <p className="text-sm text-text-mid mt-3">
-                    Active customers get a unique referral link in their dashboard.
-                    Log in to grab yours and start earning.
+                    {t("Active customers get a unique referral link in their dashboard. Log in to grab yours and start earning.")}
                   </p>
                   <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
@@ -229,14 +229,14 @@ const ReferInner = () => {
                       onClick={() => pushEvent("cta_click", { cta_id: "refer_login", cta_text: "Log in to get your code" })}
                       className="cta-arrow cta-press bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
-                      Log in to get your code <span className="arrow">→</span>
+                      {t("Log in to get your code")} <span className="arrow">→</span>
                     </Link>
                     <Link
                       to={becomeCustomerCta.to}
                       onClick={becomeCustomerCta.onClick}
                       className="cta-arrow cta-press bg-card border hover:bg-muted text-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
-                      Become a customer first <span className="arrow">→</span>
+                      {t("Become a customer first")} <span className="arrow">→</span>
                     </Link>
                   </div>
                 </>
@@ -248,9 +248,9 @@ const ReferInner = () => {
 
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
-        headline="Not a member yet? Start with a plan."
-        subhead="Lock in your monthly price, then send your link to a neighbor."
-        ctaLabel="Book in 60 seconds"
+        headline={t("Not a member yet? Start with a plan.")}
+        subhead={t("Lock in your monthly price, then send your link to a neighbor.")}
+        ctaLabel={t("Book in 60 seconds")}
         trackingId="refer_final"
       />
 
