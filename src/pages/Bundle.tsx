@@ -287,7 +287,7 @@ const BundleInner = () => {
         <SectionDecor tone="gold" />
         <div className="relative max-w-3xl mx-auto">
           <Reveal className="text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground">Why bundle?</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">{t("Why bundle?")}</h2>
           </Reveal>
           <Reveal>
             <ul className="mt-8 grid sm:grid-cols-2 gap-3 bg-card border rounded-xl p-6">
@@ -301,7 +301,7 @@ const BundleInner = () => {
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2 text-sm text-foreground/85">
                   <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
-                  {line}
+                  {t(line)}
                 </li>
               ))}
             </ul>
@@ -318,9 +318,9 @@ const BundleInner = () => {
 
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
-        headline="Ready to bundle?"
-        subhead="60-second signup. Locked price. Cancel anytime."
-        ctaLabel="Start saving"
+        headline={t("Ready to bundle?")}
+        subhead={t("60-second signup. Locked price. Cancel anytime.")}
+        ctaLabel={t("Start saving")}
         trackingId="bundle_final_cta"
         bundle="true"
         services="cleaning,lawn,detailing"
