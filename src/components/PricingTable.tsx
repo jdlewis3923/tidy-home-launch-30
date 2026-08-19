@@ -46,9 +46,9 @@ const PricingTable = () => {
               <tbody>
                 {rows.map((r, i) => (
                   <tr key={r.service} className={`${i % 2 === 0 ? "bg-background" : "bg-section-alt"} border-t transition-colors duration-200 hover:bg-primary/5`}>
-                    <td className="text-left px-6 py-4 font-medium text-foreground">{r.service}</td>
+                    <td className="text-left px-6 py-4 font-medium text-foreground">{t(r.service)}</td>
                     <td className="px-6 py-4 text-foreground/80">{r.monthly}</td>
-                    <td className="px-6 py-4 text-foreground/80">{r.biweekly}</td>
+                    <td className="px-6 py-4 text-foreground/80">{r.biweekly === "one-time" ? t(r.biweekly) : r.biweekly}</td>
                     <td className="px-6 py-4 text-foreground/80">{r.weekly}</td>
                   </tr>
                 ))}

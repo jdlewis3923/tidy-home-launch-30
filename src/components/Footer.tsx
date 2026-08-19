@@ -32,8 +32,7 @@ const Footer = () => {
           <div className="lg:col-span-5">
             <TidyLogo size="md" withBackground />
             <p className="mt-5 text-primary-foreground/65 text-sm leading-relaxed max-w-md">
-              Miami's subscription home service. House cleaning, lawn care, and car detailing —
-              one simple monthly plan. Serving Kendall + Pinecrest.
+              {t("Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Kendall + Pinecrest.")}
             </p>
 
             {/* Service-area chips */}
@@ -45,7 +44,7 @@ const Footer = () => {
                 >
                   <MapPin className="h-3 w-3 text-gold" />
                   <span className="font-semibold text-primary-foreground/85">{z.code}</span>
-                  <span className="text-primary-foreground/45">· {z.area}</span>
+                  <span className="text-primary-foreground/45">· {t(z.area)}</span>
                 </span>
               ))}
             </div>
@@ -64,7 +63,7 @@ const Footer = () => {
               >
                 <ArrowUpRight className="h-4 w-4" /> jointidy.co
               </a>
-              <p className="text-primary-foreground/45 text-xs pt-1">Miami, Florida</p>
+              <p className="text-primary-foreground/45 text-xs pt-1">{t("Miami, Florida")}</p>
             </div>
 
             {/* Social */}
@@ -94,7 +93,7 @@ const Footer = () => {
               >
                 <Music2 className="w-4 h-4" />
                 <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-8 whitespace-nowrap rounded bg-white/10 px-2 py-0.5 text-[10px] text-primary-foreground/80 opacity-0 group-hover:opacity-100 transition-opacity">
-                  Coming soon
+                  {t("Coming soon")}
                 </span>
               </span>
             </div>
@@ -109,7 +108,7 @@ const Footer = () => {
               <li><Link to="/house-cleaning" className="hover:text-primary-foreground transition-colors">{t("House Cleaning Miami")}</Link></li>
               <li><Link to="/lawn-care" className="hover:text-primary-foreground transition-colors">{t("Lawn Care Miami")}</Link></li>
               <li><Link to="/car-detailing" className="hover:text-primary-foreground transition-colors">{t("Car Detailing Miami")}</Link></li>
-              <li><Link to="/bundle" className="hover:text-primary-foreground transition-colors">Bundle &amp; Save</Link></li>
+              <li><Link to="/bundle" className="hover:text-primary-foreground transition-colors">{t("Bundle & Save")}</Link></li>
               <li><a href="#pricing" className="hover:text-primary-foreground transition-colors">{t("Pricing")}</a></li>
               <li><Link to="/refer" className="hover:text-primary-foreground transition-colors">{t("Referral Program")}</Link></li>
             </ul>
@@ -132,7 +131,7 @@ const Footer = () => {
                   to="/apply"
                   className="group inline-flex items-center gap-1.5 text-gold/90 hover:text-gold font-semibold transition"
                 >
-                  Join our team
+                  {t("Join our team")}
                   <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
               </li>
@@ -143,7 +142,7 @@ const Footer = () => {
         {/* Bottom rule */}
         <div className="mt-14 pt-6 border-t border-white/[0.08]">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-primary-foreground/40">
-            <p>© 2026 Tidy Home Concierge LLC · Miami, Florida</p>
+            <p>{t("© 2026 Tidy Home Concierge LLC · Miami, Florida")}</p>
             <div className="flex gap-5">
               <Link to="/terms" className="hover:text-primary-foreground/70 transition-colors">{t("Terms")}</Link>
               <Link to="/privacy" className="hover:text-primary-foreground/70 transition-colors">{t("Privacy")}</Link>
@@ -151,8 +150,7 @@ const Footer = () => {
             </div>
           </div>
           <p className="text-[10px] text-primary-foreground/25 mt-5 text-center leading-relaxed max-w-3xl mx-auto">
-            Serving 33183 Kendall · 33186 Kendall West · 33156 Pinecrest with recurring house cleaning,
-            lawn care, and car detailing subscriptions.
+            {t("Serving 33183 Kendall · 33186 Kendall West · 33156 Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.")}
           </p>
         </div>
       </div>
