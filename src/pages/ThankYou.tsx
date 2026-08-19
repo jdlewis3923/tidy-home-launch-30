@@ -55,7 +55,6 @@ const ThankYou = () => {
               <span className="text-lg">🗓️</span>
               <span>
                 <strong>{t("Once we launch in your area")}</strong>
-                {" "}
                 {t(", you'll be among the first activated — with priority scheduling and locked pricing.")}
               </span>
             </li>
