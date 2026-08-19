@@ -940,6 +940,37 @@ const translations: Record<string, string> = {
     "Estos Términos se rigen por las leyes del Estado de Florida.",
   "12. Contact": "12. Contacto",
   "← Back to the site": "← Volver al sitio",
+
+  // Privacy Policy page
+  "Information We Collect": "Información que Recopilamos",
+  "Name, email, phone, service address, ZIP code, and payment information. Payment is processed securely by Stripe — we never store card details. Usage data: IP address, browser type, pages visited.":
+    "Nombre, correo electrónico, teléfono, dirección de servicio, código postal e información de pago. Los pagos son procesados de forma segura por Stripe — nunca almacenamos los datos de tu tarjeta. Datos de uso: dirección IP, tipo de navegador y páginas visitadas.",
+  "How We Use It": "Cómo la Usamos",
+  "To provide and manage services, schedule appointments, process payments, communicate with you, and improve our offerings.":
+    "Para prestar y gestionar los servicios, agendar citas, procesar pagos, comunicarnos contigo y mejorar nuestra oferta.",
+  "SMS Communications & Data Privacy": "Comunicaciones por SMS y Privacidad de Datos",
+  "By providing your phone number and checking the SMS consent box, you consent to receive recurring automated SMS messages from Tidy Home Concierge LLC, including service updates, appointment reminders, and promotional offers. Message frequency varies. Message and data rates may apply. Reply STOP to cancel or HELP for assistance. Contact":
+    "Al proporcionar tu número de teléfono y marcar la casilla de consentimiento de SMS, aceptas recibir mensajes SMS automatizados recurrentes de Tidy Home Concierge LLC, incluidos avisos de servicio, recordatorios de citas y ofertas promocionales. La frecuencia de los mensajes varía. Pueden aplicar tarifas de mensajes y datos. Responde STOP para cancelar o HELP para obtener ayuda. Contacta a",
+  "for support.": "para soporte.",
+  "Text messaging opt-in data and consent will not be shared with any third parties or affiliates for marketing or promotional purposes. All other data-sharing categories explicitly exclude SMS/text messaging opt-in information and consent data — this information will not be sold, rented, or disclosed to any third party under any circumstances.":
+    "Los datos de suscripción y consentimiento para mensajes de texto no se compartirán con terceros ni afiliados con fines de marketing o promoción. Todas las demás categorías de intercambio de datos excluyen explícitamente la información de suscripción y los datos de consentimiento de SMS/mensajes de texto — esta información no será vendida, alquilada ni divulgada a ningún tercero bajo ninguna circunstancia.",
+  "Mobile information, including phone numbers collected for SMS communications, will not be shared with third parties or affiliates for marketing or promotional purposes. Consent to receive SMS is not a condition of purchase. Carriers are not liable for delayed or undelivered messages.":
+    "La información móvil, incluidos los números de teléfono recopilados para comunicaciones por SMS, no se compartirá con terceros ni afiliados con fines de marketing o promoción. El consentimiento para recibir SMS no es condición de compra. Los operadores no son responsables por mensajes retrasados o no entregados.",
+  "Information Sharing": "Compartir Información",
+  "We do not sell your personal information. We share only with trusted third parties necessary to operate our services: Stripe (payments), Twilio (SMS delivery only), and analytics tools. These parties do not receive your SMS opt-in consent data or use your information for their own marketing purposes.":
+    "No vendemos tu información personal. Solo la compartimos con terceros de confianza necesarios para operar nuestros servicios: Stripe (pagos), Twilio (solo envío de SMS) y herramientas de analítica. Estas partes no reciben tus datos de consentimiento de SMS ni usan tu información para sus propios fines de marketing.",
+  Security: "Seguridad",
+  "Industry-standard security measures. No transmission method is 100% secure.":
+    "Medidas de seguridad estándar de la industria. Ningún método de transmisión es 100% seguro.",
+  "Cookies & Tracking": "Cookies y Rastreo",
+  "We use Google Analytics and Meta Pixel. You may disable cookies through your browser settings.":
+    "Usamos Google Analytics y Meta Pixel. Puedes desactivar las cookies desde la configuración de tu navegador.",
+  "Your Rights": "Tus Derechos",
+  "Request access, correction, or deletion:": "Solicita acceso, corrección o eliminación:",
+  Minors: "Menores de Edad",
+  "Our services are not intended for individuals under 18.":
+    "Nuestros servicios no están destinados a personas menores de 18 años.",
+  Contact: "Contacto",
 };
 
 interface LanguageContextType {
