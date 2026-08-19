@@ -21,8 +21,10 @@ const ThankYou = () => {
         </div>
 
         <div className="text-5xl mb-4">🎉</div>
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">You're officially in!</h1>
-        <p className="text-primary font-semibold text-lg mb-6">Your $50 founding discount is locked.</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">You're in.</h1>
+        <p className="text-primary font-semibold text-lg mb-6">
+          Your founding rate is locked — your price never rises, for as long as you're a member.
+        </p>
         <p className="text-text-mid mb-8">
           We're prioritizing homes for the initial rollout — and you're at the front of the line.
         </p>
@@ -33,8 +35,8 @@ const ThankYou = () => {
             <li className="flex items-start gap-3">
               <span className="text-lg">📬</span>
               <span>
-                <strong>Check your email</strong> — your confirmation just landed with your $50 credit details and next
-                steps.
+                <strong>Check your email</strong> — your confirmation just landed with your founding member details and
+                next steps.
               </span>
             </li>
             <li className="flex items-start gap-3">
