@@ -3,7 +3,7 @@
  *
  * Session-scoped promo code capture. Handles:
  *   (a) per-customer referral codes (post-launch)
- *   (b) FOUNDING50 founding-member offer (pre-launch)
+ *   (b) founding-member offer codes (pre-launch)
  *   (c) any future one-off codes
  *
  * Storage is intentionally sessionStorage (not localStorage) so codes
@@ -16,11 +16,11 @@
  *   - On successful checkout redirect, all promo keys are cleared.
  */
 
-export const PROMO_KEY = 'tidy_promo_code';
-export const PROMO_TS_KEY = 'tidy_promo_code_ts';
-export const PROMO_DISMISSED_KEY = 'tidy_promo_code_dismissed';
+export const PROMO_KEY = "tidy_promo_code";
+export const PROMO_TS_KEY = "tidy_promo_code_ts";
+export const PROMO_DISMISSED_KEY = "tidy_promo_code_dismissed";
 
-const isBrowser = () => typeof window !== 'undefined' && !!window.sessionStorage;
+const isBrowser = () => typeof window !== "undefined" && !!window.sessionStorage;
 
 /** Read the active promo code, if any. */
 export function getPromoCode(): string | null {
@@ -31,7 +31,7 @@ export function getPromoCode(): string | null {
 /** True if the captured-banner has been dismissed for this session. */
 export function isPromoBannerDismissed(): boolean {
   if (!isBrowser()) return false;
-  return sessionStorage.getItem(PROMO_DISMISSED_KEY) === 'true';
+  return sessionStorage.getItem(PROMO_DISMISSED_KEY) === "true";
 }
 
 /**
@@ -42,7 +42,7 @@ export function capturePromoFromUrl(): void {
   if (!isBrowser()) return;
   try {
     const params = new URLSearchParams(window.location.search);
-    const raw = params.get('promo');
+    const raw = params.get("promo");
     if (!raw) return;
     const code = raw.trim().toUpperCase();
     if (!code) return;
@@ -66,15 +66,15 @@ export function setPromoCodeManual(raw: string): string | null {
   sessionStorage.setItem(PROMO_TS_KEY, new Date().toISOString());
   sessionStorage.removeItem(PROMO_DISMISSED_KEY);
   // Notify any mounted listeners (banner) to re-read.
-  window.dispatchEvent(new Event('tidy:promo-changed'));
+  window.dispatchEvent(new Event("tidy:promo-changed"));
   return code;
 }
 
 /** Hide the banner for the rest of the session. Does NOT clear the code. */
 export function dismissPromoBanner(): void {
   if (!isBrowser()) return;
-  sessionStorage.setItem(PROMO_DISMISSED_KEY, 'true');
-  window.dispatchEvent(new Event('tidy:promo-changed'));
+  sessionStorage.setItem(PROMO_DISMISSED_KEY, "true");
+  window.dispatchEvent(new Event("tidy:promo-changed"));
 }
 
 /** Clear all promo state — call right before redirecting to Stripe Checkout. */
@@ -83,5 +83,5 @@ export function clearPromo(): void {
   sessionStorage.removeItem(PROMO_KEY);
   sessionStorage.removeItem(PROMO_TS_KEY);
   sessionStorage.removeItem(PROMO_DISMISSED_KEY);
-  window.dispatchEvent(new Event('tidy:promo-changed'));
+  window.dispatchEvent(new Event("tidy:promo-changed"));
 }
