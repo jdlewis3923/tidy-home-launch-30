@@ -673,6 +673,63 @@ const translations: Record<string, string> = {
   "Engine bay detailing": "Detallado del compartimiento del motor",
   "Headlight restoration": "Restauración de faros",
   "Leather conditioning, clay bar, tire shine": "Acondicionamiento de cuero, barra de arcilla, brillo para llantas",
+
+  // How it works (homepage 5 steps)
+  "Five simple steps — then your home runs on autopilot.":
+    "Cinco pasos simples — y luego tu hogar funciona en piloto automático.",
+  "Choose Your Services": "Elige Tus Servicios",
+  "Pick house cleaning, lawn care, car detailing — or all three. Select your preferred frequency for each.":
+    "Elige limpieza del hogar, cuidado del jardín, detallado de auto — o los tres. Selecciona la frecuencia que prefieras para cada uno.",
+  "Set Up Your Plan": "Configura Tu Plan",
+  "Tell us about your home, choose your schedule, and review your price. Takes under 2 minutes.":
+    "Cuéntanos sobre tu hogar, elige tu horario y revisa tu precio. Toma menos de 2 minutos.",
+  "Tidy Confirms & Coordinates": "Tidy Confirma y Coordina",
+  "We assign a vetted, insured professional and lock in your recurring schedule. You'll get a confirmation with your first visit date.":
+    "Asignamos un profesional verificado y asegurado, y fijamos tu horario recurrente. Recibirás una confirmación con la fecha de tu primera visita.",
+  "Your Pro Completes the Visit": "Tu Profesional Completa la Visita",
+  "Your professional arrives on schedule, completes the service, and submits photo verification when done.":
+    "Tu profesional llega puntual, completa el servicio y envía la verificación con fotos al terminar.",
+  "Manage Everything from Your Dashboard": "Gestiona Todo desde Tu Panel",
+  "Adjust services, skip visits, update your plan, or pause anytime — all from one simple dashboard.":
+    "Ajusta servicios, omite visitas, actualiza tu plan o pausa cuando quieras — todo desde un panel simple.",
+
+  // Proof bar / trust chips
+  "Satisfaction Guaranteed": "Satisfacción Garantizada",
+  "Photo-Verified Every Visit": "Verificado con Fotos en Cada Visita",
+  "Serving Kendall + Pinecrest": "Sirviendo Kendall + Pinecrest",
+
+  // Pricing table + pricing FAQ
+  "🔧 Cleaning Add-Ons": "🔧 Adicionales de Limpieza",
+  "🔧 Lawn Add-Ons": "🔧 Adicionales de Jardín",
+  "🔧 Detailing Add-Ons": "🔧 Adicionales de Detallado",
+  "one-time": "una sola vez",
+  "Standard pricing covers most homes, yards, and vehicles. Larger properties or vehicles get a small upgrade fee — anything beyond is a quick custom quote.":
+    "Los precios estándar cubren la mayoría de las casas, jardines y vehículos. Las propiedades o vehículos más grandes tienen un pequeño cargo adicional — más allá de eso, es una cotización personalizada rápida.",
+  "What affects my price?": "¿Qué afecta mi precio?",
+  "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees.":
+    "El precio depende de los servicios que elijas y con qué frecuencia los quieras — semanal, quincenal o mensual. Eso es todo. Sin cargos ocultos.",
+  "How do bundle discounts work?": "¿Cómo funcionan los descuentos por combo?",
+  "Pick 2 services and get 10% off automatically. Pick all 3 and get 15% off. The discount is applied at checkout — no code needed.":
+    "Elige 2 servicios y obtén 10% de descuento automáticamente. Elige los 3 y obtén 15% de descuento. El descuento se aplica al pagar — sin código.",
+  "Can I add services later?": "¿Puedo agregar servicios después?",
+  "Yes. You can add or remove any service at any time. Changes take effect on your next billing cycle.":
+    "Sí. Puedes agregar o quitar cualquier servicio en cualquier momento. Los cambios aplican en tu próximo ciclo de facturación.",
+  "Can I adjust my plan after signing up?": "¿Puedo ajustar mi plan después de inscribirme?",
+  "Absolutely. Change your frequency, swap services, or pause anytime through your dashboard or by contacting us.":
+    "Por supuesto. Cambia tu frecuencia, cambia de servicios o pausa cuando quieras desde tu panel o contactándonos.",
+
+  // Footer
+  "Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Kendall + Pinecrest.":
+    "El servicio del hogar por suscripción de Miami. Limpieza del hogar, cuidado del jardín y detallado de auto — un solo plan mensual simple. Sirviendo Kendall + Pinecrest.",
+  "© 2026 Tidy Home Concierge LLC · Miami, Florida": "© 2026 Tidy Home Concierge LLC · Miami, Florida",
+  "Serving 33183 Kendall · 33186 Kendall West · 33156 Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.":
+    "Sirviendo 33183 Kendall · 33186 Kendall West · 33156 Pinecrest con suscripciones recurrentes de limpieza del hogar, cuidado del jardín y detallado de auto.",
+  "Coming soon": "Próximamente",
+  "Join our team": "Únete a nuestro equipo",
+  "Tidy on Instagram": "Tidy en Instagram",
+  "Tidy on Facebook": "Tidy en Facebook",
+  "TikTok coming soon": "TikTok próximamente",
+  "Call now": "Llamar ahora",
 };
 
 interface LanguageContextType {
