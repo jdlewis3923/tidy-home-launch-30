@@ -1,0 +1,9 @@
+UPDATE chatbot_knowledge SET content = replace(content, 'Subscribe to 2 services = 15% off automatically. Subscribe to 3 services = 20% off automatically.', 'Subscribe to 2 services = 10% off automatically. Subscribe to 3 services = 15% off automatically.') WHERE id = 'cdf7f5e3-35b6-4954-85a0-36892470fa8c';
+
+UPDATE social_posts SET caption = replace(replace(caption, 'Save 15-20%', 'Save 10-15%'), 'First month: $50 off with TIDY50. Opens May 26.', 'Founding rate locked ' || chr(8212) || ' your price never rises. Free premium add-on on visit one.') WHERE id = '04156b6a-77ed-445f-b5d3-c20b279510dc' AND posted_at IS NULL AND status <> 'posted';
+
+UPDATE social_posts SET caption = replace(caption, '$50 off your first month with TIDY50.', 'Founding rate locked ' || chr(8212) || ' your price never rises. First visit perfect or it''s free.') WHERE id = 'b8a5af5c-a8a3-4831-abbc-3d7406a26ff8' AND posted_at IS NULL AND status <> 'posted';
+
+UPDATE social_posts SET caption = replace(replace(caption, 'or all three for $275.', 'or all three bundled for 15% off.'), '$50 off your first month with TIDY50.', 'Founding rate locked ' || chr(8212) || ' your price never rises. Only 25 founding homes per ZIP.') WHERE id = '08a48c47-6ceb-41d7-b684-3b78611d0317' AND posted_at IS NULL AND status <> 'posted';
+
+UPDATE kpi_definitions SET playbook = '[{"step":"Review the 25-per-ZIP founding cap","action_key":"info_promo_terms","action_type":"INFO"},{"step":"Cost out the free first-visit add-on","action_type":"MANUAL"},{"step":"Pause founding enrollment in saturated ZIPs","action_type":"MANUAL"}]'::jsonb WHERE id = 'df9c1262-014d-4633-911e-7022c6e6d1ee';
