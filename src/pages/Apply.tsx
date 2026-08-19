@@ -64,6 +64,21 @@ export default function Apply() {
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
+  function YesNoBlock({ label, value, onChange, name }: {
+    label: string; value: string; onChange: (v: YesNo) => void; name: string;
+  }) {
+    return (
+      <RadioBlock
+        label={label}
+        value={value}
+        onChange={(v) => onChange(v as YesNo)}
+        options={[{ v: "yes", l: t("Yes") }, { v: "no", l: t("No") }]}
+        name={name}
+        inline
+      />
+    );
+  }
+
 
 
   const submit = async (e: React.FormEvent) => {
@@ -293,20 +308,5 @@ function RadioBlock({ label, value, onChange, options, name, inline }: {
         ))}
       </RadioGroup>
     </div>
-  );
-}
-
-function YesNoBlock({ label, value, onChange, name }: {
-  label: string; value: string; onChange: (v: YesNo) => void; name: string;
-}) {
-  return (
-    <RadioBlock
-      label={label}
-      value={value}
-      onChange={(v) => onChange(v as YesNo)}
-      options={[{ v: "yes", l: "Yes" }, { v: "no", l: "No" }]}
-      name={name}
-      inline
-    />
   );
 }
