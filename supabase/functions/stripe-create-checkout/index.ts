@@ -8,23 +8,23 @@
 // needs to provision the user's subscription + visit rows server-side
 // (no client-side INSERTs anywhere — RLS blocks them now).
 
-import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
-import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
-import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts';
-import { withLogging } from '../_shared/withLogging.ts';
+import Stripe from "https://esm.sh/stripe@17.5.0?target=deno";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { corsHeaders, handleCors, jsonResponse } from "../_shared/cors.ts";
+import { withLogging } from "../_shared/withLogging.ts";
 
-const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://jointidy.co';
+const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SITE_URL = Deno.env.get("SITE_URL") ?? "https://jointidy.co";
 
 // Service-area ZIP allowlist (Phase 2 hardening).
-const SERVICE_ZIPS = new Set(['33156', '33157', '33176', '33183', '33186']);
+const SERVICE_ZIPS = new Set(["33156", "33157", "33176", "33183", "33186"]);
 
 // ---------- Input schema (flat, server-side) ----------
-const ServiceTypeEnum = z.enum(['cleaning', 'lawn', 'detailing']);
-const FrequencyEnum = z.enum(['monthly', 'biweekly', 'weekly']);
+const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
+const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
 
 const CheckoutInputSchema = z.object({
   services: z
@@ -39,7 +39,7 @@ const CheckoutInputSchema = z.object({
   zip: z.string().regex(/^\d{5}$/),
   preferred_day: z.string().max(20).optional(),
   preferred_time: z.string().max(20).optional(),
-  lang: z.enum(['en', 'es']).default('en'),
+  lang: z.enum(["en", "es"]).default("en"),
   // Attribution
   gclid: z.string().max(500).optional(),
   utm_source: z.string().max(500).optional(),
@@ -54,21 +54,19 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   if (!STRIPE_SECRET_KEY) {
-    return jsonResponse({ ok: false, error: 'Stripe not configured' }, 500);
+    return jsonResponse({ ok: false, error: "Stripe not configured" }, 500);
   }
 
   // ---------- Auth: extract user_id from JWT ----------
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) return jsonResponse({ ok: false, error: "unauthorized" }, 401);
 
-  const supabaseAuth = createClient(
-    SUPABASE_URL,
-    Deno.env.get('SUPABASE_ANON_KEY')!,
-    { global: { headers: { Authorization: authHeader } } },
-  );
+  const supabaseAuth = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    global: { headers: { Authorization: authHeader } },
+  });
   const { data: userData, error: userErr } = await supabaseAuth.auth.getUser();
   if (userErr || !userData.user) {
-    return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+    return jsonResponse({ ok: false, error: "unauthorized" }, 401);
   }
   const user = userData.user;
 
@@ -77,20 +75,17 @@ Deno.serve(async (req) => {
   try {
     body = await req.json();
   } catch {
-    return jsonResponse({ ok: false, error: 'invalid JSON body' }, 400);
+    return jsonResponse({ ok: false, error: "invalid JSON body" }, 400);
   }
 
   const parsed = CheckoutInputSchema.safeParse(body);
   if (!parsed.success) {
-    return jsonResponse(
-      { ok: false, error: 'validation_failed', details: parsed.error.flatten() },
-      400,
-    );
+    return jsonResponse({ ok: false, error: "validation_failed", details: parsed.error.flatten() }, 400);
   }
   const input = parsed.data;
 
   if (!SERVICE_ZIPS.has(input.zip)) {
-    return jsonResponse({ ok: false, error: 'zip_outside_service_area' }, 400);
+    return jsonResponse({ ok: false, error: "zip_outside_service_area" }, 400);
   }
 
   // ---------- Service-role DB client ----------
@@ -100,12 +95,12 @@ Deno.serve(async (req) => {
 
   try {
     const result = await withLogging({
-      source: 'stripe',
-      event: 'checkout.session.create',
+      source: "stripe",
+      event: "checkout.session.create",
       payload: { user_id: user.id, services: input.services.map((s) => `${s.service}:${s.frequency}`) },
       fn: async () => {
         const stripe = new Stripe(STRIPE_SECRET_KEY, {
-          apiVersion: '2024-12-18.acacia',
+          apiVersion: "2024-12-18.acacia",
           httpClient: Stripe.createFetchHttpClient(),
         });
 
@@ -115,19 +110,20 @@ Deno.serve(async (req) => {
           frequency: s.frequency,
         }));
         const { data: subRows, error: subErr } = await supabase
-          .from('stripe_catalog')
-          .select('service_type, frequency, stripe_price_id')
-          .in('service_type', subKeys.map((k) => k.service_type))
-          .eq('is_addon', false)
-          .eq('active', true);
+          .from("stripe_catalog")
+          .select("service_type, frequency, stripe_price_id")
+          .in(
+            "service_type",
+            subKeys.map((k) => k.service_type),
+          )
+          .eq("is_addon", false)
+          .eq("active", true);
         if (subErr) throw new Error(`catalog read failed: ${subErr.message}`);
 
         // deno-lint-ignore no-explicit-any
         const line_items: any[] = [];
         for (const s of input.services) {
-          const row = subRows?.find(
-            (r) => r.service_type === s.service && r.frequency === s.frequency,
-          );
+          const row = subRows?.find((r) => r.service_type === s.service && r.frequency === s.frequency);
           if (!row) {
             throw new Error(`no active catalog price for ${s.service}:${s.frequency}`);
           }
@@ -137,11 +133,14 @@ Deno.serve(async (req) => {
         // ---------- Resolve add-on prices ----------
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
-            .from('stripe_catalog')
-            .select('addon_name, stripe_price_id')
-            .eq('is_addon', true)
-            .eq('active', true)
-            .in('addon_name', input.addons.map((a) => a.addon_name));
+            .from("stripe_catalog")
+            .select("addon_name, stripe_price_id")
+            .eq("is_addon", true)
+            .eq("active", true)
+            .in(
+              "addon_name",
+              input.addons.map((a) => a.addon_name),
+            );
           if (addonErr) throw new Error(`addon catalog read failed: ${addonErr.message}`);
 
           for (const a of input.addons) {
@@ -153,9 +152,7 @@ Deno.serve(async (req) => {
 
         // ---------- Bundle discount (metadata only) ----------
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
-        const bundle_discount_pct =
-          uniqueServices >= 3 ? 15 : uniqueServices === 2 ? 10 : 0;
-
+        const bundle_discount_pct = uniqueServices >= 3 ? 15 : uniqueServices === 2 ? 10 : 0;
 
         // ---------- Promo code lookup ----------
         let promoId: string | null = null;
@@ -168,31 +165,34 @@ Deno.serve(async (req) => {
             });
             promoId = found.data[0]?.id ?? null;
           } catch (err) {
-            console.error('[checkout] promo lookup failed', err);
+            console.error("[checkout] promo lookup failed", err);
           }
         }
 
         // ---------- Subscription metadata for the webhook ----------
         const subscriptionMetadata = {
+          cohort: "founding_2026",
+          price_locked: "yes",
+          signed_up_at: new Date().toISOString(),
           user_id: user.id,
           services_json: JSON.stringify(input.services),
           addons_json: JSON.stringify(input.addons),
           zip: input.zip,
-          preferred_day: input.preferred_day ?? '',
-          preferred_time: input.preferred_time ?? '',
+          preferred_day: input.preferred_day ?? "",
+          preferred_time: input.preferred_time ?? "",
           lang: input.lang,
           bundle_discount_pct: String(bundle_discount_pct),
-          gclid: input.gclid ?? '',
-          utm_source: input.utm_source ?? '',
-          utm_medium: input.utm_medium ?? '',
-          utm_campaign: input.utm_campaign ?? '',
-          utm_content: input.utm_content ?? '',
-          utm_term: input.utm_term ?? '',
+          gclid: input.gclid ?? "",
+          utm_source: input.utm_source ?? "",
+          utm_medium: input.utm_medium ?? "",
+          utm_campaign: input.utm_campaign ?? "",
+          utm_content: input.utm_content ?? "",
+          utm_term: input.utm_term ?? "",
         };
 
         // deno-lint-ignore no-explicit-any
         const sessionParams: any = {
-          mode: 'subscription',
+          mode: "subscription",
           customer_email: user.email ?? undefined,
           client_reference_id: user.id,
           line_items,
@@ -216,8 +216,8 @@ Deno.serve(async (req) => {
 
     return jsonResponse(result, 200);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('[stripe-create-checkout] failed', message);
+    const message = err instanceof Error ? err.message : "unknown error";
+    console.error("[stripe-create-checkout] failed", message);
     return jsonResponse({ ok: false, error: message }, 500);
   }
 });
