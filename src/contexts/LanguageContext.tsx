@@ -556,7 +556,27 @@ const translations: Record<string, string> = {
     "Detallado de Auto en Pinecrest + Kendall | Tidy Home Services",
   "Bundle & Save in Pinecrest + Kendall | Tidy Home Services":
     "Combo y Ahorra en Pinecrest + Kendall | Tidy Home Services",
+
+  // Thank You page
+  "You're in.": "Ya estás dentro.",
+  "Your founding rate is locked — your price never rises, for as long as you're a member.":
+    "Tu tarifa de fundador está bloqueada — tu precio nunca sube, mientras seas miembro.",
+  "We're prioritizing homes for the initial rollout — and you're at the front of the line.":
+    "Estamos priorizando hogares para el lanzamiento inicial, y tú estás al frente de la fila.",
+  "Here's what happens next:": "Esto es lo que sigue:",
+  "Check your email": "Revisa tu correo",
+  "your confirmation just landed with your founding member details and next steps.":
+    "tu confirmación acaba de llegar con los detalles de tu membresía fundadora y los próximos pasos.",
+  "Watch for a text from Tidy": "Espera un mensaje de texto de Tidy",
+  "within 24 hours to confirm your spot and check your ZIP code availability.":
+    "en un plazo de 24 horas para confirmar tu lugar y verificar la disponibilidad en tu código postal.",
+  "Once we launch in your area": "Cuando lancemos en tu zona",
+  ", you'll be among the first activated — with priority scheduling and locked pricing.":
+    "estarás entre los primeros en activarse, con programación prioritaria y precio bloqueado.",
+  "Questions? Email us at": "¿Preguntas? Escríbenos a",
+  "Back to the site": "Volver al sitio",
 };
+
 
 interface LanguageContextType {
   language: Language;
