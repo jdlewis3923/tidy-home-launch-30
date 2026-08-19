@@ -32,8 +32,7 @@ const Footer = () => {
           <div className="lg:col-span-5">
             <TidyLogo size="md" withBackground />
             <p className="mt-5 text-primary-foreground/65 text-sm leading-relaxed max-w-md">
-              Miami's subscription home service. House cleaning, lawn care, and car detailing —
-              one simple monthly plan. Serving Kendall + Pinecrest.
+              {t("Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Kendall + Pinecrest.")}
             </p>
 
             {/* Service-area chips */}
@@ -45,7 +44,7 @@ const Footer = () => {
                 >
                   <MapPin className="h-3 w-3 text-gold" />
                   <span className="font-semibold text-primary-foreground/85">{z.code}</span>
-                  <span className="text-primary-foreground/45">· {z.area}</span>
+                  <span className="text-primary-foreground/45">· {t(z.area)}</span>
                 </span>
               ))}
             </div>
