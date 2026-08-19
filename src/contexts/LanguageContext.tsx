@@ -151,8 +151,8 @@ const translations: Record<string, string> = {
   "Everything runs automatically. No scheduling. No coordination. No thinking about it again after signup.":
     "Todo funciona automáticamente. Sin programar. Sin coordinar. Sin pensar en ello después de inscribirte.",
   "Satisfaction Guarantee": "Garantía de Satisfacción",
-  "If it isn't perfect, we fix it fast. No contracts. Cancel anytime. We stand behind every visit.":
-    "Si no es perfecto, lo arreglamos rápido. Sin contratos. Cancela cuando quieras. Respaldamos cada visita.",
+  "First visit perfect or it's free. After that, if it isn't perfect, we fix it fast. No contracts. Cancel anytime.":
+    "Primera visita perfecta o es gratis. Después, si no es perfecto, lo arreglamos rápido. Sin contratos. Cancela cuando quieras.",
   "Every professional is background-checked and fully insured. Photo verification submitted after every visit.":
     "Cada profesional está verificado y completamente asegurado. Verificación con fotos después de cada visita.",
   "Always on Schedule": "Siempre a Tiempo",
