@@ -54,7 +54,6 @@ const translations: Record<string, string> = {
   "🌿 Lawn Care": "🌿 Cuidado del Jardín",
   "🚗 Car Detailing": "🚗 Detallado de Auto",
   "✓ Cancel Anytime": "✓ Cancela Cuando Quieras",
-  "Request Early Access →": "Solicitar Acceso →",
   "Limited founding memberships · No commitment required · Starting at $85/mo":
     "Membresías fundadoras limitadas · Sin compromiso · Desde $85/mes",
 
