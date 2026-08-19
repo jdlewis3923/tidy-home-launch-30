@@ -23,7 +23,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
     if (!form.firstName.trim()) errs.firstName = "First name is required";
     if (!form.email.trim() || !form.email.includes("@")) errs.email = "Valid email is required";
     if (!form.phone.trim()) errs.phone = "Phone number is required";
-    
+
     if (!form.zip.trim()) errs.zip = "ZIP code is required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -76,7 +76,9 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
   };
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
     if (isOpen) {
       document.addEventListener("keydown", handleEsc);
       document.body.style.overflow = "hidden";
@@ -90,11 +92,19 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+    >
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
 
       <div className="relative rounded-3xl shadow-[0_25px_80px_-15px_rgba(0,0,0,0.7)] max-w-[520px] w-full max-h-[90vh] overflow-y-auto animate-bounce-in">
-        <button onClick={handleClose} className="absolute top-5 right-5 z-10 text-white/60 hover:text-white transition-colors p-1">
+        <button
+          onClick={handleClose}
+          className="absolute top-5 right-5 z-10 text-white/60 hover:text-white transition-colors p-1"
+        >
           <X className="w-5 h-5" />
         </button>
 
@@ -106,33 +116,64 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
             {t("🎉 Founding Member Offer")}
           </span>
           <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
-            {t("Get $50 Off Your")}<br />{t("First Month")}
+            {t("Founding Rate Locked")}
+            <br />
+            {t("Your Price Never Rises")}
           </h3>
           <p className="text-slate-300/70 text-sm mt-3 max-w-sm mx-auto leading-relaxed">
-            {t("Join Miami homeowners who have already simplified their home. Lock in founding pricing before we launch publicly.")}
+            {t(
+              "Join Miami homeowners who have already simplified their home. Lock in founding pricing before we launch publicly.",
+            )}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-b-3xl px-8 pb-8 pt-6 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <input className={`w-full bg-gray-100 border ${errors.firstName ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("First Name")} value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+              <input
+                className={`w-full bg-gray-100 border ${errors.firstName ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`}
+                placeholder={t("First Name")}
+                value={form.firstName}
+                onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+              />
               {errors.firstName && <p className="text-xs text-red-500 mt-1 font-medium">{errors.firstName}</p>}
             </div>
             <div>
-              <input className={`w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("Last Name")} value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+              <input
+                className={`w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`}
+                placeholder={t("Last Name")}
+                value={form.lastName}
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+              />
             </div>
           </div>
           <div>
-            <input className={`w-full bg-gray-100 border ${errors.email ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("Email Address")} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <input
+              className={`w-full bg-gray-100 border ${errors.email ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`}
+              placeholder={t("Email Address")}
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
             {errors.email && <p className="text-xs text-red-500 mt-1 font-medium">{errors.email}</p>}
           </div>
           <div>
-            <input className={`w-full bg-gray-100 border ${errors.phone ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("Phone Number")} type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <input
+              className={`w-full bg-gray-100 border ${errors.phone ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`}
+              placeholder={t("Phone Number")}
+              type="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
             {errors.phone && <p className="text-xs text-red-500 mt-1 font-medium">{errors.phone}</p>}
           </div>
           <div>
-            <input className={`w-full bg-gray-100 border ${errors.zip ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`} placeholder={t("ZIP Code")} value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value })} />
+            <input
+              className={`w-full bg-gray-100 border ${errors.zip ? "border-red-400" : "border-gray-200"} rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`}
+              placeholder={t("ZIP Code")}
+              value={form.zip}
+              onChange={(e) => setForm({ ...form, zip: e.target.value })}
+            />
             {errors.zip && <p className="text-xs text-red-500 mt-1 font-medium">{errors.zip}</p>}
           </div>
 
@@ -145,8 +186,17 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
           </button>
 
           <p className="text-[11px] text-gray-400 leading-relaxed text-center mt-1">
-            {t("By submitting, you agree to receive email communications and recurring automated transactional and informational SMS messages from Tidy Home Concierge LLC at the phone number provided, including account notifications, appointment reminders, service updates, and customer care communications. Message frequency varies. Msg & data rates may apply. Consent is not a condition of any purchase. Reply STOP to cancel or HELP for assistance. Carriers are not liable for delayed or undelivered messages.")}{" "}
-            <a href="/privacy" className="text-blue-500 underline">{t("Privacy Policy")}</a> | <a href="/terms" className="text-blue-500 underline">{t("Terms of Service")}</a>.
+            {t(
+              "By submitting, you agree to receive email communications and recurring automated transactional and informational SMS messages from Tidy Home Concierge LLC at the phone number provided, including account notifications, appointment reminders, service updates, and customer care communications. Message frequency varies. Msg & data rates may apply. Consent is not a condition of any purchase. Reply STOP to cancel or HELP for assistance. Carriers are not liable for delayed or undelivered messages.",
+            )}{" "}
+            <a href="/privacy" className="text-blue-500 underline">
+              {t("Privacy Policy")}
+            </a>{" "}
+            |{" "}
+            <a href="/terms" className="text-blue-500 underline">
+              {t("Terms of Service")}
+            </a>
+            .
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 pt-1">
