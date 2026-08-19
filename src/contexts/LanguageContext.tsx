@@ -853,6 +853,48 @@ const translations: Record<string, string> = {
   "Not a member yet? Start with a plan.": "¿Aún no eres miembro? Empieza con un plan.",
   "Lock in your monthly price, then send your link to a neighbor.":
     "Asegura tu precio mensual y luego envía tu enlace a un vecino.",
+
+  // Service landing pages + bundle
+  "Reliable lawn care, done right every time. Mow, edge, blow.":
+    "Cuidado del jardín confiable, bien hecho siempre. Cortamos, bordeamos y soplamos.",
+  "Same crew every visit. Locked monthly price. Cancel anytime.":
+    "El mismo equipo en cada visita. Precio mensual fijo. Cancela cuando quieras.",
+  "Tidy isn't just lawn — it's a system for your entire home.":
+    "Tidy no es solo jardín — es un sistema para todo tu hogar.",
+  "Start lawn care": "Empezar cuidado del jardín",
+  "Start your plan": "Empieza tu plan",
+  "Weekly lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Locked price from $85/mo. Same crew, no contracts. Book in 60 seconds.":
+    "Cuidado del jardín semanal en Pinecrest y Kendall (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Precio fijo desde $85/mes. El mismo equipo, sin contratos. Reserva en 60 segundos.",
+  "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.":
+    "Limpieza profesional del hogar, resuelta por nosotros. Semanal, quincenal o mensual.",
+  "Tidy isn't just cleaning — it's a system for your entire home.":
+    "Tidy no es solo limpieza — es un sistema para todo tu hogar.",
+  "Book your cleaning": "Reserva tu limpieza",
+  "Monthly house cleaning in Pinecrest and Kendall (33156, 33183, 33186). Locked price from $159/mo. Same crew, no contracts, eco-safe. Book in 60 seconds.":
+    "Limpieza mensual del hogar en Pinecrest y Kendall (33156, 33183, 33186). Precio fijo desde $159/mes. El mismo equipo, sin contratos, productos ecológicos. Reserva en 60 segundos.",
+  "Professional car detailing at your home. Ceramic-safe, monthly.":
+    "Detallado profesional de autos en tu casa. Seguro para cerámica, mensual.",
+  "Same detailer every visit. Locked monthly price. Cancel anytime.":
+    "El mismo detallador en cada visita. Precio mensual fijo. Cancela cuando quieras.",
+  "Tidy isn't just detailing — it's a system for your entire home.":
+    "Tidy no es solo detallado — es un sistema para todo tu hogar.",
+  "Book detailing": "Reservar detallado",
+  "Mobile car detailing in Pinecrest and Kendall (33156, 33183, 33186). We come to your driveway. Ceramic-safe, locked price from $159/mo. Book in 60 seconds.":
+    "Detallado de autos a domicilio en Pinecrest y Kendall (33156, 33183, 33186). Vamos a tu entrada. Seguro para cerámica, precio fijo desde $159/mes. Reserva en 60 segundos.",
+  "Stack home cleaning, lawn care, and car detailing on one plan. Save 10–15% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.":
+    "Combina limpieza del hogar, cuidado del jardín y detallado de auto en un solo plan. Ahorra 10–15% en Pinecrest y Kendall (33156, 33183, 33186). Una suscripción, un equipo, una factura.",
+  "Vetted & insured pros": "Profesionales verificados y asegurados",
+  "Takes under 60 seconds · No card to start": "Toma menos de 60 segundos · Sin tarjeta para empezar",
+  Call: "Llamar",
+  "Locked price · No contracts · Cancel anytime · Pause or reschedule anytime":
+    "Precio fijo · Sin contratos · Cancela cuando quieras · Pausa o reagenda cuando quieras",
+  "Set it once. We handle the rest — scheduling, reminders, the same crew every visit.":
+    "Configúralo una vez. Nosotros nos encargamos del resto — programación, recordatorios y el mismo equipo en cada visita.",
+  "No contracts · Cancel, pause, or reschedule anytime": "Sin contratos · Cancela, pausa o reagenda cuando quieras",
+  "Background-checked pros": "Profesionales con antecedentes verificados",
+  "Vetted & insured": "Verificados y asegurados",
+  "Satisfaction guaranteed": "Garantía de satisfacción",
+  "Serving ": "Sirviendo ",
 };
 
 interface LanguageContextType {
