@@ -4,19 +4,19 @@ type Language = "en" | "es";
 
 const translations: Record<string, string> = {
   // Navbar
-  "Services": "Servicios",
+  Services: "Servicios",
   "How It Works": "Cómo Funciona",
-  "Pricing": "Precios",
-  "FAQ": "Preguntas Frecuentes",
+  Pricing: "Precios",
+  FAQ: "Preguntas Frecuentes",
   "Request Early Access": "Solicitar Acceso",
   "START MY PLAN": "EMPEZAR MI PLAN",
-  "Home": "Inicio",
+  Home: "Inicio",
   "House Cleaning": "Limpieza del Hogar",
   "Lawn Care": "Cuidado del Jardín",
   "Car Detailing": "Detallado de Auto",
   "Bundle & Save": "Combo y Ahorra",
-  "Refer": "Refiere",
-  "Login": "Acceder",
+  Refer: "Refiere",
+  Login: "Acceder",
 
   // Announcement ticker
   "Licensed & Insured": "Licenciado y Asegurado",
@@ -24,7 +24,7 @@ const translations: Record<string, string> = {
   "Cancel Anytime": "Cancela Cuando Quieras",
   "Photo Verified Every Visit": "Fotos Verificadas en Cada Visita",
   "No Long-Term Contracts": "Sin Contratos a Largo Plazo",
-  
+
   "Serving Kendall & Pinecrest": "Sirviendo Kendall y Pinecrest",
   "From $85/mo": "Desde $85/mes",
   "One Monthly Plan": "Un Plan Mensual",
@@ -34,7 +34,8 @@ const translations: Record<string, string> = {
 
   // Hero
   "Now accepting homes in Kendall & Pinecrest": "Ahora aceptando hogares en Kendall y Pinecrest",
-  "Now accepting homes in Kendall & Pinecrest · Limited spots": "Ahora aceptando hogares en Kendall y Pinecrest · Cupos limitados",
+  "Now accepting homes in Kendall & Pinecrest · Limited spots":
+    "Ahora aceptando hogares en Kendall y Pinecrest · Cupos limitados",
   "Your Home. Handled.": "Tu Hogar. Resuelto.",
   "Your Home.": "Tu Hogar.",
   "On Autopilot.": "En Piloto Automático.",
@@ -44,15 +45,18 @@ const translations: Record<string, string> = {
   "No contracts · Cancel anytime · From $85/mo": "Sin contratos · Cancela cuando quieras · Desde $85/mes",
   "Founding memberships · No commitment · From $85/mo": "Membresías fundadoras · Sin compromiso · Desde $85/mes",
   "START MY PLAN →": "EMPEZAR MI PLAN →",
-  "We handle scheduling, timing, and everything in between.": "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
+  "We handle scheduling, timing, and everything in between.":
+    "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
   "Just set it — we'll take care of the rest.": "Solo configúralo — nosotros nos encargamos del resto.",
-  "Cleaning, lawn care, and car detailing — fully managed for you. No booking, no vendors, no reminders. Ever.": "Limpieza, jardín y detallado de auto — totalmente gestionado. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
+  "Cleaning, lawn care, and car detailing — fully managed for you. No booking, no vendors, no reminders. Ever.":
+    "Limpieza, jardín y detallado de auto — totalmente gestionado. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
   "🏠 House Cleaning": "🏠 Limpieza del Hogar",
   "🌿 Lawn Care": "🌿 Cuidado del Jardín",
   "🚗 Car Detailing": "🚗 Detallado de Auto",
   "✓ Cancel Anytime": "✓ Cancela Cuando Quieras",
-  "Request Early Access — Get $50 Off →": "Solicitar Acceso — Obtén $50 de Descuento →",
-  "Limited founding memberships · No commitment required · Starting at $85/mo": "Membresías fundadoras limitadas · Sin compromiso · Desde $85/mes",
+  "Request Early Access →": "Solicitar Acceso →",
+  "Limited founding memberships · No commitment required · Starting at $85/mo":
+    "Membresías fundadoras limitadas · Sin compromiso · Desde $85/mes",
 
   // Proof bar
   "Miami Homeowners": "Propietarios en Miami",
@@ -66,7 +70,8 @@ const translations: Record<string, string> = {
   "What's Included": "Qué Incluye",
   "Everything your home needs. One plan.": "Todo lo que tu hogar necesita. Un plan.",
   "Everything your home needs. One simple plan.": "Todo lo que tu hogar necesita. Un plan simple.",
-  "Three essential services. One subscription. Zero coordination required. Your schedule, your frequency — handled automatically every month.": "Tres servicios esenciales. Una suscripción. Cero coordinación. Tu horario, tu frecuencia — gestionado automáticamente cada mes.",
+  "Three essential services. One subscription. Zero coordination required. Your schedule, your frequency — handled automatically every month.":
+    "Tres servicios esenciales. Una suscripción. Cero coordinación. Tu horario, tu frecuencia — gestionado automáticamente cada mes.",
   "⭐ Most Popular": "⭐ Más Popular",
   "Most Popular": "Más Popular",
   "Best Value": "Mejor Precio",
@@ -86,13 +91,17 @@ const translations: Record<string, string> = {
   // How it works
   "Simple process": "Proceso simple",
   "Get 5–10 hours back every week": "Recupera 5–10 horas cada semana",
-  "How it works — three steps, then you never think about it again.": "Cómo funciona — tres pasos, y nunca más piensas en ello.",
+  "How it works — three steps, then you never think about it again.":
+    "Cómo funciona — tres pasos, y nunca más piensas en ello.",
   "Choose Your Plan": "Elige Tu Plan",
-  "Select your services and frequency. Takes 60 seconds. See pricing before you pay.": "Selecciona tus servicios y frecuencia. Toma 60 segundos. Ve los precios antes de pagar.",
+  "Select your services and frequency. Takes 60 seconds. See pricing before you pay.":
+    "Selecciona tus servicios y frecuencia. Toma 60 segundos. Ve los precios antes de pagar.",
   "We Handle Everything": "Nosotros Nos Encargamos",
-  "A licensed, insured, background-checked professional shows up on time. You receive an ETA before every visit.": "Un profesional licenciado, asegurado y verificado llega a tiempo. Recibes un estimado antes de cada visita.",
+  "A licensed, insured, background-checked professional shows up on time. You receive an ETA before every visit.":
+    "Un profesional licenciado, asegurado y verificado llega a tiempo. Recibes un estimado antes de cada visita.",
   "You Never Think About It Again": "Nunca Más Piensas en Ello",
-  "Recurring scheduling, automatic billing, photo verification after every visit. No reminders. No rebooking. No effort.": "Programación recurrente, facturación automática, verificación con fotos después de cada visita. Sin recordatorios. Sin reagendar. Sin esfuerzo.",
+  "Recurring scheduling, automatic billing, photo verification after every visit. No reminders. No rebooking. No effort.":
+    "Programación recurrente, facturación automática, verificación con fotos después de cada visita. Sin recordatorios. Sin reagendar. Sin esfuerzo.",
   "Design Your Plan →": "Diseña Tu Plan →",
 
   // Before/After
@@ -116,19 +125,23 @@ const translations: Record<string, string> = {
   // Who it's for
   "Who it's for": "Para quién es",
   "Built for homeowners who want it handled.": "Hecho para propietarios que quieren que se encarguen de todo.",
-  "If you'd rather spend your weekend doing anything but managing vendors, Tidy is for you.": "Si prefieres pasar tu fin de semana haciendo cualquier cosa menos gestionar proveedores, Tidy es para ti.",
+  "If you'd rather spend your weekend doing anything but managing vendors, Tidy is for you.":
+    "Si prefieres pasar tu fin de semana haciendo cualquier cosa menos gestionar proveedores, Tidy es para ti.",
   "Busy Professionals": "Profesionales Ocupados",
-  "No time to manage 3 different vendors. One plan handles everything on autopilot while you focus on what matters.": "Sin tiempo para gestionar 3 proveedores diferentes. Un plan maneja todo en automático mientras te enfocas en lo que importa.",
-  "Families": "Familias",
-  "Keep your home consistently maintained without it falling on any one person. Reliable service, every single visit.": "Mantén tu hogar consistentemente mantenido sin que recaiga en una sola persona. Servicio confiable, cada visita.",
+  "No time to manage 3 different vendors. One plan handles everything on autopilot while you focus on what matters.":
+    "Sin tiempo para gestionar 3 proveedores diferentes. Un plan maneja todo en automático mientras te enfocas en lo que importa.",
+  Families: "Familias",
+  "Keep your home consistently maintained without it falling on any one person. Reliable service, every single visit.":
+    "Mantén tu hogar consistentemente mantenido sin que recaiga en una sola persona. Servicio confiable, cada visita.",
   "Time-Conscious Homeowners": "Propietarios que Valoran su Tiempo",
-  "You value your weekend. Stop spending it coordinating, rebooking, and following up. Tidy handles all of it.": "Valoras tu fin de semana. Deja de gastarlo coordinando, reagendando y dando seguimiento. Tidy se encarga de todo.",
+  "You value your weekend. Stop spending it coordinating, rebooking, and following up. Tidy handles all of it.":
+    "Valoras tu fin de semana. Deja de gastarlo coordinando, reagendando y dando seguimiento. Tidy se encarga de todo.",
 
   // Testimonials
-  "Reviews": "Reseñas",
+  Reviews: "Reseñas",
   "Trusted by homeowners": "Confiado por propietarios",
   "Real homeowners. Real results.": "Propietarios reales. Resultados reales.",
-  
+
   "100+ Miami members": "100+ miembros en Miami",
   "Request Early Access →": "Solicitar Acceso →",
 
@@ -136,79 +149,109 @@ const translations: Record<string, string> = {
   "Why Tidy": "Por Qué Tidy",
   "Why homeowners choose Tidy": "Por qué los propietarios eligen Tidy",
   "Full Autopilot": "Piloto Automático",
-  "Everything runs automatically. No scheduling. No coordination. No thinking about it again after signup.": "Todo funciona automáticamente. Sin programar. Sin coordinar. Sin pensar en ello después de inscribirte.",
+  "Everything runs automatically. No scheduling. No coordination. No thinking about it again after signup.":
+    "Todo funciona automáticamente. Sin programar. Sin coordinar. Sin pensar en ello después de inscribirte.",
   "Satisfaction Guarantee": "Garantía de Satisfacción",
-  "If it isn't perfect, we fix it fast. No contracts. Cancel anytime. We stand behind every visit.": "Si no es perfecto, lo arreglamos rápido. Sin contratos. Cancela cuando quieras. Respaldamos cada visita.",
-  "Every professional is background-checked and fully insured. Photo verification submitted after every visit.": "Cada profesional está verificado y completamente asegurado. Verificación con fotos después de cada visita.",
+  "If it isn't perfect, we fix it fast. No contracts. Cancel anytime. We stand behind every visit.":
+    "Si no es perfecto, lo arreglamos rápido. Sin contratos. Cancela cuando quieras. Respaldamos cada visita.",
+  "Every professional is background-checked and fully insured. Photo verification submitted after every visit.":
+    "Cada profesional está verificado y completamente asegurado. Verificación con fotos después de cada visita.",
   "Always on Schedule": "Siempre a Tiempo",
-  "Weekly, biweekly, or monthly service. No delays, no chasing vendors, no rescheduling headaches.": "Servicio semanal, quincenal o mensual. Sin demoras, sin perseguir proveedores, sin dolores de cabeza por reagendar.",
+  "Weekly, biweekly, or monthly service. No delays, no chasing vendors, no rescheduling headaches.":
+    "Servicio semanal, quincenal o mensual. Sin demoras, sin perseguir proveedores, sin dolores de cabeza por reagendar.",
   "One Simple Bill": "Una Sola Factura",
-  "All services under one monthly subscription. Transparent pricing, no surprise charges, secure payments via Stripe.": "Todos los servicios bajo una suscripción mensual. Precios transparentes, sin cargos sorpresa, pagos seguros vía Stripe.",
+  "All services under one monthly subscription. Transparent pricing, no surprise charges, secure payments via Stripe.":
+    "Todos los servicios bajo una suscripción mensual. Precios transparentes, sin cargos sorpresa, pagos seguros vía Stripe.",
   "Miami-Local": "Local en Miami",
-  "Built for Florida homes. Serving Kendall, Kendall West & Pinecrest neighborhoods.": "Hecho para hogares de Florida. Sirviendo las comunidades de Kendall, Kendall West y Pinecrest.",
+  "Built for Florida homes. Serving Kendall, Kendall West & Pinecrest neighborhoods.":
+    "Hecho para hogares de Florida. Sirviendo las comunidades de Kendall, Kendall West y Pinecrest.",
 
   // Pricing
-  "Everything runs automatically — no coordination needed. Modify, skip, or adjust anytime.": "Todo funciona automáticamente — sin coordinación necesaria. Modifica, omite o ajusta en cualquier momento.",
+  "Everything runs automatically — no coordination needed. Modify, skip, or adjust anytime.":
+    "Todo funciona automáticamente — sin coordinación necesaria. Modifica, omite o ajusta en cualquier momento.",
   "Simple, transparent rates. No surprises.": "Tarifas simples y transparentes. Sin sorpresas.",
-  "Pay monthly. Cancel anytime. Higher frequency = lower cost per visit. Bundle 2+ services for automatic discounts.": "Paga mensualmente. Cancela cuando quieras. Mayor frecuencia = menor costo por visita. Combina 2+ servicios para descuentos automáticos.",
-  "Service": "Servicio",
-  "Monthly": "Mensual",
-  "Biweekly": "Quincenal",
-  "Weekly": "Semanal",
-  "Bundle discount auto-applied at checkout · 2 services = 10% off · 3 services = 15% off · Cancel anytime": "Descuento por combo aplicado automáticamente · 2 servicios = 10% descuento · 3 servicios = 15% descuento · Cancela cuando quieras",
+  "Pay monthly. Cancel anytime. Higher frequency = lower cost per visit. Bundle 2+ services for automatic discounts.":
+    "Paga mensualmente. Cancela cuando quieras. Mayor frecuencia = menor costo por visita. Combina 2+ servicios para descuentos automáticos.",
+  Service: "Servicio",
+  Monthly: "Mensual",
+  Biweekly: "Quincenal",
+  Weekly: "Semanal",
+  "Bundle discount auto-applied at checkout · 2 services = 10% off · 3 services = 15% off · Cancel anytime":
+    "Descuento por combo aplicado automáticamente · 2 servicios = 10% descuento · 3 servicios = 15% descuento · Cancela cuando quieras",
 
   // FAQ
-  "Most customers never need to think about any of this — but we've got you covered.": "La mayoría de los clientes nunca necesitan pensar en esto — pero te tenemos cubierto.",
+  "Most customers never need to think about any of this — but we've got you covered.":
+    "La mayoría de los clientes nunca necesitan pensar en esto — pero te tenemos cubierto.",
   "Common questions": "Preguntas comunes",
   "Getting Started": "Primeros Pasos",
   "Services & Scheduling": "Servicios y Programación",
   "Service Scope": "Alcance del Servicio",
-  "Billing": "Facturación",
+  Billing: "Facturación",
   "Trust & Quality": "Confianza y Calidad",
 
   // FAQ Q&A (homepage)
   "What is Tidy?": "¿Qué es Tidy?",
-  "Great question! Tidy is Miami's first all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.": "¡Buena pregunta! Tidy es la primera suscripción de servicios del hogar todo-en-uno de Miami — manejamos tu limpieza, jardín y detallado de auto en un solo plan mensual. Sin malabarear varios proveedores, sin perseguir cotizaciones. Una suscripción y todo queda impecable.",
+  "Great question! Tidy is Miami's first all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
+    "¡Buena pregunta! Tidy es la primera suscripción de servicios del hogar todo-en-uno de Miami — manejamos tu limpieza, jardín y detallado de auto en un solo plan mensual. Sin malabarear varios proveedores, sin perseguir cotizaciones. Una suscripción y todo queda impecable.",
   "How do I sign up?": "¿Cómo me inscribo?",
-  "Super easy — just tap the 'Get Early Access' button, fill out a quick 60-second form with your name and contact info, and we'll reach out to confirm your spot and lock in your schedule. That's it!": "Súper fácil — toca el botón 'Solicitar Acceso', llena un formulario rápido de 60 segundos con tu nombre y contacto, y te llamamos para confirmar tu lugar y fijar tu horario. ¡Eso es todo!",
+  "Super easy — just tap the 'Get Early Access' button, fill out a quick 60-second form with your name and contact info, and we'll reach out to confirm your spot and lock in your schedule. That's it!":
+    "Súper fácil — toca el botón 'Solicitar Acceso', llena un formulario rápido de 60 segundos con tu nombre y contacto, y te llamamos para confirmar tu lugar y fijar tu horario. ¡Eso es todo!",
   "Where is Tidy available?": "¿Dónde está disponible Tidy?",
-  "We're currently serving some of Miami's best neighborhoods: Kendall (33183, 33186) and Pinecrest (33156). More areas are coming soon — grab your spot now!": "Ahora mismo servimos los mejores vecindarios de Miami: Kendall (33183, 33186) y Pinecrest (33156). Vienen más áreas — ¡reserva tu lugar ahora!",
+  "We're currently serving some of Miami's best neighborhoods: Kendall (33183, 33186) and Pinecrest (33156). More areas are coming soon — grab your spot now!":
+    "Ahora mismo servimos los mejores vecindarios de Miami: Kendall (33183, 33186) y Pinecrest (33156). Vienen más áreas — ¡reserva tu lugar ahora!",
   "Is there a commitment?": "¿Hay algún compromiso?",
-  "Nope — zero commitment! There are no contracts and no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month.": "¡Para nada — cero compromiso! Sin contratos y sin cargos por cancelación. Puedes cancelar cuando quieras, sin preguntas. Nos ganamos tu confianza cada mes.",
+  "Nope — zero commitment! There are no contracts and no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month.":
+    "¡Para nada — cero compromiso! Sin contratos y sin cargos por cancelación. Puedes cancelar cuando quieras, sin preguntas. Nos ganamos tu confianza cada mes.",
   "How often do services happen?": "¿Cada cuánto se hacen los servicios?",
-  "Totally up to you! Choose weekly, biweekly, or monthly for each service — and yes, you can mix and match. Want weekly lawn care but biweekly cleaning? Done. We build your plan around your life.": "¡Tú decides! Elige semanal, quincenal o mensual para cada servicio — y sí, puedes combinar. ¿Quieres jardín semanal pero limpieza quincenal? Listo. Armamos el plan a tu medida.",
+  "Totally up to you! Choose weekly, biweekly, or monthly for each service — and yes, you can mix and match. Want weekly lawn care but biweekly cleaning? Done. We build your plan around your life.":
+    "¡Tú decides! Elige semanal, quincenal o mensual para cada servicio — y sí, puedes combinar. ¿Quieres jardín semanal pero limpieza quincenal? Listo. Armamos el plan a tu medida.",
   "Do I need to be home?": "¿Tengo que estar en casa?",
-  "Not at all! Just give us access via a lockbox, gate code, or smart lock and our team handles everything while you're out living your best life. You'll get photo confirmation when each service is done.": "¡Para nada! Danos acceso con caja de seguridad, código de puerta o cerradura inteligente y nuestro equipo se encarga de todo mientras vives tu mejor vida. Recibes confirmación con fotos al terminar cada servicio.",
+  "Not at all! Just give us access via a lockbox, gate code, or smart lock and our team handles everything while you're out living your best life. You'll get photo confirmation when each service is done.":
+    "¡Para nada! Danos acceso con caja de seguridad, código de puerta o cerradura inteligente y nuestro equipo se encarga de todo mientras vives tu mejor vida. Recibes confirmación con fotos al terminar cada servicio.",
   "Can I reschedule or pause?": "¿Puedo reagendar o pausar?",
-  "Absolutely! Life happens — just shoot us a message and we'll move things around for you. Need to pause for a vacation? No problem. We've got you covered.": "¡Claro que sí! La vida pasa — mándanos un mensaje y movemos todo. ¿Necesitas pausar por vacaciones? Sin problema. Te tenemos cubierto.",
+  "Absolutely! Life happens — just shoot us a message and we'll move things around for you. Need to pause for a vacation? No problem. We've got you covered.":
+    "¡Claro que sí! La vida pasa — mándanos un mensaje y movemos todo. ¿Necesitas pausar por vacaciones? Sin problema. Te tenemos cubierto.",
   "What if it rains?": "¿Y si llueve?",
-  "No worries! If weather impacts an outdoor service, we'll automatically reschedule it for the next available day. Your subscription stays active and you won't miss a beat.": "¡No te preocupes! Si el clima afecta un servicio exterior, lo reprogramamos automáticamente al siguiente día disponible. Tu suscripción sigue activa y no pierdes nada.",
+  "No worries! If weather impacts an outdoor service, we'll automatically reschedule it for the next available day. Your subscription stays active and you won't miss a beat.":
+    "¡No te preocupes! Si el clima afecta un servicio exterior, lo reprogramamos automáticamente al siguiente día disponible. Tu suscripción sigue activa y no pierdes nada.",
   "What does house cleaning include?": "¿Qué incluye la limpieza del hogar?",
-  "We cover all the essentials to keep your home feeling fresh — kitchen surfaces and countertops, full bathroom cleaning, dusting throughout, vacuuming and mopping all floors, and trash removal. Your home will look and feel amazing after every visit.": "Cubrimos todo lo esencial para que tu casa se sienta fresca — superficies de cocina y mostradores, limpieza completa de baños, limpieza de polvo, aspirado y trapeado de todos los pisos, y retiro de basura. Tu casa se verá y se sentirá increíble después de cada visita.",
+  "We cover all the essentials to keep your home feeling fresh — kitchen surfaces and countertops, full bathroom cleaning, dusting throughout, vacuuming and mopping all floors, and trash removal. Your home will look and feel amazing after every visit.":
+    "Cubrimos todo lo esencial para que tu casa se sienta fresca — superficies de cocina y mostradores, limpieza completa de baños, limpieza de polvo, aspirado y trapeado de todos los pisos, y retiro de basura. Tu casa se verá y se sentirá increíble después de cada visita.",
   "What does lawn care include?": "¿Qué incluye el cuidado del jardín?",
-  "We keep your curb appeal on point! Every visit includes professional mowing, clean edging along walkways and beds, and blowing all debris off your walkways and driveways. Your neighbors will notice the difference.": "¡Mantenemos tu fachada al máximo! Cada visita incluye corte profesional, bordeado limpio a lo largo de caminos y jardineras, y soplado de todos los escombros de caminos y entradas. Los vecinos van a notar la diferencia.",
+  "We keep your curb appeal on point! Every visit includes professional mowing, clean edging along walkways and beds, and blowing all debris off your walkways and driveways. Your neighbors will notice the difference.":
+    "¡Mantenemos tu fachada al máximo! Cada visita incluye corte profesional, bordeado limpio a lo largo de caminos y jardineras, y soplado de todos los escombros de caminos y entradas. Los vecinos van a notar la diferencia.",
   "What does car detailing include?": "¿Qué incluye el detallado de auto?",
-  "Your ride deserves love too! We do a full exterior hand wash with wheel cleaning, thorough interior vacuum, and a complete interior surface wipe-down. Your car will look showroom-ready right in your driveway.": "¡Tu carro también merece cariño! Hacemos lavado exterior completo a mano con limpieza de ruedas, aspirado interior profundo y limpieza completa de superficies interiores. Tu carro va a lucir como de agencia en tu propio garaje.",
+  "Your ride deserves love too! We do a full exterior hand wash with wheel cleaning, thorough interior vacuum, and a complete interior surface wipe-down. Your car will look showroom-ready right in your driveway.":
+    "¡Tu carro también merece cariño! Hacemos lavado exterior completo a mano con limpieza de ruedas, aspirado interior profundo y limpieza completa de superficies interiores. Tu carro va a lucir como de agencia en tu propio garaje.",
   "Are deep cleaning or restoration services included?": "¿Se incluyen limpiezas profundas o restauración?",
-  "Tidy is designed for consistent, ongoing maintenance — the kind that keeps everything looking great week after week. If you need a one-time deep clean or restoration work, we offer those as add-ons. Just ask!": "Tidy está diseñado para mantenimiento constante — del que mantiene todo luciendo bien semana tras semana. Si necesitas una limpieza profunda única o trabajo de restauración, los ofrecemos como extras. ¡Solo pregunta!",
+  "Tidy is designed for consistent, ongoing maintenance — the kind that keeps everything looking great week after week. If you need a one-time deep clean or restoration work, we offer those as add-ons. Just ask!":
+    "Tidy está diseñado para mantenimiento constante — del que mantiene todo luciendo bien semana tras semana. Si necesitas una limpieza profunda única o trabajo de restauración, los ofrecemos como extras. ¡Solo pregunta!",
   "How does billing work?": "¿Cómo funciona la facturación?",
-  "Simple and transparent! You're billed monthly via Stripe — everything is automatic, fully secure, and you'll get a receipt every time. No surprise charges, ever.": "¡Simple y transparente! Te cobramos mensualmente vía Stripe — todo es automático, totalmente seguro, y recibes un recibo cada vez. Sin cargos sorpresa, nunca.",
+  "Simple and transparent! You're billed monthly via Stripe — everything is automatic, fully secure, and you'll get a receipt every time. No surprise charges, ever.":
+    "¡Simple y transparente! Te cobramos mensualmente vía Stripe — todo es automático, totalmente seguro, y recibes un recibo cada vez. Sin cargos sorpresa, nunca.",
   "Can I cancel anytime?": "¿Puedo cancelar cuando quiera?",
-  "Yes, 100%! No cancellation fees, no contracts, no awkward phone calls. If you ever want to cancel, just let us know and we'll take care of it immediately.": "¡Sí, 100%! Sin cargos por cancelación, sin contratos, sin llamadas incómodas. Si alguna vez quieres cancelar, solo avísanos y nos encargamos al instante.",
+  "Yes, 100%! No cancellation fees, no contracts, no awkward phone calls. If you ever want to cancel, just let us know and we'll take care of it immediately.":
+    "¡Sí, 100%! Sin cargos por cancelación, sin contratos, sin llamadas incómodas. Si alguna vez quieres cancelar, solo avísanos y nos encargamos al instante.",
   "What if my payment fails?": "¿Qué pasa si falla mi pago?",
-  "We'll pause your services and notify you right away via SMS and email so you can update your payment info. Once it's sorted, we'll get you back on schedule — easy as that.": "Pausamos tus servicios y te avisamos enseguida por SMS y correo para que actualices tu pago. Una vez resuelto, te ponemos de vuelta en horario — así de fácil.",
+  "We'll pause your services and notify you right away via SMS and email so you can update your payment info. Once it's sorted, we'll get you back on schedule — easy as that.":
+    "Pausamos tus servicios y te avisamos enseguida por SMS y correo para que actualices tu pago. Una vez resuelto, te ponemos de vuelta en horario — así de fácil.",
   "Can I change services later?": "¿Puedo cambiar servicios después?",
-  "Of course! Want to add car detailing or switch your cleaning frequency? Just reach out and any changes will kick in at your next billing cycle. We're flexible because your needs are too.": "¡Por supuesto! ¿Quieres agregar detallado o cambiar la frecuencia de limpieza? Contáctanos y los cambios entran en tu próximo ciclo de facturación. Somos flexibles porque tus necesidades también lo son.",
+  "Of course! Want to add car detailing or switch your cleaning frequency? Just reach out and any changes will kick in at your next billing cycle. We're flexible because your needs are too.":
+    "¡Por supuesto! ¿Quieres agregar detallado o cambiar la frecuencia de limpieza? Contáctanos y los cambios entran en tu próximo ciclo de facturación. Somos flexibles porque tus necesidades también lo son.",
   "Are contractors vetted?": "¿Están verificados los contratistas?",
-  "Absolutely — your trust means everything to us. Every single contractor is fully background-checked, and we require photo documentation after every visit so you can see exactly what was done. Quality and accountability are built into everything we do.": "Absolutamente — tu confianza lo es todo. Cada contratista está completamente verificado, y exigimos documentación con fotos después de cada visita para que veas exactamente lo que se hizo. Calidad y responsabilidad en todo lo que hacemos.",
+  "Absolutely — your trust means everything to us. Every single contractor is fully background-checked, and we require photo documentation after every visit so you can see exactly what was done. Quality and accountability are built into everything we do.":
+    "Absolutamente — tu confianza lo es todo. Cada contratista está completamente verificado, y exigimos documentación con fotos después de cada visita para que veas exactamente lo que se hizo. Calidad y responsabilidad en todo lo que hacemos.",
   "What if I'm not satisfied?": "¿Y si no quedo satisfecho?",
-  "We want you to love every service! If something isn't right, just reach out within 24 hours and we'll make it right — whether that means a re-service or a credit. Your satisfaction is our top priority.": "¡Queremos que ames cada servicio! Si algo no está bien, contáctanos en 24 horas y lo resolvemos — ya sea con otro servicio o un crédito. Tu satisfacción es nuestra prioridad.",
+  "We want you to love every service! If something isn't right, just reach out within 24 hours and we'll make it right — whether that means a re-service or a credit. Your satisfaction is our top priority.":
+    "¡Queremos que ames cada servicio! Si algo no está bien, contáctanos en 24 horas y lo resolvemos — ya sea con otro servicio o un crédito. Tu satisfacción es nuestra prioridad.",
   "How do I contact support?": "¿Cómo contacto a soporte?",
-  "We're here for you! Email us at hello@jointidy.co and we'll get back to you within 1 hour during business hours. Real people, real answers, real fast.": "¡Estamos para ti! Escríbenos a hello@jointidy.co y te respondemos en 1 hora durante horario laboral. Personas reales, respuestas reales, súper rápido.",
+  "We're here for you! Email us at hello@jointidy.co and we'll get back to you within 1 hour during business hours. Real people, real answers, real fast.":
+    "¡Estamos para ti! Escríbenos a hello@jointidy.co y te respondemos en 1 hora durante horario laboral. Personas reales, respuestas reales, súper rápido.",
 
   // Zip checker
   "Is Tidy in your neighborhood?": "¿Tidy está en tu vecindario?",
-  "We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one.": "Estamos lanzando en códigos postales selectos de Miami primero para asegurar servicio de alta calidad desde el día uno.",
+  "We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one.":
+    "Estamos lanzando en códigos postales selectos de Miami primero para asegurar servicio de alta calidad desde el día uno.",
   "Enter ZIP code e.g. 33183": "Ingresa código postal ej. 33183",
   "Check →": "Verificar →",
 
@@ -216,19 +259,23 @@ const translations: Record<string, string> = {
   "You'll never book a home service again.": "Nunca más reservarás un servicio del hogar.",
   "Never book a home service again.": "Nunca más reserves un servicio del hogar.",
   "Set it once. We handle the rest.": "Configúralo una vez. Nosotros nos encargamos del resto.",
-  "Under 60 seconds · No contracts · Cancel anytime": "En menos de 60 segundos · Sin contratos · Cancela cuando quieras",
+  "Under 60 seconds · No contracts · Cancel anytime":
+    "En menos de 60 segundos · Sin contratos · Cancela cuando quieras",
   "One setup. Everything handled.": "Una configuración. Todo resuelto.",
   "No contracts. No payments until launch.": "Sin contratos. Sin pagos hasta el lanzamiento.",
-  "Limited founding memberships available in your area. Takes 60 seconds. No commitment required.": "Membresías fundadoras limitadas en tu área. Toma 60 segundos. Sin compromiso.",
+  "Limited founding memberships available in your area. Takes 60 seconds. No commitment required.":
+    "Membresías fundadoras limitadas en tu área. Toma 60 segundos. Sin compromiso.",
   "Get Started — Request Early Access →": "Comienza — Solicitar Acceso →",
-  
+
   "Miami-Based": "Basado en Miami",
 
   // Lead popup
   "🎉 Founding Member Offer": "🎉 Oferta de Miembro Fundador",
-  "Get $50 Off Your": "Obtén $50 de Descuento en Tu",
+  "Founding Rate Locked": "Tarifa de Fundador Bloqueada",
+  "Your Price Never Rises": "Tu Precio Nunca Sube",
   "First Month": "Primer Mes",
-  "Join Miami homeowners who have already simplified their home. Lock in founding pricing before we launch publicly.": "Únete a los propietarios de Miami que ya simplificaron su hogar. Asegura precios de fundador antes del lanzamiento público.",
+  "Join Miami homeowners who have already simplified their home. Lock in founding pricing before we launch publicly.":
+    "Únete a los propietarios de Miami que ya simplificaron su hogar. Asegura precios de fundador antes del lanzamiento público.",
   "First Name": "Nombre",
   "Last Name": "Apellido",
   "Email Address": "Correo Electrónico",
@@ -245,16 +292,17 @@ const translations: Record<string, string> = {
   "Lawn Care Miami": "Cuidado del Jardín Miami",
   "Car Detailing Miami": "Detallado de Auto Miami",
   "Referral Program": "Programa de Referidos",
-  "Company": "Empresa",
+  Company: "Empresa",
   "Service Areas": "Áreas de Servicio",
   "Terms of Service": "Términos de Servicio",
   "Privacy Policy": "Política de Privacidad",
   "Contact Us": "Contáctanos",
-  "Terms": "Términos",
-  "Privacy": "Privacidad",
+  Terms: "Términos",
+  Privacy: "Privacidad",
 
   // Bundle banner
-  "💡 Bundle services and save automatically — 2 services: <strong>10% off</strong> · 3 services: <strong>15% off</strong> — Applied at checkout automatically": "💡 Combina servicios y ahorra automáticamente — 2 servicios: <strong>10% descuento</strong> · 3 servicios: <strong>15% descuento</strong> — Aplicado automáticamente",
+  "💡 Bundle services and save automatically — 2 services: <strong>10% off</strong> · 3 services: <strong>15% off</strong> — Applied at checkout automatically":
+    "💡 Combina servicios y ahorra automáticamente — 2 servicios: <strong>10% descuento</strong> · 3 servicios: <strong>15% descuento</strong> — Aplicado automáticamente",
 
   // ============================================================
   // LANDING PAGES (LPs) — /house-cleaning, /lawn-care, /car-detailing, /bundle
@@ -264,9 +312,9 @@ const translations: Record<string, string> = {
   // Shared LP UI
   "Book in 60 seconds": "Reserva en 60 segundos",
   "Locked price · No contracts · Cancel anytime": "Precio fijo · Sin contratos · Cancela cuando quieras",
-  "Plans": "Planes",
+  Plans: "Planes",
   "Pick your cadence. Lock your price.": "Elige tu frecuencia. Asegura tu precio.",
-  "Choose": "Elige",
+  Choose: "Elige",
   "Every visit, every time.": "Cada visita, todas las veces.",
   "Three steps. Then never think about it.": "Tres pasos. Y no piensas más en eso.",
   "Pick your plan": "Elige tu plan",
@@ -276,11 +324,13 @@ const translations: Record<string, string> = {
   "Set it and forget it": "Configúralo y olvídate",
   "Pause, skip, or cancel anytime from your dashboard.": "Pausa, omite o cancela cuando quieras desde tu panel.",
   "Same Crew": "El Mismo Equipo",
-  "Your same pro every visit, not a rotating marketplace crew.": "Tu mismo profesional en cada visita, no un equipo rotativo de la app.",
+  "Your same pro every visit, not a rotating marketplace crew.":
+    "Tu mismo profesional en cada visita, no un equipo rotativo de la app.",
   "Photo-Verified": "Verificado con Fotos",
-  "Before-and-after photos from every visit, sent to your phone.": "Fotos antes y después de cada visita, enviadas a tu teléfono.",
-  "Background-checked pros, insured on every Tidy job.": "Profesionales verificados y asegurados en cada trabajo de Tidy.",
-
+  "Before-and-after photos from every visit, sent to your phone.":
+    "Fotos antes y después de cada visita, enviadas a tu teléfono.",
+  "Background-checked pros, insured on every Tidy job.":
+    "Profesionales verificados y asegurados en cada trabajo de Tidy.",
 
   "Questions, answered.": "Respuestas a tus preguntas.",
   "60-second signup. Same crew. Locked price.": "Inscripción en 60 segundos. El mismo equipo. Precio fijo.",
@@ -291,8 +341,8 @@ const translations: Record<string, string> = {
   "Trusted across Pinecrest · Kendall · Kendall West": "Confiado en Pinecrest · Kendall · Kendall West",
 
   // Trust signal row
-  "Licensed": "Licenciado",
-  "Insured": "Asegurado",
+  Licensed: "Licenciado",
+  Insured: "Asegurado",
   "Background-Checked": "Verificado",
   "Locked Price": "Precio Fijo",
   "Serving 3 ZIPs": "3 Códigos Postales",
@@ -307,9 +357,10 @@ const translations: Record<string, string> = {
 
   // Neighborhood trust
   "Built for Pinecrest + Kendall.": "Hecho para Pinecrest + Kendall.",
-  "We serve only 33156, 33183, and 33186 — so your crew is local, on-time, and never stuck in traffic.": "Servimos solo 33156, 33183 y 33186 — así tu equipo es local, puntual y nunca varado en el tráfico.",
-  "Pinecrest": "Pinecrest",
-  "Kendall": "Kendall",
+  "We serve only 33156, 33183, and 33186 — so your crew is local, on-time, and never stuck in traffic.":
+    "Servimos solo 33156, 33183 y 33186 — así tu equipo es local, puntual y nunca varado en el tráfico.",
+  Pinecrest: "Pinecrest",
+  Kendall: "Kendall",
   "Kendall West": "Kendall West",
 
   // Sticky bar labels
@@ -320,14 +371,16 @@ const translations: Record<string, string> = {
 
   // House Cleaning LP
   "Monthly House Cleaning in Pinecrest + Kendall": "Limpieza Mensual del Hogar en Pinecrest + Kendall",
-  "Same crew. Locked rate. No contracts. Handle your home on autopilot.": "El mismo equipo. Tarifa fija. Sin contratos. Tu casa en piloto automático.",
+  "Same crew. Locked rate. No contracts. Handle your home on autopilot.":
+    "El mismo equipo. Tarifa fija. Sin contratos. Tu casa en piloto automático.",
   "Starting at $159/mo": "Desde $159/mes",
   "One-off cleanings in Pinecrest average **$180–$260**. Our monthly plan locks you in at **$159** — with the same crew every visit.":
     "Las limpiezas sueltas en Pinecrest cuestan en promedio **$180–$260**. Nuestro plan mensual te deja fijo en **$159** — con el mismo equipo cada visita.",
   // House Cleaning plans
   "One visit per month, same crew every time.": "Una visita al mes, el mismo equipo siempre.",
   "Two visits per month, priority scheduling.": "Dos visitas al mes, con prioridad en agendado.",
-  "Weekly visits, dedicated crew, quarterly deep-clean.": "Visitas semanales, equipo dedicado, limpieza profunda trimestral.",
+  "Weekly visits, dedicated crew, quarterly deep-clean.":
+    "Visitas semanales, equipo dedicado, limpieza profunda trimestral.",
   // House Cleaning included
   "Dust all surfaces": "Sacudir todas las superficies",
   "Vacuum + mop all floors": "Aspirar + trapear todos los pisos",
@@ -409,7 +462,8 @@ const translations: Record<string, string> = {
     "Reprogramamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa y tu precio no cambia.",
   "Reach out within 24 hours and we'll send the crew back or credit your account — no questions asked.":
     "Avísanos en 24 horas y mandamos al equipo de vuelta o te acreditamos a tu cuenta — sin preguntas.",
-  "Already booking lawn? Add biweekly cleaning for $275/mo.": "¿Ya tienes jardín? Agrega limpieza quincenal por $275/mes.",
+  "Already booking lawn? Add biweekly cleaning for $275/mo.":
+    "¿Ya tienes jardín? Agrega limpieza quincenal por $275/mes.",
 
   // Car Detailing LP
   "Mobile Car Detailing in Pinecrest + Kendall": "Detallado Móvil de Auto en Pinecrest + Kendall",
@@ -455,7 +509,8 @@ const translations: Record<string, string> = {
     "Las SUVs de 3 filas, camionetas grandes y vans grandes tienen un pequeño cargo adicional. Vans comerciales y camionetas elevadas necesitan una cotización rápida — la manejamos.",
   "Reach out within 24 hours and we'll send the detailer back or credit your account — no questions asked.":
     "Avísanos en 24 horas y mandamos al detallador de vuelta o te acreditamos a tu cuenta — sin preguntas.",
-  "Already booking detailing? Add monthly cleaning for $159/mo.": "¿Ya tienes detallado? Agrega limpieza mensual por $159/mes.",
+  "Already booking detailing? Add monthly cleaning for $159/mo.":
+    "¿Ya tienes detallado? Agrega limpieza mensual por $159/mes.",
 
   // Bundle page
   "Bundle & Save — Stack services, save 10–15%": "Combo y Ahorra — Apila servicios, ahorra 10–15%",
@@ -474,13 +529,14 @@ const translations: Record<string, string> = {
   "All three services on one plan: cleaning, lawn care, and detailing. Lock in 15% off the combined monthly price.":
     "Los tres servicios en un solo plan: limpieza, jardín y detallado. Asegura 15% de descuento sobre el precio mensual combinado.",
   "Build my 3-service bundle": "Arma mi combo de 3 servicios",
-  "Custom": "Personalizado",
-  "Tailored": "A Medida",
+  Custom: "Personalizado",
+  Tailored: "A Medida",
   "Larger home, oversized lot, or fleet of vehicles? We'll build a custom plan and send you a personal quote.":
     "¿Casa más grande, terreno extenso o flota de vehículos? Armamos un plan a medida y te enviamos una cotización personal.",
   "Request a custom plan": "Solicita un plan personalizado",
   "Why bundle?": "¿Por qué combinar?",
-  "10% off any 2 services — applied automatically": "10% de descuento en cualquier 2 servicios — aplicado automáticamente",
+  "10% off any 2 services — applied automatically":
+    "10% de descuento en cualquier 2 servicios — aplicado automáticamente",
   "15% off all 3 services — applied automatically": "15% de descuento en los 3 servicios — aplicado automáticamente",
   "One subscription, one bill, one crew": "Una suscripción, una factura, un equipo",
   "Same locked price every month": "El mismo precio fijo cada mes",
@@ -577,14 +633,13 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const setLanguage = useCallback((lang: Language) => setLanguageState(lang), []);
 
-  const t = useCallback((text: string): string => {
-    if (language === "en") return text;
-    return translations[text] || text;
-  }, [language]);
-
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
+  const t = useCallback(
+    (text: string): string => {
+      if (language === "en") return text;
+      return translations[text] || text;
+    },
+    [language],
   );
+
+  return <LanguageContext.Provider value={{ language, setLanguage, t }}>{children}</LanguageContext.Provider>;
 };
