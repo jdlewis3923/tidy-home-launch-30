@@ -813,6 +813,46 @@ const translations: Record<string, string> = {
   "One free premium add-on on your first visit": "Un servicio adicional premium gratis en tu primera visita",
   "First visit perfect or it's free": "Primera visita perfecta o es gratis",
   "Only 25 founding homes per ZIP": "Solo 25 casas fundadoras por código postal",
+
+  // Refer page
+  "Copy referral link": "Copiar enlace de referido",
+  "Become a customer": "Hazte cliente",
+  "Refer a Neighbor — Give $50, Get $50 | Tidy Home Concierge":
+    "Refiere a un Vecino — Da $50, Recibe $50 | Tidy Home Concierge",
+  "Refer a neighbor in Pinecrest or Kendall (33156 · 33183 · 33186). They get $50 off their first month, you get $50 off yours. No limit, no fine print.":
+    "Refiere a un vecino en Pinecrest o Kendall (33156 · 33183 · 33186). Ellos reciben $50 de descuento en su primer mes y tú $50 en el tuyo. Sin límite, sin letra pequeña.",
+  "Refer & Earn": "Refiere y Gana",
+  "Give $50, Get $50 — refer a neighbor in Pinecrest + Kendall":
+    "Da $50, Recibe $50 — refiere a un vecino en Pinecrest + Kendall",
+  "Send a neighbor your link. They get $50 off their first month. You get $50 off yours. No cap, no expiration, no fine print.":
+    "Envía tu enlace a un vecino. Él recibe $50 de descuento en su primer mes. Tú recibes $50 en el tuyo. Sin tope, sin vencimiento, sin letra pequeña.",
+  "How it works": "Cómo funciona",
+  "Three steps. Two rewards.": "Tres pasos. Dos recompensas.",
+  "Share your link": "Comparte tu enlace",
+  "Copy your unique referral link and send it to a neighbor in 33156, 33183, or 33186.":
+    "Copia tu enlace de referido único y envíaselo a un vecino en 33156, 33183 o 33186.",
+  "They sign up": "Ellos se inscriben",
+  "Your neighbor checks out with your link. $50 is automatically applied to their first month.":
+    "Tu vecino paga usando tu enlace. Se aplican $50 automáticamente a su primer mes.",
+  "You both save": "Ambos ahorran",
+  "Once their first invoice clears, $50 is credited to your next month. No cap, stack as many as you want.":
+    "Cuando su primera factura se procese, se acreditan $50 a tu próximo mes. Sin tope, acumula todos los que quieras.",
+  "Your referral link": "Tu enlace de referido",
+  "Sign in to get your link": "Inicia sesión para obtener tu enlace",
+  "Loading…": "Cargando…",
+  "Share this link with a neighbor. They save $50, you save $50.":
+    "Comparte este enlace con un vecino. Él ahorra $50 y tú ahorras $50.",
+  Copied: "Copiado",
+  Copy: "Copiar",
+  "Credits earned:": "Créditos ganados:",
+  "— your first referral starts the meter.": "— tu primer referido pone el contador en marcha.",
+  "Active customers get a unique referral link in their dashboard. Log in to grab yours and start earning.":
+    "Los clientes activos reciben un enlace de referido único en su panel. Inicia sesión para obtener el tuyo y empezar a ganar.",
+  "Log in to get your code": "Inicia sesión para obtener tu código",
+  "Become a customer first": "Primero hazte cliente",
+  "Not a member yet? Start with a plan.": "¿Aún no eres miembro? Empieza con un plan.",
+  "Lock in your monthly price, then send your link to a neighbor.":
+    "Asegura tu precio mensual y luego envía tu enlace a un vecino.",
 };
 
 interface LanguageContextType {
