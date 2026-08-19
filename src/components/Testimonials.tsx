@@ -36,8 +36,22 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
 
   return (
     <section className="relative py-20 px-4 overflow-hidden">
-      <img src={testimonialsBgMobile} alt="Luxury Miami home" loading="lazy" width={1080} height={1920} className="absolute inset-0 w-full h-full object-cover md:hidden" />
-      <img src={testimonialsBg} alt="Luxury home interior" loading="lazy" width={1920} height={1080} className="absolute inset-0 w-full h-full object-cover hidden md:block" />
+      <img
+        src={testimonialsBgMobile}
+        alt="Luxury Miami home"
+        loading="lazy"
+        width={1080}
+        height={1920}
+        className="absolute inset-0 w-full h-full object-cover md:hidden"
+      />
+      <img
+        src={testimonialsBg}
+        alt="Luxury home interior"
+        loading="lazy"
+        width={1920}
+        height={1080}
+        className="absolute inset-0 w-full h-full object-cover hidden md:block"
+      />
       <div className="absolute inset-0 bg-navy/75" />
 
       <div className="relative z-10 max-w-6xl mx-auto text-center">
@@ -46,14 +60,18 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
           {t("Be among the first homes on autopilot.")}
         </h2>
         <p className="text-primary-foreground/80 mt-4 max-w-2xl mx-auto">
-          {t("Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and lock in founding-member pricing.")}
+          {t(
+            "Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and lock in founding-member pricing.",
+          )}
         </p>
 
         <div className="grid md:grid-cols-3 gap-6 mt-12 text-left">
           {foundingCards.map((card, i) => (
             <FadeIn key={card.title} delay={i * 100}>
               <div className="bg-card rounded-xl p-8 h-full">
-                <div className="text-4xl mb-4" aria-hidden="true">{card.icon}</div>
+                <div className="text-4xl mb-4" aria-hidden="true">
+                  {card.icon}
+                </div>
                 <h3 className="text-lg font-bold text-foreground mb-2">{t(card.title)}</h3>
                 <p className="text-sm text-foreground/70">{t(card.desc)}</p>
               </div>
@@ -63,6 +81,12 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
 
         <p className="mt-10 text-sm text-primary-foreground/80">
           {t("Licensed & Insured · Background-Checked Pros · Satisfaction Guaranteed")}
+        </p>
+
+        <p className="mt-3 text-sm text-primary-foreground/80">
+          {t(
+            "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP",
+          )}
         </p>
 
         <button
