@@ -272,7 +272,6 @@ const translations: Record<string, string> = {
   "🎉 Founding Member Offer": "🎉 Oferta de Miembro Fundador",
   "Founding Rate Locked": "Tarifa de Fundador Bloqueada",
   "Your Price Never Rises": "Tu Precio Nunca Sube",
-  "First Month": "Primer Mes",
   "Join Miami homeowners who have already simplified their home. Lock in founding pricing before we launch publicly.":
     "Únete a los propietarios de Miami que ya simplificaron su hogar. Asegura precios de fundador antes del lanzamiento público.",
   "First Name": "Nombre",
@@ -474,8 +473,6 @@ const translations: Record<string, string> = {
 
   "Interior + exterior, one vehicle.": "Interior + exterior, un vehículo.",
   "Interior + exterior, every two weeks, one vehicle.": "Interior + exterior, cada dos semanas, un vehículo.",
-  "Quarterly full detail, monthly maintenance, up to 2 vehicles.":
-    "Detallado completo trimestral, mantenimiento mensual, hasta 2 vehículos.",
   // Car Detailing included
   "Exterior hand wash": "Lavado exterior a mano",
   "Ceramic-safe process": "Proceso seguro para cerámica",
@@ -572,7 +569,7 @@ const translations: Record<string, string> = {
     "en un plazo de 24 horas para confirmar tu lugar y verificar la disponibilidad en tu código postal.",
   "Once we launch in your area": "Cuando lancemos en tu zona",
   ", you'll be among the first activated — with priority scheduling and locked pricing.":
-    "estarás entre los primeros en activarse, con programación prioritaria y precio bloqueado.",
+    ", estarás entre los primeros en activarse, con programación prioritaria y precio bloqueado.",
   "Questions? Email us at": "¿Preguntas? Escríbenos a",
   "Back to the site": "Volver al sitio",
 
