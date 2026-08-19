@@ -971,6 +971,17 @@ const translations: Record<string, string> = {
   "Our services are not intended for individuals under 18.":
     "Nuestros servicios no están destinados a personas menores de 18 años.",
   Contact: "Contacto",
+
+  // Coming soon page
+  "Tidy Home Concierge — Coming soon to Miami": "Tidy Home Concierge — Muy pronto en Miami",
+  "Launching soon in Miami": "Muy pronto en Miami",
+  "We're almost ready.": "Ya casi estamos listos.",
+  "Subscription home care in Kendall & Pinecrest — house cleaning, lawn care, and mobile car detailing. Hiring our founding crew now.":
+    "Cuidado del hogar por suscripción en Kendall y Pinecrest — limpieza del hogar, cuidado del jardín y detallado de autos a domicilio. Estamos contratando a nuestro equipo fundador.",
+  "Opening soon in Miami": "Abrimos muy pronto en Miami",
+  "Questions?": "¿Preguntas?",
+  "Tidy Home Concierge LLC · Miami, FL": "Tidy Home Concierge LLC · Miami, FL",
+  Admin: "Admin",
 };
 
 interface LanguageContextType {
