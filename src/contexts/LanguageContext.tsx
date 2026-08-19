@@ -792,6 +792,27 @@ const translations: Record<string, string> = {
   "Can I manage everything without calling?": "¿Puedo gestionar todo sin llamar?",
   "Yes. The dashboard gives you full control over your plan. No phone calls, no emails required for routine changes.":
     "Sí. El panel te da control total sobre tu plan. Sin llamadas ni correos para los cambios de rutina.",
+
+  // Founding member section + founding offer
+  "Founding Member Pricing": "Precio de Miembro Fundador",
+  "Lock in your rate as one of our first members. Your price stays put as we grow.":
+    "Asegura tu tarifa como uno de nuestros primeros miembros. Tu precio se mantiene mientras crecemos.",
+  "Built on Accountability": "Construido sobre la Responsabilidad",
+  "Every visit is completed by a licensed, insured, background-checked pro — with photo verification after each service.":
+    "Cada visita la realiza un profesional licenciado, asegurado y con antecedentes verificados — con verificación fotográfica después de cada servicio.",
+  "Not happy? We make it right within 24 hours — re-service or credit, no questions asked.":
+    "¿No quedaste satisfecho? Lo resolvemos dentro de 24 horas — repetimos el servicio o te damos un crédito, sin preguntas.",
+  "FOUNDING MEMBERS": "MIEMBROS FUNDADORES",
+  "Be among the first homes on autopilot.": "Sé de los primeros hogares en piloto automático.",
+  "Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and lock in founding-member pricing.":
+    "Tidy está aceptando un grupo limitado de miembros fundadores en Pinecrest, Kendall y Kendall West. Únete temprano y asegura el precio de miembro fundador.",
+  "Licensed & Insured · Background-Checked Pros · Satisfaction Guaranteed":
+    "Licenciado y Asegurado · Profesionales Verificados · Garantía de Satisfacción",
+  "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
+    "Un servicio adicional premium gratis en tu primera visita · Primera visita perfecta o es gratis · Solo 25 casas fundadoras por código postal",
+  "One free premium add-on on your first visit": "Un servicio adicional premium gratis en tu primera visita",
+  "First visit perfect or it's free": "Primera visita perfecta o es gratis",
+  "Only 25 founding homes per ZIP": "Solo 25 casas fundadoras por código postal",
 };
 
 interface LanguageContextType {
