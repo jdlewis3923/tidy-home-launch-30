@@ -103,7 +103,7 @@ const BundleInner = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SeoHead
-        title={t("Bundle & Save in Pinecrest + Kendall | Tidy Home Services")}
+        title={t("Bundle & Save in Pinecrest + Kendall | Tidy Home Concierge")}
         description={t(
           "Stack home cleaning, lawn care, and car detailing on one plan. Save 10–15% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.",
         )}

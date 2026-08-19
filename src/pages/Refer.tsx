@@ -115,7 +115,7 @@ const ReferInner = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SeoHead
-        title="Refer a Neighbor — Give $50, Get $50 | Tidy Home Services"
+        title="Refer a Neighbor — Give $50, Get $50 | Tidy Home Concierge"
         description="Refer a neighbor in Pinecrest or Kendall (33156 · 33183 · 33186). They get $50 off their first month, you get $50 off yours. No limit, no fine print."
         canonical="https://jointidy.co/refer"
         priceRange="$85–$459"

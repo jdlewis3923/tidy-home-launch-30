@@ -99,7 +99,7 @@ const config: ServiceLandingConfig = {
     targetServices: "detailing,cleaning",
   },
   seo: {
-    title: "Car Detailing in Pinecrest + Kendall | Tidy Home Services",
+    title: "Car Detailing in Pinecrest + Kendall | Tidy Home Concierge",
     description:
       "Mobile car detailing in Pinecrest and Kendall (33156, 33183, 33186). We come to your driveway. Ceramic-safe, locked price from $159/mo. Book in 60 seconds.",
     canonical: "https://jointidy.co/car-detailing",

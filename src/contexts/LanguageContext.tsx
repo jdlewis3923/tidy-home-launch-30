@@ -548,14 +548,14 @@ const translations: Record<string, string> = {
   "Ready to lock in your car detailing?": "¿Listo para asegurar tu detallado de auto?",
 
   // SEO titles (browser tab) — translated for ES users
-  "House Cleaning in Pinecrest + Kendall | Tidy Home Services":
-    "Limpieza del Hogar en Pinecrest + Kendall | Tidy Home Services",
-  "Lawn Care in Pinecrest + Kendall | Tidy Home Services":
-    "Cuidado del Jardín en Pinecrest + Kendall | Tidy Home Services",
-  "Car Detailing in Pinecrest + Kendall | Tidy Home Services":
-    "Detallado de Auto en Pinecrest + Kendall | Tidy Home Services",
-  "Bundle & Save in Pinecrest + Kendall | Tidy Home Services":
-    "Combo y Ahorra en Pinecrest + Kendall | Tidy Home Services",
+  "House Cleaning in Pinecrest + Kendall | Tidy Home Concierge":
+    "Limpieza del Hogar en Pinecrest + Kendall | Tidy Home Concierge",
+  "Lawn Care in Pinecrest + Kendall | Tidy Home Concierge":
+    "Cuidado del Jardín en Pinecrest + Kendall | Tidy Home Concierge",
+  "Car Detailing in Pinecrest + Kendall | Tidy Home Concierge":
+    "Detallado de Auto en Pinecrest + Kendall | Tidy Home Concierge",
+  "Bundle & Save in Pinecrest + Kendall | Tidy Home Concierge":
+    "Combo y Ahorra en Pinecrest + Kendall | Tidy Home Concierge",
 
   // Thank You page
   "You're in.": "Ya estás dentro.",
