@@ -472,11 +472,10 @@ const translations: Record<string, string> = {
   "A good mobile detail runs **$120–$180 per appointment**. Our subscription is **$159/mo** — and we come to your driveway.":
     "Un buen detallado móvil cuesta **$120–$180 por cita**. Nuestra suscripción es **$159/mes** — y vamos a tu garaje.",
   // Car Detailing plans
-  "Basic Monthly": "Básico Mensual",
-  "Premium Monthly": "Premium Mensual",
-  "Full Detail": "Detallado Completo",
+  Monthly: "Mensual",
+  Biweekly: "Quincenal",
   "Interior + exterior, one vehicle.": "Interior + exterior, un vehículo.",
-  "Full interior + exterior + wax, one vehicle.": "Interior + exterior + cera completos, un vehículo.",
+  "Interior + exterior, every two weeks, one vehicle.": "Interior + exterior, cada dos semanas, un vehículo.",
   "Quarterly full detail, monthly maintenance, up to 2 vehicles.":
     "Detallado completo trimestral, mantenimiento mensual, hasta 2 vehículos.",
   // Car Detailing included
@@ -496,8 +495,8 @@ const translations: Record<string, string> = {
   "Locked monthly price. Same detailer every visit. Best routine I've added all year.":
     "Precio mensual fijo. El mismo detallador cada visita. La mejor rutina que añadí en todo el año.",
   // Car Detailing FAQs
-  "Plans start at $159/mo for Basic, $239/mo Premium, and $459/mo Full Detail. Pricing is based on plan and vehicle size. Standard pricing covers sedans, coupes, crossovers, and 2-row SUVs.":
-    "Los planes empiezan en $159/mes para Básico, $239/mes Premium y $459/mes Detallado Completo. El precio depende del plan y del tamaño del vehículo. El precio estándar cubre sedanes, coupés, crossovers y SUVs de 2 filas.",
+  "Plans start at $159/mo for Monthly and $249/mo for Biweekly. Pricing is based on plan and vehicle size. Standard pricing covers sedans, coupes, crossovers, and 2-row SUVs.":
+    "Los planes empiezan en $159/mes para Mensual y $249/mes para Quincenal. El precio depende del plan y del tamaño del vehículo. El precio estándar cubre sedanes, coupés, crossovers y SUVs de 2 filas.",
   "What's actually included?": "¿Qué se incluye exactamente?",
   "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet-hair and ozone available as add-ons.":
     "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascota y ozono disponibles como extras.",
