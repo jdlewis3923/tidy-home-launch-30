@@ -632,6 +632,47 @@ const translations: Record<string, string> = {
   "US work authorization?": "¿Autorización para trabajar en EE. UU.?",
   "Could not submit": "No se pudo enviar",
   "Please try again": "Intenta de nuevo",
+
+  // Service cards (homepage)
+  "Most popular · Members often pair with lawn care":
+    "Más popular · Los miembros suelen combinarlo con el cuidado del jardín",
+  "From $159/mo": "Desde $159/mes",
+  "Biweekly from $275/mo": "Quincenal desde $275/mes",
+  "Consistent interior care for a home that always feels reset. Handled on your schedule without lifting a finger.":
+    "Cuidado interior constante para un hogar que siempre se siente renovado. Lo manejamos según tu horario sin que muevas un dedo.",
+  Included: "Incluido",
+  "Kitchen & bathroom deep clean": "Limpieza profunda de cocina y baño",
+  "Dusting all surfaces & fixtures": "Desempolvado de todas las superficies y accesorios",
+  "Trash removal & liner replacement": "Retiro de basura y cambio de bolsas",
+  "Not Included": "No incluido",
+  "Deep carpet shampooing": "Lavado profundo de alfombras",
+  "Window exterior washing": "Lavado de ventanas por fuera",
+  "Garage or attic cleaning": "Limpieza de garaje o ático",
+  "Add-ons:": "Adicionales:",
+  "Deep clean, inside oven, inside fridge, interior windows":
+    "Limpieza profunda, interior del horno, interior del refrigerador, ventanas interiores",
+  "See plans & details": "Ver planes y detalles",
+  "Best value · Pairs perfectly with cleaning": "Mejor valor · Combina perfecto con la limpieza",
+  "Biweekly from $129/mo": "Quincenal desde $129/mes",
+  "Professional lawn maintenance to keep your Miami home's exterior sharp year-round. No scheduling required, ever.":
+    "Mantenimiento profesional del jardín para que el exterior de tu casa en Miami luzca impecable todo el año. Sin programar nada, nunca.",
+  "Edging along walkways & beds": "Bordeado de caminos y jardineras",
+  "Debris blowing & full cleanup": "Soplado de residuos y limpieza completa",
+  "Tree trimming or removal": "Poda o remoción de árboles",
+  "Irrigation system repair": "Reparación del sistema de riego",
+  "Landscape design or planting": "Diseño de paisajismo o siembra",
+  "Hedge trimming, fertilization, pest treatment": "Poda de setos, fertilización, tratamiento de plagas",
+  "Comes to your driveway · No drop-off needed": "Vamos a tu entrada · Sin llevar el auto a ningún lado",
+  "Biweekly from $249/mo": "Quincenal desde $249/mes",
+  "Driveway-ready detailing at your door. We come to you — exterior wash, interior vacuum, surface cleaning.":
+    "Detallado en la entrada de tu casa. Vamos a ti — lavado exterior, aspirado interior y limpieza de superficies.",
+  "Interior vacuum & floor mats": "Aspirado interior y tapetes",
+  "Dashboard & surface wipe-down": "Limpieza del tablero y las superficies",
+  "Monthly or biweekly visits": "Visitas mensuales o quincenales",
+  "Paint correction or ceramic coating": "Corrección de pintura o recubrimiento cerámico",
+  "Engine bay detailing": "Detallado del compartimiento del motor",
+  "Headlight restoration": "Restauración de faros",
+  "Leather conditioning, clay bar, tire shine": "Acondicionamiento de cuero, barra de arcilla, brillo para llantas",
 };
 
 interface LanguageContextType {
