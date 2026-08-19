@@ -214,7 +214,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             </span>
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5" />
-              {SERVICE_AREA_TRUST}
+              {t(SERVICE_AREA_TRUST)}
             </span>
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -301,7 +301,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                     <h3 className="text-lg font-bold text-foreground">{t(p.name)}</h3>
                     <div className="mt-2 flex items-baseline gap-1">
                       <span className="text-3xl font-extrabold text-foreground">{p.price}</span>
-                      <span className="text-sm text-text-mid">{p.cadence}</span>
+                      <span className="text-sm text-text-mid">{t(p.cadence)}</span>
                     </div>
                     <p className="text-sm text-text-mid mt-3 flex-1">{t(p.description)}</p>
                     <Link
@@ -396,7 +396,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             ))}
           </div>
 
-          <p className="text-center text-xs text-text-light mt-6">{SERVICE_AREA_TRUST}.</p>
+          <p className="text-center text-xs text-text-light mt-6">{t(SERVICE_AREA_TRUST)}.</p>
         </div>
       </section>
 

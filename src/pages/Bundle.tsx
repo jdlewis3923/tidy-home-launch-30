@@ -140,7 +140,7 @@ const BundleInner = () => {
           </p>
           <div className="mt-6 inline-flex items-center gap-1.5 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground text-sm font-medium">
             <MapPin className="w-3.5 h-3.5" />
-            {SERVICE_AREA_TRUST}
+            {t(SERVICE_AREA_TRUST)}
           </div>
         </div>
       </section>

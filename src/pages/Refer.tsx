@@ -118,7 +118,9 @@ const ReferInner = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <SeoHead
         title={t("Refer a Neighbor — Give $50, Get $50 | Tidy Home Concierge")}
-        description={t("Refer a neighbor in Pinecrest or Kendall (33156 · 33183 · 33186). They get $50 off their first month, you get $50 off yours. No limit, no fine print.")}
+        description={t(
+          "Refer a neighbor in Pinecrest or Kendall (33156 · 33183 · 33186). They get $50 off their first month, you get $50 off yours. No limit, no fine print.",
+        )}
         canonical="https://jointidy.co/refer"
         priceRange="$85–$459"
       />
@@ -133,11 +135,13 @@ const ReferInner = () => {
             {t("Give $50, Get $50 — refer a neighbor in Pinecrest + Kendall")}
           </h1>
           <p className="mt-5 text-lg text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            {t("Send a neighbor your link. They get $50 off their first month. You get $50 off yours. No cap, no expiration, no fine print.")}
+            {t(
+              "Send a neighbor your link. They get $50 off their first month. You get $50 off yours. No cap, no expiration, no fine print.",
+            )}
           </p>
           <div className="mt-6 inline-flex items-center gap-1.5 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground text-sm font-medium">
             <MapPin className="w-3.5 h-3.5" />
-            {SERVICE_AREA_TRUST}
+            {t(SERVICE_AREA_TRUST)}
           </div>
         </div>
       </section>
@@ -154,9 +158,21 @@ const ReferInner = () => {
           </Reveal>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { Icon: Copy, title: "Share your link", body: "Copy your unique referral link and send it to a neighbor in 33156, 33183, or 33186." },
-              { Icon: UserPlus, title: "They sign up", body: "Your neighbor checks out with your link. $50 is automatically applied to their first month." },
-              { Icon: Gift, title: "You both save", body: "Once their first invoice clears, $50 is credited to your next month. No cap, stack as many as you want." },
+              {
+                Icon: Copy,
+                title: "Share your link",
+                body: "Copy your unique referral link and send it to a neighbor in 33156, 33183, or 33186.",
+              },
+              {
+                Icon: UserPlus,
+                title: "They sign up",
+                body: "Your neighbor checks out with your link. $50 is automatically applied to their first month.",
+              },
+              {
+                Icon: Gift,
+                title: "You both save",
+                body: "Once their first invoice clears, $50 is credited to your next month. No cap, stack as many as you want.",
+              },
             ].map(({ Icon, title, body }, i) => (
               <Reveal key={title} delay={i * 80}>
                 <div className="bg-card border rounded-xl p-6 h-full hover-lift">
@@ -186,9 +202,7 @@ const ReferInner = () => {
                 {code ? t("Your referral link") : t("Sign in to get your link")}
               </h2>
 
-              {!authLoaded && (
-                <p className="text-sm text-text-mid mt-3">{t("Loading…")}</p>
-              )}
+              {!authLoaded && <p className="text-sm text-text-mid mt-3">{t("Loading…")}</p>}
 
               {authLoaded && code && (
                 <>
@@ -210,9 +224,7 @@ const ReferInner = () => {
                   </div>
                   <p className="mt-4 text-xs text-text-mid">
                     {t("Credits earned:")}{" "}
-                    <span className="font-semibold text-foreground">
-                      ${(creditCents / 100).toFixed(2)}
-                    </span>
+                    <span className="font-semibold text-foreground">${(creditCents / 100).toFixed(2)}</span>
                     {creditCents === 0 && ` ${t("— your first referral starts the meter.")}`}
                   </p>
                 </>
@@ -221,12 +233,16 @@ const ReferInner = () => {
               {authLoaded && !code && (
                 <>
                   <p className="text-sm text-text-mid mt-3">
-                    {t("Active customers get a unique referral link in their dashboard. Log in to grab yours and start earning.")}
+                    {t(
+                      "Active customers get a unique referral link in their dashboard. Log in to grab yours and start earning.",
+                    )}
                   </p>
                   <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
                       to="/login"
-                      onClick={() => pushEvent("cta_click", { cta_id: "refer_login", cta_text: "Log in to get your code" })}
+                      onClick={() =>
+                        pushEvent("cta_click", { cta_id: "refer_login", cta_text: "Log in to get your code" })
+                      }
                       className="cta-arrow cta-press bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
                       {t("Log in to get your code")} <span className="arrow">→</span>

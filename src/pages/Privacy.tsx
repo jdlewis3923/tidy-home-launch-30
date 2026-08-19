@@ -37,10 +37,10 @@ const Privacy = () => {
             <p>
               {t(
                 "By providing your phone number and checking the SMS consent box, you consent to receive recurring automated SMS messages from Tidy Home Concierge LLC, including service updates, appointment reminders, and promotional offers. Message frequency varies. Message and data rates may apply. Reply STOP to cancel or HELP for assistance. Contact",
-              )}
+              )}{" "}
               <a href="mailto:hello@jointidy.co" className="text-primary underline">
                 {t("hello@jointidy.co")}
-              </a>
+              </a>{" "}
               {t("for support.")}
             </p>
             <p className="mt-3 font-bold">
@@ -73,7 +73,7 @@ const Privacy = () => {
           <section>
             <h2 className="text-lg font-bold text-foreground">{t("Your Rights")}</h2>
             <p>
-              {t("Request access, correction, or deletion:")}
+              {t("Request access, correction, or deletion:")}{" "}
               <a href="mailto:hello@jointidy.co" className="text-primary underline">
                 {t("hello@jointidy.co")}
               </a>

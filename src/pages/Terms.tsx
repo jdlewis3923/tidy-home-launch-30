@@ -75,7 +75,7 @@ const Terms = () => {
               <p>
                 {t(
                   "Msg & data rates may apply. Consent to receive SMS messages is not a condition of any purchase. You may opt out at any time by replying STOP to any message. Reply HELP for assistance or contact",
-                )}
+                )}{" "}
                 <a href="mailto:hello@jointidy.co" className="text-primary underline">
                   {t("hello@jointidy.co")}
                 </a>

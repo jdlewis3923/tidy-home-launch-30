@@ -25,16 +25,7 @@ interface Props {
  * same button correctly takes users to the dashboard signup flow OR opens the
  * lead-capture popup based on the launch toggle.
  */
-const LpFinalCta = ({
-  headline,
-  subhead,
-  ctaLabel,
-  trackingId,
-  service,
-  plan,
-  bundle,
-  services,
-}: Props) => {
+const LpFinalCta = ({ headline, subhead, ctaLabel, trackingId, service, plan, bundle, services }: Props) => {
   const { getCtaProps } = usePrimaryCta();
   const { t } = useLanguage();
   const ctaProps = getCtaProps({
@@ -50,11 +41,15 @@ const LpFinalCta = ({
   // trackingId looks like "lp_house-cleaning_final" or "bundle_final_cta".
   const reportedService = bundle
     ? "bundle"
-    : trackingId.startsWith("lp_house-cleaning") ? "house-cleaning"
-    : trackingId.startsWith("lp_lawn-care") ? "lawn-care"
-    : trackingId.startsWith("lp_car-detailing") ? "car-detailing"
-    : trackingId.startsWith("bundle") ? "bundle"
-    : "site";
+    : trackingId.startsWith("lp_house-cleaning")
+      ? "house-cleaning"
+      : trackingId.startsWith("lp_lawn-care")
+        ? "lawn-care"
+        : trackingId.startsWith("lp_car-detailing")
+          ? "car-detailing"
+          : trackingId.startsWith("bundle")
+            ? "bundle"
+            : "site";
 
   const onClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
     track("book_cta_click", {
@@ -73,12 +68,8 @@ const LpFinalCta = ({
           <TidyLogo size="lg" withBackground />
         </div>
 
-        <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-4">
-          {headline}
-        </h2>
-        {subhead && (
-          <p className="text-primary-foreground/70 font-medium mb-2">{subhead}</p>
-        )}
+        <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-4">{headline}</h2>
+        {subhead && <p className="text-primary-foreground/70 font-medium mb-2">{subhead}</p>}
         <p className="text-primary-foreground/50 mb-8">{t("No contracts. Cancel anytime.")}</p>
 
         <Link
@@ -89,7 +80,7 @@ const LpFinalCta = ({
           {ctaLabel} <span className="arrow">→</span>
         </Link>
 
-        <p className="mt-6 text-xs text-primary-foreground/50">{SERVICE_AREA_TRUST}</p>
+        <p className="mt-6 text-xs text-primary-foreground/50">{t(SERVICE_AREA_TRUST)}</p>
       </div>
     </section>
   );

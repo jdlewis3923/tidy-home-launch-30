@@ -982,6 +982,17 @@ const translations: Record<string, string> = {
   "Questions?": "¿Preguntas?",
   "Tidy Home Concierge LLC · Miami, FL": "Tidy Home Concierge LLC · Miami, FL",
   Admin: "Admin",
+
+  // Service area line + price cadence labels
+  "Trusted across 33156 · 33183 · 33186": "Con la confianza de 33156 · 33183 · 33186",
+  "/mo": "/mes",
+  "$159/mo": "$159/mes",
+  "$275/mo": "$275/mes",
+  "$459/mo": "$459/mes",
+  "$85/mo": "$85/mes",
+  "$129/mo": "$129/mes",
+  "$195/mo": "$195/mes",
+  "$249/mo": "$249/mes",
 };
 
 interface LanguageContextType {
