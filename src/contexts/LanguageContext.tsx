@@ -585,6 +585,7 @@ const translations: Record<string, string> = {
     "Únete a la red de contratistas de Tidy en Kendall y Pinecrest. Profesionales de limpieza, jardinería y detallado de autos — pago semanal, rutas predecibles.",
   "Back to site": "Volver al sitio",
   "Now hiring · Miami": "Contratando ahora · Miami",
+  "2–3 business days": "2–3 días hábiles",
   "Join our team —": "Únete a nuestro equipo —",
   "we bring the customers.": "nosotros traemos los clientes.",
   "Tidy is Miami's subscription home-service brand. We're hiring vetted cleaners, lawn pros, and detailers in Kendall and Pinecrest.":
