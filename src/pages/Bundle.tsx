@@ -186,8 +186,14 @@ const BundleInner = () => {
                 <div className="mt-4 min-h-[44px]">
                   {twoBundle.valid ? (
                     <p className="text-sm text-text-mid">
-                      <span className="line-through text-text-light mr-1">${twoBundle.subtotal}/mo</span>
-                      <span className="font-bold text-foreground">${twoBundle.discounted}/mo</span>
+                      <span className="line-through text-text-light mr-1">
+                        ${twoBundle.subtotal}
+                        {t("/mo")}
+                      </span>
+                      <span className="font-bold text-foreground">
+                        ${twoBundle.discounted}
+                        {t("/mo")}
+                      </span>
                       <span className="text-text-light"> {t("after 10% bundle discount")}</span>
                     </p>
                   ) : (
@@ -238,8 +244,14 @@ const BundleInner = () => {
                   )}
                 </p>
                 <p className="text-sm text-text-mid mt-3">
-                  <span className="line-through text-text-light mr-1">${threeBundle.subtotal}/mo</span>
-                  <span className="font-bold text-foreground">${threeBundle.discounted}/mo</span>
+                  <span className="line-through text-text-light mr-1">
+                    ${threeBundle.subtotal}
+                    {t("/mo")}
+                  </span>
+                  <span className="font-bold text-foreground">
+                    ${threeBundle.discounted}
+                    {t("/mo")}
+                  </span>
                 </p>
                 <Link
                   to={threeBundleCta.to}
