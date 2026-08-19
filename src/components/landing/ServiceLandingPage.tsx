@@ -14,11 +14,7 @@ import SparkleField from "@/components/landing/SparkleField";
 import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
-import {
-  PHONE_DISPLAY,
-  PHONE_TEL,
-  SERVICE_AREA_TRUST,
-} from "@/lib/landing";
+import { PHONE_DISPLAY, PHONE_TEL, SERVICE_AREA_TRUST } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
@@ -37,7 +33,6 @@ export interface TrustCard {
   title: string;
   body: string;
 }
-
 
 export interface ServiceLandingConfig {
   serviceSlug: "house-cleaning" | "lawn-care" | "car-detailing";
@@ -113,11 +108,13 @@ const ServiceLandingPageInner = ({ config }: Props) => {
     });
 
     // Normalize the surface to one of the 4 locations Google Ads cares about.
-    const location: "hero" | "plans" | "sticky_bar" | "final_banner" =
-      where.startsWith("plan_") ? "plans"
-      : where === "final" || where === "final_banner" ? "final_banner"
-      : where === "sticky_bar" ? "sticky_bar"
-      : "hero";
+    const location: "hero" | "plans" | "sticky_bar" | "final_banner" = where.startsWith("plan_")
+      ? "plans"
+      : where === "final" || where === "final_banner"
+        ? "final_banner"
+        : where === "sticky_bar"
+          ? "sticky_bar"
+          : "hero";
 
     // Wrap the existing onClick so we ALSO emit the Google Ads conversion event.
     const onClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
@@ -198,9 +195,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         <SparkleField />
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-          <span className="text-xs uppercase tracking-widest text-gold font-semibold">
-            {t(config.eyebrow)}
-          </span>
+          <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t(config.eyebrow)}</span>
           <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
             {t(config.h1)}
           </h1>
@@ -236,7 +231,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               >
                 {t(config.ctaPrimaryLabel ?? "Book in 60 seconds")} <span className="arrow">→</span>
               </Link>
-              <span className="mt-2 text-xs text-primary-foreground/70">{t("Takes under 60 seconds · No card to start")}</span>
+              <span className="mt-2 text-xs text-primary-foreground/70">
+                {t("Takes under 60 seconds · No card to start")}
+              </span>
             </div>
             <a
               href={`tel:${PHONE_TEL}`}
@@ -281,14 +278,14 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             <p className="mt-3 text-sm md:text-base text-text-mid max-w-xl mx-auto">
               {t("Set it once. We handle the rest — scheduling, reminders, the same crew every visit.")}
             </p>
-            <p className="mt-2 text-xs text-text-light">
-              {t("No contracts · Cancel, pause, or reschedule anytime")}
-            </p>
+            <p className="mt-2 text-xs text-text-light">{t("No contracts · Cancel, pause, or reschedule anytime")}</p>
           </Reveal>
 
           <SavingsCallout text={t(config.savingsCallout)} />
 
-          <div className="grid md:grid-cols-3 gap-6 md:gap-5 items-stretch">
+          <div
+            className={`grid gap-6 md:gap-5 items-stretch ${config.plans.length === 2 ? "md:grid-cols-2 md:max-w-3xl md:mx-auto" : "md:grid-cols-3"}`}
+          >
             {config.plans.map((p, i) => {
               const planCta = ctaForPlan(p.planSlug, `plan_${p.planSlug}`);
               return (
@@ -300,11 +297,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                         : ""
                     }`}
                   >
-                    {p.highlighted && (
-                      <span className="most-popular-ribbon">
-                        {t("Most Popular")}
-                      </span>
-                    )}
+                    {p.highlighted && <span className="most-popular-ribbon">{t("Most Popular")}</span>}
                     <h3 className="text-lg font-bold text-foreground">{t(p.name)}</h3>
                     <div className="mt-2 flex items-baseline gap-1">
                       <span className="text-3xl font-extrabold text-foreground">{p.price}</span>
@@ -316,7 +309,8 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                       onClick={planCta.onClick}
                       className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
-                      {t(config.ctaPlanLabel ?? "Choose")} {!config.ctaPlanLabel && t(p.name)} <span className="arrow">→</span>
+                      {t(config.ctaPlanLabel ?? "Choose")} {!config.ctaPlanLabel && t(p.name)}{" "}
+                      <span className="arrow">→</span>
                     </Link>
                   </div>
                 </Reveal>
@@ -347,9 +341,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         <div className="max-w-3xl mx-auto">
           <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("What's Included")}</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              {t("Every visit, every time.")}
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Every visit, every time.")}</h2>
           </Reveal>
 
           <Reveal>
@@ -385,11 +377,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           {/* Mobile: snap-scroll carousel */}
           <div className="md:hidden snap-row flex overflow-x-auto gap-4 -mx-4 px-4 pb-2">
             {config.trustCards.map((card) => (
-              <div
-                key={card.title}
-                className="bg-card border rounded-xl p-6 shrink-0"
-                style={{ width: "85%" }}
-              >
+              <div key={card.title} className="bg-card border rounded-xl p-6 shrink-0" style={{ width: "85%" }}>
                 <h3 className="text-sm font-semibold text-foreground mb-2">{t(card.title)}</h3>
                 <p className="text-sm text-text-mid">{t(card.body)}</p>
               </div>
@@ -408,12 +396,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             ))}
           </div>
 
-          <p className="text-center text-xs text-text-light mt-6">
-            {SERVICE_AREA_TRUST}.
-          </p>
+          <p className="text-center text-xs text-text-light mt-6">{SERVICE_AREA_TRUST}.</p>
         </div>
       </section>
-
 
       {/* GOOGLE GUARANTEED SLOT */}
       <section className="bg-section-alt py-12 px-4">
@@ -429,9 +414,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Questions, answered.")}</h2>
           </Reveal>
           <Reveal>
-            <LandingFaq
-              items={config.faqs.map((f) => ({ q: t(f.q), a: t(f.a) }))}
-            />
+            <LandingFaq items={config.faqs.map((f) => ({ q: t(f.q), a: t(f.a) }))} />
           </Reveal>
         </div>
       </section>
@@ -474,9 +457,7 @@ const BundleCrossSell = ({ config }: Props) => {
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/15 mb-3">
               <Sparkles className="w-5 h-5 text-primary" aria-hidden="true" />
             </div>
-            <h3 className="text-xl md:text-2xl font-bold text-foreground">
-              {t(config.bundleCta.title)}
-            </h3>
+            <h3 className="text-xl md:text-2xl font-bold text-foreground">{t(config.bundleCta.title)}</h3>
             <p className="text-sm text-text-mid mt-2">{t(config.bundleCta.body)}</p>
             <Link
               to={cta.to}
