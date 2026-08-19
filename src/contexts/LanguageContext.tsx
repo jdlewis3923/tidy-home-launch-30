@@ -575,8 +575,67 @@ const translations: Record<string, string> = {
     "estarás entre los primeros en activarse, con programación prioritaria y precio bloqueado.",
   "Questions? Email us at": "¿Preguntas? Escríbenos a",
   "Back to the site": "Volver al sitio",
-};
 
+  // Apply page (contractor application)
+  "Application received | Tidy": "Solicitud recibida | Tidy",
+  "Application received": "Solicitud recibida",
+  "Thanks for applying. We'll review and be in touch within":
+    "Gracias por aplicar. Revisaremos tu solicitud y te contactaremos dentro de",
+  "Back to Tidy": "Volver a Tidy",
+  "Careers at Tidy — Apply to join Miami's home-service crew":
+    "Empleos en Tidy — Aplica para unirte al equipo de servicios del hogar de Miami",
+  "Join Tidy's contractor network in Kendall and Pinecrest. Cleaning, lawn care, and car detailing pros — weekly pay, predictable routes.":
+    "Únete a la red de contratistas de Tidy en Kendall y Pinecrest. Profesionales de limpieza, jardinería y detallado de autos — pago semanal, rutas predecibles.",
+  "Back to site": "Volver al sitio",
+  "Now hiring · Miami": "Contratando ahora · Miami",
+  "Join our team —": "Únete a nuestro equipo —",
+  "we bring the customers.": "nosotros traemos los clientes.",
+  "Tidy is Miami's subscription home-service brand. We're hiring vetted cleaners, lawn pros, and detailers in Kendall and Pinecrest.":
+    "Tidy es la marca de servicios del hogar por suscripción de Miami. Estamos contratando limpiadores, jardineros y detallistas verificados en Kendall y Pinecrest.",
+  "Weekly direct deposit": "Depósito directo semanal",
+  "Paid every Friday — no chasing invoices.": "Te pagamos cada viernes — sin perseguir facturas.",
+  "Predictable routes": "Rutas predecibles",
+  "Recurring subscribers in 33156 / 33183 / 33186.": "Suscriptores recurrentes en 33156 / 33183 / 33186.",
+  "We handle the admin": "Nosotros manejamos la administración",
+  "Booking, billing, and customer support — all on us.":
+    "Reservas, facturación y atención al cliente — todo por nuestra cuenta.",
+  "Grow with the brand": "Crece con la marca",
+  "Bonus rates for top-rated pros and bilingual crews.":
+    "Tarifas con bono para profesionales mejor calificados y equipos bilingües.",
+  "Background check on every hire": "Verificación de antecedentes en cada contratación",
+  "Apply to join Tidy": "Aplica para unirte a Tidy",
+  "Takes about 2 minutes.": "Toma unos 2 minutos.",
+  "First name": "Nombre",
+  "Last name": "Apellido",
+  Email: "Correo electrónico",
+  Phone: "Teléfono",
+  "ZIP code": "Código postal",
+  "Which service are you applying for?": "¿Para qué servicio estás aplicando?",
+  Multiple: "Varios",
+  "Years of relevant experience": "Años de experiencia relevante",
+  "1–2 years": "1–2 años",
+  "3–5 years": "3–5 años",
+  "5+ years": "5+ años",
+  "Do you have your own reliable transportation?": "¿Tienes tu propio transporte confiable?",
+  "Do you have your own professional equipment in working condition?":
+    "¿Tienes tu propio equipo profesional en buen estado?",
+  "Are you authorized to work in the United States?": "¿Estás autorizado para trabajar en Estados Unidos?",
+  Yes: "Sí",
+  No: "No",
+  "Brief description of your relevant experience": "Breve descripción de tu experiencia relevante",
+  "Tell us about your background in this service…": "Cuéntanos sobre tu experiencia en este servicio…",
+  "By submitting, you confirm Tidy may contact you about this role. You will undergo a background check at Tidy's expense if we move forward.":
+    "Al enviar, confirmas que Tidy puede contactarte sobre este puesto. Si avanzamos, se realizará una verificación de antecedentes por cuenta de Tidy.",
+  "Submitting…": "Enviando…",
+  "Submit application": "Enviar solicitud",
+  "Please pick a role": "Por favor elige un puesto",
+  "Please pick experience range": "Por favor elige un rango de experiencia",
+  "Reliable transportation?": "¿Transporte confiable?",
+  "Professional equipment?": "¿Equipo profesional?",
+  "US work authorization?": "¿Autorización para trabajar en EE. UU.?",
+  "Could not submit": "No se pudo enviar",
+  "Please try again": "Intenta de nuevo",
+};
 
 interface LanguageContextType {
   language: Language;
