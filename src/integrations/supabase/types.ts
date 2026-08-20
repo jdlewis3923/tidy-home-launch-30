@@ -1925,6 +1925,7 @@ export type Database = {
           sms_opt_out: boolean
           sms_preference: string
           special_instructions: string | null
+          stripe_customer_id: string | null
           updated_at: string
           user_id: string
           zip: string | null
@@ -1953,6 +1954,7 @@ export type Database = {
           sms_opt_out?: boolean
           sms_preference?: string
           special_instructions?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
           user_id: string
           zip?: string | null
@@ -1981,6 +1983,7 @@ export type Database = {
           sms_opt_out?: boolean
           sms_preference?: string
           special_instructions?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
           user_id?: string
           zip?: string | null
@@ -2025,8 +2028,14 @@ export type Database = {
           converted_at: string | null
           created_at: string
           credit_cents: number
+          credited_at: string | null
+          error_message: string | null
           id: string
           referee_email: string | null
+          referral_code: string | null
+          referred_stripe_customer_id: string | null
+          referred_user_id: string | null
+          referrer_stripe_customer_id: string | null
           referrer_user_id: string
           status: string
           stripe_credit_id: string | null
@@ -2035,8 +2044,14 @@ export type Database = {
           converted_at?: string | null
           created_at?: string
           credit_cents?: number
+          credited_at?: string | null
+          error_message?: string | null
           id?: string
           referee_email?: string | null
+          referral_code?: string | null
+          referred_stripe_customer_id?: string | null
+          referred_user_id?: string | null
+          referrer_stripe_customer_id?: string | null
           referrer_user_id: string
           status?: string
           stripe_credit_id?: string | null
@@ -2045,8 +2060,14 @@ export type Database = {
           converted_at?: string | null
           created_at?: string
           credit_cents?: number
+          credited_at?: string | null
+          error_message?: string | null
           id?: string
           referee_email?: string | null
+          referral_code?: string | null
+          referred_stripe_customer_id?: string | null
+          referred_user_id?: string | null
+          referrer_stripe_customer_id?: string | null
           referrer_user_id?: string
           status?: string
           stripe_credit_id?: string | null

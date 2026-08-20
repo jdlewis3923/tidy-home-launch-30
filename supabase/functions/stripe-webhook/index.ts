@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
         await handleSubscriptionDeleted(supabase, event);
         break;
       case 'invoice.paid':
-        await handleInvoicePaid(supabase, event);
+        await handleInvoicePaid(stripe, supabase, event);
         break;
       case 'invoice.payment_failed':
         await handleInvoicePaymentFailed(stripe, supabase, event);
@@ -371,7 +371,7 @@ async function handleSubscriptionCreated(stripe: Stripe, supabase: any, event: S
 }
 
 // deno-lint-ignore no-explicit-any
-async function handleInvoicePaid(supabase: any, event: Stripe.Event) {
+async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Event) {
   const invoice = event.data.object as Stripe.Invoice;
   const stripeSubId = typeof invoice.subscription === 'string'
     ? invoice.subscription
@@ -440,6 +440,148 @@ async function handleInvoicePaid(supabase: any, event: Stripe.Event) {
     }
   } catch (err) {
     console.warn('[stripe-webhook] card details capture failed', err);
+  }
+
+  // HALF 2 — customer referral payout: credit the REFERRER $50 once, on the
+  // referred customer's FIRST paid invoice.
+  await maybeCreditReferrer(stripe, supabase, {
+    invoice,
+    referredUserId: userId,
+    referredStripeCustomerId:
+      typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id ?? null,
+  });
+}
+
+// =====================================================================
+// Referral credit payout (flat $50, no cap, idempotent).
+// =====================================================================
+
+// deno-lint-ignore no-explicit-any
+async function maybeCreditReferrer(stripe: Stripe, supabase: any, opts: {
+  invoice: Stripe.Invoice;
+  referredUserId: string;
+  referredStripeCustomerId: string | null;
+}) {
+  const { invoice, referredUserId, referredStripeCustomerId } = opts;
+  try {
+    // Pending referral row for this referred customer?
+    const { data: referral } = await supabase
+      .from('referrals')
+      .select('id, status, referrer_user_id, referrer_stripe_customer_id, credit_cents')
+      .eq('referred_user_id', referredUserId)
+      .maybeSingle();
+
+    if (!referral) return;
+    if (referral.status !== 'pending') return; // already credited / replay guard
+
+    // FIRST paid invoice only: no other paid invoice recorded for this user.
+    const { count: priorPaid } = await supabase
+      .from('invoices')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', referredUserId)
+      .eq('status', 'paid')
+      .neq('stripe_invoice_id', invoice.id);
+    if ((priorPaid ?? 0) > 0) return;
+
+    // Backfill the referred customer's Stripe id if we learned it late.
+    if (referredStripeCustomerId) {
+      await supabase
+        .from('referrals')
+        .update({ referred_stripe_customer_id: referredStripeCustomerId })
+        .eq('id', referral.id);
+      await supabase
+        .from('profiles')
+        .update({ stripe_customer_id: referredStripeCustomerId })
+        .eq('user_id', referredUserId);
+    }
+
+    // Resolve the referrer's Stripe customer id.
+    let referrerCus: string | null = referral.referrer_stripe_customer_id ?? null;
+    if (!referrerCus) {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('stripe_customer_id')
+        .eq('user_id', referral.referrer_user_id)
+        .maybeSingle();
+      referrerCus = prof?.stripe_customer_id ?? null;
+    }
+    if (!referrerCus) {
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('stripe_customer_id')
+        .eq('user_id', referral.referrer_user_id)
+        .not('stripe_customer_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      referrerCus = sub?.stripe_customer_id ?? null;
+    }
+    if (!referrerCus) {
+      const found = await stripe.customers.search({
+        query: `metadata['user_id']:'${referral.referrer_user_id}'`,
+        limit: 1,
+      });
+      referrerCus = found.data[0]?.id ?? null;
+    }
+    if (!referrerCus) throw new Error(`referrer ${referral.referrer_user_id} has no stripe customer id`);
+
+    await supabase
+      .from('profiles')
+      .update({ stripe_customer_id: referrerCus })
+      .eq('user_id', referral.referrer_user_id);
+
+    const amountCents = referral.credit_cents ?? 5000;
+
+    // POST /v1/customers/{cus}/balance_transactions — negative amount = credit.
+    const txn = await stripe.customers.createBalanceTransaction(
+      referrerCus,
+      {
+        amount: -Math.abs(amountCents),
+        currency: 'usd',
+        description: `Tidy referral credit — referred customer ${referredUserId}`,
+        metadata: {
+          referral_id: referral.id,
+          referrer_user_id: referral.referrer_user_id,
+          referred_user_id: referredUserId,
+        },
+      },
+      { idempotencyKey: `referral-credit:${referral.id}` },
+    );
+
+    await supabase
+      .from('referrals')
+      .update({
+        status: 'credited',
+        stripe_credit_id: txn.id,
+        referrer_stripe_customer_id: referrerCus,
+        credited_at: new Date().toISOString(),
+        converted_at: new Date().toISOString(),
+        error_message: null,
+      })
+      .eq('id', referral.id)
+      .eq('status', 'pending');
+
+    await supabase.from('integration_logs').insert({
+      source: 'referral',
+      event: `credit:${referral.id}`,
+      status: 'success',
+      payload_hash: `${referrerCus}:${txn.id}:-${amountCents}`,
+    });
+    console.log('[stripe-webhook] referral credit issued', referral.id, txn.id);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'unknown';
+    console.error('[stripe-webhook] referral credit failed', message);
+    await supabase.from('integration_logs').insert({
+      source: 'referral',
+      event: `credit:${referredUserId}`,
+      status: 'error',
+      error_message: message.slice(0, 1000),
+    });
+    await supabase
+      .from('referrals')
+      .update({ error_message: message.slice(0, 500) })
+      .eq('referred_user_id', referredUserId)
+      .eq('status', 'pending');
   }
 }
 
