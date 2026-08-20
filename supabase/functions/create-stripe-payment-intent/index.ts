@@ -15,6 +15,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
+import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -35,6 +36,7 @@ const InputSchema = z.object({
     .max(50)
     .default([]),
   promo_code: z.string().trim().min(1).max(64).optional(),
+  referral_code: z.string().trim().min(1).max(64).optional(),
   zip: z.string().regex(/^\d{5}$/),
   preferred_day: z.string().max(20).optional(),
   preferred_time: z.string().max(20).optional(),
@@ -234,6 +236,16 @@ Deno.serve(async (req) => {
         // deno-lint-ignore no-explicit-any
         const paymentIntent: any = invoice?.payment_intent;
         const clientSecret = paymentIntent?.client_secret as string | undefined;
+
+        // HALF 1 — referral attribution (pending row; payout happens on first paid invoice).
+        await recordReferralAttribution({
+          supabase,
+          stripe,
+          code: input.referral_code ?? input.promo_code,
+          referredUserId: user.id,
+          referredEmail: user.email,
+          referredStripeCustomerId: customerId,
+        });
 
         if (!clientSecret) {
           throw new Error("stripe did not return a client_secret for the subscription invoice");
