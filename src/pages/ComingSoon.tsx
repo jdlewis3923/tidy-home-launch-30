@@ -11,7 +11,9 @@ const ComingSoon = () => {
         <title>{t("Tidy Home Concierge — Coming soon to Miami")}</title>
         <meta
           name="description"
-          content="Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, car detailing. Opening soon."
+          content={t(
+            "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, car detailing. Opening soon.",
+          )}
         />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
