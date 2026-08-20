@@ -978,6 +978,8 @@ const translations: Record<string, string> = {
   "We're almost ready.": "Ya casi estamos listos.",
   "Subscription home care in Kendall & Pinecrest — house cleaning, lawn care, and mobile car detailing. Hiring our founding crew now.":
     "Cuidado del hogar por suscripción en Kendall y Pinecrest — limpieza del hogar, cuidado del jardín y detallado de autos a domicilio. Estamos contratando a nuestro equipo fundador.",
+  "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, car detailing. Opening soon.":
+    "Tidy Home Concierge es una empresa de servicios del hogar por suscripción en Miami que está contratando a su equipo fundador. Limpieza, jardín y detallado de autos. Abrimos muy pronto.",
   "Opening soon in Miami": "Abrimos muy pronto en Miami",
   "Questions?": "¿Preguntas?",
   "Tidy Home Concierge LLC · Miami, FL": "Tidy Home Concierge LLC · Miami, FL",
