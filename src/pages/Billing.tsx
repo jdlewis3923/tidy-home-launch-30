@@ -137,12 +137,11 @@ export default function Billing() {
 
       if (action === "pause" && resumeOn) {
         localStorage.setItem(PAUSE_RESUME_KEY, resumeOn);
-        setPausedUntil(resumeOn);
       }
       if (action === "resume") {
         localStorage.removeItem(PAUSE_RESUME_KEY);
-        setPausedUntil(null);
       }
+
 
       toast.success(
         action === "cancel"
