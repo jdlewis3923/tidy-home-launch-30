@@ -62,7 +62,7 @@ const PERKS = [
   { icon: DollarSign, title: "Weekly direct deposit", body: "Paid every Friday — no chasing invoices." },
   { icon: CalendarClock, title: "Predictable routes", body: "Recurring subscribers in 33156 / 33183 / 33186." },
   { icon: ShieldCheck, title: "We handle the admin", body: "Booking, billing, and customer support — all on us." },
-  { icon: Sparkles, title: "Grow with the brand", body: "Bonus rates for top-rated pros and bilingual crews." },
+  { icon: Sparkles, title: "Grow with the brand", body: "" },
 ];
 
 const EXP_TO_YEARS: Record<ExpBucket, number> = { "1-2": 2, "3-5": 5, "5+": 6 };
@@ -253,7 +253,9 @@ export default function Apply() {
                   <Icon className="h-5 w-5 text-primary-foreground" />
                 </div>
                 <h3 className="mt-3 font-display text-base font-bold text-white">{t(title)}</h3>
-                <p className="mt-1 text-sm text-white/60 leading-relaxed">{t(body)}</p>
+                {body ? (
+                  <p className="mt-1 text-sm text-white/60 leading-relaxed">{t(body)}</p>
+                ) : null}
               </div>
             ))}
           </div>

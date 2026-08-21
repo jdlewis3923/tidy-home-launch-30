@@ -16,7 +16,6 @@ import { usePromoState } from '@/hooks/usePromoCapture';
 import { startCheckout } from '@/lib/checkout';
 import { provisionAccount } from '@/lib/account-provisioning';
 import { STRIPE_INTEGRATION_ENABLED } from '@/lib/dashboard-config';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getStripe, isEmbeddedCheckoutAvailable } from '@/lib/stripe-client';
 import EmbeddedPaymentForm from '@/components/dashboard/EmbeddedPaymentForm';
@@ -68,7 +67,6 @@ export default function StepPayment({ state, onChange }: Props) {
     })
     .filter((x): x is { svc: ServiceType; qty: number } => x !== null);
 
-  const navigate = useNavigate();
   const embedded = isEmbeddedCheckoutAvailable();
   const stripePromise = useMemo(() => (embedded ? getStripe() : null), [embedded]);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -125,13 +123,16 @@ export default function StepPayment({ state, onChange }: Props) {
         }
         setClientSecret(data.client_secret as string);
         // Keep submitting=true until the user finishes paying (UI shows form, no double-submit possible).
-      } else if (STRIPE_INTEGRATION_ENABLED) {
-        await startCheckout({ config: state });
       } else {
-        navigate('/dashboard/confirmation');
+        // Hosted-checkout path — always reachable, regardless of any flag state.
+        await startCheckout({ config: state });
+        // startCheckout redirects; clear the flag as a safety net so the button
+        // can never stay stuck if the redirect does not happen.
+        setSubmitting(false);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'checkout failed. please try again.');
+      setPreparing(false);
       setSubmitting(false);
     }
   };

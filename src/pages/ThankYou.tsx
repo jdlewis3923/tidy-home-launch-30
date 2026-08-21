@@ -1,20 +1,44 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import TidyLogo from "@/components/TidyLogo";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { pushEvent } from "@/lib/tracking";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const ThankYou = () => {
   const { t } = useLanguage();
+  const [params] = useSearchParams();
+  const location = useLocation();
+  const firedRef = useRef(false);
+
+  // Only a real completed checkout carries an order identifier.
+  const state = (location.state ?? {}) as Record<string, unknown>;
+  const orderId =
+    params.get("session_id") ||
+    params.get("checkout_session_id") ||
+    params.get("order_id") ||
+    (typeof state.session_id === "string" ? state.session_id : "") ||
+    (typeof state.order_id === "string" ? state.order_id : "");
 
   useEffect(() => {
     // page_view fires globally via <RouteTracker> in App.tsx — no per-page push.
+    if (!orderId) return;                 // direct/bookmark hit — no conversion
+    if (firedRef.current) return;         // StrictMode double-effect guard
+    const key = `tidy_conv_thankyou_${orderId}`;
+    try {
+      if (sessionStorage.getItem(key)) return; // refresh — never re-fire
+      sessionStorage.setItem(key, "1");
+    } catch {
+      /* storage unavailable — the ref guard still prevents the double fire */
+    }
+    firedRef.current = true;
     pushEvent("conversion", {
       send_to: "AW-17776060215/MdChCMy-4OIcELfOpJxC",
       event_category: "lead",
       event_label: "thank_you_page",
+      transaction_id: orderId,
     });
-  }, []);
+  }, [orderId]);
+
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-16">
@@ -26,7 +50,7 @@ const ThankYou = () => {
         <div className="text-5xl mb-4">🎉</div>
         <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{t("You're in.")}</h1>
         <p className="text-primary font-semibold text-lg mb-6">
-          {t("Your founding rate is locked — your price never rises, for as long as you're a member.")}
+          {t("As one of the 25 founding homes in your ZIP, your founding rate is locked — your price never rises for as long as you're a member.")}
         </p>
         <p className="text-text-mid mb-8">
           {t("We're prioritizing homes for the initial rollout — and you're at the front of the line.")}
