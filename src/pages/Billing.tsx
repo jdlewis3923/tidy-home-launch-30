@@ -301,7 +301,7 @@ export default function Billing() {
               <a href="mailto:hello@jointidy.co" className="text-[hsl(var(--primary))] hover:underline">
                 hello@jointidy.co
               </a>
-              {t("and we'll update your plan.")}
+              {t(" and we'll update your plan.")}
             </p>
 
             {sub && (

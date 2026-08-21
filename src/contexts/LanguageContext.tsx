@@ -1100,7 +1100,7 @@ const translations: Record<string, string> = {
   "You already have a Tidy plan.": "Ya tienes un plan de Tidy.",
   "Go to Billing": "Ir a Facturación",
   "Need to add or change a service? Email ": "¿Necesitas agregar o cambiar un servicio? Envía un correo a ",
-  "and we'll update your plan.": "y actualizaremos tu plan.",
+  " and we'll update your plan.": " y actualizaremos tu plan.",
 
   // Dashboard — skip visit
   "Upcoming Visits": "Próximas Visitas",
