@@ -15,6 +15,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   Calendar,
   CheckCircle2,
@@ -37,12 +38,23 @@ import type { AddonService } from '@/lib/addon-catalog';
 import ScheduleCalendar from '@/components/dashboard/ScheduleCalendar';
 import CalmModal from '@/components/dashboard/CalmModal';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   useDashboardData,
   relativeDateLabel,
   formatLongDate,
   formatMoney,
   serviceLabel,
 } from '@/lib/dashboard-data';
+import { useLanguage } from '@/contexts/LanguageContext';
 import lawnImg from '@/assets/lawn-care.jpg';
 import cleaningImg from '@/assets/cleaning-interior.jpg';
 import detailImg from '@/assets/car-detailing.jpg';
@@ -70,6 +82,7 @@ const TIME_WINDOW_FALLBACK = '8:00 – 11:00 AM';
 
 export default function DashboardIndex() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const data = useDashboardData();
   const [selectedDate, setSelectedDate] = useState(() =>
     new Date().toISOString().slice(0, 10)
@@ -78,6 +91,8 @@ export default function DashboardIndex() {
   const [activeModal, setActiveModal] = useState<null |
     'reschedule' | 'note' | 'access' | 'plan' | 'payment' | 'help' | 'visit'>(null);
   const [submitState, setSubmitState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [skipVisit, setSkipVisit] = useState<ReturnType<typeof useDashboardData>['upcoming'][number] | null>(null);
+  const [skipBusy, setSkipBusy] = useState(false);
 
   // Controlled fields for support_requests modals.
   const [rescheduleDate, setRescheduleDate] = useState<string>('');
@@ -130,6 +145,26 @@ export default function DashboardIndex() {
     } catch (err) {
       console.error('[support_requests insert threw]', err);
       setSubmitState('error');
+    }
+  };
+
+  const handleSkipVisit = async (visit: NonNullable<typeof skipVisit>) => {
+    if (!visit || skipBusy) return;
+    setSkipBusy(true);
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { error } = await supabase.functions.invoke('customer-skip-visit', {
+        body: { visit_id: visit.id },
+      });
+      if (error) throw error;
+      toast.success(t('Visit skipped.'));
+      await data.refetch();
+    } catch (err) {
+      console.error('[customer-skip-visit]', err);
+      toast.error(t('We could not skip this visit. Please try again.'));
+    } finally {
+      setSkipBusy(false);
+      setSkipVisit(null);
     }
   };
 
@@ -412,37 +447,54 @@ export default function DashboardIndex() {
               {/* Upcoming list */}
               <div className="space-y-4">
                 <Card>
-                  <h2 className="text-base font-bold text-ink">Upcoming Visits</h2>
+                  <h2 className="text-base font-bold text-ink">{t('Upcoming Visits')}</h2>
                   <ul className="mt-4 divide-y divide-[hsl(var(--hairline))]/70">
-                    {data.upcoming.slice(0, 4).map((v) => (
-                      <li key={v.id}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedDate(v.visit_date);
-                            setActiveModal('visit');
-                          }}
-                          className="flex w-full items-center gap-3 py-3 text-left transition hover:bg-cream/50"
-                        >
-                          <span className="grid h-9 w-9 place-items-center rounded-lg bg-cream text-base">
-                            {SERVICE_ICON[v.service]}
-                          </span>
-                          <span className="flex-1">
-                            <span className="block text-sm font-semibold text-ink">
-                              {relativeDateLabel(v.visit_date)}
+                    {data.upcoming.slice(0, 4).map((v) => {
+                      const isSkipped = v.status === 'skipped';
+                      const isScheduled = v.status === 'scheduled';
+                      return (
+                        <li key={v.id} className="flex items-center justify-between py-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedDate(v.visit_date);
+                              setActiveModal('visit');
+                            }}
+                            className="flex flex-1 items-center gap-3 text-left transition hover:bg-cream/50"
+                          >
+                            <span className="grid h-9 w-9 place-items-center rounded-lg bg-cream text-base">
+                              {SERVICE_ICON[v.service]}
                             </span>
-                            <span className="block text-xs text-ink-soft">
-                              {serviceLabel(v.service)} · {formatLongDate(v.visit_date)},{' '}
-                              {v.time_window || TIME_WINDOW_FALLBACK}
+                            <span className="flex-1">
+                              <span className="block text-sm font-semibold text-ink">
+                                {relativeDateLabel(v.visit_date)}
+                              </span>
+                              <span className="block text-xs text-ink-soft">
+                                {serviceLabel(v.service)} · {formatLongDate(v.visit_date)},{' '}
+                                {v.time_window || TIME_WINDOW_FALLBACK}
+                              </span>
                             </span>
-                          </span>
-                          <ChevronRight className="h-4 w-4 text-ink-faint" />
-                        </button>
-                      </li>
-                    ))}
+                          </button>
+                          {isSkipped && (
+                            <span className="mr-2 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium text-ink-faint ring-1 ring-inset ring-[hsl(var(--hairline))]">
+                              {t('Skipped')}
+                            </span>
+                          )}
+                          {isScheduled && (
+                            <button
+                              type="button"
+                              onClick={() => setSkipVisit(v)}
+                              className="ml-2 text-xs font-semibold text-ink-soft transition hover:text-ink"
+                            >
+                              {t('Skip this visit')}
+                            </button>
+                          )}
+                        </li>
+                      );
+                    })}
                     {data.upcoming.length === 0 && (
                       <li className="py-3 text-sm text-ink-faint">
-                        No upcoming visits scheduled.
+                        {t('No upcoming visits scheduled.')}
                       </li>
                     )}
                   </ul>
@@ -450,7 +502,7 @@ export default function DashboardIndex() {
                     to="/dashboard/plan"
                     className="mt-3 block text-center text-sm font-semibold text-[hsl(var(--primary))] hover:underline"
                   >
-                    View full schedule
+                    {t('View full schedule')}
                   </Link>
                 </Card>
 
@@ -741,6 +793,39 @@ export default function DashboardIndex() {
           <li>🕘 Mon–Sat, 8am–6pm</li>
         </ul>
       </CalmModal>
+
+      <AlertDialog
+        open={skipVisit !== null}
+        onOpenChange={(open) => {
+          if (!open && !skipBusy) setSkipVisit(null);
+        }}
+      >
+        <AlertDialogContent className="border border-[hsl(var(--hairline))]/70 bg-white text-ink">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Skip this visit?')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                'We will skip this visit only. Your plan and billing are unchanged, and your next visit goes ahead as normal.'
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={skipBusy}
+              className="border border-[hsl(var(--hairline))] bg-white text-ink hover:bg-cream"
+            >
+              {t('Keep it')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={skipBusy}
+              onClick={() => skipVisit && handleSkipVisit(skipVisit)}
+              className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90"
+            >
+              {skipBusy ? t('Skipping...') : t('Skip this visit')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

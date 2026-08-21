@@ -26,11 +26,12 @@ export type DashboardData = {
   profile: Profile | null;
   subscription: Subscription | null;
   visits: Visit[];                // all visits, asc by date
-  upcoming: Visit[];              // future / today, scheduled
+  upcoming: Visit[];              // future / today, scheduled or skipped
   nextVisit: Visit | null;
   lastCompleted: Visit | null;
   nextInvoice: Invoice | null;
   invoices: Invoice[];
+  refetch: () => void;
 };
 
 const SERVICE_LABEL: Record<string, string> = {
@@ -55,6 +56,7 @@ export function useDashboardData(): DashboardData {
     lastCompleted: null,
     nextInvoice: null,
     invoices: [],
+    refetch: () => {},
   });
 
   useEffect(() => {
@@ -96,9 +98,9 @@ export function useDashboardData(): DashboardData {
 
       const todayISO = new Date().toISOString().slice(0, 10);
       const upcoming = visits.filter(
-        (v) => v.visit_date >= todayISO && v.status === 'scheduled'
+        (v) => v.visit_date >= todayISO && (v.status === 'scheduled' || v.status === 'skipped')
       );
-      const nextVisit = upcoming[0] ?? null;
+      const nextVisit = upcoming.find((v) => v.status === 'scheduled') ?? null;
       const lastCompleted =
         [...visits].reverse().find((v) => v.status === 'complete') ??
         // fall back to most recent past scheduled (so "Last Service" still
@@ -132,6 +134,7 @@ export function useDashboardData(): DashboardData {
           lastCompleted,
           nextInvoice,
           invoices,
+          refetch: () => load(),
         });
       }
     };
