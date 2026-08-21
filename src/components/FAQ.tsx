@@ -64,7 +64,7 @@ const launchFAQ = [
   {
     title: "Services & Scheduling",
     items: [
-      { q: "How often do services happen?", a: "Choose weekly, biweekly, or monthly for each service — and mix and match freely. Want weekly lawn care but biweekly cleaning? Done." },
+      { q: "How often do services happen?", a: "Choose weekly, biweekly, or monthly depending on the service — and mix and match freely. Car detailing is monthly or biweekly. Want weekly lawn care but biweekly cleaning? Done." },
       { q: "Do I need to be home?", a: "Not at all. Provide access via a lockbox, gate code, or smart lock and our team handles everything. You'll get photo confirmation when each service is complete." },
       { q: "Can I reschedule or pause?", a: "Yes — reschedule, pause for vacation, or skip a visit anytime through your dashboard or by contacting us. No penalties." },
       { q: "What if it rains?", a: "If weather impacts an outdoor service, we automatically reschedule for the next available day. Your subscription stays active." },
