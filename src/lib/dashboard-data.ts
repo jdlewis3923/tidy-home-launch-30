@@ -98,9 +98,9 @@ export function useDashboardData(): DashboardData {
 
       const todayISO = new Date().toISOString().slice(0, 10);
       const upcoming = visits.filter(
-        (v) => v.visit_date >= todayISO && v.status === 'scheduled'
+        (v) => v.visit_date >= todayISO && (v.status === 'scheduled' || v.status === 'skipped')
       );
-      const nextVisit = upcoming[0] ?? null;
+      const nextVisit = upcoming.find((v) => v.status === 'scheduled') ?? null;
       const lastCompleted =
         [...visits].reverse().find((v) => v.status === 'complete') ??
         // fall back to most recent past scheduled (so "Last Service" still
@@ -134,6 +134,7 @@ export function useDashboardData(): DashboardData {
           lastCompleted,
           nextInvoice,
           invoices,
+          refetch: () => load(),
         });
       }
     };
