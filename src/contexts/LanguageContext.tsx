@@ -559,8 +559,8 @@ const translations: Record<string, string> = {
 
   // Thank You page
   "You're in.": "Ya estás dentro.",
-  "Your founding rate is locked — your price never rises, for as long as you're a member.":
-    "Tu tarifa de fundador está bloqueada — tu precio nunca sube, mientras seas miembro.",
+  "As one of the 25 founding homes in your ZIP, your founding rate is locked — your price never rises for as long as you're a member.":
+    "Como uno de los 25 hogares fundadores en tu código postal, tu tarifa de fundador está bloqueada — tu precio nunca sube mientras seas miembro.",
   "We're prioritizing homes for the initial rollout — and you're at the front of the line.":
     "Estamos priorizando hogares para el lanzamiento inicial, y tú estás al frente de la fila.",
   "Here's what happens next:": "Esto es lo que sigue:",
