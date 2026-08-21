@@ -15,6 +15,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   Calendar,
   CheckCircle2,
@@ -37,12 +38,23 @@ import type { AddonService } from '@/lib/addon-catalog';
 import ScheduleCalendar from '@/components/dashboard/ScheduleCalendar';
 import CalmModal from '@/components/dashboard/CalmModal';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   useDashboardData,
   relativeDateLabel,
   formatLongDate,
   formatMoney,
   serviceLabel,
 } from '@/lib/dashboard-data';
+import { useLanguage } from '@/contexts/LanguageContext';
 import lawnImg from '@/assets/lawn-care.jpg';
 import cleaningImg from '@/assets/cleaning-interior.jpg';
 import detailImg from '@/assets/car-detailing.jpg';
