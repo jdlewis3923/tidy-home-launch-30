@@ -1026,6 +1026,9 @@ const translations: Record<string, string> = {
   "Manage or cancel your plan": "Administra o cancela tu plan",
 
   // Dashboard — skip visit
+  "Upcoming Visits": "Próximas Visitas",
+  "No upcoming visits scheduled.": "No hay próximas visitas programadas.",
+  "View full schedule": "Ver calendario completo",
   "Skip this visit?": "¿Saltar esta visita?",
   "Skip this visit": "Saltar esta visita",
   "Skipping...": "Saltando...",
