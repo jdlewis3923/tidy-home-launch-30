@@ -202,7 +202,7 @@ export default function Billing() {
             <span className="text-[hsl(var(--primary))]">on autopilot.</span>
           </h1>
           <p className="mt-3 text-base text-ink-soft">
-            Your card is charged when you sign up, then automatically each month. No surprises, ever.
+            Your card is charged monthly, on the same date you started. No surprises, ever.
           </p>
         </div>
 
