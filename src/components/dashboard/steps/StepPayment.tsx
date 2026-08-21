@@ -16,7 +16,6 @@ import { usePromoState } from '@/hooks/usePromoCapture';
 import { startCheckout } from '@/lib/checkout';
 import { provisionAccount } from '@/lib/account-provisioning';
 import { STRIPE_INTEGRATION_ENABLED } from '@/lib/dashboard-config';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getStripe, isEmbeddedCheckoutAvailable } from '@/lib/stripe-client';
 import EmbeddedPaymentForm from '@/components/dashboard/EmbeddedPaymentForm';
