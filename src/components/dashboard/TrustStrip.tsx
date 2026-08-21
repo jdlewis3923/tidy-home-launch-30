@@ -16,13 +16,13 @@ export default function TrustStrip() {
     >
       Pinecrest 33156 · Kendall 33183/33186
       <span className="mx-1.5 text-ink-faint">·</span>
-      Bonded
+      Licensed &amp; Insured
       <span className="mx-1.5 text-ink-faint">·</span>
-      Insured
+      Background-Checked Pros
       <span className="mx-1.5 text-ink-faint">·</span>
-      Bilingual Pros (EN + ES)
+      Photo-Verified Every Visit
       <span className="mx-1.5 text-ink-faint">·</span>
-      Same Pro Every Visit
+      Cancel Anytime
       <span className="mx-1.5 text-ink-faint">·</span>
       Starting at {formatMonthly(getLowestStartingPrice())}
     </div>
