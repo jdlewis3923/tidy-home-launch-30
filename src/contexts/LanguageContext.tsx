@@ -900,8 +900,8 @@ const translations: Record<string, string> = {
   // Terms of Service page
   "Effective Date: March 25, 2026": "Fecha de vigencia: 25 de marzo de 2026",
   "1. Service Type": "1. Tipo de Servicio",
-  "Tidy provides recurring maintenance services including house cleaning, lawn care, and car detailing. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately.":
-    "Tidy ofrece servicios de mantenimiento recurrente que incluyen limpieza del hogar, cuidado del jardín y detallado de autos. Tidy NO ofrece servicios de restauración, limpieza de materiales peligrosos ni servicios en condiciones extremas, a menos que se compren por separado.",
+  "Tidy provides recurring maintenance services including house cleaning, lawn care, and car detailing. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately. Services are performed by independent contractors engaged by Tidy. Tidy carries commercial general liability coverage on every Tidy assignment, and contractors are background-checked.":
+    "Tidy ofrece servicios de mantenimiento recurrente que incluyen limpieza del hogar, cuidado del jardín y detallado de autos. Tidy NO ofrece servicios de restauración, limpieza de materiales peligrosos ni servicios en condiciones extremas, a menos que se compren por separado. Los servicios son realizados por contratistas independientes contratados por Tidy. Tidy cuenta con cobertura de responsabilidad civil general en cada asignación, y los contratistas son verificados.",
   "2. Service Scope Limitations": "2. Limitaciones del Alcance del Servicio",
   "Standard services include routine maintenance only. Not included: extreme buildup or neglect, hazardous materials, mold remediation, biohazard cleanup, heavy stain restoration, paint correction, construction debris cleanup.":
     "Los servicios estándar incluyen únicamente mantenimiento de rutina. No se incluye: acumulación extrema o abandono, materiales peligrosos, remediación de moho, limpieza de riesgo biológico, restauración de manchas severas, corrección de pintura ni limpieza de escombros de construcción.",
@@ -918,8 +918,8 @@ const translations: Record<string, string> = {
   "If payment fails, service may be paused until resolved. You will be notified immediately.":
     "Si el pago falla, el servicio puede pausarse hasta que se resuelva. Se te notificará de inmediato.",
   "7. Cancellation": "7. Cancelación",
-  "Cancel anytime. No refunds for completed services.":
-    "Cancela cuando quieras. No hay reembolsos por servicios ya completados.",
+  "You can cancel at any time from the Billing page in your account. Cancellation takes effect at the end of the billing period you have already paid for, so you keep the visits in that period and no further charge is made. We do not prorate or refund the period already paid. You can undo a cancellation any time before it takes effect. You can also pause your plan for up to 60 days from the Billing page, during which no charges are made and we hold your slot. You can skip an individual visit from your dashboard, which does not change your billing for that period.":
+    "Puedes cancelar en cualquier momento desde la página de Facturación en tu cuenta. La cancelación entra en vigor al final del período de facturación que ya pagaste, por lo que conservas las visitas de ese período y no se realiza ningún cargo adicional. No prorrateamos ni reembolsamos el período ya pagado. Puedes deshacer una cancelación en cualquier momento antes de que entre en vigor. También puedes pausar tu plan hasta por 60 días desde la página de Facturación; durante la pausa no se realizan cargos y reservamos tu lugar. Puedes omitir una visita individual desde tu panel, lo cual no cambia la facturación de ese período.",
   "8. Satisfaction": "8. Satisfacción",
   "Notify us within 24 hours of any service issue. We will make reasonable efforts to resolve it.":
     "Notifícanos dentro de 24 horas sobre cualquier problema con el servicio. Haremos esfuerzos razonables para resolverlo.",
@@ -940,6 +940,12 @@ const translations: Record<string, string> = {
   "These Terms are governed by the laws of the State of Florida.":
     "Estos Términos se rigen por las leyes del Estado de Florida.",
   "12. Contact": "12. Contacto",
+  "13. Pricing and Founding Rate": "13. Precios y Tarifa Fundadora",
+  "The price shown at signup is the price charged. Founding members — the first 25 homes per ZIP code — keep their signup rate for as long as their membership remains active and are not subject to later price increases. A founding rate is tied to continuous membership and does not carry over if the plan is cancelled and later restarted.":
+    "El precio mostrado al inscribirte es el precio cobrado. Los miembros fundadores — los primeros 25 hogares por código postal — mantienen su tarifa de inscripción mientras su membresía permanezca activa y no están sujetos a aumentos de precio posteriores. La tarifa fundadora está vinculada a la membresía continua y no se transfiere si se cancela el plan y se reinicia más tarde.",
+  "14. Referral Program": "14. Programa de Referidos",
+  "A customer who refers a new customer receives $50 in account credit, and the new customer receives $50 off their first month. The credit is applied after the referred customer's first invoice clears. The referred customer must be new to Tidy. Credit has no cash value.":
+    "Un cliente que refiere a un nuevo cliente recibe $50 en crédito de cuenta, y el nuevo cliente recibe $50 de descuento en su primer mes. El crédito se aplica después de que se acredite la primera factura del cliente referido. El cliente referido debe ser nuevo en Tidy. El crédito no tiene valor en efectivo.",
   "← Back to the site": "← Volver al sitio",
 
   // Privacy Policy page

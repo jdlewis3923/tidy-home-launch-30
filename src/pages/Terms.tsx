@@ -20,7 +20,7 @@ const Terms = () => {
             <h2 className="text-lg font-bold text-foreground">{t("1. Service Type")}</h2>
             <p>
               {t(
-                "Tidy provides recurring maintenance services including house cleaning, lawn care, and car detailing. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately.",
+                "Tidy provides recurring maintenance services including house cleaning, lawn care, and car detailing. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately. Services are performed by independent contractors engaged by Tidy. Tidy carries commercial general liability coverage on every Tidy assignment, and contractors are background-checked.",
               )}
             </p>
           </section>
@@ -58,7 +58,11 @@ const Terms = () => {
           </section>
           <section>
             <h2 className="text-lg font-bold text-foreground">{t("7. Cancellation")}</h2>
-            <p>{t("Cancel anytime. No refunds for completed services.")}</p>
+            <p>
+              {t(
+                "You can cancel at any time from the Billing page in your account. Cancellation takes effect at the end of the billing period you have already paid for, so you keep the visits in that period and no further charge is made. We do not prorate or refund the period already paid. You can undo a cancellation any time before it takes effect. You can also pause your plan for up to 60 days from the Billing page, during which no charges are made and we hold your slot. You can skip an individual visit from your dashboard, which does not change your billing for that period.",
+              )}
+            </p>
           </section>
           <section>
             <h2 className="text-lg font-bold text-foreground">{t("8. Satisfaction")}</h2>
@@ -106,6 +110,22 @@ const Terms = () => {
               <a href="mailto:hello@jointidy.co" className="text-primary underline">
                 {t("hello@jointidy.co")}
               </a>
+            </p>
+          </section>
+          <section>
+            <h2 className="text-lg font-bold text-foreground">{t("13. Pricing and Founding Rate")}</h2>
+            <p>
+              {t(
+                "The price shown at signup is the price charged. Founding members — the first 25 homes per ZIP code — keep their signup rate for as long as their membership remains active and are not subject to later price increases. A founding rate is tied to continuous membership and does not carry over if the plan is cancelled and later restarted.",
+              )}
+            </p>
+          </section>
+          <section>
+            <h2 className="text-lg font-bold text-foreground">{t("14. Referral Program")}</h2>
+            <p>
+              {t(
+                "A customer who refers a new customer receives $50 in account credit, and the new customer receives $50 off their first month. The credit is applied after the referred customer's first invoice clears. The referred customer must be new to Tidy. Credit has no cash value.",
+              )}
             </p>
           </section>
         </div>
