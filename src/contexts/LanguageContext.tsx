@@ -601,8 +601,6 @@ const translations: Record<string, string> = {
   "Booking, billing, and customer support — all on us.":
     "Reservas, facturación y atención al cliente — todo por nuestra cuenta.",
   "Grow with the brand": "Crece con la marca",
-  "Bonus rates for top-rated pros and bilingual crews.":
-    "Tarifas con bono para profesionales mejor calificados y equipos bilingües.",
   "Background check on every hire": "Verificación de antecedentes en cada contratación",
   "Apply to join Tidy": "Aplica para unirte a Tidy",
   "Takes about 2 minutes.": "Toma unos 2 minutos.",
