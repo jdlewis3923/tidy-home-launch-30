@@ -156,6 +156,20 @@ export default function CustomerLogin() {
 
           {error && <p className="text-xs text-destructive lowercase">{error}</p>}
 
+          {isSignUp && (
+            <p className="text-xs text-ink-faint text-center leading-relaxed">
+              {t("By creating an account you agree to our")}{" "}
+              <Link to="/terms" className="underline hover:text-ink">
+                {t("Terms of Service")}
+              </Link>{" "}
+              {t("and")}{" "}
+              <Link to="/privacy" className="underline hover:text-ink">
+                {t("Privacy Policy")}
+              </Link>
+              .
+            </p>
+          )}
+
           <button
             type="submit"
             disabled={loading}
@@ -164,20 +178,6 @@ export default function CustomerLogin() {
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {loading ? (isSignUp ? 'creating…' : 'signing in…') : (isSignUp ? 'create account' : 'sign in')}
           </button>
-
-          {isSignUp && (
-            <p className="text-xs text-ink-faint text-center leading-relaxed">
-              {t("By creating an account you agree to our")}{" "}
-              <Link to="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
-                {t("Terms of Service")}
-              </Link>{" "}
-              {t("and")}{" "}
-              <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
-                {t("Privacy Policy")}
-              </Link>
-              .
-            </p>
-          )}
 
           <div className="text-center space-y-2 pt-2">
             <button
