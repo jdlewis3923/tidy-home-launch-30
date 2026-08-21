@@ -1024,6 +1024,18 @@ const translations: Record<string, string> = {
   "We couldn't update your plan. Please try again.":
     "No pudimos actualizar tu plan. Inténtalo de nuevo.",
   "Manage or cancel your plan": "Administra o cancela tu plan",
+
+  // Dashboard — skip visit
+  "Skip this visit?": "¿Saltar esta visita?",
+  "Skip this visit": "Saltar esta visita",
+  "Skipping...": "Saltando...",
+  "We will skip this visit only. Your plan and billing are unchanged, and your next visit goes ahead as normal.":
+    "Solo saltaremos esta visita. Tu plan y facturación no cambian, y tu próxima visita sigue como estaba.",
+  "Keep it": "Mantenerla",
+  "Visit skipped.": "Visita saltada.",
+  "We could not skip this visit. Please try again.":
+    "No pudimos saltar esta visita. Inténtalo de nuevo.",
+  "Skipped": "Saltada",
 };
 
 
