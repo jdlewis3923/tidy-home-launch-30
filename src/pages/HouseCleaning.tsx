@@ -111,7 +111,7 @@ const config: ServiceLandingConfig = {
   seo: {
     title: "House Cleaning in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Monthly house cleaning in Pinecrest and Kendall (33156, 33183, 33186). Locked price from $159/mo. Same crew, no contracts, eco-safe. Book in 60 seconds.",
+      "Monthly house cleaning in Pinecrest and Kendall (33156, 33183, 33186). Locked price from $159/mo. Same crew, no contracts, eco-safe. Book in about 2 minutes.",
     canonical: "https://jointidy.co/house-cleaning",
     priceRange: "$159–$459",
   },

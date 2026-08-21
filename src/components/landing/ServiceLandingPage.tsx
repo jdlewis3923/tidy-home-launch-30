@@ -100,7 +100,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
   const ctaForPlan = (planSlug: string | undefined, where: string) => {
     const base = getCtaProps({
       trackingId: `lp_${config.serviceSlug}_${where}`,
-      ctaText: "Book in 60 seconds",
+      ctaText: "Book in about 2 minutes",
       service: config.signupServiceParam,
       plan: planSlug,
       trackingMeta: {
@@ -134,7 +134,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
   const handleNavCta = () => {
     pushEvent("cta_click", {
       cta_id: `lp_${config.serviceSlug}_nav`,
-      cta_text: "Book in 60 seconds",
+      cta_text: "Book in about 2 minutes",
       service: config.signupServiceParam,
     });
     track("book_cta_click", {
@@ -231,7 +231,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                 onClick={heroCta.onClick}
                 className="cta-arrow cta-press animate-pulse-gold bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
               >
-                {t(config.ctaPrimaryLabel ?? "Book in 60 seconds")} <span className="arrow">→</span>
+                {t(config.ctaPrimaryLabel ?? "Book in about 2 minutes")} <span className="arrow">→</span>
               </Link>
               <span className="mt-2 text-xs text-primary-foreground/70">
                 {t("About 2 minutes · No contracts")}
@@ -437,8 +437,8 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
         headline={t(`Ready to lock in your ${config.eyebrow.toLowerCase()}?`)}
-        subhead={t("60-second signup. Same crew. Locked price.")}
-        ctaLabel={t("Book in 60 seconds")}
+        subhead={t("About 2 minutes to sign up. Same crew. Locked price.")}
+        ctaLabel={t("Book in about 2 minutes")}
         trackingId={`lp_${config.serviceSlug}_final`}
         service={config.signupServiceParam}
       />
