@@ -148,6 +148,26 @@ export default function DashboardIndex() {
     }
   };
 
+  const handleSkipVisit = async (visit: NonNullable<typeof skipVisit>) => {
+    if (!visit || skipBusy) return;
+    setSkipBusy(true);
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { error } = await supabase.functions.invoke('customer-skip-visit', {
+        body: { visit_id: visit.id },
+      });
+      if (error) throw error;
+      toast.success(t('Visit skipped.'));
+      await data.refetch();
+    } catch (err) {
+      console.error('[customer-skip-visit]', err);
+      toast.error(t('We could not skip this visit. Please try again.'));
+    } finally {
+      setSkipBusy(false);
+      setSkipVisit(null);
+    }
+  };
+
   // Bounce unauthenticated visitors to login (after the auth state resolves).
   useEffect(() => {
     if (!data.loading && !data.isAuthed) {
