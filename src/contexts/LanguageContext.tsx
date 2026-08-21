@@ -292,6 +292,9 @@ const translations: Record<string, string> = {
   "Referral Program": "Programa de Referidos",
   Company: "Empresa",
   "Service Areas": "Áreas de Servicio",
+  // Account creation consent
+  "By creating an account you agree to our": "Al crear una cuenta, aceptas nuestros",
+  "and": "y",
   "Terms of Service": "Términos de Servicio",
   "Privacy Policy": "Política de Privacidad",
   "Contact Us": "Contáctanos",

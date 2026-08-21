@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import tidyLogo from '@/assets/tidy-logo.png';
 
 /**
@@ -14,6 +15,7 @@ export default function CustomerLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useLanguage();
   // Default view: signup if entry point signals it (?mode=signup from START MY PLAN),
   // otherwise sign-in (top-nav Login link).
   const initialIsSignUp = searchParams.get('mode') === 'signup';
@@ -162,6 +164,20 @@ export default function CustomerLogin() {
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {loading ? (isSignUp ? 'creating…' : 'signing in…') : (isSignUp ? 'create account' : 'sign in')}
           </button>
+
+          {isSignUp && (
+            <p className="text-xs text-ink-faint text-center leading-relaxed">
+              {t("By creating an account you agree to our")}{" "}
+              <Link to="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
+                {t("Terms of Service")}
+              </Link>{" "}
+              {t("and")}{" "}
+              <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
+                {t("Privacy Policy")}
+              </Link>
+              .
+            </p>
+          )}
 
           <div className="text-center space-y-2 pt-2">
             <button
