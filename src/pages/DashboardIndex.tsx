@@ -793,6 +793,39 @@ export default function DashboardIndex() {
           <li>🕘 Mon–Sat, 8am–6pm</li>
         </ul>
       </CalmModal>
+
+      <AlertDialog
+        open={skipVisit !== null}
+        onOpenChange={(open) => {
+          if (!open && !skipBusy) setSkipVisit(null);
+        }}
+      >
+        <AlertDialogContent className="border border-[hsl(var(--hairline))]/70 bg-white text-ink">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Skip this visit?')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                'We will skip this visit only. Your plan and billing are unchanged, and your next visit goes ahead as normal.'
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={skipBusy}
+              className="border border-[hsl(var(--hairline))] bg-white text-ink hover:bg-cream"
+            >
+              {t('Keep it')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={skipBusy}
+              onClick={() => skipVisit && handleSkipVisit(skipVisit)}
+              className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90"
+            >
+              {skipBusy ? t('Skipping...') : t('Skip this visit')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
