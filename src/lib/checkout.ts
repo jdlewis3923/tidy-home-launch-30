@@ -82,6 +82,7 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     services,
     addons,
     promo_code,
+    referral_code: config.referralCode?.trim() || undefined,
     zip: config.zip,
     preferred_day: config.preferredDay,
     preferred_time: config.preferredTime,
