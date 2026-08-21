@@ -918,7 +918,7 @@ const translations: Record<string, string> = {
   "If payment fails, service may be paused until resolved. You will be notified immediately.":
     "Si el pago falla, el servicio puede pausarse hasta que se resuelva. Se te notificará de inmediato.",
   "7. Cancellation": "7. Cancelación",
-  "Cancel anytime. No refunds for completed services.":
+  "You can cancel at any time from the Billing page in your account. Cancellation takes effect at the end of the billing period you have already paid for, so you keep the visits in that period and no further charge is made. We do not prorate or refund the period already paid. You can undo a cancellation any time before it takes effect. You can also pause your plan for up to 60 days from the Billing page, during which no charges are made and we hold your slot. You can skip an individual visit from your dashboard, which does not change your billing for that period.":
     "Puedes cancelar en cualquier momento desde la página de Facturación en tu cuenta. La cancelación entra en vigor al final del período de facturación que ya pagaste, por lo que conservas las visitas de ese período y no se realiza ningún cargo adicional. No prorrateamos ni reembolsamos el período ya pagado. Puedes deshacer una cancelación en cualquier momento antes de que entre en vigor. También puedes pausar tu plan hasta por 60 días desde la página de Facturación; durante la pausa no se realizan cargos y reservamos tu lugar. Puedes omitir una visita individual desde tu panel, lo cual no cambia la facturación de ese período.",
   "8. Satisfaction": "8. Satisfacción",
   "Notify us within 24 hours of any service issue. We will make reasonable efforts to resolve it.":
