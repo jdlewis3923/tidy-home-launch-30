@@ -998,7 +998,34 @@ const translations: Record<string, string> = {
   "$129/mo": "$129/mes",
   "$195/mo": "$195/mes",
   "$249/mo": "$249/mes",
+
+  // Billing — manage subscription
+  "Manage subscription": "Administrar suscripción",
+  "Pause plan": "Pausar plan",
+  "Resume plan": "Reanudar plan",
+  "Cancel plan": "Cancelar plan",
+  "Keep my plan": "Mantener mi plan",
+  "Cancel your Tidy plan?": "¿Cancelar tu plan Tidy?",
+  "Your plan stays active until the end of the period you have already paid for, then it will not renew. You can undo this any time before then.":
+    "Tu plan sigue activo hasta el final del período que ya pagaste, y luego no se renovará. Puedes deshacer esto en cualquier momento antes de esa fecha.",
+  "Yes, cancel my plan": "Sí, cancelar mi plan",
+  "Pause your plan": "Pausar tu plan",
+  "We hold your slot while you are paused. No charges while paused.":
+    "Guardamos tu cupo mientras estás en pausa. Sin cargos durante la pausa.",
+  "Resume on": "Reanudar el",
+  days: "días",
+  Paused: "En pausa",
+  "Paused until": "En pausa hasta",
+  "Cancels at period end": "Se cancela al final del período",
+  "Your plan will not renew.": "Tu plan no se renovará.",
+  "Your plan is staying active.": "Tu plan seguirá activo.",
+  "Your plan is paused.": "Tu plan está en pausa.",
+  "Your plan is active again.": "Tu plan está activo de nuevo.",
+  "We couldn't update your plan. Please try again.":
+    "No pudimos actualizar tu plan. Inténtalo de nuevo.",
+  "Manage or cancel your plan": "Administra o cancela tu plan",
 };
+
 
 interface LanguageContextType {
   language: Language;
