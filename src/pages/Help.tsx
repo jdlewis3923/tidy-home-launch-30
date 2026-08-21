@@ -30,7 +30,7 @@ const FAQ = [
   },
   {
     q: "When will I be charged?",
-    a: "Your card is charged after each completed visit. The Billing page shows the next scheduled charge and full invoice history.",
+    a: "Your card is charged when you sign up, then automatically on the same date each month. The Billing page shows your next scheduled charge and full invoice history.",
   },
   {
     q: "Can I pause my plan?",
