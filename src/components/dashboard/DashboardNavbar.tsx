@@ -5,7 +5,7 @@ import tidyLogo from '@/assets/tidy-logo.png';
 export default function DashboardNavbar() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const isOnPlan = location.pathname === '/dashboard/plan';
+  const isOnPlan = location.pathname === '/billing';
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-md">
