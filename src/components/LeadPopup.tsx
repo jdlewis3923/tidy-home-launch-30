@@ -14,6 +14,7 @@ interface LeadPopupProps {
 
 const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", zip: "" });
+  const [smsConsent, setSmsConsent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useLanguage();
@@ -25,6 +26,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
     if (!form.phone.trim()) errs.phone = "Phone number is required";
 
     if (!form.zip.trim()) errs.zip = "ZIP code is required";
+    if (!smsConsent) errs.smsConsent = "Please agree to receive SMS messages to continue";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -45,7 +47,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
           email: form.email,
           phone: form.phone,
           zip: form.zip,
-          sms_consent: true,
+          sms_consent: smsConsent,
           source: "website_popup",
           timestamp: new Date().toISOString(),
         }),
@@ -181,6 +183,21 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
             />
             {errors.zip && <p className="text-xs text-red-500 mt-1 font-medium">{errors.zip}</p>}
           </div>
+
+          <label className="flex items-start gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={smsConsent}
+              onChange={(e) => setSmsConsent(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-blue-600"
+            />
+            <span className="text-[11px] text-gray-500 leading-relaxed">
+              {t(
+                "I agree to receive recurring automated SMS messages from Tidy Home Concierge LLC at the phone number provided. Msg & data rates may apply. Reply STOP to opt out.",
+              )}
+            </span>
+          </label>
+          {errors.smsConsent && <p className="text-xs text-red-500 font-medium">{errors.smsConsent}</p>}
 
           <button
             type="submit"
