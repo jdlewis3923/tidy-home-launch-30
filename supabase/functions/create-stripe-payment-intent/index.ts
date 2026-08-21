@@ -16,6 +16,8 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
+import { getBundleCouponId } from "../_shared/bundle-coupon.ts";
+
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -189,7 +191,7 @@ Deno.serve(async (req) => {
           }
         }
 
-        const subscriptionMetadata = {
+        const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
           price_locked: "yes",
           signed_up_at: new Date().toISOString(),
@@ -225,11 +227,29 @@ Deno.serve(async (req) => {
           expand: ["latest_invoice.payment_intent", "pending_setup_intent"],
           metadata: subscriptionMetadata,
         };
-        if (promoId) subParams.promotion_code = promoId;
+
+        // Bundle discount must be a real Stripe coupon on the subscription, not
+        // metadata only. On API 2024-12-18.acacia the `discounts` array is the
+        // supported parameter (the legacy `coupon` / `promotion_code` fields are
+        // mutually exclusive with it), and it accepts multiple stacked discounts,
+        // so a bundle coupon and a referral promotion code can both apply.
+        let promoCodeApplied = true;
+        let promoCodeMessage: string | undefined;
+
+        if (bundle_discount_pct > 0) {
+          const couponId = await getBundleCouponId(stripe, bundle_discount_pct);
+          // deno-lint-ignore no-explicit-any
+          const discounts: any[] = [{ coupon: couponId }];
+          if (promoId) discounts.push({ promotion_code: promoId });
+          subParams.discounts = discounts;
+        } else if (promoId) {
+          subParams.promotion_code = promoId;
+        }
 
         const subscription = await stripe.subscriptions.create(subParams, {
           idempotencyKey: `sub:${idempotencyKey}`,
         });
+
 
         // deno-lint-ignore no-explicit-any
         const invoice: any = subscription.latest_invoice;
@@ -256,7 +276,10 @@ Deno.serve(async (req) => {
           client_secret: clientSecret,
           subscription_id: subscription.id,
           customer_id: customerId,
+          promo_code_applied: promoCodeApplied,
+          ...(promoCodeMessage ? { promo_code_message: promoCodeMessage } : {}),
         };
+
       },
     });
 
