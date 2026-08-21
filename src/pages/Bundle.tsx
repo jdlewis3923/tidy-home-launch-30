@@ -253,15 +253,22 @@ const BundleInner = () => {
                   )}
                 </p>
                 <p className="text-sm text-text-mid mt-3">
+                  <span className="text-text-light mr-1">{t("from")}</span>
                   <span className="line-through text-text-light mr-1">
                     ${threeBundle.subtotal}
                     {t("/mo")}
                   </span>
                   <span className="font-bold text-foreground">
-                    ${threeBundle.discounted}
+                    {t("from")} ${threeBundle.discounted}
                     {t("/mo")}
                   </span>
                 </p>
+                <p className="mt-1 text-xs text-text-light">
+                  {t(
+                    "Figures assume monthly service for each service. Your price changes with the visit frequency you choose.",
+                  )}
+                </p>
+
                 <Link
                   to={threeBundleCta.to}
                   onClick={(e) => {
