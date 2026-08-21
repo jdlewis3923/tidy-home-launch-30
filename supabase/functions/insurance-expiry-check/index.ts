@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
       await admin.from('contractor_insurance').update({ verification_status: 'expired' }).eq('id', r.id);
       if (a?.id) await admin.from('applicants').update({ insurance_status: 'expired' }).eq('id', a.id);
       if (a?.email) {
-        await fireBrevo(expiredTpl, { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
+        await fireBrevo(expiredTpl, 'brevo_template_insurance_expired', { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
           first_name: a.first_name, expiration_date: exp,
         });
       }
