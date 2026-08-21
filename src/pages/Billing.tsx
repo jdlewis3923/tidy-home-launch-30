@@ -174,6 +174,8 @@ export default function Billing() {
   if (!data.isAuthed) return null;
 
   const sub = subOverride ?? data.subscription;
+  // Server value is the source of truth for the pause restart date.
+  const pausedUntil = sub?.paused_until ? sub.paused_until.slice(0, 10) : null;
   const invoices = data.invoices.slice(0, 6);
   const isPaused = sub?.status === "paused" || !!sub?.pause_collection;
   const isCanceling = !!sub?.cancel_at_period_end;
