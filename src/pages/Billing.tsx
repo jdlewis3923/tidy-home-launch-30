@@ -8,6 +8,7 @@
  */
 import { Navigate, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   CreditCard,
   ReceiptText,
@@ -16,6 +17,9 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  PauseCircle,
+  PlayCircle,
+  XCircle,
 } from "lucide-react";
 import {
   CUSTOMER_ACCOUNT_ENABLED,
@@ -28,15 +32,54 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import DashboardTopNav from "@/components/dashboard/DashboardTopNav";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { Tables } from "@/integrations/supabase/types";
+import {
   useDashboardData,
   formatLongDate,
   formatMoney,
 } from "@/lib/dashboard-data";
 
+const PAUSE_RESUME_KEY = "tidy.pause_resumes_on";
+
 export default function Billing() {
   const navigate = useNavigate();
   const data = useDashboardData();
+  const { t } = useLanguage();
   const [portalState, setPortalState] = useState<"idle" | "loading" | "error">("idle");
+  const [subOverride, setSubOverride] = useState<Tables<"subscriptions"> | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [pauseOpen, setPauseOpen] = useState(false);
+  const [pauseDays, setPauseDays] = useState("30");
+  const [busy, setBusy] = useState(false);
+  const [pausedUntil, setPausedUntil] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : localStorage.getItem(PAUSE_RESUME_KEY)
+  );
+
 
   useEffect(() => {
     if (!data.loading && !data.isAuthed) {
@@ -68,6 +111,61 @@ export default function Billing() {
     }
   };
 
+  const refetchSub = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const uid = sessionData.session?.user?.id;
+    if (!uid) return;
+    const { data: row } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (row) setSubOverride(row);
+  };
+
+  const manage = async (
+    action: "cancel" | "undo_cancel" | "pause" | "resume",
+    resumeOn?: string
+  ) => {
+    setBusy(true);
+    try {
+      const { data: res, error } = await supabase.functions.invoke(
+        "customer-subscription-manage",
+        { body: resumeOn ? { action, resume_on: resumeOn } : { action } }
+      );
+      if (error) throw error;
+      if (res && res.ok === false) throw new Error(res.error ?? "failed");
+
+      if (action === "pause" && resumeOn) {
+        localStorage.setItem(PAUSE_RESUME_KEY, resumeOn);
+        setPausedUntil(resumeOn);
+      }
+      if (action === "resume") {
+        localStorage.removeItem(PAUSE_RESUME_KEY);
+        setPausedUntil(null);
+      }
+
+      toast.success(
+        action === "cancel"
+          ? t("Your plan will not renew.")
+          : action === "undo_cancel"
+          ? t("Your plan is staying active.")
+          : action === "pause"
+          ? t("Your plan is paused.")
+          : t("Your plan is active again.")
+      );
+      setCancelOpen(false);
+      setPauseOpen(false);
+      await refetchSub();
+    } catch {
+      toast.error(t("We couldn't update your plan. Please try again."));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (data.loading) {
     return (
       <div className="min-h-screen bg-cream">
@@ -79,8 +177,16 @@ export default function Billing() {
 
   if (!data.isAuthed) return null;
 
-  const sub = data.subscription;
+  const sub = subOverride ?? data.subscription;
   const invoices = data.invoices.slice(0, 6);
+  const isPaused = sub?.status === "paused" || !!sub?.pause_collection;
+  const isCanceling = !!sub?.cancel_at_period_end;
+  const resumeDateFor = (days: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  };
+
 
   return (
     <div className="min-h-screen bg-cream text-ink">
@@ -164,14 +270,77 @@ export default function Billing() {
             <p className="mt-1 text-sm capitalize text-ink-soft">
               {sub?.frequency ?? "no plan yet"}
             </p>
+
+            {(isPaused || isCanceling) && (
+              <span className="mt-3 inline-flex rounded-full bg-cream px-2 py-0.5 text-[11px] font-semibold text-ink-soft">
+                {isPaused
+                  ? pausedUntil
+                    ? `${t("Paused until")} ${formatLongDate(pausedUntil)}`
+                    : t("Paused")
+                  : t("Cancels at period end")}
+              </span>
+            )}
+
             <Link
               to="/dashboard/plan"
               className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[hsl(var(--primary))] hover:underline"
             >
               Manage plan <ArrowRight className="h-3.5 w-3.5" />
             </Link>
+
+            {sub && (
+              <div className="mt-5 border-t border-[hsl(var(--hairline))] pt-4">
+                <h3 className="text-sm font-bold text-ink">{t("Manage subscription")}</h3>
+                <div className="mt-3 flex flex-col gap-2">
+                  {isPaused ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => manage("resume")}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-[hsl(var(--hairline))] bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-cream disabled:opacity-70"
+                    >
+                      <PlayCircle className="h-4 w-4 text-[hsl(var(--primary))]" />
+                      {t("Resume plan")}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setPauseOpen(true)}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-[hsl(var(--hairline))] bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-cream disabled:opacity-70"
+                    >
+                      <PauseCircle className="h-4 w-4 text-[hsl(var(--primary))]" />
+                      {t("Pause plan")}
+                    </button>
+                  )}
+
+                  {isCanceling ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => manage("undo_cancel")}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-[hsl(var(--hairline))] bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-cream disabled:opacity-70"
+                    >
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      {t("Keep my plan")}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setCancelOpen(true)}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-[hsl(var(--hairline))] bg-white px-4 py-2.5 text-sm font-semibold text-ink-soft transition hover:bg-cream disabled:opacity-70"
+                    >
+                      <XCircle className="h-4 w-4 text-ink-faint" />
+                      {t("Cancel plan")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </Card>
         </div>
+
 
         {/* Invoices */}
         <Card className="mt-6">
@@ -235,9 +404,73 @@ export default function Billing() {
           )}
         </Card>
       </section>
+
+      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("Cancel your Tidy plan?")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                "Your plan stays active until the end of the period you have already paid for, then it will not renew. You can undo this any time before then."
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>{t("Keep my plan")}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={busy}
+              onClick={(e) => {
+                e.preventDefault();
+                manage("cancel");
+              }}
+            >
+              {t("Yes, cancel my plan")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={pauseOpen} onOpenChange={setPauseOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("Pause your plan")}</DialogTitle>
+            <DialogDescription>
+              {t("We hold your slot while you are paused. No charges while paused.")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-ink-faint">
+              {t("Resume on")}
+            </p>
+            <Select value={pauseDays} onValueChange={setPauseDays}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[14, 30, 45, 60].map((d) => (
+                  <SelectItem key={d} value={String(d)}>
+                    {formatLongDate(resumeDateFor(d))} · {d} {t("days")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => manage("pause", resumeDateFor(Number(pauseDays)))}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--primary))] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_-10px_hsl(var(--primary)/0.55)] transition hover:opacity-95 disabled:opacity-70"
+            >
+              {t("Pause plan")}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
 
 /* — Bouncing dots loader — calm, three-dot wave —————————————————— */
 
