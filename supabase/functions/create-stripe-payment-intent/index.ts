@@ -274,7 +274,10 @@ Deno.serve(async (req) => {
           client_secret: clientSecret,
           subscription_id: subscription.id,
           customer_id: customerId,
+          promo_code_applied: promoCodeApplied,
+          ...(promoCodeMessage ? { promo_code_message: promoCodeMessage } : {}),
         };
+
       },
     });
 
