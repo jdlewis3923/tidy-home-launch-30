@@ -340,12 +340,14 @@ export default function DashboardIndex() {
                 title={
                   data.subscription?.next_billing_date
                     ? formatLongDate(data.subscription.next_billing_date)
-                    : '—'
+                    : 'No upcoming charge'
                 }
               >
-                <div className="mt-1 text-sm text-ink-soft">
-                  {formatMoney(data.subscription?.monthly_total_cents)}
-                </div>
+                {data.subscription?.next_billing_date && (
+                  <div className="mt-1 text-sm text-ink-soft">
+                    {formatMoney(data.subscription.monthly_total_cents)}
+                  </div>
+                )}
                 <Link
                   to="/billing"
                   className="mt-3 block w-full rounded-lg border border-[hsl(var(--hairline))] py-2 text-center text-sm font-medium text-[hsl(var(--primary))] transition hover:bg-cream"
@@ -361,8 +363,9 @@ export default function DashboardIndex() {
                   data.subscription!.services.length === 1 ? 'Service' : 'Services'
                 }`}
               >
-                <div className="mt-1 text-sm capitalize text-ink-soft">
-                  {data.subscription!.frequency}
+                <div className="mt-1 text-sm text-ink-soft">
+                  {data.subscription!.frequency} visits ·{' '}
+                  {formatMoney(data.subscription!.monthly_total_cents)}/month
                 </div>
                 <Link
                   to="/billing"

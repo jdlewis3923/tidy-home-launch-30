@@ -3,6 +3,11 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 type Language = "en" | "es";
 
 const translations: Record<string, string> = {
+  // 404 page
+  "Page not found": "P\u00e1gina no encontrada",
+  "Oops! Page not found": "\u00a1Ups! No encontramos esta p\u00e1gina",
+  "Return to Home": "Volver al inicio",
+
   // Chatbot widget
   "Tidy Concierge": "Concierge de Tidy",
   "Usually replies instantly": "Normalmente responde al instante",
