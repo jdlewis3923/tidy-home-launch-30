@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import tidyLogo from '@/assets/tidy-logo.png';
 
@@ -11,6 +11,9 @@ import tidyLogo from '@/assets/tidy-logo.png';
 export default function CustomerLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -37,6 +40,10 @@ export default function CustomerLogin() {
     }
     if (password.length < 8) {
       setError('password must be at least 8 characters.');
+      return;
+    }
+    if (isSignUp && password !== confirmPassword) {
+      setError('Passwords do not match.');
       return;
     }
 
@@ -136,17 +143,27 @@ export default function CustomerLogin() {
             <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">
               {isSignUp ? 'create password' : 'password'}
             </label>
-            <input
-              type="password"
-              name="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder={isSignUp ? 'min. 8 characters' : 'enter your password'}
-              autoComplete={isSignUp ? 'new-password' : 'current-password'}
-              minLength={8}
-              className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder={isSignUp ? 'min. 8 characters' : 'enter your password'}
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                minLength={8}
+                className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(v => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-faint hover:text-ink transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {isSignUp && password.length > 0 && (
               <p className={`text-[11px] mt-1 ${password.length >= 8 ? 'text-ink' : 'text-ink-faint'}`}>
                 {password.length >= 8 ? 'strong enough.' : `${8 - password.length} more characters.`}
@@ -154,16 +171,45 @@ export default function CustomerLogin() {
             )}
           </div>
 
+          {isSignUp && (
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">
+                confirm password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="re-enter your password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(v => !v)}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-faint hover:text-ink transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+          )}
+
           {error && <p className="text-xs text-destructive lowercase">{error}</p>}
 
           {isSignUp && (
             <p className="text-xs text-ink-faint text-center leading-relaxed">
               {t("By creating an account you agree to our")}{" "}
-              <Link to="/terms" className="underline hover:text-ink">
+              <Link to="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
                 {t("Terms of Service")}
               </Link>{" "}
               {t("and")}{" "}
-              <Link to="/privacy" className="underline hover:text-ink">
+              <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
                 {t("Privacy Policy")}
               </Link>
               .
@@ -182,7 +228,7 @@ export default function CustomerLogin() {
           <div className="text-center space-y-2 pt-2">
             <button
               type="button"
-              onClick={() => { setIsSignUp(!isSignUp); setError(''); }}
+              onClick={() => { setIsSignUp(!isSignUp); setError(''); setConfirmPassword(''); }}
               className="text-xs text-ink-faint hover:text-ink lowercase underline-offset-4 hover:underline"
             >
               {isSignUp ? 'already a member? sign in' : "new here? create an account"}
