@@ -14,6 +14,7 @@ import {
 } from '@/lib/dashboard-pricing';
 import { usePromoState } from '@/hooks/usePromoCapture';
 import { startCheckout } from '@/lib/checkout';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { provisionAccount } from '@/lib/account-provisioning';
 import { STRIPE_INTEGRATION_ENABLED } from '@/lib/dashboard-config';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +41,7 @@ interface Props {
  * off — not checkout.
  */
 export default function StepPayment({ state, onChange }: Props) {
+  const { language } = useLanguage();
   const pricing = calculatePricing(state);
   const { code: promoCode } = usePromoState();
   const [submitting, setSubmitting] = useState(false);
@@ -91,7 +93,7 @@ export default function StepPayment({ state, onChange }: Props) {
       services, addons, promo_code: promoCode ?? undefined,
       referral_code: state.referralCode?.trim() || undefined,
       zip: state.zip, preferred_day: state.preferredDay, preferred_time: state.preferredTime,
-      lang: 'en' as const,
+      lang: language,
       idempotency_key: `cfg:${state.zip}:${services.map(s => s.service + ':' + s.frequency).sort().join(',')}:${addons.map(a => a.addon_name + 'x' + a.qty).sort().join(',')}`,
       gclid: attr.gclid, utm_source: attr.utm_source, utm_medium: attr.utm_medium,
       utm_campaign: attr.utm_campaign, utm_content: attr.utm_content, utm_term: attr.utm_term,
@@ -125,7 +127,7 @@ export default function StepPayment({ state, onChange }: Props) {
         // Keep submitting=true until the user finishes paying (UI shows form, no double-submit possible).
       } else {
         // Hosted-checkout path — always reachable, regardless of any flag state.
-        await startCheckout({ config: state });
+        await startCheckout({ config: state, lang: language });
         // startCheckout redirects; clear the flag as a safety net so the button
         // can never stay stuck if the redirect does not happen.
         setSubmitting(false);

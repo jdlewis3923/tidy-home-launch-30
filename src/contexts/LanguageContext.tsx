@@ -3,6 +3,31 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 type Language = "en" | "es";
 
 const translations: Record<string, string> = {
+  // Chatbot widget
+  "Tidy Concierge": "Concierge de Tidy",
+  "Usually replies instantly": "Normalmente responde al instante",
+  "A teammate is on the way": "Un miembro del equipo ya viene en camino",
+  Call: "Llamar",
+  Send: "Enviar",
+  "Close chat": "Cerrar el chat",
+  "Open chat with Tidy assistant": "Abrir el chat con el asistente de Tidy",
+  "Hi! I'm Tidy's concierge assistant \u{1F44B} Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.":
+    "\u00a1Hola! Soy el asistente concierge de Tidy \u{1F44B} Preg\u00fantame lo que quieras sobre limpieza, jardiner\u00eda, detallado de autos, precios o nuestra zona de servicio.",
+  "Request callback": "Solicitar llamada",
+  "Request a callback": "Solicitar una llamada",
+  "Your name (optional)": "Tu nombre (opcional)",
+  "Phone number *": "N\u00famero de tel\u00e9fono *",
+  "Sending...": "Enviando...",
+  "Ask about pricing, areas, services...": "Pregunta sobre precios, zonas, servicios...",
+  "A human will be with you soon. You can also call us at":
+    "Una persona te atender\u00e1 pronto. Tambi\u00e9n puedes llamarnos al",
+  "Couldn't reach Tidy. Try again or call ": "No pudimos conectar con Tidy. Intenta de nuevo o llama al ",
+  "Something went wrong": "Algo sali\u00f3 mal",
+  "Couldn't send — please call ": "No se pudo enviar — por favor llama al ",
+  "Thanks! We'll reach out shortly.": "\u00a1Gracias! Te contactaremos en breve.",
+  "Got it — we'll call you at": "Listo — te llamaremos al",
+  "In the meantime, you can reach us anytime at": "Mientras tanto, puedes contactarnos en cualquier momento al",
+
   // ZIP checker / waitlist capture
   "We serve": "¡Servimos en",
   "Spots are limited — get started today.": "Cupos limitados — empieza hoy.",
