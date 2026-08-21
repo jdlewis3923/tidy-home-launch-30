@@ -447,37 +447,54 @@ export default function DashboardIndex() {
               {/* Upcoming list */}
               <div className="space-y-4">
                 <Card>
-                  <h2 className="text-base font-bold text-ink">Upcoming Visits</h2>
+                  <h2 className="text-base font-bold text-ink">{t('Upcoming Visits')}</h2>
                   <ul className="mt-4 divide-y divide-[hsl(var(--hairline))]/70">
-                    {data.upcoming.slice(0, 4).map((v) => (
-                      <li key={v.id}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedDate(v.visit_date);
-                            setActiveModal('visit');
-                          }}
-                          className="flex w-full items-center gap-3 py-3 text-left transition hover:bg-cream/50"
-                        >
-                          <span className="grid h-9 w-9 place-items-center rounded-lg bg-cream text-base">
-                            {SERVICE_ICON[v.service]}
-                          </span>
-                          <span className="flex-1">
-                            <span className="block text-sm font-semibold text-ink">
-                              {relativeDateLabel(v.visit_date)}
+                    {data.upcoming.slice(0, 4).map((v) => {
+                      const isSkipped = v.status === 'skipped';
+                      const isScheduled = v.status === 'scheduled';
+                      return (
+                        <li key={v.id} className="flex items-center justify-between py-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedDate(v.visit_date);
+                              setActiveModal('visit');
+                            }}
+                            className="flex flex-1 items-center gap-3 text-left transition hover:bg-cream/50"
+                          >
+                            <span className="grid h-9 w-9 place-items-center rounded-lg bg-cream text-base">
+                              {SERVICE_ICON[v.service]}
                             </span>
-                            <span className="block text-xs text-ink-soft">
-                              {serviceLabel(v.service)} · {formatLongDate(v.visit_date)},{' '}
-                              {v.time_window || TIME_WINDOW_FALLBACK}
+                            <span className="flex-1">
+                              <span className="block text-sm font-semibold text-ink">
+                                {relativeDateLabel(v.visit_date)}
+                              </span>
+                              <span className="block text-xs text-ink-soft">
+                                {serviceLabel(v.service)} · {formatLongDate(v.visit_date)},{' '}
+                                {v.time_window || TIME_WINDOW_FALLBACK}
+                              </span>
                             </span>
-                          </span>
-                          <ChevronRight className="h-4 w-4 text-ink-faint" />
-                        </button>
-                      </li>
-                    ))}
+                          </button>
+                          {isSkipped && (
+                            <span className="mr-2 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium text-ink-faint ring-1 ring-inset ring-[hsl(var(--hairline))]">
+                              {t('Skipped')}
+                            </span>
+                          )}
+                          {isScheduled && (
+                            <button
+                              type="button"
+                              onClick={() => setSkipVisit(v)}
+                              className="ml-2 text-xs font-semibold text-ink-soft transition hover:text-ink"
+                            >
+                              {t('Skip this visit')}
+                            </button>
+                          )}
+                        </li>
+                      );
+                    })}
                     {data.upcoming.length === 0 && (
                       <li className="py-3 text-sm text-ink-faint">
-                        No upcoming visits scheduled.
+                        {t('No upcoming visits scheduled.')}
                       </li>
                     )}
                   </ul>
@@ -485,7 +502,7 @@ export default function DashboardIndex() {
                     to="/dashboard/plan"
                     className="mt-3 block text-center text-sm font-semibold text-[hsl(var(--primary))] hover:underline"
                   >
-                    View full schedule
+                    {t('View full schedule')}
                   </Link>
                 </Card>
 
