@@ -105,7 +105,7 @@ export default function ProDashboard() {
             .gte("completed_at", lastWeekStart).lt("completed_at", lastWeekEnd),
           supabase.from("google_reviews")
             .select("rating")
-            .eq("contractor_id", userId).gte("posted_at", since30),
+            .eq("contractor_id", userId).eq("is_seed", false).gte("posted_at", since30),
           supabase.from("stripe_payouts")
             .select("amount_cents, scheduled_at")
             .eq("contractor_id", userId)
