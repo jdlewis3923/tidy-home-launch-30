@@ -52,12 +52,12 @@ const config: ServiceLandingConfig = {
     "Kitchen deep-clean",
     "Bathroom disinfect",
     "Bedroom tidy + linen change",
-    "Interior windows",
     "Trash out",
     "Eco-safe products",
     "Same crew every visit",
     "Fully insured",
   ],
+  addOnsNote: "Available as add-ons: inside oven, inside fridge, interior windows, deep baseboard scrub, laundry (wash/dry/fold), inside kitchen cabinets.",
   trustCards: [
     {
       title: "Same Crew",
@@ -88,7 +88,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's actually included in a visit?",
-      a: "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, interior windows, bedroom tidy, linen change, and trash out — using eco-safe products.",
+      a: "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, bedroom tidy, linen change, and trash out — using eco-safe products.",
     },
     {
       q: "Who does the cleaning?",

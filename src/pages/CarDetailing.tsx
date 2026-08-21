@@ -46,7 +46,7 @@ const config: ServiceLandingConfig = {
     "In your driveway",
     "Fully insured",
   ],
-  addOnsNote: "Available as add-ons: pet-hair removal, ozone treatment.",
+  addOnsNote: "Available as add-ons: pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat.",
   trustCards: [
     {
       title: "Same Crew",
@@ -77,7 +77,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's actually included?",
-      a: "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet-hair and ozone available as add-ons.",
+      a: "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair removal, ozone odor treatment, engine bay clean, and ceramic spray coat are available as add-ons.",
     },
     {
       q: "Who does the detailing?",

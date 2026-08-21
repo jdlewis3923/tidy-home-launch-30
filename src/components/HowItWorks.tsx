@@ -12,7 +12,7 @@ const preLaunchSteps = [
   {
     num: 1,
     title: "Choose Your Plan",
-    desc: "Select your services and frequency. Takes 60 seconds. See pricing before you pay.",
+    desc: "Select your services and frequency. About 2 minutes. See pricing before you pay.",
     icon: CalendarCheck,
     gradient: "from-blue-500 to-blue-600",
   },
