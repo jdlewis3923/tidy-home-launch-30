@@ -45,13 +45,48 @@ export default function DashboardPlan() {
   const [direction, setDirection] = useState(0);
   const [state, setState] = useState<ConfigState>(loadState);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [hasExistingSub, setHasExistingSub] = useState(false);
+  const [checkingSub, setCheckingSub] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
   const customQuote = hasCustomQuote(state);
+
+  // Guard: existing subscribers shouldn't run the acquisition wizard again.
+  useEffect(() => {
+    let mounted = true;
+    const checkExisting = async () => {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const uid = sessionData.session?.user?.id;
+        if (!uid) {
+          if (mounted) setCheckingSub(false);
+          return;
+        }
+        const { data: row } = await supabase
+          .from("subscriptions")
+          .select("status")
+          .eq("user_id", uid)
+          .in("status", ["active", "paused"])
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (mounted) {
+          setHasExistingSub(!!row);
+          setCheckingSub(false);
+        }
+      } catch {
+        if (mounted) setCheckingSub(false);
+      }
+    };
+    checkExisting();
+    return () => { mounted = false; };
+  }, []);
 
   // Preselect from incoming ad URL params, once. If a valid ZIP is in
   // localStorage already, skip the ZIP gate.
   useEffect(() => {
+    if (hasExistingSub || checkingSub) return;
     const params = new URLSearchParams(location.search);
     const serviceParam = params.get('service');
     const planParam = params.get('plan');
@@ -92,7 +127,7 @@ export default function DashboardPlan() {
       return next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hasExistingSub, checkingSub]);
 
   const updateState = useCallback((next: ConfigState) => {
     setState(next);
