@@ -253,7 +253,9 @@ export default function Apply() {
                   <Icon className="h-5 w-5 text-primary-foreground" />
                 </div>
                 <h3 className="mt-3 font-display text-base font-bold text-white">{t(title)}</h3>
-                <p className="mt-1 text-sm text-white/60 leading-relaxed">{t(body)}</p>
+                {body ? (
+                  <p className="mt-1 text-sm text-white/60 leading-relaxed">{t(body)}</p>
+                ) : null}
               </div>
             ))}
           </div>
