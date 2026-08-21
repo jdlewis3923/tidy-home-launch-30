@@ -38,7 +38,7 @@ const Index = () => {
   // When dashboard is enabled, CTA actions navigate to login (signup view) instead of opening popup
   const handleCTA = useCallback(() => {
     if (CUSTOMER_DASHBOARD_ENABLED) {
-      navigate("/login?mode=signup");
+      navigate("/signup");
     } else {
       setPopupOpen(true);
     }

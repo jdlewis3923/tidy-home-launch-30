@@ -19,7 +19,7 @@ const services = [
     description: "Consistent interior care for a home that always feels reset. Handled on your schedule without lifting a finger.",
     checks: ["Kitchen & bathroom deep clean", "Floors vacuumed & mopped", "Dusting all surfaces & fixtures", "Trash removal & liner replacement"],
     excludes: ["Deep carpet shampooing", "Window exterior washing", "Garage or attic cleaning"],
-    addOns: "Deep clean, inside oven, inside fridge, interior windows",
+    addOns: "Inside oven, inside fridge, interior windows, baseboard scrub, laundry, inside kitchen cabinets",
     accent: "border-t-primary",
   },
   {
@@ -33,7 +33,7 @@ const services = [
     description: "Professional lawn maintenance to keep your Miami home's exterior sharp year-round. No scheduling required, ever.",
     checks: ["Mowing to standard height", "Edging along walkways & beds", "Debris blowing & full cleanup", "Weekly or biweekly cadence"],
     excludes: ["Tree trimming or removal", "Irrigation system repair", "Landscape design or planting"],
-    addOns: "Hedge trimming, fertilization, pest treatment",
+    addOns: "Hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization, driveway pressure wash",
     accent: "border-t-success",
   },
   {
@@ -46,8 +46,8 @@ const services = [
     priceSub: "Biweekly from $249/mo",
     description: "Driveway-ready detailing at your door. We come to you — exterior wash, interior vacuum, surface cleaning.",
     checks: ["Exterior hand wash & wheels", "Interior vacuum & floor mats", "Dashboard & surface wipe-down", "Monthly or biweekly visits"],
-    excludes: ["Paint correction or ceramic coating", "Engine bay detailing", "Headlight restoration"],
-    addOns: "Leather conditioning, clay bar, tire shine",
+    excludes: ["Paint correction", "Headlight restoration"],
+    addOns: "Pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat",
     accent: "border-t-violet-500",
   },
 ];

@@ -43,7 +43,7 @@ const config: ServiceLandingConfig = {
       price: "$195",
       cadence: "/mo",
       planSlug: "weekly",
-      description: "Four visits per month, bush trim included.",
+      description: "Four visits per month.",
     },
   ],
   included: [
@@ -52,12 +52,11 @@ const config: ServiceLandingConfig = {
     "Blow hardscapes clean",
     "Weed-whack fence lines",
     "Bag or mulch clippings",
-    "Bush trim (weekly)",
-    "Seasonal fertilization available",
     "Same crew every visit",
     "Fully insured",
     "Locked $85 — never surprise-priced",
   ],
+  addOnsNote: "Available as add-ons: hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization treatment, driveway pressure wash.",
   trustCards: [
     {
       title: "Same Crew",
@@ -88,7 +87,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's actually included in a visit?",
-      a: "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.",
+      a: "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Hedge and bush trimming is available as an add-on.",
     },
     {
       q: "Who does the work?",

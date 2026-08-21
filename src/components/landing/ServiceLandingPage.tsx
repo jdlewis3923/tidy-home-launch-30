@@ -234,7 +234,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                 {t(config.ctaPrimaryLabel ?? "Book in 60 seconds")} <span className="arrow">→</span>
               </Link>
               <span className="mt-2 text-xs text-primary-foreground/70">
-                {t("Takes under 60 seconds · No contracts")}
+                {t("About 2 minutes · No contracts")}
               </span>
             </div>
             <a

@@ -185,23 +185,32 @@ const BundleInner = () => {
 
                 <div className="mt-4 min-h-[44px]">
                   {twoBundle.valid ? (
-                    <p className="text-sm text-text-mid">
-                      <span className="line-through text-text-light mr-1">
-                        ${twoBundle.subtotal}
-                        {t("/mo")}
-                      </span>
-                      <span className="font-bold text-foreground">
-                        ${twoBundle.discounted}
-                        {t("/mo")}
-                      </span>
-                      <span className="text-text-light"> {t("after 10% bundle discount")}</span>
-                    </p>
+                    <>
+                      <p className="text-sm text-text-mid">
+                        <span className="text-text-light mr-1">{t("from")}</span>
+                        <span className="line-through text-text-light mr-1">
+                          ${twoBundle.subtotal}
+                          {t("/mo")}
+                        </span>
+                        <span className="font-bold text-foreground">
+                          {t("from")} ${twoBundle.discounted}
+                          {t("/mo")}
+                        </span>
+                        <span className="text-text-light"> {t("after 10% bundle discount")}</span>
+                      </p>
+                      <p className="mt-1 text-xs text-text-light">
+                        {t(
+                          "Figures assume monthly service for each service. Your price changes with the visit frequency you choose.",
+                        )}
+                      </p>
+                    </>
                   ) : (
                     <p className="text-xs text-text-light italic">
                       {t("Pick exactly 2 services to see your bundled price.")}
                     </p>
                   )}
                 </div>
+
 
                 {twoBundle.valid ? (
                   <Link
@@ -244,15 +253,22 @@ const BundleInner = () => {
                   )}
                 </p>
                 <p className="text-sm text-text-mid mt-3">
+                  <span className="text-text-light mr-1">{t("from")}</span>
                   <span className="line-through text-text-light mr-1">
                     ${threeBundle.subtotal}
                     {t("/mo")}
                   </span>
                   <span className="font-bold text-foreground">
-                    ${threeBundle.discounted}
+                    {t("from")} ${threeBundle.discounted}
                     {t("/mo")}
                   </span>
                 </p>
+                <p className="mt-1 text-xs text-text-light">
+                  {t(
+                    "Figures assume monthly service for each service. Your price changes with the visit frequency you choose.",
+                  )}
+                </p>
+
                 <Link
                   to={threeBundleCta.to}
                   onClick={(e) => {

@@ -138,8 +138,8 @@ const translations: Record<string, string> = {
   "How it works — three steps, then you never think about it again.":
     "Cómo funciona — tres pasos, y nunca más piensas en ello.",
   "Choose Your Plan": "Elige Tu Plan",
-  "Select your services and frequency. Takes 60 seconds. See pricing before you pay.":
-    "Selecciona tus servicios y frecuencia. Toma 60 segundos. Ve los precios antes de pagar.",
+  "Select your services and frequency. About 2 minutes. See pricing before you pay.":
+    "Selecciona tus servicios y frecuencia. Unos 2 minutos. Ve los precios antes de pagar.",
   "We Handle Everything": "Nosotros Nos Encargamos",
   "A licensed, insured, background-checked professional shows up on time. You receive an ETA before every visit.":
     "Un profesional licenciado, asegurado y verificado llega a tiempo. Recibes un estimado antes de cada visita.",
@@ -299,12 +299,31 @@ const translations: Record<string, string> = {
   "Enter ZIP code e.g. 33183": "Ingresa código postal ej. 33183",
   "Check →": "Verificar →",
 
+  // Add-on catalogue + bundle small print (batch 15/16)
+  "Inside oven, inside fridge, interior windows, baseboard scrub, laundry, inside kitchen cabinets":
+    "Interior del horno, interior del refrigerador, ventanas interiores, limpieza de zócalos, lavandería, interior de gabinetes de cocina",
+  "Hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization, driveway pressure wash":
+    "Poda de setos y arbustos, remoción de maleza, limpieza de hojas y escombros, fertilización, lavado a presión de entrada",
+  "Pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat":
+    "Remoción de pelo de mascotas, tratamiento de ozono para olores, limpieza del compartimiento del motor, capa cerámica en spray",
+  "Available as add-ons: inside oven, inside fridge, interior windows, deep baseboard scrub, laundry (wash/dry/fold), inside kitchen cabinets.":
+    "Disponibles como servicios adicionales: interior del horno, interior del refrigerador, ventanas interiores, limpieza profunda de zócalos, lavandería (lavado/secado/doblado), interior de gabinetes de cocina.",
+  "Available as add-ons: hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization treatment, driveway pressure wash.":
+    "Disponibles como servicios adicionales: poda de setos y arbustos, remoción de maleza, limpieza de hojas y escombros, tratamiento de fertilización, lavado a presión de la entrada.",
+  "Available as add-ons: pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat.":
+    "Disponibles como servicios adicionales: remoción de pelo de mascotas, tratamiento de ozono para olores, limpieza del compartimiento del motor, capa cerámica en spray.",
+  "from": "desde",
+  "Figures assume monthly service for each service. Your price changes with the visit frequency you choose.":
+    "Las cifras asumen servicio mensual para cada servicio. Tu precio cambia según la frecuencia de visitas que elijas.",
+  "Paint correction": "Corrección de pintura",
+  "Four visits per month.": "Cuatro visitas por mes.",
+
   // Final CTA
   "You'll never book a home service again.": "Nunca más reservarás un servicio del hogar.",
   "Never book a home service again.": "Nunca más reserves un servicio del hogar.",
   "Set it once. We handle the rest.": "Configúralo una vez. Nosotros nos encargamos del resto.",
-  "Under 60 seconds · No contracts · Cancel anytime":
-    "En menos de 60 segundos · Sin contratos · Cancela cuando quieras",
+  "About 2 minutes · No contracts · Cancel anytime":
+    "Unos 2 minutos · Sin contratos · Cancela cuando quieras",
   "One setup. Everything handled.": "Una configuración. Todo resuelto.",
   "No contracts. No payments until launch.": "Sin contratos. Sin pagos hasta el lanzamiento.",
   "Limited founding memberships available in your area. Takes 60 seconds. No commitment required.":
@@ -934,7 +953,7 @@ const translations: Record<string, string> = {
   "Stack home cleaning, lawn care, and car detailing on one plan. Save 10–15% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.":
     "Combina limpieza del hogar, cuidado del jardín y detallado de auto en un solo plan. Ahorra 10–15% en Pinecrest y Kendall (33156, 33183, 33186). Una suscripción, un equipo, una factura.",
   "Vetted & insured pros": "Profesionales verificados y asegurados",
-  "Takes under 60 seconds · No contracts": "Toma menos de 60 segundos · Sin contratos",
+  "About 2 minutes · No contracts": "Unos 2 minutos · Sin contratos",
   "Locked price · No contracts · Cancel anytime · Pause or reschedule anytime":
     "Precio fijo · Sin contratos · Cancela cuando quieras · Pausa o reagenda cuando quieras",
   "Set it once. We handle the rest — scheduling, reminders, the same crew every visit.":
