@@ -1,0 +1,1 @@
+ALTER TABLE public.google_reviews ADD COLUMN IF NOT EXISTS is_seed boolean NOT NULL DEFAULT false;
