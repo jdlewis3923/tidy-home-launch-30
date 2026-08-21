@@ -3,7 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
   Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
-  Award, ShieldCheck, RefreshCw,
+  Award, ShieldCheck, RefreshCw, ClipboardList,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,6 +23,7 @@ const NAV = [
   { to: "/admin/health",      label: "Health",      icon: Heart },
   { to: "/admin/email-health", label: "Email",      icon: Mail },
   { to: "/admin/inbox",       label: "Inbox",       icon: Inbox },
+  { to: "/admin/leads",       label: "Leads",       icon: ClipboardList },
   { to: "/admin/applicants",  label: "Applicants",  icon: Users },
   { to: "/admin/tier-progression", label: "Tier",   icon: Award },
   { to: "/admin/coi-review",  label: "COI",         icon: ShieldCheck },

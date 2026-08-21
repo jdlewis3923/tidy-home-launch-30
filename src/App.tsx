@@ -215,6 +215,8 @@ const App = () => (
                   <Route path="/admin/documenso-templates" element={<AdminDocumensoTemplates />} />
                   <Route path="/admin/email-health" element={<AdminEmailHealth />} />
                   <Route path="/admin/setup-check" element={<AdminSetupCheck />} />
+                  {/* Leads & Requests — waitlist, support requests, chatbot leads. */}
+                  <Route path="/admin/leads" element={<AdminLeads />} />
                   <Route path="/apply" element={<Apply />} />
                   <Route path="/pro" element={<ProDashboard />} />
                   <Route path="/pro/tier-progression" element={<ProTierProgression />} />
