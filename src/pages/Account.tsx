@@ -24,10 +24,12 @@ import DashboardTopNav from "@/components/dashboard/DashboardTopNav";
 import CalmModal from "@/components/dashboard/CalmModal";
 import { useDashboardData } from "@/lib/dashboard-data";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Account() {
   const navigate = useNavigate();
   const data = useDashboardData();
+  const { t } = useLanguage();
   const [editing, setEditing] = useState<null | "profile" | "address" | "access" | "notifications">(null);
 
   if (!CUSTOMER_ACCOUNT_ENABLED) return <Navigate to="/" replace />;
@@ -162,7 +164,7 @@ export default function Account() {
 
         <p className="mt-6 text-xs text-ink-soft">
           <Link to="/billing" className="hover:underline">
-            Manage or cancel your plan
+            {t("Manage or cancel your plan")}
           </Link>
         </p>
       </section>
