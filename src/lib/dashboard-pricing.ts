@@ -61,7 +61,7 @@ export const defaultState: ConfigState = {
   preferredTime: '',
   referralCode: '',
   addOns: [],
-  smsConsent: true,
+  smsConsent: false,
   outOfCoverage: false,
 };
 

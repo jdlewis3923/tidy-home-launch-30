@@ -314,12 +314,13 @@ export default function StepPayment({ state, onChange }: Props) {
         <label className="flex items-start gap-2.5 cursor-pointer group">
           <input
             type="checkbox"
-            checked={state.smsConsent}
+            checked={state.smsConsent === true}
             onChange={e => onChange({ ...state, smsConsent: e.target.checked })}
             className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
           />
           <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
-            i agree to receive sms texts from tidy with service reminders. reply stop to opt out.
+            i agree to receive recurring automated sms messages from tidy home concierge llc at the
+            phone number i provided. msg &amp; data rates may apply. reply stop to opt out.
           </span>
         </label>
 
