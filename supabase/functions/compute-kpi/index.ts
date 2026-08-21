@@ -20,6 +20,7 @@
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts';
 import { shouldAlert } from '../_shared/kpi-noise-filter.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -328,8 +329,7 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   // Auth: service role via x-cron-key OR admin via JWT
-  const cronKey = req.headers.get('x-cron-key');
-  const isCron = cronKey && cronKey === SUPABASE_SERVICE_ROLE_KEY;
+  const isCron = await isCronAuthorized(req);
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
