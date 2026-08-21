@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -15,11 +16,8 @@ const VISITOR_KEY = "tidy_chat_visitor_id";
 const NAME_KEY = "tidy_chat_name";
 const EMAIL_KEY = "tidy_chat_email";
 
-const GREETING: Msg = {
-  role: "assistant",
-  content:
-    "Hi! I'm Tidy's concierge assistant 👋 Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.",
-};
+const GREETING_EN =
+  "Hi! I'm Tidy's concierge assistant 👋 Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.";
 
 function getOrCreateVisitorId(): string {
   if (typeof window === "undefined") return "ssr";
@@ -36,7 +34,7 @@ function TypingDots() {
     <span
       className="inline-flex items-center gap-1 py-1"
       role="status"
-      aria-label="Assistant is typing"
+          aria-label="Assistant is typing"
     >
       <span className="h-1.5 w-1.5 animate-billing-bounce rounded-full bg-foreground/60" />
       <span
@@ -52,8 +50,11 @@ function TypingDots() {
 }
 
 export default function ChatbotWidget() {
+  const { t, language } = useLanguage();
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([GREETING]);
+  const [messages, setMessages] = useState<Msg[]>([
+    { role: "assistant", content: t(GREETING_EN) },
+  ]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [showCallback, setShowCallback] = useState(false);
@@ -96,6 +97,15 @@ export default function ChatbotWidget() {
     };
   }, [conversationId]);
 
+  // Keep the untouched opening message in the visitor's language.
+  useEffect(() => {
+    setMessages((prev) =>
+      prev.length === 1 && prev[0].role === "assistant"
+        ? [{ role: "assistant", content: t(GREETING_EN) }]
+        : prev,
+    );
+  }, [t]);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -128,12 +138,15 @@ export default function ChatbotWidget() {
           message: text,
           email: authedEmail || storedEmail,
           name: storedName,
+          lang: language,
         }),
       });
 
       const data = await resp.json();
       if (!resp.ok) {
-        throw new Error(data?.error || "Couldn't reach Tidy. Try again or call " + TIDY_PHONE);
+        throw new Error(
+          data?.error || t("Couldn't reach Tidy. Try again or call ") + TIDY_PHONE,
+        );
       }
 
       if (data.conversation_id) setConversationId(data.conversation_id);
@@ -145,7 +158,7 @@ export default function ChatbotWidget() {
         return copy;
       });
     } catch (e) {
-      const errMsg = e instanceof Error ? e.message : "Something went wrong";
+      const errMsg = e instanceof Error ? e.message : t("Something went wrong");
       setMessages((prev) => {
         const copy = [...prev];
         copy[copy.length - 1] = { role: "assistant", content: errMsg };
@@ -154,7 +167,7 @@ export default function ChatbotWidget() {
     } finally {
       setSending(false);
     }
-  }, [input, sending]);
+  }, [input, sending, language, t]);
 
   const submitCallback = useCallback(async () => {
     if (!cbPhone.trim() || cbSubmitting) return;
@@ -168,13 +181,13 @@ export default function ChatbotWidget() {
     });
     setCbSubmitting(false);
     if (error) {
-      toast.error("Couldn't send — please call " + TIDY_PHONE);
+      toast.error(t("Couldn't send — please call ") + TIDY_PHONE);
       return;
     }
     if (typeof window !== "undefined") {
       if (cbName.trim()) localStorage.setItem(NAME_KEY, cbName.trim());
     }
-    toast.success("Thanks! We'll reach out shortly.");
+    toast.success(t("Thanks! We'll reach out shortly."));
     setShowCallback(false);
     setCbName("");
     setCbPhone("");
@@ -182,16 +195,18 @@ export default function ChatbotWidget() {
       ...prev,
       {
         role: "assistant",
-        content: `Got it — we'll call you at ${cbPhone}. In the meantime, you can reach us anytime at ${TIDY_PHONE}.`,
+        content: `${t("Got it — we'll call you at")} ${cbPhone}. ${t(
+          "In the meantime, you can reach us anytime at",
+        )} ${TIDY_PHONE}.`,
       },
     ]);
-  }, [cbName, cbPhone, cbSubmitting, messages]);
+  }, [cbName, cbPhone, cbSubmitting, messages, t]);
 
   return (
     <>
       <button
         type="button"
-        aria-label={open ? "Close chat" : "Open chat with Tidy assistant"}
+        aria-label={open ? t("Close chat") : t("Open chat with Tidy assistant")}
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-2xl transition-all hover:scale-105 active:scale-95",
@@ -210,16 +225,16 @@ export default function ChatbotWidget() {
         >
           <div className="flex items-center justify-between gap-2 bg-primary px-4 py-3 text-primary-foreground">
             <div>
-              <div className="text-sm font-semibold">Tidy Concierge</div>
+              <div className="text-sm font-semibold">{t("Tidy Concierge")}</div>
               <div className="text-xs opacity-80">
-                {escalated ? "A teammate is on the way" : "Usually replies instantly"}
+                {escalated ? t("A teammate is on the way") : t("Usually replies instantly")}
               </div>
             </div>
             <a
               href={`tel:${TIDY_PHONE_TEL}`}
               className="flex items-center gap-1 rounded-full bg-primary-foreground/15 px-3 py-1 text-xs font-medium hover:bg-primary-foreground/25"
             >
-              <Phone className="h-3 w-3" /> Call
+              <Phone className="h-3 w-3" /> {t("Call")}
             </a>
           </div>
 
@@ -252,21 +267,21 @@ export default function ChatbotWidget() {
 
             {escalated && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
-                A human will be with you soon. You can also call us at {TIDY_PHONE}.
+                {t("A human will be with you soon. You can also call us at")} {TIDY_PHONE}.
               </div>
             )}
 
             {showCallback && (
               <div className="rounded-xl border bg-card p-3 shadow-sm">
-                <div className="mb-2 text-xs font-semibold">Request a callback</div>
+                <div className="mb-2 text-xs font-semibold">{t("Request a callback")}</div>
                 <Input
-                  placeholder="Your name (optional)"
+                  placeholder={t("Your name (optional)")}
                   value={cbName}
                   onChange={(e) => setCbName(e.target.value)}
                   className="mb-2 h-9 text-sm"
                 />
                 <Input
-                  placeholder="Phone number *"
+                  placeholder={t("Phone number *")}
                   type="tel"
                   inputMode="tel"
                   value={cbPhone}
@@ -280,14 +295,14 @@ export default function ChatbotWidget() {
                     onClick={submitCallback}
                     disabled={!cbPhone.trim() || cbSubmitting}
                   >
-                    {cbSubmitting ? "Sending..." : "Request callback"}
+                    {cbSubmitting ? t("Sending...") : t("Request callback")}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => setShowCallback(false)}
                   >
-                    Cancel
+                    {t("Cancel")}
                   </Button>
                 </div>
               </div>
@@ -301,13 +316,13 @@ export default function ChatbotWidget() {
                 onClick={() => setShowCallback(true)}
                 className="rounded-full border bg-background px-2.5 py-1 text-xs hover:bg-muted"
               >
-                📞 Request callback
+                📞 {t("Request callback")}
               </button>
               <a
                 href={`tel:${TIDY_PHONE_TEL}`}
                 className="rounded-full border bg-background px-2.5 py-1 text-xs hover:bg-muted"
               >
-                Call {TIDY_PHONE}
+                {t("Call")} {TIDY_PHONE}
               </a>
             </div>
           )}
@@ -328,7 +343,7 @@ export default function ChatbotWidget() {
                   send();
                 }
               }}
-              placeholder="Ask about pricing, areas, services..."
+              placeholder={t("Ask about pricing, areas, services...")}
               rows={1}
               className="min-h-[40px] resize-none text-sm"
               disabled={sending}
@@ -337,7 +352,7 @@ export default function ChatbotWidget() {
               type="submit"
               size="icon"
               disabled={!input.trim() || sending}
-              aria-label="Send"
+              aria-label={t("Send")}
             >
               <Send className="h-4 w-4" />
             </Button>
