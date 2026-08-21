@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
             break;
           case "undo_cancel":
             stripeParams = { cancel_at_period_end: false };
-            localPatch = { cancel_at_period_end: false, canceled_at: null };
+            localPatch = { cancel_at_period_end: false, canceled_at: null, paused_until: null };
             break;
           case "pause":
             stripeParams = { pause_collection: { behavior: "void", resumes_at: resumesAtUnix } };
@@ -132,11 +132,20 @@ Deno.serve(async (req) => {
             break;
           case "resume":
             stripeParams = { pause_collection: "" };
-            localPatch = { pause_collection: null, status: "active" };
+            localPatch = { pause_collection: null, status: "active", paused_until: null };
             break;
         }
 
         const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, stripeParams);
+
+        // Stripe holds the truth for the pause window — mirror resumes_at server-side.
+        if (action === "pause") {
+          const resumesAt = updated.pause_collection?.resumes_at ?? resumesAtUnix;
+          localPatch.paused_until = resumesAt
+            ? new Date(resumesAt * 1000).toISOString()
+            : null;
+        }
+
 
         const { error: upErr } = await supabase
           .from("subscriptions")
