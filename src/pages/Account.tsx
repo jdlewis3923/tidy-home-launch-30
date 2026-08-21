@@ -159,7 +159,14 @@ export default function Account() {
             <ArrowRight className="h-4 w-4 text-ink-faint" />
           </button>
         </div>
+
+        <p className="mt-6 text-xs text-ink-soft">
+          <Link to="/billing" className="hover:underline">
+            Manage or cancel your plan
+          </Link>
+        </p>
       </section>
+
 
       <CalmModal
         open={editing !== null}
