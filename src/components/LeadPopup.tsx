@@ -195,7 +195,6 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
               )}
             </span>
           </label>
-          {errors.smsConsent && <p className="text-xs text-red-500 font-medium">{errors.smsConsent}</p>}
 
           <button
             type="submit"
