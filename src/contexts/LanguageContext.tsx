@@ -316,7 +316,6 @@ const translations: Record<string, string> = {
   "Figures assume monthly service for each service. Your price changes with the visit frequency you choose.":
     "Las cifras asumen servicio mensual para cada servicio. Tu precio cambia según la frecuencia de visitas que elijas.",
   "Paint correction": "Corrección de pintura",
-  "Window exterior washing": "Lavado exterior de ventanas",
   "Four visits per month.": "Cuatro visitas por mes.",
 
   // Final CTA
