@@ -1,0 +1,1 @@
+ALTER TYPE public.visit_status ADD VALUE IF NOT EXISTS 'skipped';
