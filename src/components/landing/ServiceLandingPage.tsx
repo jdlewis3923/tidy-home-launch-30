@@ -60,6 +60,8 @@ export interface ServiceLandingConfig {
   heroAlt: string;
   plans: PlanTier[];
   included: string[];
+  /** Optional line listing paid add-ons, shown under the included list. */
+  addOnsNote?: string;
   trustCards: TrustCard[];
   faqs: FaqItem[];
   bundleCta: {
@@ -354,6 +356,16 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               ))}
             </ul>
           </Reveal>
+
+          {config.addOnsNote && (
+            <p className="mt-4 text-xs text-text-light/90">{t(config.addOnsNote)}</p>
+          )}
+
+          <p className="mt-3 text-xs text-text-light/80">
+            {t(
+              "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Extra-large lot (4,001–7,500 sq ft mowable turf): +$30 per visit. Extra-large vehicle: +$30 per visit. Above those sizes we quote individually.",
+            )}
+          </p>
         </div>
       </section>
 

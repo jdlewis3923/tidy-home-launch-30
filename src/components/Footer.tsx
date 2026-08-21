@@ -1,7 +1,7 @@
 import TidyLogo from "./TidyLogo";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Instagram, Facebook, Music2, Mail, MapPin, ArrowUpRight } from "lucide-react";
+import { Instagram, Facebook, Music2, Mail, MapPin, ArrowUpRight, Phone } from "lucide-react";
 
 const ZIPS = [
   { code: "33156", area: "Pinecrest" },
@@ -56,6 +56,12 @@ const Footer = () => {
                 className="inline-flex items-center gap-2 text-primary-foreground/70 hover:text-gold transition"
               >
                 <Mail className="h-4 w-4" /> hello@jointidy.co
+              </a>
+              <a
+                href="tel:+17868291141"
+                className="flex items-center gap-2 text-primary-foreground/70 hover:text-gold transition"
+              >
+                <Phone className="h-4 w-4" /> (786) 829-1141
               </a>
               <a
                 href="https://jointidy.co"
