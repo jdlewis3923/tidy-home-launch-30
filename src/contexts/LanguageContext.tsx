@@ -17,7 +17,6 @@ const translations: Record<string, string> = {
   "← try another zip": "← probar otro código postal",
   "notify me": "avísame",
   "saving…": "guardando…",
-  Email: "Correo",
 
   // Navbar
   Services: "Servicios",
