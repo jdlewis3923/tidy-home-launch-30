@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
     const message = (payload?.message || "").toString().trim();
     const email = payload?.email ? String(payload.email).trim() : null;
     const name = payload?.name ? String(payload.name).trim() : null;
+    const lang: "en" | "es" = payload?.lang === "es" ? "es" : "en";
 
     if (!visitorId || !message) {
       return new Response(
@@ -91,11 +92,13 @@ Deno.serve(async (req) => {
       content: m.body,
     }));
 
-    const result = await runSupportAssistant(history, "web");
+    const result = await runSupportAssistant(history, "web", lang);
     const shouldAutoSend = !result.escalate && result.confidence >= 0.7;
     const replyToSend = shouldAutoSend
       ? result.reply
-      : "Thanks — a real teammate will reach out shortly. You can also call us at (786) 829-1141.";
+      : lang === "es"
+        ? "Gracias — un miembro del equipo te contactará en breve. También puedes llamarnos al (786) 829-1141."
+        : "Thanks — a real teammate will reach out shortly. You can also call us at (786) 829-1141.";
 
     await supabase.from("support_messages").insert({
       conversation_id: convId!,
