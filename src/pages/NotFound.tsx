@@ -3,10 +3,12 @@ import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePrimaryCta } from "@/hooks/usePrimaryCta";
 
 const NotFound = () => {
   const location = useLocation();
   const { t } = useLanguage();
+  const { openPopup } = usePrimaryCta();
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
@@ -22,7 +24,7 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar onOpenPopup={openPopup} />
       <main className="mx-auto flex max-w-3xl flex-col items-center px-4 py-24 text-center">
         <h1 className="mb-4 text-4xl font-bold text-foreground">404</h1>
         <p className="mb-6 text-xl text-muted-foreground">{t("Oops! Page not found")}</p>
