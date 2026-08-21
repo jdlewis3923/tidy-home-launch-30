@@ -31,20 +31,46 @@ async function milestonesFor(serviceCategory?: string | null): Promise<number[]>
   return days.length ? [...days].sort((a, b) => b - a) : DEFAULT_MILESTONES;
 }
 
+async function logMissingTemplate(key: string) {
+  console.error(`[insurance-expiry] missing Brevo template id for app_settings key "${key}"`);
+  await admin.from('integration_logs').insert({
+    source: 'internal',
+    event: `brevo.template_id_missing:${key}`,
+    status: 'error',
+    error_message: `app_settings.${key} is missing or 0 — insurance email was not sent`,
+  }).then(() => {}, () => {});
+}
+
 async function templateId(key: string): Promise<number> {
   const { data } = await admin.from('app_settings').select('value').eq('key', key).maybeSingle();
   const raw = data?.value as any;
-  return Number(raw?.id ?? raw ?? 0);
+  const id = Number(raw?.id ?? raw ?? 0) || 0;
+  if (!id) await logMissingTemplate(key);
+  return id;
 }
 
-async function fireBrevo(id: number, to: { email: string; name: string }, params: Record<string, unknown>) {
-  if (!LOVABLE_API_KEY || !BREVO_API_KEY || !id) return;
+async function fireBrevo(id: number, key: string, to: { email: string; name: string }, params: Record<string, unknown>) {
+  if (!id) {
+    await logMissingTemplate(key);
+    return;
+  }
+  if (!LOVABLE_API_KEY || !BREVO_API_KEY) {
+    console.error('[insurance-expiry] Brevo credentials not configured');
+    await admin.from('integration_logs').insert({
+      source: 'internal',
+      event: 'brevo.credentials_missing',
+      status: 'error',
+      error_message: 'LOVABLE_API_KEY or BREVO_API_KEY not set — insurance email was not sent',
+    }).then(() => {}, () => {});
+    return;
+  }
   await fetch('https://connector-gateway.lovable.dev/brevo/smtp/email', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${LOVABLE_API_KEY}`, 'X-Connection-Api-Key': BREVO_API_KEY },
     body: JSON.stringify({ templateId: id, to: [to], params }),
   }).catch((e) => console.error('[insurance-expiry] brevo failed', e));
 }
+
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
@@ -80,7 +106,7 @@ Deno.serve(async (req) => {
       await admin.from('contractor_insurance').update({ verification_status: 'expired' }).eq('id', r.id);
       if (a?.id) await admin.from('applicants').update({ insurance_status: 'expired' }).eq('id', a.id);
       if (a?.email) {
-        await fireBrevo(expiredTpl, { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
+        await fireBrevo(expiredTpl, 'brevo_template_insurance_expired', { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
           first_name: a.first_name, expiration_date: exp,
         });
       }
@@ -107,7 +133,7 @@ Deno.serve(async (req) => {
     if (a?.id) await admin.from('applicants').update({ insurance_status: 'expiring_soon' }).eq('id', a.id);
 
     if (due && a?.email) {
-      await fireBrevo(remindTpl, { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
+      await fireBrevo(remindTpl, 'brevo_template_insurance_expiring', { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
         first_name: a.first_name, expiration_date: exp, days_left: daysLeft, carrier_name: r.carrier_name ?? null,
       });
       reminded++;

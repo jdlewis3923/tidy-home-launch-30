@@ -31,12 +31,31 @@ const STATUS: Record<string, string> = {
   waive: 'waived',
 };
 
+async function logConfigError(event: string, message: string) {
+  console.error(`[insurance-decision] ${message}`);
+  await admin.from('integration_logs').insert({
+    source: 'internal',
+    event,
+    status: 'error',
+    error_message: message,
+  }).then(() => {}, () => {});
+}
+
 async function fireBrevo(templateKey: string, to: { email: string; name: string }, params: Record<string, unknown>) {
-  if (!LOVABLE_API_KEY || !BREVO_API_KEY) return;
+  if (!LOVABLE_API_KEY || !BREVO_API_KEY) {
+    await logConfigError('brevo.credentials_missing', 'LOVABLE_API_KEY or BREVO_API_KEY not set — insurance decision email was not sent');
+    return;
+  }
   const { data: setting } = await admin.from('app_settings').select('value').eq('key', templateKey).maybeSingle();
   const raw = setting?.value as any;
-  const templateId = Number(raw?.id ?? raw ?? 0);
-  if (!templateId) return;
+  const templateId = Number(raw?.id ?? raw ?? 0) || 0;
+  if (!templateId) {
+    await logConfigError(
+      `brevo.template_id_missing:${templateKey}`,
+      `app_settings.${templateKey} is missing or 0 — insurance decision email was not sent`,
+    );
+    return;
+  }
   await fetch('https://connector-gateway.lovable.dev/brevo/smtp/email', {
     method: 'POST',
     headers: {
@@ -47,6 +66,7 @@ async function fireBrevo(templateKey: string, to: { email: string; name: string 
     body: JSON.stringify({ templateId, to: [to], params }),
   }).catch((e) => console.error('[insurance-decision] brevo failed', e));
 }
+
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;

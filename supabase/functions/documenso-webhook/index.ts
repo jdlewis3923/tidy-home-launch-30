@@ -87,6 +87,29 @@ Deno.serve(async (req) => {
     // and links to /pro/tier-progression for the full explainer.
     const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
     const TIER_PROGRESSION_URL = "https://jointidy.co/pro/tier-progression";
+    // Template id resolution: app_settings first (admin-configurable), env var second.
+    let welcomeTemplateId = 0;
+    {
+      const { data: setting } = await sb
+        .from("app_settings")
+        .select("value")
+        .eq("key", "brevo_template_welcome_t1")
+        .maybeSingle();
+      const raw = setting?.value as { id?: number } | number | null | undefined;
+      welcomeTemplateId =
+        Number(typeof raw === "number" ? raw : raw?.id ?? raw ?? 0) ||
+        Number(Deno.env.get("BREVO_TEMPLATE_WELCOME_T1") ?? 0) ||
+        0;
+      if (!welcomeTemplateId) {
+        console.error("[documenso-webhook] missing brevo_template_welcome_t1 template id");
+        await sb.from("integration_logs").insert({
+          source: "internal",
+          event: "brevo.template_id_missing:brevo_template_welcome_t1",
+          status: "error",
+          error_message: "No template id in app_settings.brevo_template_welcome_t1 or BREVO_TEMPLATE_WELCOME_T1; sent inline fallback HTML",
+        }).then(() => {}, () => {});
+      }
+    }
     if (BREVO_API_KEY && match.email) {
       try {
         const res = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -97,18 +120,13 @@ Deno.serve(async (req) => {
             accept: "application/json",
           },
           body: JSON.stringify({
-            templateId: Number(Deno.env.get("BREVO_TEMPLATE_WELCOME_T1") ?? 0) || undefined,
-            to: [{ email: match.email, name: match.first_name ?? undefined }],
-            params: {
-              first_name: match.first_name ?? "there",
-              tier_name: "Tidy Verified Pro",
-              tier_label: "Tier 1 — Tidy Verified Pro",
-              tier_progression_url: TIER_PROGRESSION_URL,
-            },
-            // Inline fallback so the email still sends if the Brevo template
-            // ID isn't configured yet.
-            subject: "Welcome to Tidy — you're a Verified Pro",
-            htmlContent: `
+            ...(welcomeTemplateId
+              ? { templateId: welcomeTemplateId }
+              : {
+                  // Inline fallback only when no template id is configured —
+                  // Brevo rejects htmlContent alongside templateId.
+                  subject: "Welcome to Tidy — you're a Verified Pro",
+                  htmlContent: `
               <div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a">
                 <h1 style="margin:0 0 8px;font-size:24px">Welcome to Tidy, ${match.first_name ?? "Pro"}.</h1>
                 <p style="margin:0 0 16px">Congrats — you're officially a <strong>Tier 1 — Tidy Verified Pro</strong>. Tidy carries commercial GL coverage on every assignment so you can start earning on day one.</p>
@@ -119,8 +137,17 @@ Deno.serve(async (req) => {
                 <p style="color:#64748b;font-size:13px;margin-top:24px">— The Tidy team</p>
               </div>
             `,
+                }),
+            to: [{ email: match.email, name: match.first_name ?? undefined }],
+            params: {
+              first_name: match.first_name ?? "there",
+              tier_name: "Tidy Verified Pro",
+              tier_label: "Tier 1 — Tidy Verified Pro",
+              tier_progression_url: TIER_PROGRESSION_URL,
+            },
             tags: ["WELCOME-T1"],
           }),
+
         });
         await sb.from("email_send_log").insert({
           template_name: "WELCOME-T1",
