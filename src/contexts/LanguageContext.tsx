@@ -930,7 +930,6 @@ const translations: Record<string, string> = {
     "Combina limpieza del hogar, cuidado del jardín y detallado de auto en un solo plan. Ahorra 10–15% en Pinecrest y Kendall (33156, 33183, 33186). Una suscripción, un equipo, una factura.",
   "Vetted & insured pros": "Profesionales verificados y asegurados",
   "Takes under 60 seconds · No contracts": "Toma menos de 60 segundos · Sin contratos",
-  Call: "Llamar",
   "Locked price · No contracts · Cancel anytime · Pause or reschedule anytime":
     "Precio fijo · Sin contratos · Cancela cuando quieras · Pausa o reagenda cuando quieras",
   "Set it once. We handle the rest — scheduling, reminders, the same crew every visit.":
