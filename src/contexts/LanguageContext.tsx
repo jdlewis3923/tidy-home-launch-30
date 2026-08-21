@@ -3,6 +3,21 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 type Language = "en" | "es";
 
 const translations: Record<string, string> = {
+  // ZIP checker / waitlist capture
+  "We serve": "¡Servimos en",
+  "Spots are limited — get started today.": "Cupos limitados — empieza hoy.",
+  "We're not in": "Todavía no estamos en",
+  "yet.": "—",
+  "We launched in Pinecrest + Kendall first. Drop your email and we'll alert you the moment we expand to your area.": "Comenzamos en Pinecrest y Kendall. Déjanos tu correo y te avisamos en cuanto lleguemos a tu zona.",
+  "You're on the list.": "Estás en la lista.",
+  "We'll email you the moment Tidy reaches": "Te escribiremos en cuanto Tidy llegue a",
+  "No spam — one note when we expand.": "Sin spam — un solo aviso cuando nos expandamos.",
+  "Please enter a valid email.": "Ingresa un correo válido.",
+  "Couldn't save — try again in a moment.": "No se pudo guardar — inténtalo en un momento.",
+  "← try another zip": "← probar otro código postal",
+  "notify me": "avísame",
+  "saving…": "guardando…",
+
   // Navbar
   Services: "Servicios",
   "How It Works": "Cómo Funciona",

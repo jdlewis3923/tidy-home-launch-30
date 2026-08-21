@@ -84,7 +84,7 @@ const Index = () => {
         <WhyTidy />
         <PricingTable />
         <FAQ />
-        <ZipChecker />
+        <ZipChecker onStart={handleCTA} />
         <FinalCTA onOpenPopup={handleCTA} />
         <Footer />
 
