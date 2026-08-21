@@ -31,20 +31,46 @@ async function milestonesFor(serviceCategory?: string | null): Promise<number[]>
   return days.length ? [...days].sort((a, b) => b - a) : DEFAULT_MILESTONES;
 }
 
+async function logMissingTemplate(key: string) {
+  console.error(`[insurance-expiry] missing Brevo template id for app_settings key "${key}"`);
+  await admin.from('integration_logs').insert({
+    source: 'internal',
+    event: `brevo.template_id_missing:${key}`,
+    status: 'error',
+    error_message: `app_settings.${key} is missing or 0 — insurance email was not sent`,
+  }).then(() => {}, () => {});
+}
+
 async function templateId(key: string): Promise<number> {
   const { data } = await admin.from('app_settings').select('value').eq('key', key).maybeSingle();
   const raw = data?.value as any;
-  return Number(raw?.id ?? raw ?? 0);
+  const id = Number(raw?.id ?? raw ?? 0) || 0;
+  if (!id) await logMissingTemplate(key);
+  return id;
 }
 
-async function fireBrevo(id: number, to: { email: string; name: string }, params: Record<string, unknown>) {
-  if (!LOVABLE_API_KEY || !BREVO_API_KEY || !id) return;
+async function fireBrevo(id: number, key: string, to: { email: string; name: string }, params: Record<string, unknown>) {
+  if (!id) {
+    await logMissingTemplate(key);
+    return;
+  }
+  if (!LOVABLE_API_KEY || !BREVO_API_KEY) {
+    console.error('[insurance-expiry] Brevo credentials not configured');
+    await admin.from('integration_logs').insert({
+      source: 'internal',
+      event: 'brevo.credentials_missing',
+      status: 'error',
+      error_message: 'LOVABLE_API_KEY or BREVO_API_KEY not set — insurance email was not sent',
+    }).then(() => {}, () => {});
+    return;
+  }
   await fetch('https://connector-gateway.lovable.dev/brevo/smtp/email', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${LOVABLE_API_KEY}`, 'X-Connection-Api-Key': BREVO_API_KEY },
     body: JSON.stringify({ templateId: id, to: [to], params }),
   }).catch((e) => console.error('[insurance-expiry] brevo failed', e));
 }
+
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
