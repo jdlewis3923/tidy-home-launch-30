@@ -274,8 +274,10 @@ export default function Billing() {
             <p className="mt-3 text-2xl font-black text-ink">
               {sub ? `${sub.services.length} ${sub.services.length === 1 ? "service" : "services"}` : "—"}
             </p>
-            <p className="mt-1 text-sm capitalize text-ink-soft">
-              {sub?.frequency ?? "no plan yet"}
+            <p className="mt-1 text-sm text-ink-soft">
+              {sub
+                ? `${sub.frequency} visits · ${formatMoney(sub.monthly_total_cents)}/month`
+                : "no plan yet"}
             </p>
 
             {(isPaused || isCanceling) && (
