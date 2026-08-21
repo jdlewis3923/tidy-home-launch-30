@@ -43,11 +43,10 @@ const config: ServiceLandingConfig = {
     "Interior vacuum",
     "Dashboard + console wipe",
     "Interior + exterior glass",
-    "Pet-hair removal add-on",
-    "Ozone treatment add-on",
     "In your driveway",
     "Fully insured",
   ],
+  addOnsNote: "Available as add-ons: pet-hair removal, ozone treatment.",
   trustCards: [
     {
       title: "Same Crew",

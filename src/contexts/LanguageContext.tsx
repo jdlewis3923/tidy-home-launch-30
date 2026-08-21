@@ -705,8 +705,12 @@ const translations: Record<string, string> = {
   "🔧 Lawn Add-Ons": "🔧 Adicionales de Jardín",
   "🔧 Detailing Add-Ons": "🔧 Adicionales de Detallado",
   "one-time": "una sola vez",
-  "Standard pricing covers most homes, yards, and vehicles. Larger properties or vehicles get a small upgrade fee — anything beyond is a quick custom quote.":
-    "Los precios estándar cubren la mayoría de las casas, jardines y vehículos. Las propiedades o vehículos más grandes tienen un pequeño cargo adicional — más allá de eso, es una cotización personalizada rápida.",
+  "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Extra-large lot (4,001–7,500 sq ft mowable turf): +$30 per visit. Extra-large vehicle: +$30 per visit. Above those sizes we quote individually.":
+    "Casa extra grande (2,501–4,000 pies²): +$60 por visita. Terreno extra grande (4,001–7,500 pies² de césped cortable): +$30 por visita. Vehículo extra grande: +$30 por visita. Por encima de esos tamaños cotizamos de forma individual.",
+  "Available as add-ons: pet-hair removal, ozone treatment.":
+    "Disponibles como complementos: eliminación de pelo de mascotas, tratamiento de ozono.",
+  "Choose weekly, biweekly, or monthly depending on the service — and mix and match freely. Car detailing is monthly or biweekly. Want weekly lawn care but biweekly cleaning? Done.":
+    "Elige semanal, quincenal o mensual según el servicio, y combínalos libremente. El detallado de autos es mensual o quincenal. ¿Quieres jardinería semanal pero limpieza quincenal? Listo.",
   "What affects my price?": "¿Qué afecta mi precio?",
   "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees.":
     "El precio depende de los servicios que elijas y con qué frecuencia los quieras — semanal, quincenal o mensual. Eso es todo. Sin cargos ocultos.",

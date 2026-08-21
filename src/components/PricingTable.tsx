@@ -80,7 +80,7 @@ const PricingTable = () => {
           </p>
           <p className="mt-2 text-xs text-text-light/80">
             {t(
-              "Standard pricing covers most homes, yards, and vehicles. Larger properties or vehicles get a small upgrade fee — anything beyond is a quick custom quote.",
+              "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Extra-large lot (4,001–7,500 sq ft mowable turf): +$30 per visit. Extra-large vehicle: +$30 per visit. Above those sizes we quote individually.",
             )}
           </p>
         </FadeIn>
