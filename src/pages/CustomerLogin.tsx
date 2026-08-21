@@ -15,6 +15,7 @@ export default function CustomerLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useLanguage();
   // Default view: signup if entry point signals it (?mode=signup from START MY PLAN),
   // otherwise sign-in (top-nav Login link).
   const initialIsSignUp = searchParams.get('mode') === 'signup';
