@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import WaitlistCapture from "@/components/dashboard/WaitlistCapture";
+import { loadState, saveState } from "@/lib/dashboard-pricing";
 
 const zipData: Record<string, string> = {
   "33183": "Kendall",
@@ -7,7 +9,12 @@ const zipData: Record<string, string> = {
   "33156": "Pinecrest",
 };
 
-const ZipChecker = () => {
+interface ZipCheckerProps {
+  /** Same handler the other homepage START MY PLAN buttons use. */
+  onStart?: () => void;
+}
+
+const ZipChecker = ({ onStart }: ZipCheckerProps) => {
   const [zip, setZip] = useState("");
   const [result, setResult] = useState<{ found: boolean; name?: string; zip?: string } | null>(null);
   const { t } = useLanguage();
@@ -15,7 +22,7 @@ const ZipChecker = () => {
   const handleCheck = () => {
     const trimmed = zip.trim();
     if (zipData[trimmed]) {
-      setResult({ found: true, name: zipData[trimmed] });
+      setResult({ found: true, name: zipData[trimmed], zip: trimmed });
     } else {
       setResult({ found: false, zip: trimmed });
     }
@@ -45,12 +52,32 @@ const ZipChecker = () => {
           </button>
         </div>
 
-        {result && (
-          <p className={`text-sm font-medium mb-6 transition-all duration-300 ${result.found ? "text-success" : "text-destructive"}`}>
-            {result.found
-              ? `✓ We serve ${result.name}! Spots are limited — get started today.`
-              : `We're not in ${result.zip} yet, but expanding fast. Email hello@jointidy.co to join the waitlist.`}
-          </p>
+        {result && result.found && (
+          <div className="mb-6">
+            <p className="text-sm font-medium text-success transition-all duration-300">
+              {`✓ ${t("We serve")} ${result.name}! ${t("Spots are limited — get started today.")}`}
+            </p>
+            <button
+              onClick={() => {
+                // Carry the confirmed ZIP forward the same way the wizard reads it.
+                saveState({ ...loadState(), zip: result.zip || "", outOfCoverage: false });
+                onStart?.();
+              }}
+              className="mt-4 bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-base px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
+            >
+              {t("START MY PLAN →")}
+            </button>
+          </div>
+        )}
+
+        {result && !result.found && (
+          <div className="mb-6 max-w-md mx-auto text-left">
+            <WaitlistCapture
+              zip={result.zip || ""}
+              source="homepage_zip_checker"
+              onReset={() => { setResult(null); setZip(""); }}
+            />
+          </div>
         )}
 
         <div className="flex flex-wrap justify-center gap-2 mt-4">
