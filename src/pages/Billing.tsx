@@ -111,6 +111,61 @@ export default function Billing() {
     }
   };
 
+  const refetchSub = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const uid = sessionData.session?.user?.id;
+    if (!uid) return;
+    const { data: row } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (row) setSubOverride(row);
+  };
+
+  const manage = async (
+    action: "cancel" | "undo_cancel" | "pause" | "resume",
+    resumeOn?: string
+  ) => {
+    setBusy(true);
+    try {
+      const { data: res, error } = await supabase.functions.invoke(
+        "customer-subscription-manage",
+        { body: resumeOn ? { action, resume_on: resumeOn } : { action } }
+      );
+      if (error) throw error;
+      if (res && res.ok === false) throw new Error(res.error ?? "failed");
+
+      if (action === "pause" && resumeOn) {
+        localStorage.setItem(PAUSE_RESUME_KEY, resumeOn);
+        setPausedUntil(resumeOn);
+      }
+      if (action === "resume") {
+        localStorage.removeItem(PAUSE_RESUME_KEY);
+        setPausedUntil(null);
+      }
+
+      toast.success(
+        action === "cancel"
+          ? t("Your plan will not renew.")
+          : action === "undo_cancel"
+          ? t("Your plan is staying active.")
+          : action === "pause"
+          ? t("Your plan is paused.")
+          : t("Your plan is active again.")
+      );
+      setCancelOpen(false);
+      setPauseOpen(false);
+      await refetchSub();
+    } catch {
+      toast.error(t("We couldn't update your plan. Please try again."));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (data.loading) {
     return (
       <div className="min-h-screen bg-cream">
@@ -122,8 +177,16 @@ export default function Billing() {
 
   if (!data.isAuthed) return null;
 
-  const sub = data.subscription;
+  const sub = subOverride ?? data.subscription;
   const invoices = data.invoices.slice(0, 6);
+  const isPaused = sub?.status === "paused" || !!sub?.pause_collection;
+  const isCanceling = !!sub?.cancel_at_period_end;
+  const resumeDateFor = (days: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  };
+
 
   return (
     <div className="min-h-screen bg-cream text-ink">
