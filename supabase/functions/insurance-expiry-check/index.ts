@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
     if (a?.id) await admin.from('applicants').update({ insurance_status: 'expiring_soon' }).eq('id', a.id);
 
     if (due && a?.email) {
-      await fireBrevo(remindTpl, { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
+      await fireBrevo(remindTpl, 'brevo_template_insurance_expiring', { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
         first_name: a.first_name, expiration_date: exp, days_left: daysLeft, carrier_name: r.carrier_name ?? null,
       });
       reminded++;
