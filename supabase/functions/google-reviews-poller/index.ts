@@ -84,13 +84,15 @@ Deno.serve(async (req) => {
         contractor_id: match?.contractor_id ?? null,
         contractor_name_matched: match?.google_review_match_name ?? null,
         raw_payload: r as Record<string, unknown>,
+        is_seed: false,
       },
       { onConflict: 'review_id' },
     );
     if (!insErr) inserted++;
 
-    // Bump applicant counters when we matched a new review
-    if (match) {
+    // Bump applicant counters when we matched a new review.
+    // Seed/test rows must never roll into a contractor's rating.
+    if (match && !reviewId.startsWith('seed-review-')) {
       matched++;
       const prevCount = match.total_ratings_count ?? 0;
       const prevAvg = Number(match.avg_customer_rating ?? 0);
