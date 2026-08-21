@@ -112,6 +112,22 @@ const Terms = () => {
               </a>
             </p>
           </section>
+          <section>
+            <h2 className="text-lg font-bold text-foreground">{t("13. Pricing and Founding Rate")}</h2>
+            <p>
+              {t(
+                "The price shown at signup is the price charged. Founding members — the first 25 homes per ZIP code — keep their signup rate for as long as their membership remains active and are not subject to later price increases. A founding rate is tied to continuous membership and does not carry over if the plan is cancelled and later restarted.",
+              )}
+            </p>
+          </section>
+          <section>
+            <h2 className="text-lg font-bold text-foreground">{t("14. Referral Program")}</h2>
+            <p>
+              {t(
+                "A customer who refers a new customer receives $50 in account credit, and the new customer receives $50 off their first month. The credit is applied after the referred customer's first invoice clears. The referred customer must be new to Tidy. Credit has no cash value.",
+              )}
+            </p>
+          </section>
         </div>
 
         <div className="mt-12">
