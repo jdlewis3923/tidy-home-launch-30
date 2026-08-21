@@ -61,6 +61,7 @@ const AdminDocuments = lazy(() => import("./pages/AdminDocuments.tsx"));
 const AdminApplicants = lazy(() => import("./pages/AdminApplicants.tsx"));
 const AdminEmailHealth = lazy(() => import("./pages/AdminEmailHealth.tsx"));
 const AdminSetupCheck = lazy(() => import("./pages/AdminSetupCheck.tsx"));
+const AdminLeads = lazy(() => import("./pages/AdminLeads.tsx"));
 const AdminOrientations = lazy(() => import("./pages/AdminOrientations.tsx"));
 const AdminSocialLaunch = lazy(() => import("./pages/AdminSocialLaunch.tsx"));
 const AdminNextdoorVerify = lazy(() => import("./pages/AdminNextdoorVerify.tsx"));
