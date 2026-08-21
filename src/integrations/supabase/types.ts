@@ -2410,6 +2410,7 @@ export type Database = {
           monthly_total_cents: number
           next_billing_date: string | null
           pause_collection: string | null
+          paused_until: string | null
           services: Database["public"]["Enums"]["service_type"][]
           status: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id: string | null
@@ -2432,6 +2433,7 @@ export type Database = {
           monthly_total_cents?: number
           next_billing_date?: string | null
           pause_collection?: string | null
+          paused_until?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
@@ -2454,6 +2456,7 @@ export type Database = {
           monthly_total_cents?: number
           next_billing_date?: string | null
           pause_collection?: string | null
+          paused_until?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null

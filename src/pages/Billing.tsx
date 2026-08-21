@@ -76,9 +76,6 @@ export default function Billing() {
   const [pauseOpen, setPauseOpen] = useState(false);
   const [pauseDays, setPauseDays] = useState("30");
   const [busy, setBusy] = useState(false);
-  const [pausedUntil, setPausedUntil] = useState<string | null>(() =>
-    typeof window === "undefined" ? null : localStorage.getItem(PAUSE_RESUME_KEY)
-  );
 
 
   useEffect(() => {
@@ -140,12 +137,11 @@ export default function Billing() {
 
       if (action === "pause" && resumeOn) {
         localStorage.setItem(PAUSE_RESUME_KEY, resumeOn);
-        setPausedUntil(resumeOn);
       }
       if (action === "resume") {
         localStorage.removeItem(PAUSE_RESUME_KEY);
-        setPausedUntil(null);
       }
+
 
       toast.success(
         action === "cancel"
@@ -178,6 +174,8 @@ export default function Billing() {
   if (!data.isAuthed) return null;
 
   const sub = subOverride ?? data.subscription;
+  // Server value is the source of truth for the pause restart date.
+  const pausedUntil = sub?.paused_until ? sub.paused_until.slice(0, 10) : null;
   const invoices = data.invoices.slice(0, 6);
   const isPaused = sub?.status === "paused" || !!sub?.pause_collection;
   const isCanceling = !!sub?.cancel_at_period_end;
