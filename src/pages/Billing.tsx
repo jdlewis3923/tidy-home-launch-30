@@ -270,14 +270,77 @@ export default function Billing() {
             <p className="mt-1 text-sm capitalize text-ink-soft">
               {sub?.frequency ?? "no plan yet"}
             </p>
+
+            {(isPaused || isCanceling) && (
+              <span className="mt-3 inline-flex rounded-full bg-cream px-2 py-0.5 text-[11px] font-semibold text-ink-soft">
+                {isPaused
+                  ? pausedUntil
+                    ? `${t("Paused until")} ${formatLongDate(pausedUntil)}`
+                    : t("Paused")
+                  : t("Cancels at period end")}
+              </span>
+            )}
+
             <Link
               to="/dashboard/plan"
               className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[hsl(var(--primary))] hover:underline"
             >
               Manage plan <ArrowRight className="h-3.5 w-3.5" />
             </Link>
+
+            {sub && (
+              <div className="mt-5 border-t border-[hsl(var(--hairline))] pt-4">
+                <h3 className="text-sm font-bold text-ink">{t("Manage subscription")}</h3>
+                <div className="mt-3 flex flex-col gap-2">
+                  {isPaused ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => manage("resume")}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-[hsl(var(--hairline))] bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-cream disabled:opacity-70"
+                    >
+                      <PlayCircle className="h-4 w-4 text-[hsl(var(--primary))]" />
+                      {t("Resume plan")}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setPauseOpen(true)}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-[hsl(var(--hairline))] bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-cream disabled:opacity-70"
+                    >
+                      <PauseCircle className="h-4 w-4 text-[hsl(var(--primary))]" />
+                      {t("Pause plan")}
+                    </button>
+                  )}
+
+                  {isCanceling ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => manage("undo_cancel")}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-[hsl(var(--hairline))] bg-white px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-cream disabled:opacity-70"
+                    >
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      {t("Keep my plan")}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setCancelOpen(true)}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-[hsl(var(--hairline))] bg-white px-4 py-2.5 text-sm font-semibold text-ink-soft transition hover:bg-cream disabled:opacity-70"
+                    >
+                      <XCircle className="h-4 w-4 text-ink-faint" />
+                      {t("Cancel plan")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </Card>
         </div>
+
 
         {/* Invoices */}
         <Card className="mt-6">
