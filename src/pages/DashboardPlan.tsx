@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote, VALID_ZIPS } from '@/lib/dashboard-pricing';
+import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 import CalmShell from '@/components/dashboard/CalmShell';
 import ProgressBar from '@/components/dashboard/ProgressBar';
 import StickyPriceBar from '@/components/dashboard/StickyPriceBar';
