@@ -245,15 +245,51 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   let nextBillingDate: string | null = null;
   let monthlyTotalCents = 0;
   if (stripeSubscriptionId) {
-    const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    const sub: any = await stripe.subscriptions.retrieve(stripeSubscriptionId);
     if (sub.current_period_end) {
       nextBillingDate = new Date(sub.current_period_end * 1000).toISOString().slice(0, 10);
     }
+    // Gross subtotal (list price, pre-discount).
+    let grossCents = 0;
     for (const item of sub.items.data) {
       const amt = item.price.unit_amount ?? 0;
-      monthlyTotalCents += amt * (item.quantity ?? 1);
+      grossCents += amt * (item.quantity ?? 1);
+    }
+
+    // Apply the discounts actually attached to the live Stripe subscription so the
+    // stored monthly total matches what Stripe will really bill each month.
+    const rawDiscounts: any[] = Array.isArray(sub.discounts)
+      ? sub.discounts
+      : sub.discount
+        ? [sub.discount]
+        : [];
+    let netCents = grossCents;
+    for (const d of rawDiscounts) {
+      const coupon = d?.coupon ?? d;
+      if (!coupon) continue;
+      if (coupon.amount_off) {
+        console.warn(
+          `[stripe-webhook] ignoring amount_off coupon ${coupon.id} (${coupon.amount_off}) for recurring monthly total on ${stripeSubscriptionId}`,
+        );
+        continue;
+      }
+      if (typeof coupon.percent_off !== 'number') continue;
+      if (coupon.duration !== 'forever' && coupon.duration !== 'repeating') {
+        console.warn(
+          `[stripe-webhook] ignoring coupon ${coupon.id} with duration '${coupon.duration}' for recurring monthly total on ${stripeSubscriptionId}`,
+        );
+        continue;
+      }
+      netCents = netCents * (1 - coupon.percent_off / 100);
+    }
+    monthlyTotalCents = Math.round(netCents);
+    if (monthlyTotalCents !== grossCents) {
+      console.log(
+        `[stripe-webhook] monthly total ${grossCents} gross -> ${monthlyTotalCents} net after ${rawDiscounts.length} discount(s) on ${stripeSubscriptionId}`,
+      );
     }
   }
+
 
   const bundleDiscountPct = parseInt(meta.bundle_discount_pct ?? '0', 10) || 0;
 
