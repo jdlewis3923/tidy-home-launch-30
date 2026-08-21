@@ -220,14 +220,21 @@ export default function Billing() {
             </div>
             <div className="mt-5 flex items-end justify-between">
               <div>
-                <p className="text-3xl font-black text-ink">
-                  {formatMoney(sub?.monthly_total_cents)}
-                </p>
-                <p className="mt-1 text-sm text-ink-soft">
-                  {sub?.next_billing_date
-                    ? `on ${formatLongDate(sub.next_billing_date)}`
-                    : "no upcoming charge"}
-                </p>
+                {sub?.next_billing_date ? (
+                  <>
+                    <p className="text-3xl font-black text-ink">
+                      {formatMoney(sub.monthly_total_cents)}
+                    </p>
+                    <p className="mt-1 text-sm text-ink-soft">
+                      {`on ${formatLongDate(sub.next_billing_date)}`}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-3xl font-black text-ink">—</p>
+                    <p className="mt-1 text-sm text-ink-soft">no upcoming charge</p>
+                  </>
+                )}
                 {sub?.card_last4 && (
                   <p className="mt-2 text-xs text-ink-faint">
                     {(sub.card_brand ?? "Card").replace(/^./, (c) => c.toUpperCase())} ····{" "}
