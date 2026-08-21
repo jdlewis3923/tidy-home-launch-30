@@ -50,7 +50,7 @@ const ThankYou = () => {
         <div className="text-5xl mb-4">🎉</div>
         <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{t("You're in.")}</h1>
         <p className="text-primary font-semibold text-lg mb-6">
-          {t("Your founding rate is locked — your price never rises, for as long as you're a member.")}
+          {t("As one of the 25 founding homes in your ZIP, your founding rate is locked — your price never rises for as long as you're a member.")}
         </p>
         <p className="text-text-mid mb-8">
           {t("We're prioritizing homes for the initial rollout — and you're at the front of the line.")}
