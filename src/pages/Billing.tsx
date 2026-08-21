@@ -8,6 +8,7 @@
  */
 import { Navigate, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   CreditCard,
   ReceiptText,
@@ -16,6 +17,9 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  PauseCircle,
+  PlayCircle,
+  XCircle,
 } from "lucide-react";
 import {
   CUSTOMER_ACCOUNT_ENABLED,
@@ -28,15 +32,54 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import DashboardTopNav from "@/components/dashboard/DashboardTopNav";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { Tables } from "@/integrations/supabase/types";
+import {
   useDashboardData,
   formatLongDate,
   formatMoney,
 } from "@/lib/dashboard-data";
 
+const PAUSE_RESUME_KEY = "tidy.pause_resumes_on";
+
 export default function Billing() {
   const navigate = useNavigate();
   const data = useDashboardData();
+  const { t } = useLanguage();
   const [portalState, setPortalState] = useState<"idle" | "loading" | "error">("idle");
+  const [subOverride, setSubOverride] = useState<Tables<"subscriptions"> | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [pauseOpen, setPauseOpen] = useState(false);
+  const [pauseDays, setPauseDays] = useState("30");
+  const [busy, setBusy] = useState(false);
+  const [pausedUntil, setPausedUntil] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : localStorage.getItem(PAUSE_RESUME_KEY)
+  );
+
 
   useEffect(() => {
     if (!data.loading && !data.isAuthed) {
