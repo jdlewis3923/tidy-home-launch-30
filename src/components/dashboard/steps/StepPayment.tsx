@@ -68,7 +68,6 @@ export default function StepPayment({ state, onChange }: Props) {
     })
     .filter((x): x is { svc: ServiceType; qty: number } => x !== null);
 
-  const navigate = useNavigate();
   const embedded = isEmbeddedCheckoutAvailable();
   const stripePromise = useMemo(() => (embedded ? getStripe() : null), [embedded]);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
