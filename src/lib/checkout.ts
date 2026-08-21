@@ -19,6 +19,8 @@ import type { ConfigState, ServiceType } from '@/lib/dashboard-pricing';
 
 interface CheckoutPayload {
   config: ConfigState;
+  /** Visitor's active locale; defaults to 'en'. */
+  lang?: 'en' | 'es';
 }
 
 // Add-ons that are billed per-vehicle (Detailing only).
@@ -74,7 +76,7 @@ function translate(config: ConfigState) {
 export async function startCheckout(payload: CheckoutPayload): Promise<void> {
   const promo_code = getPromoCode() ?? undefined;
   const attribution = getUtmAttribution();
-  const { config } = payload;
+  const { config, lang } = payload;
 
   const { services, addons } = translate(config);
 
@@ -86,7 +88,7 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     zip: config.zip,
     preferred_day: config.preferredDay,
     preferred_time: config.preferredTime,
-    lang: 'en' as const,
+    lang: lang ?? ('en' as const),
     gclid: attribution.gclid,
     utm_source: attribution.utm_source,
     utm_medium: attribution.utm_medium,

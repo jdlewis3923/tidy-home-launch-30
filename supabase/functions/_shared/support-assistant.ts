@@ -20,6 +20,7 @@ const STATIC_ACK =
 export async function runSupportAssistant(
   history: SupportMsg[],
   channel: "sms" | "web",
+  lang: "en" | "es" = "en",
 ): Promise<AssistantResult> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) {
@@ -46,9 +47,15 @@ export async function runSupportAssistant(
       ? "This is an SMS conversation. Keep replies under 320 characters and friendly. No markdown."
       : "This is a website chat. Keep replies under 3 short sentences.";
 
+  const languageGuide =
+    lang === "es"
+      ? "Reply in the same language the customer writes in. If unclear, reply in Latin-American Spanish."
+      : "Reply in the same language the customer writes in. If unclear, reply in English.";
+
   const systemPrompt = `You are Tidy's support assistant for ${channel.toUpperCase()} customers.
 
 ${channelGuide}
+${languageGuide}
 
 RULES:
 - Answer ONLY using the BUSINESS KNOWLEDGE below. Never invent prices, ZIPs, hours, or policies.
