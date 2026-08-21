@@ -20,7 +20,7 @@ const Terms = () => {
             <h2 className="text-lg font-bold text-foreground">{t("1. Service Type")}</h2>
             <p>
               {t(
-                "Tidy provides recurring maintenance services including house cleaning, lawn care, and car detailing. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately.",
+                "Tidy provides recurring maintenance services including house cleaning, lawn care, and car detailing. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately. Services are performed by independent contractors engaged by Tidy. Tidy carries commercial general liability coverage on every Tidy assignment, and contractors are background-checked.",
               )}
             </p>
           </section>
