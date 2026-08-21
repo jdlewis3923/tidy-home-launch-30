@@ -275,15 +275,16 @@ export function loadState(): ConfigState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // SECURITY: never restore passwords from localStorage.
-      // One-time cleanup: strip any legacy plaintext password stored in a returning visitor's browser.
-      if (parsed.password != null || parsed.confirmPassword != null) {
+      // SECURITY: never restore sensitive plaintext from localStorage.
+      // One-time cleanup: strip any legacy password, address, or accessNotes stored in a returning visitor's browser.
+      if (parsed.password != null || parsed.address != null || parsed.accessNotes != null) {
         const cleaned = { ...parsed };
         delete cleaned.password;
-        delete cleaned.confirmPassword;
+        delete cleaned.address;
+        delete cleaned.accessNotes;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
       }
-      return { ...defaultState, ...parsed, password: '' };
+      return { ...defaultState, ...parsed, password: '', address: '', accessNotes: '' };
     }
   } catch {}
   return { ...defaultState };
@@ -291,8 +292,9 @@ export function loadState(): ConfigState {
 
 export function saveState(state: ConfigState) {
   const safe = { ...state };
-  delete (safe as Partial<{ password: string; confirmPassword: string }>).password;
-  delete (safe as Partial<{ password: string; confirmPassword: string }>).confirmPassword;
+  delete (safe as Partial<ConfigState>).password;
+  delete (safe as Partial<ConfigState>).address;
+  delete (safe as Partial<ConfigState>).accessNotes;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
 }
 
