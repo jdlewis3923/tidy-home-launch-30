@@ -404,9 +404,73 @@ export default function Billing() {
           )}
         </Card>
       </section>
+
+      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("Cancel your Tidy plan?")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                "Your plan stays active until the end of the period you have already paid for, then it will not renew. You can undo this any time before then."
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>{t("Keep my plan")}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={busy}
+              onClick={(e) => {
+                e.preventDefault();
+                manage("cancel");
+              }}
+            >
+              {t("Yes, cancel my plan")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={pauseOpen} onOpenChange={setPauseOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("Pause your plan")}</DialogTitle>
+            <DialogDescription>
+              {t("We hold your slot while you are paused. No charges while paused.")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-ink-faint">
+              {t("Resume on")}
+            </p>
+            <Select value={pauseDays} onValueChange={setPauseDays}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[14, 30, 45, 60].map((d) => (
+                  <SelectItem key={d} value={String(d)}>
+                    {formatLongDate(resumeDateFor(d))} · {d} {t("days")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => manage("pause", resumeDateFor(Number(pauseDays)))}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[hsl(var(--primary))] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_-10px_hsl(var(--primary)/0.55)] transition hover:opacity-95 disabled:opacity-70"
+            >
+              {t("Pause plan")}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
 
 /* — Bouncing dots loader — calm, three-dot wave —————————————————— */
 
