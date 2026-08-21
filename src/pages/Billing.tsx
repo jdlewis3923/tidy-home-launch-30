@@ -282,11 +282,18 @@ export default function Billing() {
             )}
 
             <Link
-              to="/dashboard/plan"
+              to="/billing"
               className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[hsl(var(--primary))] hover:underline"
             >
               Manage plan <ArrowRight className="h-3.5 w-3.5" />
             </Link>
+            <p className="mt-3 text-xs text-ink-faint">
+              {t("Need to add or change a service? Email ")}
+              <a href="mailto:hello@jointidy.co" className="text-[hsl(var(--primary))] hover:underline">
+                hello@jointidy.co
+              </a>
+              {t("and we'll update your plan.")}
+            </p>
 
             {sub && (
               <div className="mt-5 border-t border-[hsl(var(--hairline))] pt-4">

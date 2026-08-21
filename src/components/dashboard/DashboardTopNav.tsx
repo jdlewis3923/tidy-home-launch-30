@@ -19,7 +19,7 @@ import { useHasRoleState } from '@/hooks/useHasRole';
 
 const NAV = [
   { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Services', href: '/dashboard/plan' },
+  { label: 'Services', href: '/billing' },
   { label: 'Billing', href: '/billing' },
   { label: 'Notifications', href: '/dashboard/notifications' },
   { label: 'Account', href: '/account' },

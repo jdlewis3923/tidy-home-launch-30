@@ -1,7 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote, VALID_ZIPS } from '@/lib/dashboard-pricing';
+import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 import CalmShell from '@/components/dashboard/CalmShell';
 import ProgressBar from '@/components/dashboard/ProgressBar';
 import StickyPriceBar from '@/components/dashboard/StickyPriceBar';
@@ -43,13 +46,48 @@ export default function DashboardPlan() {
   const [direction, setDirection] = useState(0);
   const [state, setState] = useState<ConfigState>(loadState);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [hasExistingSub, setHasExistingSub] = useState(false);
+  const [checkingSub, setCheckingSub] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
   const customQuote = hasCustomQuote(state);
+
+  // Guard: existing subscribers shouldn't run the acquisition wizard again.
+  useEffect(() => {
+    let mounted = true;
+    const checkExisting = async () => {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const uid = sessionData.session?.user?.id;
+        if (!uid) {
+          if (mounted) setCheckingSub(false);
+          return;
+        }
+        const { data: row } = await supabase
+          .from("subscriptions")
+          .select("status")
+          .eq("user_id", uid)
+          .in("status", ["active", "paused"])
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (mounted) {
+          setHasExistingSub(!!row);
+          setCheckingSub(false);
+        }
+      } catch {
+        if (mounted) setCheckingSub(false);
+      }
+    };
+    checkExisting();
+    return () => { mounted = false; };
+  }, []);
 
   // Preselect from incoming ad URL params, once. If a valid ZIP is in
   // localStorage already, skip the ZIP gate.
   useEffect(() => {
+    if (hasExistingSub || checkingSub) return;
     const params = new URLSearchParams(location.search);
     const serviceParam = params.get('service');
     const planParam = params.get('plan');
@@ -90,7 +128,7 @@ export default function DashboardPlan() {
       return next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hasExistingSub, checkingSub]);
 
   const updateState = useCallback((next: ConfigState) => {
     setState(next);
@@ -128,6 +166,22 @@ export default function DashboardPlan() {
   };
 
   const stepInfo = STEPS[step];
+
+  if (hasExistingSub) {
+    return (
+      <CalmShell step={0} totalSteps={0} microcopy="">
+        <div className="rounded-3xl border border-[hsl(var(--hairline))] bg-white p-12 text-center shadow-[0_4px_20px_rgba(15,23,42,0.04)]">
+          <h1 className="text-2xl font-bold text-ink lowercase">{t("You already have a Tidy plan.")}</h1>
+          <Link
+            to="/billing"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] transition hover:bg-ink-soft"
+          >
+            {t("Go to Billing")} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </CalmShell>
+    );
+  }
 
   return (
     <CalmShell step={step} totalSteps={STEPS.length} microcopy={stepInfo.micro}>
