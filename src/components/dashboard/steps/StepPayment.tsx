@@ -91,6 +91,7 @@ export default function StepPayment({ state, onChange }: Props) {
     const attr = getUtmAttribution();
     return {
       services, addons, promo_code: promoCode ?? undefined,
+      referral_code: state.referralCode?.trim() || undefined,
       zip: state.zip, preferred_day: state.preferredDay, preferred_time: state.preferredTime,
       lang: 'en' as const,
       idempotency_key: `cfg:${state.zip}:${services.map(s => s.service + ':' + s.frequency).sort().join(',')}:${addons.map(a => a.addon_name + 'x' + a.qty).sort().join(',')}`,
