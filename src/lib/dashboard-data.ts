@@ -26,11 +26,12 @@ export type DashboardData = {
   profile: Profile | null;
   subscription: Subscription | null;
   visits: Visit[];                // all visits, asc by date
-  upcoming: Visit[];              // future / today, scheduled
+  upcoming: Visit[];              // future / today, scheduled or skipped
   nextVisit: Visit | null;
   lastCompleted: Visit | null;
   nextInvoice: Invoice | null;
   invoices: Invoice[];
+  refetch: () => void;
 };
 
 const SERVICE_LABEL: Record<string, string> = {
@@ -55,6 +56,7 @@ export function useDashboardData(): DashboardData {
     lastCompleted: null,
     nextInvoice: null,
     invoices: [],
+    refetch: () => {},
   });
 
   useEffect(() => {
