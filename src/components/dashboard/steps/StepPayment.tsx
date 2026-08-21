@@ -125,13 +125,16 @@ export default function StepPayment({ state, onChange }: Props) {
         }
         setClientSecret(data.client_secret as string);
         // Keep submitting=true until the user finishes paying (UI shows form, no double-submit possible).
-      } else if (STRIPE_INTEGRATION_ENABLED) {
-        await startCheckout({ config: state });
       } else {
-        navigate('/dashboard/confirmation');
+        // Hosted-checkout path — always reachable, regardless of any flag state.
+        await startCheckout({ config: state });
+        // startCheckout redirects; clear the flag as a safety net so the button
+        // can never stay stuck if the redirect does not happen.
+        setSubmitting(false);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'checkout failed. please try again.');
+      setPreparing(false);
       setSubmitting(false);
     }
   };
