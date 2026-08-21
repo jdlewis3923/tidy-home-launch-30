@@ -365,7 +365,7 @@ export default function DashboardIndex() {
                   {data.subscription!.frequency}
                 </div>
                 <Link
-                  to="/dashboard/plan"
+                  to="/billing"
                   className="mt-3 block w-full rounded-lg border border-[hsl(var(--hairline))] py-2 text-center text-sm font-medium text-[hsl(var(--primary))] transition hover:bg-cream"
                 >
                   Manage plan
@@ -757,8 +757,8 @@ export default function DashboardIndex() {
         title="Manage your plan"
         subtitle="Add or remove services, change frequency, pause anytime."
         onClose={() => setActiveModal(null)}
-        primaryLabel="Open plan builder"
-        onPrimary={() => navigate('/dashboard/plan')}
+        primaryLabel="Go to Billing"
+        onPrimary={() => navigate('/billing')}
       />
 
       <CalmModal
