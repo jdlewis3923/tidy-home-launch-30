@@ -189,7 +189,7 @@ Deno.serve(async (req) => {
           }
         }
 
-        const subscriptionMetadata = {
+        const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
           price_locked: "yes",
           signed_up_at: new Date().toISOString(),
@@ -225,11 +225,29 @@ Deno.serve(async (req) => {
           expand: ["latest_invoice.payment_intent", "pending_setup_intent"],
           metadata: subscriptionMetadata,
         };
-        if (promoId) subParams.promotion_code = promoId;
+
+        // Bundle discount must be a real Stripe coupon on the subscription, not
+        // metadata only. On API 2024-12-18.acacia the `discounts` array is the
+        // supported parameter (the legacy `coupon` / `promotion_code` fields are
+        // mutually exclusive with it), and it accepts multiple stacked discounts,
+        // so a bundle coupon and a referral promotion code can both apply.
+        let promoCodeApplied = true;
+        let promoCodeMessage: string | undefined;
+
+        if (bundle_discount_pct > 0) {
+          const couponId = await getBundleCouponId(stripe, bundle_discount_pct);
+          // deno-lint-ignore no-explicit-any
+          const discounts: any[] = [{ coupon: couponId }];
+          if (promoId) discounts.push({ promotion_code: promoId });
+          subParams.discounts = discounts;
+        } else if (promoId) {
+          subParams.promotion_code = promoId;
+        }
 
         const subscription = await stripe.subscriptions.create(subParams, {
           idempotencyKey: `sub:${idempotencyKey}`,
         });
+
 
         // deno-lint-ignore no-explicit-any
         const invoice: any = subscription.latest_invoice;
