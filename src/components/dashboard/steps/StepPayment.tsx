@@ -332,6 +332,20 @@ export default function StepPayment({ state, onChange }: Props) {
           <a href="/terms" className="font-medium text-ink hover:underline">terms</a> and{' '}
           <a href="/privacy" className="font-medium text-ink hover:underline">privacy policy</a>.
         </p>
+
+        {/* Founding-offer terms — small print, no counters or spot numbers. */}
+        <div className="border-t border-hairline pt-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-faint">
+            founding offer terms
+          </p>
+          <ul className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-ink-faint">
+            <li>· founding rate locked — your price never rises.</li>
+            <li>· one free premium add-on on your first visit.</li>
+            <li>· first visit perfect or it's free.</li>
+            <li>· only 25 founding homes per zip code.</li>
+            <li>· in exchange for a review after your second visit.</li>
+          </ul>
+        </div>
       </div>
 
       {error && (
