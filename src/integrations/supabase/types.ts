@@ -961,6 +961,7 @@ export type Database = {
           contractor_name_matched: string | null
           created_at: string
           id: string
+          is_seed: boolean
           posted_at: string | null
           rating: number
           raw_payload: Json
@@ -974,6 +975,7 @@ export type Database = {
           contractor_name_matched?: string | null
           created_at?: string
           id?: string
+          is_seed?: boolean
           posted_at?: string | null
           rating: number
           raw_payload?: Json
@@ -987,6 +989,7 @@ export type Database = {
           contractor_name_matched?: string | null
           created_at?: string
           id?: string
+          is_seed?: boolean
           posted_at?: string | null
           rating?: number
           raw_payload?: Json
