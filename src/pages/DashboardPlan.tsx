@@ -166,6 +166,22 @@ export default function DashboardPlan() {
 
   const stepInfo = STEPS[step];
 
+  if (hasExistingSub) {
+    return (
+      <CalmShell step={0} totalSteps={0} microcopy="">
+        <div className="rounded-3xl border border-[hsl(var(--hairline))] bg-white p-12 text-center shadow-[0_4px_20px_rgba(15,23,42,0.04)]">
+          <h1 className="text-2xl font-bold text-ink lowercase">{t("You already have a Tidy plan.")}</h1>
+          <Link
+            to="/billing"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] transition hover:bg-ink-soft"
+          >
+            {t("Go to Billing")} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </CalmShell>
+    );
+  }
+
   return (
     <CalmShell step={step} totalSteps={STEPS.length} microcopy={stepInfo.micro}>
       <div className="space-y-6">
