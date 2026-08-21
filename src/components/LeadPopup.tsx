@@ -24,9 +24,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
     if (!form.firstName.trim()) errs.firstName = "First name is required";
     if (!form.email.trim() || !form.email.includes("@")) errs.email = "Valid email is required";
     if (!form.phone.trim()) errs.phone = "Phone number is required";
-
     if (!form.zip.trim()) errs.zip = "ZIP code is required";
-    if (!smsConsent) errs.smsConsent = "Please agree to receive SMS messages to continue";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -197,7 +195,6 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
               )}
             </span>
           </label>
-          {errors.smsConsent && <p className="text-xs text-red-500 font-medium">{errors.smsConsent}</p>}
 
           <button
             type="submit"
