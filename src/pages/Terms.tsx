@@ -58,7 +58,11 @@ const Terms = () => {
           </section>
           <section>
             <h2 className="text-lg font-bold text-foreground">{t("7. Cancellation")}</h2>
-            <p>{t("Cancel anytime. No refunds for completed services.")}</p>
+            <p>
+              {t(
+                "You can cancel at any time from the Billing page in your account. Cancellation takes effect at the end of the billing period you have already paid for, so you keep the visits in that period and no further charge is made. We do not prorate or refund the period already paid. You can undo a cancellation any time before it takes effect. You can also pause your plan for up to 60 days from the Billing page, during which no charges are made and we hold your slot. You can skip an individual visit from your dashboard, which does not change your billing for that period.",
+              )}
+            </p>
           </section>
           <section>
             <h2 className="text-lg font-bold text-foreground">{t("8. Satisfaction")}</h2>
