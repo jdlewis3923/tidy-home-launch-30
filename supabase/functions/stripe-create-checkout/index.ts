@@ -14,6 +14,7 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { corsHeaders, handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
+import { getBundleCouponId } from "../_shared/bundle-coupon.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -152,7 +153,7 @@ Deno.serve(async (req) => {
           }
         }
 
-        // ---------- Bundle discount (metadata only) ----------
+        // ---------- Bundle discount ----------
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
         const bundle_discount_pct = uniqueServices >= 3 ? 15 : uniqueServices === 2 ? 10 : 0;
 
@@ -172,7 +173,7 @@ Deno.serve(async (req) => {
         }
 
         // ---------- Subscription metadata for the webhook ----------
-        const subscriptionMetadata = {
+        const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
           price_locked: "yes",
           signed_up_at: new Date().toISOString(),
@@ -205,7 +206,29 @@ Deno.serve(async (req) => {
           allow_promotion_codes: true,
         };
 
-        if (promoId) {
+        // Stripe Checkout accepts only ONE entry in `discounts`, so a recurring
+        // bundle coupon and a one-off referral promotion code cannot both apply.
+        // The bundle coupon wins (it recurs forever), but the submitted promo code
+        // is recorded rather than dropped silently.
+        let promoCodeApplied = true;
+        let promoCodeMessage: string | undefined;
+
+        if (bundle_discount_pct > 0) {
+          const couponId = await getBundleCouponId(stripe, bundle_discount_pct);
+          sessionParams.discounts = [{ coupon: couponId }];
+          // Stripe rejects discounts + allow_promotion_codes simultaneously.
+          delete sessionParams.allow_promotion_codes;
+
+          if (input.promo_code) {
+            promoCodeApplied = false;
+            promoCodeMessage = `Your ${bundle_discount_pct}% bundle discount was applied instead of promo code ${input.promo_code} — only one discount can apply per subscription.`;
+            subscriptionMetadata.promo_code_not_applied = input.promo_code;
+            subscriptionMetadata.promo_code_not_applied_reason = "bundle_discount_takes_precedence";
+            console.warn(
+              `[checkout] promo code ${input.promo_code} not applied: bundle_discount_takes_precedence (${bundle_discount_pct}%)`,
+            );
+          }
+        } else if (promoId) {
           sessionParams.discounts = [{ promotion_code: promoId }];
           // Stripe rejects discounts + allow_promotion_codes simultaneously.
           delete sessionParams.allow_promotion_codes;
@@ -224,7 +247,13 @@ Deno.serve(async (req) => {
             typeof session.customer === "string" ? session.customer : session.customer?.id ?? null,
         });
 
-        return { ok: true as const, checkout_url: session.url, session_id: session.id };
+        return {
+          ok: true as const,
+          checkout_url: session.url,
+          session_id: session.id,
+          promo_code_applied: promoCodeApplied,
+          ...(promoCodeMessage ? { promo_code_message: promoCodeMessage } : {}),
+        };
       },
     });
 
