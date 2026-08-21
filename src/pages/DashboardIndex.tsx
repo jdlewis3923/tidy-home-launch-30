@@ -82,6 +82,7 @@ const TIME_WINDOW_FALLBACK = '8:00 – 11:00 AM';
 
 export default function DashboardIndex() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const data = useDashboardData();
   const [selectedDate, setSelectedDate] = useState(() =>
     new Date().toISOString().slice(0, 10)
@@ -90,6 +91,8 @@ export default function DashboardIndex() {
   const [activeModal, setActiveModal] = useState<null |
     'reschedule' | 'note' | 'access' | 'plan' | 'payment' | 'help' | 'visit'>(null);
   const [submitState, setSubmitState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [skipVisit, setSkipVisit] = useState<ReturnType<typeof useDashboardData>['upcoming'][number] | null>(null);
+  const [skipBusy, setSkipBusy] = useState(false);
 
   // Controlled fields for support_requests modals.
   const [rescheduleDate, setRescheduleDate] = useState<string>('');
