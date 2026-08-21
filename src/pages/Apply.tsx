@@ -62,7 +62,7 @@ const PERKS = [
   { icon: DollarSign, title: "Weekly direct deposit", body: "Paid every Friday — no chasing invoices." },
   { icon: CalendarClock, title: "Predictable routes", body: "Recurring subscribers in 33156 / 33183 / 33186." },
   { icon: ShieldCheck, title: "We handle the admin", body: "Booking, billing, and customer support — all on us." },
-  { icon: Sparkles, title: "Grow with the brand", body: "Bonus rates for top-rated pros and bilingual crews." },
+  { icon: Sparkles, title: "Grow with the brand", body: "" },
 ];
 
 const EXP_TO_YEARS: Record<ExpBucket, number> = { "1-2": 2, "3-5": 5, "5+": 6 };
