@@ -76,9 +76,6 @@ export default function Billing() {
   const [pauseOpen, setPauseOpen] = useState(false);
   const [pauseDays, setPauseDays] = useState("30");
   const [busy, setBusy] = useState(false);
-  const [pausedUntil, setPausedUntil] = useState<string | null>(() =>
-    typeof window === "undefined" ? null : localStorage.getItem(PAUSE_RESUME_KEY)
-  );
 
 
   useEffect(() => {
