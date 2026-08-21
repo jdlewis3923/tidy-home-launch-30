@@ -233,13 +233,11 @@ export default function CustomerLogin() {
             >
               {isSignUp ? 'already a member? sign in' : "new here? create an account"}
             </button>
-            {!isSignUp && (
-              <div>
-                <Link to="/forgot-password" className="text-xs text-ink-faint hover:text-ink lowercase underline-offset-4 hover:underline">
-                  forgot password?
-                </Link>
-              </div>
-            )}
+            <div>
+              <Link to="/forgot-password" className="text-xs text-ink-faint hover:text-ink lowercase underline-offset-4 hover:underline">
+                forgot password?
+              </Link>
+            </div>
           </div>
 
           <div className="text-center pt-6 border-t border-hairline">
