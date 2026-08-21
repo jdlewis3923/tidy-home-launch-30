@@ -106,7 +106,7 @@ const ReferInner = () => {
     }
   };
 
-  const navCta = getCtaProps({ trackingId: "refer_nav", ctaText: "Book in 60 seconds" });
+  const navCta = getCtaProps({ trackingId: "refer_nav", ctaText: "Book in about 2 minutes" });
   const becomeCustomerCta = getCtaProps({ trackingId: "refer_signup", ctaText: "Become a customer" });
 
   const handleNavCta = () => {
@@ -266,7 +266,7 @@ const ReferInner = () => {
       <LpFinalCta
         headline={t("Not a member yet? Start with a plan.")}
         subhead={t("Lock in your monthly price, then send your link to a neighbor.")}
-        ctaLabel={t("Book in 60 seconds")}
+        ctaLabel={t("Book in about 2 minutes")}
         trackingId="refer_final"
       />
 

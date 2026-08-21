@@ -53,7 +53,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
 
   const desktopRaw = getCtaProps({
     trackingId: `${surface}_sticky_top`,
-    ctaText: "Book in 60 seconds",
+    ctaText: "Book in about 2 minutes",
     service,
     plan,
     bundle,
@@ -63,7 +63,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
 
   const mobileRaw = getCtaProps({
     trackingId: `${surface}_sticky_mobile`,
-    ctaText: "Book in 60 seconds",
+    ctaText: "Book in about 2 minutes",
     service,
     plan,
     bundle,
@@ -88,7 +88,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
               onClick={desktopCta.onClick}
               className="cta-arrow cta-press shrink-0 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-1.5 rounded-md text-sm transition-colors animate-pulse-gold"
             >
-              {t("Book in 60 seconds")} <span className="arrow">→</span>
+              {t("Book in about 2 minutes")} <span className="arrow">→</span>
             </Link>
           </div>
         </div>
@@ -112,7 +112,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
               onClick={mobileCta.onClick}
               className="cta-arrow cta-press flex-1 text-center bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-3 rounded-lg text-sm animate-pulse-gold"
             >
-              {t("Book in 60 seconds")} <span className="arrow">→</span>
+              {t("Book in about 2 minutes")} <span className="arrow">→</span>
             </Link>
             <a
               href={`tel:${PHONE_TEL}`}

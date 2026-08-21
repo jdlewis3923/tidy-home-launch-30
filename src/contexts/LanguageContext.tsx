@@ -238,8 +238,8 @@ const translations: Record<string, string> = {
   "Great question! Tidy is Miami's first all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
     "¡Buena pregunta! Tidy es la primera suscripción de servicios del hogar todo-en-uno de Miami — manejamos tu limpieza, jardín y detallado de auto en un solo plan mensual. Sin malabarear varios proveedores, sin perseguir cotizaciones. Una suscripción y todo queda impecable.",
   "How do I sign up?": "¿Cómo me inscribo?",
-  "Super easy — just tap the 'Get Early Access' button, fill out a quick 60-second form with your name and contact info, and we'll reach out to confirm your spot and lock in your schedule. That's it!":
-    "Súper fácil — toca el botón 'Solicitar Acceso', llena un formulario rápido de 60 segundos con tu nombre y contacto, y te llamamos para confirmar tu lugar y fijar tu horario. ¡Eso es todo!",
+  "Super easy — just tap the 'Get Early Access' button, fill out a quick 2-minute form with your name and contact info, and we'll reach out to confirm your spot and lock in your schedule. That's it!":
+    "Súper fácil — toca el botón 'Solicitar Acceso', llena un formulario rápido de 2 minutos con tu nombre y contacto, y te llamamos para confirmar tu lugar y fijar tu horario. ¡Eso es todo!",
   "Where is Tidy available?": "¿Dónde está disponible Tidy?",
   "We're currently serving some of Miami's best neighborhoods: Kendall (33183, 33186) and Pinecrest (33156). More areas are coming soon — grab your spot now!":
     "Ahora mismo servimos los mejores vecindarios de Miami: Kendall (33183, 33186) y Pinecrest (33156). Vienen más áreas — ¡reserva tu lugar ahora!",
@@ -326,8 +326,8 @@ const translations: Record<string, string> = {
     "Unos 2 minutos · Sin contratos · Cancela cuando quieras",
   "One setup. Everything handled.": "Una configuración. Todo resuelto.",
   "No contracts. No payments until launch.": "Sin contratos. Sin pagos hasta el lanzamiento.",
-  "Limited founding memberships available in your area. Takes 60 seconds. No commitment required.":
-    "Membresías fundadoras limitadas en tu área. Toma 60 segundos. Sin compromiso.",
+  "Limited founding memberships available in your area. Takes about 2 minutes. No commitment required.":
+    "Membresías fundadoras limitadas en tu área. Toma unos 2 minutos. Sin compromiso.",
   "Get Started — Request Early Access →": "Comienza — Solicitar Acceso →",
 
   "Miami-Based": "Basado en Miami",
@@ -375,7 +375,7 @@ const translations: Record<string, string> = {
   // ============================================================
 
   // Shared LP UI
-  "Book in 60 seconds": "Reserva en 60 segundos",
+  "Book in about 2 minutes": "Reserva en unos 2 minutos",
   "Locked price · No contracts · Cancel anytime": "Precio fijo · Sin contratos · Cancela cuando quieras",
   Plans: "Planes",
   "Pick your cadence. Lock your price.": "Elige tu frecuencia. Asegura tu precio.",
@@ -398,8 +398,8 @@ const translations: Record<string, string> = {
     "Profesionales verificados y asegurados en cada trabajo de Tidy.",
 
   "Questions, answered.": "Respuestas a tus preguntas.",
-  "60-second signup. Same crew. Locked price.": "Inscripción en 60 segundos. El mismo equipo. Precio fijo.",
-  "60-second signup. Locked price. Cancel anytime.": "Inscripción en 60 segundos. Precio fijo. Cancela cuando quieras.",
+  "About 2 minutes to sign up. Same crew. Locked price.": "Inscripción en unos 2 minutos. El mismo equipo. Precio fijo.",
+  "About 2 minutes to sign up. Locked price. Cancel anytime.": "Inscripción en unos 2 minutos. Precio fijo. Cancela cuando quieras.",
   "No contracts. Cancel anytime.": "Sin contratos. Cancela cuando quieras.",
   "Save 10%": "Ahorra 10%",
   "Bundle & save": "Combo y ahorra",
@@ -932,15 +932,15 @@ const translations: Record<string, string> = {
     "Tidy no es solo jardín — es un sistema para todo tu hogar.",
   "Start lawn care": "Empezar cuidado del jardín",
   "Start your plan": "Empieza tu plan",
-  "Weekly lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Locked price from $85/mo. Same crew, no contracts. Book in 60 seconds.":
-    "Cuidado del jardín semanal en Pinecrest y Kendall (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Precio fijo desde $85/mes. El mismo equipo, sin contratos. Reserva en 60 segundos.",
+  "Weekly lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Locked price from $85/mo. Same crew, no contracts. Book in about 2 minutes.":
+    "Cuidado del jardín semanal en Pinecrest y Kendall (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Precio fijo desde $85/mes. El mismo equipo, sin contratos. Reserva en unos 2 minutos.",
   "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.":
     "Limpieza profesional del hogar, resuelta por nosotros. Semanal, quincenal o mensual.",
   "Tidy isn't just cleaning — it's a system for your entire home.":
     "Tidy no es solo limpieza — es un sistema para todo tu hogar.",
   "Book your cleaning": "Reserva tu limpieza",
-  "Monthly house cleaning in Pinecrest and Kendall (33156, 33183, 33186). Locked price from $159/mo. Same crew, no contracts, eco-safe. Book in 60 seconds.":
-    "Limpieza mensual del hogar en Pinecrest y Kendall (33156, 33183, 33186). Precio fijo desde $159/mes. El mismo equipo, sin contratos, productos ecológicos. Reserva en 60 segundos.",
+  "Monthly house cleaning in Pinecrest and Kendall (33156, 33183, 33186). Locked price from $159/mo. Same crew, no contracts, eco-safe. Book in about 2 minutes.":
+    "Limpieza mensual del hogar en Pinecrest y Kendall (33156, 33183, 33186). Precio fijo desde $159/mes. El mismo equipo, sin contratos, productos ecológicos. Reserva en unos 2 minutos.",
   "Professional car detailing at your home. Ceramic-safe, monthly.":
     "Detallado profesional de autos en tu casa. Seguro para cerámica, mensual.",
   "Same detailer every visit. Locked monthly price. Cancel anytime.":
@@ -948,8 +948,8 @@ const translations: Record<string, string> = {
   "Tidy isn't just detailing — it's a system for your entire home.":
     "Tidy no es solo detallado — es un sistema para todo tu hogar.",
   "Book detailing": "Reservar detallado",
-  "Mobile car detailing in Pinecrest and Kendall (33156, 33183, 33186). We come to your driveway. Ceramic-safe, locked price from $159/mo. Book in 60 seconds.":
-    "Detallado de autos a domicilio en Pinecrest y Kendall (33156, 33183, 33186). Vamos a tu entrada. Seguro para cerámica, precio fijo desde $159/mes. Reserva en 60 segundos.",
+  "Mobile car detailing in Pinecrest and Kendall (33156, 33183, 33186). We come to your driveway. Ceramic-safe, locked price from $159/mo. Book in about 2 minutes.":
+    "Detallado de autos a domicilio en Pinecrest y Kendall (33156, 33183, 33186). Vamos a tu entrada. Seguro para cerámica, precio fijo desde $159/mes. Reserva en unos 2 minutos.",
   "Stack home cleaning, lawn care, and car detailing on one plan. Save 10–15% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.":
     "Combina limpieza del hogar, cuidado del jardín y detallado de auto en un solo plan. Ahorra 10–15% en Pinecrest y Kendall (33156, 33183, 33186). Una suscripción, un equipo, una factura.",
   "Vetted & insured pros": "Profesionales verificados y asegurados",

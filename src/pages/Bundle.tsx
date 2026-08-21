@@ -68,13 +68,13 @@ const BundleInner = () => {
   }, []);
 
   const handleNavCta = () => {
-    pushEvent("cta_click", { cta_id: "bundle_nav", cta_text: "Book in 60 seconds" });
+    pushEvent("cta_click", { cta_id: "bundle_nav", cta_text: "Book in about 2 minutes" });
     track("book_cta_click", { service: "bundle", location: "hero" });
     if (popupMode) openPopup();
     else {
       window.location.href = getCtaProps({
         trackingId: "bundle_nav_redirect",
-        ctaText: "Book in 60 seconds",
+        ctaText: "Book in about 2 minutes",
       }).to;
     }
   };
@@ -347,7 +347,7 @@ const BundleInner = () => {
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
         headline={t("Ready to bundle?")}
-        subhead={t("60-second signup. Locked price. Cancel anytime.")}
+        subhead={t("About 2 minutes to sign up. Locked price. Cancel anytime.")}
         ctaLabel={t("Start saving")}
         trackingId="bundle_final_cta"
         bundle="true"
