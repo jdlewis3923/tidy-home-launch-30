@@ -16,7 +16,7 @@ import StepDetails from '@/components/dashboard/steps/StepDetails';
 import StepAddOns from '@/components/dashboard/steps/StepAddOns';
 import StepReview from '@/components/dashboard/steps/StepReview';
 import StepPayment from '@/components/dashboard/steps/StepPayment';
-import PromoBanner from '@/components/dashboard/PromoBanner';
+
 import TrustStrip from '@/components/dashboard/TrustStrip';
 import BundleNudge from '@/components/dashboard/BundleNudge';
 import CustomQuoteModal from '@/components/dashboard/CustomQuoteModal';
@@ -191,7 +191,7 @@ export default function DashboardPlan() {
         {/* Above-the-fold trust strip — visible on every step. */}
         <TrustStrip />
 
-        <PromoBanner />
+        
 
         <div className="animate-calm-in" key={`heading-${step}`}>
           <h1
