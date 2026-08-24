@@ -116,7 +116,7 @@ export default function ProTierProgression() {
         <Card className="border-slate-200 mb-10">
           <CardContent className="p-6 space-y-4">
             {[
-              { n: 1, title: "Day 0 — Tier 2 offer sent", body: "Once you meet all six criteria, Tidy emails and texts your Pro Partner offer with a secure upload link." },
+              { n: 1, title: "Day 0 — Tier 2 offer sent", body: "Once you meet every criterion, Tidy emails your Pro Partner offer with a secure upload link." },
               { n: 2, title: "Day 1–10 — Bind your policies", body: "Most Pros bind GL ($1M/$2M aggregate) and commercial auto in 24–72 hours. We provide a list of partner brokers." },
               { n: 3, title: "Day 11–14 — Upload COI", body: "Drop your Certificate of Insurance into /pro/upload-coi. Our team reviews within one business day." },
               { n: 4, title: "Confirmed", body: "On approval, your tier flips to Pro Partner instantly — the 45% split, the $30 per-visit floor, and premium routes unlock automatically." },
