@@ -111,6 +111,19 @@ export default function StepPayment({ state, onChange }: Props) {
         setSubmitting(false);
         return;
       }
+      // TCPA: store the exact SMS wording the customer saw, plus whether they
+      // opted in. Recorded for both outcomes so a "no" is provable too.
+      {
+        const { recordConsent, SMS_CONSENT_VERSION, SMS_CONSENT_WORDING } = await import('@/lib/consent');
+        void recordConsent({
+          kind: 'sms',
+          version: SMS_CONSENT_VERSION,
+          wording: SMS_CONSENT_WORDING,
+          granted: state.smsConsent === true,
+          email: state.email || undefined,
+        });
+      }
+
       if (STRIPE_INTEGRATION_ENABLED && embedded) {
         // Embedded path — fetch client_secret then mount Payment Element.
         setPreparing(true);
