@@ -222,12 +222,9 @@ export function calculatePricing(state: ConfigState) {
     price: getServicePrice(state, s),
   }));
 
-  const subtotal = servicePrices.reduce((sum, sp) => sum + sp.price, 0);
-  const discountPercent = getBundleDiscount(state.services.length);
-  const discountAmount = subtotal * discountPercent;
-  const servicesTotal = subtotal - discountAmount;
+  const servicesSubtotal = servicePrices.reduce((sum, sp) => sum + sp.price, 0);
 
-  const addOnsTotal = state.addOns.reduce((sum, id) => {
+  const addOnsSubtotal = state.addOns.reduce((sum, id) => {
     const addon = addOnData[id];
     if (!addon) return sum;
     let price = addon.price;
@@ -235,17 +232,32 @@ export function calculatePricing(state: ConfigState) {
     return sum + price;
   }, 0);
 
+  // The bundle discount is charged as a Stripe coupon on the whole
+  // subscription (percent_off applies to every recurring line item, add-ons
+  // included), so the displayed discount must be computed the same way —
+  // otherwise the quoted total and the amount charged diverge.
+  const subtotal = servicesSubtotal + addOnsSubtotal;
+  const discountPercent = getBundleDiscount(state.services.length);
+  const discountAmount = subtotal * discountPercent;
+  const total = subtotal - discountAmount;
+
+  const servicesTotal = servicesSubtotal - servicesSubtotal * discountPercent;
+  const addOnsTotal = addOnsSubtotal - addOnsSubtotal * discountPercent;
+
   return {
     servicePrices,
     subtotal,
+    servicesSubtotal,
+    addOnsSubtotal,
     discountPercent,
     discountAmount,
     servicesTotal,
     addOnsTotal,
-    firstMonth: servicesTotal + addOnsTotal,
-    ongoing: servicesTotal,
+    firstMonth: total,
+    ongoing: total,
   };
 }
+
 
 export const VALID_ZIPS = ['33183', '33186', '33156'];
 
