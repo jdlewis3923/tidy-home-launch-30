@@ -59,6 +59,14 @@ export default function CustomerLogin() {
         if (signUpError) {
           setError(signUpError.message);
         } else {
+          // Durable Terms/Privacy assent record (wording + version + server IP).
+          const { recordConsent, TERMS_VERSION, TERMS_CONSENT_WORDING } = await import('@/lib/consent');
+          void recordConsent({
+            kind: 'terms',
+            version: TERMS_VERSION,
+            wording: TERMS_CONSENT_WORDING,
+            email,
+          });
           setError('');
           setIsSignUp(false);
           alert('check your email to confirm your account, then sign in.');
