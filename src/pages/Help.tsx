@@ -26,7 +26,7 @@ import { useDashboardData } from "@/lib/dashboard-data";
 const FAQ = [
   {
     q: "How do I reschedule a visit?",
-    a: "Open the next visit on your dashboard and tap Reschedule, or text us at (786) 829-1141. We confirm within an hour.",
+    a: "Open the next visit on your dashboard and tap Reschedule, or email hello@jointidy.co — same-day reply, Mon–Sat 8am–6pm.",
   },
   {
     q: "When will I be charged?",
@@ -82,7 +82,7 @@ export default function Help() {
             <span className="text-[hsl(var(--primary))]">always one tap away.</span>
           </h1>
           <p className="mt-3 text-base text-ink-soft">
-            Real humans, fast answers. Pick the easiest channel below.
+            Email hello@jointidy.co — same-day reply, Mon–Sat 8am–6pm.
           </p>
         </div>
 
@@ -93,7 +93,7 @@ export default function Help() {
             label="Text us"
             value="(786) 829-1141"
             href="sms:+17868291141"
-            note="Avg reply: 8 min"
+            note="Mon–Sat · 8a–6p"
             primary
           />
           <ContactCard
