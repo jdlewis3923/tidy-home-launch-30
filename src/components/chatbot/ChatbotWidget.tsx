@@ -173,17 +173,22 @@ export default function ChatbotWidget() {
     if (!cbPhone.trim() || cbSubmitting) return;
     setCbSubmitting(true);
     const lastUserQ = [...messages].reverse().find((m) => m.role === "user")?.content ?? null;
-    const { error } = await supabase.from("chatbot_leads").insert({
-      name: cbName.trim() || null,
-      phone: cbPhone.trim(),
-      question: lastUserQ,
-      source_page: typeof window !== "undefined" ? window.location.pathname : null,
+    // Written server-side: the client has no INSERT grant on public.chatbot_leads.
+    const { data: res, error } = await supabase.functions.invoke("submit-chatbot-lead", {
+      body: {
+        name: cbName.trim() || null,
+        phone: cbPhone.trim(),
+        question: lastUserQ,
+        source_page: typeof window !== "undefined" ? window.location.pathname : null,
+      },
     });
     setCbSubmitting(false);
-    if (error) {
+    if (error || !(res as { ok?: boolean } | null)?.ok) {
+      console.error("[submit-chatbot-lead]", error?.message ?? res);
       toast.error(t("Couldn't send — please call ") + TIDY_PHONE);
       return;
     }
+
     if (typeof window !== "undefined") {
       if (cbName.trim()) localStorage.setItem(NAME_KEY, cbName.trim());
     }

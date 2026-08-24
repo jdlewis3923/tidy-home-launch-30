@@ -130,16 +130,16 @@ export default function DashboardIndex() {
         setSubmitState('error');
         return;
       }
-      const { error } = await supabase.from('support_requests').insert({
-        user_id: userId,
-        type,
-        payload: payload as never,
+      // Written server-side: the client has no INSERT grant on public.support_requests.
+      const { data: res, error } = await supabase.functions.invoke('submit-support-request', {
+        body: { type, payload },
       });
-      if (error) {
-        console.error('[support_requests insert]', error.message);
+      if (error || !(res as { ok?: boolean } | null)?.ok) {
+        console.error('[submit-support-request]', error?.message ?? res);
         setSubmitState('error');
         return;
       }
+
       setSubmitState('sent');
       setTimeout(() => setActiveModal(null), 900);
     } catch (err) {
