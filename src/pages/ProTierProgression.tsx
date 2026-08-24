@@ -13,8 +13,9 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 
 const CRITERIA = [
-  { icon: TrendingUp, label: "50+ completed visits", desc: "Rolling 90-day window of paid, customer-verified visits." },
-  { icon: Star, label: "4.8+ average rating", desc: "Customer ratings averaged across the same 90-day window." },
+  { icon: TrendingUp, label: "50+ completed visits", desc: "Paid, customer-verified visits completed as a Verified Pro." },
+  { icon: Star, label: "4.8+ average rating", desc: "Average customer rating across your completed visits." },
+  { icon: CheckCircle2, label: "60+ days active", desc: "At least 60 days since your first completed visit." },
   { icon: XCircle, label: "<5% Pro-initiated cancel rate", desc: "Reschedules and cancels you initiate, divided by total accepted visits." },
   { icon: AlertOctagon, label: "<2% complaint rate", desc: "Verified service complaints filed by customers, divided by total visits." },
   { icon: Camera, label: "95%+ photo compliance", desc: "Before/after photos uploaded on every required visit." },
@@ -22,8 +23,8 @@ const CRITERIA = [
 ];
 
 const FAQ = [
-  { q: "How do I know I'm eligible?", a: "We track all six metrics live. Once you've cleared every threshold for a full 90-day rolling window, your dashboard will switch the Tier 2 callout to 'Eligible' and Tidy support will reach out within 48 hours with an offer." },
-  { q: "What if I drop below a threshold after I'm promoted?", a: "Tier 2 status is reviewed on a rolling basis. If your metrics slip, Tidy will move you back to Tier 1 with at least 30 days notice and a coaching plan to climb back." },
+  { q: "How do I know I'm eligible?", a: "Your dashboard tracks each metric live. The signed Independent Contractor Agreement sets the core thresholds: 50+ completed visits, a 4.8+ average rating, and 60+ days active. Once every threshold is met, the Tier 2 callout switches to 'Eligible' and Tidy follows up with an offer." },
+  { q: "What if I drop below a threshold after I'm promoted?", a: "Tier 2 status is reviewed periodically. If your metrics slip, Tidy will move you back to Tier 1 with at least 30 days notice and a coaching plan to climb back." },
   { q: "Do I have to pay for the COI?", a: "Yes — Tier 2 requires you to carry your own commercial general liability ($1M/$2M aggregate) and commercial auto. Most Pros find competitive policies for $40–80/mo." },
   { q: "Can I stay at Tier 1 forever?", a: "Absolutely. Tier 1 is a permanent, supported home for Pros who prefer steady work without the overhead of a registered business." },
 ];
@@ -48,7 +49,7 @@ export default function ProTierProgression() {
             How Tier Progression Works at Tidy
           </h1>
           <p className="text-slate-600 mt-3 max-w-2xl mx-auto">
-            Every Pro starts at Tier 1 with full Tidy backing. Earn Tier 2 to unlock premium pay, premium routes, and Pro Partner perks.
+            Every Pro starts at Tier 1 with full Tidy backing. Earn Tier 2 to unlock a higher pay split, a higher per-visit floor, and premium routes.
           </p>
         </div>
 
@@ -68,7 +69,6 @@ export default function ProTierProgression() {
               <Row label="Per-visit floor" value="$25" />
               <Row label="Routes" value="Standard" />
               <Row label="Insurance" value="Tidy provides GL during assignments" />
-              <Row label="Gear stipend" value="—" />
               <Row label="Badge" value="Verified Pro" />
             </CardContent>
           </Card>
@@ -82,20 +82,19 @@ export default function ProTierProgression() {
                   <h3 className="text-xl font-bold text-slate-900">Tidy Pro Partner</h3>
                 </div>
               </div>
-              <p className="text-sm text-slate-700 mb-4">Unlocked after 50+ visits and consistent excellence.</p>
+              <p className="text-sm text-slate-700 mb-4">Unlocked after 50+ visits, a 4.8+ rating, and 60+ days active.</p>
               <Row label="Pay split" value="45% to Pro" highlight />
               <Row label="Per-visit floor" value="$30" highlight />
               <Row label="Routes" value="Premium $2M+ homes" highlight />
               <Row label="Insurance" value="Pro carries own GL + auto COI" />
-              <Row label="Gear stipend" value="$300/yr" highlight />
               <Row label="Badge" value="Pro Partner" highlight />
             </CardContent>
           </Card>
         </div>
 
         {/* Criteria */}
-        <h2 className="text-2xl font-bold text-slate-900 mb-4">The 6 readiness criteria</h2>
-        <p className="text-sm text-slate-600 mb-5">Measured on a rolling 90-day window. All six must be met to receive a Tier 2 offer.</p>
+        <h2 className="text-2xl font-bold text-slate-900 mb-4">The readiness criteria</h2>
+        <p className="text-sm text-slate-600 mb-5">Per the signed Independent Contractor Agreement, Tier 2 requires 50+ completed visits AND a 4.8+ average rating AND 60+ days active. The quality thresholds below must also be clear.</p>
         <div className="grid gap-3 sm:grid-cols-2 mb-10">
           {CRITERIA.map(({ icon: Icon, label, desc }) => (
             <Card key={label} className="border-slate-200">
@@ -117,10 +116,10 @@ export default function ProTierProgression() {
         <Card className="border-slate-200 mb-10">
           <CardContent className="p-6 space-y-4">
             {[
-              { n: 1, title: "Day 0 — Tier 2 offer sent", body: "Once you meet all six criteria, Tidy emails and texts your Pro Partner offer with a secure upload link." },
+              { n: 1, title: "Day 0 — Tier 2 offer sent", body: "Once you meet every criterion, Tidy emails your Pro Partner offer with a secure upload link." },
               { n: 2, title: "Day 1–10 — Bind your policies", body: "Most Pros bind GL ($1M/$2M aggregate) and commercial auto in 24–72 hours. We provide a list of partner brokers." },
               { n: 3, title: "Day 11–14 — Upload COI", body: "Drop your Certificate of Insurance into /pro/upload-coi. Our team reviews within one business day." },
-              { n: 4, title: "Confirmed", body: "On approval, your tier flips to Pro Partner instantly — pay split, floor, premium routes, and stipend all unlock automatically." },
+              { n: 4, title: "Confirmed", body: "On approval, your tier flips to Pro Partner instantly — the 45% split, the $30 per-visit floor, and premium routes unlock automatically." },
             ].map((s) => (
               <div key={s.n} className="flex gap-4">
                 <div className="shrink-0 h-8 w-8 rounded-full bg-slate-900 text-white text-sm font-bold grid place-items-center">{s.n}</div>

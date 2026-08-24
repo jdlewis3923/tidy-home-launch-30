@@ -8,9 +8,7 @@
 import { Navigate, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {
-  MessageSquare,
   Mail,
-  Phone,
   HelpCircle,
   Calendar,
   CreditCard,
@@ -26,7 +24,7 @@ import { useDashboardData } from "@/lib/dashboard-data";
 const FAQ = [
   {
     q: "How do I reschedule a visit?",
-    a: "Open the next visit on your dashboard and tap Reschedule, or text us at (786) 829-1141. We confirm within an hour.",
+    a: "Open the next visit on your dashboard and tap Reschedule, or email hello@jointidy.co — same-day reply, Mon–Sat 8am–6pm.",
   },
   {
     q: "When will I be charged?",
@@ -82,33 +80,19 @@ export default function Help() {
             <span className="text-[hsl(var(--primary))]">always one tap away.</span>
           </h1>
           <p className="mt-3 text-base text-ink-soft">
-            Real humans, fast answers. Pick the easiest channel below.
+            Email hello@jointidy.co — same-day reply, Mon–Sat 8am–6pm.
           </p>
         </div>
 
         {/* Contact channels */}
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          <ContactCard
-            icon={<MessageSquare className="h-5 w-5" />}
-            label="Text us"
-            value="(786) 829-1141"
-            href="sms:+17868291141"
-            note="Avg reply: 8 min"
-            primary
-          />
+        <div className="mt-10 grid gap-4">
           <ContactCard
             icon={<Mail className="h-5 w-5" />}
             label="Email"
             value="hello@jointidy.co"
             href="mailto:hello@jointidy.co"
-            note="Same-day response"
-          />
-          <ContactCard
-            icon={<Phone className="h-5 w-5" />}
-            label="Call"
-            value="(786) 829-1141"
-            href="tel:+17868291141"
-            note="Mon–Sat · 8a–6p"
+            note="Same-day reply, Mon–Sat 8am–6pm"
+            primary
           />
         </div>
 

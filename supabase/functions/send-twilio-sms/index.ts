@@ -5,7 +5,8 @@
 // to Twilio's REST API using Basic auth.
 //
 // Guards:
-//   - Quiet hours: only sends between 9:00 and 21:00 America/New_York.
+//   - Send window: 08:00-18:00 America/New_York, Monday-Saturday only.
+//     (Tighter than FL FTSA 8am-8pm, and simpler to reason about.)
 //   - Idempotency: dedupes against integration_logs.payload_hash within 24h.
 //   - E.164 phone validation.
 //
@@ -130,7 +131,8 @@ function isSundayET(): boolean {
 
 function isQuietHours(): boolean {
   const h = easternHour();
-  return !(h >= 9 && h < 21);
+  // Tidy send window: 8:00 AM - 6:00 PM ET.
+  return !(h >= 8 && h < 18);
 }
 
 async function sha256(input: string): Promise<string> {

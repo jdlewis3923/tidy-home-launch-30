@@ -31,16 +31,19 @@ export default function WaitlistCapture({ zip, source, onReset }: Props) {
       return;
     }
     setSubmitting(true);
-    const { error: insertErr } = await supabase
-      .from('waitlist')
-      .insert({ email: email.trim().toLowerCase(), zip, source });
+    // Written server-side: the client has no INSERT grant on public.waitlist.
+    const { data, error: invokeErr } = await supabase.functions.invoke('submit-waitlist', {
+      body: { email: email.trim().toLowerCase(), zip, source },
+    });
     setSubmitting(false);
-    if (insertErr) {
+    if (invokeErr || !(data as { ok?: boolean } | null)?.ok) {
+      console.error('[submit-waitlist]', invokeErr?.message ?? data);
       setError(t("Couldn't save — try again in a moment."));
       return;
     }
     setWaitlisted(true);
   };
+
 
   if (waitlisted) {
     return (

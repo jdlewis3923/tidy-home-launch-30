@@ -173,17 +173,22 @@ export default function ChatbotWidget() {
     if (!cbPhone.trim() || cbSubmitting) return;
     setCbSubmitting(true);
     const lastUserQ = [...messages].reverse().find((m) => m.role === "user")?.content ?? null;
-    const { error } = await supabase.from("chatbot_leads").insert({
-      name: cbName.trim() || null,
-      phone: cbPhone.trim(),
-      question: lastUserQ,
-      source_page: typeof window !== "undefined" ? window.location.pathname : null,
+    // Written server-side: the client has no INSERT grant on public.chatbot_leads.
+    const { data: res, error } = await supabase.functions.invoke("submit-chatbot-lead", {
+      body: {
+        name: cbName.trim() || null,
+        phone: cbPhone.trim(),
+        question: lastUserQ,
+        source_page: typeof window !== "undefined" ? window.location.pathname : null,
+      },
     });
     setCbSubmitting(false);
-    if (error) {
+    if (error || !(res as { ok?: boolean } | null)?.ok) {
+      console.error("[submit-chatbot-lead]", error?.message ?? res);
       toast.error(t("Couldn't send — please call ") + TIDY_PHONE);
       return;
     }
+
     if (typeof window !== "undefined") {
       if (cbName.trim()) localStorage.setItem(NAME_KEY, cbName.trim());
     }
@@ -227,7 +232,7 @@ export default function ChatbotWidget() {
             <div>
               <div className="text-sm font-semibold">{t("Tidy Concierge")}</div>
               <div className="text-xs opacity-80">
-                {escalated ? t("A teammate is on the way") : t("Usually replies instantly")}
+                {t("Mon–Sat 8am–6pm ET")}
               </div>
             </div>
             <a
@@ -295,7 +300,7 @@ export default function ChatbotWidget() {
                     onClick={submitCallback}
                     disabled={!cbPhone.trim() || cbSubmitting}
                   >
-                    {cbSubmitting ? t("Sending...") : t("Request callback")}
+                    {cbSubmitting ? t("Sending...") : t("Leave my number")}
                   </Button>
                   <Button
                     size="sm"
@@ -316,7 +321,7 @@ export default function ChatbotWidget() {
                 onClick={() => setShowCallback(true)}
                 className="rounded-full border bg-background px-2.5 py-1 text-xs hover:bg-muted"
               >
-                📞 {t("Request callback")}
+                📞 {t("Leave my number")}
               </button>
               <a
                 href={`tel:${TIDY_PHONE_TEL}`}
