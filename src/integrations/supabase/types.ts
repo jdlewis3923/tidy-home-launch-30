@@ -2719,6 +2719,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_consents: {
+        Row: {
+          created_at: string
+          email: string | null
+          granted: boolean
+          id: string
+          ip: string | null
+          kind: string
+          user_agent: string | null
+          user_id: string | null
+          version: string
+          wording: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          granted?: boolean
+          id?: string
+          ip?: string | null
+          kind: string
+          user_agent?: string | null
+          user_id?: string | null
+          version: string
+          wording: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          granted?: boolean
+          id?: string
+          ip?: string | null
+          kind?: string
+          user_agent?: string | null
+          user_id?: string | null
+          version?: string
+          wording?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
