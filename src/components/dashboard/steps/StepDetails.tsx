@@ -101,7 +101,7 @@ export default function StepDetails({ state, onChange }: Props) {
             className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
           >
             <option value="">no preference</option>
-            {['Monday','Tuesday','Wednesday','Thursday','Friday'].map(d => (
+            {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(d => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
@@ -115,7 +115,7 @@ export default function StepDetails({ state, onChange }: Props) {
           >
             <option value="">no preference</option>
             <option value="morning">morning · 8am–12pm</option>
-            <option value="afternoon">afternoon · 12pm–5pm</option>
+            <option value="afternoon">afternoon · 12pm–6pm</option>
           </select>
         </div>
       </div>

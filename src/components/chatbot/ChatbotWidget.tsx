@@ -232,7 +232,7 @@ export default function ChatbotWidget() {
             <div>
               <div className="text-sm font-semibold">{t("Tidy Concierge")}</div>
               <div className="text-xs opacity-80">
-                {escalated ? t("A teammate is on the way") : t("Usually replies instantly")}
+                {t("Mon–Sat 8am–6pm ET")}
               </div>
             </div>
             <a
@@ -300,7 +300,7 @@ export default function ChatbotWidget() {
                     onClick={submitCallback}
                     disabled={!cbPhone.trim() || cbSubmitting}
                   >
-                    {cbSubmitting ? t("Sending...") : t("Request callback")}
+                    {cbSubmitting ? t("Sending...") : t("Leave my number")}
                   </Button>
                   <Button
                     size="sm"
@@ -321,7 +321,7 @@ export default function ChatbotWidget() {
                 onClick={() => setShowCallback(true)}
                 className="rounded-full border bg-background px-2.5 py-1 text-xs hover:bg-muted"
               >
-                📞 {t("Request callback")}
+                📞 {t("Leave my number")}
               </button>
               <a
                 href={`tel:${TIDY_PHONE_TEL}`}
