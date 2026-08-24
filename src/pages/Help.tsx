@@ -8,9 +8,7 @@
 import { Navigate, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {
-  MessageSquare,
   Mail,
-  Phone,
   HelpCircle,
   Calendar,
   CreditCard,
