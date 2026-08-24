@@ -87,28 +87,14 @@ export default function Help() {
         </div>
 
         {/* Contact channels */}
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          <ContactCard
-            icon={<MessageSquare className="h-5 w-5" />}
-            label="Text us"
-            value="(786) 829-1141"
-            href="sms:+17868291141"
-            note="Mon–Sat · 8a–6p"
-            primary
-          />
+        <div className="mt-10 grid gap-4">
           <ContactCard
             icon={<Mail className="h-5 w-5" />}
             label="Email"
             value="hello@jointidy.co"
             href="mailto:hello@jointidy.co"
-            note="Same-day response"
-          />
-          <ContactCard
-            icon={<Phone className="h-5 w-5" />}
-            label="Call"
-            value="(786) 829-1141"
-            href="tel:+17868291141"
-            note="Mon–Sat · 8a–6p"
+            note="Same-day reply, Mon–Sat 8am–6pm"
+            primary
           />
         </div>
 
