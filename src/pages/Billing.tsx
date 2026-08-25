@@ -64,7 +64,6 @@ import {
   formatMoney,
 } from "@/lib/dashboard-data";
 
-const PAUSE_RESUME_KEY = "tidy.pause_resumes_on";
 
 export default function Billing() {
   const navigate = useNavigate();
@@ -135,12 +134,8 @@ export default function Billing() {
       if (error) throw error;
       if (res && res.ok === false) throw new Error(res.error ?? "failed");
 
-      if (action === "pause" && resumeOn) {
-        localStorage.setItem(PAUSE_RESUME_KEY, resumeOn);
-      }
-      if (action === "resume") {
-        localStorage.removeItem(PAUSE_RESUME_KEY);
-      }
+      // Pause restart date lives on public.subscriptions.paused_until (synced from
+      // Stripe) — never in localStorage, so it survives across devices.
 
 
       toast.success(
