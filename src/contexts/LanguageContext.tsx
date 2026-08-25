@@ -16,19 +16,12 @@ const translations: Record<string, string> = {
   "Open chat with Tidy assistant": "Abrir el chat con el asistente de Tidy",
   "Hi! I'm Tidy's concierge assistant \u{1F44B} Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.":
     "\u00a1Hola! Soy el asistente concierge de Tidy \u{1F44B} Preg\u00fantame lo que quieras sobre limpieza, jardiner\u00eda, detallado de autos, precios o nuestra zona de servicio.",
-  "Request a callback": "Solicitar una llamada",
-  "Your name (optional)": "Tu nombre (opcional)",
-  "Phone number *": "N\u00famero de tel\u00e9fono *",
   "Sending...": "Enviando...",
   "Ask about pricing, areas, services...": "Pregunta sobre precios, zonas, servicios...",
   "A human will be with you soon. You can also call us at":
     "Una persona te atender\u00e1 pronto. Tambi\u00e9n puedes llamarnos al",
   "Couldn't reach Tidy. Try again or call ": "No pudimos conectar con Tidy. Intenta de nuevo o llama al ",
   "Something went wrong": "Algo sali\u00f3 mal",
-  "Couldn't send — please call ": "No se pudo enviar — por favor llama al ",
-  "Thanks! We'll reach out shortly.": "\u00a1Gracias! Te contactaremos en breve.",
-  "Got it — we'll call you at": "Listo — te llamaremos al",
-  "In the meantime, you can reach us anytime at": "Mientras tanto, puedes contactarnos en cualquier momento al",
 
   // ZIP checker / waitlist capture
   "We serve": "¡Servimos en",
