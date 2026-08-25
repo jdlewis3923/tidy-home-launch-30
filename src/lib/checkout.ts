@@ -47,9 +47,14 @@ export function translate(config: ConfigState) {
     .map((svc) => {
       const frequency = config.frequencies[svc];
       if (!frequency) return null;
-      return { service: svc, frequency };
+      // Detailing is priced PER VEHICLE, so the recurring line item has to carry
+      // the vehicle count as its quantity — otherwise we quote N vehicles and
+      // Stripe charges for one.
+      return { service: svc, frequency, qty: svc === 'detailing' ? vehicleCount : 1 };
     })
-    .filter((x): x is { service: ServiceType; frequency: 'monthly' | 'biweekly' | 'weekly' } => !!x);
+    .filter(
+      (x): x is { service: ServiceType; frequency: 'monthly' | 'biweekly' | 'weekly'; qty: number } => !!x,
+    );
 
   const addons: Array<{ addon_name: string; qty: number }> = [];
 

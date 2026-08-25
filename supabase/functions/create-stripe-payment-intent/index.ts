@@ -30,7 +30,14 @@ const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
 
 const InputSchema = z.object({
   services: z
-    .array(z.object({ service: ServiceTypeEnum, frequency: FrequencyEnum }))
+    .array(
+      z.object({
+        service: ServiceTypeEnum,
+        frequency: FrequencyEnum,
+        // Per-vehicle services (detailing) send the vehicle count here.
+        qty: z.number().int().min(1).max(10).default(1),
+      }),
+    )
     .min(1)
     .max(3),
   addons: z
@@ -123,7 +130,7 @@ Deno.serve(async (req) => {
         for (const s of input.services) {
           const row = subRows?.find((r) => r.service_type === s.service && r.frequency === s.frequency);
           if (!row) throw new Error(`no active catalog price for ${s.service}:${s.frequency}`);
-          items.push({ price: row.stripe_price_id, quantity: 1 });
+          items.push({ price: row.stripe_price_id, quantity: s.qty ?? 1 });
         }
 
         // Resolve add-ons
