@@ -232,7 +232,10 @@ export default function AdminKpis() {
   const toggleSiteLive = useCallback(async () => {
     const next = !siteLive;
     setSiteToggleSaving(true);
-    const { error } = await supabase.rpc("admin_set_site_live", { _live: next });
+    const { data: authData } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: "site_live", value: next, updated_by: authData.user?.id ?? null });
     setSiteToggleSaving(false);
     if (error) {
       toast({ title: "Could not update site status", description: error.message, variant: "destructive" });

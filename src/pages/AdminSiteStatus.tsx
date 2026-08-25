@@ -24,7 +24,10 @@ const AdminSiteStatus = () => {
 
   const onToggle = async (next: boolean) => {
     setSaving(true);
-    const { error } = await supabase.rpc("admin_set_site_live", { _live: next });
+    const { data: authData } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: "site_live", value: next, updated_by: authData.user?.id ?? null });
     setSaving(false);
     if (error) {
       toast({ title: "Could not update", description: error.message, variant: "destructive" });
