@@ -24,6 +24,39 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const SERVICE_ZIPS = new Set(["33156", "33183", "33186"]);
+const FALLBACK_BUNDLE_DISCOUNTS: Record<number, number> = { 2: 10, 3: 15 };
+
+function fallbackBundleDiscount(uniqueServices: number): number {
+  if (uniqueServices >= 3) return FALLBACK_BUNDLE_DISCOUNTS[3];
+  if (uniqueServices === 2) return FALLBACK_BUNDLE_DISCOUNTS[2];
+  return 0;
+}
+
+async function resolveBundleDiscountPct(
+  supabase: ReturnType<typeof createClient>,
+  uniqueServices: number,
+): Promise<number> {
+  if (uniqueServices < 2) return 0;
+  const fallback = fallbackBundleDiscount(uniqueServices);
+  const { data, error } = await supabase
+    .from("app_settings")
+    .select("value")
+    .eq("key", "bundle_discount_pct")
+    .maybeSingle();
+  if (error) {
+    console.warn("[embedded] bundle discount setting read failed; using fallback", error.message);
+    return fallback;
+  }
+
+  const value = data?.value;
+  const tierKey = uniqueServices >= 3 ? "3" : "2";
+  const configured =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? Number((value as Record<string, unknown>)[tierKey])
+      : Number(value);
+
+  return Number.isFinite(configured) && configured >= 0 && configured <= 100 ? configured : fallback;
+}
 
 const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
 const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
@@ -181,7 +214,7 @@ Deno.serve(async (req) => {
         }
 
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
-        const bundle_discount_pct = uniqueServices >= 3 ? 15 : uniqueServices === 2 ? 10 : 0;
+        const bundle_discount_pct = await resolveBundleDiscountPct(supabase, uniqueServices);
 
         // Promo code lookup → coupon
         let promoId: string | null = null;
