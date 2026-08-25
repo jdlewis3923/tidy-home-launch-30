@@ -256,7 +256,7 @@ export default function StepPayment({ state, onChange }: Props) {
         </div>
       </div>
 
-      {/* 48-Hour Re-do Guarantee — prominent near price summary. */}
+      {/* 24-Hour Re-do Guarantee — prominent near price summary. */}
       <div
         className={`flex items-center gap-3 rounded-xl border-2 border-gold/40 bg-gold/10 px-4 py-3 ${reveal(0)}`}
         style={{ transitionDelay: '180ms' }}
