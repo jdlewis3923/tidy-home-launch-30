@@ -15,7 +15,9 @@ const ComingSoon = () => {
             "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, car detailing. Opening soon.",
           )}
         />
+        <link rel="canonical" href="https://jointidy.co" />
         <meta name="robots" content="noindex, nofollow" />
+
       </Helmet>
 
       <main className="relative min-h-screen overflow-hidden bg-[#0f172a] text-white">

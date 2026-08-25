@@ -10,15 +10,12 @@ const translations: Record<string, string> = {
 
   // Chatbot widget
   "Tidy Concierge": "Concierge de Tidy",
-  "Usually replies instantly": "Normalmente responde al instante",
-  "A teammate is on the way": "Un miembro del equipo ya viene en camino",
   Call: "Llamar",
   Send: "Enviar",
   "Close chat": "Cerrar el chat",
   "Open chat with Tidy assistant": "Abrir el chat con el asistente de Tidy",
   "Hi! I'm Tidy's concierge assistant \u{1F44B} Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.":
     "\u00a1Hola! Soy el asistente concierge de Tidy \u{1F44B} Preg\u00fantame lo que quieras sobre limpieza, jardiner\u00eda, detallado de autos, precios o nuestra zona de servicio.",
-  "Request callback": "Solicitar llamada",
   "Request a callback": "Solicitar una llamada",
   "Your name (optional)": "Tu nombre (opcional)",
   "Phone number *": "N\u00famero de tel\u00e9fono *",
@@ -104,7 +101,6 @@ const translations: Record<string, string> = {
 
   // Proof bar
   "Miami Homeowners": "Propietarios en Miami",
-  "Average Rating": "Calificación Promedio",
   "Core Services": "Servicios Principales",
   "ZIP Codes Served": "Códigos Postales",
   "Consistent service. No follow-ups. No hassle.": "Servicio consistente. Sin seguimientos. Sin complicaciones.",
@@ -183,10 +179,7 @@ const translations: Record<string, string> = {
 
   // Testimonials
   Reviews: "Reseñas",
-  "Trusted by homeowners": "Confiado por propietarios",
-  "Real homeowners. Real results.": "Propietarios reales. Resultados reales.",
 
-  "100+ Miami members": "100+ miembros en Miami",
   "Request Early Access →": "Solicitar Acceso →",
 
   // Why Tidy

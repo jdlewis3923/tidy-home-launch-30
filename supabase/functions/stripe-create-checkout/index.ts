@@ -30,7 +30,14 @@ const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
 
 const CheckoutInputSchema = z.object({
   services: z
-    .array(z.object({ service: ServiceTypeEnum, frequency: FrequencyEnum }))
+    .array(
+      z.object({
+        service: ServiceTypeEnum,
+        frequency: FrequencyEnum,
+        // Per-vehicle services (detailing) send the vehicle count here.
+        qty: z.number().int().min(1).max(10).default(1),
+      }),
+    )
     .min(1)
     .max(3),
   addons: z
@@ -130,7 +137,7 @@ Deno.serve(async (req) => {
           if (!row) {
             throw new Error(`no active catalog price for ${s.service}:${s.frequency}`);
           }
-          line_items.push({ price: row.stripe_price_id, quantity: 1 });
+          line_items.push({ price: row.stripe_price_id, quantity: s.qty ?? 1 });
         }
 
         // ---------- Resolve add-on prices ----------
