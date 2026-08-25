@@ -82,7 +82,7 @@ function stripeSessionCents(state: ConfigState): number {
       (r) => !r.is_addon && r.service_type === s.service && r.frequency === s.frequency,
     );
     if (!row) throw new Error(`no catalog price for ${s.service}:${s.frequency}`);
-    subtotalCents += row.price_cents;
+    subtotalCents += row.price_cents * (s.qty ?? 1);
   }
   for (const a of addons) {
     const row = catalog.find((r) => r.is_addon && r.addon_name === a.addon_name);
