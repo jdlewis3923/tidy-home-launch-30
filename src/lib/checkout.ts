@@ -39,7 +39,8 @@ function tierFor(state: ConfigState, svc: ServiceType): string | null {
   return state.vehicleSize;
 }
 
-function translate(config: ConfigState) {
+/** Exported for the checkout-parity test: builds the exact server payload. */
+export function translate(config: ConfigState) {
   const vehicleCount = Math.max(1, Number(config.vehicleCount) || 1);
 
   const services = config.services
