@@ -265,9 +265,9 @@ export default function StepPayment({ state, onChange }: Props) {
           <BadgeCheck className="h-5 w-5 text-gold" strokeWidth={2.25} />
         </div>
         <div className="min-w-0">
-          <p className="text-[13px] font-bold text-ink leading-tight">48-hour Re-do Guarantee</p>
+          <p className="text-[13px] font-bold text-ink leading-tight">24-hour Re-do Guarantee</p>
           <p className="text-[11px] text-ink-soft mt-0.5 leading-snug">
-            Not happy? We come back free within 48 hours.
+            Not happy? We come back free within 24 hours.
           </p>
         </div>
       </div>
