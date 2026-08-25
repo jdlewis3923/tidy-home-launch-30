@@ -62,13 +62,11 @@ const catalog = loadCatalog();
 /** The bundle percentage the checkout edge function actually sends to Stripe. */
 function serverBundlePct(uniqueServices: number): number {
   const src = read('supabase/functions/stripe-create-checkout/index.ts');
-  const m = src.match(
-    /uniqueServices >= (\d+) \? (\d+) : uniqueServices === (\d+) \? (\d+) : 0/,
-  );
-  if (!m) throw new Error('could not parse the bundle discount rule from stripe-create-checkout');
-  const [, hiCount, hiPct, loCount, loPct] = m.map(Number) as unknown as number[];
-  if (uniqueServices >= hiCount) return hiPct;
-  if (uniqueServices === loCount) return loPct;
+  const pairs = [...src.matchAll(/(\d+):\s*(\d+)/g)].map((m) => [Number(m[1]), Number(m[2])] as const);
+  if (pairs.length < 2) throw new Error('could not parse the bundle discount fallback map');
+  const discounts = Object.fromEntries(pairs);
+  if (uniqueServices >= 3) return discounts[3] ?? 0;
+  if (uniqueServices === 2) return discounts[2] ?? 0;
   return 0;
 }
 

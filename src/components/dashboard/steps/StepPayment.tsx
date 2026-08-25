@@ -267,7 +267,7 @@ export default function StepPayment({ state, onChange }: Props) {
         <div className="min-w-0">
           <p className="text-[13px] font-bold text-ink leading-tight">24-hour Re-do Guarantee</p>
           <p className="text-[11px] text-ink-soft mt-0.5 leading-snug">
-            Not happy? We come back free within 24 hours.
+            Not happy? We make it right within 24 hours.
           </p>
         </div>
       </div>
@@ -278,7 +278,7 @@ export default function StepPayment({ state, onChange }: Props) {
         style={{ transitionDelay: '220ms' }}
       >
         {[
-          { icon: Banknote,    label: 'Bonded $25k' },
+          { icon: Banknote,    label: 'Licensed' },
           { icon: ShieldCheck, label: '$1M Insured' },
           { icon: BadgeCheck,  label: 'Background Checked' },
           { icon: XIcon,       label: 'Cancel Anytime' },

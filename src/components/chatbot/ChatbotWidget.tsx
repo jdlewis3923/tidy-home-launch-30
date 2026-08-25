@@ -1,10 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageCircle, X, Send, Phone, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -57,10 +55,6 @@ export default function ChatbotWidget() {
   ]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
-  const [showCallback, setShowCallback] = useState(false);
-  const [cbName, setCbName] = useState("");
-  const [cbPhone, setCbPhone] = useState("");
-  const [cbSubmitting, setCbSubmitting] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [escalated, setEscalated] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -110,7 +104,7 @@ export default function ChatbotWidget() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, sending, showCallback]);
+  }, [messages, sending]);
 
   const send = useCallback(async () => {
     const text = input.trim();
@@ -168,44 +162,6 @@ export default function ChatbotWidget() {
       setSending(false);
     }
   }, [input, sending, language, t]);
-
-  const submitCallback = useCallback(async () => {
-    if (!cbPhone.trim() || cbSubmitting) return;
-    setCbSubmitting(true);
-    const lastUserQ = [...messages].reverse().find((m) => m.role === "user")?.content ?? null;
-    // Written server-side: the client has no INSERT grant on public.chatbot_leads.
-    const { data: res, error } = await supabase.functions.invoke("submit-chatbot-lead", {
-      body: {
-        name: cbName.trim() || null,
-        phone: cbPhone.trim(),
-        question: lastUserQ,
-        source_page: typeof window !== "undefined" ? window.location.pathname : null,
-      },
-    });
-    setCbSubmitting(false);
-    if (error || !(res as { ok?: boolean } | null)?.ok) {
-      console.error("[submit-chatbot-lead]", error?.message ?? res);
-      toast.error(t("Couldn't send — please call ") + TIDY_PHONE);
-      return;
-    }
-
-    if (typeof window !== "undefined") {
-      if (cbName.trim()) localStorage.setItem(NAME_KEY, cbName.trim());
-    }
-    toast.success(t("Thanks! We'll reach out shortly."));
-    setShowCallback(false);
-    setCbName("");
-    setCbPhone("");
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "assistant",
-        content: `${t("Got it — we'll call you at")} ${cbPhone}. ${t(
-          "In the meantime, you can reach us anytime at",
-        )} ${TIDY_PHONE}.`,
-      },
-    ]);
-  }, [cbName, cbPhone, cbSubmitting, messages, t]);
 
   return (
     <>
@@ -276,61 +232,16 @@ export default function ChatbotWidget() {
               </div>
             )}
 
-            {showCallback && (
-              <div className="rounded-xl border bg-card p-3 shadow-sm">
-                <div className="mb-2 text-xs font-semibold">{t("Request a callback")}</div>
-                <Input
-                  placeholder={t("Your name (optional)")}
-                  value={cbName}
-                  onChange={(e) => setCbName(e.target.value)}
-                  className="mb-2 h-9 text-sm"
-                />
-                <Input
-                  placeholder={t("Phone number *")}
-                  type="tel"
-                  inputMode="tel"
-                  value={cbPhone}
-                  onChange={(e) => setCbPhone(e.target.value)}
-                  className="mb-2 h-9 text-sm"
-                />
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    className="flex-1"
-                    onClick={submitCallback}
-                    disabled={!cbPhone.trim() || cbSubmitting}
-                  >
-                    {cbSubmitting ? t("Sending...") : t("Leave my number")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowCallback(false)}
-                  >
-                    {t("Cancel")}
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
 
-          {!showCallback && (
-            <div className="flex flex-wrap gap-1.5 border-t bg-muted/30 px-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowCallback(true)}
-                className="rounded-full border bg-background px-2.5 py-1 text-xs hover:bg-muted"
-              >
-                📞 {t("Leave my number")}
-              </button>
-              <a
-                href={`tel:${TIDY_PHONE_TEL}`}
-                className="rounded-full border bg-background px-2.5 py-1 text-xs hover:bg-muted"
-              >
-                {t("Call")} {TIDY_PHONE}
-              </a>
-            </div>
-          )}
+          <div className="flex flex-wrap gap-1.5 border-t bg-muted/30 px-3 pt-2">
+            <a
+              href={`tel:${TIDY_PHONE_TEL}`}
+              className="rounded-full border bg-background px-2.5 py-1 text-xs hover:bg-muted"
+            >
+              {t("Call")} {TIDY_PHONE}
+            </a>
+          </div>
 
           <form
             className="flex items-center gap-2 border-t bg-background p-3"

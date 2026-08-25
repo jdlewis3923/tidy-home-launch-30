@@ -129,12 +129,16 @@ export default function AdminSchedule() {
   }, []);
 
   const loadPauseFlag = useCallback(async () => {
-    const { data, error } = await supabase.rpc("admin_get_scheduler_paused");
+    const { data, error } = await supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "scheduler_paused")
+      .maybeSingle();
     if (error) {
       console.warn("pause flag load failed", error);
       return;
     }
-    setSchedulerPaused(Boolean(data));
+    setSchedulerPaused(data?.value === undefined ? true : Boolean(data.value));
   }, []);
 
   useEffect(() => {
@@ -159,13 +163,16 @@ export default function AdminSchedule() {
     const next = !schedulerPaused;
     if (!next && !confirm("Resume the scheduler? Cron will start firing scheduled posts every minute.")) return;
     setPauseBusy(true);
-    const { data, error } = await supabase.rpc("admin_set_scheduler_paused", { _paused: next });
+    const { data: authData } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: "scheduler_paused", value: next, updated_by: authData.user?.id ?? null });
     setPauseBusy(false);
     if (error) {
       toast.error("Toggle failed: " + error.message);
       return;
     }
-    setSchedulerPaused(Boolean(data));
+    setSchedulerPaused(next);
     toast.success(next ? "Scheduler PAUSED — no posts will fire" : "Scheduler RESUMED");
   };
 

@@ -1,5 +1,5 @@
 /**
- * useHasRole — client-side check for an app role via Supabase RPC `has_role`.
+ * useHasRole — client-side check for an app role via the user_roles table.
  *
  * IMPORTANT: This is for UI gating only (showing/hiding nav links, badges).
  * Real authorization MUST live server-side in RLS policies and edge functions
@@ -29,12 +29,14 @@ export function useHasRoleState(role: AppRole): { hasRole: boolean; isLoading: b
         }
         return;
       }
-      const { data, error } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: role,
-      });
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", role)
+        .maybeSingle();
       if (!cancelled) {
-        setHasRole(!error && data === true);
+        setHasRole(!error && data?.role === role);
         setIsLoading(false);
       }
     };
