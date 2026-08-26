@@ -1,24 +1,17 @@
 import TidyLogo from "@/components/TidyLogo";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import SeoHead from "@/components/landing/SeoHead";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Terms = () => {
   const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>{t("Terms of Service | Tidy Home Concierge")}</title>
-        <meta
-          name="description"
-          content={t(
-            "Terms of Service for Tidy Home Concierge LLC — subscription cleaning, lawn care and car detailing in Miami ZIPs 33156, 33183 and 33186.",
-          )}
-        />
-        <link rel="canonical" href="https://jointidy.co/terms" />
-        <meta property="og:url" content="https://jointidy.co/terms" />
-        <meta property="og:title" content={t("Terms of Service | Tidy Home Concierge")} />
-      </Helmet>
+      <SeoHead
+        title={t("Terms of Service | Tidy Home Concierge")}
+        description={t("Terms of Service for Tidy Home Concierge LLC — subscription cleaning, lawn care and car detailing in Miami ZIPs 33156, 33183 and 33186.")}
+        canonical="https://jointidy.co/terms"
+      />
       <div className="max-w-3xl mx-auto px-4 py-16">
         <div className="flex items-center gap-4 mb-8">
           <Link to="/">

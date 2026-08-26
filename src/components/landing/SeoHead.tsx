@@ -8,13 +8,14 @@ interface SeoHeadProps {
   ogImage?: string;
   /** Service-specific JSON-LD price range, e.g. "$85–$459". */
   priceRange?: string;
+  noindex?: boolean;
 }
 
 /**
  * Per-LP SEO head: title, meta description, canonical, OG image, and
  * LocalBusiness JSON-LD scoped to the 3 ZIPs we actually serve.
  */
-const SeoHead = ({ title, description, canonical, ogImage, priceRange = "$$" }: SeoHeadProps) => {
+const SeoHead = ({ title, description, canonical, ogImage, priceRange = "$$", noindex = false }: SeoHeadProps) => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -51,6 +52,7 @@ const SeoHead = ({ title, description, canonical, ogImage, priceRange = "$$" }: 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
+      {noindex && <meta name="robots" content="noindex, nofollow" />}
       {ogImage && <meta name="twitter:image" content={ogImage} />}
       <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
     </Helmet>

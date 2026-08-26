@@ -1,24 +1,17 @@
 import TidyLogo from "@/components/TidyLogo";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import SeoHead from "@/components/landing/SeoHead";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Privacy = () => {
   const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>{t("Privacy Policy | Tidy Home Concierge")}</title>
-        <meta
-          name="description"
-          content={t(
-            "How Tidy Home Concierge LLC collects, uses and protects your information, including SMS and payment data.",
-          )}
-        />
-        <link rel="canonical" href="https://jointidy.co/privacy" />
-        <meta property="og:url" content="https://jointidy.co/privacy" />
-        <meta property="og:title" content={t("Privacy Policy | Tidy Home Concierge")} />
-      </Helmet>
+      <SeoHead
+        title={t("Privacy Policy | Tidy Home Concierge")}
+        description={t("How Tidy Home Concierge LLC collects, uses and protects your information, including SMS and payment data.")}
+        canonical="https://jointidy.co/privacy"
+      />
       <div className="max-w-3xl mx-auto px-4 py-16">
         <div className="flex items-center gap-4 mb-8">
           <Link to="/">

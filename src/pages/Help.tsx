@@ -6,7 +6,7 @@
  * forms — Tidy answers via human channels.
  */
 import { Navigate, Link, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import SeoHead from "@/components/landing/SeoHead";
 import { useState } from "react";
 import {
   Mail,
@@ -69,15 +69,12 @@ export default function Help() {
 
   return (
     <div className="min-h-screen bg-cream text-ink">
-      <Helmet>
-        <title>Help Center | Tidy Home Concierge</title>
-        <meta
-          name="description"
-          content="Answers about scheduling, billing, pausing and account access for Tidy Home Concierge members in Miami."
-        />
-        <link rel="canonical" href="https://jointidy.co/help" />
-        <meta name="robots" content="noindex" />
-      </Helmet>
+      <SeoHead
+        title="Help Center | Tidy Home Concierge"
+        description="Answers about scheduling, billing, pausing and account access for Tidy Home Concierge members in Miami."
+        canonical="https://jointidy.co/help"
+        noindex
+      />
       <DashboardTopNav initials={data.initials} />
 
       <section className="mx-auto max-w-[1100px] px-6 pt-10 pb-16">
