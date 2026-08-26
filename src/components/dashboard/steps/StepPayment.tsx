@@ -24,6 +24,11 @@ import { getUtmAttribution } from '@/lib/utm';
 
 // Per-vehicle add-ons (keep in sync with src/lib/checkout.ts).
 const PER_VEHICLE_ADDONS = new Set(['ozone', 'petHair', 'engineBay', 'ceramicSpray']);
+
+// The exact Terms wording shown next to the pay button. It is both rendered and
+// stored with the recorded consent, so change them together.
+const CHECKOUT_TERMS_WORDING =
+  "By subscribing, you agree to Tidy's Terms of Service and Privacy Policy.";
 const XL_ADDON_BY_SERVICE: Record<ServiceType, string> = {
   cleaning: 'xl_cleaning',
   lawn: 'xl_lawn',
@@ -114,12 +119,23 @@ export default function StepPayment({ state, onChange }: Props) {
       // TCPA: store the exact SMS wording the customer saw, plus whether they
       // opted in. Recorded for both outcomes so a "no" is provable too.
       {
-        const { recordConsent, SMS_CONSENT_VERSION, SMS_CONSENT_WORDING } = await import('@/lib/consent');
+        const { recordConsent, SMS_CONSENT_VERSION, SMS_CONSENT_WORDING, TERMS_VERSION } =
+          await import('@/lib/consent');
         void recordConsent({
           kind: 'sms',
           version: SMS_CONSENT_VERSION,
           wording: SMS_CONSENT_WORDING,
           granted: state.smsConsent === true,
+          email: state.email || undefined,
+        });
+        // Terms assent: subscribing is the affirmative act, so it is recorded
+        // with the exact wording shown next to the pay button (timestamp,
+        // version and IP are stamped server-side by record-consent).
+        void recordConsent({
+          kind: 'terms',
+          version: TERMS_VERSION,
+          wording: CHECKOUT_TERMS_WORDING,
+          granted: true,
           email: state.email || undefined,
         });
       }
@@ -340,10 +356,17 @@ export default function StepPayment({ state, onChange }: Props) {
           </span>
         </label>
 
+        {/* Terms assent — this exact wording is stored via recordConsent('terms'). */}
         <p className="text-[11px] leading-relaxed text-ink-faint">
           by subscribing, you agree to tidy's{' '}
-          <a href="/terms" className="font-medium text-ink hover:underline">terms</a> and{' '}
-          <a href="/privacy" className="font-medium text-ink hover:underline">privacy policy</a>.
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:underline">
+            terms of service
+          </a>{' '}
+          and{' '}
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:underline">
+            privacy policy
+          </a>
+          .
         </p>
 
         {/* Founding-offer terms — small print, no counters or spot numbers. */}

@@ -201,6 +201,9 @@ export default function Apply() {
             "Join Tidy's contractor network in Kendall and Pinecrest. Cleaning, lawn care, and car detailing pros — weekly pay, predictable routes.",
           )}
         />
+        <link rel="canonical" href="https://jointidy.co/apply" />
+        <meta property="og:url" content="https://jointidy.co/apply" />
+        <meta property="og:title" content={t("Careers at Tidy — Apply to join Miami's home-service crew")} />
       </Helmet>
 
       <div className="absolute inset-0 pointer-events-none">

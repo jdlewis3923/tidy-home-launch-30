@@ -27,10 +27,10 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
-    // Fetch knowledge base (public read).
+    // Fetch knowledge base (service-role: the table is admin/backend only).
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
     const { data: kbRow } = await supabase
       .from("chatbot_knowledge")

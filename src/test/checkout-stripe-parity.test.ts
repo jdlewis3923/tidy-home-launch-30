@@ -17,6 +17,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { translate } from '@/lib/checkout';
+import { getBundleDiscountPct } from '@/lib/bundle-discount';
 import {
   calculatePricing,
   defaultState,
@@ -122,6 +123,13 @@ describe('checkout ↔ Stripe parity', () => {
     expect(serverBundlePct(1)).toBe(0);
     expect(serverBundlePct(2)).toBe(10);
     expect(serverBundlePct(3)).toBe(15);
+  });
+
+  // The client must never carry its own copy of the rate.
+  it('the client bundle rates equal the rates the server charges', () => {
+    for (const n of [1, 2, 3, 4]) {
+      expect(getBundleDiscountPct(n)).toBe(serverBundlePct(n));
+    }
   });
 
   it('a coupon exists for every non-zero bundle rate the server can send', () => {
