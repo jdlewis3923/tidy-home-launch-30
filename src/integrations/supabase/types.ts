@@ -511,6 +511,24 @@ export type Database = {
         }
         Relationships: []
       }
+      bundle_discount_tiers: {
+        Row: {
+          discount_pct: number
+          service_count: number
+          updated_at: string
+        }
+        Insert: {
+          discount_pct: number
+          service_count: number
+          updated_at?: string
+        }
+        Update: {
+          discount_pct?: number
+          service_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chatbot_knowledge: {
         Row: {
           content: string
