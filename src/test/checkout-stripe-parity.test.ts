@@ -17,7 +17,9 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect, beforeAll } from 'vitest';
 import { translate } from '@/lib/checkout';
+import { FLORIDA_TAX, cartTriggersFloridaTax } from '@/lib/florida-tax';
 import { getBundleDiscountPct } from '@/lib/bundle-discount';
+
 import {
   calculatePricing,
   defaultState,
