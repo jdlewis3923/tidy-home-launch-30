@@ -1,3 +1,5 @@
+import { getBundleDiscountPct } from '@/lib/bundle-discount';
+
 // Referral discount applied to first month when a valid promo code is present.
 // Stored in cents to mirror Stripe; UI converts to dollars for display.
 // Edit this single constant to change the displayed discount amount.
