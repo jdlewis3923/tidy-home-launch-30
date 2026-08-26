@@ -15,7 +15,7 @@
 // this fails.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { translate } from '@/lib/checkout';
 import { getBundleDiscountPct } from '@/lib/bundle-discount';
 import {
@@ -60,15 +60,53 @@ function loadCatalog(): CatalogRow[] {
 
 const catalog = loadCatalog();
 
-/** The bundle percentage the checkout edge function actually sends to Stripe. */
-function serverBundlePct(uniqueServices: number): number {
-  const src = read('supabase/functions/stripe-create-checkout/index.ts');
-  const pairs = [...src.matchAll(/(\d+):\s*(\d+)/g)].map((m) => [Number(m[1]), Number(m[2])] as const);
-  if (pairs.length < 2) throw new Error('could not parse the bundle discount fallback map');
-  const discounts = Object.fromEntries(pairs);
-  if (uniqueServices >= 3) return discounts[3] ?? 0;
-  if (uniqueServices === 2) return discounts[2] ?? 0;
-  return 0;
+/**
+ * The live DB rates — public.bundle_discount_tiers is the source of truth for
+ * both the displayed total and the amount Stripe charges. Populated in
+ * beforeAll from the REST API so an edit to the column that diverges from the
+ * client fails this suite.
+ */
+let dbTiers: Record<number, number> = {};
+
+function envFromDotEnv(): { url: string; key: string } {
+  const raw = read('.env');
+  const get = (name: string) =>
+    raw.match(new RegExp(`^${name}=("?)(.*?)\\1$`, 'm'))?.[2]?.trim() ?? '';
+  return { url: get('VITE_SUPABASE_URL'), key: get('VITE_SUPABASE_PUBLISHABLE_KEY') };
+}
+
+async function fetchDbTiers(): Promise<Record<number, number>> {
+  const { url, key } = envFromDotEnv();
+  if (!url || !key) throw new Error('missing Supabase env for the bundle discount DB check');
+  const res = await fetch(`${url}/rest/v1/bundle_discount_tiers?select=service_count,discount_pct`, {
+    headers: { apikey: key, Authorization: `Bearer ${key}` },
+  });
+  if (!res.ok) throw new Error(`bundle_discount_tiers read failed: ${res.status}`);
+  const rows = (await res.json()) as Array<{ service_count: number; discount_pct: number }>;
+  if (!rows.length) throw new Error('bundle_discount_tiers is empty — the charged rate has no source');
+  const map: Record<number, number> = {};
+  for (const r of rows) map[Number(r.service_count)] = Number(r.discount_pct);
+  return map;
+}
+
+/** The rate the server resolves for a given distinct-service count. */
+function dbPct(uniqueServices: number): number {
+  let pct = 0;
+  for (const [countKey, value] of Object.entries(dbTiers)) {
+    if (uniqueServices >= Number(countKey) && value > pct) pct = value;
+  }
+  return pct;
+}
+
+/** The server's offline fallback map, parsed out of the shared resolver. */
+function serverFallbackPct(uniqueServices: number): number {
+  const src = read('supabase/functions/_shared/bundle-discount.ts');
+  const block = src.match(/HARD_FALLBACK[^=]*=\s*\{([^}]*)\}/)?.[1];
+  if (!block) throw new Error('could not parse the server fallback bundle map');
+  const pairs = [...block.matchAll(/(\d+):\s*(\d+)/g)].map((m) => [Number(m[1]), Number(m[2])] as const);
+  let pct = 0;
+  for (const [count, value] of pairs) if (uniqueServices >= count && value > pct) pct = value;
+  return pct;
 }
 
 /** Simulates the Stripe session total in cents for a given ConfigState. */
@@ -90,7 +128,7 @@ function stripeSessionCents(state: ConfigState): number {
   }
 
   // Stripe applies percent_off to the sum of every recurring line item.
-  const pct = serverBundlePct(new Set(services.map((s) => s.service)).size);
+  const pct = dbPct(new Set(services.map((s) => s.service)).size);
   return subtotalCents - subtotalCents * (pct / 100);
 }
 
@@ -118,24 +156,36 @@ function buildState(services: ServiceType[], opts: { xl?: boolean; addOns?: stri
 }
 
 describe('checkout ↔ Stripe parity', () => {
-  it('the catalog seed and the coupon rates are both present', () => {
+  beforeAll(async () => {
+    dbTiers = await fetchDbTiers();
+  });
+
+  it('the catalog seed and the DB bundle rates are both present', () => {
     expect(catalog.filter((r) => !r.is_addon).length).toBeGreaterThanOrEqual(8);
-    expect(serverBundlePct(1)).toBe(0);
-    expect(serverBundlePct(2)).toBe(10);
-    expect(serverBundlePct(3)).toBe(15);
+    expect(dbPct(1)).toBe(0);
+    expect(dbPct(2)).toBe(10);
+    expect(dbPct(3)).toBe(15);
+  });
+
+  it('every catalog row is flagged bundle-eligible at the top DB rate', () => {
+    const top = Math.max(...Object.values(dbTiers));
+    const src = read('supabase/functions/setup-stripe-catalog/index.ts');
+    expect(top).toBeGreaterThan(0);
+    expect(src).toContain('bundle_discount_pct');
   });
 
   // The client must never carry its own copy of the rate.
-  it('the client bundle rates equal the rates the server charges', () => {
+  it('the client and server fallbacks equal the DB rates', () => {
     for (const n of [1, 2, 3, 4]) {
-      expect(getBundleDiscountPct(n)).toBe(serverBundlePct(n));
+      expect(getBundleDiscountPct(n)).toBe(dbPct(n));
+      expect(serverFallbackPct(n)).toBe(dbPct(n));
     }
   });
 
   it('a coupon exists for every non-zero bundle rate the server can send', () => {
     const coupons = read('supabase/functions/_shared/bundle-coupon.ts');
     for (const n of [2, 3]) {
-      const pct = serverBundlePct(n);
+      const pct = dbPct(n);
       expect(coupons).toMatch(new RegExp(`\\b${pct}:\\s*"TIDY_BUNDLE_${pct}PCT"`));
     }
     // The coupon must recur, or month 2 silently reverts to full price.
