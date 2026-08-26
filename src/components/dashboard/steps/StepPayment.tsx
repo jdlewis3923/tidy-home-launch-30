@@ -356,10 +356,17 @@ export default function StepPayment({ state, onChange }: Props) {
           </span>
         </label>
 
+        {/* Terms assent — this exact wording is stored via recordConsent('terms'). */}
         <p className="text-[11px] leading-relaxed text-ink-faint">
           by subscribing, you agree to tidy's{' '}
-          <a href="/terms" className="font-medium text-ink hover:underline">terms</a> and{' '}
-          <a href="/privacy" className="font-medium text-ink hover:underline">privacy policy</a>.
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:underline">
+            terms of service
+          </a>{' '}
+          and{' '}
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:underline">
+            privacy policy
+          </a>
+          .
         </p>
 
         {/* Founding-offer terms — small print, no counters or spot numbers. */}
