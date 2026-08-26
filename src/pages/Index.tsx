@@ -6,6 +6,7 @@ import Hero from "@/components/Hero";
 import ProofBar from "@/components/ProofBar";
 import { useNavigate } from "react-router-dom";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
+import SeoHead from "@/components/landing/SeoHead";
 
 // Lazy-load below-fold sections
 const TrustBar = lazy(() => import("@/components/TrustBar"));
@@ -70,6 +71,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      {/* index.html no longer hardcodes any head tags — every route owns its own. */}
+      <SeoHead
+        title="Tidy Home Concierge | Miami Subscription Home Services"
+        description="Miami's all-in-one home services subscription. House cleaning, lawn care and car detailing on one monthly plan. Serving ZIPs 33156, 33183 and 33186."
+        canonical="https://jointidy.co/"
+        priceRange="$85–$459"
+      />
       <Navbar onOpenPopup={handleCTA} />
       <AnnouncementTicker />
       <Hero onOpenPopup={handleCTA} />
