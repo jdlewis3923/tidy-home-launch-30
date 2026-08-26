@@ -114,13 +114,8 @@ export default function StepPayment({ state, onChange }: Props) {
       // TCPA: store the exact SMS wording the customer saw, plus whether they
       // opted in. Recorded for both outcomes so a "no" is provable too.
       {
-        const {
-          recordConsent,
-          SMS_CONSENT_VERSION,
-          SMS_CONSENT_WORDING,
-          TERMS_VERSION,
-          TERMS_CONSENT_WORDING,
-        } = await import('@/lib/consent');
+        const { recordConsent, SMS_CONSENT_VERSION, SMS_CONSENT_WORDING, TERMS_VERSION } =
+          await import('@/lib/consent');
         void recordConsent({
           kind: 'sms',
           version: SMS_CONSENT_VERSION,
@@ -134,7 +129,7 @@ export default function StepPayment({ state, onChange }: Props) {
         void recordConsent({
           kind: 'terms',
           version: TERMS_VERSION,
-          wording: TERMS_CONSENT_WORDING,
+          wording: CHECKOUT_TERMS_WORDING,
           granted: true,
           email: state.email || undefined,
         });
