@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import tidyLogo from "@/assets/tidy-logo.png";
 import SparkleField from "@/components/landing/SparkleField";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -81,6 +82,16 @@ const ComingSoon = () => {
           <div className="mt-16 text-[11px] uppercase tracking-[0.25em] text-white/30">
             {t("Tidy Home Concierge LLC · Miami, FL")}
           </div>
+
+          <div className="mt-6">
+            <Link
+              to="/admin/site-status"
+              className="text-[10px] uppercase tracking-[0.2em] text-white/25 hover:text-white/60 transition-colors"
+            >
+              Admin
+            </Link>
+          </div>
+
         </div>
       </main>
     </>
