@@ -1,4 +1,6 @@
 import { getBundleDiscountPct } from '@/lib/bundle-discount';
+import { FLORIDA_TAX, cartTriggersFloridaTax } from '@/lib/florida-tax';
+
 
 // Referral discount applied to first month when a valid promo code is present.
 // Stored in cents to mirror Stripe; UI converts to dollars for display.
