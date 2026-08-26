@@ -124,6 +124,13 @@ describe('checkout ↔ Stripe parity', () => {
     expect(serverBundlePct(3)).toBe(15);
   });
 
+  // The client must never carry its own copy of the rate.
+  it('the client bundle rates equal the rates the server charges', () => {
+    for (const n of [1, 2, 3, 4]) {
+      expect(getBundleDiscountPct(n)).toBe(serverBundlePct(n));
+    }
+  });
+
   it('a coupon exists for every non-zero bundle rate the server can send', () => {
     const coupons = read('supabase/functions/_shared/bundle-coupon.ts');
     for (const n of [2, 3]) {
