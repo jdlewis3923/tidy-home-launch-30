@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { capturePromoFromUrl } from "@/lib/promo";
 import { captureUtmFromUrl } from "@/lib/utm";
+import { loadBundleDiscountTiers } from "@/lib/bundle-discount";
 import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
@@ -137,6 +138,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <PromoCaptureWatcher />
+            <BundleDiscountLoader />
             <MetaPixel />
             <ChatbotMount />
             <HomeButton />
