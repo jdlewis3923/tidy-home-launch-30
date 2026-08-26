@@ -200,10 +200,13 @@ export function formatMonthly(amount: number): string {
 }
 
 
+/**
+ * Bundle discount as a 0–1 fraction. Rates come from the shared map in
+ * src/lib/bundle-discount.ts so the displayed price and the amount Stripe
+ * charges are derived from the same source.
+ */
 export function getBundleDiscount(serviceCount: number): number {
-  if (serviceCount >= 3) return 0.15;
-  if (serviceCount >= 2) return 0.10;
-  return 0;
+  return getBundleDiscountPct(serviceCount) / 100;
 }
 
 
