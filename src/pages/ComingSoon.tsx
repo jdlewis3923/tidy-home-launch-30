@@ -81,6 +81,16 @@ const ComingSoon = () => {
           <div className="mt-16 text-[11px] uppercase tracking-[0.25em] text-white/30">
             {t("Tidy Home Concierge LLC · Miami, FL")}
           </div>
+
+          <div className="mt-6">
+            <Link
+              to="/admin/site-status"
+              className="text-[10px] uppercase tracking-[0.2em] text-white/25 hover:text-white/60 transition-colors"
+            >
+              Admin
+            </Link>
+          </div>
+
         </div>
       </main>
     </>
