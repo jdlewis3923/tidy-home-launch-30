@@ -1,25 +1,42 @@
-import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import tidyLogo from "@/assets/tidy-logo.png";
 import SparkleField from "@/components/landing/SparkleField";
+import SeoHead from "@/components/landing/SeoHead";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const ComingSoon = () => {
   const { t } = useLanguage();
+  const { pathname } = useLocation();
+  const routeSeo: Record<string, { title: string; description: string }> = {
+    "/bundle": {
+      title: "Bundle Home Services | Tidy Miami",
+      description: "Bundle cleaning, lawn care, and car detailing in Miami with one monthly Tidy plan.",
+    },
+    "/help": {
+      title: "Help Center | Tidy Home Concierge",
+      description: "Answers about scheduling, billing, pausing and account access for Tidy Home Concierge members in Miami.",
+    },
+    "/terms": {
+      title: "Terms of Service | Tidy Home Concierge",
+      description: "Terms for Tidy Home Concierge subscriptions, services, billing, and referrals in Miami.",
+    },
+    "/privacy": {
+      title: "Privacy Policy | Tidy Home Concierge",
+      description: "How Tidy Home Concierge collects, uses, and protects customer information.",
+    },
+  };
+  const seo = routeSeo[pathname] ?? {
+    title: "Tidy Home Concierge — Coming soon to Miami",
+    description: "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, car detailing. Opening soon.",
+  };
   return (
     <>
-      <Helmet>
-        <title>{t("Tidy Home Concierge — Coming soon to Miami")}</title>
-        <meta
-          name="description"
-          content={t(
-            "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, car detailing. Opening soon.",
-          )}
-        />
-        <link rel="canonical" href="https://jointidy.co" />
-        <meta name="robots" content="noindex, nofollow" />
-
-      </Helmet>
+      <SeoHead
+        title={t(seo.title)}
+        description={t(seo.description)}
+        canonical={`https://jointidy.co${pathname === "/" ? "" : pathname}`}
+        noindex
+      />
 
       <main className="relative min-h-screen overflow-hidden bg-[#0f172a] text-white">
         {/* Ambient brand glow */}

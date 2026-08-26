@@ -17,6 +17,7 @@ import { pushEvent } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getBundleDiscount } from "@/lib/dashboard-pricing";
 import heroImg from "@/assets/hero-miami-home.jpg";
 
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
@@ -51,7 +52,7 @@ const BundleInner = () => {
     const chosen = SERVICES.filter((s) => picked.has(s.slug));
     const valid = chosen.length === 2;
     const subtotal = chosen.reduce((sum, s) => sum + s.basePrice, 0);
-    const discounted = (subtotal * 0.9).toFixed(2);
+    const discounted = (subtotal * (1 - getBundleDiscount(2))).toFixed(2);
     return {
       valid,
       chosen,
@@ -63,7 +64,7 @@ const BundleInner = () => {
 
   const threeBundle = useMemo(() => {
     const subtotal = SERVICES.reduce((sum, s) => sum + s.basePrice, 0);
-    const discounted = (subtotal * 0.85).toFixed(2);
+    const discounted = (subtotal * (1 - getBundleDiscount(3))).toFixed(2);
     return { subtotal, discounted };
   }, []);
 
