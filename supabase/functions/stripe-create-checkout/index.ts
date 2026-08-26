@@ -162,6 +162,17 @@ Deno.serve(async (req) => {
           }
         }
 
+        // ---------- Florida sales tax (see _shared/florida-tax.ts) ----------
+        // Detailing is only taxable when wax / sealant / ceramic coating is
+        // applied, and applying it makes the WHOLE transaction taxable. Cleaning
+        // and lawn care are never taxable, so an untriggered cart gets no tax.
+        const taxable = cartTriggersFloridaTax(input.addons);
+        let taxRateId: string | null = null;
+        if (taxable) {
+          taxRateId = await getFloridaTaxRateId(stripe);
+          for (const li of line_items) li.tax_rates = [taxRateId];
+        }
+
         // ---------- Bundle discount ----------
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
         const bundle_discount_pct = await resolveBundleDiscountPctFromDb(supabase, uniqueServices, "checkout");
