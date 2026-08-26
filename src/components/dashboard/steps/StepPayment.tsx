@@ -24,6 +24,11 @@ import { getUtmAttribution } from '@/lib/utm';
 
 // Per-vehicle add-ons (keep in sync with src/lib/checkout.ts).
 const PER_VEHICLE_ADDONS = new Set(['ozone', 'petHair', 'engineBay', 'ceramicSpray']);
+
+// The exact Terms wording shown next to the pay button. It is both rendered and
+// stored with the recorded consent, so change them together.
+const CHECKOUT_TERMS_WORDING =
+  "By subscribing, you agree to Tidy's Terms of Service and Privacy Policy.";
 const XL_ADDON_BY_SERVICE: Record<ServiceType, string> = {
   cleaning: 'xl_cleaning',
   lawn: 'xl_lawn',
