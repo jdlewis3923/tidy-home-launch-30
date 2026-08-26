@@ -109,7 +109,7 @@ function serverFallbackPct(uniqueServices: number): number {
   return pct;
 }
 
-/** Simulates the Stripe session total in cents for a given ConfigState. */
+/** Simulates the Stripe session total in cents (tax-inclusive) for a ConfigState. */
 function stripeSessionCents(state: ConfigState): number {
   const { services, addons } = translate(state);
 
@@ -129,8 +129,15 @@ function stripeSessionCents(state: ConfigState): number {
 
   // Stripe applies percent_off to the sum of every recurring line item.
   const pct = dbPct(new Set(services.map((s) => s.service)).size);
-  return subtotalCents - subtotalCents * (pct / 100);
+  const netCents = subtotalCents - subtotalCents * (pct / 100);
+
+  // Then the exclusive FL TaxRate, when a coating add-on is in the cart.
+  const taxCents = cartTriggersFloridaTax(addons)
+    ? Math.round(netCents * (FLORIDA_TAX.percentage / 100))
+    : 0;
+  return netCents + taxCents;
 }
+
 
 const state = (over: Partial<ConfigState>): ConfigState => ({ ...defaultState, ...over });
 
