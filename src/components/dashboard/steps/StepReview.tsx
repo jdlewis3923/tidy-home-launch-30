@@ -86,7 +86,15 @@ export default function StepReview({ state, onEdit }: Props) {
                   <span className="tabular-nums">−${referralDiscount.toFixed(2)}</span>
                 </div>
               )}
+
+              {pricing.taxTriggered && (
+                <div className="flex justify-between text-ink-soft">
+                  <span>FL sales tax ({pricing.taxPercentage}%, coating applied)</span>
+                  <span className="tabular-nums">${pricing.taxAmount.toFixed(2)}/mo</span>
+                </div>
+              )}
             </div>
+
 
             <div className="my-5 h-px bg-hairline" />
 

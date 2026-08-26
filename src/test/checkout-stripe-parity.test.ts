@@ -17,7 +17,9 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect, beforeAll } from 'vitest';
 import { translate } from '@/lib/checkout';
+import { FLORIDA_TAX, cartTriggersFloridaTax } from '@/lib/florida-tax';
 import { getBundleDiscountPct } from '@/lib/bundle-discount';
+
 import {
   calculatePricing,
   defaultState,
@@ -109,7 +111,7 @@ function serverFallbackPct(uniqueServices: number): number {
   return pct;
 }
 
-/** Simulates the Stripe session total in cents for a given ConfigState. */
+/** Simulates the Stripe session total in cents (tax-inclusive) for a ConfigState. */
 function stripeSessionCents(state: ConfigState): number {
   const { services, addons } = translate(state);
 
@@ -129,8 +131,15 @@ function stripeSessionCents(state: ConfigState): number {
 
   // Stripe applies percent_off to the sum of every recurring line item.
   const pct = dbPct(new Set(services.map((s) => s.service)).size);
-  return subtotalCents - subtotalCents * (pct / 100);
+  const netCents = subtotalCents - subtotalCents * (pct / 100);
+
+  // Then the exclusive FL TaxRate, when a coating add-on is in the cart.
+  const taxCents = cartTriggersFloridaTax(addons)
+    ? Math.round(netCents * (FLORIDA_TAX.percentage / 100))
+    : 0;
+  return netCents + taxCents;
 }
+
 
 const state = (over: Partial<ConfigState>): ConfigState => ({ ...defaultState, ...over });
 
@@ -154,6 +163,22 @@ function buildState(services: ServiceType[], opts: { xl?: boolean; addOns?: stri
     addOns: opts.addOns ?? [],
   });
 }
+
+/** All-monthly cart, standard sizes — the shape of the five audit carts. */
+function monthly(services: ServiceType[], addOns: string[] = []): ConfigState {
+  const frequencies: Partial<Record<ServiceType, Frequency>> = {};
+  for (const s of services) frequencies[s] = 'monthly';
+  return state({
+    services,
+    frequencies,
+    homeSize: services.includes('cleaning') ? 'standard' : null,
+    yardSize: services.includes('lawn') ? 'standard' : null,
+    vehicleSize: services.includes('detailing') ? 'standard' : null,
+    vehicleCount: 1,
+    addOns,
+  });
+}
+
 
 describe('checkout ↔ Stripe parity', () => {
   beforeAll(async () => {
@@ -205,6 +230,13 @@ describe('checkout ↔ Stripe parity', () => {
       label: '2 services + XL + add-ons + 2 vehicles',
       s: buildState(['detailing', 'cleaning'], { xl: true, vehicles: 2, addOns: ['petHair', 'fridge'] }),
     },
+    // The five audit carts, all monthly. E is the taxable one: the displayed
+    // total MUST include the 7% FL tax that Stripe adds as an exclusive rate.
+    { label: 'A · cleaning monthly', s: monthly(['cleaning']) },
+    { label: 'B · cleaning + lawn monthly', s: monthly(['cleaning', 'lawn']) },
+    { label: 'C · cleaning + lawn + detailing monthly', s: monthly(['cleaning', 'lawn', 'detailing']) },
+    { label: 'D · detailing monthly', s: monthly(['detailing']) },
+    { label: 'E · detailing monthly + Ceramic Spray Coat', s: monthly(['detailing'], ['ceramicSpray']) },
   ];
 
   for (const { label, s } of combos) {
@@ -213,6 +245,39 @@ describe('checkout ↔ Stripe parity', () => {
       expect(displayedCents).toBe(Math.round(stripeSessionCents(s)));
     });
   }
+
+  it('the taxable cart shows tax as its own line and folds it into the total', () => {
+    const taxed = calculatePricing(monthly(['detailing'], ['ceramicSpray']));
+    expect(taxed.taxTriggered).toBe(true);
+    expect(taxed.taxPercentage).toBe(FLORIDA_TAX.percentage);
+    expect(Math.round(taxed.taxAmount * 100)).toBe(Math.round(taxed.netTotal * FLORIDA_TAX.percentage));
+    expect(taxed.ongoing).toBeCloseTo(taxed.netTotal + taxed.taxAmount, 2);
+
+    const untaxed = calculatePricing(monthly(['detailing']));
+    expect(untaxed.taxTriggered).toBe(false);
+    expect(untaxed.taxAmount).toBe(0);
+    expect(untaxed.ongoing).toBeCloseTo(untaxed.netTotal, 2);
+  });
+
+  it('prints the five-cart parity table', () => {
+    const carts: Array<[string, ConfigState]> = [
+      ['A cleaning monthly', monthly(['cleaning'])],
+      ['B cleaning + lawn', monthly(['cleaning', 'lawn'])],
+      ['C cleaning + lawn + detailing', monthly(['cleaning', 'lawn', 'detailing'])],
+      ['D detailing monthly', monthly(['detailing'])],
+      ['E detailing + ceramicSpray', monthly(['detailing'], ['ceramicSpray'])],
+    ];
+    for (const [label, s] of carts) {
+      const p = calculatePricing(s);
+      const session = Math.round(stripeSessionCents(s));
+      const displayed = Math.round(p.ongoing * 100);
+      console.log(
+        `${label} | displayed $${(displayed / 100).toFixed(2)} | session $${(session / 100).toFixed(2)} | discount ${Math.round(p.discountPercent * 100)}% (−$${p.discountAmount.toFixed(2)}) | tax $${p.taxAmount.toFixed(2)} | ${displayed === session ? 'PASS' : `FAIL gap ${displayed - session}c`}`,
+      );
+      expect(displayed).toBe(session);
+    }
+  });
+
 
   it('every configurator add-on has a Stripe price behind it', () => {
     for (const id of Object.keys(addOnData)) {

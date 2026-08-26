@@ -1,4 +1,6 @@
 import { getBundleDiscountPct } from '@/lib/bundle-discount';
+import { FLORIDA_TAX, cartTriggersFloridaTax } from '@/lib/florida-tax';
+
 
 // Referral discount applied to first month when a valid promo code is present.
 // Stored in cents to mirror Stripe; UI converts to dollars for display.
@@ -244,7 +246,17 @@ export function calculatePricing(state: ConfigState) {
   const subtotal = servicesSubtotal + addOnsSubtotal;
   const discountPercent = getBundleDiscount(state.services.length);
   const discountAmount = subtotal * discountPercent;
-  const total = subtotal - discountAmount;
+  const netTotal = subtotal - discountAmount;
+
+  // Florida sales tax. The trigger is a wax/sealant/coating add-on in the cart
+  // (see src/lib/florida-tax.ts → the same module stripe-create-checkout uses),
+  // and when it fires the ENTIRE post-discount amount is taxable. Stripe adds
+  // this as an exclusive TaxRate on top of the subscription, so the customer-
+  // facing total must include it or the quote won't match the charge.
+  const taxTriggered = cartTriggersFloridaTax((state.addOns ?? []).map((addon_name) => ({ addon_name })));
+  const taxPercent = taxTriggered ? FLORIDA_TAX.percentage / 100 : 0;
+  const taxAmount = Math.round(netTotal * taxPercent * 100) / 100;
+  const total = netTotal + taxAmount;
 
   const servicesTotal = servicesSubtotal - servicesSubtotal * discountPercent;
   const addOnsTotal = addOnsSubtotal - addOnsSubtotal * discountPercent;
@@ -258,10 +270,18 @@ export function calculatePricing(state: ConfigState) {
     discountAmount,
     servicesTotal,
     addOnsTotal,
+    /** Post-discount, pre-tax amount. */
+    netTotal,
+    taxTriggered,
+    /** Combined FL + Miami-Dade rate as a percentage (0 when untaxed). */
+    taxPercentage: taxTriggered ? FLORIDA_TAX.percentage : 0,
+    taxAmount,
+    /** Tax-inclusive totals — these are what Stripe actually charges. */
     firstMonth: total,
     ongoing: total,
   };
 }
+
 
 
 export const VALID_ZIPS = ['33183', '33186', '33156'];

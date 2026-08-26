@@ -242,7 +242,15 @@ export default function StepPayment({ state, onChange }: Props) {
               <span className="text-xs tabular-nums">−${(REFERRAL_DISCOUNT_CENTS / 100).toFixed(2)}</span>
             </div>
           )}
+
+          {pricing.taxTriggered && (
+            <div className="flex justify-between items-baseline gap-3 text-ink-soft">
+              <span className="text-xs">FL sales tax ({pricing.taxPercentage}%, coating applied)</span>
+              <span className="text-xs tabular-nums">${pricing.taxAmount.toFixed(2)}</span>
+            </div>
+          )}
         </div>
+
 
         <div className="my-5 h-px bg-hairline" />
 
