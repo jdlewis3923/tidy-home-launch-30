@@ -164,6 +164,22 @@ function buildState(services: ServiceType[], opts: { xl?: boolean; addOns?: stri
   });
 }
 
+/** All-monthly cart, standard sizes — the shape of the five audit carts. */
+function monthly(services: ServiceType[], addOns: string[] = []): ConfigState {
+  const frequencies: Partial<Record<ServiceType, Frequency>> = {};
+  for (const s of services) frequencies[s] = 'monthly';
+  return state({
+    services,
+    frequencies,
+    homeSize: services.includes('cleaning') ? 'standard' : null,
+    yardSize: services.includes('lawn') ? 'standard' : null,
+    vehicleSize: services.includes('detailing') ? 'standard' : null,
+    vehicleCount: 1,
+    addOns,
+  });
+}
+
+
 describe('checkout ↔ Stripe parity', () => {
   beforeAll(async () => {
     dbTiers = await fetchDbTiers();
