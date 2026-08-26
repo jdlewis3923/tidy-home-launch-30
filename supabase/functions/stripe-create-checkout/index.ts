@@ -16,6 +16,7 @@ import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
 import { getBundleCouponId } from "../_shared/bundle-coupon.ts";
 import { resolveBundleDiscountPct as resolveBundleDiscountPctFromDb } from "../_shared/bundle-discount.ts";
+import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -161,6 +162,17 @@ Deno.serve(async (req) => {
           }
         }
 
+        // ---------- Florida sales tax (see _shared/florida-tax.ts) ----------
+        // Detailing is only taxable when wax / sealant / ceramic coating is
+        // applied, and applying it makes the WHOLE transaction taxable. Cleaning
+        // and lawn care are never taxable, so an untriggered cart gets no tax.
+        const taxable = cartTriggersFloridaTax(input.addons);
+        let taxRateId: string | null = null;
+        if (taxable) {
+          taxRateId = await getFloridaTaxRateId(stripe);
+          for (const li of line_items) li.tax_rates = [taxRateId];
+        }
+
         // ---------- Bundle discount ----------
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
         const bundle_discount_pct = await resolveBundleDiscountPctFromDb(supabase, uniqueServices, "checkout");
@@ -193,6 +205,9 @@ Deno.serve(async (req) => {
           preferred_time: input.preferred_time ?? "",
           lang: input.lang,
           bundle_discount_pct: String(bundle_discount_pct),
+          fl_tax_applied: taxable ? "yes" : "no",
+          fl_tax_pct: taxable ? String(FLORIDA_TAX.percentage) : "0",
+          fl_tax_rate_id: taxRateId ?? "",
           gclid: input.gclid ?? "",
           utm_source: input.utm_source ?? "",
           utm_medium: input.utm_medium ?? "",

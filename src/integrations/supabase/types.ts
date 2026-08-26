@@ -2095,6 +2095,48 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_delivery_events: {
+        Row: {
+          created_at: string
+          error_code: number | null
+          error_message: string | null
+          from_number: string | null
+          id: string
+          message_sid: string | null
+          message_status: string | null
+          messaging_service_sid: string | null
+          raw: Json | null
+          received_at: string
+          to_number: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_code?: number | null
+          error_message?: string | null
+          from_number?: string | null
+          id?: string
+          message_sid?: string | null
+          message_status?: string | null
+          messaging_service_sid?: string | null
+          raw?: Json | null
+          received_at?: string
+          to_number?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_code?: number | null
+          error_message?: string | null
+          from_number?: string | null
+          id?: string
+          message_sid?: string | null
+          message_status?: string | null
+          messaging_service_sid?: string | null
+          raw?: Json | null
+          received_at?: string
+          to_number?: string | null
+        }
+        Relationships: []
+      }
       sms_log: {
         Row: {
           context: Json
