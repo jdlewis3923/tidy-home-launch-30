@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { capturePromoFromUrl } from "@/lib/promo";
 import { captureUtmFromUrl } from "@/lib/utm";
+import { loadBundleDiscountTiers } from "@/lib/bundle-discount";
 import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
@@ -103,6 +104,16 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Hydrates the bundle discount rates from the database so every displayed
+// total is derived from the same rate the checkout function charges.
+const BundleDiscountLoader = () => {
+  useEffect(() => {
+    void loadBundleDiscountTiers();
+  }, []);
+  return null;
+};
+
+
 // Routes that remain accessible when an admin has toggled the site OFF.
 // Admin can still log in and flip it back on; everything else shows ComingSoon.
 const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply"];
@@ -127,6 +138,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <PromoCaptureWatcher />
+            <BundleDiscountLoader />
             <MetaPixel />
             <ChatbotMount />
             <HomeButton />
