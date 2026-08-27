@@ -410,9 +410,7 @@ async function handleSubscriptionCreated(stripe: Stripe, supabase: any, event: S
 // deno-lint-ignore no-explicit-any
 async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Event) {
   const invoice = event.data.object as Stripe.Invoice;
-  const stripeSubId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription?.id ?? null;
+  const stripeSubId = resolveStripeSubscriptionId(invoice);
 
   let userId: string | null = null;
   let localSubId: string | null = null;
@@ -625,9 +623,7 @@ async function maybeCreditReferrer(stripe: Stripe, supabase: any, opts: {
 // deno-lint-ignore no-explicit-any
 async function handleInvoicePaymentFailed(stripe: Stripe, supabase: any, event: Stripe.Event) {
   const invoice = event.data.object as Stripe.Invoice;
-  const stripeSubId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription?.id ?? null;
+  const stripeSubId = resolveStripeSubscriptionId(invoice);
 
   let userId: string | null = null;
   let localSubId: string | null = null;
@@ -700,9 +696,7 @@ async function handleInvoicePaymentFailed(stripe: Stripe, supabase: any, event: 
 // deno-lint-ignore no-explicit-any
 async function handleInvoicePaymentActionRequired(supabase: any, event: Stripe.Event) {
   const invoice = event.data.object as Stripe.Invoice;
-  const stripeSubId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription?.id ?? null;
+  const stripeSubId = resolveStripeSubscriptionId(invoice);
 
   let userId: string | null = null;
   if (stripeSubId) {
