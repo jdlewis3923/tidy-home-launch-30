@@ -26,9 +26,9 @@ import { isServiceOrZapAuthorized } from '../_shared/zap-auth.ts';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-const TEMPLATE_A = Deno.env.get('TWILIO_ADDON_TEMPLATE_A') ?? 'HX1b3c5e31f07d66994a37671a1e2f585a';
-const TEMPLATE_B = Deno.env.get('TWILIO_ADDON_TEMPLATE_B') ?? 'HX668f4e5e2adce7025bcec50c1891951c';
-const TEMPLATE_C = Deno.env.get('TWILIO_ADDON_TEMPLATE_C') ?? 'HXac9b403c650bc5d778124434952481a5';
+const TEMPLATE_A = Deno.env.get('TWILIO_ADDON_TEMPLATE_A') ?? 'HX88462433c67059e9668c8f18d98f86ff';
+const TEMPLATE_B = Deno.env.get('TWILIO_ADDON_TEMPLATE_B') ?? 'HX1a943a990cf5028e0e1b4af2a8e5b0ac';
+const TEMPLATE_C = Deno.env.get('TWILIO_ADDON_TEMPLATE_C') ?? 'HXc28877287009b7af59a576356491e38b';
 
 const BodySchema = z.object({
   user_id: z.string().uuid(),
