@@ -87,11 +87,13 @@ Deno.serve(async (req) => {
           : `<p>Hi ${a.first_name ?? 'there'},</p><p>Just checking in — your Tidy application has been sitting for a week. If you're still interested, reply to this email and we'll pick things back up.</p>`,
         ctaUrl: 'https://jointidy.co/onboarding', ctaLabel: 'Resume my application',
       });
+      // Re-engagement nudge — treated as marketing: honors the Brevo unsubscribe list.
       await sendBrevoEmail({
         toEmail: a.email, toName: a.first_name ?? '',
         subject: isLast ? 'Last call from Tidy' : 'Still interested in joining Tidy?',
         htmlContent: html, tags: [`applicant-nudge-${bucket}`],
         templateName: `applicant-nudge-${bucket}`, triggeredBy: 'applicant-stale-nudge',
+        marketing: true,
       }).catch(() => {});
     }
 
