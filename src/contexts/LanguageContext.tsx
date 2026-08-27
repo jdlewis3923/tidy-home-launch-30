@@ -788,8 +788,8 @@ const translations: Record<string, string> = {
   "Call now": "Llamar ahora",
 
   // FAQ — homepage
-  "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one — more areas coming soon.":
-    "Actualmente servimos Pinecrest (33156), Kendall (33183) y Kendall West (33186). Estamos lanzando primero en códigos postales selectos de Miami para asegurar un servicio de alta calidad desde el día uno — más áreas próximamente.",
+  "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one.":
+    "Actualmente servimos Pinecrest (33156), Kendall (33183) y Kendall West (33186). Estamos lanzando primero en códigos postales selectos de Miami para asegurar un servicio de alta calidad desde el día uno.",
   "Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
     "Tidy es una suscripción todo en uno de servicios del hogar en Miami — nos encargamos de la limpieza de tu casa, el cuidado del jardín y el detallado de tu auto bajo un solo plan mensual. Sin coordinar varios proveedores, sin perseguir cotizaciones. Una sola suscripción y todo se mantiene impecable.",
   "Tap 'Start My Plan,' choose your services and schedule, and complete checkout. Your first visit is confirmed within 24 hours.":
