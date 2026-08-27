@@ -248,8 +248,9 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   let monthlyTotalCents = 0;
   if (stripeSubscriptionId) {
     const sub: any = await stripe.subscriptions.retrieve(stripeSubscriptionId);
-    if (sub.current_period_end) {
-      nextBillingDate = new Date(sub.current_period_end * 1000).toISOString().slice(0, 10);
+    const currentPeriodEnd = resolveStripeCurrentPeriodEnd(sub);
+    if (currentPeriodEnd) {
+      nextBillingDate = new Date(currentPeriodEnd * 1000).toISOString().slice(0, 10);
     }
     // Gross subtotal (list price, pre-discount).
     let grossCents = 0;
@@ -730,8 +731,9 @@ async function handleSubscriptionUpdated(supabase: any, event: Stripe.Event) {
           ? 'canceled'
           : 'active';
 
-  const next = sub.current_period_end
-    ? new Date(sub.current_period_end * 1000).toISOString().slice(0, 10)
+  const currentPeriodEnd = resolveStripeCurrentPeriodEnd(sub);
+  const next = currentPeriodEnd
+    ? new Date(currentPeriodEnd * 1000).toISOString().slice(0, 10)
     : null;
 
   await supabase

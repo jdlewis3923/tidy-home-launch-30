@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
             status: (localPatch.status as string | undefined) ?? sub.status,
             cancel_at_period_end: updated.cancel_at_period_end,
             pause_collection: localPatch.pause_collection ?? null,
-            current_period_end: updated.current_period_end ?? null,
+            current_period_end: resolveStripeCurrentPeriodEnd(updated),
           },
         };
       },
