@@ -4,6 +4,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -24,16 +25,12 @@ async function fireBrevo(templateKey: string, to: { email: string; name: string 
     console.warn(`[offer-tier-2] template ${templateKey} not configured in app_settings`);
     return;
   }
-  const res = await fetch('https://connector-gateway.lovable.dev/brevo/smtp/email', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      'X-Connection-Api-Key': BREVO_API_KEY,
-    },
-    body: JSON.stringify({ templateId: Number(templateId), to: [to], params }),
+  // Contractor-ops (relationship) mail — marketing: false.
+  const res = await sendBrevoEmail({
+    to: [to], templateId: Number(templateId), params, marketing: false,
+    transport: 'gateway', label: 'offer-tier-2-promotion',
   });
-  if (!res.ok) console.error('[offer-tier-2] brevo failed', res.status, await res.text());
+  if (!res.sent) console.error('[offer-tier-2] brevo failed', res.status, res.reason);
 }
 
 Deno.serve(async (req) => {

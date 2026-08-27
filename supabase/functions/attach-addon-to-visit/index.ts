@@ -13,6 +13,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { sendBrevoEmail as sendViaBrevo } from '../_shared/brevo-send.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -154,18 +155,17 @@ Deno.serve(async (req) => {
             },
           }),
         });
-        await fetch('https://api.brevo.com/v3/smtp/email', {
-          method: 'POST',
-          headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            templateId: ADDON_CONFIRMED_TEMPLATE_ID,
-            to: [{ email: userEmail }],
-            params: {
-              addon_name: addonName,
-              addon_price: addonPriceDollars,
-              visit_date: visit_date ?? '',
-            },
-          }),
+        // Add-on purchase confirmation receipt — transactional, marketing: false.
+        await sendViaBrevo({
+          to: [{ email: userEmail }],
+          templateId: ADDON_CONFIRMED_TEMPLATE_ID,
+          params: {
+            addon_name: addonName,
+            addon_price: addonPriceDollars,
+            visit_date: visit_date ?? '',
+          },
+          marketing: false,
+          label: 'attach-addon-to-visit',
         });
       } catch (err) { console.error('[attach-addon] brevo failed', err); }
     }

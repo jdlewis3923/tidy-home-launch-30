@@ -10,6 +10,7 @@
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { sendBrevoEmail as sendViaBrevo } from '../_shared/brevo-send.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -25,25 +26,13 @@ interface AlertPayload {
 
 async function sendBrevoEmail(to: string[], subject: string, html: string) {
   if (!BREVO_API_KEY || to.length === 0) return false;
-  try {
-    const resp = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        accept: 'application/json',
-        'api-key': BREVO_API_KEY,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        sender: { name: 'Tidy KPI Alerts', email: ALERT_FROM_EMAIL },
-        to: to.map((email) => ({ email })),
-        subject,
-        htmlContent: html,
-      }),
-    });
-    return resp.ok;
-  } catch {
-    return false;
-  }
+  // Internal admin ops mail — marketing: false.
+  const r = await sendViaBrevo({
+    to, subject, htmlContent: html, marketing: false,
+    sender: { name: 'Tidy KPI Alerts', email: ALERT_FROM_EMAIL },
+    label: 'kpi-alert-dispatcher',
+  });
+  return r.sent;
 }
 
 Deno.serve(async (req) => {

@@ -1,6 +1,7 @@
 // Shared assistant for SMS + Web support inbox.
 // Reuses the chatbot_knowledge base. Returns reply + self-reported confidence.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendBrevoEmail as sendViaBrevo } from "./brevo-send.ts";
 
 export type SupportMsg = { role: "user" | "assistant"; content: string };
 
@@ -166,24 +167,18 @@ export async function notifyAdminEmail(opts: {
   `.trim();
 
   try {
-    const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "api-key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-        accept: "application/json",
-      },
-      body: JSON.stringify({
-        sender: { name: "Tidy Support", email: "noreply@jointidy.co" },
-        to: [{ email: adminEmail, name: "Tidy Admin" }],
-        subject,
-        htmlContent: html,
-      }),
+    // Internal admin notification — marketing: false.
+    const resp = await sendViaBrevo({
+      to: [{ email: adminEmail, name: "Tidy Admin" }],
+      subject,
+      htmlContent: html,
+      marketing: false,
+      sender: { name: "Tidy Support", email: "noreply@jointidy.co" },
+      label: "notifyAdminEmail",
     });
-    if (!resp.ok) {
-      const t = await resp.text();
-      console.error("[notifyAdminEmail] brevo error", resp.status, t);
-      return { ok: false, error: `brevo ${resp.status}: ${t.slice(0, 200)}` };
+    if (!resp.sent) {
+      console.error("[notifyAdminEmail] brevo error", resp.status, resp.reason);
+      return { ok: false, error: `brevo ${resp.status ?? ''}: ${resp.reason ?? 'send failed'}` };
     }
     return { ok: true };
   } catch (e) {

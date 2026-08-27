@@ -9,6 +9,8 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
+import { sendBrevoEmail as sendViaBrevo } from "../_shared/brevo-send.ts";
+
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -112,15 +114,9 @@ Deno.serve(async (req) => {
     }
     if (BREVO_API_KEY && match.email) {
       try {
-        const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-          method: "POST",
-          headers: {
-            "api-key": BREVO_API_KEY,
-            "Content-Type": "application/json",
-            accept: "application/json",
-          },
-          body: JSON.stringify({
-            ...(welcomeTemplateId
+        // Contractor onboarding welcome — relationship mail, marketing: false.
+        const res = await sendViaBrevo({
+          ...(welcomeTemplateId
               ? { templateId: welcomeTemplateId }
               : {
                   // Inline fallback only when no template id is configured —
@@ -146,16 +142,17 @@ Deno.serve(async (req) => {
               tier_progression_url: TIER_PROGRESSION_URL,
             },
             tags: ["WELCOME-T1"],
-          }),
-
+            marketing: false,
+            label: "documenso-webhook",
         });
         await sb.from("email_send_log").insert({
           template_name: "WELCOME-T1",
           channel: "brevo",
           recipient: match.email,
           triggered_by: "documenso-webhook",
-          status: res.ok ? "sent" : "failed",
-          error_message: res.ok ? null : await res.text().catch(() => "send failed"),
+          status: res.sent ? "sent" : "failed",
+          error_message: res.sent ? null : (res.reason ?? "send failed"),
+
           payload: { applicant_id: match.id },
         });
       } catch (e) {
