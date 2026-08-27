@@ -3,7 +3,7 @@ import Reveal from "./Reveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const SIGNALS = [
-  { Icon: ShieldCheck, label: "Licensed" },
+  { Icon: ShieldCheck, label: "Vetted" },
   { Icon: BadgeCheck, label: "Insured" },
   { Icon: UserCheck, label: "Background-Checked" },
   { Icon: Lock, label: "Locked Price" },

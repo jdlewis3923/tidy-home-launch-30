@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const signals = [
-  "Licensed & Insured",
+  "Vetted & Insured",
   "Background-Checked Pros",
   "Satisfaction Guaranteed",
   "Serving Kendall + Pinecrest",

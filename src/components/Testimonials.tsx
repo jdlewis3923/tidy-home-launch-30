@@ -80,7 +80,7 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
         </div>
 
         <p className="mt-10 text-sm text-primary-foreground/80">
-          {t("Licensed & Insured · Background-Checked Pros · Satisfaction Guaranteed")}
+          {t("Vetted & Insured · Background-Checked Pros · Satisfaction Guaranteed")}
         </p>
 
         <p className="mt-3 text-sm text-primary-foreground/80">

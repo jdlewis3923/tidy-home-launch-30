@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const ITEMS = [
-  "Licensed & Insured",
+  "Vetted & Insured",
   "Background-Checked Pros",
   "Same Crew Every Visit",
   "Locked Monthly Price",

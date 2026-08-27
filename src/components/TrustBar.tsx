@@ -3,7 +3,7 @@ import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const items = [
-  "Licensed & Insured",
+  "Vetted & Insured",
   "Background-Checked Pros",
   "Photo Verified Every Visit",
   "Cancel Anytime",
