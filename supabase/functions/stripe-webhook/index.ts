@@ -22,6 +22,7 @@
 
 import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { resolveStripeSubscriptionId } from './_shared/resolve-stripe-subscription-id.ts';
 
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET');
@@ -409,9 +410,7 @@ async function handleSubscriptionCreated(stripe: Stripe, supabase: any, event: S
 // deno-lint-ignore no-explicit-any
 async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Event) {
   const invoice = event.data.object as Stripe.Invoice;
-  const stripeSubId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription?.id ?? null;
+  const stripeSubId = resolveStripeSubscriptionId(invoice);
 
   let userId: string | null = null;
   let localSubId: string | null = null;
@@ -624,9 +623,7 @@ async function maybeCreditReferrer(stripe: Stripe, supabase: any, opts: {
 // deno-lint-ignore no-explicit-any
 async function handleInvoicePaymentFailed(stripe: Stripe, supabase: any, event: Stripe.Event) {
   const invoice = event.data.object as Stripe.Invoice;
-  const stripeSubId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription?.id ?? null;
+  const stripeSubId = resolveStripeSubscriptionId(invoice);
 
   let userId: string | null = null;
   let localSubId: string | null = null;
@@ -699,9 +696,7 @@ async function handleInvoicePaymentFailed(stripe: Stripe, supabase: any, event: 
 // deno-lint-ignore no-explicit-any
 async function handleInvoicePaymentActionRequired(supabase: any, event: Stripe.Event) {
   const invoice = event.data.object as Stripe.Invoice;
-  const stripeSubId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription?.id ?? null;
+  const stripeSubId = resolveStripeSubscriptionId(invoice);
 
   let userId: string | null = null;
   if (stripeSubId) {
