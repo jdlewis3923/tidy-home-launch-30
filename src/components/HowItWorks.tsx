@@ -19,7 +19,7 @@ const preLaunchSteps = [
   {
     num: 2,
     title: "We Handle Everything",
-    desc: "A licensed, insured, background-checked professional shows up on time. You receive an ETA before every visit.",
+    desc: "A vetted, insured, background-checked professional shows up on time. You receive an ETA before every visit.",
     icon: ShieldCheck,
     gradient: "from-emerald-500 to-emerald-600",
   },
