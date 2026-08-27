@@ -5,6 +5,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -23,16 +24,12 @@ const Body = z.object({
 
 async function fireBrevoTemplate(templateId: number, to: { email: string; name: string }, params: Record<string, unknown>) {
   if (!LOVABLE_API_KEY || !BREVO_API_KEY) return { skipped: 'missing-brevo-keys' };
-  const r = await fetch('https://connector-gateway.lovable.dev/brevo/smtp/email', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      'X-Connection-Api-Key': BREVO_API_KEY,
-    },
-    body: JSON.stringify({ templateId, to: [to], params }),
+  // Contractor-ops (relationship) mail — marketing: false.
+  const r = await sendBrevoEmail({
+    to: [to], templateId, params, marketing: false,
+    transport: 'gateway', label: 'coi-decision',
   });
-  return { status: r.status };
+  return { status: r.status ?? 0, sent: r.sent, reason: r.reason };
 }
 
 Deno.serve(async (req) => {

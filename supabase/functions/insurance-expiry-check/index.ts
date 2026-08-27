@@ -9,6 +9,7 @@
 // eligibility (see public.is_contractor_job_eligible).
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -64,10 +65,10 @@ async function fireBrevo(id: number, key: string, to: { email: string; name: str
     }).then(() => {}, () => {});
     return;
   }
-  await fetch('https://connector-gateway.lovable.dev/brevo/smtp/email', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${LOVABLE_API_KEY}`, 'X-Connection-Api-Key': BREVO_API_KEY },
-    body: JSON.stringify({ templateId: id, to: [to], params }),
+  // Contractor-ops (relationship) mail — marketing: false.
+  await sendBrevoEmail({
+    to: [to], templateId: id, params, marketing: false,
+    transport: 'gateway', label: 'insurance-expiry-check',
   }).catch((e) => console.error('[insurance-expiry] brevo failed', e));
 }
 
