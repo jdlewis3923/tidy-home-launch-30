@@ -14,8 +14,15 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { corsHeaders, handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
-import { getBundleCouponId } from "../_shared/bundle-coupon.ts";
 import { resolveBundleDiscountPct as resolveBundleDiscountPctFromDb } from "../_shared/bundle-discount.ts";
+
+// Bundle discount is charged as an existing Stripe coupon (live mode), chosen by
+// the number of DISTINCT services in the cart. Line items always carry the
+// undiscounted catalog prices, so the coupon discounts exactly once.
+const BUNDLE_COUPON_BY_SERVICE_COUNT: Record<number, string> = {
+  2: "BUNDLE_2_SERVICE", // 10% off forever
+  3: "BUNDLE_3_SERVICE", // 15% off forever
+};
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
