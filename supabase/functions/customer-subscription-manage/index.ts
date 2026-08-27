@@ -9,6 +9,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
+import { resolveStripeCurrentPeriodEnd } from "../_shared/resolve-stripe-current-period-end.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -161,7 +162,7 @@ Deno.serve(async (req) => {
             status: (localPatch.status as string | undefined) ?? sub.status,
             cancel_at_period_end: updated.cancel_at_period_end,
             pause_collection: localPatch.pause_collection ?? null,
-            current_period_end: updated.current_period_end ?? null,
+            current_period_end: resolveStripeCurrentPeriodEnd(updated),
           },
         };
       },
