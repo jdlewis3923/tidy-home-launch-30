@@ -464,7 +464,7 @@ const translations: Record<string, string> = {
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos eco-seguros.",
   "Who does the cleaning?": "¿Quién hace la limpieza?",
   "Vetted, insured, background-checked professionals. Same crew every visit so they learn your home.":
-    "Profesionales verificados, asegurados y verificados. El mismo equipo cada visita para que conozcan tu casa.",
+    "Profesionales evaluados, asegurados y con antecedentes verificados. El mismo equipo cada visita para que conozcan tu casa.",
   "How is scheduling handled?": "¿Cómo se maneja el horario?",
   "After signup, we lock in a recurring day and time window. You'll get an ETA reminder before every visit. Reschedule anytime from your dashboard.":
     "Al inscribirte, fijamos un día y horario recurrente. Recibes un aviso de llegada antes de cada visita. Reagenda cuando quieras desde tu panel.",
@@ -508,7 +508,7 @@ const translations: Record<string, string> = {
     "Corte a altura precisa, bordeado de todos los contornos, soplado de áreas pavimentadas, desbroce a lo largo de las cercas y embolsar o triturar el césped. Los planes semanales incluyen poda de arbustos.",
   "Who does the work?": "¿Quién hace el trabajo?",
   "Vetted, insured, background-checked crews. Same team every visit so your lawn stays consistent.":
-    "Equipos verificados, asegurados y verificados. El mismo equipo cada visita para que tu jardín se mantenga consistente.",
+    "Equipos evaluados, asegurados y con antecedentes verificados. El mismo equipo cada visita para que tu jardín se mantenga consistente.",
   "We automatically reschedule to the next available day. Your subscription stays active and your price doesn't change.":
     "Reprogramamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa y tu precio no cambia.",
   "Reach out within 24 hours and we'll send the crew back or credit your account — no questions asked.":
@@ -550,7 +550,7 @@ const translations: Record<string, string> = {
     "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascota y ozono disponibles como extras.",
   "Who does the detailing?": "¿Quién hace el detallado?",
   "Vetted, insured, background-checked detailers. Same detailer every visit so they learn your vehicle.":
-    "Detalladores verificados, asegurados y verificados. El mismo detallador cada visita para que conozca tu vehículo.",
+    "Detalladores evaluados, asegurados y con antecedentes verificados. El mismo detallador cada visita para que conozca tu vehículo.",
   "What about oversized or commercial vehicles?": "¿Y los vehículos grandes o comerciales?",
   "3-row SUVs, full-size trucks, and large vans get a small upgrade fee. Commercial vans and lifted trucks need a quick custom quote — we'll handle it.":
     "Las SUVs de 3 filas, camionetas grandes y vans grandes tienen un pequeño cargo adicional. Vans comerciales y camionetas elevadas necesitan una cotización rápida — la manejamos.",
