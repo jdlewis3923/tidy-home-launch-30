@@ -221,8 +221,8 @@ const translations: Record<string, string> = {
 
   // FAQ Q&A (homepage)
   "What is Tidy?": "¿Qué es Tidy?",
-  "Great question! Tidy is Miami's first all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
-    "¡Buena pregunta! Tidy es la primera suscripción de servicios del hogar todo-en-uno de Miami — manejamos tu limpieza, jardín y detallado de auto en un solo plan mensual. Sin malabarear varios proveedores, sin perseguir cotizaciones. Una suscripción y todo queda impecable.",
+  "Great question! Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
+    "¡Buena pregunta! Tidy es una suscripción de servicios del hogar todo-en-uno en Miami — manejamos tu limpieza, jardín y detallado de auto en un solo plan mensual. Sin malabarear varios proveedores, sin perseguir cotizaciones. Una suscripción y todo queda impecable.",
   "How do I sign up?": "¿Cómo me inscribo?",
   "Super easy — just tap the 'Get Early Access' button, fill out a quick 2-minute form with your name and contact info, and we'll reach out to confirm your spot and lock in your schedule. That's it!":
     "Súper fácil — toca el botón 'Solicitar Acceso', llena un formulario rápido de 2 minutos con tu nombre y contacto, y te llamamos para confirmar tu lugar y fijar tu horario. ¡Eso es todo!",
@@ -790,8 +790,8 @@ const translations: Record<string, string> = {
   // FAQ — homepage
   "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one — more areas coming soon.":
     "Actualmente servimos Pinecrest (33156), Kendall (33183) y Kendall West (33186). Estamos lanzando primero en códigos postales selectos de Miami para asegurar un servicio de alta calidad desde el día uno — más áreas próximamente.",
-  "Tidy is Miami's first all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
-    "Tidy es la primera suscripción todo en uno de servicios del hogar en Miami — nos encargamos de la limpieza de tu casa, el cuidado del jardín y el detallado de tu auto bajo un solo plan mensual. Sin coordinar varios proveedores, sin perseguir cotizaciones. Una sola suscripción y todo se mantiene impecable.",
+  "Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
+    "Tidy es una suscripción todo en uno de servicios del hogar en Miami — nos encargamos de la limpieza de tu casa, el cuidado del jardín y el detallado de tu auto bajo un solo plan mensual. Sin coordinar varios proveedores, sin perseguir cotizaciones. Una sola suscripción y todo se mantiene impecable.",
   "Tap 'Start My Plan,' choose your services and schedule, and complete checkout. Your first visit is confirmed within 24 hours.":
     "Toca 'Empezar Mi Plan', elige tus servicios y tu horario, y completa el pago. Tu primera visita se confirma dentro de 24 horas.",
   "No contracts, no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month.":
