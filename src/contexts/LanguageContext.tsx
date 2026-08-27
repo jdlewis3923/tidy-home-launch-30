@@ -130,8 +130,8 @@ const translations: Record<string, string> = {
   "Select your services and frequency. About 2 minutes. See pricing before you pay.":
     "Selecciona tus servicios y frecuencia. Unos 2 minutos. Ve los precios antes de pagar.",
   "We Handle Everything": "Nosotros Nos Encargamos",
-  "A licensed, insured, background-checked professional shows up on time. You receive an ETA before every visit.":
-    "Un profesional licenciado, asegurado y verificado llega a tiempo. Recibes un estimado antes de cada visita.",
+  "A vetted, insured, background-checked professional shows up on time. You receive an ETA before every visit.":
+    "Un profesional verificado, asegurado y con antecedentes revisados llega a tiempo. Recibes un estimado antes de cada visita.",
   "You Never Think About It Again": "Nunca Más Piensas en Ello",
   "Recurring scheduling, automatic billing, photo verification after every visit. No reminders. No rebooking. No effort.":
     "Programación recurrente, facturación automática, verificación con fotos después de cada visita. Sin recordatorios. Sin reagendar. Sin esfuerzo.",
@@ -831,8 +831,8 @@ const translations: Record<string, string> = {
   "Of course. Add, remove, or change frequency for any service anytime. Changes kick in at your next billing cycle.":
     "Por supuesto. Agrega, elimina o cambia la frecuencia de cualquier servicio cuando quieras. Los cambios aplican en tu siguiente ciclo de facturación.",
   "Are professionals vetted?": "¿Los profesionales están verificados?",
-  "Every professional is fully background-checked, licensed, and insured. We require photo documentation after every visit for accountability.":
-    "Cada profesional está completamente verificado con antecedentes, licenciado y asegurado. Exigimos documentación con fotos después de cada visita para garantizar responsabilidad.",
+  "Every professional is background-checked through Checkr, covered by our commercial liability insurance on every Tidy visit, and required to submit photo documentation after each service.":
+    "Cada profesional tiene revisados sus antecedentes a través de Checkr, está cubierto por nuestro seguro de responsabilidad comercial en cada visita de Tidy y debe enviar documentación con fotos después de cada servicio.",
   "Reach out within 24 hours and we'll make it right — re-service or credit, no questions asked. Your satisfaction is our top priority.":
     "Contáctanos dentro de 24 horas y lo resolvemos — repetimos el servicio o te damos un crédito, sin preguntas. Tu satisfacción es nuestra prioridad.",
   "What if something goes wrong during a visit?": "¿Qué pasa si algo sale mal durante una visita?",
