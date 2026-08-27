@@ -853,8 +853,8 @@ const translations: Record<string, string> = {
   "Lock in your rate as one of our first members. Your price stays put as we grow.":
     "Asegura tu tarifa como uno de nuestros primeros miembros. Tu precio se mantiene mientras crecemos.",
   "Built on Accountability": "Construido sobre la Responsabilidad",
-  "Every visit is completed by a licensed, insured, background-checked pro — with photo verification after each service.":
-    "Cada visita la realiza un profesional licenciado, asegurado y con antecedentes verificados — con verificación fotográfica después de cada servicio.",
+  "Every visit is completed by a vetted, insured, background-checked pro — with photo verification after each service, and a named point of contact on every job.":
+    "Cada visita la realiza un profesional verificado, asegurado y con antecedentes revisados — con verificación fotográfica después de cada servicio y un contacto asignado en cada trabajo.",
   "Not happy? We make it right within 24 hours — re-service or credit, no questions asked.":
     "¿No quedaste satisfecho? Lo resolvemos dentro de 24 horas — repetimos el servicio o te damos un crédito, sin preguntas.",
   "FOUNDING MEMBERS": "MIEMBROS FUNDADORES",
