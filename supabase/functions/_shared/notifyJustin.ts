@@ -1,6 +1,8 @@
 // Tidy — Shared helper to notify Justin (Brevo email + PWA push + optional SMS).
 // All channels are best-effort: a failure in one does not block the others.
 
+import { sendBrevoEmail as sendViaBrevo } from './brevo-send.ts';
+
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
@@ -60,6 +62,8 @@ export async function sendBrevoEmail(opts: {
   attachments?: BrevoAttachment[];
   templateName?: string;   // explicit template name for email_send_log
   triggeredBy?: string;    // edge fn / cron name for email_send_log
+  /** true for lifecycle/marketing mail — enforces the Brevo unsubscribe list. */
+  marketing?: boolean;
 }) {
   const templateName = opts.templateName ?? opts.tags?.[0] ?? 'unknown';
   if (!BREVO_API_KEY) {
@@ -71,48 +75,46 @@ export async function sendBrevoEmail(opts: {
     });
     return null;
   }
-  let r: Response;
-  try {
-    r = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify({
-        sender: { name: 'Tidy', email: 'no-reply@jointidy.co' },
-        to: [{ email: opts.toEmail, name: opts.toName ?? opts.toEmail }],
-        subject: opts.subject,
-        htmlContent: opts.htmlContent,
-        ...(opts.tags && opts.tags.length ? { tags: opts.tags } : {}),
-        ...(opts.attachments && opts.attachments.length ? { attachment: opts.attachments } : {}),
-      }),
-    });
-  } catch (e) {
+  // All sends go through the shared helper so marketing mail honors the Brevo
+  // unsubscribe (blacklist) list. Defaults to relationship mail (marketing: false).
+  const result = await sendViaBrevo({
+    to: [{ email: opts.toEmail, name: opts.toName ?? opts.toEmail }],
+    subject: opts.subject,
+    htmlContent: opts.htmlContent,
+    sender: { name: 'Tidy', email: 'no-reply@jointidy.co' },
+    tags: opts.tags,
+    attachment: opts.attachments,
+    marketing: opts.marketing ?? false,
+    label: 'notifyJustin',
+  });
+
+  if (!result.sent) {
+    if (result.reason === 'blacklisted') {
+      await logEmailSend({
+        template_name: templateName, channel: 'email', recipient: opts.toEmail,
+        triggered_by: opts.triggeredBy ?? null, status: 'failed',
+        error_message: 'suppressed: recipient unsubscribed (Brevo emailBlacklisted)',
+        payload: { subject: opts.subject, tags: opts.tags ?? [] },
+      });
+      return null;
+    }
     await logEmailSend({
       template_name: templateName, channel: 'email', recipient: opts.toEmail,
       triggered_by: opts.triggeredBy ?? null, status: 'failed',
-      error_message: (e as Error).message, payload: { subject: opts.subject },
-    });
-    return null;
-  }
-  if (!r.ok) {
-    const errText = await r.text().catch(() => '');
-    console.error('[brevo] send failed', r.status, errText);
-    await logEmailSend({
-      template_name: templateName, channel: 'email', recipient: opts.toEmail,
-      triggered_by: opts.triggeredBy ?? null, status: 'failed',
-      error_message: `HTTP ${r.status}: ${errText.slice(0, 500)}`,
+      error_message: `${result.reason ?? 'send failed'}${result.status ? ` (HTTP ${result.status})` : ''}`,
       payload: { subject: opts.subject, tags: opts.tags ?? [] },
     });
     return null;
   }
-  const json = await r.json().catch(() => ({})) as { messageId?: string };
-  console.log('[brevo] sent', { to: opts.toEmail, subject: opts.subject, messageId: json.messageId });
+
+  console.log('[brevo] sent', { to: opts.toEmail, subject: opts.subject, messageId: result.messageId });
   await logEmailSend({
     template_name: templateName, channel: 'email', recipient: opts.toEmail,
     triggered_by: opts.triggeredBy ?? null,
-    brevo_message_id: json.messageId ?? null, status: 'sent',
+    brevo_message_id: result.messageId ?? null, status: 'sent',
     payload: { subject: opts.subject, tags: opts.tags ?? [], hasAttachments: !!opts.attachments?.length },
   });
-  return json.messageId ?? null;
+  return result.messageId ?? null;
 }
 
 export async function sendPwaPushToJustin(title: string, body: string, url = '/admin/applicants') {
