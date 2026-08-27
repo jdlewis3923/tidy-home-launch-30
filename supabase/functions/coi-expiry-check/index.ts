@@ -12,12 +12,13 @@ const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: fals
 
 async function fireBrevo(id: number, to: { email: string; name: string }, params: Record<string, unknown>) {
   if (!LOVABLE_API_KEY || !BREVO_API_KEY || !id) return;
-  await fetch('https://connector-gateway.lovable.dev/brevo/smtp/email', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${LOVABLE_API_KEY}`, 'X-Connection-Api-Key': BREVO_API_KEY },
-    body: JSON.stringify({ templateId: id, to: [to], params }),
+  // Contractor-ops (relationship) mail — marketing: false, no opt-out lookup.
+  await sendBrevoEmail({
+    to: [to], templateId: id, params, marketing: false,
+    transport: 'gateway', label: 'coi-expiry-check',
   });
 }
+
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
