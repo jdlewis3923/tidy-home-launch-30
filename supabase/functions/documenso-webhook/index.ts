@@ -140,16 +140,17 @@ Deno.serve(async (req) => {
               tier_progression_url: TIER_PROGRESSION_URL,
             },
             tags: ["WELCOME-T1"],
-          }),
-
+            marketing: false,
+            label: "documenso-webhook",
         });
         await sb.from("email_send_log").insert({
           template_name: "WELCOME-T1",
           channel: "brevo",
           recipient: match.email,
           triggered_by: "documenso-webhook",
-          status: res.ok ? "sent" : "failed",
-          error_message: res.ok ? null : await res.text().catch(() => "send failed"),
+          status: res.sent ? "sent" : "failed",
+          error_message: res.sent ? null : (res.reason ?? "send failed"),
+
           payload: { applicant_id: match.id },
         });
       } catch (e) {
