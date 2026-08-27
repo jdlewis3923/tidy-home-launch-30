@@ -112,15 +112,9 @@ Deno.serve(async (req) => {
     }
     if (BREVO_API_KEY && match.email) {
       try {
-        const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-          method: "POST",
-          headers: {
-            "api-key": BREVO_API_KEY,
-            "Content-Type": "application/json",
-            accept: "application/json",
-          },
-          body: JSON.stringify({
-            ...(welcomeTemplateId
+        // Contractor onboarding welcome — relationship mail, marketing: false.
+        const res = await sendViaBrevo({
+          ...(welcomeTemplateId
               ? { templateId: welcomeTemplateId }
               : {
                   // Inline fallback only when no template id is configured —
