@@ -269,7 +269,7 @@ export default function ProDashboard() {
           </span>
         </h1>
         <p className="mt-3 max-w-xl text-base sm:text-lg text-slate-600">
-          You're representing the #1 home-services brand in Miami. Here's your day.
+          You're representing Tidy on every visit. Here's your day.
         </p>
 
         <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -359,7 +359,7 @@ export default function ProDashboard() {
       <footer className="relative z-10 border-t border-slate-200/70 py-6">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-8">
           <p className="text-xs text-slate-500">Tidy Home Concierge · Built for Pros, by Pros.</p>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">#1 in Miami</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Tidy Verified Pro</p>
         </div>
       </footer>
     </div>
