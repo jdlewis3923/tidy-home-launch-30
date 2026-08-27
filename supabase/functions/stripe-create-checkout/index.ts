@@ -243,9 +243,10 @@ Deno.serve(async (req) => {
         let promoCodeApplied = true;
         let promoCodeMessage: string | undefined;
 
-        if (bundle_discount_pct > 0) {
-          const couponId = await getBundleCouponId(stripe, bundle_discount_pct);
-          sessionParams.discounts = [{ coupon: couponId }];
+        const bundleCouponId = BUNDLE_COUPON_BY_SERVICE_COUNT[uniqueServices];
+
+        if (bundleCouponId) {
+          sessionParams.discounts = [{ coupon: bundleCouponId }];
           // Stripe rejects discounts + allow_promotion_codes simultaneously.
           delete sessionParams.allow_promotion_codes;
 
