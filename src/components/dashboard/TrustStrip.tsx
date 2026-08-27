@@ -16,7 +16,7 @@ export default function TrustStrip() {
     >
       Pinecrest 33156 · Kendall 33183/33186
       <span className="mx-1.5 text-ink-faint">·</span>
-      Licensed &amp; Insured
+      Vetted &amp; Insured
       <span className="mx-1.5 text-ink-faint">·</span>
       Background-Checked Pros
       <span className="mx-1.5 text-ink-faint">·</span>

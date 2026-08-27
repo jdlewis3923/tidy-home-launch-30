@@ -45,7 +45,7 @@ const FAQ = [
   },
   {
     q: "Are you insured?",
-    a: "Fully licensed and insured in Florida. Every crew member is background-checked before their first visit.",
+    a: "Fully insured in Florida. Every professional is background-checked through Checkr before their first visit.",
   },
 ];
 

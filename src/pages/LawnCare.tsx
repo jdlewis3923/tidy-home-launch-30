@@ -67,7 +67,7 @@ const config: ServiceLandingConfig = {
       body: "Before-and-after photos from every visit, sent to your phone.",
     },
     {
-      title: "Licensed & Insured",
+      title: "Vetted & Insured",
       body: "Background-checked pros, insured on every Tidy job.",
     },
   ],
@@ -91,7 +91,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "Who does the work?",
-      a: "Licensed, insured, background-checked crews. Same team every visit so your lawn stays consistent.",
+      a: "Vetted, insured, background-checked crews. Same team every visit so your lawn stays consistent.",
     },
     {
       q: "What if it rains?",

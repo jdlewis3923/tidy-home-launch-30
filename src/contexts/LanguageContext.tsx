@@ -54,7 +54,7 @@ const translations: Record<string, string> = {
   Login: "Acceder",
 
   // Announcement ticker
-  "Licensed & Insured": "Licenciado y Asegurado",
+  "Vetted & Insured": "Verificado y Asegurado",
   "Background-Checked Pros": "Profesionales Verificados",
   "Cancel Anytime": "Cancela Cuando Quieras",
   "Photo Verified Every Visit": "Fotos Verificadas en Cada Visita",
@@ -392,7 +392,7 @@ const translations: Record<string, string> = {
   "Trusted across Pinecrest · Kendall · Kendall West": "Confiado en Pinecrest · Kendall · Kendall West",
 
   // Trust signal row
-  Licensed: "Licenciado",
+  Vetted: "Verificado",
   Insured: "Asegurado",
   "Background-Checked": "Verificado",
   "Locked Price": "Precio Fijo",
@@ -463,8 +463,8 @@ const translations: Record<string, string> = {
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, interior windows, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos eco-seguros.",
   "Who does the cleaning?": "¿Quién hace la limpieza?",
-  "Licensed, insured, background-checked professionals. Same crew every visit so they learn your home.":
-    "Profesionales licenciados, asegurados y verificados. El mismo equipo cada visita para que conozcan tu casa.",
+  "Vetted, insured, background-checked professionals. Same crew every visit so they learn your home.":
+    "Profesionales evaluados, asegurados y con antecedentes verificados. El mismo equipo cada visita para que conozcan tu casa.",
   "How is scheduling handled?": "¿Cómo se maneja el horario?",
   "After signup, we lock in a recurring day and time window. You'll get an ETA reminder before every visit. Reschedule anytime from your dashboard.":
     "Al inscribirte, fijamos un día y horario recurrente. Recibes un aviso de llegada antes de cada visita. Reagenda cuando quieras desde tu panel.",
@@ -507,8 +507,8 @@ const translations: Record<string, string> = {
   "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.":
     "Corte a altura precisa, bordeado de todos los contornos, soplado de áreas pavimentadas, desbroce a lo largo de las cercas y embolsar o triturar el césped. Los planes semanales incluyen poda de arbustos.",
   "Who does the work?": "¿Quién hace el trabajo?",
-  "Licensed, insured, background-checked crews. Same team every visit so your lawn stays consistent.":
-    "Equipos licenciados, asegurados y verificados. El mismo equipo cada visita para que tu jardín se mantenga consistente.",
+  "Vetted, insured, background-checked crews. Same team every visit so your lawn stays consistent.":
+    "Equipos evaluados, asegurados y con antecedentes verificados. El mismo equipo cada visita para que tu jardín se mantenga consistente.",
   "We automatically reschedule to the next available day. Your subscription stays active and your price doesn't change.":
     "Reprogramamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa y tu precio no cambia.",
   "Reach out within 24 hours and we'll send the crew back or credit your account — no questions asked.":
@@ -549,8 +549,8 @@ const translations: Record<string, string> = {
   "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet-hair and ozone available as add-ons.":
     "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascota y ozono disponibles como extras.",
   "Who does the detailing?": "¿Quién hace el detallado?",
-  "Licensed, insured, background-checked detailers. Same detailer every visit so they learn your vehicle.":
-    "Detalladores licenciados, asegurados y verificados. El mismo detallador cada visita para que conozca tu vehículo.",
+  "Vetted, insured, background-checked detailers. Same detailer every visit so they learn your vehicle.":
+    "Detalladores evaluados, asegurados y con antecedentes verificados. El mismo detallador cada visita para que conozca tu vehículo.",
   "What about oversized or commercial vehicles?": "¿Y los vehículos grandes o comerciales?",
   "3-row SUVs, full-size trucks, and large vans get a small upgrade fee. Commercial vans and lifted trucks need a quick custom quote — we'll handle it.":
     "Las SUVs de 3 filas, camionetas grandes y vans grandes tienen un pequeño cargo adicional. Vans comerciales y camionetas elevadas necesitan una cotización rápida — la manejamos.",
@@ -861,8 +861,8 @@ const translations: Record<string, string> = {
   "Be among the first homes on autopilot.": "Sé de los primeros hogares en piloto automático.",
   "Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and lock in founding-member pricing.":
     "Tidy está aceptando un grupo limitado de miembros fundadores en Pinecrest, Kendall y Kendall West. Únete temprano y asegura el precio de miembro fundador.",
-  "Licensed & Insured · Background-Checked Pros · Satisfaction Guaranteed":
-    "Licenciado y Asegurado · Profesionales Verificados · Garantía de Satisfacción",
+  "Vetted & Insured · Background-Checked Pros · Satisfaction Guaranteed":
+    "Verificado y Asegurado · Profesionales Verificados · Garantía de Satisfacción",
   "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
     "Un servicio adicional premium gratis en tu primera visita · Primera visita perfecta o es gratis · Solo 25 casas fundadoras por código postal",
   "One free premium add-on on your first visit": "Un servicio adicional premium gratis en tu primera visita",

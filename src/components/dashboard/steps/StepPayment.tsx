@@ -302,7 +302,7 @@ export default function StepPayment({ state, onChange }: Props) {
         style={{ transitionDelay: '220ms' }}
       >
         {[
-          { icon: Banknote,    label: 'Licensed' },
+          { icon: Banknote,    label: 'Vetted' },
           { icon: ShieldCheck, label: '$1M Insured' },
           { icon: BadgeCheck,  label: 'Background Checked' },
           { icon: XIcon,       label: 'Cancel Anytime' },
