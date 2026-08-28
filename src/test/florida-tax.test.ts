@@ -10,7 +10,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { translate } from '@/lib/checkout';
-import { defaultState, type ConfigState, type ServiceType, type Frequency } from '@/lib/dashboard-pricing';
+import { calculatePricing, defaultState, type ConfigState, type ServiceType, type Frequency } from '@/lib/dashboard-pricing';
+import { FL_SALES_TAX_COLLECTION_ENABLED } from '@/lib/florida-tax';
 
 const read = (p: string) => readFileSync(path.join(process.cwd(), p), 'utf8');
 const taxSrc = read('supabase/functions/_shared/florida-tax.ts');
@@ -68,9 +69,15 @@ describe('Florida sales tax in checkout', () => {
     expect(checkoutSrc).toMatch(/detailingIndices/);
   });
 
-  it('nothing is taxed while collection is disabled', () => {
-    expect(taxPctFor(buildState(['detailing'], ['ceramicSpray']))).toBe(0);
-    expect(taxPctFor(buildState(['cleaning', 'lawn', 'detailing'], ['ceramicSpray']))).toBe(0);
+  it('nothing is charged or displayed while collection is disabled', () => {
+    // Tidy is not registered to collect FL sales tax: the master switch is off,
+    // so the quoted total must carry no tax either.
+    expect(FL_SALES_TAX_COLLECTION_ENABLED).toBe(false);
+    const p = calculatePricing(buildState(['detailing'], ['ceramicSpray']));
+    expect(p.taxAmount).toBe(0);
+    expect(p.ongoing).toBeCloseTo(p.netTotal, 2);
+    // The rule itself still identifies the coating cart, for when we register.
+    expect(taxPctFor(buildState(['detailing'], ['ceramicSpray']))).toBe(7);
   });
 
   it('detailing WITHOUT a coating add-on is untaxed', () => {
