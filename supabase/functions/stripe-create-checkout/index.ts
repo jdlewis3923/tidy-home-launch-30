@@ -141,11 +141,15 @@ Deno.serve(async (req) => {
 
         // deno-lint-ignore no-explicit-any
         const line_items: any[] = [];
+        // Indices of line items that belong to the detailing service. Only these
+        // can ever carry Florida sales tax (cleaning + lawn are nontaxable).
+        const detailingIndices = new Set<number>();
         for (const s of input.services) {
           const row = subRows?.find((r) => r.service_type === s.service && r.frequency === s.frequency);
           if (!row) {
             throw new Error(`no active catalog price for ${s.service}:${s.frequency}`);
           }
+          if (s.service === "detailing") detailingIndices.add(line_items.length);
           line_items.push({ price: row.stripe_price_id, quantity: s.qty ?? 1 });
         }
 
@@ -153,7 +157,7 @@ Deno.serve(async (req) => {
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
             .from("stripe_catalog")
-            .select("addon_name, stripe_price_id")
+            .select("addon_name, service_type, stripe_price_id")
             .eq("is_addon", true)
             .eq("active", true)
             .in(
@@ -165,19 +169,31 @@ Deno.serve(async (req) => {
           for (const a of input.addons) {
             const row = addonRows?.find((r) => r.addon_name === a.addon_name);
             if (!row) continue; // unknown add-on — skip silently
+            if (row.service_type === "detailing") detailingIndices.add(line_items.length);
             line_items.push({ price: row.stripe_price_id, quantity: a.qty });
           }
         }
 
         // ---------- Florida sales tax (see _shared/florida-tax.ts) ----------
-        // Detailing is only taxable when wax / sealant / ceramic coating is
-        // applied, and applying it makes the WHOLE transaction taxable. Cleaning
-        // and lawn care are never taxable, so an untriggered cart gets no tax.
-        const taxable = cartTriggersFloridaTax(input.addons);
+        // GATED OFF: Tidy Home Concierge LLC holds no Florida Certificate of
+        // Registration, so no sales tax may be collected. The app_settings key
+        // `fl_sales_tax_enabled` (default false) is the switch. While it is
+        // false we never touch Stripe TaxRates at all.
+        // When enabled, tax applies ONLY to detailing line items — residential
+        // cleaning and lawn care are nontaxable services in Florida — and only
+        // when a wax/sealant/ceramic coating add-on is in the cart.
+        const { data: taxFlagRow } = await supabase
+          .from("app_settings")
+          .select("value")
+          .eq("key", "fl_sales_tax_enabled")
+          .maybeSingle();
+        const taxCollectionEnabled = taxFlagRow?.value === true;
+
+        const taxable = taxCollectionEnabled && cartTriggersFloridaTax(input.addons);
         let taxRateId: string | null = null;
         if (taxable) {
           taxRateId = await getFloridaTaxRateId(stripe);
-          for (const li of line_items) li.tax_rates = [taxRateId];
+          for (const idx of detailingIndices) line_items[idx].tax_rates = [taxRateId];
         }
 
         // ---------- Bundle discount ----------
