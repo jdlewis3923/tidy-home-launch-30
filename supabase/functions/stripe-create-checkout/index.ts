@@ -19,9 +19,12 @@ import { resolveBundleDiscountPct as resolveBundleDiscountPctFromDb } from "../_
 // Bundle discount is charged as an existing Stripe coupon (live mode), chosen by
 // the number of DISTINCT services in the cart. Line items always carry the
 // undiscounted catalog prices, so the coupon discounts exactly once.
+// Single canonical coupon pair, shared with the embedded path
+// (_shared/bundle-coupon.ts). Legacy BUNDLE_2_SERVICE / BUNDLE_3_SERVICE remain
+// active in Stripe but are no longer referenced here.
 const BUNDLE_COUPON_BY_SERVICE_COUNT: Record<number, string> = {
-  2: "BUNDLE_2_SERVICE", // 10% off forever
-  3: "BUNDLE_3_SERVICE", // 15% off forever
+  2: "TIDY_BUNDLE_10PCT", // 10% off forever
+  3: "TIDY_BUNDLE_15PCT", // 15% off forever
 };
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
 
