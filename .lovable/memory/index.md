@@ -10,6 +10,7 @@ Supabase auth, GTM tracking.
 Transactional email/SMS: edge functions fire Zapier webhooks only — never call Brevo/Twilio/Resend directly. Existing Zaps render Brevo templates + send Twilio SMS.
 
 ## Memories
+- [Pricing Canon](mem://features/pricing-canon) — Single source for all prices, 10/15% bundle discounts, $50 referral, FL tax off
 - [Project Overview](mem://project/overview) — Tidy Home Concierge LLC business details and target Miami zip codes
 - [Branding Colors](mem://style/branding-colors) — Core brand colors and typography settings
 - [Logo Guidelines](mem://style/logo-guidelines) — Circular badge styling, sunburst, gradient, and layout containers
