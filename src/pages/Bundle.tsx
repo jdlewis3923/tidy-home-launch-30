@@ -18,14 +18,15 @@ import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getBundleDiscount } from "@/lib/dashboard-pricing";
+import { SERVICE_PRICES } from "@/lib/pricing-canon";
 import heroImg from "@/assets/hero-miami-home.jpg";
 
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
 
 const SERVICES: { slug: ServiceSlug; label: string; basePrice: number }[] = [
-  { slug: "cleaning", label: "House Cleaning", basePrice: 159 },
-  { slug: "lawn", label: "Lawn Care", basePrice: 85 },
-  { slug: "detailing", label: "Car Detailing", basePrice: 159 },
+  { slug: "cleaning", label: "House Cleaning", basePrice: SERVICE_PRICES.cleaning.monthly as number },
+  { slug: "lawn", label: "Lawn Care", basePrice: SERVICE_PRICES.lawn.monthly as number },
+  { slug: "detailing", label: "Car Detailing", basePrice: SERVICE_PRICES.detailing.monthly as number },
 ];
 
 const Bundle = () => (

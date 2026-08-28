@@ -2,11 +2,14 @@ import { Check, HelpCircle } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
+import { SERVICE_PRICES } from "@/lib/pricing-canon";
+
+const mo = (v: number | null) => (v == null ? "—" : `$${v}/mo`);
 
 const rows = [
-  { service: "🏠 House Cleaning", monthly: "$159/mo", biweekly: "$275/mo", weekly: "$459/mo" },
-  { service: "🌿 Lawn Care", monthly: "$85/mo", biweekly: "$129/mo", weekly: "$195/mo" },
-  { service: "🚗 Car Detailing", monthly: "$159/mo", biweekly: "$249/mo", weekly: "—" },
+  { service: "🏠 House Cleaning", monthly: mo(SERVICE_PRICES.cleaning.monthly), biweekly: mo(SERVICE_PRICES.cleaning.biweekly), weekly: mo(SERVICE_PRICES.cleaning.weekly) },
+  { service: "🌿 Lawn Care", monthly: mo(SERVICE_PRICES.lawn.monthly), biweekly: mo(SERVICE_PRICES.lawn.biweekly), weekly: mo(SERVICE_PRICES.lawn.weekly) },
+  { service: "🚗 Car Detailing", monthly: mo(SERVICE_PRICES.detailing.monthly), biweekly: mo(SERVICE_PRICES.detailing.biweekly), weekly: mo(SERVICE_PRICES.detailing.weekly) },
   { service: "🔧 Cleaning Add-Ons", monthly: "$30–$55", biweekly: "one-time", weekly: "—" },
   { service: "🔧 Lawn Add-Ons", monthly: "$45–$150", biweekly: "one-time", weekly: "—" },
   { service: "🔧 Detailing Add-Ons", monthly: "$45–$85", biweekly: "one-time", weekly: "—" },

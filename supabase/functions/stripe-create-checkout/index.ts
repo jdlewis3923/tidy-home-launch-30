@@ -15,6 +15,7 @@ import { corsHeaders, handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
 import { resolveBundleDiscountPct as resolveBundleDiscountPctFromDb } from "../_shared/bundle-discount.ts";
+import { BUNDLE_DISCOUNT_PCT_CANON } from "../_shared/pricing-canon.ts";
 
 // Bundle discount is charged as an existing Stripe coupon (live mode), chosen by
 // the number of DISTINCT services in the cart. Line items always carry the
@@ -22,10 +23,11 @@ import { resolveBundleDiscountPct as resolveBundleDiscountPctFromDb } from "../_
 // Single canonical coupon pair, shared with the embedded path
 // (_shared/bundle-coupon.ts). Legacy BUNDLE_2_SERVICE / BUNDLE_3_SERVICE remain
 // active in Stripe but are no longer referenced here.
-const BUNDLE_COUPON_BY_SERVICE_COUNT: Record<number, string> = {
-  2: "TIDY_BUNDLE_10PCT", // 10% off forever
-  3: "TIDY_BUNDLE_15PCT", // 15% off forever
-};
+// Coupon ids are derived from the canon percentages so a rate change cannot
+// leave the coupon behind.
+const BUNDLE_COUPON_BY_SERVICE_COUNT: Record<number, string> = Object.fromEntries(
+  Object.entries(BUNDLE_DISCOUNT_PCT_CANON).map(([count, pct]) => [Number(count), `TIDY_BUNDLE_${pct}PCT`]),
+);
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");

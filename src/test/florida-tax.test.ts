@@ -60,15 +60,17 @@ describe('Florida sales tax in checkout', () => {
     expect(checkoutSrc).not.toContain('tax_behavior');
   });
 
-  it('detailing WITH a coating add-on is taxed at 7% on the entire transaction', () => {
-    const s = buildState(['detailing'], ['ceramicSpray']);
-    expect(taxPctFor(s)).toBe(7);
-    // Every line item carries the rate, so the whole charge is taxed.
-    expect(checkoutSrc).toMatch(/for \(const li of line_items\) li\.tax_rates = \[taxRateId\]/);
+  it('collection is flag-gated and, when on, applies only to detailing line items', () => {
+    // Fails closed on a missing/errored app_settings row.
+    expect(checkoutSrc).toContain('"fl_sales_tax_enabled"');
+    expect(checkoutSrc).toContain('taxFlagRow?.value === true');
+    // Only detailing is a taxable service in Florida.
+    expect(checkoutSrc).toMatch(/detailingIndices/);
   });
 
-  it('a bundle that includes a coating add-on taxes the whole cart', () => {
-    expect(taxPctFor(buildState(['cleaning', 'lawn', 'detailing'], ['ceramicSpray']))).toBe(7);
+  it('nothing is taxed while collection is disabled', () => {
+    expect(taxPctFor(buildState(['detailing'], ['ceramicSpray']))).toBe(0);
+    expect(taxPctFor(buildState(['cleaning', 'lawn', 'detailing'], ['ceramicSpray']))).toBe(0);
   });
 
   it('detailing WITHOUT a coating add-on is untaxed', () => {

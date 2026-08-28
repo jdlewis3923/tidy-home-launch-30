@@ -32,6 +32,13 @@ export const FLORIDA_TAX = {
   coatingAddonIds: ["ceramicSpray"] as const,
 } as const;
 
+/**
+ * Master switch mirroring app_settings.fl_sales_tax_enabled. Tidy is NOT
+ * registered to collect Florida sales tax, so nothing is charged and nothing
+ * may be displayed. Flip BOTH this constant and the app_settings row together.
+ */
+export const FL_SALES_TAX_COLLECTION_ENABLED = false;
+
 const COATING_SET = new Set<string>(FLORIDA_TAX.coatingAddonIds as readonly string[]);
 
 /** True when the cart contains a wax/sealant/coating add-on. */
