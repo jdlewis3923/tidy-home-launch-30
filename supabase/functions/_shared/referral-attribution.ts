@@ -8,7 +8,9 @@
 // The referred customer's own $50 off comes from the Stripe coupon
 // REFERRAL_50_OFF_FIRST_MONTH — nothing here touches that side.
 
-export const REFERRAL_CREDIT_CENTS = 5000;
+import { REFERRAL_BONUS_CENTS } from "./pricing-canon.ts";
+
+export const REFERRAL_CREDIT_CENTS = REFERRAL_BONUS_CENTS;
 
 /** Resolve a Stripe customer id for a user: profile → subscription → Stripe search. */
 // deno-lint-ignore no-explicit-any

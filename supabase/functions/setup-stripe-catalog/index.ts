@@ -17,6 +17,7 @@ import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts';
 import { withLogging } from '../_shared/withLogging.ts';
+import { TOP_BUNDLE_DISCOUNT_PCT } from '../_shared/pricing-canon.ts';
 
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -47,39 +48,39 @@ type CatalogRow = {
 
 const CATALOG: CatalogRow[] = [
   // ---- 8 recurring subscription prices ----
-  { service_type: 'cleaning', frequency: 'monthly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1BxDD7AxvAjJGv03232kHG', price_cents: 15900, description: 'House Cleaning — Monthly (1 visit/mo)', sort_order: 10, bundle_discount_pct: 0 },
-  { service_type: 'cleaning', frequency: 'biweekly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1BtVD7AxvAjJGv6DK47KkX', price_cents: 27500, description: 'House Cleaning — Biweekly (2 visits/mo)', sort_order: 11, bundle_discount_pct: 0 },
-  { service_type: 'cleaning', frequency: 'weekly', is_addon: false, addon_name: null, stripe_price_id: 'price_1TNCl3D7AxvAjJGvV63NNBap', price_cents: 45900, description: 'House Cleaning — Weekly (4 visits/mo)', sort_order: 12, bundle_discount_pct: 0 },
-  { service_type: 'lawn', frequency: 'monthly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1C60D7AxvAjJGvHwsiZY3x', price_cents: 8500, description: 'Lawn Care — Monthly (1 visit/mo)', sort_order: 20, bundle_discount_pct: 0 },
-  { service_type: 'lawn', frequency: 'biweekly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1C3SD7AxvAjJGv62XM2Bkv', price_cents: 12900, description: 'Lawn Care — Biweekly (2 visits/mo)', sort_order: 21, bundle_discount_pct: 0 },
-  { service_type: 'lawn', frequency: 'weekly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1C1vD7AxvAjJGvd2jXDMra', price_cents: 19500, description: 'Lawn Care — Weekly (4 visits/mo)', sort_order: 22, bundle_discount_pct: 0 },
-  { service_type: 'detailing', frequency: 'monthly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1CAMD7AxvAjJGv7lPz24fS', price_cents: 15900, description: 'Mobile Car Detailing — Monthly (1 visit/mo)', sort_order: 30, bundle_discount_pct: 0 },
-  { service_type: 'detailing', frequency: 'biweekly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1C8KD7AxvAjJGviNYShuGx', price_cents: 24900, description: 'Mobile Car Detailing — Biweekly (2 visits/mo)', sort_order: 31, bundle_discount_pct: 0 },
+  { service_type: 'cleaning', frequency: 'monthly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1BxDD7AxvAjJGv03232kHG', price_cents: 15900, description: 'House Cleaning — Monthly (1 visit/mo)', sort_order: 10, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: 'cleaning', frequency: 'biweekly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1BtVD7AxvAjJGv6DK47KkX', price_cents: 27500, description: 'House Cleaning — Biweekly (2 visits/mo)', sort_order: 11, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: 'cleaning', frequency: 'weekly', is_addon: false, addon_name: null, stripe_price_id: 'price_1TNCl3D7AxvAjJGvV63NNBap', price_cents: 45900, description: 'House Cleaning — Weekly (4 visits/mo)', sort_order: 12, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: 'lawn', frequency: 'monthly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1C60D7AxvAjJGvHwsiZY3x', price_cents: 8500, description: 'Lawn Care — Monthly (1 visit/mo)', sort_order: 20, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: 'lawn', frequency: 'biweekly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1C3SD7AxvAjJGv62XM2Bkv', price_cents: 12900, description: 'Lawn Care — Biweekly (2 visits/mo)', sort_order: 21, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: 'lawn', frequency: 'weekly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1C1vD7AxvAjJGvd2jXDMra', price_cents: 19500, description: 'Lawn Care — Weekly (4 visits/mo)', sort_order: 22, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: 'detailing', frequency: 'monthly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1CAMD7AxvAjJGv7lPz24fS', price_cents: 15900, description: 'Mobile Car Detailing — Monthly (1 visit/mo)', sort_order: 30, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: 'detailing', frequency: 'biweekly', is_addon: false, addon_name: null, stripe_price_id: 'price_1T1C8KD7AxvAjJGviNYShuGx', price_cents: 24900, description: 'Mobile Car Detailing — Biweekly (2 visits/mo)', sort_order: 31, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
 
   // ---- 3 XL Size Upgrade one-time prices (treated as add-ons in catalog) ----
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'xl_cleaning', stripe_price_id: 'price_1TOXMDD7AxvAjJGvSM51J1SR', price_cents: 6000, description: 'House Cleaning — XL Size Upgrade', sort_order: 100, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'xl_lawn', stripe_price_id: 'price_1TOXMLD7AxvAjJGvLvapXzvK', price_cents: 3000, description: 'Lawn Care — XL Size Upgrade', sort_order: 101, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'xl_detailing', stripe_price_id: 'price_1TOXMSD7AxvAjJGvfA9EueeM', price_cents: 3000, description: 'Mobile Car Detailing — XL Size Upgrade (per vehicle)', sort_order: 102, bundle_discount_pct: 0 },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'xl_cleaning', stripe_price_id: 'price_1TOXMDD7AxvAjJGvSM51J1SR', price_cents: 6000, description: 'House Cleaning — XL Size Upgrade', sort_order: 100, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'xl_lawn', stripe_price_id: 'price_1TOXMLD7AxvAjJGvLvapXzvK', price_cents: 3000, description: 'Lawn Care — XL Size Upgrade', sort_order: 101, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'xl_detailing', stripe_price_id: 'price_1TOXMSD7AxvAjJGvfA9EueeM', price_cents: 3000, description: 'Mobile Car Detailing — XL Size Upgrade (per vehicle)', sort_order: 102, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
 
   // ---- 15 add-on one-time prices ----
   // House Cleaning (6)
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'oven', stripe_price_id: 'price_1T1CMdD7AxvAjJGvb2RXCJUg', price_cents: 4500, description: 'Inside Oven Clean', sort_order: 200, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'fridge', stripe_price_id: 'price_1TNCl4D7AxvAjJGvCEEWmMKA', price_cents: 3500, description: 'Inside Fridge Clean', sort_order: 201, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'interiorWindows', stripe_price_id: 'price_1TNCjmD7AxvAjJGvtwYE31nw', price_cents: 5500, description: 'Interior Windows', sort_order: 202, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'baseboards', stripe_price_id: 'price_1TNCjnD7AxvAjJGvAKQN2y7a', price_cents: 3500, description: 'Deep Baseboard Scrub', sort_order: 203, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'laundry', stripe_price_id: 'price_1TNCjpD7AxvAjJGvoZQSrVrh', price_cents: 3000, description: 'Laundry — Wash, Dry & Fold (1 load)', sort_order: 204, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'cabinets', stripe_price_id: 'price_1TNCl5D7AxvAjJGvPbjrVube', price_cents: 5000, description: 'Inside Kitchen Cabinets', sort_order: 205, bundle_discount_pct: 0 },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'oven', stripe_price_id: 'price_1T1CMdD7AxvAjJGvb2RXCJUg', price_cents: 4500, description: 'Inside Oven Clean', sort_order: 200, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'fridge', stripe_price_id: 'price_1TNCl4D7AxvAjJGvCEEWmMKA', price_cents: 3500, description: 'Inside Fridge Clean', sort_order: 201, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'interiorWindows', stripe_price_id: 'price_1TNCjmD7AxvAjJGvtwYE31nw', price_cents: 5500, description: 'Interior Windows', sort_order: 202, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'baseboards', stripe_price_id: 'price_1TNCjnD7AxvAjJGvAKQN2y7a', price_cents: 3500, description: 'Deep Baseboard Scrub', sort_order: 203, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'laundry', stripe_price_id: 'price_1TNCjpD7AxvAjJGvoZQSrVrh', price_cents: 3000, description: 'Laundry — Wash, Dry & Fold (1 load)', sort_order: 204, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'cabinets', stripe_price_id: 'price_1TNCl5D7AxvAjJGvPbjrVube', price_cents: 5000, description: 'Inside Kitchen Cabinets', sort_order: 205, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
   // Lawn Care (5)
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'hedge', stripe_price_id: 'price_1T1CpMD7AxvAjJGvWqNVcrSi', price_cents: 6500, description: 'Hedge & Bush Trimming', sort_order: 300, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'weed', stripe_price_id: 'price_1TNCl7D7AxvAjJGv3YxUwsUg', price_cents: 4500, description: 'Weed Removal — Garden Beds', sort_order: 301, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'leaf', stripe_price_id: 'price_1TNCl9D7AxvAjJGvf7PJ200g', price_cents: 5500, description: 'Leaf & Debris Cleanup', sort_order: 302, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'fertilization', stripe_price_id: 'price_1TNCjqD7AxvAjJGvmWIM5yUB', price_cents: 7500, description: 'Fertilization Treatment', sort_order: 303, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'pressureWash', stripe_price_id: 'price_1TNCjrD7AxvAjJGv3cHMAlq6', price_cents: 15000, description: 'Driveway Pressure Wash', sort_order: 304, bundle_discount_pct: 0 },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'hedge', stripe_price_id: 'price_1T1CpMD7AxvAjJGvWqNVcrSi', price_cents: 6500, description: 'Hedge & Bush Trimming', sort_order: 300, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'weed', stripe_price_id: 'price_1TNCl7D7AxvAjJGv3YxUwsUg', price_cents: 4500, description: 'Weed Removal — Garden Beds', sort_order: 301, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'leaf', stripe_price_id: 'price_1TNCl9D7AxvAjJGvf7PJ200g', price_cents: 5500, description: 'Leaf & Debris Cleanup', sort_order: 302, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'fertilization', stripe_price_id: 'price_1TNCjqD7AxvAjJGvmWIM5yUB', price_cents: 7500, description: 'Fertilization Treatment', sort_order: 303, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'pressureWash', stripe_price_id: 'price_1TNCjrD7AxvAjJGv3cHMAlq6', price_cents: 15000, description: 'Driveway Pressure Wash', sort_order: 304, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
   // Car Detailing (4)
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'ozone', stripe_price_id: 'price_1TNCjsD7AxvAjJGviCx7ZE0B', price_cents: 7500, description: 'Ozone Odor Treatment', sort_order: 400, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'petHair', stripe_price_id: 'price_1TNCl6D7AxvAjJGvxirYq3hZ', price_cents: 4500, description: 'Pet Hair Removal', sort_order: 401, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'engineBay', stripe_price_id: 'price_1TNCjuD7AxvAjJGvKKqR021j', price_cents: 8500, description: 'Engine Bay Clean', sort_order: 402, bundle_discount_pct: 0 },
-  { service_type: null, frequency: null, is_addon: true, addon_name: 'ceramicSpray', stripe_price_id: 'price_1TNCjvD7AxvAjJGvQXVMBvpa', price_cents: 8500, description: 'Ceramic Spray Coat', sort_order: 403, bundle_discount_pct: 0 },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'ozone', stripe_price_id: 'price_1TNCjsD7AxvAjJGviCx7ZE0B', price_cents: 7500, description: 'Ozone Odor Treatment', sort_order: 400, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'petHair', stripe_price_id: 'price_1TNCl6D7AxvAjJGvxirYq3hZ', price_cents: 4500, description: 'Pet Hair Removal', sort_order: 401, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'engineBay', stripe_price_id: 'price_1TNCjuD7AxvAjJGvKKqR021j', price_cents: 8500, description: 'Engine Bay Clean', sort_order: 402, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
+  { service_type: null, frequency: null, is_addon: true, addon_name: 'ceramicSpray', stripe_price_id: 'price_1TNCjvD7AxvAjJGvQXVMBvpa', price_cents: 8500, description: 'Ceramic Spray Coat', sort_order: 403, bundle_discount_pct: TOP_BUNDLE_DISCOUNT_PCT },
 ];
 
 interface SetupResult {

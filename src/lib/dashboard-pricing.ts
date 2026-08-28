@@ -1,11 +1,12 @@
 import { getBundleDiscountPct } from '@/lib/bundle-discount';
-import { FLORIDA_TAX, cartTriggersFloridaTax } from '@/lib/florida-tax';
+import { SERVICE_PRICES, XL_UPCHARGE_CANON, REFERRAL_BONUS_CENTS } from '@/lib/pricing-canon';
+import { FLORIDA_TAX, cartTriggersFloridaTax, FL_SALES_TAX_COLLECTION_ENABLED } from '@/lib/florida-tax';
 
 
 // Referral discount applied to first month when a valid promo code is present.
 // Stored in cents to mirror Stripe; UI converts to dollars for display.
 // Edit this single constant to change the displayed discount amount.
-export const REFERRAL_DISCOUNT_CENTS = 5000;
+export const REFERRAL_DISCOUNT_CENTS = REFERRAL_BONUS_CENTS;
 
 // Types
 export type ServiceType = 'cleaning' | 'lawn' | 'detailing';
@@ -71,29 +72,19 @@ export const defaultState: ConfigState = {
 
 // Base recurring prices — flat per-visit, by frequency.
 // Size upgrades are applied as additive per-visit upcharges (see XL_UPCHARGE).
-const cleaningPrices: Record<Frequency, number> = {
-  monthly: 159,
-  biweekly: 275,
-  weekly: 459,
-};
+// Prices come from the pricing canon (src/lib/pricing-canon.ts) — never edit
+// them here.
+const cleaningPrices: Record<Frequency, number> = SERVICE_PRICES.cleaning as Record<Frequency, number>;
 
-const lawnPrices: Record<Frequency, number> = {
-  monthly: 85,
-  biweekly: 129,
-  weekly: 195,
-};
+const lawnPrices: Record<Frequency, number> = SERVICE_PRICES.lawn as Record<Frequency, number>;
 
 const detailingPrices: Record<'monthly' | 'biweekly', number> = {
-  monthly: 159,
-  biweekly: 249,
+  monthly: SERVICE_PRICES.detailing.monthly as number,
+  biweekly: SERVICE_PRICES.detailing.biweekly as number,
 };
 
 // Extra Large per-visit upcharge by service.
-export const XL_UPCHARGE: Record<ServiceType, number> = {
-  cleaning: 60,
-  lawn: 30,
-  detailing: 30, // per vehicle
-};
+export const XL_UPCHARGE: Record<ServiceType, number> = XL_UPCHARGE_CANON;
 
 // Human-readable size tier copy (for dashboard helper text + summaries).
 export const sizeTierCopy: Record<ServiceType, Record<SizeTier, { label: string; helper: string }>> = {
@@ -253,7 +244,9 @@ export function calculatePricing(state: ConfigState) {
   // and when it fires the ENTIRE post-discount amount is taxable. Stripe adds
   // this as an exclusive TaxRate on top of the subscription, so the customer-
   // facing total must include it or the quote won't match the charge.
-  const taxTriggered = cartTriggersFloridaTax((state.addOns ?? []).map((addon_name) => ({ addon_name })));
+  const taxTriggered =
+    FL_SALES_TAX_COLLECTION_ENABLED &&
+    cartTriggersFloridaTax((state.addOns ?? []).map((addon_name) => ({ addon_name })));
   const taxPercent = taxTriggered ? FLORIDA_TAX.percentage / 100 : 0;
   const taxAmount = Math.round(netTotal * taxPercent * 100) / 100;
   const total = netTotal + taxAmount;

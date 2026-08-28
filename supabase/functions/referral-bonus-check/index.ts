@@ -9,6 +9,7 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { isValidStripeSecretKey } from "../_shared/stripe-keys.ts";
+import { REFERRAL_BONUS_CENTS } from "../_shared/pricing-canon.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,7 +33,7 @@ Deno.serve(async (req) => {
     .select("value")
     .eq("key", "referral_bonus_amount_cents")
     .maybeSingle();
-  const bonusCents = Number(setting?.value ?? 20000);
+  const bonusCents = Number(setting?.value ?? REFERRAL_BONUS_CENTS);
 
   const { data: pending, error } = await supabase
     .from("pro_referrals")

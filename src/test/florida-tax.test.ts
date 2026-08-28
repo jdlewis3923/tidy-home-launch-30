@@ -10,7 +10,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { translate } from '@/lib/checkout';
-import { defaultState, type ConfigState, type ServiceType, type Frequency } from '@/lib/dashboard-pricing';
+import { calculatePricing, defaultState, type ConfigState, type ServiceType, type Frequency } from '@/lib/dashboard-pricing';
+import { FL_SALES_TAX_COLLECTION_ENABLED } from '@/lib/florida-tax';
 
 const read = (p: string) => readFileSync(path.join(process.cwd(), p), 'utf8');
 const taxSrc = read('supabase/functions/_shared/florida-tax.ts');
@@ -60,15 +61,23 @@ describe('Florida sales tax in checkout', () => {
     expect(checkoutSrc).not.toContain('tax_behavior');
   });
 
-  it('detailing WITH a coating add-on is taxed at 7% on the entire transaction', () => {
-    const s = buildState(['detailing'], ['ceramicSpray']);
-    expect(taxPctFor(s)).toBe(7);
-    // Every line item carries the rate, so the whole charge is taxed.
-    expect(checkoutSrc).toMatch(/for \(const li of line_items\) li\.tax_rates = \[taxRateId\]/);
+  it('collection is flag-gated and, when on, applies only to detailing line items', () => {
+    // Fails closed on a missing/errored app_settings row.
+    expect(checkoutSrc).toContain('"fl_sales_tax_enabled"');
+    expect(checkoutSrc).toContain('taxFlagRow?.value === true');
+    // Only detailing is a taxable service in Florida.
+    expect(checkoutSrc).toMatch(/detailingIndices/);
   });
 
-  it('a bundle that includes a coating add-on taxes the whole cart', () => {
-    expect(taxPctFor(buildState(['cleaning', 'lawn', 'detailing'], ['ceramicSpray']))).toBe(7);
+  it('nothing is charged or displayed while collection is disabled', () => {
+    // Tidy is not registered to collect FL sales tax: the master switch is off,
+    // so the quoted total must carry no tax either.
+    expect(FL_SALES_TAX_COLLECTION_ENABLED).toBe(false);
+    const p = calculatePricing(buildState(['detailing'], ['ceramicSpray']));
+    expect(p.taxAmount).toBe(0);
+    expect(p.ongoing).toBeCloseTo(p.netTotal, 2);
+    // The rule itself still identifies the coating cart, for when we register.
+    expect(taxPctFor(buildState(['detailing'], ['ceramicSpray']))).toBe(7);
   });
 
   it('detailing WITHOUT a coating add-on is untaxed', () => {

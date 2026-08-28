@@ -9,4 +9,5 @@
 export {
   FLORIDA_TAX,
   cartTriggersFloridaTax,
+  FL_SALES_TAX_COLLECTION_ENABLED,
 } from '../../supabase/functions/_shared/florida-tax';

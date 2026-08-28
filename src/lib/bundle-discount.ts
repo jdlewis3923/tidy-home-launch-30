@@ -12,9 +12,10 @@
  * server charges, so the column cannot silently drift again.
  */
 import { supabase } from '@/integrations/supabase/client';
+import { BUNDLE_DISCOUNT_PCT_CANON } from '@/lib/pricing-canon';
 
 /** Offline fallback only — never edit this instead of the DB. */
-export const FALLBACK_BUNDLE_DISCOUNT_PCT: Record<number, number> = { 2: 10, 3: 15 };
+export const FALLBACK_BUNDLE_DISCOUNT_PCT: Record<number, number> = BUNDLE_DISCOUNT_PCT_CANON;
 
 /** Back-compat alias used by older imports. */
 export const BUNDLE_DISCOUNT_PCT = FALLBACK_BUNDLE_DISCOUNT_PCT;

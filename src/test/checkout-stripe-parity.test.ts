@@ -17,7 +17,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect, beforeAll } from 'vitest';
 import { translate } from '@/lib/checkout';
-import { FLORIDA_TAX, cartTriggersFloridaTax } from '@/lib/florida-tax';
+import { FLORIDA_TAX, cartTriggersFloridaTax, FL_SALES_TAX_COLLECTION_ENABLED } from '@/lib/florida-tax';
 import { getBundleDiscountPct } from '@/lib/bundle-discount';
 
 import {
@@ -134,7 +134,7 @@ function stripeSessionCents(state: ConfigState): number {
   const netCents = subtotalCents - subtotalCents * (pct / 100);
 
   // Then the exclusive FL TaxRate, when a coating add-on is in the cart.
-  const taxCents = cartTriggersFloridaTax(addons)
+  const taxCents = FL_SALES_TAX_COLLECTION_ENABLED && cartTriggersFloridaTax(addons)
     ? Math.round(netCents * (FLORIDA_TAX.percentage / 100))
     : 0;
   return netCents + taxCents;
@@ -248,9 +248,13 @@ describe('checkout ↔ Stripe parity', () => {
 
   it('the taxable cart shows tax as its own line and folds it into the total', () => {
     const taxed = calculatePricing(monthly(['detailing'], ['ceramicSpray']));
-    expect(taxed.taxTriggered).toBe(true);
-    expect(taxed.taxPercentage).toBe(FLORIDA_TAX.percentage);
-    expect(Math.round(taxed.taxAmount * 100)).toBe(Math.round(taxed.netTotal * FLORIDA_TAX.percentage));
+    expect(taxed.taxTriggered).toBe(FL_SALES_TAX_COLLECTION_ENABLED);
+    if (FL_SALES_TAX_COLLECTION_ENABLED) {
+      expect(taxed.taxPercentage).toBe(FLORIDA_TAX.percentage);
+      expect(Math.round(taxed.taxAmount * 100)).toBe(Math.round(taxed.netTotal * FLORIDA_TAX.percentage));
+    } else {
+      expect(taxed.taxAmount).toBe(0);
+    }
     expect(taxed.ongoing).toBeCloseTo(taxed.netTotal + taxed.taxAmount, 2);
 
     const untaxed = calculatePricing(monthly(['detailing']));
