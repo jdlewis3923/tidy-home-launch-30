@@ -323,6 +323,25 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
     throw new Error(`subscriptions insert failed: ${subErr?.message ?? 'no row returned'}`);
   }
 
+  // Every self-selected band lands in the review queue. Admin compares it with
+  // the county property record daily; agreement closes the row, a disagreement
+  // gets corrected under the correction policy.
+  const bandRows = services
+    .filter((s) => !!s.band)
+    .map((s) => ({
+      subscription_id: subRow.id,
+      user_id: userId,
+      service_type: s.service,
+      self_band: s.band!,
+      address: meta.address || null,
+      status: 'open',
+    }));
+  if (bandRows.length) {
+    const { error: bandErr } = await supabase.from('band_reviews').insert(bandRows);
+    if (bandErr) console.error('[stripe-webhook] band_reviews insert failed', bandErr.message);
+  }
+
+
   // Mirror service_tier + signup_source onto profile (best-effort).
   const dominantService = services[0]?.service ?? null;
   if (dominantService) {
