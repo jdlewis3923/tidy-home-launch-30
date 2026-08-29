@@ -1,14 +1,26 @@
-import { ConfigState, ServiceType, Frequency, frequencyLabels, serviceLabels, serviceIcons } from '@/lib/dashboard-pricing';
+import {
+  ConfigState,
+  ServiceType,
+  Frequency,
+  frequencyLabels,
+  frequencyVisitCopy,
+  serviceLabels,
+  serviceIcons,
+  bandFor,
+  getServicePerVisit,
+  formatPerVisit,
+} from '@/lib/dashboard-pricing';
 
 interface Props {
   state: ConfigState;
   onChange: (s: ConfigState) => void;
 }
 
+// Cadence no longer changes the price, so every service offers all three.
 const freqOptions: Record<ServiceType, Frequency[]> = {
   cleaning: ['monthly', 'biweekly', 'weekly'],
   lawn:     ['monthly', 'biweekly', 'weekly'],
-  detailing:['monthly', 'biweekly'],
+  detailing:['monthly', 'biweekly', 'weekly'],
 };
 
 const popularBy: Record<ServiceType, Frequency> = {
@@ -51,6 +63,9 @@ export default function StepFrequency({ state, onChange }: Props) {
                   }`}
                 >
                   <span className="font-semibold lowercase block">{frequencyLabels[freq]}</span>
+                  <span className={`block text-[10px] mt-0.5 lowercase ${selected ? 'text-white/70' : 'text-ink-faint'}`}>
+                    {frequencyVisitCopy[freq]}
+                  </span>
                   {popular && selected && (
                     <span className="absolute inset-x-3 -bottom-[1px] h-[2px] rounded-full bg-white animate-calm-in" />
                   )}
@@ -59,15 +74,22 @@ export default function StepFrequency({ state, onChange }: Props) {
             })}
           </div>
 
-          {state.frequencies[svc] === popularBy[svc] && (
-            <p className="text-[11px] text-ink-faint animate-calm-in">
-              most members choose biweekly.
-            </p>
-          )}
+          {(() => {
+            const perVisit = getServicePerVisit(state, svc);
+            const band = bandFor(state, svc);
+            if (!perVisit || band === 'custom') return null;
+            return (
+              <p className="text-[11px] text-ink-faint animate-calm-in">
+                {formatPerVisit(perVisit)} — the same however often we come.
+              </p>
+            );
+          })()}
         </div>
       ))}
 
-      <p className="text-xs text-ink-faint">change anytime — no lock-in.</p>
+      <p className="text-xs text-ink-faint">
+        one price per visit, set by the size of your home or lot. change cadence anytime — no lock-in.
+      </p>
     </div>
   );
 }

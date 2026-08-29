@@ -119,7 +119,7 @@ export default function DashboardPlan() {
         if (!next.services.includes(svc)) next.services = [...next.services, svc];
         const planFreq = planParam && PLAN_PARAM_MAP[planParam];
         if (planFreq) {
-          next.frequencies[svc] = svc === 'detailing' && planFreq === 'weekly' ? 'biweekly' : planFreq;
+          next.frequencies[svc] = planFreq;
         } else if (!next.frequencies[svc]) {
           next.frequencies[svc] = svc === 'lawn' ? 'monthly' : 'biweekly';
         }
@@ -140,9 +140,9 @@ export default function DashboardPlan() {
     if (step === 1) return state.services.length > 0;
     if (step === 2) return state.services.every(s => !!state.frequencies[s]);
     if (step === 3) {
-      if (state.services.includes('cleaning') && !state.homeSize) return false;
-      if (state.services.includes('lawn') && !state.yardSize) return false;
-      if (state.services.includes('detailing') && !state.vehicleSize) return false;
+      if (state.services.includes('cleaning') && !state.homeBand) return false;
+      if (state.services.includes('lawn') && !state.lawnBand) return false;
+      if (state.services.includes('detailing') && !state.vehicleBand) return false;
       return true;
     }
     if (step === 4) return !!(state.firstName && state.lastName && state.email && state.password && state.password.length >= 8 && state.phone && state.address && state.city && state.zip);

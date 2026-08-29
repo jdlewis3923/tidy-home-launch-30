@@ -1,4 +1,4 @@
-import { formatMonthly, getLowestStartingPrice } from '@/lib/dashboard-pricing';
+import { formatPerVisit, getLowestStartingPrice } from '@/lib/dashboard-pricing';
 
 /**
  * Above-the-fold trust strip for the /signup builder.
@@ -24,7 +24,7 @@ export default function TrustStrip() {
       <span className="mx-1.5 text-ink-faint">·</span>
       Cancel Anytime
       <span className="mx-1.5 text-ink-faint">·</span>
-      Starting at {formatMonthly(getLowestStartingPrice())}
+      From {formatPerVisit(getLowestStartingPrice())}
     </div>
   );
 }

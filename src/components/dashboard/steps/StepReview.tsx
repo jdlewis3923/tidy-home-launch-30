@@ -1,4 +1,4 @@
-import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, sizeTierCopy, hasCustomQuote, REFERRAL_DISCOUNT_CENTS } from '@/lib/dashboard-pricing';
+import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, bandLabels, bandFor, frequencyVisitCopy, formatPerVisit, hasCustomQuote, REFERRAL_DISCOUNT_CENTS } from '@/lib/dashboard-pricing';
 import { usePromoState } from '@/hooks/usePromoCapture';
 
 interface Props {
@@ -25,22 +25,22 @@ export default function StepReview({ state, onEdit }: Props) {
 
         <div className="mt-4 space-y-2.5">
           {pricing.servicePrices.map(sp => {
-            const tier = sp.service === 'cleaning' ? state.homeSize
-                       : sp.service === 'lawn' ? state.yardSize
-                       : state.vehicleSize;
-            const tierLabel = tier ? sizeTierCopy[sp.service][tier].label : null;
+            const band = bandFor(state, sp.service);
+            const freq = state.frequencies[sp.service]!;
             return (
               <div key={sp.service} className="flex justify-between items-baseline text-sm">
                 <span className="text-ink">
                   <span className="mr-1.5">{serviceIcons[sp.service]}</span>
                   <span className="font-semibold lowercase">{serviceLabels[sp.service]}</span>
-                  <span className="text-ink-faint ml-2 lowercase">{frequencyLabels[state.frequencies[sp.service]!]}</span>
-                  {tierLabel && tierLabel !== 'Standard' && (
-                    <span className="ml-2 text-[11px] text-ink-faint lowercase">· {tierLabel}</span>
+                  <span className="text-ink-faint ml-2 lowercase">{frequencyLabels[freq].toLowerCase()}</span>
+                  {band && band !== 'custom' && (
+                    <span className="ml-2 text-[11px] text-ink-faint lowercase">
+                      · {bandLabels[band].toLowerCase()} · {formatPerVisit(sp.perVisit)} · {frequencyVisitCopy[freq]}
+                    </span>
                   )}
                 </span>
                 <span className="font-semibold text-ink tabular-nums">
-                  {tier === 'custom' ? 'custom' : `$${sp.price.toFixed(2)}/mo`}
+                  {band === 'custom' ? 'custom' : `$${sp.price.toFixed(2)}/mo`}
                 </span>
               </div>
             );

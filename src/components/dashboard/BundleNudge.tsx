@@ -2,8 +2,8 @@ import {
   ConfigState,
   ServiceType,
   defaultBundleFrequency,
-  formatMonthly,
-  getBasePrice,
+  formatPerVisit,
+  getHeadlinePrice,
   getBundleDiscount,
   serviceLabels,
 } from '@/lib/dashboard-pricing';
@@ -29,19 +29,19 @@ export default function BundleNudge({ state, onChange }: Props) {
   const suggest = candidates.find((s) => s !== current)!;
 
   const suggestFreq = defaultBundleFrequency[suggest];
-  const addedPrice = getBasePrice(suggest, suggestFreq);
+  const addedPrice = getHeadlinePrice(suggest);
 
   // Discount the user unlocks by moving from 1 → 2 services, applied to the
   // combined subtotal of the current service + the suggested one.
   const currentFreq = state.frequencies[current] ?? defaultBundleFrequency[current];
-  const bundleSubtotal = getBasePrice(current, currentFreq) + addedPrice;
+  const bundleSubtotal = getHeadlinePrice(current) + addedPrice;
   const discountPercent = getBundleDiscount(2);
   const savingAmount = bundleSubtotal * discountPercent;
 
   const meta = {
     name: serviceLabels[suggest],
-    price: formatMonthly(addedPrice),
-    saving: formatMonthly(Math.round(savingAmount * 100) / 100),
+    price: formatPerVisit(addedPrice),
+    saving: formatPerVisit(Math.round(savingAmount * 100) / 100),
     percentLabel: `${Math.round(discountPercent * 100)}%`,
   };
 
