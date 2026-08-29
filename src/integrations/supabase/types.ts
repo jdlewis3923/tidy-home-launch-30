@@ -2282,6 +2282,7 @@ export type Database = {
         Row: {
           active: boolean
           addon_name: string | null
+          band: string | null
           bundle_discount_pct: number
           created_at: string
           description: string | null
@@ -2290,6 +2291,7 @@ export type Database = {
             | null
           id: string
           is_addon: boolean
+          per_visit: boolean
           price_cents: number
           service_type: Database["public"]["Enums"]["service_type"] | null
           sort_order: number
@@ -2299,6 +2301,7 @@ export type Database = {
         Insert: {
           active?: boolean
           addon_name?: string | null
+          band?: string | null
           bundle_discount_pct?: number
           created_at?: string
           description?: string | null
@@ -2307,6 +2310,7 @@ export type Database = {
             | null
           id?: string
           is_addon?: boolean
+          per_visit?: boolean
           price_cents: number
           service_type?: Database["public"]["Enums"]["service_type"] | null
           sort_order?: number
@@ -2316,6 +2320,7 @@ export type Database = {
         Update: {
           active?: boolean
           addon_name?: string | null
+          band?: string | null
           bundle_discount_pct?: number
           created_at?: string
           description?: string | null
@@ -2324,6 +2329,7 @@ export type Database = {
             | null
           id?: string
           is_addon?: boolean
+          per_visit?: boolean
           price_cents?: number
           service_type?: Database["public"]["Enums"]["service_type"] | null
           sort_order?: number
