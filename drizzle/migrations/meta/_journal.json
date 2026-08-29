@@ -15,6 +15,13 @@
       "when": 1787980085147,
       "tag": "0001_band_catalog_rows",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787980108841,
+      "tag": "0002_subscription_bands_and_review_queue",
+      "breakpoints": true
     }
   ]
 }

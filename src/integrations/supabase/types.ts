@@ -511,6 +511,68 @@ export type Database = {
         }
         Relationships: []
       }
+      band_reviews: {
+        Row: {
+          address: string | null
+          county_band: string | null
+          county_source: string | null
+          county_sq_ft: number | null
+          created_at: string
+          id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_band: string | null
+          resolved_by: string | null
+          self_band: string
+          service_type: Database["public"]["Enums"]["service_type"]
+          status: string
+          subscription_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          county_band?: string | null
+          county_source?: string | null
+          county_sq_ft?: number | null
+          created_at?: string
+          id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_band?: string | null
+          resolved_by?: string | null
+          self_band: string
+          service_type: Database["public"]["Enums"]["service_type"]
+          status?: string
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          county_band?: string | null
+          county_source?: string | null
+          county_sq_ft?: number | null
+          created_at?: string
+          id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_band?: string | null
+          resolved_by?: string | null
+          self_band?: string
+          service_type?: Database["public"]["Enums"]["service_type"]
+          status?: string
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "band_reviews_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bundle_discount_tiers: {
         Row: {
           discount_pct: number
@@ -2462,6 +2524,9 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          band: string | null
+          band_source: string | null
+          band_verified_at: string | null
           bundle_discount_pct: number
           cancel_at_period_end: boolean
           canceled_at: string | null
@@ -2485,6 +2550,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          band?: string | null
+          band_source?: string | null
+          band_verified_at?: string | null
           bundle_discount_pct?: number
           cancel_at_period_end?: boolean
           canceled_at?: string | null
@@ -2508,6 +2576,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          band?: string | null
+          band_source?: string | null
+          band_verified_at?: string | null
           bundle_discount_pct?: number
           cancel_at_period_end?: boolean
           canceled_at?: string | null
