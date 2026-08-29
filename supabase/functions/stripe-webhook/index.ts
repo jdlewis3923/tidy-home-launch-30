@@ -233,8 +233,11 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
     if (dup) return;
   }
 
-  const services: Array<{ service: 'cleaning' | 'lawn' | 'detailing'; frequency: 'monthly' | 'biweekly' | 'weekly' }> =
-    meta.services_json ? JSON.parse(meta.services_json) : [];
+  const services: Array<{
+    service: 'cleaning' | 'lawn' | 'detailing';
+    frequency: 'monthly' | 'biweekly' | 'weekly';
+    band?: 'compact' | 'standard' | 'large' | 'estate';
+  }> = meta.services_json ? JSON.parse(meta.services_json) : [];
   if (services.length === 0) {
     console.warn('[stripe-webhook] seed skipped — no services_json in metadata for', stripeSubscriptionId);
     return;
@@ -308,6 +311,10 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       stripe_customer_id: stripeCustomerId,
       next_billing_date: nextBillingDate,
       bundle_discount_pct: bundleDiscountPct,
+      // The size band the customer booked at, plus how we learned it. County
+      // verification happens later in the admin band review queue.
+      band: services[0]?.band ?? null,
+      band_source: services[0]?.band ? (meta.band_source ?? 'self') : null,
     })
     .select('id')
     .single();
