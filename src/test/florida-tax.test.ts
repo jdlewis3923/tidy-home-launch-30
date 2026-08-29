@@ -42,9 +42,14 @@ function buildState(services: ServiceType[], addOns: string[] = []): ConfigState
     ...defaultState,
     services,
     frequencies,
-    homeSize: services.includes('cleaning') ? 'standard' : null,
-    yardSize: services.includes('lawn') ? 'standard' : null,
-    vehicleSize: services.includes('detailing') ? 'standard' : null,
+    // Standard band on every service.
+    bedrooms: services.includes('cleaning') ? '3' : null,
+    bathrooms: services.includes('cleaning') ? '2' : null,
+    homeBand: services.includes('cleaning') ? 'standard' : null,
+    lotChoice: services.includes('lawn') ? 'half' : null,
+    lawnBand: services.includes('lawn') ? 'standard' : null,
+    vehicleClass: services.includes('detailing') ? 'crossover' : null,
+    vehicleBand: services.includes('detailing') ? 'standard' : null,
     vehicleCount: 1,
     addOns,
   };
