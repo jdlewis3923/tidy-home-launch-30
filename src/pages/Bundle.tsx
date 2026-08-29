@@ -18,15 +18,17 @@ import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getBundleDiscount } from "@/lib/dashboard-pricing";
-import { SERVICE_PRICES } from "@/lib/pricing-canon";
+import { BAND_PRICES, HEADLINE_BAND } from "@/lib/pricing-canon";
 import heroImg from "@/assets/hero-miami-home.jpg";
 
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
 
+// Headline figures are the Standard band, one visit each — the per-visit price
+// is what stays fixed, so every worked example on this page is per visit.
 const SERVICES: { slug: ServiceSlug; label: string; basePrice: number }[] = [
-  { slug: "cleaning", label: "House Cleaning", basePrice: SERVICE_PRICES.cleaning.monthly as number },
-  { slug: "lawn", label: "Lawn Care", basePrice: SERVICE_PRICES.lawn.monthly as number },
-  { slug: "detailing", label: "Car Detailing", basePrice: SERVICE_PRICES.detailing.monthly as number },
+  { slug: "cleaning", label: "House Cleaning", basePrice: BAND_PRICES.cleaning[HEADLINE_BAND] },
+  { slug: "lawn", label: "Lawn Care", basePrice: BAND_PRICES.lawn[HEADLINE_BAND] },
+  { slug: "detailing", label: "Car Detailing", basePrice: BAND_PRICES.detailing[HEADLINE_BAND] },
 ];
 
 const Bundle = () => (
@@ -107,11 +109,11 @@ const BundleInner = () => {
       <SeoHead
         title={t("Bundle & Save in Pinecrest + Kendall | Tidy Home Concierge")}
         description={t(
-          "Stack home cleaning, lawn care, and car detailing on one plan. Save 10–15% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.",
+          "One price per visit, set by the size of your home or lot. Stack cleaning, lawn care and car detailing and save 10–15% in Pinecrest and Kendall (33156, 33183, 33186).",
         )}
         canonical="https://jointidy.co/bundle"
         ogImage={heroImg}
-        priceRange="$85–$859"
+        priceRange="$55–$299"
       />
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
@@ -160,7 +162,7 @@ const BundleInner = () => {
                 <h3 className="text-lg font-bold text-foreground">{t("2-Service Bundle")}</h3>
                 <div className="mt-2 text-3xl font-extrabold text-primary">{t("10% off")}</div>
                 <p className="text-sm text-text-mid mt-3">
-                  {t("Pick any two — we coordinate everything and you save 10% every month.")}
+                  {t("Pick any two — we coordinate everything and you save 10% on every visit.")}
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -192,17 +194,17 @@ const BundleInner = () => {
                         <span className="text-text-light mr-1">{t("from")}</span>
                         <span className="line-through text-text-light mr-1">
                           ${twoBundle.subtotal}
-                          {t("/mo")}
+                          {t(" a visit")}
                         </span>
                         <span className="font-bold text-foreground">
-                          {t("from")} ${twoBundle.discounted}
-                          {t("/mo")}
+                          ${twoBundle.discounted}
+                          {t(" a visit")}
                         </span>
                         <span className="text-text-light"> {t("after 10% bundle discount")}</span>
                       </p>
                       <p className="mt-1 text-xs text-text-light">
                         {t(
-                          "Figures assume monthly service for each service. Your price changes with the visit frequency you choose.",
+                          "Standard-band prices. Your band is set by the size of your home or lot — come monthly, biweekly or weekly and the price per visit stays the same.",
                         )}
                       </p>
                     </>
@@ -251,18 +253,18 @@ const BundleInner = () => {
                 <div className="mt-2 text-3xl font-extrabold text-primary">{t("15% off")}</div>
                 <p className="text-sm text-text-mid mt-3 flex-1">
                   {t(
-                    "All three services on one plan: cleaning, lawn care, and detailing. Lock in 15% off the combined monthly price.",
+                    "All three services on one plan: cleaning, lawn care and detailing. 15% off every visit.",
                   )}
                 </p>
                 <p className="text-sm text-text-mid mt-3">
                   <span className="text-text-light mr-1">{t("from")}</span>
                   <span className="line-through text-text-light mr-1">
                     ${threeBundle.subtotal}
-                    {t("/mo")}
+                    {t(" a visit")}
                   </span>
                   <span className="font-bold text-foreground">
-                    {t("from")} ${threeBundle.discounted}
-                    {t("/mo")}
+                    ${threeBundle.discounted}
+                    {t(" a visit")}
                   </span>
                 </p>
                 <p className="mt-1 text-xs text-text-light">
