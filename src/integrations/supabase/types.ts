@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.17"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -510,6 +510,68 @@ export type Database = {
           zip?: string | null
         }
         Relationships: []
+      }
+      band_reviews: {
+        Row: {
+          address: string | null
+          county_band: string | null
+          county_source: string | null
+          county_sq_ft: number | null
+          created_at: string
+          id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_band: string | null
+          resolved_by: string | null
+          self_band: string
+          service_type: Database["public"]["Enums"]["service_type"]
+          status: string
+          subscription_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          county_band?: string | null
+          county_source?: string | null
+          county_sq_ft?: number | null
+          created_at?: string
+          id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_band?: string | null
+          resolved_by?: string | null
+          self_band: string
+          service_type: Database["public"]["Enums"]["service_type"]
+          status?: string
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          county_band?: string | null
+          county_source?: string | null
+          county_sq_ft?: number | null
+          created_at?: string
+          id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_band?: string | null
+          resolved_by?: string | null
+          self_band?: string
+          service_type?: Database["public"]["Enums"]["service_type"]
+          status?: string
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "band_reviews_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bundle_discount_tiers: {
         Row: {
@@ -2282,6 +2344,7 @@ export type Database = {
         Row: {
           active: boolean
           addon_name: string | null
+          band: string | null
           bundle_discount_pct: number
           created_at: string
           description: string | null
@@ -2290,6 +2353,7 @@ export type Database = {
             | null
           id: string
           is_addon: boolean
+          per_visit: boolean
           price_cents: number
           service_type: Database["public"]["Enums"]["service_type"] | null
           sort_order: number
@@ -2299,6 +2363,7 @@ export type Database = {
         Insert: {
           active?: boolean
           addon_name?: string | null
+          band?: string | null
           bundle_discount_pct?: number
           created_at?: string
           description?: string | null
@@ -2307,6 +2372,7 @@ export type Database = {
             | null
           id?: string
           is_addon?: boolean
+          per_visit?: boolean
           price_cents: number
           service_type?: Database["public"]["Enums"]["service_type"] | null
           sort_order?: number
@@ -2316,6 +2382,7 @@ export type Database = {
         Update: {
           active?: boolean
           addon_name?: string | null
+          band?: string | null
           bundle_discount_pct?: number
           created_at?: string
           description?: string | null
@@ -2324,6 +2391,7 @@ export type Database = {
             | null
           id?: string
           is_addon?: boolean
+          per_visit?: boolean
           price_cents?: number
           service_type?: Database["public"]["Enums"]["service_type"] | null
           sort_order?: number
@@ -2456,6 +2524,9 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          band: string | null
+          band_source: string | null
+          band_verified_at: string | null
           bundle_discount_pct: number
           cancel_at_period_end: boolean
           canceled_at: string | null
@@ -2479,6 +2550,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          band?: string | null
+          band_source?: string | null
+          band_verified_at?: string | null
           bundle_discount_pct?: number
           cancel_at_period_end?: boolean
           canceled_at?: string | null
@@ -2502,6 +2576,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          band?: string | null
+          band_source?: string | null
+          band_verified_at?: string | null
           bundle_discount_pct?: number
           cancel_at_period_end?: boolean
           canceled_at?: string | null

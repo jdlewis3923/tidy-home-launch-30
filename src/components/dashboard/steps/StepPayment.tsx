@@ -9,11 +9,14 @@ import {
   frequencyLabels,
   addOnData,
   hasCustomQuote,
-  XL_UPCHARGE,
-  ServiceType,
+  bandLabels,
+  bandFor,
+  frequencyVisitCopy,
+  formatPerVisit,
+  type Band,
 } from '@/lib/dashboard-pricing';
 import { usePromoState } from '@/hooks/usePromoCapture';
-import { startCheckout } from '@/lib/checkout';
+import { startCheckout, translate } from '@/lib/checkout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { provisionAccount } from '@/lib/account-provisioning';
 import { STRIPE_INTEGRATION_ENABLED } from '@/lib/dashboard-config';
@@ -22,18 +25,10 @@ import { getStripe, isEmbeddedCheckoutAvailable } from '@/lib/stripe-client';
 import EmbeddedPaymentForm from '@/components/dashboard/EmbeddedPaymentForm';
 import { getUtmAttribution } from '@/lib/utm';
 
-// Per-vehicle add-ons (keep in sync with src/lib/checkout.ts).
-const PER_VEHICLE_ADDONS = new Set(['ozone', 'petHair', 'engineBay', 'ceramicSpray']);
-
 // The exact Terms wording shown next to the pay button. It is both rendered and
 // stored with the recorded consent, so change them together.
 const CHECKOUT_TERMS_WORDING =
   "By subscribing, you agree to Tidy's Terms of Service and Privacy Policy.";
-const XL_ADDON_BY_SERVICE: Record<ServiceType, string> = {
-  cleaning: 'xl_cleaning',
-  lawn: 'xl_lawn',
-  detailing: 'xl_detailing',
-};
 
 interface Props {
   state: ConfigState;
@@ -62,44 +57,22 @@ export default function StepPayment({ state, onChange }: Props) {
   const referralDiscount = promoCode ? REFERRAL_DISCOUNT_CENTS / 100 : 0;
   const totalToday = Math.max(0, pricing.firstMonth - referralDiscount);
 
-  // XL upgrades broken out as their own line items (matches Stripe invoice).
-  const xlLines = state.services
-    .map((svc): { svc: ServiceType; qty: number } | null => {
-      const tier = svc === 'cleaning' ? state.homeSize
-                : svc === 'lawn' ? state.yardSize
-                : state.vehicleSize;
-      if (tier !== 'xl') return null;
-      const qty = svc === 'detailing' ? state.vehicleCount : 1;
-      return { svc, qty };
-    })
-    .filter((x): x is { svc: ServiceType; qty: number } => x !== null);
-
   const embedded = isEmbeddedCheckoutAvailable();
   const stripePromise = useMemo(() => (embedded ? getStripe() : null), [embedded]);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [preparing, setPreparing] = useState(false);
 
-  // Translate ConfigState into the flat shape the edge fn expects.
+  // The server contract lives in src/lib/checkout.ts — one translator for both
+  // the hosted and embedded paths, so bands and cadence can't drift apart.
   const buildIntentBody = () => {
-    const vehicleCount = Math.max(1, Number(state.vehicleCount) || 1);
-    const services = state.services
-      .map((svc) => state.frequencies[svc] ? { service: svc, frequency: state.frequencies[svc]! } : null)
-      .filter((x): x is { service: ServiceType; frequency: 'monthly' | 'biweekly' | 'weekly' } => !!x);
-    const addons: Array<{ addon_name: string; qty: number }> = [];
-    for (const svc of state.services) {
-      const tier = svc === 'cleaning' ? state.homeSize : svc === 'lawn' ? state.yardSize : state.vehicleSize;
-      if (tier === 'xl') addons.push({ addon_name: XL_ADDON_BY_SERVICE[svc], qty: svc === 'detailing' ? vehicleCount : 1 });
-    }
-    for (const id of state.addOns ?? []) {
-      addons.push({ addon_name: id, qty: PER_VEHICLE_ADDONS.has(id) ? vehicleCount : 1 });
-    }
+    const { services, addons } = translate(state);
     const attr = getUtmAttribution();
     return {
       services, addons, promo_code: promoCode ?? undefined,
       referral_code: state.referralCode?.trim() || undefined,
       zip: state.zip, preferred_day: state.preferredDay, preferred_time: state.preferredTime,
       lang: language,
-      idempotency_key: `cfg:${state.zip}:${services.map(s => s.service + ':' + s.frequency).sort().join(',')}:${addons.map(a => a.addon_name + 'x' + a.qty).sort().join(',')}`,
+      idempotency_key: `cfg:${state.zip}:${services.map(s => `${s.service}:${s.band}:${s.frequency}`).sort().join(',')}:${addons.map(a => a.addon_name + 'x' + a.qty).sort().join(',')}`,
       gclid: attr.gclid, utm_source: attr.utm_source, utm_medium: attr.utm_medium,
       utm_campaign: attr.utm_campaign, utm_content: attr.utm_content, utm_term: attr.utm_term,
     };
@@ -184,11 +157,8 @@ export default function StepPayment({ state, onChange }: Props) {
 
         <div className="mt-4 space-y-2 text-sm">
           {pricing.servicePrices.map((sp, idx) => {
-            const tier = sp.service === 'cleaning' ? state.homeSize
-                      : sp.service === 'lawn' ? state.yardSize
-                      : state.vehicleSize;
-            const qty = sp.service === 'detailing' ? state.vehicleCount : 1;
-            const baseDisplay = tier === 'xl' ? sp.price - XL_UPCHARGE[sp.service] * qty : sp.price;
+            const band = bandFor(state, sp.service);
+            const freq = state.frequencies[sp.service]!;
             return (
               <div
                 key={sp.service}
@@ -198,24 +168,27 @@ export default function StepPayment({ state, onChange }: Props) {
                 <span className="text-ink">
                   <span className="mr-1.5">{serviceIcons[sp.service]}</span>
                   <span className="font-semibold lowercase">{serviceLabels[sp.service]}</span>
-                  <span className="text-ink-faint ml-1.5 text-xs lowercase">— {frequencyLabels[state.frequencies[sp.service]!]}</span>
+                  <span className="text-ink-faint ml-1.5 text-xs lowercase">
+                    — {band && band !== 'custom' ? `${bandLabels[band as Band].toLowerCase()} · ` : ''}
+                    {frequencyLabels[freq].toLowerCase()}
+                  </span>
                   {sp.service === 'detailing' && state.vehicleCount > 1 && (
                     <span className="text-ink-faint ml-1 text-xs">× {state.vehicleCount}</span>
                   )}
                 </span>
-                <span className="font-semibold text-ink tabular-nums">
-                  {tier === 'custom' ? 'custom' : `$${baseDisplay.toFixed(2)}`}
+                <span className="text-right">
+                  <span className="font-semibold text-ink tabular-nums block">
+                    {band === 'custom' ? 'custom' : `$${sp.price.toFixed(2)}`}
+                  </span>
+                  {band !== 'custom' && sp.perVisit > 0 && (
+                    <span className="text-[10px] text-ink-faint block lowercase">
+                      {formatPerVisit(sp.perVisit)} · {frequencyVisitCopy[freq]}
+                    </span>
+                  )}
                 </span>
               </div>
             );
           })}
-
-          {xlLines.map(({ svc, qty }) => (
-            <div key={`xl-${svc}`} className="flex justify-between items-baseline gap-3 text-ink-soft">
-              <span className="text-xs lowercase">↳ {serviceLabels[svc]} · xl size {qty > 1 && `× ${qty}`}</span>
-              <span className="text-xs tabular-nums">+${(XL_UPCHARGE[svc] * qty).toFixed(2)}</span>
-            </div>
-          ))}
 
           {pricing.discountPercent > 0 && (
             <div className="flex justify-between items-baseline gap-3 text-ink">

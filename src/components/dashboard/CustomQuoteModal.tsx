@@ -21,9 +21,9 @@ export default function CustomQuoteModal({ open, onOpenChange, state, onSubmitte
   const [done, setDone] = useState(false);
 
   const customServices: ServiceType[] = state.services.filter(s => {
-    if (s === 'cleaning') return state.homeSize === 'custom';
-    if (s === 'lawn') return state.yardSize === 'custom';
-    if (s === 'detailing') return state.vehicleSize === 'custom';
+    if (s === 'cleaning') return state.homeBand === 'custom';
+    if (s === 'lawn') return state.lawnBand === 'custom';
+    if (s === 'detailing') return state.vehicleBand === 'custom';
     return false;
   });
 

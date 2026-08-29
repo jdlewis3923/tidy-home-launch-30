@@ -15,7 +15,7 @@ import { corsHeaders, handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
 import { resolveBundleDiscountPct as resolveBundleDiscountPctFromDb } from "../_shared/bundle-discount.ts";
-import { BUNDLE_DISCOUNT_PCT_CANON } from "../_shared/pricing-canon.ts";
+import { BUNDLE_DISCOUNT_PCT_CANON, CADENCE_MULTIPLIER } from "../_shared/pricing-canon.ts";
 
 // Bundle discount is charged as an existing Stripe coupon (live mode), chosen by
 // the number of DISTINCT services in the cart. Line items always carry the
@@ -41,12 +41,15 @@ const SERVICE_ZIPS = new Set(["33156", "33183", "33186"]);
 // ---------- Input schema (flat, server-side) ----------
 const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
 const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
+// Size bands. The band IS the price; cadence only sets the item quantity.
+const BandEnum = z.enum(["compact", "standard", "large", "estate"]);
 
 const CheckoutInputSchema = z.object({
   services: z
     .array(
       z.object({
         service: ServiceTypeEnum,
+        band: BandEnum,
         frequency: FrequencyEnum,
         // Per-vehicle services (detailing) send the vehicle count here.
         qty: z.number().int().min(1).max(10).default(1),
@@ -121,7 +124,10 @@ Deno.serve(async (req) => {
     const result = await withLogging({
       source: "stripe",
       event: "checkout.session.create",
-      payload: { user_id: user.id, services: input.services.map((s) => `${s.service}:${s.frequency}`) },
+      payload: {
+        user_id: user.id,
+        services: input.services.map((s) => `${s.service}:${s.band}:${s.frequency}`),
+      },
       fn: async () => {
         const stripe = new Stripe(STRIPE_SECRET_KEY, {
           apiVersion: "2024-12-18.acacia",
@@ -129,16 +135,12 @@ Deno.serve(async (req) => {
         });
 
         // ---------- Resolve service prices from catalog ----------
-        const subKeys = input.services.map((s) => ({
-          service_type: s.service,
-          frequency: s.frequency,
-        }));
         const { data: subRows, error: subErr } = await supabase
           .from("stripe_catalog")
-          .select("service_type, frequency, stripe_price_id")
+          .select("service_type, band, stripe_price_id")
           .in(
             "service_type",
-            subKeys.map((k) => k.service_type),
+            input.services.map((s) => s.service),
           )
           .eq("is_addon", false)
           .eq("active", true);
@@ -150,12 +152,17 @@ Deno.serve(async (req) => {
         // can ever carry Florida sales tax (cleaning + lawn are nontaxable).
         const detailingIndices = new Set<number>();
         for (const s of input.services) {
-          const row = subRows?.find((r) => r.service_type === s.service && r.frequency === s.frequency);
+          const row = subRows?.find((r) => r.service_type === s.service && r.band === s.band);
           if (!row) {
-            throw new Error(`no active catalog price for ${s.service}:${s.frequency}`);
+            throw new Error(`no active catalog price for ${s.service}:${s.band}`);
           }
           if (s.service === "detailing") detailingIndices.add(line_items.length);
-          line_items.push({ price: row.stripe_price_id, quantity: s.qty ?? 1 });
+          // Cadence is the quantity: monthly 1, biweekly 2, weekly 4. Detailing
+          // multiplies again by the number of vehicles.
+          line_items.push({
+            price: row.stripe_price_id,
+            quantity: CADENCE_MULTIPLIER[s.frequency] * (s.qty ?? 1),
+          });
         }
 
         // ---------- Resolve add-on prices ----------
@@ -227,6 +234,10 @@ Deno.serve(async (req) => {
           signed_up_at: new Date().toISOString(),
           user_id: user.id,
           services_json: JSON.stringify(input.services),
+          bands_json: JSON.stringify(
+            Object.fromEntries(input.services.map((s) => [s.service, s.band])),
+          ),
+          band_source: "self",
           addons_json: JSON.stringify(input.addons),
           zip: input.zip,
           preferred_day: input.preferred_day ?? "",

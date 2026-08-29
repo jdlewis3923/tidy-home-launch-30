@@ -7,15 +7,17 @@
  * 100% client-side here so neither the dashboard nor the configurator
  * need to know the server contract.
  *
- * Per-vehicle qty rules + XL upgrade flattening are applied here so the
- * server only sees a single uniform addon list with explicit quantities.
+ * Cadence is no longer a price: the band is. Each service line carries its
+ * band plus the cadence, and the server turns cadence into the subscription
+ * item quantity (monthly 1, biweekly 2, weekly 4).
  */
 
 import { supabase } from '@/integrations/supabase/client';
 import { getPromoCode } from '@/lib/promo';
 import { getUtmAttribution } from '@/lib/utm';
 import { STRIPE_FUNCTIONS } from '@/lib/stripe-config';
-import type { ConfigState, ServiceType } from '@/lib/dashboard-pricing';
+import { bandFor, type ConfigState, type Frequency, type ServiceType } from '@/lib/dashboard-pricing';
+import type { CanonBand } from '@/lib/pricing-canon';
 
 interface CheckoutPayload {
   config: ConfigState;
@@ -26,17 +28,12 @@ interface CheckoutPayload {
 // Add-ons that are billed per-vehicle (Detailing only).
 const PER_VEHICLE_ADDONS = new Set(['ozone', 'petHair', 'engineBay', 'ceramicSpray']);
 
-/** Map XL flag on a service to the correct catalog addon_name. */
-const XL_ADDON_BY_SERVICE: Record<ServiceType, string> = {
-  cleaning: 'xl_cleaning',
-  lawn: 'xl_lawn',
-  detailing: 'xl_detailing',
-};
-
-function tierFor(state: ConfigState, svc: ServiceType): string | null {
-  if (svc === 'cleaning') return state.homeSize;
-  if (svc === 'lawn') return state.yardSize;
-  return state.vehicleSize;
+export interface CheckoutServiceLine {
+  service: ServiceType;
+  band: CanonBand;
+  frequency: Frequency;
+  /** Units of the property being serviced — vehicles for detailing, else 1. */
+  qty: number;
 }
 
 /** Exported for the checkout-parity test: builds the exact server payload. */
@@ -46,35 +43,22 @@ export function translate(config: ConfigState) {
   const services = config.services
     .map((svc) => {
       const frequency = config.frequencies[svc];
-      if (!frequency) return null;
-      // Detailing is priced PER VEHICLE, so the recurring line item has to carry
-      // the vehicle count as its quantity — otherwise we quote N vehicles and
-      // Stripe charges for one.
-      return { service: svc, frequency, qty: svc === 'detailing' ? vehicleCount : 1 };
-    })
-    .filter(
-      (x): x is { service: ServiceType; frequency: 'monthly' | 'biweekly' | 'weekly'; qty: number } => !!x,
-    );
-
-  const addons: Array<{ addon_name: string; qty: number }> = [];
-
-  // XL upgrades: convert size tiers into add-on rows (detailing × vehicleCount).
-  for (const svc of config.services) {
-    if (tierFor(config, svc) === 'xl') {
-      addons.push({
-        addon_name: XL_ADDON_BY_SERVICE[svc],
+      const band = bandFor(config, svc);
+      // Above Estate is a custom quote — never auto-booked.
+      if (!frequency || !band || band === 'custom') return null;
+      return {
+        service: svc,
+        band,
+        frequency,
         qty: svc === 'detailing' ? vehicleCount : 1,
-      });
-    }
-  }
+      } as CheckoutServiceLine;
+    })
+    .filter((x): x is CheckoutServiceLine => !!x);
 
-  // Configurator add-ons.
-  for (const id of config.addOns ?? []) {
-    addons.push({
-      addon_name: id,
-      qty: PER_VEHICLE_ADDONS.has(id) ? vehicleCount : 1,
-    });
-  }
+  const addons: Array<{ addon_name: string; qty: number }> = (config.addOns ?? []).map((id) => ({
+    addon_name: id,
+    qty: PER_VEHICLE_ADDONS.has(id) ? vehicleCount : 1,
+  }));
 
   return { services, addons };
 }

@@ -233,8 +233,11 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
     if (dup) return;
   }
 
-  const services: Array<{ service: 'cleaning' | 'lawn' | 'detailing'; frequency: 'monthly' | 'biweekly' | 'weekly' }> =
-    meta.services_json ? JSON.parse(meta.services_json) : [];
+  const services: Array<{
+    service: 'cleaning' | 'lawn' | 'detailing';
+    frequency: 'monthly' | 'biweekly' | 'weekly';
+    band?: 'compact' | 'standard' | 'large' | 'estate';
+  }> = meta.services_json ? JSON.parse(meta.services_json) : [];
   if (services.length === 0) {
     console.warn('[stripe-webhook] seed skipped — no services_json in metadata for', stripeSubscriptionId);
     return;
@@ -308,6 +311,10 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       stripe_customer_id: stripeCustomerId,
       next_billing_date: nextBillingDate,
       bundle_discount_pct: bundleDiscountPct,
+      // The size band the customer booked at, plus how we learned it. County
+      // verification happens later in the admin band review queue.
+      band: services[0]?.band ?? null,
+      band_source: services[0]?.band ? (meta.band_source ?? 'self') : null,
     })
     .select('id')
     .single();
@@ -315,6 +322,25 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   if (subErr || !subRow) {
     throw new Error(`subscriptions insert failed: ${subErr?.message ?? 'no row returned'}`);
   }
+
+  // Every self-selected band lands in the review queue. Admin compares it with
+  // the county property record daily; agreement closes the row, a disagreement
+  // gets corrected under the correction policy.
+  const bandRows = services
+    .filter((s) => !!s.band)
+    .map((s) => ({
+      subscription_id: subRow.id,
+      user_id: userId,
+      service_type: s.service,
+      self_band: s.band!,
+      address: meta.address || null,
+      status: 'open',
+    }));
+  if (bandRows.length) {
+    const { error: bandErr } = await supabase.from('band_reviews').insert(bandRows);
+    if (bandErr) console.error('[stripe-webhook] band_reviews insert failed', bandErr.message);
+  }
+
 
   // Mirror service_tier + signup_source onto profile (best-effort).
   const dominantService = services[0]?.service ?? null;

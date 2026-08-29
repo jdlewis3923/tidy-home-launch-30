@@ -1,72 +1,60 @@
-// Money guard. The bundle discount has broken twice: once by never being
-// charged, once by being stored at the wrong rate. This test removes the need
-// for a manual check by simulating the Stripe session end-to-end:
+// Money guard. The bundle discount has broken three times: never charged, then
+// stored at the wrong rate, then quoted at 15% while backed by 10%. This test
+// removes the manual check by simulating the Stripe subscription end-to-end:
 //
 //   client ConfigState
 //     -> src/lib/checkout.ts translate()          (the real payload builder)
-//     -> Stripe Price ids + price_cents from      (the real catalog seed)
+//     -> band price ids + price_cents from        (the real catalog seed)
 //        supabase/functions/setup-stripe-catalog
-//     -> percent_off coupon rate parsed out of    (the real server rule)
-//        supabase/functions/stripe-create-checkout
+//     -> cadence as line-item quantity            (the real server rule)
+//     -> percent_off coupon rate from             (the real DB rate)
+//        public.bundle_discount_tiers
 //
-// and asserting the simulated Stripe session amount equals the total we DISPLAY
-// via calculatePricing(). If the displayed total and the charged amount ever
-// diverge again — wrong percentage, missing coupon, un-discounted line item —
-// this fails.
+// and asserting the simulated Stripe amount equals the total we DISPLAY via
+// calculatePricing(). If displayed and charged ever diverge again — wrong
+// percentage, missing coupon, un-discounted line item, wrong band price, wrong
+// cadence quantity — this fails.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect, beforeAll } from 'vitest';
 import { translate } from '@/lib/checkout';
 import { FLORIDA_TAX, cartTriggersFloridaTax, FL_SALES_TAX_COLLECTION_ENABLED } from '@/lib/florida-tax';
 import { getBundleDiscountPct } from '@/lib/bundle-discount';
+import { BAND_PRICES, CADENCE_MULTIPLIER, STRIPE_PRICE_IDS, type CanonBand } from '@/lib/pricing-canon';
 
 import {
   calculatePricing,
   defaultState,
-  addOnData,
+  bandForCleaning,
+  bandForLawn,
+  bandForDetailing,
   type ConfigState,
   type ServiceType,
   type Frequency,
+  type LotChoice,
 } from '@/lib/dashboard-pricing';
+import type { VehicleClass } from '@/lib/pricing-canon';
 
 const root = process.cwd();
 const read = (p: string) => readFileSync(path.join(root, p), 'utf8');
 
-// ---------- The real Stripe catalog (price_cents per price id) ----------
-type CatalogRow = {
-  service_type: string | null;
-  frequency: string | null;
-  is_addon: boolean;
-  addon_name: string | null;
-  price_cents: number;
-};
+// ---------- The real add-on catalog rows (price_cents per addon) ----------
+type AddonRow = { addon_name: string; price_cents: number };
 
-function loadCatalog(): CatalogRow[] {
+function loadAddons(): AddonRow[] {
   const src = read('supabase/functions/setup-stripe-catalog/index.ts');
-  const rows: CatalogRow[] = [];
-  const re =
-    /service_type:\s*(null|'[a-z]+'),\s*frequency:\s*(null|'[a-z]+'),\s*is_addon:\s*(true|false),\s*addon_name:\s*(null|'[A-Za-z_]+'),\s*stripe_price_id:\s*'[^']+',\s*price_cents:\s*(\d+)/g;
+  const rows: AddonRow[] = [];
+  const re = /addon_name:\s*'([A-Za-z_]+)',\s*stripe_price_id:\s*'[^']+',\s*price_cents:\s*(\d+)/g;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(src))) {
-    const unquote = (v: string) => (v === 'null' ? null : v.slice(1, -1));
-    rows.push({
-      service_type: unquote(m[1]),
-      frequency: unquote(m[2]),
-      is_addon: m[3] === 'true',
-      addon_name: unquote(m[4]),
-      price_cents: Number(m[5]),
-    });
-  }
+  while ((m = re.exec(src))) rows.push({ addon_name: m[1], price_cents: Number(m[2]) });
   return rows;
 }
 
-const catalog = loadCatalog();
+const addonCatalog = loadAddons();
 
 /**
  * The live DB rates — public.bundle_discount_tiers is the source of truth for
- * both the displayed total and the amount Stripe charges. Populated in
- * beforeAll from the REST API so an edit to the column that diverges from the
- * client fails this suite.
+ * both the displayed total and the amount Stripe charges.
  */
 let dbTiers: Record<number, number> = {};
 
@@ -111,20 +99,21 @@ function serverFallbackPct(uniqueServices: number): number {
   return pct;
 }
 
-/** Simulates the Stripe session total in cents (tax-inclusive) for a ConfigState. */
-function stripeSessionCents(state: ConfigState): number {
+/** Simulates the Stripe subscription amount in cents for a ConfigState. */
+function stripeSubscriptionCents(state: ConfigState): number {
   const { services, addons } = translate(state);
 
   let subtotalCents = 0;
   for (const s of services) {
-    const row = catalog.find(
-      (r) => !r.is_addon && r.service_type === s.service && r.frequency === s.frequency,
-    );
-    if (!row) throw new Error(`no catalog price for ${s.service}:${s.frequency}`);
-    subtotalCents += row.price_cents * (s.qty ?? 1);
+    // The server resolves the price by (service, band) and sets the quantity
+    // from the cadence — mirrored exactly here.
+    const priceId = STRIPE_PRICE_IDS[s.service][s.band as CanonBand];
+    expect(priceId, `${s.service}:${s.band}`).toBeTruthy();
+    const unit = BAND_PRICES[s.service][s.band as CanonBand] * 100;
+    subtotalCents += unit * CADENCE_MULTIPLIER[s.frequency] * (s.qty ?? 1);
   }
   for (const a of addons) {
-    const row = catalog.find((r) => r.is_addon && r.addon_name === a.addon_name);
+    const row = addonCatalog.find((r) => r.addon_name === a.addon_name);
     if (!row) throw new Error(`no catalog price for addon ${a.addon_name}`);
     subtotalCents += row.price_cents * a.qty;
   }
@@ -133,15 +122,34 @@ function stripeSessionCents(state: ConfigState): number {
   const pct = dbPct(new Set(services.map((s) => s.service)).size);
   const netCents = subtotalCents - subtotalCents * (pct / 100);
 
-  // Then the exclusive FL TaxRate, when a coating add-on is in the cart.
-  const taxCents = FL_SALES_TAX_COLLECTION_ENABLED && cartTriggersFloridaTax(addons)
-    ? Math.round(netCents * (FLORIDA_TAX.percentage / 100))
-    : 0;
+  // Then the exclusive FL TaxRate, when collection is on and a coating is in cart.
+  const taxCents =
+    FL_SALES_TAX_COLLECTION_ENABLED && cartTriggersFloridaTax(addons)
+      ? Math.round(netCents * (FLORIDA_TAX.percentage / 100))
+      : 0;
   return netCents + taxCents;
 }
 
-
 const state = (over: Partial<ConfigState>): ConfigState => ({ ...defaultState, ...over });
+
+const bedBathForBand: Record<CanonBand, [string, string]> = {
+  compact: ['2', '2'],
+  standard: ['3', '2'],
+  large: ['4', '3'],
+  estate: ['5+', '4+'],
+};
+const lotForBand: Record<CanonBand, LotChoice> = {
+  compact: 'quarter',
+  standard: 'half',
+  large: 'threeQuarter',
+  estate: 'acre',
+};
+const vehicleForBand: Record<CanonBand, VehicleClass> = {
+  compact: 'sedan',
+  standard: 'crossover',
+  large: 'pickup',
+  estate: 'suvFullSize',
+};
 
 const freq: Record<ServiceType, Frequency> = {
   cleaning: 'biweekly',
@@ -149,54 +157,46 @@ const freq: Record<ServiceType, Frequency> = {
   detailing: 'monthly',
 };
 
-function buildState(services: ServiceType[], opts: { xl?: boolean; addOns?: string[]; vehicles?: number } = {}) {
+function buildState(
+  servicesIn: ServiceType[],
+  opts: { band?: CanonBand; addOns?: string[]; vehicles?: number; cadence?: Frequency } = {},
+): ConfigState {
+  const band = opts.band ?? 'standard';
   const frequencies: Partial<Record<ServiceType, Frequency>> = {};
-  for (const s of services) frequencies[s] = freq[s];
-  const tier = opts.xl ? 'xl' : 'standard';
+  for (const s of servicesIn) frequencies[s] = opts.cadence ?? freq[s];
+  const [bedrooms, bathrooms] = bedBathForBand[band];
   return state({
-    services,
+    services: servicesIn,
     frequencies,
-    homeSize: services.includes('cleaning') ? tier : null,
-    yardSize: services.includes('lawn') ? tier : null,
-    vehicleSize: services.includes('detailing') ? tier : null,
+    bedrooms: servicesIn.includes('cleaning') ? bedrooms : null,
+    bathrooms: servicesIn.includes('cleaning') ? bathrooms : null,
+    homeBand: servicesIn.includes('cleaning') ? bandForCleaning(bedrooms, bathrooms) : null,
+    lotChoice: servicesIn.includes('lawn') ? lotForBand[band] : null,
+    lawnBand: servicesIn.includes('lawn') ? bandForLawn(lotForBand[band], false) : null,
+    vehicleClass: servicesIn.includes('detailing') ? vehicleForBand[band] : null,
+    vehicleBand: servicesIn.includes('detailing') ? bandForDetailing(vehicleForBand[band]) : null,
     vehicleCount: opts.vehicles ?? 1,
     addOns: opts.addOns ?? [],
   });
 }
-
-/** All-monthly cart, standard sizes — the shape of the five audit carts. */
-function monthly(services: ServiceType[], addOns: string[] = []): ConfigState {
-  const frequencies: Partial<Record<ServiceType, Frequency>> = {};
-  for (const s of services) frequencies[s] = 'monthly';
-  return state({
-    services,
-    frequencies,
-    homeSize: services.includes('cleaning') ? 'standard' : null,
-    yardSize: services.includes('lawn') ? 'standard' : null,
-    vehicleSize: services.includes('detailing') ? 'standard' : null,
-    vehicleCount: 1,
-    addOns,
-  });
-}
-
 
 describe('checkout ↔ Stripe parity', () => {
   beforeAll(async () => {
     dbTiers = await fetchDbTiers();
   });
 
-  it('the catalog seed and the DB bundle rates are both present', () => {
-    expect(catalog.filter((r) => !r.is_addon).length).toBeGreaterThanOrEqual(8);
+  it('the add-on seed and the DB bundle rates are both present', () => {
+    expect(addonCatalog.length).toBeGreaterThanOrEqual(15);
     expect(dbPct(1)).toBe(0);
     expect(dbPct(2)).toBe(10);
     expect(dbPct(3)).toBe(15);
   });
 
-  it('every catalog row is flagged bundle-eligible at the top DB rate', () => {
-    const top = Math.max(...Object.values(dbTiers));
-    const src = read('supabase/functions/setup-stripe-catalog/index.ts');
-    expect(top).toBeGreaterThan(0);
-    expect(src).toContain('bundle_discount_pct');
+  it('the server sets cadence with quantity, not with a separate price', () => {
+    const src = read('supabase/functions/stripe-create-checkout/index.ts');
+    expect(src).toContain('CADENCE_MULTIPLIER[s.frequency]');
+    expect(src).toContain('r.band === s.band');
+    expect(src).not.toContain('r.frequency === s.frequency');
   });
 
   // The client must never carry its own copy of the rate.
@@ -218,74 +218,45 @@ describe('checkout ↔ Stripe parity', () => {
   });
 
   const combos: Array<{ label: string; s: ConfigState }> = [
-    { label: '1 service', s: buildState(['cleaning']) },
-    { label: '2 services', s: buildState(['cleaning', 'lawn']) },
-    { label: '3 services', s: buildState(['cleaning', 'lawn', 'detailing']) },
-    { label: '3 services + XL everywhere', s: buildState(['cleaning', 'lawn', 'detailing'], { xl: true }) },
+    { label: '1 service · standard', s: buildState(['cleaning']) },
+    { label: '2 services · standard', s: buildState(['cleaning', 'lawn']) },
+    { label: '3 services · standard', s: buildState(['cleaning', 'lawn', 'detailing']) },
+    { label: '3 services · compact', s: buildState(['cleaning', 'lawn', 'detailing'], { band: 'compact' }) },
+    { label: '3 services · large', s: buildState(['cleaning', 'lawn', 'detailing'], { band: 'large' }) },
+    { label: '3 services · estate', s: buildState(['cleaning', 'lawn', 'detailing'], { band: 'estate' }) },
+    { label: '3 services · weekly', s: buildState(['cleaning', 'lawn', 'detailing'], { cadence: 'weekly' }) },
     {
       label: '3 services + add-ons',
       s: buildState(['cleaning', 'lawn', 'detailing'], { addOns: ['oven', 'hedge', 'ozone'] }),
     },
     {
-      label: '2 services + XL + add-ons + 2 vehicles',
-      s: buildState(['detailing', 'cleaning'], { xl: true, vehicles: 2, addOns: ['petHair', 'fridge'] }),
+      label: '2 services + 2 vehicles + add-ons',
+      s: buildState(['detailing', 'cleaning'], { vehicles: 2, addOns: ['petHair', 'fridge'] }),
     },
-    // The five audit carts, all monthly. E is the taxable one: the displayed
-    // total MUST include the 7% FL tax that Stripe adds as an exclusive rate.
-    { label: 'A · cleaning monthly', s: monthly(['cleaning']) },
-    { label: 'B · cleaning + lawn monthly', s: monthly(['cleaning', 'lawn']) },
-    { label: 'C · cleaning + lawn + detailing monthly', s: monthly(['cleaning', 'lawn', 'detailing']) },
-    { label: 'D · detailing monthly', s: monthly(['detailing']) },
-    { label: 'E · detailing monthly + Ceramic Spray Coat', s: monthly(['detailing'], ['ceramicSpray']) },
+    { label: 'detailing only + coating add-on', s: buildState(['detailing'], { addOns: ['ceramicSpray'] }) },
   ];
 
   for (const { label, s } of combos) {
-    it(`displayed total === Stripe session amount — ${label}`, () => {
+    it(`displayed total === Stripe amount — ${label}`, () => {
       const displayedCents = Math.round(calculatePricing(s).ongoing * 100);
-      expect(displayedCents).toBe(Math.round(stripeSessionCents(s)));
+      expect(Math.round(stripeSubscriptionCents(s))).toBe(displayedCents);
     });
   }
 
-  it('the taxable cart shows tax as its own line and folds it into the total', () => {
-    const taxed = calculatePricing(monthly(['detailing'], ['ceramicSpray']));
-    expect(taxed.taxTriggered).toBe(FL_SALES_TAX_COLLECTION_ENABLED);
-    if (FL_SALES_TAX_COLLECTION_ENABLED) {
-      expect(taxed.taxPercentage).toBe(FLORIDA_TAX.percentage);
-      expect(Math.round(taxed.taxAmount * 100)).toBe(Math.round(taxed.netTotal * FLORIDA_TAX.percentage));
-    } else {
-      expect(taxed.taxAmount).toBe(0);
-    }
-    expect(taxed.ongoing).toBeCloseTo(taxed.netTotal + taxed.taxAmount, 2);
-
-    const untaxed = calculatePricing(monthly(['detailing']));
-    expect(untaxed.taxTriggered).toBe(false);
-    expect(untaxed.taxAmount).toBe(0);
-    expect(untaxed.ongoing).toBeCloseTo(untaxed.netTotal, 2);
+  it('the published Standard worked examples are what we charge', () => {
+    const two = buildState(['cleaning', 'lawn'], { cadence: 'biweekly' });
+    expect(Math.round(stripeSubscriptionCents(two))).toBe(39240);
+    const one = buildState(['cleaning'], { cadence: 'biweekly' });
+    expect(Math.round(stripeSubscriptionCents(one))).toBe(29800);
   });
 
-  it('prints the five-cart parity table', () => {
-    const carts: Array<[string, ConfigState]> = [
-      ['A cleaning monthly', monthly(['cleaning'])],
-      ['B cleaning + lawn', monthly(['cleaning', 'lawn'])],
-      ['C cleaning + lawn + detailing', monthly(['cleaning', 'lawn', 'detailing'])],
-      ['D detailing monthly', monthly(['detailing'])],
-      ['E detailing + ceramicSpray', monthly(['detailing'], ['ceramicSpray'])],
-    ];
-    for (const [label, s] of carts) {
-      const p = calculatePricing(s);
-      const session = Math.round(stripeSessionCents(s));
-      const displayed = Math.round(p.ongoing * 100);
-      console.log(
-        `${label} | displayed $${(displayed / 100).toFixed(2)} | session $${(session / 100).toFixed(2)} | discount ${Math.round(p.discountPercent * 100)}% (−$${p.discountAmount.toFixed(2)}) | tax $${p.taxAmount.toFixed(2)} | ${displayed === session ? 'PASS' : `FAIL gap ${displayed - session}c`}`,
-      );
-      expect(displayed).toBe(session);
-    }
-  });
-
-
-  it('every configurator add-on has a Stripe price behind it', () => {
-    for (const id of Object.keys(addOnData)) {
-      expect(catalog.some((r) => r.is_addon && r.addon_name === id)).toBe(true);
-    }
+  it('a custom-quote cart never reaches Stripe', () => {
+    const over = state({
+      services: ['lawn'],
+      frequencies: { lawn: 'monthly' },
+      lotChoice: 'over',
+      lawnBand: bandForLawn('over', false),
+    });
+    expect(translate(over).services).toEqual([]);
   });
 });

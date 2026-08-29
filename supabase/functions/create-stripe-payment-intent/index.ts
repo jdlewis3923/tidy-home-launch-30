@@ -18,6 +18,7 @@ import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
 import { getBundleCouponId } from "../_shared/bundle-coupon.ts";
 import { resolveBundleDiscountPct as resolveBundleDiscountPctFromDb } from "../_shared/bundle-discount.ts";
+import { CADENCE_MULTIPLIER } from "../_shared/pricing-canon.ts";
 
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
@@ -28,12 +29,15 @@ const SERVICE_ZIPS = new Set(["33156", "33183", "33186"]);
 
 const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
 const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
+// Size bands. The band IS the price; cadence only sets the item quantity.
+const BandEnum = z.enum(["compact", "standard", "large", "estate"]);
 
 const InputSchema = z.object({
   services: z
     .array(
       z.object({
         service: ServiceTypeEnum,
+        band: BandEnum,
         frequency: FrequencyEnum,
         // Per-vehicle services (detailing) send the vehicle count here.
         qty: z.number().int().min(1).max(10).default(1),
@@ -107,7 +111,10 @@ Deno.serve(async (req) => {
     const result = await withLogging({
       source: "stripe",
       event: "subscription.create.embedded",
-      payload: { user_id: user.id, services: input.services.map((s) => `${s.service}:${s.frequency}`) },
+      payload: {
+        user_id: user.id,
+        services: input.services.map((s) => `${s.service}:${s.band}:${s.frequency}`),
+      },
       fn: async () => {
         const stripe = new Stripe(STRIPE_SECRET_KEY, {
           apiVersion: "2024-12-18.acacia",
@@ -117,7 +124,7 @@ Deno.serve(async (req) => {
         // Resolve service prices
         const { data: subRows, error: subErr } = await supabase
           .from("stripe_catalog")
-          .select("service_type, frequency, stripe_price_id")
+          .select("service_type, band, stripe_price_id")
           .in(
             "service_type",
             input.services.map((s) => s.service),
@@ -129,9 +136,13 @@ Deno.serve(async (req) => {
         // deno-lint-ignore no-explicit-any
         const items: any[] = [];
         for (const s of input.services) {
-          const row = subRows?.find((r) => r.service_type === s.service && r.frequency === s.frequency);
-          if (!row) throw new Error(`no active catalog price for ${s.service}:${s.frequency}`);
-          items.push({ price: row.stripe_price_id, quantity: s.qty ?? 1 });
+          const row = subRows?.find((r) => r.service_type === s.service && r.band === s.band);
+          if (!row) throw new Error(`no active catalog price for ${s.service}:${s.band}`);
+          // Cadence is the quantity: monthly 1, biweekly 2, weekly 4.
+          items.push({
+            price: row.stripe_price_id,
+            quantity: CADENCE_MULTIPLIER[s.frequency] * (s.qty ?? 1),
+          });
         }
 
         // Resolve add-ons
@@ -205,6 +216,10 @@ Deno.serve(async (req) => {
           signed_up_at: new Date().toISOString(),
           user_id: user.id,
           services_json: JSON.stringify(input.services),
+          bands_json: JSON.stringify(
+            Object.fromEntries(input.services.map((s) => [s.service, s.band])),
+          ),
+          band_source: "self",
           addons_json: JSON.stringify(input.addons),
           zip: input.zip,
           preferred_day: input.preferred_day ?? "",
