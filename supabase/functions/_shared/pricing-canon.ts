@@ -1,7 +1,16 @@
-// PRICING CANON (server mirror).
-//
-// This file MUST stay value-identical to src/lib/pricing-canon.ts.
-// src/test/pricing-canon.test.ts parses both and fails on any divergence.
+/**
+ * PRICING CANON — the ONE source of truth for every price and discount.
+ *
+ * The model: one flat price per visit, set by the size band of the property.
+ * Cadence multiplies it (monthly x1, biweekly x2, weekly x4). The only
+ * discount is the bundle discount. There is no frequency discount and no
+ * size "upgrade" surcharge — the band IS the price.
+ *
+ * The client copy lives at
+ * `src/lib/pricing-canon.ts`; `src/test/pricing-canon.test.ts`
+ * fails if the two diverge, if the Stripe catalog disagrees, or if a page ships
+ * a stale number.
+ */
 
 export type CanonService = "cleaning" | "lawn" | "detailing";
 export type CanonBand = "compact" | "standard" | "large" | "estate";
