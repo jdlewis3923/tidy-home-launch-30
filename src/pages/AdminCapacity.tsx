@@ -153,3 +153,157 @@ export default function AdminCapacity() {
     </main>
   );
 }
+
+interface AssignmentRow {
+  id: string;
+  pro_name: string | null;
+  service: "cleaning" | "lawn" | "detailing";
+  time_share: number;
+  active: boolean;
+}
+
+const SERVICE_OPTIONS: Array<{ value: AssignmentRow["service"]; label: string }> = [
+  { value: "cleaning", label: "House Cleaning" },
+  { value: "lawn", label: "Lawn Care" },
+  { value: "detailing", label: "Shine Complete" },
+];
+
+/**
+ * Who is assigned to what, and what share of their time. The first hire is
+ * cross-trained, so a pro holds one row per service with a fractional share
+ * (0.34 / 0.33 / 0.33 sums to one whole pro).
+ */
+function ProAssignments({ onChanged }: { onChanged: () => void }) {
+  const [rows, setRows] = useState<AssignmentRow[]>([]);
+  const [name, setName] = useState("");
+  const [service, setService] = useState<AssignmentRow["service"]>("cleaning");
+  const [share, setShare] = useState("1");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("pro_service_assignments")
+      .select("id, pro_name, service, time_share, active")
+      .order("created_at", { ascending: true });
+    if (error) {
+      setErr(error.message);
+      return;
+    }
+    setErr(null);
+    setRows((data ?? []) as AssignmentRow[]);
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const add = async () => {
+    const value = Number(share);
+    if (!Number.isFinite(value) || value <= 0 || value > 1) {
+      setErr("Time share must be between 0 and 1.");
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.from("pro_service_assignments").insert({
+      pro_name: name.trim() || null,
+      service,
+      time_share: value,
+    });
+    setBusy(false);
+    if (error) {
+      setErr(error.message);
+      return;
+    }
+    setName("");
+    setShare("1");
+    await load();
+    onChanged();
+  };
+
+  const remove = async (id: string) => {
+    setBusy(true);
+    const { error } = await supabase.from("pro_service_assignments").delete().eq("id", id);
+    setBusy(false);
+    if (error) {
+      setErr(error.message);
+      return;
+    }
+    await load();
+    onChanged();
+  };
+
+  return (
+    <section className="mt-8 rounded-xl border bg-card p-4">
+      <h2 className="font-semibold">Pros assigned</h2>
+      <p className="mb-3 text-sm text-muted-foreground">
+        One row per service per pro. A cross-trained pro is split — 0.34 cleaning, 0.33 lawn, 0.33
+        Shine sums to one whole pro.
+      </p>
+
+      {err && <p className="mb-3 text-sm text-rose-700">{err}</p>}
+
+      <ul className="mb-4 divide-y text-sm">
+        {rows.length === 0 && <li className="py-2 text-muted-foreground">No pros assigned yet.</li>}
+        {rows.map((r) => (
+          <li key={r.id} className="flex items-center justify-between py-2">
+            <span>
+              <span className="font-medium">{r.pro_name ?? "Unnamed pro"}</span>{" "}
+              — {SERVICE_OPTIONS.find((o) => o.value === r.service)?.label} ·{" "}
+              {Number(r.time_share).toFixed(2)} of their time
+            </span>
+            <button
+              type="button"
+              onClick={() => remove(r.id)}
+              disabled={busy}
+              className="rounded-md border px-2 py-1 text-xs hover:bg-muted disabled:opacity-50"
+            >
+              Remove
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="text-xs">
+          <span className="block text-muted-foreground">Pro name</span>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="mt-1 rounded-md border px-2 py-1 text-sm"
+            placeholder="First hire"
+          />
+        </label>
+        <label className="text-xs">
+          <span className="block text-muted-foreground">Service</span>
+          <select
+            value={service}
+            onChange={(e) => setService(e.target.value as AssignmentRow["service"])}
+            className="mt-1 rounded-md border px-2 py-1 text-sm"
+          >
+            {SERVICE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="text-xs">
+          <span className="block text-muted-foreground">Share of time</span>
+          <input
+            value={share}
+            onChange={(e) => setShare(e.target.value)}
+            inputMode="decimal"
+            className="mt-1 w-24 rounded-md border px-2 py-1 text-sm"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={add}
+          disabled={busy}
+          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+        >
+          Add assignment
+        </button>
+      </div>
+    </section>
+  );
+}
