@@ -43,6 +43,13 @@
       "when": 1788060908660,
       "tag": "0005_schedule_capacity_alert_check",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788097186481,
+      "tag": "0006_qr_scans_log",
+      "breakpoints": true
     }
   ]
 }
