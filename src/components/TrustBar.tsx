@@ -1,17 +1,11 @@
 import { Check } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const items = [
-  "Vetted & Insured",
-  "Background-Checked Pros",
-  "Photo Verified Every Visit",
-  "Cancel Anytime",
-  "No Long-Term Contracts",
-];
+import { trustClaims } from "@/lib/pricing-canon";
 
 const TrustBar = () => {
   const { t } = useLanguage();
+  const items = trustClaims();
   return (
     <section className="bg-background border-y py-6">
       <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-x-8 gap-y-3 px-4">
