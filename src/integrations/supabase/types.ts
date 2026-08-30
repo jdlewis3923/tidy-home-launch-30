@@ -2195,6 +2195,42 @@ export type Database = {
         }
         Relationships: []
       }
+      qr_scans: {
+        Row: {
+          created_at: string
+          id: string
+          lang: string | null
+          parsed: boolean
+          placement: string | null
+          raw_code: string
+          referrer: string | null
+          user_agent: string | null
+          zip: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lang?: string | null
+          parsed?: boolean
+          placement?: string | null
+          raw_code: string
+          referrer?: string | null
+          user_agent?: string | null
+          zip?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lang?: string | null
+          parsed?: boolean
+          placement?: string | null
+          raw_code?: string
+          referrer?: string | null
+          user_agent?: string | null
+          zip?: string | null
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           converted_at: string | null

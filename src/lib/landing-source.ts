@@ -11,7 +11,13 @@
  * checkout functions, so the split survives the whole redirect chain.
  */
 
-export type LandingSource = "doorhanger_en" | "doorhanger_es";
+export type LandingSource = "doorhanger_en" | "doorhanger_es" | "doorhanger";
+
+const LANDING_SOURCE_VALUES: readonly string[] = ["doorhanger_en", "doorhanger_es", "doorhanger"];
+
+export type QrPlacementValue = "hero" | "card" | "unknown";
+const PLACEMENT_KEY = "tidy_qr_placement";
+const ZIP_KEY = "tidy_qr_zip";
 
 export const LANDING_SOURCES: Record<"en" | "es", LandingSource> = {
   en: "doorhanger_en",
@@ -45,7 +51,9 @@ export function getLandingSource(): LandingSource | null {
       window.localStorage?.removeItem(STORAGE_KEY);
       return null;
     }
-    if (parsed?.v === "doorhanger_en" || parsed?.v === "doorhanger_es") return parsed.v;
+    if (typeof parsed?.v === "string" && LANDING_SOURCE_VALUES.includes(parsed.v)) {
+      return parsed.v as LandingSource;
+    }
     return null;
   } catch {
     return null;
@@ -58,14 +66,61 @@ export function getLandingSource(): LandingSource | null {
  */
 export function captureLandingSourceFromUrl(): void {
   if (!isBrowser()) return;
-  const v = new URLSearchParams(window.location.search).get("src");
-  if (v === "doorhanger_en" || v === "doorhanger_es") captureLandingSource(v);
+  const params = new URLSearchParams(window.location.search);
+  const v = params.get("src");
+  if (v && LANDING_SOURCE_VALUES.includes(v)) captureLandingSource(v as LandingSource);
+  // Placement is deliberately SEPARATE from source: hero = scanned off the
+  // door, card = kept the tear-off and scanned later. Different intents.
+  const placement = params.get("placement");
+  if (placement === "hero" || placement === "card" || placement === "unknown") {
+    captureFirstWins(PLACEMENT_KEY, placement);
+  }
+  const zip = params.get("zip");
+  if (zip && /^\d{5}$/.test(zip)) captureFirstWins(ZIP_KEY, zip);
+}
+
+/** First-wins write for the simple string attribution keys. */
+function captureFirstWins(key: string, value: string): void {
+  if (!isBrowser()) return;
+  try {
+    if (window.localStorage?.getItem(key)) return;
+    window.localStorage?.setItem(key, JSON.stringify({ v: value, ts: Date.now() }));
+  } catch { /* storage unavailable */ }
+}
+
+function readFirstWins(key: string): string | null {
+  if (!isBrowser()) return null;
+  try {
+    const raw = window.localStorage?.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { v?: string; ts?: number };
+    if (typeof parsed?.ts === "number" && Date.now() - parsed.ts > TTL_MS) {
+      window.localStorage?.removeItem(key);
+      return null;
+    }
+    return typeof parsed?.v === "string" ? parsed.v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** hero | card | unknown — which panel of the print run was scanned. */
+export function getQrPlacement(): QrPlacementValue | null {
+  const v = readFirstWins(PLACEMENT_KEY);
+  return v === "hero" || v === "card" || v === "unknown" ? v : null;
+}
+
+/** The ZIP printed on the scanned hanger, independent of the ZIP typed later. */
+export function getQrZip(): string | null {
+  return readFirstWins(ZIP_KEY);
 }
 
 export function clearLandingSource(): void {
   if (!isBrowser()) return;
   try {
     window.localStorage?.removeItem(STORAGE_KEY);
+    window.localStorage?.removeItem(PLACEMENT_KEY);
+    window.localStorage?.removeItem(ZIP_KEY);
   } catch {
     /* ignore */
   }

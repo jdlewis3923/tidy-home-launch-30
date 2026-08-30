@@ -38,7 +38,10 @@ const promiseIcons = [Lock, Gift, ShieldCheck, MapPin];
 const Neighbor = () => {
   const { t, language, setLanguage } = useLanguage();
   const { search } = useLocation();
-  const langParam = new URLSearchParams(search).get("lang");
+  const params = new URLSearchParams(search);
+  const langParam = params.get("lang");
+  // hero = scanned off the door, card = kept the tear-off and scanned later.
+  const placement = params.get("placement") ?? undefined;
   // The Spanish panel's QR code carries ?lang=es — that is the panel split.
   const landingSource: LandingSource =
     langParam === "es" ? LANDING_SOURCES.es : LANDING_SOURCES.en;
@@ -52,8 +55,8 @@ const Neighbor = () => {
 
   useEffect(() => {
     captureLandingSource(landingSource);
-    pushEvent("doorhanger_landing", { landing_source: landingSource });
-  }, [landingSource]);
+    pushEvent("doorhanger_landing", { landing_source: landingSource, placement: placement ?? "direct" });
+  }, [landingSource, placement]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,7 +93,7 @@ const Neighbor = () => {
               </p>
               <Link
                 to={signupHref}
-                onClick={() => pushEvent("cta_click", { location: "neighbor_hero", cta_text: "Claim founding spot", landing_source: landingSource })}
+                onClick={() => pushEvent("cta_click", { location: "neighbor_hero", cta_text: "Claim founding spot", landing_source: landingSource, placement: placement ?? "direct" })}
                 className="btn-gold-glow inline-flex mt-8 items-center justify-center rounded-full px-8 py-4 text-base font-bold"
               >
                 {t("Claim your founding spot")}
@@ -154,7 +157,7 @@ const Neighbor = () => {
               </ul>
               <Link
                 to={signupHref}
-                onClick={() => pushEvent("cta_click", { location: "neighbor_footer", cta_text: "Claim founding spot", landing_source: landingSource })}
+                onClick={() => pushEvent("cta_click", { location: "neighbor_footer", cta_text: "Claim founding spot", landing_source: landingSource, placement: placement ?? "direct" })}
                 className="btn-gold-glow inline-flex mt-10 items-center justify-center rounded-full px-8 py-4 text-base font-bold"
               >
                 {t("Claim your founding spot")}

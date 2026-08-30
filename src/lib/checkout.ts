@@ -15,7 +15,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { getUtmAttribution } from '@/lib/utm';
-import { getLandingSource } from '@/lib/landing-source';
+import { getLandingSource, getQrPlacement, getQrZip } from '@/lib/landing-source';
 import { STRIPE_FUNCTIONS } from '@/lib/stripe-config';
 import {
   carWashEligible,
@@ -88,6 +88,10 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     utm_term: attribution.utm_term,
     // Door-hanger split: /neighbor (English) vs /vecino (Spanish).
     landing_source: getLandingSource() ?? undefined,
+    // Placement is separate from source: hero = scanned off the door,
+    // card = kept the tear-off and scanned later.
+    qr_placement: getQrPlacement() ?? undefined,
+    qr_zip: getQrZip() ?? undefined,
   };
 
   const { data, error } = await supabase.functions.invoke(
