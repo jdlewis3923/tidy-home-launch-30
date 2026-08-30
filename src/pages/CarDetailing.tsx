@@ -12,28 +12,35 @@ const config: ServiceLandingConfig = {
   systemBridge: "Tidy isn't just detailing — it's a system for your entire home.",
   ctaPrimaryLabel: "Book detailing",
   ctaPlanLabel: "Start your plan",
-  priceAnchor: "Starting at $159/mo",
-  stickyLabel: "Car Detailing · from $159/mo",
+  priceAnchor: "From $149/mo",
+  stickyLabel: "Shine Complete · from $149/mo",
   savingsCallout:
-    "A good mobile detail runs **$120–$180 per appointment**. Our subscription is **$159/mo** — and we come to your driveway.",
+    "A good mobile detail runs **$120–$180 per appointment**. Shine Complete is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.",
   heroImage: heroImg,
   heroImageMobile: heroImgMobile,
   heroAlt: "Pristine freshly detailed black SUV in a Miami driveway",
   plans: [
     {
-      name: "Monthly",
-      price: "$159",
+      name: "Shine Complete · Size 1",
+      price: "$149",
       cadence: "/mo",
       planSlug: "monthly",
-      description: "Interior + exterior, one vehicle.",
+      description: "Sedans and coupes. 3 washes a month plus 2 full details a year.",
     },
     {
-      name: "Biweekly",
-      price: "$249",
+      name: "Shine Complete · Size 2",
+      price: "$179",
       cadence: "/mo",
-      planSlug: "biweekly",
-      description: "Interior + exterior, every two weeks, one vehicle.",
+      planSlug: "monthly",
+      description: "Crossovers and 2-row SUVs. Same flat monthly price.",
       highlighted: true,
+    },
+    {
+      name: "Shine Complete · Size 3",
+      price: "$239",
+      cadence: "/mo",
+      planSlug: "monthly",
+      description: "Trucks, 3-row SUVs and vans.",
     },
   ],
   included: [
@@ -44,7 +51,7 @@ const config: ServiceLandingConfig = {
     "Dashboard + console wipe",
     "Interior + exterior glass",
     "In your driveway",
-    "Fully insured",
+    "Background-checked pros",
   ],
   addOnsNote: "Available as add-ons: pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat.",
   trustCards: [
@@ -65,7 +72,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "Plans start at $159/mo for Monthly and $249/mo for Biweekly. Pricing is based on plan and vehicle size. Standard pricing covers sedans, coupes, crossovers, and 2-row SUVs.",
+      a: "Shine Complete is one flat monthly price set by what you drive: $149, $179 or $239. Every plan is 3 maintenance washes a month plus 2 full details a year.",
     },
     {
       q: "Can I cancel anytime?",
@@ -85,7 +92,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What about oversized or commercial vehicles?",
-      a: "3-row SUVs, full-size trucks, and large vans get a small upgrade fee. Commercial vans and lifted trucks need a quick custom quote — we'll handle it.",
+      a: "3-row SUVs, full-size trucks and vans are size 3 at $239/mo — a size, never a surcharge. Commercial vans and lifted trucks we price by hand.",
     },
     {
       q: "What if I'm not satisfied?",
@@ -93,16 +100,16 @@ const config: ServiceLandingConfig = {
     },
   ],
   bundleCta: {
-    title: "Already booking detailing? Add monthly cleaning for $159/mo.",
-    body: "Save 10% when you stack — and never coordinate two providers again.",
+    title: "Already on Shine Complete? Add cleaning from $139 a visit.",
+    body: "Add a 2nd service and we throw in a free car wash every month — and you never coordinate two providers again.",
     targetServices: "detailing,cleaning",
   },
   seo: {
     title: "Car Detailing in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Mobile car detailing in Pinecrest and Kendall (33156, 33183, 33186). We come to your driveway. Ceramic-safe, locked price from $159/mo. Book in about 2 minutes.",
+      "Shine Complete mobile car care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.",
     canonical: "https://jointidy.co/car-detailing",
-    priceRange: "$159–$249",
+    priceRange: "$149–$239",
   },
 };
 

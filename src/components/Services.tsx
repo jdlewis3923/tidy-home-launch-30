@@ -14,8 +14,8 @@ const services = [
     image: cleaningImg,
     lpHref: "/house-cleaning",
     anchor: "Most popular · Members often pair with lawn care",
-    priceMain: "From $159/mo",
-    priceSub: "Biweekly from $275/mo",
+    priceMain: "From $139 a visit",
+    priceSub: "Biweekly from $278/mo",
     description: "Consistent interior care for a home that always feels reset. Handled on your schedule without lifting a finger.",
     checks: ["Kitchen & bathroom deep clean", "Floors vacuumed & mopped", "Dusting all surfaces & fixtures", "Trash removal & liner replacement"],
     excludes: ["Deep carpet shampooing", "Window exterior washing", "Garage or attic cleaning"],
@@ -28,8 +28,8 @@ const services = [
     image: lawnImg,
     lpHref: "/lawn-care",
     anchor: "Best value · Pairs perfectly with cleaning",
-    priceMain: "From $85/mo",
-    priceSub: "Biweekly from $129/mo",
+    priceMain: "From $45 a visit",
+    priceSub: "Biweekly from $90/mo",
     description: "Professional lawn maintenance to keep your Miami home's exterior sharp year-round. No scheduling required, ever.",
     checks: ["Mowing to standard height", "Edging along walkways & beds", "Debris blowing & full cleanup", "Weekly or biweekly cadence"],
     excludes: ["Tree trimming or removal", "Irrigation system repair", "Landscape design or planting"],
@@ -37,15 +37,15 @@ const services = [
     accent: "border-t-success",
   },
   {
-    title: "Car Detailing",
+    title: "Shine Complete",
     badge: null,
     image: carImg,
     lpHref: "/car-detailing",
     anchor: "Comes to your driveway · No drop-off needed",
-    priceMain: "From $159/mo",
-    priceSub: "Biweekly from $249/mo",
+    priceMain: "From $149/mo",
+    priceSub: "3 washes a month + 2 full details a year",
     description: "Driveway-ready detailing at your door. We come to you — exterior wash, interior vacuum, surface cleaning.",
-    checks: ["Exterior hand wash & wheels", "Interior vacuum & floor mats", "Dashboard & surface wipe-down", "Monthly or biweekly visits"],
+    checks: ["Exterior hand wash & wheels", "Interior vacuum & floor mats", "Dashboard & surface wipe-down", "3 maintenance washes every month"],
     excludes: ["Paint correction", "Headlight restoration"],
     addOns: "Pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat",
     accent: "border-t-violet-500",
@@ -64,7 +64,7 @@ const Services = () => {
 
         <FadeIn className="mb-12" delay={100}>
           <div className="bg-gradient-to-r from-primary/10 to-success/10 border border-primary/20 rounded-xl px-6 py-4 text-center">
-            <span className="text-sm font-medium text-foreground" dangerouslySetInnerHTML={{ __html: t("💡 Bundle services and save automatically — 2 services: <strong>10% off</strong> · 3 services: <strong>15% off</strong> — Applied at checkout automatically") }} />
+            <span className="text-sm font-medium text-foreground" dangerouslySetInnerHTML={{ __html: t("💡 Bundle and we add car washes — 2 services: <strong>1 free car wash a month</strong> · 3 services: <strong>2 free car washes a month</strong>") }} />
           </div>
         </FadeIn>
 

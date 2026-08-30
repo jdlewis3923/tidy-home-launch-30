@@ -42,15 +42,11 @@ function buildState(services: ServiceType[], addOns: string[] = []): ConfigState
     ...defaultState,
     services,
     frequencies,
-    // Standard band on every service.
+    // Size 2 on every service.
     bedrooms: services.includes('cleaning') ? '3' : null,
     bathrooms: services.includes('cleaning') ? '2' : null,
-    homeBand: services.includes('cleaning') ? 'standard' : null,
-    lotChoice: services.includes('lawn') ? 'half' : null,
-    lawnBand: services.includes('lawn') ? 'standard' : null,
+    lawnChoice: services.includes('lawn') ? 'standard' : null,
     vehicleClass: services.includes('detailing') ? 'crossover' : null,
-    vehicleBand: services.includes('detailing') ? 'standard' : null,
-    vehicleCount: 1,
     addOns,
   };
 }
@@ -71,7 +67,7 @@ describe('Florida sales tax in checkout', () => {
     expect(checkoutSrc).toContain('"fl_sales_tax_enabled"');
     expect(checkoutSrc).toContain('taxFlagRow?.value === true');
     // Only detailing is a taxable service in Florida.
-    expect(checkoutSrc).toMatch(/detailingIndices/);
+    expect(checkoutSrc).toMatch(/carCareIndices/);
   });
 
   it('nothing is charged or displayed while collection is disabled', () => {

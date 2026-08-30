@@ -139,8 +139,8 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         <p className="mt-4 text-xs text-primary-foreground/50">
           {t(
             CUSTOMER_DASHBOARD_ENABLED
-              ? "No contracts · Cancel anytime · From $85/mo"
-              : "Founding memberships · No commitment · From $85/mo",
+              ? "No contracts · Cancel anytime · From $90/mo"
+              : "Founding memberships · No commitment · From $90/mo",
           )}
         </p>
       </div>

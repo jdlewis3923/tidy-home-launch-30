@@ -17,18 +17,17 @@ import { pushEvent } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getBundleDiscount } from "@/lib/dashboard-pricing";
-import { BAND_PRICES, HEADLINE_BAND } from "@/lib/pricing-canon";
+import { BUNDLE_GIFT_COPY, SERVICE_NAMES, SIZE_PRICES, freeCarWashesPerMonth } from "@/lib/pricing-canon";
 import heroImg from "@/assets/hero-miami-home.jpg";
 
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
 
-// Headline figures are the Standard band, one visit each — the per-visit price
-// is what stays fixed, so every worked example on this page is per visit.
+// Headline figures are size 1 for each service. Cleaning and lawn care are
+// priced per visit; Shine Complete is a flat monthly price.
 const SERVICES: { slug: ServiceSlug; label: string; basePrice: number }[] = [
-  { slug: "cleaning", label: "House Cleaning", basePrice: BAND_PRICES.cleaning[HEADLINE_BAND] },
-  { slug: "lawn", label: "Lawn Care", basePrice: BAND_PRICES.lawn[HEADLINE_BAND] },
-  { slug: "detailing", label: "Car Detailing", basePrice: BAND_PRICES.detailing[HEADLINE_BAND] },
+  { slug: "cleaning", label: SERVICE_NAMES.cleaning, basePrice: SIZE_PRICES.cleaning[1] },
+  { slug: "lawn", label: SERVICE_NAMES.lawn, basePrice: SIZE_PRICES.lawn[1] },
+  { slug: "detailing", label: SERVICE_NAMES.detailing, basePrice: SIZE_PRICES.detailing[1] },
 ];
 
 const Bundle = () => (
@@ -55,20 +54,19 @@ const BundleInner = () => {
     const chosen = SERVICES.filter((s) => picked.has(s.slug));
     const valid = chosen.length === 2;
     const subtotal = chosen.reduce((sum, s) => sum + s.basePrice, 0);
-    const discounted = (subtotal * (1 - getBundleDiscount(2))).toFixed(2);
+    const freeWashes = freeCarWashesPerMonth(2);
     return {
       valid,
+      freeWashes,
       chosen,
       subtotal,
-      discounted,
       services: chosen.map((c) => c.slug).join(","),
     };
   }, [picked]);
 
   const threeBundle = useMemo(() => {
     const subtotal = SERVICES.reduce((sum, s) => sum + s.basePrice, 0);
-    const discounted = (subtotal * (1 - getBundleDiscount(3))).toFixed(2);
-    return { subtotal, discounted };
+    return { subtotal, freeWashes: freeCarWashesPerMonth(3) };
   }, []);
 
   const handleNavCta = () => {
@@ -109,15 +107,15 @@ const BundleInner = () => {
       <SeoHead
         title={t("Bundle & Save in Pinecrest + Kendall | Tidy Home Concierge")}
         description={t(
-          "One price per visit, set by the size of your home or lot. Stack cleaning, lawn care and car detailing and save 10–15% in Pinecrest and Kendall (33156, 33183, 33186).",
+          "One flat price set by the size of your home, lawn or vehicle. Stack services and we add free car washes every month — Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186).",
         )}
         canonical="https://jointidy.co/bundle"
         ogImage={heroImg}
-        priceRange="$55–$299"
+        priceRange="$45–$279"
       />
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
-        label={t("Bundle & Save · 10–15% off")}
+        label={t("Bundle & Save · free car washes")}
         surface="lp_bundle"
         bundle="true"
         services="cleaning,lawn,detailing"
@@ -137,10 +135,10 @@ const BundleInner = () => {
         <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Bundle & Save")}</span>
           <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
-            {t("Bundle & Save — Stack services, save 10–15%")}
+            {t("Bundle & Save — stack services, get free car washes")}
           </h1>
           <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            {t("The more you stack, the more you save. Pinecrest + Kendall only (33156 · 33183 · 33186).")}
+            {t("The more you stack, the more washes we throw in. Pinecrest, Kendall & Palmetto Bay only (33156 · 33183 · 33186).")}
           </p>
           <div className="mt-6 inline-flex items-center gap-1.5 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground text-sm font-medium">
             <MapPin className="w-3.5 h-3.5" />
@@ -160,9 +158,9 @@ const BundleInner = () => {
             <Reveal>
               <div className="bg-card border rounded-xl p-6 h-full flex flex-col hover-lift">
                 <h3 className="text-lg font-bold text-foreground">{t("2-Service Bundle")}</h3>
-                <div className="mt-2 text-3xl font-extrabold text-primary">{t("10% off")}</div>
+                <div className="mt-2 text-3xl font-extrabold text-primary">{t("1 free car wash a month")}</div>
                 <p className="text-sm text-text-mid mt-3">
-                  {t("Pick any two — we coordinate everything and you save 10% on every visit.")}
+                  {t(BUNDLE_GIFT_COPY.two)}
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -192,25 +190,21 @@ const BundleInner = () => {
                     <>
                       <p className="text-sm text-text-mid">
                         <span className="text-text-light mr-1">{t("from")}</span>
-                        <span className="line-through text-text-light mr-1">
-                          ${twoBundle.subtotal}
-                          {t(" a visit")}
+                        <span className="font-bold text-foreground">${twoBundle.subtotal}</span>
+                        <span className="text-text-light">
+                          {" "}
+                          {t("plus 1 free car wash every month")}
                         </span>
-                        <span className="font-bold text-foreground">
-                          ${twoBundle.discounted}
-                          {t(" a visit")}
-                        </span>
-                        <span className="text-text-light"> {t("after 10% bundle discount")}</span>
                       </p>
                       <p className="mt-1 text-xs text-text-light">
                         {t(
-                          "Standard-band prices. Your band is set by the size of your home or lot — come monthly, biweekly or weekly and the price per visit stays the same.",
+                          "Size 1 prices. Your size is set by the size of your home, lawn or vehicle — cleaning and lawn care are priced per visit, so how often we come is up to you.",
                         )}
                       </p>
                     </>
                   ) : (
                     <p className="text-xs text-text-light italic">
-                      {t("Pick exactly 2 services to see your bundled price.")}
+                      {t("Pick exactly 2 services to see your plan.")}
                     </p>
                   )}
                 </div>
@@ -250,26 +244,18 @@ const BundleInner = () => {
               <div className="relative bg-card border-2 border-primary rounded-xl p-6 h-full flex flex-col hover-lift shadow-[0_0_28px_-8px_hsl(var(--primary)/0.3)] md:scale-[1.04] md:-my-1 z-10">
                 <span className="most-popular-ribbon">{t("Best Value")}</span>
                 <h3 className="text-lg font-bold text-foreground">{t("3-Service Bundle")}</h3>
-                <div className="mt-2 text-3xl font-extrabold text-primary">{t("15% off")}</div>
+                <div className="mt-2 text-3xl font-extrabold text-primary">{t("2 free car washes a month")}</div>
                 <p className="text-sm text-text-mid mt-3 flex-1">
-                  {t(
-                    "All three services on one plan: cleaning, lawn care and detailing. 15% off every visit.",
-                  )}
+                  {t(BUNDLE_GIFT_COPY.three)}
                 </p>
                 <p className="text-sm text-text-mid mt-3">
                   <span className="text-text-light mr-1">{t("from")}</span>
-                  <span className="line-through text-text-light mr-1">
-                    ${threeBundle.subtotal}
-                    {t(" a visit")}
-                  </span>
-                  <span className="font-bold text-foreground">
-                    ${threeBundle.discounted}
-                    {t(" a visit")}
-                  </span>
+                  <span className="font-bold text-foreground">${threeBundle.subtotal}</span>
+                  <span className="text-text-light"> {t("plus 2 free car washes every month")}</span>
                 </p>
                 <p className="mt-1 text-xs text-text-light">
                   {t(
-                    "Figures assume monthly service for each service. Your price changes with the visit frequency you choose.",
+                    "Size 1 prices, one visit each for cleaning and lawn care. Your total changes with the visit frequency you choose.",
                   )}
                 </p>
 
@@ -298,7 +284,7 @@ const BundleInner = () => {
                 <div className="mt-2 text-3xl font-extrabold text-primary">{t("Tailored")}</div>
                 <p className="text-sm text-text-mid mt-3 flex-1">
                   {t(
-                    "Larger home, oversized lot, or fleet of vehicles? We'll build a custom plan and send you a personal quote.",
+                    "Larger home, oversized lawn, or a fleet of vehicles? We price it by hand and send you a personal quote.",
                   )}
                 </p>
                 <Link
@@ -324,8 +310,8 @@ const BundleInner = () => {
           <Reveal>
             <ul className="mt-8 grid sm:grid-cols-2 gap-3 bg-card border rounded-xl p-6">
               {[
-                "10% off any 2 services — applied automatically",
-                "15% off all 3 services — applied automatically",
+                "Any 2 services — 1 free car wash every month",
+                "All 3 services — 2 free car washes every month",
                 "One subscription, one bill, one crew",
                 "Same locked price every month",
                 "Cancel or adjust anytime",
@@ -352,7 +338,7 @@ const BundleInner = () => {
       <LpFinalCta
         headline={t("Ready to bundle?")}
         subhead={t("About 2 minutes to sign up. Locked price. Cancel anytime.")}
-        ctaLabel={t("Start saving")}
+        ctaLabel={t("Build my plan")}
         trackingId="bundle_final_cta"
         bundle="true"
         services="cleaning,lawn,detailing"

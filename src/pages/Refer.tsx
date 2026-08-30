@@ -122,7 +122,7 @@ const ReferInner = () => {
           "Refer a neighbor in Pinecrest or Kendall (33156 · 33183 · 33186). They get $50 off their first month, you get $50 off yours. No limit, no fine print.",
         )}
         canonical="https://jointidy.co/refer"
-        priceRange="$85–$459"
+        priceRange="$45–$279"
       />
       <Navbar onOpenPopup={handleNavCta} />
 

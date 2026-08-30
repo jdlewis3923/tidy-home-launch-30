@@ -15,24 +15,24 @@ const config: ServiceLandingConfig = {
     "Tidy isn't just cleaning — it's a system for your entire home.",
   ctaPrimaryLabel: "Book your cleaning",
   ctaPlanLabel: "Start your plan",
-  priceAnchor: "Starting at $159/mo",
-  stickyLabel: "House Cleaning · from $159/mo",
+  priceAnchor: "From $139 a visit",
+  stickyLabel: "House Cleaning · from $139 a visit",
   savingsCallout:
-    "One-off cleanings in Pinecrest average **$180–$260**. Our monthly plan locks you in at **$159** — with the same crew every visit.",
+    "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a visit** — with the same crew every time.",
   heroImage: heroImg,
   heroImageMobile: heroImgMobile,
   heroAlt: "Bright, freshly cleaned modern Miami living room",
   plans: [
     {
       name: "Monthly",
-      price: "$159",
+      price: "$139",
       cadence: "/mo",
       planSlug: "monthly",
       description: "One visit per month, same crew every time.",
     },
     {
       name: "Biweekly",
-      price: "$275",
+      price: "$278",
       cadence: "/mo",
       planSlug: "biweekly",
       description: "Two visits per month, priority scheduling.",
@@ -40,7 +40,7 @@ const config: ServiceLandingConfig = {
     },
     {
       name: "Weekly",
-      price: "$459",
+      price: "$556",
       cadence: "/mo",
       planSlug: "weekly",
       description: "Weekly visits, dedicated crew, quarterly deep-clean.",
@@ -55,7 +55,7 @@ const config: ServiceLandingConfig = {
     "Trash out",
     "Eco-safe products",
     "Same crew every visit",
-    "Fully insured",
+    "Background-checked pros",
   ],
   addOnsNote: "Available as add-ons: inside oven, inside fridge, interior windows, deep baseboard scrub, laundry (wash/dry/fold), inside kitchen cabinets.",
   trustCards: [
@@ -76,7 +76,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "Plans start at $159/mo for a monthly visit, $275/mo biweekly, $459/mo weekly. Pricing is based on cadence and home size. Standard pricing covers most homes up to 2,500 sq ft — larger homes have a small flat upgrade.",
+      a: "One flat price per visit, set by the size of your home: $139, $189 or $279. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Homes with 5+ bedrooms are quoted by hand.",
     },
     {
       q: "Can I cancel anytime?",
@@ -104,16 +104,16 @@ const config: ServiceLandingConfig = {
     },
   ],
   bundleCta: {
-    title: "Already booking cleaning? Add lawn care for $85/mo.",
-    body: "Save 10% when you stack — and never coordinate two providers again.",
+    title: "Already booking cleaning? Add lawn care from $45 a visit.",
+    body: "Add a 2nd service and we throw in a free car wash every month — and you never coordinate two providers again.",
     targetServices: "cleaning,lawn",
   },
   seo: {
     title: "House Cleaning in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Monthly house cleaning in Pinecrest and Kendall (33156, 33183, 33186). Locked price from $159/mo. Same crew, no contracts, eco-safe. Book in about 2 minutes.",
+      "House cleaning in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). One flat price per visit from $139. Same crew, no contracts, eco-safe. Book in about 2 minutes.",
     canonical: "https://jointidy.co/house-cleaning",
-    priceRange: "$159–$459",
+    priceRange: "$139–$279",
   },
 };
 

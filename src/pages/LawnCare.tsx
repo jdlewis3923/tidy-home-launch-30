@@ -15,24 +15,24 @@ const config: ServiceLandingConfig = {
     "Tidy isn't just lawn — it's a system for your entire home.",
   ctaPrimaryLabel: "Start lawn care",
   ctaPlanLabel: "Start your plan",
-  priceAnchor: "Starting at $85/mo",
-  stickyLabel: "Lawn Care · from $85/mo",
+  priceAnchor: "From $45 a visit",
+  stickyLabel: "Lawn Care · from $45 a visit",
   savingsCallout:
-    "Most Pinecrest lawn pros charge **$40–$60 per visit**. Monthly Tidy is **$85/mo flat**, same crew, no surprise invoices.",
+    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$45 a visit** flat, same crew, no surprise invoices.",
   heroImage: heroImg,
   heroImageMobile: heroImgMobile,
   heroAlt: "Freshly mowed striped emerald lawn at a Pinecrest home",
   plans: [
     {
       name: "Monthly",
-      price: "$85",
+      price: "$45",
       cadence: "/mo",
       planSlug: "monthly",
       description: "One visit per month.",
     },
     {
       name: "Biweekly",
-      price: "$129",
+      price: "$90",
       cadence: "/mo",
       planSlug: "biweekly",
       description: "Two visits per month.",
@@ -40,7 +40,7 @@ const config: ServiceLandingConfig = {
     },
     {
       name: "Weekly",
-      price: "$195",
+      price: "$180",
       cadence: "/mo",
       planSlug: "weekly",
       description: "Four visits per month.",
@@ -53,8 +53,8 @@ const config: ServiceLandingConfig = {
     "Weed-whack fence lines",
     "Bag or mulch clippings",
     "Same crew every visit",
-    "Fully insured",
-    "Locked $85 — never surprise-priced",
+    "Background-checked pros",
+    "Locked $45 a visit — never surprise-priced",
   ],
   addOnsNote: "Available as add-ons: hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization treatment, driveway pressure wash.",
   trustCards: [
@@ -75,7 +75,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "Plans start at $85/mo monthly, $129/mo biweekly, $195/mo weekly. Pricing is based on cadence and yard size. Standard pricing covers most yards up to 4,000 sq ft of mowable turf.",
+      a: "One flat price per visit, set by the size of your lawn: $45, $65 or $99. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Pick your best guess and we confirm the size from satellite imagery before your first visit.",
     },
     {
       q: "Can I cancel anytime?",
@@ -103,16 +103,16 @@ const config: ServiceLandingConfig = {
     },
   ],
   bundleCta: {
-    title: "Already booking lawn? Add biweekly cleaning for $275/mo.",
-    body: "Save 10% when you stack — and never coordinate two providers again.",
+    title: "Already booking lawn? Add cleaning from $139 a visit.",
+    body: "Add a 2nd service and we throw in a free car wash every month — and you never coordinate two providers again.",
     targetServices: "lawn,cleaning",
   },
   seo: {
     title: "Lawn Care in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Weekly lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Locked price from $85/mo. Same crew, no contracts. Book in about 2 minutes.",
+      "Lawn care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same crew, no contracts. Book in about 2 minutes.",
     canonical: "https://jointidy.co/lawn-care",
-    priceRange: "$85–$195",
+    priceRange: "$45–$99",
   },
 };
 

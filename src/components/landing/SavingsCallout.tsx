@@ -1,7 +1,7 @@
 import Reveal from "./Reveal";
 
 interface Props {
-  /** Plain-text version with the price segment marked with `**`, e.g. "...locks you in at **$159**..." */
+  /** Plain-text version with the price segment marked with `**`, e.g. "...starts at **$139 a visit**..." */
   text: string;
 }
 
