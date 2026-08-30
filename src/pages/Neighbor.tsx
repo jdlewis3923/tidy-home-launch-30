@@ -19,7 +19,7 @@ import {
 import {
   serviceLabels,
   serviceUnits,
-  formatSizePrice,
+  getSizePrice,
   type ServiceType,
 } from "@/lib/dashboard-pricing";
 
@@ -137,7 +137,7 @@ const Neighbor = ({ variant = "en" }: NeighborProps) => {
                   <div key={service} className="rounded-xl border bg-card p-5">
                     <p className="text-sm font-semibold text-foreground">{t(serviceLabels[service])}</p>
                     <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">
-                      {formatSizePrice(service, 1)}
+                      {`$${getSizePrice(service, 1)}`}
                     </p>
                     <p className="text-xs text-text-mid mt-1">
                       {t(serviceUnits[service] === 'per_month' ? 'per month, size 1' : 'per visit, size 1')}
