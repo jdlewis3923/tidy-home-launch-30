@@ -207,6 +207,7 @@ Deno.serve(async (req) => {
           preferred_day: input.preferred_day ?? "",
           preferred_time: input.preferred_time ?? "",
           lang: input.lang,
+          founding_zip: input.zip,
           founding_rate_locked: "yes",
           founding_free_addon_first_visit: "yes",
           founding_review_promised: "yes",
