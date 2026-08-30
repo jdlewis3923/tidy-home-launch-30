@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { ConfigState, hasCustomQuote, serviceLabels, ServiceType } from '@/lib/dashboard-pricing';
+import { ConfigState, hasCustomQuote, serviceLabels, sizeFor, ServiceType } from '@/lib/dashboard-pricing';
 import { fireCustomQuote } from '@/lib/webhooks';
 
 interface Props {
