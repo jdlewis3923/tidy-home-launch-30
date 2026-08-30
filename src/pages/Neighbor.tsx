@@ -26,13 +26,14 @@ import {
 const promiseIcons = [Lock, Gift, ShieldCheck, MapPin];
 
 /**
- * /neighbor — the single founding-neighbor landing page. It carries the founding
+ * /neighbor — the founding-neighbor landing page. It carries the founding
  * fulfilment promises (rate lock, free premium add-on, first visit perfect or
  * free, 25 homes per ZIP), forwards UTM/gclid params into signup, and records
  * which side of the door hanger the visit arrived on.
  *
- * Spanish comes from `?lang=es` (the /vecino redirect on the Spanish tear-off)
- * or from the browser's own language, and a visible toggle switches either way.
+ * `?lang=es` (the QR code on the Spanish panel) flips the existing site-wide
+ * language toggle to Spanish on arrival; the param rides into signup so
+ * English-panel and Spanish-panel scans can be told apart.
  */
 const Neighbor = () => {
   const { t, language, setLanguage } = useLanguage();
@@ -74,25 +75,6 @@ const Neighbor = () => {
       <main>
         <section className="bg-navy text-primary-foreground px-4 pt-28 pb-16">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="flex justify-center mb-6">
-              <div className="inline-flex rounded-full border border-primary-foreground/30 p-1 text-xs font-semibold">
-                {(["en", "es"] as const).map(code => (
-                  <button
-                    key={code}
-                    type="button"
-                    onClick={() => setLanguage(code)}
-                    aria-pressed={language === code}
-                    className={`rounded-full px-4 py-1.5 transition-colors ${
-                      language === code
-                        ? "bg-gold text-navy"
-                        : "text-primary-foreground/70 hover:text-primary-foreground"
-                    }`}
-                  >
-                    {code === "en" ? "English" : "Español"}
-                  </button>
-                ))}
-              </div>
-            </div>
             <Reveal>
               <span className="text-xs uppercase tracking-widest text-gold font-semibold">
                 {t(FOUNDING_OFFER.headline)}
