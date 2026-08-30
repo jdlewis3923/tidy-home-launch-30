@@ -1,10 +1,10 @@
 /**
  * Door-hanger response attribution.
  *
- * The 14,000-piece run is printed two-sided: the English tear-off points at
- * /neighbor, the Spanish one at /vecino. Both land on the same founding offer,
- * so the only way to know whether the Spanish half pulls its weight is to
- * record WHICH door the signup walked through.
+ * The 14,000-piece run is printed two-sided and both panels show the same URL,
+ * jointidy.co/neighbor. The QR code on the Spanish panel encodes ?lang=es, so
+ * that param is the only signal separating a Spanish-panel scan from an
+ * English-panel one — record it with the signup.
  *
  * First-wins, 90-day window, mirroring src/lib/utm.ts. The value rides into
  * /signup as `src=` and is written onto the Stripe subscription metadata by the
@@ -13,9 +13,9 @@
 
 export type LandingSource = "doorhanger_en" | "doorhanger_es";
 
-export const LANDING_SOURCES: Record<"neighbor" | "vecino", LandingSource> = {
-  neighbor: "doorhanger_en",
-  vecino: "doorhanger_es",
+export const LANDING_SOURCES: Record<"en" | "es", LandingSource> = {
+  en: "doorhanger_en",
+  es: "doorhanger_es",
 };
 
 const STORAGE_KEY = "tidy_landing_source";

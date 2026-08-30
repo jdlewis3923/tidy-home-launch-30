@@ -39,9 +39,9 @@ const Neighbor = () => {
   const { t, language, setLanguage } = useLanguage();
   const { search } = useLocation();
   const langParam = new URLSearchParams(search).get("lang");
-  // Arrived on the Spanish URL (jointidy.co/vecino → /neighbor?lang=es).
+  // The Spanish panel's QR code carries ?lang=es — that is the panel split.
   const landingSource: LandingSource =
-    langParam === "es" ? LANDING_SOURCES.vecino : LANDING_SOURCES.neighbor;
+    langParam === "es" ? LANDING_SOURCES.es : LANDING_SOURCES.en;
   const signupHref = buildSignupHref(search, { src: landingSource });
   const isSpanish = language === "es";
 
