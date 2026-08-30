@@ -52,6 +52,16 @@ export function getLandingSource(): LandingSource | null {
   }
 }
 
+/**
+ * Pick the source back up off the URL (`?src=doorhanger_es`) so it survives a
+ * shared link or a return visit that skips the landing page itself.
+ */
+export function captureLandingSourceFromUrl(): void {
+  if (!isBrowser()) return;
+  const v = new URLSearchParams(window.location.search).get("src");
+  if (v === "doorhanger_en" || v === "doorhanger_es") captureLandingSource(v);
+}
+
 export function clearLandingSource(): void {
   if (!isBrowser()) return;
   try {
