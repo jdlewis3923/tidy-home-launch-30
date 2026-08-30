@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Check, MapPin, Lock, Gift, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -8,6 +9,7 @@ import LandingTicker from "@/components/landing/LandingTicker";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { buildSignupHref } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
+import { captureLandingSource, LANDING_SOURCES, type LandingSource } from "@/lib/landing-source";
 import {
   FOUNDING_OFFER,
   SERVICE_AREA_LINE,
@@ -17,29 +19,58 @@ import {
 import {
   serviceLabels,
   serviceUnits,
-  formatSizePrice,
+  getSizePrice,
   type ServiceType,
 } from "@/lib/dashboard-pricing";
 
 const promiseIcons = [Lock, Gift, ShieldCheck, MapPin];
 
+interface NeighborProps {
+  /**
+   * The door hanger is printed two-sided. `en` is /neighbor (English front),
+   * `es` is /vecino (Spanish back) — same founding offer, Spanish interface set
+   * on arrival so the reader never has to find the toggle.
+   */
+  variant?: "en" | "es";
+}
+
 /**
- * /neighbor — the founding-neighbor landing page. It carries the founding
- * fulfilment promises (rate lock, free premium add-on, first visit perfect or
- * free, 25 homes per ZIP) and forwards UTM/gclid params into signup.
+ * /neighbor and /vecino — the founding-neighbor landing page. It carries the
+ * founding fulfilment promises (rate lock, free premium add-on, first visit
+ * perfect or free, 25 homes per ZIP), forwards UTM/gclid params into signup,
+ * and tags the signup with which side of the door hanger it came through.
  */
-const Neighbor = () => {
-  const { t } = useLanguage();
+const Neighbor = ({ variant = "en" }: NeighborProps) => {
+  const { t, setLanguage } = useLanguage();
   const { search } = useLocation();
-  const signupHref = buildSignupHref(search);
+  const landingSource: LandingSource =
+    variant === "es" ? LANDING_SOURCES.vecino : LANDING_SOURCES.neighbor;
+  const signupHref = buildSignupHref(search, { src: landingSource });
+
+  useEffect(() => {
+    if (variant === "es") setLanguage("es");
+  }, [variant, setLanguage]);
+
+  useEffect(() => {
+    captureLandingSource(landingSource);
+    pushEvent("doorhanger_landing", { landing_source: landingSource, variant });
+  }, [landingSource, variant]);
 
   return (
     <div className="min-h-screen bg-background">
-      <SeoHead
-        title="Founding Neighbor Offer | Tidy Home Concierge"
-        description="Founding neighbors lock their rate for life, get a free premium add-on on visit one, and a first visit that is perfect or free. 25 homes per ZIP in Pinecrest, Kendall and Palmetto Bay."
-        canonical="https://jointidy.co/neighbor"
-      />
+      {variant === "es" ? (
+        <SeoHead
+          title="Oferta de Vecino Fundador | Tidy Home Concierge"
+          description="Los vecinos fundadores fijan su precio para siempre, reciben un servicio adicional gratis en la primera visita y una primera visita perfecta o es gratis. 25 hogares por código postal en Pinecrest, Kendall y Palmetto Bay."
+          canonical="https://jointidy.co/vecino"
+        />
+      ) : (
+        <SeoHead
+          title="Founding Neighbor Offer | Tidy Home Concierge"
+          description="Founding neighbors lock their rate for life, get a free premium add-on on visit one, and a first visit that is perfect or free. 25 homes per ZIP in Pinecrest, Kendall and Palmetto Bay."
+          canonical="https://jointidy.co/neighbor"
+        />
+      )}
       <Navbar onOpenPopup={() => { window.location.assign(signupHref); }} />
 
       <main>
@@ -60,7 +91,7 @@ const Neighbor = () => {
               </p>
               <Link
                 to={signupHref}
-                onClick={() => pushEvent("cta_click", { location: "neighbor_hero", cta_text: "Claim founding spot" })}
+                onClick={() => pushEvent("cta_click", { location: `${variant === "es" ? "vecino" : "neighbor"}_hero`, cta_text: "Claim founding spot", landing_source: landingSource })}
                 className="btn-gold-glow inline-flex mt-8 items-center justify-center rounded-full px-8 py-4 text-base font-bold"
               >
                 {t("Claim your founding spot")}
@@ -106,7 +137,7 @@ const Neighbor = () => {
                   <div key={service} className="rounded-xl border bg-card p-5">
                     <p className="text-sm font-semibold text-foreground">{t(serviceLabels[service])}</p>
                     <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">
-                      {formatSizePrice(service, 1)}
+                      {`$${getSizePrice(service, 1)}`}
                     </p>
                     <p className="text-xs text-text-mid mt-1">
                       {t(serviceUnits[service] === 'per_month' ? 'per month, size 1' : 'per visit, size 1')}
@@ -124,7 +155,7 @@ const Neighbor = () => {
               </ul>
               <Link
                 to={signupHref}
-                onClick={() => pushEvent("cta_click", { location: "neighbor_footer", cta_text: "Claim founding spot" })}
+                onClick={() => pushEvent("cta_click", { location: `${variant === "es" ? "vecino" : "neighbor"}_footer`, cta_text: "Claim founding spot", landing_source: landingSource })}
                 className="btn-gold-glow inline-flex mt-10 items-center justify-center rounded-full px-8 py-4 text-base font-bold"
               >
                 {t("Claim your founding spot")}

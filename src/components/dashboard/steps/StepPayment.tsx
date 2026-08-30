@@ -22,6 +22,7 @@ import { STRIPE_INTEGRATION_ENABLED } from '@/lib/dashboard-config';
 import { supabase } from '@/integrations/supabase/client';
 import { getStripe, isEmbeddedCheckoutAvailable } from '@/lib/stripe-client';
 import EmbeddedPaymentForm from '@/components/dashboard/EmbeddedPaymentForm';
+import { getLandingSource } from "@/lib/landing-source";
 import { getUtmAttribution } from '@/lib/utm';
 
 // The exact Terms wording shown next to the pay button. It is both rendered and
@@ -72,6 +73,8 @@ export default function StepPayment({ state, onChange }: Props) {
       idempotency_key: `cfg:${state.zip}:${services.map(s => `${s.service}:${s.size}:${s.frequency}`).sort().join(',')}:${addons.map(a => a.addon_name + 'x' + a.qty).sort().join(',')}`,
       gclid: attr.gclid, utm_source: attr.utm_source, utm_medium: attr.utm_medium,
       utm_campaign: attr.utm_campaign, utm_content: attr.utm_content, utm_term: attr.utm_term,
+      // Door-hanger split: which side of the print run this signup came through.
+      landing_source: getLandingSource() ?? undefined,
     };
   };
 

@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { capturePromoFromUrl } from "@/lib/promo";
 import { captureUtmFromUrl } from "@/lib/utm";
+import { captureLandingSourceFromUrl } from "@/lib/landing-source";
 import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
@@ -89,6 +90,7 @@ const PromoCaptureWatcher = () => {
   useEffect(() => {
     capturePromoFromUrl();
     captureUtmFromUrl();
+    captureLandingSourceFromUrl();
   }, [location.pathname, location.search]);
   return null;
 };
@@ -154,7 +156,9 @@ const App = () => (
                   <Route path="/signup" element={<SignupRedirect />} />
                   <Route path="/referral" element={<ReferralRedirect />} />
                   <Route path="/refer" element={<Refer />} />
-                  <Route path="/neighbor" element={<Neighbor />} />
+                  <Route path="/neighbor" element={<Neighbor variant="en" />} />
+                  {/* Spanish back of the door hanger — jointidy.co/vecino */}
+                  <Route path="/vecino" element={<Neighbor variant="es" />} />
                   <Route path="/thank-you" element={<ThankYou />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
