@@ -15,6 +15,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { getUtmAttribution } from '@/lib/utm';
+import { getLandingSource } from '@/lib/landing-source';
 import { STRIPE_FUNCTIONS } from '@/lib/stripe-config';
 import {
   carWashEligible,
@@ -85,6 +86,8 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     utm_campaign: attribution.utm_campaign,
     utm_content: attribution.utm_content,
     utm_term: attribution.utm_term,
+    // Door-hanger split: /neighbor (English) vs /vecino (Spanish).
+    landing_source: getLandingSource() ?? undefined,
   };
 
   const { data, error } = await supabase.functions.invoke(
