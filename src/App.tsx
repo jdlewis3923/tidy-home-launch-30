@@ -34,6 +34,7 @@ const LawnCare = lazy(() => import("./pages/LawnCare.tsx"));
 const CarDetailing = lazy(() => import("./pages/CarDetailing.tsx"));
 const Bundle = lazy(() => import("./pages/Bundle.tsx"));
 const Refer = lazy(() => import("./pages/Refer.tsx"));
+const Neighbor = lazy(() => import("./pages/Neighbor.tsx"));
 const CustomerLogin = lazy(() => import("./pages/CustomerLogin.tsx"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
@@ -152,6 +153,7 @@ const App = () => (
                   <Route path="/signup" element={<SignupRedirect />} />
                   <Route path="/referral" element={<ReferralRedirect />} />
                   <Route path="/refer" element={<Refer />} />
+                  <Route path="/neighbor" element={<Neighbor />} />
                   <Route path="/thank-you" element={<ThankYou />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
