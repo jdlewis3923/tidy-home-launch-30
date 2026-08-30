@@ -177,12 +177,23 @@ export const FOUNDING_OFFER = {
 
 // ---------------------------------------------------------------------------
 // Trust claims — only what is provable. "Insured" is NOT published yet: the
-// liability certificate is outstanding. Flip INSURED_CLAIM_ENABLED to true in
-// one edit once it lands.
+// general liability certificate is outstanding. Flip INSURANCE_VERIFIED to true
+// in one edit once the certificate is in hand; every insured/insurance claim in
+// customer-facing copy is gated on it.
 // ---------------------------------------------------------------------------
 
-export const INSURED_CLAIM_ENABLED = false;
+export const INSURANCE_VERIFIED = false;
 export const INSURED_CLAIM = 'Insured';
+
+/** Badge/chip claim. Reads "Vetted & Insured" only once insurance is verified. */
+export const VETTED_CLAIM = INSURANCE_VERIFIED
+  ? 'Vetted & Insured'
+  : 'Vetted & Background-Checked';
+
+/** Prose form used in sentences about who shows up. */
+export const VETTED_PROS_SENTENCE = INSURANCE_VERIFIED
+  ? 'vetted, insured, background-checked'
+  : 'vetted, background-checked';
 
 export const TRUST_CLAIMS = [
   'Background-Checked Pros',
@@ -193,7 +204,7 @@ export const TRUST_CLAIMS = [
 ] as const;
 
 export function trustClaims(): string[] {
-  return INSURED_CLAIM_ENABLED ? [...TRUST_CLAIMS, INSURED_CLAIM] : [...TRUST_CLAIMS];
+  return INSURANCE_VERIFIED ? [...TRUST_CLAIMS, INSURED_CLAIM] : [...TRUST_CLAIMS];
 }
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { VETTED_CLAIM } from "@/lib/pricing-canon";
 
 const reasons = [
   {
@@ -14,8 +15,8 @@ const reasons = [
   },
   {
     icon: "🛡️",
-    title: "Vetted & Insured",
-    desc: "Every professional is background-checked and fully insured. Photo verification submitted after every visit.",
+    title: VETTED_CLAIM,
+    desc: "Every professional is background-checked through Checkr. Photo verification submitted after every visit.",
   },
   {
     icon: "📅",

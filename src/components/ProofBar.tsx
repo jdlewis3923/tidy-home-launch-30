@@ -1,7 +1,8 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { VETTED_CLAIM } from "@/lib/pricing-canon";
 
 const signals = [
-  "Vetted & Insured",
+  VETTED_CLAIM,
   "Background-Checked Pros",
   "Satisfaction Guaranteed",
   "Serving Kendall + Pinecrest",

@@ -267,14 +267,14 @@ export default function StepPayment({ state, onChange }: Props) {
         </div>
       </div>
 
-      {/* Pre-checkout trust badge row — bonded / insured / vetted / cancel anytime. */}
+      {/* Pre-checkout trust badge row — vetted / background-checked / cancel anytime. */}
       <div
         className={`grid grid-cols-2 gap-2 sm:grid-cols-4 ${reveal(0)}`}
         style={{ transitionDelay: '220ms' }}
       >
         {[
           { icon: Banknote,    label: 'Vetted' },
-          { icon: ShieldCheck, label: '$1M Insured' },
+          { icon: ShieldCheck, label: 'Photo Verified' },
           { icon: BadgeCheck,  label: 'Background Checked' },
           { icon: XIcon,       label: 'Cancel Anytime' },
         ].map(({ icon: Icon, label }) => (

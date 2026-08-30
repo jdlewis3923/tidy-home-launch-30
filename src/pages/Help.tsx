@@ -44,8 +44,8 @@ const FAQ = [
     a: "Yes — every crew arrives fully equipped. If you prefer specific products, leave a note and we'll honor it.",
   },
   {
-    q: "Are you insured?",
-    a: "Fully insured in Florida. Every professional is background-checked through Checkr before their first visit.",
+    q: "How are your pros vetted?",
+    a: "Every professional is background-checked through Checkr before their first visit, and submits photo verification after every service.",
   },
 ];
 
