@@ -140,10 +140,7 @@ export default function DashboardPlan() {
     if (step === 1) return state.services.length > 0;
     if (step === 2) return state.services.every(s => !!state.frequencies[s]);
     if (step === 3) {
-      if (state.services.includes('cleaning') && !state.homeBand) return false;
-      if (state.services.includes('lawn') && !state.lawnBand) return false;
-      if (state.services.includes('detailing') && !state.vehicleBand) return false;
-      return true;
+      return state.services.every(svc => !!sizeFor(state, svc));
     }
     if (step === 4) return !!(state.firstName && state.lastName && state.email && state.password && state.password.length >= 8 && state.phone && state.address && state.city && state.zip);
     return true;
