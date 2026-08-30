@@ -54,7 +54,7 @@ const translations: Record<string, string> = {
   Login: "Acceder",
 
   // Announcement ticker
-  "Vetted & Background-Checked": "Verificado y con Antecedentes Revisados",
+  "Vetted & Background-Checked": "Antecedentes Verificados",
   "Background-Checked Pros": "Profesionales Verificados",
   "Cancel Anytime": "Cancela Cuando Quieras",
   "Photo Verified Every Visit": "Fotos Verificadas en Cada Visita",
@@ -207,7 +207,7 @@ const translations: Record<string, string> = {
   Biweekly: "Quincenal",
   Weekly: "Semanal",
   "Bundle and we add car washes · 2 services = 1 free car wash a month · 3 services = 2 · Cancel anytime":
-    "Combina y agregamos lavadas de auto · 2 servicios = 1 lavada gratis al mes · 3 servicios = 2 · Cancela cuando quieras",
+    "Combina y agregamos lavados de auto · 2 servicios = 1 lavado gratis al mes · 3 servicios = 2 · Cancela cuando quieras",
 
   // FAQ
   "Most customers never need to think about any of this — but we've got you covered.":
@@ -353,7 +353,7 @@ const translations: Record<string, string> = {
 
   // Bundle banner
   "💡 Bundle and we add car washes — 2 services: <strong>1 free car wash a month</strong> · 3 services: <strong>2 free car washes a month</strong>":
-    "💡 Combina y agregamos lavadas de auto — 2 servicios: <strong>1 lavada gratis al mes</strong> · 3 servicios: <strong>2 lavadas gratis al mes</strong>",
+    "💡 Combina y agregamos lavados de auto — 2 servicios: <strong>1 lavado gratis al mes</strong> · 3 servicios: <strong>2 lavados gratis al mes</strong>",
 
   // ============================================================
   // LANDING PAGES (LPs) — /house-cleaning, /lawn-care, /car-detailing, /bundle
@@ -401,9 +401,9 @@ const translations: Record<string, string> = {
   // Landing ticker
   "Same Crew Every Visit": "El Mismo Equipo Cada Visita",
   "Locked Monthly Price": "Precio Mensual Fijo",
-  "Photo Verified Visits": "Visitas con Fotos",
+  "Photo Verified Visits": "Fotos Tras Cada Visita",
   "Serving 33156 · 33183 · 33186": "Sirviendo 33156 · 33183 · 33186",
-  "Eco-Safe Products": "Productos Eco-Seguros",
+  "Eco-Safe Products": "Productos Ecológicos",
   "60-Second Signup": "Inscripción en 60 Segundos",
 
   // Neighborhood trust
@@ -418,7 +418,7 @@ const translations: Record<string, string> = {
   "House Cleaning · from $139 a visit": "Limpieza del Hogar · desde $139 por visita",
   "Lawn Care · from $45 a visit": "Cuidado del Jardín · desde $45 por visita",
   "Shine Complete · from $149/mo": "Shine Complete · desde $149/mes",
-  "Bundle & Save · free car washes": "Combo y Ahorra · lavadas de auto gratis",
+  "Bundle & Save · free car washes": "Combo y Ahorra · lavados de auto gratis",
 
   // House Cleaning LP
   "Monthly House Cleaning in Pinecrest + Kendall": "Limpieza Mensual del Hogar en Pinecrest + Kendall",
@@ -472,7 +472,7 @@ const translations: Record<string, string> = {
     "Avísanos en 24 horas y volvemos a limpiar el área o te acreditamos a tu cuenta — sin preguntas.",
   "Already booking cleaning? Add lawn care from $45 a visit.": "¿Ya tienes limpieza? Agrega jardín desde $45 por visita.",
   "Add a 2nd service and we throw in a free car wash every month — and you never coordinate two providers again.":
-    "Agrega un 2º servicio y te regalamos una lavada de auto cada mes — y nunca más coordinas dos proveedores.",
+    "Agrega un 2º servicio y te regalamos un lavado de auto cada mes — y nunca más coordinas dos proveedores.",
 
   // Lawn Care LP
   "Monthly Lawn Care in Pinecrest + Kendall": "Cuidado Mensual del Jardín en Pinecrest + Kendall",
@@ -521,7 +521,7 @@ const translations: Record<string, string> = {
   "We come to your driveway. Ceramic-safe. Monthly interior + exterior.":
     "Vamos a tu garaje. Seguro para cerámica. Interior + exterior mensual.",
   "A good mobile detail runs **$120–$180 per appointment**. Shine Complete is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.":
-    "Un buen detallado móvil cuesta **$120–$180 por cita**. Shine Complete es **$149/mes** por 3 lavadas de mantenimiento al mes más 2 detallados completos al año — en tu entrada.",
+    "Un buen detallado móvil cuesta **$120–$180 por cita**. Shine Complete es **$149/mes** por 3 lavados de mantenimiento al mes más 2 detallados completos al año — en tu entrada.",
   // Car Detailing plans
 
   "Interior + exterior, one vehicle.": "Interior + exterior, un vehículo.",
@@ -544,7 +544,7 @@ const translations: Record<string, string> = {
     "Precio mensual fijo. El mismo detallador cada visita. La mejor rutina que añadí en todo el año.",
   // Car Detailing FAQs
   "Shine Complete is one flat monthly price set by what you drive: $149, $179 or $239. Every plan is 3 maintenance washes a month plus 2 full details a year.":
-    "Shine Complete es un precio fijo mensual según lo que conduces: $149, $179 o $239. Todos los planes incluyen 3 lavadas de mantenimiento al mes más 2 detallados completos al año.",
+    "Shine Complete es un precio fijo mensual según lo que conduces: $149, $179 o $239. Todos los planes incluyen 3 lavados de mantenimiento al mes más 2 detallados completos al año.",
   "What's actually included?": "¿Qué se incluye exactamente?",
   "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet-hair and ozone available as add-ons.":
     "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascota y ozono disponibles como extras.",
@@ -560,22 +560,22 @@ const translations: Record<string, string> = {
     "¿Ya tienes Shine Complete? Agrega limpieza desde $139 por visita.",
 
   // Bundle page
-  "Bundle & Save — stack services, get free car washes": "Combo y Ahorra — apila servicios y recibe lavadas de auto gratis",
+  "Bundle & Save — stack services, get free car washes": "Combo y Ahorra — apila servicios y recibe lavados de auto gratis",
   "The more you stack, the more you save. Pinecrest + Kendall only (33156 · 33183 · 33186).":
     "Mientras más combinas, más ahorras. Solo Pinecrest + Kendall (33156 · 33183 · 33186).",
   "2-Service Bundle": "Combo de 2 Servicios",
-  "1 free car wash a month": "1 lavada de auto gratis al mes",
+  "1 free car wash a month": "1 lavado de auto gratis al mes",
   "Add a 2nd service — 1 free car wash every month.":
-    "Agrega un 2º servicio — 1 lavada de auto gratis cada mes.",
-  "plus 1 free car wash every month": "más 1 lavada de auto gratis cada mes",
-  "plus 2 free car washes every month": "más 2 lavadas de auto gratis cada mes",
+    "Agrega un 2º servicio — 1 lavado de auto gratis cada mes.",
+  "plus 1 free car wash every month": "más 1 lavado de auto gratis cada mes",
+  "plus 2 free car washes every month": "más 2 lavados de auto gratis cada mes",
   "Pick exactly 2 services to see your bundled price.": "Elige exactamente 2 servicios para ver tu precio combinado.",
   "Build my 2-service bundle": "Arma mi combo de 2 servicios",
   "Pick 2 services to continue": "Elige 2 servicios para continuar",
   "3-Service Bundle": "Combo de 3 Servicios",
-  "2 free car washes a month": "2 lavadas de auto gratis al mes",
+  "2 free car washes a month": "2 lavados de auto gratis al mes",
   "Add a 3rd service — 2 free car washes every month.":
-    "Agrega un 3er servicio — 2 lavadas de auto gratis cada mes.",
+    "Agrega un 3er servicio — 2 lavados de auto gratis cada mes.",
   "Build my 3-service bundle": "Arma mi combo de 3 servicios",
   Custom: "Personalizado",
   Tailored: "A Medida",
@@ -584,8 +584,8 @@ const translations: Record<string, string> = {
   "Request a custom plan": "Solicita un plan personalizado",
   "Why bundle?": "¿Por qué combinar?",
   "Any 2 services — 1 free car wash every month":
-    "Cualquier 2 servicios — 1 lavada de auto gratis cada mes",
-  "All 3 services — 2 free car washes every month": "Los 3 servicios — 2 lavadas de auto gratis cada mes",
+    "Cualquier 2 servicios — 1 lavado de auto gratis cada mes",
+  "All 3 services — 2 free car washes every month": "Los 3 servicios — 2 lavados de auto gratis cada mes",
   "One subscription, one bill, one crew": "Una suscripción, una factura, un equipo",
   "Same locked price every month": "El mismo precio fijo cada mes",
   "Cancel or adjust anytime": "Cancela o ajusta cuando quieras",
@@ -716,7 +716,7 @@ const translations: Record<string, string> = {
   "Landscape design or planting": "Diseño de paisajismo o siembra",
   "Hedge trimming, fertilization, pest treatment": "Poda de setos, fertilización, tratamiento de plagas",
   "Comes to your driveway · No drop-off needed": "Vamos a tu entrada · Sin llevar el auto a ningún lado",
-  "3 washes a month + 2 full details a year": "3 lavadas al mes + 2 detallados completos al año",
+  "3 washes a month + 2 full details a year": "3 lavados al mes + 2 detallados completos al año",
   "Driveway-ready detailing at your door. We come to you — exterior wash, interior vacuum, surface cleaning.":
     "Detallado en la entrada de tu casa. Vamos a ti — lavado exterior, aspirado interior y limpieza de superficies.",
   "Interior vacuum & floor mats": "Aspirado interior y tapetes",
@@ -767,7 +767,7 @@ const translations: Record<string, string> = {
     "El precio depende de los servicios que elijas y con qué frecuencia los quieras — semanal, quincenal o mensual. Eso es todo. Sin cargos ocultos.",
   "How do bundle discounts work?": "¿Cómo funcionan los descuentos por combo?",
   "Pick 2 services and we add 1 free car wash a month. Pick all 3 and we add 2. It is applied at checkout — no code needed.":
-    "Elige 2 servicios y agregamos 1 lavada de auto gratis al mes. Elige los 3 y agregamos 2. Se aplica al pagar — sin código.",
+    "Elige 2 servicios y agregamos 1 lavado de auto gratis al mes. Elige los 3 y agregamos 2. Se aplica al pagar — sin código.",
   "Can I add services later?": "¿Puedo agregar servicios después?",
   "Yes. You can add or remove any service at any time. Changes take effect on your next billing cycle.":
     "Sí. Puedes agregar o quitar cualquier servicio en cualquier momento. Los cambios aplican en tu próximo ciclo de facturación.",
@@ -936,7 +936,7 @@ const translations: Record<string, string> = {
     "Tidy no es solo detallado — es un sistema para todo tu hogar.",
   "Book detailing": "Reservar detallado",
   "Shine Complete mobile car care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.":
-    "Shine Complete a domicilio en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). 3 lavadas al mes más 2 detallados completos al año, desde $149/mes. Reserva en unos 2 minutos.",
+    "Shine Complete a domicilio en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). 3 lavados al mes más 2 detallados completos al año, desde $149/mes. Reserva en unos 2 minutos.",
   "Stack home cleaning, lawn care and Shine Complete on one plan. Free car washes every month in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). One subscription, one crew, one bill.":
     "Combina limpieza del hogar, cuidado del jardín y Shine Complete en un solo plan. Lavadas de auto gratis cada mes en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Una suscripción, un equipo, una factura.",
   "Vetted & background-checked pros": "Profesionales verificados y con antecedentes revisados",
