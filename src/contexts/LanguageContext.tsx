@@ -866,7 +866,7 @@ const translations: Record<string, string> = {
     "Verificado y Asegurado · Profesionales Verificados · Garantía de Satisfacción",
   "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
     "Un servicio adicional premium gratis en tu primera visita · Primera visita perfecta o es gratis · Solo 25 casas fundadoras por código postal",
-  "One free premium add-on on your first visit": "Un servicio adicional premium gratis en tu primera visita",
+  "One free premium add-on on your first visit": "Un servicio adicional gratis en la primera visita",
   "First visit perfect or it's free": "Primera visita perfecta o es gratis",
   "Only 25 founding homes per ZIP": "Solo 25 casas fundadoras por código postal",
 
