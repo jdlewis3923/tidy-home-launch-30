@@ -460,6 +460,10 @@ const translations: Record<string, string> = {
   "We serve Pinecrest and Kendall — ZIP codes 33156, 33183, and 33186. We're not currently serving other areas.":
     "Servimos Pinecrest y Kendall — códigos postales 33156, 33183 y 33186. Por ahora no servimos otras áreas.",
   "What's actually included in a visit?": "¿Qué incluye realmente una visita?",
+  "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, bedroom tidy, linen change, and trash out — using eco-safe products.":
+    "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
+  "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Hedge and bush trimming is available as an add-on.":
+    "Corte a altura precisa, bordeado de todos los contornos, soplado de áreas pavimentadas, desbroce a lo largo de las cercas y embolsar o triturar el césped cortado. La poda de setos y arbustos está disponible como servicio adicional.",
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, interior windows, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
   "Who does the cleaning?": "¿Quién hace la limpieza?",
