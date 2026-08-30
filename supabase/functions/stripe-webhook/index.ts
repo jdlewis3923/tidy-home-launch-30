@@ -284,6 +284,7 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       size: services[0]?.size ?? null,
       sizes_json: sizesJson,
       free_car_washes_per_month: freeCarWashes,
+      founding_zip: meta.founding_zip ?? meta.zip ?? null,
       founding_rate_locked: meta.founding_rate_locked === 'yes',
       founding_free_addon_first_visit: meta.founding_free_addon_first_visit === 'yes',
       founding_review_promised: meta.founding_review_promised === 'yes',

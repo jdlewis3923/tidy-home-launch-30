@@ -29,6 +29,20 @@
       "when": 1788057157241,
       "tag": "0003_three_size_catalog_and_founding_promises",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788060491400,
+      "tag": "0004_capacity_hiring_and_founding_zip",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788060908660,
+      "tag": "0005_schedule_capacity_alert_check",
+      "breakpoints": true
     }
   ]
 }

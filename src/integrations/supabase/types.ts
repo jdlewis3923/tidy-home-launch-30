@@ -591,6 +591,51 @@ export type Database = {
         }
         Relationships: []
       }
+      capacity_crossings: {
+        Row: {
+          active_customers: number | null
+          capacity_hours: number | null
+          cleared_at: string | null
+          created_at: string
+          days_to_ceiling: number | null
+          demand_hours: number | null
+          fill_pct: number | null
+          id: string
+          level: string
+          notified_at: string | null
+          notify_channels: string[]
+          service: Database["public"]["Enums"]["service_type"]
+        }
+        Insert: {
+          active_customers?: number | null
+          capacity_hours?: number | null
+          cleared_at?: string | null
+          created_at?: string
+          days_to_ceiling?: number | null
+          demand_hours?: number | null
+          fill_pct?: number | null
+          id?: string
+          level: string
+          notified_at?: string | null
+          notify_channels?: string[]
+          service: Database["public"]["Enums"]["service_type"]
+        }
+        Update: {
+          active_customers?: number | null
+          capacity_hours?: number | null
+          cleared_at?: string | null
+          created_at?: string
+          days_to_ceiling?: number | null
+          demand_hours?: number | null
+          fill_pct?: number | null
+          id?: string
+          level?: string
+          notified_at?: string | null
+          notify_channels?: string[]
+          service?: Database["public"]["Enums"]["service_type"]
+        }
+        Relationships: []
+      }
       chatbot_knowledge: {
         Row: {
           content: string
@@ -1932,6 +1977,50 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_service_assignments: {
+        Row: {
+          active: boolean
+          applicant_id: string | null
+          contractor_id: string | null
+          created_at: string
+          id: string
+          pro_name: string | null
+          service: Database["public"]["Enums"]["service_type"]
+          time_share: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          applicant_id?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          id?: string
+          pro_name?: string | null
+          service: Database["public"]["Enums"]["service_type"]
+          time_share?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          applicant_id?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          id?: string
+          pro_name?: string | null
+          service?: Database["public"]["Enums"]["service_type"]
+          time_share?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_service_assignments_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pro_visits: {
         Row: {
           amount_cents: number | null
@@ -2549,6 +2638,7 @@ export type Database = {
           founding_free_addon_fulfilled_at: string | null
           founding_rate_locked: boolean
           founding_review_promised: boolean
+          founding_zip: string | null
           free_car_washes_per_month: number
           frequency: Database["public"]["Enums"]["subscription_frequency"]
           id: string
@@ -2582,6 +2672,7 @@ export type Database = {
           founding_free_addon_fulfilled_at?: string | null
           founding_rate_locked?: boolean
           founding_review_promised?: boolean
+          founding_zip?: string | null
           free_car_washes_per_month?: number
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
@@ -2615,6 +2706,7 @@ export type Database = {
           founding_free_addon_fulfilled_at?: string | null
           founding_rate_locked?: boolean
           founding_review_promised?: boolean
+          founding_zip?: string | null
           free_car_washes_per_month?: number
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string

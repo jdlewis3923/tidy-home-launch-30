@@ -3,9 +3,10 @@ import { useLocation, Link } from "react-router-dom";
 import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
   Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
-  Award, ShieldCheck, RefreshCw, ClipboardList,
+  Award, ShieldCheck, RefreshCw, ClipboardList, Gauge,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import CapacityBanner from "@/components/admin/CapacityBanner";
 
 /**
  * AdminChrome — Iron-Man HUD shell injected on every /admin/* route.
@@ -20,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const NAV = [
   { to: "/admin/kpis",        label: "KPIs",        icon: BarChart3 },
+  { to: "/admin/capacity",    label: "Capacity",    icon: Gauge },
   { to: "/admin/health",      label: "Health",      icon: Heart },
   { to: "/admin/email-health", label: "Email",      icon: Mail },
   { to: "/admin/inbox",       label: "Inbox",       icon: Inbox },
@@ -113,6 +115,9 @@ export default function AdminChrome() {
         <div className="admin-hud-scanline" />
         <div className="admin-hud-vignette" />
       </div>
+
+      {/* === Capacity + hiring alert — must be visible without scrolling === */}
+      <CapacityBanner />
 
       {/* === Slim top status rail === */}
       <div className="admin-hud-topbar" role="status" aria-label="Admin status">
