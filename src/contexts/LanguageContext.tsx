@@ -440,7 +440,7 @@ const translations: Record<string, string> = {
   "Bedroom tidy + linen change": "Orden de habitaciones + cambio de sábanas",
   "Interior windows": "Ventanas interiores",
   "Trash out": "Sacar la basura",
-  "Eco-safe products": "Productos eco-seguros",
+  "Eco-safe products": "Productos ecológicos",
   "Same crew every visit": "El mismo equipo cada visita",
 
   // House Cleaning testimonials
@@ -461,7 +461,7 @@ const translations: Record<string, string> = {
     "Servimos Pinecrest y Kendall — códigos postales 33156, 33183 y 33186. Por ahora no servimos otras áreas.",
   "What's actually included in a visit?": "¿Qué incluye realmente una visita?",
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, interior windows, bedroom tidy, linen change, and trash out — using eco-safe products.":
-    "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos eco-seguros.",
+    "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
   "Who does the cleaning?": "¿Quién hace la limpieza?",
   "Vetted, background-checked professionals. Same crew every visit so they learn your home.":
     "Profesionales evaluados y con antecedentes verificados. El mismo equipo cada visita para que conozcan tu casa.",
@@ -954,7 +954,7 @@ const translations: Record<string, string> = {
     "Configúralo una vez. Nosotros nos encargamos del resto — programación, recordatorios y el mismo equipo en cada visita.",
   "No contracts · Cancel, pause, or reschedule anytime": "Sin contratos · Cancela, pausa o reagenda cuando quieras",
   "Background-checked pros": "Profesionales con antecedentes verificados",
-  "Vetted & background-checked": "Verificados y con antecedentes revisados",
+  "Vetted & background-checked": "Antecedentes verificados a través de Checkr",
   "Satisfaction guaranteed": "Garantía de satisfacción",
   "Serving ": "Sirviendo ",
 
