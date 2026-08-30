@@ -14,8 +14,8 @@ const reasons = [
   },
   {
     icon: "🛡️",
-    title: "Vetted & Insured",
-    desc: "Every professional is background-checked and fully insured. Photo verification submitted after every visit.",
+    title: VETTED_CLAIM,
+    desc: "Every professional is background-checked through Checkr. Photo verification submitted after every visit.",
   },
   {
     icon: "📅",

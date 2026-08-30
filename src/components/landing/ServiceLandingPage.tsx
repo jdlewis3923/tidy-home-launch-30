@@ -220,7 +220,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             </span>
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5" />
-              {t("Vetted & insured pros")}
+              {t("Vetted & background-checked pros")}
             </span>
           </div>
 
@@ -328,7 +328,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <BadgeCheck className="w-4 h-4 text-primary" />
-              {t("Vetted & insured")}
+              {t("Vetted & background-checked")}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Star className="w-4 h-4 text-gold" />

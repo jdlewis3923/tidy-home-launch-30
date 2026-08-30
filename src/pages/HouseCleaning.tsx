@@ -68,8 +68,8 @@ const config: ServiceLandingConfig = {
       body: "Before-and-after photos from every visit, sent to your phone.",
     },
     {
-      title: "Vetted & Insured",
-      body: "Background-checked pros, insured on every Tidy job.",
+      title: "Vetted & Background-Checked",
+      body: "Every pro is background-checked through Checkr before their first visit.",
     },
   ],
 
@@ -92,7 +92,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "Who does the cleaning?",
-      a: "Vetted, insured, background-checked professionals. Same crew every visit so they learn your home.",
+      a: "Vetted, background-checked professionals. Same crew every visit so they learn your home.",
     },
     {
       q: "How is scheduling handled?",

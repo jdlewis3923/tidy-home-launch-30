@@ -1,7 +1,8 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { VETTED_CLAIM } from "@/lib/pricing-canon";
 
 const ITEMS = [
-  "Vetted & Insured",
+  VETTED_CLAIM,
   "Background-Checked Pros",
   "Same Crew Every Visit",
   "Locked Monthly Price",
