@@ -2,11 +2,12 @@ import {
   ConfigState,
   ServiceType,
   defaultBundleFrequency,
-  formatPerVisit,
-  getHeadlinePrice,
-  getBundleDiscount,
+  formatSizePrice,
+  getServiceStartingPrice,
   serviceLabels,
+  serviceUnits,
 } from '@/lib/dashboard-pricing';
+import { SIZE_PRICES, freeCarWashesPerMonth } from '@/lib/pricing-canon';
 
 interface Props {
   state: ConfigState;
@@ -14,44 +15,30 @@ interface Props {
 }
 
 /**
- * Single-service users see a one-tap nudge to add a second service for
- * the bundle discount. Calm cream surface, gold accent — no shouting.
- *
- * All figures are derived from dashboard-pricing.ts (the same source checkout
- * math uses) so labels can never drift from real pricing.
+ * Single-service users see a one-tap nudge to add a second service. The bundle
+ * is a gift, not a percentage: a second service earns one free car wash a
+ * month, a third earns two.
  */
 export default function BundleNudge({ state, onChange }: Props) {
   if (state.services.length !== 1) return null;
 
   const current = state.services[0];
-  // Suggest lawn if not selected, else detailing, else cleaning.
   const candidates: ServiceType[] = ['lawn', 'detailing', 'cleaning'];
   const suggest = candidates.find((s) => s !== current)!;
 
   const suggestFreq = defaultBundleFrequency[suggest];
-  const addedPrice = getHeadlinePrice(suggest);
+  const fromPrice = getServiceStartingPrice(suggest);
+  const washes = freeCarWashesPerMonth(2);
 
-  // Discount the user unlocks by moving from 1 → 2 services, applied to the
-  // combined subtotal of the current service + the suggested one.
-  const currentFreq = state.frequencies[current] ?? defaultBundleFrequency[current];
-  const bundleSubtotal = getHeadlinePrice(current) + addedPrice;
-  const discountPercent = getBundleDiscount(2);
-  const savingAmount = bundleSubtotal * discountPercent;
-
-  const meta = {
-    name: serviceLabels[suggest],
-    price: formatPerVisit(addedPrice),
-    saving: formatPerVisit(Math.round(savingAmount * 100) / 100),
-    percentLabel: `${Math.round(discountPercent * 100)}%`,
-  };
+  const priceCopy =
+    serviceUnits[suggest] === 'per_month'
+      ? `from $${SIZE_PRICES[suggest][1]}/mo`
+      : `from ${formatSizePrice(suggest, 1)}`;
 
   const addBundle = () => {
-    const nextServices = [...state.services, suggest];
-    const nextFreqs = { ...state.frequencies };
-    nextFreqs[suggest] = suggestFreq;
-    onChange({ ...state, services: nextServices, frequencies: nextFreqs });
+    const nextFreqs = { ...state.frequencies, [suggest]: suggestFreq };
+    onChange({ ...state, services: [...state.services, suggest], frequencies: nextFreqs });
   };
-
 
   return (
     <button
@@ -61,10 +48,10 @@ export default function BundleNudge({ state, onChange }: Props) {
     >
       <div className="min-w-0">
         <p className="text-[13px] font-semibold text-ink leading-tight">
-          Add {meta.name} for {meta.price} more
+          Add {serviceLabels[suggest]}, {priceCopy}
         </p>
         <p className="text-[11px] text-ink-soft mt-0.5">
-          Save {meta.percentLabel} on your bundle — {meta.saving} discount
+          {washes === 1 ? 'One car wash a month is on us' : `${washes} car washes a month are on us`}
         </p>
       </div>
       <span className="shrink-0 rounded-lg bg-ink px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-white transition-transform group-hover:translate-x-0.5">

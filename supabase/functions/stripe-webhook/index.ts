@@ -236,7 +236,7 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   const services: Array<{
     service: 'cleaning' | 'lawn' | 'detailing';
     frequency: 'monthly' | 'biweekly' | 'weekly';
-    band?: 'compact' | 'standard' | 'large' | 'estate';
+    size?: 1 | 2 | 3;
   }> = meta.services_json ? JSON.parse(meta.services_json) : [];
   if (services.length === 0) {
     console.warn('[stripe-webhook] seed skipped — no services_json in metadata for', stripeSubscriptionId);
@@ -255,49 +255,19 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
     if (currentPeriodEnd) {
       nextBillingDate = new Date(currentPeriodEnd * 1000).toISOString().slice(0, 10);
     }
-    // Gross subtotal (list price, pre-discount).
-    let grossCents = 0;
+    // List price: quantity carries the cadence, so this is the real monthly bill.
+    // No percentage discounts exist in this model — bundling earns free car washes.
     for (const item of sub.items.data) {
       const amt = item.price.unit_amount ?? 0;
-      grossCents += amt * (item.quantity ?? 1);
-    }
-
-    // Apply the discounts actually attached to the live Stripe subscription so the
-    // stored monthly total matches what Stripe will really bill each month.
-    const rawDiscounts: any[] = Array.isArray(sub.discounts)
-      ? sub.discounts
-      : sub.discount
-        ? [sub.discount]
-        : [];
-    let netCents = grossCents;
-    for (const d of rawDiscounts) {
-      const coupon = d?.coupon ?? d;
-      if (!coupon) continue;
-      if (coupon.amount_off) {
-        console.warn(
-          `[stripe-webhook] ignoring amount_off coupon ${coupon.id} (${coupon.amount_off}) for recurring monthly total on ${stripeSubscriptionId}`,
-        );
-        continue;
-      }
-      if (typeof coupon.percent_off !== 'number') continue;
-      if (coupon.duration !== 'forever' && coupon.duration !== 'repeating') {
-        console.warn(
-          `[stripe-webhook] ignoring coupon ${coupon.id} with duration '${coupon.duration}' for recurring monthly total on ${stripeSubscriptionId}`,
-        );
-        continue;
-      }
-      netCents = netCents * (1 - coupon.percent_off / 100);
-    }
-    monthlyTotalCents = Math.round(netCents);
-    if (monthlyTotalCents !== grossCents) {
-      console.log(
-        `[stripe-webhook] monthly total ${grossCents} gross -> ${monthlyTotalCents} net after ${rawDiscounts.length} discount(s) on ${stripeSubscriptionId}`,
-      );
+      monthlyTotalCents += amt * (item.quantity ?? 1);
     }
   }
 
-
-  const bundleDiscountPct = parseInt(meta.bundle_discount_pct ?? '0', 10) || 0;
+  // Sizes the customer selected, plus the founding-offer fulfilment promises.
+  // These are promises, not coupons: if they are not written here they silently
+  // never happen.
+  const sizesJson = meta.sizes_json ? JSON.parse(meta.sizes_json) : {};
+  const freeCarWashes = parseInt(meta.free_car_washes_per_month ?? '0', 10) || 0;
 
   const { data: subRow, error: subErr } = await supabase
     .from('subscriptions')
@@ -310,11 +280,13 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       stripe_subscription_id: stripeSubscriptionId,
       stripe_customer_id: stripeCustomerId,
       next_billing_date: nextBillingDate,
-      bundle_discount_pct: bundleDiscountPct,
-      // The size band the customer booked at, plus how we learned it. County
-      // verification happens later in the admin band review queue.
-      band: services[0]?.band ?? null,
-      band_source: services[0]?.band ? (meta.band_source ?? 'self') : null,
+      bundle_discount_pct: 0,
+      size: services[0]?.size ?? null,
+      sizes_json: sizesJson,
+      free_car_washes_per_month: freeCarWashes,
+      founding_rate_locked: meta.founding_rate_locked === 'yes',
+      founding_free_addon_first_visit: meta.founding_free_addon_first_visit === 'yes',
+      founding_review_promised: meta.founding_review_promised === 'yes',
     })
     .select('id')
     .single();
@@ -323,23 +295,7 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
     throw new Error(`subscriptions insert failed: ${subErr?.message ?? 'no row returned'}`);
   }
 
-  // Every self-selected band lands in the review queue. Admin compares it with
-  // the county property record daily; agreement closes the row, a disagreement
-  // gets corrected under the correction policy.
-  const bandRows = services
-    .filter((s) => !!s.band)
-    .map((s) => ({
-      subscription_id: subRow.id,
-      user_id: userId,
-      service_type: s.service,
-      self_band: s.band!,
-      address: meta.address || null,
-      status: 'open',
-    }));
-  if (bandRows.length) {
-    const { error: bandErr } = await supabase.from('band_reviews').insert(bandRows);
-    if (bandErr) console.error('[stripe-webhook] band_reviews insert failed', bandErr.message);
-  }
+
 
 
   // Mirror service_tier + signup_source onto profile (best-effort).

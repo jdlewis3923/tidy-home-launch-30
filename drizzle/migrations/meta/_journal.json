@@ -22,6 +22,13 @@
       "when": 1787980108841,
       "tag": "0002_subscription_bands_and_review_queue",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788057157241,
+      "tag": "0003_three_size_catalog_and_founding_promises",
+      "breakpoints": true
     }
   ]
 }

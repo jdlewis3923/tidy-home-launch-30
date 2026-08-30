@@ -3,19 +3,18 @@ import { Lock, ShieldCheck, CreditCard, BadgeCheck, Banknote, X as XIcon } from 
 import {
   ConfigState,
   calculatePricing,
-  REFERRAL_DISCOUNT_CENTS,
   serviceLabels,
   serviceIcons,
   frequencyLabels,
   addOnData,
   hasCustomQuote,
-  bandLabels,
-  bandFor,
+  sizeLabels,
+  sizeFor,
+  serviceUnits,
   frequencyVisitCopy,
   formatPerVisit,
-  type Band,
+  formatMonthly,
 } from '@/lib/dashboard-pricing';
-import { usePromoState } from '@/hooks/usePromoCapture';
 import { startCheckout, translate } from '@/lib/checkout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { provisionAccount } from '@/lib/account-provisioning';
@@ -43,7 +42,6 @@ interface Props {
 export default function StepPayment({ state, onChange }: Props) {
   const { language } = useLanguage();
   const pricing = calculatePricing(state);
-  const { code: promoCode } = usePromoState();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -54,8 +52,7 @@ export default function StepPayment({ state, onChange }: Props) {
     return () => cancelAnimationFrame(t);
   }, []);
 
-  const referralDiscount = promoCode ? REFERRAL_DISCOUNT_CENTS / 100 : 0;
-  const totalToday = Math.max(0, pricing.firstMonth - referralDiscount);
+  const totalToday = pricing.firstMonth;
 
   const embedded = isEmbeddedCheckoutAvailable();
   const stripePromise = useMemo(() => (embedded ? getStripe() : null), [embedded]);
@@ -63,16 +60,16 @@ export default function StepPayment({ state, onChange }: Props) {
   const [preparing, setPreparing] = useState(false);
 
   // The server contract lives in src/lib/checkout.ts — one translator for both
-  // the hosted and embedded paths, so bands and cadence can't drift apart.
+  // the hosted and embedded paths, so sizes and cadence can't drift apart.
   const buildIntentBody = () => {
-    const { services, addons } = translate(state);
+    const { services, addons, car_wash } = translate(state);
     const attr = getUtmAttribution();
     return {
-      services, addons, promo_code: promoCode ?? undefined,
+      services, addons, car_wash,
       referral_code: state.referralCode?.trim() || undefined,
       zip: state.zip, preferred_day: state.preferredDay, preferred_time: state.preferredTime,
       lang: language,
-      idempotency_key: `cfg:${state.zip}:${services.map(s => `${s.service}:${s.band}:${s.frequency}`).sort().join(',')}:${addons.map(a => a.addon_name + 'x' + a.qty).sort().join(',')}`,
+      idempotency_key: `cfg:${state.zip}:${services.map(s => `${s.service}:${s.size}:${s.frequency}`).sort().join(',')}:${addons.map(a => a.addon_name + 'x' + a.qty).sort().join(',')}`,
       gclid: attr.gclid, utm_source: attr.utm_source, utm_medium: attr.utm_medium,
       utm_campaign: attr.utm_campaign, utm_content: attr.utm_content, utm_term: attr.utm_term,
     };
@@ -157,8 +154,9 @@ export default function StepPayment({ state, onChange }: Props) {
 
         <div className="mt-4 space-y-2 text-sm">
           {pricing.servicePrices.map((sp, idx) => {
-            const band = bandFor(state, sp.service);
+            const size = sizeFor(state, sp.service);
             const freq = state.frequencies[sp.service]!;
+            const quoted = size === 'quote' || !size;
             return (
               <div
                 key={sp.service}
@@ -169,20 +167,19 @@ export default function StepPayment({ state, onChange }: Props) {
                   <span className="mr-1.5">{serviceIcons[sp.service]}</span>
                   <span className="font-semibold lowercase">{serviceLabels[sp.service]}</span>
                   <span className="text-ink-faint ml-1.5 text-xs lowercase">
-                    — {band && band !== 'custom' ? `${bandLabels[band as Band].toLowerCase()} · ` : ''}
-                    {frequencyLabels[freq].toLowerCase()}
+                    — {!quoted ? `${sizeLabels[sp.service][size as 1 | 2 | 3].toLowerCase()} · ` : ''}
+                    {serviceUnits[sp.service] === 'per_month' ? 'monthly' : frequencyLabels[freq].toLowerCase()}
                   </span>
-                  {sp.service === 'detailing' && state.vehicleCount > 1 && (
-                    <span className="text-ink-faint ml-1 text-xs">× {state.vehicleCount}</span>
-                  )}
                 </span>
                 <span className="text-right">
                   <span className="font-semibold text-ink tabular-nums block">
-                    {band === 'custom' ? 'custom' : `$${sp.price.toFixed(2)}`}
+                    {quoted ? 'quote' : `$${sp.price.toFixed(2)}`}
                   </span>
-                  {band !== 'custom' && sp.perVisit > 0 && (
+                  {!quoted && sp.sticker > 0 && (
                     <span className="text-[10px] text-ink-faint block lowercase">
-                      {formatPerVisit(sp.perVisit)} · {frequencyVisitCopy[freq]}
+                      {serviceUnits[sp.service] === 'per_month'
+                        ? formatMonthly(sp.sticker)
+                        : `${formatPerVisit(sp.sticker)} · ${frequencyVisitCopy[freq]}`}
                     </span>
                   )}
                 </span>
@@ -190,31 +187,32 @@ export default function StepPayment({ state, onChange }: Props) {
             );
           })}
 
-          {pricing.discountPercent > 0 && (
+          {pricing.carWashSubtotal > 0 && (
+            <div className="flex justify-between items-baseline gap-3 text-ink-soft text-xs">
+              <span>+ Car Wash Add-On</span>
+              <span className="tabular-nums">${pricing.carWashSubtotal.toFixed(2)}</span>
+            </div>
+          )}
+
+          {pricing.freeCarWashes > 0 && (
             <div className="flex justify-between items-baseline gap-3 text-ink">
-              <span className="text-xs">bundle saving · {Math.round(pricing.discountPercent * 100)}%</span>
-              <span className="text-xs tabular-nums">−${pricing.discountAmount.toFixed(2)}</span>
+              <span className="text-xs lowercase">
+                {pricing.freeCarWashes === 1 ? '1 free car wash a month' : `${pricing.freeCarWashes} free car washes a month`}
+              </span>
+              <span className="text-xs tabular-nums">included</span>
             </div>
           )}
 
           {state.addOns.map(id => {
             const addon = addOnData[id];
             if (!addon) return null;
-            const price = addon.service === 'detailing' ? addon.price * state.vehicleCount : addon.price;
             return (
               <div key={id} className="flex justify-between items-baseline gap-3 text-ink-soft text-xs">
                 <span>+ {addon.name}</span>
-                <span className="tabular-nums">${price.toFixed(2)}</span>
+                <span className="tabular-nums">${addon.price.toFixed(2)}</span>
               </div>
             );
           })}
-
-          {promoCode && !customQuote && (
-            <div className="flex justify-between items-baseline gap-3 text-ink">
-              <span className="text-xs">referral · {promoCode}</span>
-              <span className="text-xs tabular-nums">−${(REFERRAL_DISCOUNT_CENTS / 100).toFixed(2)}</span>
-            </div>
-          )}
 
           {pricing.taxTriggered && (
             <div className="flex justify-between items-baseline gap-3 text-ink-soft">
@@ -241,9 +239,6 @@ export default function StepPayment({ state, onChange }: Props) {
               <span className="text-2xl font-bold text-ink tracking-tight">custom</span>
             ) : (
               <>
-                {promoCode && (
-                  <div className="text-xs text-ink-faint line-through tabular-nums">${pricing.firstMonth.toFixed(2)}</div>
-                )}
                 <div className="text-4xl font-bold text-ink tabular-nums tracking-tight">
                   ${totalToday.toFixed(2)}
                 </div>

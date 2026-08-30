@@ -1,33 +1,31 @@
-// Tidy — Stripe Create Checkout Session (Phase 2)
+// Tidy — Stripe Create Checkout Session
 //
-// Reads the flat CheckoutInputSchema from the client (translation lives
-// in src/lib/checkout.ts), looks up Stripe Price IDs from stripe_catalog,
+// Reads the flat CheckoutInputSchema from the client (translation lives in
+// src/lib/checkout.ts), resolves Stripe prices from stripe_catalog BY LOOKUP KEY,
 // builds line_items, and creates a subscription-mode Checkout Session.
 //
-// Subscription metadata carries everything the stripe-webhook handler
-// needs to provision the user's subscription + visit rows server-side
-// (no client-side INSERTs anywhere — RLS blocks them now).
+// Model: three sizes (1/2/3) per service. Cleaning and lawn are per visit and
+// carry cadence as the item quantity (monthly 1, biweekly 2, weekly 4). Shine
+// Complete and the Car Wash Add-On are per month, always quantity 1.
+//
+// There is NO percentage discount and NO promo code. Bundling earns free car
+// washes, and the founding offer is a set of fulfilment promises recorded in
+// subscription metadata (the webhook writes them onto the subscription row).
 
 import Stripe from "https://esm.sh/stripe@17.5.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
-import { corsHeaders, handleCors, jsonResponse } from "../_shared/cors.ts";
+import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
-import { resolveBundleDiscountPct as resolveBundleDiscountPctFromDb } from "../_shared/bundle-discount.ts";
-import { BUNDLE_DISCOUNT_PCT_CANON, CADENCE_MULTIPLIER } from "../_shared/pricing-canon.ts";
-
-// Bundle discount is charged as an existing Stripe coupon (live mode), chosen by
-// the number of DISTINCT services in the cart. Line items always carry the
-// undiscounted catalog prices, so the coupon discounts exactly once.
-// Single canonical coupon pair, shared with the embedded path
-// (_shared/bundle-coupon.ts). Legacy BUNDLE_2_SERVICE / BUNDLE_3_SERVICE remain
-// active in Stripe but are no longer referenced here.
-// Coupon ids are derived from the canon percentages so a rate change cannot
-// leave the coupon behind.
-const BUNDLE_COUPON_BY_SERVICE_COUNT: Record<number, string> = Object.fromEntries(
-  Object.entries(BUNDLE_DISCOUNT_PCT_CANON).map(([count, pct]) => [Number(count), `TIDY_BUNDLE_${pct}PCT`]),
-);
+import {
+  CAR_WASH_LOOKUP_KEYS,
+  SERVICE_LOOKUP_KEYS,
+  freeCarWashesPerMonth,
+  quantityFor,
+  type CanonSize,
+  type WashCount,
+} from "../_shared/pricing-canon.ts";
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
@@ -35,24 +33,20 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SITE_URL = Deno.env.get("SITE_URL") ?? "https://jointidy.co";
 
-// Service-area ZIP allowlist (Phase 2 hardening).
+// Service-area ZIPs. Anything else gets a waitlist, never a checkout.
 const SERVICE_ZIPS = new Set(["33156", "33183", "33186"]);
 
-// ---------- Input schema (flat, server-side) ----------
 const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
 const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
-// Size bands. The band IS the price; cadence only sets the item quantity.
-const BandEnum = z.enum(["compact", "standard", "large", "estate"]);
+const SizeEnum = z.union([z.literal(1), z.literal(2), z.literal(3)]);
 
 const CheckoutInputSchema = z.object({
   services: z
     .array(
       z.object({
         service: ServiceTypeEnum,
-        band: BandEnum,
+        size: SizeEnum,
         frequency: FrequencyEnum,
-        // Per-vehicle services (detailing) send the vehicle count here.
-        qty: z.number().int().min(1).max(10).default(1),
       }),
     )
     .min(1)
@@ -61,7 +55,9 @@ const CheckoutInputSchema = z.object({
     .array(z.object({ addon_name: z.string().min(1).max(64), qty: z.number().int().min(1).max(20) }))
     .max(50)
     .default([]),
-  promo_code: z.string().trim().min(1).max(64).optional(),
+  car_wash: z
+    .object({ size: SizeEnum, washes: z.union([z.literal(1), z.literal(2)]) })
+    .optional(),
   referral_code: z.string().trim().min(1).max(64).optional(),
   zip: z.string().regex(/^\d{5}$/),
   preferred_day: z.string().max(20).optional(),
@@ -84,7 +80,6 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: "Stripe not configured" }, 500);
   }
 
-  // ---------- Auth: extract user_id from JWT ----------
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) return jsonResponse({ ok: false, error: "unauthorized" }, 401);
 
@@ -97,7 +92,6 @@ Deno.serve(async (req) => {
   }
   const user = userData.user;
 
-  // ---------- Validate body ----------
   let body: unknown;
   try {
     body = await req.json();
@@ -115,7 +109,12 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: "zip_outside_service_area" }, 400);
   }
 
-  // ---------- Service-role DB client ----------
+  // The Car Wash Add-On requires an active lawn or cleaning plan.
+  const hasHomeService = input.services.some((s) => s.service === "lawn" || s.service === "cleaning");
+  if (input.car_wash && !hasHomeService) {
+    return jsonResponse({ ok: false, error: "car_wash_requires_home_service" }, 400);
+  }
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -126,7 +125,7 @@ Deno.serve(async (req) => {
       event: "checkout.session.create",
       payload: {
         user_id: user.id,
-        services: input.services.map((s) => `${s.service}:${s.band}:${s.frequency}`),
+        services: input.services.map((s) => `${s.service}:${s.size}:${s.frequency}`),
       },
       fn: async () => {
         const stripe = new Stripe(STRIPE_SECRET_KEY, {
@@ -134,38 +133,41 @@ Deno.serve(async (req) => {
           httpClient: Stripe.createFetchHttpClient(),
         });
 
-        // ---------- Resolve service prices from catalog ----------
-        const { data: subRows, error: subErr } = await supabase
+        // ---------- Resolve recurring prices by lookup key ----------
+        const serviceKeys = input.services.map((s) => SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize]);
+        const carWashKey = input.car_wash
+          ? CAR_WASH_LOOKUP_KEYS[input.car_wash.size as CanonSize][input.car_wash.washes as WashCount]
+          : null;
+
+        const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
-          .select("service_type, band, stripe_price_id")
-          .in(
-            "service_type",
-            input.services.map((s) => s.service),
-          )
-          .eq("is_addon", false)
+          .select("lookup_key, service_type, stripe_price_id")
+          .in("lookup_key", carWashKey ? [...serviceKeys, carWashKey] : serviceKeys)
           .eq("active", true);
-        if (subErr) throw new Error(`catalog read failed: ${subErr.message}`);
+        if (priceErr) throw new Error(`catalog read failed: ${priceErr.message}`);
 
         // deno-lint-ignore no-explicit-any
         const line_items: any[] = [];
-        // Indices of line items that belong to the detailing service. Only these
-        // can ever carry Florida sales tax (cleaning + lawn are nontaxable).
-        const detailingIndices = new Set<number>();
+        // Only car-care line items can ever carry Florida sales tax; residential
+        // cleaning and lawn care are nontaxable services in Florida.
+        const carCareIndices = new Set<number>();
+
         for (const s of input.services) {
-          const row = subRows?.find((r) => r.service_type === s.service && r.band === s.band);
-          if (!row) {
-            throw new Error(`no active catalog price for ${s.service}:${s.band}`);
-          }
-          if (s.service === "detailing") detailingIndices.add(line_items.length);
-          // Cadence is the quantity: monthly 1, biweekly 2, weekly 4. Detailing
-          // multiplies again by the number of vehicles.
-          line_items.push({
-            price: row.stripe_price_id,
-            quantity: CADENCE_MULTIPLIER[s.frequency] * (s.qty ?? 1),
-          });
+          const key = SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize];
+          const row = priceRows?.find((r) => r.lookup_key === key);
+          if (!row) throw new Error(`no active catalog price for lookup_key ${key}`);
+          if (s.service === "detailing") carCareIndices.add(line_items.length);
+          line_items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, s.frequency) });
         }
 
-        // ---------- Resolve add-on prices ----------
+        if (carWashKey) {
+          const row = priceRows?.find((r) => r.lookup_key === carWashKey);
+          if (!row) throw new Error(`no active catalog price for lookup_key ${carWashKey}`);
+          carCareIndices.add(line_items.length);
+          line_items.push({ price: row.stripe_price_id, quantity: 1 });
+        }
+
+        // ---------- Resolve one-time add-on prices ----------
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
             .from("stripe_catalog")
@@ -181,19 +183,15 @@ Deno.serve(async (req) => {
           for (const a of input.addons) {
             const row = addonRows?.find((r) => r.addon_name === a.addon_name);
             if (!row) continue; // unknown add-on — skip silently
-            if (row.service_type === "detailing") detailingIndices.add(line_items.length);
+            if (row.service_type === "detailing") carCareIndices.add(line_items.length);
             line_items.push({ price: row.stripe_price_id, quantity: a.qty });
           }
         }
 
         // ---------- Florida sales tax (see _shared/florida-tax.ts) ----------
         // GATED OFF: Tidy Home Concierge LLC holds no Florida Certificate of
-        // Registration, so no sales tax may be collected. The app_settings key
-        // `fl_sales_tax_enabled` (default false) is the switch. While it is
-        // false we never touch Stripe TaxRates at all.
-        // When enabled, tax applies ONLY to detailing line items — residential
-        // cleaning and lawn care are nontaxable services in Florida — and only
-        // when a wax/sealant/ceramic coating add-on is in the cart.
+        // Registration, so no sales tax may be collected. `fl_sales_tax_enabled`
+        // (default false) is the switch and a missing/errored row fails closed.
         const { data: taxFlagRow } = await supabase
           .from("app_settings")
           .select("value")
@@ -205,45 +203,31 @@ Deno.serve(async (req) => {
         let taxRateId: string | null = null;
         if (taxable) {
           taxRateId = await getFloridaTaxRateId(stripe);
-          for (const idx of detailingIndices) line_items[idx].tax_rates = [taxRateId];
+          for (const idx of carCareIndices) line_items[idx].tax_rates = [taxRateId];
         }
 
-        // ---------- Bundle discount ----------
+        // ---------- Bundle gift: free car washes, never a percentage ----------
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
-        const bundle_discount_pct = await resolveBundleDiscountPctFromDb(supabase, uniqueServices, "checkout");
-
-        // ---------- Promo code lookup ----------
-        let promoId: string | null = null;
-        if (input.promo_code) {
-          try {
-            const found = await stripe.promotionCodes.list({
-              code: input.promo_code.toUpperCase(),
-              active: true,
-              limit: 1,
-            });
-            promoId = found.data[0]?.id ?? null;
-          } catch (err) {
-            console.error("[checkout] promo lookup failed", err);
-          }
-        }
+        const freeCarWashes = freeCarWashesPerMonth(uniqueServices);
 
         // ---------- Subscription metadata for the webhook ----------
         const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
-          price_locked: "yes",
           signed_up_at: new Date().toISOString(),
           user_id: user.id,
           services_json: JSON.stringify(input.services),
-          bands_json: JSON.stringify(
-            Object.fromEntries(input.services.map((s) => [s.service, s.band])),
-          ),
-          band_source: "self",
+          sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
           addons_json: JSON.stringify(input.addons),
+          car_wash_json: input.car_wash ? JSON.stringify(input.car_wash) : "",
+          free_car_washes_per_month: String(freeCarWashes),
           zip: input.zip,
           preferred_day: input.preferred_day ?? "",
           preferred_time: input.preferred_time ?? "",
           lang: input.lang,
-          bundle_discount_pct: String(bundle_discount_pct),
+          // Founding offer — fulfilment promises, not coupons.
+          founding_rate_locked: "yes",
+          founding_free_addon_first_visit: "yes",
+          founding_review_promised: "yes",
           fl_tax_applied: taxable ? "yes" : "no",
           fl_tax_pct: taxable ? String(FLORIDA_TAX.percentage) : "0",
           fl_tax_rate_id: taxRateId ?? "",
@@ -265,45 +249,15 @@ Deno.serve(async (req) => {
           subscription_data: { metadata: subscriptionMetadata },
           success_url: `${SITE_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${SITE_URL}/checkout/canceled`,
-          allow_promotion_codes: true,
         };
-
-        // Stripe Checkout accepts only ONE entry in `discounts`, so a recurring
-        // bundle coupon and a one-off referral promotion code cannot both apply.
-        // The bundle coupon wins (it recurs forever), but the submitted promo code
-        // is recorded rather than dropped silently.
-        let promoCodeApplied = true;
-        let promoCodeMessage: string | undefined;
-
-        const bundleCouponId = BUNDLE_COUPON_BY_SERVICE_COUNT[uniqueServices];
-
-        if (bundleCouponId) {
-          sessionParams.discounts = [{ coupon: bundleCouponId }];
-          // Stripe rejects discounts + allow_promotion_codes simultaneously.
-          delete sessionParams.allow_promotion_codes;
-
-          if (input.promo_code) {
-            promoCodeApplied = false;
-            promoCodeMessage = `Your ${bundle_discount_pct}% bundle discount was applied instead of promo code ${input.promo_code} — only one discount can apply per subscription.`;
-            subscriptionMetadata.promo_code_not_applied = input.promo_code;
-            subscriptionMetadata.promo_code_not_applied_reason = "bundle_discount_takes_precedence";
-            console.warn(
-              `[checkout] promo code ${input.promo_code} not applied: bundle_discount_takes_precedence (${bundle_discount_pct}%)`,
-            );
-          }
-        } else if (promoId) {
-          sessionParams.discounts = [{ promotion_code: promoId }];
-          // Stripe rejects discounts + allow_promotion_codes simultaneously.
-          delete sessionParams.allow_promotion_codes;
-        }
 
         const session = await stripe.checkout.sessions.create(sessionParams);
 
-        // HALF 1 — referral attribution (pending row; payout happens on first paid invoice).
+        // Referral attribution (pending row; payout happens on first paid invoice).
         await recordReferralAttribution({
           supabase,
           stripe,
-          code: input.referral_code ?? input.promo_code,
+          code: input.referral_code,
           referredUserId: user.id,
           referredEmail: user.email,
           referredStripeCustomerId:
@@ -314,8 +268,7 @@ Deno.serve(async (req) => {
           ok: true as const,
           checkout_url: session.url,
           session_id: session.id,
-          promo_code_applied: promoCodeApplied,
-          ...(promoCodeMessage ? { promo_code_message: promoCodeMessage } : {}),
+          free_car_washes_per_month: freeCarWashes,
         };
       },
     });

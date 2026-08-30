@@ -6,9 +6,11 @@ import {
   frequencyVisitCopy,
   serviceLabels,
   serviceIcons,
-  bandFor,
-  getServicePerVisit,
+  sizeFor,
+  getSizePrice,
+  serviceUnits,
   formatPerVisit,
+  formatMonthly,
 } from '@/lib/dashboard-pricing';
 
 interface Props {
@@ -47,6 +49,11 @@ export default function StepFrequency({ state, onChange }: Props) {
             <span className="lowercase">{serviceLabels[svc]}</span>
           </h3>
 
+          {serviceUnits[svc] === 'per_month' ? (
+            <p className="text-[11px] text-ink-faint">
+              shine complete is a flat monthly price — 3 maintenance washes a month plus 2 full details a year.
+            </p>
+          ) : (
           <div className="grid grid-cols-3 gap-2">
             {freqOptions[svc].map(freq => {
               const selected = state.frequencies[svc] === freq;
@@ -73,14 +80,17 @@ export default function StepFrequency({ state, onChange }: Props) {
               );
             })}
           </div>
+          )}
 
           {(() => {
-            const perVisit = getServicePerVisit(state, svc);
-            const band = bandFor(state, svc);
-            if (!perVisit || band === 'custom') return null;
+            const size = sizeFor(state, svc);
+            if (!size || size === 'quote') return null;
+            const sticker = getSizePrice(svc, size);
             return (
               <p className="text-[11px] text-ink-faint animate-calm-in">
-                {formatPerVisit(perVisit)} — the same however often we come.
+                {serviceUnits[svc] === 'per_month'
+                  ? `${formatMonthly(sticker)} — the same every month.`
+                  : `${formatPerVisit(sticker)} — the same however often we come.`}
               </p>
             );
           })()}
@@ -88,7 +98,7 @@ export default function StepFrequency({ state, onChange }: Props) {
       ))}
 
       <p className="text-xs text-ink-faint">
-        one price per visit, set by the size of your home or lot. change cadence anytime — no lock-in.
+        cleaning and lawn care are priced per visit, so how often we come is up to you. change it anytime — no lock-in.
       </p>
     </div>
   );

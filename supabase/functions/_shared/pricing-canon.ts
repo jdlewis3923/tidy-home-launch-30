@@ -1,185 +1,368 @@
-/**
- * PRICING CANON — the ONE source of truth for every price and discount.
- *
- * The model: one flat price per visit, set by the size band of the property.
- * Cadence multiplies it (monthly x1, biweekly x2, weekly x4). The only
- * discount is the bundle discount. There is no frequency discount and no
- * size "upgrade" surcharge — the band IS the price.
- *
- * The client copy lives at
- * `src/lib/pricing-canon.ts`; `src/test/pricing-canon.test.ts`
- * fails if the two diverge, if the Stripe catalog disagrees, or if a page ships
- * a stale number.
- */
+// PRICING CANON (server mirror).
+//
+// This file MUST stay identical in values to src/lib/pricing-canon.ts.
+// src/test/pricing-canon.test.ts parses both and fails on any divergence.
+export type CanonService = 'cleaning' | 'lawn' | 'detailing';
+export type CanonSize = 1 | 2 | 3;
+/** `quote` is not a size — it means the property is above size 3 and must never be auto-booked. */
+export type SizeSelection = CanonSize | 'quote';
+export type CanonCadence = 'monthly' | 'biweekly' | 'weekly';
+export type PriceUnit = 'per_visit' | 'per_month';
+export type QuantityRule = 'cadence' | 'always_1';
 
-export type CanonService = "cleaning" | "lawn" | "detailing";
-export type CanonBand = "compact" | "standard" | "large" | "estate";
-export type CanonCadence = "monthly" | "biweekly" | "weekly";
+export const SIZES: CanonSize[] = [1, 2, 3];
 
-export const BANDS: CanonBand[] = ["compact", "standard", "large", "estate"];
-
-/** Per-visit price in whole dollars, by service and band. */
-export const BAND_PRICES: Record<CanonService, Record<CanonBand, number>> = {
-  cleaning: { compact: 119, standard: 149, large: 219, estate: 299 },
-  lawn: { compact: 55, standard: 69, large: 105, estate: 135 },
-  detailing: { compact: 119, standard: 139, large: 179, estate: 219 },
+/** Price in whole dollars, by service and size. Unit differs per service. */
+export const SIZE_PRICES: Record<CanonService, Record<CanonSize, number>> = {
+  cleaning: { 1: 139, 2: 189, 3: 279 },
+  lawn: { 1: 45, 2: 65, 3: 99 },
+  detailing: { 1: 149, 2: 179, 3: 239 },
 };
 
-/** Visits billed per month for each cadence. */
+/** Stripe lookup keys for the recurring service prices. */
+export const SERVICE_LOOKUP_KEYS: Record<CanonService, Record<CanonSize, string>> = {
+  cleaning: { 1: 'clean_1', 2: 'clean_2', 3: 'clean_3' },
+  lawn: { 1: 'lawn_1', 2: 'lawn_2', 3: 'lawn_3' },
+  detailing: { 1: 'shine_1', 2: 'shine_2', 3: 'shine_3' },
+};
+
+export const SERVICE_UNIT: Record<CanonService, PriceUnit> = {
+  cleaning: 'per_visit',
+  lawn: 'per_visit',
+  detailing: 'per_month',
+};
+
+export const SERVICE_QUANTITY_RULE: Record<CanonService, QuantityRule> = {
+  cleaning: 'cadence',
+  lawn: 'cadence',
+  detailing: 'always_1',
+};
+
+/** Customer-facing service names. */
+export const SERVICE_NAMES: Record<CanonService, string> = {
+  cleaning: 'House Cleaning',
+  lawn: 'Lawn Care',
+  detailing: 'Shine Complete',
+};
+
+/** Size labels, per service, in the customer's own words. */
+export const SIZE_LABELS: Record<CanonService, Record<CanonSize, string>> = {
+  cleaning: {
+    1: 'Condo / up to 2 bedrooms',
+    2: 'House / 3 bedrooms',
+    3: 'Large house / 4 bedrooms',
+  },
+  lawn: {
+    1: 'Small yard',
+    2: 'Standard yard',
+    3: 'Large yard',
+  },
+  detailing: {
+    1: 'Sedan / coupe',
+    2: 'SUV / crossover',
+    3: 'Truck / 3-row SUV / van',
+  },
+};
+
+/** The detail under each size label. */
+export const SIZE_HELPERS: Record<CanonService, Record<CanonSize, string>> = {
+  cleaning: {
+    1: 'max 2 baths',
+    2: 'max 2.5 baths',
+    3: 'max 3 baths',
+  },
+  lawn: {
+    1: 'up to 3,000 sq ft of turf',
+    2: '3,001–6,000 sq ft of turf',
+    3: '6,001–10,000 sq ft of turf',
+  },
+  detailing: {
+    1: 'coupe, sedan',
+    2: 'SUV, crossover',
+    3: 'truck, 3-row SUV, van',
+  },
+};
+
+/** Visits billed per month for each cadence. Per-visit services only. */
 export const CADENCE_MULTIPLIER: Record<CanonCadence, number> = {
   monthly: 1,
   biweekly: 2,
   weekly: 4,
 };
 
-/** Live Stripe products — cadence-agnostic, one per service. */
-export const STRIPE_PRODUCT_IDS: Record<CanonService, string> = {
-  cleaning: "prod_V9xQs6lixEmaXs",
-  lawn: "prod_V9xQtvYJFErOag",
-  detailing: "prod_V9xQ8RCRFTdLBK",
+// ---------------------------------------------------------------------------
+// Car Wash Add-On — per month, requires an active lawn or cleaning plan.
+// Renamed from "Driveway Add-On". Not to be confused with the one-time lawn
+// add-on "Driveway Pressure Wash", which cleans concrete.
+// ---------------------------------------------------------------------------
+
+export const CAR_WASH_ADDON_NAME = 'Car Wash Add-On';
+
+export type WashCount = 1 | 2;
+
+export const CAR_WASH_PRICES: Record<CanonSize, Record<WashCount, number>> = {
+  1: { 1: 39, 2: 75 },
+  2: { 1: 49, 2: 95 },
+  3: { 1: 65, 2: 129 },
 };
 
-/** Live per-visit Stripe prices. Cadence is set with `quantity`, not price. */
-export const STRIPE_PRICE_IDS: Record<CanonService, Record<CanonBand, string>> = {
-  cleaning: {
-    compact: "price_1U9dWND7AxvAjJGvikkpM5oo",
-    standard: "price_1U9dWdD7AxvAjJGv0476nn3e",
-    large: "price_1U9dWiD7AxvAjJGvXpIZJ367",
-    estate: "price_1U9dWmD7AxvAjJGvbSwUpNZu",
-  },
-  lawn: {
-    compact: "price_1U9dWrD7AxvAjJGv0d6VTUcs",
-    standard: "price_1U9dWvD7AxvAjJGvaCMrL4Jp",
-    large: "price_1U9dWzD7AxvAjJGv58uQlPNP",
-    estate: "price_1U9dXCD7AxvAjJGveTN1h0Rg",
-  },
-  detailing: {
-    compact: "price_1U9dXGD7AxvAjJGv2bx2MHGJ",
-    standard: "price_1U9dXKD7AxvAjJGvGVpD41QG",
-    large: "price_1U9dXPD7AxvAjJGvJmXLFvts",
-    estate: "price_1U9dXTD7AxvAjJGvx6gFOj2X",
-  },
+export const CAR_WASH_LOOKUP_KEYS: Record<CanonSize, Record<WashCount, string>> = {
+  1: { 1: 'wash_1_x1', 2: 'wash_1_x2' },
+  2: { 1: 'wash_2_x1', 2: 'wash_2_x2' },
+  3: { 1: 'wash_3_x1', 2: 'wash_3_x2' },
 };
 
-/**
- * Bundle discount by count of DISTINCT services, as a percentage. It is a
- * property of the ORDER, never of a catalog row — computed server-side in
- * stripe-create-checkout from the cart, and mirrored by the Stripe coupons
- * TIDY_BUNDLE_10PCT / TIDY_BUNDLE_15PCT.
- */
-export const BUNDLE_DISCOUNT_PCT_CANON: Record<number, number> = { 2: 10, 3: 15 };
+export const CAR_WASH_UNIT: PriceUnit = 'per_month';
+export const CAR_WASH_QUANTITY_RULE: QuantityRule = 'always_1';
 
-/** Referral program — give $50, get $50. */
+// ---------------------------------------------------------------------------
+// The bundle is a gift, not a discount. No percentages anywhere.
+// ---------------------------------------------------------------------------
+
+/** Free car washes each month, by count of DISTINCT services in the plan. */
+export function freeCarWashesPerMonth(serviceCount: number): number {
+  if (serviceCount >= 3) return 2;
+  if (serviceCount === 2) return 1;
+  return 0;
+}
+
+export const BUNDLE_GIFT_COPY = {
+  two: 'Add a 2nd service — 1 free car wash every month.',
+  three: 'Add a 3rd service — 2 free car washes every month.',
+} as const;
+
+// ---------------------------------------------------------------------------
+// Entry price and referral
+// ---------------------------------------------------------------------------
+
+/** The single company-wide entry price: lawn size 1, biweekly. */
+export const ENTRY_PRICE_MONTHLY = SIZE_PRICES.lawn[1] * CADENCE_MULTIPLIER.biweekly;
+export const ENTRY_PRICE_COPY = `from $${ENTRY_PRICE_MONTHLY}/mo`;
+
+/** Referral program — give $50, get $50. Unchanged. */
 export const REFERRAL_BONUS_CENTS = 5000;
 
-/** The advertised band. Headline prices always quote this one. */
-export const HEADLINE_BAND: CanonBand = "standard";
+// ---------------------------------------------------------------------------
+// Founding offer. These are FULFILMENT PROMISES, not coupon codes — they are
+// written onto the subscription row at signup.
+// ---------------------------------------------------------------------------
 
-/** Single company-wide "from" price: a Standard lawn visit. */
-export const FROM_PRICE_PER_VISIT = BAND_PRICES.lawn.standard;
+export const FOUNDING_OFFER = {
+  headline: 'Founding neighbor offer',
+  promises: [
+    'Your founding rate is locked — your price never rises',
+    'One free premium add-on on your first visit',
+    'First visit perfect or it’s free',
+    'Capped at 25 founding homes per ZIP',
+  ],
+  inExchangeFor: 'in exchange for a review after your second visit',
+  homesPerZip: 25,
+} as const;
 
-/**
- * Contractor pay — a share of BANDED LIST price with a per-visit floor.
- * The bundle discount comes out of Tidy's margin, never contractor pay.
- */
+// ---------------------------------------------------------------------------
+// Trust claims — only what is provable. "Insured" is NOT published yet: the
+// liability certificate is outstanding. Flip INSURED_CLAIM_ENABLED to true in
+// one edit once it lands.
+// ---------------------------------------------------------------------------
+
+export const INSURED_CLAIM_ENABLED = false;
+export const INSURED_CLAIM = 'Insured';
+
+export const TRUST_CLAIMS = [
+  'Background-Checked Pros',
+  'Photo-Verified Every Visit',
+  'Cancel Anytime',
+  'Same Pro Every Time',
+  'Serving Kendall & Pinecrest',
+] as const;
+
+export function trustClaims(): string[] {
+  return INSURED_CLAIM_ENABLED ? [...TRUST_CLAIMS, INSURED_CLAIM] : [...TRUST_CLAIMS];
+}
+
+// ---------------------------------------------------------------------------
+// Service area — never "South Florida", never "South Miami".
+// ---------------------------------------------------------------------------
+
+export const SERVICE_AREA_ZIPS = ['33156', '33183', '33186'] as const;
+export const SERVICE_AREA_LINE = 'Serving Pinecrest, Kendall & Palmetto Bay — 33156, 33183, 33186';
+export const SERVICE_AREA_SHORT = 'Pinecrest, Kendall & Palmetto Bay';
+
+// ---------------------------------------------------------------------------
+// Contractor pay — a share of LIST price with a per-visit floor.
+// ---------------------------------------------------------------------------
+
 export const CONTRACTOR_PAY = {
   tier1: { pct: 45, floorDollars: 30 },
   tier2: { pct: 50, floorDollars: 35 },
 } as const;
 
-/** Per-visit price in whole dollars. */
-export function bandPrice(service: CanonService, band: CanonBand): number {
-  return BAND_PRICES[service][band];
-}
-
-/** Per-visit price in cents, for Stripe comparisons. */
-export function bandPriceCents(service: CanonService, band: CanonBand): number {
-  return Math.round(bandPrice(service, band) * 100);
-}
-
-/** Monthly billed amount for one service line: per-visit price x cadence. */
-export function linePrice(service: CanonService, band: CanonBand, cadence: CanonCadence, qty = 1): number {
-  return bandPrice(service, band) * CADENCE_MULTIPLIER[cadence] * qty;
-}
-
-/** Discount percentage for a distinct-service count (highest tier reached). */
-export function canonBundlePct(serviceCount: number): number {
-  let pct = 0;
-  for (const [count, value] of Object.entries(BUNDLE_DISCOUNT_PCT_CANON)) {
-    if (serviceCount >= Number(count) && value > pct) pct = value;
-  }
-  return pct;
-}
-
-/** Contractor pay for one visit at banded list price, by tier. */
 export function contractorPayForVisit(listDollars: number, tier: 1 | 2): number {
   const rule = tier === 2 ? CONTRACTOR_PAY.tier2 : CONTRACTOR_PAY.tier1;
   return Math.max((listDollars * rule.pct) / 100, rule.floorDollars);
 }
 
 // ---------------------------------------------------------------------------
-// Band definitions. Customers never enter square footage — we infer the band
-// from plain-language answers. Square footage is a tiebreak we only apply when
-// we already know it (county record, contractor visit).
+// Prices
 // ---------------------------------------------------------------------------
 
-/** Cleaning: bed/bath, with square footage as tiebreak. */
-export function bandFromBedBath(bedrooms: number, bathrooms: number): CanonBand {
-  const beds = Math.max(1, bedrooms);
-  const baths = Math.max(1, Math.ceil(bathrooms));
-  if (beds >= 5 || baths >= 4) return "estate";
-  if (beds >= 4 || baths >= 3) return "large";
-  if (beds >= 3) return "standard";
-  return "compact";
+export function sizePrice(service: CanonService, size: CanonSize): number {
+  return SIZE_PRICES[service][size];
 }
 
-/** Cleaning square-footage tiebreak — square footage wins when they disagree. */
-export function bandFromHomeSqFt(sqft: number): CanonBand | null {
-  if (sqft <= 1400) return "compact";
-  if (sqft <= 2200) return "standard";
-  if (sqft <= 3200) return "large";
-  if (sqft <= 4500) return "estate";
-  return null; // above Estate — custom quote, never auto-booked
+export function sizePriceCents(service: CanonService, size: CanonSize): number {
+  return Math.round(sizePrice(service, size) * 100);
 }
 
-/** Lawn: total lot size. Band on the parcel, service the yard. */
-export function bandFromLotSqFt(sqft: number): CanonBand | null {
-  if (sqft < 10890) return "compact";
-  if (sqft <= 21780) return "standard";
-  if (sqft <= 32670) return "large";
-  if (sqft <= 43560) return "estate";
-  return null; // over an acre — custom quote
+/** Stripe subscription quantity for a line. */
+export function quantityFor(service: CanonService, cadence: CanonCadence): number {
+  return SERVICE_QUANTITY_RULE[service] === 'always_1' ? 1 : CADENCE_MULTIPLIER[cadence];
 }
 
-/** Corner lots move up one band. */
-export function bumpBand(band: CanonBand): CanonBand | null {
-  const i = BANDS.indexOf(band);
-  return i < BANDS.length - 1 ? BANDS[i + 1] : null;
+/** Monthly billed amount for one service line. */
+export function monthlyPrice(service: CanonService, size: CanonSize, cadence: CanonCadence): number {
+  return sizePrice(service, size) * quantityFor(service, cadence);
 }
 
-export type VehicleClass =
-  | "coupe"
-  | "sedan"
-  | "hatchback"
-  | "crossover"
-  | "suv2row"
-  | "suv3row"
-  | "pickup"
-  | "minivan"
-  | "suvFullSize"
-  | "dually"
-  | "eightSeat";
+// ---------------------------------------------------------------------------
+// Sizing. The customer is never asked to look anything up or measure anything.
+// ---------------------------------------------------------------------------
 
-export const VEHICLE_CLASS_BAND: Record<VehicleClass, CanonBand> = {
-  coupe: "compact",
-  sedan: "compact",
-  hatchback: "compact",
-  crossover: "standard",
-  suv2row: "standard",
-  suv3row: "large",
-  pickup: "large",
-  minivan: "large",
-  suvFullSize: "estate",
-  dually: "estate",
-  eightSeat: "estate",
+/**
+ * Cleaning size from bedrooms, with bathrooms as the only modifier: more baths
+ * than the size allows moves the home up one size. 5+ bedrooms is a quote.
+ */
+export function sizeFromBedrooms(bedrooms: number, bathrooms: number): SizeSelection {
+  if (bedrooms >= 5) return 'quote';
+  const base: CanonSize = bedrooms <= 2 ? 1 : bedrooms === 3 ? 2 : 3;
+  const bathLimit: Record<CanonSize, number> = { 1: 2, 2: 2.5, 3: 3 };
+  if (bathrooms > bathLimit[base]) {
+    return base === 3 ? 'quote' : ((base + 1) as CanonSize);
+  }
+  return base;
+}
+
+export const BATH_LIMITS: Record<CanonSize, number> = { 1: 2, 2: 2.5, 3: 3 };
+
+/** Lawn size from mowable turf area. Over 10,000 sq ft is a quote. */
+export function sizeFromTurfSqFt(sqft: number): SizeSelection {
+  if (sqft <= 3000) return 1;
+  if (sqft <= 6000) return 2;
+  if (sqft <= 10000) return 3;
+  return 'quote';
+}
+
+/** What the customer drives → size. */
+export type VehicleClass = 'sedan' | 'coupe' | 'suv' | 'crossover' | 'truck' | 'suv3row' | 'van';
+
+export const VEHICLE_CLASS_SIZE: Record<VehicleClass, CanonSize> = {
+  sedan: 1,
+  coupe: 1,
+  suv: 2,
+  crossover: 2,
+  truck: 3,
+  suv3row: 3,
+  van: 3,
 };
+
+export const VEHICLE_CLASS_LABELS: Record<VehicleClass, string> = {
+  sedan: 'sedan',
+  coupe: 'coupe',
+  suv: 'SUV',
+  crossover: 'crossover',
+  truck: 'pickup truck',
+  suv3row: '3-row SUV',
+  van: 'van or minivan',
+};
+
+/** Shown beside the lawn selector, verbatim. */
+export const LAWN_GUESS_NOTE =
+  'Not sure? Pick your best guess — we confirm the exact size from satellite imagery before your first visit, and we’ll tell you before we start if it’s different.';
+
+// ---------------------------------------------------------------------------
+// What every visit includes. Published on the pricing page and in the FAQ.
+// ---------------------------------------------------------------------------
+
+export const CLEANING_INCLUDED = [
+  'kitchen surfaces and appliance exteriors',
+  'all bathrooms',
+  'floors vacuumed and mopped',
+  'dusting of reachable surfaces',
+  'beds made',
+  'trash out',
+];
+
+export const CLEANING_PAID_ADDONS = [
+  'inside oven',
+  'inside fridge',
+  'interior windows',
+  'baseboards',
+  'blinds',
+  'walls',
+  'laundry',
+  'dishes',
+  'garage',
+  'patio',
+  'organising',
+];
+
+export const LAWN_INCLUDED = ['mow', 'edge', 'line-trim', 'blow clear of hard surfaces'];
+
+export const SHINE_MAINTENANCE_WASH = [
+  'hand wash',
+  'wheels',
+  'tires',
+  'tire shine',
+  'spot-free dry',
+  'all glass in and out',
+  'full interior vacuum',
+  'dash',
+  'console',
+  'door panels',
+];
+
+export const SHINE_FULL_DETAIL = [
+  'clay bar decontamination',
+  'machine-applied paint sealant',
+  'interior shampoo and extraction',
+  'leather deep clean and condition',
+  'engine bay',
+  'trim restoration',
+];
+
+export const SHINE_SUMMARY = '3 maintenance washes every month plus 2 full details every year';
+
+// ---------------------------------------------------------------------------
+// How sizing works — published verbatim on the pricing page and in the FAQ.
+// ---------------------------------------------------------------------------
+
+export const SIZING_FAQ: { q: string; a: string }[] = [
+  {
+    q: 'How do I know which size I am?',
+    a: 'Bedrooms for cleaning, what you drive for car care. For lawn, pick small, standard or large — we confirm it from satellite imagery before your first visit. You never have to measure anything.',
+  },
+  {
+    q: 'What if I pick the wrong size?',
+    a: 'We move you to the right price before your second visit. We never bill you retroactively for the first.',
+  },
+  {
+    q: 'What if I have more bathrooms than my size allows?',
+    a: 'Your home moves up one size. Bathrooms drive the length of a visit more than anything else.',
+  },
+  {
+    q: 'What if I have 5+ bedrooms, or more than 10,000 sq ft of lawn?',
+    a: "Call us and we'll quote it. It isn't a worse deal, it just isn't a checkbox.",
+  },
+  {
+    q: 'What happens if a visit takes longer than expected?',
+    a: 'Nothing. The size price is the price.',
+  },
+  {
+    q: 'Can I change how often you come?',
+    a: 'Yes, from your dashboard, effective next billing cycle.',
+  },
+];
+
+/** The quote path. No checkout button is ever shown for a quote-sized property. */
+export const QUOTE_PHONE = '(786) 829-1141';
+export const QUOTE_COPY = "Call for a quote — we'll price it by hand.";

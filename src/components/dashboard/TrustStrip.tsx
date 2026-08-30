@@ -1,30 +1,29 @@
-import { formatPerVisit, getLowestStartingPrice } from '@/lib/dashboard-pricing';
+import { ENTRY_PRICE_COPY, SERVICE_AREA_LINE, trustClaims } from '@/lib/pricing-canon';
 
 /**
  * Above-the-fold trust strip for the /signup builder.
  * One short line. Calm cream surface. No icons — pure typography.
  *
- * The starting price is derived from dashboard-pricing.ts (the same source
- * checkout math uses) so it can never drift from real pricing.
+ * Claims and the entry price come from pricing-canon.ts, so nothing here can
+ * drift from what we actually charge or what we are allowed to say.
  */
 export default function TrustStrip() {
+  const claims = trustClaims();
   return (
     <div
       role="note"
       aria-label="Service area and trust"
       className="rounded-xl border border-hairline bg-white/70 px-3.5 py-2 text-center text-[11px] font-medium tracking-tight text-ink-soft backdrop-blur"
     >
-      Pinecrest 33156 · Kendall 33183/33186
+      {SERVICE_AREA_LINE}
+      {claims.map((claim) => (
+        <span key={claim}>
+          <span className="mx-1.5 text-ink-faint">·</span>
+          {claim}
+        </span>
+      ))}
       <span className="mx-1.5 text-ink-faint">·</span>
-      Vetted &amp; Insured
-      <span className="mx-1.5 text-ink-faint">·</span>
-      Background-Checked Pros
-      <span className="mx-1.5 text-ink-faint">·</span>
-      Photo-Verified Every Visit
-      <span className="mx-1.5 text-ink-faint">·</span>
-      Cancel Anytime
-      <span className="mx-1.5 text-ink-faint">·</span>
-      From {formatPerVisit(getLowestStartingPrice())}
+      {ENTRY_PRICE_COPY}
     </div>
   );
 }
