@@ -1,5 +1,4 @@
-import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, bandLabels, bandFor, frequencyVisitCopy, formatPerVisit, hasCustomQuote, REFERRAL_DISCOUNT_CENTS } from '@/lib/dashboard-pricing';
-import { usePromoState } from '@/hooks/usePromoCapture';
+import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, sizeLabels, sizeFor, serviceUnits, frequencyVisitCopy, formatPerVisit, formatMonthly, hasCustomQuote } from '@/lib/dashboard-pricing';
 
 interface Props {
   state: ConfigState;
@@ -14,9 +13,7 @@ interface Props {
 export default function StepReview({ state, onEdit }: Props) {
   const pricing = calculatePricing(state);
   const customQuote = hasCustomQuote(state);
-  const { code: promoCode } = usePromoState();
-  const referralDiscount = promoCode && !customQuote ? REFERRAL_DISCOUNT_CENTS / 100 : 0;
-  const firstMonthTotal = Math.max(0, pricing.firstMonth - referralDiscount);
+  const firstMonthTotal = pricing.firstMonth;
 
   return (
     <div className="space-y-5">
@@ -25,22 +22,28 @@ export default function StepReview({ state, onEdit }: Props) {
 
         <div className="mt-4 space-y-2.5">
           {pricing.servicePrices.map(sp => {
-            const band = bandFor(state, sp.service);
+            const size = sizeFor(state, sp.service);
+            const quoted = !size || size === 'quote';
             const freq = state.frequencies[sp.service]!;
             return (
               <div key={sp.service} className="flex justify-between items-baseline text-sm">
                 <span className="text-ink">
                   <span className="mr-1.5">{serviceIcons[sp.service]}</span>
                   <span className="font-semibold lowercase">{serviceLabels[sp.service]}</span>
-                  <span className="text-ink-faint ml-2 lowercase">{frequencyLabels[freq].toLowerCase()}</span>
-                  {band && band !== 'custom' && (
+                  <span className="text-ink-faint ml-2 lowercase">
+                    {serviceUnits[sp.service] === 'per_month' ? 'monthly' : frequencyLabels[freq].toLowerCase()}
+                  </span>
+                  {!quoted && (
                     <span className="ml-2 text-[11px] text-ink-faint lowercase">
-                      · {bandLabels[band].toLowerCase()} · {formatPerVisit(sp.perVisit)} · {frequencyVisitCopy[freq]}
+                      · {sizeLabels[sp.service][size as 1 | 2 | 3].toLowerCase()} ·{' '}
+                      {serviceUnits[sp.service] === 'per_month'
+                        ? formatMonthly(sp.sticker)
+                        : `${formatPerVisit(sp.sticker)} · ${frequencyVisitCopy[freq]}`}
                     </span>
                   )}
                 </span>
                 <span className="font-semibold text-ink tabular-nums">
-                  {band === 'custom' ? 'custom' : `$${sp.price.toFixed(2)}/mo`}
+                  {quoted ? 'quote' : `$${sp.price.toFixed(2)}/mo`}
                 </span>
               </div>
             );
@@ -56,10 +59,20 @@ export default function StepReview({ state, onEdit }: Props) {
                 <span>subtotal</span>
                 <span className="tabular-nums">${pricing.subtotal.toFixed(2)}/mo</span>
               </div>
-              {pricing.discountPercent > 0 && (
+              {pricing.carWashSubtotal > 0 && (
+                <div className="flex justify-between text-ink-soft">
+                  <span>car wash add-on</span>
+                  <span className="tabular-nums">${pricing.carWashSubtotal.toFixed(2)}/mo</span>
+                </div>
+              )}
+              {pricing.freeCarWashes > 0 && (
                 <div className="flex justify-between text-ink">
-                  <span>bundle saving · {Math.round(pricing.discountPercent * 100)}%</span>
-                  <span className="tabular-nums">−${pricing.discountAmount.toFixed(2)}/mo</span>
+                  <span>
+                    {pricing.freeCarWashes === 1
+                      ? '1 free car wash a month'
+                      : `${pricing.freeCarWashes} free car washes a month`}
+                  </span>
+                  <span className="tabular-nums">included</span>
                 </div>
               )}
 
@@ -80,12 +93,6 @@ export default function StepReview({ state, onEdit }: Props) {
                 </>
               )}
 
-              {referralDiscount > 0 && (
-                <div className="flex justify-between text-ink">
-                  <span>referral · {promoCode}</span>
-                  <span className="tabular-nums">−${referralDiscount.toFixed(2)}</span>
-                </div>
-              )}
 
               {pricing.taxTriggered && (
                 <div className="flex justify-between text-ink-soft">
@@ -114,9 +121,9 @@ export default function StepReview({ state, onEdit }: Props) {
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">total today</p>
-                <p className="text-[11px] text-ink-faint mt-1">tailored quote — no payment today.</p>
+                <p className="text-[11px] text-ink-faint mt-1">we quote this one by hand — no payment today.</p>
               </div>
-              <p className="text-xl font-bold text-ink">custom</p>
+              <p className="text-xl font-bold text-ink">quote</p>
             </div>
           </>
         )}
