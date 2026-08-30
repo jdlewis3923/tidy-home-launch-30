@@ -1,44 +1,48 @@
 import {
   ConfigState,
+  LawnChoice,
   ServiceType,
-  Band,
-  BandSelection,
-  LotChoice,
-  bandCopy,
-  bandLabels,
-  bandForCleaning,
-  bandForLawn,
-  bandForDetailing,
-  lotChoiceLabels,
-  vehicleClassLabels,
-  getPerVisitPrice,
+  SizeSelection,
+  formatMonthly,
   formatPerVisit,
+  getSizePrice,
+  lawnChoiceHelpers,
+  lawnChoiceLabels,
+  serviceUnits,
+  sizeFor,
+  sizeHelpers,
+  sizeLabels,
+  vehicleClassLabels,
 } from '@/lib/dashboard-pricing';
-import type { VehicleClass } from '@/lib/pricing-canon';
+import { LAWN_GUESS_NOTE, QUOTE_COPY, QUOTE_PHONE, type VehicleClass } from '@/lib/pricing-canon';
 
 interface Props {
   state: ConfigState;
   onChange: (s: ConfigState) => void;
 }
 
-/** Live band + price readout, shown as soon as we can work the band out. */
-function BandReadout({ service, band }: { service: ServiceType; band: BandSelection | null }) {
-  if (!band) return null;
-  if (band === 'custom') {
+/** Live size + price readout, shown as soon as we can work the size out. */
+function SizeReadout({ service, size }: { service: ServiceType; size: SizeSelection | null }) {
+  if (!size) return null;
+  if (size === 'quote') {
     return (
       <p className="text-[11px] text-ink-soft">
-        that one sits above our estate band, so we quote it by hand — we'll reach out within one
-        business day. no payment today.
+        {QUOTE_COPY.toLowerCase()} give us a ring on {QUOTE_PHONE} — no payment today.
       </p>
     );
   }
+  const price = getSizePrice(service, size);
   return (
     <div className="rounded-xl border border-hairline bg-cream-deep/40 px-4 py-3 animate-calm-in">
       <p className="text-sm font-semibold text-ink lowercase">
-        {bandLabels[band as Band].toLowerCase()} — {formatPerVisit(getPerVisitPrice(service, band as Band))}
+        {sizeLabels[service][size].toLowerCase()} —{' '}
+        {serviceUnits[service] === 'per_month' ? formatMonthly(price) : formatPerVisit(price)}
       </p>
       <p className="text-[11px] text-ink-faint mt-0.5">
-        {bandCopy[service][band as Band]}. the price per visit stays the same however often we come.
+        {sizeHelpers[service][size]}.{' '}
+        {serviceUnits[service] === 'per_month'
+          ? 'the same every month.'
+          : 'the price per visit stays the same however often we come.'}
       </p>
     </div>
   );
@@ -85,31 +89,14 @@ function OptionCard({ selected, title, helper, onClick }: {
   );
 }
 
-const lotOptions: LotChoice[] = ['quarter', 'half', 'threeQuarter', 'acre', 'over', 'noLot'];
+const lawnOptions: LawnChoice[] = ['small', 'standard', 'large', 'over'];
 
-const vehicleOptions: VehicleClass[] = [
-  'sedan', 'coupe', 'hatchback', 'crossover', 'suv2row', 'suv3row', 'pickup', 'minivan', 'suvFullSize', 'dually', 'eightSeat',
-];
+const vehicleOptions: VehicleClass[] = ['sedan', 'coupe', 'crossover', 'suv', 'suv3row', 'truck', 'van'];
 
 export default function StepProperty({ state, onChange }: Props) {
   const hasCleaning = state.services.includes('cleaning');
   const hasLawn = state.services.includes('lawn');
   const hasDetailing = state.services.includes('detailing');
-
-  const setCleaning = (patch: Partial<ConfigState>) => {
-    const next = { ...state, ...patch };
-    onChange({ ...next, homeBand: bandForCleaning(next.bedrooms, next.bathrooms) });
-  };
-
-  const setLawn = (patch: Partial<ConfigState>) => {
-    const next = { ...state, ...patch };
-    onChange({ ...next, lawnBand: bandForLawn(next.lotChoice, next.cornerLot) });
-  };
-
-  const setVehicle = (patch: Partial<ConfigState>) => {
-    const next = { ...state, ...patch };
-    onChange({ ...next, vehicleBand: bandForDetailing(next.vehicleClass) });
-  };
 
   return (
     <div className="space-y-10">
@@ -121,62 +108,41 @@ export default function StepProperty({ state, onChange }: Props) {
               label="bedrooms"
               value={state.bedrooms}
               options={['1','2','3','4','5+'].map(v => ({ value: v, label: v }))}
-              onSelect={v => setCleaning({ bedrooms: v })}
+              onSelect={v => onChange({ ...state, bedrooms: v })}
             />
             <SelectField
               label="bathrooms"
               value={state.bathrooms}
               options={['1','1.5','2','2.5','3','3.5','4+'].map(v => ({ value: v, label: v }))}
-              onSelect={v => setCleaning({ bathrooms: v })}
+              onSelect={v => onChange({ ...state, bathrooms: v })}
             />
           </div>
           <p className="text-[11px] text-ink-faint">
-            a bedroom is a room with a door and a closet. a half bath counts as half — two half baths
-            round up to one.
+            more bathrooms than your size allows moves the home up one size — bathrooms drive the
+            length of a visit more than anything else.
           </p>
-          <BandReadout service="cleaning" band={state.homeBand} />
+          <SizeReadout service="cleaning" size={sizeFor(state, 'cleaning')} />
         </div>
       )}
 
       {hasLawn && (
         <div className="space-y-4 animate-calm-in" style={{ animationDelay: '60ms' }}>
-          <h3 className="text-sm font-semibold text-ink-soft lowercase">roughly how big is your lot?</h3>
+          <h3 className="text-sm font-semibold text-ink-soft lowercase">roughly how big is your lawn?</h3>
           <div className="grid gap-2 md:grid-cols-2">
-            {lotOptions.map(lot => (
+            {lawnOptions.map(choice => (
               <OptionCard
-                key={lot}
-                selected={state.lotChoice === lot}
-                title={lotChoiceLabels[lot]}
-                onClick={() => setLawn({ lotChoice: lot })}
+                key={choice}
+                selected={state.lawnChoice === choice}
+                title={lawnChoiceLabels[choice]}
+                helper={lawnChoiceHelpers[choice]}
+                onClick={() => onChange({ ...state, lawnChoice: choice })}
               />
             ))}
           </div>
 
-          {state.lotChoice === 'noLot' && (
-            <p className="text-[11px] text-ink-soft">
-              lawn care needs a private lot, so condos and townhomes aren't eligible. remove lawn to
-              carry on, or send us a note and we'll take a look.
-            </p>
-          )}
+          <p className="text-[11px] text-ink-faint">{LAWN_GUESS_NOTE}</p>
 
-          {state.lotChoice && state.lotChoice !== 'noLot' && (
-            <>
-              <label className="flex items-center gap-2 text-xs text-ink-soft">
-                <input
-                  type="checkbox"
-                  checked={state.cornerLot}
-                  onChange={e => setLawn({ cornerLot: e.target.checked })}
-                  className="h-4 w-4 rounded border-hairline accent-[hsl(var(--ink))]"
-                />
-                <span className="lowercase">it's a corner lot</span>
-              </label>
-              <p className="text-[11px] text-ink-faint">
-                corner lots have more edging and frontage, so they move up one band.
-              </p>
-            </>
-          )}
-
-          <BandReadout service="lawn" band={state.lawnBand} />
+          <SizeReadout service="lawn" size={sizeFor(state, 'lawn')} />
         </div>
       )}
 
@@ -189,22 +155,14 @@ export default function StepProperty({ state, onChange }: Props) {
                 key={vc}
                 selected={state.vehicleClass === vc}
                 title={vehicleClassLabels[vc]}
-                onClick={() => setVehicle({ vehicleClass: vc })}
+                onClick={() => onChange({ ...state, vehicleClass: vc })}
               />
             ))}
           </div>
-          <div className="max-w-xs">
-            <SelectField
-              label="number of vehicles"
-              value={String(state.vehicleCount)}
-              options={[1,2,3].map(v => ({ value: String(v), label: String(v) }))}
-              onSelect={v => onChange({ ...state, vehicleCount: parseInt(v) })}
-            />
-          </div>
           <p className="text-[11px] text-ink-faint">
-            pet hair, sand and smoke are add-ons, not a bigger vehicle band.
+            pet hair, sand and smoke are add-ons, never a bigger size.
           </p>
-          <BandReadout service="detailing" band={state.vehicleBand} />
+          <SizeReadout service="detailing" size={sizeFor(state, 'detailing')} />
         </div>
       )}
     </div>
