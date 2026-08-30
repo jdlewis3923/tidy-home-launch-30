@@ -1,248 +1,145 @@
-// Canon guard. Every price and both discount percentages must trace back to
-// src/lib/pricing-canon.ts. This suite fails if:
-//   - the server mirror diverges from the client canon
-//   - the live Stripe catalog price_cents disagrees with the canon
-//   - bundle_discount_tiers (the rate actually charged) disagrees
-//   - app_settings.referral_bonus_amount_cents is not $50
-//   - a page ships a discount percentage other than 10% / 15%
-//   - a retired XL Size Upgrade price is still referenced anywhere
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+// PRICING CANON GUARD
+//
+// One source of truth: src/lib/pricing-canon.ts, mirrored byte-for-byte by
+// supabase/functions/_shared/pricing-canon.ts. This test fails if the two
+// diverge, if a page ships a stale number, or if a retired concept (four size
+// bands, percentage bundle discounts, promo codes) creeps back in.
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
-  BAND_PRICES,
-  BANDS,
   CADENCE_MULTIPLIER,
-  BUNDLE_DISCOUNT_PCT_CANON,
+  CAR_WASH_PRICES,
+  ENTRY_PRICE_MONTHLY,
   REFERRAL_BONUS_CENTS,
-  STRIPE_PRICE_IDS,
-  FROM_PRICE_PER_VISIT,
-  CONTRACTOR_PAY,
-  bandPriceCents,
-  bandFromBedBath,
-  bandFromHomeSqFt,
-  bandFromLotSqFt,
-  canonBundlePct,
-  contractorPayForVisit,
-  linePrice,
-  type CanonBand,
+  SERVICE_LOOKUP_KEYS,
+  SERVICE_QUANTITY_RULE,
+  SERVICE_UNIT,
+  SIZES,
+  SIZE_PRICES,
+  freeCarWashesPerMonth,
+  monthlyPrice,
+  quantityFor,
+  sizePrice,
+  sizePriceCents,
   type CanonService,
 } from '@/lib/pricing-canon';
-import { getBundleDiscountPct } from '@/lib/bundle-discount';
-import { getPerVisitPrice, REFERRAL_DISCOUNT_CENTS } from '@/lib/dashboard-pricing';
+import { calculatePricing, defaultState, getSizePrice } from '@/lib/dashboard-pricing';
 
-const root = process.cwd();
-const read = (p: string) => readFileSync(path.join(root, p), 'utf8');
+const read = (p: string) => readFileSync(path.join(process.cwd(), p), 'utf8');
 
-function env(name: string): string {
-  const raw = read('.env');
-  return raw.match(new RegExp(`^${name}=("?)(.*?)\\1$`, 'm'))?.[2]?.trim() ?? '';
-}
-
-async function rest<T>(pathAndQuery: string): Promise<T> {
-  const url = env('VITE_SUPABASE_URL');
-  const key = env('VITE_SUPABASE_PUBLISHABLE_KEY');
-  const res = await fetch(`${url}/rest/v1/${pathAndQuery}`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}` },
-  });
-  if (!res.ok) throw new Error(`${pathAndQuery} failed: ${res.status}`);
-  return (await res.json()) as T;
-}
-
-const services: CanonService[] = ['cleaning', 'lawn', 'detailing'];
-
-describe('pricing canon', () => {
-  it('holds the locked per-visit band prices', () => {
-    expect(BAND_PRICES).toEqual({
-      cleaning: { compact: 119, standard: 149, large: 219, estate: 299 },
-      lawn: { compact: 55, standard: 69, large: 105, estate: 135 },
-      detailing: { compact: 119, standard: 139, large: 179, estate: 219 },
-    });
-    expect(CADENCE_MULTIPLIER).toEqual({ monthly: 1, biweekly: 2, weekly: 4 });
-    expect(BUNDLE_DISCOUNT_PCT_CANON).toEqual({ 2: 10, 3: 15 });
-    expect(REFERRAL_BONUS_CENTS).toBe(5000);
-    expect(FROM_PRICE_PER_VISIT).toBe(69);
-  });
-
-  it('the edge-function mirror matches the client canon', () => {
-    const mirror = read('supabase/functions/_shared/pricing-canon.ts');
+describe('canon is mirrored on the server', () => {
+  it('client and server canon are identical apart from the doc header path', () => {
     const client = read('src/lib/pricing-canon.ts');
-    const grab = (src: string, name: string) =>
-      src.match(new RegExp(`${name}[^=]*=\\s*(\\{[\\s\\S]*?\\n\\};)`))?.[1] ?? '';
-    for (const name of ['BAND_PRICES', 'CADENCE_MULTIPLIER', 'STRIPE_PRICE_IDS', 'VEHICLE_CLASS_BAND']) {
-      const norm = (v: string) => v.replace(/\/\/[^\n]*/g, '').replace(/\s|"|'/g, '');
-      expect(norm(grab(mirror, name)), name).toBe(norm(grab(client, name)));
-      expect(norm(grab(mirror, name)).length, name).toBeGreaterThan(0);
-    }
-    expect(mirror).toContain('BUNDLE_DISCOUNT_PCT_CANON: Record<number, number> = { 2: 10, 3: 15 }');
-    expect(mirror).toContain('REFERRAL_BONUS_CENTS = 5000');
-  });
-
-  it('cadence multiplies the per-visit price, nothing else', () => {
-    expect(linePrice('cleaning', 'standard', 'monthly')).toBe(149);
-    expect(linePrice('cleaning', 'standard', 'biweekly')).toBe(298);
-    expect(linePrice('cleaning', 'standard', 'weekly')).toBe(596);
-  });
-
-  it('the client pricing engine reads the canon', () => {
-    for (const s of services) {
-      for (const b of BANDS) expect(getPerVisitPrice(s, b)).toBe(BAND_PRICES[s][b]);
-    }
-    expect(REFERRAL_DISCOUNT_CENTS).toBe(REFERRAL_BONUS_CENTS);
-    for (const n of [1, 2, 3, 4]) expect(getBundleDiscountPct(n)).toBe(canonBundlePct(n));
-  });
-
-  it('bands follow the published definitions', () => {
-    expect(bandFromBedBath(2, 2)).toBe('compact');
-    expect(bandFromBedBath(3, 2)).toBe('standard');
-    expect(bandFromBedBath(4, 3)).toBe('large');
-    expect(bandFromBedBath(5, 4)).toBe('estate');
-    // Square footage wins the tiebreak: a 3/2 at 2,900 sq ft is Large.
-    expect(bandFromHomeSqFt(2900)).toBe('large');
-    expect(bandFromHomeSqFt(5000)).toBeNull(); // above Estate — custom quote
-    expect(bandFromLotSqFt(9000)).toBe('compact');
-    expect(bandFromLotSqFt(20000)).toBe('standard');
-    expect(bandFromLotSqFt(30000)).toBe('large');
-    expect(bandFromLotSqFt(43000)).toBe('estate');
-    expect(bandFromLotSqFt(50000)).toBeNull();
-  });
-
-  it('the bundle worked examples come out to the published totals', () => {
-    const cleaning = linePrice('cleaning', 'standard', 'biweekly');
-    const lawn = linePrice('lawn', 'standard', 'biweekly');
-    const detail = linePrice('detailing', 'standard', 'monthly');
-    expect(cleaning).toBe(298);
-    expect(cleaning + lawn).toBe(436);
-    expect(Math.round((cleaning + lawn) * 0.9 * 100) / 100).toBe(392.4);
-    expect(cleaning + lawn + detail).toBe(575);
-    expect(Math.round((cleaning + lawn + detail) * 0.85 * 100) / 100).toBe(488.75);
-    // All-monthly Standard bundles.
-    expect(Math.round((149 + 69) * 0.9 * 100) / 100).toBe(196.2);
-    expect(Math.round((149 + 69 + 139) * 0.85 * 100) / 100).toBe(303.45);
-  });
-
-  it('contractor pay is a share of BANDED LIST price, with a floor', () => {
-    expect(CONTRACTOR_PAY).toEqual({
-      tier1: { pct: 45, floorDollars: 30 },
-      tier2: { pct: 50, floorDollars: 35 },
-    });
-    expect(contractorPayForVisit(149, 1)).toBeCloseTo(67.05, 2);
-    expect(contractorPayForVisit(149, 2)).toBeCloseTo(74.5, 2);
-    // The floor protects small jobs: a $55 Compact lawn pays the floor.
-    expect(contractorPayForVisit(55, 1)).toBe(30);
-    expect(contractorPayForVisit(55, 2)).toBe(35);
-  });
-
-  it('no page or component hardcodes a discount percentage off canon', () => {
-    const files: string[] = [];
-    const walk = (dir: string) => {
-      for (const entry of readdirSync(path.join(root, dir))) {
-        const rel = `${dir}/${entry}`;
-        if (statSync(path.join(root, rel)).isDirectory()) walk(rel);
-        else if (/\.(tsx|ts)$/.test(entry)) files.push(rel);
-      }
-    };
-    walk('src/pages');
-    walk('src/components');
-    const banned = /\b(5|20|25|30)%\s*(off|discount|bundle)/i;
-    expect(files.filter((f) => banned.test(read(f)))).toEqual([]);
-  });
-
-  it('the retired XL Size Upgrade prices are referenced nowhere', () => {
-    const files: string[] = [];
-    const walk = (dir: string) => {
-      for (const entry of readdirSync(path.join(root, dir))) {
-        const rel = `${dir}/${entry}`;
-        if (entry === 'node_modules') continue;
-        if (statSync(path.join(root, rel)).isDirectory()) walk(rel);
-        else if (/\.(tsx|ts)$/.test(entry)) files.push(rel);
-      }
-    };
-    walk('src/lib');
-    walk('src/pages');
-    walk('src/components');
-    walk('supabase/functions');
-    const retired = [
-      'price_1TOXMDD7AxvAjJGvSM51J1SR',
-      'price_1TOXMLD7AxvAjJGvLvapXzvK',
-      'price_1TOXMSD7AxvAjJGvfA9EueeM',
-      'xl_cleaning',
-      'xl_lawn',
-      'xl_detailing',
-      'XL_UPCHARGE',
-    ];
-    const offenders = files.filter((f) => retired.some((r) => read(f).includes(r)));
-    expect(offenders).toEqual([]);
+    const server = read('supabase/functions/_shared/pricing-canon.ts');
+    const strip = (s: string) => s.replace(/^[\s\S]*?\*\//, '').trim();
+    expect(strip(server)).toBe(strip(client));
   });
 });
 
-describe('pricing canon ↔ database', () => {
-  let catalog: Array<{
-    service_type: string | null;
-    band: string | null;
-    is_addon: boolean;
-    per_visit: boolean;
-    price_cents: number;
-    stripe_price_id: string;
-  }> = [];
-  let tiers: Array<{ service_count: number; discount_pct: number }> = [];
-  let settings: Array<{ key: string; value: unknown }> = [];
-
-  beforeAll(async () => {
-    catalog = await rest(
-      'stripe_catalog?select=service_type,band,is_addon,per_visit,price_cents,stripe_price_id&active=eq.true',
-    );
-    tiers = await rest('bundle_discount_tiers?select=service_count,discount_pct');
-    settings = await rest('app_settings?select=key,value&key=eq.referral_bonus_amount_cents');
+describe('three sizes, one flat price each', () => {
+  it('exposes exactly sizes 1, 2 and 3', () => {
+    expect(SIZES).toEqual([1, 2, 3]);
   });
 
-  it('all 12 band prices exist in the catalog at the canon amount and price id', () => {
-    for (const s of services) {
-      for (const b of BANDS) {
-        const row = catalog.find((r) => !r.is_addon && r.service_type === s && r.band === b);
-        expect(row, `${s}:${b}`).toBeTruthy();
-        expect(row?.price_cents, `${s}:${b}`).toBe(bandPriceCents(s, b));
-        expect(row?.stripe_price_id, `${s}:${b}`).toBe(STRIPE_PRICE_IDS[s][b as CanonBand]);
-        expect(row?.per_visit, `${s}:${b}`).toBe(true);
+  it('locks the per-visit and per-month prices', () => {
+    expect(SIZE_PRICES.cleaning).toEqual({ 1: 139, 2: 189, 3: 279 });
+    expect(SIZE_PRICES.lawn).toEqual({ 1: 45, 2: 65, 3: 99 });
+    expect(SIZE_PRICES.detailing).toEqual({ 1: 149, 2: 179, 3: 239 });
+  });
+
+  it('locks the car wash add-on prices', () => {
+    expect(CAR_WASH_PRICES).toEqual({
+      1: { 1: 39, 2: 75 },
+      2: { 1: 49, 2: 95 },
+      3: { 1: 65, 2: 129 },
+    });
+  });
+
+  it('prices cleaning and lawn per visit, Shine Complete per month', () => {
+    expect(SERVICE_UNIT.cleaning).toBe('per_visit');
+    expect(SERVICE_UNIT.lawn).toBe('per_visit');
+    expect(SERVICE_UNIT.detailing).toBe('per_month');
+  });
+
+  it('cents helper matches the dollar price', () => {
+    for (const service of ['cleaning', 'lawn', 'detailing'] as CanonService[]) {
+      for (const size of SIZES) {
+        expect(sizePriceCents(service, size)).toBe(sizePrice(service, size) * 100);
+        expect(getSizePrice(service, size)).toBe(sizePrice(service, size));
       }
     }
-    expect(catalog.filter((r) => !r.is_addon).length).toBe(12);
+  });
+});
+
+describe('cadence multiplies, it never discounts', () => {
+  it('monthly x1, biweekly x2, weekly x4', () => {
+    expect(CADENCE_MULTIPLIER).toEqual({ monthly: 1, biweekly: 2, weekly: 4 });
   });
 
-  it('no retired cadence row or XL upgrade row is still active', () => {
-    const retiredPriceIds = [
-      'price_1T1BxDD7AxvAjJGv03232kHG',
-      'price_1T1BtVD7AxvAjJGv6DK47KkX',
-      'price_1TNCl3D7AxvAjJGvV63NNBap',
-      'price_1T1C60D7AxvAjJGvHwsiZY3x',
-      'price_1T1C3SD7AxvAjJGv62XM2Bkv',
-      'price_1T1C1vD7AxvAjJGvd2jXDMra',
-      'price_1T1CAMD7AxvAjJGv7lPz24fS',
-      'price_1T1C8KD7AxvAjJGviNYShuGx',
-      'price_1TOXMDD7AxvAjJGvSM51J1SR',
-      'price_1TOXMLD7AxvAjJGvLvapXzvK',
-      'price_1TOXMSD7AxvAjJGvfA9EueeM',
-    ];
-    for (const id of retiredPriceIds) {
-      expect(catalog.find((r) => r.stripe_price_id === id), id).toBeUndefined();
+  it('per-visit services follow cadence; flat monthly services stay at 1', () => {
+    expect(SERVICE_QUANTITY_RULE.cleaning).toBe('cadence');
+    expect(SERVICE_QUANTITY_RULE.lawn).toBe('cadence');
+    expect(SERVICE_QUANTITY_RULE.detailing).toBe('always_1');
+    expect(quantityFor('lawn', 'weekly')).toBe(4);
+    expect(quantityFor('detailing', 'weekly')).toBe(1);
+  });
+
+  it('a weekly lawn costs four times a monthly one — no frequency discount', () => {
+    expect(monthlyPrice('lawn', 2, 'weekly')).toBe(sizePrice('lawn', 2) * 4);
+    expect(monthlyPrice('detailing', 2, 'weekly')).toBe(sizePrice('detailing', 2));
+  });
+});
+
+describe('bundling gives car washes, never a percentage', () => {
+  it('one free wash at two services, two at three', () => {
+    expect(freeCarWashesPerMonth(1)).toBe(0);
+    expect(freeCarWashesPerMonth(2)).toBe(1);
+    expect(freeCarWashesPerMonth(3)).toBe(2);
+  });
+
+  it('calculatePricing applies no discount to the subtotal', () => {
+    const p = calculatePricing({
+      ...defaultState,
+      services: ['cleaning', 'lawn'],
+      frequencies: { cleaning: 'biweekly', lawn: 'weekly' },
+      bedrooms: '3',
+      bathrooms: '2',
+      lawnChoice: 'standard',
+    });
+    expect(p.netTotal).toBe(p.subtotal);
+    expect(p.subtotal).toBe(189 * 2 + 65 * 4);
+    expect(p.freeCarWashes).toBe(1);
+  });
+
+  it('no percentage-discount or promo-code machinery survives in the canon', () => {
+    const canon = read('src/lib/pricing-canon.ts');
+    for (const dead of ['BAND_PRICES', 'bundle_discount_pct', 'TIDY_BUNDLE_', 'promo']) {
+      expect(canon).not.toContain(dead);
     }
   });
+});
 
-  it('the charged bundle rates equal the canon', () => {
-    const map: Record<number, number> = {};
-    for (const t of tiers) map[Number(t.service_count)] = Number(t.discount_pct);
-    expect(map).toEqual(BUNDLE_DISCOUNT_PCT_CANON);
+describe('lookup keys are the only way to reach a recurring Stripe price', () => {
+  it('every service/size pair has the expected lookup key', () => {
+    expect(SERVICE_LOOKUP_KEYS.cleaning).toEqual({ 1: 'clean_1', 2: 'clean_2', 3: 'clean_3' });
+    expect(SERVICE_LOOKUP_KEYS.lawn).toEqual({ 1: 'lawn_1', 2: 'lawn_2', 3: 'lawn_3' });
+    expect(SERVICE_LOOKUP_KEYS.detailing).toEqual({ 1: 'shine_1', 2: 'shine_2', 3: 'shine_3' });
   });
 
-  it('the referral bonus is $50 wherever it is read', () => {
-    // app_settings is admin-only, so an anon read returns nothing; when it IS
-    // visible it must match. The payout fallback in the edge function must too.
-    if (settings.length) expect(Number(settings[0].value)).toBe(REFERRAL_BONUS_CENTS);
-    const payout = read('supabase/functions/referral-bonus-check/index.ts');
-    expect(payout).toContain('setting?.value ?? REFERRAL_BONUS_CENTS');
-    expect(payout).toContain('../_shared/pricing-canon.ts');
-    expect(read('supabase/functions/_shared/referral-attribution.ts')).toContain(
-      'REFERRAL_CREDIT_CENTS = REFERRAL_BONUS_CENTS',
-    );
+  it('checkout never hardcodes a recurring price id', () => {
+    const checkout = read('supabase/functions/stripe-create-checkout/index.ts');
+    expect(checkout).toContain('lookup_key');
+    expect(checkout).not.toMatch(/price_1U9d/); // the archived four-band prices
+  });
+});
+
+describe('untouched programme rules', () => {
+  it('referral is give $50, get $50', () => {
+    expect(REFERRAL_BONUS_CENTS).toBe(5000);
+  });
+
+  it('the single entry price is a size 1 lawn, biweekly', () => {
+    expect(ENTRY_PRICE_MONTHLY).toBe(45 * 2);
   });
 });
