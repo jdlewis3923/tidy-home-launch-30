@@ -90,7 +90,7 @@ const translations: Record<string, string> = {
   "🚗 Car Detailing": "🚗 Detallado de Auto",
   "✓ Cancel Anytime": "✓ Cancela Cuando Quieras",
   "Limited founding memberships · No commitment required · From $90/mo":
-    "Membresías fundadoras limitadas · Sin compromiso · Desde $85/mes",
+    "Membresías fundadoras limitadas · Sin compromiso · Desde $90/mes",
 
   // Proof bar
   "Miami Homeowners": "Propietarios en Miami",
@@ -480,7 +480,7 @@ const translations: Record<string, string> = {
     "Cortar, bordear, soplar. El mismo equipo. Precio fijo. Sin facturas sorpresa.",
   "From $45 a visit": "Desde $45 por visita",
   "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$45 a visit** flat, same crew, no surprise invoices.":
-    "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy mensual es **$85/mes fijo**, el mismo equipo, sin facturas sorpresa.",
+    "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy es **$45 por visita**, precio fijo, el mismo equipo, sin facturas sorpresa.",
   // Lawn Care plans
   "One visit per month.": "Una visita al mes.",
   "Two visits per month.": "Dos visitas al mes.",
@@ -493,10 +493,10 @@ const translations: Record<string, string> = {
   "Bag or mulch clippings": "Embolsar o triturar el césped cortado",
   "Bush trim (weekly)": "Poda de arbustos (semanal)",
   "Seasonal fertilization available": "Fertilización por temporada disponible",
-  "Locked $85 — never surprise-priced": "$85 fijo — nunca con precios sorpresa",
+  "Locked $45 a visit — never surprise-priced": "$45 por visita, precio fijo — nunca con precios sorpresa",
   // Lawn Care testimonials
   "Lawn looks sharp every week without me lifting a finger. Best $85 I spend monthly.":
-    "El jardín se ve impecable cada semana sin mover un dedo. Los mejores $85 que gasto al mes.",
+    "El jardín se ve impecable cada semana sin mover un dedo. El mejor dinero que gasto al mes.",
   "Edges are crisp, beds are clean, no debris left behind. Pure consistency.":
     "Los bordes salen limpios, las jardineras quedan despejadas, sin escombros. Pura consistencia.",
   "They show up rain or shine. Locked price, never a surprise invoice.":
@@ -920,7 +920,7 @@ const translations: Record<string, string> = {
   "Start lawn care": "Empezar cuidado del jardín",
   "Start your plan": "Empieza tu plan",
   "Lawn care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same crew, no contracts. Book in about 2 minutes.":
-    "Cuidado del jardín semanal en Pinecrest y Kendall (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Precio fijo desde $85/mes. El mismo equipo, sin contratos. Reserva en unos 2 minutos.",
+    "Cuidado del jardín en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Un precio fijo por visita desde $45. El mismo equipo, sin contratos. Reserva en unos 2 minutos.",
   "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.":
     "Limpieza profesional del hogar, resuelta por nosotros. Semanal, quincenal o mensual.",
   "Tidy isn't just cleaning — it's a system for your entire home.":
