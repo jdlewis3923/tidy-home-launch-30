@@ -553,6 +553,10 @@ const translations: Record<string, string> = {
   "Shine Complete is one flat monthly price set by what you drive: $149, $179 or $239. Every plan is 3 maintenance washes a month plus 2 full details a year.":
     "Shine Complete es un precio fijo mensual según lo que conduces: $149, $179 o $239. Todos los planes incluyen 3 lavados de mantenimiento al mes más 2 detallados completos al año.",
   "What's actually included?": "¿Qué se incluye exactamente?",
+  "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair removal, ozone odor treatment, engine bay clean, and ceramic spray coat are available as add-ons.":
+    "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Retiro de pelo de mascota, tratamiento de olores con ozono, limpieza del compartimento del motor y recubrimiento cerámico en spray están disponibles como servicios adicionales.",
+  "3-row SUVs, full-size trucks and vans are size 3 at $239/mo — a size, never a surcharge. Commercial vans and lifted trucks we price by hand.":
+    "Las SUVs de 3 filas, camionetas grandes y vans son tamaño 3 a $239/mes — es un tamaño, nunca un cargo extra. Las vans comerciales y camionetas elevadas las cotizamos a mano.",
   "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet-hair and ozone available as add-ons.":
     "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascota y ozono disponibles como extras.",
   "Who does the detailing?": "¿Quién hace el detallado?",
