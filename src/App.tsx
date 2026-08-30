@@ -154,7 +154,9 @@ const App = () => (
                   <Route path="/signup" element={<SignupRedirect />} />
                   <Route path="/referral" element={<ReferralRedirect />} />
                   <Route path="/refer" element={<Refer />} />
-                  <Route path="/neighbor" element={<Neighbor />} />
+                  <Route path="/neighbor" element={<Neighbor variant="en" />} />
+                  {/* Spanish back of the door hanger — jointidy.co/vecino */}
+                  <Route path="/vecino" element={<Neighbor variant="es" />} />
                   <Route path="/thank-you" element={<ThankYou />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
