@@ -6,7 +6,7 @@ interface SeoHeadProps {
   description: string;
   canonical: string;
   ogImage?: string;
-  /** Service-specific JSON-LD price range, e.g. "$85–$459". */
+  /** Service-specific JSON-LD price range, e.g. "$45–$279". */
   priceRange?: string;
   noindex?: boolean;
 }

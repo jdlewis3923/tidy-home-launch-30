@@ -8,7 +8,7 @@ const items = [
   "No Long-Term Contracts",
   
   "Serving Kendall & Pinecrest",
-  "From $85/mo",
+  "From $90/mo",
   "One Monthly Plan",
   "No Rebooking",
 ];

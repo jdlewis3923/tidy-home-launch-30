@@ -76,7 +76,7 @@ const Index = () => {
         title="Tidy Home Concierge | Miami Subscription Home Services"
         description="Miami's all-in-one home services subscription. House cleaning, lawn care and car detailing on one monthly plan. Serving ZIPs 33156, 33183 and 33186."
         canonical="https://jointidy.co/"
-        priceRange="$85–$459"
+        priceRange="$45–$279"
       />
       <Navbar onOpenPopup={handleCTA} />
       <AnnouncementTicker />
