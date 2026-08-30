@@ -1,65 +1,49 @@
-# Pro Dashboard live data + COI + sheet sync
+# Pricing rebuild — three sizes, lookup keys, gift bundle
 
-This is a large multi-system build that depends on credentials I don't have yet. I'll ship it in 3 phases so the UI side is usable immediately while the integrations come online as their secrets are provided.
+The four-band (Compact/Standard/Large/Estate) work is abandoned and reverted. New model: sizes 1/2/3 on every service, Stripe referenced only by `lookup_key`, cadence carried by quantity, bundle is free car washes rather than a percentage.
 
-## Phase 1 — Schema + UI wiring (ship now, no external creds needed)
+## 1. Verify Stripe before writing anything
+Resolve all 15 recurring lookup keys against live Stripe (`clean_1..3`, `lawn_1..3`, `shine_1..3`, `wash_{1,2,3}_x{1,2}`) plus the 15 one-time add-ons, and confirm amounts match this brief. If a key is missing or archived, stop and report it rather than guessing a price ID.
 
-**Database migration** (single migration):
-- Add to `applicants`: `coi_uploaded_at`, `coi_pdf_url`, `coi_effective_date`, `coi_expires_at`, `coi_carrier_name`, `coi_policy_number`, `coi_review_status`, `coi_review_notes` (skip generated `dashboard_url` — derive client-side; Postgres generated columns can't reference `gen_random_uuid()`-derived columns reliably, and we'd risk breaking existing rows).
-- Convert `contractor_cancel_rate`, `complaint_rate`, `photo_compliance_rate` to **regular columns updated by trigger** (not GENERATED — Postgres generated columns can't reference other generated values cleanly; trigger keeps the same UX with more flexibility).
-- New tables: `visits`, `google_reviews`, `complaints`, `escalations`, `today_visits`, `stripe_payouts`, `referrals`, `jobber_webhook_log`, `tier_audit_log`.
-- Storage bucket `contractor-coi-pdfs` (private, 10MB, PDF-only) with RLS: Pro can upload to `/{contractor_id}/...`, admin can read all.
-- RLS on every new table: Pro reads own row by `contractor_id = auth.uid()`; admin reads all.
-- Seed Justin's row + 42 fake visits + 38 fake ratings + 3 today_visits + 1 stripe_payouts ($640).
+## 2. Revert the four-band code
+Delete the band model from `src/lib/pricing-canon.ts`, `supabase/functions/_shared/pricing-canon.ts`, `src/lib/dashboard-pricing.ts`, `src/lib/checkout.ts`, the four-band tests, and the band UI in `StepProperty.tsx`. Drop the four-band catalog rows and the `band`/`band_reviews` migration objects (mark rows inactive, do not delete history).
 
-**Frontend**:
-- Apply Part J design tokens to `index.css` (Inter + JetBrains Mono, exact hex tokens, criterion badge variants, tier badges, navy hero band w/ 3px yellow stripe).
-- Rewrite `MyTierWidget` to read from `applicants` for `auth.uid()`, remove all hardcoded fallbacks (show "0 / required" gray when null/0).
-- Rewrite the 8 dashboard widgets to read from the new tables. Skeletons while loading.
-- Animations: progress bar fill (1200ms ease-out), criterion stagger fade-in (80ms), AnimatedNumber for stats, shimmer pulse, hover lifts, prefers-reduced-motion guard.
-- Realtime: subscribe to `applicants`/`today_visits`/`stripe_payouts`/`google_reviews` UPDATE channels for the current user; toast on +1 visit / +5★ review.
-- Confetti celebration (`canvas-confetti`) when readiness flips to ready, persisted via `localStorage` key per advancement.
-- Fix referral copy from `$150` → `$200` everywhere (`MyTierWidget`, `ProDashboard` ref card, `ProTierProgression`).
-- New page `/pro/upload-coi` (JWT-gated, 3-step indicator, drop zone, PDF.js preview, carrier/policy/dates form, submits to storage + edge fn).
-- New page `/admin/coi-review` (queue of `pending_admin_review`, inline PDF viewer, Approve/Reject).
+## 3. New single source of truth
+One canon file, mirrored server-side (parity test enforces byte equality of values):
+- sizes 1/2/3 per service with label, price, unit (`per_visit` / `per_month`), lookup key, quantity rule (`cadence` / `always_1`)
+- cadence multipliers monthly 1 / biweekly 2 / weekly 4
+- entry price "from $90/mo" (lawn size 1, biweekly)
+- sizing rules: bedrooms for cleaning (extra baths move up one size, 5+ bedrooms not purchasable), turf bands for lawn (over 10,000 sq ft not purchasable), vehicle class for car care
+- bundle gift: 2nd service = 1 free monthly car wash, 3rd = 2
+- no percentages, no XL surcharge, no promo codes
 
-## Phase 2 — Edge functions (ship now, gated on secrets per integration)
+## 4. Supabase
+- `stripe_catalog`: exactly the 15 recurring + 15 one-time rows active, all others set inactive; columns `lookup_key`, `size`, `service`, `unit`, `quantity_rule`
+- `subscriptions`: add `size`, plus founding-offer fulfilment columns (`founding_rate_locked`, `free_addon_first_visit`, `founding_zip_slot`) written at signup
+- keep RLS/grants pattern already used by these tables
 
-| Function | Purpose | Secret needed |
-|---|---|---|
-| `jobber-webhook` | HMAC verify, ingest visit events, update counts | `JOBBER_WEBHOOK_SECRET` |
-| `jobber-schedule-sync` (CRON 15min) | Pull next-24h visits → `today_visits` | already have `JOBBER_*` |
-| `google-reviews-poller` (CRON 60min) | Poll GBP, dedupe, name-match, $25 bonus | `GOOGLE_GBP_SERVICE_ACCOUNT_JSON`, `GBP_ACCOUNT_ID`, `GBP_LOCATION_ID` |
-| `stripe-payout-sync` | Webhook for `transfer.created`/`transfer.paid` | already have `STRIPE_*` |
-| `upload-coi-submitted` | Email Justin + flip status | already have `BREVO_API_KEY` |
-| `coi-expiry-check` (CRON daily 9am ET) | 30/14/0/+7 day reminders | needs Brevo template IDs |
-| `referral-bonus-check` (CRON daily 6am ET) | Pay $200 after 10 visits | already have Stripe |
-| `master-sheet-sync` | Upsert applicants/visits/audit log to sheet | `MASTER_SHEET_ID`, `GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON` |
-| `tier-readiness-snapshot` (CRON daily 6am ET) | Refresh snapshot tab | same as above |
-| `recalculate-readiness` | Manual admin button | none |
+## 5. Checkout and edge functions
+`stripe-create-checkout` and `create-stripe-payment-intent` resolve prices by lookup key from the catalog, set quantity from the cadence rule (always 1 for Shine and Car Wash Add-On), block non-purchasable sizes with a quote path, attach the free-car-wash gift line at $0 or as a fulfilment flag, and write founding-offer promises onto the subscription row. Remove all coupon/bundle-percentage code and the dead founding coupons. A test fails if displayed total ≠ Stripe session amount.
 
-I'll scaffold every function. Ones whose secrets exist will be live; others return 503 until the secret arrives, and I'll prompt for them in batches.
+## 6. Sizing UX
+Three plain pickers: bedrooms/baths, lawn by eye with the satellite-confirmation note verbatim, vehicle type. No square-footage or turf inputs at checkout. Live size name + price as they pick. 5+ bedroom and >10,000 sq ft paths show "Call for a quote", no checkout button. ZIP outside 33156/33183/33186 → waitlist, never checkout.
 
-## Phase 3 — Admin polish
+## 7. Copy sweep
+Remove every occurrence of: Compact/Standard/Large/Estate as customer labels; prices $85 $105 $110 $119 $129 $135 $159 $169 $195 $209 $219 $249 $275 $299 $459 and add-on $79 $109 $159; "from $85/mo", "from $110/mo", "from $129/mo"; all percentage discounts; XL Size Upgrade; every star rating, review count and testimonial; "South Florida"/broad Miami claims; "$50 off your first month", NEIGHBOR50, TIDY50 and any promo-code field. Rename "Driveway Add-On" → "Car Wash Add-On" everywhere, keeping the separate one-time "Driveway Pressure Wash" ($150).
 
-- `/admin/applicants` drawer: "Live Data Status" panel (last webhook, last review match, totals with drilldown links), "Recalculate Readiness" button, "Log Complaint" + "Open Escalation" modals.
-- Tier badge column in the table.
+Files in scope: `PricingTable.tsx`, `Services.tsx`, `Hero.tsx`, `AnnouncementTicker.tsx`, `TrustBar.tsx`, `Bundle.tsx`, `HouseCleaning.tsx`, `LawnCare.tsx`, `CarDetailing.tsx`, landing components (`SeoHead`, `ServiceLandingPage`, `StickyBookBar`, `SavingsCallout`), `FAQ.tsx`, `LeadPopup.tsx`, `Index.tsx`, `Refer.tsx`, `Terms.tsx`, `DashboardIndex.tsx`, `Billing.tsx`, dashboard steps, `LanguageContext.tsx` (47 stale price strings, EN + ES).
 
-## What I need from you to ship Phase 2 in the same session
+## 8. Trust claims
+Exactly: Background-Checked Pros | Photo-Verified Every Visit | Cancel Anytime | Same Pro Every Time | Serving Kendall & Pinecrest. "Insured" stays off behind a single clearly-marked flag constant so it can be switched on in one edit. Service area line everywhere: "Serving Pinecrest, Kendall & Palmetto Bay — 33156, 33183, 33186".
 
-These secrets — drop them and I'll wire each function the moment they're set:
+## 9. Publish sizing rules and inclusions
+"How sizing works" section on the pricing page, mirrored in the FAQ with the six Q/A entries verbatim. Publish the cleaning / lawn / Shine Complete inclusion lists, with the cleaning exclusions explicitly marked as paid add-ons.
 
-1. **`JOBBER_WEBHOOK_SECRET`** (Jobber → Settings → Integrations → Webhooks → reveal signing secret)
-2. **`GOOGLE_GBP_SERVICE_ACCOUNT_JSON`** + **`GBP_ACCOUNT_ID`** + **`GBP_LOCATION_ID`** (Google Cloud → service account JSON, GBP account/location IDs from your business profile)
-3. **`MASTER_SHEET_ID`** = `13WGFqOTt_ccRwVVR_FU2VKKE1N91HASZHdhHpMjgunc` (I'll set this)
-4. **`GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON`** (same service account is fine — share the sheet with that service account email as Editor)
-5. **Brevo template IDs** for `COI-RENEWAL-30`, `COI-RENEWAL-14`, `COI-REJECTED` (I can scaffold the function with placeholder IDs and you swap in real numbers later)
+## 10. /neighbor landing page
+New route carrying the founding offer (rate lock, free premium add-on, first visit perfect or free, capped at 25 homes per ZIP, in exchange for a review after visit two), accepting and persisting UTM parameters into the signup payload.
 
-## Decisions I'd like you to confirm before I start
+## 11. Also update
+Chatbot knowledge base pricing answers, JSON-LD offers, meta/OG text containing prices, every seeded/fallback price constant, and the dashboard plan display so a customer sees their size and what it means.
 
-1. **Generated columns**: I want to use a **trigger** to maintain `*_rate` columns instead of Postgres `GENERATED` columns — same outcome from your perspective, but lets webhooks update one number atomically and avoids nasty migration failures with existing rows. OK?
-2. **`dashboard_url`**: derive client-side as a constant `https://jointidy.co/pro` (Pros only see their own data via RLS — no `?as=` needed, that's actually a security smell). The `dashboard_url` written to the sheet is just the static URL. OK?
-3. **Phase 2 strategy**: ship all edge function code now, gate each behind a secret check (returns 503 with a helpful message if its secret is missing) so you can light them up one by one without me touching code again. OR wait until you have all secrets ready and ship them in one pass. Which do you prefer?
-4. **COI test JWT**: I'll generate a test JWT for `jdlewis3923@gmail.com` and link it in the screenshot. OK?
-
-Reply with answers (or just "go ahead, your call on all four") and I'll start Phase 1 immediately.
+## 12. Verify
+Typecheck, run the full test suite (canon parity, checkout-vs-Stripe total, purchasable-size guards), grep for every deleted price string and dead phrase, then report the file list and removed strings. `site_live` stays false; the $50 referral and $50 5★ contractor bonus are untouched.
