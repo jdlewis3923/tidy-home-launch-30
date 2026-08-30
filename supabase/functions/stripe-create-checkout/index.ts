@@ -70,6 +70,8 @@ const CheckoutInputSchema = z.object({
   utm_campaign: z.string().max(500).optional(),
   utm_content: z.string().max(500).optional(),
   utm_term: z.string().max(500).optional(),
+  /** Which door hanger side the signup walked through: doorhanger_en | doorhanger_es. */
+  landing_source: z.string().max(64).optional(),
 });
 
 Deno.serve(async (req) => {
@@ -238,6 +240,7 @@ Deno.serve(async (req) => {
           utm_campaign: input.utm_campaign ?? "",
           utm_content: input.utm_content ?? "",
           utm_term: input.utm_term ?? "",
+          landing_source: input.landing_source ?? "",
         };
 
         // deno-lint-ignore no-explicit-any
