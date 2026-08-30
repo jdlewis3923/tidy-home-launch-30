@@ -96,7 +96,7 @@ const launchFAQ = [
     items: [
       { q: "Are professionals vetted?", a: "Every professional is background-checked through Checkr and required to submit photo documentation after each service." },
       { q: "What if I'm not satisfied?", a: "Reach out within 24 hours and we'll make it right — re-service or credit, no questions asked. Your satisfaction is our top priority." },
-      { q: "What if something goes wrong during a visit?", a: "Every professional carries liability insurance. If there's ever an issue, contact us immediately and we'll resolve it — including damage claims if applicable." },
+      { q: "What if something goes wrong during a visit?", a: "Contact us immediately and we'll make it right — a redo at no charge, or a credit if you prefer." },
       { q: "How do I contact support?", a: "Email hello@jointidy.co and we'll respond within 1 hour during business hours. Real people, real answers." },
     ],
   },

@@ -18,7 +18,7 @@ const foundingCards = [
   {
     icon: "📸",
     title: "Built on Accountability",
-    desc: "Every visit is completed by a vetted, insured, background-checked pro — with photo verification after each service, and a named point of contact on every job.",
+    desc: "Every visit is completed by a vetted, background-checked pro — with photo verification after each service, and a named point of contact on every job.",
   },
   {
     icon: "🛡️",
