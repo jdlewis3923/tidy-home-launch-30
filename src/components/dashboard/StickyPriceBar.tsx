@@ -52,10 +52,12 @@ export default function StickyPriceBar({ state, currentStep }: Props) {
               )}
             </div>
             <p className="text-[11px] text-ink-faint">
-              {pricing.discountPercent > 0
-                ? `${Math.round(pricing.discountPercent * 100)}% bundle saving applied`
+              {pricing.freeCarWashes > 0
+                ? pricing.freeCarWashes === 1
+                  ? '1 free car wash a month included'
+                  : `${pricing.freeCarWashes} free car washes a month included`
                 : state.services.length >= 2 && !hasFullPricing
-                  ? 'bundle saving will apply'
+                  ? 'free car washes will apply'
                   : 'cancel anytime'}
             </p>
           </div>
