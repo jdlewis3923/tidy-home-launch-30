@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
-import { useEffect, lazy, Suspense } from "react";
+import { hasPreviewAccess, redeemPreviewTokenFromUrl } from "@/lib/preview-access";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -119,10 +120,24 @@ const SiteGate = ({ children }: { children: React.ReactNode }) => {
   const { isLive, isLoading } = useSiteLive();
   const { hasRole: isAdmin, isLoading: roleLoading } = useHasRoleState("admin");
   const location = useLocation();
+  // ?preview=TOKEN → validated server side, then held in a session cookie.
+  const [previewChecked, setPreviewChecked] = useState(() => !location.search.includes("preview="));
+  const [hasPreview, setHasPreview] = useState(hasPreviewAccess);
+  useEffect(() => {
+    if (previewChecked) return;
+    let cancelled = false;
+    redeemPreviewTokenFromUrl().then((ok) => {
+      if (cancelled) return;
+      setHasPreview(ok);
+      setPreviewChecked(true);
+    });
+    return () => { cancelled = true; };
+  }, [previewChecked]);
   const isWhitelisted = ALWAYS_OPEN_PREFIXES.some((p) => location.pathname.startsWith(p));
-  if (isLoading || roleLoading) return <RouteFallback />;
-  // Admins always see the full site — toggle only affects everyone else.
-  if (!isLive && !isAdmin && !isWhitelisted) return <ComingSoon />;
+  if (isLoading || roleLoading || !previewChecked) return <RouteFallback />;
+  // Admins and staging previewers always see the full site — the toggle only
+  // affects everyone else.
+  if (!isLive && !isAdmin && !hasPreview && !isWhitelisted) return <ComingSoon />;
   return <>{children}</>;
 };
 
