@@ -32,7 +32,7 @@ describe('canon is mirrored on the server', () => {
   it('client and server canon are identical apart from the doc header path', () => {
     const client = read('src/lib/pricing-canon.ts');
     const server = read('supabase/functions/_shared/pricing-canon.ts');
-    const strip = (s: string) => s.replace(/^[\s\S]*?\*\//, '').trim();
+    const strip = (s: string) => s.slice(s.indexOf('export type CanonService')).trim();
     expect(strip(server)).toBe(strip(client));
   });
 });

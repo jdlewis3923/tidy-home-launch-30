@@ -67,7 +67,7 @@ describe('Florida sales tax in checkout', () => {
     expect(checkoutSrc).toContain('"fl_sales_tax_enabled"');
     expect(checkoutSrc).toContain('taxFlagRow?.value === true');
     // Only detailing is a taxable service in Florida.
-    expect(checkoutSrc).toMatch(/detailingIndices/);
+    expect(checkoutSrc).toMatch(/carCareIndices/);
   });
 
   it('nothing is charged or displayed while collection is disabled', () => {
