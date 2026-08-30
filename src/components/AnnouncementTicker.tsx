@@ -1,14 +1,10 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { trustClaims, ENTRY_PRICE_COPY } from "@/lib/pricing-canon";
 
 const items = [
-  "Vetted & Insured",
-  "Background-Checked Pros",
-  "Cancel Anytime",
-  "Photo-Verified Every Visit",
+  ...trustClaims(),
   "No Long-Term Contracts",
-  
-  "Serving Kendall & Pinecrest",
-  "From $90/mo",
+  ENTRY_PRICE_COPY,
   "One Monthly Plan",
   "No Rebooking",
 ];
