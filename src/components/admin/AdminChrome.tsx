@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const NAV = [
   { to: "/admin/kpis",        label: "KPIs",        icon: BarChart3 },
+  { to: "/admin/capacity",    label: "Capacity",    icon: Gauge },
   { to: "/admin/health",      label: "Health",      icon: Heart },
   { to: "/admin/email-health", label: "Email",      icon: Mail },
   { to: "/admin/inbox",       label: "Inbox",       icon: Inbox },
