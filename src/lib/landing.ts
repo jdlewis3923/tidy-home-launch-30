@@ -20,6 +20,11 @@ export const FORWARDED_PARAMS = [
   "utm_term",
   "gclid",
   "promo",
+  // Door-hanger QR attribution: source, printed ZIP, panel placement, language.
+  "src",
+  "zip",
+  "placement",
+  "lang",
 ] as const;
 
 /**

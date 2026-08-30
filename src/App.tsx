@@ -84,6 +84,7 @@ const AdminInsurance = lazy(() => import("./pages/AdminInsurance.tsx"));
 const AdminTierProgression = lazy(() => import("./pages/AdminTierProgression.tsx"));
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
+const QrRedirect = lazy(() => import("./pages/QrRedirect.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -114,7 +115,7 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 
 // Routes that remain accessible when an admin has toggled the site OFF.
 // Admin can still log in and flip it back on; everything else shows ComingSoon.
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/"];
 
 const SiteGate = ({ children }: { children: React.ReactNode }) => {
   const { isLive, isLoading } = useSiteLive();
@@ -260,6 +261,9 @@ const App = () => (
                     element={CUSTOMER_DASHBOARD_ENABLED ? <CustomerNotifications /> : <Navigate to="/" replace />}
                   />
                   <Route path="/add/:token" element={<AddTokenLanding />} />
+                  {/* Printed door-hanger QR target. Never 404s — see src/lib/qr-codes.ts. */}
+                  <Route path="/q/:code" element={<QrRedirect />} />
+                  <Route path="/q" element={<QrRedirect />} />
 
                   <Route path="*" element={<NotFound />} />
                   </Routes>
