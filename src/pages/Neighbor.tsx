@@ -40,7 +40,7 @@ const Neighbor = () => {
         description="Founding neighbors lock their rate for life, get a free premium add-on on visit one, and a first visit that is perfect or free. 25 homes per ZIP in Pinecrest, Kendall and Palmetto Bay."
         canonical="https://jointidy.co/neighbor"
       />
-      <Navbar />
+      <Navbar onOpenPopup={() => { window.location.assign(signupHref); }} />
 
       <main>
         <section className="bg-navy text-primary-foreground px-4 pt-28 pb-16">
@@ -109,7 +109,7 @@ const Neighbor = () => {
                       {formatSizePrice(service, 1)}
                     </p>
                     <p className="text-xs text-text-mid mt-1">
-                      {t(serviceUnits[service] === 'month' ? 'per month, size 1' : 'per visit, size 1')}
+                      {t(serviceUnits[service] === 'per_month' ? 'per month, size 1' : 'per visit, size 1')}
                     </p>
                   </div>
                 ))}
