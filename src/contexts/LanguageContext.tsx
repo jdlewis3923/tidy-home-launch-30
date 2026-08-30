@@ -1110,7 +1110,6 @@ const translations: Record<string, string> = {
   // The Spanish wording here is the exact copy printed on the tear-off card.
   "Founding neighbor offer": "Oferta de vecino fundador",
   "Your founding rate is locked — your price never rises": "Su precio nunca sube",
-  "One free premium add-on on your first visit": "Un servicio adicional gratis en la primera visita",
   "First visit perfect or it’s free": "Primera visita perfecta o es gratis",
   "Capped at 25 founding homes per ZIP": "Limitado a 25 hogares fundadores por código postal",
   "in exchange for a review after your second visit":
@@ -1126,7 +1125,7 @@ const translations: Record<string, string> = {
   "per month, size 1": "por mes, tamaño 1",
   "Serving Pinecrest, Kendall & Palmetto Bay — 33156, 33183, 33186":
     "Servimos Pinecrest, Kendall y Palmetto Bay — 33156, 33183, 33186",
-  "from $45/mo": "desde $45/mes",
+  "from $90/mo": "desde $90/mes",
 };
 
 
