@@ -89,7 +89,7 @@ const translations: Record<string, string> = {
   "🌿 Lawn Care": "🌿 Cuidado del Jardín",
   "🚗 Car Detailing": "🚗 Detallado de Auto",
   "✓ Cancel Anytime": "✓ Cancela Cuando Quieras",
-  "Limited founding memberships · No commitment required · Starting at $85/mo":
+  "Limited founding memberships · No commitment required · From $90/mo":
     "Membresías fundadoras limitadas · Sin compromiso · Desde $85/mes",
 
   // Proof bar
@@ -206,8 +206,8 @@ const translations: Record<string, string> = {
   Monthly: "Mensual",
   Biweekly: "Quincenal",
   Weekly: "Semanal",
-  "Bundle discount auto-applied at checkout · 2 services = 10% off · 3 services = 15% off · Cancel anytime":
-    "Descuento por combo aplicado automáticamente · 2 servicios = 10% descuento · 3 servicios = 15% descuento · Cancela cuando quieras",
+  "Bundle and we add car washes · 2 services = 1 free car wash a month · 3 services = 2 · Cancel anytime":
+    "Combina y agregamos lavadas de auto · 2 servicios = 1 lavada gratis al mes · 3 servicios = 2 · Cancela cuando quieras"
 
   // FAQ
   "Most customers never need to think about any of this — but we've got you covered.":
@@ -352,8 +352,8 @@ const translations: Record<string, string> = {
   Privacy: "Privacidad",
 
   // Bundle banner
-  "💡 Bundle services and save automatically — 2 services: <strong>10% off</strong> · 3 services: <strong>15% off</strong> — Applied at checkout automatically":
-    "💡 Combina servicios y ahorra automáticamente — 2 servicios: <strong>10% descuento</strong> · 3 servicios: <strong>15% descuento</strong> — Aplicado automáticamente",
+  "💡 Bundle and we add car washes — 2 services: <strong>1 free car wash a month</strong> · 3 services: <strong>2 free car washes a month</strong>":
+    "💡 Combina y agregamos lavadas de auto — 2 servicios: <strong>1 lavada gratis al mes</strong> · 3 servicios: <strong>2 lavadas gratis al mes</strong>",
 
   // ============================================================
   // LANDING PAGES (LPs) — /house-cleaning, /lawn-care, /car-detailing, /bundle
@@ -425,8 +425,8 @@ const translations: Record<string, string> = {
   "Same crew. Locked rate. No contracts. Handle your home on autopilot.":
     "El mismo equipo. Tarifa fija. Sin contratos. Tu casa en piloto automático.",
   "From $139 a visit": "Desde $139 por visita",
-  "One-off cleanings in Pinecrest average **$180–$260**. Our monthly plan locks you in at **$159** — with the same crew every visit.":
-    "Las limpiezas sueltas en Pinecrest cuestan en promedio **$180–$260**. Nuestro plan mensual te deja fijo en **$159** — con el mismo equipo cada visita.",
+  "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a visit** — with the same crew every time.":
+    "Las limpiezas sueltas en Pinecrest cuestan en promedio **$180–$260**. Nuestros planes empiezan en **$139 por visita** — con el mismo equipo cada vez.",
   // House Cleaning plans
   "One visit per month, same crew every time.": "Una visita al mes, el mismo equipo siempre.",
   "Two visits per month, priority scheduling.": "Dos visitas al mes, con prioridad en agendado.",
@@ -452,8 +452,8 @@ const translations: Record<string, string> = {
     "Reservé en menos de un minuto. El equipo es puntual, amable y minucioso.",
   // House Cleaning FAQs
   "What's the price and what's it based on?": "¿Cuál es el precio y de qué depende?",
-  "Plans start at $159/mo for a monthly visit, $275/mo biweekly, $459/mo weekly. Pricing is based on cadence and home size. Standard pricing covers most homes up to 2,500 sq ft — larger homes have a small flat upgrade.":
-    "Los planes empiezan en $159/mes para una visita mensual, $275/mes quincenal y $459/mes semanal. El precio depende de la frecuencia y el tamaño de la casa. El precio estándar cubre la mayoría de las casas hasta 2,500 pies cuadrados — las casas más grandes tienen un pequeño cargo adicional fijo.",
+  "One flat price per visit, set by the size of your home: $139, $189 or $279. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Homes with 5+ bedrooms are quoted by hand.":
+    "Un precio fijo por visita, según el tamaño de tu casa: $139, $189 o $279. La frecuencia solo lo multiplica — mensual es una visita, quincenal dos y semanal cuatro. Las casas de 5+ recámaras las cotizamos a mano.",
   "Yes. No contracts, no cancellation fees. Pause, skip, or cancel from your dashboard anytime.":
     "Sí. Sin contratos, sin cargos por cancelación. Pausa, omite o cancela desde tu panel cuando quieras.",
   "What's your service area?": "¿Cuál es su área de servicio?",
@@ -470,16 +470,16 @@ const translations: Record<string, string> = {
     "Al inscribirte, fijamos un día y horario recurrente. Recibes un aviso de llegada antes de cada visita. Reagenda cuando quieras desde tu panel.",
   "Reach out within 24 hours and we'll re-clean the area or credit your account — no questions asked.":
     "Avísanos en 24 horas y volvemos a limpiar el área o te acreditamos a tu cuenta — sin preguntas.",
-  "Already booking cleaning? Add lawn care for $85/mo.": "¿Ya tienes limpieza? Agrega jardín por $85/mes.",
-  "Save 10% when you stack — and never coordinate two providers again.":
-    "Ahorra 10% al combinar — y nunca más coordines dos proveedores.",
+  "Already booking cleaning? Add lawn care from $45 a visit.": "¿Ya tienes limpieza? Agrega jardín desde $45 por visita.",
+  "Add a 2nd service and we throw in a free car wash every month — and you never coordinate two providers again.":
+    "Agrega un 2º servicio y te regalamos una lavada de auto cada mes — y nunca más coordinas dos proveedores.",
 
   // Lawn Care LP
   "Monthly Lawn Care in Pinecrest + Kendall": "Cuidado Mensual del Jardín en Pinecrest + Kendall",
   "Mow, edge, blow. Same crew. Locked price. Never surprise-billed.":
     "Cortar, bordear, soplar. El mismo equipo. Precio fijo. Sin facturas sorpresa.",
   "From $45 a visit": "Desde $45 por visita",
-  "Most Pinecrest lawn pros charge **$40–$60 per visit**. Monthly Tidy is **$85/mo flat**, same crew, no surprise invoices.":
+  "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$45 a visit** flat, same crew, no surprise invoices.":
     "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy mensual es **$85/mes fijo**, el mismo equipo, sin facturas sorpresa.",
   // Lawn Care plans
   "One visit per month.": "Una visita al mes.",
@@ -502,8 +502,8 @@ const translations: Record<string, string> = {
   "They show up rain or shine. Locked price, never a surprise invoice.":
     "Llegan llueva o truene. Precio fijo, nunca una factura sorpresa.",
   // Lawn Care FAQs
-  "Plans start at $85/mo monthly, $129/mo biweekly, $195/mo weekly. Pricing is based on cadence and yard size. Standard pricing covers most yards up to 4,000 sq ft of mowable turf.":
-    "Los planes empiezan en $85/mes mensual, $129/mes quincenal y $195/mes semanal. El precio depende de la frecuencia y el tamaño del jardín. El precio estándar cubre la mayoría de los jardines hasta 4,000 pies cuadrados de césped cortable.",
+  "One flat price per visit, set by the size of your lawn: $45, $65 or $99. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Pick your best guess and we confirm the size from satellite imagery before your first visit.":
+    "Un precio fijo por visita, según el tamaño de tu jardín: $45, $65 o $99. La frecuencia solo lo multiplica — mensual es una visita, quincenal dos y semanal cuatro. Elige tu mejor estimación y confirmamos el tamaño con imágenes satelitales antes de la primera visita.",
   "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.":
     "Corte a altura precisa, bordeado de todos los contornos, soplado de áreas pavimentadas, desbroce a lo largo de las cercas y embolsar o triturar el césped. Los planes semanales incluyen poda de arbustos.",
   "Who does the work?": "¿Quién hace el trabajo?",
@@ -513,15 +513,15 @@ const translations: Record<string, string> = {
     "Reprogramamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa y tu precio no cambia.",
   "Reach out within 24 hours and we'll send the crew back or credit your account — no questions asked.":
     "Avísanos en 24 horas y mandamos al equipo de vuelta o te acreditamos a tu cuenta — sin preguntas.",
-  "Already booking lawn? Add biweekly cleaning for $275/mo.":
-    "¿Ya tienes jardín? Agrega limpieza quincenal por $275/mes.",
+  "Already booking lawn? Add cleaning from $139 a visit.":
+    "¿Ya tienes jardín? Agrega limpieza desde $139 por visita.",
 
   // Car Detailing LP
   "Mobile Car Detailing in Pinecrest + Kendall": "Detallado Móvil de Auto en Pinecrest + Kendall",
   "We come to your driveway. Ceramic-safe. Monthly interior + exterior.":
     "Vamos a tu garaje. Seguro para cerámica. Interior + exterior mensual.",
-  "A good mobile detail runs **$120–$180 per appointment**. Our subscription is **$159/mo** — and we come to your driveway.":
-    "Un buen detallado móvil cuesta **$120–$180 por cita**. Nuestra suscripción es **$159/mes** — y vamos a tu garaje.",
+  "A good mobile detail runs **$120–$180 per appointment**. Shine Complete is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.":
+    "Un buen detallado móvil cuesta **$120–$180 por cita**. Shine Complete es **$149/mes** por 3 lavadas de mantenimiento al mes más 2 detallados completos al año — en tu entrada.",
   // Car Detailing plans
 
   "Interior + exterior, one vehicle.": "Interior + exterior, un vehículo.",
@@ -543,8 +543,8 @@ const translations: Record<string, string> = {
   "Locked monthly price. Same detailer every visit. Best routine I've added all year.":
     "Precio mensual fijo. El mismo detallador cada visita. La mejor rutina que añadí en todo el año.",
   // Car Detailing FAQs
-  "Plans start at $159/mo for Monthly and $249/mo for Biweekly. Pricing is based on plan and vehicle size. Standard pricing covers sedans, coupes, crossovers, and 2-row SUVs.":
-    "Los planes empiezan en $159/mes para Mensual y $249/mes para Quincenal. El precio depende del plan y del tamaño del vehículo. El precio estándar cubre sedanes, coupés, crossovers y SUVs de 2 filas.",
+  "Shine Complete is one flat monthly price set by what you drive: $149, $179 or $239. Every plan is 3 maintenance washes a month plus 2 full details a year.":
+    "Shine Complete es un precio fijo mensual según lo que conduces: $149, $179 o $239. Todos los planes incluyen 3 lavadas de mantenimiento al mes más 2 detallados completos al año.",
   "What's actually included?": "¿Qué se incluye exactamente?",
   "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet-hair and ozone available as add-ons.":
     "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascota y ozono disponibles como extras.",
@@ -556,8 +556,8 @@ const translations: Record<string, string> = {
     "Las SUVs de 3 filas, camionetas grandes y vans grandes tienen un pequeño cargo adicional. Vans comerciales y camionetas elevadas necesitan una cotización rápida — la manejamos.",
   "Reach out within 24 hours and we'll send the detailer back or credit your account — no questions asked.":
     "Avísanos en 24 horas y mandamos al detallador de vuelta o te acreditamos a tu cuenta — sin preguntas.",
-  "Already booking detailing? Add monthly cleaning for $159/mo.":
-    "¿Ya tienes detallado? Agrega limpieza mensual por $159/mes.",
+  "Already on Shine Complete? Add cleaning from $139 a visit.":
+    "¿Ya tienes Shine Complete? Agrega limpieza desde $139 por visita.",
 
   // Bundle page
   "Bundle & Save — stack services, get free car washes": "Combo y Ahorra — apila servicios y recibe lavadas de auto gratis",
@@ -565,16 +565,17 @@ const translations: Record<string, string> = {
     "Mientras más combinas, más ahorras. Solo Pinecrest + Kendall (33156 · 33183 · 33186).",
   "2-Service Bundle": "Combo de 2 Servicios",
   "1 free car wash a month": "1 lavada de auto gratis al mes",
-  "Pick any two — we coordinate everything and you save 10% every month.":
-    "Elige cualquier dos — coordinamos todo y ahorras 10% cada mes.",
-  "after 10% bundle discount": "después del 10% de descuento por combo",
+  "Add a 2nd service — 1 free car wash every month.":
+    "Agrega un 2º servicio — 1 lavada de auto gratis cada mes.",
+  "plus 1 free car wash every month": "más 1 lavada de auto gratis cada mes",
+  "plus 2 free car washes every month": "más 2 lavadas de auto gratis cada mes",
   "Pick exactly 2 services to see your bundled price.": "Elige exactamente 2 servicios para ver tu precio combinado.",
   "Build my 2-service bundle": "Arma mi combo de 2 servicios",
   "Pick 2 services to continue": "Elige 2 servicios para continuar",
   "3-Service Bundle": "Combo de 3 Servicios",
   "2 free car washes a month": "2 lavadas de auto gratis al mes",
-  "All three services on one plan: cleaning, lawn care, and detailing. Lock in 15% off the combined monthly price.":
-    "Los tres servicios en un solo plan: limpieza, jardín y detallado. Asegura 15% de descuento sobre el precio mensual combinado.",
+  "Add a 3rd service — 2 free car washes every month.":
+    "Agrega un 3er servicio — 2 lavadas de auto gratis cada mes.",
   "Build my 3-service bundle": "Arma mi combo de 3 servicios",
   Custom: "Personalizado",
   Tailored: "A Medida",
@@ -765,8 +766,8 @@ const translations: Record<string, string> = {
   "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees.":
     "El precio depende de los servicios que elijas y con qué frecuencia los quieras — semanal, quincenal o mensual. Eso es todo. Sin cargos ocultos.",
   "How do bundle discounts work?": "¿Cómo funcionan los descuentos por combo?",
-  "Pick 2 services and get 10% off automatically. Pick all 3 and get 15% off. The discount is applied at checkout — no code needed.":
-    "Elige 2 servicios y obtén 10% de descuento automáticamente. Elige los 3 y obtén 15% de descuento. El descuento se aplica al pagar — sin código.",
+  "Pick 2 services and we add 1 free car wash a month. Pick all 3 and we add 2. It is applied at checkout — no code needed.":
+    "Elige 2 servicios y agregamos 1 lavada de auto gratis al mes. Elige los 3 y agregamos 2. Se aplica al pagar — sin código.",
   "Can I add services later?": "¿Puedo agregar servicios después?",
   "Yes. You can add or remove any service at any time. Changes take effect on your next billing cycle.":
     "Sí. Puedes agregar o quitar cualquier servicio en cualquier momento. Los cambios aplican en tu próximo ciclo de facturación.",
@@ -918,15 +919,15 @@ const translations: Record<string, string> = {
     "Tidy no es solo jardín — es un sistema para todo tu hogar.",
   "Start lawn care": "Empezar cuidado del jardín",
   "Start your plan": "Empieza tu plan",
-  "Weekly lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Locked price from $85/mo. Same crew, no contracts. Book in about 2 minutes.":
+  "Lawn care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same crew, no contracts. Book in about 2 minutes.":
     "Cuidado del jardín semanal en Pinecrest y Kendall (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Precio fijo desde $85/mes. El mismo equipo, sin contratos. Reserva en unos 2 minutos.",
   "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.":
     "Limpieza profesional del hogar, resuelta por nosotros. Semanal, quincenal o mensual.",
   "Tidy isn't just cleaning — it's a system for your entire home.":
     "Tidy no es solo limpieza — es un sistema para todo tu hogar.",
   "Book your cleaning": "Reserva tu limpieza",
-  "Monthly house cleaning in Pinecrest and Kendall (33156, 33183, 33186). Locked price from $159/mo. Same crew, no contracts, eco-safe. Book in about 2 minutes.":
-    "Limpieza mensual del hogar en Pinecrest y Kendall (33156, 33183, 33186). Precio fijo desde $159/mes. El mismo equipo, sin contratos, productos ecológicos. Reserva en unos 2 minutos.",
+  "House cleaning in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). One flat price per visit from $139. Same crew, no contracts, eco-safe. Book in about 2 minutes.":
+    "Limpieza del hogar en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Un precio fijo por visita desde $139. El mismo equipo, sin contratos, productos ecológicos. Reserva en unos 2 minutos.",
   "Professional car detailing at your home. Ceramic-safe, monthly.":
     "Detallado profesional de autos en tu casa. Seguro para cerámica, mensual.",
   "Same detailer every visit. Locked monthly price. Cancel anytime.":
@@ -934,10 +935,10 @@ const translations: Record<string, string> = {
   "Tidy isn't just detailing — it's a system for your entire home.":
     "Tidy no es solo detallado — es un sistema para todo tu hogar.",
   "Book detailing": "Reservar detallado",
-  "Mobile car detailing in Pinecrest and Kendall (33156, 33183, 33186). We come to your driveway. Ceramic-safe, locked price from $159/mo. Book in about 2 minutes.":
-    "Detallado de autos a domicilio en Pinecrest y Kendall (33156, 33183, 33186). Vamos a tu entrada. Seguro para cerámica, precio fijo desde $159/mes. Reserva en unos 2 minutos.",
-  "Stack home cleaning, lawn care, and car detailing on one plan. Save 10–15% in Pinecrest and Kendall (33156, 33183, 33186). One subscription, one crew, one bill.":
-    "Combina limpieza del hogar, cuidado del jardín y detallado de auto en un solo plan. Ahorra 10–15% en Pinecrest y Kendall (33156, 33183, 33186). Una suscripción, un equipo, una factura.",
+  "Shine Complete mobile car care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.":
+    "Shine Complete a domicilio en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). 3 lavadas al mes más 2 detallados completos al año, desde $149/mes. Reserva en unos 2 minutos.",
+  "Stack home cleaning, lawn care and Shine Complete on one plan. Free car washes every month in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). One subscription, one crew, one bill.":
+    "Combina limpieza del hogar, cuidado del jardín y Shine Complete en un solo plan. Lavadas de auto gratis cada mes en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Una suscripción, un equipo, una factura.",
   "Vetted & insured pros": "Profesionales verificados y asegurados",
   "About 2 minutes · No contracts": "Unos 2 minutos · Sin contratos",
   "Locked price · No contracts · Cancel anytime · Pause or reschedule anytime":
@@ -1048,13 +1049,15 @@ const translations: Record<string, string> = {
   // Service area line + price cadence labels
   "Trusted across 33156 · 33183 · 33186": "Con la confianza de 33156 · 33183 · 33186",
   "/mo": "/mes",
-  "$159/mo": "$159/mes",
-  "$275/mo": "$275/mes",
-  "$459/mo": "$459/mes",
-  "$85/mo": "$85/mes",
-  "$129/mo": "$129/mes",
-  "$195/mo": "$195/mes",
-  "$249/mo": "$249/mes",
+  "$139/mo": "$139/mes",
+  "$278/mo": "$278/mes",
+  "$556/mo": "$556/mes",
+  "$45/mo": "$45/mes",
+  "$90/mo": "$90/mes",
+  "$180/mo": "$180/mes",
+  "$149/mo": "$149/mes",
+  "$179/mo": "$179/mes",
+  "$239/mo": "$239/mes",
 
   // Billing — manage subscription
   "Manage subscription": "Administrar suscripción",
