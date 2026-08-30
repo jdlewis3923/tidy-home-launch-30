@@ -1,5 +1,6 @@
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { VETTED_CLAIM } from "@/lib/pricing-canon";
 
 const reasons = [
   {

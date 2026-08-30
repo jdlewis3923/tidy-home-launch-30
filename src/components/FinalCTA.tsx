@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
+import { VETTED_CLAIM } from "@/lib/pricing-canon";
 
 interface FinalCTAProps {
   onOpenPopup: () => void;
