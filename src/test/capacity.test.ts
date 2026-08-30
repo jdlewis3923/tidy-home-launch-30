@@ -38,7 +38,7 @@ describe('capacity math', () => {
   });
 
   it('cleaning trips before lawn at identical customer counts and growth', () => {
-    const args = { activeCustomers: 15, assignedPros: 1, netNewCustomers: 3 } as const;
+    const args = { activeCustomers: 18, assignedPros: 1, netNewCustomers: 6 } as const;
     const cleaning = computeCapacity({ service: 'cleaning', ...args });
     const lawn = computeCapacity({ service: 'lawn', ...args });
     expect(cleaning.daysToCeiling!).toBeLessThan(lawn.daysToCeiling!);
@@ -76,7 +76,7 @@ describe('capacity math', () => {
   });
 
   it('amber says post today; green says post in N days', () => {
-    const amber = computeCapacity({ service: 'cleaning', activeCustomers: 18, assignedPros: 1, netNewCustomers: 4 });
+    const amber = computeCapacity({ service: 'cleaning', activeCustomers: 18, assignedPros: 1, netNewCustomers: 6 });
     expect(amber.status).toBe('amber');
     expect(amber.message).toContain('Post the job today');
     expect(amber.message).toContain('hiring takes 26');
