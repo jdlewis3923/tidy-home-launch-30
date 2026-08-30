@@ -3,7 +3,6 @@ import { Lock, ShieldCheck, CreditCard, BadgeCheck, Banknote, X as XIcon } from 
 import {
   ConfigState,
   calculatePricing,
-  REFERRAL_DISCOUNT_CENTS,
   serviceLabels,
   serviceIcons,
   frequencyLabels,
@@ -240,9 +239,6 @@ export default function StepPayment({ state, onChange }: Props) {
               <span className="text-2xl font-bold text-ink tracking-tight">custom</span>
             ) : (
               <>
-                {promoCode && (
-                  <div className="text-xs text-ink-faint line-through tabular-nums">${pricing.firstMonth.toFixed(2)}</div>
-                )}
                 <div className="text-4xl font-bold text-ink tabular-nums tracking-tight">
                   ${totalToday.toFixed(2)}
                 </div>
