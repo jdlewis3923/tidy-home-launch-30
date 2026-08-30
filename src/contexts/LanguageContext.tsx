@@ -523,7 +523,14 @@ const translations: Record<string, string> = {
   "A good mobile detail runs **$120–$180 per appointment**. Shine Complete is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.":
     "Un buen detallado móvil cuesta **$120–$180 por cita**. Shine Complete es **$149/mes** por 3 lavados de mantenimiento al mes más 2 detallados completos al año — en tu entrada.",
   // Car Detailing plans
-
+  "Shine Complete · Size 1": "Shine Complete · Tamaño 1",
+  "Shine Complete · Size 2": "Shine Complete · Tamaño 2",
+  "Shine Complete · Size 3": "Shine Complete · Tamaño 3",
+  "Sedans and coupes. 3 washes a month plus 2 full details a year.":
+    "Sedanes y coupés. 3 lavados al mes más 2 detallados completos al año.",
+  "Crossovers and 2-row SUVs. Same flat monthly price.":
+    "Crossovers y SUVs de 2 filas. El mismo precio fijo mensual.",
+  "Trucks, 3-row SUVs and vans.": "Camionetas, SUVs de 3 filas y vans.",
   "Interior + exterior, one vehicle.": "Interior + exterior, un vehículo.",
   "Interior + exterior, every two weeks, one vehicle.": "Interior + exterior, cada dos semanas, un vehículo.",
   // Car Detailing included
