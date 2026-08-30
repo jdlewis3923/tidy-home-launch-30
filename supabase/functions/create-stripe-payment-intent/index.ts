@@ -60,6 +60,10 @@ const InputSchema = z.object({
   utm_term: z.string().max(500).optional(),
   /** Which door hanger side the signup walked through: doorhanger_en | doorhanger_es. */
   landing_source: z.string().max(64).optional(),
+  /** hero | card | unknown — which door-hanger panel was scanned. */
+  qr_placement: z.string().max(16).optional(),
+  /** ZIP printed on the scanned hanger. */
+  qr_zip: z.string().max(10).optional(),
 });
 
 async function deterministicKey(userId: string, payload: unknown): Promise<string> {
@@ -221,6 +225,8 @@ Deno.serve(async (req) => {
           utm_content: input.utm_content ?? "",
           utm_term: input.utm_term ?? "",
           landing_source: input.landing_source ?? "",
+          qr_placement: input.qr_placement ?? "",
+          qr_zip: input.qr_zip ?? "",
         };
 
         const idempotencyKey =
