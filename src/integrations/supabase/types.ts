@@ -2353,12 +2353,16 @@ export type Database = {
             | null
           id: string
           is_addon: boolean
+          lookup_key: string | null
           per_visit: boolean
           price_cents: number
+          quantity_rule: string | null
           service_type: Database["public"]["Enums"]["service_type"] | null
+          size: number | null
           sort_order: number
           stripe_price_id: string
           stripe_product_id: string | null
+          unit: string | null
         }
         Insert: {
           active?: boolean
@@ -2372,12 +2376,16 @@ export type Database = {
             | null
           id?: string
           is_addon?: boolean
+          lookup_key?: string | null
           per_visit?: boolean
           price_cents: number
+          quantity_rule?: string | null
           service_type?: Database["public"]["Enums"]["service_type"] | null
+          size?: number | null
           sort_order?: number
           stripe_price_id: string
           stripe_product_id?: string | null
+          unit?: string | null
         }
         Update: {
           active?: boolean
@@ -2391,12 +2399,16 @@ export type Database = {
             | null
           id?: string
           is_addon?: boolean
+          lookup_key?: string | null
           per_visit?: boolean
           price_cents?: number
+          quantity_rule?: string | null
           service_type?: Database["public"]["Enums"]["service_type"] | null
+          size?: number | null
           sort_order?: number
           stripe_price_id?: string
           stripe_product_id?: string | null
+          unit?: string | null
         }
         Relationships: []
       }
@@ -2533,6 +2545,11 @@ export type Database = {
           card_brand: string | null
           card_last4: string | null
           created_at: string
+          founding_free_addon_first_visit: boolean
+          founding_free_addon_fulfilled_at: string | null
+          founding_rate_locked: boolean
+          founding_review_promised: boolean
+          free_car_washes_per_month: number
           frequency: Database["public"]["Enums"]["subscription_frequency"]
           id: string
           jobber_client_id: string | null
@@ -2543,6 +2560,8 @@ export type Database = {
           pause_collection: string | null
           paused_until: string | null
           services: Database["public"]["Enums"]["service_type"][]
+          size: number | null
+          sizes_json: Json | null
           status: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -2559,6 +2578,11 @@ export type Database = {
           card_brand?: string | null
           card_last4?: string | null
           created_at?: string
+          founding_free_addon_first_visit?: boolean
+          founding_free_addon_fulfilled_at?: string | null
+          founding_rate_locked?: boolean
+          founding_review_promised?: boolean
+          free_car_washes_per_month?: number
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
           jobber_client_id?: string | null
@@ -2569,6 +2593,8 @@ export type Database = {
           pause_collection?: string | null
           paused_until?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
+          size?: number | null
+          sizes_json?: Json | null
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -2585,6 +2611,11 @@ export type Database = {
           card_brand?: string | null
           card_last4?: string | null
           created_at?: string
+          founding_free_addon_first_visit?: boolean
+          founding_free_addon_fulfilled_at?: string | null
+          founding_rate_locked?: boolean
+          founding_review_promised?: boolean
+          free_car_washes_per_month?: number
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
           jobber_client_id?: string | null
@@ -2595,6 +2626,8 @@ export type Database = {
           pause_collection?: string | null
           paused_until?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
+          size?: number | null
+          sizes_json?: Json | null
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null

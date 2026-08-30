@@ -1,14 +1,14 @@
 // Tidy — Create Stripe Subscription with embedded Payment Element
 //
-// Replaces the redirect-to-Checkout flow on /signup by creating the
-// Stripe Customer + Subscription server-side and returning the latest
-// invoice's PaymentIntent client_secret. The browser confirms the
-// payment inline using @stripe/react-stripe-js Payment Element — the
-// customer never leaves jointidy.co.
+// Creates the Stripe Customer + Subscription server-side and returns the latest
+// invoice's PaymentIntent client_secret so the browser can confirm inline.
 //
-// Idempotency: pass a client-supplied `idempotency_key` so retries do
-// not create duplicate subscriptions. Falls back to a deterministic
-// hash of (user_id + sorted line_items) when missing.
+// Model: three sizes (1/2/3) per service, resolved from stripe_catalog BY
+// LOOKUP KEY. Cleaning and lawn are per visit and carry cadence as the item
+// quantity (monthly 1, biweekly 2, weekly 4). Shine Complete and the Car Wash
+// Add-On are per month, always quantity 1. No percentage discounts, no promo
+// codes — bundling earns free car washes and the founding offer is a set of
+// fulfilment promises recorded in metadata.
 
 import Stripe from "https://esm.sh/stripe@17.5.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
@@ -16,10 +16,14 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
-import { getBundleCouponId } from "../_shared/bundle-coupon.ts";
-import { resolveBundleDiscountPct as resolveBundleDiscountPctFromDb } from "../_shared/bundle-discount.ts";
-import { CADENCE_MULTIPLIER } from "../_shared/pricing-canon.ts";
-
+import {
+  CAR_WASH_LOOKUP_KEYS,
+  SERVICE_LOOKUP_KEYS,
+  freeCarWashesPerMonth,
+  quantityFor,
+  type CanonSize,
+  type WashCount,
+} from "../_shared/pricing-canon.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -29,27 +33,18 @@ const SERVICE_ZIPS = new Set(["33156", "33183", "33186"]);
 
 const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
 const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
-// Size bands. The band IS the price; cadence only sets the item quantity.
-const BandEnum = z.enum(["compact", "standard", "large", "estate"]);
+const SizeEnum = z.union([z.literal(1), z.literal(2), z.literal(3)]);
 
 const InputSchema = z.object({
   services: z
-    .array(
-      z.object({
-        service: ServiceTypeEnum,
-        band: BandEnum,
-        frequency: FrequencyEnum,
-        // Per-vehicle services (detailing) send the vehicle count here.
-        qty: z.number().int().min(1).max(10).default(1),
-      }),
-    )
+    .array(z.object({ service: ServiceTypeEnum, size: SizeEnum, frequency: FrequencyEnum }))
     .min(1)
     .max(3),
   addons: z
     .array(z.object({ addon_name: z.string().min(1).max(64), qty: z.number().int().min(1).max(20) }))
     .max(50)
     .default([]),
-  promo_code: z.string().trim().min(1).max(64).optional(),
+  car_wash: z.object({ size: SizeEnum, washes: z.union([z.literal(1), z.literal(2)]) }).optional(),
   referral_code: z.string().trim().min(1).max(64).optional(),
   zip: z.string().regex(/^\d{5}$/),
   preferred_day: z.string().max(20).optional(),
@@ -103,6 +98,11 @@ Deno.serve(async (req) => {
   const input = parsed.data;
   if (!SERVICE_ZIPS.has(input.zip)) return jsonResponse({ ok: false, error: "zip_outside_service_area" }, 400);
 
+  const hasHomeService = input.services.some((s) => s.service === "lawn" || s.service === "cleaning");
+  if (input.car_wash && !hasHomeService) {
+    return jsonResponse({ ok: false, error: "car_wash_requires_home_service" }, 400);
+  }
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -111,41 +111,41 @@ Deno.serve(async (req) => {
     const result = await withLogging({
       source: "stripe",
       event: "subscription.create.embedded",
-      payload: {
-        user_id: user.id,
-        services: input.services.map((s) => `${s.service}:${s.band}:${s.frequency}`),
-      },
+      payload: { user_id: user.id, services: input.services.map((s) => `${s.service}:${s.size}:${s.frequency}`) },
       fn: async () => {
         const stripe = new Stripe(STRIPE_SECRET_KEY, {
           apiVersion: "2024-12-18.acacia",
           httpClient: Stripe.createFetchHttpClient(),
         });
 
-        // Resolve service prices
-        const { data: subRows, error: subErr } = await supabase
+        // Resolve recurring prices by lookup key.
+        const serviceKeys = input.services.map((s) => SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize]);
+        const carWashKey = input.car_wash
+          ? CAR_WASH_LOOKUP_KEYS[input.car_wash.size as CanonSize][input.car_wash.washes as WashCount]
+          : null;
+
+        const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
-          .select("service_type, band, stripe_price_id")
-          .in(
-            "service_type",
-            input.services.map((s) => s.service),
-          )
-          .eq("is_addon", false)
+          .select("lookup_key, stripe_price_id")
+          .in("lookup_key", carWashKey ? [...serviceKeys, carWashKey] : serviceKeys)
           .eq("active", true);
-        if (subErr) throw new Error(`catalog read failed: ${subErr.message}`);
+        if (priceErr) throw new Error(`catalog read failed: ${priceErr.message}`);
 
         // deno-lint-ignore no-explicit-any
         const items: any[] = [];
         for (const s of input.services) {
-          const row = subRows?.find((r) => r.service_type === s.service && r.band === s.band);
-          if (!row) throw new Error(`no active catalog price for ${s.service}:${s.band}`);
-          // Cadence is the quantity: monthly 1, biweekly 2, weekly 4.
-          items.push({
-            price: row.stripe_price_id,
-            quantity: CADENCE_MULTIPLIER[s.frequency] * (s.qty ?? 1),
-          });
+          const key = SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize];
+          const row = priceRows?.find((r) => r.lookup_key === key);
+          if (!row) throw new Error(`no active catalog price for lookup_key ${key}`);
+          items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, s.frequency) });
+        }
+        if (carWashKey) {
+          const row = priceRows?.find((r) => r.lookup_key === carWashKey);
+          if (!row) throw new Error(`no active catalog price for lookup_key ${carWashKey}`);
+          items.push({ price: row.stripe_price_id, quantity: 1 });
         }
 
-        // Resolve add-ons
+        // Resolve one-time add-ons
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
             .from("stripe_catalog")
@@ -177,7 +177,6 @@ Deno.serve(async (req) => {
             email: user.email ?? undefined,
             metadata: {
               cohort: "founding_2026",
-              price_locked: "yes",
               signed_up_at: new Date().toISOString(),
               user_id: user.id,
               signup_source: "embedded_checkout",
@@ -193,39 +192,24 @@ Deno.serve(async (req) => {
         }
 
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
-        const bundle_discount_pct = await resolveBundleDiscountPctFromDb(supabase, uniqueServices, "embedded");
-
-        // Promo code lookup → coupon
-        let promoId: string | null = null;
-        if (input.promo_code) {
-          try {
-            const found = await stripe.promotionCodes.list({
-              code: input.promo_code.toUpperCase(),
-              active: true,
-              limit: 1,
-            });
-            promoId = found.data[0]?.id ?? null;
-          } catch (err) {
-            console.error("[embedded] promo lookup failed", err);
-          }
-        }
+        const freeCarWashes = freeCarWashesPerMonth(uniqueServices);
 
         const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
-          price_locked: "yes",
           signed_up_at: new Date().toISOString(),
           user_id: user.id,
           services_json: JSON.stringify(input.services),
-          bands_json: JSON.stringify(
-            Object.fromEntries(input.services.map((s) => [s.service, s.band])),
-          ),
-          band_source: "self",
+          sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
           addons_json: JSON.stringify(input.addons),
+          car_wash_json: input.car_wash ? JSON.stringify(input.car_wash) : "",
+          free_car_washes_per_month: String(freeCarWashes),
           zip: input.zip,
           preferred_day: input.preferred_day ?? "",
           preferred_time: input.preferred_time ?? "",
           lang: input.lang,
-          bundle_discount_pct: String(bundle_discount_pct),
+          founding_rate_locked: "yes",
+          founding_free_addon_first_visit: "yes",
+          founding_review_promised: "yes",
           signup_source: "embedded_checkout",
           gclid: input.gclid ?? "",
           utm_source: input.utm_source ?? "",
@@ -251,28 +235,9 @@ Deno.serve(async (req) => {
           metadata: subscriptionMetadata,
         };
 
-        // Bundle discount must be a real Stripe coupon on the subscription, not
-        // metadata only. On API 2024-12-18.acacia the `discounts` array is the
-        // supported parameter (the legacy `coupon` / `promotion_code` fields are
-        // mutually exclusive with it), and it accepts multiple stacked discounts,
-        // so a bundle coupon and a referral promotion code can both apply.
-        let promoCodeApplied = true;
-        let promoCodeMessage: string | undefined;
-
-        if (bundle_discount_pct > 0) {
-          const couponId = await getBundleCouponId(stripe, bundle_discount_pct);
-          // deno-lint-ignore no-explicit-any
-          const discounts: any[] = [{ coupon: couponId }];
-          if (promoId) discounts.push({ promotion_code: promoId });
-          subParams.discounts = discounts;
-        } else if (promoId) {
-          subParams.promotion_code = promoId;
-        }
-
         const subscription = await stripe.subscriptions.create(subParams, {
           idempotencyKey: `sub:${idempotencyKey}`,
         });
-
 
         // deno-lint-ignore no-explicit-any
         const invoice: any = subscription.latest_invoice;
@@ -280,11 +245,11 @@ Deno.serve(async (req) => {
         const paymentIntent: any = invoice?.payment_intent;
         const clientSecret = paymentIntent?.client_secret as string | undefined;
 
-        // HALF 1 — referral attribution (pending row; payout happens on first paid invoice).
+        // Referral attribution (pending row; payout happens on first paid invoice).
         await recordReferralAttribution({
           supabase,
           stripe,
-          code: input.referral_code ?? input.promo_code,
+          code: input.referral_code,
           referredUserId: user.id,
           referredEmail: user.email,
           referredStripeCustomerId: customerId,
@@ -299,10 +264,8 @@ Deno.serve(async (req) => {
           client_secret: clientSecret,
           subscription_id: subscription.id,
           customer_id: customerId,
-          promo_code_applied: promoCodeApplied,
-          ...(promoCodeMessage ? { promo_code_message: promoCodeMessage } : {}),
+          free_car_washes_per_month: freeCarWashes,
         };
-
       },
     });
 

@@ -1,50 +1,54 @@
-import { getBundleDiscountPct } from '@/lib/bundle-discount';
 import {
-  BAND_PRICES,
-  BANDS,
   CADENCE_MULTIPLIER,
+  CAR_WASH_LOOKUP_KEYS,
+  CAR_WASH_PRICES,
+  ENTRY_PRICE_MONTHLY,
   REFERRAL_BONUS_CENTS,
-  VEHICLE_CLASS_BAND,
-  bandFromBedBath,
-  bandPrice,
-  type CanonBand,
+  SERVICE_LOOKUP_KEYS,
+  SERVICE_NAMES,
+  SERVICE_QUANTITY_RULE,
+  SERVICE_UNIT,
+  SIZE_HELPERS,
+  SIZE_LABELS,
+  SIZE_PRICES,
+  SIZES,
+  VEHICLE_CLASS_LABELS,
+  VEHICLE_CLASS_SIZE,
+  freeCarWashesPerMonth,
+  quantityFor,
+  sizeFromBedrooms,
+  type CanonService,
+  type CanonSize,
+  type SizeSelection,
   type VehicleClass,
+  type WashCount,
 } from '@/lib/pricing-canon';
 import { FLORIDA_TAX, cartTriggersFloridaTax, FL_SALES_TAX_COLLECTION_ENABLED } from '@/lib/florida-tax';
 
-// Referral reward — give $50, get $50. Unchanged by the band model.
+// Referral reward — give $50, get $50.
 export const REFERRAL_DISCOUNT_CENTS = REFERRAL_BONUS_CENTS;
 
 // Types
-export type ServiceType = 'cleaning' | 'lawn' | 'detailing';
+export type ServiceType = CanonService;
 export type Frequency = 'monthly' | 'biweekly' | 'weekly';
+export type Size = CanonSize;
+export type { SizeSelection, VehicleClass, WashCount };
 
-/**
- * The size band IS the price. One flat per-visit amount per band; cadence
- * multiplies it. `custom` is not a band — it means the property is above
- * Estate and must never be auto-booked.
- */
-export type Band = CanonBand;
-export type BandSelection = Band | 'custom';
-
-/** Plain-language lot answers. Customers are never asked for square footage. */
-export type LotChoice = 'quarter' | 'half' | 'threeQuarter' | 'acre' | 'over' | 'noLot';
+/** Plain-language lawn answers. We never ask for turf area at checkout. */
+export type LawnChoice = 'small' | 'standard' | 'large' | 'over';
 
 export interface ConfigState {
   services: ServiceType[];
   frequencies: Partial<Record<ServiceType, Frequency>>;
-  /** Cleaning band, derived from bedrooms + bathrooms. */
-  homeBand: BandSelection | null;
+  /** Cleaning size, derived from bedrooms (+1 size when baths exceed the limit). */
   bedrooms: string | null;
   bathrooms: string | null;
-  /** Lawn band, derived from the lot answer (+1 band for a corner lot). */
-  lawnBand: BandSelection | null;
-  lotChoice: LotChoice | null;
-  cornerLot: boolean;
-  /** Detailing band, derived from the vehicle body type. */
-  vehicleBand: BandSelection | null;
+  /** Lawn size, picked by eye — we confirm from aerial imagery before visit one. */
+  lawnChoice: LawnChoice | null;
+  /** Car care size, derived from what they drive. */
   vehicleClass: VehicleClass | null;
-  vehicleCount: number;
+  /** Optional Car Wash Add-On (per month). Requires lawn or cleaning. */
+  carWashes: WashCount | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -65,15 +69,11 @@ export interface ConfigState {
 export const defaultState: ConfigState = {
   services: [],
   frequencies: {},
-  homeBand: null,
   bedrooms: null,
   bathrooms: null,
-  lawnBand: null,
-  lotChoice: null,
-  cornerLot: false,
-  vehicleBand: null,
+  lawnChoice: null,
   vehicleClass: null,
-  vehicleCount: 1,
+  carWashes: null,
   firstName: '',
   lastName: '',
   email: '',
@@ -92,62 +92,28 @@ export const defaultState: ConfigState = {
 };
 
 // ---------------------------------------------------------------------------
-// Bands — labels, definitions, and derivation from plain-language answers.
+// Sizes — labels and derivation from the plain answers we do ask for.
 // ---------------------------------------------------------------------------
 
-export const bandLabels: Record<Band, string> = {
-  compact: 'Compact',
-  standard: 'Standard',
-  large: 'Large',
-  estate: 'Estate',
+export const sizeLabels = SIZE_LABELS;
+export const sizeHelpers = SIZE_HELPERS;
+export const vehicleClassLabels = VEHICLE_CLASS_LABELS;
+export const allSizes = SIZES;
+
+export const lawnChoiceLabels: Record<LawnChoice, string> = {
+  small: 'Small yard',
+  standard: 'Standard yard',
+  large: 'Large yard',
+  over: 'Bigger than that',
 };
 
-/** What each band means, in the customer's words. */
-export const bandCopy: Record<ServiceType, Record<Band, string>> = {
-  cleaning: {
-    compact: 'up to 2 bed / 2 bath',
-    standard: '3 bed / 2 bath',
-    large: '4 bed / 3 bath',
-    estate: '5+ bed / 4+ bath',
-  },
-  lawn: {
-    compact: 'smaller than a quarter acre',
-    standard: 'a quarter to half an acre',
-    large: 'half to three-quarters of an acre',
-    estate: 'three-quarters to a full acre',
-  },
-  detailing: {
-    compact: 'coupe, sedan or hatchback',
-    standard: 'crossover or 2-row SUV',
-    large: '3-row SUV, pickup or minivan',
-    estate: 'full-size SUV, dually or 8-seat',
-  },
+export const lawnChoiceHelpers: Record<LawnChoice, string> = {
+  small: 'up to 3,000 sq ft of turf',
+  standard: '3,001–6,000 sq ft of turf',
+  large: '6,001–10,000 sq ft of turf',
+  over: 'more than 10,000 sq ft — we quote it',
 };
 
-export const lotChoiceLabels: Record<LotChoice, string> = {
-  quarter: 'smaller than a quarter acre',
-  half: 'about a quarter to half an acre',
-  threeQuarter: 'about half to three-quarters of an acre',
-  acre: 'about three-quarters to a full acre',
-  over: 'more than an acre',
-  noLot: 'no private lot (condo or townhome)',
-};
-
-export const vehicleClassLabels: Record<VehicleClass, string> = {
-  coupe: 'coupe',
-  sedan: 'sedan',
-  hatchback: 'hatchback',
-  crossover: 'crossover',
-  suv2row: '2-row SUV',
-  suv3row: '3-row SUV',
-  pickup: 'pickup truck',
-  minivan: 'minivan',
-  suvFullSize: 'full-size SUV',
-  dually: 'dually pickup',
-  eightSeat: '8-seat vehicle',
-};
-
-/** Bathrooms answer → number. Two half baths round up to one full bath. */
 export function bathroomsToNumber(value: string | null): number {
   if (!value) return 0;
   return parseFloat(value.replace('+', ''));
@@ -158,46 +124,54 @@ export function bedroomsToNumber(value: string | null): number {
   return parseInt(value.replace('+', ''), 10);
 }
 
-/** Cleaning band from the bed/bath answer. */
-export function bandForCleaning(bedrooms: string | null, bathrooms: string | null): BandSelection | null {
+/** Cleaning size from bedrooms and bathrooms. */
+export function sizeForCleaning(bedrooms: string | null, bathrooms: string | null): SizeSelection | null {
   const beds = bedroomsToNumber(bedrooms);
   const baths = bathroomsToNumber(bathrooms);
   if (!beds || !baths) return null;
-  return bandFromBedBath(beds, baths);
+  return sizeFromBedrooms(beds, baths);
 }
 
-/** Lawn band from the lot answer. Corner lots move up one band. */
-export function bandForLawn(lot: LotChoice | null, cornerLot: boolean): BandSelection | null {
-  if (!lot) return null;
-  if (lot === 'over') return 'custom';
-  // Condos and townhomes with no private lot are not eligible for lawn.
-  if (lot === 'noLot') return null;
-  const base: Band = lot === 'quarter' ? 'compact' : lot === 'half' ? 'standard' : lot === 'threeQuarter' ? 'large' : 'estate';
-  if (!cornerLot) return base;
-  const next = BANDS[BANDS.indexOf(base) + 1];
-  return next ?? 'custom';
+/** Lawn size from the by-eye answer. */
+export function sizeForLawn(choice: LawnChoice | null): SizeSelection | null {
+  if (!choice) return null;
+  if (choice === 'over') return 'quote';
+  return choice === 'small' ? 1 : choice === 'standard' ? 2 : 3;
 }
 
-/** Detailing band from the body type. Condition is a surcharge, never a band. */
-export function bandForDetailing(vehicleClass: VehicleClass | null): BandSelection | null {
+/** Car care size from what they drive. */
+export function sizeForCarCare(vehicleClass: VehicleClass | null): SizeSelection | null {
   if (!vehicleClass) return null;
-  return VEHICLE_CLASS_BAND[vehicleClass];
+  return VEHICLE_CLASS_SIZE[vehicleClass];
 }
 
-/** The band in play for a service, given the current answers. */
-export function bandFor(state: ConfigState, service: ServiceType): BandSelection | null {
-  if (service === 'cleaning') return state.homeBand ?? bandForCleaning(state.bedrooms, state.bathrooms);
-  if (service === 'lawn') return state.lawnBand ?? bandForLawn(state.lotChoice, state.cornerLot);
-  return state.vehicleBand ?? bandForDetailing(state.vehicleClass);
+/** The size in play for a service, given the current answers. */
+export function sizeFor(state: ConfigState, service: ServiceType): SizeSelection | null {
+  if (service === 'cleaning') return sizeForCleaning(state.bedrooms, state.bathrooms);
+  if (service === 'lawn') return sizeForLawn(state.lawnChoice);
+  return sizeForCarCare(state.vehicleClass);
 }
+
+/** True when any selected service is above size 3 — quote by hand, never book. */
+export function needsQuote(state: ConfigState): boolean {
+  return state.services.some((svc) => sizeFor(state, svc) === 'quote');
+}
+
+/** Kept for older call sites: a quote-sized plan is not purchasable. */
+export const hasCustomQuote = needsQuote;
 
 // ---------------------------------------------------------------------------
 // Prices
 // ---------------------------------------------------------------------------
 
-/** Per-visit price for a service at a band. */
-export function getPerVisitPrice(service: ServiceType, band: Band): number {
-  return bandPrice(service, band);
+export const serviceUnits = SERVICE_UNIT;
+export const serviceQuantityRules = SERVICE_QUANTITY_RULE;
+export const serviceLookupKeys = SERVICE_LOOKUP_KEYS;
+export const carWashLookupKeys = CAR_WASH_LOOKUP_KEYS;
+
+/** Sticker price for a size: per visit for cleaning/lawn, per month for car care. */
+export function getSizePrice(service: ServiceType, size: Size): number {
+  return SIZE_PRICES[service][size];
 }
 
 /** Visits billed per month at a cadence. */
@@ -205,26 +179,34 @@ export function visitsPerMonth(frequency: Frequency): number {
   return CADENCE_MULTIPLIER[frequency];
 }
 
-/** Monthly billed amount for one service line: per-visit price x cadence x qty. */
+/** Monthly billed amount for one service line. */
 export function getServicePrice(state: ConfigState, service: ServiceType): number {
-  const freq = state.frequencies[service];
-  if (!freq) return 0;
-  const band = bandFor(state, service);
-  if (!band || band === 'custom') return 0;
-  const perVisit = getPerVisitPrice(service, band);
-  const qty = service === 'detailing' ? Math.max(1, state.vehicleCount) : 1;
-  return perVisit * visitsPerMonth(freq) * qty;
+  const size = sizeFor(state, service);
+  if (!size || size === 'quote') return 0;
+  const freq = state.frequencies[service] ?? 'monthly';
+  if (SERVICE_QUANTITY_RULE[service] === 'always_1') return getSizePrice(service, size);
+  return getSizePrice(service, size) * visitsPerMonth(freq);
 }
 
-/** Per-visit price for a service in the current cart (0 when unpriceable). */
-export function getServicePerVisit(state: ConfigState, service: ServiceType): number {
-  const band = bandFor(state, service);
-  if (!band || band === 'custom') return 0;
-  const qty = service === 'detailing' ? Math.max(1, state.vehicleCount) : 1;
-  return getPerVisitPrice(service, band) * qty;
+/** The Car Wash Add-On price per month, if selected. */
+export function getCarWashPrice(state: ConfigState): number {
+  if (!state.carWashes) return 0;
+  const size = sizeForCarCare(state.vehicleClass);
+  if (!size || size === 'quote') return 0;
+  return CAR_WASH_PRICES[size][state.carWashes];
 }
 
-// Add-ons. Bands cover property size — add-ons are extra tasks only.
+/** The Car Wash Add-On requires an active lawn or cleaning plan. */
+export function carWashEligible(state: ConfigState): boolean {
+  return state.services.includes('lawn') || state.services.includes('cleaning');
+}
+
+/** Free car washes each month, earned by bundling. Never a percentage. */
+export function freeCarWashes(state: ConfigState): number {
+  return freeCarWashesPerMonth(state.services.length);
+}
+
+// One-time add-ons. Size covers the property — add-ons are extra tasks only.
 export const addOnData: Record<string, { name: string; price: number; service: ServiceType; description: string }> = {
   // House Cleaning
   oven: { name: 'Inside Oven Clean', price: 45, service: 'cleaning', description: 'Deep clean inside your oven' },
@@ -239,9 +221,9 @@ export const addOnData: Record<string, { name: string; price: number; service: S
   weed: { name: 'Weed Removal — Garden Beds', price: 45, service: 'lawn', description: 'Manual weed pulling in beds' },
   leaf: { name: 'Leaf & Debris Cleanup', price: 55, service: 'lawn', description: 'Full yard leaf and debris removal' },
   fertilization: { name: 'Fertilization Treatment', price: 75, service: 'lawn', description: 'Seasonal turf fertilizer' },
-  pressureWash: { name: 'Driveway Pressure Wash', price: 150, service: 'lawn', description: 'Driveway and walkway pressure clean' },
+  pressureWash: { name: 'Driveway Pressure Wash', price: 150, service: 'lawn', description: 'Concrete driveway and walkway pressure clean' },
 
-  // Car Detailing — condition surcharges live here, never in a band.
+  // Car care — condition surcharges live here, never in a size.
   ozone: { name: 'Ozone Odor Treatment', price: 75, service: 'detailing', description: 'Eliminates trapped odors' },
   petHair: { name: 'Pet Hair Removal', price: 45, service: 'detailing', description: 'Thorough pet hair extraction' },
   engineBay: { name: 'Engine Bay Clean', price: 85, service: 'detailing', description: 'Hand-cleaned engine bay' },
@@ -249,81 +231,63 @@ export const addOnData: Record<string, { name: string; price: number; service: S
 };
 
 // ---------------------------------------------------------------------------
-// Display helpers — the single source for every price label in the UI.
-// Prefer per-visit phrasing: totals depend on both band and cadence.
+// Display helpers
 // ---------------------------------------------------------------------------
 
-/** Headline (Standard-band) per-visit price for a service. */
-export function getHeadlinePrice(service: ServiceType): number {
-  return BAND_PRICES[service].standard;
-}
-
-/** Lowest per-visit price for a service (its Compact band). */
+/** Lowest price a service can start at (its size 1). */
 export function getServiceStartingPrice(service: ServiceType): number {
-  return BAND_PRICES[service].compact;
+  return SIZE_PRICES[service][1];
 }
 
-/** Lowest per-visit price across all services. */
-export function getLowestStartingPrice(): number {
-  return Math.min(...(['cleaning', 'lawn', 'detailing'] as ServiceType[]).map(getServiceStartingPrice));
+/** The single company-wide entry price, as a monthly figure. */
+export function getEntryPriceMonthly(): number {
+  return ENTRY_PRICE_MONTHLY;
 }
 
-/** Cadence the bundle nudge pre-selects when adding a service. */
 export const defaultBundleFrequency: Record<ServiceType, Frequency> = {
   cleaning: 'biweekly',
-  lawn: 'monthly',
+  lawn: 'biweekly',
   detailing: 'monthly',
 };
 
-/** Formats a per-visit price, e.g. "$149 a visit". */
 export function formatPerVisit(amount: number): string {
   return `$${Number.isInteger(amount) ? amount : amount.toFixed(2)} a visit`;
 }
 
-/** Formats a monthly billed amount, e.g. "$298/mo". */
 export function formatMonthly(amount: number): string {
   return `$${Number.isInteger(amount) ? amount : amount.toFixed(2)}/mo`;
 }
 
-/**
- * Bundle discount as a 0–1 fraction. Rates come from the shared map in
- * src/lib/bundle-discount.ts so the displayed price and the amount Stripe
- * charges are derived from the same source.
- */
-export function getBundleDiscount(serviceCount: number): number {
-  return getBundleDiscountPct(serviceCount) / 100;
-}
-
-/** True when any selected service is above Estate — quote by hand, never book. */
-export function hasCustomQuote(state: ConfigState): boolean {
-  return state.services.some((svc) => bandFor(state, svc) === 'custom');
+/** How a service's sticker price reads on its own. */
+export function formatSizePrice(service: ServiceType, size: Size): string {
+  const price = getSizePrice(service, size);
+  return SERVICE_UNIT[service] === 'per_month' ? formatMonthly(price) : formatPerVisit(price);
 }
 
 export function calculatePricing(state: ConfigState) {
-  const servicePrices = state.services.map((s) => ({
-    service: s,
-    band: bandFor(state, s),
-    perVisit: getServicePerVisit(state, s),
-    price: getServicePrice(state, s),
-  }));
+  const servicePrices = state.services.map((s) => {
+    const size = sizeFor(state, s);
+    return {
+      service: s,
+      size,
+      unit: SERVICE_UNIT[s],
+      sticker: size && size !== 'quote' ? getSizePrice(s, size) : 0,
+      quantity: size && size !== 'quote' ? quantityFor(s, state.frequencies[s] ?? 'monthly') : 0,
+      price: getServicePrice(state, s),
+    };
+  });
 
   const servicesSubtotal = servicePrices.reduce((sum, sp) => sum + sp.price, 0);
+  const carWashSubtotal = getCarWashPrice(state);
 
   const addOnsSubtotal = state.addOns.reduce((sum, id) => {
     const addon = addOnData[id];
-    if (!addon) return sum;
-    let price = addon.price;
-    if (addon.service === 'detailing') price *= Math.max(1, state.vehicleCount);
-    return sum + price;
+    return addon ? sum + addon.price : sum;
   }, 0);
 
-  // The bundle discount is charged as a Stripe coupon on the whole
-  // subscription (percent_off applies to every recurring line item, add-ons
-  // included), so the displayed discount is computed the same way.
-  const subtotal = servicesSubtotal + addOnsSubtotal;
-  const discountPercent = getBundleDiscount(state.services.length);
-  const discountAmount = subtotal * discountPercent;
-  const netTotal = subtotal - discountAmount;
+  // No percentage discounts exist. Bundling earns free car washes instead.
+  const subtotal = servicesSubtotal + carWashSubtotal + addOnsSubtotal;
+  const netTotal = subtotal;
 
   // Florida sales tax stays gated off (see src/lib/florida-tax.ts).
   const taxTriggered =
@@ -333,24 +297,20 @@ export function calculatePricing(state: ConfigState) {
   const taxAmount = Math.round(netTotal * taxPercent * 100) / 100;
   const total = netTotal + taxAmount;
 
-  const servicesTotal = servicesSubtotal - servicesSubtotal * discountPercent;
-  const addOnsTotal = addOnsSubtotal - addOnsSubtotal * discountPercent;
-
   return {
     servicePrices,
     subtotal,
     servicesSubtotal,
+    carWashSubtotal,
     addOnsSubtotal,
-    discountPercent,
-    discountAmount,
-    servicesTotal,
-    addOnsTotal,
-    /** Post-discount, pre-tax amount. */
+    freeCarWashes: freeCarWashes(state),
+    servicesTotal: servicesSubtotal,
+    addOnsTotal: addOnsSubtotal,
+    /** Pre-tax amount. */
     netTotal,
     taxTriggered,
     taxPercentage: taxTriggered ? FLORIDA_TAX.percentage : 0,
     taxAmount,
-    /** Tax-inclusive totals — these are what Stripe actually charges. */
     firstMonth: total,
     ongoing: total,
   };
@@ -364,18 +324,13 @@ export const frequencyLabels: Record<Frequency, string> = {
   weekly: 'Weekly',
 };
 
-/** How each cadence reads in a sentence. */
 export const frequencyVisitCopy: Record<Frequency, string> = {
   monthly: '1 visit a month',
   biweekly: '2 visits a month',
   weekly: '4 visits a month',
 };
 
-export const serviceLabels: Record<ServiceType, string> = {
-  cleaning: 'House Cleaning',
-  lawn: 'Lawn Care',
-  detailing: 'Car Detailing',
-};
+export const serviceLabels: Record<ServiceType, string> = SERVICE_NAMES;
 
 export const serviceIcons: Record<ServiceType, string> = {
   cleaning: '🏠',
@@ -385,6 +340,8 @@ export const serviceIcons: Record<ServiceType, string> = {
 
 // localStorage helpers
 const STORAGE_KEY = 'tidy_config';
+
+const LEGACY_FIELDS = ['homeSize', 'yardSize', 'vehicleSize', 'homeBand', 'lawnBand', 'vehicleBand', 'lotChoice', 'cornerLot', 'vehicleCount'];
 
 export function loadState(): ConfigState {
   try {
@@ -399,11 +356,9 @@ export function loadState(): ConfigState {
         delete cleaned.accessNotes;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
       }
-      // Legacy carts stored the retired size tiers (standard/xl/custom). They
-      // don't translate to bands, so drop them and re-ask.
-      delete parsed.homeSize;
-      delete parsed.yardSize;
-      delete parsed.vehicleSize;
+      // Legacy carts stored retired size tiers and four-band fields. They don't
+      // translate to the 1/2/3 sizes, so drop them and re-ask.
+      for (const field of LEGACY_FIELDS) delete parsed[field];
       return { ...defaultState, ...parsed, password: '', address: '', accessNotes: '' };
     }
   } catch {}
