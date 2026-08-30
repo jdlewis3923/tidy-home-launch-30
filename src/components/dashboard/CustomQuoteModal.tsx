@@ -20,12 +20,9 @@ export default function CustomQuoteModal({ open, onOpenChange, state, onSubmitte
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
-  const customServices: ServiceType[] = state.services.filter(s => {
-    if (s === 'cleaning') return state.homeBand === 'custom';
-    if (s === 'lawn') return state.lawnBand === 'custom';
-    if (s === 'detailing') return state.vehicleBand === 'custom';
-    return false;
-  });
+  // Sizes above 3 aren't purchasable — those are the ones we quote by hand.
+  const customServices: ServiceType[] = state.services.filter((s) => sizeFor(state, s) === 'quote');
+
 
   const canSubmit = name.trim() && phone.trim() && address.trim() && !submitting;
 
