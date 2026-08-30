@@ -109,7 +109,7 @@ export default function CustomQuoteModal({ open, onOpenChange, state, onSubmitte
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   rows={3}
-                  placeholder="Anything we should know? (sq ft, vehicle type, gate codes…)"
+                  placeholder="Anything we should know? (bedrooms, vehicle, gate codes…)"
                   className="w-full rounded-lg border-[1.5px] border-border bg-card px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                 />
               </div>
