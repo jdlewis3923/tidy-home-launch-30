@@ -36,6 +36,19 @@ const CarDetailing = lazy(() => import("./pages/CarDetailing.tsx"));
 const Bundle = lazy(() => import("./pages/Bundle.tsx"));
 const Refer = lazy(() => import("./pages/Refer.tsx"));
 const Neighbor = lazy(() => import("./pages/Neighbor.tsx"));
+
+/**
+ * /vecino exists only so the URL printed on the Spanish side of the door hanger
+ * resolves. It redirects to /neighbor?lang=es, keeping every UTM/gclid param.
+ */
+const VecinoRedirect = () => {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  params.set("lang", "es");
+  params.set("src", "doorhanger_es");
+  return <Navigate to={`/neighbor?${params.toString()}`} replace />;
+};
+
 const CustomerLogin = lazy(() => import("./pages/CustomerLogin.tsx"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
