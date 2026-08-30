@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote, VALID_ZIPS } from '@/lib/dashboard-pricing';
+import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote, sizeFor, VALID_ZIPS } from '@/lib/dashboard-pricing';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import CalmShell from '@/components/dashboard/CalmShell';
