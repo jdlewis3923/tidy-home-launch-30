@@ -207,7 +207,7 @@ const translations: Record<string, string> = {
   Biweekly: "Quincenal",
   Weekly: "Semanal",
   "Bundle and we add car washes · 2 services = 1 free car wash a month · 3 services = 2 · Cancel anytime":
-    "Combina y agregamos lavadas de auto · 2 servicios = 1 lavada gratis al mes · 3 servicios = 2 · Cancela cuando quieras"
+    "Combina y agregamos lavadas de auto · 2 servicios = 1 lavada gratis al mes · 3 servicios = 2 · Cancela cuando quieras",
 
   // FAQ
   "Most customers never need to think about any of this — but we've got you covered.":
