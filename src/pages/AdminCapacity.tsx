@@ -145,6 +145,8 @@ export default function AdminCapacity() {
         ))}
       </div>
 
+      <ProAssignments onChanged={load} />
+
       <p className="mt-6 text-xs text-muted-foreground">
         {loading ? "Refreshing…" : data ? `As of ${new Date(data.as_of).toLocaleString()}` : ""}
       </p>
