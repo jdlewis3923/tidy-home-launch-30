@@ -863,7 +863,7 @@ const translations: Record<string, string> = {
   "Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and lock in founding-member pricing.":
     "Tidy está aceptando un grupo limitado de miembros fundadores en Pinecrest, Kendall y Kendall West. Únete temprano y asegura el precio de miembro fundador.",
   "Vetted & Background-Checked · Photo-Verified Visits · Satisfaction Guaranteed":
-    "Verificado y con Antecedentes Revisados · Visitas Verificadas con Fotos · Garantía de Satisfacción",
+    "Antecedentes Verificados · Fotos Tras Cada Visita · Garantía de Satisfacción",
   "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
     "Un servicio adicional premium gratis en tu primera visita · Primera visita perfecta o es gratis · Solo 25 casas fundadoras por código postal",
   "One free premium add-on on your first visit": "Un servicio adicional gratis en la primera visita",
