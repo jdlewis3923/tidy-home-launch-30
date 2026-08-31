@@ -57,21 +57,21 @@ const NEW_ADDONS = [
   },
 ];
 
-/** Metadata every add-on price/product carries. */
-function addonMetadata(o: {
-  category: 'car' | 'lawn' | 'home';
-  service_type: 'detailing' | 'lawn' | 'cleaning';
-  zapier_label: string;
-}) {
+/**
+ * Metadata every add-on price/product carries — the exact eight keys the
+ * existing add-ons use (category is always `add_on`; the service lives in
+ * service_type).
+ */
+function addonMetadata(o: { service_type: 'car_detailing' | 'lawn' | 'house_cleaning'; addon_key: string }) {
   return {
     add_on: 'yes',
     billing_type: 'one_time',
     bundle: 'no',
-    category: o.category,
-    frequency: 'per_visit',
-    internal_status: 'active',
+    category: 'add_on',
+    frequency: 'one_time',
+    internal_status: 'final',
     service_type: o.service_type,
-    zapier_label: o.zapier_label,
+    zapier_label: `addon_${o.addon_key}`,
   } as Record<string, string>;
 }
 
