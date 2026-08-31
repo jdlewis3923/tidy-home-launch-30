@@ -88,3 +88,9 @@ verify_jwt = false
 verify_jwt = false
 
 
+# One-off admin maintenance job (car add-on restructure + Stripe duplicate
+# cleanup). No Authorization header is available from the maintenance caller,
+# so the handler gates on a single-use token stored in app_settings and
+# deleted immediately after the run.
+[functions.admin-addon-restructure]
+verify_jwt = false

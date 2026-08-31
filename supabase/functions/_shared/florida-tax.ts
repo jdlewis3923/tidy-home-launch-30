@@ -29,7 +29,7 @@ export const FLORIDA_TAX = {
    * Catalog addon_name values that mean wax / sealant / ceramic coating was
    * applied to the vehicle, which makes the whole transaction taxable.
    */
-  coatingAddonIds: ["ceramicSpray"] as const,
+  coatingAddonIds: ["clayBarCeramic"] as const,
 } as const;
 
 /**

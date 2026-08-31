@@ -290,14 +290,14 @@ const translations: Record<string, string> = {
     "Interior del horno, interior del refrigerador, ventanas interiores, limpieza de zócalos, lavandería, interior de gabinetes de cocina",
   "Weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens":
     "Remoción de maleza, limpieza de hojas y escombros, reajuste del borde de jardineras, ventanas y mosquiteros exteriores",
-  "Pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat":
-    "Remoción de pelo de mascotas, tratamiento de ozono para olores, limpieza del compartimiento del motor, capa cerámica en spray",
+  "Pet hair removal, clay bar & ceramic coat, headlight restoration, interior protect & condition":
+    "Remoción de pelo de mascotas, barra de arcilla y capa cerámica, restauración de faros, protección y acondicionamiento del interior",
   "Available as add-ons: inside oven, inside fridge, interior windows, deep baseboard scrub, laundry (wash/dry/fold), inside kitchen cabinets.":
     "Disponibles como servicios adicionales: interior del horno, interior del refrigerador, ventanas interiores, limpieza profunda de zócalos, lavandería (lavado/secado/doblado), interior de gabinetes de cocina.",
   "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens. Driveway pressure wash is specialist work, quoted separately.":
     "Disponibles como servicios adicionales: remoción de maleza, limpieza de hojas y escombros, reajuste del borde de jardineras, ventanas y mosquiteros exteriores. El lavado a presión de la entrada es trabajo especializado y se cotiza aparte.",
-  "Available as add-ons: pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat.":
-    "Disponibles como servicios adicionales: remoción de pelo de mascotas, tratamiento de ozono para olores, limpieza del compartimiento del motor, capa cerámica en spray.",
+  "Available as add-ons: pet hair removal, clay bar & ceramic coat, headlight restoration, interior protect & condition.":
+    "Disponibles como servicios adicionales: remoción de pelo de mascotas, barra de arcilla y capa cerámica, restauración de faros, protección y acondicionamiento del interior.",
   "from": "desde",
   "Figures assume monthly service for each service. Your price changes with the visit frequency you choose.":
     "Las cifras asumen servicio mensual para cada servicio. Tu precio cambia según la frecuencia de visitas que elijas.",
@@ -542,7 +542,7 @@ const translations: Record<string, string> = {
   "Dashboard + console wipe": "Limpieza de tablero y consola",
   "Interior + exterior glass": "Cristales interiores y exteriores",
   "Pet-hair removal add-on": "Extra: retiro de pelo de mascota",
-  "Ozone treatment add-on": "Extra: tratamiento con ozono",
+  "Headlight restoration add-on": "Extra: restauración de faros",
   "In your driveway": "En tu garaje",
   // Car Detailing testimonials
   "They come to my driveway every month — car looks showroom-fresh, no drop-off needed.":
@@ -555,12 +555,12 @@ const translations: Record<string, string> = {
   "Shine Complete is one flat monthly price set by what you drive: $149, $179 or $239. Every plan is 3 maintenance washes a month plus 2 full details a year.":
     "Shine Complete es un precio fijo mensual según lo que conduces: $149, $179 o $239. Todos los planes incluyen 3 lavados de mantenimiento al mes más 2 detallados completos al año.",
   "What's actually included?": "¿Qué se incluye exactamente?",
-  "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair removal, ozone odor treatment, engine bay clean, and ceramic spray coat are available as add-ons.":
-    "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Retiro de pelo de mascota, tratamiento de olores con ozono, limpieza del compartimento del motor y recubrimiento cerámico en spray están disponibles como servicios adicionales.",
+  "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair removal, clay bar & ceramic coat, headlight restoration, and interior protect & condition are available as add-ons.":
+    "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Remoción de pelo de mascotas, barra de arcilla y capa cerámica, restauración de faros, y protección y acondicionamiento del interior están disponibles como servicios adicionales.",
   "3-row SUVs, full-size trucks and vans are size 3 at $239/mo — a size, never a surcharge. Commercial vans and lifted trucks we price by hand.":
     "Las SUVs de 3 filas, camionetas grandes y vans son tamaño 3 a $239/mes — es un tamaño, nunca un cargo extra. Las vans comerciales y camionetas elevadas las cotizamos a mano.",
-  "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet-hair and ozone available as add-ons.":
-    "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascota y ozono disponibles como extras.",
+  "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair and clay bar & ceramic coat available as add-ons.":
+    "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascotas y barra de arcilla con capa cerámica disponibles como extras.",
   "Who does the detailing?": "¿Quién hace el detallado?",
   "Vetted, background-checked detailers. Same detailer every visit so they learn your vehicle.":
     "Detalladores evaluados y con antecedentes verificados. El mismo detallador cada visita para que conozca tu vehículo.",
@@ -738,8 +738,7 @@ const translations: Record<string, string> = {
   "Dashboard & surface wipe-down": "Limpieza del tablero y las superficies",
   "Monthly or biweekly visits": "Visitas mensuales o quincenales",
   "Paint correction or ceramic coating": "Corrección de pintura o recubrimiento cerámico",
-  "Engine bay detailing": "Detallado del compartimiento del motor",
-  "Headlight restoration": "Restauración de faros",
+  "Paint sealant machine application": "Aplicación de sellador de pintura a máquina",
   "Leather conditioning, clay bar, tire shine": "Acondicionamiento de cuero, barra de arcilla, brillo para llantas",
 
   // How it works (homepage 5 steps)
@@ -773,8 +772,8 @@ const translations: Record<string, string> = {
   "one-time": "una sola vez",
   "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Extra-large lot (4,001–7,500 sq ft mowable turf): +$30 per visit. Extra-large vehicle: +$30 per visit. Above those sizes we quote individually.":
     "Casa extra grande (2,501–4,000 pies²): +$60 por visita. Terreno extra grande (4,001–7,500 pies² de césped cortable): +$30 por visita. Vehículo extra grande: +$30 por visita. Por encima de esos tamaños cotizamos de forma individual.",
-  "Available as add-ons: pet-hair removal, ozone treatment.":
-    "Disponibles como complementos: eliminación de pelo de mascotas, tratamiento de ozono.",
+  "Available as add-ons: pet-hair removal, headlight restoration.":
+    "Disponibles como complementos: eliminación de pelo de mascotas, restauración de faros.",
   "Choose weekly, biweekly, or monthly depending on the service — and mix and match freely. Car detailing is monthly or biweekly. Want weekly lawn care but biweekly cleaning? Done.":
     "Elige semanal, quincenal o mensual según el servicio, y combínalos libremente. El detallado de autos es mensual o quincenal. ¿Quieres jardinería semanal pero limpieza quincenal? Listo.",
   "What affects my price?": "¿Qué afecta mi precio?",

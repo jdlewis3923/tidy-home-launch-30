@@ -46,8 +46,8 @@ const services = [
     priceSub: "3 washes a month + 2 full details a year",
     description: "Driveway-ready detailing at your door. We come to you — exterior wash, interior vacuum, surface cleaning.",
     checks: ["Exterior hand wash & wheels", "Interior vacuum & floor mats", "Dashboard & surface wipe-down", "3 maintenance washes every month"],
-    excludes: ["Paint correction", "Headlight restoration"],
-    addOns: "Pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat",
+    excludes: ["Paint correction", "Paint sealant machine application"],
+    addOns: "Pet hair removal, clay bar & ceramic coat, headlight restoration, interior protect & condition",
     accent: "border-t-violet-500",
   },
 ];

@@ -149,10 +149,10 @@ describe('checkout ↔ Stripe parity', () => {
     { label: '3 services · weekly', s: buildState(['cleaning', 'lawn', 'detailing'], { cadence: 'weekly' }) },
     {
       label: '3 services + add-ons',
-      s: buildState(['cleaning', 'lawn', 'detailing'], { addOns: ['oven', 'bedEdgeReset', 'ozone'] }),
+      s: buildState(['cleaning', 'lawn', 'detailing'], { addOns: ['oven', 'bedEdgeReset', 'headlightRestoration'] }),
     },
     { label: 'cleaning + car wash add-on', s: buildState(['cleaning'], { washes: 2 }) },
-    { label: 'detailing only + coating add-on', s: buildState(['detailing'], { addOns: ['ceramicSpray'] }) },
+    { label: 'detailing only + coating add-on', s: buildState(['detailing'], { addOns: ['clayBarCeramic'] }) },
   ];
 
   for (const { label, s } of combos) {
