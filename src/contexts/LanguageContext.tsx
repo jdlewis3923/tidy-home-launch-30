@@ -84,8 +84,8 @@ const translations: Record<string, string> = {
   "We handle scheduling, timing, and everything in between.":
     "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
   "Just set it — we'll take care of the rest.": "Solo configúralo — nosotros nos encargamos del resto.",
-  "Cleaning, lawn care, and car detailing — fully managed for you. No booking, no vendors, no reminders. Ever.":
-    "Limpieza, jardín y detallado de carro — totalmente gestionado. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
+"Cleaning, lawn care, and car detailing — fully managed for you. No booking, no vendors, no reminders. Ever.":
+    "Limpieza, jardín y detallado de carro — lo manejamos todo nosotros. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
   "🏠 House Cleaning": "🏠 Limpieza del Hogar",
   "🌿 Lawn Care": "🌿 Cuidado del Jardín",
   "🚗 Car Detailing": "🚗 Detallado de Carro",
@@ -104,8 +104,8 @@ const translations: Record<string, string> = {
   "What's Included": "Qué Incluye",
   "Everything your home needs. One plan.": "Todo lo que tu hogar necesita. Un plan.",
   "Everything your home needs. One simple plan.": "Todo lo que tu hogar necesita. Un plan simple.",
-  "Three essential services. One subscription. Zero coordination required. Your schedule, your frequency — handled automatically every month.":
-    "Tres servicios esenciales. Una suscripción. Cero coordinación. Tu horario, tu frecuencia — gestionado automáticamente cada mes.",
+"Three essential services. One subscription. Zero coordination required. Your schedule, your frequency — handled automatically every month.":
+    "Tres servicios esenciales. Una suscripción. Cero coordinación. Tu horario, tu frecuencia — todo corre solo cada mes.",
   "⭐ Most Popular": "⭐ Más Popular",
   "Most Popular": "Más Popular",
   "Best Value": "Mejor Precio",
@@ -147,7 +147,7 @@ const translations: Record<string, string> = {
   "Inconsistent, unreliable scheduling": "Programación inconsistente y poco confiable",
   "Missed appointments & no-shows": "Citas perdidas y ausencias",
   "Constant rebooking headaches": "Dolores de cabeza constantes por reagendar",
-  "Hours lost managing home services monthly": "Horas perdidas gestionando servicios del hogar mensualmente",
+  "Hours lost managing home services monthly": "Horas perdidas manejando servicios del hogar mensualmente",
   "Three separate bills every month": "Tres facturas separadas cada mes",
   "One simple monthly subscription": "Una simple suscripción mensual",
   "Everything runs on autopilot": "Todo funciona en piloto automático",
@@ -159,11 +159,11 @@ const translations: Record<string, string> = {
   // Who it's for
   "Who it's for": "Para quién es",
   "Built for homeowners who want it handled.": "Hecho para propietarios que quieren que se encarguen de todo.",
-  "If you'd rather spend your weekend doing anything but managing vendors, Tidy is for you.":
-    "Si prefieres pasar tu fin de semana haciendo cualquier cosa menos gestionar proveedores, Tidy es para ti.",
+"If you'd rather spend your weekend doing anything but managing vendors, Tidy is for you.":
+    "Si prefieres pasar tu fin de semana haciendo cualquier cosa menos lidiar con proveedores, Tidy es para ti.",
   "Busy Professionals": "Profesionales Ocupados",
-  "No time to manage 3 different vendors. One plan handles everything on autopilot while you focus on what matters.":
-    "Sin tiempo para gestionar 3 proveedores diferentes. Un plan maneja todo en automático mientras te enfocas en lo que importa.",
+"No time to manage 3 different vendors. One plan handles everything on autopilot while you focus on what matters.":
+    "Sin tiempo para estar detrás de 3 compañías diferentes. Un plan maneja todo en automático mientras te enfocas en lo que importa.",
   Families: "Familias",
   "Keep your home consistently maintained without it falling on any one person. Reliable service, every single visit.":
     "Mantén tu hogar consistentemente mantenido sin que recaiga en una sola persona. Servicio confiable, cada visita.",
@@ -462,8 +462,8 @@ const translations: Record<string, string> = {
   "What's actually included in a visit?": "¿Qué incluye realmente una visita?",
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
-  "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. A bed edge reset is available as an add-on.":
-    "Corte a altura precisa, bordeado de todos los contornos, soplado de áreas pavimentadas, desbroce a lo largo de las cercas y recoger o triturar la grama cortada. La poda de setos y arbustos está disponible como servicio adicional.",
+"Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. A bed edge reset is available as an add-on.":
+    "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y recoger o triturar la grama cortada. La poda de setos y arbustos está disponible como servicio adicional.",
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, interior windows, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
   "Who does the cleaning?": "¿Quién hace la limpieza?",
@@ -491,9 +491,9 @@ const translations: Record<string, string> = {
   "Four visits per month, bush trim included.": "Cuatro visitas al mes, poda de arbustos incluida.",
   // Lawn Care included
   "Mow to precise height": "Corte a altura precisa",
-  "Edge all borders": "Bordeado de todos los contornos",
-  "Blow hardscapes clean": "Soplado de áreas pavimentadas",
-  "Weed-whack fence lines": "Desbroce a lo largo de las cercas",
+"Edge all borders": "Bordeado de todas las orillas",
+  "Blow hardscapes clean": "Soplado de aceras y entradas",
+  "Weed-whack fence lines": "Recorte a lo largo de las cercas",
   "Bag or mulch clippings": "Recoger o triturar la grama cortada",
   "Bush trim (weekly)": "Poda de arbustos (semanal)",
     "Locked $45 a visit — never surprise-priced": "$45 por visita, precio fijo — nunca con precios sorpresa",
@@ -507,8 +507,8 @@ const translations: Record<string, string> = {
   // Lawn Care FAQs
   "One flat price per visit, set by the size of your lawn: $45, $65 or $99. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Pick your best guess and we confirm the size from satellite imagery before your first visit.":
     "Un precio fijo por visita, según el tamaño de tu jardín: $45, $65 o $99. La frecuencia solo lo multiplica — mensual es una visita, quincenal dos y semanal cuatro. Elige tu mejor estimación y confirmamos el tamaño con imágenes satelitales antes de la primera visita.",
-  "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.":
-    "Corte a altura precisa, bordeado de todos los contornos, soplado de áreas pavimentadas, desbroce a lo largo de las cercas y recoger o triturar la grama. Los planes semanales incluyen poda de arbustos.",
+"Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.":
+    "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y recoger o triturar la grama. Los planes semanales incluyen poda de arbustos.",
   "Who does the work?": "¿Quién hace el trabajo?",
   "Vetted, background-checked crews. Same team every visit so your lawn stays consistent.":
     "Equipos evaluados y con antecedentes verificados. El mismo equipo cada visita para que tu jardín se mantenga consistente.",
@@ -757,7 +757,7 @@ const translations: Record<string, string> = {
   "Your Pro Completes the Visit": "Tu Profesional Completa la Visita",
   "Your professional arrives on schedule, completes the service, and submits photo verification when done.":
     "Tu profesional llega puntual, completa el servicio y envía la verificación con fotos al terminar.",
-  "Manage Everything from Your Dashboard": "Gestiona Todo desde Tu Panel",
+  "Manage Everything from Your Dashboard": "Controla Todo desde Tu Panel",
   "Adjust services, skip visits, update your plan, or pause anytime — all from one simple dashboard.":
     "Ajusta servicios, omite visitas, actualiza tu plan o pausa cuando quieras — todo desde un panel simple.",
 
@@ -858,9 +858,9 @@ const translations: Record<string, string> = {
     "Escríbenos a hello@jointidy.co y responderemos dentro de 1 hora en horario laboral. Personas reales, respuestas reales.",
   "Your Dashboard": "Tu Panel",
   "What can I do from the dashboard?": "¿Qué puedo hacer desde el panel?",
-  "View upcoming visits, manage your services and schedule, update payment info, skip or pause visits, and review service history — all in one place.":
-    "Ver próximas visitas, gestionar tus servicios y horario, actualizar tu información de pago, omitir o pausar visitas, y revisar el historial de servicios — todo en un solo lugar.",
-  "Can I manage everything without calling?": "¿Puedo gestionar todo sin llamar?",
+"View upcoming visits, manage your services and schedule, update payment info, skip or pause visits, and review service history — all in one place.":
+    "Ver próximas visitas, cambiar tus servicios y horario, actualizar tu información de pago, omitir o pausar visitas, y revisar el historial de servicios — todo en un solo lugar.",
+  "Can I manage everything without calling?": "¿Puedo hacerlo todo sin llamar?",
   "Yes. The dashboard gives you full control over your plan. No phone calls, no emails required for routine changes.":
     "Sí. El panel te da control total sobre tu plan. Sin llamadas ni correos para los cambios de rutina.",
 
