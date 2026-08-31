@@ -33,7 +33,8 @@ const NEW_ADDONS = [
     addon_key: 'clay_bar_ceramic_coat',
     display_name: 'Clay Bar & Ceramic Coat',
     price_cents: 9500,
-    sort_order: 400,
+    sort_order: 250,
+    icon: 'Sparkles',
     description:
       'Clay bar paint decontamination followed by a ceramic spray coat — about 6 months of protection.',
   },
@@ -42,7 +43,8 @@ const NEW_ADDONS = [
     addon_key: 'headlight_restoration',
     display_name: 'Headlight Restoration',
     price_cents: 7900,
-    sort_order: 402,
+    sort_order: 260,
+    icon: 'Lightbulb',
     description:
       'Wet-sand, polish and UV-seal both headlights back to clear. The UV sealant step is included — without it the lenses re-yellow within a year.',
   },
@@ -51,7 +53,8 @@ const NEW_ADDONS = [
     addon_key: 'interior_protect_condition',
     display_name: 'Interior Protect & Condition',
     price_cents: 5500,
-    sort_order: 403,
+    sort_order: 270,
+    icon: 'ShieldCheck',
     description:
       'Dash, door panels and seats cleaned and conditioned with UV protection against Miami sun damage.',
   },
