@@ -164,6 +164,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <PromoCaptureWatcher />
+            <DoorhangerRescue />
+
                         <MetaPixel />
             <ChatbotMount />
             <HomeButton />
