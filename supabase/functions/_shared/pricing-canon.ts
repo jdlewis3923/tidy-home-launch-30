@@ -117,19 +117,27 @@ export const CAR_WASH_QUANTITY_RULE: QuantityRule = 'always_1';
 
 // ---------------------------------------------------------------------------
 // The bundle is a gift, not a discount. No percentages anywhere.
+//
+// ONE free premium add-on per month at two or more distinct services. No
+// three-service tier, no free car wash — the only wash in the system is the
+// $0.00 Maintenance Wash row inside Shine Complete, never billed separately,
+// so a free wash cannot be fulfilled. The gift pool is the standard add-on
+// catalogue minus specialist work (Driveway Pressure Wash), and the CUSTOMER
+// CHOOSES the add-on each month.
 // ---------------------------------------------------------------------------
 
-/** Free car washes each month, by count of DISTINCT services in the plan. */
-export function freeCarWashesPerMonth(serviceCount: number): number {
-  if (serviceCount >= 3) return 2;
-  if (serviceCount === 2) return 1;
-  return 0;
+/** Free premium add-ons each month, by count of DISTINCT services in the plan. */
+export function freeAddonsPerMonth(serviceCount: number): number {
+  return serviceCount >= 2 ? 1 : 0;
 }
 
+/** The customer picks the add-on; it is never assigned for them. */
+export const FREE_ADDON_CUSTOMER_CHOICE = true;
+
 export const BUNDLE_GIFT_COPY = {
-  two: 'Add a 2nd service — 1 free car wash every month.',
-  three: 'Add a 3rd service — 2 free car washes every month.',
+  two: 'Add a 2nd service — you pick one free premium add-on every month.',
 } as const;
+
 
 // ---------------------------------------------------------------------------
 // Entry price and referral
