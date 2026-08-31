@@ -188,7 +188,7 @@ export const INSURED_CLAIM = 'Insured';
 /** Badge/chip claim. Reads "Vetted & Insured" only once insurance is verified. */
 export const VETTED_CLAIM = INSURANCE_VERIFIED
   ? 'Vetted & Insured'
-  : 'Vetted & Background-Checked';
+  : 'Background-Checked';
 
 /** Prose form used in sentences about who shows up. */
 export const VETTED_PROS_SENTENCE = INSURANCE_VERIFIED
