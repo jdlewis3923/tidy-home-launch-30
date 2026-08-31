@@ -532,9 +532,9 @@ const translations: Record<string, string> = {
   "Shine Complete · Size 3": "Shine Complete · Tamaño 3",
   "Sedans and coupes. 3 washes a month plus 2 full details a year.":
     "Sedanes y coupés. 3 lavados al mes más 2 detallados completos al año.",
-  "Crossovers and 2-row SUVs. Same flat monthly price.":
-    "Crossovers y SUVs de 2 filas. El mismo precio fijo mensual.",
-  "Trucks, 3-row SUVs and vans.": "Camionetas, SUVs de 3 filas y vans.",
+"Crossovers and 2-row SUVs. Same flat monthly price.":
+    "Crossovers y SUV de 2 filas. El mismo precio fijo mensual.",
+  "Trucks, 3-row SUVs and vans.": "Camionetas, SUV de 3 filas y vans.",
   "Interior + exterior, one vehicle.": "Interior + exterior, un vehículo.",
   "Interior + exterior, every two weeks, one vehicle.": "Interior + exterior, cada dos semanas, un vehículo.",
   // Car Detailing included
