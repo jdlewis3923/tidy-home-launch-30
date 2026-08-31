@@ -228,10 +228,10 @@ export const addOnData: Record<string, { name: string; price: number; service: S
 
 
   // Car care — condition surcharges live here, never in a size.
-  ozone: { name: 'Ozone Odor Treatment', price: 75, service: 'detailing', description: 'Eliminates trapped odors' },
   petHair: { name: 'Pet Hair Removal', price: 45, service: 'detailing', description: 'Thorough pet hair extraction' },
-  engineBay: { name: 'Engine Bay Clean', price: 85, service: 'detailing', description: 'Hand-cleaned engine bay' },
-  ceramicSpray: { name: 'Ceramic Spray Coat', price: 85, service: 'detailing', description: 'Hand spray coat & seal' },
+  clayBarCeramic: { name: 'Clay Bar & Ceramic Coat', price: 95, service: 'detailing', description: 'Clay bar paint decontamination then a ceramic spray coat — about 6 months of protection' },
+  headlightRestoration: { name: 'Headlight Restoration', price: 79, service: 'detailing', description: 'Wet-sand, polish and UV-seal both headlights back to clear — the UV sealant keeps them from re-yellowing' },
+  interiorProtect: { name: 'Interior Protect & Condition', price: 55, service: 'detailing', description: 'Dash, door panels and seats cleaned and conditioned with UV protection' },
 };
 
 // ---------------------------------------------------------------------------
