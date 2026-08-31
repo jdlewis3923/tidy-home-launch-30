@@ -387,7 +387,7 @@ const translations: Record<string, string> = {
   "About 2 minutes to sign up. Same crew. Locked price.": "Inscripción en unos 2 minutos. El mismo equipo. Precio fijo.",
   "About 2 minutes to sign up. Locked price. Cancel anytime.": "Inscripción en unos 2 minutos. Precio fijo. Cancela cuando quieras.",
   "No contracts. Cancel anytime.": "Sin contratos. Cancela cuando quieras.",
-  "Free car washes": "Lavadas de auto gratis",
+  "Free car washes": "Lavados de auto gratis",
   "Bundle & save": "Combo y ahorra",
   "Trusted across Pinecrest · Kendall · Kendall West": "Confiado en Pinecrest · Kendall · Kendall West",
 
@@ -952,7 +952,7 @@ const translations: Record<string, string> = {
   "Shine Complete mobile car care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.":
     "Shine Complete a domicilio en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). 3 lavados al mes más 2 detallados completos al año, desde $149/mes. Reserva en unos 2 minutos.",
   "Stack home cleaning, lawn care and Shine Complete on one plan. Free car washes every month in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). One subscription, one crew, one bill.":
-    "Combina limpieza del hogar, cuidado del jardín y Shine Complete en un solo plan. Lavadas de auto gratis cada mes en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Una suscripción, un equipo, una factura.",
+    "Combina limpieza del hogar, cuidado del jardín y Shine Complete en un solo plan. Lavados de auto gratis cada mes en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Una suscripción, un equipo, una factura.",
   "Vetted & background-checked pros": "Profesionales verificados y con antecedentes revisados",
   "About 2 minutes · No contracts": "Unos 2 minutos · Sin contratos",
   "Locked price · No contracts · Cancel anytime · Pause or reschedule anytime":
