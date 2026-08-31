@@ -403,8 +403,7 @@ const translations: Record<string, string> = {
   "Locked Monthly Price": "Precio Mensual Fijo",
   "Photo Verified Visits": "Fotos Tras Cada Visita",
   "Serving 33156 · 33183 · 33186": "Sirviendo 33156 · 33183 · 33186",
-  "Eco-Safe Products": "Productos Ecológicos",
-  "60-Second Signup": "Inscripción en 60 Segundos",
+"Eco-Safe Products": "Productos Ecológicos",
 
   // Neighborhood trust
   "Built for Pinecrest + Kendall.": "Hecho para Pinecrest + Kendall.",
