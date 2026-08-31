@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import TidyLogo from "./TidyLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { pushEvent } from "@/lib/tracking";
+import { pushEvent, emailSha256 } from "@/lib/tracking";
+import { supabase } from "@/integrations/supabase/client";
 
+// Secondary notification only — allowed to fail. The durable write is the
+// submit-lead edge function (public.leads).
 const WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/26380119/un5oqdu/";
 
 interface LeadPopupProps {
@@ -16,6 +19,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", zip: "" });
   const [smsConsent, setSmsConsent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useLanguage();
 
@@ -24,46 +28,74 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
     if (!form.firstName.trim()) errs.firstName = "First name is required";
     if (!form.email.trim() || !form.email.includes("@")) errs.email = "Valid email is required";
     if (!form.phone.trim()) errs.phone = "Phone number is required";
-    if (!form.zip.trim()) errs.zip = "ZIP code is required";
+    if (!/^\d{5}$/.test(form.zip.trim())) errs.zip = "5-digit ZIP code is required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     if (!validate()) return;
     setIsSubmitting(true);
 
+    const payload = {
+      first_name: form.firstName.trim(),
+      last_name: form.lastName.trim(),
+      email: form.email.trim().toLowerCase(),
+      phone: form.phone.trim(),
+      zip: form.zip.trim(),
+      sms_consent: smsConsent,
+      source: "website_popup",
+      page_url: window.location.href,
+    };
+
+    // 1) Durable write. This is the source of truth — if it fails we keep the
+    //    form open with the values intact rather than losing the lead.
+    const { data, error } = await supabase.functions.invoke("submit-lead", { body: payload });
+    const ok = !error && (data as { ok?: boolean } | null)?.ok === true;
+
+    if (!ok) {
+      console.error("[submit-lead]", error?.message ?? data);
+      setIsSubmitting(false);
+      setSubmitError(
+        t("We couldn't save your details. Please try again, or call us at (786) 829-1141."),
+      );
+      return;
+    }
+
+    // 2) Secondary notification — best-effort, never blocks success.
     try {
       await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         mode: "no-cors",
-        body: JSON.stringify({
-          first_name: form.firstName,
-          last_name: form.lastName,
-          email: form.email,
-          phone: form.phone,
-          zip: form.zip,
-          sms_consent: smsConsent,
-          source: "website_popup",
-          timestamp: new Date().toISOString(),
-        }),
-      });
-      // Fire lead submission + conversion event
-      pushEvent("lead_form_submit", {
-        source: "website_popup",
-        email: form.email,
-        zip: form.zip,
-      });
-      pushEvent("conversion", {
-        send_to: "AW-CONVERSION_ID/CONVERSION_LABEL",
-        event_category: "lead",
-        event_label: "early_access_signup",
+        body: JSON.stringify({ ...payload, timestamp: new Date().toISOString() }),
       });
     } catch (err) {
-      console.error("Webhook error:", err);
+      console.error("Webhook error (non-fatal):", err);
     }
+
+    // 3) Analytics. No raw email/phone/name/address is ever pushed — only a
+    //    SHA-256 hash of the lowercased email as an optional join key.
+    const hashed = await emailSha256(payload.email);
+    pushEvent("lead_form_submit", {
+      source: "website_popup",
+      zip: payload.zip,
+      ...(hashed ? { email_sha256: hashed } : {}),
+    });
+    // The previous Google Ads push here used the literal placeholder
+    // "AW-CONVERSION_ID/CONVERSION_LABEL" and therefore never registered.
+    // We have no conversion label for the early-access lead yet, so we emit a
+    // clean dataLayer event instead: point a GTM tag at `generate_lead` once
+    // the conversion action is created in Google Ads (account AW-17776060215).
+    pushEvent("generate_lead", {
+      source: "website_popup",
+      zip: payload.zip,
+    });
+    // Meta Pixel — standard Lead event so Meta can optimise for leads and
+    // seed a lookalike audience.
+    window.fbq?.("track", "Lead");
 
     setIsSubmitting(false);
     localStorage.setItem("tidy_popup_dismissed", Date.now().toString());
@@ -74,6 +106,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
     localStorage.setItem("tidy_popup_dismissed", Date.now().toString());
     onClose();
   };
+
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {

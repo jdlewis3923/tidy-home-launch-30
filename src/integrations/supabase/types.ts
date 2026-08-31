@@ -1843,6 +1843,48 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string | null
+          page_url: string | null
+          phone: string
+          sms_consent: boolean
+          source: string
+          user_agent: string | null
+          zip: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name?: string | null
+          page_url?: string | null
+          phone: string
+          sms_consent?: boolean
+          source?: string
+          user_agent?: string | null
+          zip: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string | null
+          page_url?: string | null
+          phone?: string
+          sms_consent?: boolean
+          source?: string
+          user_agent?: string | null
+          zip?: string
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           calendar_enabled: boolean
