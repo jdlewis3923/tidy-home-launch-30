@@ -289,7 +289,7 @@ export function calculatePricing(state: ConfigState) {
     return addon ? sum + addon.price : sum;
   }, 0);
 
-  // No percentage discounts exist. Bundling earns free car washes instead.
+  // No percentage discounts exist. Bundling earns one free premium add-on a month.
   const subtotal = servicesSubtotal + carWashSubtotal + addOnsSubtotal;
   const netTotal = subtotal;
 
