@@ -56,7 +56,7 @@ const config: ServiceLandingConfig = {
     "Background-checked pros",
     "Locked $45 a visit — never surprise-priced",
   ],
-  addOnsNote: "Available as add-ons: hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization treatment, driveway pressure wash.",
+  addOnsNote: "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens. Driveway pressure wash is specialist work, quoted separately.",
   trustCards: [
     {
       title: "Same Crew",
@@ -87,7 +87,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's actually included in a visit?",
-      a: "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Hedge and bush trimming is available as an add-on.",
+      a: "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. A bed edge reset is available as an add-on.",
     },
     {
       q: "Who does the work?",

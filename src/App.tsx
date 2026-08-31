@@ -115,7 +115,20 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 
 // Routes that remain accessible when an admin has toggled the site OFF.
 // Admin can still log in and flip it back on; everything else shows ComingSoon.
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/", "/neighbor"];
+
+// The printed door hangers point at /dashboard/plan?src=doorhanger_en — an
+// authenticated route a neighbour with no account cannot see. Send those hits to
+// the public founding-neighbour page instead, params intact.
+const DoorhangerRescue = () => {
+  const location = useLocation();
+  const src = new URLSearchParams(location.search).get("src") ?? "";
+  if (location.pathname === "/dashboard/plan" && src.startsWith("doorhanger")) {
+    return <Navigate to={`/neighbor${location.search}`} replace />;
+  }
+  return null;
+};
+
 
 const SiteGate = ({ children }: { children: React.ReactNode }) => {
   const { isLive, isLoading } = useSiteLive();
@@ -151,6 +164,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <PromoCaptureWatcher />
+            <DoorhangerRescue />
+
                         <MetaPixel />
             <ChatbotMount />
             <HomeButton />

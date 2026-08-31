@@ -26,12 +26,16 @@ export const LANDING_SOURCES: Record<"en" | "es", LandingSource> = {
 
 const STORAGE_KEY = "tidy_landing_source";
 const TTL_MS = 90 * 24 * 60 * 60 * 1000;
+/** Once-per-session guard so one visit writes one server-side touch row. */
+const TOUCH_SENT_KEY = "tidy_landing_touch_sent";
 
 const isBrowser = () => typeof window !== "undefined";
 
 /** Record the landing source. First-wins inside the 90-day window. */
 export function captureLandingSource(source: LandingSource): void {
   if (!isBrowser()) return;
+  // Server-side persistence is the real record; localStorage is the fallback.
+  void persistLandingTouch(source);
   if (getLandingSource()) return;
   try {
     window.localStorage?.setItem(STORAGE_KEY, JSON.stringify({ v: source, ts: Date.now() }));
@@ -39,6 +43,42 @@ export function captureLandingSource(source: LandingSource): void {
     /* storage unavailable — the URL param and the GTM event still carry it */
   }
 }
+
+/**
+ * Write the door-hanger touch to the backend on first sight. localStorage is
+ * only a fallback: it is per-device and gets cleared, so attribution has to
+ * live server-side to survive to the customer record.
+ */
+export async function persistLandingTouch(source: LandingSource): Promise<void> {
+  if (!isBrowser()) return;
+  try {
+    if (window.sessionStorage?.getItem(TOUCH_SENT_KEY)) return;
+    window.sessionStorage?.setItem(TOUCH_SENT_KEY, "1");
+  } catch {
+    /* sessionStorage unavailable — still try the insert once */
+  }
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { error } = await supabase.from("landing_touches").insert({
+      landing_source: source,
+      placement: params.get("placement")?.slice(0, 16) ?? getQrPlacement(),
+      zip: (params.get("zip") ?? getQrZip())?.slice(0, 10) ?? null,
+      lang: params.get("lang")?.slice(0, 5) ?? null,
+      path: window.location.pathname.slice(0, 200),
+      utm_source: params.get("utm_source")?.slice(0, 200) ?? null,
+      utm_medium: params.get("utm_medium")?.slice(0, 200) ?? null,
+      utm_campaign: params.get("utm_campaign")?.slice(0, 200) ?? null,
+      utm_content: params.get("utm_content")?.slice(0, 200) ?? null,
+      user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
+      referrer: typeof document !== "undefined" ? document.referrer.slice(0, 500) || null : null,
+    });
+    if (error) console.warn("[landing] touch log failed", error.message);
+  } catch {
+    /* never let attribution logging break the page */
+  }
+}
+
 
 /** Read the stored landing source, or null once the window has lapsed. */
 export function getLandingSource(): LandingSource | null {

@@ -88,7 +88,7 @@ describe('Florida sales tax in checkout', () => {
 
   it('house cleaning and lawn care are never taxed', () => {
     expect(taxPctFor(buildState(['cleaning'], ['oven', 'fridge']))).toBe(0);
-    expect(taxPctFor(buildState(['lawn'], ['hedge', 'weed']))).toBe(0);
+    expect(taxPctFor(buildState(['lawn'], ['bedEdgeReset', 'weed']))).toBe(0);
     expect(taxPctFor(buildState(['cleaning', 'lawn']))).toBe(0);
   });
 });

@@ -13,6 +13,11 @@ export type Addon = {
   icon: string;
   /** Items that "feel one-time" — pushed to bottom if bought in last 60 days */
   oneTimeFeel?: boolean;
+  /**
+   * Specialist work: quoted and scheduled separately, and never part of the
+   * free monthly add-on gift for bundled plans.
+   */
+  specialist?: boolean;
 };
 
 export const ADDON_CATALOG: Addon[] = [
@@ -24,17 +29,21 @@ export const ADDON_CATALOG: Addon[] = [
   { key: 'laundry_wdf',        name: 'Laundry W/D/F',         price: 30, service: 'cleaning', icon: 'Shirt' },
   { key: 'inside_cabinets',    name: 'Inside Kitchen Cabinets', price: 50, service: 'cleaning', icon: 'Boxes' },
   // Lawn
-  { key: 'hedge_trim',         name: 'Hedge & Bush Trimming', price: 65, service: 'lawn', icon: 'Scissors' },
   { key: 'weed_removal',       name: 'Weed Removal',          price: 45, service: 'lawn', icon: 'Sprout' },
   { key: 'leaf_cleanup',       name: 'Leaf & Debris Cleanup', price: 55, service: 'lawn', icon: 'Leaf' },
-  { key: 'fertilization',      name: 'Fertilization Treatment', price: 75, service: 'lawn', icon: 'Droplets', oneTimeFeel: true },
-  { key: 'driveway_pressure',  name: 'Driveway Pressure Wash', price: 150, service: 'lawn', icon: 'Wind', oneTimeFeel: true },
+  { key: 'bed_edge_reset',     name: 'Bed Edge Reset',        price: 65, service: 'lawn', icon: 'Scissors' },
+  { key: 'exterior_windows_screens', name: 'Exterior Windows & Screens', price: 85, service: 'lawn', icon: 'PanelTop' },
+  { key: 'driveway_pressure',  name: 'Driveway Pressure Wash', price: 150, service: 'lawn', icon: 'Wind', oneTimeFeel: true, specialist: true },
   // Detail
   { key: 'ozone_odor',         name: 'Ozone Odor Treatment',  price: 75, service: 'detailing', icon: 'Wind' },
   { key: 'pet_hair',           name: 'Pet Hair Removal',      price: 45, service: 'detailing', icon: 'Dog' },
   { key: 'engine_bay',         name: 'Engine Bay Clean',      price: 85, service: 'detailing', icon: 'Wrench' },
   { key: 'ceramic_spray',      name: 'Ceramic Spray Coat',    price: 85, service: 'detailing', icon: 'Sparkles', oneTimeFeel: true },
 ];
+
+/** The pool the free monthly add-on for bundled plans is picked from. */
+export const GIFT_ELIGIBLE_ADDONS = ADDON_CATALOG.filter((a) => !a.specialist);
+
 
 export const SERVICE_LABELS: Record<AddonService, string> = {
   cleaning: 'Cleaning',

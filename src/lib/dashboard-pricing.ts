@@ -207,7 +207,7 @@ export function freeCarWashes(state: ConfigState): number {
 }
 
 // One-time add-ons. Size covers the property — add-ons are extra tasks only.
-export const addOnData: Record<string, { name: string; price: number; service: ServiceType; description: string }> = {
+export const addOnData: Record<string, { name: string; price: number; service: ServiceType; description: string; specialist?: boolean }> = {
   // House Cleaning
   oven: { name: 'Inside Oven Clean', price: 45, service: 'cleaning', description: 'Deep clean inside your oven' },
   fridge: { name: 'Inside Fridge Clean', price: 35, service: 'cleaning', description: 'Interior fridge scrub & wipe-down' },
@@ -217,11 +217,12 @@ export const addOnData: Record<string, { name: string; price: number; service: S
   cabinets: { name: 'Inside Kitchen Cabinets', price: 50, service: 'cleaning', description: 'Wipe inside all kitchen cabinets' },
 
   // Lawn Care
-  hedge: { name: 'Hedge & Bush Trimming', price: 65, service: 'lawn', description: 'Shape and trim all hedges' },
   weed: { name: 'Weed Removal — Garden Beds', price: 45, service: 'lawn', description: 'Manual weed pulling in beds' },
   leaf: { name: 'Leaf & Debris Cleanup', price: 55, service: 'lawn', description: 'Full yard leaf and debris removal' },
-  fertilization: { name: 'Fertilization Treatment', price: 75, service: 'lawn', description: 'Seasonal turf fertilizer' },
-  pressureWash: { name: 'Driveway Pressure Wash', price: 150, service: 'lawn', description: 'Concrete driveway and walkway pressure clean' },
+  bedEdgeReset: { name: 'Bed Edge Reset', price: 65, service: 'lawn', description: 'Clean vertical edge cut where beds meet turf — mulch stays in, grass stays out' },
+  exteriorWindows: { name: 'Exterior Windows & Screens', price: 85, service: 'lawn', description: 'Exterior window and screen rinse — ground floor only, no ladder work' },
+  pressureWash: { name: 'Driveway Pressure Wash', price: 150, service: 'lawn', description: 'Concrete driveway and walkway pressure clean', specialist: true },
+
 
   // Car care — condition surcharges live here, never in a size.
   ozone: { name: 'Ozone Odor Treatment', price: 75, service: 'detailing', description: 'Eliminates trapped odors' },
