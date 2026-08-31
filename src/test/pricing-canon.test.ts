@@ -4,6 +4,7 @@
 // supabase/functions/_shared/pricing-canon.ts. This test fails if the two
 // diverge, if a page ships a stale number, or if a retired concept (four size
 // bands, percentage bundle discounts, promo codes) creeps back in.
+import { GIFT_ELIGIBLE_ADDONS } from '@/lib/addon-catalog';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect } from 'vitest';
@@ -17,7 +18,8 @@ import {
   SERVICE_UNIT,
   SIZES,
   SIZE_PRICES,
-  freeCarWashesPerMonth,
+  FREE_ADDON_CUSTOMER_CHOICE,
+  freeAddonsPerMonth,
   monthlyPrice,
   quantityFor,
   sizePrice,
@@ -91,11 +93,20 @@ describe('cadence multiplies, it never discounts', () => {
   });
 });
 
-describe('bundling gives car washes, never a percentage', () => {
-  it('one free wash at two services, two at three', () => {
-    expect(freeCarWashesPerMonth(1)).toBe(0);
-    expect(freeCarWashesPerMonth(2)).toBe(1);
-    expect(freeCarWashesPerMonth(3)).toBe(2);
+describe('bundling gives one free premium add-on, never a percentage or a wash', () => {
+  it('one free add-on at two OR MORE services — there is no third tier', () => {
+    expect(freeAddonsPerMonth(0)).toBe(0);
+    expect(freeAddonsPerMonth(1)).toBe(0);
+    expect(freeAddonsPerMonth(2)).toBe(1);
+    expect(freeAddonsPerMonth(3)).toBe(1);
+    expect(freeAddonsPerMonth(4)).toBe(1);
+  });
+
+  it('the gift pool is the add-on catalogue and the customer chooses', () => {
+    expect(FREE_ADDON_CUSTOMER_CHOICE).toBe(true);
+    expect(GIFT_ELIGIBLE_ADDONS.length).toBeGreaterThan(0);
+    expect(GIFT_ELIGIBLE_ADDONS.some((a) => a.key === 'driveway_pressure')).toBe(false);
+    expect(GIFT_ELIGIBLE_ADDONS.every((a) => !a.specialist)).toBe(true);
   });
 
   it('calculatePricing applies no discount to the subtotal', () => {
@@ -109,7 +120,7 @@ describe('bundling gives car washes, never a percentage', () => {
     });
     expect(p.netTotal).toBe(p.subtotal);
     expect(p.subtotal).toBe(189 * 2 + 65 * 4);
-    expect(p.freeCarWashes).toBe(1);
+    expect(p.freeAddons).toBe(1);
   });
 
   it('no percentage-discount or promo-code machinery survives in the canon', () => {
