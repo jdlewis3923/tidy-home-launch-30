@@ -288,13 +288,13 @@ const translations: Record<string, string> = {
   // Add-on catalogue + bundle small print (batch 15/16)
   "Inside oven, inside fridge, interior windows, baseboard scrub, laundry, inside kitchen cabinets":
     "Interior del horno, interior del refrigerador, ventanas interiores, limpieza de zócalos, lavandería, interior de gabinetes de cocina",
-  "Hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization, driveway pressure wash":
+  "Weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens":
     "Remoción de maleza, limpieza de hojas y escombros, reajuste del borde de jardineras, ventanas y mosquiteros exteriores",
   "Pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat":
     "Remoción de pelo de mascotas, tratamiento de ozono para olores, limpieza del compartimiento del motor, capa cerámica en spray",
   "Available as add-ons: inside oven, inside fridge, interior windows, deep baseboard scrub, laundry (wash/dry/fold), inside kitchen cabinets.":
     "Disponibles como servicios adicionales: interior del horno, interior del refrigerador, ventanas interiores, limpieza profunda de zócalos, lavandería (lavado/secado/doblado), interior de gabinetes de cocina.",
-  "Available as add-ons: hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization treatment, driveway pressure wash.":
+  "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens. Driveway pressure wash is specialist work, quoted separately.":
     "Disponibles como servicios adicionales: remoción de maleza, limpieza de hojas y escombros, reajuste del borde de jardineras, ventanas y mosquiteros exteriores. El lavado a presión de la entrada es trabajo especializado y se cotiza aparte.",
   "Available as add-ons: pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat.":
     "Disponibles como servicios adicionales: remoción de pelo de mascotas, tratamiento de ozono para olores, limpieza del compartimiento del motor, capa cerámica en spray.",
@@ -461,7 +461,7 @@ const translations: Record<string, string> = {
   "What's actually included in a visit?": "¿Qué incluye realmente una visita?",
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
-  "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Hedge and bush trimming is available as an add-on.":
+  "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. A bed edge reset is available as an add-on.":
     "Corte a altura precisa, bordeado de todos los contornos, soplado de áreas pavimentadas, desbroce a lo largo de las cercas y embolsar o triturar el césped cortado. La poda de setos y arbustos está disponible como servicio adicional.",
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, interior windows, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
@@ -495,8 +495,7 @@ const translations: Record<string, string> = {
   "Weed-whack fence lines": "Desbroce a lo largo de las cercas",
   "Bag or mulch clippings": "Embolsar o triturar el césped cortado",
   "Bush trim (weekly)": "Poda de arbustos (semanal)",
-  "Seasonal fertilization available": "Fertilización por temporada disponible",
-  "Locked $45 a visit — never surprise-priced": "$45 por visita, precio fijo — nunca con precios sorpresa",
+    "Locked $45 a visit — never surprise-priced": "$45 por visita, precio fijo — nunca con precios sorpresa",
   // Lawn Care testimonials
   "Lawn looks sharp every week without me lifting a finger. Best $85 I spend monthly.":
     "El jardín se ve impecable cada semana sin mover un dedo. El mejor dinero que gasto al mes.",
@@ -728,7 +727,7 @@ const translations: Record<string, string> = {
   "Tree trimming or removal": "Poda o remoción de árboles",
   "Irrigation system repair": "Reparación del sistema de riego",
   "Landscape design or planting": "Diseño de paisajismo o siembra",
-  "Hedge trimming, fertilization, pest treatment": "Poda de setos, fertilización, tratamiento de plagas",
+  "Bed edge reset, weed removal, leaf cleanup": "Reajuste del borde de jardineras, remoción de maleza, limpieza de hojas",
   "Comes to your driveway · No drop-off needed": "Vamos a tu entrada · Sin llevar el auto a ningún lado",
   "3 washes a month + 2 full details a year": "3 lavados al mes + 2 detallados completos al año",
   "Driveway-ready detailing at your door. We come to you — exterior wash, interior vacuum, surface cleaning.":
@@ -829,7 +828,7 @@ const translations: Record<string, string> = {
   "Full exterior hand wash with wheel cleaning, interior vacuum with floor mats, and dashboard and surface wipe-down — right in your driveway.":
     "Lavado exterior completo a mano con limpieza de ruedas, aspirado interior con tapetes, y limpieza del tablero y superficies — en tu propia entrada.",
   "Can I add extra services or upgrades?": "¿Puedo agregar servicios adicionales o mejoras?",
-  "Yes. Add-ons like deep cleaning, hedge trimming, leather conditioning, and more are available as one-time or recurring extras. You can add them anytime through your dashboard.":
+  "Yes. Add-ons like deep cleaning, bed edge reset, leather conditioning, and more are available as one-time or recurring extras. You can add them anytime through your dashboard.":
     "Sí. Los servicios adicionales como limpieza profunda, poda de setos, acondicionamiento de cuero y más están disponibles como extras únicos o recurrentes. Puedes agregarlos cuando quieras desde tu panel.",
   "Tidy is designed for consistent ongoing maintenance. Deep cleans and restoration work are available as add-ons — just ask.":
     "Tidy está diseñado para mantenimiento continuo y constante. Las limpiezas profundas y los trabajos de restauración están disponibles como servicios adicionales — solo pídelos.",
