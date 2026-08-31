@@ -54,7 +54,7 @@ function buildState(services: ServiceType[], addOns: string[] = []): ConfigState
 describe('Florida sales tax in checkout', () => {
   it('the rate and trigger list live in one auditable, rule-cited constant', () => {
     expect(SERVER_PCT).toBe(7);
-    expect(SERVER_COATING_IDS).toContain('ceramicSpray');
+    expect(SERVER_COATING_IDS).toContain('clayBarCeramic');
     expect(taxSrc).toMatch(/12A-1\.0091/);
     expect(taxSrc).toMatch(/12A-1\.006\(6\)/);
     // The decision must be cart-level in checkout, never a price tax_behavior.
@@ -74,11 +74,11 @@ describe('Florida sales tax in checkout', () => {
     // Tidy is not registered to collect FL sales tax: the master switch is off,
     // so the quoted total must carry no tax either.
     expect(FL_SALES_TAX_COLLECTION_ENABLED).toBe(false);
-    const p = calculatePricing(buildState(['detailing'], ['ceramicSpray']));
+    const p = calculatePricing(buildState(['detailing'], ['clayBarCeramic']));
     expect(p.taxAmount).toBe(0);
     expect(p.ongoing).toBeCloseTo(p.netTotal, 2);
     // The rule itself still identifies the coating cart, for when we register.
-    expect(taxPctFor(buildState(['detailing'], ['ceramicSpray']))).toBe(7);
+    expect(taxPctFor(buildState(['detailing'], ['clayBarCeramic']))).toBe(7);
   });
 
   it('detailing WITHOUT a coating add-on is untaxed', () => {
