@@ -56,6 +56,7 @@ const translations: Record<string, string> = {
   // Announcement ticker
   "Vetted & Background-Checked": "Antecedentes Verificados",
   "Background-Checked Pros": "Profesionales Verificados",
+  "Same Pro Every Time": "El Mismo Profesional Cada Visita",
   "Cancel Anytime": "Cancela Cuando Quieras",
   "Photo Verified Every Visit": "Fotos Verificadas en Cada Visita",
   "No Long-Term Contracts": "Sin Contratos a Largo Plazo",
