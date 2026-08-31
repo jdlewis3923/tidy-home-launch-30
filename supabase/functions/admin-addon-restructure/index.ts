@@ -81,15 +81,25 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
   if (!STRIPE_SECRET_KEY) return jsonResponse({ ok: false, error: 'missing_stripe_key' }, 500);
 
-  const auth = req.headers.get('Authorization') ?? '';
-  if (!auth.startsWith('Bearer ')) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
-  const token = auth.slice(7);
-
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  if (token !== SUPABASE_SERVICE_ROLE_KEY) {
+  const auth = req.headers.get('Authorization') ?? '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  const maintToken = req.headers.get('x-restructure-token') ?? '';
+
+  let authorized = token !== '' && token === SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!authorized && maintToken) {
+    // Single-use maintenance token, stored in app_settings and deleted right
+    // after the run.
+    const { data: row } = await admin
+      .from('app_settings').select('value').eq('key', 'addon_restructure_token').maybeSingle();
+    authorized = typeof row?.value === 'string' && row.value === maintToken;
+  }
+
+  if (!authorized && token) {
     const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: auth } },
     });
@@ -97,8 +107,10 @@ Deno.serve(async (req) => {
     if (claimsErr || !claims?.claims?.sub) return jsonResponse({ ok: false, error: 'invalid_jwt' }, 401);
     const { data: roleRow } = await admin
       .from('user_roles').select('role').eq('user_id', claims.claims.sub as string).eq('role', 'admin').maybeSingle();
-    if (!roleRow) return jsonResponse({ ok: false, error: 'forbidden' }, 403);
+    authorized = Boolean(roleRow);
   }
+
+  if (!authorized) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
 
   const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2025-03-31.basil' as any });
   const body = await req.json().catch(() => ({}));
