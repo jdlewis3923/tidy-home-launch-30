@@ -455,7 +455,7 @@ const translations: Record<string, string> = {
     "Un precio fijo por visita, según el tamaño de tu casa: $139, $189 o $279. La frecuencia solo lo multiplica — mensual es una visita, quincenal dos y semanal cuatro. Las casas de 5+ recámaras las cotizamos a mano.",
   "Yes. No contracts, no cancellation fees. Pause, skip, or cancel from your dashboard anytime.":
     "Sí. Sin contratos, sin cargos por cancelación. Pausa, omite o cancela desde tu panel cuando quieras.",
-  "What's your service area?": "¿Cuál es su área de servicio?",
+  "What's your service area?": "¿Cuál es el área de servicio?",
   "We serve Pinecrest and Kendall — ZIP codes 33156, 33183, and 33186. We're not currently serving other areas.":
     "Servimos Pinecrest y Kendall — códigos postales 33156, 33183 y 33186. Por ahora no servimos otras áreas.",
   "What's actually included in a visit?": "¿Qué incluye realmente una visita?",
