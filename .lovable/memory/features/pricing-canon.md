@@ -7,10 +7,11 @@ All prices and discounts come from `src/lib/pricing-canon.ts`, mirrored for edge
 functions at `supabase/functions/_shared/pricing-canon.ts`. Never hardcode a
 price or percentage anywhere else.
 
-- House Cleaning: $159 monthly / $275 biweekly / $459 weekly
-- Lawn Care: $85 / $129 / $195
-- Car Detailing: $159 monthly / $249 biweekly (no weekly)
-- XL upcharge: cleaning +$60, lawn +$30, detailing +$30 per vehicle
+- Three sizes (1/2/3) per service, no XL surcharges, no square footage.
+- House Cleaning per visit: $139 / $189 / $279 (cadence multiplies: 1/2/4)
+- Lawn Care per visit: $45 / $65 / $99
+- Shine Complete per month: $149 / $179 / $239
+
 - Bundling is NEVER a discount and NEVER a car wash. It is ONE free premium
   add-on per month whenever the customer holds 2+ distinct services. No
   3-service tier. The CUSTOMER CHOOSES the add-on (`freeAddonsPerMonth`,
