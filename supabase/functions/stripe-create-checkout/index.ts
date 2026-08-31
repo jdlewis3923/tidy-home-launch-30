@@ -21,7 +21,7 @@ import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
 import {
   CAR_WASH_LOOKUP_KEYS,
   SERVICE_LOOKUP_KEYS,
-  freeCarWashesPerMonth,
+  freeAddonsPerMonth,
   quantityFor,
   type CanonSize,
   type WashCount,
@@ -214,7 +214,7 @@ Deno.serve(async (req) => {
 
         // ---------- Bundle gift: free car washes, never a percentage ----------
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
-        const freeCarWashes = freeCarWashesPerMonth(uniqueServices);
+        const freeAddons = freeAddonsPerMonth(uniqueServices);
 
         // ---------- Subscription metadata for the webhook ----------
         const subscriptionMetadata: Record<string, string> = {
@@ -225,7 +225,7 @@ Deno.serve(async (req) => {
           sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
           addons_json: JSON.stringify(input.addons),
           car_wash_json: input.car_wash ? JSON.stringify(input.car_wash) : "",
-          free_car_washes_per_month: String(freeCarWashes),
+          free_addons_per_month: String(freeAddons),
           zip: input.zip,
           preferred_day: input.preferred_day ?? "",
           preferred_time: input.preferred_time ?? "",
@@ -278,7 +278,7 @@ Deno.serve(async (req) => {
           ok: true as const,
           checkout_url: session.url,
           session_id: session.id,
-          free_car_washes_per_month: freeCarWashes,
+          free_addons_per_month: freeAddons,
         };
       },
     });

@@ -105,7 +105,7 @@ const config: ServiceLandingConfig = {
   ],
   bundleCta: {
     title: "Already booking cleaning? Add lawn care from $45 a visit.",
-    body: "Add a 2nd service and we throw in a free car wash every month — and you never coordinate two providers again.",
+    body: "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.",
     targetServices: "cleaning,lawn",
   },
   seo: {

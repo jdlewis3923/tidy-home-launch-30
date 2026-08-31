@@ -57,6 +57,13 @@
       "when": 1788183880776,
       "tag": "0007_landing_touches_and_addon_catalog_corrections",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788184355963,
+      "tag": "0008_subscriptions_free_addons_per_month",
+      "breakpoints": true
     }
   ]
 }

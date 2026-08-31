@@ -7,7 +7,7 @@
 //     -> add-on price_cents from setup-stripe-catalog (the real catalog seed)
 //
 // There are no coupons and no percentage discounts in this model: bundling
-// earns free car washes, so the charged subtotal is simply the sum of the
+// earns one free premium add-on, so the charged subtotal is simply the sum of the
 // line items. If the two ever diverge again, this fails.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -19,7 +19,7 @@ import {
   CAR_WASH_PRICES,
   SERVICE_LOOKUP_KEYS,
   SIZE_PRICES,
-  freeCarWashesPerMonth,
+  freeAddonsPerMonth,
   quantityFor,
   type CanonSize,
   type VehicleClass,
@@ -176,13 +176,13 @@ describe('checkout ↔ Stripe parity', () => {
     expect(Math.round(stripeSubscriptionCents(monthly))).toBe(179 * 100);
   });
 
-  it('bundling adds free washes, never a discount on the charge', () => {
+  it('bundling adds a free monthly add-on, never a discount on the charge', () => {
     const one = buildState(['cleaning']);
     const two = buildState(['cleaning', 'lawn']);
     expect(Math.round(stripeSubscriptionCents(two))).toBe(
       Math.round(stripeSubscriptionCents(one)) + 65 * 100,
     );
-    expect(calculatePricing(two).freeCarWashes).toBe(freeCarWashesPerMonth(2));
+    expect(calculatePricing(two).freeAddons).toBe(freeAddonsPerMonth(2));
   });
 
   it('a quote-only cart never reaches Stripe', () => {

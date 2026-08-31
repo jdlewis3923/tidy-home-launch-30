@@ -64,7 +64,7 @@ const Services = () => {
 
         <FadeIn className="mb-12" delay={100}>
           <div className="bg-gradient-to-r from-primary/10 to-success/10 border border-primary/20 rounded-xl px-6 py-4 text-center">
-            <span className="text-sm font-medium text-foreground" dangerouslySetInnerHTML={{ __html: t("💡 Bundle and we add car washes — 2 services: <strong>1 free car wash a month</strong> · 3 services: <strong>2 free car washes a month</strong>") }} />
+            <span className="text-sm font-medium text-foreground" dangerouslySetInnerHTML={{ __html: t("💡 Bundle 2+ services and you pick <strong>one free premium add-on every month</strong> — your choice from our add-on list") }} />
           </div>
         </FadeIn>
 

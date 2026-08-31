@@ -117,19 +117,35 @@ export const CAR_WASH_QUANTITY_RULE: QuantityRule = 'always_1';
 
 // ---------------------------------------------------------------------------
 // The bundle is a gift, not a discount. No percentages anywhere.
+//
+// The gift is ONE free premium add-on per month whenever the customer holds two
+// or more distinct services. There is no three-service tier and there is NO
+// free car wash: the only wash in the whole system is the $0.00 Maintenance
+// Wash scheduling row inside a Shine Complete subscription, which is never
+// billed separately, so a free car wash cannot be fulfilled by Stripe or
+// Jobber. The gift pool is the standard add-on catalogue minus specialist work
+// (see GIFT_ELIGIBLE_ADDONS in src/lib/addon-catalog.ts — Driveway Pressure
+// Wash is excluded). The CUSTOMER CHOOSES which add-on they take each month;
+// we never assign one.
 // ---------------------------------------------------------------------------
 
-/** Free car washes each month, by count of DISTINCT services in the plan. */
-export function freeCarWashesPerMonth(serviceCount: number): number {
-  if (serviceCount >= 3) return 2;
-  if (serviceCount === 2) return 1;
-  return 0;
+/** Free premium add-ons each month, by count of DISTINCT services in the plan. */
+export function freeAddonsPerMonth(serviceCount: number): number {
+  return serviceCount >= 2 ? 1 : 0;
 }
 
+/** True when the plan earns the monthly free add-on. */
+export function hasFreeAddonEntitlement(serviceCount: number): boolean {
+  return freeAddonsPerMonth(serviceCount) > 0;
+}
+
+/** The customer picks the add-on; it is never assigned for them. */
+export const FREE_ADDON_CUSTOMER_CHOICE = true;
+
 export const BUNDLE_GIFT_COPY = {
-  two: 'Add a 2nd service — 1 free car wash every month.',
-  three: 'Add a 3rd service — 2 free car washes every month.',
+  two: 'Add a 2nd service — you pick one free premium add-on every month.',
 } as const;
+
 
 // ---------------------------------------------------------------------------
 // Entry price and referral

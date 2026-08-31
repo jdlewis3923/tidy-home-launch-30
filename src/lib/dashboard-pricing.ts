@@ -14,7 +14,7 @@ import {
   SIZES,
   VEHICLE_CLASS_LABELS,
   VEHICLE_CLASS_SIZE,
-  freeCarWashesPerMonth,
+  freeAddonsPerMonth,
   quantityFor,
   sizeFromBedrooms,
   type CanonService,
@@ -201,9 +201,12 @@ export function carWashEligible(state: ConfigState): boolean {
   return state.services.includes('lawn') || state.services.includes('cleaning');
 }
 
-/** Free car washes each month, earned by bundling. Never a percentage. */
-export function freeCarWashes(state: ConfigState): number {
-  return freeCarWashesPerMonth(state.services.length);
+/**
+ * Free premium add-ons each month, earned by bundling. Never a percentage, and
+ * never a car wash — the customer picks one add-on from the gift pool.
+ */
+export function freeAddons(state: ConfigState): number {
+  return freeAddonsPerMonth(state.services.length);
 }
 
 // One-time add-ons. Size covers the property — add-ons are extra tasks only.
@@ -286,7 +289,7 @@ export function calculatePricing(state: ConfigState) {
     return addon ? sum + addon.price : sum;
   }, 0);
 
-  // No percentage discounts exist. Bundling earns free car washes instead.
+  // No percentage discounts exist. Bundling earns one free premium add-on a month.
   const subtotal = servicesSubtotal + carWashSubtotal + addOnsSubtotal;
   const netTotal = subtotal;
 
@@ -304,7 +307,7 @@ export function calculatePricing(state: ConfigState) {
     servicesSubtotal,
     carWashSubtotal,
     addOnsSubtotal,
-    freeCarWashes: freeCarWashes(state),
+    freeAddons: freeAddons(state),
     servicesTotal: servicesSubtotal,
     addOnsTotal: addOnsSubtotal,
     /** Pre-tax amount. */

@@ -206,8 +206,8 @@ const translations: Record<string, string> = {
   Monthly: "Mensual",
   Biweekly: "Quincenal",
   Weekly: "Semanal",
-  "Bundle and we add car washes · 2 services = 1 free car wash a month · 3 services = 2 · Cancel anytime":
-    "Combina y agregamos lavados de auto · 2 servicios = 1 lavado gratis al mes · 3 servicios = 2 · Cancela cuando quieras",
+  "Bundle 2+ services · you pick 1 free premium add-on every month · Cancel anytime":
+    "Combina 2+ servicios · eliges 1 servicio adicional premium gratis cada mes · Cancela cuando quieras",
 
   // FAQ
   "Most customers never need to think about any of this — but we've got you covered.":
@@ -352,8 +352,8 @@ const translations: Record<string, string> = {
   Privacy: "Privacidad",
 
   // Bundle banner
-  "💡 Bundle and we add car washes — 2 services: <strong>1 free car wash a month</strong> · 3 services: <strong>2 free car washes a month</strong>":
-    "💡 Combina y agregamos lavados de auto — 2 servicios: <strong>1 lavado gratis al mes</strong> · 3 servicios: <strong>2 lavados gratis al mes</strong>",
+  "💡 Bundle 2+ services and you pick <strong>one free premium add-on every month</strong> — your choice from our add-on list":
+    "💡 Combina 2+ servicios y eliges <strong>un servicio adicional premium gratis cada mes</strong> — tú eliges de nuestra lista",
 
   // ============================================================
   // LANDING PAGES (LPs) — /house-cleaning, /lawn-care, /car-detailing, /bundle
@@ -387,7 +387,7 @@ const translations: Record<string, string> = {
   "About 2 minutes to sign up. Same crew. Locked price.": "Inscripción en unos 2 minutos. El mismo equipo. Precio fijo.",
   "About 2 minutes to sign up. Locked price. Cancel anytime.": "Inscripción en unos 2 minutos. Precio fijo. Cancela cuando quieras.",
   "No contracts. Cancel anytime.": "Sin contratos. Cancela cuando quieras.",
-  "Free car washes": "Lavados de auto gratis",
+  "Free monthly add-on": "Servicio adicional gratis al mes",
   "Bundle & save": "Combo y ahorra",
   "Trusted across Pinecrest · Kendall · Kendall West": "Confiado en Pinecrest · Kendall · Kendall West",
 
@@ -417,7 +417,7 @@ const translations: Record<string, string> = {
   "House Cleaning · from $139 a visit": "Limpieza del Hogar · desde $139 por visita",
   "Lawn Care · from $45 a visit": "Cuidado del Jardín · desde $45 por visita",
   "Shine Complete · from $149/mo": "Shine Complete · desde $149/mes",
-  "Bundle & Save · free car washes": "Combo y Ahorra · lavados de auto gratis",
+  "Bundle your services · free monthly add-on": "Combina tus servicios · servicio adicional gratis al mes",
 
   // House Cleaning LP
   "Monthly House Cleaning in Pinecrest + Kendall": "Limpieza Mensual del Hogar en Pinecrest + Kendall",
@@ -474,7 +474,7 @@ const translations: Record<string, string> = {
   "Reach out within 24 hours and we'll re-clean the area or credit your account — no questions asked.":
     "Avísanos en 24 horas y volvemos a limpiar el área o te acreditamos a tu cuenta — sin preguntas.",
   "Already booking cleaning? Add lawn care from $45 a visit.": "¿Ya tienes limpieza? Agrega jardín desde $45 por visita.",
-  "Add a 2nd service and we throw in a free car wash every month — and you never coordinate two providers again.":
+  "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.":
     "Agrega un 2º servicio y te regalamos un lavado de auto cada mes — y nunca más coordinas dos proveedores.",
 
   // Lawn Care LP
@@ -573,22 +573,23 @@ const translations: Record<string, string> = {
     "¿Ya tienes Shine Complete? Agrega limpieza desde $139 por visita.",
 
   // Bundle page
-  "Bundle & Save — stack services, get free car washes": "Combo y Ahorra — apila servicios y recibe lavados de auto gratis",
+  "Bundle your services — a free premium add-on every month": "Combina tus servicios — un servicio adicional premium gratis cada mes",
+  "Bundle your services": "Combina tus servicios",
+  "Hold two or more services and you pick one free premium add-on every month. Pinecrest, Kendall & Palmetto Bay only (33156 · 33183 · 33186).":
+    "Si tienes dos o más servicios, eliges un servicio adicional premium gratis cada mes. Solo Pinecrest, Kendall y Palmetto Bay (33156 · 33183 · 33186).",
+  "Every service on one bill — and you still pick one free premium add-on every month.":
+    "Todos los servicios en una sola factura — y sigues eligiendo un servicio adicional premium gratis cada mes.",
   "The more you stack, the more you save. Pinecrest + Kendall only (33156 · 33183 · 33186).":
     "Mientras más combinas, más ahorras. Solo Pinecrest + Kendall (33156 · 33183 · 33186).",
   "2-Service Bundle": "Combo de 2 Servicios",
-  "1 free car wash a month": "1 lavado de auto gratis al mes",
-  "Add a 2nd service — 1 free car wash every month.":
-    "Agrega un 2º servicio — 1 lavado de auto gratis cada mes.",
-  "plus 1 free car wash every month": "más 1 lavado de auto gratis cada mes",
-  "plus 2 free car washes every month": "más 2 lavados de auto gratis cada mes",
+  "1 free premium add-on a month": "1 servicio adicional premium gratis al mes",
+  "Add a 2nd service — you pick one free premium add-on every month.":
+    "Agrega un 2º servicio — eliges un servicio adicional premium gratis cada mes.",
+  "plus one free premium add-on every month, your pick": "más un servicio adicional premium gratis cada mes, tú eliges",
   "Pick exactly 2 services to see your bundled price.": "Elige exactamente 2 servicios para ver tu precio combinado.",
   "Build my 2-service bundle": "Arma mi combo de 2 servicios",
   "Pick 2 services to continue": "Elige 2 servicios para continuar",
   "3-Service Bundle": "Combo de 3 Servicios",
-  "2 free car washes a month": "2 lavados de auto gratis al mes",
-  "Add a 3rd service — 2 free car washes every month.":
-    "Agrega un 3er servicio — 2 lavados de auto gratis cada mes.",
   "Build my 3-service bundle": "Arma mi combo de 3 servicios",
   Custom: "Personalizado",
   Tailored: "A Medida",
@@ -596,9 +597,10 @@ const translations: Record<string, string> = {
     "¿Casa más grande, terreno extenso o flota de vehículos? Armamos un plan a medida y te enviamos una cotización personal.",
   "Request a custom plan": "Solicita un plan personalizado",
   "Why bundle?": "¿Por qué combinar?",
-  "Any 2 services — 1 free car wash every month":
-    "Cualquier 2 servicios — 1 lavado de auto gratis cada mes",
-  "All 3 services — 2 free car washes every month": "Los 3 servicios — 2 lavados de auto gratis cada mes",
+  "Two or more services — you pick 1 free premium add-on every month":
+    "Dos o más servicios — eliges 1 servicio adicional premium gratis cada mes",
+  "Your choice from the add-on list, applied automatically at checkout":
+    "Tú eliges de la lista de servicios adicionales, se aplica automáticamente al pagar",
   "One subscription, one bill, one crew": "Una suscripción, una factura, un equipo",
   "Same locked price every month": "El mismo precio fijo cada mes",
   "Cancel or adjust anytime": "Cancela o ajusta cuando quieras",
@@ -950,8 +952,8 @@ const translations: Record<string, string> = {
   "Book detailing": "Reservar detallado",
   "Shine Complete mobile car care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.":
     "Shine Complete a domicilio en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). 3 lavados al mes más 2 detallados completos al año, desde $149/mes. Reserva en unos 2 minutos.",
-  "Stack home cleaning, lawn care and Shine Complete on one plan. Free car washes every month in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). One subscription, one crew, one bill.":
-    "Combina limpieza del hogar, cuidado del jardín y Shine Complete en un solo plan. Lavados de auto gratis cada mes en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Una suscripción, un equipo, una factura.",
+  "One flat price set by the size of your home, lawn or vehicle. Hold two or more services and you pick one free premium add-on every month — Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186).":
+    "Un precio fijo según el tamaño de tu casa, jardín o vehículo. Si tienes dos o más servicios, eliges un servicio adicional premium gratis cada mes — Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186).",
   "Vetted & background-checked pros": "Profesionales verificados y con antecedentes revisados",
   "About 2 minutes · No contracts": "Unos 2 minutos · Sin contratos",
   "Locked price · No contracts · Cancel anytime · Pause or reschedule anytime":
