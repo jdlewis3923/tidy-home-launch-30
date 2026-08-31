@@ -68,7 +68,7 @@ const config: ServiceLandingConfig = {
       body: "Before-and-after photos from every visit, sent to your phone.",
     },
     {
-      title: "Vetted & Background-Checked",
+      title: "Background-Checked",
       body: "Every pro is background-checked through Checkr before their first visit.",
     },
   ],

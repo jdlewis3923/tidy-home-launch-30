@@ -54,7 +54,7 @@ const translations: Record<string, string> = {
   Login: "Acceder",
 
   // Announcement ticker
-  "Vetted & Background-Checked": "Antecedentes Verificados",
+  "Background-Checked": "Antecedentes Verificados",
   "Background-Checked Pros": "Profesionales Verificados",
   "Same Pro Every Time": "El Mismo Profesional Cada Visita",
   "Cancel Anytime": "Cancela Cuando Quieras",
@@ -238,10 +238,10 @@ const translations: Record<string, string> = {
     "¡Tú decides! Elige semanal, quincenal o mensual para cada servicio — y sí, puedes combinar. ¿Quieres jardín semanal pero limpieza quincenal? Listo. Armamos el plan a tu medida.",
   "Do I need to be home?": "¿Tengo que estar en casa?",
   "Not at all! Just give us access via a lockbox, gate code, or smart lock and our team handles everything while you're out living your best life. You'll get photo confirmation when each service is done.":
-    "¡Para nada! Danos acceso con caja de seguridad, código de puerta o cerradura inteligente y nuestro equipo se encarga de todo mientras vives tu mejor vida. Recibes confirmación con fotos al terminar cada servicio.",
+    "¡Para nada! Danos acceso con caja de seguridad, código de puerta o cerradura inteligente y nuestro equipo se encarga de todo mientras tú haces lo tuyo. Recibes confirmación con fotos al terminar cada servicio.",
   "Can I reschedule or pause?": "¿Puedo reagendar o pausar?",
   "Absolutely! Life happens — just shoot us a message and we'll move things around for you. Need to pause for a vacation? No problem. We've got you covered.":
-    "¡Claro que sí! La vida pasa — mándanos un mensaje y movemos todo. ¿Necesitas pausar por vacaciones? Sin problema. Te tenemos cubierto.",
+    "¡Claro que sí! Las cosas pasan — mándanos un mensaje y movemos todo. ¿Necesitas pausar por vacaciones? Sin problema. Te tenemos cubierto.",
   "What if it rains?": "¿Y si llueve?",
   "No worries! If weather impacts an outdoor service, we'll automatically reschedule it for the next available day. Your subscription stays active and you won't miss a beat.":
     "¡No te preocupes! Si el clima afecta un servicio exterior, lo reprogramamos automáticamente al siguiente día disponible. Tu suscripción sigue activa y no pierdes nada.",
@@ -711,7 +711,7 @@ const translations: Record<string, string> = {
     "Cuidado interior constante para un hogar que siempre se siente renovado. Lo manejamos según tu horario sin que muevas un dedo.",
   Included: "Incluido",
   "Kitchen & bathroom deep clean": "Limpieza profunda de cocina y baño",
-  "Dusting all surfaces & fixtures": "Desempolvado de todas las superficies y accesorios",
+  "Dusting all surfaces & fixtures": "Sacudir todas las superficies y accesorios",
   "Trash removal & liner replacement": "Retiro de basura y cambio de bolsas",
   "Not Included": "No incluido",
   "Deep carpet shampooing": "Lavado profundo de alfombras",
@@ -824,7 +824,7 @@ const translations: Record<string, string> = {
   "After signup, Tidy assigns a recurring day and time window for each service. You'll receive a confirmation and an ETA reminder before every visit. No rebooking needed — it just repeats automatically.":
     "Después de inscribirte, Tidy asigna un día y una ventana de horario recurrentes para cada servicio. Recibirás una confirmación y un recordatorio con la hora estimada antes de cada visita. No necesitas reagendar — se repite automáticamente.",
   "Kitchen surfaces, full bathroom cleaning, dusting throughout, vacuuming and mopping all floors, and trash removal with fresh liners.":
-    "Superficies de cocina, limpieza completa de baños, desempolvado en toda la casa, aspirado y trapeado de todos los pisos, y retiro de basura con bolsas nuevas.",
+    "Superficies de cocina, limpieza completa de baños, sacudir el polvo en toda la casa, aspirado y trapeado de todos los pisos, y retiro de basura con bolsas nuevas.",
   "Professional mowing to standard height, clean edging along walkways and beds, and debris blowing off walkways and driveways.":
     "Corte profesional a altura estándar, bordeado limpio en caminos y jardineras, y soplado de residuos en caminos y entradas.",
   "Full exterior hand wash with wheel cleaning, interior vacuum with floor mats, and dashboard and surface wipe-down — right in your driveway.":
@@ -896,7 +896,7 @@ const translations: Record<string, string> = {
   "Give $50, Get $50 — refer a neighbor in Pinecrest + Kendall":
     "Da $50, Recibe $50 — refiere a un vecino en Pinecrest + Kendall",
   "Send a neighbor your link. They get $50 off their first month. You get $50 off yours. No cap, no expiration, no fine print.":
-    "Envía tu enlace a un vecino. Él recibe $50 de descuento en su primer mes. Tú recibes $50 en el tuyo. Sin tope, sin vencimiento, sin letra pequeña.",
+    "Envía tu enlace a un vecino. Tu vecino recibe $50 de descuento en su primer mes. Tú recibes $50 en el tuyo. Sin tope, sin vencimiento, sin letra pequeña.",
   "How it works": "Cómo funciona",
   "Three steps. Two rewards.": "Tres pasos. Dos recompensas.",
   "Share your link": "Comparte tu enlace",
@@ -907,7 +907,7 @@ const translations: Record<string, string> = {
     "Tu vecino paga usando tu enlace. Se aplican $50 automáticamente a su primer mes.",
   "You both save": "Ambos ahorran",
   "Once their first invoice clears, $50 is credited to your next month. No cap, stack as many as you want.":
-    "Cuando su primera factura se procese, se acreditan $50 a tu próximo mes. Sin tope, acumula todos los que quieras.",
+    "Cuando se procese la primera factura de tu vecino, se acreditan $50 a tu próximo mes. Sin tope, acumula todos los que quieras.",
   "Your referral link": "Tu enlace de referido",
   "Sign in to get your link": "Inicia sesión para obtener tu enlace",
   "Loading…": "Cargando…",
