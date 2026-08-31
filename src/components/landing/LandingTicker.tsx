@@ -9,8 +9,7 @@ const ITEMS = [
   "Cancel Anytime",
   "Photo Verified Visits",
   "Serving 33156 · 33183 · 33186",
-  "Eco-Safe Products",
-  "60-Second Signup",
+"Eco-Safe Products",
 ];
 
 const LandingTicker = () => {
