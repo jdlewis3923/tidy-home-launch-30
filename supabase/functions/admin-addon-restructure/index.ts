@@ -164,9 +164,20 @@ Deno.serve(async (req) => {
   // stripe_catalog. Never archive whatever checkout points at without moving
   // stripe_catalog to the survivor first.
   const dupResults: any[] = [];
-  const pairs: { label: string; match: RegExp; amount: number; keepSuffix?: string }[] = [
-    { label: 'Exterior Windows & Screens', match: /exterior window/i, amount: 8500, keepSuffix: body?.keep_exterior_suffix },
-    { label: 'Bed Edge Reset', match: /bed edge/i, amount: 6500, keepSuffix: body?.keep_bed_edge_suffix },
+  const pairs: {
+    label: string; match: RegExp; amount: number; keepSuffix?: string;
+    addonKey: string; addonName: string; lookupKey: string;
+  }[] = [
+    {
+      label: 'Exterior Windows & Screens', match: /exterior window/i, amount: 8500,
+      keepSuffix: body?.keep_exterior_suffix, addonKey: 'exterior_windows_screens',
+      addonName: 'exteriorWindows', lookupKey: 'addon_exterior_windows_screens',
+    },
+    {
+      label: 'Bed Edge Reset', match: /bed edge/i, amount: 6500,
+      keepSuffix: body?.keep_bed_edge_suffix, addonKey: 'bed_edge_reset',
+      addonName: 'bedEdgeReset', lookupKey: 'addon_bed_edge_reset',
+    },
   ];
 
   for (const pair of pairs) {
@@ -179,36 +190,53 @@ Deno.serve(async (req) => {
       );
       if (hit) survivor = hit;
     }
-    // Normalise metadata on the survivor (price + product).
-    const meta = addonMetadata({
-      category: 'lawn',
-      service_type: 'lawn',
-      zapier_label: pair.label,
+    const meta = addonMetadata({ service_type: 'lawn', addon_key: pair.addonKey });
+
+    // Archive the losers' prices first so the lookup_key can transfer cleanly.
+    const archived: string[] = [];
+    for (const c of candidates) {
+      if (c.price_id === survivor.price_id) continue;
+      if (c.active) {
+        await stripe.prices.update(c.price_id, {
+          active: false,
+          metadata: { ...c.price_metadata, internal_status: 'duplicate_archived' },
+        });
+      }
+      archived.push(c.price_id);
+    }
+
+    // Normalise the survivor: metadata on both objects, canonical name, and the
+    // catalogue lookup_key transferred off the archived twin.
+    await stripe.prices.update(survivor.price_id, {
+      metadata: { ...survivor.price_metadata, ...meta },
+      lookup_key: pair.lookupKey,
+      transfer_lookup_key: true,
     });
-    await stripe.prices.update(survivor.price_id, { metadata: { ...survivor.price_metadata, ...meta } });
     await stripe.products.update(survivor.product_id, {
       active: true,
       name: pair.label,
       metadata: { ...survivor.product_metadata, ...meta },
     });
 
-    // Point the DB at the survivor BEFORE archiving the loser.
-    const addonKey = pair.label.startsWith('Bed') ? 'bed_edge_reset' : 'exterior_windows_screens';
-    const addonName = pair.label.startsWith('Bed') ? 'bedEdgeReset' : 'exteriorWindows';
-    await admin.from('stripe_catalog').update({ stripe_price_id: survivor.price_id, active: true })
-      .eq('addon_name', addonName);
+    // Point the DB at the survivor.
+    await admin.from('stripe_catalog')
+      .update({ stripe_price_id: survivor.price_id, lookup_key: pair.lookupKey, description: pair.label, active: true })
+      .eq('addon_name', pair.addonName);
     await admin.from('addon_catalog')
-      .update({ stripe_price_id: survivor.price_id, stripe_product_id: survivor.product_id })
-      .eq('addon_key', addonKey);
+      .update({ stripe_price_id: survivor.price_id, stripe_product_id: survivor.product_id, display_name: pair.label })
+      .eq('addon_key', pair.addonKey);
 
-    const archived: string[] = [];
+    // Only now archive the losers' products (never before the DB moved over).
     for (const c of candidates) {
-      if (c.price_id === survivor.price_id) continue;
-      if (c.active) await stripe.prices.update(c.price_id, { active: false, metadata: { ...c.price_metadata, internal_status: 'duplicate_archived' } });
-      if (c.product_id !== survivor.product_id) await stripe.products.update(c.product_id, { active: false }).catch(() => {});
-      archived.push(c.price_id);
+      if (c.product_id === survivor.product_id) continue;
+      await stripe.products.update(c.product_id, { active: false }).catch(() => {});
     }
-    dupResults.push({ label: pair.label, kept: { price_id: survivor.price_id, product_id: survivor.product_id }, archived });
+
+    dupResults.push({
+      label: pair.label,
+      kept: { price_id: survivor.price_id, product_id: survivor.product_id },
+      archived,
+    });
   }
 
   // ---- 3. Create the three new car add-ons -------------------------------
@@ -219,7 +247,7 @@ Deno.serve(async (req) => {
     );
     let priceId = existing?.price_id as string | undefined;
     let productId = existing?.product_id as string | undefined;
-    const meta = addonMetadata({ category: 'car', service_type: 'detailing', zapier_label: a.display_name });
+    const meta = addonMetadata({ service_type: 'car_detailing', addon_key: a.addon_key });
     if (!priceId) {
       const product = await stripe.products.create({
         name: a.display_name,
@@ -255,9 +283,10 @@ Deno.serve(async (req) => {
     await admin.from('addon_catalog').upsert({
       addon_key: a.addon_key,
       display_name: a.display_name,
-      description: a.description,
       price_cents: a.price_cents,
-      service_type: 'detailing',
+      services: ['detailing'],
+      lucide_icon: a.icon,
+      is_specialist: false,
       sort_order: a.sort_order,
       is_active: true,
       stripe_price_id: priceId!,
