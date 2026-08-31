@@ -102,6 +102,7 @@ export type Database = {
           display_name: string
           id: string
           is_active: boolean
+          is_specialist: boolean
           lucide_icon: string | null
           price_cents: number
           services: string[]
@@ -116,6 +117,7 @@ export type Database = {
           display_name: string
           id?: string
           is_active?: boolean
+          is_specialist?: boolean
           lucide_icon?: string | null
           price_cents: number
           services?: string[]
@@ -130,6 +132,7 @@ export type Database = {
           display_name?: string
           id?: string
           is_active?: boolean
+          is_specialist?: boolean
           lucide_icon?: string | null
           price_cents?: number
           services?: string[]
@@ -1791,6 +1794,54 @@ export type Database = {
             referencedColumns: ["code"]
           },
         ]
+      }
+      landing_touches: {
+        Row: {
+          created_at: string
+          id: string
+          landing_source: string
+          lang: string | null
+          path: string | null
+          placement: string | null
+          referrer: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          zip: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          landing_source: string
+          lang?: string | null
+          path?: string | null
+          placement?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          zip?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          landing_source?: string
+          lang?: string | null
+          path?: string | null
+          placement?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          zip?: string | null
+        }
+        Relationships: []
       }
       notification_preferences: {
         Row: {

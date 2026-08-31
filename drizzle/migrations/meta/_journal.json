@@ -50,6 +50,13 @@
       "when": 1788097186481,
       "tag": "0006_qr_scans_log",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788183880776,
+      "tag": "0007_landing_touches_and_addon_catalog_corrections",
+      "breakpoints": true
     }
   ]
 }
