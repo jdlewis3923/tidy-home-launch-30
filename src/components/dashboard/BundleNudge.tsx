@@ -7,7 +7,7 @@ import {
   serviceLabels,
   serviceUnits,
 } from '@/lib/dashboard-pricing';
-import { SIZE_PRICES, freeCarWashesPerMonth } from '@/lib/pricing-canon';
+import { SIZE_PRICES, hasFreeAddonEntitlement } from '@/lib/pricing-canon';
 
 interface Props {
   state: ConfigState;
@@ -16,8 +16,8 @@ interface Props {
 
 /**
  * Single-service users see a one-tap nudge to add a second service. The bundle
- * is a gift, not a percentage: a second service earns one free car wash a
- * month, a third earns two.
+ * is a gift, not a percentage: holding two or more services earns one free
+ * premium add-on a month, and the customer picks which one.
  */
 export default function BundleNudge({ state, onChange }: Props) {
   if (state.services.length !== 1) return null;
@@ -28,7 +28,7 @@ export default function BundleNudge({ state, onChange }: Props) {
 
   const suggestFreq = defaultBundleFrequency[suggest];
   const fromPrice = getServiceStartingPrice(suggest);
-  const washes = freeCarWashesPerMonth(2);
+  const earnsFreeAddon = hasFreeAddonEntitlement(2);
 
   const priceCopy =
     serviceUnits[suggest] === 'per_month'
@@ -51,7 +51,7 @@ export default function BundleNudge({ state, onChange }: Props) {
           Add {serviceLabels[suggest]}, {priceCopy}
         </p>
         <p className="text-[11px] text-ink-soft mt-0.5">
-          {washes === 1 ? 'One car wash a month is on us' : `${washes} car washes a month are on us`}
+          {earnsFreeAddon ? 'You pick one free premium add-on every month' : 'Cancel anytime'}
         </p>
       </div>
       <span className="shrink-0 rounded-lg bg-ink px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-white transition-transform group-hover:translate-x-0.5">

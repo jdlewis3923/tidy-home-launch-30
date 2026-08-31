@@ -67,11 +67,7 @@ export default function StepReview({ state, onEdit }: Props) {
               )}
               {pricing.freeAddons > 0 && (
                 <div className="flex justify-between text-ink">
-                  <span>
-                    {pricing.freeAddons === 1
-                      ? '1 free car wash a month'
-                      : `${pricing.freeCarWashes} free car washes a month`}
-                  </span>
+                  <span>1 free premium add-on a month — your pick</span>
                   <span className="tabular-nums">included</span>
                 </div>
               )}
