@@ -35,10 +35,10 @@ export const ADDON_CATALOG: Addon[] = [
   { key: 'exterior_windows_screens', name: 'Exterior Windows & Screens', price: 85, service: 'lawn', icon: 'PanelTop' },
   { key: 'driveway_pressure',  name: 'Driveway Pressure Wash', price: 150, service: 'lawn', icon: 'Wind', oneTimeFeel: true, specialist: true },
   // Detail
-  { key: 'ozone_odor',         name: 'Ozone Odor Treatment',  price: 75, service: 'detailing', icon: 'Wind' },
   { key: 'pet_hair',           name: 'Pet Hair Removal',      price: 45, service: 'detailing', icon: 'Dog' },
-  { key: 'engine_bay',         name: 'Engine Bay Clean',      price: 85, service: 'detailing', icon: 'Wrench' },
-  { key: 'ceramic_spray',      name: 'Ceramic Spray Coat',    price: 85, service: 'detailing', icon: 'Sparkles', oneTimeFeel: true },
+  { key: 'clay_bar_ceramic',   name: 'Clay Bar & Ceramic Coat', price: 95, service: 'detailing', icon: 'Sparkles', oneTimeFeel: true },
+  { key: 'headlight_restoration', name: 'Headlight Restoration', price: 79, service: 'detailing', icon: 'Lightbulb', oneTimeFeel: true },
+  { key: 'interior_protect',   name: 'Interior Protect & Condition', price: 55, service: 'detailing', icon: 'ShieldCheck' },
 ];
 
 /** The pool the free monthly add-on for bundled plans is picked from. */
