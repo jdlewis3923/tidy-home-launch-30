@@ -2726,6 +2726,7 @@ export type Database = {
           founding_rate_locked: boolean
           founding_review_promised: boolean
           founding_zip: string | null
+          free_addons_per_month: number
           free_car_washes_per_month: number
           frequency: Database["public"]["Enums"]["subscription_frequency"]
           id: string
@@ -2760,6 +2761,7 @@ export type Database = {
           founding_rate_locked?: boolean
           founding_review_promised?: boolean
           founding_zip?: string | null
+          free_addons_per_month?: number
           free_car_washes_per_month?: number
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
@@ -2794,6 +2796,7 @@ export type Database = {
           founding_rate_locked?: boolean
           founding_review_promised?: boolean
           founding_zip?: string | null
+          free_addons_per_month?: number
           free_car_washes_per_month?: number
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           id?: string
