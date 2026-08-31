@@ -287,7 +287,7 @@ Deno.serve(async (req) => {
       addon_key: a.addon_key,
       display_name: a.display_name,
       price_cents: a.price_cents,
-      services: ['detailing'],
+      services: ['detail'],
       lucide_icon: a.icon,
       is_specialist: false,
       sort_order: a.sort_order,
