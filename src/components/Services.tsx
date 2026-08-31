@@ -33,7 +33,7 @@ const services = [
     description: "Professional lawn maintenance to keep your Miami home's exterior sharp year-round. No scheduling required, ever.",
     checks: ["Mowing to standard height", "Edging along walkways & beds", "Debris blowing & full cleanup", "Weekly or biweekly cadence"],
     excludes: ["Tree trimming or removal", "Irrigation system repair", "Landscape design or planting"],
-    addOns: "Hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization, driveway pressure wash",
+    addOns: "Weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens",
     accent: "border-t-success",
   },
   {

@@ -77,7 +77,7 @@ const launchFAQ = [
       { q: "What does house cleaning include?", a: "Kitchen surfaces, full bathroom cleaning, dusting throughout, vacuuming and mopping all floors, and trash removal with fresh liners." },
       { q: "What does lawn care include?", a: "Professional mowing to standard height, clean edging along walkways and beds, and debris blowing off walkways and driveways." },
       { q: "What does car detailing include?", a: "Full exterior hand wash with wheel cleaning, interior vacuum with floor mats, and dashboard and surface wipe-down — right in your driveway." },
-      { q: "Can I add extra services or upgrades?", a: "Yes. Add-ons like deep cleaning, hedge trimming, leather conditioning, and more are available as one-time or recurring extras. You can add them anytime through your dashboard." },
+      { q: "Can I add extra services or upgrades?", a: "Yes. Add-ons like deep cleaning, bed edge reset, leather conditioning, and more are available as one-time or recurring extras. You can add them anytime through your dashboard." },
       { q: "Are deep cleaning or restoration services included?", a: "Tidy is designed for consistent ongoing maintenance. Deep cleans and restoration work are available as add-ons — just ask." },
     ],
   },

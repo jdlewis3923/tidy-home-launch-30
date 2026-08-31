@@ -85,7 +85,7 @@ const PricingTable = () => {
           </p>
           <p className="mt-2 text-xs text-text-light/80">
             {t(
-              "Add a second service and one monthly car wash is on us; add a third and two are. Add-ons — ovens, hedges, pet hair and the like — are priced separately.",
+              "Add a 2nd service and you pick one free premium add-on every month. Add-ons — ovens, bed edges, pet hair and the like — are priced separately.",
             )}
           </p>
         </FadeIn>

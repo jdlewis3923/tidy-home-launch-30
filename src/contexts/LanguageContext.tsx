@@ -200,8 +200,8 @@ const translations: Record<string, string> = {
   "Everything runs automatically — no coordination needed. Modify, skip, or adjust anytime.":
     "Todo funciona automáticamente — sin coordinación necesaria. Modifica, omite o ajusta en cualquier momento.",
   "Simple, transparent rates. No surprises.": "Tarifas simples y transparentes. Sin sorpresas.",
-  "Pay monthly. Cancel anytime. Higher frequency = lower cost per visit. Bundle 2+ services for automatic discounts.":
-    "Paga mensualmente. Cancela cuando quieras. Mayor frecuencia = menor costo por visita. Combina 2+ servicios para descuentos automáticos.",
+  "Pay monthly. Cancel anytime. Higher frequency = lower cost per visit. Add a 2nd service and one free premium add-on a month.":
+    "Paga mensualmente. Cancela cuando quieras. Mayor frecuencia = menor costo por visita. Agrega un 2.º servicio y recibe un servicio adicional premium gratis al mes.",
   Service: "Servicio",
   Monthly: "Mensual",
   Biweekly: "Quincenal",
@@ -289,13 +289,13 @@ const translations: Record<string, string> = {
   "Inside oven, inside fridge, interior windows, baseboard scrub, laundry, inside kitchen cabinets":
     "Interior del horno, interior del refrigerador, ventanas interiores, limpieza de zócalos, lavandería, interior de gabinetes de cocina",
   "Hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization, driveway pressure wash":
-    "Poda de setos y arbustos, remoción de maleza, limpieza de hojas y escombros, fertilización, lavado a presión de entrada",
+    "Remoción de maleza, limpieza de hojas y escombros, reajuste del borde de jardineras, ventanas y mosquiteros exteriores",
   "Pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat":
     "Remoción de pelo de mascotas, tratamiento de ozono para olores, limpieza del compartimiento del motor, capa cerámica en spray",
   "Available as add-ons: inside oven, inside fridge, interior windows, deep baseboard scrub, laundry (wash/dry/fold), inside kitchen cabinets.":
     "Disponibles como servicios adicionales: interior del horno, interior del refrigerador, ventanas interiores, limpieza profunda de zócalos, lavandería (lavado/secado/doblado), interior de gabinetes de cocina.",
   "Available as add-ons: hedge & bush trimming, weed removal, leaf & debris cleanup, fertilization treatment, driveway pressure wash.":
-    "Disponibles como servicios adicionales: poda de setos y arbustos, remoción de maleza, limpieza de hojas y escombros, tratamiento de fertilización, lavado a presión de la entrada.",
+    "Disponibles como servicios adicionales: remoción de maleza, limpieza de hojas y escombros, reajuste del borde de jardineras, ventanas y mosquiteros exteriores. El lavado a presión de la entrada es trabajo especializado y se cotiza aparte.",
   "Available as add-ons: pet hair removal, ozone odor treatment, engine bay clean, ceramic spray coat.":
     "Disponibles como servicios adicionales: remoción de pelo de mascotas, tratamiento de ozono para olores, limpieza del compartimiento del motor, capa cerámica en spray.",
   "from": "desde",
@@ -619,8 +619,8 @@ const translations: Record<string, string> = {
     "Cuidado del Jardín en Pinecrest + Kendall | Tidy Home Concierge",
   "Car Detailing in Pinecrest + Kendall | Tidy Home Concierge":
     "Detallado de Auto en Pinecrest + Kendall | Tidy Home Concierge",
-  "Bundle & Save in Pinecrest + Kendall | Tidy Home Concierge":
-    "Combo y Ahorra en Pinecrest + Kendall | Tidy Home Concierge",
+  "Bundle Your Services in Pinecrest + Kendall | Tidy Home Concierge":
+    "Combina Tus Servicios en Pinecrest + Kendall | Tidy Home Concierge",
 
   // Thank You page
   "You're in.": "Ya estás dentro.",
@@ -779,9 +779,9 @@ const translations: Record<string, string> = {
   "What affects my price?": "¿Qué afecta mi precio?",
   "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees.":
     "El precio depende de los servicios que elijas y con qué frecuencia los quieras — semanal, quincenal o mensual. Eso es todo. Sin cargos ocultos.",
-  "How do bundle discounts work?": "¿Cómo funcionan los descuentos por combo?",
-  "Pick 2 services and we add 1 free car wash a month. Pick all 3 and we add 2. It is applied at checkout — no code needed.":
-    "Elige 2 servicios y agregamos 1 lavado de auto gratis al mes. Elige los 3 y agregamos 2. Se aplica al pagar — sin código.",
+  "How does bundling work?": "¿Cómo funciona combinar servicios?",
+  "Hold two or more services and you pick one free premium add-on every month — your choice from our add-on list. It is applied automatically at checkout, no code needed.":
+    "Si tienes dos o más servicios, eliges un servicio adicional premium gratis cada mes — tú eliges de nuestra lista. Se aplica automáticamente al pagar, sin códigos.",
   "Can I add services later?": "¿Puedo agregar servicios después?",
   "Yes. You can add or remove any service at any time. Changes take effect on your next billing cycle.":
     "Sí. Puedes agregar o quitar cualquier servicio en cualquier momento. Los cambios aplican en tu próximo ciclo de facturación.",
