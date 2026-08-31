@@ -144,17 +144,20 @@ Deno.serve(async (req) => {
   const actions: string[] = [];
 
   // ---- 1. Archive retired car add-on prices --------------------------------
+  // A price that is its product's default_price cannot be archived while the
+  // product is active, so the product is deactivated first.
   for (const priceId of RETIRED_PRICE_IDS) {
     try {
       const p = await stripe.prices.retrieve(priceId);
+      const productId = typeof p.product === 'string' ? p.product : null;
+      if (productId) {
+        await stripe.products.update(productId, { active: false }).catch(() => {});
+      }
       if (p.active) {
         await stripe.prices.update(priceId, { active: false, metadata: { ...p.metadata, internal_status: 'retired' } });
         actions.push(`archived_price:${priceId}`);
       } else {
         actions.push(`already_archived:${priceId}`);
-      }
-      if (typeof p.product === 'string') {
-        await stripe.products.update(p.product, { active: false }).catch(() => {});
       }
     } catch (e) {
       actions.push(`archive_failed:${priceId}:${e instanceof Error ? e.message : String(e)}`);
