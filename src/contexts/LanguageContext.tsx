@@ -395,7 +395,6 @@ const translations: Record<string, string> = {
   // Trust signal row
   Vetted: "Verificado",
 
-  "Background-Checked": "Verificado",
   "Locked Price": "Precio Fijo",
   "Serving 3 ZIPs": "3 Códigos Postales",
 
