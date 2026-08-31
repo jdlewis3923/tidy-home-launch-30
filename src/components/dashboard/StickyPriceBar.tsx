@@ -52,8 +52,8 @@ export default function StickyPriceBar({ state, currentStep }: Props) {
               )}
             </div>
             <p className="text-[11px] text-ink-faint">
-              {pricing.freeCarWashes > 0
-                ? pricing.freeCarWashes === 1
+              {pricing.freeAddons > 0
+                ? pricing.freeAddons === 1
                   ? '1 free car wash a month included'
                   : `${pricing.freeCarWashes} free car washes a month included`
                 : state.services.length >= 2 && !hasFullPricing

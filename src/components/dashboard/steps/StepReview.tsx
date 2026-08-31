@@ -65,10 +65,10 @@ export default function StepReview({ state, onEdit }: Props) {
                   <span className="tabular-nums">${pricing.carWashSubtotal.toFixed(2)}/mo</span>
                 </div>
               )}
-              {pricing.freeCarWashes > 0 && (
+              {pricing.freeAddons > 0 && (
                 <div className="flex justify-between text-ink">
                   <span>
-                    {pricing.freeCarWashes === 1
+                    {pricing.freeAddons === 1
                       ? '1 free car wash a month'
                       : `${pricing.freeCarWashes} free car washes a month`}
                   </span>

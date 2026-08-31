@@ -199,10 +199,10 @@ export default function StepPayment({ state, onChange }: Props) {
             </div>
           )}
 
-          {pricing.freeCarWashes > 0 && (
+          {pricing.freeAddons > 0 && (
             <div className="flex justify-between items-baseline gap-3 text-ink">
               <span className="text-xs lowercase">
-                {pricing.freeCarWashes === 1 ? '1 free car wash a month' : `${pricing.freeCarWashes} free car washes a month`}
+                {pricing.freeAddons === 1 ? '1 free car wash a month' : `${pricing.freeCarWashes} free car washes a month`}
               </span>
               <span className="text-xs tabular-nums">included</span>
             </div>

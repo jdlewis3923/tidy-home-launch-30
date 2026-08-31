@@ -267,7 +267,7 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   // These are promises, not coupons: if they are not written here they silently
   // never happen.
   const sizesJson = meta.sizes_json ? JSON.parse(meta.sizes_json) : {};
-  const freeCarWashes = parseInt(meta.free_car_washes_per_month ?? '0', 10) || 0;
+  const freeAddons = parseInt(meta.free_addons_per_month ?? '0', 10) || 0;
 
   const { data: subRow, error: subErr } = await supabase
     .from('subscriptions')
@@ -283,7 +283,7 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       bundle_discount_pct: 0,
       size: services[0]?.size ?? null,
       sizes_json: sizesJson,
-      free_car_washes_per_month: freeCarWashes,
+      free_addons_per_month: freeAddons,
       founding_zip: meta.founding_zip ?? meta.zip ?? null,
       founding_rate_locked: meta.founding_rate_locked === 'yes',
       founding_free_addon_first_visit: meta.founding_free_addon_first_visit === 'yes',
