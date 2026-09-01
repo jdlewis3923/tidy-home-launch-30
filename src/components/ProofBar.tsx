@@ -1,9 +1,10 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { VETTED_CLAIM } from "@/lib/pricing-canon";
 
+// One claim per slot. VETTED_CLAIM already reads "Background-Checked Pros",
+// so the adjacent duplicate slot was removed.
 const signals = [
   VETTED_CLAIM,
-  "Background-Checked Pros",
   "Satisfaction Guaranteed",
   "Serving Kendall + Pinecrest",
 ];

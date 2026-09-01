@@ -24,6 +24,7 @@ const TidyLogo = ({ size = "md", withBackground = false }: { size?: "sm" | "md" 
         alt="Tidy Home Concierge"
         width={600}
         height={362}
+        loading="lazy"
         decoding="async"
         className={`${sizes[size]} object-contain`}
       />

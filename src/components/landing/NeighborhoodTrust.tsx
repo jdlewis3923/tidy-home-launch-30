@@ -18,7 +18,7 @@ const NeighborhoodTrust = () => {
             {t("Built for Pinecrest + Kendall.")}
           </h2>
           <p className="text-sm md:text-base text-text-mid mt-3 max-w-2xl mx-auto leading-relaxed">
-            {t("We serve only 33156, 33183, and 33186 — so your crew is local, on-time, and never stuck in traffic.")}
+            {t("We serve these three neighborhoods only — so your crew is local, on-time, and never stuck in traffic.")}
           </p>
         </Reveal>
 

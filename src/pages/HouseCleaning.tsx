@@ -30,7 +30,7 @@ const config: ServiceLandingConfig = {
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
   heroImageMobileWebp: heroImgMobileWebp,
-  heroDimensions: [1600, 900],
+  heroDimensions: [1920, 1080],
   heroMobileDimensions: [900, 1599],
   heroAlt: "Bright, freshly cleaned modern Miami living room",
   plans: [
