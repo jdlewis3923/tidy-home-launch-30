@@ -115,7 +115,9 @@ export default function ProEquipment() {
 
   if (authed === false) return <Navigate to="/login?next=/pro/equipment" replace />;
 
-  const approvedCount = required.filter((r) => latestByType[r.key]?.status === "approved").length;
+  // Optional items never count toward the progress denominator and never block.
+  const mandatory = required.filter((r) => !isOptionalItem(r));
+  const approvedCount = mandatory.filter((r) => latestByType[r.key]?.status === "approved").length;
 
   return (
     <div className="min-h-screen bg-white text-navy">
@@ -136,10 +138,11 @@ export default function ProEquipment() {
         <h1 className="font-display text-3xl font-bold mt-2">Equipment photos</h1>
         <p className="mt-2 text-slate-600 text-sm">
           Photograph each required item. Tidy reviews within 24 hours.
-          {required.length > 0 && (
-            <> {approvedCount} of {required.length} approved.</>
+          {mandatory.length > 0 && (
+            <> {approvedCount} of {mandatory.length} approved.</>
           )}
         </p>
+
 
         {loading ? (
           <div className="mt-8 text-slate-400 text-sm flex items-center gap-2">
