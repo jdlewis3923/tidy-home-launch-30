@@ -15,7 +15,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { getUtmAttribution } from '@/lib/utm';
-import { getLandingSource, getQrPlacement, getQrZip } from '@/lib/landing-source';
+import { getLandingSource, getQrPlacement, getQrRoute, getQrZip } from '@/lib/landing-source';
 import { STRIPE_FUNCTIONS } from '@/lib/stripe-config';
 import {
   carWashEligible,
