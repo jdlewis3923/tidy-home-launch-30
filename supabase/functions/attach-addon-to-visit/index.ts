@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
           templateId: ADDON_CONFIRMED_TEMPLATE_ID,
           params: {
             addon_name: addonName,
-            addon_price: addonPriceDollars,
+            addon_price: isFree ? 0 : addonPriceDollars,
             visit_date: visit_date ?? '',
           },
           marketing: false,
@@ -211,9 +211,11 @@ Deno.serve(async (req) => {
     ok: status === 'pending_visit',
     attach_id: attachRow.id,
     stripe_invoice_item_id: stripeInvoiceItemId,
-    stripe_error: stripeError,
+    stripe_error: isFree ? null : stripeError,
     addon_name: addonName,
-    addon_price: addonPriceDollars,
+    addon_price: isFree ? 0 : addonPriceDollars,
+    is_free: isFree,
+    free_period: isFree ? period : null,
     status,
   });
 });
