@@ -77,9 +77,10 @@ function IconFor({ name }: { name: string | null }) {
 
 const currentPeriod = () => new Date().toISOString().slice(0, 7);
 
-function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+function Card({ children, className = '', id }: { children: React.ReactNode; className?: string; id?: string }) {
   return (
     <div
+      id={id}
       className={`rounded-3xl border border-[hsl(var(--hairline))] bg-white p-6 shadow-[0_4px_20px_rgba(15,23,42,0.04)] ${className}`}
     >
       {children}
