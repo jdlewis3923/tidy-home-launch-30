@@ -103,6 +103,13 @@ export function getRequiredItems(service: string | null | undefined): EquipmentI
   return items;
 }
 
+/** Checklist items that actually gate submission / approval (optional excluded). */
+export function getMandatoryItems(service: string | null | undefined): EquipmentItem[] {
+  return getRequiredItems(service).filter((it) => !isOptionalItem(it));
+}
+
+
+
 export const REJECTION_REASONS = [
   'Image too blurry',
   'Wrong item shown',
