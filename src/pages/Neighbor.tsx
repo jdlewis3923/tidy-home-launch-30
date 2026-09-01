@@ -45,7 +45,12 @@ const Neighbor = () => {
   // The Spanish panel's QR code carries ?lang=es — that is the panel split.
   const landingSource: LandingSource =
     langParam === "es" ? LANDING_SOURCES.es : LANDING_SOURCES.en;
-  const signupHref = buildSignupHref(search, { src: landingSource });
+  // offer=seen releases the /dashboard/plan door-hanger redirect. All existing
+  // attribution params (src, zip, lang, placement, utm_*, gclid) ride along.
+  const signupHref = buildSignupHref(search, {
+    src: landingSource,
+    [OFFER_SEEN_PARAM]: OFFER_SEEN_VALUE,
+  });
   const isSpanish = language === "es";
 
   useEffect(() => {
