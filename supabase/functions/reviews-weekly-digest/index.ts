@@ -100,6 +100,79 @@ Deno.serve(async (req) => {
   const holdCutoff = new Date(now.getTime() - policy.hold_days * 86400000).toISOString();
   const expireCutoff = new Date(now.getTime() - EXPIRE_DAYS * 86400000).toISOString();
 
+  // ---- Step 1: re-run attribution on anything still unmatched ------------
+  // Uses the same shared scoring engine as reviews-import. High confidence
+  // populates matched_pro_id and flips status to 'matched'; never approves.
+  let rescored = 0;
+  const { data: unscored } = await admin
+    .from('reviews')
+    .select('id, reviewer_name, comment, posted_at')
+    .eq('status', 'new')
+    .is('matched_pro_id', null)
+    .order('posted_at', { ascending: true })
+    .limit(BATCH_SIZE);
+
+  if (unscored && unscored.length > 0) {
+    const { data: applicants } = await admin
+      .from('applicants')
+      .select('id, contractor_id, first_name, last_name, out_of_service_area')
+      .not('contractor_id', 'is', null);
+    const applicantByContractor = new Map(
+      (applicants ?? []).map((a) => [a.contractor_id as string, a]),
+    );
+
+    for (const row of unscored) {
+      const windowStart = new Date(
+        new Date(row.posted_at as string).getTime() - CANDIDATE_WINDOW_DAYS * 86_400_000,
+      ).toISOString();
+      const { data: visits } = await admin
+        .from('pro_visits')
+        .select('id, contractor_id, customer_name, completed_at, customer_rating')
+        .eq('status', 'complete')
+        .not('completed_at', 'is', null)
+        .gte('completed_at', windowStart)
+        .lte('completed_at', row.posted_at as string);
+
+      const candidatePool: AttributionCandidate[] = (visits ?? [])
+        .map((v) => {
+          const a = applicantByContractor.get(v.contractor_id as string);
+          if (!a || a.out_of_service_area) return null;
+          return {
+            pro_id: a.id as string,
+            contractor_id: v.contractor_id as string,
+            pro_first_name: a.first_name as string,
+            pro_last_name: a.last_name as string,
+            visit_id: v.id as string,
+            customer_name: v.customer_name as string | null,
+            completed_at: v.completed_at as string,
+            customer_rating: v.customer_rating as number | null,
+          } as AttributionCandidate;
+        })
+        .filter((c): c is AttributionCandidate => c !== null);
+
+      const result = attribute(
+        row.reviewer_name as string | null,
+        row.comment as string | null,
+        row.posted_at as string,
+        candidatePool,
+      );
+
+      await admin
+        .from('reviews')
+        .update({
+          matched_job_id: result.matched_job_id,
+          matched_pro_id: result.matched_pro_id,
+          match_confidence: result.match_confidence,
+          match_score: result.match_score,
+          match_debug: result.match_debug,
+          status: result.match_confidence === 'high' ? 'matched' : 'new',
+        })
+        .eq('id', row.id as string)
+        .eq('status', 'new');
+      rescored += 1;
+    }
+  }
+
   // ---- Step 2: promotion candidates -------------------------------------
   const { data: candidates, error: candErr } = await admin
     .from('reviews')
