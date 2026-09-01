@@ -1671,7 +1671,8 @@ function EquipmentReviewPanel({ applicantId, service }: { applicantId: string; s
             {required.map((item) => {
               const latest = latestByType[item.key];
               const attempts = photos.filter((p) => p.photo_type === item.key).length;
-              const flagged = attempts >= 3 && latest?.status !== "approved";
+              const optional = _isOptional(item);
+              const flagged = attempts >= 3 && latest?.status !== "approved" && !optional;
               return (
                 <li key={item.key} className="rounded-lg border border-slate-200 p-3">
                   <div className="flex items-start gap-3">
@@ -1688,6 +1689,11 @@ function EquipmentReviewPanel({ applicantId, service }: { applicantId: string; s
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm text-[#0D1117]">{item.label}</span>
+                        {optional && (
+                          <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 ring-1 ring-slate-200">
+                            optional — wash only if missing
+                          </span>
+                        )}
                         {latest && (
                           <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ring-1 ${
                             latest.status === "approved" ? "bg-emerald-100 text-emerald-700 ring-emerald-200"
