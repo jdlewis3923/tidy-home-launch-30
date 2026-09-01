@@ -191,6 +191,12 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         title={t(config.seo.title)}
         description={t(config.seo.description)}
         ogImage={config.heroImage}
+        /* Built from the same array the FAQ section renders — cannot drift. */
+        faqs={config.faqs.map((f) => ({ q: t(f.q), a: t(f.a) }))}
+        breadcrumb={[
+          { name: "Home", url: "https://jointidy.co/" },
+          { name: t(config.eyebrow), url: config.seo.canonical },
+        ]}
       />
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
@@ -201,32 +207,34 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
       {/* HERO */}
       <section className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden">
-        {config.heroImageMobile ? (
-          <>
-            <img
-              src={config.heroImageMobile}
-              alt={config.heroAlt}
-              className="md:hidden absolute inset-0 w-full h-full object-cover"
-              width={1080}
-              height={1080}
-            />
-            <img
-              src={config.heroImage}
-              alt={config.heroAlt}
-              className="hidden md:block absolute inset-0 w-full h-full object-cover"
-              width={1600}
-              height={896}
-            />
-          </>
-        ) : (
+        {/*
+          One <picture>: WebP first with a jpg fallback, the portrait mobile crop
+          only under 640px (above that the 1600px landscape asset is sharper than
+          upscaling a 900px portrait), intrinsic width/height to stop layout
+          shift, and fetchpriority=high because this is the LCP element.
+        */}
+        <picture>
+          {config.heroImageMobile && (
+            <>
+              {config.heroImageMobileWebp && (
+                <source media="(max-width: 639px)" srcSet={config.heroImageMobileWebp} type="image/webp" />
+              )}
+              <source media="(max-width: 639px)" srcSet={config.heroImageMobile} type="image/jpeg" />
+            </>
+          )}
+          {config.heroImageWebp && <source srcSet={config.heroImageWebp} type="image/webp" />}
           <img
             src={config.heroImage}
             alt={config.heroAlt}
             className="absolute inset-0 w-full h-full object-cover"
-            width={1600}
-            height={896}
+            width={config.heroDimensions?.[0] ?? 1600}
+            height={config.heroDimensions?.[1] ?? 900}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
-        )}
+        </picture>
+
         <div className="absolute inset-0 bg-navy/65" />
         <SparkleField />
 
