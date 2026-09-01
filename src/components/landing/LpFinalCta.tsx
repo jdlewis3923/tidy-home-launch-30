@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import TidyLogo from "@/components/TidyLogo";
 import SparkleField from "./SparkleField";
-import { SERVICE_AREA_TRUST } from "@/lib/landing";
+
 import { usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { track } from "@/lib/track";
 import { useLanguage } from "@/contexts/LanguageContext";
