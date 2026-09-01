@@ -1225,6 +1225,31 @@ const translations: Record<string, string> = {
     "Especialistas con antecedentes verificados. El mismo especialista en cada visita para que conozca tu carro.",
   "We couldn't save your details. Please try again, or call us at (786) 829-1141.":
     "No pudimos guardar tus datos. Inténtalo de nuevo o llámanos al (786) 829-1141.",
+
+  // Car Wash / Car Detail split — StepProperty
+  "wash or detail?": "¿lavado o detallado?",
+  "Car Wash": "Lavado de Carro",
+  "Car Detail": "Detallado de Carro",
+  "Included — a detail starts with a full exterior wash.":
+    "Incluido — un detallado comienza con un lavado exterior completo.",
+  "A thorough exterior wash — about an hour.":
+    "Un lavado exterior completo — aproximadamente una hora.",
+  "Full interior + exterior detail — about 3.5 hours.":
+    "Detallado completo interior y exterior — aproximadamente 3.5 horas.",
+
+  // Before-payment access gate — StepPayment
+  "Before we come out": "Antes de ir a tu casa",
+  "There's an outdoor water spigot I can reach from my driveway or parking spot":
+    "Hay una llave de agua exterior a la que puedo acceder desde mi entrada o estacionamiento",
+  "There's an outdoor electrical outlet available":
+    "Hay un tomacorriente exterior disponible",
+  "Washing vehicles is allowed at this property (some HOAs and condo lots don't permit it)":
+    "Lavar vehículos está permitido en esta propiedad (algunas HOA y condominios no lo permiten)",
+  "If you're not sure about the last one, check with your HOA first — we can't wash where it isn't permitted, and we can't refund a trip we couldn't complete.":
+    "Si no estás seguro de lo último, consulta primero con tu HOA — no podemos lavar donde no esté permitido, y no podemos reembolsar una visita que no pudimos completar.",
+  "We may not be able to service this address. Send us the details and we'll tell you before you pay.":
+    "Puede que no podamos dar servicio en esta dirección. Envíanos los detalles y te avisaremos antes de que pagues.",
+  "Call us": "Llámanos",
 };
 
 
