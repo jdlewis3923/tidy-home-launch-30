@@ -420,11 +420,12 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             <p className="mt-4 text-xs text-text-light/90">{t(config.addOnsNote)}</p>
           )}
 
-          <p className="mt-3 text-xs text-text-light/80">
-            {t(
-              "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Extra-large lot (4,001–7,500 sq ft mowable turf): +$30 per visit. Extra-large vehicle: +$30 per visit. Above those sizes we quote individually.",
-            )}
-          </p>
+          {/* Per-service surcharge only — a cleaning page never mentions lawn
+              or vehicle sizes. */}
+          {config.surchargeNote && (
+            <p className="mt-3 text-xs text-text-light/80">{t(config.surchargeNote)}</p>
+          )}
+
         </div>
       </section>
 
