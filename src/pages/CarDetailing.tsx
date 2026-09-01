@@ -20,15 +20,23 @@ const config: ServiceLandingConfig = {
   savingsCallout:
     "A good mobile detail runs **$120–$180 per appointment**. Shine Complete is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.",
   heroImage: heroImg,
+  heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
+  heroImageMobileWebp: heroImgMobileWebp,
+  heroDimensions: [1400, 933],
   heroAlt: "Pristine freshly detailed black SUV in a Miami driveway",
   plans: [
+    // Each card is one vehicle size, so the price is exact — no "From" here.
     {
       name: "Shine Complete · Size 1",
       price: "$149",
       cadence: "/mo",
       planSlug: "monthly",
       description: "Sedans and coupes. 3 washes a month plus 2 full details a year.",
+      sizeNote: "sedans and coupes",
+      priceValue: 149,
+      size: 1,
+      cadenceKey: "monthly",
     },
     {
       name: "Shine Complete · Size 2",
@@ -37,6 +45,10 @@ const config: ServiceLandingConfig = {
       planSlug: "monthly",
       description: "Crossovers and 2-row SUVs. Same flat monthly price.",
       highlighted: true,
+      sizeNote: "crossovers and 2-row SUVs",
+      priceValue: 179,
+      size: 2,
+      cadenceKey: "monthly",
     },
     {
       name: "Shine Complete · Size 3",
@@ -44,7 +56,12 @@ const config: ServiceLandingConfig = {
       cadence: "/mo",
       planSlug: "monthly",
       description: "Trucks, 3-row SUVs and vans.",
+      sizeNote: "trucks, 3-row SUVs and vans",
+      priceValue: 239,
+      size: 3,
+      cadenceKey: "monthly",
     },
+
   ],
   included: [
     "Exterior hand wash",
