@@ -908,6 +908,10 @@ const translations: Record<string, string> = {
   "Once their first invoice clears, $50 is credited to your next month. No cap, stack as many as you want.":
     "Cuando se procese la primera factura de tu vecino, se acreditan $50 a tu próximo mes. Sin tope, acumula todos los que quieras.",
   "Your referral link": "Tu enlace de referido",
+  "We couldn't load your referral link": "No pudimos cargar tu enlace de referido",
+  "Something went wrong on our side — your link was not created. Try again, or call us at (786) 829-1141.":
+    "Algo falló de nuestro lado — tu enlace no se creó. Intenta de nuevo o llámanos al (786) 829-1141.",
+  "Try again": "Intentar de nuevo",
   "Sign in to get your link": "Inicia sesión para obtener tu enlace",
   "Loading…": "Cargando…",
   "Share this link with a neighbor. They save $50, you save $50.":

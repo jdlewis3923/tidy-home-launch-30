@@ -25,6 +25,7 @@ const QrRedirect = () => {
       placement: parsed?.placement ?? "unknown",
       zip: parsed?.zip ?? undefined,
       lang: parsed?.lang ?? undefined,
+      route: parsed?.route ?? undefined,
     });
     // Fire-and-forget: a logging failure must never block the redirect.
     void supabase
@@ -35,6 +36,7 @@ const QrRedirect = () => {
         lang: parsed?.lang ?? null,
         zip: parsed?.zip ?? null,
         placement: parsed?.placement ?? "unknown",
+        route: parsed?.route ?? null,
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
         referrer: typeof document !== "undefined" ? document.referrer.slice(0, 500) || null : null,
       })

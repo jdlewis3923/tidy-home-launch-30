@@ -1804,6 +1804,7 @@ export type Database = {
           path: string | null
           placement: string | null
           referrer: string | null
+          route: string | null
           user_agent: string | null
           utm_campaign: string | null
           utm_content: string | null
@@ -1819,6 +1820,7 @@ export type Database = {
           path?: string | null
           placement?: string | null
           referrer?: string | null
+          route?: string | null
           user_agent?: string | null
           utm_campaign?: string | null
           utm_content?: string | null
@@ -1834,6 +1836,7 @@ export type Database = {
           path?: string | null
           placement?: string | null
           referrer?: string | null
+          route?: string | null
           user_agent?: string | null
           utm_campaign?: string | null
           utm_content?: string | null
@@ -2297,6 +2300,7 @@ export type Database = {
           placement: string | null
           raw_code: string
           referrer: string | null
+          route: string | null
           user_agent: string | null
           zip: string | null
         }
@@ -2308,6 +2312,7 @@ export type Database = {
           placement?: string | null
           raw_code: string
           referrer?: string | null
+          route?: string | null
           user_agent?: string | null
           zip?: string | null
         }
@@ -2319,6 +2324,7 @@ export type Database = {
           placement?: string | null
           raw_code?: string
           referrer?: string | null
+          route?: string | null
           user_agent?: string | null
           zip?: string | null
         }
@@ -3327,6 +3333,7 @@ export type Database = {
         Returns: undefined
       }
       current_user_admin: { Args: never; Returns: boolean }
+      ensure_referral_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {

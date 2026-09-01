@@ -31,6 +31,8 @@ const ReferInner = () => {
   const [creditCents, setCreditCents] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [authLoaded, setAuthLoaded] = useState(false);
+  const [codeError, setCodeError] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
   const { t } = useLanguage();
 
@@ -50,27 +52,17 @@ const ReferInner = () => {
         const user = data.session?.user;
         if (!user) return;
 
-        // Read or backfill referral_code on the profile.
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("referral_code")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        // ensure_referral_code() is a SECURITY DEFINER RPC: it returns this
+        // caller's code and CREATES one when the profile predates the trigger.
+        const { data: rpcCode, error: rpcError } = await supabase.rpc("ensure_referral_code");
         if (!active) return;
-
-        let resolvedCode = profile?.referral_code ?? null;
-        if (!resolvedCode) {
-          // Trigger normally seeds it; if a legacy profile is missing one,
-          // the SQL backfill in the migration handled it. Last-resort:
-          // re-read once after a small delay (handled below as fallback).
-          const { data: retry } = await supabase
-            .from("profiles")
-            .select("referral_code")
-            .eq("user_id", user.id)
-            .maybeSingle();
-          resolvedCode = retry?.referral_code ?? null;
+        if (rpcError || !rpcCode) {
+          console.error("[refer] ensure_referral_code failed", rpcError?.message ?? "empty code");
+          setCodeError(true);
+        } else {
+          setCodeError(false);
+          setCode(rpcCode as string);
         }
-        if (resolvedCode) setCode(resolvedCode);
 
         // Sum unspent credits (status converted, not yet credited out).
         const { data: refRows } = await supabase
@@ -83,8 +75,9 @@ const ReferInner = () => {
             .reduce((acc, r) => acc + (r.credit_cents ?? 0), 0);
           setCreditCents(sum);
         }
-      } catch {
-        /* unauthenticated or auth not yet available — fall through */
+      } catch (err) {
+        console.error("[refer] referral code load failed", err);
+        if (active) setCodeError(true);
       } finally {
         if (active) setAuthLoaded(true);
       }
@@ -92,7 +85,7 @@ const ReferInner = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [retryTick]);
 
   const handleCopy = async () => {
     if (!code) return;
@@ -199,7 +192,11 @@ const ReferInner = () => {
             <div className="bg-card border rounded-2xl p-6 md:p-8 text-center shadow-sm">
               <Sparkles className="w-6 h-6 text-gold mx-auto mb-3" aria-hidden="true" />
               <h2 className="text-xl md:text-2xl font-bold text-foreground">
-                {code ? t("Your referral link") : t("Sign in to get your link")}
+                {code
+                  ? t("Your referral link")
+                  : codeError
+                    ? t("We couldn't load your referral link")
+                    : t("Sign in to get your link")}
               </h2>
 
               {!authLoaded && <p className="text-sm text-text-mid mt-3">{t("Loading…")}</p>}
@@ -230,7 +227,27 @@ const ReferInner = () => {
                 </>
               )}
 
-              {authLoaded && !code && (
+              {authLoaded && !code && codeError && (
+                <>
+                  <p className="text-sm text-text-mid mt-3">
+                    {t(
+                      "Something went wrong on our side — your link was not created. Try again, or call us at (786) 829-1141.",
+                    )}
+                  </p>
+                  <button
+                    onClick={() => {
+                      setCodeError(false);
+                      setAuthLoaded(false);
+                      setRetryTick((n) => n + 1);
+                    }}
+                    className="cta-press mt-5 bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
+                  >
+                    {t("Try again")}
+                  </button>
+                </>
+              )}
+
+              {authLoaded && !code && !codeError && (
                 <>
                   <p className="text-sm text-text-mid mt-3">
                     {t(

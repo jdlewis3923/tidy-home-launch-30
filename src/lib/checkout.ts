@@ -15,7 +15,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { getUtmAttribution } from '@/lib/utm';
-import { getLandingSource, getQrPlacement, getQrZip } from '@/lib/landing-source';
+import { getLandingSource, getQrPlacement, getQrRoute, getQrZip } from '@/lib/landing-source';
 import { STRIPE_FUNCTIONS } from '@/lib/stripe-config';
 import {
   carWashEligible,
@@ -92,6 +92,7 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     // card = kept the tear-off and scanned later.
     qr_placement: getQrPlacement() ?? undefined,
     qr_zip: getQrZip() ?? undefined,
+    qr_route: getQrRoute() ?? undefined,
   };
 
   const { data, error } = await supabase.functions.invoke(
