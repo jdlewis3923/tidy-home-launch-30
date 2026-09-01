@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import TidyLogo from "@/components/TidyLogo";
 import SparkleField from "./SparkleField";
-import { SERVICE_AREA_TRUST } from "@/lib/landing";
+
 import { usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { track } from "@/lib/track";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -80,7 +80,7 @@ const LpFinalCta = ({ headline, subhead, ctaLabel, trackingId, service, plan, bu
           {ctaLabel} <span className="arrow">→</span>
         </Link>
 
-        <p className="mt-6 text-xs text-primary-foreground/50">{t(SERVICE_AREA_TRUST)}</p>
+        <p className="mt-6 text-xs text-primary-foreground/50">{t("Pinecrest & Kendall — Miami-Dade")}</p>
       </div>
     </section>
   );
