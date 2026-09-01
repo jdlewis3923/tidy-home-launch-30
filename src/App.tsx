@@ -44,6 +44,8 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const DashboardIndex = lazy(() => import("./pages/DashboardIndex.tsx"));
 const DashboardPlan = lazy(() => import("./pages/DashboardPlan.tsx"));
+const DashboardServices = lazy(() => import("./pages/DashboardServices.tsx"));
+const DashboardSchedule = lazy(() => import("./pages/DashboardSchedule.tsx"));
 const DashboardConfirmation = lazy(() => import("./pages/DashboardConfirmation.tsx"));
 const Account = lazy(() => import("./pages/Account.tsx"));
 const Billing = lazy(() => import("./pages/Billing.tsx"));
