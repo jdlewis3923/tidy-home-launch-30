@@ -50,6 +50,7 @@ export default function DashboardSchedule() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [showAllPast, setShowAllPast] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   useEffect(() => {
     if (!data.loading && !data.isAuthed) navigate('/login', { replace: true });
@@ -84,7 +85,7 @@ export default function DashboardSchedule() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-2">
-            <ScheduleCalendar visits={data.visits} />
+            <ScheduleCalendar visits={data.visits} selectedDate={selectedDate} onSelect={setSelectedDate} />
           </Card>
 
           <div className="space-y-6">
