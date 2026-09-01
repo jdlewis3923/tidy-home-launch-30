@@ -275,7 +275,7 @@ Deno.serve(async (req) => {
     source: 'internal',
     event: 'reviews_weekly_digest',
     status: 'success',
-    payload_hash: `promoted=${promoted} expired=${expiredCount} awaiting=${awaitingCount ?? 0} attribution_gap=true`,
+    payload_hash: `promoted=${promoted} expired=${expiredCount} awaiting=${awaitingCount ?? 0} rescored=${rescored}`,
   });
 
   return jsonResponse({
@@ -285,6 +285,6 @@ Deno.serve(async (req) => {
     expired: expiredCount,
     awaiting_total: awaitingCount ?? 0,
     email_sent: emailSent,
-    attribution_gap: 'shared attribution module not present yet — matching not re-run by this job',
+    rescored,
   });
 });
