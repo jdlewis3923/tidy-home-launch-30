@@ -1181,9 +1181,8 @@ const translations: Record<string, string> = {
   "How was your visit?": "¿Cómo te fue la visita?",
   "Anything you want us to know?": "¿Algo que quieras contarnos?",
   "Anything you want us to know? (optional)": "¿Algo que quieras contarnos? (opcional)",
-  Send: "Enviar",
-  "Sending...": "Enviando...",
   "Thanks — that helps.": "Gracias — eso ayuda.",
+
   "Leave us a Google review": "Déjanos una reseña en Google",
   "It takes 20 seconds and it's the single biggest thing that helps a small local company.":
     "Toma 20 segundos y es lo que más ayuda a una empresa local pequeña.",

@@ -14,7 +14,11 @@ import {
   frequencyVisitCopy,
   formatPerVisit,
   formatMonthly,
+  hasCarService,
 } from '@/lib/dashboard-pricing';
+import { QUOTE_PHONE } from '@/lib/pricing-canon';
+import { trackAccessGateFail } from '@/lib/tracking';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { startCheckout, translate } from '@/lib/checkout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { provisionAccount } from '@/lib/account-provisioning';
@@ -47,6 +51,39 @@ export default function StepPayment({ state, onChange }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const customQuote = hasCustomQuote(state);
+
+  // Access gate — car services only. Not a hard block: an unchecked box shows
+  // a "we may not be able to service this" banner and captures a lead so we
+  // can call ahead, rather than losing the sale outright.
+  const showAccessGate = hasCarService(state);
+  const accessAnswers: Array<{ key: 'hasWaterSpigot' | 'hasElectricalOutlet' | 'washingAllowed'; which: 'water_spigot' | 'electrical_outlet' | 'washing_allowed' }> = [
+    { key: 'hasWaterSpigot', which: 'water_spigot' },
+    { key: 'hasElectricalOutlet', which: 'electrical_outlet' },
+    { key: 'washingAllowed', which: 'washing_allowed' },
+  ];
+  const failingAccess = accessAnswers.filter((a) => state[a.key] === false);
+  const accessGateFailed = failingAccess.length > 0;
+  const [accessLeadSent, setAccessLeadSent] = useState(false);
+
+  useEffect(() => {
+    if (!accessGateFailed || accessLeadSent) return;
+    failingAccess.forEach((a) => trackAccessGateFail(a.which));
+    setAccessLeadSent(true);
+    if (state.email && state.zip) {
+      void supabaseClient.functions.invoke('submit-lead', {
+        body: {
+          first_name: state.firstName || 'Customer',
+          last_name: state.lastName || '',
+          email: state.email,
+          phone: state.phone || '0000000000',
+          zip: state.zip,
+          sms_consent: state.smsConsent === true,
+          source: 'access_gate_fail',
+          page_url: typeof window !== 'undefined' ? window.location.href : '',
+        },
+      }).catch(() => {});
+    }
+  }, [accessGateFailed, accessLeadSent]);
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true));

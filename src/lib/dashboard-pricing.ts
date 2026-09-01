@@ -223,7 +223,10 @@ export function carVariantAvailable(state: ConfigState): boolean {
  */
 export function setCarVariant(state: ConfigState, variant: 'car_wash' | 'car_detail'): ConfigState {
   if (variant === 'car_detail') {
-    const services = state.services.includes('detailing') ? state.services : [...state.services, 'detailing'];
+    const services: ServiceType[] = state.services.includes('detailing')
+      ? state.services
+      : [...state.services, 'detailing'];
+
     const frequencies = { ...state.frequencies, detailing: state.frequencies.detailing ?? 'monthly' as Frequency };
     return { ...state, carVariant: 'car_detail', services, frequencies, carWashes: null };
   }
