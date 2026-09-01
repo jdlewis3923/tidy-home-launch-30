@@ -3190,15 +3190,20 @@ export type Database = {
           comment: string | null
           contractor_id: string | null
           created_at: string
+          customer_id: string | null
           google_prompted: boolean
           id: string
+          job_id: string | null
           lang: string
+          needs_followup: boolean
           pro_visit_id: string | null
           rating: number
           raw_identifier: string | null
           resolution_notes: string | null
           resolved_at: string | null
           source: string
+          stars: number | null
+          user_agent: string | null
           user_id: string | null
           visit_id: string | null
         }
@@ -3206,15 +3211,20 @@ export type Database = {
           comment?: string | null
           contractor_id?: string | null
           created_at?: string
+          customer_id?: string | null
           google_prompted?: boolean
           id?: string
+          job_id?: string | null
           lang?: string
+          needs_followup?: boolean
           pro_visit_id?: string | null
           rating: number
           raw_identifier?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
           source?: string
+          stars?: number | null
+          user_agent?: string | null
           user_id?: string | null
           visit_id?: string | null
         }
@@ -3222,15 +3232,20 @@ export type Database = {
           comment?: string | null
           contractor_id?: string | null
           created_at?: string
+          customer_id?: string | null
           google_prompted?: boolean
           id?: string
+          job_id?: string | null
           lang?: string
+          needs_followup?: boolean
           pro_visit_id?: string | null
           rating?: number
           raw_identifier?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
           source?: string
+          stars?: number | null
+          user_agent?: string | null
           user_id?: string | null
           visit_id?: string | null
         }

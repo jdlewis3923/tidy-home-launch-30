@@ -92,6 +92,13 @@
       "when": 1788286978222,
       "tag": "0012_visit_ratings_table",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1788304639090,
+      "tag": "0013_visit_ratings_rate_page_columns",
+      "breakpoints": true
     }
   ]
 }
