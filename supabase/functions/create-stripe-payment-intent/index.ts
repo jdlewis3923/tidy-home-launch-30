@@ -64,6 +64,7 @@ const InputSchema = z.object({
   qr_placement: z.string().max(16).optional(),
   /** ZIP printed on the scanned hanger. */
   qr_zip: z.string().max(10).optional(),
+  qr_route: z.string().max(24).optional(),
 });
 
 async function deterministicKey(userId: string, payload: unknown): Promise<string> {
@@ -227,6 +228,7 @@ Deno.serve(async (req) => {
           landing_source: input.landing_source ?? "",
           qr_placement: input.qr_placement ?? "",
           qr_zip: input.qr_zip ?? "",
+          qr_route: input.qr_route ?? "",
         };
 
         const idempotencyKey =

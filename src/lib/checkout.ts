@@ -92,6 +92,7 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     // card = kept the tear-off and scanned later.
     qr_placement: getQrPlacement() ?? undefined,
     qr_zip: getQrZip() ?? undefined,
+    qr_route: getQrRoute() ?? undefined,
   };
 
   const { data, error } = await supabase.functions.invoke(

@@ -77,6 +77,7 @@ export default function StepPayment({ state, onChange }: Props) {
       landing_source: getLandingSource() ?? undefined,
       qr_placement: getQrPlacement() ?? undefined,
       qr_zip: getQrZip() ?? undefined,
+      qr_route: getQrRoute() ?? undefined,
     };
   };
 

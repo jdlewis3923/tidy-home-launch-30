@@ -18,6 +18,7 @@ const LANDING_SOURCE_VALUES: readonly string[] = ["doorhanger_en", "doorhanger_e
 export type QrPlacementValue = "hero" | "card" | "unknown";
 const PLACEMENT_KEY = "tidy_qr_placement";
 const ZIP_KEY = "tidy_qr_zip";
+const ROUTE_KEY = "tidy_qr_route";
 
 export const LANDING_SOURCES: Record<"en" | "es", LandingSource> = {
   en: "doorhanger_en",
@@ -65,6 +66,7 @@ export async function persistLandingTouch(source: LandingSource): Promise<void> 
       placement: params.get("placement")?.slice(0, 16) ?? getQrPlacement(),
       zip: (params.get("zip") ?? getQrZip())?.slice(0, 10) ?? null,
       lang: params.get("lang")?.slice(0, 5) ?? null,
+      route: params.get("route")?.slice(0, 24) ?? getQrRoute(),
       path: window.location.pathname.slice(0, 200),
       utm_source: params.get("utm_source")?.slice(0, 200) ?? null,
       utm_medium: params.get("utm_medium")?.slice(0, 200) ?? null,
@@ -117,6 +119,9 @@ export function captureLandingSourceFromUrl(): void {
   }
   const zip = params.get("zip");
   if (zip && /^\d{5}$/.test(zip)) captureFirstWins(ZIP_KEY, zip);
+  // Distribution route id — which walker covered which street.
+  const route = params.get("route");
+  if (route && /^[a-z0-9_]{1,24}$/i.test(route)) captureFirstWins(ROUTE_KEY, route.toLowerCase());
 }
 
 /** First-wins write for the simple string attribution keys. */
@@ -155,12 +160,18 @@ export function getQrZip(): string | null {
   return readFirstWins(ZIP_KEY);
 }
 
+/** The distribution route id printed on the scanned hanger, when present. */
+export function getQrRoute(): string | null {
+  return readFirstWins(ROUTE_KEY);
+}
+
 export function clearLandingSource(): void {
   if (!isBrowser()) return;
   try {
     window.localStorage?.removeItem(STORAGE_KEY);
     window.localStorage?.removeItem(PLACEMENT_KEY);
     window.localStorage?.removeItem(ZIP_KEY);
+    window.localStorage?.removeItem(ROUTE_KEY);
   } catch {
     /* ignore */
   }
