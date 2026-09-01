@@ -25,9 +25,12 @@ const config: ServiceLandingConfig = {
   priceAnchor: "From $45 a visit",
   stickyLabel: "Lawn Care · from $45 a visit",
   savingsCallout:
-    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$45 a visit** flat, same crew, no surprise invoices.",
+    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $45 a visit** flat, same crew, no surprise invoices.",
   heroImage: heroImg,
+  heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
+  heroImageMobileWebp: heroImgMobileWebp,
+  heroDimensions: [1600, 935],
   heroAlt: "Freshly mowed striped emerald lawn at a Pinecrest home",
   plans: [
     {
@@ -36,6 +39,11 @@ const config: ServiceLandingConfig = {
       cadence: "/mo",
       planSlug: "monthly",
       description: "One visit per month.",
+      isFromPrice: true,
+      sizeNote: SIZE_NOTE,
+      priceValue: 45,
+      size: 1,
+      cadenceKey: "monthly",
     },
     {
       name: "Biweekly",
@@ -44,6 +52,11 @@ const config: ServiceLandingConfig = {
       planSlug: "biweekly",
       description: "Two visits per month.",
       highlighted: true,
+      isFromPrice: true,
+      sizeNote: SIZE_NOTE,
+      priceValue: 90,
+      size: 1,
+      cadenceKey: "biweekly",
     },
     {
       name: "Weekly",
@@ -51,8 +64,14 @@ const config: ServiceLandingConfig = {
       cadence: "/mo",
       planSlug: "weekly",
       description: "Four visits per month.",
+      isFromPrice: true,
+      sizeNote: SIZE_NOTE,
+      priceValue: 180,
+      size: 1,
+      cadenceKey: "weekly",
     },
   ],
+
   included: [
     "Mow to precise height",
     "Edge all borders",
