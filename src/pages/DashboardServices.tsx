@@ -14,7 +14,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
-import { ArrowRight, Check, Gift, Loader2, Plus, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Check, Gift, Loader2, Plus, Sparkles, User, X } from 'lucide-react';
 import DashboardTopNav from '@/components/dashboard/DashboardTopNav';
 import RouteFallback from '@/components/RouteFallback';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDashboardData, formatLongDate, serviceLabel } from '@/lib/dashboard-data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { startAddServiceCheckout, type CheckoutServiceLine } from '@/lib/checkout';
+import { trackPreferredProSet } from '@/lib/tracking';
 import {
   SERVICE_NAMES,
   SIZE_LABELS,
@@ -42,6 +43,14 @@ type CatalogRow = {
   lucide_icon: string | null;
   sort_order: number;
   is_specialist: boolean;
+};
+
+type ProOption = {
+  pro_id: string;
+  first_name: string;
+  last_name: string;
+  high_demand: boolean;
+  preferred_by_count: number;
 };
 
 type AttachRow = {
@@ -100,6 +109,12 @@ export default function DashboardServices() {
   const [working, setWorking] = useState<string | null>(null);
   const [activeService, setActiveService] = useState<CanonService | null>(null);
 
+  // Preferred Pro
+  const [proOptions, setProOptions] = useState<ProOption[]>([]);
+  const [loadingPros, setLoadingPros] = useState(true);
+  const [preferredProId, setPreferredProId] = useState<string | null>(null);
+  const [savingPreferredPro, setSavingPreferredPro] = useState(false);
+
   // Add-a-service state
   const [newService, setNewService] = useState<CanonService | null>(null);
   const [newSize, setNewSize] = useState<CanonSize>(1);
@@ -119,6 +134,26 @@ export default function DashboardServices() {
   useEffect(() => {
     if (planServices.length && !activeService) setActiveService(planServices[0]);
   }, [planServices, activeService]);
+
+  useEffect(() => {
+    if (sub?.preferred_pro_id !== undefined) setPreferredProId(sub?.preferred_pro_id ?? null);
+  }, [sub?.preferred_pro_id]);
+
+  useEffect(() => {
+    if (!sub?.user_id) return;
+    let cancelled = false;
+    setLoadingPros(true);
+    supabase
+      .rpc('get_customer_preferred_pro_options', { p_user_id: sub.user_id })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (!error) setProOptions((data as ProOption[]) ?? []);
+        setLoadingPros(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sub?.user_id]);
 
   useEffect(() => {
     if (!sub?.user_id) return;
@@ -222,6 +257,28 @@ export default function DashboardServices() {
     }
     setAttaches((prev) => prev.filter((a) => a.id !== row.id));
     toast({ title: t('Removed') });
+  };
+
+  const savePreferredPro = async (proId: string | null) => {
+    if (!sub?.user_id) return;
+    setSavingPreferredPro(true);
+    const { error } = await supabase
+      .from('subscriptions')
+      .update({ preferred_pro_id: proId })
+      .eq('user_id', sub.user_id);
+    setSavingPreferredPro(false);
+    if (error) {
+      toast({
+        title: t('Could not save your preference'),
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+    setPreferredProId(proId);
+    const opt = proId ? proOptions.find((p) => p.pro_id === proId) : null;
+    trackPreferredProSet({ pro_id: proId, high_demand: opt?.high_demand });
+    toast({ title: t('Preference saved') });
   };
 
   const addService = async () => {
@@ -455,6 +512,51 @@ export default function DashboardServices() {
               <p className="mt-4 text-[11px] text-ink-faint">
                 {t('Charged on your next invoice · remove any time before the visit')}
               </p>
+            </Card>
+
+            {/* ---------------- Preferred Pro ---------------- */}
+            <Card>
+              <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
+                <User className="h-4 w-4 text-[hsl(var(--primary))]" />
+                {t('Preferred Pro')}
+              </h2>
+              <p className="mt-2 text-sm text-ink-soft">
+                {t("Choose a Pro if you'd like the same person whenever possible.")}
+              </p>
+
+              {loadingPros ? (
+                <div className="mt-4 flex items-center gap-2 text-ink-soft">
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t('Loading Pros…')}
+                </div>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  <select
+                    value={preferredProId ?? ''}
+                    onChange={(e) => savePreferredPro(e.target.value || null)}
+                    disabled={savingPreferredPro}
+                    className="w-full max-w-sm rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 py-2.5 text-sm font-medium text-ink focus:border-ink focus:outline-none disabled:opacity-60"
+                  >
+                    <option value="">{t('No preference (fastest scheduling)')}</option>
+                    {proOptions.map((p) => (
+                      <option key={p.pro_id} value={p.pro_id}>
+                        {p.first_name} {p.last_name}
+                        {p.high_demand ? ` ${t('— high demand, limited times')}` : ''}
+                      </option>
+                    ))}
+                  </select>
+
+                  {preferredProId && (
+                    <p className="rounded-xl bg-cream/50 p-3 text-xs text-ink-soft">
+                      {t(
+                        "We'll send {name} whenever we can. Requesting a specific Pro can mean fewer available times, and if they're booked or out we'll send another Tidy Pro rather than push your visit.",
+                      ).replace(
+                        '{name}',
+                        proOptions.find((p) => p.pro_id === preferredProId)?.first_name ?? '',
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
             </Card>
 
             {/* ---------------- Add a service ---------------- */}
