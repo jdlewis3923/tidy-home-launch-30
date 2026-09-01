@@ -120,7 +120,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "Who does the work?",
-      a: "Vetted, background-checked crews. Same team every visit so your lawn stays consistent.",
+      a: "Background-checked crews. Same team every visit so your lawn stays consistent.",
     },
     {
       q: "What if it rains?",
