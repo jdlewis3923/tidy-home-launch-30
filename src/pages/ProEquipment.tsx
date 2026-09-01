@@ -158,15 +158,30 @@ export default function ProEquipment() {
             {required.map((item) => {
               const latest = latestByType[item.key];
               const attempts = attemptCount(item.key);
-              const flagged = attempts >= 3 && latest?.status !== "approved";
+              const optional = isOptionalItem(item);
+              const flagged = attempts >= 3 && latest?.status !== "approved" && !optional;
               const isUploading = uploadingKey === item.key;
               return (
                 <div key={item.key} className="rounded-2xl border border-slate-200 p-4 sm:p-5">
                   <div className="flex items-start gap-3">
-                    <StatusIcon status={latest?.status} />
+                    <StatusIcon status={latest?.status} optional={optional} />
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-navy">{item.label}</h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-semibold text-navy">{item.label}</h3>
+                        {optional && (
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                            Optional
+                          </span>
+                        )}
+                      </div>
                       <p className="mt-0.5 text-xs text-slate-500">{item.description}</p>
+                      {optional && (
+                        <p className="mt-1.5 text-xs text-slate-500">
+                          Skip this and you can still be approved — you'll be set up for Wash jobs
+                          only until you add it. Add it anytime.
+                        </p>
+                      )}
+
 
                       {latest?.status === "rejected" && (
                         <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs">
