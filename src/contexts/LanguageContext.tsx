@@ -270,7 +270,7 @@ const translations: Record<string, string> = {
   "Of course! Want to add car detailing or switch your cleaning frequency? Just reach out and any changes will kick in at your next billing cycle. We're flexible because your needs are too.":
     "¡Por supuesto! ¿Quieres agregar detallado o cambiar la frecuencia de limpieza? Contáctanos y los cambios entran en tu próximo ciclo de facturación. Somos flexibles porque tus necesidades también lo son.",
   "Are contractors background-checked?": "¿Los contratistas tienen antecedentes verificados?",
-  "Absolutely — your trust means everything to us. Every single contractor is fully background-checked, and we require photo documentation after every visit so you can see exactly what was done. Quality and accountability are built into everything we do.":
+  "Absolutely — your trust means everything to us. Every single contractor is screened through Checkr, and we require photo documentation after every visit so you can see exactly what was done. Quality and accountability are built into everything we do.":
     "Absolutamente — tu confianza lo es todo. Cada contratista está completamente verificado, y exigimos documentación con fotos después de cada visita para que veas exactamente lo que se hizo. Calidad y responsabilidad en todo lo que hacemos.",
   "What if I'm not satisfied?": "¿Y si no quedo satisfecho?",
   "We want you to love every service! If something isn't right, just reach out within 24 hours and we'll make it right — whether that means a re-service or a credit. Your satisfaction is our top priority.":
