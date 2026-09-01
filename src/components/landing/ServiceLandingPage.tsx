@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { Check, Phone, MapPin, Sparkles, ShieldCheck, BadgeCheck, Star } from "lucide-react";
+import { Check, Phone, MapPin, Sparkles, ShieldCheck, BadgeCheck, Camera } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import SeoHead from "@/components/landing/SeoHead";
+import SeoHead, { SeoService } from "@/components/landing/SeoHead";
 import LandingFaq, { FaqItem } from "@/components/landing/LandingFaq";
 import Reveal from "@/components/landing/Reveal";
 import StickyBookBar from "@/components/landing/StickyBookBar";
@@ -15,7 +15,7 @@ import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import { PHONE_DISPLAY, PHONE_TEL, SERVICE_AREA_TRUST } from "@/lib/landing";
-import { pushEvent } from "@/lib/tracking";
+import { pushEvent, trackSelectPlan, useViewPricingObserver } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -27,7 +27,22 @@ export interface PlanTier {
   description: string;
   planSlug: string;
   highlighted?: boolean;
+  /**
+   * When true the price is the entry (size-1) price and the card renders
+   * "From $X" — required on every cadence-priced card so a size-2 homeowner is
+   * never shown a number they don't actually owe.
+   */
+  isFromPrice?: boolean;
+  /** Size qualifier shown under the price, e.g. "size 1 home — see sizes below". */
+  sizeNote?: string;
+  /** Numeric monthly price, used for select_plan / begin_checkout analytics. */
+  priceValue?: number;
+  /** Size this card is priced at, used for analytics. */
+  size?: 1 | 2 | 3;
+  /** Cadence for analytics; falls back to planSlug. */
+  cadenceKey?: "monthly" | "biweekly" | "weekly";
 }
+
 
 export interface TrustCard {
   title: string;
