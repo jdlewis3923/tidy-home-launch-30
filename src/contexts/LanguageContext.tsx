@@ -1152,7 +1152,8 @@ const translations: Record<string, string> = {
   "trucks, 3-row SUVs and vans": "camionetas, SUVs de 3 filas y vans",
   "Built for 33156 · 33183 · 33186": "Hecho para 33156 · 33183 · 33186",
   "Built for Pinecrest · Kendall · Kendall West": "Hecho para Pinecrest · Kendall · Kendall West",
-  "First visit perfect or it's free": "Primera visita perfecta o es gratis",
+  // "First visit perfect or it's free" is already defined above.
+
   "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Above that size we quote individually.":
     "Hogar extra grande (2,501–4,000 pies²): +$60 por visita. Arriba de ese tamaño cotizamos individualmente.",
   "Extra-large lot (4,001–7,500 sq ft of mowable turf): +$30 per visit. Above that size we quote individually.":
