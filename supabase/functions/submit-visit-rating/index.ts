@@ -24,6 +24,67 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
+
+    // ---- Follow-up append mode -------------------------------------------
+    // The "Let us make it right" panel on screen 2 posts back with the
+    // rating_id returned by the initial submit, so a customer who only
+    // decides to explain AFTER rating still lands in the ops queue.
+    const followupId = typeof body?.rating_id === 'string' ? body.rating_id.trim() : '';
+    if (followupId && UUID_RE.test(followupId)) {
+      const note = typeof body?.comment === 'string' ? body.comment.slice(0, 2000).trim() : '';
+      if (!note) return jsonResponse({ ok: false, error: 'empty_followup' }, 400);
+
+      const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+
+      const { data: existing } = await admin
+        .from('visit_ratings')
+        .select('id, stars, rating, comment, job_id, customer_id')
+        .eq('id', followupId)
+        .maybeSingle();
+      if (!existing) return jsonResponse({ ok: false, error: 'rating_not_found' }, 404);
+
+      const merged = existing.comment ? `${existing.comment}\n\n--- follow-up ---\n${note}` : note;
+      const { error: updErr } = await admin
+        .from('visit_ratings')
+        .update({ comment: merged, needs_followup: true })
+        .eq('id', followupId);
+      if (updErr) {
+        console.error('[submit-visit-rating] followup update failed', updErr.message);
+        return jsonResponse({ ok: false, error: 'followup_failed' }, 500);
+      }
+
+      const fStars = Number(existing.stars ?? existing.rating ?? 0);
+      await admin.from('admin_alerts').insert({
+        alert_type: 'low_visit_rating',
+        title: `Make-it-right request (${fStars}★)`,
+        body: note,
+        context: {
+          visit_rating_id: followupId,
+          stars: fStars,
+          job_id: existing.job_id ?? null,
+          customer_id: existing.customer_id ?? null,
+          followup: true,
+        },
+      }).then(({ error }) => {
+        if (error) console.warn('[submit-visit-rating] followup alert failed', error.message);
+      });
+
+      sendBrevoEmail({
+        to: OPS_ALERT_EMAIL,
+        marketing: false,
+        subject: `Make-it-right request (${fStars}★) — customer explained`,
+        htmlContent: `<p>A customer who rated ${fStars}★ has told us what happened.</p>
+          <p><b>What they said:</b> ${note.replace(/</g, '&lt;')}</p>
+          <p><b>Rating row:</b> ${followupId}</p>`,
+        tags: ['visit-rating-alert'],
+        label: 'submit-visit-rating-followup',
+      }).catch((e) => console.warn('[submit-visit-rating] brevo followup failed', (e as Error).message));
+
+      return jsonResponse({ ok: true, followup: true, rating_id: followupId });
+    }
+
     const stars = Number(body?.stars ?? body?.rating);
     if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
       return jsonResponse({ ok: false, error: 'invalid_rating' }, 400);
@@ -168,6 +229,7 @@ Deno.serve(async (req) => {
       ok: true,
       matched,
       stars,
+      rating_id: inserted?.id ?? null,
       needs_followup: needsFollowup,
       google_review_url: GOOGLE_REVIEW_URL,
     });
