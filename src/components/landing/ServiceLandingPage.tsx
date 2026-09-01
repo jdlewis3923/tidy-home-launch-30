@@ -70,13 +70,25 @@ export interface ServiceLandingConfig {
   /** Single line above the plans grid; wrap the price segment in **double asterisks**. */
   savingsCallout: string;
   heroImage: string;
-  /** Optional mobile-only hero image. Falls back to heroImage on desktop. */
+  /** WebP variant of heroImage, emitted as the preferred <source>. */
+  heroImageWebp?: string;
+  /** Optional mobile-only hero image (used under 640px only). */
   heroImageMobile?: string;
+  heroImageMobileWebp?: string;
+  /** Intrinsic pixel size of heroImage — prevents layout shift. */
+  heroDimensions?: [number, number];
+  /** Intrinsic pixel size of heroImageMobile. */
+  heroMobileDimensions?: [number, number];
   heroAlt: string;
   plans: PlanTier[];
   included: string[];
   /** Optional line listing paid add-ons, shown under the included list. */
   addOnsNote?: string;
+  /**
+   * Size-surcharge line. Per service — a cleaning page must never mention lawn
+   * or vehicle surcharges.
+   */
+  surchargeNote?: string;
   trustCards: TrustCard[];
   faqs: FaqItem[];
   bundleCta: {
@@ -90,7 +102,10 @@ export interface ServiceLandingConfig {
     description: string;
     canonical: string;
     priceRange: string;
+    /** Service + Offer JSON-LD carrying the three real size prices. */
+    service?: SeoService;
   };
+
 }
 
 interface Props {
