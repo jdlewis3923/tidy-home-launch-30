@@ -1,13 +1,14 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 
-// One claim per slot. "Background-Checked" and "Background-Checked Pros" used
-// to sit next to each other making the same claim — the shorter one is gone.
+// One claim per slot, rendered EXACTLY ONCE. The old marquee doubled its items,
+// so every claim printed twice on /bundle, /refer and the service pages —
+// which read as the trust strip appearing twice and blew the per-page claim cap.
+// "Background-Checked Pros" leads: it is the strongest trust claim we have and
+// it sits above the fold on /neighbor, the page the door hangers point at.
 // The ZIP list is deliberately NOT here: it already appears in the hero, the
-// service-area section and the footer, and a 4th pass reads as keyword stuffing.
-// "Background-Checked Pros" is deliberately NOT here: the ticker doubles its
-// items to loop, so it would render the claim twice and blow the per-page cap.
-// The claim lives in the hero chip, the pricing trust row and a trust card.
+// service-area section and the footer.
 const ITEMS = [
+  "Background-Checked Pros",
   "Same Crew Every Visit",
   "Locked Monthly Price",
   "Cancel Anytime",
@@ -15,18 +16,17 @@ const ITEMS = [
   "Eco-Safe Products",
 ];
 
-
 /**
- * `single` renders the claim row exactly once, static, no marquee. /neighbor
- * uses it: the doubled marquee copy read as the trust strip appearing twice.
+ * Static claim row — no marquee, no duplicated copy. The `single` prop is kept
+ * for call-site compatibility; the row renders once either way.
  */
-const LandingTicker = ({ single = false }: { single?: boolean }) => {
+const LandingTicker = ({ single = true }: { single?: boolean }) => {
   const { t } = useLanguage();
-  const items = single ? ITEMS : [...ITEMS, ...ITEMS];
+  void single;
   return (
-    <div className="bg-navy overflow-hidden whitespace-nowrap border-y border-primary-foreground/10">
-      <div className={`${single ? "flex flex-wrap justify-center" : "animate-ticker inline-flex"} py-2.5`}>
-        {items.map((item, i) => (
+    <div className="bg-navy overflow-hidden border-y border-primary-foreground/10">
+      <div className="flex flex-wrap justify-center py-2.5">
+        {ITEMS.map((item, i) => (
           <span
             key={i}
             className="inline-flex items-center mx-5 text-xs text-primary-foreground/75 font-medium"
