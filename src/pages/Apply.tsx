@@ -255,6 +255,31 @@ export default function Apply() {
                 ) : null}
               </div>
             ))}
+</div>
+
+          <div className="mt-10 rounded-xl bg-white/[0.04] backdrop-blur border border-white/10 p-5">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-gold" />
+              <h2 className="font-display text-base font-bold text-white">{t("Insurance requirement")}</h2>
+            </div>
+            <p className="mt-3 text-sm text-white/70 leading-relaxed">
+              {t(
+                "Every Tidy Pro carries their own commercial general liability policy at $1,000,000 per occurrence / $2,000,000 aggregate, naming Tidy Home Concierge LLC as Additional Insured. It must be active and verified before your first visit.",
+              )}
+            </p>
+            <p className="mt-2 text-sm text-white/70 leading-relaxed">
+              {t(
+                "No LLC is required and most solo operators pay about $25 to $60 a month; Hiscox and NEXT Insurance are the two carriers our Pros use.",
+              )}
+            </p>
+            <div className="mt-3 rounded-xl bg-gold/10 ring-1 ring-gold/30 p-4">
+              <p className="text-sm text-white/85 leading-relaxed">
+                <span className="font-bold text-gold">{t("We reimburse up to $50 a month")}</span>{" "}
+                {t(
+                  "toward your premium for the first 3 months — paid with your Friday deposit once your certificate is verified.",
+                )}
+              </p>
+            </div>
           </div>
 
           <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/55">

@@ -672,7 +672,15 @@ const translations: Record<string, string> = {
   "Booking, billing, and customer support — all on us.":
     "Reservas, facturación y atención al cliente — todo por nuestra cuenta.",
   "Grow with the brand": "Crece con la marca",
-  "Background check on every hire": "Verificación de antecedentes en cada contratación",
+"Background check on every hire": "Verificación de antecedentes en cada contratación",
+  "Insurance requirement": "Requisito de seguro",
+  "Every Tidy Pro carries their own commercial general liability policy at $1,000,000 per occurrence / $2,000,000 aggregate, naming Tidy Home Concierge LLC as Additional Insured. It must be active and verified before your first visit.":
+    "Cada Pro de Tidy mantiene su propia póliza de responsabilidad civil general comercial de $1,000,000 por ocurrencia / $2,000,000 agregado, con Tidy Home Concierge LLC nombrada como Asegurado Adicional. Debe estar activa y verificada antes de tu primera visita.",
+  "No LLC is required and most solo operators pay about $25 to $60 a month; Hiscox and NEXT Insurance are the two carriers our Pros use.":
+    "No se requiere LLC y la mayoría de los operadores independientes pagan entre $25 y $60 al mes; Hiscox y NEXT Insurance son las dos aseguradoras que usan nuestros Pros.",
+  "We reimburse up to $50 a month": "Reembolsamos hasta $50 al mes",
+  "toward your premium for the first 3 months — paid with your Friday deposit once your certificate is verified.":
+    "de tu prima durante los primeros 3 meses — pagados con tu depósito del viernes una vez que tu certificado esté verificado.",
   "Apply to join Tidy": "Aplica para unirte a Tidy",
   "Takes about 2 minutes.": "Toma unos 2 minutos.",
   "First name": "Nombre",
