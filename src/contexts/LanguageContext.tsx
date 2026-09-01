@@ -1146,8 +1146,6 @@ const translations: Record<string, string> = {
   "Where plans start": "Desde dónde empiezan los planes",
   "per visit, size 1": "por visita, tamaño 1",
   "per month, size 1": "por mes, tamaño 1",
-  "Serving Pinecrest, Kendall & Palmetto Bay — 33156, 33183, 33186":
-    "Servimos Pinecrest, Kendall y Palmetto Bay — 33156, 33183, 33186",
   "Serving Pinecrest & Kendall — 33156, 33183, 33186":
     "Servimos Pinecrest y Kendall — 33156, 33183, 33186",
   "from $90/mo": "desde $90/mes",

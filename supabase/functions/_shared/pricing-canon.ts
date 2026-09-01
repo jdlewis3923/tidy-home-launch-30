@@ -216,7 +216,8 @@ export function trustClaims(): string[] {
 // ---------------------------------------------------------------------------
 
 export const SERVICE_AREA_ZIPS = ['33156', '33183', '33186'] as const;
-export const SERVICE_AREA_LINE = 'Serving Pinecrest, Kendall & Palmetto Bay — 33156, 33183, 33186';
+// Matches the /neighbor line exactly — Palmetto Bay is not in the served set.
+export const SERVICE_AREA_LINE = 'Serving Pinecrest & Kendall — 33156, 33183, 33186';
 export const SERVICE_AREA_SHORT = 'Pinecrest, Kendall & Palmetto Bay';
 
 // ---------------------------------------------------------------------------
