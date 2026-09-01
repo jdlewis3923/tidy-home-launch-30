@@ -119,9 +119,11 @@ export async function logReferralDiscountDecision(opts: {
 
   try {
     await supabase.from("integration_logs").insert({
-      source: "referral",
-      event: `discount:${decision.reason}:${userId}`,
-      status: decision.apply ? "success" : "skipped",
+      // integration_logs.source/status are CHECK-constrained; 'referral' and
+      // 'skipped' are not allowed values, so a skip is logged as a warning.
+      source: "stripe",
+      event: `referral_discount:${decision.reason}:${userId}`,
+      status: decision.apply ? "success" : "warning",
       payload_hash: decision.code || null,
       error_message: decision.apply ? null : `referral discount skipped: ${decision.reason}`,
     });
