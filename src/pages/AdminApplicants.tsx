@@ -96,6 +96,7 @@ type Applicant = {
   stripe_connect_complete: boolean | null;
   training_passed: boolean | null;
   equipment_approved: boolean | null;
+  wash_only: boolean | null;
   training_scheduled_at: string | null;
   training_no_show_count: number | null;
   out_of_service_area: boolean | null;
@@ -282,7 +283,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved, training_scheduled_at, training_no_show_count, out_of_service_area")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved, wash_only, training_scheduled_at, training_no_show_count, out_of_service_area")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -819,6 +820,9 @@ export default function AdminApplicants() {
                     { label: "Has transportation", value: yn(open.has_vehicle ?? submitted?.has_vehicle) },
                     { label: "Has equipment", value: yn(open.has_supplies ?? submitted?.has_supplies) },
                     { label: "US work authorized", value: yn(submitted?.work_authorized) },
+                    ...(open.wash_only
+                      ? [{ label: "Detail capability", value: "Wash only — no pressure washer" }]
+                      : []),
                   ];
                   return (
                     <Card className="rounded-2xl border-slate-200">
@@ -1581,7 +1585,7 @@ function EmailLogPanel({ recipient }: { recipient: string }) {
 
 // =================== Equipment Photo Review ===================
 
-import { getRequiredItems as _getReq, REJECTION_REASONS as _REASONS } from "@/lib/equipmentChecklist";
+import { getRequiredItems as _getReq, isOptionalItem as _isOptional, REJECTION_REASONS as _REASONS } from "@/lib/equipmentChecklist";
 
 type EquipPhoto = {
   id: string;
@@ -1645,7 +1649,8 @@ function EquipmentReviewPanel({ applicantId, service }: { applicantId: string; s
   // Group by photo_type with latest first.
   const latestByType: Record<string, EquipPhoto> = {};
   for (const p of photos) if (!latestByType[p.photo_type]) latestByType[p.photo_type] = p;
-  const approvedCount = required.filter((r) => latestByType[r.key]?.status === "approved").length;
+  const mandatory = required.filter((r) => !_isOptional(r));
+  const approvedCount = mandatory.filter((r) => latestByType[r.key]?.status === "approved").length;
 
   return (
     <Card className="rounded-2xl border-slate-200">
@@ -1653,7 +1658,7 @@ function EquipmentReviewPanel({ applicantId, service }: { applicantId: string; s
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-[#0D1117]">Equipment Photos</h3>
           <span className="text-xs text-slate-500">
-            {approvedCount}/{required.length} approved
+            {approvedCount}/{mandatory.length} approved
           </span>
         </div>
 
