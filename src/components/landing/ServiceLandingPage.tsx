@@ -329,12 +329,13 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           <SavingsCallout text={t(config.savingsCallout)} />
 
           <div
+            ref={pricingRef}
             className={`grid gap-6 md:gap-5 items-stretch ${config.plans.length === 2 ? "md:grid-cols-2 md:max-w-3xl md:mx-auto" : "md:grid-cols-3"}`}
           >
             {config.plans.map((p, i) => {
               const planCta = ctaForPlan(p.planSlug, `plan_${p.planSlug}`);
               return (
-                <Reveal key={p.planSlug} delay={i * 80}>
+                <Reveal key={`${p.planSlug}-${p.name}`} delay={i * 80}>
                   <div
                     className={`relative overflow-hidden bg-card border rounded-xl p-6 h-full flex flex-col hover-lift transition-transform ${
                       p.highlighted
@@ -345,13 +346,27 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                     {p.highlighted && <span className="most-popular-ribbon">{t("Most Popular")}</span>}
                     <h3 className="text-lg font-bold text-foreground">{t(p.name)}</h3>
                     <div className="mt-2 flex items-baseline gap-1">
+                      {/* Cadence-priced cards must say "From" — the number is the
+                          size-1 price, not what every home pays. */}
+                      {p.isFromPrice && <span className="text-sm font-semibold text-text-mid">{t("From")}</span>}
                       <span className="text-3xl font-extrabold text-foreground">{p.price}</span>
                       <span className="text-sm text-text-mid">{t(p.cadence)}</span>
                     </div>
+                    {p.sizeNote && (
+                      <p className="mt-1 text-[11px] leading-snug text-text-light">{t(p.sizeNote)}</p>
+                    )}
                     <p className="text-sm text-text-mid mt-3 flex-1">{t(p.description)}</p>
                     <Link
                       to={planCta.to}
-                      onClick={planCta.onClick}
+                      onClick={(e) => {
+                        trackSelectPlan({
+                          service: config.signupServiceParam,
+                          cadence: p.cadenceKey ?? p.planSlug,
+                          size: p.size,
+                          price: p.priceValue,
+                        });
+                        planCta.onClick(e);
+                      }}
                       className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
                       {t(config.ctaPlanLabel ?? "Choose")} {!config.ctaPlanLabel && t(p.name)}{" "}
@@ -363,21 +378,22 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             })}
           </div>
 
-          {/* Trust signal row directly under pricing */}
+          {/* Trust signal row directly under pricing — one claim per slot. */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-text-mid">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-primary" />
-              {t("Background-checked pros")}
+              {t("Background-Checked Pros")}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <BadgeCheck className="w-4 h-4 text-primary" />
-              {t("Vetted & background-checked")}
+              <Camera className="w-4 h-4 text-primary" />
+              {t("Photo-Verified Every Visit")}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Star className="w-4 h-4 text-gold" />
-              {t("Satisfaction guaranteed")}
+              <BadgeCheck className="w-4 h-4 text-gold" />
+              {t("First visit perfect or it's free")}
             </span>
           </div>
+
         </div>
       </section>
 
