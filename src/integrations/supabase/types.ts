@@ -3185,6 +3185,57 @@ export type Database = {
         }
         Relationships: []
       }
+      visit_ratings: {
+        Row: {
+          comment: string | null
+          contractor_id: string | null
+          created_at: string
+          google_prompted: boolean
+          id: string
+          lang: string
+          pro_visit_id: string | null
+          rating: number
+          raw_identifier: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          source: string
+          user_id: string | null
+          visit_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          google_prompted?: boolean
+          id?: string
+          lang?: string
+          pro_visit_id?: string | null
+          rating: number
+          raw_identifier?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          source?: string
+          user_id?: string | null
+          visit_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          google_prompted?: boolean
+          id?: string
+          lang?: string
+          pro_visit_id?: string | null
+          rating?: number
+          raw_identifier?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          source?: string
+          user_id?: string | null
+          visit_id?: string | null
+        }
+        Relationships: []
+      }
       visit_sms_state: {
         Row: {
           created_at: string
