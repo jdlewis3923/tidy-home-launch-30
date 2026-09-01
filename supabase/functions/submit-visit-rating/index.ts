@@ -229,6 +229,7 @@ Deno.serve(async (req) => {
       ok: true,
       matched,
       stars,
+      rating_id: inserted?.id ?? null,
       needs_followup: needsFollowup,
       google_review_url: GOOGLE_REVIEW_URL,
     });
