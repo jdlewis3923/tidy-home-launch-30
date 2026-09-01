@@ -299,6 +299,10 @@ const App = () => (
                   <Route path="/q/:code" element={<QrRedirect />} />
                   <Route path="/q" element={<QrRedirect />} />
 
+                  {/* Post-visit SMS rating link — no login, identifier optional. */}
+                  <Route path="/rate" element={<Rate />} />
+
+
                   <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
