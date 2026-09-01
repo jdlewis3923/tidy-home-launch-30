@@ -5,7 +5,14 @@ export type EquipmentItem = {
   key: string;
   label: string;
   description: string;
+  /**
+   * Optional items are shown in the checklist but never gate submission or
+   * approval. A Detail applicant who skips the pressure washer is still
+   * approvable — they are flagged wash_only on their Pro record instead.
+   */
+  optional?: boolean;
 };
+
 
 export const HOUSE_CLEANING_ITEMS: EquipmentItem[] = [
   { key: 'vacuum_cleaner', label: 'Vacuum cleaner',
