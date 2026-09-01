@@ -64,7 +64,20 @@ const BY_SERVICE: Record<string, EquipmentItem[]> = {
   car_detailing: DETAIL_ITEMS,
 };
 
-/** Normalize free-form service string(s) → distinct required items (UNION). */
+/** Key of the optional Detail item whose absence flags a Pro wash-only. */
+export const PRESSURE_WASHER_KEY = 'pressure_washer';
+
+/** True when the checklist item never gates submission or approval. */
+export function isOptionalItem(item: EquipmentItem): boolean {
+  return item.optional === true;
+}
+
+/**
+ * Normalize free-form service string(s) → distinct checklist items (UNION).
+ * Includes optional items; use getMandatoryItems() for anything that gates
+ * submission or approval.
+ */
+
 export function getRequiredItems(service: string | null | undefined): EquipmentItem[] {
   const raw = (service ?? '').toLowerCase();
   if (!raw) return [];
