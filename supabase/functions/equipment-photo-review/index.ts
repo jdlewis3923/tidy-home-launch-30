@@ -15,7 +15,15 @@ const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 // Mirror of src/lib/equipmentChecklist required-item sets.
 const HOUSE = ['vacuum_cleaner', 'mop_and_bucket', 'supply_kit', 'uniform_or_attire'];
 const LAWN = ['mower', 'edger', 'blower', 'trimmer', 'vehicle_and_trailer'];
-const DETAIL = ['pressure_washer_or_water_source', 'shop_vac_or_wet_dry_vac', 'polishing_supplies', 'microfiber_supply', 'vehicle'];
+// NOTE: 'pressure_washer' is OPTIONAL and deliberately not in this list — it
+// never gates equipment_approved. Missing/unapproved => wash_only = true.
+const DETAIL = ['hose_nozzle_buckets', 'shop_vac_or_wet_dry_vac', 'polishing_supplies', 'microfiber_supply', 'vehicle'];
+const PRESSURE_WASHER_KEY = 'pressure_washer';
+
+function isDetailService(service: string | null): boolean {
+  const s = (service ?? '').toLowerCase();
+  return s.includes('detail') || s.includes('car') || s.includes('bundle') || s.includes('all');
+}
 
 function requiredFor(service: string | null): string[] {
   const s = (service ?? '').toLowerCase();
@@ -29,6 +37,7 @@ function requiredFor(service: string | null): string[] {
   if (set.size === 0) add(HOUSE);
   return Array.from(set);
 }
+
 
 const Body = z.object({
   photo_id: z.string().uuid(),
