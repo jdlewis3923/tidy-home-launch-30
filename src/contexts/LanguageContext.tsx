@@ -1177,6 +1177,26 @@ const translations: Record<string, string> = {
   "Need us sooner? Call": "¿Nos necesitas antes? Llama al",
   "or email": "o escribe a",
 
+  // /rate rebuild — ungated Google prompt
+  "How was your visit?": "¿Cómo te fue la visita?",
+  "Anything you want us to know?": "¿Algo que quieras contarnos?",
+  "Anything you want us to know? (optional)": "¿Algo que quieras contarnos? (opcional)",
+  Send: "Enviar",
+  "Sending...": "Enviando...",
+  "Thanks — that helps.": "Gracias — eso ayuda.",
+  "Leave us a Google review": "Déjanos una reseña en Google",
+  "It takes 20 seconds and it's the single biggest thing that helps a small local company.":
+    "Toma 20 segundos y es lo que más ayuda a una empresa local pequeña.",
+  "Let us make it right.": "Déjanos resolverlo.",
+  "Tell us what happened and we'll re-clean the area free, or refund the visit.":
+    "Cuéntanos qué pasó y volvemos a limpiar el área gratis, o te devolvemos el pago de la visita.",
+  "Tell us what happened": "Cuéntanos qué pasó",
+  "Or email hello@jointidy.co": "O escribe a hello@jointidy.co",
+  "Couldn't save — try again in a moment.":
+    "No se pudo guardar — inténtalo de nuevo en un momento.",
+
+
+
 
 
   // Site fix pass — "From" pricing, size qualifiers, corrected claims.
