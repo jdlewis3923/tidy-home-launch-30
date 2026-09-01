@@ -94,3 +94,9 @@ verify_jwt = false
 # deleted immediately after the run.
 [functions.admin-addon-restructure]
 verify_jwt = false
+
+# Public post-visit rating intake for jointidy.co/rate. Customers arrive cold
+# from an SMS with no session, so no Authorization header is present. The
+# handler only accepts a 1-5 star rating plus an optional comment.
+[functions.submit-visit-rating]
+verify_jwt = false

@@ -87,6 +87,7 @@ const AdminTierProgression = lazy(() => import("./pages/AdminTierProgression.tsx
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
 const QrRedirect = lazy(() => import("./pages/QrRedirect.tsx"));
+const Rate = lazy(() => import("./pages/Rate.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -120,7 +121,7 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFoundingOfferShown, doorhangerGateAllows } from "@/lib/doorhanger";
 import { getLandingSource } from "@/lib/landing-source";
 
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/", "/neighbor"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/", "/neighbor", "/rate"];
 
 // The printed door hangers point at /dashboard/plan?src=doorhanger_en — a
 // neighbour with no account should see the founding offer first. Bounce them to
@@ -297,6 +298,10 @@ const App = () => (
                   {/* Printed door-hanger QR target. Never 404s — see src/lib/qr-codes.ts. */}
                   <Route path="/q/:code" element={<QrRedirect />} />
                   <Route path="/q" element={<QrRedirect />} />
+
+                  {/* Post-visit SMS rating link — no login, identifier optional. */}
+                  <Route path="/rate" element={<Rate />} />
+
 
                   <Route path="*" element={<NotFound />} />
                   </Routes>
