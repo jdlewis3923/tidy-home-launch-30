@@ -111,7 +111,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "Who does the detailing?",
-      a: "Vetted, background-checked detailers. Same detailer every visit so they learn your vehicle.",
+      a: "Background-checked detailers. Same detailer every visit so they learn your vehicle.",
     },
     {
       q: "What about oversized or commercial vehicles?",
@@ -130,9 +130,20 @@ const config: ServiceLandingConfig = {
   seo: {
     title: "Car Detailing in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Shine Complete mobile car care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.",
+      "Shine Complete mobile car care in Pinecrest and Kendall (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.",
     canonical: "https://jointidy.co/car-detailing",
     priceRange: "$149–$239",
+    service: {
+      name: "Mobile Car Detailing",
+      serviceType: "Car Detailing",
+      description:
+        "Shine Complete mobile car care in Pinecrest and Kendall. One flat monthly price set by vehicle size.",
+      offers: [
+        { name: "Size 1 vehicle (sedans, coupes)", price: 149, unit: "month" },
+        { name: "Size 2 vehicle (crossovers, 2-row SUVs)", price: 179, unit: "month" },
+        { name: "Size 3 vehicle (trucks, 3-row SUVs, vans)", price: 239, unit: "month" },
+      ],
+    },
   },
 };
 
