@@ -1247,6 +1247,21 @@ const translations: Record<string, string> = {
   "We may not be able to service this address. Send us the details and we'll tell you before you pay.":
     "Puede que no podamos dar servicio en esta dirección. Envíanos los detalles y te avisaremos antes de que pagues.",
   "Call us": "Llámanos",
+
+  // Preferred Pro — DashboardServices
+  "Preferred Pro": "Pro preferido",
+  "No preference (fastest scheduling)": "Sin preferencia (agenda más rápido)",
+  "Choose a Pro if you'd like the same person whenever possible.": "Elige un Pro si prefieres que sea la misma persona siempre que sea posible.",
+  "— high demand, limited times": "— alta demanda, horarios limitados",
+  "We'll send {name} whenever we can. Requesting a specific Pro can mean fewer available times, and if they're booked or out we'll send another Tidy Pro rather than push your visit.":
+    "Enviaremos a {name} siempre que podamos. Pedir un Pro específico puede significar menos horarios disponibles, y si está ocupado o no disponible enviaremos a otro Pro de Tidy en lugar de retrasar tu visita.",
+  "Save preference": "Guardar preferencia",
+  "Preference saved": "Preferencia guardada",
+  "Could not save your preference": "No se pudo guardar tu preferencia",
+  "Loading Pros…": "Cargando Pros…",
+
+  // Admin Applicants — preferred pro count
+  "Preferred by": "Preferido por",
 };
 
 
