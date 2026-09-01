@@ -401,6 +401,7 @@ const translations: Record<string, string> = {
   "Locked Monthly Price": "Precio Mensual Fijo",
   "Photo Verified Visits": "Fotos Tras Cada Visita",
   "Serving 33156 · 33183 · 33186": "Sirviendo 33156 · 33183 · 33186",
+  "Pinecrest & Kendall — Miami-Dade": "Pinecrest y Kendall — Miami-Dade",
 "Eco-Safe Products": "Productos Ecológicos",
 
   // Neighborhood trust
