@@ -1,5 +1,28 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { PHONE_TEL, SERVICE_ZIPS } from "@/lib/landing";
+
+export interface SeoFaq {
+  q: string;
+  a: string;
+}
+
+export interface SeoOffer {
+  /** e.g. "Size 1 home" */
+  name: string;
+  /** numeric price, no currency symbol */
+  price: number;
+  /** "per visit" services use UnitPriceSpecification referenceQuantity */
+  unit: "visit" | "month";
+}
+
+export interface SeoService {
+  /** e.g. "House Cleaning" */
+  name: string;
+  description: string;
+  /** schema.org serviceType */
+  serviceType: string;
+  offers: SeoOffer[];
+}
 
 interface SeoHeadProps {
   title: string;
@@ -9,35 +32,118 @@ interface SeoHeadProps {
   /** Service-specific JSON-LD price range, e.g. "$45–$279". */
   priceRange?: string;
   noindex?: boolean;
+  /**
+   * Built from the SAME array the FAQ section renders, so the rendered Q&A and
+   * the FAQPage markup can never drift apart.
+   */
+  faqs?: SeoFaq[];
+  service?: SeoService;
+  /** Breadcrumb trail, root first. */
+  breadcrumb?: { name: string; url: string }[];
 }
 
 /**
- * Per-LP SEO head: title, meta description, canonical, OG image, and
- * LocalBusiness JSON-LD scoped to the 3 ZIPs we actually serve.
+ * Per-LP SEO head: title, meta description, canonical, OG image, and a
+ * JSON-LD @graph containing LocalBusiness, Service + Offers, FAQPage and
+ * BreadcrumbList.
+ *
+ * NEVER add AggregateRating or Review here. We have zero customers; rating
+ * markup without real reviews is a manual-action risk.
  */
-const SeoHead = ({ title, description, canonical, ogImage, priceRange = "$$", noindex = false }: SeoHeadProps) => {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: "Tidy Home Concierge LLC",
-    description,
-    url: canonical,
-    telephone: PHONE_TEL,
-    email: "hello@jointidy.co",
-    priceRange,
-    areaServed: SERVICE_ZIPS.map((zip) => ({
-      "@type": "PostalCodeArea",
-      postalCode: zip,
-      addressCountry: "US",
-    })),
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Miami",
-      addressRegion: "FL",
-      addressCountry: "US",
-    },
-    sameAs: ["https://jointidy.co"],
-  };
+const SeoHead = ({
+  title,
+  description,
+  canonical,
+  ogImage,
+  priceRange = "$$",
+  noindex = false,
+  faqs,
+  service,
+  breadcrumb,
+}: SeoHeadProps) => {
+  const jsonLd = useMemo(() => {
+    const businessId = "https://jointidy.co/#business";
+    const graph: Record<string, unknown>[] = [
+      {
+        "@type": "LocalBusiness",
+        "@id": businessId,
+        name: "Tidy Home Concierge LLC",
+        description,
+        url: canonical,
+        telephone: PHONE_TEL,
+        email: "hello@jointidy.co",
+        priceRange,
+        areaServed: SERVICE_ZIPS.map((zip) => ({
+          "@type": "PostalCodeArea",
+          postalCode: zip,
+          addressCountry: "US",
+        })),
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Miami",
+          addressRegion: "FL",
+          addressCountry: "US",
+        },
+        sameAs: ["https://jointidy.co"],
+      },
+    ];
+
+    if (service) {
+      graph.push({
+        "@type": "Service",
+        "@id": `${canonical}#service`,
+        name: service.name,
+        serviceType: service.serviceType,
+        description: service.description,
+        provider: { "@id": businessId },
+        areaServed: SERVICE_ZIPS.map((zip) => ({
+          "@type": "PostalCodeArea",
+          postalCode: zip,
+          addressCountry: "US",
+        })),
+        offers: service.offers.map((offer) => ({
+          "@type": "Offer",
+          name: offer.name,
+          priceCurrency: "USD",
+          price: offer.price,
+          availability: "https://schema.org/InStock",
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            price: offer.price,
+            priceCurrency: "USD",
+            unitText: offer.unit === "visit" ? "per visit" : "per month",
+          },
+        })),
+      });
+    }
+
+    if (faqs?.length) {
+      graph.push({
+        "@type": "FAQPage",
+        "@id": `${canonical}#faq`,
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      });
+    }
+
+    if (breadcrumb?.length) {
+      graph.push({
+        "@type": "BreadcrumbList",
+        "@id": `${canonical}#breadcrumb`,
+        itemListElement: breadcrumb.map((item, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: item.name,
+          item: item.url,
+        })),
+      });
+    }
+
+    return { "@context": "https://schema.org", "@graph": graph };
+  }, [breadcrumb, canonical, description, faqs, priceRange, service]);
 
   useEffect(() => {
     document.title = title;
