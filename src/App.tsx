@@ -115,7 +115,8 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 
 // Routes that remain accessible when an admin has toggled the site OFF.
 // Admin can still log in and flip it back on; everything else shows ComingSoon.
-import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFoundingOfferShown } from "@/lib/doorhanger";
+import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFoundingOfferShown, doorhangerGateAllows } from "@/lib/doorhanger";
+import { getLandingSource } from "@/lib/landing-source";
 
 const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/", "/neighbor"];
 
@@ -151,7 +152,10 @@ const SiteGate = ({ children }: { children: React.ReactNode }) => {
     });
     return () => { cancelled = true; };
   }, [previewChecked]);
-  const isWhitelisted = ALWAYS_OPEN_PREFIXES.some((p) => location.pathname.startsWith(p));
+  const isWhitelisted =
+    ALWAYS_OPEN_PREFIXES.some((p) => location.pathname.startsWith(p)) ||
+    // Narrow carve-out: the conversion hops open for door-hanger arrivals only.
+    doorhangerGateAllows(location.pathname, location.search, getLandingSource());
   if (isLoading || roleLoading || !previewChecked) return <RouteFallback />;
   // Admins and staging previewers always see the full site — the toggle only
   // affects everyone else.
