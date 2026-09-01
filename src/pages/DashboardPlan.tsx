@@ -36,6 +36,14 @@ const STEPS = [
   { heading: "you're all set.",                 sub: 'secure checkout · cancel anytime.',                cta: 'confirm subscription', micro: 'final step.' },
 ];
 
+// Analytics-only step names — kept separate from the display copy so a wording
+// tweak never breaks the funnel report.
+const STEP_NAMES = [
+  'zip_gate', 'services', 'frequency', 'property', 'details', 'add_ons', 'review', 'payment',
+];
+
+
+
 const SERVICE_PARAM_MAP: Record<string, ServiceType> = {
   cleaning: 'cleaning', lawn: 'lawn', detailing: 'detailing',
 };
