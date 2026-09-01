@@ -1,16 +1,18 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { VETTED_CLAIM } from "@/lib/pricing-canon";
 
+// One claim per slot. "Background-Checked" and "Background-Checked Pros" used
+// to sit next to each other making the same claim — the shorter one is gone.
+// The ZIP list is deliberately NOT here: it already appears in the hero, the
+// service-area section and the footer, and a 4th pass reads as keyword stuffing.
 const ITEMS = [
-  VETTED_CLAIM,
   "Background-Checked Pros",
   "Same Crew Every Visit",
   "Locked Monthly Price",
   "Cancel Anytime",
   "Photo Verified Visits",
-  "Serving 33156 · 33183 · 33186",
-"Eco-Safe Products",
+  "Eco-Safe Products",
 ];
+
 
 const LandingTicker = () => {
   const { t } = useLanguage();
