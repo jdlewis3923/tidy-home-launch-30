@@ -8,7 +8,10 @@
 // quantity (monthly 1, biweekly 2, weekly 4). Shine Complete and the Car Wash
 // Add-On are per month, always quantity 1. No percentage discounts, no promo
 // codes — bundling earns free car washes and the founding offer is a set of
-// fulfilment promises recorded in metadata.
+// fulfilment promises recorded in metadata. The single exception is the referred
+// friend's $50-off-first-month coupon (uncapped, duration "once"), validated
+// server-side in _shared/referral-discount.ts. This path can be the first paid
+// transaction, so it applies the coupon too.
 
 import Stripe from "https://esm.sh/stripe@17.5.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
@@ -16,6 +19,10 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
+import {
+  logReferralDiscountDecision,
+  resolveReferralDiscount,
+} from "../_shared/referral-discount.ts";
 import {
   CAR_WASH_LOOKUP_KEYS,
   SERVICE_LOOKUP_KEYS,
@@ -229,6 +236,7 @@ Deno.serve(async (req) => {
           qr_placement: input.qr_placement ?? "",
           qr_zip: input.qr_zip ?? "",
           qr_route: input.qr_route ?? "",
+          referral_code: (input.referral_code ?? "").trim().toUpperCase(),
         };
 
         const idempotencyKey =
@@ -246,6 +254,22 @@ Deno.serve(async (req) => {
           expand: ["latest_invoice.payment_intent", "pending_setup_intent"],
           metadata: subscriptionMetadata,
         };
+
+        // ---------- Referred friend's own $50 off first month ----------
+        const referralDiscount = await resolveReferralDiscount({
+          supabase,
+          code: input.referral_code,
+          userId: user.id,
+        });
+        if (referralDiscount.apply && referralDiscount.coupon) {
+          subParams.discounts = [{ coupon: referralDiscount.coupon }];
+        }
+        await logReferralDiscountDecision({
+          supabase,
+          decision: referralDiscount,
+          userId: user.id,
+          where: "subscription.embedded",
+        });
 
         const subscription = await stripe.subscriptions.create(subParams, {
           idempotencyKey: `sub:${idempotencyKey}`,
