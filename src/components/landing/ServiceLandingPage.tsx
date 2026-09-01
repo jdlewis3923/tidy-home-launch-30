@@ -469,8 +469,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               </Reveal>
             ))}
           </div>
+          {/* The ZIP list intentionally stops here: hero chip, the
+              service-area section above, and the footer are the only 3 places. */}
 
-          <p className="text-center text-xs text-text-light mt-6">{t(SERVICE_AREA_TRUST)}.</p>
         </div>
       </section>
 
