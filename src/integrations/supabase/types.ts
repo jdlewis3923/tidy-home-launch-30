@@ -48,7 +48,9 @@ export type Database = {
           addon_price_cents: number
           attached_at: string
           completed_at: string | null
+          free_period: string | null
           id: string
+          is_free: boolean
           jobber_job_id: string | null
           jobber_line_item_id: string | null
           jobber_visit_id: string | null
@@ -65,7 +67,9 @@ export type Database = {
           addon_price_cents: number
           attached_at?: string
           completed_at?: string | null
+          free_period?: string | null
           id?: string
+          is_free?: boolean
           jobber_job_id?: string | null
           jobber_line_item_id?: string | null
           jobber_visit_id?: string | null
@@ -82,7 +86,9 @@ export type Database = {
           addon_price_cents?: number
           attached_at?: string
           completed_at?: string | null
+          free_period?: string | null
           id?: string
+          is_free?: boolean
           jobber_job_id?: string | null
           jobber_line_item_id?: string | null
           jobber_visit_id?: string | null

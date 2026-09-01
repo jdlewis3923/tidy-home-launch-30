@@ -502,7 +502,7 @@ export default function DashboardIndex() {
                     )}
                   </ul>
                   <Link
-                    to="/dashboard/plan"
+                    to="/dashboard/schedule"
                     className="mt-3 block text-center text-sm font-semibold text-[hsl(var(--primary))] hover:underline"
                   >
                     {t('View full schedule')}

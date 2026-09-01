@@ -110,3 +110,50 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
 
   window.location.href = data.checkout_url as string;
 }
+
+/**
+ * Add a service to an existing plan.
+ *
+ * Goes through the same `stripe-create-checkout` function the initial plan
+ * uses — same lookup keys, same cadence-as-quantity rule, same referral and
+ * attribution handling. No percentage discounts: bundling stays the free
+ * premium add-on, which the webhook records on the subscription row.
+ */
+export async function startAddServiceCheckout(args: {
+  lines: CheckoutServiceLine[];
+  zip: string;
+  lang?: 'en' | 'es';
+}): Promise<void> {
+  const attribution = getUtmAttribution();
+  const body = {
+    services: args.lines,
+    addons: [],
+    zip: args.zip,
+    lang: args.lang ?? ('en' as const),
+    gclid: attribution.gclid,
+    utm_source: attribution.utm_source,
+    utm_medium: attribution.utm_medium,
+    utm_campaign: attribution.utm_campaign,
+    utm_content: attribution.utm_content,
+    utm_term: attribution.utm_term,
+    landing_source: getLandingSource() ?? undefined,
+    qr_placement: getQrPlacement() ?? undefined,
+    qr_zip: getQrZip() ?? undefined,
+    qr_route: getQrRoute() ?? undefined,
+  };
+
+  const { data, error } = await supabase.functions.invoke(
+    STRIPE_FUNCTIONS.CREATE_CHECKOUT,
+    { body },
+  );
+
+  if (error) {
+    console.error('[add-service checkout] failed', error);
+    throw error;
+  }
+  if (!data?.ok || !data?.checkout_url) {
+    throw new Error(data?.error ?? 'Checkout session did not return a redirect URL');
+  }
+
+  window.location.href = data.checkout_url as string;
+}

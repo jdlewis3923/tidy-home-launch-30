@@ -26,7 +26,14 @@ const BodySchema = z.object({
   addon_key: z.string().min(1),
   jobber_visit_id: z.string().optional(),
   visit_date: z.string().optional(),
+  /** Redeem the bundle gift: one free premium add-on per month. Never a discount. */
+  redeem_free: z.boolean().optional(),
 });
+
+/** Calendar month key used to cap free redemptions, e.g. "2026-09". */
+function currentPeriod(): string {
+  return new Date().toISOString().slice(0, 7);
+}
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
@@ -50,7 +57,7 @@ Deno.serve(async (req) => {
   if (!parsed.success) {
     return jsonResponse({ ok: false, error: 'validation_failed', details: parsed.error.flatten().fieldErrors }, 400);
   }
-  const { addon_key, jobber_visit_id, visit_date } = parsed.data;
+  const { addon_key, jobber_visit_id, visit_date, redeem_free } = parsed.data;
 
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -59,7 +66,7 @@ Deno.serve(async (req) => {
   // Look up addon from catalog (single source of truth)
   const { data: addon, error: addonErr } = await admin
     .from('addon_catalog')
-    .select('addon_key, display_name, price_cents, services, stripe_price_id, is_active')
+    .select('addon_key, display_name, price_cents, services, stripe_price_id, is_active, is_specialist')
     .eq('addon_key', addon_key)
     .maybeSingle();
   if (addonErr) return jsonResponse({ ok: false, error: 'catalog_fetch_failed', detail: addonErr.message }, 500);
@@ -71,17 +78,44 @@ Deno.serve(async (req) => {
   const addonPriceDollars = (addon.price_cents as number) / 100;
   const addonService = (addon.services?.[0] as string | undefined) ?? null;
 
-  // Look up subscription for stripe_customer_id
+  // Look up subscription for stripe_customer_id + the monthly gift allowance.
   const { data: sub } = await admin
     .from('subscriptions')
-    .select('stripe_customer_id')
+    .select('stripe_customer_id, free_addons_per_month')
     .eq('user_id', userId)
     .maybeSingle();
+
+  // --- Gift path: one free premium add-on per month for bundled plans. -------
+  const period = currentPeriod();
+  let isFree = false;
+  if (redeem_free) {
+    const allowance = Number(sub?.free_addons_per_month ?? 0);
+    if (allowance < 1) {
+      return jsonResponse({ ok: false, error: 'no_free_addon_allowance' }, 409);
+    }
+    if (addon.is_specialist) {
+      // Specialist work is quoted and scheduled separately — never the gift.
+      return jsonResponse({ ok: false, error: 'addon_not_gift_eligible' }, 409);
+    }
+    const { count: usedThisMonth } = await admin
+      .from('addon_attaches')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_free', true)
+      .eq('free_period', period)
+      .is('removed_at', null);
+    if ((usedThisMonth ?? 0) >= allowance) {
+      return jsonResponse({ ok: false, error: 'free_addon_already_used', period }, 409);
+    }
+    isFree = true;
+  }
 
   let stripeInvoiceItemId: string | null = null;
   let stripeError: string | null = null;
 
-  if (STRIPE_SECRET_KEY && sub?.stripe_customer_id) {
+  if (isFree) {
+    // Nothing is charged — no Stripe invoice item at all.
+  } else if (STRIPE_SECRET_KEY && sub?.stripe_customer_id) {
     try {
       const form = new URLSearchParams({
         customer: sub.stripe_customer_id,
@@ -110,7 +144,7 @@ Deno.serve(async (req) => {
   }
 
   // Insert addon_attaches row regardless of Stripe (so admin can see failures)
-  const status = stripeInvoiceItemId ? 'pending_visit' : 'failed';
+  const status = isFree || stripeInvoiceItemId ? 'pending_visit' : 'failed';
   const { data: attachRow, error: insErr } = await admin.from('addon_attaches').insert({
     user_id: userId,
     jobber_visit_id: jobber_visit_id ?? null,
@@ -121,6 +155,8 @@ Deno.serve(async (req) => {
     addon_price_cents: addon.price_cents,
     service_type: addonService,
     status,
+    is_free: isFree,
+    free_period: isFree ? period : null,
   }).select('id').single();
 
   if (insErr) {
@@ -161,7 +197,7 @@ Deno.serve(async (req) => {
           templateId: ADDON_CONFIRMED_TEMPLATE_ID,
           params: {
             addon_name: addonName,
-            addon_price: addonPriceDollars,
+            addon_price: isFree ? 0 : addonPriceDollars,
             visit_date: visit_date ?? '',
           },
           marketing: false,
@@ -175,9 +211,11 @@ Deno.serve(async (req) => {
     ok: status === 'pending_visit',
     attach_id: attachRow.id,
     stripe_invoice_item_id: stripeInvoiceItemId,
-    stripe_error: stripeError,
+    stripe_error: isFree ? null : stripeError,
     addon_name: addonName,
-    addon_price: addonPriceDollars,
+    addon_price: isFree ? 0 : addonPriceDollars,
+    is_free: isFree,
+    free_period: isFree ? period : null,
     status,
   });
 });
