@@ -288,6 +288,9 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       founding_rate_locked: meta.founding_rate_locked === 'yes',
       founding_free_addon_first_visit: meta.founding_free_addon_first_visit === 'yes',
       founding_review_promised: meta.founding_review_promised === 'yes',
+      has_water_spigot: meta.access_water_spigot === 'yes' ? true : meta.access_water_spigot === 'no' ? false : null,
+      has_electrical_outlet: meta.access_electrical_outlet === 'yes' ? true : meta.access_electrical_outlet === 'no' ? false : null,
+      washing_allowed: meta.access_washing_allowed === 'yes' ? true : meta.access_washing_allowed === 'no' ? false : null,
     })
     .select('id')
     .single();
