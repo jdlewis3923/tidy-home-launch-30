@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { Check, Phone, MapPin, Sparkles, ShieldCheck, BadgeCheck, Star } from "lucide-react";
+import { Check, Phone, MapPin, Sparkles, ShieldCheck, BadgeCheck, Camera } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import SeoHead from "@/components/landing/SeoHead";
+import SeoHead, { SeoService } from "@/components/landing/SeoHead";
 import LandingFaq, { FaqItem } from "@/components/landing/LandingFaq";
 import Reveal from "@/components/landing/Reveal";
 import StickyBookBar from "@/components/landing/StickyBookBar";
@@ -15,7 +15,7 @@ import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import { PHONE_DISPLAY, PHONE_TEL, SERVICE_AREA_TRUST } from "@/lib/landing";
-import { pushEvent } from "@/lib/tracking";
+import { pushEvent, trackSelectPlan, useViewPricingObserver } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -27,7 +27,22 @@ export interface PlanTier {
   description: string;
   planSlug: string;
   highlighted?: boolean;
+  /**
+   * When true the price is the entry (size-1) price and the card renders
+   * "From $X" — required on every cadence-priced card so a size-2 homeowner is
+   * never shown a number they don't actually owe.
+   */
+  isFromPrice?: boolean;
+  /** Size qualifier shown under the price, e.g. "size 1 home — see sizes below". */
+  sizeNote?: string;
+  /** Numeric monthly price, used for select_plan / begin_checkout analytics. */
+  priceValue?: number;
+  /** Size this card is priced at, used for analytics. */
+  size?: 1 | 2 | 3;
+  /** Cadence for analytics; falls back to planSlug. */
+  cadenceKey?: "monthly" | "biweekly" | "weekly";
 }
+
 
 export interface TrustCard {
   title: string;
@@ -55,13 +70,25 @@ export interface ServiceLandingConfig {
   /** Single line above the plans grid; wrap the price segment in **double asterisks**. */
   savingsCallout: string;
   heroImage: string;
-  /** Optional mobile-only hero image. Falls back to heroImage on desktop. */
+  /** WebP variant of heroImage, emitted as the preferred <source>. */
+  heroImageWebp?: string;
+  /** Optional mobile-only hero image (used under 640px only). */
   heroImageMobile?: string;
+  heroImageMobileWebp?: string;
+  /** Intrinsic pixel size of heroImage — prevents layout shift. */
+  heroDimensions?: [number, number];
+  /** Intrinsic pixel size of heroImageMobile. */
+  heroMobileDimensions?: [number, number];
   heroAlt: string;
   plans: PlanTier[];
   included: string[];
   /** Optional line listing paid add-ons, shown under the included list. */
   addOnsNote?: string;
+  /**
+   * Size-surcharge line. Per service — a cleaning page must never mention lawn
+   * or vehicle surcharges.
+   */
+  surchargeNote?: string;
   trustCards: TrustCard[];
   faqs: FaqItem[];
   bundleCta: {
@@ -75,7 +102,10 @@ export interface ServiceLandingConfig {
     description: string;
     canonical: string;
     priceRange: string;
+    /** Service + Offer JSON-LD carrying the three real size prices. */
+    service?: SeoService;
   };
+
 }
 
 interface Props {
@@ -96,6 +126,10 @@ const ServiceLandingPage = ({ config }: Props) => (
 const ServiceLandingPageInner = ({ config }: Props) => {
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
   const { t } = useLanguage();
+  // Fires view_pricing once per pageview when the plan cards scroll into view.
+  const pricingRef = useViewPricingObserver({ service: config.signupServiceParam });
+
+
 
   const ctaForPlan = (planSlug: string | undefined, where: string) => {
     const base = getCtaProps({
@@ -157,6 +191,12 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         title={t(config.seo.title)}
         description={t(config.seo.description)}
         ogImage={config.heroImage}
+        /* Built from the same array the FAQ section renders — cannot drift. */
+        faqs={config.faqs.map((f) => ({ q: t(f.q), a: t(f.a) }))}
+        breadcrumb={[
+          { name: "Home", url: "https://jointidy.co/" },
+          { name: t(config.eyebrow), url: config.seo.canonical },
+        ]}
       />
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar
@@ -167,32 +207,34 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
       {/* HERO */}
       <section className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden">
-        {config.heroImageMobile ? (
-          <>
-            <img
-              src={config.heroImageMobile}
-              alt={config.heroAlt}
-              className="md:hidden absolute inset-0 w-full h-full object-cover"
-              width={1080}
-              height={1080}
-            />
-            <img
-              src={config.heroImage}
-              alt={config.heroAlt}
-              className="hidden md:block absolute inset-0 w-full h-full object-cover"
-              width={1600}
-              height={896}
-            />
-          </>
-        ) : (
+        {/*
+          One <picture>: WebP first with a jpg fallback, the portrait mobile crop
+          only under 640px (above that the 1600px landscape asset is sharper than
+          upscaling a 900px portrait), intrinsic width/height to stop layout
+          shift, and fetchpriority=high because this is the LCP element.
+        */}
+        <picture>
+          {config.heroImageMobile && (
+            <>
+              {config.heroImageMobileWebp && (
+                <source media="(max-width: 639px)" srcSet={config.heroImageMobileWebp} type="image/webp" />
+              )}
+              <source media="(max-width: 639px)" srcSet={config.heroImageMobile} type="image/jpeg" />
+            </>
+          )}
+          {config.heroImageWebp && <source srcSet={config.heroImageWebp} type="image/webp" />}
           <img
             src={config.heroImage}
             alt={config.heroAlt}
             className="absolute inset-0 w-full h-full object-cover"
-            width={1600}
-            height={896}
+            width={config.heroDimensions?.[0] ?? 1600}
+            height={config.heroDimensions?.[1] ?? 900}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
-        )}
+        </picture>
+
         <div className="absolute inset-0 bg-navy/65" />
         <SparkleField />
 
@@ -220,8 +262,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             </span>
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5" />
-              {t("Vetted & background-checked pros")}
+              {t("Background-Checked Pros")}
             </span>
+
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -286,12 +329,13 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           <SavingsCallout text={t(config.savingsCallout)} />
 
           <div
+            ref={pricingRef}
             className={`grid gap-6 md:gap-5 items-stretch ${config.plans.length === 2 ? "md:grid-cols-2 md:max-w-3xl md:mx-auto" : "md:grid-cols-3"}`}
           >
             {config.plans.map((p, i) => {
               const planCta = ctaForPlan(p.planSlug, `plan_${p.planSlug}`);
               return (
-                <Reveal key={p.planSlug} delay={i * 80}>
+                <Reveal key={`${p.planSlug}-${p.name}`} delay={i * 80}>
                   <div
                     className={`relative overflow-hidden bg-card border rounded-xl p-6 h-full flex flex-col hover-lift transition-transform ${
                       p.highlighted
@@ -302,13 +346,27 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                     {p.highlighted && <span className="most-popular-ribbon">{t("Most Popular")}</span>}
                     <h3 className="text-lg font-bold text-foreground">{t(p.name)}</h3>
                     <div className="mt-2 flex items-baseline gap-1">
+                      {/* Cadence-priced cards must say "From" — the number is the
+                          size-1 price, not what every home pays. */}
+                      {p.isFromPrice && <span className="text-sm font-semibold text-text-mid">{t("From")}</span>}
                       <span className="text-3xl font-extrabold text-foreground">{p.price}</span>
                       <span className="text-sm text-text-mid">{t(p.cadence)}</span>
                     </div>
+                    {p.sizeNote && (
+                      <p className="mt-1 text-[11px] leading-snug text-text-light">{t(p.sizeNote)}</p>
+                    )}
                     <p className="text-sm text-text-mid mt-3 flex-1">{t(p.description)}</p>
                     <Link
                       to={planCta.to}
-                      onClick={planCta.onClick}
+                      onClick={(e) => {
+                        trackSelectPlan({
+                          service: config.signupServiceParam,
+                          cadence: p.cadenceKey ?? p.planSlug,
+                          size: p.size,
+                          price: p.priceValue,
+                        });
+                        planCta.onClick(e);
+                      }}
                       className="cta-arrow cta-press mt-5 block text-center bg-primary hover:bg-primary-deep text-primary-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
                       {t(config.ctaPlanLabel ?? "Choose")} {!config.ctaPlanLabel && t(p.name)}{" "}
@@ -320,21 +378,22 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             })}
           </div>
 
-          {/* Trust signal row directly under pricing */}
+          {/* Trust signal row directly under pricing — one claim per slot. */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-text-mid">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-primary" />
-              {t("Background-checked pros")}
+              {t("Background-Checked Pros")}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <BadgeCheck className="w-4 h-4 text-primary" />
-              {t("Vetted & background-checked")}
+              <Camera className="w-4 h-4 text-primary" />
+              {t("Photo-Verified Every Visit")}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Star className="w-4 h-4 text-gold" />
-              {t("Satisfaction guaranteed")}
+              <BadgeCheck className="w-4 h-4 text-gold" />
+              {t("First visit perfect or it's free")}
             </span>
           </div>
+
         </div>
       </section>
 
@@ -361,11 +420,12 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             <p className="mt-4 text-xs text-text-light/90">{t(config.addOnsNote)}</p>
           )}
 
-          <p className="mt-3 text-xs text-text-light/80">
-            {t(
-              "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Extra-large lot (4,001–7,500 sq ft mowable turf): +$30 per visit. Extra-large vehicle: +$30 per visit. Above those sizes we quote individually.",
-            )}
-          </p>
+          {/* Per-service surcharge only — a cleaning page never mentions lawn
+              or vehicle sizes. */}
+          {config.surchargeNote && (
+            <p className="mt-3 text-xs text-text-light/80">{t(config.surchargeNote)}</p>
+          )}
+
         </div>
       </section>
 
@@ -382,8 +442,10 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Why Tidy")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              {t(`Trusted across ${SERVICE_AREA_TRUST.replace("Serving ", "")}`)}
+              {/* "Trusted" is unsupportable — we have zero customers. */}
+              {t(`Built for ${SERVICE_AREA_TRUST.replace("Serving ", "")}`)}
             </h2>
+
           </Reveal>
 
           {/* Mobile: snap-scroll carousel */}
@@ -407,8 +469,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               </Reveal>
             ))}
           </div>
+          {/* The ZIP list intentionally stops here: hero chip, the
+              service-area section above, and the footer are the only 3 places. */}
 
-          <p className="text-center text-xs text-text-light mt-6">{t(SERVICE_AREA_TRUST)}.</p>
         </div>
       </section>
 

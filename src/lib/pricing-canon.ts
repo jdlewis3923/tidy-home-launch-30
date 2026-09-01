@@ -201,15 +201,19 @@ export const FOUNDING_OFFER = {
 export const INSURANCE_VERIFIED = false;
 export const INSURED_CLAIM = 'Insured';
 
-/** Badge/chip claim. Reads "Vetted & Insured" only once insurance is verified. */
+/**
+ * Badge/chip claim. "Vetted" is a RETIRED string — it is vague and
+ * unsupportable. The only approved claim is "Background-Checked Pros".
+ */
 export const VETTED_CLAIM = INSURANCE_VERIFIED
-  ? 'Vetted & Insured'
-  : 'Background-Checked';
+  ? 'Background-Checked & Insured'
+  : 'Background-Checked Pros';
 
 /** Prose form used in sentences about who shows up. */
 export const VETTED_PROS_SENTENCE = INSURANCE_VERIFIED
-  ? 'vetted, insured, background-checked'
-  : 'vetted, background-checked';
+  ? 'insured, background-checked'
+  : 'background-checked';
+
 
 export const TRUST_CLAIMS = [
   'Background-Checked Pros',

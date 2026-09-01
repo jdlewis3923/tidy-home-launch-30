@@ -2,14 +2,17 @@ import { ShieldCheck, BadgeCheck, UserCheck, Lock, Ban, MapPin } from "lucide-re
 import Reveal from "./Reveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+// "Vetted" was retired — the approved claim is "Background-Checked Pros", and
+// it appears exactly once in this row (no adjacent duplicate slot).
 const SIGNALS = [
-  { Icon: ShieldCheck, label: "Vetted" },
+  { Icon: UserCheck, label: "Background-Checked Pros" },
   { Icon: BadgeCheck, label: "Insured" },
-  { Icon: UserCheck, label: "Background-Checked" },
+  { Icon: ShieldCheck, label: "Photo-Verified Every Visit" },
   { Icon: Lock, label: "Locked Price" },
   { Icon: Ban, label: "Cancel Anytime" },
   { Icon: MapPin, label: "Serving 3 ZIPs" },
 ];
+
 
 const TrustSignalRow = () => {
   const { t } = useLanguage();

@@ -1,6 +1,9 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
 import heroImg from "@/assets/lp-car-detailing.jpg";
+import heroImgWebp from "@/assets/lp-car-detailing.webp";
 import heroImgMobile from "@/assets/lp-car-detailing-mobile.jpg";
+import heroImgMobileWebp from "@/assets/lp-car-detailing-mobile.webp";
+
 
 const config: ServiceLandingConfig = {
   serviceSlug: "car-detailing",
@@ -17,15 +20,23 @@ const config: ServiceLandingConfig = {
   savingsCallout:
     "A good mobile detail runs **$120–$180 per appointment**. Shine Complete is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.",
   heroImage: heroImg,
+  heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
+  heroImageMobileWebp: heroImgMobileWebp,
+  heroDimensions: [1400, 933],
   heroAlt: "Pristine freshly detailed black SUV in a Miami driveway",
   plans: [
+    // Each card is one vehicle size, so the price is exact — no "From" here.
     {
       name: "Shine Complete · Size 1",
       price: "$149",
       cadence: "/mo",
       planSlug: "monthly",
       description: "Sedans and coupes. 3 washes a month plus 2 full details a year.",
+      sizeNote: "sedans and coupes",
+      priceValue: 149,
+      size: 1,
+      cadenceKey: "monthly",
     },
     {
       name: "Shine Complete · Size 2",
@@ -34,6 +45,10 @@ const config: ServiceLandingConfig = {
       planSlug: "monthly",
       description: "Crossovers and 2-row SUVs. Same flat monthly price.",
       highlighted: true,
+      sizeNote: "crossovers and 2-row SUVs",
+      priceValue: 179,
+      size: 2,
+      cadenceKey: "monthly",
     },
     {
       name: "Shine Complete · Size 3",
@@ -41,7 +56,12 @@ const config: ServiceLandingConfig = {
       cadence: "/mo",
       planSlug: "monthly",
       description: "Trucks, 3-row SUVs and vans.",
+      sizeNote: "trucks, 3-row SUVs and vans",
+      priceValue: 239,
+      size: 3,
+      cadenceKey: "monthly",
     },
+
   ],
   included: [
     "Exterior hand wash",
@@ -54,6 +74,9 @@ const config: ServiceLandingConfig = {
     "Background-checked pros",
   ],
   addOnsNote: "Available as add-ons: pet hair removal, clay bar & ceramic coat, headlight restoration, interior protect & condition.",
+  surchargeNote:
+    "Lifted trucks, commercial vans and oversized vehicles are quoted individually.",
+
   trustCards: [
     {
       title: "Same Crew",
@@ -88,7 +111,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "Who does the detailing?",
-      a: "Vetted, background-checked detailers. Same detailer every visit so they learn your vehicle.",
+      a: "Background-checked detailers. Same detailer every visit so they learn your vehicle.",
     },
     {
       q: "What about oversized or commercial vehicles?",
@@ -107,9 +130,20 @@ const config: ServiceLandingConfig = {
   seo: {
     title: "Car Detailing in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Shine Complete mobile car care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.",
+      "Shine Complete mobile car care in Pinecrest and Kendall (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.",
     canonical: "https://jointidy.co/car-detailing",
     priceRange: "$149–$239",
+    service: {
+      name: "Mobile Car Detailing",
+      serviceType: "Car Detailing",
+      description:
+        "Shine Complete mobile car care in Pinecrest and Kendall. One flat monthly price set by vehicle size.",
+      offers: [
+        { name: "Size 1 vehicle (sedans, coupes)", price: 149, unit: "month" },
+        { name: "Size 2 vehicle (crossovers, 2-row SUVs)", price: 179, unit: "month" },
+        { name: "Size 3 vehicle (trucks, 3-row SUVs, vans)", price: 239, unit: "month" },
+      ],
+    },
   },
 };
 

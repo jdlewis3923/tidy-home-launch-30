@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
-import { pushEvent } from "@/lib/tracking";
+import { useEffect, useRef } from "react";
+import { pushEvent, trackPurchase } from "@/lib/tracking";
 import { clearPromo } from "@/lib/promo";
 import {
   CUSTOMER_ACCOUNT_ENABLED,
@@ -19,17 +19,41 @@ import {
 export default function CheckoutSuccess() {
   const [params] = useSearchParams();
   const sessionId = params.get("session_id");
+  const firedRef = useRef(false);
 
   useEffect(() => {
     pushEvent("checkout_success", {
       session_id: sessionId ?? null,
       page: "/checkout/success",
     });
+
+    // purchase — fires once per Stripe session. Value comes from the amount the
+    // wizard displayed (stashed at begin_checkout), never from a URL param, so
+    // it cannot be inflated by a crafted link. A refresh never re-fires.
+    if (sessionId && !firedRef.current) {
+      const key = `tidy_purchase_${sessionId}`;
+      let alreadySent = false;
+      let value = 0;
+      try {
+        alreadySent = sessionStorage.getItem(key) === "1";
+        value = Number(sessionStorage.getItem("tidy_checkout_value") ?? 0) || 0;
+        if (!alreadySent) sessionStorage.setItem(key, "1");
+      } catch {
+        /* storage unavailable — the ref guard still blocks the double fire */
+      }
+      if (!alreadySent) {
+        firedRef.current = true;
+        trackPurchase(value, sessionId);
+        window.fbq?.("track", "Purchase", { value, currency: "USD" });
+      }
+    }
+
     // Defense-in-depth: also clear any lingering promo state on the
     // success landing (the redirect helper already clears, but if the
     // user lands here directly we want a clean slate).
     clearPromo();
   }, [sessionId]);
+
 
   const ctaTo = CUSTOMER_ACCOUNT_ENABLED ? "/account" : "/";
   const ctaLabel = CUSTOMER_ACCOUNT_ENABLED

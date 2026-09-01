@@ -2,9 +2,11 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote, sizeFor, VALID_ZIPS } from '@/lib/dashboard-pricing';
+import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote, sizeFor, VALID_ZIPS, calculatePricing } from '@/lib/dashboard-pricing';
 import { supabase } from '@/integrations/supabase/client';
+import { trackBeginCheckout, trackCheckoutStep } from '@/lib/tracking';
 import { useLanguage } from '@/contexts/LanguageContext';
+
 import CalmShell from '@/components/dashboard/CalmShell';
 import ProgressBar from '@/components/dashboard/ProgressBar';
 import StickyPriceBar from '@/components/dashboard/StickyPriceBar';
@@ -33,6 +35,14 @@ const STEPS = [
   { heading: 'your home, handled.',             sub: 'review your plan before we begin.',                cta: 'looks right',  micro: 'almost done.' },
   { heading: "you're all set.",                 sub: 'secure checkout · cancel anytime.',                cta: 'confirm subscription', micro: 'final step.' },
 ];
+
+// Analytics-only step names — kept separate from the display copy so a wording
+// tweak never breaks the funnel report.
+const STEP_NAMES = [
+  'zip_gate', 'services', 'frequency', 'property', 'details', 'add_ons', 'review', 'payment',
+];
+
+
 
 const SERVICE_PARAM_MAP: Record<string, ServiceType> = {
   cleaning: 'cleaning', lawn: 'lawn', detailing: 'detailing',
@@ -134,6 +144,33 @@ export default function DashboardPlan() {
     setState(next);
     saveState(next);
   }, []);
+
+  // Funnel instrumentation. checkout_step on every step, begin_checkout once
+  // the payment step is reached. No name, email, phone or address is ever
+  // pushed — only service/cadence/size/price.
+  useEffect(() => {
+    trackCheckoutStep(step, STEP_NAMES[step] ?? String(step));
+    if (step !== 7) return;
+    const pricing = calculatePricing(state);
+    state.services.forEach((svc) => {
+      const size = sizeFor(state, svc);
+      trackBeginCheckout({
+        service: svc,
+        cadence: state.frequencies[svc] ?? undefined,
+        size: size === 'quote' || size === null ? 'quote' : size,
+        price: pricing.ongoing,
+      });
+    });
+    // Stashed so /checkout/success can report a purchase value without ever
+    // trusting a URL parameter.
+    try {
+      sessionStorage.setItem('tidy_checkout_value', String(pricing.ongoing));
+    } catch {
+      /* private mode — purchase still fires, just without a value */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
 
   const canAdvance = () => {
     if (step === 0) return false; // gate has its own submit

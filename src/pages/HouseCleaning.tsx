@@ -1,6 +1,13 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
 import heroImg from "@/assets/lp-house-cleaning.jpg";
+import heroImgWebp from "@/assets/lp-house-cleaning.webp";
 import heroImgMobile from "@/assets/lp-house-cleaning-mobile.jpg";
+import heroImgMobileWebp from "@/assets/lp-house-cleaning-mobile.webp";
+
+// Every card price below is the SIZE-1 price, which is why each card says
+// "From" and carries the size qualifier. Size 2 is $189 and size 3 is $279 a
+// visit — see the FAQ and the pricing table.
+const SIZE_NOTE = "size 1 home — sizes 2 and 3 cost more, see sizes below";
 
 const config: ServiceLandingConfig = {
   serviceSlug: "house-cleaning",
@@ -20,7 +27,11 @@ const config: ServiceLandingConfig = {
   savingsCallout:
     "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a visit** — with the same crew every time.",
   heroImage: heroImg,
+  heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
+  heroImageMobileWebp: heroImgMobileWebp,
+  heroDimensions: [1600, 900],
+  heroMobileDimensions: [900, 1599],
   heroAlt: "Bright, freshly cleaned modern Miami living room",
   plans: [
     {
@@ -29,6 +40,11 @@ const config: ServiceLandingConfig = {
       cadence: "/mo",
       planSlug: "monthly",
       description: "One visit per month, same crew every time.",
+      isFromPrice: true,
+      sizeNote: SIZE_NOTE,
+      priceValue: 139,
+      size: 1,
+      cadenceKey: "monthly",
     },
     {
       name: "Biweekly",
@@ -37,6 +53,11 @@ const config: ServiceLandingConfig = {
       planSlug: "biweekly",
       description: "Two visits per month, priority scheduling.",
       highlighted: true,
+      isFromPrice: true,
+      sizeNote: SIZE_NOTE,
+      priceValue: 278,
+      size: 1,
+      cadenceKey: "biweekly",
     },
     {
       name: "Weekly",
@@ -44,6 +65,11 @@ const config: ServiceLandingConfig = {
       cadence: "/mo",
       planSlug: "weekly",
       description: "Weekly visits, dedicated crew, quarterly deep-clean.",
+      isFromPrice: true,
+      sizeNote: SIZE_NOTE,
+      priceValue: 556,
+      size: 1,
+      cadenceKey: "weekly",
     },
   ],
   included: [
@@ -55,9 +81,11 @@ const config: ServiceLandingConfig = {
     "Trash out",
     "Eco-safe products",
     "Same crew every visit",
-    "Background-checked pros",
+    "Photo-verified after every visit",
   ],
   addOnsNote: "Available as add-ons: inside oven, inside fridge, interior windows, deep baseboard scrub, laundry (wash/dry/fold), inside kitchen cabinets.",
+  surchargeNote:
+    "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Above that size we quote individually.",
   trustCards: [
     {
       title: "Same Crew",
@@ -69,7 +97,7 @@ const config: ServiceLandingConfig = {
     },
     {
       title: "Background-Checked",
-      body: "Every pro is background-checked through Checkr before their first visit.",
+      body: "Every pro clears a Checkr criminal screen before their first visit.",
     },
   ],
 
@@ -84,7 +112,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's your service area?",
-      a: "We serve Pinecrest and Kendall — ZIP codes 33156, 33183, and 33186. We're not currently serving other areas.",
+      a: "Pinecrest and Kendall only. We're not currently serving other areas.",
     },
     {
       q: "What's actually included in a visit?",
@@ -92,7 +120,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "Who does the cleaning?",
-      a: "Vetted, background-checked professionals. Same crew every visit so they learn your home.",
+      a: "Screened professionals. Same crew every visit so they learn your home.",
     },
     {
       q: "How is scheduling handled?",
@@ -111,9 +139,20 @@ const config: ServiceLandingConfig = {
   seo: {
     title: "House Cleaning in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "House cleaning in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). One flat price per visit from $139. Same crew, no contracts, eco-safe. Book in about 2 minutes.",
+      "House cleaning in Pinecrest and Kendall (33156, 33183, 33186). One flat price per visit from $139. Same crew, no contracts, eco-safe. Book in about 2 minutes.",
     canonical: "https://jointidy.co/house-cleaning",
     priceRange: "$139–$279",
+    service: {
+      name: "House Cleaning",
+      serviceType: "House Cleaning",
+      description:
+        "Recurring house cleaning in Pinecrest and Kendall. One flat price per visit set by the size of your home.",
+      offers: [
+        { name: "Size 1 home (up to 2 bedrooms)", price: 139, unit: "visit" },
+        { name: "Size 2 home (3 bedrooms)", price: 189, unit: "visit" },
+        { name: "Size 3 home (4 bedrooms)", price: 279, unit: "visit" },
+      ],
+    },
   },
 };
 
