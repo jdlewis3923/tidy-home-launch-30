@@ -18,7 +18,7 @@ import { ArrowLeft, Upload, CheckCircle2, Clock, XCircle, Loader2, Camera } from
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { getRequiredItems, type EquipmentItem } from "@/lib/equipmentChecklist";
+import { getRequiredItems, isOptionalItem, type EquipmentItem } from "@/lib/equipmentChecklist";
 import tidyLogo from "@/assets/tidy-logo.png";
 
 type PhotoRow = {
