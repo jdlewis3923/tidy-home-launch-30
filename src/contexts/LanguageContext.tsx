@@ -972,7 +972,6 @@ const translations: Record<string, string> = {
     "Configúralo una vez. Nosotros nos encargamos del resto — programación, recordatorios y el mismo equipo en cada visita.",
   "No contracts · Cancel, pause, or reschedule anytime": "Sin contratos · Cancela, pausa o reagenda cuando quieras",
   "Background-checked pros": "Profesionales con antecedentes verificados",
-  "Satisfaction guaranteed": "Garantía de satisfacción",
   "Serving ": "Sirviendo ",
 
   // Terms of Service page

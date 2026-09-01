@@ -268,7 +268,7 @@ export default function StepPayment({ state, onChange }: Props) {
         </div>
       </div>
 
-      {/* Pre-checkout trust badge row — vetted / background-checked / cancel anytime. */}
+      {/* Pre-checkout trust badge row — background-checked / cancel anytime. */}
       <div
         className={`grid grid-cols-2 gap-2 sm:grid-cols-4 ${reveal(0)}`}
         style={{ transitionDelay: '220ms' }}
