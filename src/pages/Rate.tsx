@@ -197,13 +197,46 @@ const Rate = () => {
                 <p className="text-sm text-text-mid mb-4">
                   {t("Tell us what happened and we'll re-clean the area free, or refund the visit.")}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => commentRef.current?.focus()}
-                  className="w-full rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 transition-colors mb-2"
-                >
-                  {t("Tell us what happened")}
-                </button>
+                {followupSent ? (
+                  <p className="text-sm font-medium text-foreground">
+                    {t("Got it — we'll be in touch to make this right.")}
+                  </p>
+                ) : followupOpen ? (
+                  <>
+                    <label htmlFor="rate-followup" className="sr-only">
+                      {t("Tell us what happened")}
+                    </label>
+                    <textarea
+                      ref={followupRef}
+                      id="rate-followup"
+                      value={followup}
+                      onChange={(e) => setFollowup(e.target.value)}
+                      rows={4}
+                      maxLength={2000}
+                      placeholder={t("What went wrong? (we read every one of these)")}
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-primary/40 mb-3"
+                    />
+                    {followupError && (
+                      <p className="text-sm text-destructive mb-3">{followupError}</p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={sendFollowup}
+                      disabled={!followup.trim() || followupSending}
+                      className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep disabled:opacity-50 mb-2"
+                    >
+                      {followupSending ? t("Sending...") : t("Send this to us")}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={openFollowup}
+                    className="w-full rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 transition-colors mb-2"
+                  >
+                    {t("Tell us what happened")}
+                  </button>
+                )}
                 <a
                   href="mailto:hello@jointidy.co"
                   className="block text-center text-sm text-text-light underline hover:text-text-mid"
