@@ -274,7 +274,7 @@ export default function StepPayment({ state, onChange }: Props) {
         style={{ transitionDelay: '220ms' }}
       >
         {[
-          { icon: Banknote,    label: 'Vetted' },
+          { icon: Banknote,    label: 'Background-Checked' },
           { icon: ShieldCheck, label: 'Photo Verified' },
           { icon: BadgeCheck,  label: 'Background Checked' },
           { icon: XIcon,       label: 'Cancel Anytime' },

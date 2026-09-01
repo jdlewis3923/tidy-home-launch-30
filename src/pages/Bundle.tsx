@@ -138,7 +138,7 @@ const BundleInner = () => {
             {t("Bundle your services — a free premium add-on every month")}
           </h1>
           <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            {t("Hold two or more services and you pick one free premium add-on every month. Pinecrest, Kendall & Palmetto Bay only (33156 · 33183 · 33186).")}
+            {t("Hold two or more services and you pick one free premium add-on every month. Pinecrest & Kendall only (33156 · 33183 · 33186).")}
           </p>
           <div className="mt-6 inline-flex items-center gap-1.5 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground text-sm font-medium">
             <MapPin className="w-3.5 h-3.5" />

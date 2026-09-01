@@ -3,7 +3,6 @@ import { Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
-import { VETTED_CLAIM } from "@/lib/pricing-canon";
 
 interface FinalCTAProps {
   onOpenPopup: () => void;
@@ -27,7 +26,7 @@ const FinalCTA = ({ onOpenPopup }: FinalCTAProps) => {
         </button>
 
         <div className="flex flex-wrap justify-center gap-4 mt-8">
-          {[VETTED_CLAIM, "Background-Checked Pros", "Cancel Anytime", "Miami-Based"].map((item) => (
+          {["Photo-Verified Visits", "Locked Monthly Price", "Cancel Anytime", "Miami-Based"].map((item) => (
             <span key={item} className="flex items-center gap-1.5 text-xs text-primary-foreground/40">
               <Check className="w-3 h-3 text-success" />
               {t(item)}

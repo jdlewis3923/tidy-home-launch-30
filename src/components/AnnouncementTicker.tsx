@@ -1,8 +1,11 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { trustClaims, ENTRY_PRICE_COPY } from "@/lib/pricing-canon";
+import { trustClaims, ENTRY_PRICE_COPY, VETTED_CLAIM } from "@/lib/pricing-canon";
 
 const items = [
-  ...trustClaims(),
+  // The ticker doubles its items to loop, so the background-check claim would
+  // print twice here. It lives in ProofBar, WhyTidy, the Testimonials trust row
+  // and the FAQ instead.
+  ...trustClaims().filter((c) => c !== VETTED_CLAIM),
   "No Long-Term Contracts",
   ENTRY_PRICE_COPY,
   "One Monthly Plan",

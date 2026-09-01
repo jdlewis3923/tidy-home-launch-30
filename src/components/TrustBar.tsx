@@ -1,11 +1,13 @@
 import { Check } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { trustClaims } from "@/lib/pricing-canon";
+import { trustClaims, VETTED_CLAIM } from "@/lib/pricing-canon";
 
 const TrustBar = () => {
   const { t } = useLanguage();
-  const items = trustClaims();
+  // The background-check claim is carried by ProofBar just above this row —
+  // repeating it here pushed the page over the approved per-page cap.
+  const items = trustClaims().filter((c) => c !== VETTED_CLAIM);
   return (
     <section className="bg-background border-y py-6">
       <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-x-8 gap-y-3 px-4">
