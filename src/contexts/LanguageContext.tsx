@@ -1227,6 +1227,8 @@ const translations: Record<string, string> = {
   "wash or detail?": "¿lavado o detallado?",
   "Car Wash": "Lavado de Carro",
   "Car Detail": "Detallado de Carro",
+  "Pick your arrival time": "Elige tu horario de llegada",
+  "Done by ~{time}": "Listo antes de las ~{time}",
   "Included — a detail starts with a full exterior wash.":
     "Incluido — un detallado comienza con un lavado exterior completo.",
   "A thorough exterior wash — about an hour.":
