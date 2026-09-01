@@ -121,7 +121,7 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFoundingOfferShown, doorhangerGateAllows } from "@/lib/doorhanger";
 import { getLandingSource } from "@/lib/landing-source";
 
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/", "/neighbor"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/", "/neighbor", "/rate"];
 
 // The printed door hangers point at /dashboard/plan?src=doorhanger_en — a
 // neighbour with no account should see the founding offer first. Bounce them to
