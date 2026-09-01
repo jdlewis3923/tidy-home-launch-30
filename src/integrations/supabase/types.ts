@@ -2791,6 +2791,7 @@ export type Database = {
           next_billing_date: string | null
           pause_collection: string | null
           paused_until: string | null
+          preferred_pro_id: string | null
           services: Database["public"]["Enums"]["service_type"][]
           size: number | null
           sizes_json: Json | null
@@ -2826,6 +2827,7 @@ export type Database = {
           next_billing_date?: string | null
           pause_collection?: string | null
           paused_until?: string | null
+          preferred_pro_id?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           size?: number | null
           sizes_json?: Json | null
@@ -2861,6 +2863,7 @@ export type Database = {
           next_billing_date?: string | null
           pause_collection?: string | null
           paused_until?: string | null
+          preferred_pro_id?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           size?: number | null
           sizes_json?: Json | null
@@ -2870,7 +2873,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_preferred_pro_id_fkey"
+            columns: ["preferred_pro_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_conversations: {
         Row: {
@@ -3407,6 +3418,25 @@ export type Database = {
       current_user_admin: { Args: never; Returns: boolean }
       ensure_referral_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
+      get_customer_preferred_pro_options: {
+        Args: { p_user_id: string }
+        Returns: {
+          first_name: string
+          high_demand: boolean
+          last_name: string
+          preferred_by_count: number
+          pro_id: string
+        }[]
+      }
+      get_pro_capacity_stats: {
+        Args: never
+        Returns: {
+          applicant_id: string
+          booked_pct: number
+          high_demand: boolean
+          preferred_by_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
