@@ -45,7 +45,7 @@ interface Props {
  * off — not checkout.
  */
 export default function StepPayment({ state, onChange }: Props) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const pricing = calculatePricing(state);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -349,6 +349,65 @@ export default function StepPayment({ state, onChange }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Before we come out — access gate for car services. Not a hard block. */}
+      {showAccessGate && (
+        <div
+          className={`space-y-3 rounded-xl border border-hairline bg-white/70 p-4 ${reveal(0)}`}
+          style={{ transitionDelay: '270ms' }}
+        >
+          <p className="text-sm font-semibold text-ink lowercase">{t('Before we come out')}</p>
+
+          <label className="flex items-start gap-2.5 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={state.hasWaterSpigot === true}
+              onChange={(e) => onChange({ ...state, hasWaterSpigot: e.target.checked })}
+              className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
+            />
+            <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
+              {t("There's an outdoor water spigot I can reach from my driveway or parking spot")}
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2.5 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={state.hasElectricalOutlet === true}
+              onChange={(e) => onChange({ ...state, hasElectricalOutlet: e.target.checked })}
+              className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
+            />
+            <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
+              {t('There\'s an outdoor electrical outlet available')}
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2.5 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={state.washingAllowed === true}
+              onChange={(e) => onChange({ ...state, washingAllowed: e.target.checked })}
+              className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
+            />
+            <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
+              {t("Washing vehicles is allowed at this property (some HOAs and condo lots don't permit it)")}
+            </span>
+          </label>
+
+          <p className="text-[10px] leading-relaxed text-ink-faint">
+            {t("If you're not sure about the last one, check with your HOA first — we can't wash where it isn't permitted, and we can't refund a trip we couldn't complete.")}
+          </p>
+
+          {accessGateFailed && (
+            <div className="rounded-lg border border-gold/50 bg-gold/10 px-3 py-2.5 text-[11px] leading-relaxed text-ink-soft animate-calm-in">
+              {t("We may not be able to service this address. Send us the details and we'll tell you before you pay.")}{' '}
+              <a href={`tel:${QUOTE_PHONE.replace(/[^\d+]/g, '')}`} className="font-semibold text-ink hover:underline">
+                {t('Call us')} {QUOTE_PHONE}
+              </a>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Consent block */}
       <div

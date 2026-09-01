@@ -24,6 +24,8 @@ ON CONFLICT (key) DO NOTHING;
 --    an approximate booked-hours utilization from scheduled pro_visits in the
 --    next 7 days (pro_visits has no duration field, so we use the
 --    assumed_hours_per_visit / weekly_capacity_hours settings above).
+--    NOTE: pro_visits.contractor_id stores the auth.users id (per
+--    applicants.contractor_id), NOT applicants.id — joins below reflect that.
 CREATE OR REPLACE FUNCTION public.get_pro_capacity_stats()
 RETURNS TABLE (
   applicant_id uuid,
@@ -72,11 +74,11 @@ BEGIN
     SELECT contractor_id, COUNT(*) * v_hours_per_visit AS hours
     FROM public.pro_visits
     WHERE contractor_id IS NOT NULL
-      AND status IN ('scheduled', 'assigned')
+      AND status = 'scheduled'
       AND scheduled_at >= now()
       AND scheduled_at < now() + interval '7 days'
     GROUP BY contractor_id
-  ) booked ON booked.contractor_id = a.id;
+  ) booked ON booked.contractor_id = a.contractor_id;
 END;
 $$;
 
@@ -110,16 +112,12 @@ BEGIN
     cap.high_demand
   FROM public.pro_visits pv
   JOIN public.visits v ON v.jobber_visit_id = pv.jobber_visit_id
-  JOIN public.applicants a ON a.id = pv.contractor_id
+  JOIN public.applicants a ON a.contractor_id = pv.contractor_id
   LEFT JOIN public.get_pro_capacity_stats() cap ON cap.applicant_id = a.id
   WHERE v.user_id = p_user_id
-    AND pv.status = 'completed'
+    AND pv.status = 'complete'
     AND pv.contractor_id IS NOT NULL;
 END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_customer_preferred_pro_options(uuid) TO authenticated;
-
--- 5. Let a customer set their own preferred pro (existing subscriptions
---    UPDATE policy already scopes to auth.uid() = user_id; this just confirms
---    the column is covered by the standard grant).
