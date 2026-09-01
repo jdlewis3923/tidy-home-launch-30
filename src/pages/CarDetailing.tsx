@@ -74,6 +74,9 @@ const config: ServiceLandingConfig = {
     "Background-checked pros",
   ],
   addOnsNote: "Available as add-ons: pet hair removal, clay bar & ceramic coat, headlight restoration, interior protect & condition.",
+  surchargeNote:
+    "Lifted trucks, commercial vans and oversized vehicles are quoted individually.",
+
   trustCards: [
     {
       title: "Same Crew",
