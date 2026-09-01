@@ -172,7 +172,7 @@ export default function DashboardServices() {
     const { data: res, error } = await supabase.functions.invoke('attach-addon-to-visit', {
       body: {
         addon_key: addon.addon_key,
-        jobber_visit_id: (targetVisit as { jobber_visit_id?: string } | null)?.jobber_visit_id ?? undefined,
+        jobber_visit_id: targetVisit?.jobber_visit_id ?? undefined,
         visit_date: targetVisit?.visit_date ?? undefined,
         redeem_free: free || undefined,
       },
@@ -225,7 +225,7 @@ export default function DashboardServices() {
 
   const addService = async () => {
     if (!newService) return;
-    const zip = (sub?.zip as string | undefined) ?? (data.profile?.zip as string | undefined) ?? '';
+    const zip = data.profile?.zip ?? sub?.founding_zip ?? '';
     if (!/^\d{5}$/.test(zip)) {
       toast({
         title: t('We need your ZIP first'),
