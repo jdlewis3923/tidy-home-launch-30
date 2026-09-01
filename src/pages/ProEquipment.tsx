@@ -240,9 +240,10 @@ export default function ProEquipment() {
   );
 }
 
-function StatusIcon({ status }: { status?: "pending" | "approved" | "rejected" }) {
+function StatusIcon({ status, optional }: { status?: "pending" | "approved" | "rejected"; optional?: boolean }) {
   if (status === "approved") return <CheckCircle2 className="h-6 w-6 text-emerald-600 mt-0.5" />;
   if (status === "rejected") return <XCircle className="h-6 w-6 text-red-600 mt-0.5" />;
   if (status === "pending") return <Clock className="h-6 w-6 text-amber-500 mt-0.5" />;
-  return <Camera className="h-6 w-6 text-slate-400 mt-0.5" />;
+  return <Camera className={`h-6 w-6 mt-0.5 ${optional ? "text-slate-300" : "text-slate-400"}`} />;
+
 }
