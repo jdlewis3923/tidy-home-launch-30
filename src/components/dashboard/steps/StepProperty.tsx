@@ -15,6 +15,9 @@ import {
   vehicleClassLabels,
 } from '@/lib/dashboard-pricing';
 import { LAWN_GUESS_NOTE, QUOTE_COPY, QUOTE_PHONE, type VehicleClass } from '@/lib/pricing-canon';
+import { carVariantAvailable, carWashEligible, setCarVariant } from '@/lib/dashboard-pricing';
+import { trackCarVariantSelect } from '@/lib/tracking';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Props {
   state: ConfigState;
@@ -94,9 +97,18 @@ const lawnOptions: LawnChoice[] = ['small', 'standard', 'large', 'over'];
 const vehicleOptions: VehicleClass[] = ['sedan', 'coupe', 'crossover', 'suv', 'suv3row', 'truck', 'van'];
 
 export default function StepProperty({ state, onChange }: Props) {
+  const { t } = useLanguage();
   const hasCleaning = state.services.includes('cleaning');
   const hasLawn = state.services.includes('lawn');
   const hasDetailing = state.services.includes('detailing');
+  const carEligible = carVariantAvailable(state);
+  const washAllowed = carWashEligible(state);
+
+  const chooseVariant = (variant: 'car_wash' | 'car_detail') => {
+    if (variant === 'car_wash' && !washAllowed) return;
+    onChange(setCarVariant(state, variant));
+    trackCarVariantSelect(variant);
+  };
 
   return (
     <div className="space-y-10">
@@ -143,6 +155,56 @@ export default function StepProperty({ state, onChange }: Props) {
           <p className="text-[11px] text-ink-faint">{LAWN_GUESS_NOTE}</p>
 
           <SizeReadout service="lawn" size={sizeFor(state, 'lawn')} />
+        </div>
+      )}
+
+
+      {carEligible && (
+        <div className="space-y-4 animate-calm-in">
+          <h3 className="text-sm font-semibold text-ink-soft lowercase">{t('wash or detail?')}</h3>
+          <div className="grid gap-3 md:grid-cols-2" role="radiogroup" aria-label={t('wash or detail?')}>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={hasDetailing === false && !!state.carWashes}
+              disabled={hasDetailing}
+              onClick={() => chooseVariant('car_wash')}
+              className={`text-left rounded-xl border-2 p-4 transition-all ${
+                hasDetailing
+                  ? 'cursor-not-allowed border-hairline bg-cream-deep/30 opacity-60'
+                  : !hasDetailing && state.carWashes
+                    ? 'border-ink bg-ink text-white shadow-[0_8px_22px_-10px_hsl(var(--ink)/0.45)]'
+                    : 'border-hairline bg-white hover:border-ink/40 hover:bg-cream-deep/40'
+              }`}
+            >
+              <p className={`text-sm font-semibold lowercase ${!hasDetailing && state.carWashes ? 'text-white' : 'text-ink'}`}>
+                {t('Car Wash')}
+              </p>
+              <p className={`text-[11px] mt-1 leading-snug ${!hasDetailing && state.carWashes ? 'text-white/70' : 'text-ink-faint'}`}>
+                {hasDetailing
+                  ? t('Included — a detail starts with a full exterior wash.')
+                  : t('A thorough exterior wash — about an hour.')}
+              </p>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={hasDetailing}
+              onClick={() => chooseVariant('car_detail')}
+              className={`text-left rounded-xl border-2 p-4 transition-all ${
+                hasDetailing
+                  ? 'border-ink bg-ink text-white shadow-[0_8px_22px_-10px_hsl(var(--ink)/0.45)]'
+                  : 'border-hairline bg-white hover:border-ink/40 hover:bg-cream-deep/40'
+              }`}
+            >
+              <p className={`text-sm font-semibold lowercase ${hasDetailing ? 'text-white' : 'text-ink'}`}>
+                {t('Car Detail')}
+              </p>
+              <p className={`text-[11px] mt-1 leading-snug ${hasDetailing ? 'text-white/70' : 'text-ink-faint'}`}>
+                {t('Full interior + exterior detail — about 3.5 hours.')}
+              </p>
+            </button>
+          </div>
         </div>
       )}
 
