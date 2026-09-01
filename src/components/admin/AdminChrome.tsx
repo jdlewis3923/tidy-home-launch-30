@@ -26,6 +26,7 @@ const NAV = [
   { to: "/admin/email-health", label: "Email",      icon: Mail },
   { to: "/admin/inbox",       label: "Inbox",       icon: Inbox },
   { to: "/admin/leads",       label: "Leads",       icon: ClipboardList },
+  { to: "/admin/reviews",     label: "Reviews",     icon: Star },
   { to: "/admin/applicants",  label: "Applicants",  icon: Users },
   { to: "/admin/tier-progression", label: "Tier",   icon: Award },
   { to: "/admin/coi-review",  label: "COI",         icon: ShieldCheck },
