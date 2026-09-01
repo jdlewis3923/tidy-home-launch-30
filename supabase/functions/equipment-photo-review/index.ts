@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
 
     // Recompute equipment_approved for this applicant.
     const { data: applicant } = await admin.from('applicants')
-      .select('id, service, equipment_approved').eq('id', photo.applicant_id).single();
+      .select('id, service, equipment_approved, wash_only').eq('id', photo.applicant_id).single();
     if (!applicant) return jsonResponse({ ok: true, recomputed: false });
 
     const required = requiredFor(applicant.service);
@@ -100,18 +100,44 @@ Deno.serve(async (req) => {
     const approvedTypes = new Set((approvedPhotos ?? []).map((p) => p.photo_type));
     const allApproved = required.every((k) => approvedTypes.has(k));
 
-    if (allApproved !== applicant.equipment_approved) {
-      await admin.from('applicants')
-        .update({ equipment_approved: allApproved, updated_at: new Date().toISOString() })
-        .eq('id', applicant.id);
-      await admin.from('onboarding_events').insert({
-        applicant_id: applicant.id,
-        event: allApproved ? 'equipment_approved' : 'equipment_unapproved',
-        metadata: { required, approved: Array.from(approvedTypes) },
-      });
+    // Detail Pros without an approved pressure-washer photo are wash-only:
+    // approvable, but not eligible for full Detail jobs.
+    const washOnly = isDetailService(applicant.service)
+      ? !approvedTypes.has(PRESSURE_WASHER_KEY)
+      : false;
+
+    const patch: Record<string, unknown> = {};
+    if (allApproved !== applicant.equipment_approved) patch.equipment_approved = allApproved;
+    if (washOnly !== applicant.wash_only) patch.wash_only = washOnly;
+
+    if (Object.keys(patch).length > 0) {
+      patch.updated_at = new Date().toISOString();
+      await admin.from('applicants').update(patch).eq('id', applicant.id);
+      if ('equipment_approved' in patch) {
+        await admin.from('onboarding_events').insert({
+          applicant_id: applicant.id,
+          event: allApproved ? 'equipment_approved' : 'equipment_unapproved',
+          metadata: { required, approved: Array.from(approvedTypes), wash_only: washOnly },
+        });
+      }
+      if ('wash_only' in patch) {
+        await admin.from('onboarding_events').insert({
+          applicant_id: applicant.id,
+          event: washOnly ? 'flagged_wash_only' : 'cleared_wash_only',
+          metadata: { reason: 'pressure_washer photo (optional item)' },
+        });
+      }
     }
 
-    return jsonResponse({ ok: true, equipment_approved: allApproved, required, approved: Array.from(approvedTypes) });
+    return jsonResponse({
+      ok: true,
+      equipment_approved: allApproved,
+      wash_only: washOnly,
+      required,
+      optional: [PRESSURE_WASHER_KEY],
+      approved: Array.from(approvedTypes),
+    });
+
   } catch (e) {
     console.error('[equipment-photo-review]', e);
     return jsonResponse({ error: 'internal_error', message: String(e) }, 500);
