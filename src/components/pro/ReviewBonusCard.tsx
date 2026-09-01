@@ -148,6 +148,13 @@ export default function ReviewBonusCard() {
             {t("Plus")} {pendingCount} {t("more matched review(s) still in the 7-day hold period.")}
           </p>
         )}
+
+        <p className="mt-4 border-t border-slate-100 pt-3 text-xs leading-relaxed text-slate-500">
+          {t(
+            "$25 per 5-star Google review that names you, capped at 4 per calendar month (up to $100). Paid 7 days after the review posts, on your Friday deposit. The cap does not roll over.",
+          )}
+        </p>
+
       </CardContent>
     </Card>
   );
