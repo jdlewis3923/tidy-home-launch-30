@@ -11,7 +11,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CalendarDays, Clock, History } from 'lucide-react';
 import DashboardTopNav from '@/components/dashboard/DashboardTopNav';
 import ScheduleCalendar from '@/components/dashboard/ScheduleCalendar';
+import CarSlotPicker from '@/components/dashboard/CarSlotPicker';
 import RouteFallback from '@/components/RouteFallback';
+import type { CarServiceCode } from '@/lib/pricing-canon';
 import {
   useDashboardData,
   formatLongDate,
@@ -51,6 +53,7 @@ export default function DashboardSchedule() {
   const { t } = useLanguage();
   const [showAllPast, setShowAllPast] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [carSlot, setCarSlot] = useState<number | null>(null);
 
   useEffect(() => {
     if (!data.loading && !data.isAuthed) navigate('/login', { replace: true });
@@ -68,6 +71,7 @@ export default function DashboardSchedule() {
   if (data.loading) return <RouteFallback />;
 
   const visiblePast = showAllPast ? past : past.slice(0, 6);
+  const carServiceCode = (data.subscription?.car_service_code ?? null) as CarServiceCode | null;
 
   return (
     <div className="min-h-screen bg-cream">
@@ -89,6 +93,9 @@ export default function DashboardSchedule() {
           </Card>
 
           <div className="space-y-6">
+            {carServiceCode && (
+              <CarSlotPicker carServiceCode={carServiceCode} value={carSlot} onChange={setCarSlot} />
+            )}
             <Card>
               <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
                 <CalendarDays className="h-4 w-4 text-[hsl(var(--primary))]" />

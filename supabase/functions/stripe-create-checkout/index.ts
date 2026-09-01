@@ -84,6 +84,9 @@ const CheckoutInputSchema = z.object({
   /** ZIP printed on the scanned hanger. */
   qr_zip: z.string().max(10).optional(),
   qr_route: z.string().max(24).optional(),
+  access_water_spigot: z.boolean().optional(),
+  access_electrical_outlet: z.boolean().optional(),
+  access_washing_allowed: z.boolean().optional(),
 });
 
 Deno.serve(async (req) => {
@@ -127,6 +130,16 @@ Deno.serve(async (req) => {
   const hasHomeService = input.services.some((s) => s.service === "lawn" || s.service === "cleaning");
   if (input.car_wash && !hasHomeService) {
     return jsonResponse({ ok: false, error: "car_wash_requires_home_service" }, 400);
+  }
+
+  // Car Wash and Car Detail are mutually exclusive — never both in one cart.
+  const hasCarWashLine = !!input.car_wash;
+  const hasCarDetailLine = input.services.some((s) => s.service === "detailing");
+  if (hasCarWashLine && hasCarDetailLine) {
+    return jsonResponse(
+      { ok: false, error: "A detail already includes a full exterior wash — you can't have both a Car Wash and a Car Detail in the same cart." },
+      400,
+    );
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -237,6 +250,9 @@ Deno.serve(async (req) => {
           zip: input.zip,
           preferred_day: input.preferred_day ?? "",
           preferred_time: input.preferred_time ?? "",
+          access_water_spigot: input.access_water_spigot === true ? "yes" : input.access_water_spigot === false ? "no" : "",
+          access_electrical_outlet: input.access_electrical_outlet === true ? "yes" : input.access_electrical_outlet === false ? "no" : "",
+          access_washing_allowed: input.access_washing_allowed === true ? "yes" : input.access_washing_allowed === false ? "no" : "",
           lang: input.lang,
           // Founding offer — fulfilment promises, not coupons.
           founding_zip: input.zip,

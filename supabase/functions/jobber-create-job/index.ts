@@ -45,6 +45,29 @@ const SERVICE_TITLE: Record<string, string> = {
   detailing: 'Tidy — Recurring Mobile Car Detailing',
 };
 
+/**
+ * Renders the three "Before we come out" access answers (water spigot,
+ * electrical outlet, washing allowed) as a short note so the Pro sees them
+ * before dispatch. Only surfaced on the detailing/car-service job.
+ */
+function accessAnswersNote(sub: {
+  has_water_spigot: boolean | null;
+  has_electrical_outlet: boolean | null;
+  washing_allowed: boolean | null;
+}): string | null {
+  const line = (label: string, value: boolean | null) =>
+    `${label}: ${value === true ? 'Yes' : value === false ? 'No' : 'Not answered'}`;
+  if (sub.has_water_spigot == null && sub.has_electrical_outlet == null && sub.washing_allowed == null) {
+    return null;
+  }
+  return [
+    'Access check (from customer):',
+    line('Outdoor water spigot', sub.has_water_spigot),
+    line('Outdoor electrical outlet', sub.has_electrical_outlet),
+    line('Car washing allowed on property', sub.washing_allowed),
+  ].join('\n');
+}
+
 function isAuthorized(req: Request): boolean {
   const auth = req.headers.get('Authorization') ?? '';
   return auth === `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`;
@@ -76,7 +99,7 @@ Deno.serve(async (req) => {
       fn: async () => {
         const { data: sub, error: subErr } = await supabase
           .from('subscriptions')
-          .select('id, user_id, services, jobber_client_id, jobber_job_ids, frequency')
+          .select('id, user_id, services, jobber_client_id, jobber_job_ids, frequency, has_water_spigot, has_electrical_outlet, washing_allowed')
           .eq('id', subscription_id)
           .maybeSingle();
         if (subErr) throw new Error(`subscription lookup failed: ${subErr.message}`);
@@ -112,7 +135,12 @@ Deno.serve(async (req) => {
             ? new Date(`${nextVisit.visit_date}T13:00:00Z`).toISOString()
             : new Date(Date.now() + 5 * 86_400_000).toISOString();
 
-          const input = {
+          // Surface the access answers as job instructions on the car
+          // service job only — a house cleaning or lawn job has no water
+          // spigot / electrical outlet / washing-allowed context.
+          const instructions = service === 'detailing' ? accessAnswersNote(sub) : null;
+
+          const input: Record<string, unknown> = {
             clientId: sub.jobber_client_id,
             title: SERVICE_TITLE[service] ?? `Tidy — ${service}`,
             startAt,
@@ -120,6 +148,7 @@ Deno.serve(async (req) => {
             // via the Jobber UI / Job Type defaults. We create the parent
             // job and let Jobber's scheduler handle recurrence.
           };
+          if (instructions) input.instructions = instructions;
 
           const data = await jobberGraphQL<{
             jobCreate: {

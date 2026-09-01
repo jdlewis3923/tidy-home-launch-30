@@ -147,6 +147,51 @@ Deno.serve(async (req) => {
         patch.contractor_cancel_count = (a.contractor_cancel_count ?? 0) + 1;
       }
       await supabase.from('applicants').update(patch).eq('id', a.id);
+
+      // Preferred Pro is a preference, never an assignment. If the customer
+      // asked for a specific Pro and Jobber assigned someone else for this
+      // visit, text them before the visit rather than substituting silently.
+      if (action === 'schedule' && itemId) {
+        try {
+          const { data: vRow } = await supabase
+            .from('visits')
+            .select('user_id, visit_date')
+            .eq('jobber_visit_id', itemId)
+            .maybeSingle();
+          if (vRow?.user_id) {
+            const { data: subRow } = await supabase
+              .from('subscriptions')
+              .select('preferred_pro_id, user_id')
+              .eq('user_id', vRow.user_id)
+              .maybeSingle();
+            if (subRow?.preferred_pro_id && subRow.preferred_pro_id !== cid) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('phone, language')
+                .eq('user_id', vRow.user_id)
+                .maybeSingle();
+              const phone = (profile as { phone?: string } | null)?.phone;
+              if (phone) {
+                const lang = (profile as { language?: string } | null)?.language;
+                const body = lang === 'es'
+                  ? `Tidy: tu Pro preferido no estaba disponible para tu visita del ${vRow.visit_date}, asi que enviamos a otro Tidy Pro para que tu visita no se retrase.`
+                  : `Tidy: your preferred Pro wasn't available for your ${vRow.visit_date} visit, so we're sending another Tidy Pro so your visit doesn't slip.`;
+                await supabase.functions.invoke('send-twilio-sms', {
+                  body: {
+                    to_phone_e164: phone,
+                    body,
+                    idempotency_key: `preferred-pro-sub-${itemId}`,
+                    template_name: 'preferred-pro-substitution',
+                    triggered_by: 'jobber-webhook',
+                  },
+                });
+              }
+            }
+          }
+        } catch (subErr) {
+          console.warn('[jobber-webhook] preferred pro substitution check failed', (subErr as Error).message);
+        }
+      }
     }
 
     switch (topic) {

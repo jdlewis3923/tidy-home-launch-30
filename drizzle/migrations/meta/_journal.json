@@ -92,6 +92,27 @@
       "when": 1788286978222,
       "tag": "0012_visit_ratings_table",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1788304639090,
+      "tag": "0013_visit_ratings_rate_page_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1788304791999,
+      "tag": "0014_preferred_pro",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1788304831379,
+      "tag": "0015_car_access_gate_and_review_bonuses",
+      "breakpoints": true
     }
   ]
 }

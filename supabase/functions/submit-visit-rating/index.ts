@@ -1,30 +1,21 @@
 // Tidy — Public visit rating intake (backs jointidy.co/rate).
 //
-// The post-visit SMS links every customer to /rate?visit=<id>. Nobody is
-// logged in, so this endpoint is anonymous (verify_jwt = false) and does all
-// the work with the service role:
-//   1. Resolve the identifier (pro_visits.id / jobber_visit_id, visits.id /
-//      jobber_visit_id). Unknown or missing → still record the rating.
-//   2. Insert public.visit_ratings (the row the admin low-rating flow reads).
-//   3. Mirror the score onto pro_visits.customer_rating so the Pro dashboard,
-//      tier progression and the $50 five-star bonus keep working.
-//   4. 3 stars or lower → open an admin alert (private re-service path).
-//      4-5 stars → return the Google review URL so the client can prompt.
+// Anonymous (verify_jwt = false). Screen 2 on the client is IDENTICAL for
+// every star value — the Google review button always renders. This function
+// no longer gates google_review_url by rating; it always returns it. For
+// ratings <= 3 it additionally fires an ops Brevo alert and flags
+// needs_followup so the "make it right" panel + admin alert queue work.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const GOOGLE_PLACE_ID = Deno.env.get('GOOGLE_PLACE_ID') ?? '';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function googleReviewUrl(): string {
-  return GOOGLE_PLACE_ID
-    ? `https://search.google.com/local/writereview?placeid=${encodeURIComponent(GOOGLE_PLACE_ID)}`
-    : 'https://www.google.com/search?q=Tidy+Home+Concierge+Miami+reviews';
-}
+const GOOGLE_REVIEW_URL = 'https://g.page/r/Cd7-Iz6HobqzEBI/review';
+const OPS_ALERT_EMAIL = 'hello@jointidy.co';
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
@@ -33,13 +24,17 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const rating = Number(body?.rating);
-    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    const stars = Number(body?.stars ?? body?.rating);
+    if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
       return jsonResponse({ ok: false, error: 'invalid_rating' }, 400);
     }
     const comment = typeof body?.comment === 'string' ? body.comment.slice(0, 2000).trim() : '';
     const lang = body?.lang === 'es' ? 'es' : 'en';
-    const raw = typeof body?.identifier === 'string' ? body.identifier.slice(0, 120).trim() : '';
+    const jobId = typeof body?.job_id === 'string' ? body.job_id.slice(0, 120).trim() : '';
+    const customerId = typeof body?.customer_id === 'string' ? body.customer_id.slice(0, 120).trim() : '';
+    const raw = jobId || (typeof body?.identifier === 'string' ? body.identifier.slice(0, 120).trim() : '');
+    const userAgent = req.headers.get('user-agent')?.slice(0, 500) ?? null;
+    const needsFollowup = stars <= 3;
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
@@ -51,7 +46,6 @@ Deno.serve(async (req) => {
     let userId: string | null = null;
 
     if (raw) {
-      // pro_visits — by primary key or Jobber visit id.
       const pvQuery = admin.from('pro_visits').select('id, contractor_id').limit(1);
       const { data: pv } = UUID_RE.test(raw)
         ? await pvQuery.or(`id.eq.${raw},jobber_visit_id.eq.${raw}`)
@@ -72,48 +66,81 @@ Deno.serve(async (req) => {
     }
 
     const matched = Boolean(proVisitId || visitId);
-    const wantsGoogle = rating >= 4;
 
-    const { data: inserted, error: insErr } = await admin
+    // visit_ratings — write both the legacy `rating` column and the new
+    // job_id/customer_id/stars/user_agent/needs_followup columns where the
+    // schema has them; fall back gracefully if a column doesn't exist yet.
+    const insertPayload: Record<string, unknown> = {
+      rating: stars,
+      stars,
+      comment: comment || null,
+      visit_id: visitId,
+      pro_visit_id: proVisitId,
+      contractor_id: contractorId,
+      user_id: userId,
+      raw_identifier: raw || null,
+      job_id: jobId || raw || null,
+      customer_id: customerId || null,
+      user_agent: userAgent,
+      needs_followup: needsFollowup,
+      source: matched ? 'sms_rate_link' : 'sms_rate_link_generic',
+      lang,
+      google_prompted: true,
+    };
+
+    let { data: inserted, error: insErr } = await admin
       .from('visit_ratings')
-      .insert({
-        rating,
-        comment: comment || null,
-        visit_id: visitId,
-        pro_visit_id: proVisitId,
-        contractor_id: contractorId,
-        user_id: userId,
-        raw_identifier: raw || null,
-        source: matched ? 'sms_rate_link' : 'sms_rate_link_generic',
-        lang,
-        google_prompted: wantsGoogle,
-      })
+      .insert(insertPayload)
       .select('id')
       .single();
+
+    if (insErr) {
+      // Schema without the newer columns yet — retry with the legacy shape
+      // so the page never breaks on a missing migration.
+      console.warn('[submit-visit-rating] full insert failed, retrying legacy shape', insErr.message);
+      const legacy = await admin
+        .from('visit_ratings')
+        .insert({
+          rating: stars,
+          comment: comment || null,
+          visit_id: visitId,
+          pro_visit_id: proVisitId,
+          contractor_id: contractorId,
+          user_id: userId,
+          raw_identifier: jobId || customerId ? `job:${jobId || ''} customer:${customerId || ''} raw:${raw || ''}`.trim() : raw || null,
+          source: matched ? 'sms_rate_link' : 'sms_rate_link_generic',
+          lang,
+          google_prompted: true,
+        })
+        .select('id')
+        .single();
+      inserted = legacy.data;
+      insErr = legacy.error;
+    }
 
     if (insErr) {
       console.error('[submit-visit-rating] insert failed', insErr.message);
       return jsonResponse({ ok: false, error: 'insert_failed' }, 500);
     }
 
-    // Keep the existing Pro-facing rating surfaces working.
     if (proVisitId) {
       const { error: upErr } = await admin
         .from('pro_visits')
-        .update({ customer_rating: rating })
+        .update({ customer_rating: stars })
         .eq('id', proVisitId);
       if (upErr) console.warn('[submit-visit-rating] pro_visits update failed', upErr.message);
     }
 
-    // 3 or below never goes to Google — it comes to us.
-    if (rating <= 3) {
+    if (needsFollowup) {
       const { error: alertErr } = await admin.from('admin_alerts').insert({
         alert_type: 'low_visit_rating',
-        title: `Low rating (${rating}★) — re-service review needed`,
+        title: `Low rating (${stars}★) — re-service review needed`,
         body: comment || null,
         context: {
           visit_rating_id: inserted?.id ?? null,
-          rating,
+          stars,
+          job_id: jobId || null,
+          customer_id: customerId || null,
           pro_visit_id: proVisitId,
           visit_id: visitId,
           contractor_id: contractorId,
@@ -123,13 +150,26 @@ Deno.serve(async (req) => {
         },
       });
       if (alertErr) console.warn('[submit-visit-rating] alert insert failed', alertErr.message);
+
+      sendBrevoEmail({
+        to: OPS_ALERT_EMAIL,
+        marketing: false,
+        subject: `Low visit rating (${stars}★) — needs follow-up`,
+        htmlContent: `<p>A customer left a ${stars}-star rating and needs follow-up.</p>
+          <p><b>Comment:</b> ${comment ? comment.replace(/</g, '&lt;') : '(none)'}</p>
+          <p><b>Job ID:</b> ${jobId || raw || '(none)'}<br/><b>Customer ID:</b> ${customerId || '(none)'}</p>
+          <p><b>Rating row:</b> ${inserted?.id ?? '(unknown)'}</p>`,
+        tags: ['visit-rating-alert'],
+        label: 'submit-visit-rating',
+      }).catch((e) => console.warn('[submit-visit-rating] brevo alert failed', (e as Error).message));
     }
 
     return jsonResponse({
       ok: true,
       matched,
-      rating,
-      google_review_url: wantsGoogle ? googleReviewUrl() : null,
+      stars,
+      needs_followup: needsFollowup,
+      google_review_url: GOOGLE_REVIEW_URL,
     });
   } catch (err) {
     console.error('[submit-visit-rating] unhandled', err);

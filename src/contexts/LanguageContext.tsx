@@ -8,6 +8,16 @@ const translations: Record<string, string> = {
   "Oops! Page not found": "\u00a1Ups! No encontramos esta p\u00e1gina",
   "Return to Home": "Volver al inicio",
 
+  // Pro dashboard — review bonus card
+  "Review Bonus": "Bono por reseña",
+  "This month's 5-star reviews": "Reseñas de 5 estrellas este mes",
+  "counted toward your monthly cap": "contadas hacia tu límite mensual",
+  "Bonuses earned": "Bonos ganados",
+  "Cap remaining": "Límite restante",
+  "Plus": "Además,",
+  "more matched review(s) still in the 7-day hold period.": "reseña(s) más en el período de espera de 7 días.",
+  "Back to dashboard": "Volver al panel",
+
   // Chatbot widget
   "Tidy Concierge": "Concierge de Tidy",
   Call: "Llamar",
@@ -1177,6 +1187,23 @@ const translations: Record<string, string> = {
   "Need us sooner? Call": "¿Nos necesitas antes? Llama al",
   "or email": "o escribe a",
 
+  // /rate rebuild — ungated Google prompt
+  "How was your visit?": "¿Cómo te fue la visita?",
+  "Anything you want us to know?": "¿Algo que quieras contarnos?",
+  "Anything you want us to know? (optional)": "¿Algo que quieras contarnos? (opcional)",
+  "Thanks — that helps.": "Gracias — eso ayuda.",
+
+  "Leave us a Google review": "Déjanos una reseña en Google",
+  "It takes 20 seconds and it's the single biggest thing that helps a small local company.":
+    "Toma 20 segundos y es lo que más ayuda a una empresa local pequeña.",
+  "Let us make it right.": "Déjanos resolverlo.",
+  "Tell us what happened and we'll re-clean the area free, or refund the visit.":
+    "Cuéntanos qué pasó y volvemos a limpiar el área gratis, o te devolvemos el pago de la visita.",
+  "Tell us what happened": "Cuéntanos qué pasó",
+  "Or email hello@jointidy.co": "O escribe a hello@jointidy.co",
+
+
+
 
 
   // Site fix pass — "From" pricing, size qualifiers, corrected claims.
@@ -1205,6 +1232,48 @@ const translations: Record<string, string> = {
     "Especialistas con antecedentes verificados. El mismo especialista en cada visita para que conozca tu carro.",
   "We couldn't save your details. Please try again, or call us at (786) 829-1141.":
     "No pudimos guardar tus datos. Inténtalo de nuevo o llámanos al (786) 829-1141.",
+
+  // Car Wash / Car Detail split — StepProperty
+  "wash or detail?": "¿lavado o detallado?",
+  "Car Wash": "Lavado de Carro",
+  "Car Detail": "Detallado de Carro",
+  "Pick your arrival time": "Elige tu horario de llegada",
+  "Done by ~{time}": "Listo antes de las ~{time}",
+  "Included — a detail starts with a full exterior wash.":
+    "Incluido — un detallado comienza con un lavado exterior completo.",
+  "A thorough exterior wash — about an hour.":
+    "Un lavado exterior completo — aproximadamente una hora.",
+  "Full interior + exterior detail — about 3.5 hours.":
+    "Detallado completo interior y exterior — aproximadamente 3.5 horas.",
+
+  // Before-payment access gate — StepPayment
+  "Before we come out": "Antes de ir a tu casa",
+  "There's an outdoor water spigot I can reach from my driveway or parking spot":
+    "Hay una llave de agua exterior a la que puedo acceder desde mi entrada o estacionamiento",
+  "There's an outdoor electrical outlet available":
+    "Hay un tomacorriente exterior disponible",
+  "Washing vehicles is allowed at this property (some HOAs and condo lots don't permit it)":
+    "Lavar vehículos está permitido en esta propiedad (algunas HOA y condominios no lo permiten)",
+  "If you're not sure about the last one, check with your HOA first — we can't wash where it isn't permitted, and we can't refund a trip we couldn't complete.":
+    "Si no estás seguro de lo último, consulta primero con tu HOA — no podemos lavar donde no esté permitido, y no podemos reembolsar una visita que no pudimos completar.",
+  "We may not be able to service this address. Send us the details and we'll tell you before you pay.":
+    "Puede que no podamos dar servicio en esta dirección. Envíanos los detalles y te avisaremos antes de que pagues.",
+  "Call us": "Llámanos",
+
+  // Preferred Pro — DashboardServices
+  "Preferred Pro": "Pro preferido",
+  "No preference (fastest scheduling)": "Sin preferencia (agenda más rápido)",
+  "Choose a Pro if you'd like the same person whenever possible.": "Elige un Pro si prefieres que sea la misma persona siempre que sea posible.",
+  "— high demand, limited times": "— alta demanda, horarios limitados",
+  "We'll send {name} whenever we can. Requesting a specific Pro can mean fewer available times, and if they're booked or out we'll send another Tidy Pro rather than push your visit.":
+    "Enviaremos a {name} siempre que podamos. Pedir un Pro específico puede significar menos horarios disponibles, y si está ocupado o no disponible enviaremos a otro Pro de Tidy en lugar de retrasar tu visita.",
+  "Save preference": "Guardar preferencia",
+  "Preference saved": "Preferencia guardada",
+  "Could not save your preference": "No se pudo guardar tu preferencia",
+  "Loading Pros…": "Cargando Pros…",
+
+  // Admin Applicants — preferred pro count
+  "Preferred by": "Preferido por",
 };
 
 

@@ -414,3 +414,32 @@ export const SIZING_FAQ: { q: string; a: string }[] = [
 /** The quote path. No checkout button is ever shown for a quote-sized property. */
 export const QUOTE_PHONE = '(786) 829-1141';
 export const QUOTE_COPY = "Call for a quote — we'll price it by hand.";
+
+// ---------------------------------------------------------------------------
+// Car service variants — Car Wash and Car Detail are mutually exclusive.
+// Duration drives arrival windows and scheduling; admin-editable via
+// app_settings keys below (falls back to these defaults).
+// ---------------------------------------------------------------------------
+
+export type CarServiceCode = 'car_wash' | 'car_detail';
+
+export const CAR_SERVICE_DEFAULT_DURATION_MINUTES: Record<CarServiceCode, number> = {
+  car_wash: 60,
+  car_detail: 210,
+};
+
+export const CAR_SERVICE_ARRIVAL_WINDOW_MINUTES: Record<CarServiceCode, number> = {
+  car_wash: 60,
+  car_detail: 120,
+};
+
+/** app_settings keys an admin can edit to override the default duration. */
+export const CAR_SERVICE_DURATION_SETTINGS_KEY: Record<CarServiceCode, string> = {
+  car_wash: 'car_wash_duration_minutes',
+  car_detail: 'car_detail_duration_minutes',
+};
+
+export const CAR_SERVICE_NAMES: Record<CarServiceCode, string> = {
+  car_wash: 'Car Wash',
+  car_detail: 'Car Detail',
+};

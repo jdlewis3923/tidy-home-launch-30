@@ -64,6 +64,12 @@ export interface ConfigState {
   addOns: string[];
   smsConsent: boolean;
   outOfCoverage: boolean;
+  /** Car step: wash and detail are mutually exclusive. */
+  carVariant: 'car_wash' | 'car_detail' | null;
+  /** Water/access gate — null = not yet answered. */
+  hasWaterSpigot: boolean | null;
+  hasElectricalOutlet: boolean | null;
+  washingAllowed: boolean | null;
 }
 
 export const defaultState: ConfigState = {
@@ -89,6 +95,10 @@ export const defaultState: ConfigState = {
   addOns: [],
   smsConsent: false,
   outOfCoverage: false,
+  carVariant: null,
+  hasWaterSpigot: null,
+  hasElectricalOutlet: null,
+  washingAllowed: null,
 };
 
 // ---------------------------------------------------------------------------
@@ -199,6 +209,36 @@ export function getCarWashPrice(state: ConfigState): number {
 /** The Car Wash Add-On requires an active lawn or cleaning plan. */
 export function carWashEligible(state: ConfigState): boolean {
   return state.services.includes('lawn') || state.services.includes('cleaning');
+}
+
+/** True whenever a car-care selection (wash or detail) makes sense to show. */
+export function carVariantAvailable(state: ConfigState): boolean {
+  return carWashEligible(state) || state.services.includes('detailing');
+}
+
+/**
+ * Sets the mutually-exclusive car variant. Selecting car_detail always wins:
+ * it adds the 'detailing' service and clears any Car Wash Add-On. Selecting
+ * car_wash removes 'detailing' and turns the Car Wash Add-On on.
+ */
+export function setCarVariant(state: ConfigState, variant: 'car_wash' | 'car_detail'): ConfigState {
+  if (variant === 'car_detail') {
+    const services: ServiceType[] = state.services.includes('detailing')
+      ? state.services
+      : [...state.services, 'detailing'];
+
+    const frequencies = { ...state.frequencies, detailing: state.frequencies.detailing ?? 'monthly' as Frequency };
+    return { ...state, carVariant: 'car_detail', services, frequencies, carWashes: null };
+  }
+  const services = state.services.filter((s) => s !== 'detailing');
+  const frequencies = { ...state.frequencies };
+  delete frequencies.detailing;
+  return { ...state, carVariant: 'car_wash', services, frequencies, carWashes: state.carWashes ?? 1 };
+}
+
+/** True once the customer has a live car service (wash or detail) selected. */
+export function hasCarService(state: ConfigState): boolean {
+  return state.services.includes('detailing') || !!state.carWashes;
 }
 
 /**

@@ -2040,6 +2040,69 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_bonuses: {
+        Row: {
+          amount_cents: number
+          blocked_reason: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          paid_at: string | null
+          period: string
+          pro_id: string
+          reason: string
+          review_id: string | null
+          status: string
+          stripe_transfer_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          blocked_reason?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          paid_at?: string | null
+          period: string
+          pro_id: string
+          reason?: string
+          review_id?: string | null
+          status?: string
+          stripe_transfer_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          blocked_reason?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          paid_at?: string | null
+          period?: string
+          pro_id?: string
+          reason?: string
+          review_id?: string | null
+          status?: string
+          stripe_transfer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_bonuses_pro_id_fkey"
+            columns: ["pro_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pro_bonuses_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pro_referrals: {
         Row: {
           bonus_cents: number
@@ -2386,6 +2449,83 @@ export type Database = {
           stripe_credit_id?: string | null
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          comment: string | null
+          created_at: string
+          external_review_id: string
+          fetched_at: string
+          fraud_flag: string | null
+          id: string
+          match_confidence: string
+          match_debug: Json | null
+          match_score: number | null
+          matched_job_id: string | null
+          matched_pro_id: string | null
+          notes: string | null
+          paid_at: string | null
+          posted_at: string
+          reviewer_name: string | null
+          source: string
+          stars: number
+          status: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          comment?: string | null
+          created_at?: string
+          external_review_id: string
+          fetched_at?: string
+          fraud_flag?: string | null
+          id?: string
+          match_confidence?: string
+          match_debug?: Json | null
+          match_score?: number | null
+          matched_job_id?: string | null
+          matched_pro_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          posted_at: string
+          reviewer_name?: string | null
+          source?: string
+          stars: number
+          status?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          comment?: string | null
+          created_at?: string
+          external_review_id?: string
+          fetched_at?: string
+          fraud_flag?: string | null
+          id?: string
+          match_confidence?: string
+          match_debug?: Json | null
+          match_score?: number | null
+          matched_job_id?: string | null
+          matched_pro_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          posted_at?: string
+          reviewer_name?: string | null
+          source?: string
+          stars?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_matched_pro_id_fkey"
+            columns: ["matched_pro_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sms_delivery_events: {
         Row: {
@@ -2772,6 +2912,7 @@ export type Database = {
           bundle_discount_pct: number
           cancel_at_period_end: boolean
           canceled_at: string | null
+          car_service_code: string | null
           card_brand: string | null
           card_last4: string | null
           created_at: string
@@ -2783,6 +2924,8 @@ export type Database = {
           free_addons_per_month: number
           free_car_washes_per_month: number
           frequency: Database["public"]["Enums"]["subscription_frequency"]
+          has_electrical_outlet: boolean | null
+          has_water_spigot: boolean | null
           id: string
           jobber_client_id: string | null
           jobber_job_ids: Json
@@ -2791,6 +2934,7 @@ export type Database = {
           next_billing_date: string | null
           pause_collection: string | null
           paused_until: string | null
+          preferred_pro_id: string | null
           services: Database["public"]["Enums"]["service_type"][]
           size: number | null
           sizes_json: Json | null
@@ -2799,6 +2943,7 @@ export type Database = {
           stripe_subscription_id: string | null
           updated_at: string
           user_id: string
+          washing_allowed: boolean | null
         }
         Insert: {
           band?: string | null
@@ -2807,6 +2952,7 @@ export type Database = {
           bundle_discount_pct?: number
           cancel_at_period_end?: boolean
           canceled_at?: string | null
+          car_service_code?: string | null
           card_brand?: string | null
           card_last4?: string | null
           created_at?: string
@@ -2818,6 +2964,8 @@ export type Database = {
           free_addons_per_month?: number
           free_car_washes_per_month?: number
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
+          has_electrical_outlet?: boolean | null
+          has_water_spigot?: boolean | null
           id?: string
           jobber_client_id?: string | null
           jobber_job_ids?: Json
@@ -2826,6 +2974,7 @@ export type Database = {
           next_billing_date?: string | null
           pause_collection?: string | null
           paused_until?: string | null
+          preferred_pro_id?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           size?: number | null
           sizes_json?: Json | null
@@ -2834,6 +2983,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
+          washing_allowed?: boolean | null
         }
         Update: {
           band?: string | null
@@ -2842,6 +2992,7 @@ export type Database = {
           bundle_discount_pct?: number
           cancel_at_period_end?: boolean
           canceled_at?: string | null
+          car_service_code?: string | null
           card_brand?: string | null
           card_last4?: string | null
           created_at?: string
@@ -2853,6 +3004,8 @@ export type Database = {
           free_addons_per_month?: number
           free_car_washes_per_month?: number
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
+          has_electrical_outlet?: boolean | null
+          has_water_spigot?: boolean | null
           id?: string
           jobber_client_id?: string | null
           jobber_job_ids?: Json
@@ -2861,6 +3014,7 @@ export type Database = {
           next_billing_date?: string | null
           pause_collection?: string | null
           paused_until?: string | null
+          preferred_pro_id?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           size?: number | null
           sizes_json?: Json | null
@@ -2869,8 +3023,17 @@ export type Database = {
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
+          washing_allowed?: boolean | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_preferred_pro_id_fkey"
+            columns: ["preferred_pro_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_conversations: {
         Row: {
@@ -3190,15 +3353,20 @@ export type Database = {
           comment: string | null
           contractor_id: string | null
           created_at: string
+          customer_id: string | null
           google_prompted: boolean
           id: string
+          job_id: string | null
           lang: string
+          needs_followup: boolean
           pro_visit_id: string | null
           rating: number
           raw_identifier: string | null
           resolution_notes: string | null
           resolved_at: string | null
           source: string
+          stars: number | null
+          user_agent: string | null
           user_id: string | null
           visit_id: string | null
         }
@@ -3206,15 +3374,20 @@ export type Database = {
           comment?: string | null
           contractor_id?: string | null
           created_at?: string
+          customer_id?: string | null
           google_prompted?: boolean
           id?: string
+          job_id?: string | null
           lang?: string
+          needs_followup?: boolean
           pro_visit_id?: string | null
           rating: number
           raw_identifier?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
           source?: string
+          stars?: number | null
+          user_agent?: string | null
           user_id?: string | null
           visit_id?: string | null
         }
@@ -3222,15 +3395,20 @@ export type Database = {
           comment?: string | null
           contractor_id?: string | null
           created_at?: string
+          customer_id?: string | null
           google_prompted?: boolean
           id?: string
+          job_id?: string | null
           lang?: string
+          needs_followup?: boolean
           pro_visit_id?: string | null
           rating?: number
           raw_identifier?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
           source?: string
+          stars?: number | null
+          user_agent?: string | null
           user_id?: string | null
           visit_id?: string | null
         }
@@ -3392,6 +3570,25 @@ export type Database = {
       current_user_admin: { Args: never; Returns: boolean }
       ensure_referral_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
+      get_customer_preferred_pro_options: {
+        Args: { p_user_id: string }
+        Returns: {
+          first_name: string
+          high_demand: boolean
+          last_name: string
+          preferred_by_count: number
+          pro_id: string
+        }[]
+      }
+      get_pro_capacity_stats: {
+        Args: never
+        Returns: {
+          applicant_id: string
+          booked_pct: number
+          high_demand: boolean
+          preferred_by_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

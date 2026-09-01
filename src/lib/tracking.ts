@@ -34,6 +34,9 @@ export const trackCheckoutStep = (stepNumber: number, stepName: string) =>
 export const trackPurchase = (value: number, transactionId: string) =>
   pushEvent("purchase", { value, currency: "USD", transaction_id: transactionId });
 
+export const trackPreferredProSet = (p: { pro_id: string | null; high_demand?: boolean }) =>
+  pushEvent("preferred_pro_set", p);
+
 /**
  * SHA-256 hex of a lowercased, trimmed email — safe to send as a join key.
  * Returns null when SubtleCrypto is unavailable (non-HTTPS contexts).
@@ -97,3 +100,9 @@ export const initScrollTracking = () => {
   window.addEventListener("scroll", handler, { passive: true });
   return () => window.removeEventListener("scroll", handler);
 };
+
+export const trackCarVariantSelect = (service_code: 'car_wash' | 'car_detail') =>
+  pushEvent('car_variant_select', { service_code });
+
+export const trackAccessGateFail = (which: 'water_spigot' | 'electrical_outlet' | 'washing_allowed') =>
+  pushEvent('access_gate_fail', { which });

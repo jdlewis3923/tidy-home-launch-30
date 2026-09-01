@@ -276,6 +276,7 @@ export default function AdminApplicants() {
   const [nextOrientation, setNextOrientation] = useState<Orientation | null>(null);
   const [registeringOrientation, setRegisteringOrientation] = useState(false);
   const [registeredOrientationId, setRegisteredOrientationId] = useState<string | null>(null);
+  const [proCapacity, setProCapacity] = useState<Record<string, { preferred_by_count: number; high_demand: boolean; booked_pct: number }>>({});
 
   const fetchRows = useCallback(async () => {
     setLoading(true);
@@ -303,6 +304,23 @@ export default function AdminApplicants() {
   }, []);
 
   useEffect(() => { if (hasRole) fetchRows(); }, [hasRole, fetchRows]);
+
+  useEffect(() => {
+    if (!hasRole) return;
+    (async () => {
+      const { data, error } = await (supabase as any).rpc("get_pro_capacity_stats");
+      if (error) { console.error(error); return; }
+      const map: Record<string, { preferred_by_count: number; high_demand: boolean; booked_pct: number }> = {};
+      (data ?? []).forEach((row: any) => {
+        map[row.applicant_id] = {
+          preferred_by_count: row.preferred_by_count ?? 0,
+          high_demand: !!row.high_demand,
+          booked_pct: row.booked_pct ?? 0,
+        };
+      });
+      setProCapacity(map);
+    })();
+  }, [hasRole]);
 
   useEffect(() => {
     setBgNotes(open?.bg_check_notes ?? "");
@@ -711,6 +729,14 @@ export default function AdminApplicants() {
                     {STAGE_LABEL[stage] ?? stage}
                   </span>
                   <span className={`h-2.5 w-2.5 rounded-full ring-2 shrink-0 ${BG_DOT[bg] ?? BG_DOT.pending}`} title={`BG: ${bg}`} />
+                  {proCapacity[a.id] !== undefined && (
+                    <span
+                      className={`hidden lg:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-md ring-1 shrink-0 ${proCapacity[a.id].high_demand ? "bg-purple-50 text-purple-700 ring-purple-200" : "bg-slate-50 text-slate-600 ring-slate-200"}`}
+                      title="Customers who set this Pro as their preferred Pro"
+                    >
+                      Preferred by: {proCapacity[a.id].preferred_by_count}
+                    </span>
+                  )}
                   <span className="hidden md:inline text-xs text-slate-500 shrink-0 w-20 text-right">{relTime(a.created_at)}</span>
                   <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-[#1FA1F0] transition-colors shrink-0" />
                 </button>

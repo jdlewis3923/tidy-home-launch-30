@@ -14,7 +14,11 @@ import {
   frequencyVisitCopy,
   formatPerVisit,
   formatMonthly,
+  hasCarService,
 } from '@/lib/dashboard-pricing';
+import { QUOTE_PHONE } from '@/lib/pricing-canon';
+import { trackAccessGateFail } from '@/lib/tracking';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { startCheckout, translate } from '@/lib/checkout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { provisionAccount } from '@/lib/account-provisioning';
@@ -41,12 +45,45 @@ interface Props {
  * off — not checkout.
  */
 export default function StepPayment({ state, onChange }: Props) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const pricing = calculatePricing(state);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const customQuote = hasCustomQuote(state);
+
+  // Access gate — car services only. Not a hard block: an unchecked box shows
+  // a "we may not be able to service this" banner and captures a lead so we
+  // can call ahead, rather than losing the sale outright.
+  const showAccessGate = hasCarService(state);
+  const accessAnswers: Array<{ key: 'hasWaterSpigot' | 'hasElectricalOutlet' | 'washingAllowed'; which: 'water_spigot' | 'electrical_outlet' | 'washing_allowed' }> = [
+    { key: 'hasWaterSpigot', which: 'water_spigot' },
+    { key: 'hasElectricalOutlet', which: 'electrical_outlet' },
+    { key: 'washingAllowed', which: 'washing_allowed' },
+  ];
+  const failingAccess = accessAnswers.filter((a) => state[a.key] === false);
+  const accessGateFailed = failingAccess.length > 0;
+  const [accessLeadSent, setAccessLeadSent] = useState(false);
+
+  useEffect(() => {
+    if (!accessGateFailed || accessLeadSent) return;
+    failingAccess.forEach((a) => trackAccessGateFail(a.which));
+    setAccessLeadSent(true);
+    if (state.email && state.zip) {
+      void supabaseClient.functions.invoke('submit-lead', {
+        body: {
+          first_name: state.firstName || 'Customer',
+          last_name: state.lastName || '',
+          email: state.email,
+          phone: state.phone || '0000000000',
+          zip: state.zip,
+          sms_consent: state.smsConsent === true,
+          source: 'access_gate_fail',
+          page_url: typeof window !== 'undefined' ? window.location.href : '',
+        },
+      }).catch(() => {});
+    }
+  }, [accessGateFailed, accessLeadSent]);
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true));
@@ -312,6 +349,65 @@ export default function StepPayment({ state, onChange }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Before we come out — access gate for car services. Not a hard block. */}
+      {showAccessGate && (
+        <div
+          className={`space-y-3 rounded-xl border border-hairline bg-white/70 p-4 ${reveal(0)}`}
+          style={{ transitionDelay: '270ms' }}
+        >
+          <p className="text-sm font-semibold text-ink lowercase">{t('Before we come out')}</p>
+
+          <label className="flex items-start gap-2.5 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={state.hasWaterSpigot === true}
+              onChange={(e) => onChange({ ...state, hasWaterSpigot: e.target.checked })}
+              className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
+            />
+            <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
+              {t("There's an outdoor water spigot I can reach from my driveway or parking spot")}
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2.5 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={state.hasElectricalOutlet === true}
+              onChange={(e) => onChange({ ...state, hasElectricalOutlet: e.target.checked })}
+              className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
+            />
+            <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
+              {t('There\'s an outdoor electrical outlet available')}
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2.5 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={state.washingAllowed === true}
+              onChange={(e) => onChange({ ...state, washingAllowed: e.target.checked })}
+              className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
+            />
+            <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
+              {t("Washing vehicles is allowed at this property (some HOAs and condo lots don't permit it)")}
+            </span>
+          </label>
+
+          <p className="text-[10px] leading-relaxed text-ink-faint">
+            {t("If you're not sure about the last one, check with your HOA first — we can't wash where it isn't permitted, and we can't refund a trip we couldn't complete.")}
+          </p>
+
+          {accessGateFailed && (
+            <div className="rounded-lg border border-gold/50 bg-gold/10 px-3 py-2.5 text-[11px] leading-relaxed text-ink-soft animate-calm-in">
+              {t("We may not be able to service this address. Send us the details and we'll tell you before you pay.")}{' '}
+              <a href={`tel:${QUOTE_PHONE.replace(/[^\d+]/g, '')}`} className="font-semibold text-ink hover:underline">
+                {t('Call us')} {QUOTE_PHONE}
+              </a>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Consent block */}
       <div
