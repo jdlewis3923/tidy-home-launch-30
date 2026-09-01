@@ -145,6 +145,32 @@ export default function DashboardPlan() {
     saveState(next);
   }, []);
 
+  // Funnel instrumentation. checkout_step on every step, begin_checkout once
+  // the payment step is reached. No name, email, phone or address is ever
+  // pushed — only service/cadence/size/price.
+  useEffect(() => {
+    trackCheckoutStep(step, STEP_NAMES[step] ?? String(step));
+    if (step !== 7) return;
+    const pricing = calculatePricing(state);
+    state.services.forEach((svc) => {
+      trackBeginCheckout({
+        service: svc,
+        cadence: state.frequencies[svc] ?? undefined,
+        size: sizeFor(state, svc)?.size,
+        price: pricing.ongoing,
+      });
+    });
+    // Stashed so /checkout/success can report a purchase value without ever
+    // trusting a URL parameter.
+    try {
+      sessionStorage.setItem('tidy_checkout_value', String(pricing.ongoing));
+    } catch {
+      /* private mode — purchase still fires, just without a value */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+
   const canAdvance = () => {
     if (step === 0) return false; // gate has its own submit
     if (step === 1) return state.services.length > 0;
