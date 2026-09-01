@@ -18,11 +18,11 @@ const foundingCards = [
   {
     icon: "📸",
     title: "Built on Accountability",
-    desc: "Every visit is completed by a vetted, background-checked pro — with photo verification after each service, and a named point of contact on every job.",
+    desc: "Every visit gets photo verification after the service, and a named point of contact on every job.",
   },
   {
     icon: "🛡️",
-    title: "Satisfaction Guaranteed",
+    title: "First visit perfect or it's free",
     desc: "Not happy? We make it right within 24 hours — re-service or credit, no questions asked.",
   },
 ];
@@ -80,7 +80,7 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
         </div>
 
         <p className="mt-10 text-sm text-primary-foreground/80">
-          {t("Background-Checked · Photo-Verified Visits · Satisfaction Guaranteed")}
+          {t("Background-Checked · Photo-Verified Visits · First visit perfect or it's free")}
         </p>
 
         <p className="mt-3 text-sm text-primary-foreground/80">

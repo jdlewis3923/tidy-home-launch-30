@@ -236,7 +236,7 @@ export default function Apply() {
           </h1>
           <p className="mt-5 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed">
             {t(
-              "Tidy is Miami's subscription home-service brand. We're hiring vetted cleaners, lawn pros, and detailers in Kendall and Pinecrest.",
+              "Tidy is Miami's subscription home-service brand. We're hiring background-checked cleaners, lawn pros, and detailers in Kendall and Pinecrest.",
             )}
           </p>
 

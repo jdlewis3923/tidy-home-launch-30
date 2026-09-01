@@ -19,7 +19,7 @@ const preLaunchSteps = [
   {
     num: 2,
     title: "We Handle Everything",
-    desc: "A vetted, background-checked professional shows up on time. You receive an ETA before every visit.",
+    desc: "Your assigned professional shows up on time. You receive an ETA before every visit.",
     icon: ShieldCheck,
     gradient: "from-emerald-500 to-emerald-600",
   },
@@ -50,7 +50,7 @@ const launchSteps = [
   {
     num: 3,
     title: "Tidy Confirms & Coordinates",
-    desc: "We assign a vetted, background-checked professional and lock in your recurring schedule. You'll get a confirmation with your first visit date.",
+    desc: "We assign your professional and lock in your recurring schedule. You'll get a confirmation with your first visit date.",
     icon: ShieldCheck,
     gradient: "from-emerald-500 to-emerald-600",
   },

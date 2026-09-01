@@ -10,13 +10,13 @@ const reasons = [
   },
   {
     icon: "✅",
-    title: "Satisfaction Guarantee",
+    title: "First Visit Perfect or Free",
     desc: "First visit perfect or it's free. After that, if it isn't perfect, we fix it fast. No contracts. Cancel anytime.",
   },
   {
     icon: "🛡️",
     title: VETTED_CLAIM,
-    desc: "Every professional is background-checked through Checkr. Photo verification submitted after every visit.",
+    desc: "Every professional is screened through Checkr before their first visit. Photo verification submitted after every visit.",
   },
   {
     icon: "📅",

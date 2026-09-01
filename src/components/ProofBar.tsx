@@ -3,9 +3,11 @@ import { VETTED_CLAIM } from "@/lib/pricing-canon";
 
 // One claim per slot. VETTED_CLAIM already reads "Background-Checked Pros",
 // so the adjacent duplicate slot was removed.
+// "Satisfaction Guaranteed" is RETIRED — unbounded promise, no defined remedy.
+// The approved guarantee is "First visit perfect or it's free".
 const signals = [
   VETTED_CLAIM,
-  "Satisfaction Guaranteed",
+  "First visit perfect or it's free",
   "Serving Kendall + Pinecrest",
 ];
 
