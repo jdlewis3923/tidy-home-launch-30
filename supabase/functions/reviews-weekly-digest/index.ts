@@ -3,13 +3,10 @@
 // Runs Mondays 8:00 AM ET (12:00 UTC) via pg_cron → x-cron-key auth.
 //
 // Steps:
-//   1. Attribution: the shared `_shared/review-attribution.ts` module (owned by
-//      another agent, imported into a dedicated import/matching function) does
-//      not exist in this codebase yet, and there is no `review-scan` function
-//      either. GAP: this job therefore does NOT re-run name/job matching — it
-//      only promotes/expires rows that some other process has already scored.
-//      Once the shared attribution module ships, wire a call to it here before
-//      step 2.
+//   1. Attribution: re-scores any review still sitting at status='new' with no
+//      matched pro, using the shared `_shared/review-attribution.ts` engine
+//      (the same one reviews-import uses). High confidence populates
+//      matched_pro_id and flips status to 'matched'. Never auto-approves.
 //   2. Promotion: reviews with status='matched', stars=5, a non-excluded
 //      reviewer_name, posted_at older than hold_days, whose matched_pro is
 //      still under cap_per_month for the current calendar month → flipped to
