@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
     const { data: visits } = await admin
       .from('pro_visits')
       .select('id, contractor_id, customer_name, completed_at, customer_rating')
-      .eq('status', 'completed')
+      .eq('status', 'complete')
       .not('completed_at', 'is', null)
       .gte('completed_at', windowStart)
       .lte('completed_at', row.posted_at);

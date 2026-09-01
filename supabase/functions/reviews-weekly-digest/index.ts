@@ -3,13 +3,10 @@
 // Runs Mondays 8:00 AM ET (12:00 UTC) via pg_cron → x-cron-key auth.
 //
 // Steps:
-//   1. Attribution: the shared `_shared/review-attribution.ts` module (owned by
-//      another agent, imported into a dedicated import/matching function) does
-//      not exist in this codebase yet, and there is no `review-scan` function
-//      either. GAP: this job therefore does NOT re-run name/job matching — it
-//      only promotes/expires rows that some other process has already scored.
-//      Once the shared attribution module ships, wire a call to it here before
-//      step 2.
+//   1. Attribution: re-scores any review still sitting at status='new' with no
+//      matched pro, using the shared `_shared/review-attribution.ts` engine
+//      (the same one reviews-import uses). High confidence populates
+//      matched_pro_id and flips status to 'matched'. Never auto-approves.
 //   2. Promotion: reviews with status='matched', stars=5, a non-excluded
 //      reviewer_name, posted_at older than hold_days, whose matched_pro is
 //      still under cap_per_month for the current calendar month → flipped to
@@ -25,6 +22,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import { attribute, type AttributionCandidate } from '../_shared/review-attribution.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -33,6 +31,7 @@ const ADMIN_BASE_URL = Deno.env.get('ADMIN_BASE_URL') ?? 'https://jointidy.co';
 
 const BATCH_SIZE = 200;
 const EXPIRE_DAYS = 30;
+const CANDIDATE_WINDOW_DAYS = 14;
 
 type ReviewBonusPolicy = {
   amount_cents: number;
@@ -99,6 +98,79 @@ Deno.serve(async (req) => {
   const now = new Date();
   const holdCutoff = new Date(now.getTime() - policy.hold_days * 86400000).toISOString();
   const expireCutoff = new Date(now.getTime() - EXPIRE_DAYS * 86400000).toISOString();
+
+  // ---- Step 1: re-run attribution on anything still unmatched ------------
+  // Uses the same shared scoring engine as reviews-import. High confidence
+  // populates matched_pro_id and flips status to 'matched'; never approves.
+  let rescored = 0;
+  const { data: unscored } = await admin
+    .from('reviews')
+    .select('id, reviewer_name, comment, posted_at')
+    .eq('status', 'new')
+    .is('matched_pro_id', null)
+    .order('posted_at', { ascending: true })
+    .limit(BATCH_SIZE);
+
+  if (unscored && unscored.length > 0) {
+    const { data: applicants } = await admin
+      .from('applicants')
+      .select('id, contractor_id, first_name, last_name, out_of_service_area')
+      .not('contractor_id', 'is', null);
+    const applicantByContractor = new Map(
+      (applicants ?? []).map((a) => [a.contractor_id as string, a]),
+    );
+
+    for (const row of unscored) {
+      const windowStart = new Date(
+        new Date(row.posted_at as string).getTime() - CANDIDATE_WINDOW_DAYS * 86_400_000,
+      ).toISOString();
+      const { data: visits } = await admin
+        .from('pro_visits')
+        .select('id, contractor_id, customer_name, completed_at, customer_rating')
+        .eq('status', 'complete')
+        .not('completed_at', 'is', null)
+        .gte('completed_at', windowStart)
+        .lte('completed_at', row.posted_at as string);
+
+      const candidatePool: AttributionCandidate[] = (visits ?? [])
+        .map((v) => {
+          const a = applicantByContractor.get(v.contractor_id as string);
+          if (!a || a.out_of_service_area) return null;
+          return {
+            pro_id: a.id as string,
+            contractor_id: v.contractor_id as string,
+            pro_first_name: a.first_name as string,
+            pro_last_name: a.last_name as string,
+            visit_id: v.id as string,
+            customer_name: v.customer_name as string | null,
+            completed_at: v.completed_at as string,
+            customer_rating: v.customer_rating as number | null,
+          } as AttributionCandidate;
+        })
+        .filter((c): c is AttributionCandidate => c !== null);
+
+      const result = attribute(
+        row.reviewer_name as string | null,
+        row.comment as string | null,
+        row.posted_at as string,
+        candidatePool,
+      );
+
+      await admin
+        .from('reviews')
+        .update({
+          matched_job_id: result.matched_job_id,
+          matched_pro_id: result.matched_pro_id,
+          match_confidence: result.match_confidence,
+          match_score: result.match_score,
+          match_debug: result.match_debug,
+          status: result.match_confidence === 'high' ? 'matched' : 'new',
+        })
+        .eq('id', row.id as string)
+        .eq('status', 'new');
+      rescored += 1;
+    }
+  }
 
   // ---- Step 2: promotion candidates -------------------------------------
   const { data: candidates, error: candErr } = await admin
@@ -203,7 +275,7 @@ Deno.serve(async (req) => {
     source: 'internal',
     event: 'reviews_weekly_digest',
     status: 'success',
-    payload_hash: `promoted=${promoted} expired=${expiredCount} awaiting=${awaitingCount ?? 0} attribution_gap=true`,
+    payload_hash: `promoted=${promoted} expired=${expiredCount} awaiting=${awaitingCount ?? 0} rescored=${rescored}`,
   });
 
   return jsonResponse({
@@ -213,6 +285,6 @@ Deno.serve(async (req) => {
     expired: expiredCount,
     awaiting_total: awaitingCount ?? 0,
     email_sent: emailSent,
-    attribution_gap: 'shared attribution module not present yet — matching not re-run by this job',
+    rescored,
   });
 });
