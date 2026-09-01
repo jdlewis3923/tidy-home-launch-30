@@ -262,8 +262,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             </span>
             <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5" />
-              {t("Vetted & background-checked pros")}
+              {t("Background-Checked Pros")}
             </span>
+
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
