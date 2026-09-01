@@ -195,9 +195,11 @@ describe('6. the founding offer is a persisted promise, not a coupon', () => {
     expect(src).toContain('founding_zip:');
   });
 
-  it('no coupon or promo-code machinery reaches Stripe', () => {
+  // The ONE permitted coupon is the referred friend's $50-off-first-month
+  // (see src/test/referral-discount.test.ts). No percentages, no promo codes.
+  it('no percentage or promo-code machinery reaches Stripe', () => {
     const src = read('supabase/functions/stripe-create-checkout/index.ts');
-    for (const dead of ['TIDY_BUNDLE_', 'percent_off', 'allow_promotion_codes', 'discounts:']) {
+    for (const dead of ['TIDY_BUNDLE_', 'percent_off', 'allow_promotion_codes', 'promotion_code']) {
       expect(src).not.toContain(dead);
     }
   });
