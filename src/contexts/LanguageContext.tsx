@@ -1159,6 +1159,26 @@ const translations: Record<string, string> = {
     "Servimos Pinecrest y Kendall — 33156, 33183, 33186",
   "from $90/mo": "desde $90/mes",
 
+  // Post-visit rating page (/rate)
+  "How did your visit go?": "¿Cómo te fue con tu visita?",
+  "Tap a star. It takes a few seconds and it goes straight to your Pro.":
+    "Toca una estrella. Toma unos segundos y le llega directo a tu profesional.",
+  "Star rating": "Calificación con estrellas",
+  stars: "estrellas",
+  "Anything you'd like to add? (optional)": "¿Algo que quieras agregar? (opcional)",
+  "Submit rating": "Enviar calificación",
+  "Thank you — that means a lot.": "Gracias — eso significa mucho.",
+  "Would you share it on Google? It takes 30 seconds and it helps your Pro directly.":
+    "¿Lo compartes en Google? Toma 30 segundos y ayuda directo a tu profesional.",
+  "Leave a Google review": "Dejar una reseña en Google",
+  "Thank you for telling us.": "Gracias por contarnos.",
+  "This went straight to our team, not to a public review. Someone will follow up with you about making it right.":
+    "Esto le llegó directo a nuestro equipo, no a una reseña pública. Alguien te va a contactar para resolverlo.",
+  "Need us sooner? Call": "¿Nos necesitas antes? Llama al",
+  "or email": "o escribe a",
+
+
+
   // Site fix pass — "From" pricing, size qualifiers, corrected claims.
   From: "Desde",
   "size 1 home — sizes 2 and 3 cost more, see sizes below":
