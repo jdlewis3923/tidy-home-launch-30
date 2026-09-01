@@ -1,6 +1,13 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
 import heroImg from "@/assets/lp-lawn-care.jpg";
+import heroImgWebp from "@/assets/lp-lawn-care.webp";
 import heroImgMobile from "@/assets/lp-lawn-care-mobile.jpg";
+import heroImgMobileWebp from "@/assets/lp-lawn-care-mobile.webp";
+
+// Card prices are the SIZE-1 lot price. Size 2 is $65 and size 3 is $99 a
+// visit, which is why every card says "From" and carries this qualifier.
+const SIZE_NOTE = "size 1 lot — sizes 2 and 3 cost more, see sizes below";
+
 
 const config: ServiceLandingConfig = {
   serviceSlug: "lawn-care",
