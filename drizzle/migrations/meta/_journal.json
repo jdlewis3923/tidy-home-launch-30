@@ -78,6 +78,13 @@
       "when": 1788230381702,
       "tag": "0010_referral_code_generation_and_qr_route",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788274145864,
+      "tag": "0011_addon_attaches_free_monthly_redemption",
+      "breakpoints": true
     }
   ]
 }
