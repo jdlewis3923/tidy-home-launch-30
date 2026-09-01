@@ -8,6 +8,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import ReviewsThisWeekCard from "@/components/admin/ReviewsThisWeekCard";
 
 type Source =
   | "stripe"
