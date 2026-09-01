@@ -115,15 +115,19 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 
 // Routes that remain accessible when an admin has toggled the site OFF.
 // Admin can still log in and flip it back on; everything else shows ComingSoon.
+import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFoundingOfferShown } from "@/lib/doorhanger";
+
 const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/", "/neighbor"];
 
-// The printed door hangers point at /dashboard/plan?src=doorhanger_en — an
-// authenticated route a neighbour with no account cannot see. Send those hits to
-// the public founding-neighbour page instead, params intact.
+// The printed door hangers point at /dashboard/plan?src=doorhanger_en — a
+// neighbour with no account should see the founding offer first. Bounce them to
+// /neighbor ONCE: the CTA there comes back with offer=seen, and a session marker
+// backs it up, so this can never become a redirect loop.
 const DoorhangerRescue = () => {
   const location = useLocation();
-  const src = new URLSearchParams(location.search).get("src") ?? "";
-  if (location.pathname === "/dashboard/plan" && src.startsWith("doorhanger")) {
+  const sessionSeen = hasSeenFoundingOfferThisSession();
+  if (shouldRedirectToFoundingOffer(location.pathname, location.search, sessionSeen)) {
+    markFoundingOfferShown();
     return <Navigate to={`/neighbor${location.search}`} replace />;
   }
   return null;

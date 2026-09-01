@@ -16,13 +16,17 @@ const ITEMS = [
 ];
 
 
-const LandingTicker = () => {
+/**
+ * `single` renders the claim row exactly once, static, no marquee. /neighbor
+ * uses it: the doubled marquee copy read as the trust strip appearing twice.
+ */
+const LandingTicker = ({ single = false }: { single?: boolean }) => {
   const { t } = useLanguage();
-  const doubled = [...ITEMS, ...ITEMS];
+  const items = single ? ITEMS : [...ITEMS, ...ITEMS];
   return (
     <div className="bg-navy overflow-hidden whitespace-nowrap border-y border-primary-foreground/10">
-      <div className="animate-ticker inline-flex py-2.5">
-        {doubled.map((item, i) => (
+      <div className={`${single ? "flex flex-wrap justify-center" : "animate-ticker inline-flex"} py-2.5`}>
+        {items.map((item, i) => (
           <span
             key={i}
             className="inline-flex items-center mx-5 text-xs text-primary-foreground/75 font-medium"
