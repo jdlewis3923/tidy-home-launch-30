@@ -4,8 +4,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 // to sit next to each other making the same claim — the shorter one is gone.
 // The ZIP list is deliberately NOT here: it already appears in the hero, the
 // service-area section and the footer, and a 4th pass reads as keyword stuffing.
+// "Background-Checked Pros" is deliberately NOT here: the ticker doubles its
+// items to loop, so it would render the claim twice and blow the per-page cap.
+// The claim lives in the hero chip, the pricing trust row and a trust card.
 const ITEMS = [
-  "Background-Checked Pros",
   "Same Crew Every Visit",
   "Locked Monthly Price",
   "Cancel Anytime",
