@@ -25,6 +25,9 @@ export const FORWARDED_PARAMS = [
   "zip",
   "placement",
   "lang",
+  // Routing flag only — "the visitor already saw the founding offer".
+  // Never written to landing_touches and never sent to Stripe metadata.
+  "offer",
 ] as const;
 
 /**
