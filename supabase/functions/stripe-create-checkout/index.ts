@@ -9,7 +9,10 @@
 // Complete and the Car Wash Add-On are per month, always quantity 1.
 //
 // There is NO percentage discount and NO promo code. Bundling earns free car
-// washes, and the founding offer is a set of fulfilment promises recorded in
+// washes. The one coupon that can reach a session is the referred friend's
+// $50-off-first-month (uncapped, duration "once"), validated server-side in
+// _shared/referral-discount.ts. Bundling never produces a coupon, so a bundle
+// plus a referral cannot double-discount, and the founding offer is a set of fulfilment promises recorded in
 // subscription metadata (the webhook writes them onto the subscription row).
 
 import Stripe from "https://esm.sh/stripe@17.5.0?target=deno";
@@ -18,6 +21,10 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
 import { recordReferralAttribution } from "../_shared/referral-attribution.ts";
+import {
+  logReferralDiscountDecision,
+  resolveReferralDiscount,
+} from "../_shared/referral-discount.ts";
 import {
   CAR_WASH_LOOKUP_KEYS,
   SERVICE_LOOKUP_KEYS,
@@ -249,6 +256,7 @@ Deno.serve(async (req) => {
           qr_placement: input.qr_placement ?? "",
           qr_zip: input.qr_zip ?? "",
           qr_route: input.qr_route ?? "",
+          referral_code: (input.referral_code ?? "").trim().toUpperCase(),
         };
 
         // deno-lint-ignore no-explicit-any
@@ -262,6 +270,27 @@ Deno.serve(async (req) => {
           success_url: `${SITE_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${SITE_URL}/checkout/canceled`,
         };
+
+        // ---------- Referred friend's own $50 off first month ----------
+        // Validated server-side: the code must resolve to another user's
+        // profile and this must be the customer's first order. A bad code is
+        // logged and skipped — it never fails the checkout. `discounts` and
+        // `allow_promotion_codes` are mutually exclusive in the Stripe API;
+        // this session sets no `allow_promotion_codes`, so nothing conflicts.
+        const referralDiscount = await resolveReferralDiscount({
+          supabase,
+          code: input.referral_code,
+          userId: user.id,
+        });
+        if (referralDiscount.apply && referralDiscount.coupon) {
+          sessionParams.discounts = [{ coupon: referralDiscount.coupon }];
+        }
+        await logReferralDiscountDecision({
+          supabase,
+          decision: referralDiscount,
+          userId: user.id,
+          where: "checkout.session",
+        });
 
         const session = await stripe.checkout.sessions.create(sessionParams);
 
