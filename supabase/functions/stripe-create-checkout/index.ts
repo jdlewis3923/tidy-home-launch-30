@@ -274,9 +274,9 @@ Deno.serve(async (req) => {
         // ---------- Referred friend's own $50 off first month ----------
         // Validated server-side: the code must resolve to another user's
         // profile and this must be the customer's first order. A bad code is
-        // logged and skipped — it never fails the checkout. `discounts` and
-        // `allow_promotion_codes` are mutually exclusive in the Stripe API;
-        // this session sets no `allow_promotion_codes`, so nothing conflicts.
+        // logged and skipped — it never fails the checkout. Stripe treats
+        // `discounts` and customer-entered promo codes as mutually exclusive;
+        // this session never enabled promo-code entry, so nothing conflicts.
         const referralDiscount = await resolveReferralDiscount({
           supabase,
           code: input.referral_code,
