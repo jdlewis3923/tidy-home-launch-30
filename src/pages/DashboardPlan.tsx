@@ -153,10 +153,11 @@ export default function DashboardPlan() {
     if (step !== 7) return;
     const pricing = calculatePricing(state);
     state.services.forEach((svc) => {
+      const size = sizeFor(state, svc);
       trackBeginCheckout({
         service: svc,
         cadence: state.frequencies[svc] ?? undefined,
-        size: sizeFor(state, svc)?.size,
+        size: size === 'quote' || size === null ? 'quote' : size,
         price: pricing.ongoing,
       });
     });
