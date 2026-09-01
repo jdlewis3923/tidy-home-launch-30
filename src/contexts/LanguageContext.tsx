@@ -8,6 +8,16 @@ const translations: Record<string, string> = {
   "Oops! Page not found": "\u00a1Ups! No encontramos esta p\u00e1gina",
   "Return to Home": "Volver al inicio",
 
+  // Pro dashboard — review bonus card
+  "Review Bonus": "Bono por reseña",
+  "This month's 5-star reviews": "Reseñas de 5 estrellas este mes",
+  "counted toward your monthly cap": "contadas hacia tu límite mensual",
+  "Bonuses earned": "Bonos ganados",
+  "Cap remaining": "Límite restante",
+  "Plus": "Además,",
+  "more matched review(s) still in the 7-day hold period.": "reseña(s) más en el período de espera de 7 días.",
+  "Back to dashboard": "Volver al panel",
+
   // Chatbot widget
   "Tidy Concierge": "Concierge de Tidy",
   Call: "Llamar",

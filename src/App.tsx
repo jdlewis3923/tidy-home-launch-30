@@ -77,6 +77,7 @@ const AdminDocumensoTemplates = lazy(() => import("./pages/AdminDocumensoTemplat
 const Apply = lazy(() => import("./pages/Apply.tsx"));
 const ProDashboard = lazy(() => import("./pages/ProDashboard.tsx"));
 const ProTierProgression = lazy(() => import("./pages/ProTierProgression.tsx"));
+const ProReviewBonuses = lazy(() => import("./pages/ProReviewBonuses.tsx"));
 const ProUploadCoi = lazy(() => import("./pages/ProUploadCoi.tsx"));
 const ProOnboarding = lazy(() => import("./pages/ProOnboarding.tsx"));
 const ProTraining = lazy(() => import("./pages/ProTraining.tsx"));
@@ -282,6 +283,7 @@ const App = () => (
                   <Route path="/apply" element={<Apply />} />
                   <Route path="/pro" element={<ProDashboard />} />
                   <Route path="/pro/tier-progression" element={<ProTierProgression />} />
+                  <Route path="/pro/review-bonus" element={<ProReviewBonuses />} />
                   <Route path="/pro/upload-coi" element={<ProUploadCoi />} />
                   <Route path="/pro/onboarding" element={<ProOnboarding />} />
                   <Route path="/pro/training" element={<ProTraining />} />
