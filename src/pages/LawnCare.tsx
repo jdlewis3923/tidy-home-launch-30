@@ -30,7 +30,7 @@ const config: ServiceLandingConfig = {
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
   heroImageMobileWebp: heroImgMobileWebp,
-  heroDimensions: [1600, 935],
+  heroDimensions: [1920, 1122],
   heroAlt: "Freshly mowed striped emerald lawn at a Pinecrest home",
   plans: [
     {
@@ -112,7 +112,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's your service area?",
-      a: "We serve Pinecrest and Kendall — ZIP codes 33156, 33183, and 33186. We're not currently serving other areas.",
+      a: "We serve Pinecrest and Kendall only. We are not currently serving other areas.",
     },
     {
       q: "What's actually included in a visit?",

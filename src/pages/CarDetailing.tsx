@@ -103,7 +103,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's your service area?",
-      a: "We serve Pinecrest and Kendall — ZIP codes 33156, 33183, and 33186. We're not currently serving other areas.",
+      a: "We serve Pinecrest and Kendall only. We are not currently serving other areas.",
     },
     {
       q: "What's actually included?",
