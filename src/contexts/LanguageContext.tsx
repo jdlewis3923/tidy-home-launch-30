@@ -409,6 +409,18 @@ const translations: Record<string, string> = {
   "Built for Pinecrest + Kendall.": "Hecho para Pinecrest + Kendall.",
   "We serve only 33156, 33183, and 33186 — so your crew is local, on-time, and never stuck in traffic.":
     "Servimos solo 33156, 33183 y 33186 — así tu equipo es local, puntual y nunca varado en el tráfico.",
+  "We serve these three neighborhoods only — so your crew is local, on-time, and never stuck in traffic.":
+    "Servimos solo estas tres comunidades — así tu equipo es local, puntual y nunca varado en el tráfico.",
+  "Kendall & Pinecrest": "Kendall y Pinecrest",
+  "Built for Kendall & Pinecrest": "Hecho para Kendall y Pinecrest",
+  "Serving Kendall & Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.":
+    "Sirviendo Kendall y Pinecrest con suscripciones recurrentes de limpieza del hogar, cuidado del jardín y detallado de carro.",
+  "A quick form · No contracts": "Un formulario rápido · Sin contratos",
+  "A quick form to sign up. Same crew. Locked price.":
+    "Un formulario rápido para inscribirte. El mismo equipo. Precio fijo.",
+  "Book in a couple of minutes": "Reserva en un par de minutos",
+  "We serve Pinecrest and Kendall only. We are not currently serving other areas.":
+    "Servimos solo Pinecrest y Kendall. Por ahora no servimos otras áreas.",
   Pinecrest: "Pinecrest",
   Kendall: "Kendall",
   "Kendall West": "Kendall West",
