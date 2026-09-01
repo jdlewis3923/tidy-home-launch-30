@@ -1140,7 +1140,34 @@ const translations: Record<string, string> = {
   "Serving Pinecrest, Kendall & Palmetto Bay — 33156, 33183, 33186":
     "Servimos Pinecrest, Kendall y Palmetto Bay — 33156, 33183, 33186",
   "from $90/mo": "desde $90/mes",
+
+  // Site fix pass — "From" pricing, size qualifiers, corrected claims.
+  From: "Desde",
+  "size 1 home — sizes 2 and 3 cost more, see sizes below":
+    "hogar tamaño 1 — los tamaños 2 y 3 cuestan más, mira los tamaños abajo",
+  "size 1 lot — sizes 2 and 3 cost more, see sizes below":
+    "terreno tamaño 1 — los tamaños 2 y 3 cuestan más, mira los tamaños abajo",
+  "sedans and coupes": "sedanes y coupés",
+  "crossovers and 2-row SUVs": "crossovers y SUVs de 2 filas",
+  "trucks, 3-row SUVs and vans": "camionetas, SUVs de 3 filas y vans",
+  "Built for 33156 · 33183 · 33186": "Hecho para 33156 · 33183 · 33186",
+  "Built for Pinecrest · Kendall · Kendall West": "Hecho para Pinecrest · Kendall · Kendall West",
+  "First visit perfect or it's free": "Primera visita perfecta o es gratis",
+  "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Above that size we quote individually.":
+    "Hogar extra grande (2,501–4,000 pies²): +$60 por visita. Arriba de ese tamaño cotizamos individualmente.",
+  "Extra-large lot (4,001–7,500 sq ft of mowable turf): +$30 per visit. Above that size we quote individually.":
+    "Terreno extra grande (4,001–7,500 pies² de grama cortable): +$30 por visita. Arriba de ese tamaño cotizamos individualmente.",
+  "Lifted trucks, commercial vans and oversized vehicles are quoted individually.":
+    "Camionetas elevadas, vans comerciales y vehículos de gran tamaño se cotizan individualmente.",
+  "Locked price — never surprise-priced": "Precio fijo — nunca precios sorpresa",
+  "Background-checked crews. Same team every visit so your lawn stays consistent.":
+    "Equipos con antecedentes verificados. El mismo equipo en cada visita para que tu grama se mantenga igual.",
+  "Background-checked detailers. Same detailer every visit so they learn your vehicle.":
+    "Especialistas con antecedentes verificados. El mismo especialista en cada visita para que conozca tu carro.",
+  "We couldn't save your details. Please try again, or call us at (786) 829-1141.":
+    "No pudimos guardar tus datos. Inténtalo de nuevo o llámanos al (786) 829-1141.",
 };
+
 
 
 
