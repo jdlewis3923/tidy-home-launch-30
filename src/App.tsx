@@ -115,6 +115,8 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 
 // Routes that remain accessible when an admin has toggled the site OFF.
 // Admin can still log in and flip it back on; everything else shows ComingSoon.
+import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFoundingOfferShown } from "@/lib/doorhanger";
+
 const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/", "/neighbor"];
 
 // The printed door hangers point at /dashboard/plan?src=doorhanger_en — a

@@ -8,11 +8,11 @@ import Reveal from "@/components/landing/Reveal";
 import LandingTicker from "@/components/landing/LandingTicker";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { buildSignupHref } from "@/lib/landing";
+import { OFFER_SEEN_PARAM, OFFER_SEEN_VALUE, markFoundingOfferShown } from "@/lib/doorhanger";
 import { pushEvent } from "@/lib/tracking";
 import { captureLandingSource, LANDING_SOURCES, type LandingSource } from "@/lib/landing-source";
 import {
   FOUNDING_OFFER,
-  SERVICE_AREA_LINE,
   ENTRY_PRICE_COPY,
   trustClaims,
 } from "@/lib/pricing-canon";
@@ -60,6 +60,7 @@ const Neighbor = () => {
 
   useEffect(() => {
     captureLandingSource(landingSource);
+    markFoundingOfferShown();
     pushEvent("doorhanger_landing", { landing_source: landingSource, placement: placement ?? "direct" });
   }, [landingSource, placement]);
 
@@ -94,7 +95,7 @@ const Neighbor = () => {
                 {t("One plan for cleaning, lawn care and car care — one flat price per visit, set by the size of your property.")}
               </p>
               <p className="text-sm text-primary-foreground/60 mt-3">
-                {t(SERVICE_AREA_LINE)} · {t(ENTRY_PRICE_COPY)}
+                {t("Serving Pinecrest & Kendall — 33156, 33183, 33186")} · {t(ENTRY_PRICE_COPY)}
               </p>
               <Link
                 to={signupHref}
@@ -107,7 +108,7 @@ const Neighbor = () => {
           </div>
         </section>
 
-        <LandingTicker />
+        <LandingTicker single />
 
         <section className="px-4 py-16">
           <div className="max-w-3xl mx-auto">
