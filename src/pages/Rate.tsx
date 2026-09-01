@@ -46,6 +46,17 @@ const Rate = () => {
   const [done, setDone] = useState(false);
   const commentRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // Screen-2 follow-up ("Let us make it right") state. The screen-1 textarea is
+  // unmounted by then, so the panel owns its own field and posts back against
+  // the rating row rather than trying to focus a field that no longer exists.
+  const [ratingId, setRatingId] = useState<string | null>(null);
+  const [followupOpen, setFollowupOpen] = useState(false);
+  const [followup, setFollowup] = useState("");
+  const [followupSending, setFollowupSending] = useState(false);
+  const [followupSent, setFollowupSent] = useState(false);
+  const [followupError, setFollowupError] = useState("");
+  const followupRef = useRef<HTMLTextAreaElement | null>(null);
+
   const submit = async () => {
     if (!rating || submitting) return;
     setSubmitting(true);
@@ -61,12 +72,39 @@ const Rate = () => {
         },
       });
       if (fnError || !data?.ok) throw new Error(fnError?.message || "failed");
+      setRatingId(typeof data?.rating_id === "string" ? data.rating_id : null);
       setDone(true);
       pushEvent("visit_rating", { stars: rating, has_comment: comment.trim().length > 0 });
     } catch {
       setError(t("Couldn't save — try again in a moment."));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const openFollowup = () => {
+    setFollowupOpen(true);
+    // Focus after the field actually mounts.
+    requestAnimationFrame(() => followupRef.current?.focus());
+  };
+
+  const sendFollowup = async () => {
+    const note = followup.trim();
+    if (!note || followupSending) return;
+    setFollowupSending(true);
+    setFollowupError("");
+    try {
+      if (!ratingId) throw new Error("no_rating_id");
+      const { data, error: fnError } = await supabase.functions.invoke("submit-visit-rating", {
+        body: { rating_id: ratingId, comment: note },
+      });
+      if (fnError || !data?.ok) throw new Error(fnError?.message || "failed");
+      setFollowupSent(true);
+      pushEvent("visit_rating_followup", { stars: rating });
+    } catch {
+      setFollowupError(t("Couldn't send — email us at hello@jointidy.co and we'll fix it."));
+    } finally {
+      setFollowupSending(false);
     }
   };
 
