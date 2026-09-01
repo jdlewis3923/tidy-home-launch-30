@@ -320,6 +320,10 @@ export default function AdminHealth() {
           </div>
         )}
 
+        <div className="mt-6">
+          <ReviewsThisWeekCard />
+        </div>
+
         {data && (
           <div className="mt-6 space-y-4">
             <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
