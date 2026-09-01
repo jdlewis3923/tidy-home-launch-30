@@ -34,6 +34,7 @@ const ADMIN_BASE_URL = Deno.env.get('ADMIN_BASE_URL') ?? 'https://jointidy.co';
 
 const BATCH_SIZE = 200;
 const EXPIRE_DAYS = 30;
+const CANDIDATE_WINDOW_DAYS = 14;
 
 type ReviewBonusPolicy = {
   amount_cents: number;
