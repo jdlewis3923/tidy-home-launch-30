@@ -1191,8 +1191,6 @@ const translations: Record<string, string> = {
     "Cuéntanos qué pasó y volvemos a limpiar el área gratis, o te devolvemos el pago de la visita.",
   "Tell us what happened": "Cuéntanos qué pasó",
   "Or email hello@jointidy.co": "O escribe a hello@jointidy.co",
-  "Couldn't save — try again in a moment.":
-    "No se pudo guardar — inténtalo de nuevo en un momento.",
 
 
 
