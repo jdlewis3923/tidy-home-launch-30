@@ -23,7 +23,7 @@ const config: ServiceLandingConfig = {
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
   heroImageMobileWebp: heroImgMobileWebp,
-  heroDimensions: [1400, 933],
+  heroDimensions: [1920, 1080],
   heroAlt: "Pristine freshly detailed black SUV in a Miami driveway",
   plans: [
     // Each card is one vehicle size, so the price is exact — no "From" here.
