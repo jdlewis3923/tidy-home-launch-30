@@ -289,12 +289,14 @@ export default function Billing() {
             >
               Manage plan <ArrowRight className="h-3.5 w-3.5" />
             </Link>
-            <p className="mt-3 text-xs text-ink-faint">
-              {t("Need to add or change a service? Email ")}
-              <a href="mailto:hello@jointidy.co" className="text-[hsl(var(--primary))] hover:underline">
-                hello@jointidy.co
-              </a>
-              {t(" and we'll update your plan.")}
+            <Link
+              to="/dashboard/services#add-service"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[hsl(var(--primary))] hover:underline"
+            >
+              {t("Add a service")} <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <p className="mt-2 text-xs text-ink-faint">
+              {t("Two or more services earns one free premium add-on every month.")}
             </p>
 
             {sub && (
