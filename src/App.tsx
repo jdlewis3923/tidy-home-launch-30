@@ -224,6 +224,14 @@ const App = () => (
                     element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardPlan /> : <Navigate to="/" replace />}
                   />
                   <Route
+                    path="/dashboard/services"
+                    element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardServices /> : <Navigate to="/" replace />}
+                  />
+                  <Route
+                    path="/dashboard/schedule"
+                    element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardSchedule /> : <Navigate to="/" replace />}
+                  />
+                  <Route
                     path="/dashboard/confirmation"
                     element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardConfirmation /> : <Navigate to="/" replace />}
                   />
