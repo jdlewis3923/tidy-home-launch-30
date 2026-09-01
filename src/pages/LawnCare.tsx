@@ -139,11 +139,23 @@ const config: ServiceLandingConfig = {
   seo: {
     title: "Lawn Care in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Lawn care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same crew, no contracts. Book in about 2 minutes.",
+      "Lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same crew, no contracts. Book in about 2 minutes.",
     canonical: "https://jointidy.co/lawn-care",
     priceRange: "$45–$99",
+    service: {
+      name: "Lawn Care",
+      serviceType: "Lawn Care",
+      description:
+        "Recurring lawn care in Pinecrest and Kendall. One flat price per visit set by the size of your lot.",
+      offers: [
+        { name: "Size 1 lot (up to 2,000 sq ft turf)", price: 45, unit: "visit" },
+        { name: "Size 2 lot (2,001–3,500 sq ft turf)", price: 65, unit: "visit" },
+        { name: "Size 3 lot (3,501–5,000 sq ft turf)", price: 99, unit: "visit" },
+      ],
+    },
   },
 };
+
 
 const LawnCarePage = () => <ServiceLandingPage config={config} />;
 export default LawnCarePage;
