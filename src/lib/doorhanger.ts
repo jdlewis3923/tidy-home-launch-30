@@ -51,3 +51,34 @@ export function shouldRedirectToFoundingOffer(
   if (!src.startsWith("doorhanger")) return false;
   return params.get(OFFER_SEEN_PARAM) !== OFFER_SEEN_VALUE;
 }
+
+/**
+ * Door-hanger conversion carve-out for the coming-soon gate.
+ *
+ * /q/ and /neighbor are already always-open so the 14k print run can run while
+ * the site is dark, but that stopped one hop short of the actual conversion.
+ * These paths open for a door-hanger visitor ONLY — everybody else still gets
+ * the splash, so the site stays dark to the public.
+ */
+export const DOORHANGER_OPEN_PREFIXES = ["/signup", "/dashboard/plan", "/dashboard/confirmation", "/checkout"];
+
+/**
+ * True when this visitor arrived from a door hanger. The URL param is the fresh
+ * signal; the stored first-touch source is the durable one, so access cannot be
+ * lost three hops into the builder because a param got rewritten.
+ */
+export function isDoorhangerVisitor(search: string, storedSource: string | null): boolean {
+  if ((storedSource ?? "").startsWith("doorhanger")) return true;
+  const src = new URLSearchParams(search).get("src") ?? "";
+  return src.startsWith("doorhanger");
+}
+
+/** True when the gate should let this request through on the hanger carve-out. */
+export function doorhangerGateAllows(
+  pathname: string,
+  search: string,
+  storedSource: string | null
+): boolean {
+  if (!DOORHANGER_OPEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return false;
+  return isDoorhangerVisitor(search, storedSource);
+}
