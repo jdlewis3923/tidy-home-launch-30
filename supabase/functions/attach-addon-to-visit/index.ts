@@ -26,7 +26,14 @@ const BodySchema = z.object({
   addon_key: z.string().min(1),
   jobber_visit_id: z.string().optional(),
   visit_date: z.string().optional(),
+  /** Redeem the bundle gift: one free premium add-on per month. Never a discount. */
+  redeem_free: z.boolean().optional(),
 });
+
+/** Calendar month key used to cap free redemptions, e.g. "2026-09". */
+function currentPeriod(): string {
+  return new Date().toISOString().slice(0, 7);
+}
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
