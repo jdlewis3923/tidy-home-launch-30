@@ -69,6 +69,8 @@ const AdminApplicants = lazy(() => import("./pages/AdminApplicants.tsx"));
 const AdminEmailHealth = lazy(() => import("./pages/AdminEmailHealth.tsx"));
 const AdminSetupCheck = lazy(() => import("./pages/AdminSetupCheck.tsx"));
 const AdminLeads = lazy(() => import("./pages/AdminLeads.tsx"));
+const AdminReviews = lazy(() => import("./pages/AdminReviews.tsx"));
+const AdminReviewsImport = lazy(() => import("./pages/AdminReviewsImport.tsx"));
 const AdminCapacity = lazy(() => import("./pages/AdminCapacity.tsx"));
 const AdminOrientations = lazy(() => import("./pages/AdminOrientations.tsx"));
 const AdminSocialLaunch = lazy(() => import("./pages/AdminSocialLaunch.tsx"));
@@ -278,6 +280,9 @@ const App = () => (
                   <Route path="/admin/setup-check" element={<AdminSetupCheck />} />
                   {/* Leads & Requests — waitlist, support requests, chatbot leads. */}
                   <Route path="/admin/leads" element={<AdminLeads />} />
+                  {/* Google review → Pro bonus queue. */}
+                  <Route path="/admin/reviews" element={<AdminReviews />} />
+                  <Route path="/admin/reviews/import" element={<AdminReviewsImport />} />
                   {/* Capacity & hiring — fill %, ceiling dates, when to post the job. */}
                   <Route path="/admin/capacity" element={<AdminCapacity />} />
                   <Route path="/apply" element={<Apply />} />
