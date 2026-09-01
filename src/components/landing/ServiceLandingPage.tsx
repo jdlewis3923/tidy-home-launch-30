@@ -442,8 +442,10 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Why Tidy")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              {t(`Trusted across ${SERVICE_AREA_TRUST.replace("Serving ", "")}`)}
+              {/* "Trusted" is unsupportable — we have zero customers. */}
+              {t(`Built for ${SERVICE_AREA_TRUST.replace("Serving ", "")}`)}
             </h2>
+
           </Reveal>
 
           {/* Mobile: snap-scroll carousel */}
