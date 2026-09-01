@@ -1,6 +1,9 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
 import heroImg from "@/assets/lp-car-detailing.jpg";
+import heroImgWebp from "@/assets/lp-car-detailing.webp";
 import heroImgMobile from "@/assets/lp-car-detailing-mobile.jpg";
+import heroImgMobileWebp from "@/assets/lp-car-detailing-mobile.webp";
+
 
 const config: ServiceLandingConfig = {
   serviceSlug: "car-detailing",
