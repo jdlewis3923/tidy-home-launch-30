@@ -277,7 +277,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                 {t(config.ctaPrimaryLabel ?? "Book in about 2 minutes")} <span className="arrow">→</span>
               </Link>
               <span className="mt-2 text-xs text-primary-foreground/70">
-                {t("About 2 minutes · No contracts")}
+                {t("A quick form · No contracts")}
               </span>
             </div>
             <a
@@ -442,8 +442,9 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           <Reveal className="text-center mb-10">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Why Tidy")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              {/* "Trusted" is unsupportable — we have zero customers. */}
-              {t(`Built for ${SERVICE_AREA_TRUST.replace("Serving ", "")}`)}
+              {/* "Trusted" is unsupportable — we have zero customers. The ZIP
+                  list is capped at 3 places per page, so use the area name. */}
+              {t("Built for Kendall & Pinecrest")}
             </h2>
 
           </Reveal>
@@ -500,8 +501,8 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
         headline={t(`Ready to lock in your ${config.eyebrow.toLowerCase()}?`)}
-        subhead={t("About 2 minutes to sign up. Same crew. Locked price.")}
-        ctaLabel={t("Book in about 2 minutes")}
+        subhead={t("A quick form to sign up. Same crew. Locked price.")}
+        ctaLabel={t("Start your plan")}
         trackingId={`lp_${config.serviceSlug}_final`}
         service={config.signupServiceParam}
       />

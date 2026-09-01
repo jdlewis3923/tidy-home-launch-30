@@ -128,7 +128,7 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-primary-foreground/60">
               <li><a href="#how-it-works" className="hover:text-primary-foreground transition-colors">{t("How It Works")}</a></li>
               <li><a href="#faq" className="hover:text-primary-foreground transition-colors">{t("FAQ")}</a></li>
-              <li className="text-primary-foreground/45">{t("Service Areas")}: 33156 · 33183 · 33186</li>
+              <li className="text-primary-foreground/45">{t("Service Areas")}: {t("Kendall & Pinecrest")}</li>
               <li><Link to="/terms" className="hover:text-primary-foreground transition-colors">{t("Terms of Service")}</Link></li>
               <li><Link to="/privacy" className="hover:text-primary-foreground transition-colors">{t("Privacy Policy")}</Link></li>
               <li><a href="mailto:hello@jointidy.co" className="hover:text-primary-foreground transition-colors">{t("Contact Us")}</a></li>
@@ -156,7 +156,7 @@ const Footer = () => {
             </div>
           </div>
           <p className="text-[10px] text-primary-foreground/25 mt-5 text-center leading-relaxed max-w-3xl mx-auto">
-            {t("Serving 33183 Kendall · 33186 Kendall West · 33156 Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.")}
+            {t("Serving Kendall & Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.")}
           </p>
         </div>
       </div>
