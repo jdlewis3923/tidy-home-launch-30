@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
   }
 
   // Insert addon_attaches row regardless of Stripe (so admin can see failures)
-  const status = stripeInvoiceItemId ? 'pending_visit' : 'failed';
+  const status = isFree || stripeInvoiceItemId ? 'pending_visit' : 'failed';
   const { data: attachRow, error: insErr } = await admin.from('addon_attaches').insert({
     user_id: userId,
     jobber_visit_id: jobber_visit_id ?? null,
@@ -155,6 +155,8 @@ Deno.serve(async (req) => {
     addon_price_cents: addon.price_cents,
     service_type: addonService,
     status,
+    is_free: isFree,
+    free_period: isFree ? period : null,
   }).select('id').single();
 
   if (insErr) {
