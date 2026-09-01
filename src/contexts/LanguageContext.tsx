@@ -55,7 +55,7 @@ const translations: Record<string, string> = {
 
   // Announcement ticker
   "Background-Checked": "Antecedentes Verificados",
-  "Background-Checked Pros": "Profesionales Verificados",
+  "Background-Checked Pros": "Profesionales con Antecedentes Verificados",
   "Same Pro Every Time": "El Mismo Profesional Cada Visita",
   "Cancel Anytime": "Cancela Cuando Quieras",
   "Photo Verified Every Visit": "Fotos Verificadas en Cada Visita",
@@ -131,7 +131,7 @@ const translations: Record<string, string> = {
   "Select your services and frequency. About 2 minutes. See pricing before you pay.":
     "Selecciona tus servicios y frecuencia. Unos 2 minutos. Ve los precios antes de pagar.",
   "We Handle Everything": "Nosotros Nos Encargamos",
-  "A vetted, background-checked professional shows up on time. You receive an ETA before every visit.":
+  "Your assigned professional shows up on time. You receive an ETA before every visit.":
     "Un profesional verificado y con antecedentes revisados llega a tiempo. Recibes un estimado antes de cada visita.",
   "You Never Think About It Again": "Nunca Más Piensas en Ello",
   "Recurring scheduling, automatic billing, photo verification after every visit. No reminders. No rebooking. No effort.":
@@ -269,7 +269,7 @@ const translations: Record<string, string> = {
   "Can I change services later?": "¿Puedo cambiar servicios después?",
   "Of course! Want to add car detailing or switch your cleaning frequency? Just reach out and any changes will kick in at your next billing cycle. We're flexible because your needs are too.":
     "¡Por supuesto! ¿Quieres agregar detallado o cambiar la frecuencia de limpieza? Contáctanos y los cambios entran en tu próximo ciclo de facturación. Somos flexibles porque tus necesidades también lo son.",
-  "Are contractors vetted?": "¿Están verificados los contratistas?",
+  "Are contractors background-checked?": "¿Los contratistas tienen antecedentes verificados?",
   "Absolutely — your trust means everything to us. Every single contractor is fully background-checked, and we require photo documentation after every visit so you can see exactly what was done. Quality and accountability are built into everything we do.":
     "Absolutamente — tu confianza lo es todo. Cada contratista está completamente verificado, y exigimos documentación con fotos después de cada visita para que veas exactamente lo que se hizo. Calidad y responsabilidad en todo lo que hacemos.",
   "What if I'm not satisfied?": "¿Y si no quedo satisfecho?",
@@ -390,10 +390,8 @@ const translations: Record<string, string> = {
   "No contracts. Cancel anytime.": "Sin contratos. Cancela cuando quieras.",
   "Free monthly add-on": "Servicio adicional gratis al mes",
   "Bundle & save": "Combo y ahorra",
-  "Trusted across Pinecrest · Kendall · Kendall West": "Confiado en Pinecrest · Kendall · Kendall West",
 
   // Trust signal row
-  Vetted: "Verificado",
 
   "Locked Price": "Precio Fijo",
   "Serving 3 ZIPs": "3 Códigos Postales",
@@ -478,7 +476,7 @@ const translations: Record<string, string> = {
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, interior windows, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
   "Who does the cleaning?": "¿Quién hace la limpieza?",
-  "Vetted, background-checked professionals. Same crew every visit so they learn your home.":
+  "REMOVED_1":
     "Profesionales evaluados y con antecedentes verificados. El mismo equipo cada visita para que conozcan tu casa.",
   "How is scheduling handled?": "¿Cómo se maneja el horario?",
   "After signup, we lock in a recurring day and time window. You'll get an ETA reminder before every visit. Reschedule anytime from your dashboard.":
@@ -521,7 +519,7 @@ const translations: Record<string, string> = {
 "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.":
     "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y recoger o triturar la grama. Los planes semanales incluyen poda de arbustos.",
   "Who does the work?": "¿Quién hace el trabajo?",
-  "Vetted, background-checked crews. Same team every visit so your lawn stays consistent.":
+  "REMOVED_2":
     "Equipos evaluados y con antecedentes verificados. El mismo equipo cada visita para que tu jardín se mantenga consistente.",
   "We automatically reschedule to the next available day. Your subscription stays active and your price doesn't change.":
     "Reprogramamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa y tu precio no cambia.",
@@ -574,7 +572,7 @@ const translations: Record<string, string> = {
   "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair and clay bar & ceramic coat available as add-ons.":
     "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascotas y barra de arcilla con capa cerámica disponibles como extras.",
   "Who does the detailing?": "¿Quién hace el detallado?",
-  "Vetted, background-checked detailers. Same detailer every visit so they learn your vehicle.":
+  "REMOVED_3":
     "Detalladores evaluados y con antecedentes verificados. El mismo detallador cada visita para que conozca tu vehículo.",
   "What about oversized or commercial vehicles?": "¿Y los vehículos grandes o comerciales?",
   "3-row SUVs, full-size trucks, and large vans get a small upgrade fee. Commercial vans and lifted trucks need a quick custom quote — we'll handle it.":
@@ -587,8 +585,8 @@ const translations: Record<string, string> = {
   // Bundle page
   "Bundle your services — a free premium add-on every month": "Combina tus servicios — un servicio adicional premium gratis cada mes",
   "Bundle your services": "Combina tus servicios",
-  "Hold two or more services and you pick one free premium add-on every month. Pinecrest, Kendall & Palmetto Bay only (33156 · 33183 · 33186).":
-    "Si tienes dos o más servicios, eliges un servicio adicional premium gratis cada mes. Solo Pinecrest, Kendall y Palmetto Bay (33156 · 33183 · 33186).",
+  "Hold two or more services and you pick one free premium add-on every month. Pinecrest & Kendall only (33156 · 33183 · 33186).":
+    "Si tienes dos o más servicios, eliges un servicio adicional premium gratis cada mes. Solo Pinecrest y Kendall (33156 · 33183 · 33186).",
   "Every service on one bill — and you still pick one free premium add-on every month.":
     "Todos los servicios en una sola factura — y sigues eligiendo un servicio adicional premium gratis cada mes.",
   "The more you stack, the more you save. Pinecrest + Kendall only (33156 · 33183 · 33186).":
@@ -669,7 +667,7 @@ const translations: Record<string, string> = {
   "2–3 business days": "2–3 días hábiles",
   "Join our team —": "Únete a nuestro equipo —",
   "we bring the customers.": "nosotros traemos los clientes.",
-  "Tidy is Miami's subscription home-service brand. We're hiring vetted cleaners, lawn pros, and detailers in Kendall and Pinecrest.":
+  "Tidy is Miami's subscription home-service brand. We're hiring background-checked cleaners, lawn pros, and detailers in Kendall and Pinecrest.":
     "Tidy es la marca de servicios del hogar por suscripción de Miami. Estamos contratando limpiadores, jardineros y detallistas verificados en Kendall y Pinecrest.",
   "Weekly direct deposit": "Depósito directo semanal",
   "Paid every Friday — no chasing invoices.": "Te pagamos cada viernes — sin perseguir facturas.",
@@ -763,7 +761,7 @@ const translations: Record<string, string> = {
   "Tell us about your home, choose your schedule, and review your price. Takes under 2 minutes.":
     "Cuéntanos sobre tu hogar, elige tu horario y revisa tu precio. Toma menos de 2 minutos.",
   "Tidy Confirms & Coordinates": "Tidy Confirma y Coordina",
-  "We assign a vetted, background-checked professional and lock in your recurring schedule. You'll get a confirmation with your first visit date.":
+  "We assign your professional and lock in your recurring schedule. You'll get a confirmation with your first visit date.":
     "Asignamos un profesional verificado y con antecedentes revisados, y fijamos tu horario recurrente. Recibirás una confirmación con la fecha de tu primera visita.",
   "Your Pro Completes the Visit": "Tu Profesional Completa la Visita",
   "Your professional arrives on schedule, completes the service, and submits photo verification when done.":
@@ -773,7 +771,11 @@ const translations: Record<string, string> = {
     "Ajusta servicios, omite visitas, actualiza tu plan o pausa cuando quieras — todo desde un panel simple.",
 
   // Proof bar / trust chips
-  "Satisfaction Guaranteed": "Satisfacción Garantizada",
+  "First Visit Perfect or Free": "Primera Visita Perfecta o Gratis",
+  "Photo-Verified Visits": "Visitas Verificadas con Fotos",
+  "Every professional is screened through Checkr before their first visit. Photo verification submitted after every visit.":
+    "Cada profesional pasa por una revisión a través de Checkr antes de su primera visita. Se envía verificación con fotos después de cada visita.",
+  "How are your pros background-checked?": "¿Cómo se revisan los antecedentes de tus profesionales?",
   "Photo-Verified Every Visit": "Verificado con Fotos en Cada Visita",
   "Serving Kendall + Pinecrest": "Sirviendo Kendall + Pinecrest",
 
@@ -857,9 +859,9 @@ const translations: Record<string, string> = {
     "Pausaremos tus servicios y te notificaremos por SMS y correo para que actualices tu información de pago. Una vez resuelto, vuelves a tu programación.",
   "Of course. Add, remove, or change frequency for any service anytime. Changes kick in at your next billing cycle.":
     "Por supuesto. Agrega, elimina o cambia la frecuencia de cualquier servicio cuando quieras. Los cambios aplican en tu siguiente ciclo de facturación.",
-  "Are professionals vetted?": "¿Los profesionales están verificados?",
-  "Every professional is background-checked through Checkr and required to submit photo documentation after each service.":
-    "Cada profesional tiene revisados sus antecedentes a través de Checkr y debe enviar documentación con fotos después de cada servicio.",
+  "Are professionals background-checked?": "¿Los profesionales tienen antecedentes verificados?",
+  "Every professional is screened through Checkr and required to submit photo documentation after each service.":
+    "Cada profesional pasa por una revisión a través de Checkr y debe enviar documentación con fotos después de cada servicio.",
   "Reach out within 24 hours and we'll make it right — re-service or credit, no questions asked. Your satisfaction is our top priority.":
     "Contáctanos dentro de 24 horas y lo resolvemos — repetimos el servicio o te damos un crédito, sin preguntas. Tu satisfacción es nuestra prioridad.",
   "What if something goes wrong during a visit?": "¿Qué pasa si algo sale mal durante una visita?",
@@ -880,16 +882,16 @@ const translations: Record<string, string> = {
   "Lock in your rate as one of our first members. Your price stays put as we grow.":
     "Asegura tu tarifa como uno de nuestros primeros miembros. Tu precio se mantiene mientras crecemos.",
   "Built on Accountability": "Construido sobre la Responsabilidad",
-  "Every visit is completed by a vetted, background-checked pro — with photo verification after each service, and a named point of contact on every job.":
-    "Cada visita la realiza un profesional verificado y con antecedentes revisados — con verificación fotográfica después de cada servicio y un contacto asignado en cada trabajo.",
+  "Every visit gets photo verification after the service, and a named point of contact on every job.":
+    "Cada visita recibe verificación con fotos después del servicio y un contacto asignado en cada trabajo.",
   "Not happy? We make it right within 24 hours — re-service or credit, no questions asked.":
     "¿No quedaste satisfecho? Lo resolvemos dentro de 24 horas — repetimos el servicio o te damos un crédito, sin preguntas.",
   "FOUNDING MEMBERS": "MIEMBROS FUNDADORES",
   "Be among the first homes on autopilot.": "Sé de los primeros hogares en piloto automático.",
   "Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and lock in founding-member pricing.":
     "Tidy está aceptando un grupo limitado de miembros fundadores en Pinecrest, Kendall y Kendall West. Únete temprano y asegura el precio de miembro fundador.",
-  "Background-Checked · Photo-Verified Visits · Satisfaction Guaranteed":
-    "Antecedentes Verificados · Visitas Verificadas con Fotos · Satisfacción Garantizada",
+  "Background-Checked · Photo-Verified Visits · First visit perfect or it's free":
+    "Antecedentes Verificados · Visitas Verificadas con Fotos · Primera visita perfecta o es gratis",
   "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
     "Un servicio adicional premium gratis en tu primera visita · Primera visita perfecta o es gratis · Solo 25 casas fundadoras por código postal",
   "One free premium add-on on your first visit": "Un servicio adicional gratis en la primera visita",
@@ -969,7 +971,6 @@ const translations: Record<string, string> = {
     "Shine Complete a domicilio en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). 3 lavados al mes más 2 detallados completos al año, desde $149/mes. Reserva en unos 2 minutos.",
   "One flat price set by the size of your home, lawn or vehicle. Hold two or more services and you pick one free premium add-on every month — Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186).":
     "Un precio fijo según el tamaño de tu casa, jardín o vehículo. Si tienes dos o más servicios, eliges un servicio adicional premium gratis cada mes — Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186).",
-  "Vetted & background-checked pros": "Profesionales verificados y con antecedentes revisados",
   "About 2 minutes · No contracts": "Unos 2 minutos · Sin contratos",
   "Locked price · No contracts · Cancel anytime · Pause or reschedule anytime":
     "Precio fijo · Sin contratos · Cancela cuando quieras · Pausa o reagenda cuando quieras",
@@ -977,7 +978,6 @@ const translations: Record<string, string> = {
     "Configúralo una vez. Nosotros nos encargamos del resto — programación, recordatorios y el mismo equipo en cada visita.",
   "No contracts · Cancel, pause, or reschedule anytime": "Sin contratos · Cancela, pausa o reagenda cuando quieras",
   "Background-checked pros": "Profesionales con antecedentes verificados",
-  "Vetted & background-checked": "Antecedentes verificados a través de Checkr",
   "Satisfaction guaranteed": "Garantía de satisfacción",
   "Serving ": "Sirviendo ",
 
