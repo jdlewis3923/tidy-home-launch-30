@@ -87,6 +87,7 @@ const AdminTierProgression = lazy(() => import("./pages/AdminTierProgression.tsx
 const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.tsx"));
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
 const QrRedirect = lazy(() => import("./pages/QrRedirect.tsx"));
+const Rate = lazy(() => import("./pages/Rate.tsx"));
 
 const queryClient = new QueryClient();
 
