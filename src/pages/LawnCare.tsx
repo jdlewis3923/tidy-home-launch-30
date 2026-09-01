@@ -80,9 +80,12 @@ const config: ServiceLandingConfig = {
     "Bag or mulch clippings",
     "Same crew every visit",
     "Background-checked pros",
-    "Locked $45 a visit — never surprise-priced",
+    "Locked price — never surprise-priced",
   ],
   addOnsNote: "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens. Driveway pressure wash is specialist work, quoted separately.",
+  surchargeNote:
+    "Extra-large lot (4,001–7,500 sq ft of mowable turf): +$30 per visit. Above that size we quote individually.",
+
   trustCards: [
     {
       title: "Same Crew",
