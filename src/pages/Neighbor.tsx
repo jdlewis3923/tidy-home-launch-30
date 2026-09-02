@@ -112,7 +112,7 @@ const Neighbor = () => {
     if (!zipParam) return;
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase.rpc("founding_spots_left", { _zip: zipParam });
+      const { data, error } = await (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>)("founding_spots_left", { _zip: zipParam });
       if (!cancelled && !error && typeof data === "number") setSpotsLeft(data);
     })();
     return () => { cancelled = true; };

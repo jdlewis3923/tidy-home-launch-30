@@ -1172,7 +1172,6 @@ const translations: Record<string, string> = {
     "Los lugares de fundador están limitados a 25 hogares por código postal y no se vuelven a abrir.",
   "Locked founding rate": "Tarifa de fundador fija",
   "One free premium add-on": "Un servicio adicional premium gratis",
-  "Same crew every visit": "El mismo equipo en cada visita",
   "Three services. One plan.": "Tres servicios. Un solo plan.",
   "Kitchen, baths, floors and dusting, same crew every visit.":
     "Cocina, baños, pisos y polvo, con el mismo equipo en cada visita.",
