@@ -1,9 +1,11 @@
 {
   "version": 1,
-  "asset_id": "2bdf69a6-56ba-49bf-b238-a664e811225e",
+  "asset_id": "e3d5454b-7846-48f2-ab4a-67f8bd26cec6",
   "project_id": "05344d47-ecbe-47e9-bfc5-690b69ee10c2",
-  "url": "/__l5e/assets-v1/2bdf69a6-56ba-49bf-b238-a664e811225e/neighbor-hero-loop.mp4",
+  "url": "/__l5e/assets-v1/e3d5454b-7846-48f2-ab4a-67f8bd26cec6/neighbor-hero-loop.mp4",
+  "r2_key": "a/v1/05344d47-ecbe-47e9-bfc5-690b69ee10c2/e3d5454b-7846-48f2-ab4a-67f8bd26cec6/neighbor-hero-loop.mp4",
   "original_filename": "neighbor-hero-loop.mp4",
-  "size": 39545267,
-  "created_at": "2026-09-02T21:45:21Z"
+  "size": 950231,
+  "content_type": "video/mp4",
+  "created_at": "2026-09-02T21:46:34Z"
 }
