@@ -17,6 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import MyTierWidget from "@/components/pro/MyTierWidget";
 import InsuranceCard from "@/components/pro/InsuranceCard";
+import ProNotificationBell from "@/components/pro/ProNotificationBell";
 import { Skeleton } from "@/components/ui/skeleton";
 import AnimatedNumber from "@/components/motion/AnimatedNumber";
 import tidyLogo from "@/assets/tidy-logo.png";
