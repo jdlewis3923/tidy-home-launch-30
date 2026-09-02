@@ -1,9 +1,10 @@
 /**
- * Admin Social Launch Campaign — /admin/social-launch
+ * Admin Founding Neighbor Social Campaign — /admin/social-launch
  *
- * Two stacked, distinct campaigns: Nextdoor (12 posts, 4×3) and Meta IG+FB (30 posts, 5×6).
- * Each card with no image shows a dashed drop zone (drag-drop or click-to-pick).
- * Section-level "Arm" buttons + a sticky "Launch All Campaigns" button.
+ * Two stacked campaigns: Nextdoor (12 posts, 4×3) and Meta IG+FB (30 posts, 5×6).
+ * Captions live in `src/lib/socialCampaign.ts` (evergreen, EN + ES, per-ZIP
+ * attributed links) and are written into the row at ARM time, together with the
+ * scheduled date computed from the settable campaign START DATE.
  * Armed posts are auto-published by the social-launch-publisher edge function.
  */
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
@@ -18,13 +19,23 @@ import {
   Rocket,
   Send,
   AlertCircle,
+  CalendarDays,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import {
+  CAMPAIGN_NAMES,
+  NEXTDOOR_POSTS,
+  META_POSTS,
+  buildCaption,
+  scheduledFor,
+  defaultStartDate,
+  type CampaignPost,
+} from "@/lib/socialCampaign";
 import {
   Dialog,
   DialogContent,
@@ -35,9 +46,10 @@ import {
 } from "@/components/ui/dialog";
 
 type Channel = "nextdoor" | "instagram" | "facebook" | "meta_combined";
+type Platform = "nextdoor" | "meta";
 type Status = "pending" | "image_uploaded" | "scheduled" | "armed" | "posted" | "failed" | "skipped";
 
-type Post = {
+type Row = {
   id: string;
   channel: Channel;
   post_number: number;
@@ -52,7 +64,8 @@ type Post = {
   publish_error: string | null;
 };
 
-const LAUNCH_DATE = new Date("2026-05-26T12:00:00Z");
+/** A DB row joined to its library copy — the library always wins for display. */
+type Post = Row & { libTitle: string; libCaption: string; plannedFor: string };
 
 const STATUS_BADGE: Record<Status, { label: string; className: string }> = {
   pending: { label: "Pending", className: "bg-slate-200 text-slate-700" },
@@ -74,9 +87,8 @@ function fmtDate(iso: string) {
   });
 }
 
-function daysUntilLaunch() {
-  const ms = LAUNCH_DATE.getTime() - Date.now();
-  return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+function fmtShort(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 // ---------- Card ----------
@@ -95,8 +107,9 @@ function PostCard({
   const [expanded, setExpanded] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const captionPreview = expanded ? post.caption : post.caption.slice(0, 150);
-  const truncated = post.caption.length > 150;
+  const caption = post.libCaption;
+  const captionPreview = expanded ? caption : caption.slice(0, 150);
+  const truncated = caption.length > 150;
 
   const handleFiles = useCallback(
     async (file: File) => {
@@ -115,7 +128,7 @@ function PostCard({
   );
 
   const copyCaption = async () => {
-    await navigator.clipboard.writeText(post.caption);
+    await navigator.clipboard.writeText(caption);
     toast.success(`Post #${post.post_number} caption copied`);
   };
 
@@ -134,7 +147,9 @@ function PostCard({
       {/* Top metadata strip */}
       <div className="flex items-center justify-between px-3 py-2 text-xs">
         <span className="font-bold text-slate-900">Post {post.post_number}</span>
-        <span className="text-slate-600">{fmtDate(post.scheduled_for)}</span>
+        <span className="text-slate-600">
+          {fmtDate(post.status === "posted" || post.status === "armed" ? post.scheduled_for : post.plannedFor)}
+        </span>
       </div>
 
       {/* Image / drop zone */}
@@ -182,6 +197,7 @@ function PostCard({
 
       {/* Caption preview */}
       <div className="flex-1 px-3 py-2 text-xs text-slate-700">
+        <p className="mb-1 font-semibold text-slate-900">{post.libTitle}</p>
         <p className="whitespace-pre-wrap leading-snug">
           {captionPreview}
           {truncated && !expanded && "… "}
@@ -246,8 +262,8 @@ function CampaignSection({
   const withImage = posts.filter((p) => p.image_url).length;
   const armed = posts.filter((p) => p.status === "armed" || p.status === "posted").length;
   const posted = posts.filter((p) => p.status === "posted").length;
-  const ready = withImage === total;
-  const allArmed = armed === total;
+  const ready = total > 0 && withImage === total;
+  const allArmed = total > 0 && armed === total;
   const [confirming, setConfirming] = useState(false);
 
   return (
@@ -298,8 +314,8 @@ function CampaignSection({
           <DialogHeader>
             <DialogTitle>Arm {title}?</DialogTitle>
             <DialogDescription>
-              {withImage} posts will be locked in to publish on schedule. You can still edit captions, but new
-              uploads after arming require re-arming.
+              {withImage} posts get the current captions and the schedule built from your campaign start date,
+              then publish automatically. New uploads after arming require re-arming.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -324,21 +340,28 @@ function CampaignSection({
 
 export default function AdminSocialLaunch() {
   const { hasRole, isLoading: roleLoading } = useHasRoleState("admin");
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [launchOpen, setLaunchOpen] = useState(false);
+  const [startDate, setStartDate] = useState<string>(defaultStartDate());
+  const [savingDate, setSavingDate] = useState(false);
 
   const refresh = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("social_launch_posts")
-      .select("*")
-      .order("channel", { ascending: true })
-      .order("post_number", { ascending: true });
+    const [{ data, error }, settings] = await Promise.all([
+      supabase
+        .from("social_launch_posts")
+        .select("*")
+        .order("channel", { ascending: true })
+        .order("post_number", { ascending: true }),
+      supabase.from("app_settings").select("value").eq("key", "social_campaign_start_date").maybeSingle(),
+    ]);
     if (error) {
       toast.error("Failed to load posts");
       return;
     }
-    setPosts((data ?? []) as Post[]);
+    const saved = settings.data?.value;
+    if (typeof saved === "string" && /^\d{4}-\d{2}-\d{2}$/.test(saved)) setStartDate(saved);
+    setRows((data ?? []) as Row[]);
     setLoading(false);
   }, []);
 
@@ -346,15 +369,49 @@ export default function AdminSocialLaunch() {
     if (hasRole) void refresh();
   }, [hasRole, refresh]);
 
-  const nextdoor = useMemo(() => posts.filter((p) => p.channel === "nextdoor"), [posts]);
-  const meta = useMemo(
-    () => posts.filter((p) => p.channel === "meta_combined" || p.channel === "instagram" || p.channel === "facebook"),
-    [posts],
+  /** Join DB rows to library copy + planned schedule. */
+  const join = useCallback(
+    (library: CampaignPost[], platform: Platform, channels: Channel[]): Post[] => {
+      const pool = rows.filter((r) => channels.includes(r.channel));
+      return library
+        .map((lib, index) => {
+          const row = pool.find((r) => r.post_number === lib.post_number);
+          if (!row) return null;
+          return {
+            ...row,
+            libTitle: lib.title,
+            libCaption: buildCaption(lib, platform),
+            plannedFor: scheduledFor(startDate, platform, index).toISOString(),
+          } as Post;
+        })
+        .filter((p): p is Post => p !== null);
+    },
+    [rows, startDate],
   );
 
-  const totalImages = posts.filter((p) => p.image_url).length;
-  const allReady = totalImages === posts.length && posts.length > 0;
-  const remaining = posts.length - totalImages;
+  const nextdoor = useMemo(() => join(NEXTDOOR_POSTS, "nextdoor", ["nextdoor"]), [join]);
+  const meta = useMemo(
+    () => join(META_POSTS, "meta", ["meta_combined", "instagram", "facebook"]),
+    [join],
+  );
+  const allPosts = useMemo(() => [...nextdoor, ...meta], [nextdoor, meta]);
+
+  const totalImages = allPosts.filter((p) => p.image_url).length;
+  const allReady = allPosts.length > 0 && totalImages === allPosts.length;
+  const remaining = allPosts.length - totalImages;
+
+  const saveStartDate = useCallback(async (next: string) => {
+    setStartDate(next);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(next)) return;
+    setSavingDate(true);
+    const { data: authData } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: "social_campaign_start_date", value: next, updated_by: authData.user?.id ?? null });
+    setSavingDate(false);
+    if (error) toast.error(`Could not save start date: ${error.message}`);
+    else toast.success("Campaign start date saved");
+  }, []);
 
   const onUpload = useCallback(async (post: Post, file: File) => {
     const ext = file.name.split(".").pop() || "jpg";
@@ -384,58 +441,60 @@ export default function AdminSocialLaunch() {
     void refresh();
   }, [refresh]);
 
-  const armChannel = useCallback(async (channelFilter: Channel[]) => {
-    const ids = posts
-      .filter((p) => channelFilter.includes(p.channel) && p.status === "image_uploaded")
-      .map((p) => p.id);
-    if (ids.length === 0) {
+  /** Arming writes the live caption, title and computed schedule onto each row. */
+  const armPosts = useCallback(async (targets: Post[]) => {
+    const armable = targets.filter((p) => p.status === "image_uploaded");
+    if (armable.length === 0) {
       toast.info("Nothing to arm");
-      return;
+      return 0;
     }
-    const { error } = await supabase
-      .from("social_launch_posts")
-      .update({ status: "armed", armed_at: new Date().toISOString() })
-      .in("id", ids);
-    if (error) {
-      toast.error(`Arm failed: ${error.message}`);
-      return;
+    const armed_at = new Date().toISOString();
+    const results = await Promise.all(
+      armable.map((p) =>
+        supabase
+          .from("social_launch_posts")
+          .update({
+            title: p.libTitle,
+            caption: p.libCaption,
+            scheduled_for: p.plannedFor,
+            status: "armed",
+            armed_at,
+            publish_error: null,
+          })
+          .eq("id", p.id),
+      ),
+    );
+    const failed = results.filter((r) => r.error);
+    if (failed.length) {
+      toast.error(`Arm failed on ${failed.length} posts: ${failed[0].error?.message}`);
+    } else {
+      toast.success(`Armed ${armable.length} posts`);
     }
-    toast.success(`Armed ${ids.length} posts`);
     void refresh();
-  }, [posts, refresh]);
+    return armable.length - failed.length;
+  }, [refresh]);
 
   const armAll = useCallback(async () => {
-    const ids = posts.filter((p) => p.status === "image_uploaded").map((p) => p.id);
-    if (ids.length === 0) {
-      toast.info("Nothing to arm");
-      return;
-    }
-    const { error } = await supabase
-      .from("social_launch_posts")
-      .update({ status: "armed", armed_at: new Date().toISOString() })
-      .in("id", ids);
-    if (error) {
-      toast.error(`Arm failed: ${error.message}`);
-      return;
-    }
-    toast.success(`Armed all ${ids.length} posts`);
+    await armPosts(allPosts);
     setLaunchOpen(false);
-    void refresh();
-  }, [posts, refresh]);
+  }, [armPosts, allPosts]);
 
   if (roleLoading) {
     return <div className="grid min-h-screen place-items-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   }
   if (!hasRole) return <Navigate to="/" replace />;
 
-  const firstScheduled = posts.length > 0
-    ? posts.map((p) => new Date(p.scheduled_for).getTime()).sort((a, b) => a - b)[0]
-    : null;
+  const ndRange = nextdoor.length
+    ? `${fmtShort(nextdoor[0].plannedFor)} → ${fmtShort(nextdoor[nextdoor.length - 1].plannedFor)}`
+    : "";
+  const metaRange = meta.length
+    ? `${fmtShort(meta[0].plannedFor)} → ${fmtShort(meta[meta.length - 1].plannedFor)}`
+    : "";
 
   return (
     <div className="min-h-screen bg-slate-100">
       <Helmet>
-        <title>Social Launch · Admin</title>
+        <title>Founding Neighbor Social Campaign · Admin</title>
         <meta name="robots" content="noindex" />
       </Helmet>
 
@@ -447,13 +506,24 @@ export default function AdminSocialLaunch() {
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Pre-Launch Social Campaign</h1>
+              <h1 className="text-xl font-bold tracking-tight">Founding Neighbor Social Campaign</h1>
               <p className="text-xs text-slate-300">
-                {daysUntilLaunch()} days to launch · {totalImages}/{posts.length} images uploaded
+                {totalImages}/{allPosts.length} images uploaded · evergreen captions, EN + ES
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 rounded-md bg-white/10 px-3 py-1.5 text-xs">
+              <CalendarDays className="h-3.5 w-3.5" />
+              Start date
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => saveStartDate(e.target.value)}
+                className="h-7 w-[140px] border-white/20 bg-white/10 text-xs text-white"
+              />
+              {savingDate && <Loader2 className="h-3 w-3 animate-spin" />}
+            </label>
             {!allReady && (
               <span className="hidden text-xs text-amber-300 md:inline-flex items-center gap-1">
                 <AlertCircle className="h-3.5 w-3.5" />
@@ -481,23 +551,23 @@ export default function AdminSocialLaunch() {
         ) : (
           <>
             <CampaignSection
-              title="Nextdoor Pre-Launch Campaign"
-              subtitle="Apr 30 → May 26 · 12 posts"
+              title={CAMPAIGN_NAMES.nextdoor}
+              subtitle={`${ndRange} · ${nextdoor.length} posts`}
               posts={nextdoor}
               cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
               headerBg="bg-slate-900"
               onUpload={onUpload}
-              onArmSection={() => armChannel(["nextdoor"])}
+              onArmSection={() => armPosts(nextdoor).then(() => undefined)}
               refresh={refresh}
             />
             <CampaignSection
-              title="Meta IG + FB Pre-Launch Campaign"
-              subtitle="Apr 30 → May 26 · 30 posts"
+              title={CAMPAIGN_NAMES.meta}
+              subtitle={`${metaRange} · ${meta.length} posts`}
               posts={meta}
               cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
               headerBg="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500"
               onUpload={onUpload}
-              onArmSection={() => armChannel(["meta_combined", "instagram", "facebook"])}
+              onArmSection={() => armPosts(meta).then(() => undefined)}
               refresh={refresh}
             />
           </>
@@ -507,14 +577,22 @@ export default function AdminSocialLaunch() {
       <Dialog open={launchOpen} onOpenChange={setLaunchOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Arm {posts.length} posts to launch on schedule?</DialogTitle>
+            <DialogTitle>Arm {allPosts.length} posts?</DialogTitle>
             <DialogDescription>
               Nextdoor: {nextdoor.length} · Meta: {meta.length}
-              {firstScheduled && (
+              {allPosts.length > 0 && (
                 <>
                   <br />
                   First post fires:{" "}
-                  <b>{new Date(firstScheduled).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" })}</b>
+                  <b>
+                    {new Date(nextdoor[0]?.plannedFor ?? meta[0]?.plannedFor).toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      timeZoneName: "short",
+                    })}
+                  </b>
                 </>
               )}
             </DialogDescription>
