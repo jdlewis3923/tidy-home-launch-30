@@ -393,7 +393,51 @@ export const META_POSTS: CampaignPost[] = [
     en: `Founding neighbor: rate locked for life, one free premium add-on, first visit perfect or it's free. 25 homes per ZIP.`,
     es: `Vecino fundador: precio fijo de por vida, un servicio premium gratis y primera visita perfecta o gratis. 25 hogares por código postal.`,
   },
+  // ── Moved off Nextdoor (its cadence is one post every two weeks) ───────────
+  {
+    post_number: 31,
+    title: "House cleaning, same Pro",
+    zip: "33183",
+    en: `House cleaning in ${N["33183"]}, from $139 a visit for a size 1 home.\n\nKitchen, baths, floors and dusting. Same crew every visit, so nobody has to be shown where anything goes twice.\n\nFirst visit perfect or it's free.`,
+    es: `Limpieza de casa en ${N["33183"]}, desde $139 por visita para un hogar tamaño 1.\n\nCocina, baños, pisos y polvo. El mismo equipo en cada visita, así nadie tiene que explicar dos veces dónde va cada cosa.\n\nPrimera visita perfecta o es gratis.`,
+  },
+  {
+    post_number: 32,
+    title: "Lawn care from $45",
+    zip: "33186",
+    en: `Lawn care in ${N["33186"]}, from $45 a visit.\n\nMow, edge, trim and blow down — clippings hauled off, gate closed behind us.\n\nAdd it to cleaning or car care and it's all one plan, one bill.`,
+    es: `Cuidado de grama en ${N["33186"]}, desde $45 por visita.\n\nCortamos, bordeamos, recortamos y soplamos — nos llevamos los recortes y cerramos el portón al salir.\n\nCombínalo con limpieza o cuidado del carro: un solo plan, una sola factura.`,
+  },
+  {
+    post_number: 33,
+    title: "Car care in your driveway",
+    zip: "33186",
+    en: `Shine Complete: car care in your own driveway, from $149 a month.\n\nHand wash, wheels, glass and an interior wipe-down. You never move the car.\n\n${N["33186"]} founding spots are open.`,
+    es: `Shine Complete: cuidado del carro en tu propia entrada, desde $149 al mes.\n\nLavado a mano, ruedas, vidrios y limpieza interior. No tienes que mover el carro.\n\nHay lugares fundadores abiertos en ${N["33186"]}.`,
+  },
+  {
+    post_number: 34,
+    title: "One free premium add-on",
+    zip: "33183",
+    en: `Founding neighbors get one free premium add-on on the first visit — you pick it.\n\nInside-the-fridge, oven, bed edge reset, clay bar. Your choice, no charge, no conditions.`,
+    es: `Los vecinos fundadores reciben un servicio premium gratis en la primera visita — tú lo eliges.\n\nInterior del refrigerador, horno, reinicio de bordes de jardineras, clay bar. Tú decides, sin costo y sin condiciones.`,
+  },
+  {
+    post_number: 35,
+    title: "Saturdays back",
+    zip: "33183",
+    en: `Nobody in ${N["33183"]} moved here to spend Saturday behind a mower.\n\nLawn from $45 a visit, cleaning from $139. Set it once and it just happens.`,
+    es: `Nadie en ${N["33183"]} se mudó aquí para pasar el sábado detrás de una podadora.\n\nGrama desde $45 por visita, limpieza desde $139. Lo configuras una vez y simplemente pasa.`,
+  },
+  {
+    post_number: 36,
+    title: "Founding spots in Kendall West",
+    zip: "33186",
+    en: `Founding neighbor, plainly:\n\nYour rate is locked for life. One free premium add-on on the first visit. First visit perfect or it's free. Capped at 25 homes in ${N["33186"]}.\n\nNo contract. Cancel anytime.`,
+    es: `Vecino fundador, en simple:\n\nTu precio queda fijo de por vida. Un servicio premium gratis en la primera visita. Primera visita perfecta o es gratis. Limitado a 25 hogares en ${N["33186"]}.\n\nSin contrato. Cancela cuando quieras.`,
+  },
 ];
+
 
 /** Every row we manage, with its stored caption and title, ready for the DB. */
 export function campaignRows(): {
