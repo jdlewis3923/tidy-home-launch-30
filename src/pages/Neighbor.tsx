@@ -419,8 +419,13 @@ const Neighbor = () => {
               {HOW_IT_WORKS.map((step, i) => (
                 <Reveal key={step.n} delay={i * 70}>
                   <li className="h-full">
-                    <span className="block text-[26px] font-extrabold leading-none text-[#F7C618]">{step.n}</span>
-                    <h3 className="mt-2 text-[17px] font-bold text-[#0F1729]">{t(step.title)}</h3>
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#F7C618]/15">
+                        <step.Icon className="h-5 w-5 text-[#0F1729]" aria-hidden="true" />
+                      </span>
+                      <span className="text-[26px] font-extrabold leading-none text-[#F7C618]">{step.n}</span>
+                    </div>
+                    <h3 className="mt-3 text-[17px] font-bold text-[#0F1729]">{t(step.title)}</h3>
                     <p className="mt-1.5 text-[15px] leading-snug text-[#0F1729]/70">{t(step.body)}</p>
                   </li>
                 </Reveal>
