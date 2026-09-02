@@ -88,13 +88,15 @@ const STATUS_BADGE: Record<Status, { label: string; className: string }> = {
   skipped: { label: "Skipped", className: "bg-slate-400 text-white" },
 };
 
-function fmtDate(iso: string) {
+function fmtDate(iso: string, et = false) {
   const d = new Date(iso);
   return d.toLocaleString("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
     hour: "numeric",
+    minute: "2-digit",
+    ...(et ? { timeZone: "America/New_York", timeZoneName: "short" as const } : {}),
   });
 }
 
@@ -108,11 +110,16 @@ function PostCard({
   post,
   onUpload,
   onChange,
+  manual = false,
+  onMarkPosted,
 }: {
   post: Post;
   onUpload: (post: Post, file: File) => Promise<void>;
   onChange: () => void;
+  manual?: boolean;
+  onMarkPosted?: (post: Post) => Promise<void>;
 }) {
+
   const [busy, setBusy] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [expanded, setExpanded] = useState(false);
