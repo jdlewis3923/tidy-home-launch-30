@@ -122,7 +122,7 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-gold": "pulse-gold 2s ease-in-out infinite",
+        "pulse-gold": "pulse-gold 3.6s ease-in-out infinite",
         shimmer: "shimmer 1.8s ease-in-out infinite",
         "fade-in": "fade-in 0.4s ease-out",
         "billing-bounce": "billing-bounce 1.2s ease-in-out infinite",
