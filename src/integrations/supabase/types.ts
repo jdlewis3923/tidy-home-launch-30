@@ -3841,6 +3841,7 @@ export type Database = {
       }
       current_user_admin: { Args: never; Returns: boolean }
       ensure_referral_code: { Args: never; Returns: string }
+      founding_spots_left: { Args: { _zip: string }; Returns: number }
       generate_referral_code: { Args: never; Returns: string }
       get_customer_preferred_pro_options: {
         Args: { p_user_id: string }

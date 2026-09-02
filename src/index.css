@@ -215,7 +215,7 @@
 
 .animate-ticker { animation: ticker-scroll 30s linear infinite; }
 .animate-float { animation: float 3s ease-in-out infinite; }
-.animate-bounce-float { animation: bounce-float 2.5s ease-in-out infinite; }
+.animate-bounce-float { animation: bounce-float 4.5s ease-in-out infinite; }
 
 @keyframes bounce-float {
   0%, 100% { transform: translateY(0) scale(1); }
