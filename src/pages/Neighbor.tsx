@@ -155,7 +155,7 @@ const Neighbor = () => {
 
       <main>
         {/* ── HERO: full-bleed photograph ───────────────────────────────── */}
-        <section className="relative isolate min-h-[86svh] flex flex-col justify-end overflow-hidden">
+        <section className="relative isolate min-h-[78svh] flex flex-col justify-end overflow-hidden">
           <picture>
             <source media="(max-width: 767px)" srcSet={heroMobileWebp} type="image/webp" />
             <source media="(max-width: 767px)" srcSet={heroMobileJpg} type="image/jpeg" />
@@ -168,17 +168,17 @@ const Neighbor = () => {
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className="absolute inset-0 -z-10 h-full w-full object-cover object-center"
+              className="absolute inset-0 -z-10 h-full w-full object-cover object-bottom"
             />
           </picture>
           {/* Hard scrim — daylight legibility, not decoration. */}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0F1729] via-[#0F1729]/80 to-[#0F1729]/25" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0F1729] via-[#0F1729]/85 to-[#0F1729]/20" />
 
           <div className="absolute left-4 top-24 md:left-8">
             <TidyLogo size="sm" priority />
           </div>
 
-          <div className="px-5 pb-10 pt-40 md:px-8 md:pb-16">
+          <div className="px-5 pb-8 pt-32 md:px-8 md:pb-16">
             <div className="mx-auto w-full max-w-3xl">
               <span className="inline-flex rounded-full bg-[#F7C618] px-3 py-1 text-[13px] font-extrabold uppercase tracking-wide text-[#0F1729]">
                 {t(FOUNDING_OFFER.headline)}
