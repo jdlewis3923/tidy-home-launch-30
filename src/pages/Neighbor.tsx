@@ -23,8 +23,8 @@ import {
   type ServiceType,
 } from "@/lib/dashboard-pricing";
 
-import heroAsset from "@/assets/neighbor-hero.webp.asset.json";
-import heroMobileAsset from "@/assets/neighbor-hero-mobile.webp.asset.json";
+import heroAsset from "@/assets/neighbor-hero.jpg.asset.json";
+import heroMobileAsset from "@/assets/neighbor-hero-mobile.jpg.asset.json";
 
 import cleaningJpg from "@/assets/cleaning-interior.jpg";
 import cleaningWebp from "@/assets/cleaning-interior.webp";
