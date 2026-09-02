@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDashboardData, formatLongDate, serviceLabel } from '@/lib/dashboard-data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { startAddServiceCheckout, type CheckoutServiceLine } from '@/lib/checkout';
-import { trackPreferredProSet } from '@/lib/tracking';
+import { trackPreferredProSet, pushEvent } from '@/lib/tracking';
 import {
   SERVICE_NAMES,
   SIZE_LABELS,
