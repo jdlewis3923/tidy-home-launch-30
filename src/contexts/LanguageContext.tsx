@@ -75,7 +75,7 @@ const translations: Record<string, string> = {
   "No Long-Term Contracts": "Sin Contratos a Largo Plazo",
 
   "Serving Kendall & Pinecrest": "Sirviendo Kendall y Pinecrest",
-  "From $90/mo": "Desde $90/mes",
+  "From $45 a visit": "Desde $45 por visita",
   "One Monthly Plan": "Un Plan Mensual",
   "No Rebooking": "Sin Reagendar",
   "One Simple Monthly Plan": "Un Solo Plan Mensual",
@@ -91,8 +91,8 @@ const translations: Record<string, string> = {
   "Every Month.": "Cada Mes.",
   "Scheduling, timing, and follow-through — handled.": "Programación, tiempos y seguimiento — resueltos.",
   "Set it once. We take care of the rest.": "Configúralo una vez. Nosotros nos encargamos del resto.",
-  "No contracts · Cancel anytime · From $90/mo": "Sin contratos · Cancela cuando quieras · Desde $90/mes",
-  "Founding memberships · No commitment · From $90/mo": "Membresías fundadoras · Sin compromiso · Desde $90/mes",
+  "No contracts · Cancel anytime · From $45 a visit": "Sin contratos · Cancela cuando quieras · Desde $45 por visita",
+  "Founding memberships · No commitment · From $45 a visit": "Membresías fundadoras · Sin compromiso · Desde $45 por visita",
   "START MY PLAN →": "EMPEZAR MI PLAN →",
   "We handle scheduling, timing, and everything in between.":
     "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
@@ -103,8 +103,8 @@ const translations: Record<string, string> = {
   "🌿 Lawn Care": "🌿 Cuidado del Jardín",
   "🚗 Car Detailing": "🚗 Detallado de Carro",
   "✓ Cancel Anytime": "✓ Cancela Cuando Quieras",
-  "Limited founding memberships · No commitment required · From $90/mo":
-    "Membresías fundadoras limitadas · Sin compromiso · Desde $90/mes",
+  "Limited founding memberships · No commitment required · From $45 a visit":
+    "Membresías fundadoras limitadas · Sin compromiso · Desde $45 por visita",
 
   // Proof bar
   "Miami Homeowners": "Propietarios en Miami",
@@ -1193,7 +1193,10 @@ const translations: Record<string, string> = {
   "per month, size 1": "por mes, tamaño 1",
   "Serving Pinecrest & Kendall — 33156, 33183, 33186":
     "Servimos Pinecrest y Kendall — 33156, 33183, 33186",
-  "from $90/mo": "desde $90/mes",
+  "from $45 a visit": "desde $45 por visita",
+  "five-star reviews": "reseñas de cinco estrellas",
+  "from neighbors in": "de vecinos en",
+  "Pinecrest and Kendall": "Pinecrest y Kendall",
 
   // Post-visit rating page (/rate)
   "How did your visit go?": "¿Cómo te fue con tu visita?",
