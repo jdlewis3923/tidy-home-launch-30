@@ -42,7 +42,6 @@ export const DETAIL_ITEMS: EquipmentItem[] = [
     description: '50 ft hose with an adjustable nozzle, two buckets with grit guards, wash mitts, and your own outdoor extension cord. This is the required kit — reach matters more than pressure.' },
   { key: 'pressure_washer', label: 'Pressure washer — optional', optional: true,
     description: "Not required to join, and not required for a Wash. A portable pressure washer is what unlocks full Detail jobs, which pay materially more per visit than a Wash." },
-
   { key: 'shop_vac_or_wet_dry_vac', label: 'Wet/dry vac',
     description: 'Must be wet/dry capable — regular vacuums not accepted.' },
   { key: 'polishing_supplies', label: 'Polishing supplies',
@@ -77,7 +76,6 @@ export function isOptionalItem(item: EquipmentItem): boolean {
  * Includes optional items; use getMandatoryItems() for anything that gates
  * submission or approval.
  */
-
 export function getRequiredItems(service: string | null | undefined): EquipmentItem[] {
   const raw = (service ?? '').toLowerCase();
   if (!raw) return [];
@@ -107,8 +105,6 @@ export function getRequiredItems(service: string | null | undefined): EquipmentI
 export function getMandatoryItems(service: string | null | undefined): EquipmentItem[] {
   return getRequiredItems(service).filter((it) => !isOptionalItem(it));
 }
-
-
 
 export const REJECTION_REASONS = [
   'Image too blurry',
