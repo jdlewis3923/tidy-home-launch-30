@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import heroImg from "@/assets/hero-miami-home.jpg";
 import heroImgMobile from "@/assets/hero-miami-home-mobile.jpg";
+import heroVideo from "@/assets/hero-loop.mp4.asset.json";
+import heroPoster from "@/assets/hero-poster.jpg.asset.json";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
@@ -10,27 +13,50 @@ interface HeroProps {
 
 const Hero = ({ onOpenPopup }: HeroProps) => {
   const { t } = useLanguage();
+  // Reduced-motion visitors keep the still photo; everyone else gets the loop.
+  const [motionOk, setMotionOk] = useState(false);
+  useEffect(() => {
+    setMotionOk(!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      <img
-        src={heroImgMobile}
-        alt="Modern Miami home with pool and palm trees"
-        className="absolute inset-0 w-full h-full object-cover object-center md:hidden"
-        width={1080}
-        height={1920}
-        fetchPriority="high"
-        decoding="async"
-      />
-      <img
-        src={heroImg}
-        alt="Modern Miami home with pool and palm trees"
-        className="absolute inset-0 w-full h-full object-cover md:object-[center_60%] hidden md:block"
-        width={1920}
-        height={1080}
-        fetchPriority="high"
-        decoding="async"
-      />
+      {motionOk ? (
+        <video
+          src={heroVideo.url}
+          poster={heroPoster.url}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+      ) : (
+        <>
+          <img
+            src={heroImgMobile}
+            alt="Modern Miami home with pool and palm trees"
+            className="absolute inset-0 w-full h-full object-cover object-center md:hidden"
+            width={1080}
+            height={1920}
+            fetchPriority="high"
+            decoding="async"
+          />
+          <img
+            src={heroImg}
+            alt="Modern Miami home with pool and palm trees"
+            className="absolute inset-0 w-full h-full object-cover md:object-[center_60%] hidden md:block"
+            width={1920}
+            height={1080}
+            fetchPriority="high"
+            decoding="async"
+          />
+        </>
+      )}
       <div className="absolute inset-0 bg-navy/65" />
+
 
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div className="absolute top-20 left-[15%] animate-sparkle">
