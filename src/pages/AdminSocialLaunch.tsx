@@ -290,6 +290,9 @@ function CampaignSection({
   onUpload,
   onArmSection,
   refresh,
+  manual = false,
+  onMarkPosted,
+  controls,
 }: {
   title: string;
   subtitle: string;
@@ -299,6 +302,9 @@ function CampaignSection({
   onUpload: (post: Post, file: File) => Promise<void>;
   onArmSection: () => Promise<void>;
   refresh: () => void;
+  manual?: boolean;
+  onMarkPosted?: (post: Post) => Promise<void>;
+  controls?: React.ReactNode;
 }) {
   const total = posts.length;
   const withImage = posts.filter((p) => p.image_url).length;
@@ -319,8 +325,20 @@ function CampaignSection({
         <div>
           <h2 className="text-lg font-bold tracking-tight">{title}</h2>
           <p className="text-sm opacity-90">{subtitle}</p>
+          {manual ? (
+            <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-amber-300">
+              <Hand className="h-3.5 w-3.5" />
+              Manual channel — Nextdoor has no public API for organic business posts. Arming schedules a
+              reminder; you publish each post in Nextdoor, then hit “Mark as posted”.
+            </p>
+          ) : (
+            <p className="mt-1 text-xs opacity-80">
+              Auto-published via the Meta Graph API integration (social-launch-publisher).
+            </p>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs">
+          {controls}
           <span className="rounded-full bg-white/15 px-3 py-1">
             Images: <b>{withImage}/{total}</b>
           </span>
@@ -340,24 +358,39 @@ function CampaignSection({
             className="bg-amber-400 text-slate-900 hover:bg-amber-300 disabled:opacity-50"
           >
             <Send className="mr-1 h-3.5 w-3.5" />
-            {allArmed ? "Armed" : `Arm ${title.split(" ")[0]} Campaign`}
+            {allArmed
+              ? "Armed"
+              : manual
+                ? "Schedule Nextdoor Reminders"
+                : `Arm ${title.split(" ")[0]} Campaign`}
           </Button>
         </div>
       </div>
 
       <div className={cn("grid gap-4 rounded-b-xl border border-t-0 bg-slate-50 p-5", cols)}>
         {posts.map((p) => (
-          <PostCard key={p.id} post={p} onUpload={onUpload} onChange={refresh} />
+          <PostCard
+            key={p.id}
+            post={p}
+            onUpload={onUpload}
+            onChange={refresh}
+            manual={manual}
+            onMarkPosted={onMarkPosted}
+          />
         ))}
       </div>
 
       <Dialog open={confirming} onOpenChange={setConfirming}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Arm {title}?</DialogTitle>
+            <DialogTitle>{manual ? `Schedule ${title}?` : `Arm ${title}?`}</DialogTitle>
             <DialogDescription>
-              {withImage} posts get the current captions and the schedule built from your campaign start date,
-              then publish automatically. New uploads after arming require re-arming.
+              {withImage} posts get the current captions and the schedule built from your campaign start date
+              {manual ? " and cadence" : ""}.{" "}
+              {manual
+                ? "Nothing publishes automatically — each post is a reminder you publish inside Nextdoor and then mark as posted."
+                : "They then publish automatically."}{" "}
+              New uploads after arming require re-arming.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -369,7 +402,7 @@ function CampaignSection({
               }}
               className="bg-blue-600 text-white hover:bg-blue-700"
             >
-              Confirm Arm
+              {manual ? "Confirm Schedule" : "Confirm Arm"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -377,6 +410,7 @@ function CampaignSection({
     </section>
   );
 }
+
 
 // ---------- Page ----------
 
