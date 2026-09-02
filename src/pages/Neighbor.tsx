@@ -45,7 +45,7 @@ const SERVICE_CARDS: {
     service: "cleaning",
     jpg: cleaningJpg,
     webp: cleaningWebp,
-    includes: "Kitchen, baths, floors and dusting, same crew every visit.",
+    includes: "Kitchen, baths, floors and dusting, same Pro every visit.",
   },
   {
     service: "lawn",
@@ -298,7 +298,7 @@ const Neighbor = () => {
                     t("Locked founding rate"),
                     t("One free premium add-on"),
                     t("First visit perfect or it’s free"),
-                    t("Same crew every visit"),
+                    t("Same Pro every visit"),
                   ].map(item => (
                     <span key={item} className="text-[15px] font-bold uppercase tracking-wide text-white/80">
                       {item}

@@ -117,7 +117,7 @@ export default function Account() {
           >
             <Row k="Preferred day" v={p?.preferred_day || "Any"} />
             <Row k="Preferred time" v={p?.preferred_time || "Any"} />
-            <Row k="Notes for crew" v={p?.special_instructions || "None"} />
+            <Row k="Notes for your Pro" v={p?.special_instructions || "None"} />
           </AccountCard>
         </div>
 

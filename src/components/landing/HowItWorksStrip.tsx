@@ -14,7 +14,7 @@ interface Props {
 
 const DEFAULT_STEPS: Step[] = [
   { title: "Pick your plan", body: "Choose cadence. Lock your price." },
-  { title: "We show up", body: "Same crew every visit. ETA reminder 30 min before." },
+  { title: "We show up", body: "Same Pro every visit. ETA reminder 30 min before." },
   { title: "Set it and forget it", body: "Pause, skip, or cancel anytime from your dashboard." },
 ];
 

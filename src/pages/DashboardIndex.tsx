@@ -579,7 +579,7 @@ export default function DashboardIndex() {
                           {data.lastCompleted.time_window || TIME_WINDOW_FALLBACK}
                         </span>
                         <span>·</span>
-                        <span>Pro: {data.lastCompleted.crew_name ?? 'Your Tidy crew'}</span>
+                        <span>Pro: {data.lastCompleted.crew_name ?? 'Your Tidy Pro'}</span>
                       </div>
                     </div>
                     <div className="mt-4 flex gap-2">
@@ -705,7 +705,7 @@ export default function DashboardIndex() {
       <CalmModal
         open={activeModal === 'note'}
         title="Add a note"
-        subtitle="Anything our crew should know before they arrive?"
+        subtitle="Anything your Pro should know before they arrive?"
         onClose={() => setActiveModal(null)}
         primaryLabel={
           submitState === 'sending' ? 'Sending…' :
