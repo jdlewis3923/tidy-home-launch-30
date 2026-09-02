@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Check, MapPin, Lock, Gift, ShieldCheck } from "lucide-react";
+import { Check, MapPin, Lock, Gift, ShieldCheck, Tag, CalendarDays, UserCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
@@ -23,8 +23,8 @@ import {
   type ServiceType,
 } from "@/lib/dashboard-pricing";
 
-import heroAsset from "@/assets/neighbor-hero.jpg.asset.json";
-import heroMobileAsset from "@/assets/neighbor-hero-mobile.jpg.asset.json";
+import heroAsset from "@/assets/neighbor-hero-v2.jpg.asset.json";
+import heroMobileAsset from "@/assets/neighbor-hero-mobile-v2.jpg.asset.json";
 
 import cleaningJpg from "@/assets/cleaning-interior.jpg";
 import cleaningWebp from "@/assets/cleaning-interior.webp";
@@ -41,9 +41,9 @@ export const PHONE_TEL = "+17868291141";
 
 /** The hanger's numbered three-step, verbatim apart from step 1 (they scanned already). */
 const HOW_IT_WORKS = [
-  { n: "1", title: "See your price", body: "Sixty seconds. No account, no call." },
-  { n: "2", title: "Pick your day", body: "Choose the day and time that suits you." },
-  { n: "3", title: "Meet your Pro", body: "The same background-checked Pro, every visit." },
+  { n: "1", Icon: Tag, title: "See your price", body: "Sixty seconds. No account, no call." },
+  { n: "2", Icon: CalendarDays, title: "Pick your day", body: "Choose the day and time that suits you." },
+  { n: "3", Icon: UserCheck, title: "Meet your Pro", body: "The same background-checked Pro, every visit." },
 ];
 
 const SERVICE_CARDS: {
@@ -198,28 +198,29 @@ const Neighbor = () => {
 
       <main>
         {/* ── HERO: full-bleed photograph ───────────────────────────────── */}
-        <section className="relative isolate min-h-[94svh] flex flex-col justify-end overflow-hidden">
+        <section className="relative isolate min-h-[82svh] flex flex-col justify-end overflow-hidden">
           <picture>
             <source media="(max-width: 767px)" srcSet={heroMobileAsset.url} type="image/jpeg" />
             <img
               src={heroAsset.url}
-              alt="A traditional South Miami home with barrel-tile roof, coral rock wall and paver driveway at golden hour"
+              alt="A traditional South Miami home with barrel-tile roof, coral rock wall and paver driveway under a bright blue sky"
               width={1600}
-              height={1200}
+              height={1195}
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className="absolute inset-0 -z-10 h-full w-full object-cover object-[center_28%] md:object-[center_45%]"
+              className="absolute inset-0 -z-10 h-full w-full object-cover object-[center_35%] md:object-[center_40%]"
             />
           </picture>
-          {/* Hard scrim — daylight legibility, not decoration. */}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0F1729] via-[#0F1729]/70 to-transparent" />
+          {/* Scrim — kept light so the blue sky and house stay visible. */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0F1729]/95 via-[#0F1729]/45 to-transparent" />
 
           <div className="absolute left-4 top-24 md:left-8">
             <TidyLogo size="sm" priority />
           </div>
 
-          <div className="px-5 pb-8 pt-40 md:px-8 md:pb-16">
+          <div className="px-5 pb-8 pt-56 md:px-8 md:pb-16">
+
 
             <div className="mx-auto w-full max-w-3xl">
               <span className="inline-flex rounded-full bg-[#F7C618] px-3 py-1 text-[13px] font-extrabold uppercase tracking-wide text-[#0F1729]">
@@ -419,8 +420,13 @@ const Neighbor = () => {
               {HOW_IT_WORKS.map((step, i) => (
                 <Reveal key={step.n} delay={i * 70}>
                   <li className="h-full">
-                    <span className="block text-[26px] font-extrabold leading-none text-[#F7C618]">{step.n}</span>
-                    <h3 className="mt-2 text-[17px] font-bold text-[#0F1729]">{t(step.title)}</h3>
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#F7C618]/15">
+                        <step.Icon className="h-5 w-5 text-[#0F1729]" aria-hidden="true" />
+                      </span>
+                      <span className="text-[26px] font-extrabold leading-none text-[#F7C618]">{step.n}</span>
+                    </div>
+                    <h3 className="mt-3 text-[17px] font-bold text-[#0F1729]">{t(step.title)}</h3>
                     <p className="mt-1.5 text-[15px] leading-snug text-[#0F1729]/70">{t(step.body)}</p>
                   </li>
                 </Reveal>
