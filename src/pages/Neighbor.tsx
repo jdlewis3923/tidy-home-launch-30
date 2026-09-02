@@ -41,9 +41,9 @@ export const PHONE_TEL = "+17868291141";
 
 /** The hanger's numbered three-step, verbatim apart from step 1 (they scanned already). */
 const HOW_IT_WORKS = [
-  { n: "1", title: "See your price", body: "Sixty seconds. No account, no call." },
-  { n: "2", title: "Pick your day", body: "Choose the day and time that suits you." },
-  { n: "3", title: "Meet your Pro", body: "The same background-checked Pro, every visit." },
+  { n: "1", Icon: Tag, title: "See your price", body: "Sixty seconds. No account, no call." },
+  { n: "2", Icon: CalendarDays, title: "Pick your day", body: "Choose the day and time that suits you." },
+  { n: "3", Icon: UserCheck, title: "Meet your Pro", body: "The same background-checked Pro, every visit." },
 ];
 
 const SERVICE_CARDS: {
