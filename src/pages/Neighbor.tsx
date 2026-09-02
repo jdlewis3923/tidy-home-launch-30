@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
 import Reveal from "@/components/landing/Reveal";
 import LandingTicker from "@/components/landing/LandingTicker";
-import FoundingConfetti from "@/components/landing/FoundingConfetti";
+import FiveStarBand from "@/components/landing/FiveStarBand";
 import TidyLogo from "@/components/TidyLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -182,7 +182,7 @@ const Neighbor = () => {
           canonical="https://jointidy.co/neighbor"
         />
       )}
-      <FoundingConfetti />
+      
       <Navbar onOpenPopup={() => { window.location.assign(signupHref); }} />
 
       <main>
@@ -277,6 +277,7 @@ const Neighbor = () => {
               <p className="mt-3 text-[15px] font-medium text-white/85">
                 {t(ENTRY_PRICE_COPY)} · {t("No contract. Cancel anytime.")}
               </p>
+              <FiveStarBand neighborhoods={neighborhood ?? t("Pinecrest and Kendall")} />
             </div>
           </div>
         </section>

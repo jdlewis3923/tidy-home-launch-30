@@ -3892,6 +3892,7 @@ export type Database = {
       }
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
+      public_five_star_proof: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "customer" | "crew" | "admin"

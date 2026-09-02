@@ -141,6 +141,13 @@
       "when": 1788316104233,
       "tag": "0019_fix_founding_spot_count_and_waitlist_address",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1788365655899,
+      "tag": "0020_public_five_star_proof",
+      "breakpoints": true
     }
   ]
 }
