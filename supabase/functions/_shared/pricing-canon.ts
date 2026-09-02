@@ -151,6 +151,8 @@ export const BUNDLE_GIFT_COPY = {
 // Entry price and referral
 // ---------------------------------------------------------------------------
 
+/** The single company-wide entry price: lawn size 1, biweekly. */
+export const ENTRY_PRICE_MONTHLY = SIZE_PRICES.lawn[1] * CADENCE_MULTIPLIER.biweekly;
 /**
  * Public entry-price claim. Stated per visit, matching the printed door
  * hanger ("PLANS FROM $45 A VISIT"). Never quote a monthly entry price.
@@ -174,7 +176,9 @@ export const FOUNDING_OFFER = {
     'First visit perfect or it’s free',
     'Capped at 25 founding homes per ZIP',
   ],
-  inExchangeFor: 'in exchange for a review after your second visit',
+  // NOTE: there is deliberately no "in exchange for a review" string here.
+  // Conditioning a perk on a review violates Google's review policy and can
+  // get the Business Profile suspended. The founding perks are unconditional.
   homesPerZip: 25,
 } as const;
 
