@@ -670,16 +670,59 @@ export default function AdminSocialLaunch() {
           <>
             <CampaignSection
               title={CAMPAIGN_NAMES.nextdoor}
-              subtitle={`${ndRange} · ${nextdoor.length} posts`}
+              subtitle={`${nextdoor.length} posts · every ${cadence.intervalDays} days · ${WEEKDAYS[cadence.weekday]}s ${hourLabel} · ${ndRange}`}
               posts={nextdoor}
-              cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+              cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-3"
               headerBg="bg-slate-900"
               onUpload={onUpload}
               onArmSection={() => armPosts(nextdoor).then(() => undefined)}
               refresh={refresh}
+              manual
+              onMarkPosted={markPosted}
+              controls={
+                <div className="flex flex-wrap items-center gap-2 rounded-md bg-white/10 px-3 py-1.5">
+                  <span className="font-semibold">Cadence</span>
+                  <label className="flex items-center gap-1">
+                    every
+                    <Input
+                      type="number"
+                      min={1}
+                      max={90}
+                      value={cadence.intervalDays}
+                      onChange={(e) =>
+                        saveCadence({ ...cadence, intervalDays: Number(e.target.value) || 1 })
+                      }
+                      className="h-7 w-[64px] border-white/20 bg-white/10 text-xs text-white"
+                    />
+                    days
+                  </label>
+                  <select
+                    value={cadence.weekday}
+                    onChange={(e) => saveCadence({ ...cadence, weekday: Number(e.target.value) })}
+                    className="h-7 rounded-md border border-white/20 bg-slate-800 px-1 text-xs text-white"
+                  >
+                    {WEEKDAYS.map((d, i) => (
+                      <option key={d} value={i}>{d}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={cadence.hour}
+                    onChange={(e) => saveCadence({ ...cadence, hour: Number(e.target.value) })}
+                    className="h-7 rounded-md border border-white/20 bg-slate-800 px-1 text-xs text-white"
+                  >
+                    {Array.from({ length: 24 }, (_, h) => (
+                      <option key={h} value={h}>
+                        {`${((h + 11) % 12) + 1}:00 ${h < 12 ? "AM" : "PM"} ET`}
+                      </option>
+                    ))}
+                  </select>
+                  {savingCadence && <Loader2 className="h-3 w-3 animate-spin" />}
+                </div>
+              }
             />
             <CampaignSection
               title={CAMPAIGN_NAMES.meta}
+
               subtitle={`${metaRange} · ${meta.length} posts`}
               posts={meta}
               cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
