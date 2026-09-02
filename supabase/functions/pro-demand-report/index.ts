@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
   const ids = crossing.map((s: { applicant_id: string }) => s.applicant_id);
   const { data: pros } = await admin
     .from('applicants')
-    .select('id, first_name, last_name, zip_code, service_zips')
+    .select('id, first_name, last_name, zip, service')
     .in('id', ids);
   const byId = new Map((pros ?? []).map((p) => [p.id, p]));
 
@@ -72,8 +72,8 @@ Deno.serve(async (req) => {
     if (!row) continue;
     recorded.push(s.applicant_id);
     const p = byId.get(s.applicant_id);
-    const area = (p as { zip_code?: string; service_zips?: string[] } | undefined);
-    const where = area?.zip_code ?? (area?.service_zips ?? []).join(', ') ?? 'unknown area';
+    const area = p as { zip?: string; service?: string } | undefined;
+    const where = [area?.service, area?.zip].filter(Boolean).join(' · ') || 'unknown area';
     lines.push(
       `• ${p?.first_name ?? 'Pro'} ${p?.last_name ?? ''} — requested by ${s.preferred_by_count} ` +
       `customer(s), calendar ${s.booked_pct ?? '?'}% booked, works ${where}`,
