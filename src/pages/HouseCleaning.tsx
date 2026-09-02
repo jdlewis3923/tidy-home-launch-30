@@ -88,7 +88,7 @@ const config: ServiceLandingConfig = {
     "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Above that size we quote individually.",
   trustCards: [
     {
-      title: "Same Crew",
+      title: "Same Pro",
       body: "Your same pro every visit, not a rotating marketplace roster.",
     },
     {

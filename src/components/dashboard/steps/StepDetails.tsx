@@ -89,7 +89,7 @@ export default function StepDetails({ state, onChange }: Props) {
           rows={3}
           className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
         />
-        <p className="text-[11px] text-ink-faint">you don't need to be home. same crew, every visit.</p>
+        <p className="text-[11px] text-ink-faint">you don't need to be home. same Pro, every visit.</p>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">

@@ -25,7 +25,7 @@ const config: ServiceLandingConfig = {
   priceAnchor: "From $45 a visit",
   stickyLabel: "Lawn Care · from $45 a visit",
   savingsCallout:
-    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $45 a visit** flat, same crew, no surprise invoices.",
+    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $45 a visit** flat, same Pro, no surprise invoices.",
   heroImage: heroImg,
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
@@ -88,7 +88,7 @@ const config: ServiceLandingConfig = {
 
   trustCards: [
     {
-      title: "Same Crew",
+      title: "Same Pro",
       body: "Your same pro every visit, not a rotating marketplace roster.",
     },
     {

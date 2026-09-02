@@ -387,7 +387,7 @@ const translations: Record<string, string> = {
   "Same Pro every visit. ETA reminder 30 min before.": "El mismo Pro cada visita. Aviso de llegada 30 min antes.",
   "Set it and forget it": "Configúralo y olvídate",
   "Pause, skip, or cancel anytime from your dashboard.": "Pausa, omite o cancela cuando quieras desde tu panel.",
-  "Same Crew": "El Mismo Pro",
+  "Same Pro": "El Mismo Pro",
   "Your same pro every visit, not a rotating marketplace roster.":
     "Tu mismo profesional en cada visita, no un equipo rotativo de la app.",
   "Photo-Verified": "Verificado con Fotos",
@@ -470,7 +470,7 @@ const translations: Record<string, string> = {
     "La cocina y los baños quedan como nuevos cada vez. El mismo equipo, el mismo estándar — se siente sin esfuerzo.",
   "I haven't touched a mop in months. Locked monthly price, no surprise bills.":
     "No toco un trapeador hace meses. Precio mensual fijo, sin facturas sorpresa.",
-  "Booked in under a minute. The crew is on time, polite, and thorough.":
+  "Booked in under a minute. Your Pro is on time, polite, and thorough.":
     "Reservé en menos de un minuto. El equipo es puntual, amable y minucioso.",
   // House Cleaning FAQs
   "What's the price and what's it based on?": "¿Cuál es el precio y de qué depende?",
@@ -503,7 +503,7 @@ const translations: Record<string, string> = {
   "Mow, edge, blow. Same Pro. Locked price. Never surprise-billed.":
     "Cortar, bordear, soplar. El mismo equipo. Precio fijo. Sin facturas sorpresa.",
   "From $45 a visit": "Desde $45 por visita",
-  "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$45 a visit** flat, same crew, no surprise invoices.":
+  "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$45 a visit** flat, same Pro, no surprise invoices.":
     "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy es **$45 por visita**, precio fijo, el mismo equipo, sin facturas sorpresa.",
   // Lawn Care plans
   "One visit per month.": "Una visita al mes.",
