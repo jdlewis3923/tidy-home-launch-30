@@ -30,7 +30,7 @@ const foundingCards = [
 const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
   const { t } = useLanguage();
 
-  const ctaText = CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN →" : "Request Early Access →";
+  const ctaText = CUSTOMER_DASHBOARD_ENABLED ? "See your price — 60 seconds →" : "Request Early Access →";
   const btnClass =
     "mt-12 bg-gold hover:bg-gold/90 text-gold-foreground font-bold px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,197,24,0.3)] animate-pulse-gold";
 

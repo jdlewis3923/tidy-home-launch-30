@@ -8,7 +8,7 @@ import { VETTED_CLAIM } from "@/lib/pricing-canon";
 const signals = [
   VETTED_CLAIM,
   "First visit perfect or it's free",
-  "Serving Kendall + Pinecrest",
+  "Serving Pinecrest, Kendall and Kendall West.",
 ];
 
 const ProofBar = () => {
