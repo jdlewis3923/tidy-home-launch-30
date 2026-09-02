@@ -240,15 +240,35 @@ function PostCard({
         <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", badge.className)}>
           {badge.label}
         </span>
-        <button
-          type="button"
-          onClick={copyCaption}
-          className="grid h-7 w-7 place-items-center rounded-md text-slate-500 hover:bg-slate-100"
-          title="Copy caption"
-        >
-          <Copy className="h-3.5 w-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          {manual && onMarkPosted && post.status !== "posted" && (
+            <button
+              type="button"
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await onMarkPosted(post);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              disabled={busy}
+              className="rounded-md border border-emerald-300 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+            >
+              Mark as posted
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={copyCaption}
+            className="grid h-7 w-7 place-items-center rounded-md text-slate-500 hover:bg-slate-100"
+            title="Copy caption"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
+
 
       {post.publish_error && (
         <div className="border-t border-red-200 bg-red-50 px-3 py-1.5 text-[11px] text-red-700">
