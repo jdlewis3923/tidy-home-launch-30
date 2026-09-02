@@ -484,7 +484,7 @@ const Neighbor = () => {
               aria-label={`${t("or call")} ${PHONE_DISPLAY}`}
               className="flex min-h-12 items-center rounded-full border border-[#0F1729]/15 px-4 text-[15px] font-extrabold text-[#0F1729]"
             >
-              {t("Call")}
+              {t("Call now")}
             </a>
           </div>
         </div>

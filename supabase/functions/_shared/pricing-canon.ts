@@ -151,9 +151,12 @@ export const BUNDLE_GIFT_COPY = {
 // Entry price and referral
 // ---------------------------------------------------------------------------
 
-/** The single company-wide entry price: lawn size 1, biweekly. */
-export const ENTRY_PRICE_MONTHLY = SIZE_PRICES.lawn[1] * CADENCE_MULTIPLIER.biweekly;
-export const ENTRY_PRICE_COPY = `from $${ENTRY_PRICE_MONTHLY}/mo`;
+/**
+ * Public entry-price claim. Stated per visit, matching the printed door
+ * hanger ("PLANS FROM $45 A VISIT"). Never quote a monthly entry price.
+ */
+export const ENTRY_PRICE_PER_VISIT = SIZE_PRICES.lawn[1];
+export const ENTRY_PRICE_COPY = `from $${ENTRY_PRICE_PER_VISIT} a visit`;
 
 /** Referral program — give $50, get $50. Unchanged. */
 export const REFERRAL_BONUS_CENTS = 5000;
