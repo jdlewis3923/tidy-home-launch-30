@@ -626,8 +626,11 @@ export default function AdminSocialLaunch() {
             <div>
               <h1 className="text-xl font-bold tracking-tight">Founding Neighbor Social Campaign</h1>
               <p className="text-xs text-slate-300">
-                {totalImages}/{allPosts.length} images uploaded · evergreen captions, EN + ES
+                {totalImages}/{allPosts.length} images uploaded · evergreen captions, EN + ES · Nextdoor:{" "}
+                {nextdoor.length} posts, every {cadence.intervalDays} days, {WEEKDAYS[cadence.weekday]}s {hourLabel}{" "}
+                (manual publish)
               </p>
+
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
