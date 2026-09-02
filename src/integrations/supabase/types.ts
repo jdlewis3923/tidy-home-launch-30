@@ -3785,6 +3785,7 @@ export type Database = {
       }
       waitlist: {
         Row: {
+          address: string | null
           email: string
           id: string
           requested_at: string
@@ -3792,6 +3793,7 @@ export type Database = {
           zip: string
         }
         Insert: {
+          address?: string | null
           email: string
           id?: string
           requested_at?: string
@@ -3799,6 +3801,7 @@ export type Database = {
           zip: string
         }
         Update: {
+          address?: string | null
           email?: string
           id?: string
           requested_at?: string
