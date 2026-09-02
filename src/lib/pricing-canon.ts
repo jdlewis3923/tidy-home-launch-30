@@ -187,7 +187,9 @@ export const FOUNDING_OFFER = {
     'First visit perfect or it’s free',
     'Capped at 25 founding homes per ZIP',
   ],
-  inExchangeFor: 'in exchange for a review after your second visit',
+  // NOTE: there is deliberately no "in exchange for a review" string here.
+  // Conditioning a perk on a review violates Google's review policy and can
+  // get the Business Profile suspended. The founding perks are unconditional.
   homesPerZip: 25,
 } as const;
 

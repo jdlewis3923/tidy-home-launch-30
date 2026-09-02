@@ -1157,13 +1157,31 @@ const translations: Record<string, string> = {
   "Your founding rate is locked — your price never rises": "Tu tarifa de fundador queda fija — tu precio nunca sube",
   "First visit perfect or it’s free": "Primera visita perfecta o es gratis",
   "Capped at 25 founding homes per ZIP": "Limitado a 25 hogares fundadores por código postal",
-  "in exchange for a review after your second visit":
-    "a cambio de una reseña después de la segunda visita",
   "Be one of the first 25 homes on your street":
     "Sé uno de los primeros 25 hogares de tu calle",
   "One plan for cleaning, lawn care and car care — one flat price per visit, set by the size of your property.":
     "Un solo plan para limpieza, jardinería y cuidado del carro — un precio fijo por visita, según el tamaño de tu propiedad.",
   "Claim your founding spot": "Reserva tu lugar de fundador",
+  "Be one of the first 25 homes in": "Sé uno de los primeros 25 hogares en",
+  "Cleaning, lawn and car care on one plan. One flat price per visit.":
+    "Limpieza, grama y cuidado del carro en un solo plan. Un precio fijo por visita.",
+  "No contract. Cancel anytime.": "Sin contrato. Cancela cuando quieras.",
+  of: "de",
+  "founding spots left in": "lugares de fundador disponibles en",
+  "Founding spots are limited to 25 homes per ZIP and do not reopen.":
+    "Los lugares de fundador están limitados a 25 hogares por código postal y no se vuelven a abrir.",
+  "Locked founding rate": "Tarifa de fundador fija",
+  "One free premium add-on": "Un servicio adicional premium gratis",
+  "Same crew every visit": "El mismo equipo en cada visita",
+  "Three services. One plan.": "Tres servicios. Un solo plan.",
+  "Kitchen, baths, floors and dusting, same crew every visit.":
+    "Cocina, baños, pisos y polvo, con el mismo equipo en cada visita.",
+  "Mow, edge, trim and blow down — clippings hauled off.":
+    "Cortamos, orillamos, recortamos y sopleteamos — nos llevamos los recortes.",
+  "Hand wash, wheels, glass and interior wipe-down in your driveway.":
+    "Lavado a mano, ruedas, cristales e interior limpiado en tu entrada.",
+  "Takes about two minutes. No contract.": "Toma unos dos minutos. Sin contrato.",
+  "Claim your spot in": "Reserva tu lugar en",
   "What a founding neighbor gets": "Lo que recibe un vecino fundador",
   "Where plans start": "Desde dónde empiezan los planes",
   "per visit, size 1": "por visita, tamaño 1",
