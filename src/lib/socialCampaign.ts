@@ -25,7 +25,7 @@ export const CAMPAIGN_NAMES = {
   meta: "Meta IG + FB Founding Neighbor Campaign",
 } as const;
 
-/** Hours between consecutive posts, per channel — matches the original cadence. */
+/** Hours between consecutive posts, per channel — Meta only (Nextdoor uses cadence below). */
 export const CADENCE_HOURS: Record<"nextdoor" | "meta", number> = {
   nextdoor: 56,
   meta: 22,
@@ -37,33 +37,77 @@ export const FIRST_POST_UTC_HOUR: Record<"nextdoor" | "meta", number> = {
   meta: 15,
 };
 
-export type CampaignZip = keyof typeof ZIP_NEIGHBORHOODS;
+/**
+ * NEXTDOOR CADENCE — configurable, stored in app_settings.social_campaign_nextdoor_cadence.
+ *
+ * Nextdoor's own published guidance for business pages is one post every TWO
+ * WEEKS (engagement declines after roughly two weeks), with the strongest
+ * engagement between 5–7 PM local and on Thursday/Friday. Hence: Thursdays at
+ * 6:00 PM America/New_York, 14 days apart. Meta is unaffected.
+ */
+export interface CampaignCadence {
+  /** Days between consecutive posts. */
+  intervalDays: number;
+  /** 0 = Sunday … 4 = Thursday. The first post lands on this weekday. */
+  weekday: number;
+  /** Local hour (America/New_York), 24h. */
+  hour: number;
+}
 
-export interface CampaignPost {
-  post_number: number;
-  title: string;
-  zip: CampaignZip;
-  en: string;
-  es: string;
+export const NEXTDOOR_TIMEZONE = "America/New_York";
+
+export const DEFAULT_NEXTDOOR_CADENCE: CampaignCadence = {
+  intervalDays: 14,
+  weekday: 4, // Thursday
+  hour: 18, // 6 PM ET
+};
+
+export function parseCadence(raw: unknown): CampaignCadence {
+  const d = DEFAULT_NEXTDOOR_CADENCE;
+  if (!raw || typeof raw !== "object") return d;
+  const o = raw as Record<string, unknown>;
+  const num = (v: unknown, fallback: number, min: number, max: number) => {
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) && n >= min && n <= max ? Math.round(n) : fallback;
+  };
+  return {
+    intervalDays: num(o.intervalDays, d.intervalDays, 1, 90),
+    weekday: num(o.weekday, d.weekday, 0, 6),
+    hour: num(o.hour, d.hour, 0, 23),
+  };
+}
+
+/** Offset of America/New_York from UTC in hours at the given instant (-4 or -5). */
+function etOffsetHours(at: Date): number {
+  const s = new Intl.DateTimeFormat("en-US", {
+    timeZone: NEXTDOOR_TIMEZONE,
+    timeZoneName: "shortOffset",
+  }).format(at);
+  const m = s.match(/GMT([+-]\d+)/);
+  return m ? Number(m[1]) : -5;
+}
+
+/** A UTC Date for the given America/New_York wall-clock date + hour. */
+function etWallClockToUtc(y: number, mo: number, d: number, hour: number): Date {
+  const guess = new Date(Date.UTC(y, mo, d, hour));
+  const off = etOffsetHours(guess);
+  return new Date(Date.UTC(y, mo, d, hour - off));
 }
 
 /**
- * Per-ZIP landing link with channel-specific attribution. Deliberately NOT the
- * door-hanger UTM values — social has to be separable from print.
+ * Nextdoor schedule: first post on the first `cadence.weekday` on/after the
+ * start date, then every `cadence.intervalDays`, always at `cadence.hour` ET.
  */
-export function buildSocialLink(platform: "nextdoor" | "meta", zip: CampaignZip): string {
-  const p = new URLSearchParams({
-    zip,
-    utm_source: platform,
-    utm_medium: "social",
-    utm_campaign: `founding_${zip}`,
-  });
-  return `https://jointidy.co/neighbor?${p.toString()}`;
-}
-
-/** Final stored caption: English, Spanish, then the attributed link. */
-export function buildCaption(post: CampaignPost, platform: "nextdoor" | "meta"): string {
-  return `${post.en.trim()}\n\n— — —\n\n${post.es.trim()}\n\n${buildSocialLink(platform, post.zip)}`;
+export function nextdoorScheduledFor(
+  startDate: string,
+  index: number,
+  cadence: CampaignCadence = DEFAULT_NEXTDOOR_CADENCE,
+): Date {
+  const anchor = new Date(`${startDate}T12:00:00Z`);
+  const delta = (cadence.weekday - anchor.getUTCDay() + 7) % 7;
+  const first = new Date(anchor.getTime() + delta * 86400000);
+  const day = new Date(first.getTime() + index * cadence.intervalDays * 86400000);
+  return etWallClockToUtc(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), cadence.hour);
 }
 
 /** Scheduled time for post index (0-based) given a YYYY-MM-DD start date. */
@@ -71,7 +115,9 @@ export function scheduledFor(
   startDate: string,
   platform: "nextdoor" | "meta",
   index: number,
+  cadence: CampaignCadence = DEFAULT_NEXTDOOR_CADENCE,
 ): Date {
+  if (platform === "nextdoor") return nextdoorScheduledFor(startDate, index, cadence);
   const base = new Date(`${startDate}T00:00:00Z`);
   base.setUTCHours(FIRST_POST_UTC_HOUR[platform], 0, 0, 0);
   return new Date(base.getTime() + index * CADENCE_HOURS[platform] * 3600 * 1000);
@@ -82,6 +128,7 @@ export function defaultStartDate(now = new Date()): string {
   const d = new Date(now.getTime() + 24 * 3600 * 1000);
   return d.toISOString().slice(0, 10);
 }
+
 
 const N = ZIP_NEIGHBORHOODS;
 
