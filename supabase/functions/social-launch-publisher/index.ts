@@ -41,6 +41,7 @@ type Post = {
   caption: string;
   image_url: string | null;
   status: string;
+  notes: string | null;
 };
 
 async function vaultGet(sb: ReturnType<typeof createClient>, name: string): Promise<string | null> {
@@ -137,6 +138,7 @@ async function processPost(sb: ReturnType<typeof createClient>, post: Post): Pro
       // Nextdoor has NO public API for organic business posts. We only deliver a
       // REMINDER (Zapier webhook / admin alert). The row stays 'armed' until an
       // admin publishes it in Nextdoor and marks it posted on /admin/social-launch.
+      if (post.notes?.startsWith("reminder sent")) return { ok: true }; // already nudged
       const r = await publishToNextdoor(post, sb);
       await sb
         .from("social_launch_posts")
@@ -196,7 +198,7 @@ Deno.serve(async (req) => {
 
   let q = sb
     .from("social_launch_posts")
-    .select("id,channel,post_number,scheduled_for,caption,image_url,status")
+    .select("id,channel,post_number,scheduled_for,caption,image_url,status,notes")
     .is("posted_at", null);
 
   if (onlyId) {
