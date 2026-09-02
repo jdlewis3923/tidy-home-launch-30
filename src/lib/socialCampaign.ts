@@ -13,8 +13,10 @@
  *
  * The calendar start date is NOT hardcoded — it is stored in
  * `app_settings.social_campaign_start_date` and editable on /admin/social-launch,
- * defaulting to the day after arming. Cadence below mirrors the original
- * calendar spacing (Nextdoor every ~2.4 days, Meta ~daily).
+ * defaulting to the day after arming. Nextdoor cadence is configurable in
+ * `app_settings.social_campaign_nextdoor_cadence` (every 14 days, Thursday, 6 PM ET
+ * by default); Meta stays on its own near-daily spacing.
+
  */
 import { ZIP_NEIGHBORHOODS } from "@/lib/neighborhoods";
 
