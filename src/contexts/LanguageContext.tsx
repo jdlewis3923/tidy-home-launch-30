@@ -75,7 +75,6 @@ const translations: Record<string, string> = {
   "No Long-Term Contracts": "Sin Contratos a Largo Plazo",
 
   "Serving Kendall & Pinecrest": "Sirviendo Kendall y Pinecrest",
-  "From $45 a visit": "Desde $45 por visita",
   "One Monthly Plan": "Un Plan Mensual",
   "No Rebooking": "Sin Reagendar",
   "One Simple Monthly Plan": "Un Solo Plan Mensual",
