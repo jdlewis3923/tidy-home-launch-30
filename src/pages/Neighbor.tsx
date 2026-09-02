@@ -213,7 +213,17 @@ const Neighbor = () => {
               <span className="inline-flex rounded-full bg-[#F7C618] px-3 py-1 text-[13px] font-extrabold uppercase tracking-wide text-[#0F1729]">
                 {t(FOUNDING_OFFER.headline)}
               </span>
-              <h1 className="mt-4 text-[2.35rem] leading-[1.06] font-extrabold text-white md:text-6xl">
+              {/* Echoes the printed door hanger's headline — the half-second
+                  confirmation that this page is the thing they just scanned. */}
+              <p className="mt-4 text-[13px] font-extrabold uppercase tracking-[0.14em] text-[#F7C618] md:text-sm">
+                {t("More life. Less chores.")}
+              </p>
+              {fromDoorhanger && (
+                <p className="mt-2 text-[15px] font-semibold leading-snug text-white/90">
+                  {t("Thanks for scanning — you’re looking at one of 25 founding spots in")} {areaName}.
+                </p>
+              )}
+              <h1 className="mt-3 text-[2.35rem] leading-[1.06] font-extrabold text-white md:text-6xl">
                 {heroHeadline}
               </h1>
               <p className="mt-4 text-[17px] font-semibold leading-snug text-white md:text-xl">
@@ -231,11 +241,18 @@ const Neighbor = () => {
                 <Link
                   to={signupHref}
                   onClick={() => ctaClick("neighbor_hero")}
-                  className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
+                  className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-6 py-4 text-center text-[17px] font-extrabold leading-tight text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex md:text-lg"
                 >
-                  {t("Claim your founding spot")}
+                  {t("See your price — 60 seconds")}
                 </Link>
               )}
+              <p className="mt-3 text-[15px] font-semibold text-white/90">
+                {t("or call")}{" "}
+                <a href={`tel:${PHONE_TEL}`} className="underline decoration-[#F7C618] decoration-2 underline-offset-4">
+                  {PHONE_DISPLAY}
+                </a>
+              </p>
+
               {isFull && waitlistOpen && (
                 waitlistDone ? (
                   <p className="mt-5 text-base font-semibold text-white">{t("You're on the list.")}</p>
