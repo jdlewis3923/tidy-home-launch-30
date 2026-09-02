@@ -500,6 +500,33 @@ export default function AdminSocialLaunch() {
     else toast.success("Campaign start date saved");
   }, []);
 
+  const saveCadence = useCallback(async (next: CampaignCadence) => {
+    setCadence(next);
+    setSavingCadence(true);
+    const { data: authData } = await supabase.auth.getUser();
+    const { error } = await supabase.from("app_settings").upsert({
+      key: "social_campaign_nextdoor_cadence",
+      value: next as unknown as never,
+      updated_by: authData.user?.id ?? null,
+    });
+    setSavingCadence(false);
+    if (error) toast.error(`Could not save cadence: ${error.message}`);
+  }, []);
+
+  const markPosted = useCallback(async (post: Post) => {
+    const { error } = await supabase
+      .from("social_launch_posts")
+      .update({ status: "posted", posted_at: new Date().toISOString(), publish_error: null })
+      .eq("id", post.id);
+    if (error) {
+      toast.error(`Could not mark posted: ${error.message}`);
+      return;
+    }
+    toast.success(`Post #${post.post_number} marked as posted`);
+    void refresh();
+  }, [refresh]);
+
+
   const onUpload = useCallback(async (post: Post, file: File) => {
     const ext = file.name.split(".").pop() || "jpg";
     const path = `${post.channel}/${post.post_number}-${Date.now()}.${ext}`;
