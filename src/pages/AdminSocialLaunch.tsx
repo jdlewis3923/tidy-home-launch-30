@@ -166,8 +166,12 @@ function PostCard({
       <div className="flex items-center justify-between px-3 py-2 text-xs">
         <span className="font-bold text-slate-900">Post {post.post_number}</span>
         <span className="text-slate-600">
-          {fmtDate(post.status === "posted" || post.status === "armed" ? post.scheduled_for : post.plannedFor)}
+          {fmtDate(
+            post.status === "posted" || post.status === "armed" ? post.scheduled_for : post.plannedFor,
+            manual,
+          )}
         </span>
+
       </div>
 
       {/* Image / drop zone */}
