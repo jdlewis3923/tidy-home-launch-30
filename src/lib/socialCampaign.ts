@@ -13,8 +13,10 @@
  *
  * The calendar start date is NOT hardcoded — it is stored in
  * `app_settings.social_campaign_start_date` and editable on /admin/social-launch,
- * defaulting to the day after arming. Cadence below mirrors the original
- * calendar spacing (Nextdoor every ~2.4 days, Meta ~daily).
+ * defaulting to the day after arming. Nextdoor cadence is configurable in
+ * `app_settings.social_campaign_nextdoor_cadence` (every 14 days, Thursday, 6 PM ET
+ * by default); Meta stays on its own near-daily spacing.
+
  */
 import { ZIP_NEIGHBORHOODS } from "@/lib/neighborhoods";
 
@@ -25,7 +27,7 @@ export const CAMPAIGN_NAMES = {
   meta: "Meta IG + FB Founding Neighbor Campaign",
 } as const;
 
-/** Hours between consecutive posts, per channel — matches the original cadence. */
+/** Hours between consecutive posts, per channel — Meta only (Nextdoor uses cadence below). */
 export const CADENCE_HOURS: Record<"nextdoor" | "meta", number> = {
   nextdoor: 56,
   meta: 22,
@@ -66,12 +68,88 @@ export function buildCaption(post: CampaignPost, platform: "nextdoor" | "meta"):
   return `${post.en.trim()}\n\n— — —\n\n${post.es.trim()}\n\n${buildSocialLink(platform, post.zip)}`;
 }
 
+
+/**
+ * NEXTDOOR CADENCE — configurable, stored in app_settings.social_campaign_nextdoor_cadence.
+ *
+ * Nextdoor's own published guidance for business pages is one post every TWO
+ * WEEKS (engagement declines after roughly two weeks), with the strongest
+ * engagement between 5–7 PM local and on Thursday/Friday. Hence: Thursdays at
+ * 6:00 PM America/New_York, 14 days apart. Meta is unaffected.
+ */
+export interface CampaignCadence {
+  /** Days between consecutive posts. */
+  intervalDays: number;
+  /** 0 = Sunday … 4 = Thursday. The first post lands on this weekday. */
+  weekday: number;
+  /** Local hour (America/New_York), 24h. */
+  hour: number;
+}
+
+export const NEXTDOOR_TIMEZONE = "America/New_York";
+
+export const DEFAULT_NEXTDOOR_CADENCE: CampaignCadence = {
+  intervalDays: 14,
+  weekday: 4, // Thursday
+  hour: 18, // 6 PM ET
+};
+
+export function parseCadence(raw: unknown): CampaignCadence {
+  const d = DEFAULT_NEXTDOOR_CADENCE;
+  if (!raw || typeof raw !== "object") return d;
+  const o = raw as Record<string, unknown>;
+  const num = (v: unknown, fallback: number, min: number, max: number) => {
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) && n >= min && n <= max ? Math.round(n) : fallback;
+  };
+  return {
+    intervalDays: num(o.intervalDays, d.intervalDays, 1, 90),
+    weekday: num(o.weekday, d.weekday, 0, 6),
+    hour: num(o.hour, d.hour, 0, 23),
+  };
+}
+
+/** Offset of America/New_York from UTC in hours at the given instant (-4 or -5). */
+function etOffsetHours(at: Date): number {
+  const s = new Intl.DateTimeFormat("en-US", {
+    timeZone: NEXTDOOR_TIMEZONE,
+    timeZoneName: "shortOffset",
+  }).format(at);
+  const m = s.match(/GMT([+-]\d+)/);
+  return m ? Number(m[1]) : -5;
+}
+
+/** A UTC Date for the given America/New_York wall-clock date + hour. */
+function etWallClockToUtc(y: number, mo: number, d: number, hour: number): Date {
+  const guess = new Date(Date.UTC(y, mo, d, hour));
+  const off = etOffsetHours(guess);
+  return new Date(Date.UTC(y, mo, d, hour - off));
+}
+
+/**
+ * Nextdoor schedule: first post on the first `cadence.weekday` on/after the
+ * start date, then every `cadence.intervalDays`, always at `cadence.hour` ET.
+ */
+export function nextdoorScheduledFor(
+  startDate: string,
+  index: number,
+  cadence: CampaignCadence = DEFAULT_NEXTDOOR_CADENCE,
+): Date {
+  const anchor = new Date(`${startDate}T12:00:00Z`);
+  const delta = (cadence.weekday - anchor.getUTCDay() + 7) % 7;
+  const first = new Date(anchor.getTime() + delta * 86400000);
+  const day = new Date(first.getTime() + index * cadence.intervalDays * 86400000);
+  return etWallClockToUtc(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), cadence.hour);
+}
+
 /** Scheduled time for post index (0-based) given a YYYY-MM-DD start date. */
 export function scheduledFor(
   startDate: string,
   platform: "nextdoor" | "meta",
   index: number,
+  cadence: CampaignCadence = DEFAULT_NEXTDOOR_CADENCE,
 ): Date {
+  if (platform === "nextdoor") return nextdoorScheduledFor(startDate, index, cadence);
   const base = new Date(`${startDate}T00:00:00Z`);
   base.setUTCHours(FIRST_POST_UTC_HOUR[platform], 0, 0, 0);
   return new Date(base.getTime() + index * CADENCE_HOURS[platform] * 3600 * 1000);
@@ -83,9 +161,12 @@ export function defaultStartDate(now = new Date()): string {
   return d.toISOString().slice(0, 10);
 }
 
+
 const N = ZIP_NEIGHBORHOODS;
 
-// ── NEXTDOOR — 12 posts, neighborly register ─────────────────────────────────
+// ── NEXTDOOR — 6 posts, every 2 weeks, intro → scarcity arc ──────────────────
+// Order matters: introduction, differentiator, pricing, breadth, risk reversal,
+// scarcity last. The six captions cut from here now live in META_POSTS (31–36).
 export const NEXTDOOR_POSTS: CampaignPost[] = [
   {
     post_number: 1,
@@ -96,82 +177,41 @@ export const NEXTDOOR_POSTS: CampaignPost[] = [
   },
   {
     post_number: 2,
-    title: "House cleaning, same Pro",
-    zip: "33183",
-    en: `House cleaning in ${N["33183"]}, from $139 a visit for a size 1 home.\n\nKitchen, baths, floors and dusting. Same crew every visit, so nobody has to be shown where anything goes twice.\n\nFirst visit perfect or it's free.`,
-    es: `Limpieza de casa en ${N["33183"]}, desde $139 por visita para un hogar tamaño 1.\n\nCocina, baños, pisos y polvo. El mismo equipo en cada visita, así nadie tiene que explicar dos veces dónde va cada cosa.\n\nPrimera visita perfecta o es gratis.`,
-  },
-  {
-    post_number: 3,
-    title: "Lawn care from $45",
-    zip: "33186",
-    en: `Lawn care in ${N["33186"]}, from $45 a visit.\n\nMow, edge, trim and blow down — clippings hauled off, gate closed behind us.\n\nAdd it to cleaning or car care and it's all one plan, one bill.`,
-    es: `Cuidado de grama en ${N["33186"]}, desde $45 por visita.\n\nCortamos, bordeamos, recortamos y soplamos — nos llevamos los recortes y cerramos el portón al salir.\n\nCombínalo con limpieza o cuidado del carro: un solo plan, una sola factura.`,
-  },
-  {
-    post_number: 4,
-    title: "25 founding homes per ZIP",
-    zip: "33156",
-    en: `We cap founding pricing at 25 homes per ZIP, on purpose.\n\nSmall route, same Pros, no scrambling. It's the only way the same crew keeps showing up at the same houses.\n\nFounding neighbors in ${N["33156"]}: your rate is locked for life.`,
-    es: `Limitamos el precio fundador a 25 hogares por código postal, a propósito.\n\nRuta pequeña, los mismos Pros, sin carreras. Es la única forma de que el mismo equipo siga llegando a las mismas casas.\n\nVecinos fundadores en ${N["33156"]}: su precio queda fijo de por vida.`,
-  },
-  {
-    post_number: 5,
-    title: "Flat price by size",
-    zip: "33183",
-    en: `No square-footage math. No surprise line items.\n\nThree sizes per service, one flat price per visit. You see the number before you book, and founding neighbors keep that number for life.`,
-    es: `Sin cálculos de pies cuadrados. Sin cargos sorpresa.\n\nTres tamaños por servicio y un precio fijo por visita. Ves el número antes de reservar, y los vecinos fundadores conservan ese número de por vida.`,
-  },
-  {
-    post_number: 6,
-    title: "Car care in your driveway",
-    zip: "33186",
-    en: `Shine Complete: car care in your own driveway, from $149 a month.\n\nHand wash, wheels, glass and an interior wipe-down. You never move the car.\n\n${N["33186"]} founding spots are open.`,
-    es: `Shine Complete: cuidado del carro en tu propia entrada, desde $149 al mes.\n\nLavado a mano, ruedas, vidrios y limpieza interior. No tienes que mover el carro.\n\nHay lugares fundadores abiertos en ${N["33186"]}.`,
-  },
-  {
-    post_number: 7,
     title: "Same Pro every visit",
     zip: "33156",
     en: `The same Pro, every visit.\n\nEvery Tidy Pro is background-checked and covered by insurance, and you keep the same one — they learn your gate code, your dog's name, which room matters most.`,
     es: `El mismo Pro, en cada visita.\n\nCada Pro de Tidy pasa verificación de antecedentes y está cubierto por seguro, y siempre te toca el mismo — aprende el código del portón, el nombre del perro y cuál cuarto importa más.`,
   },
   {
-    post_number: 8,
-    title: "One free premium add-on",
+    post_number: 3,
+    title: "Flat price by size",
     zip: "33183",
-    en: `Founding neighbors get one free premium add-on on the first visit — you pick it.\n\nInside-the-fridge, oven, bed edge reset, clay bar. Your choice, no charge, no conditions.`,
-    es: `Los vecinos fundadores reciben un servicio premium gratis en la primera visita — tú lo eliges.\n\nInterior del refrigerador, horno, reinicio de bordes de jardineras, clay bar. Tú decides, sin costo y sin condiciones.`,
+    en: `No square-footage math. No surprise line items.\n\nThree sizes per service, one flat price per visit. You see the number before you book, and founding neighbors keep that number for life.`,
+    es: `Sin cálculos de pies cuadrados. Sin cargos sorpresa.\n\nTres tamaños por servicio y un precio fijo por visita. Ves el número antes de reservar, y los vecinos fundadores conservan ese número de por vida.`,
   },
   {
-    post_number: 9,
-    title: "First visit perfect or it's free",
-    zip: "33186",
-    en: `First visit perfect or it's free. That's the whole promise.\n\nIf the first visit isn't right, tell us and you don't pay for it. No forms, no argument.\n\n${N["33186"]} — founding spots are capped at 25 homes.`,
-    es: `Primera visita perfecta o es gratis. Esa es toda la promesa.\n\nSi la primera visita no queda bien, dínoslo y no la pagas. Sin formularios y sin discusiones.\n\n${N["33186"]} — los lugares fundadores están limitados a 25 hogares.`,
-  },
-  {
-    post_number: 10,
+    post_number: 4,
     title: "Three services, one plan",
     zip: "33156",
     en: `Three services. One plan. One bill.\n\nCleaning, lawn and car care, scheduled together instead of three companies and three text threads. Hold two or more and you get a free premium add-on every month.`,
     es: `Tres servicios. Un plan. Una factura.\n\nLimpieza, grama y cuidado del carro, coordinados juntos en vez de tres empresas y tres cadenas de mensajes. Con dos o más servicios recibes un servicio premium gratis cada mes.`,
   },
   {
-    post_number: 11,
-    title: "Saturdays back",
-    zip: "33183",
-    en: `Nobody in ${N["33183"]} moved here to spend Saturday behind a mower.\n\nLawn from $45 a visit, cleaning from $139. Set it once and it just happens.`,
-    es: `Nadie en ${N["33183"]} se mudó aquí para pasar el sábado detrás de una podadora.\n\nGrama desde $45 por visita, limpieza desde $139. Lo configuras una vez y simplemente pasa.`,
+    post_number: 5,
+    title: "First visit perfect or it's free",
+    zip: "33186",
+    en: `First visit perfect or it's free. That's the whole promise.\n\nIf the first visit isn't right, tell us and you don't pay for it. No forms, no argument.\n\n${N["33186"]} — founding spots are capped at 25 homes.`,
+    es: `Primera visita perfecta o es gratis. Esa es toda la promesa.\n\nSi la primera visita no queda bien, dínoslo y no la pagas. Sin formularios y sin discusiones.\n\n${N["33186"]} — los lugares fundadores están limitados a 25 hogares.`,
   },
   {
-    post_number: 12,
-    title: "Founding spots in Kendall West",
-    zip: "33186",
-    en: `Founding neighbor, plainly:\n\nYour rate is locked for life. One free premium add-on on the first visit. First visit perfect or it's free. Capped at 25 homes in ${N["33186"]}.\n\nNo contract. Cancel anytime.`,
-    es: `Vecino fundador, en simple:\n\nTu precio queda fijo de por vida. Un servicio premium gratis en la primera visita. Primera visita perfecta o es gratis. Limitado a 25 hogares en ${N["33186"]}.\n\nSin contrato. Cancela cuando quieras.`,
+    post_number: 6,
+    title: "25 founding homes per ZIP",
+    zip: "33156",
+    en: `We cap founding pricing at 25 homes per ZIP, on purpose.\n\nSmall route, same Pros, no scrambling. It's the only way the same crew keeps showing up at the same houses.\n\nFounding neighbors in ${N["33156"]}: your rate is locked for life.`,
+    es: `Limitamos el precio fundador a 25 hogares por código postal, a propósito.\n\nRuta pequeña, los mismos Pros, sin carreras. Es la única forma de que el mismo equipo siga llegando a las mismas casas.\n\nVecinos fundadores en ${N["33156"]}: su precio queda fijo de por vida.`,
   },
 ];
+
 
 // ── META (IG + FB) — 30 posts, punchier register ─────────────────────────────
 export const META_POSTS: CampaignPost[] = [
@@ -385,7 +425,51 @@ export const META_POSTS: CampaignPost[] = [
     en: `Founding neighbor: rate locked for life, one free premium add-on, first visit perfect or it's free. 25 homes per ZIP.`,
     es: `Vecino fundador: precio fijo de por vida, un servicio premium gratis y primera visita perfecta o gratis. 25 hogares por código postal.`,
   },
+  // ── Moved off Nextdoor (its cadence is one post every two weeks) ───────────
+  {
+    post_number: 31,
+    title: "House cleaning, same Pro",
+    zip: "33183",
+    en: `House cleaning in ${N["33183"]}, from $139 a visit for a size 1 home.\n\nKitchen, baths, floors and dusting. Same crew every visit, so nobody has to be shown where anything goes twice.\n\nFirst visit perfect or it's free.`,
+    es: `Limpieza de casa en ${N["33183"]}, desde $139 por visita para un hogar tamaño 1.\n\nCocina, baños, pisos y polvo. El mismo equipo en cada visita, así nadie tiene que explicar dos veces dónde va cada cosa.\n\nPrimera visita perfecta o es gratis.`,
+  },
+  {
+    post_number: 32,
+    title: "Lawn care from $45",
+    zip: "33186",
+    en: `Lawn care in ${N["33186"]}, from $45 a visit.\n\nMow, edge, trim and blow down — clippings hauled off, gate closed behind us.\n\nAdd it to cleaning or car care and it's all one plan, one bill.`,
+    es: `Cuidado de grama en ${N["33186"]}, desde $45 por visita.\n\nCortamos, bordeamos, recortamos y soplamos — nos llevamos los recortes y cerramos el portón al salir.\n\nCombínalo con limpieza o cuidado del carro: un solo plan, una sola factura.`,
+  },
+  {
+    post_number: 33,
+    title: "Car care in your driveway",
+    zip: "33186",
+    en: `Shine Complete: car care in your own driveway, from $149 a month.\n\nHand wash, wheels, glass and an interior wipe-down. You never move the car.\n\n${N["33186"]} founding spots are open.`,
+    es: `Shine Complete: cuidado del carro en tu propia entrada, desde $149 al mes.\n\nLavado a mano, ruedas, vidrios y limpieza interior. No tienes que mover el carro.\n\nHay lugares fundadores abiertos en ${N["33186"]}.`,
+  },
+  {
+    post_number: 34,
+    title: "One free premium add-on",
+    zip: "33183",
+    en: `Founding neighbors get one free premium add-on on the first visit — you pick it.\n\nInside-the-fridge, oven, bed edge reset, clay bar. Your choice, no charge, no conditions.`,
+    es: `Los vecinos fundadores reciben un servicio premium gratis en la primera visita — tú lo eliges.\n\nInterior del refrigerador, horno, reinicio de bordes de jardineras, clay bar. Tú decides, sin costo y sin condiciones.`,
+  },
+  {
+    post_number: 35,
+    title: "Saturdays back",
+    zip: "33183",
+    en: `Nobody in ${N["33183"]} moved here to spend Saturday behind a mower.\n\nLawn from $45 a visit, cleaning from $139. Set it once and it just happens.`,
+    es: `Nadie en ${N["33183"]} se mudó aquí para pasar el sábado detrás de una podadora.\n\nGrama desde $45 por visita, limpieza desde $139. Lo configuras una vez y simplemente pasa.`,
+  },
+  {
+    post_number: 36,
+    title: "Founding spots in Kendall West",
+    zip: "33186",
+    en: `Founding neighbor, plainly:\n\nYour rate is locked for life. One free premium add-on on the first visit. First visit perfect or it's free. Capped at 25 homes in ${N["33186"]}.\n\nNo contract. Cancel anytime.`,
+    es: `Vecino fundador, en simple:\n\nTu precio queda fijo de por vida. Un servicio premium gratis en la primera visita. Primera visita perfecta o es gratis. Limitado a 25 hogares en ${N["33186"]}.\n\nSin contrato. Cancela cuando quieras.`,
+  },
 ];
+
 
 /** Every row we manage, with its stored caption and title, ready for the DB. */
 export function campaignRows(): {

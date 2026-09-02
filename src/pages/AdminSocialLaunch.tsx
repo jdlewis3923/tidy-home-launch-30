@@ -1,11 +1,17 @@
 /**
  * Admin Founding Neighbor Social Campaign — /admin/social-launch
  *
- * Two stacked campaigns: Nextdoor (12 posts, 4×3) and Meta IG+FB (30 posts, 5×6).
+ * Two stacked campaigns:
+ *   - Nextdoor: 6 posts, one every 14 days, Thursdays 6:00 PM America/New_York.
+ *     Nextdoor has NO public API for publishing organic business posts, so arming
+ *     only schedules a reminder — an admin publishes each post inside Nextdoor and
+ *     marks the row posted here.
+ *   - Meta IG+FB: 36 posts, auto-published by the social-launch-publisher function.
+ *
  * Captions live in `src/lib/socialCampaign.ts` (evergreen, EN + ES, per-ZIP
  * attributed links) and are written into the row at ARM time, together with the
- * scheduled date computed from the settable campaign START DATE.
- * Armed posts are auto-published by the social-launch-publisher edge function.
+ * scheduled date computed from the settable campaign START DATE and, for Nextdoor,
+ * the settable cadence (interval days / weekday / hour).
  */
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Helmet } from "react-helmet-async";
@@ -20,6 +26,7 @@ import {
   Send,
   AlertCircle,
   CalendarDays,
+  Hand,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -34,6 +41,9 @@ import {
   buildCaption,
   scheduledFor,
   defaultStartDate,
+  parseCadence,
+  DEFAULT_NEXTDOOR_CADENCE,
+  type CampaignCadence,
   type CampaignPost,
 } from "@/lib/socialCampaign";
 import {
@@ -44,6 +54,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 
 type Channel = "nextdoor" | "instagram" | "facebook" | "meta_combined";
 type Platform = "nextdoor" | "meta";
@@ -77,13 +88,15 @@ const STATUS_BADGE: Record<Status, { label: string; className: string }> = {
   skipped: { label: "Skipped", className: "bg-slate-400 text-white" },
 };
 
-function fmtDate(iso: string) {
+function fmtDate(iso: string, et = false) {
   const d = new Date(iso);
   return d.toLocaleString("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
     hour: "numeric",
+    minute: "2-digit",
+    ...(et ? { timeZone: "America/New_York", timeZoneName: "short" as const } : {}),
   });
 }
 
@@ -97,11 +110,16 @@ function PostCard({
   post,
   onUpload,
   onChange,
+  manual = false,
+  onMarkPosted,
 }: {
   post: Post;
   onUpload: (post: Post, file: File) => Promise<void>;
   onChange: () => void;
+  manual?: boolean;
+  onMarkPosted?: (post: Post) => Promise<void>;
 }) {
+
   const [busy, setBusy] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -148,8 +166,12 @@ function PostCard({
       <div className="flex items-center justify-between px-3 py-2 text-xs">
         <span className="font-bold text-slate-900">Post {post.post_number}</span>
         <span className="text-slate-600">
-          {fmtDate(post.status === "posted" || post.status === "armed" ? post.scheduled_for : post.plannedFor)}
+          {fmtDate(
+            post.status === "posted" || post.status === "armed" ? post.scheduled_for : post.plannedFor,
+            manual,
+          )}
         </span>
+
       </div>
 
       {/* Image / drop zone */}
@@ -218,15 +240,35 @@ function PostCard({
         <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", badge.className)}>
           {badge.label}
         </span>
-        <button
-          type="button"
-          onClick={copyCaption}
-          className="grid h-7 w-7 place-items-center rounded-md text-slate-500 hover:bg-slate-100"
-          title="Copy caption"
-        >
-          <Copy className="h-3.5 w-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          {manual && onMarkPosted && post.status !== "posted" && (
+            <button
+              type="button"
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await onMarkPosted(post);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              disabled={busy}
+              className="rounded-md border border-emerald-300 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+            >
+              Mark as posted
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={copyCaption}
+            className="grid h-7 w-7 place-items-center rounded-md text-slate-500 hover:bg-slate-100"
+            title="Copy caption"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
+
 
       {post.publish_error && (
         <div className="border-t border-red-200 bg-red-50 px-3 py-1.5 text-[11px] text-red-700">
@@ -248,6 +290,9 @@ function CampaignSection({
   onUpload,
   onArmSection,
   refresh,
+  manual = false,
+  onMarkPosted,
+  controls,
 }: {
   title: string;
   subtitle: string;
@@ -257,6 +302,9 @@ function CampaignSection({
   onUpload: (post: Post, file: File) => Promise<void>;
   onArmSection: () => Promise<void>;
   refresh: () => void;
+  manual?: boolean;
+  onMarkPosted?: (post: Post) => Promise<void>;
+  controls?: React.ReactNode;
 }) {
   const total = posts.length;
   const withImage = posts.filter((p) => p.image_url).length;
@@ -277,8 +325,20 @@ function CampaignSection({
         <div>
           <h2 className="text-lg font-bold tracking-tight">{title}</h2>
           <p className="text-sm opacity-90">{subtitle}</p>
+          {manual ? (
+            <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-amber-300">
+              <Hand className="h-3.5 w-3.5" />
+              Manual channel — Nextdoor has no public API for organic business posts. Arming schedules a
+              reminder; you publish each post in Nextdoor, then hit “Mark as posted”.
+            </p>
+          ) : (
+            <p className="mt-1 text-xs opacity-80">
+              Auto-published via the Meta Graph API integration (social-launch-publisher).
+            </p>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs">
+          {controls}
           <span className="rounded-full bg-white/15 px-3 py-1">
             Images: <b>{withImage}/{total}</b>
           </span>
@@ -298,24 +358,39 @@ function CampaignSection({
             className="bg-amber-400 text-slate-900 hover:bg-amber-300 disabled:opacity-50"
           >
             <Send className="mr-1 h-3.5 w-3.5" />
-            {allArmed ? "Armed" : `Arm ${title.split(" ")[0]} Campaign`}
+            {allArmed
+              ? "Armed"
+              : manual
+                ? "Schedule Nextdoor Reminders"
+                : `Arm ${title.split(" ")[0]} Campaign`}
           </Button>
         </div>
       </div>
 
       <div className={cn("grid gap-4 rounded-b-xl border border-t-0 bg-slate-50 p-5", cols)}>
         {posts.map((p) => (
-          <PostCard key={p.id} post={p} onUpload={onUpload} onChange={refresh} />
+          <PostCard
+            key={p.id}
+            post={p}
+            onUpload={onUpload}
+            onChange={refresh}
+            manual={manual}
+            onMarkPosted={onMarkPosted}
+          />
         ))}
       </div>
 
       <Dialog open={confirming} onOpenChange={setConfirming}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Arm {title}?</DialogTitle>
+            <DialogTitle>{manual ? `Schedule ${title}?` : `Arm ${title}?`}</DialogTitle>
             <DialogDescription>
-              {withImage} posts get the current captions and the schedule built from your campaign start date,
-              then publish automatically. New uploads after arming require re-arming.
+              {withImage} posts get the current captions and the schedule built from your campaign start date
+              {manual ? " and cadence" : ""}.{" "}
+              {manual
+                ? "Nothing publishes automatically — each post is a reminder you publish inside Nextdoor and then mark as posted."
+                : "They then publish automatically."}{" "}
+              New uploads after arming require re-arming.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -327,7 +402,7 @@ function CampaignSection({
               }}
               className="bg-blue-600 text-white hover:bg-blue-700"
             >
-              Confirm Arm
+              {manual ? "Confirm Schedule" : "Confirm Arm"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -335,6 +410,7 @@ function CampaignSection({
     </section>
   );
 }
+
 
 // ---------- Page ----------
 
@@ -345,6 +421,8 @@ export default function AdminSocialLaunch() {
   const [launchOpen, setLaunchOpen] = useState(false);
   const [startDate, setStartDate] = useState<string>(defaultStartDate());
   const [savingDate, setSavingDate] = useState(false);
+  const [cadence, setCadence] = useState<CampaignCadence>(DEFAULT_NEXTDOOR_CADENCE);
+  const [savingCadence, setSavingCadence] = useState(false);
 
   const refresh = useCallback(async () => {
     const [{ data, error }, settings] = await Promise.all([
@@ -353,14 +431,22 @@ export default function AdminSocialLaunch() {
         .select("*")
         .order("channel", { ascending: true })
         .order("post_number", { ascending: true }),
-      supabase.from("app_settings").select("value").eq("key", "social_campaign_start_date").maybeSingle(),
+      supabase
+        .from("app_settings")
+        .select("key, value")
+        .in("key", ["social_campaign_start_date", "social_campaign_nextdoor_cadence"]),
     ]);
     if (error) {
       toast.error("Failed to load posts");
       return;
     }
-    const saved = settings.data?.value;
-    if (typeof saved === "string" && /^\d{4}-\d{2}-\d{2}$/.test(saved)) setStartDate(saved);
+    for (const s of settings.data ?? []) {
+      if (s.key === "social_campaign_start_date") {
+        if (typeof s.value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.value)) setStartDate(s.value);
+      } else if (s.key === "social_campaign_nextdoor_cadence") {
+        setCadence(parseCadence(s.value));
+      }
+    }
     setRows((data ?? []) as Row[]);
     setLoading(false);
   }, []);
@@ -381,13 +467,14 @@ export default function AdminSocialLaunch() {
             ...row,
             libTitle: lib.title,
             libCaption: buildCaption(lib, platform),
-            plannedFor: scheduledFor(startDate, platform, index).toISOString(),
+            plannedFor: scheduledFor(startDate, platform, index, cadence).toISOString(),
           } as Post;
         })
         .filter((p): p is Post => p !== null);
     },
-    [rows, startDate],
+    [rows, startDate, cadence],
   );
+
 
   const nextdoor = useMemo(() => join(NEXTDOOR_POSTS, "nextdoor", ["nextdoor"]), [join]);
   const meta = useMemo(
@@ -412,6 +499,33 @@ export default function AdminSocialLaunch() {
     if (error) toast.error(`Could not save start date: ${error.message}`);
     else toast.success("Campaign start date saved");
   }, []);
+
+  const saveCadence = useCallback(async (next: CampaignCadence) => {
+    setCadence(next);
+    setSavingCadence(true);
+    const { data: authData } = await supabase.auth.getUser();
+    const { error } = await supabase.from("app_settings").upsert({
+      key: "social_campaign_nextdoor_cadence",
+      value: next as unknown as never,
+      updated_by: authData.user?.id ?? null,
+    });
+    setSavingCadence(false);
+    if (error) toast.error(`Could not save cadence: ${error.message}`);
+  }, []);
+
+  const markPosted = useCallback(async (post: Post) => {
+    const { error } = await supabase
+      .from("social_launch_posts")
+      .update({ status: "posted", posted_at: new Date().toISOString(), publish_error: null })
+      .eq("id", post.id);
+    if (error) {
+      toast.error(`Could not mark posted: ${error.message}`);
+      return;
+    }
+    toast.success(`Post #${post.post_number} marked as posted`);
+    void refresh();
+  }, [refresh]);
+
 
   const onUpload = useCallback(async (post: Post, file: File) => {
     const ext = file.name.split(".").pop() || "jpg";
@@ -484,12 +598,16 @@ export default function AdminSocialLaunch() {
   }
   if (!hasRole) return <Navigate to="/" replace />;
 
+  const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const hourLabel = `${((cadence.hour + 11) % 12) + 1}:00 ${cadence.hour < 12 ? "AM" : "PM"} ET`;
+
   const ndRange = nextdoor.length
     ? `${fmtShort(nextdoor[0].plannedFor)} → ${fmtShort(nextdoor[nextdoor.length - 1].plannedFor)}`
     : "";
   const metaRange = meta.length
     ? `${fmtShort(meta[0].plannedFor)} → ${fmtShort(meta[meta.length - 1].plannedFor)}`
     : "";
+
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -508,8 +626,11 @@ export default function AdminSocialLaunch() {
             <div>
               <h1 className="text-xl font-bold tracking-tight">Founding Neighbor Social Campaign</h1>
               <p className="text-xs text-slate-300">
-                {totalImages}/{allPosts.length} images uploaded · evergreen captions, EN + ES
+                {totalImages}/{allPosts.length} images uploaded · evergreen captions, EN + ES · Nextdoor:{" "}
+                {nextdoor.length} posts, every {cadence.intervalDays} days, {WEEKDAYS[cadence.weekday]}s {hourLabel}{" "}
+                (manual publish)
               </p>
+
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -552,16 +673,59 @@ export default function AdminSocialLaunch() {
           <>
             <CampaignSection
               title={CAMPAIGN_NAMES.nextdoor}
-              subtitle={`${ndRange} · ${nextdoor.length} posts`}
+              subtitle={`${nextdoor.length} posts · every ${cadence.intervalDays} days · ${WEEKDAYS[cadence.weekday]}s ${hourLabel} · ${ndRange}`}
               posts={nextdoor}
-              cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+              cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-3"
               headerBg="bg-slate-900"
               onUpload={onUpload}
               onArmSection={() => armPosts(nextdoor).then(() => undefined)}
               refresh={refresh}
+              manual
+              onMarkPosted={markPosted}
+              controls={
+                <div className="flex flex-wrap items-center gap-2 rounded-md bg-white/10 px-3 py-1.5">
+                  <span className="font-semibold">Cadence</span>
+                  <label className="flex items-center gap-1">
+                    every
+                    <Input
+                      type="number"
+                      min={1}
+                      max={90}
+                      value={cadence.intervalDays}
+                      onChange={(e) =>
+                        saveCadence({ ...cadence, intervalDays: Number(e.target.value) || 1 })
+                      }
+                      className="h-7 w-[64px] border-white/20 bg-white/10 text-xs text-white"
+                    />
+                    days
+                  </label>
+                  <select
+                    value={cadence.weekday}
+                    onChange={(e) => saveCadence({ ...cadence, weekday: Number(e.target.value) })}
+                    className="h-7 rounded-md border border-white/20 bg-slate-800 px-1 text-xs text-white"
+                  >
+                    {WEEKDAYS.map((d, i) => (
+                      <option key={d} value={i}>{d}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={cadence.hour}
+                    onChange={(e) => saveCadence({ ...cadence, hour: Number(e.target.value) })}
+                    className="h-7 rounded-md border border-white/20 bg-slate-800 px-1 text-xs text-white"
+                  >
+                    {Array.from({ length: 24 }, (_, h) => (
+                      <option key={h} value={h}>
+                        {`${((h + 11) % 12) + 1}:00 ${h < 12 ? "AM" : "PM"} ET`}
+                      </option>
+                    ))}
+                  </select>
+                  {savingCadence && <Loader2 className="h-3 w-3 animate-spin" />}
+                </div>
+              }
             />
             <CampaignSection
               title={CAMPAIGN_NAMES.meta}
+
               subtitle={`${metaRange} · ${meta.length} posts`}
               posts={meta}
               cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
