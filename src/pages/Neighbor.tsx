@@ -41,7 +41,7 @@ export const PHONE_TEL = "+17868291141";
 
 /** The hanger's numbered three-step, verbatim apart from step 1 (they scanned already). */
 const HOW_IT_WORKS = [
-  { n: "1", title: "See your price", body: "See your price in 60 seconds. No account, no call." },
+  { n: "1", title: "See your price", body: "Sixty seconds. No account, no call." },
   { n: "2", title: "Pick your day", body: "Choose the day and time that suits you." },
   { n: "3", title: "Meet your Pro", body: "The same background-checked Pro, every visit." },
 ];
@@ -258,9 +258,9 @@ const Neighbor = () => {
                   {t("See your price — 60 seconds")}
                 </Link>
               )}
-              <p className="mt-3 text-[15px] font-semibold text-white/90">
+<p className="mt-3 text-[15px] font-normal text-white/85">
                 {t("or call")}{" "}
-                <a href={`tel:${PHONE_TEL}`} className="underline decoration-[#F7C618] decoration-2 underline-offset-4">
+                <a href={`tel:${PHONE_TEL}`} className="underline decoration-white/60 underline-offset-4 hover:text-white">
                   {PHONE_DISPLAY}
                 </a>
               </p>
@@ -409,22 +409,19 @@ const Neighbor = () => {
           </div>
         </section>
 
-        {/* ── HOW IT WORKS: the hanger's numbered three-step ───────────── */}
+{/* ── HOW IT WORKS: the hanger's numbered three-step ───────────── */}
         <section className="bg-white px-5 py-14 md:px-8 md:py-20">
           <div className="mx-auto max-w-3xl">
             <h2 className="text-[26px] font-extrabold leading-tight text-[#0F1729] md:text-4xl">
               {t("How it works")}
             </h2>
-            <ol className="mt-8 grid gap-4 md:grid-cols-3">
+            <ol className="mt-10 grid gap-8 md:grid-cols-3 md:gap-6">
               {HOW_IT_WORKS.map((step, i) => (
                 <Reveal key={step.n} delay={i * 70}>
-                  <li className="h-full rounded-2xl border border-[#0F1729]/10 bg-white p-5">
-                    <span className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
-                      {step.n} · {t(step.title)}
-                    </span>
-                    <p className="mt-2 text-[17px] font-semibold leading-snug text-[#0F1729]">
-                      {t(step.body)}
-                    </p>
+                  <li className="h-full">
+                    <span className="block text-[26px] font-extrabold leading-none text-[#F7C618]">{step.n}</span>
+                    <h3 className="mt-2 text-[17px] font-bold text-[#0F1729]">{t(step.title)}</h3>
+                    <p className="mt-1.5 text-[15px] leading-snug text-[#0F1729]/70">{t(step.body)}</p>
                   </li>
                 </Reveal>
               ))}
