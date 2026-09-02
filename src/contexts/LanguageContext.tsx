@@ -912,6 +912,7 @@ const translations: Record<string, string> = {
   "One free premium add-on on your first visit — a $45 value": "Un servicio adicional gratis en la primera visita — valor de $45",
   "One free premium add-on on your first visit": "Un servicio adicional gratis en la primera visita",
   "More life. Less chores.": "Más vida. Menos tareas.",
+  "Call": "Llamar",
   "See your price — 60 seconds": "Ve tu precio — 60 segundos",
   "See your price in 60 seconds. No contract.": "Ve tu precio en 60 segundos. Sin contrato.",
   "or call": "o llama al",
