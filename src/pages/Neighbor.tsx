@@ -23,9 +23,9 @@ import {
   type ServiceType,
 } from "@/lib/dashboard-pricing";
 
-import heroAsset from "@/assets/neighbor-hero-v2.jpg.asset.json";
-import heroMobileAsset from "@/assets/neighbor-hero-mobile-v2.jpg.asset.json";
-import heroLoop from "@/assets/neighbor-hero-loop.mp4.asset.json";
+import heroAsset from "@/assets/neighbor-hero-v3.jpg.asset.json";
+import heroMobileAsset from "@/assets/neighbor-hero-mobile-v3.jpg.asset.json";
+import heroLoop from "@/assets/neighbor-hero-loop-v2.mp4.asset.json";
 
 import cleaningJpg from "@/assets/cleaning-interior.jpg";
 import cleaningWebp from "@/assets/cleaning-interior.webp";
