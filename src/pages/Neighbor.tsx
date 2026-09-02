@@ -112,6 +112,14 @@ const Neighbor = () => {
   const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
   const [waitlistDone, setWaitlistDone] = useState(false);
   const [waitlistError, setWaitlistError] = useState<string | null>(null);
+  // Reduced-motion visitors keep the still hero photo; everyone else gets the loop.
+  const [motionOk, setMotionOk] = useState(false);
+
+  useEffect(() => {
+    setMotionOk(!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+
+
 
   useEffect(() => {
     if (langParam === "es") setLanguage("es");
