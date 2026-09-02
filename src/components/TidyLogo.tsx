@@ -7,11 +7,10 @@ import tidyLogoWebp from "@/assets/tidy-logo.webp";
  * reserved empty space and shifted layout once the image decoded. Intrinsic
  * width/height are declared so the browser reserves the correct ratio.
  */
-const TidyLogo = ({ size = "md", withBackground = false, priority = false }: { size?: "xs" | "sm" | "md" | "lg"; withBackground?: boolean; priority?: boolean }) => {
+const TidyLogo = ({ size = "md", withBackground = false, priority = false }: { size?: "sm" | "md" | "lg"; withBackground?: boolean; priority?: boolean }) => {
   // withBackground prop kept for API compatibility but no longer renders a white circle —
   // the logo now floats directly on the surface for a cleaner, larger presence.
   const sizes = {
-    xs: "h-8 w-auto",
     sm: "h-12 w-auto",
     md: "h-20 md:h-24 w-auto",
     lg: "h-40 md:h-44 w-auto",
