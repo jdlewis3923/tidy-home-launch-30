@@ -240,14 +240,11 @@ const Neighbor = () => {
           {/* Scrim — kept light so the blue sky and house stay visible. */}
           <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0F1729]/95 via-[#0F1729]/45 to-transparent" />
 
-          <div className="absolute left-4 top-24 md:left-8">
-            <TidyLogo size="lg" priority />
-          </div>
-
-          <div className="px-5 pb-8 pt-56 md:px-8 md:pb-16">
-
-
+<div className="px-5 pb-8 pt-32 md:px-8 md:pb-16 md:pt-40">
             <div className="mx-auto w-full max-w-3xl">
+              <div className="mb-5">
+                <TidyLogo size="md" priority />
+              </div>
               <span className="inline-flex rounded-full bg-[#F7C618] px-3 py-1 text-[13px] font-extrabold uppercase tracking-wide text-[#0F1729]">
                 {t(FOUNDING_OFFER.headline)}
               </span>
