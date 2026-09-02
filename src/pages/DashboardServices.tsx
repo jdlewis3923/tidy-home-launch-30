@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDashboardData, formatLongDate, serviceLabel } from '@/lib/dashboard-data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { startAddServiceCheckout, type CheckoutServiceLine } from '@/lib/checkout';
-import { trackPreferredProSet } from '@/lib/tracking';
+import { trackPreferredProSet, pushEvent } from '@/lib/tracking';
 import {
   SERVICE_NAMES,
   SIZE_LABELS,
@@ -278,6 +278,9 @@ export default function DashboardServices() {
     setPreferredProId(proId);
     const opt = proId ? proOptions.find((p) => p.pro_id === proId) : null;
     trackPreferredProSet({ pro_id: proId, high_demand: opt?.high_demand });
+    // The Pro is told once, ever, by the notify-preferred-pro trigger — so this
+    // fires only when a Pro is actually named, never on clearing the choice.
+    if (proId) pushEvent('preferred_pro_notified', { pro_id: proId, high_demand: opt?.high_demand });
     toast({ title: t('Preference saved') });
   };
 

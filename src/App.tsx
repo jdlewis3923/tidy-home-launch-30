@@ -78,6 +78,8 @@ const AdminNextdoorVerify = lazy(() => import("./pages/AdminNextdoorVerify.tsx")
 const AdminDocumensoTemplates = lazy(() => import("./pages/AdminDocumensoTemplates.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
 const ProDashboard = lazy(() => import("./pages/ProDashboard.tsx"));
+const ProJobView = lazy(() => import("./pages/ProJobView.tsx"));
+const AddonApproval = lazy(() => import("./pages/AddonApproval.tsx"));
 const ProTierProgression = lazy(() => import("./pages/ProTierProgression.tsx"));
 const ProReviewBonuses = lazy(() => import("./pages/ProReviewBonuses.tsx"));
 const ProUploadCoi = lazy(() => import("./pages/ProUploadCoi.tsx"));
@@ -124,7 +126,7 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFoundingOfferShown, doorhangerGateAllows } from "@/lib/doorhanger";
 import { getLandingSource } from "@/lib/landing-source";
 
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/q/", "/neighbor", "/rate"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/addon/", "/q/", "/neighbor", "/rate"];
 
 // The printed door hangers point at /dashboard/plan?src=doorhanger_en — a
 // neighbour with no account should see the founding offer first. Bounce them to
@@ -293,6 +295,10 @@ const App = () => (
                   <Route path="/pro/onboarding" element={<ProOnboarding />} />
                   <Route path="/pro/training" element={<ProTraining />} />
                   <Route path="/pro/equipment" element={<ProEquipment />} />
+                  {/* On-site job view: before-photo gate + walkaround add-on request. */}
+                  <Route path="/pro/job/:jobId" element={<ProJobView />} />
+                  {/* Public, token-authenticated add-on approval from the SMS link. */}
+                  <Route path="/addon/:token" element={<AddonApproval />} />
                   <Route path="/admin/coi-review" element={<AdminCoiReview />} />
                   <Route path="/admin/insurance" element={<AdminInsurance />} />
                   <Route path="/admin/tier-progression" element={<AdminTierProgression />} />

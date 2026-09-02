@@ -149,6 +149,90 @@ export type Database = {
         }
         Relationships: []
       }
+      addon_requests: {
+        Row: {
+          addon_id: string | null
+          addon_key: string | null
+          addon_name: string
+          amount_cents: number
+          condition_note: string | null
+          customer_id: string | null
+          expires_at: string
+          id: string
+          job_id: string
+          minutes_estimate: number
+          photo_url: string | null
+          pro_id: string
+          pro_pay_cents: number | null
+          pro_visit_id: string | null
+          requested_at: string
+          responded_at: string | null
+          status: string
+          stripe_invoice_item_id: string | null
+          stripe_payment_intent_id: string | null
+          token: string
+        }
+        Insert: {
+          addon_id?: string | null
+          addon_key?: string | null
+          addon_name: string
+          amount_cents?: number
+          condition_note?: string | null
+          customer_id?: string | null
+          expires_at?: string
+          id?: string
+          job_id: string
+          minutes_estimate?: number
+          photo_url?: string | null
+          pro_id: string
+          pro_pay_cents?: number | null
+          pro_visit_id?: string | null
+          requested_at?: string
+          responded_at?: string | null
+          status?: string
+          stripe_invoice_item_id?: string | null
+          stripe_payment_intent_id?: string | null
+          token?: string
+        }
+        Update: {
+          addon_id?: string | null
+          addon_key?: string | null
+          addon_name?: string
+          amount_cents?: number
+          condition_note?: string | null
+          customer_id?: string | null
+          expires_at?: string
+          id?: string
+          job_id?: string
+          minutes_estimate?: number
+          photo_url?: string | null
+          pro_id?: string
+          pro_pay_cents?: number | null
+          pro_visit_id?: string | null
+          requested_at?: string
+          responded_at?: string | null
+          status?: string
+          stripe_invoice_item_id?: string | null
+          stripe_payment_intent_id?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addon_requests_addon_id_fkey"
+            columns: ["addon_id"]
+            isOneToOne: false
+            referencedRelation: "addon_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "addon_requests_pro_visit_id_fkey"
+            columns: ["pro_visit_id"]
+            isOneToOne: false
+            referencedRelation: "pro_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       addon_sms_log: {
         Row: {
           context: Json
@@ -1942,6 +2026,38 @@ export type Database = {
         }
         Relationships: []
       }
+      notified_pro_preference: {
+        Row: {
+          customer_id: string
+          id: string
+          notified_at: string
+          pro_id: string
+          service: string | null
+        }
+        Insert: {
+          customer_id: string
+          id?: string
+          notified_at?: string
+          pro_id: string
+          service?: string | null
+        }
+        Update: {
+          customer_id?: string
+          id?: string
+          notified_at?: string
+          pro_id?: string
+          service?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notified_pro_preference_pro_id_fkey"
+            columns: ["pro_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_events: {
         Row: {
           applicant_id: string | null
@@ -2043,6 +2159,48 @@ export type Database = {
         }
         Relationships: []
       }
+      preferred_pro_changes: {
+        Row: {
+          changed_at: string
+          customer_id: string
+          from_pro_id: string | null
+          id: string
+          subscription_id: string | null
+          to_pro_id: string | null
+        }
+        Insert: {
+          changed_at?: string
+          customer_id: string
+          from_pro_id?: string | null
+          id?: string
+          subscription_id?: string | null
+          to_pro_id?: string | null
+        }
+        Update: {
+          changed_at?: string
+          customer_id?: string
+          from_pro_id?: string | null
+          id?: string
+          subscription_id?: string | null
+          to_pro_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preferred_pro_changes_from_pro_id_fkey"
+            columns: ["from_pro_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preferred_pro_changes_to_pro_id_fkey"
+            columns: ["to_pro_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pro_bonuses: {
         Row: {
           amount_cents: number
@@ -2105,6 +2263,77 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pro_demand_crossings: {
+        Row: {
+          applicant_id: string
+          booked_pct: number | null
+          created_at: string
+          id: string
+          period: string
+          preferred_by_count: number
+        }
+        Insert: {
+          applicant_id: string
+          booked_pct?: number | null
+          created_at?: string
+          id?: string
+          period: string
+          preferred_by_count?: number
+        }
+        Update: {
+          applicant_id?: string
+          booked_pct?: number | null
+          created_at?: string
+          id?: string
+          period?: string
+          preferred_by_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_demand_crossings_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pro_notifications: {
+        Row: {
+          body: string | null
+          context: Json
+          contractor_id: string
+          created_at: string
+          id: string
+          kind: string
+          read_at: string | null
+          title: string
+          url: string | null
+        }
+        Insert: {
+          body?: string | null
+          context?: Json
+          contractor_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          read_at?: string | null
+          title: string
+          url?: string | null
+        }
+        Update: {
+          body?: string | null
+          context?: Json
+          contractor_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          title?: string
+          url?: string | null
+        }
+        Relationships: []
       }
       pro_referrals: {
         Row: {
@@ -2191,51 +2420,75 @@ export type Database = {
       }
       pro_visits: {
         Row: {
+          addon_pay_cents: number
           amount_cents: number | null
+          before_photos_count: number
+          before_photos_uploaded_at: string | null
           cancellation_reason: string | null
           completed_at: string | null
+          condition_flagged: boolean
+          condition_note: string | null
+          condition_photo_url: string | null
           contractor_id: string | null
           created_at: string
           customer_name: string | null
           customer_rating: number | null
+          declined_addon_name: string | null
           id: string
           jobber_visit_id: string | null
           photos_count: number
           photos_expected: number
           scheduled_at: string | null
           service_type: string | null
+          started_at: string | null
           status: string
         }
         Insert: {
+          addon_pay_cents?: number
           amount_cents?: number | null
+          before_photos_count?: number
+          before_photos_uploaded_at?: string | null
           cancellation_reason?: string | null
           completed_at?: string | null
+          condition_flagged?: boolean
+          condition_note?: string | null
+          condition_photo_url?: string | null
           contractor_id?: string | null
           created_at?: string
           customer_name?: string | null
           customer_rating?: number | null
+          declined_addon_name?: string | null
           id?: string
           jobber_visit_id?: string | null
           photos_count?: number
           photos_expected?: number
           scheduled_at?: string | null
           service_type?: string | null
+          started_at?: string | null
           status?: string
         }
         Update: {
+          addon_pay_cents?: number
           amount_cents?: number | null
+          before_photos_count?: number
+          before_photos_uploaded_at?: string | null
           cancellation_reason?: string | null
           completed_at?: string | null
+          condition_flagged?: boolean
+          condition_note?: string | null
+          condition_photo_url?: string | null
           contractor_id?: string | null
           created_at?: string
           customer_name?: string | null
           customer_rating?: number | null
+          declined_addon_name?: string | null
           id?: string
           jobber_visit_id?: string | null
           photos_count?: number
           photos_expected?: number
           scheduled_at?: string | null
           service_type?: string | null
+          started_at?: string | null
           status?: string
         }
         Relationships: []
@@ -3353,10 +3606,14 @@ export type Database = {
       }
       visit_ratings: {
         Row: {
+          admin_review_notes: string | null
+          admin_review_status: string
+          admin_reviewed_at: string | null
           comment: string | null
           contractor_id: string | null
           created_at: string
           customer_id: string | null
+          excluded_from_average: boolean
           google_prompted: boolean
           id: string
           job_id: string | null
@@ -3374,10 +3631,14 @@ export type Database = {
           visit_id: string | null
         }
         Insert: {
+          admin_review_notes?: string | null
+          admin_review_status?: string
+          admin_reviewed_at?: string | null
           comment?: string | null
           contractor_id?: string | null
           created_at?: string
           customer_id?: string | null
+          excluded_from_average?: boolean
           google_prompted?: boolean
           id?: string
           job_id?: string | null
@@ -3395,10 +3656,14 @@ export type Database = {
           visit_id?: string | null
         }
         Update: {
+          admin_review_notes?: string | null
+          admin_review_status?: string
+          admin_reviewed_at?: string | null
           comment?: string | null
           contractor_id?: string | null
           created_at?: string
           customer_id?: string | null
+          excluded_from_average?: boolean
           google_prompted?: boolean
           id?: string
           job_id?: string | null
@@ -3570,6 +3835,10 @@ export type Database = {
         Args: { _name: string; _value: string }
         Returns: undefined
       }
+      call_edge_function: {
+        Args: { _fn: string; _payload: Json }
+        Returns: undefined
+      }
       current_user_admin: { Args: never; Returns: boolean }
       ensure_referral_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
@@ -3581,6 +3850,20 @@ export type Database = {
           last_name: string
           preferred_by_count: number
           pro_id: string
+        }[]
+      }
+      get_pro_addon_request_stats: {
+        Args: never
+        Returns: {
+          applicant_id: string
+          approval_rate: number
+          approvals: number
+          completed_visits: number
+          contractor_id: string
+          fleet_median_rate: number
+          over_3x_median: boolean
+          request_rate: number
+          requests: number
         }[]
       }
       get_pro_capacity_stats: {

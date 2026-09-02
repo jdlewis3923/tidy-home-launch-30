@@ -13,3 +13,11 @@
 
 ## Follow-ups (not requested yet)
 - Ingestion adapter B (Google Business Profile API) once API access is approved — adapter interface is already in place.
+
+## Follow-ups from preferred-pro + walkaround add-ons
+- Admin reassignment screen (/admin/visits): reassign a booked visit inside Tidy so the
+  substitution notice actually fires, and push the `substitution_sms_sent` dataLayer event
+  from that action. A swap made directly in Jobber cannot notify the customer.
+- Price the two new draft car add-ons (heavy interior soil, excessive exterior
+  contamination) and activate them; they are inactive at $0 until then.
+- Admin review queue for quarantined low ratings (visit_ratings.admin_review_status).

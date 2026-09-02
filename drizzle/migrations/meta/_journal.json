@@ -120,6 +120,20 @@
       "when": 1788307104610,
       "tag": "0016_applicants_wash_only_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1788310850685,
+      "tag": "0017_preferred_pro_notifications_and_addon_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788310893219,
+      "tag": "0018_job_condition_photos_storage_policies",
+      "breakpoints": true
     }
   ]
 }
