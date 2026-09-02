@@ -455,7 +455,7 @@ export default function StepPayment({ state, onChange }: Props) {
             <li>· one free premium add-on on your first visit.</li>
             <li>· first visit perfect or it's free.</li>
             <li>· only 25 founding homes per zip code.</li>
-            <li>· in exchange for a review after your second visit.</li>
+            {/* No review condition: perks are unconditional (Google policy). */}
           </ul>
         </div>
       </div>
