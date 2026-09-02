@@ -192,7 +192,7 @@ const Neighbor = () => {
               <Link
                 to={signupHref}
                 onClick={() => ctaClick("neighbor_hero")}
-                className="mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] shadow-lg shadow-black/30 active:scale-[0.99] md:w-auto md:inline-flex"
+                className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
               >
                 {t("Claim your founding spot")}
               </Link>
@@ -319,7 +319,7 @@ const Neighbor = () => {
             <Link
               to={signupHref}
               onClick={() => ctaClick("neighbor_footer")}
-              className="mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] shadow-lg shadow-black/10 active:scale-[0.99] md:w-auto md:inline-flex"
+              className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
             >
               {t("Claim your founding spot")}
             </Link>
