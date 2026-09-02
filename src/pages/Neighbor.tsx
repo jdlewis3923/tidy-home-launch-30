@@ -241,7 +241,7 @@ const Neighbor = () => {
           <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0F1729]/95 via-[#0F1729]/45 to-transparent" />
 
           <div className="absolute left-4 top-24 md:left-8">
-            <TidyLogo size="sm" priority />
+            <TidyLogo size="lg" priority />
           </div>
 
           <div className="px-5 pb-8 pt-56 md:px-8 md:pb-16">
