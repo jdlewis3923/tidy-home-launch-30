@@ -40,14 +40,14 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  const ctaText = CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN" : "Request Early Access";
+  const ctaText = CUSTOMER_DASHBOARD_ENABLED ? "See your price — 60 seconds" : "Request Early Access";
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `text-sm font-medium transition-colors ${
       isActive ? "text-primary" : "text-foreground/80 hover:text-primary"
     }`;
 
-  // --- DASHBOARD ON: hamburger dropdown + Login + START MY PLAN ---
+  // --- DASHBOARD ON: hamburger dropdown + Login + See your price — 60 seconds ---
   if (CUSTOMER_DASHBOARD_ENABLED) {
     return (
       <nav className={`fixed top-0 left-0 right-0 z-50 bg-background border-b transition-shadow duration-300 ${scrolled ? "shadow-md" : ""}`}>

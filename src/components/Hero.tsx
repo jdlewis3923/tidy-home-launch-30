@@ -153,13 +153,13 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           onClick={() => {
             pushEvent("cta_click", {
               cta_id: "hero",
-              cta_text: CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN" : "Request Early Access",
+              cta_text: CUSTOMER_DASHBOARD_ENABLED ? "See your price — 60 seconds" : "Request Early Access",
             });
             onOpenPopup();
           }}
           className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)] animate-pulse-gold"
         >
-          {t(CUSTOMER_DASHBOARD_ENABLED ? "START MY PLAN →" : "Request Early Access →")}
+          {t(CUSTOMER_DASHBOARD_ENABLED ? "See your price — 60 seconds →" : "Request Early Access →")}
         </button>
 
         <p className="mt-4 text-xs text-primary-foreground/50">

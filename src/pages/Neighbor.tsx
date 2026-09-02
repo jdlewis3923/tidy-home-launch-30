@@ -228,7 +228,7 @@ const Neighbor = () => {
               {/* Echoes the printed door hanger's headline — the half-second
                   confirmation that this page is the thing they just scanned. */}
               <p className="mt-4 text-[13px] font-extrabold uppercase tracking-[0.14em] text-[#F7C618] md:text-sm">
-                {t("More life. Less chores.")}
+                {t("MORE LIFE. LESS CHORES.")}
               </p>
               {fromDoorhanger && (
                 <p className="mt-2 text-[15px] font-semibold leading-snug text-white/90">
@@ -438,7 +438,7 @@ const Neighbor = () => {
             <h2 className="text-[28px] font-extrabold leading-tight text-[#0F1729] md:text-4xl">
               {neighborhood
                 ? `${t("Claim your spot in")} ${neighborhood}.`
-                : t("Claim your founding spot")}
+                : t("See your price — 60 seconds")}
             </h2>
             <p className="mt-3 text-[17px] text-[#0F1729]/70">
               {t("See your price in 60 seconds. No contract.")}

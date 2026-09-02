@@ -10,7 +10,7 @@ const zipData: Record<string, string> = {
 };
 
 interface ZipCheckerProps {
-  /** Same handler the other homepage START MY PLAN buttons use. */
+  /** Same handler the other homepage See your price — 60 seconds buttons use. */
   onStart?: () => void;
 }
 
@@ -65,7 +65,7 @@ const ZipChecker = ({ onStart }: ZipCheckerProps) => {
               }}
               className="mt-4 bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-base px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
             >
-              {t("START MY PLAN →")}
+              {t("See your price — 60 seconds →")}
             </button>
           </div>
         )}

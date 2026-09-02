@@ -57,7 +57,7 @@ const translations: Record<string, string> = {
   Pricing: "Precios",
   FAQ: "Preguntas Frecuentes",
   "Request Early Access": "Solicitar Acceso",
-  "START MY PLAN": "EMPEZAR MI PLAN",
+  "See your price — 60 seconds": "Ve tu precio — 60 segundos",
   Home: "Inicio",
   "House Cleaning": "Limpieza del Hogar",
   "Lawn Care": "Cuidado del Jardín",
@@ -92,7 +92,7 @@ const translations: Record<string, string> = {
   "Set it once. We take care of the rest.": "Configúralo una vez. Nosotros nos encargamos del resto.",
   "No contracts · Cancel anytime · From $45 a visit": "Sin contratos · Cancela cuando quieras · Desde $45 por visita",
   "Founding memberships · No commitment · From $45 a visit": "Membresías fundadoras · Sin compromiso · Desde $45 por visita",
-  "START MY PLAN →": "EMPEZAR MI PLAN →",
+  "See your price — 60 seconds →": "Ve tu precio — 60 segundos →",
   "We handle scheduling, timing, and everything in between.":
     "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
   "Just set it — we'll take care of the rest.": "Solo configúralo — nosotros nos encargamos del resto.",
@@ -792,7 +792,7 @@ const translations: Record<string, string> = {
     "Cada profesional pasa por una revisión a través de Checkr antes de su primera visita. Se envía verificación con fotos después de cada visita.",
   "How are your pros background-checked?": "¿Cómo se revisan los antecedentes de tus profesionales?",
   "Photo-Verified Every Visit": "Verificado con Fotos en Cada Visita",
-  "Serving Kendall + Pinecrest": "Sirviendo Kendall + Pinecrest",
+  "Serving Pinecrest, Kendall and Kendall West.": "Sirviendo Pinecrest, Kendall y Kendall West.",
 
   // Pricing table + pricing FAQ
   "🔧 Cleaning Add-Ons": "🔧 Adicionales de Limpieza",
@@ -909,9 +909,9 @@ const translations: Record<string, string> = {
     "Antecedentes Verificados · Visitas Verificadas con Fotos · Primera visita perfecta o es gratis",
   "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
     "Un servicio adicional premium gratis en tu primera visita · Primera visita perfecta o es gratis · Solo 25 casas fundadoras por código postal",
-  "One free premium add-on on your first visit — a $45 value": "Un servicio adicional gratis en la primera visita — valor de $45",
-  "One free premium add-on on your first visit": "Un servicio adicional gratis en la primera visita",
-  "More life. Less chores.": "Más vida. Menos tareas.",
+  "One free premium add-on on your first visit — $45 value": "Un servicio adicional gratis en la primera visita — valor de $45",
+  "One free premium add-on on your first visit — $45 value (alt)": "Un servicio adicional gratis en la primera visita — valor de $45",
+  "MORE LIFE. LESS CHORES.": "MÁS VIDA. MENOS TAREAS.",
   "See your price — 60 seconds": "Ve tu precio — 60 segundos",
   "See your price in 60 seconds. No contract.": "Ve tu precio en 60 segundos. Sin contrato.",
   "or call": "o llama al",
@@ -1173,7 +1173,7 @@ const translations: Record<string, string> = {
     "Sé uno de los primeros 25 hogares de tu calle",
   "One plan for cleaning, lawn care and car care — one flat price per visit, set by the size of your property.":
     "Un solo plan para limpieza, jardinería y cuidado del carro — un precio fijo por visita, según el tamaño de tu propiedad.",
-  "Claim your founding spot": "Reserva tu lugar de fundador",
+  "Claim your founding spot (retired)": "Reserva tu lugar de fundador",
   "Be one of the first 25 homes in": "Sé uno de los primeros 25 hogares en",
   "Cleaning, lawn and car care on one plan. One flat price per visit.":
     "Limpieza, grama y cuidado del carro en un solo plan. Un precio fijo por visita.",
@@ -1197,13 +1197,13 @@ const translations: Record<string, string> = {
     "Cortamos, orillamos, recortamos y sopleteamos — nos llevamos los recortes.",
   "Hand wash, wheels, glass and interior wipe-down in your driveway.":
     "Lavado a mano, ruedas, cristales e interior limpiado en tu entrada.",
-  "Takes about two minutes. No contract.": "Toma unos dos minutos. Sin contrato.",
+  "See your price in 60 seconds. No contract.": "Ve tu precio en 60 segundos. Sin contrato.",
   "Claim your spot in": "Reserva tu lugar en",
   "What a founding neighbor gets": "Lo que recibe un vecino fundador",
   "Where plans start": "Desde dónde empiezan los planes",
   "per visit, size 1": "por visita, tamaño 1",
   "per month, size 1": "por mes, tamaño 1",
-  "Serving Pinecrest & Kendall — 33156, 33183, 33186":
+  "Serving Pinecrest, Kendall and Kendall West — 33156, 33183, 33186":
     "Servimos Pinecrest y Kendall — 33156, 33183, 33186",
   "from $45 a visit": "desde $45 por visita",
   "five-star reviews": "reseñas de cinco estrellas",
