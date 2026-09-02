@@ -364,6 +364,7 @@ export type Database = {
           training_passed: boolean
           training_scheduled_at: string | null
           updated_at: string
+          wash_only: boolean
           zip: string | null
         }
         Insert: {
@@ -440,6 +441,7 @@ export type Database = {
           training_passed?: boolean
           training_scheduled_at?: string | null
           updated_at?: string
+          wash_only?: boolean
           zip?: string | null
         }
         Update: {
@@ -516,6 +518,7 @@ export type Database = {
           training_passed?: boolean
           training_scheduled_at?: string | null
           updated_at?: string
+          wash_only?: boolean
           zip?: string | null
         }
         Relationships: []

@@ -5,7 +5,14 @@ export type EquipmentItem = {
   key: string;
   label: string;
   description: string;
+  /**
+   * Optional items are shown in the checklist but never gate submission or
+   * approval. A Detail applicant who skips the pressure washer is still
+   * approvable — they are flagged wash_only on their Pro record instead.
+   */
+  optional?: boolean;
 };
+
 
 export const HOUSE_CLEANING_ITEMS: EquipmentItem[] = [
   { key: 'vacuum_cleaner', label: 'Vacuum cleaner',
@@ -31,8 +38,10 @@ export const LAWN_ITEMS: EquipmentItem[] = [
 ];
 
 export const DETAIL_ITEMS: EquipmentItem[] = [
-  { key: 'pressure_washer_or_water_source', label: 'Pressure washer or water source',
-    description: 'Portable pressure washer OR a photo showing planned jobsite hose-access approach.' },
+  { key: 'hose_nozzle_buckets', label: 'Hose, nozzle, two buckets',
+    description: '50 ft hose with an adjustable nozzle, two buckets with grit guards, wash mitts, and your own outdoor extension cord. This is the required kit — reach matters more than pressure.' },
+  { key: 'pressure_washer', label: 'Pressure washer — optional', optional: true,
+    description: "Not required to join, and not required for a Wash. A portable pressure washer is what unlocks full Detail jobs, which pay materially more per visit than a Wash." },
   { key: 'shop_vac_or_wet_dry_vac', label: 'Wet/dry vac',
     description: 'Must be wet/dry capable — regular vacuums not accepted.' },
   { key: 'polishing_supplies', label: 'Polishing supplies',
@@ -54,7 +63,19 @@ const BY_SERVICE: Record<string, EquipmentItem[]> = {
   car_detailing: DETAIL_ITEMS,
 };
 
-/** Normalize free-form service string(s) → distinct required items (UNION). */
+/** Key of the optional Detail item whose absence flags a Pro wash-only. */
+export const PRESSURE_WASHER_KEY = 'pressure_washer';
+
+/** True when the checklist item never gates submission or approval. */
+export function isOptionalItem(item: EquipmentItem): boolean {
+  return item.optional === true;
+}
+
+/**
+ * Normalize free-form service string(s) → distinct checklist items (UNION).
+ * Includes optional items; use getMandatoryItems() for anything that gates
+ * submission or approval.
+ */
 export function getRequiredItems(service: string | null | undefined): EquipmentItem[] {
   const raw = (service ?? '').toLowerCase();
   if (!raw) return [];
@@ -78,6 +99,11 @@ export function getRequiredItems(service: string | null | undefined): EquipmentI
   // Fallback: assume cleaning if we couldn't parse anything.
   if (items.length === 0) return HOUSE_CLEANING_ITEMS;
   return items;
+}
+
+/** Checklist items that actually gate submission / approval (optional excluded). */
+export function getMandatoryItems(service: string | null | undefined): EquipmentItem[] {
+  return getRequiredItems(service).filter((it) => !isOptionalItem(it));
 }
 
 export const REJECTION_REASONS = [

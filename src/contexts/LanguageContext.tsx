@@ -16,6 +16,9 @@ const translations: Record<string, string> = {
   "Cap remaining": "Límite restante",
   "Plus": "Además,",
   "more matched review(s) still in the 7-day hold period.": "reseña(s) más en el período de espera de 7 días.",
+  "$25 per 5-star Google review that names you, capped at 4 per calendar month (up to $100). Paid 7 days after the review posts, on your Friday deposit. The cap does not roll over.":
+    "$25 por cada reseña de 5 estrellas en Google que te mencione por nombre, con un límite de 4 por mes calendario (hasta $100). Se paga 7 días después de que se publique la reseña, en tu depósito del viernes. El límite no se acumula para el mes siguiente.",
+
   "Back to dashboard": "Volver al panel",
 
   // Chatbot widget

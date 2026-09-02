@@ -18,7 +18,7 @@ import { ArrowLeft, Upload, CheckCircle2, Clock, XCircle, Loader2, Camera } from
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { getRequiredItems, type EquipmentItem } from "@/lib/equipmentChecklist";
+import { getRequiredItems, isOptionalItem, type EquipmentItem } from "@/lib/equipmentChecklist";
 import tidyLogo from "@/assets/tidy-logo.png";
 
 type PhotoRow = {
@@ -115,7 +115,9 @@ export default function ProEquipment() {
 
   if (authed === false) return <Navigate to="/login?next=/pro/equipment" replace />;
 
-  const approvedCount = required.filter((r) => latestByType[r.key]?.status === "approved").length;
+  // Optional items never count toward the progress denominator and never block.
+  const mandatory = required.filter((r) => !isOptionalItem(r));
+  const approvedCount = mandatory.filter((r) => latestByType[r.key]?.status === "approved").length;
 
   return (
     <div className="min-h-screen bg-white text-navy">
@@ -136,10 +138,11 @@ export default function ProEquipment() {
         <h1 className="font-display text-3xl font-bold mt-2">Equipment photos</h1>
         <p className="mt-2 text-slate-600 text-sm">
           Photograph each required item. Tidy reviews within 24 hours.
-          {required.length > 0 && (
-            <> {approvedCount} of {required.length} approved.</>
+          {mandatory.length > 0 && (
+            <> {approvedCount} of {mandatory.length} approved.</>
           )}
         </p>
+
 
         {loading ? (
           <div className="mt-8 text-slate-400 text-sm flex items-center gap-2">
@@ -155,15 +158,30 @@ export default function ProEquipment() {
             {required.map((item) => {
               const latest = latestByType[item.key];
               const attempts = attemptCount(item.key);
-              const flagged = attempts >= 3 && latest?.status !== "approved";
+              const optional = isOptionalItem(item);
+              const flagged = attempts >= 3 && latest?.status !== "approved" && !optional;
               const isUploading = uploadingKey === item.key;
               return (
                 <div key={item.key} className="rounded-2xl border border-slate-200 p-4 sm:p-5">
                   <div className="flex items-start gap-3">
-                    <StatusIcon status={latest?.status} />
+                    <StatusIcon status={latest?.status} optional={optional} />
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-navy">{item.label}</h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-semibold text-navy">{item.label}</h3>
+                        {optional && (
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                            Optional
+                          </span>
+                        )}
+                      </div>
                       <p className="mt-0.5 text-xs text-slate-500">{item.description}</p>
+                      {optional && (
+                        <p className="mt-1.5 text-xs text-slate-500">
+                          Skip this and you can still be approved — you'll be set up for Wash jobs
+                          only until you add it. Add it anytime.
+                        </p>
+                      )}
+
 
                       {latest?.status === "rejected" && (
                         <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs">
@@ -222,9 +240,10 @@ export default function ProEquipment() {
   );
 }
 
-function StatusIcon({ status }: { status?: "pending" | "approved" | "rejected" }) {
+function StatusIcon({ status, optional }: { status?: "pending" | "approved" | "rejected"; optional?: boolean }) {
   if (status === "approved") return <CheckCircle2 className="h-6 w-6 text-emerald-600 mt-0.5" />;
   if (status === "rejected") return <XCircle className="h-6 w-6 text-red-600 mt-0.5" />;
   if (status === "pending") return <Clock className="h-6 w-6 text-amber-500 mt-0.5" />;
-  return <Camera className="h-6 w-6 text-slate-400 mt-0.5" />;
+  return <Camera className={`h-6 w-6 mt-0.5 ${optional ? "text-slate-300" : "text-slate-400"}`} />;
+
 }
