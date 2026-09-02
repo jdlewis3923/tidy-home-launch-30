@@ -295,6 +295,10 @@ const App = () => (
                   <Route path="/pro/onboarding" element={<ProOnboarding />} />
                   <Route path="/pro/training" element={<ProTraining />} />
                   <Route path="/pro/equipment" element={<ProEquipment />} />
+                  {/* On-site job view: before-photo gate + walkaround add-on request. */}
+                  <Route path="/pro/job/:jobId" element={<ProJobView />} />
+                  {/* Public, token-authenticated add-on approval from the SMS link. */}
+                  <Route path="/addon/:token" element={<AddonApproval />} />
                   <Route path="/admin/coi-review" element={<AdminCoiReview />} />
                   <Route path="/admin/insurance" element={<AdminInsurance />} />
                   <Route path="/admin/tier-progression" element={<AdminTierProgression />} />
