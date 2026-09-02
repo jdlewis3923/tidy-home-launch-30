@@ -198,28 +198,29 @@ const Neighbor = () => {
 
       <main>
         {/* ── HERO: full-bleed photograph ───────────────────────────────── */}
-        <section className="relative isolate min-h-[94svh] flex flex-col justify-end overflow-hidden">
+        <section className="relative isolate min-h-[82svh] flex flex-col justify-end overflow-hidden">
           <picture>
             <source media="(max-width: 767px)" srcSet={heroMobileAsset.url} type="image/jpeg" />
             <img
               src={heroAsset.url}
-              alt="A traditional South Miami home with barrel-tile roof, coral rock wall and paver driveway at golden hour"
+              alt="A traditional South Miami home with barrel-tile roof, coral rock wall and paver driveway under a bright blue sky"
               width={1600}
-              height={1200}
+              height={1195}
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className="absolute inset-0 -z-10 h-full w-full object-cover object-[center_28%] md:object-[center_45%]"
+              className="absolute inset-0 -z-10 h-full w-full object-cover object-[center_35%] md:object-[center_40%]"
             />
           </picture>
-          {/* Hard scrim — daylight legibility, not decoration. */}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0F1729] via-[#0F1729]/70 to-transparent" />
+          {/* Scrim — kept light so the blue sky and house stay visible. */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0F1729]/95 via-[#0F1729]/45 to-transparent" />
 
           <div className="absolute left-4 top-24 md:left-8">
             <TidyLogo size="sm" priority />
           </div>
 
-          <div className="px-5 pb-8 pt-40 md:px-8 md:pb-16">
+          <div className="px-5 pb-8 pt-56 md:px-8 md:pb-16">
+
 
             <div className="mx-auto w-full max-w-3xl">
               <span className="inline-flex rounded-full bg-[#F7C618] px-3 py-1 text-[13px] font-extrabold uppercase tracking-wide text-[#0F1729]">
