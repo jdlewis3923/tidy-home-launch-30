@@ -312,7 +312,7 @@ const BundleInner = () => {
               {[
                 "Two or more services — you pick 1 free premium add-on every month",
                 "Your choice from the add-on list, applied automatically at checkout",
-                "One subscription, one bill, one crew",
+                "One subscription, one bill, one Pro",
                 "Same locked price every month",
                 "Cancel or adjust anytime",
                 "Serving 33156 · 33183 · 33186 only",

@@ -153,7 +153,12 @@ export const BUNDLE_GIFT_COPY = {
 
 /** The single company-wide entry price: lawn size 1, biweekly. */
 export const ENTRY_PRICE_MONTHLY = SIZE_PRICES.lawn[1] * CADENCE_MULTIPLIER.biweekly;
-export const ENTRY_PRICE_COPY = `from $${ENTRY_PRICE_MONTHLY}/mo`;
+/**
+ * Public entry-price claim. Stated per visit, matching the printed door
+ * hanger ("PLANS FROM $45 A VISIT"). Never quote a monthly entry price.
+ */
+export const ENTRY_PRICE_PER_VISIT = SIZE_PRICES.lawn[1];
+export const ENTRY_PRICE_COPY = `from $${ENTRY_PRICE_PER_VISIT} a visit`;
 
 /** Referral program — give $50, get $50. Unchanged. */
 export const REFERRAL_BONUS_CENTS = 5000;
@@ -167,11 +172,13 @@ export const FOUNDING_OFFER = {
   headline: 'Founding neighbor offer',
   promises: [
     'Your founding rate is locked — your price never rises',
-    'One free premium add-on on your first visit',
+    'One free premium add-on on your first visit — a $45 value',
     'First visit perfect or it’s free',
     'Capped at 25 founding homes per ZIP',
   ],
-  inExchangeFor: 'in exchange for a review after your second visit',
+  // NOTE: there is deliberately no "in exchange for a review" string here.
+  // Conditioning a perk on a review violates Google's review policy and can
+  // get the Business Profile suspended. The founding perks are unconditional.
   homesPerZip: 25,
 } as const;
 

@@ -79,8 +79,8 @@ const config: ServiceLandingConfig = {
 
   trustCards: [
     {
-      title: "Same Crew",
-      body: "Your same pro every visit, not a rotating marketplace crew.",
+      title: "Same Pro",
+      body: "Your same pro every visit, not a rotating marketplace roster.",
     },
     {
       title: "Photo-Verified",

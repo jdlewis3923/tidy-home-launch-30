@@ -207,7 +207,7 @@ export const NEXTDOOR_POSTS: CampaignPost[] = [
     post_number: 6,
     title: "25 founding homes per ZIP",
     zip: "33156",
-    en: `We cap founding pricing at 25 homes per ZIP, on purpose.\n\nSmall route, same Pros, no scrambling. It's the only way the same crew keeps showing up at the same houses.\n\nFounding neighbors in ${N["33156"]}: your rate is locked for life.`,
+    en: `We cap founding pricing at 25 homes per ZIP, on purpose.\n\nSmall route, same Pros, no scrambling. It's the only way the same Pro keeps showing up at the same houses.\n\nFounding neighbors in ${N["33156"]}: your rate is locked for life.`,
     es: `Limitamos el precio fundador a 25 hogares por código postal, a propósito.\n\nRuta pequeña, los mismos Pros, sin carreras. Es la única forma de que el mismo equipo siga llegando a las mismas casas.\n\nVecinos fundadores en ${N["33156"]}: su precio queda fijo de por vida.`,
   },
 ];
@@ -226,7 +226,7 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 2,
     title: "Cleaning from $139",
     zip: "33183",
-    en: `House cleaning from $139 a visit for a size 1 home.\n\nKitchen, baths, floors, dusting. Same crew every time.`,
+    en: `House cleaning from $139 a visit for a size 1 home.\n\nKitchen, baths, floors, dusting. Same Pro every time.`,
     es: `Limpieza de casa desde $139 por visita para un hogar tamaño 1.\n\nCocina, baños, pisos y polvo. El mismo equipo siempre.`,
   },
   {
@@ -247,7 +247,7 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 5,
     title: "One plan, three services",
     zip: "33183",
-    en: `Three services. One plan. One bill. One crew that knows your house.`,
+    en: `Three services. One plan. One bill. One Pro who knows your house.`,
     es: `Tres servicios. Un plan. Una factura. Un equipo que conoce tu casa.`,
   },
   {
@@ -336,9 +336,9 @@ export const META_POSTS: CampaignPost[] = [
   },
   {
     post_number: 18,
-    title: "Same crew",
+    title: "Same Pro",
     zip: "33186",
-    en: `You shouldn't have to re-explain your own house every two weeks. Same crew, every visit.`,
+    en: `You shouldn't have to re-explain your own house every two weeks. Same Pro, every visit.`,
     es: `No deberías tener que explicar tu casa otra vez cada dos semanas. El mismo equipo, cada visita.`,
   },
   {
@@ -373,7 +373,7 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 23,
     title: "Big lots too",
     zip: "33183",
-    en: `Bigger lot: $65 or $99 a visit depending on mowable turf. Same crew, same day of the week.`,
+    en: `Bigger lot: $65 or $99 a visit depending on mowable turf. Same Pro, same day of the week.`,
     es: `Terreno más grande: $65 o $99 por visita según la grama a cortar. El mismo equipo, el mismo día de la semana.`,
   },
   {
@@ -430,7 +430,7 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 31,
     title: "House cleaning, same Pro",
     zip: "33183",
-    en: `House cleaning in ${N["33183"]}, from $139 a visit for a size 1 home.\n\nKitchen, baths, floors and dusting. Same crew every visit, so nobody has to be shown where anything goes twice.\n\nFirst visit perfect or it's free.`,
+    en: `House cleaning in ${N["33183"]}, from $139 a visit for a size 1 home.\n\nKitchen, baths, floors and dusting. Same Pro every visit, so nobody has to be shown where anything goes twice.\n\nFirst visit perfect or it's free.`,
     es: `Limpieza de casa en ${N["33183"]}, desde $139 por visita para un hogar tamaño 1.\n\nCocina, baños, pisos y polvo. El mismo equipo en cada visita, así nadie tiene que explicar dos veces dónde va cada cosa.\n\nPrimera visita perfecta o es gratis.`,
   },
   {

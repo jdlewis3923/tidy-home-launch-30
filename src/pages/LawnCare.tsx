@@ -17,7 +17,7 @@ const config: ServiceLandingConfig = {
   subhead:
     "Reliable lawn care, done right every time. Mow, edge, blow.",
   intentConfirm:
-    "Same crew every visit. Locked monthly price. Cancel anytime.",
+    "Same Pro every visit. Locked monthly price. Cancel anytime.",
   systemBridge:
     "Tidy isn't just lawn — it's a system for your entire home.",
   ctaPrimaryLabel: "Start lawn care",
@@ -25,7 +25,7 @@ const config: ServiceLandingConfig = {
   priceAnchor: "From $45 a visit",
   stickyLabel: "Lawn Care · from $45 a visit",
   savingsCallout:
-    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $45 a visit** flat, same crew, no surprise invoices.",
+    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $45 a visit** flat, same Pro, no surprise invoices.",
   heroImage: heroImg,
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
@@ -78,7 +78,7 @@ const config: ServiceLandingConfig = {
     "Blow hardscapes clean",
     "Weed-whack fence lines",
     "Bag or mulch clippings",
-    "Same crew every visit",
+    "Same Pro every visit",
     "Background-checked pros",
     "Locked price — never surprise-priced",
   ],
@@ -88,8 +88,8 @@ const config: ServiceLandingConfig = {
 
   trustCards: [
     {
-      title: "Same Crew",
-      body: "Your same pro every visit, not a rotating marketplace crew.",
+      title: "Same Pro",
+      body: "Your same pro every visit, not a rotating marketplace roster.",
     },
     {
       title: "Photo-Verified",
@@ -120,7 +120,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "Who does the work?",
-      a: "Background-checked crews. Same team every visit so your lawn stays consistent.",
+      a: "Background-checked Pros. Same Pro every visit so your lawn stays consistent.",
     },
     {
       q: "What if it rains?",
@@ -128,7 +128,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What if I'm not satisfied?",
-      a: "Reach out within 24 hours and we'll send the crew back or credit your account — no questions asked.",
+      a: "Reach out within 24 hours and we'll send your Pro back or credit your account — no questions asked.",
     },
   ],
   bundleCta: {
@@ -139,7 +139,7 @@ const config: ServiceLandingConfig = {
   seo: {
     title: "Lawn Care in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same crew, no contracts. Book in about 2 minutes.",
+      "Lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same Pro, no contracts. Book in about 2 minutes.",
     canonical: "https://jointidy.co/lawn-care",
     priceRange: "$45–$99",
     service: {

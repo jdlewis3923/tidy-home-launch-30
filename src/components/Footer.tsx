@@ -32,7 +32,7 @@ const Footer = () => {
           <div className="lg:col-span-5">
             <TidyLogo size="md" withBackground />
             <p className="mt-5 text-primary-foreground/65 text-sm leading-relaxed max-w-md">
-              {t("Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Kendall + Pinecrest.")}
+              {t("Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Pinecrest, Kendall and Kendall West.")}
             </p>
 
             {/* Service-area chips */}

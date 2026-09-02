@@ -37,11 +37,11 @@ const FAQ = [
   },
   {
     q: "What if no one is home?",
-    a: "Most customers leave a gate code or a hidden key. Add yours under Account → Access & Pets so the crew has what they need.",
+    a: "Most customers leave a gate code or a hidden key. Add yours under Account → Access & Pets so your Pro has what they need.",
   },
   {
     q: "Do you bring your own supplies?",
-    a: "Yes — every crew arrives fully equipped. If you prefer specific products, leave a note and we'll honor it.",
+    a: "Yes — every Pro arrives fully equipped. If you prefer specific products, leave a note and we'll honor it.",
   },
   {
     q: "How are your pros background-checked?",

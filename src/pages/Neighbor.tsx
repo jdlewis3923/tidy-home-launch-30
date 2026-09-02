@@ -35,6 +35,17 @@ import carWebp from "@/assets/car-detailing.webp";
 
 const promiseIcons = [Lock, Gift, ShieldCheck, MapPin];
 
+/** The door hanger carries this number on both faces. */
+export const PHONE_DISPLAY = "(786) 829-1141";
+export const PHONE_TEL = "+17868291141";
+
+/** The hanger's numbered three-step, verbatim apart from step 1 (they scanned already). */
+const HOW_IT_WORKS = [
+  { n: "1", title: "See your price", body: "See your price in 60 seconds. No account, no call." },
+  { n: "2", title: "Pick your day", body: "Choose the day and time that suits you." },
+  { n: "3", title: "Meet your Pro", body: "The same background-checked Pro, every visit." },
+];
+
 const SERVICE_CARDS: {
   service: ServiceType;
   jpg: string;
@@ -45,7 +56,7 @@ const SERVICE_CARDS: {
     service: "cleaning",
     jpg: cleaningJpg,
     webp: cleaningWebp,
-    includes: "Kitchen, baths, floors and dusting, same crew every visit.",
+    includes: "Kitchen, baths, floors and dusting, same Pro every visit.",
   },
   {
     service: "lawn",
@@ -82,6 +93,7 @@ const Neighbor = () => {
   const neighborhood = neighborhoodForZip(zipParam);
   // hero = scanned off the door, card = kept the tear-off and scanned later.
   const placement = params.get("placement") ?? undefined;
+  const fromDoorhanger = params.get("src") === "doorhanger";
   // The Spanish panel's QR code carries ?lang=es — that is the panel split.
   const landingSource: LandingSource =
     langParam === "es" ? LANDING_SOURCES.es : LANDING_SOURCES.en;
@@ -161,7 +173,7 @@ const Neighbor = () => {
   const ctaClick = (location: string) =>
     pushEvent("cta_click", {
       location,
-      cta_text: "Claim founding spot",
+      cta_text: "See your price — 60 seconds",
       landing_source: landingSource,
       placement: placement ?? "direct",
     });
@@ -213,7 +225,17 @@ const Neighbor = () => {
               <span className="inline-flex rounded-full bg-[#F7C618] px-3 py-1 text-[13px] font-extrabold uppercase tracking-wide text-[#0F1729]">
                 {t(FOUNDING_OFFER.headline)}
               </span>
-              <h1 className="mt-4 text-[2.35rem] leading-[1.06] font-extrabold text-white md:text-6xl">
+              {/* Echoes the printed door hanger's headline — the half-second
+                  confirmation that this page is the thing they just scanned. */}
+              <p className="mt-4 text-[13px] font-extrabold uppercase tracking-[0.14em] text-[#F7C618] md:text-sm">
+                {t("More life. Less chores.")}
+              </p>
+              {fromDoorhanger && (
+                <p className="mt-2 text-[15px] font-semibold leading-snug text-white/90">
+                  {t("Thanks for scanning — you’re looking at one of 25 founding spots in")} {areaName}.
+                </p>
+              )}
+              <h1 className="mt-3 text-[2.35rem] leading-[1.06] font-extrabold text-white md:text-6xl">
                 {heroHeadline}
               </h1>
               <p className="mt-4 text-[17px] font-semibold leading-snug text-white md:text-xl">
@@ -231,11 +253,18 @@ const Neighbor = () => {
                 <Link
                   to={signupHref}
                   onClick={() => ctaClick("neighbor_hero")}
-                  className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
+                  className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-6 py-4 text-center text-[17px] font-extrabold leading-tight text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex md:text-lg"
                 >
-                  {t("Claim your founding spot")}
+                  {t("See your price — 60 seconds")}
                 </Link>
               )}
+              <p className="mt-3 text-[15px] font-semibold text-white/90">
+                {t("or call")}{" "}
+                <a href={`tel:${PHONE_TEL}`} className="underline decoration-[#F7C618] decoration-2 underline-offset-4">
+                  {PHONE_DISPLAY}
+                </a>
+              </p>
+
               {isFull && waitlistOpen && (
                 waitlistDone ? (
                   <p className="mt-5 text-base font-semibold text-white">{t("You're on the list.")}</p>
@@ -290,25 +319,23 @@ const Neighbor = () => {
               {t("Founding spots are limited to 25 homes per ZIP and do not reopen.")}
             </p>
           </div>
-          <div className="mt-5 overflow-hidden border-y border-white/10 py-2">
-            <div className="flex w-max animate-[marquee_22s_linear_infinite] gap-10 whitespace-nowrap will-change-transform">
-              {[0, 1].map(dup => (
-                <div key={dup} className="flex gap-10" aria-hidden={dup === 1}>
-                  {[
-                    t("Locked founding rate"),
-                    t("One free premium add-on"),
-                    t("First visit perfect or it’s free"),
-                    t("Same crew every visit"),
-                  ].map(item => (
-                    <span key={item} className="text-[15px] font-bold uppercase tracking-wide text-white/80">
-                      {item}
-                      <span className="ml-10 text-[#F7C618]">◆</span>
-                    </span>
-                  ))}
-                </div>
+          {/* Static, never scrolling: this is read standing in a driveway, so
+              nothing may clip mid-word or make the reader wait for a loop. */}
+          <div className="mt-5 border-y border-white/10 py-3">
+            <ul className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2 px-5 text-center">
+              {[
+                t("Locked founding rate"),
+                t("One free premium add-on"),
+                t("First visit perfect or it’s free"),
+                t("Same Pro every visit"),
+              ].map(item => (
+                <li key={item} className="text-[13px] font-bold uppercase tracking-wide text-white/80 md:text-[15px]">
+                  {item}
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
+
         </section>
 
         {/* ── THE THREE SERVICES ────────────────────────────────────────── */}
@@ -330,7 +357,7 @@ const Neighbor = () => {
                       alt={t(serviceLabels[card.service])}
                       width={800}
                       height={533}
-                      loading="eager"
+                      loading="lazy"
                       decoding="async"
                       className="h-44 w-full object-cover"
                     />
@@ -382,6 +409,29 @@ const Neighbor = () => {
           </div>
         </section>
 
+        {/* ── HOW IT WORKS: the hanger's numbered three-step ───────────── */}
+        <section className="bg-white px-5 py-14 md:px-8 md:py-20">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="text-[26px] font-extrabold leading-tight text-[#0F1729] md:text-4xl">
+              {t("How it works")}
+            </h2>
+            <ol className="mt-8 grid gap-4 md:grid-cols-3">
+              {HOW_IT_WORKS.map((step, i) => (
+                <Reveal key={step.n} delay={i * 70}>
+                  <li className="h-full rounded-2xl border border-[#0F1729]/10 bg-white p-5">
+                    <span className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
+                      {step.n} · {t(step.title)}
+                    </span>
+                    <p className="mt-2 text-[17px] font-semibold leading-snug text-[#0F1729]">
+                      {t(step.body)}
+                    </p>
+                  </li>
+                </Reveal>
+              ))}
+            </ol>
+          </div>
+        </section>
+
         {/* ── CLOSING CTA ───────────────────────────────────────────────── */}
         <section className="bg-white px-5 py-16 text-center md:px-8 md:py-20">
           <div className="mx-auto max-w-2xl">
@@ -391,7 +441,7 @@ const Neighbor = () => {
                 : t("Claim your founding spot")}
             </h2>
             <p className="mt-3 text-[17px] text-[#0F1729]/70">
-              {t("Takes about two minutes. No contract.")}
+              {t("See your price in 60 seconds. No contract.")}
             </p>
             {isFull ? (
               <button
@@ -405,17 +455,41 @@ const Neighbor = () => {
               <Link
                 to={signupHref}
                 onClick={() => ctaClick("neighbor_footer")}
-                className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
+                className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-6 py-4 text-center text-[17px] font-extrabold leading-tight text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex md:text-lg"
               >
-                {t("Claim your founding spot")}
+                {t("See your price — 60 seconds")}
               </Link>
             )}
             <p className="mt-4 text-[15px] font-medium text-[#0F1729]/60">
-              {t("Serving Pinecrest & Kendall — 33156, 33183, 33186")}
+              {t("Serving Pinecrest, Kendall and Kendall West.")} 33156 · 33183 · 33186
             </p>
           </div>
         </section>
       </main>
+
+      {/* Sticky action bar — same label as the hero so the promise never
+          changes, with the hanger's phone number beside it. */}
+      {!isFull && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#0F1729]/10 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
+          <div className="flex items-center gap-3">
+            <Link
+              to={signupHref}
+              onClick={() => ctaClick("neighbor_sticky")}
+              className="flex min-h-12 flex-1 items-center justify-center rounded-full bg-[#F7C618] px-4 text-center text-[15px] font-extrabold leading-tight text-[#0F1729] active:scale-[0.99]"
+            >
+              {t("See your price — 60 seconds")}
+            </Link>
+            <a
+              href={`tel:${PHONE_TEL}`}
+              aria-label={`${t("or call")} ${PHONE_DISPLAY}`}
+              className="flex min-h-12 items-center rounded-full border border-[#0F1729]/15 px-4 text-[15px] font-extrabold text-[#0F1729]"
+            >
+              {t("Call now")}
+            </a>
+          </div>
+        </div>
+      )}
+      <div className="h-20 md:hidden" aria-hidden="true" />
 
       <Footer />
     </div>
