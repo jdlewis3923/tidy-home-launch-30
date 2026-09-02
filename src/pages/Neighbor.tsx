@@ -307,25 +307,23 @@ const Neighbor = () => {
               {t("Founding spots are limited to 25 homes per ZIP and do not reopen.")}
             </p>
           </div>
-          <div className="mt-5 overflow-hidden border-y border-white/10 py-2">
-            <div className="flex w-max animate-[marquee_22s_linear_infinite] gap-10 whitespace-nowrap will-change-transform">
-              {[0, 1].map(dup => (
-                <div key={dup} className="flex gap-10" aria-hidden={dup === 1}>
-                  {[
-                    t("Locked founding rate"),
-                    t("One free premium add-on"),
-                    t("First visit perfect or it’s free"),
-                    t("Same Pro every visit"),
-                  ].map(item => (
-                    <span key={item} className="text-[15px] font-bold uppercase tracking-wide text-white/80">
-                      {item}
-                      <span className="ml-10 text-[#F7C618]">◆</span>
-                    </span>
-                  ))}
-                </div>
+          {/* Static, never scrolling: this is read standing in a driveway, so
+              nothing may clip mid-word or make the reader wait for a loop. */}
+          <div className="mt-5 border-y border-white/10 py-3">
+            <ul className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2 px-5 text-center">
+              {[
+                t("Locked founding rate"),
+                t("One free premium add-on"),
+                t("First visit perfect or it’s free"),
+                t("Same Pro every visit"),
+              ].map(item => (
+                <li key={item} className="text-[13px] font-bold uppercase tracking-wide text-white/80 md:text-[15px]">
+                  {item}
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
+
         </section>
 
         {/* ── THE THREE SERVICES ────────────────────────────────────────── */}
