@@ -78,6 +78,8 @@ const AdminNextdoorVerify = lazy(() => import("./pages/AdminNextdoorVerify.tsx")
 const AdminDocumensoTemplates = lazy(() => import("./pages/AdminDocumensoTemplates.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
 const ProDashboard = lazy(() => import("./pages/ProDashboard.tsx"));
+const ProJobView = lazy(() => import("./pages/ProJobView.tsx"));
+const AddonApproval = lazy(() => import("./pages/AddonApproval.tsx"));
 const ProTierProgression = lazy(() => import("./pages/ProTierProgression.tsx"));
 const ProReviewBonuses = lazy(() => import("./pages/ProReviewBonuses.tsx"));
 const ProUploadCoi = lazy(() => import("./pages/ProUploadCoi.tsx"));
