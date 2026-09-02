@@ -598,12 +598,17 @@ export default function AdminSocialLaunch() {
   }
   if (!hasRole) return <Navigate to="/" replace />;
 
+  const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const hourLabel = new Date(Date.UTC(2026, 0, 1, 12))
+    ? `${((cadence.hour + 11) % 12) + 1}:00 ${cadence.hour < 12 ? "AM" : "PM"} ET`
+    : "";
   const ndRange = nextdoor.length
     ? `${fmtShort(nextdoor[0].plannedFor)} → ${fmtShort(nextdoor[nextdoor.length - 1].plannedFor)}`
     : "";
   const metaRange = meta.length
     ? `${fmtShort(meta[0].plannedFor)} → ${fmtShort(meta[meta.length - 1].plannedFor)}`
     : "";
+
 
   return (
     <div className="min-h-screen bg-slate-100">
