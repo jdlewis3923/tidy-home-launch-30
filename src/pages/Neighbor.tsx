@@ -25,6 +25,7 @@ import {
 
 import heroAsset from "@/assets/neighbor-hero-v2.jpg.asset.json";
 import heroMobileAsset from "@/assets/neighbor-hero-mobile-v2.jpg.asset.json";
+import heroLoop from "@/assets/neighbor-hero-loop.mp4.asset.json";
 
 import cleaningJpg from "@/assets/cleaning-interior.jpg";
 import cleaningWebp from "@/assets/cleaning-interior.webp";
@@ -212,6 +213,22 @@ const Neighbor = () => {
               className="absolute inset-0 -z-10 h-full w-full object-cover object-[center_35%] md:object-[center_40%]"
             />
           </picture>
+          {/* Living-photo loop: gentle palm sway and birds. Sits over the still
+              photo, which stays the poster and the reduced-motion fallback. */}
+          {motionOk && (
+            <video
+              src={heroLoop.url}
+              poster={heroAsset.url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+              tabIndex={-1}
+              className="absolute inset-0 -z-10 h-full w-full object-cover object-[center_35%] md:object-[center_40%]"
+            />
+          )}
           {/* Scrim — kept light so the blue sky and house stay visible. */}
           <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0F1729]/95 via-[#0F1729]/45 to-transparent" />
 
