@@ -421,6 +421,8 @@ export default function AdminSocialLaunch() {
   const [launchOpen, setLaunchOpen] = useState(false);
   const [startDate, setStartDate] = useState<string>(defaultStartDate());
   const [savingDate, setSavingDate] = useState(false);
+  const [cadence, setCadence] = useState<CampaignCadence>(DEFAULT_NEXTDOOR_CADENCE);
+  const [savingCadence, setSavingCadence] = useState(false);
 
   const refresh = useCallback(async () => {
     const [{ data, error }, settings] = await Promise.all([
@@ -429,14 +431,22 @@ export default function AdminSocialLaunch() {
         .select("*")
         .order("channel", { ascending: true })
         .order("post_number", { ascending: true }),
-      supabase.from("app_settings").select("value").eq("key", "social_campaign_start_date").maybeSingle(),
+      supabase
+        .from("app_settings")
+        .select("key, value")
+        .in("key", ["social_campaign_start_date", "social_campaign_nextdoor_cadence"]),
     ]);
     if (error) {
       toast.error("Failed to load posts");
       return;
     }
-    const saved = settings.data?.value;
-    if (typeof saved === "string" && /^\d{4}-\d{2}-\d{2}$/.test(saved)) setStartDate(saved);
+    for (const s of settings.data ?? []) {
+      if (s.key === "social_campaign_start_date") {
+        if (typeof s.value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.value)) setStartDate(s.value);
+      } else if (s.key === "social_campaign_nextdoor_cadence") {
+        setCadence(parseCadence(s.value));
+      }
+    }
     setRows((data ?? []) as Row[]);
     setLoading(false);
   }, []);
@@ -457,13 +467,14 @@ export default function AdminSocialLaunch() {
             ...row,
             libTitle: lib.title,
             libCaption: buildCaption(lib, platform),
-            plannedFor: scheduledFor(startDate, platform, index).toISOString(),
+            plannedFor: scheduledFor(startDate, platform, index, cadence).toISOString(),
           } as Post;
         })
         .filter((p): p is Post => p !== null);
     },
-    [rows, startDate],
+    [rows, startDate, cadence],
   );
+
 
   const nextdoor = useMemo(() => join(NEXTDOOR_POSTS, "nextdoor", ["nextdoor"]), [join]);
   const meta = useMemo(
