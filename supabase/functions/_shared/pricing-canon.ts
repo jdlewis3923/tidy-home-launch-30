@@ -167,7 +167,7 @@ export const FOUNDING_OFFER = {
   headline: 'Founding neighbor offer',
   promises: [
     'Your founding rate is locked — your price never rises',
-    'One free premium add-on on your first visit',
+    'One free premium add-on on your first visit — a $45 value',
     'First visit perfect or it’s free',
     'Capped at 25 founding homes per ZIP',
   ],

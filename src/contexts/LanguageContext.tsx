@@ -819,7 +819,7 @@ const translations: Record<string, string> = {
     "Por supuesto. Cambia tu frecuencia, cambia de servicios o pausa cuando quieras desde tu panel o contactándonos.",
 
   // Footer
-  "Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Kendall + Pinecrest.":
+  "Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Pinecrest, Kendall and Kendall West.":
     "El servicio del hogar por suscripción de Miami. Limpieza del hogar, cuidado del jardín y detallado de carro — un solo plan mensual simple. Sirviendo Kendall + Pinecrest.",
   "© 2026 Tidy Home Concierge LLC · Miami, Florida": "© 2026 Tidy Home Concierge LLC · Miami, Florida",
   "Serving 33183 Kendall · 33186 Kendall West · 33156 Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.":
@@ -909,7 +909,21 @@ const translations: Record<string, string> = {
     "Antecedentes Verificados · Visitas Verificadas con Fotos · Primera visita perfecta o es gratis",
   "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
     "Un servicio adicional premium gratis en tu primera visita · Primera visita perfecta o es gratis · Solo 25 casas fundadoras por código postal",
+  "One free premium add-on on your first visit — a $45 value": "Un servicio adicional gratis en la primera visita — valor de $45",
   "One free premium add-on on your first visit": "Un servicio adicional gratis en la primera visita",
+  "More life. Less chores.": "Más vida. Menos tareas.",
+  "See your price — 60 seconds": "Ve tu precio — 60 segundos",
+  "See your price in 60 seconds. No contract.": "Ve tu precio en 60 segundos. Sin contrato.",
+  "or call": "o llama al",
+  "Thanks for scanning — you’re looking at one of 25 founding spots in": "Gracias por escanear — estás viendo uno de los 25 lugares fundadores en",
+  "See your price": "Ve tu precio",
+  "See your price in 60 seconds. No account, no call.": "Ve tu precio en 60 segundos. Sin cuenta, sin llamadas.",
+  "Pick your day": "Elige tu día",
+  "Choose the day and time that suits you.": "Elige el día y la hora que te convenga.",
+  "Meet your Pro": "Conoce a tu Pro",
+  "The same background-checked Pro, every visit.": "El mismo Pro verificado, en cada visita.",
+  "How it works": "Cómo funciona",
+  "Serving Pinecrest, Kendall and Kendall West.": "Servimos Pinecrest, Kendall y Kendall West.",
   "First visit perfect or it's free": "Primera visita perfecta o es gratis",
   "Only 25 founding homes per ZIP": "Solo 25 casas fundadoras por código postal",
 
