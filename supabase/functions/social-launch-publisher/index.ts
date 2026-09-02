@@ -134,17 +134,20 @@ async function publishToNextdoor(post: Post, sb: ReturnType<typeof createClient>
 async function processPost(sb: ReturnType<typeof createClient>, post: Post): Promise<{ ok: boolean; error?: string }> {
   try {
     if (post.channel === "nextdoor") {
+      // Nextdoor has NO public API for organic business posts. We only deliver a
+      // REMINDER (Zapier webhook / admin alert). The row stays 'armed' until an
+      // admin publishes it in Nextdoor and marks it posted on /admin/social-launch.
       const r = await publishToNextdoor(post, sb);
-      if (r.needs_manual) {
-        // Leave status='armed', surface via admin_alerts
-        return { ok: true };
-      }
       await sb
         .from("social_launch_posts")
-        .update({ status: "posted", posted_at: new Date().toISOString(), publish_error: null })
+        .update({
+          publish_error: null,
+          notes: r.delivered ? "reminder sent — publish manually in Nextdoor" : "manual post required",
+        })
         .eq("id", post.id);
       return { ok: true };
     } else {
+
       const ids = await publishToMeta(post, sb);
       await sb
         .from("social_launch_posts")
