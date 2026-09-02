@@ -134,6 +134,13 @@
       "when": 1788310893219,
       "tag": "0018_job_condition_photos_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788316104233,
+      "tag": "0019_fix_founding_spot_count_and_waitlist_address",
+      "breakpoints": true
     }
   ]
 }
