@@ -188,18 +188,16 @@ const Neighbor = () => {
         {/* ── HERO: full-bleed photograph ───────────────────────────────── */}
         <section className="relative isolate min-h-[78svh] flex flex-col justify-end overflow-hidden">
           <picture>
-            <source media="(max-width: 767px)" srcSet={heroMobileWebp} type="image/webp" />
-            <source media="(max-width: 767px)" srcSet={heroMobileJpg} type="image/jpeg" />
-            <source srcSet={heroWebp} type="image/webp" />
+            <source media="(max-width: 767px)" srcSet={heroMobileAsset.url} type="image/webp" />
             <img
-              src={heroJpg}
-              alt="A Miami home in Pinecrest kept by Tidy"
-              width={1920}
-              height={1280}
+              src={heroAsset.url}
+              alt="A traditional South Miami home with barrel-tile roof, coral rock wall and paver driveway at golden hour"
+              width={1600}
+              height={1200}
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className="absolute inset-0 -z-10 h-full w-full object-cover object-bottom"
+              className="absolute inset-0 -z-10 h-full w-full object-cover object-center"
             />
           </picture>
           {/* Hard scrim — daylight legibility, not decoration. */}
