@@ -39,6 +39,36 @@ export const FIRST_POST_UTC_HOUR: Record<"nextdoor" | "meta", number> = {
   meta: 15,
 };
 
+export type CampaignZip = keyof typeof ZIP_NEIGHBORHOODS;
+
+export interface CampaignPost {
+  post_number: number;
+  title: string;
+  zip: CampaignZip;
+  en: string;
+  es: string;
+}
+
+/**
+ * Per-ZIP landing link with channel-specific attribution. Deliberately NOT the
+ * door-hanger UTM values — social has to be separable from print.
+ */
+export function buildSocialLink(platform: "nextdoor" | "meta", zip: CampaignZip): string {
+  const p = new URLSearchParams({
+    zip,
+    utm_source: platform,
+    utm_medium: "social",
+    utm_campaign: `founding_${zip}`,
+  });
+  return `https://jointidy.co/neighbor?${p.toString()}`;
+}
+
+/** Final stored caption: English, Spanish, then the attributed link. */
+export function buildCaption(post: CampaignPost, platform: "nextdoor" | "meta"): string {
+  return `${post.en.trim()}\n\n— — —\n\n${post.es.trim()}\n\n${buildSocialLink(platform, post.zip)}`;
+}
+
+
 /**
  * NEXTDOOR CADENCE — configurable, stored in app_settings.social_campaign_nextdoor_cadence.
  *
