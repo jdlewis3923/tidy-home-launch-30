@@ -1,11 +1,17 @@
 /**
  * Admin Founding Neighbor Social Campaign — /admin/social-launch
  *
- * Two stacked campaigns: Nextdoor (12 posts, 4×3) and Meta IG+FB (30 posts, 5×6).
+ * Two stacked campaigns:
+ *   - Nextdoor: 6 posts, one every 14 days, Thursdays 6:00 PM America/New_York.
+ *     Nextdoor has NO public API for publishing organic business posts, so arming
+ *     only schedules a reminder — an admin publishes each post inside Nextdoor and
+ *     marks the row posted here.
+ *   - Meta IG+FB: 36 posts, auto-published by the social-launch-publisher function.
+ *
  * Captions live in `src/lib/socialCampaign.ts` (evergreen, EN + ES, per-ZIP
  * attributed links) and are written into the row at ARM time, together with the
- * scheduled date computed from the settable campaign START DATE.
- * Armed posts are auto-published by the social-launch-publisher edge function.
+ * scheduled date computed from the settable campaign START DATE and, for Nextdoor,
+ * the settable cadence (interval days / weekday / hour).
  */
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Helmet } from "react-helmet-async";
@@ -20,6 +26,7 @@ import {
   Send,
   AlertCircle,
   CalendarDays,
+  Hand,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -34,6 +41,9 @@ import {
   buildCaption,
   scheduledFor,
   defaultStartDate,
+  parseCadence,
+  DEFAULT_NEXTDOOR_CADENCE,
+  type CampaignCadence,
   type CampaignPost,
 } from "@/lib/socialCampaign";
 import {
@@ -44,6 +54,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 
 type Channel = "nextdoor" | "instagram" | "facebook" | "meta_combined";
 type Platform = "nextdoor" | "meta";
