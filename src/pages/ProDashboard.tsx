@@ -247,14 +247,9 @@ export default function ProDashboard() {
               </span>
               <span className="text-xs font-semibold text-emerald-700">On-shift · Miami</span>
             </div>
-            <button className="relative rounded-full border border-slate-200 bg-white p-2.5 text-navy hover:bg-slate-50 transition shadow-sm">
-              <Bell className="h-4 w-4" />
-              {data && data.photosPending > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-navy">
-                  {data.photosPending}
-                </span>
-              )}
-            </button>
+            <div className="rounded-full border border-slate-200 bg-white shadow-sm">
+              <ProNotificationBell />
+            </div>
           </div>
         </div>
       </header>
