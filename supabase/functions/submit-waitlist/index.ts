@@ -15,6 +15,7 @@ const admin = createClient(
 
 const BodySchema = z.object({
   email: z.string().trim().toLowerCase().email().max(200),
+  address: z.string().trim().min(3).max(300).optional(),
   zip: z.string().regex(/^\d{5}$/),
   source: z.string().trim().min(1).max(64),
 });

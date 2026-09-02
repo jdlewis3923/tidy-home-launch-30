@@ -94,6 +94,12 @@ const Neighbor = () => {
   });
   const isSpanish = language === "es";
   const [spotsLeft, setSpotsLeft] = useState<number | null>(null);
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistAddress, setWaitlistAddress] = useState("");
+  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
+  const [waitlistDone, setWaitlistDone] = useState(false);
+  const [waitlistError, setWaitlistError] = useState<string | null>(null);
 
   useEffect(() => {
     if (langParam === "es") setLanguage("es");
@@ -118,14 +124,40 @@ const Neighbor = () => {
     return () => { cancelled = true; };
   }, [zipParam]);
 
+  const taken = spotsLeft === null ? null : FOUNDING_CAP - spotsLeft;
+  const isFull = taken !== null && taken >= FOUNDING_CAP;
+
+  const areaName = neighborhood ?? t("your neighborhood");
   const heroHeadline = neighborhood
     ? `${t("Be one of the first 25 homes in")} ${neighborhood}.`
     : t("Be one of the first 25 homes on your street");
 
-  const scarcityLine =
-    spotsLeft !== null && zipParam
-      ? `${spotsLeft} ${t("of")} ${FOUNDING_CAP} ${t("founding spots left in")} ${zipParam}`
-      : t("Capped at 25 founding homes per ZIP");
+  const scarcityLine = isFull
+    ? `${t("Founding spots in")} ${areaName} ${t("are full.")}`
+    : taken !== null && taken >= 3
+      ? `${spotsLeft} ${t("of")} ${FOUNDING_CAP} ${t("founding spots left in")} ${areaName}.`
+      : `${t("Founding pricing is capped at 25 homes in")} ${areaName}.`;
+
+  const handleWaitlist = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!zipParam || !waitlistEmail.trim() || !waitlistAddress.trim()) return;
+    setWaitlistSubmitting(true);
+    setWaitlistError(null);
+    const { data, error } = await supabase.functions.invoke("submit-waitlist", {
+      body: {
+        email: waitlistEmail.trim().toLowerCase(),
+        address: waitlistAddress.trim(),
+        zip: zipParam,
+        source: `${landingSource}_full`,
+      },
+    });
+    setWaitlistSubmitting(false);
+    if (error || !(data as { ok?: boolean } | null)?.ok) {
+      setWaitlistError(t("Couldn't save — try again in a moment."));
+      return;
+    }
+    setWaitlistDone(true);
+  };
 
   const ctaClick = (location: string) =>
     pushEvent("cta_click", {
@@ -189,13 +221,59 @@ const Neighbor = () => {
               <p className="mt-4 text-[17px] font-semibold leading-snug text-white md:text-xl">
                 {t("Cleaning, lawn and car care on one plan. One flat price per visit.")}
               </p>
-              <Link
-                to={signupHref}
-                onClick={() => ctaClick("neighbor_hero")}
-                className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
-              >
-                {t("Claim your founding spot")}
-              </Link>
+              {isFull ? (
+                <button
+                  type="button"
+                  onClick={() => setWaitlistOpen(true)}
+                  className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
+                >
+                  {t("Join the waitlist")}
+                </button>
+              ) : (
+                <Link
+                  to={signupHref}
+                  onClick={() => ctaClick("neighbor_hero")}
+                  className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
+                >
+                  {t("Claim your founding spot")}
+                </Link>
+              )}
+              {isFull && waitlistOpen && (
+                waitlistDone ? (
+                  <p className="mt-5 text-base font-semibold text-white">{t("You're on the list.")}</p>
+                ) : (
+                  <form onSubmit={handleWaitlist} className="mt-5 grid gap-3 md:max-w-lg">
+                    <input
+                      type="email"
+                      required
+                      autoComplete="email"
+                      value={waitlistEmail}
+                      onChange={(event) => setWaitlistEmail(event.target.value)}
+                      placeholder={t("Email Address")}
+                      aria-label={t("Email Address")}
+                      className="min-h-12 rounded-lg border border-white/30 bg-white px-4 text-base text-[#0F1729] placeholder:text-[#0F1729]/55 focus:outline-none focus:ring-2 focus:ring-[#F7C618]"
+                    />
+                    <input
+                      type="text"
+                      required
+                      autoComplete="street-address"
+                      value={waitlistAddress}
+                      onChange={(event) => setWaitlistAddress(event.target.value)}
+                      placeholder={t("Service Address")}
+                      aria-label={t("Service Address")}
+                      className="min-h-12 rounded-lg border border-white/30 bg-white px-4 text-base text-[#0F1729] placeholder:text-[#0F1729]/55 focus:outline-none focus:ring-2 focus:ring-[#F7C618]"
+                    />
+                    <button
+                      type="submit"
+                      disabled={waitlistSubmitting}
+                      className="min-h-12 rounded-full bg-[#F7C618] px-6 text-base font-extrabold text-[#0F1729] disabled:opacity-60"
+                    >
+                      {waitlistSubmitting ? t("saving…") : t("Join the waitlist")}
+                    </button>
+                    {waitlistError && <p className="text-sm font-semibold text-white">{waitlistError}</p>}
+                  </form>
+                )
+              )}
               <p className="mt-3 text-[15px] font-medium text-white/85">
                 {t(ENTRY_PRICE_COPY)} · {t("No contract. Cancel anytime.")}
               </p>
@@ -253,7 +331,7 @@ const Neighbor = () => {
                       alt={t(serviceLabels[card.service])}
                       width={800}
                       height={533}
-                      loading="lazy"
+                      loading="eager"
                       decoding="async"
                       className="h-44 w-full object-cover"
                     />
@@ -316,13 +394,23 @@ const Neighbor = () => {
             <p className="mt-3 text-[17px] text-[#0F1729]/70">
               {t("Takes about two minutes. No contract.")}
             </p>
-            <Link
-              to={signupHref}
-              onClick={() => ctaClick("neighbor_footer")}
-              className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
-            >
-              {t("Claim your founding spot")}
-            </Link>
+            {isFull ? (
+              <button
+                type="button"
+                onClick={() => { setWaitlistOpen(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
+              >
+                {t("Join the waitlist")}
+              </button>
+            ) : (
+              <Link
+                to={signupHref}
+                onClick={() => ctaClick("neighbor_footer")}
+                className="animate-pulse-gold mt-7 flex w-full items-center justify-center rounded-full bg-[#F7C618] px-8 py-4 text-lg font-extrabold text-[#0F1729] active:scale-[0.99] md:w-auto md:inline-flex"
+              >
+                {t("Claim your founding spot")}
+              </Link>
+            )}
             <p className="mt-4 text-[15px] font-medium text-[#0F1729]/60">
               {t("Serving Pinecrest & Kendall — 33156, 33183, 33186")}
             </p>

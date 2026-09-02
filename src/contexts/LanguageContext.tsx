@@ -1168,6 +1168,12 @@ const translations: Record<string, string> = {
   "No contract. Cancel anytime.": "Sin contrato. Cancela cuando quieras.",
   of: "de",
   "founding spots left in": "lugares de fundador disponibles en",
+  "Founding pricing is capped at 25 homes in": "El precio de fundador está limitado a 25 hogares en",
+  "Founding spots in": "Los lugares de fundador en",
+  "are full.": "están completos.",
+  "Join the waitlist": "Únete a la lista de espera",
+  "your neighborhood": "tu vecindario",
+  "Service Address": "Dirección del servicio",
   "Founding spots are limited to 25 homes per ZIP and do not reopen.":
     "Los lugares de fundador están limitados a 25 hogares por código postal y no se vuelven a abrir.",
   "Locked founding rate": "Tarifa de fundador fija",
