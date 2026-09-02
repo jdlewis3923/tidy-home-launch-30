@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Check, MapPin, Lock, Gift, ShieldCheck } from "lucide-react";
+import { Check, MapPin, Lock, Gift, ShieldCheck, Tag, CalendarDays, UserCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
