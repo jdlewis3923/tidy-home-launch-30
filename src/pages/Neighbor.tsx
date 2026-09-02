@@ -277,6 +277,9 @@ const Neighbor = () => {
               <p className="mt-3 text-[15px] font-medium text-white/85">
                 {t(ENTRY_PRICE_COPY)} · {t("No contract. Cancel anytime.")}
               </p>
+              <FiveStarBand
+                neighborhoods={neighborhood ? `${neighborhood} (${zipParam})` : t("Pinecrest and Kendall")}
+              />
             </div>
           </div>
         </section>
