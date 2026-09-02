@@ -910,9 +910,7 @@ const translations: Record<string, string> = {
   "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
     "Un servicio adicional premium gratis en tu primera visita · Primera visita perfecta o es gratis · Solo 25 casas fundadoras por código postal",
   "One free premium add-on on your first visit — $45 value": "Un servicio adicional gratis en la primera visita — valor de $45",
-  "One free premium add-on on your first visit — $45 value (alt)": "Un servicio adicional gratis en la primera visita — valor de $45",
   "MORE LIFE. LESS CHORES.": "MÁS VIDA. MENOS TAREAS.",
-  "See your price — 60 seconds": "Ve tu precio — 60 segundos",
   "See your price in 60 seconds. No contract.": "Ve tu precio en 60 segundos. Sin contrato.",
   "or call": "o llama al",
   "Thanks for scanning — you’re looking at one of 25 founding spots in": "Gracias por escanear — estás viendo uno de los 25 lugares fundadores en",
@@ -922,7 +920,6 @@ const translations: Record<string, string> = {
   "Choose the day and time that suits you.": "Elige el día y la hora que te convenga.",
   "Meet your Pro": "Conoce a tu Pro",
   "The same background-checked Pro, every visit.": "El mismo Pro verificado, en cada visita.",
-  "Serving Pinecrest, Kendall and Kendall West.": "Servimos Pinecrest, Kendall y Kendall West.",
   "First visit perfect or it's free": "Primera visita perfecta o es gratis",
   "Only 25 founding homes per ZIP": "Solo 25 casas fundadoras por código postal",
 
@@ -1197,7 +1194,6 @@ const translations: Record<string, string> = {
     "Cortamos, orillamos, recortamos y sopleteamos — nos llevamos los recortes.",
   "Hand wash, wheels, glass and interior wipe-down in your driveway.":
     "Lavado a mano, ruedas, cristales e interior limpiado en tu entrada.",
-  "See your price in 60 seconds. No contract.": "Ve tu precio en 60 segundos. Sin contrato.",
   "Claim your spot in": "Reserva tu lugar en",
   "What a founding neighbor gets": "Lo que recibe un vecino fundador",
   "Where plans start": "Desde dónde empiezan los planes",
