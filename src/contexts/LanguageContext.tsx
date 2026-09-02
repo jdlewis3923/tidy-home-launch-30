@@ -250,7 +250,7 @@ const translations: Record<string, string> = {
     "¡Tú decides! Elige semanal, quincenal o mensual para cada servicio — y sí, puedes combinar. ¿Quieres jardín semanal pero limpieza quincenal? Listo. Armamos el plan a tu medida.",
   "Do I need to be home?": "¿Tengo que estar en casa?",
   "Not at all! Just give us access via a lockbox, gate code, or smart lock and our team handles everything while you're out living your best life. You'll get photo confirmation when each service is done.":
-    "¡Para nada! Danos acceso con caja de seguridad, código de puerta o cerradura inteligente y nuestro equipo se encarga de todo mientras tú haces lo tuyo. Recibes confirmación con fotos al terminar cada servicio.",
+    "¡Para nada! Danos acceso con caja de seguridad, código de puerta o cerradura inteligente y nuestro profesional se encarga de todo mientras tú haces lo tuyo. Recibes confirmación con fotos al terminar cada servicio.",
   "Can I reschedule or pause?": "¿Puedo reagendar o pausar?",
   "Absolutely! Life happens — just shoot us a message and we'll move things around for you. Need to pause for a vacation? No problem. We've got you covered.":
     "¡Claro que sí! Las cosas pasan — mándanos un mensaje y movemos todo. ¿Necesitas pausar por vacaciones? Sin problema. Te tenemos cubierto.",
@@ -389,7 +389,7 @@ const translations: Record<string, string> = {
   "Pause, skip, or cancel anytime from your dashboard.": "Pausa, omite o cancela cuando quieras desde tu panel.",
   "Same Pro": "El Mismo Pro",
   "Your same pro every visit, not a rotating marketplace roster.":
-    "Tu mismo profesional en cada visita, no un equipo rotativo de la app.",
+    "Tu mismo profesional en cada visita, no profesionales rotativos de la app.",
   "Photo-Verified": "Verificado con Fotos",
   "Before-and-after photos from every visit, sent to your phone.":
     "Fotos antes y después de cada visita, enviadas a tu teléfono.",
@@ -419,16 +419,16 @@ const translations: Record<string, string> = {
   // Neighborhood trust
   "Built for Pinecrest + Kendall.": "Hecho para Pinecrest + Kendall.",
   "We serve only 33156, 33183, and 33186 — so your Pro is local, on-time, and never stuck in traffic.":
-    "Servimos solo 33156, 33183 y 33186 — así tu equipo es local, puntual y nunca varado en el tráfico.",
+    "Servimos solo 33156, 33183 y 33186 — así tu profesional es local, puntual y nunca varado en el tráfico.",
   "We serve these three neighborhoods only — so your Pro is local, on-time, and never stuck in traffic.":
-    "Servimos solo estas tres comunidades — así tu equipo es local, puntual y nunca varado en el tráfico.",
+    "Servimos solo estas tres comunidades — así tu profesional es local, puntual y nunca varado en el tráfico.",
   "Kendall & Pinecrest": "Kendall y Pinecrest",
   "Built for Kendall & Pinecrest": "Hecho para Kendall y Pinecrest",
   "Serving Kendall & Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.":
     "Sirviendo Kendall y Pinecrest con suscripciones recurrentes de limpieza del hogar, cuidado del jardín y detallado de carro.",
   "A quick form · No contracts": "Un formulario rápido · Sin contratos",
   "A quick form to sign up. Same Pro. Locked price.":
-    "Un formulario rápido para inscribirte. El mismo equipo. Precio fijo.",
+    "Un formulario rápido para inscribirte. El mismo profesional. Precio fijo.",
   "Book in a couple of minutes": "Reserva en un par de minutos",
   "We serve Pinecrest and Kendall only. We are not currently serving other areas.":
     "Servimos solo Pinecrest y Kendall. Por ahora no servimos otras áreas.",
@@ -445,15 +445,15 @@ const translations: Record<string, string> = {
   // House Cleaning LP
   "Monthly House Cleaning in Pinecrest + Kendall": "Limpieza Mensual del Hogar en Pinecrest + Kendall",
   "Same Pro. Locked rate. No contracts. Handle your home on autopilot.":
-    "El mismo equipo. Tarifa fija. Sin contratos. Tu casa en piloto automático.",
+    "El mismo profesional. Tarifa fija. Sin contratos. Tu casa en piloto automático.",
   "From $139 a visit": "Desde $139 por visita",
   "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a visit** — with the same Pro every time.":
-    "Las limpiezas sueltas en Pinecrest cuestan en promedio **$180–$260**. Nuestros planes empiezan en **$139 por visita** — con el mismo equipo cada vez.",
+    "Las limpiezas sueltas en Pinecrest cuestan en promedio **$180–$260**. Nuestros planes empiezan en **$139 por visita** — con el mismo profesional cada vez.",
   // House Cleaning plans
   "One visit per month, same Pro every time.": "Una visita al mes, el mismo Pro siempre.",
   "Two visits per month, priority scheduling.": "Dos visitas al mes, con prioridad en agendado.",
   "Weekly visits, dedicated Pro, quarterly deep-clean.":
-    "Visitas semanales, equipo dedicado, limpieza profunda trimestral.",
+    "Visitas semanales, profesional dedicado, limpieza profunda trimestral.",
   // House Cleaning included
   "Dust all surfaces": "Sacudir todas las superficies",
   "Vacuum + mop all floors": "Aspirar + trapear todos los pisos",
@@ -467,11 +467,11 @@ const translations: Record<string, string> = {
 
   // House Cleaning testimonials
   "Kitchen and bathrooms look reset every time. Same Pro, same standard — feels effortless.":
-    "La cocina y los baños quedan como nuevos cada vez. El mismo equipo, el mismo estándar — se siente sin esfuerzo.",
+    "La cocina y los baños quedan como nuevos cada vez. El mismo profesional, el mismo estándar — se siente sin esfuerzo.",
   "I haven't touched a mop in months. Locked monthly price, no surprise bills.":
     "No toco un trapeador hace meses. Precio mensual fijo, sin facturas sorpresa.",
   "Booked in under a minute. Your Pro is on time, polite, and thorough.":
-    "Reservé en menos de un minuto. El equipo es puntual, amable y minucioso.",
+    "Reservé en menos de un minuto. El profesional es puntual, amable y minucioso.",
   // House Cleaning FAQs
   "What's the price and what's it based on?": "¿Cuál es el precio y de qué depende?",
   "One flat price per visit, set by the size of your home: $139, $189 or $279. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Homes with 5+ bedrooms are quoted by hand.":
@@ -501,10 +501,10 @@ const translations: Record<string, string> = {
   // Lawn Care LP
   "Monthly Lawn Care in Pinecrest + Kendall": "Cuidado Mensual del Jardín en Pinecrest + Kendall",
   "Mow, edge, blow. Same Pro. Locked price. Never surprise-billed.":
-    "Cortar, bordear, soplar. El mismo equipo. Precio fijo. Sin facturas sorpresa.",
+    "Cortar, bordear, soplar. El mismo profesional. Precio fijo. Sin facturas sorpresa.",
   "From $45 a visit": "Desde $45 por visita",
   "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$45 a visit** flat, same Pro, no surprise invoices.":
-    "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy es **$45 por visita**, precio fijo, el mismo equipo, sin facturas sorpresa.",
+    "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy es **$45 por visita**, precio fijo, el mismo profesional, sin facturas sorpresa.",
   // Lawn Care plans
   "One visit per month.": "Una visita al mes.",
   "Two visits per month.": "Dos visitas al mes.",
@@ -533,7 +533,7 @@ const translations: Record<string, string> = {
   "We automatically reschedule to the next available day. Your subscription stays active and your price doesn't change.":
     "Reprogramamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa y tu precio no cambia.",
   "Reach out within 24 hours and we'll send your Pro back or credit your account — no questions asked.":
-    "Avísanos en 24 horas y mandamos al equipo de vuelta o te acreditamos a tu cuenta — sin preguntas.",
+    "Avísanos en 24 horas y mandamos al profesional de vuelta o te acreditamos a tu cuenta — sin preguntas.",
   "Already booking lawn? Add cleaning from $139 a visit.":
     "¿Ya tienes jardín? Agrega limpieza desde $139 por visita.",
 
@@ -843,7 +843,7 @@ const translations: Record<string, string> = {
   "Choose weekly, biweekly, or monthly for each service — and mix and match freely. Want weekly lawn care but biweekly cleaning? Done.":
     "Elige semanal, quincenal o mensual para cada servicio — y combínalos libremente. ¿Quieres jardín semanal pero limpieza quincenal? Listo.",
   "Not at all. Provide access via a lockbox, gate code, or smart lock and our team handles everything. You'll get photo confirmation when each service is complete.":
-    "Para nada. Danos acceso con una caja de llaves, un código de portón o una cerradura inteligente y nuestro equipo se encarga de todo. Recibirás confirmación con fotos cuando cada servicio esté completo.",
+    "Para nada. Danos acceso con una caja de llaves, un código de portón o una cerradura inteligente y nuestro profesional se encarga de todo. Recibirás confirmación con fotos cuando cada servicio esté completo.",
   "Yes — reschedule, pause for vacation, or skip a visit anytime through your dashboard or by contacting us. No penalties.":
     "Sí — reagenda, pausa por vacaciones u omite una visita cuando quieras desde tu panel o contactándonos. Sin penalizaciones.",
   "If weather impacts an outdoor service, we automatically reschedule for the next available day. Your subscription stays active.":
@@ -974,20 +974,20 @@ const translations: Record<string, string> = {
   "Reliable lawn care, done right every time. Mow, edge, blow.":
     "Cuidado del jardín confiable, bien hecho siempre. Cortamos, bordeamos y soplamos.",
   "Same Pro every visit. Locked monthly price. Cancel anytime.":
-    "El mismo equipo en cada visita. Precio mensual fijo. Cancela cuando quieras.",
+    "El mismo profesional en cada visita. Precio mensual fijo. Cancela cuando quieras.",
   "Tidy isn't just lawn — it's a system for your entire home.":
     "Tidy no es solo jardín — es un sistema para todo tu hogar.",
   "Start lawn care": "Empezar cuidado del jardín",
   "Start your plan": "Empieza tu plan",
   "Lawn care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same Pro, no contracts. Book in about 2 minutes.":
-    "Cuidado del jardín en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Un precio fijo por visita desde $45. El mismo equipo, sin contratos. Reserva en unos 2 minutos.",
+    "Cuidado del jardín en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Un precio fijo por visita desde $45. El mismo profesional, sin contratos. Reserva en unos 2 minutos.",
   "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.":
     "Limpieza profesional del hogar, resuelta por nosotros. Semanal, quincenal o mensual.",
   "Tidy isn't just cleaning — it's a system for your entire home.":
     "Tidy no es solo limpieza — es un sistema para todo tu hogar.",
   "Book your cleaning": "Reserva tu limpieza",
   "House cleaning in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). One flat price per visit from $139. Same Pro, no contracts, eco-safe. Book in about 2 minutes.":
-    "Limpieza del hogar en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Un precio fijo por visita desde $139. El mismo equipo, sin contratos, productos ecológicos. Reserva en unos 2 minutos.",
+    "Limpieza del hogar en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Un precio fijo por visita desde $139. El mismo profesional, sin contratos, productos ecológicos. Reserva en unos 2 minutos.",
   "Professional car detailing at your home. Ceramic-safe, monthly.":
     "Detallado profesional de carros en tu casa. Seguro para cerámica, mensual.",
   "Same detailer every visit. Locked monthly price. Cancel anytime.":
@@ -1003,7 +1003,7 @@ const translations: Record<string, string> = {
   "Locked price · No contracts · Cancel anytime · Pause or reschedule anytime":
     "Precio fijo · Sin contratos · Cancela cuando quieras · Pausa o reagenda cuando quieras",
   "Set it once. We handle the rest — scheduling, reminders, the same Pro every visit.":
-    "Configúralo una vez. Nosotros nos encargamos del resto — programación, recordatorios y el mismo equipo en cada visita.",
+    "Configúralo una vez. Nosotros nos encargamos del resto — programación, recordatorios y el mismo profesional en cada visita.",
   "No contracts · Cancel, pause, or reschedule anytime": "Sin contratos · Cancela, pausa o reagenda cuando quieras",
   "Background-checked pros": "Profesionales con antecedentes verificados",
   "Serving ": "Sirviendo ",
@@ -1192,7 +1192,7 @@ const translations: Record<string, string> = {
   "One free premium add-on": "Un servicio adicional premium gratis",
   "Three services. One plan.": "Tres servicios. Un solo plan.",
   "Kitchen, baths, floors and dusting, same Pro every visit.":
-    "Cocina, baños, pisos y polvo, con el mismo equipo en cada visita.",
+    "Cocina, baños, pisos y polvo, con el mismo profesional en cada visita.",
   "Mow, edge, trim and blow down — clippings hauled off.":
     "Cortamos, orillamos, recortamos y sopleteamos — nos llevamos los recortes.",
   "Hand wash, wheels, glass and interior wipe-down in your driveway.":
@@ -1268,7 +1268,7 @@ const translations: Record<string, string> = {
     "Camionetas elevadas, vans comerciales y vehículos de gran tamaño se cotizan individualmente.",
   "Locked price — never surprise-priced": "Precio fijo — nunca precios sorpresa",
   "Background-checked Pros. Same Pro every visit so your lawn stays consistent.":
-    "Equipos con antecedentes verificados. El mismo equipo en cada visita para que tu grama se mantenga igual.",
+    "Profesionales con antecedentes verificados. El mismo profesional en cada visita para que tu grama se mantenga igual.",
   "Background-checked detailers. Same detailer every visit so they learn your vehicle.":
     "Especialistas con antecedentes verificados. El mismo especialista en cada visita para que conozca tu carro.",
   "We couldn't save your details. Please try again, or call us at (786) 829-1141.":
