@@ -279,6 +279,28 @@ export default function AdminApplicants() {
   const [registeredOrientationId, setRegisteredOrientationId] = useState<string | null>(null);
   const [proCapacity, setProCapacity] = useState<Record<string, { preferred_by_count: number; high_demand: boolean; booked_pct: number }>>({});
 
+  // Onboarding program completion per Pro (required modules only).
+  const [requiredModules, setRequiredModules] = useState(0);
+  const [moduleProgress, setModuleProgress] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    (async () => {
+      const sb = supabase as any;
+      const [mods, prog] = await Promise.all([
+        sb.from("onboarding_module").select("slug").eq("required", true),
+        sb.from("onboarding_progress").select("pro_id, module_slug"),
+      ]);
+      const required = new Set<string>((mods.data ?? []).map((m: { slug: string }) => m.slug));
+      setRequiredModules(required.size);
+      const counts: Record<string, number> = {};
+      for (const row of (prog.data ?? []) as { pro_id: string; module_slug: string }[]) {
+        if (!required.has(row.module_slug)) continue;
+        counts[row.pro_id] = (counts[row.pro_id] ?? 0) + 1;
+      }
+      setModuleProgress(counts);
+    })();
+  }, []);
+
   const fetchRows = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -736,6 +758,14 @@ export default function AdminApplicants() {
                       title="Customers who set this Pro as their preferred Pro"
                     >
                       Preferred by: {proCapacity[a.id].preferred_by_count}
+                    </span>
+                  )}
+                  {requiredModules > 0 && (
+                    <span
+                      className="hidden xl:inline-flex items-center text-[11px] font-semibold px-2 py-1 rounded-md ring-1 shrink-0 bg-slate-50 text-slate-600 ring-slate-200"
+                      title="Pro onboarding program progress"
+                    >
+                      {moduleProgress[a.id] ?? 0} of {requiredModules} modules complete
                     </span>
                   )}
                   <span className="hidden md:inline text-xs text-slate-500 shrink-0 w-20 text-right">{relTime(a.created_at)}</span>
