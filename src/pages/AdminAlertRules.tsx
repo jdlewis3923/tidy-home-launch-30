@@ -60,7 +60,7 @@ export default function AdminAlertRules() {
 
   const save = async (rule: Rule) => {
     const d = drafts[rule.id] ?? {};
-    let threshold = rule.threshold as never;
+    let threshold: any = rule.threshold;
     if (d.thresholdText !== undefined) {
       try {
         threshold = d.thresholdText.trim() === "" ? null : JSON.parse(d.thresholdText);
