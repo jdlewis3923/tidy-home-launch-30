@@ -62,6 +62,7 @@ const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
 const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
 const AdminCommand = lazy(() => import("./pages/AdminCommand.tsx"));
 const AdminAlertRules = lazy(() => import("./pages/AdminAlertRules.tsx"));
+const AdminOnboarding = lazy(() => import("./pages/AdminOnboarding.tsx"));
 const AdminAgents = lazy(() => import("./pages/AdminAgents.tsx"));
 const AdminNotificationSettings = lazy(() => import("./pages/AdminNotificationSettings.tsx"));
 const AdminCosts = lazy(() => import("./pages/AdminCosts.tsx"));
@@ -274,6 +275,7 @@ const App = () => (
                   <Route path="/admin" element={<Navigate to="/admin/command" replace />} />
                   <Route path="/admin/command" element={<AdminCommand />} />
                   <Route path="/admin/alert-rules" element={<AdminAlertRules />} />
+                  <Route path="/admin/onboarding" element={<AdminOnboarding />} />
                   <Route path="/admin/agents" element={<AdminAgents />} />
                   <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
                   <Route path="/admin/costs" element={<AdminCosts />} />
