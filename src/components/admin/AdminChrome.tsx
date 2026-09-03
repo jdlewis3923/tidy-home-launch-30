@@ -20,7 +20,9 @@ import CapacityBanner from "@/components/admin/CapacityBanner";
  */
 
 const NAV = [
+  { to: "/admin/command",     label: "Command",     icon: Activity },
   { to: "/admin/kpis",        label: "KPIs",        icon: BarChart3 },
+  { to: "/admin/alert-rules", label: "Rules",       icon: SlidersHorizontal },
   { to: "/admin/capacity",    label: "Capacity",    icon: Gauge },
   { to: "/admin/health",      label: "Health",      icon: Heart },
   { to: "/admin/email-health", label: "Email",      icon: Mail },
