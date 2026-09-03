@@ -1,5 +1,4 @@
 /**
-/*
  * kpi-plan-digest — one owner email per run, through the existing Brevo setup and
  * the existing Tidy branded template (brandedEmailHtml). No new design.
  *
