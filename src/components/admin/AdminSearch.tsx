@@ -12,6 +12,7 @@ import { Search, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fuzzyScoreItem, buildSnippet } from "@/lib/fuzzy";
 import { SERVICE_ZIPS } from "@/lib/serviceZips";
+import { ZIP_NEIGHBORHOODS } from "@/lib/neighborhoods";
 
 export type IndexType =
   | "Onboarding" | "SOP" | "Template" | "Customer"
@@ -122,12 +123,13 @@ async function loadIndex(nav: { to: string; label: string }[]): Promise<IndexIte
       to: "/admin/alert-rules",
     });
   }
-  for (const z of SERVICE_ZIPS) {
+  for (const zip of SERVICE_ZIPS) {
+    const label = ZIP_NEIGHBORHOODS[zip] ?? "";
     items.push({
-      key: `zip:${z.zip}`,
+      key: `zip:${zip}`,
       type: "ZIP",
-      title: `${z.zip} — ${z.label ?? ""}`.trim(),
-      body: oneLine(`Service ZIP ${z.zip} ${z.label ?? ""}`),
+      title: label ? `${zip} — ${label}` : zip,
+      body: oneLine(`Service ZIP ${zip} ${label}`),
       to: "/admin/command",
     });
   }
@@ -148,7 +150,9 @@ const BADGE: Record<IndexType, string> = {
   ZIP: "admin-search__badge--zip",
 };
 
-export default function AdminSearch() {
+export type NavItem = { to: string; label: string };
+
+export default function AdminSearch({ nav }: { nav: NavItem[] }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -158,7 +162,7 @@ export default function AdminSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const ensureIndex = useCallback(async (nav: { to: string; label: string }[]) => {
+  const ensureIndex = useCallback(async () => {
     if (items || loading) return;
     setLoading(true);
     try {
@@ -166,15 +170,11 @@ export default function AdminSearch() {
     } finally {
       setLoading(false);
     }
-  }, [items, loading]);
+  }, [items, loading, nav]);
 
   const openPanel = useCallback(() => {
     setOpen(true);
-    // Nav labels are read from the rendered rail so pages stay in sync.
-    const nav = Array.from(document.querySelectorAll<HTMLAnchorElement>(".admin-hud-rail__item"))
-      .map((a) => ({ to: a.getAttribute("href") ?? "", label: a.textContent?.trim() ?? "" }))
-      .filter((n) => n.to);
-    void ensureIndex(nav);
+    void ensureIndex();
     requestAnimationFrame(() => inputRef.current?.focus());
   }, [ensureIndex]);
 
