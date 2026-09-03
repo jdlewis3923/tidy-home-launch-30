@@ -3,6 +3,8 @@ import heroImg from "@/assets/hero-miami-home.jpg";
 import heroImgMobile from "@/assets/hero-miami-home-mobile.jpg";
 import heroVideo from "@/assets/hero-loop-hq.mp4.asset.json";
 import heroPoster from "@/assets/hero-poster.jpg.asset.json";
+import heroWideVideo from "@/assets/hero-wide-loop.mp4.asset.json";
+import heroWidePoster from "@/assets/hero-wide-poster.jpg.asset.json";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
