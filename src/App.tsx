@@ -270,6 +270,10 @@ const App = () => (
                   <Route path="/admin/schedule" element={<AdminSchedule />} />
                   {/* Permanent KPI Command Center — admins only. */}
                   <Route path="/admin/kpis" element={<AdminKpis />} />
+                  {/* Command center — default admin landing view. */}
+                  <Route path="/admin" element={<Navigate to="/admin/command" replace />} />
+                  <Route path="/admin/command" element={<AdminCommand />} />
+                  <Route path="/admin/alert-rules" element={<AdminAlertRules />} />
                   <Route path="/admin/agents" element={<AdminAgents />} />
                   <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
                   <Route path="/admin/costs" element={<AdminCosts />} />
