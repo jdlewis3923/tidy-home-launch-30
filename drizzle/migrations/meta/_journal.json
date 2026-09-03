@@ -155,6 +155,13 @@
       "when": 1788402228286,
       "tag": "0021_create_kpi_alerting_layer",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1788402343620,
+      "tag": "0022_add_available_minutes_week_to_applicants",
+      "breakpoints": true
     }
   ]
 }
