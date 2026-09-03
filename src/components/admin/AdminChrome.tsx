@@ -3,7 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
   Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
-  Award, ShieldCheck, RefreshCw, ClipboardList, Gauge, Star,
+  Award, ShieldCheck, RefreshCw, ClipboardList, Gauge, Star, SlidersHorizontal,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import CapacityBanner from "@/components/admin/CapacityBanner";
