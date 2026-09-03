@@ -162,6 +162,13 @@
       "when": 1788402343620,
       "tag": "0022_add_available_minutes_week_to_applicants",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1788403478030,
+      "tag": "0023_create_onboarding_modules_and_progress",
+      "breakpoints": true
     }
   ]
 }
