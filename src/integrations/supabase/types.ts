@@ -305,6 +305,111 @@ export type Database = {
         }
         Relationships: []
       }
+      alert_event: {
+        Row: {
+          acknowledged_at: string | null
+          detail: string | null
+          digest: string | null
+          fired_at: string
+          headline: string | null
+          id: string
+          metric_value: number | null
+          resolved_at: string | null
+          rule_code: string
+          severity: string | null
+          status: string
+          suppressed_in_digest: boolean
+          threshold_value: number | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          detail?: string | null
+          digest?: string | null
+          fired_at?: string
+          headline?: string | null
+          id?: string
+          metric_value?: number | null
+          resolved_at?: string | null
+          rule_code: string
+          severity?: string | null
+          status?: string
+          suppressed_in_digest?: boolean
+          threshold_value?: number | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          detail?: string | null
+          digest?: string | null
+          fired_at?: string
+          headline?: string | null
+          id?: string
+          metric_value?: number | null
+          resolved_at?: string | null
+          rule_code?: string
+          severity?: string | null
+          status?: string
+          suppressed_in_digest?: boolean
+          threshold_value?: number | null
+        }
+        Relationships: []
+      }
+      alert_rule: {
+        Row: {
+          action_text: string | null
+          code: string
+          condition_note: string | null
+          cooldown_hours: number
+          created_at: string
+          digest: string | null
+          domain: string | null
+          enabled: boolean
+          evaluation_window_days: number
+          id: string
+          min_sample: number
+          priority: number
+          severity: string | null
+          threshold: Json
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_text?: string | null
+          code: string
+          condition_note?: string | null
+          cooldown_hours?: number
+          created_at?: string
+          digest?: string | null
+          domain?: string | null
+          enabled?: boolean
+          evaluation_window_days?: number
+          id?: string
+          min_sample?: number
+          priority?: number
+          severity?: string | null
+          threshold?: Json
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_text?: string | null
+          code?: string
+          condition_note?: string | null
+          cooldown_hours?: number
+          created_at?: string
+          digest?: string | null
+          domain?: string | null
+          enabled?: boolean
+          evaluation_window_days?: number
+          id?: string
+          min_sample?: number
+          priority?: number
+          severity?: string | null
+          threshold?: Json
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
@@ -1220,6 +1325,42 @@ export type Database = {
         }
         Relationships: []
       }
+      hanger_drop: {
+        Row: {
+          cost: number
+          created_at: string
+          distributor: string | null
+          dropped_on: string
+          id: string
+          notes: string | null
+          quantity: number
+          verified_spotcheck: boolean
+          zip: string | null
+        }
+        Insert: {
+          cost?: number
+          created_at?: string
+          distributor?: string | null
+          dropped_on?: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          verified_spotcheck?: boolean
+          zip?: string | null
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          distributor?: string | null
+          dropped_on?: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          verified_spotcheck?: boolean
+          zip?: string | null
+        }
+        Relationships: []
+      }
       insurance_audit_log: {
         Row: {
           action: string
@@ -1626,6 +1767,69 @@ export type Database = {
           },
         ]
       }
+      kpi_constant: {
+        Row: {
+          churn_target: number
+          cost_per_hanger: number
+          cust_per_5k: number
+          doors_33156: number
+          doors_33183: number
+          doors_33186: number
+          gp_sub: number
+          hire_buffer_days: number
+          hire_lead_days_detail: number
+          hire_lead_days_house: number
+          id: string
+          max_hires_mo: number
+          overhead_mo: number
+          pay_sub: number
+          rev_sub: number
+          subs_per_pro: number
+          target_y1_profit: number
+          updated_at: string
+        }
+        Insert: {
+          churn_target?: number
+          cost_per_hanger?: number
+          cust_per_5k?: number
+          doors_33156?: number
+          doors_33183?: number
+          doors_33186?: number
+          gp_sub?: number
+          hire_buffer_days?: number
+          hire_lead_days_detail?: number
+          hire_lead_days_house?: number
+          id?: string
+          max_hires_mo?: number
+          overhead_mo?: number
+          pay_sub?: number
+          rev_sub?: number
+          subs_per_pro?: number
+          target_y1_profit?: number
+          updated_at?: string
+        }
+        Update: {
+          churn_target?: number
+          cost_per_hanger?: number
+          cust_per_5k?: number
+          doors_33156?: number
+          doors_33183?: number
+          doors_33186?: number
+          gp_sub?: number
+          hire_buffer_days?: number
+          hire_lead_days_detail?: number
+          hire_lead_days_house?: number
+          id?: string
+          max_hires_mo?: number
+          overhead_mo?: number
+          pay_sub?: number
+          rev_sub?: number
+          subs_per_pro?: number
+          target_y1_profit?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       kpi_definitions: {
         Row: {
           category: Database["public"]["Enums"]["kpi_category"]
@@ -1725,6 +1929,45 @@ export type Database = {
         }
         Relationships: []
       }
+      kpi_plan: {
+        Row: {
+          created_at: string
+          cum_profit_planned: number
+          gp_planned: number
+          hangers_planned: number
+          id: string
+          marketing_spend_planned: number
+          month_label: string
+          plan_month: number
+          pros_required: number
+          subs_planned: number
+        }
+        Insert: {
+          created_at?: string
+          cum_profit_planned?: number
+          gp_planned?: number
+          hangers_planned?: number
+          id?: string
+          marketing_spend_planned?: number
+          month_label: string
+          plan_month: number
+          pros_required?: number
+          subs_planned?: number
+        }
+        Update: {
+          created_at?: string
+          cum_profit_planned?: number
+          gp_planned?: number
+          hangers_planned?: number
+          id?: string
+          marketing_spend_planned?: number
+          month_label?: string
+          plan_month?: number
+          pros_required?: number
+          subs_planned?: number
+        }
+        Relationships: []
+      }
       kpi_playbook_steps: {
         Row: {
           action_key: string | null
@@ -1773,6 +2016,30 @@ export type Database = {
           step_index?: number
           updated_at?: string
           why_text?: string
+        }
+        Relationships: []
+      }
+      kpi_snapshot: {
+        Row: {
+          captured_at: string
+          computed_by: string
+          id: string
+          metrics: Json
+          window: string | null
+        }
+        Insert: {
+          captured_at?: string
+          computed_by?: string
+          id?: string
+          metrics?: Json
+          window?: string | null
+        }
+        Update: {
+          captured_at?: string
+          computed_by?: string
+          id?: string
+          metrics?: Json
+          window?: string | null
         }
         Relationships: []
       }
@@ -2613,6 +2880,48 @@ export type Database = {
           p256dh?: string
           user_agent?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      qr_scan: {
+        Row: {
+          campaign: string | null
+          converted_paid: boolean
+          converted_quote: boolean
+          customer_id: string | null
+          id: string
+          placement: string | null
+          scanned_at: string
+          session_id: string | null
+          user_agent: string | null
+          variant: string | null
+          zip: string | null
+        }
+        Insert: {
+          campaign?: string | null
+          converted_paid?: boolean
+          converted_quote?: boolean
+          customer_id?: string | null
+          id?: string
+          placement?: string | null
+          scanned_at?: string
+          session_id?: string | null
+          user_agent?: string | null
+          variant?: string | null
+          zip?: string | null
+        }
+        Update: {
+          campaign?: string | null
+          converted_paid?: boolean
+          converted_quote?: boolean
+          customer_id?: string | null
+          id?: string
+          placement?: string | null
+          scanned_at?: string
+          session_id?: string | null
+          user_agent?: string | null
+          variant?: string | null
+          zip?: string | null
         }
         Relationships: []
       }
