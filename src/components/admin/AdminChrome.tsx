@@ -4,9 +4,12 @@ import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
   Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
   Award, ShieldCheck, RefreshCw, ClipboardList, Gauge, Star, SlidersHorizontal,
+  GraduationCap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import CapacityBanner from "@/components/admin/CapacityBanner";
+import AdminSearch from "@/components/admin/AdminSearch";
+import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
 
 /**
  * AdminChrome — Iron-Man HUD shell injected on every /admin/* route.
@@ -30,6 +33,7 @@ const NAV = [
   { to: "/admin/leads",       label: "Leads",       icon: ClipboardList },
   { to: "/admin/reviews",     label: "Reviews",     icon: Star },
   { to: "/admin/applicants",  label: "Applicants",  icon: Users },
+  { to: "/admin/onboarding",  label: "Onboarding",  icon: GraduationCap },
   { to: "/admin/tier-progression", label: "Tier",   icon: Award },
   { to: "/admin/coi-review",  label: "COI",         icon: ShieldCheck },
   { to: "/admin/insurance",   label: "Insurance",   icon: ShieldCheck },
@@ -130,14 +134,18 @@ export default function AdminChrome() {
           <span className="admin-hud-divider" />
           <span className="admin-hud-path">{pathname.replace("/admin", "ADMIN") || "ADMIN"}</span>
         </div>
+        <div className="admin-hud-topbar__center">
+          <AdminSearch nav={NAV.map(({ to, label }) => ({ to, label }))} />
+        </div>
         <div className="admin-hud-topbar__right">
+          <AdminThemeToggle active />
           {/* Days-to-launch countdown badge */}
           <span
             className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]"
             style={{
-              backgroundColor: "#0D1117",
-              color: "#F4C430",
-              border: "1px solid rgba(244,196,48,0.35)",
+              backgroundColor: "hsl(var(--admin-chip-bg))",
+              color: "hsl(var(--admin-gold))",
+              border: "1px solid hsl(var(--admin-gold) / 0.35)",
             }}
             title={launched ? "Tidy is live." : `Launching ${launchDate.toDateString()}`}
           >
@@ -145,14 +153,14 @@ export default function AdminChrome() {
           </span>
           <span
             className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]"
-            style={{ backgroundColor: "#0D1117", color: "#9CA3AF", border: "1px solid rgba(148,163,184,0.25)" }}
+            style={{ backgroundColor: "hsl(var(--admin-chip-bg))", color: "hsl(var(--admin-text-dim))", border: "1px solid hsl(var(--admin-rail-border))" }}
             title={lastSync ? `sheets-master-sync last ran ${new Date(lastSync).toLocaleString()}` : "sheets-master-sync has not run yet"}
           >
             <RefreshCw className="h-2.5 w-2.5" />
             Sync · {syncRel(lastSync)}
           </span>
           <span className="admin-hud-meta">SYS</span>
-          <Activity className="h-3 w-3 text-[hsl(var(--gold))]" />
+          <Activity className="h-3 w-3" style={{ color: "hsl(var(--admin-gold))" }} />
           <span className="admin-hud-meta">·</span>
           <span className="admin-hud-meta admin-hud-time">{stamp}</span>
           <span className="admin-hud-meta">UTC-5</span>

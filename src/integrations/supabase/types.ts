@@ -2360,6 +2360,63 @@ export type Database = {
           },
         ]
       }
+      onboarding_module: {
+        Row: {
+          body_md: string
+          id: string
+          required: boolean
+          section_number: number
+          service_scope: string
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body_md?: string
+          id?: string
+          required?: boolean
+          section_number?: number
+          service_scope?: string
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body_md?: string
+          id?: string
+          required?: boolean
+          section_number?: number
+          service_scope?: string
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      onboarding_progress: {
+        Row: {
+          completed_at: string
+          id: string
+          module_slug: string
+          pro_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          module_slug: string
+          pro_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          module_slug?: string
+          pro_id?: string
+        }
+        Relationships: []
+      }
       orientation_attendees: {
         Row: {
           applicant_id: string
