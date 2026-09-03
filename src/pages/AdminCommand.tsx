@@ -195,8 +195,9 @@ export default function AdminCommand() {
   );
 
   const updateEvent = async (id: string, status: "acknowledged" | "resolved") => {
-    const patch: Record<string, unknown> = { status };
-    patch[status === "resolved" ? "resolved_at" : "acknowledged_at"] = new Date().toISOString();
+    const now = new Date().toISOString();
+    const patch =
+      status === "resolved" ? { status, resolved_at: now } : { status, acknowledged_at: now };
     const { error } = await supabase.from("alert_event").update(patch).eq("id", id);
     if (error) {
       toast({ title: "Could not update alert", description: error.message, variant: "destructive" });

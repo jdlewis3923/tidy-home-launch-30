@@ -22,7 +22,7 @@ interface Rule {
   title: string;
   severity: string;
   digest: string;
-  threshold: Record<string, unknown> | null;
+  threshold: unknown;
   evaluation_window_days: number | null;
   min_sample: number | null;
   cooldown_hours: number | null;
@@ -60,7 +60,7 @@ export default function AdminAlertRules() {
 
   const save = async (rule: Rule) => {
     const d = drafts[rule.id] ?? {};
-    let threshold = rule.threshold;
+    let threshold = rule.threshold as never;
     if (d.thresholdText !== undefined) {
       try {
         threshold = d.thresholdText.trim() === "" ? null : JSON.parse(d.thresholdText);
