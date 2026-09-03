@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import heroImg from "@/assets/hero-miami-home.jpg";
 import heroImgMobile from "@/assets/hero-miami-home-mobile.jpg";
-import heroVideo from "@/assets/hero-loop.mp4.asset.json";
+import heroVideo from "@/assets/hero-loop-hq.mp4.asset.json";
 import heroPoster from "@/assets/hero-poster.jpg.asset.json";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
@@ -21,6 +21,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
 
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+      {/* Mobile (portrait source matches portrait viewport): animated loop. */}
       {motionOk ? (
         <video
           src={heroVideo.url}
@@ -31,31 +32,31 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           playsInline
           preload="auto"
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className="absolute inset-0 w-full h-full object-cover object-center md:hidden"
         />
       ) : (
-        <>
-          <img
-            src={heroImgMobile}
-            alt="Modern Miami home with pool and palm trees"
-            className="absolute inset-0 w-full h-full object-cover object-center md:hidden"
-            width={1080}
-            height={1920}
-            fetchPriority="high"
-            decoding="async"
-          />
-          <img
-            src={heroImg}
-            alt="Modern Miami home with pool and palm trees"
-            className="absolute inset-0 w-full h-full object-cover md:object-[center_60%] hidden md:block"
-            width={1920}
-            height={1080}
-            fetchPriority="high"
-            decoding="async"
-          />
-        </>
+        <img
+          src={heroImgMobile}
+          alt="Modern Miami home with pool and palm trees"
+          className="absolute inset-0 w-full h-full object-cover object-center md:hidden"
+          width={1080}
+          height={1920}
+          fetchPriority="high"
+          decoding="async"
+        />
       )}
-      <div className="absolute inset-0 bg-navy/65" />
+      {/* Desktop/laptop: full-resolution landscape still so nothing is cropped or upscaled. */}
+      <img
+        src={heroImg}
+        alt="Modern Miami home with pool and palm trees"
+        className="absolute inset-0 w-full h-full object-cover object-[center_55%] hidden md:block"
+        width={1602}
+        height={982}
+        fetchPriority="high"
+        decoding="async"
+      />
+      <div className="absolute inset-0 bg-navy/45" />
+
 
 
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
