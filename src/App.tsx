@@ -60,6 +60,8 @@ const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.t
 const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
 const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
 const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
+const AdminCommand = lazy(() => import("./pages/AdminCommand.tsx"));
+const AdminAlertRules = lazy(() => import("./pages/AdminAlertRules.tsx"));
 const AdminAgents = lazy(() => import("./pages/AdminAgents.tsx"));
 const AdminNotificationSettings = lazy(() => import("./pages/AdminNotificationSettings.tsx"));
 const AdminCosts = lazy(() => import("./pages/AdminCosts.tsx"));
