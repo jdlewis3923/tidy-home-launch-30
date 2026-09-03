@@ -3,6 +3,8 @@ import heroImg from "@/assets/hero-miami-home.jpg";
 import heroImgMobile from "@/assets/hero-miami-home-mobile.jpg";
 import heroVideo from "@/assets/hero-loop-hq.mp4.asset.json";
 import heroPoster from "@/assets/hero-poster.jpg.asset.json";
+import heroWideVideo from "@/assets/hero-wide-loop.mp4.asset.json";
+import heroWidePoster from "@/assets/hero-wide-poster.jpg.asset.json";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
@@ -45,16 +47,31 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           decoding="async"
         />
       )}
-      {/* Desktop/laptop: full-resolution landscape still so nothing is cropped or upscaled. */}
-      <img
-        src={heroImg}
-        alt="Modern Miami home with pool and palm trees"
-        className="absolute inset-0 w-full h-full object-cover object-[center_55%] hidden md:block"
-        width={1602}
-        height={982}
-        fetchPriority="high"
-        decoding="async"
-      />
+      {/* Desktop/laptop: widescreen animated loop (swaying palms, drifting clouds, distant birds). */}
+      {motionOk ? (
+        <video
+          src={heroWideVideo.url}
+          poster={heroWidePoster.url}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-[center_55%] hidden md:block"
+        />
+      ) : (
+        <img
+          src={heroImg}
+          alt="Modern Miami home with palm trees and a detailed black car in the driveway"
+          className="absolute inset-0 w-full h-full object-cover object-[center_55%] hidden md:block"
+          width={1602}
+          height={982}
+          fetchPriority="high"
+          decoding="async"
+        />
+      )}
+
       <div className="absolute inset-0 bg-navy/45" />
 
 
