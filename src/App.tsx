@@ -60,6 +60,8 @@ const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.t
 const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
 const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
 const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
+const AdminCommand = lazy(() => import("./pages/AdminCommand.tsx"));
+const AdminAlertRules = lazy(() => import("./pages/AdminAlertRules.tsx"));
 const AdminAgents = lazy(() => import("./pages/AdminAgents.tsx"));
 const AdminNotificationSettings = lazy(() => import("./pages/AdminNotificationSettings.tsx"));
 const AdminCosts = lazy(() => import("./pages/AdminCosts.tsx"));
@@ -268,6 +270,10 @@ const App = () => (
                   <Route path="/admin/schedule" element={<AdminSchedule />} />
                   {/* Permanent KPI Command Center — admins only. */}
                   <Route path="/admin/kpis" element={<AdminKpis />} />
+                  {/* Command center — default admin landing view. */}
+                  <Route path="/admin" element={<Navigate to="/admin/command" replace />} />
+                  <Route path="/admin/command" element={<AdminCommand />} />
+                  <Route path="/admin/alert-rules" element={<AdminAlertRules />} />
                   <Route path="/admin/agents" element={<AdminAgents />} />
                   <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
                   <Route path="/admin/costs" element={<AdminCosts />} />
