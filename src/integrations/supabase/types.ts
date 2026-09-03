@@ -480,6 +480,7 @@ export type Database = {
       }
       applicants: {
         Row: {
+          available_minutes_week: number
           avg_customer_rating: number | null
           bg_check_completed_at: string | null
           bg_check_notes: string | null
@@ -557,6 +558,7 @@ export type Database = {
           zip: string | null
         }
         Insert: {
+          available_minutes_week?: number
           avg_customer_rating?: number | null
           bg_check_completed_at?: string | null
           bg_check_notes?: string | null
@@ -634,6 +636,7 @@ export type Database = {
           zip?: string | null
         }
         Update: {
+          available_minutes_week?: number
           avg_customer_rating?: number | null
           bg_check_completed_at?: string | null
           bg_check_notes?: string | null
