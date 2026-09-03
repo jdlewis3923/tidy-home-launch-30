@@ -82,8 +82,11 @@ function NoData({ label = "no data yet" }: { label?: string }) {
     </span>
   );
 }
-const money = (n: unknown) =>
-  has(n) ? `$${Math.round(Number(n)).toLocaleString()}` : null;
+const money = (n: unknown) => {
+  if (!has(n)) return null;
+  const v = Math.round(Number(n));
+  return `${v < 0 ? "-" : ""}$${Math.abs(v).toLocaleString()}`;
+};
 const pct = (n: unknown, digits = 1) =>
   has(n) ? `${Number(n).toFixed(digits)}%` : null;
 const count = (n: unknown) => (has(n) ? Number(n).toLocaleString() : null);
@@ -341,7 +344,7 @@ export default function AdminCommand() {
                   return (
                     <div
                       key={key}
-                      className={`rounded-lg border p-4 ${hireNow ? "border-rose-300 bg-rose-50" : "border-slate-200 bg-slate-50/60"}`}
+                      className={`rounded-lg border p-4 ${hireNow ? "border-rose-300 bg-rose-50" : "border-slate-200 bg-slate-50"}`}
                     >
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
                         <p className={`text-sm font-semibold ${hireNow ? "text-rose-800" : "text-slate-900"}`}>
@@ -407,7 +410,7 @@ export default function AdminCommand() {
                   return (
                     <div
                       key={st.key}
-                      className="rounded-md border border-slate-200 bg-slate-50/60 px-3 py-2"
+                      className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2"
                       style={{ marginLeft: i * 6, marginRight: i * 6 }}
                     >
                       <div className="flex items-baseline justify-between gap-2">
@@ -481,7 +484,7 @@ function Tile({
 }: { label: string; value: string | null; sub?: string; tone?: "good" | "bad" }) {
   const toneClass = tone === "good" ? "text-emerald-600" : tone === "bad" ? "text-rose-600" : "text-slate-900";
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
       <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
       <p className={`mt-1 text-xl font-bold ${value === null ? "" : toneClass}`}>
         {value === null ? <NoData /> : value}
@@ -554,7 +557,7 @@ function FunnelTable({ funnel, scanSeries }: { funnel: Metrics; scanSeries: Reco
             const cac = has(r.d.cac) ? Number(r.d.cac) : null;
             const isTotal = r.zip === "total";
             return (
-              <tr key={r.zip} className={`border-t border-slate-100 ${isTotal ? "font-semibold bg-slate-50/70" : ""}`}>
+              <tr key={r.zip} className={`border-t border-slate-100 ${isTotal ? "font-semibold bg-slate-50" : ""}`}>
                 <td className="py-2.5 pr-3 whitespace-nowrap">{r.label}</td>
                 <td className="py-2.5 pr-3"><Cell value={count(r.d.hangers_dropped_cum)} /></td>
                 <td className="py-2.5 pr-3"><Cell value={count(r.d.scans_30d)} /></td>
