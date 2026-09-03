@@ -45,16 +45,31 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           decoding="async"
         />
       )}
-      {/* Desktop/laptop: full-resolution landscape still so nothing is cropped or upscaled. */}
-      <img
-        src={heroImg}
-        alt="Modern Miami home with pool and palm trees"
-        className="absolute inset-0 w-full h-full object-cover object-[center_55%] hidden md:block"
-        width={1602}
-        height={982}
-        fetchPriority="high"
-        decoding="async"
-      />
+      {/* Desktop/laptop: widescreen animated loop (swaying palms, drifting clouds, distant birds). */}
+      {motionOk ? (
+        <video
+          src={heroWideVideo.url}
+          poster={heroWidePoster.url}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-[center_55%] hidden md:block"
+        />
+      ) : (
+        <img
+          src={heroImg}
+          alt="Modern Miami home with palm trees and a detailed black car in the driveway"
+          className="absolute inset-0 w-full h-full object-cover object-[center_55%] hidden md:block"
+          width={1602}
+          height={982}
+          fetchPriority="high"
+          decoding="async"
+        />
+      )}
+
       <div className="absolute inset-0 bg-navy/45" />
 
 
