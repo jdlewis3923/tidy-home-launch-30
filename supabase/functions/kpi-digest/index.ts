@@ -1,219 +1,220 @@
 /**
- * kpi-digest — Sends scheduled KPI digest emails to admins.
+ * kpi-digest — one owner email per run, through the existing Brevo setup and
+ * the existing Tidy branded template (brandedEmailHtml). No new design.
  *
- * Five digest variants (selected via ?variant= query param or body):
- *   - morning_pulse  (daily 7am)  : open alerts, today's visits, MRR, signups
- *   - midday_check   (daily 12pm) : conversion + ads checkpoint
- *   - evening_close  (daily 6pm)  : day-rollup, completion %, inbox
- *   - weekly_review  (Mon 8am)    : weekly trend across all 38 KPIs
- *   - launch_window  (Fri 5pm)    : 90-day launch progress vs targets
+ * AM (11:00 UTC) is FORWARD-LOOKING: today's jobs, unassigned jobs, capacity
+ * runway with hire-by dates, plumbing blockers, one line per open capacity alert.
  *
- * Auth: service-role only via x-cron-key (called from pg_cron).
+ * PM (22:00 UTC) is BACKWARD-LOOKING: yesterday's adds and churn, cumulative
+ * profit vs plan with days ahead/behind, the funnel table by ZIP, trust metrics,
+ * one line per open profit / funnel / trust alert.
+ *
+ * Both open with a single status line. If nothing fired we still send, with
+ * "No alerts. Here are the numbers." The send is never skipped.
  */
-import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
-import { sendBrevoEmail as sendViaBrevo } from '../_shared/brevo-send.ts';
+import { brandedEmailHtml, sendBrevoEmail } from '../_shared/notifyJustin.ts';
+import { DAY_MS, round } from '../_shared/kpi-engine.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
-const ALERT_FROM_EMAIL = Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@jointidy.co';
+const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+const OWNER_EMAIL = Deno.env.get('KPI_DIGEST_TO') ?? 'admin@jointidy.co';
+const APP_URL = 'https://jointidy.co';
 
-type Variant = 'morning_pulse' | 'midday_check' | 'evening_close' | 'weekly_review' | 'launch_window';
+type Row = Record<string, any>;
 
-const VARIANT_META: Record<Variant, { subject: (date: string) => string; kpis: string[] }> = {
-  morning_pulse: {
-    subject: (d) => `☀️ Tidy Morning Pulse · ${d}`,
-    kpis: ['active_subs', 'mrr', 'visits_today', 'daily_signups', 'inbox_open', 'edge_errors'],
-  },
-  midday_check: {
-    subject: (d) => `⏱ Tidy Midday Check · ${d}`,
-    kpis: ['daily_signups', 'signup_conversion', 'site_sessions', 'ads_spend_daily', 'ads_ctr', 'promo_redemption'],
-  },
-  evening_close: {
-    subject: (d) => `🌙 Tidy Evening Close · ${d}`,
-    kpis: ['visit_completion', 'on_time_arrival', 'inbox_open', 'failed_payments', 'edge_errors', 'webhook_delivery'],
-  },
-  weekly_review: {
-    subject: (d) => `📊 Tidy Weekly Review · week of ${d}`,
-    kpis: [
-      'active_subs','mrr','daily_signups','signup_conversion','plan_distribution',
-      'visit_completion','on_time_arrival','customer_no_show','churn_rate','ltv',
-      'google_reviews_weekly','avg_star_rating','failed_payments','payment_recovery',
-    ],
-  },
-  launch_window: {
-    subject: (d) => `🚀 Tidy 90-Day Launch · ${d}`,
-    kpis: ['active_subs', 'mrr', 'daily_signups', 'cac', 'ltv', 'churn_rate', 'avg_star_rating'],
-  },
-};
+const money = (n: number | null | undefined) =>
+  n === null || n === undefined ? '—' : `$${Math.round(n).toLocaleString()}`;
+const pct = (n: number | null | undefined) => (n === null || n === undefined ? '—' : `${n}%`);
+const val = (n: unknown) => (n === null || n === undefined ? '—' : String(n));
 
-async function getAdminEmails(s: SupabaseClient): Promise<string[]> {
-  const { data: roles } = await s.from('user_roles').select('user_id').eq('role', 'admin');
-  const ids = (roles ?? []).map((r) => r.user_id);
-  const emails: string[] = [];
-  for (const uid of ids) {
-    try {
-      const { data } = await s.auth.admin.getUserById(uid);
-      if (data.user?.email) emails.push(data.user.email);
-    } catch { /* skip */ }
-  }
-  return emails;
+function statusLine(p: Row): string {
+  const d = typeof p?.plan_delta_dollars === 'number' ? p.plan_delta_dollars : null;
+  const days = typeof p?.days_behind_plan === 'number' ? p.days_behind_plan : null;
+  if (d === null) return 'ON TRACK — no plan row for this month yet.';
+  if (Math.abs(d) < 250) return 'ON TRACK';
+  if (d > 0) return `AHEAD by ${money(d)}`;
+  return `BEHIND by ${money(Math.abs(d))}${days !== null ? ` and ${Math.abs(round(days, 1))} days` : ''}`;
 }
 
-function statusColor(status: string): string {
-  if (status === 'green') return '#059669';
-  if (status === 'warn') return '#d97706';
-  if (status === 'critical') return '#dc2626';
-  return '#94a3b8';
-}
-
-function statusEmoji(status: string): string {
-  if (status === 'green') return '🟢';
-  if (status === 'warn') return '🟡';
-  if (status === 'critical') return '🔴';
-  return '⚪';
-}
-
-async function sendBrevoEmail(to: string[], subject: string, html: string) {
-  if (!BREVO_API_KEY || to.length === 0) return false;
-  // Internal admin ops digest — marketing: false.
-  const r = await sendViaBrevo({
-    to, subject, htmlContent: html, marketing: false,
-    sender: { name: 'Tidy Operating System', email: ALERT_FROM_EMAIL },
-    label: 'kpi-digest',
-  });
-  return r.sent;
-}
-
-function buildEmailHtml(
-  variant: Variant,
-  rows: Array<{ name: string; code: string; value: string; status: string; target: string }>,
-  openAlerts: number,
-): string {
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-  const variantTitle = variant.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  const rowsHtml = rows
+function table(headers: string[], rows: string[][]): string {
+  const th = headers
+    .map((h) => `<th align="left" style="padding:6px 8px;border-bottom:2px solid #f5c518;font-size:12px;color:#0f172a">${h}</th>`)
+    .join('');
+  const tr = rows
     .map(
-      (r) => `
-    <tr>
-      <td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#0f172a;">
-        ${statusEmoji(r.status)} <strong>${r.name}</strong>
-        <div style="color:#64748b;font-size:11px;margin-top:2px;">target: ${r.target}</div>
-      </td>
-      <td style="padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:15px;font-weight:600;color:${statusColor(r.status)};text-align:right;white-space:nowrap;">
-        ${r.value}
-      </td>
-    </tr>`,
+      (r) =>
+        `<tr>${r
+          .map((cell) => `<td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#475569">${cell}</td>`)
+          .join('')}</tr>`,
     )
     .join('');
+  return `<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:10px 0"><tr>${th}</tr>${tr}</table>`;
+}
 
-  return `
-    <div style="font-family:system-ui,-apple-system,sans-serif;max-width:600px;margin:0 auto;background:#f8fafc;padding:24px;">
-      <div style="background:#0f172a;color:#fff;padding:24px;border-radius:12px 12px 0 0;">
-        <div style="color:#f5c518;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Tidy · Operating System</div>
-        <div style="font-size:24px;font-weight:600;margin-top:4px;">${variantTitle}</div>
-        <div style="color:#94a3b8;font-size:13px;margin-top:4px;">${today}</div>
-      </div>
-      <div style="background:#fff;padding:0;border-radius:0 0 12px 12px;border:1px solid #e2e8f0;border-top:0;">
-        ${
-          openAlerts > 0
-            ? `<div style="background:#fef2f2;color:#991b1b;padding:14px 20px;border-bottom:1px solid #fecaca;font-size:14px;font-weight:600;">⚠️ ${openAlerts} open alert${openAlerts > 1 ? 's' : ''} — open command center</div>`
-            : ''
-        }
-        <table style="width:100%;border-collapse:collapse;">${rowsHtml}</table>
-        <div style="padding:20px;text-align:center;">
-          <a href="https://jointidy.co/admin/kpis" style="display:inline-block;background:#f5c518;color:#0f172a;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">Open KPI Command Center →</a>
-        </div>
-      </div>
-      <p style="text-align:center;color:#94a3b8;font-size:11px;margin:16px 0 0;">Tidy Home Concierge · Miami</p>
-    </div>
-  `;
+function alertLines(events: Row[]): string {
+  if (!events.length) return '<p style="margin:8px 0"><strong>No alerts. Here are the numbers.</strong></p>';
+  return `<ul style="margin:8px 0 0;padding-left:18px">${events
+    .map(
+      (e) =>
+        `<li style="margin-bottom:6px"><strong style="color:${
+          e.severity === 'red' ? '#b91c1c' : e.severity === 'amber' ? '#b45309' : '#0f172a'
+        }">${String(e.severity ?? '').toUpperCase()}</strong> — ${e.headline ?? e.rule_code}${
+          e.detail ? `<br/><span style="color:#64748b;font-size:13px">${e.detail}</span>` : ''
+        }</li>`,
+    )
+    .join('')}</ul>`;
 }
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
 
-  // Auth: service-role via x-cron-key OR POST body cron_key
-  if (!(await isCronAuthorized(req))) {
-    return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
-  }
-
-  let variant: Variant = 'morning_pulse';
-  try {
-    const url = new URL(req.url);
-    const v = url.searchParams.get('variant');
-    if (v && v in VARIANT_META) variant = v as Variant;
-    else if (req.method === 'POST') {
-      const body = await req.json().catch(() => ({}));
-      if (body.variant && body.variant in VARIANT_META) variant = body.variant;
-    }
-  } catch { /* default */ }
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  if (!(await isCronAuthorized(req))) {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: authHeader } } });
+    const { data: u } = await userClient.auth.getUser();
+    if (!u.user) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+    const { data: ok } = await supabase.rpc('has_role', { _user_id: u.user.id, _role: 'admin' });
+    if (ok !== true) return jsonResponse({ ok: false, error: 'forbidden' }, 403);
+  }
+
+  let body: Record<string, unknown> = {};
+  try { body = await req.json(); } catch { /* cron sends no body */ }
+
   try {
-    const codes = VARIANT_META[variant].kpis;
-    // Pull defs + latest snapshots for these codes
-    const [{ data: defs }, { data: snaps }, { count: openAlertsCount }] = await Promise.all([
-      supabase
-        .from('kpi_definitions')
-        .select('code, name, target_label')
-        .in('code', codes),
-      supabase
-        .from('kpi_snapshots')
-        .select('kpi_code, value, value_text, status, computed_at')
-        .in('kpi_code', codes)
-        .order('computed_at', { ascending: false })
-        .limit(200),
-      supabase
-        .from('kpi_alerts')
-        .select('*', { count: 'exact', head: true })
-        .is('resolved_at', null),
-    ]);
+    const { data: snap } = await supabase.from('kpi_snapshot')
+      .select('id, window, captured_at, metrics')
+      .order('captured_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    const latestByCode = new Map<string, { value: number | null; value_text: string | null; status: string }>();
-    for (const s of snaps ?? []) {
-      if (!latestByCode.has(s.kpi_code)) {
-        latestByCode.set(s.kpi_code, {
-          value: s.value,
-          value_text: s.value_text,
-          status: s.status,
-        });
-      }
+    const win = (body.window === 'am' || body.window === 'pm')
+      ? (body.window as 'am' | 'pm')
+      : ((snap?.window as 'am' | 'pm') ?? (new Date().getUTCHours() < 16 ? 'am' : 'pm'));
+
+    const m = ((snap?.metrics ?? {}) as Row);
+    const p = (m.profit ?? {}) as Row;
+    const cap = (m.capacity ?? {}) as Row;
+    const fun = (m.funnel ?? {}) as Row;
+    const trust = (m.trust ?? {}) as Row;
+    const plumb = (m.plumbing ?? {}) as Row;
+
+    // Open, un-suppressed events from the last 24h
+    const { data: events } = await supabase.from('alert_event')
+      .select('rule_code, severity, headline, detail, fired_at, status, suppressed_in_digest')
+      .eq('status', 'open')
+      .eq('suppressed_in_digest', false)
+      .gte('fired_at', new Date(Date.now() - DAY_MS).toISOString())
+      .order('fired_at', { ascending: false });
+
+    const { data: rules } = await supabase.from('alert_rule').select('code, domain');
+    const domainOf = (code: string) => rules?.find((r) => r.code === code)?.domain ?? 'other';
+    const inDomains = (domains: string[]) =>
+      (events ?? []).filter((e) => domains.includes(String(domainOf(String(e.rule_code)))));
+
+    const status = statusLine(p);
+    let heading: string;
+    let bodyHtml: string;
+
+    if (win === 'am') {
+      const capacityAlerts = inDomains(['capacity']);
+      const plumbingAlerts = inDomains(['plumbing']);
+      const urgent = [...capacityAlerts, ...plumbingAlerts][0];
+      heading = urgent ? String(urgent.headline) : 'Nothing urgent today';
+
+      const svc = (cap.services ?? {}) as Record<string, Row>;
+      bodyHtml = `
+        <p style="margin:0 0 14px;font-weight:700;color:#0f172a">${status}</p>
+        <h2 style="font-size:16px;margin:18px 0 4px">Today</h2>
+        <p style="margin:0">Unassigned jobs in the next 72h: <strong>${val(cap.unassigned_jobs_72h)}</strong></p>
+        ${((cap.unassigned_jobs ?? []) as Row[]).length
+          ? table(['Job', 'Service', 'When'], (cap.unassigned_jobs as Row[]).slice(0, 10).map((v) => [
+              val(v.customer_name), val(v.service_type), String(v.scheduled_at ?? '').slice(0, 16).replace('T', ' '),
+            ]))
+          : ''}
+        <h2 style="font-size:16px;margin:18px 0 4px">Capacity runway (forward)</h2>
+        ${table(['Service', 'Pros', 'Util', 'Runway (wks)', 'Hire by'],
+          Object.values(svc).map((s) => [
+            val(s.service_name), val(s.pros_certified), pct(s.utilization_pct), val(s.runway_weeks), val(s.hire_by_date),
+          ]))}
+        <h2 style="font-size:16px;margin:18px 0 4px">Hiring pipeline</h2>
+        ${table(['Stage', 'Count', 'Avg days in stage'],
+          ((cap.pipeline ?? []) as Row[]).map((r) => [val(r.stage), val(r.count), val(r.avg_days_in_stage)]))}
+        <h2 style="font-size:16px;margin:18px 0 4px">Plumbing blockers</h2>
+        <p style="margin:0">Payouts blocked with money owed: <strong>${val(plumb.pros_payouts_disabled_with_owed_bonus)}</strong>
+          ${(plumb.pros_payouts_disabled_names ?? []).length ? `(${(plumb.pros_payouts_disabled_names as string[]).join(', ')})` : ''}<br/>
+          COIs expiring in 30 days: <strong>${val(plumb.coi_expiring_30d)}</strong>
+          ${(plumb.coi_expiring_names ?? []).length ? `(${(plumb.coi_expiring_names as string[]).join(', ')})` : ''}</p>
+        <h2 style="font-size:16px;margin:18px 0 4px">Open alerts</h2>
+        ${alertLines([...capacityAlerts, ...plumbingAlerts])}
+      `;
+    } else {
+      const pmAlerts = inDomains(['profit', 'funnel', 'trust']);
+      heading = pmAlerts.length ? String(pmAlerts[0].headline) : 'Yesterday in numbers';
+
+      const zips = Object.entries((fun.zips ?? {}) as Record<string, Row>);
+      bodyHtml = `
+        <p style="margin:0 0 14px;font-weight:700;color:#0f172a">${status}</p>
+        <h2 style="font-size:16px;margin:18px 0 4px">Yesterday</h2>
+        <p style="margin:0">Adds: <strong>${val(p.adds_yesterday)}</strong> · Churn: <strong>${val(p.churn_yesterday)}</strong>
+          · Active subs: <strong>${val(p.active_subs)}</strong> · MRR: <strong>${money(p.mrr)}</strong></p>
+        <h2 style="font-size:16px;margin:18px 0 4px">Profit vs plan</h2>
+        ${table(['Actual', 'Plan', 'Delta', 'Days'], [[
+          money(p.cum_profit_actual), money(p.cum_profit_planned),
+          money(p.plan_delta_dollars), val(p.days_behind_plan),
+        ]])}
+        <h2 style="font-size:16px;margin:18px 0 4px">Funnel by ZIP (trailing 30d)</h2>
+        ${table(['ZIP', 'Hangers', 'Scans 30d', 'Paid 30d', 'Scan→Paid', 'CAC', 'Passes'],
+          zips.map(([zip, z]) => [
+            zip, val(z.hangers_dropped_cum), val(z.scans_30d), val(z.paid_30d),
+            pct(z.scan_to_paid_pct), money(z.cac), val(z.coverage_passes),
+          ]))}
+        <h2 style="font-size:16px;margin:18px 0 4px">Trust</h2>
+        <p style="margin:0">Named 5-star (30d): <strong>${val(trust.named_5star_30d)}</strong>
+          · Avg rating: <strong>${val(trust.avg_rating_30d)}</strong>
+          · Ratings ≤3: <strong>${val(trust.ratings_le3_30d)}</strong>
+          · First-visit perfect: <strong>${pct(trust.first_visit_perfect_pct_30d)}</strong>
+          · Add-on attach: <strong>${pct(trust.addon_attach_rate_30d)}</strong></p>
+        <h2 style="font-size:16px;margin:18px 0 4px">Open alerts</h2>
+        ${alertLines(pmAlerts)}
+      `;
     }
-    // Preserve KPI ordering from variant config
-    const defByCode = new Map((defs ?? []).map((d) => [d.code, d]));
-    const rows = codes
-      .map((c) => {
-        const d = defByCode.get(c);
-        const snap = latestByCode.get(c);
-        return {
-          name: d?.name ?? c,
-          code: c,
-          value: snap?.value_text ?? (snap?.value !== null && snap?.value !== undefined ? String(snap.value) : '—'),
-          status: snap?.status ?? 'unknown',
-          target: d?.target_label ?? '—',
-        };
-      });
 
-    const html = buildEmailHtml(variant, rows, openAlertsCount ?? 0);
-    const subject = VARIANT_META[variant].subject(
-      new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    );
+    const subject = `Tidy ${win.toUpperCase()} digest — ${status}`;
+    const html = brandedEmailHtml({
+      heading,
+      bodyHtml,
+      ctaUrl: `${APP_URL}/admin/kpis`,
+      ctaLabel: 'Open the dashboard',
+    });
 
-    const recipients = await getAdminEmails(supabase);
-    const sent = await sendBrevoEmail(recipients, subject, html);
+    const messageId = await sendBrevoEmail({
+      toEmail: OWNER_EMAIL,
+      toName: 'Justin',
+      subject,
+      htmlContent: html,
+      tags: [`kpi-digest-${win}`],
+      templateName: `kpi_digest_${win}`,
+      triggeredBy: 'kpi-digest',
+      marketing: false,
+    });
 
     return jsonResponse({
-      ok: sent,
-      variant,
-      recipients: recipients.length,
-      kpis_in_digest: rows.length,
+      ok: true,
+      window: win,
+      snapshot_id: snap?.id ?? null,
+      alerts_included: (events ?? []).length,
+      sent: !!messageId,
+      message_id: messageId,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
