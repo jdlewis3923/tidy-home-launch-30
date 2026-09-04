@@ -482,6 +482,8 @@ export type Database = {
         Row: {
           available_minutes_week: number
           avg_customer_rating: number | null
+          badge_photo_url: string | null
+          badge_status: string
           bg_check_completed_at: string | null
           bg_check_notes: string | null
           bg_check_provider: string | null
@@ -536,7 +538,9 @@ export type Database = {
           photo_compliance_rate: number | null
           photos_expected_count: number
           photos_uploaded_count: number
+          pro_number: string | null
           pro_partner_interest: string | null
+          pro_since: string | null
           rejected_at: string | null
           rejection_reason: string | null
           role: string | null
@@ -554,12 +558,15 @@ export type Database = {
           training_passed: boolean
           training_scheduled_at: string | null
           updated_at: string
+          verify_token: string | null
           wash_only: boolean
           zip: string | null
         }
         Insert: {
           available_minutes_week?: number
           avg_customer_rating?: number | null
+          badge_photo_url?: string | null
+          badge_status?: string
           bg_check_completed_at?: string | null
           bg_check_notes?: string | null
           bg_check_provider?: string | null
@@ -614,7 +621,9 @@ export type Database = {
           photo_compliance_rate?: number | null
           photos_expected_count?: number
           photos_uploaded_count?: number
+          pro_number?: string | null
           pro_partner_interest?: string | null
+          pro_since?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
           role?: string | null
@@ -632,12 +641,15 @@ export type Database = {
           training_passed?: boolean
           training_scheduled_at?: string | null
           updated_at?: string
+          verify_token?: string | null
           wash_only?: boolean
           zip?: string | null
         }
         Update: {
           available_minutes_week?: number
           avg_customer_rating?: number | null
+          badge_photo_url?: string | null
+          badge_status?: string
           bg_check_completed_at?: string | null
           bg_check_notes?: string | null
           bg_check_provider?: string | null
@@ -692,7 +704,9 @@ export type Database = {
           photo_compliance_rate?: number | null
           photos_expected_count?: number
           photos_uploaded_count?: number
+          pro_number?: string | null
           pro_partner_interest?: string | null
+          pro_since?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
           role?: string | null
@@ -710,6 +724,7 @@ export type Database = {
           training_passed?: boolean
           training_scheduled_at?: string | null
           updated_at?: string
+          verify_token?: string | null
           wash_only?: boolean
           zip?: string | null
         }
@@ -4262,6 +4277,19 @@ export type Database = {
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
       public_five_star_proof: { Args: never; Returns: Json }
+      verify_pro_badge: {
+        Args: { _token: string }
+        Returns: {
+          badge_photo_url: string
+          badge_status: string
+          bg_check_cleared_at: string
+          display_name: string
+          insurance_active: boolean
+          pro_number: string
+          pro_since: string
+          services: string
+        }[]
+      }
     }
     Enums: {
       app_role: "customer" | "crew" | "admin"

@@ -169,6 +169,13 @@
       "when": 1788403478030,
       "tag": "0023_create_onboarding_modules_and_progress",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1788542459036,
+      "tag": "0024_pro_badge_verification",
+      "breakpoints": true
     }
   ]
 }
