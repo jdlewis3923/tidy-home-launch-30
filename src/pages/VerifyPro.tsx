@@ -224,7 +224,7 @@ const VerifyPro = () => {
       </main>
 
       <footer className="w-full max-w-md mx-auto px-5 pb-8 text-center">
-        <TidyLogo size="sm" className="mx-auto opacity-80" />
+        <div className="flex justify-center opacity-80"><TidyLogo size="sm" /></div>
         <p className="mt-3 text-xs text-muted-foreground">Tidy Home Concierge LLC</p>
         <a href={PHONE_TEL} className="text-xs text-muted-foreground underline">{PHONE_DISPLAY}</a>
         {(state === "inactive" || state === "notfound") && (
