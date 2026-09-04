@@ -1076,8 +1076,8 @@ body.admin-hud > #root > * {
    Every motion here is opted out under prefers-reduced-motion at the bottom.
 --------------------------------------------------------------------------- */
 .verify-page {
-  --v-navy: 207 75% 16%;          /* #0A2A47 */
-  --v-navy-lift: 208 55% 21%;
+  --v-navy: 213 78% 26%;          /* Tidy blue ground */
+  --v-navy-lift: 213 66% 33%;
 }
 .verify-sunburst {
   background-image: repeating-conic-gradient(
