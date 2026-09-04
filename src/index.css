@@ -1024,7 +1024,11 @@ body.admin-hud > #root > * {
   --v-green: 154 44% 28%;
   --v-amberred: 10 52% 42%;
   --v-neutral: 215 15% 42%;
-  --v-shadow: 0 24px 60px -24px hsl(222 47% 4% / 0.55), 0 4px 12px -6px hsl(222 47% 4% / 0.35);
+  --v-tile: 214 32% 97%;
+  --v-tile-border: 214 25% 92%;
+  --v-tile-fg: 215 16% 47%;
+  --v-shadow: 0 32px 64px -18px hsl(222 47% 4% / 0.6), 0 6px 16px -8px hsl(222 47% 4% / 0.4);
+
 }
 .dark .verify-page {
   --v-ground: 224 71% 4%;
