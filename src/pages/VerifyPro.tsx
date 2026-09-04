@@ -650,17 +650,21 @@ const VerifyPro = () => {
                   />
                 </div>
 
-                <a
-                  href={PHONE_TEL}
-                  className={buttonBase}
+                <div
+                  className="mt-6 rounded-2xl px-4 py-3.5 text-center"
                   style={{
-                    border: "1px solid hsl(var(--v-hairline))",
-                    color: "hsl(var(--primary))",
-                    backgroundColor: "hsl(var(--v-card))",
+                    backgroundColor: "hsl(var(--v-green) / 0.1)",
+                    border: "1px solid hsl(var(--v-green) / 0.35)",
                   }}
                 >
-                  Not expecting a visit?
-                </a>
+                  <p className="text-sm font-bold" style={{ color: "hsl(var(--v-green))" }}>
+                    Good to go — this badge is active today.
+                  </p>
+                  <p className="mt-1 text-[12.5px]" style={{ color: "hsl(var(--v-muted-fg))" }}>
+                    No need to call us.
+                  </p>
+                </div>
+
               </>
             )}
 
