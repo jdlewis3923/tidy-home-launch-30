@@ -1070,3 +1070,123 @@ body.admin-hud > #root > * {
 @media (prefers-reduced-motion: reduce) {
   .verify-card, .verify-row { animation: none !important; opacity: 1 !important; transform: none !important; }
 }
+
+/* ---------------------------------------------------------------------------
+   /verify — depth layer: sunburst ground, grain, glass card, seal, orb.
+   Every motion here is opted out under prefers-reduced-motion at the bottom.
+--------------------------------------------------------------------------- */
+.verify-page {
+  --v-navy: 207 75% 16%;          /* #0A2A47 */
+  --v-navy-lift: 208 55% 21%;
+}
+.verify-sunburst {
+  background-image: repeating-conic-gradient(
+    from 0deg,
+    hsl(var(--primary) / 0.55) 0deg 6deg,
+    transparent 6deg 18deg
+  );
+  opacity: 0.05;
+  animation: verify-spin 90s linear infinite;
+  will-change: transform;
+}
+.verify-grain {
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.verify-sparkle {
+  animation: verify-drift 7s ease-in-out infinite;
+}
+.verify-glass {
+  border-radius: 20px;
+  backdrop-filter: blur(14px) saturate(1.05);
+  box-shadow:
+    0 2px 6px -2px hsl(207 75% 4% / 0.5),
+    0 14px 30px -12px hsl(207 75% 4% / 0.38),
+    0 44px 80px -28px hsl(207 75% 4% / 0.3);
+  animation: verify-rise-10 450ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.verify-sweep::after {
+  content: "";
+  position: absolute;
+  inset: -40% -60%;
+  pointer-events: none;
+  background: linear-gradient(70deg, transparent 40%, hsl(0 0% 100% / 0.55) 50%, transparent 60%);
+  animation: verify-sweep 900ms 320ms ease-out both;
+}
+.verify-orb-ring {
+  animation: verify-ring 2.4s ease-out infinite;
+}
+.verify-orb {
+  animation: verify-breathe 2.6s ease-in-out infinite;
+}
+.verify-seal {
+  stroke-dasharray: 408;
+  stroke-dashoffset: 408;
+  animation: verify-seal 700ms 380ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.verify-icon-draw path,
+.verify-icon-draw circle,
+.verify-icon-draw line,
+.verify-icon-draw polyline,
+.verify-icon-draw rect {
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+  animation: verify-draw 500ms ease-out forwards;
+}
+.verify-press { transition: transform 120ms ease, box-shadow 120ms ease; }
+.verify-press:active { transform: translateY(2px); box-shadow: 0 2px 8px -4px hsl(207 75% 4% / 0.5); }
+.verify-shimmer { position: relative; overflow: hidden; }
+.verify-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; width: 45%;
+  background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.5), transparent);
+  animation: verify-shimmer 8s 2s ease-in-out infinite;
+}
+.verify-lift { transition: transform 200ms ease, box-shadow 200ms ease; }
+.verify-lift:hover, .verify-lift:active { transform: translateY(-3px); }
+.verify-lift:hover .verify-gold-icon, .verify-lift:active .verify-gold-icon { filter: brightness(1.35); }
+
+@keyframes verify-spin { to { transform: rotate(360deg); } }
+@keyframes verify-drift {
+  0%, 100% { transform: translate3d(0,0,0); opacity: 0.35; }
+  50% { transform: translate3d(0,-10px,0); opacity: 0.85; }
+}
+@keyframes verify-rise-10 {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes verify-sweep {
+  from { transform: translateX(-70%); opacity: 0; }
+  35%  { opacity: 0.55; }
+  to   { transform: translateX(70%); opacity: 0; }
+}
+@keyframes verify-ring {
+  0%   { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+@keyframes verify-breathe {
+  0%, 100% { opacity: 0.82; }
+  50% { opacity: 1; }
+}
+@keyframes verify-seal { to { stroke-dashoffset: 0; } }
+@keyframes verify-draw { to { stroke-dashoffset: 0; } }
+@keyframes verify-shimmer {
+  0%   { transform: translateX(-160%); }
+  18%  { transform: translateX(260%); }
+  100% { transform: translateX(260%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verify-sunburst, .verify-sparkle, .verify-glass, .verify-orb, .verify-orb-ring,
+  .verify-seal, .verify-icon-draw path, .verify-icon-draw circle, .verify-icon-draw line,
+  .verify-icon-draw polyline, .verify-icon-draw rect, .verify-shimmer::after, .verify-sweep::after {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+  .verify-orb-ring, .verify-sweep::after, .verify-shimmer::after { opacity: 0 !important; }
+  .verify-sunburst { opacity: 0.05 !important; }
+  .verify-grain { opacity: 0.03 !important; }
+}
