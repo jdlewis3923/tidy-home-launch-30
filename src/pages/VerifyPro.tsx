@@ -136,41 +136,26 @@ const Ground = () => {
 /* -------------------------------------------------------------------- orb */
 
 const StatusOrb = ({ tone, label }: { tone: "green" | "amberred" | "neutral"; label: string }) => {
-  const color =
-    tone === "green"
-      ? "hsl(var(--v-green))"
-      : tone === "amberred"
-        ? "hsl(var(--v-amberred))"
-        : "hsl(var(--v-neutral))";
-  const still = tone === "neutral";
+  // Verified flashes green; anything unauthorised (inactive or unrecognised) flashes red.
+  const color = tone === "green" ? "hsl(var(--v-green))" : "hsl(var(--v-amberred))";
   return (
     <span
       className="inline-flex items-center gap-2.5 rounded-full py-1.5 pl-3 pr-4"
       style={{
         backgroundColor: "hsl(var(--v-tile))",
-        border: "1px solid hsl(var(--v-tile-border))",
+        border: `1px solid ${color}`,
       }}
     >
       <span className="relative flex h-3.5 w-3.5 items-center justify-center">
-        {!still && (
-          <>
-            <span
-              className="verify-orb-ring absolute inset-0 rounded-full"
-              style={{ border: `1.5px solid ${color}` }}
-            />
-            <span
-              className="verify-orb-ring absolute inset-0 rounded-full"
-              style={{ border: `1.5px solid ${color}`, animationDelay: "1.2s" }}
-            />
-          </>
-        )}
-        {still && (
-          <span className="absolute inset-0 rounded-full" style={{ border: `1.5px solid ${color}`, opacity: 0.4 }} />
-        )}
         <span
-          className={still ? "h-3.5 w-3.5 rounded-full" : "verify-orb h-3.5 w-3.5 rounded-full"}
-          style={{ backgroundColor: color }}
+          className="verify-orb-ring absolute inset-0 rounded-full"
+          style={{ border: `1.5px solid ${color}` }}
         />
+        <span
+          className="verify-orb-ring absolute inset-0 rounded-full"
+          style={{ border: `1.5px solid ${color}`, animationDelay: "1.2s" }}
+        />
+        <span className="verify-flash h-3.5 w-3.5 rounded-full" style={{ backgroundColor: color, color }} />
       </span>
       <span
         className="text-[11px] font-bold uppercase leading-none"
@@ -181,6 +166,7 @@ const StatusOrb = ({ tone, label }: { tone: "green" | "amberred" | "neutral"; la
     </span>
   );
 };
+
 
 /* ------------------------------------------------------------ record tile */
 
@@ -664,17 +650,21 @@ const VerifyPro = () => {
                   />
                 </div>
 
-                <a
-                  href={PHONE_TEL}
-                  className={buttonBase}
+                <div
+                  className="mt-6 rounded-2xl px-4 py-3.5 text-center"
                   style={{
-                    border: "1px solid hsl(var(--v-hairline))",
-                    color: "hsl(var(--primary))",
-                    backgroundColor: "hsl(var(--v-card))",
+                    backgroundColor: "hsl(var(--v-green) / 0.1)",
+                    border: "1px solid hsl(var(--v-green) / 0.35)",
                   }}
                 >
-                  Not expecting a visit?
-                </a>
+                  <p className="text-sm font-bold" style={{ color: "hsl(var(--v-green))" }}>
+                    Good to go — this badge is active today.
+                  </p>
+                  <p className="mt-1 text-[12.5px]" style={{ color: "hsl(var(--v-muted-fg))" }}>
+                    No need to call us.
+                  </p>
+                </div>
+
               </>
             )}
 
@@ -698,8 +688,8 @@ const VerifyPro = () => {
                 </div>
                 <a
                   href={PHONE_TEL}
-                  className={`${buttonBase} verify-shimmer`}
-                  style={{ backgroundColor: "hsl(var(--gold))", color: "hsl(var(--gold-foreground))" }}
+                  className={`${buttonBase} verify-flash-btn`}
+                  style={{ backgroundColor: "hsl(var(--v-amberred))", color: "hsl(0 0% 100%)" }}
                 >
                   <Phone className="h-4 w-4" /> Call Tidy now · {PHONE_DISPLAY}
                 </a>
@@ -714,8 +704,8 @@ const VerifyPro = () => {
                 </p>
                 <a
                   href={PHONE_TEL}
-                  className={`${buttonBase} verify-shimmer`}
-                  style={{ backgroundColor: "hsl(var(--gold))", color: "hsl(var(--gold-foreground))" }}
+                  className={`${buttonBase} verify-flash-btn`}
+                  style={{ backgroundColor: "hsl(var(--v-amberred))", color: "hsl(0 0% 100%)" }}
                 >
                   <Phone className="h-4 w-4" /> Call Tidy now · {PHONE_DISPLAY}
                 </a>

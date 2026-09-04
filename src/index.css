@@ -1146,6 +1146,9 @@ body.admin-hud > #root > * {
 .verify-lift { transition: transform 200ms ease, box-shadow 200ms ease; }
 .verify-lift:hover, .verify-lift:active { transform: translateY(-3px); }
 .verify-lift:hover .verify-gold-icon, .verify-lift:active .verify-gold-icon { filter: brightness(1.35); }
+.verify-flash { animation: verify-flash 1.6s ease-in-out infinite; }
+.verify-flash-btn { animation: verify-flash-btn 1.6s ease-in-out infinite; }
+
 
 @keyframes verify-spin { to { transform: rotate(360deg); } }
 @keyframes verify-drift {
@@ -1176,16 +1179,27 @@ body.admin-hud > #root > * {
   18%  { transform: translateX(260%); }
   100% { transform: translateX(260%); }
 }
+@keyframes verify-flash {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50%      { opacity: 0.35; box-shadow: 0 0 12px 3px currentColor; }
+}
+@keyframes verify-flash-btn {
+  0%, 100% { filter: brightness(1); box-shadow: 0 8px 22px -12px hsl(0 0% 0% / 0.5); }
+  50%      { filter: brightness(1.22); box-shadow: 0 0 22px 2px hsl(var(--v-amberred) / 0.7); }
+}
 
 @media (prefers-reduced-motion: reduce) {
+
   .verify-sunburst, .verify-sparkle, .verify-glass, .verify-orb, .verify-orb-ring,
   .verify-seal, .verify-icon-draw path, .verify-icon-draw circle, .verify-icon-draw line,
-  .verify-icon-draw polyline, .verify-icon-draw rect, .verify-shimmer::after, .verify-sweep::after {
+  .verify-icon-draw polyline, .verify-icon-draw rect, .verify-shimmer::after, .verify-sweep::after,
+  .verify-flash, .verify-flash-btn {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
     stroke-dashoffset: 0 !important;
   }
+
   .verify-orb-ring, .verify-sweep::after, .verify-shimmer::after { opacity: 0 !important; }
   .verify-sunburst { opacity: 0.05 !important; }
   .verify-grain { opacity: 0.03 !important; }
