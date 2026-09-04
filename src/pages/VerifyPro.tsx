@@ -106,7 +106,7 @@ const Ground = () => {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(60% 45% at 50% 26%, hsl(var(--primary) / 0.22) 0%, transparent 70%), radial-gradient(120% 90% at 50% 50%, transparent 35%, hsl(207 75% 8% / 0.85) 100%)",
+            "radial-gradient(60% 45% at 50% 26%, hsl(var(--primary) / 0.22) 0%, transparent 70%), radial-gradient(120% 90% at 50% 50%, transparent 35%, hsl(207 75% 9% / 0.7) 100%)",
         }}
       />
       <div className="verify-grain absolute inset-0" />
@@ -516,12 +516,12 @@ const VerifyPro = () => {
                 <div className="relative mx-auto h-[140px] w-[140px]">
                   {/* the seal drawing itself around the photo, once */}
                   {state === "active" && (
-                    <svg viewBox="0 0 140 140" className="absolute -inset-[6px] h-[152px] w-[152px]" aria-hidden>
+                    <svg viewBox="0 0 140 140" className="absolute -inset-[10px] h-[160px] w-[160px]" aria-hidden>
                       <circle
                         className="verify-seal"
                         cx="70"
                         cy="70"
-                        r="65"
+                        r="67"
                         fill="none"
                         stroke="hsl(var(--gold))"
                         strokeWidth="3"
