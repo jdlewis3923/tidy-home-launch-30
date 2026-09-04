@@ -1192,12 +1192,14 @@ body.admin-hud > #root > * {
 
   .verify-sunburst, .verify-sparkle, .verify-glass, .verify-orb, .verify-orb-ring,
   .verify-seal, .verify-icon-draw path, .verify-icon-draw circle, .verify-icon-draw line,
-  .verify-icon-draw polyline, .verify-icon-draw rect, .verify-shimmer::after, .verify-sweep::after {
+  .verify-icon-draw polyline, .verify-icon-draw rect, .verify-shimmer::after, .verify-sweep::after,
+  .verify-flash, .verify-flash-btn {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
     stroke-dashoffset: 0 !important;
   }
+
   .verify-orb-ring, .verify-sweep::after, .verify-shimmer::after { opacity: 0 !important; }
   .verify-sunburst { opacity: 0.05 !important; }
   .verify-grain { opacity: 0.03 !important; }
