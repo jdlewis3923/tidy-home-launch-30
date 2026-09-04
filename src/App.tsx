@@ -96,6 +96,7 @@ const CustomerNotifications = lazy(() => import("./pages/CustomerNotifications.t
 const AddTokenLanding = lazy(() => import("./pages/AddTokenLanding.tsx"));
 const QrRedirect = lazy(() => import("./pages/QrRedirect.tsx"));
 const Rate = lazy(() => import("./pages/Rate.tsx"));
+const VerifyPro = lazy(() => import("./pages/VerifyPro.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -129,7 +130,7 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFoundingOfferShown, doorhangerGateAllows } from "@/lib/doorhanger";
 import { getLandingSource } from "@/lib/landing-source";
 
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/addon/", "/q/", "/neighbor", "/rate"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/addon/", "/q/", "/neighbor", "/rate", "/verify/"];
 
 // The printed door hangers point at /dashboard/plan?src=doorhanger_en — a
 // neighbour with no account should see the founding offer first. Bounce them to
@@ -322,6 +323,9 @@ const App = () => (
 
                   {/* Post-visit SMS rating link — no login, identifier optional. */}
                   <Route path="/rate" element={<Rate />} />
+
+                  {/* Public Pro badge verification — no login, ever. */}
+                  <Route path="/verify/:token" element={<VerifyPro />} />
 
 
                   <Route path="*" element={<NotFound />} />

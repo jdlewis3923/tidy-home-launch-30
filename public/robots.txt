@@ -2,5 +2,6 @@
 # To go live, change the Disallow line below to: Allow: /
 User-agent: *
 Disallow: /
+Disallow: /verify/
 
 Sitemap: https://jointidy.co/sitemap.xml
