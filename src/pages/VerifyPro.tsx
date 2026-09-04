@@ -2,26 +2,29 @@
  * /verify/:token — public Pro badge verification.
  *
  * A stranger is at the customer's front door. No login, ever. The page answers
- * one question — is this a real, current Tidy Pro — above the fold, and gets
- * out of the way. Status resolves LIVE from the Pro record on every load
- * (no caching), so deactivating a badge takes effect immediately.
+ * one question — is this a real, current Tidy Pro — above the fold on a
+ * 360x640 phone, then offers depth below it. Status resolves LIVE from the Pro
+ * record on every load (no caching), so deactivating a badge takes effect
+ * immediately.
  *
  * It confirms a CREDENTIAL, never an appointment.
  *
- * Craft: a private-bank credential document. Navy room, one elevated card with
- * a brand-edge accent, a gold-haloed portrait plate, ruled record tiles with
- * label/value rhythm, and a quiet institutional footer band. Tokens live in
- * index.css under `.verify-page` and are re-checked for dark mode.
+ * Craft: navy room built from our own roundel — a slow sunburst, a soft glow,
+ * fine grain, drifting gold sparks — with one frosted-glass credential card on
+ * it. Tokens live in index.css under `.verify-page`; every animation is opted
+ * out under prefers-reduced-motion.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Check, Phone, ShieldCheck, IdCard, CalendarDays } from "lucide-react";
+import { Check, Phone, ShieldCheck, IdCard, CalendarDays, Camera, UserRound, Sparkle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import TidyLogo from "@/components/TidyLogo";
+import Reveal from "@/components/motion/Reveal";
 
 const PHONE_DISPLAY = "(786) 829-1141";
 const PHONE_TEL = "tel:+17868291141";
+const EMAIL = "hello@jointidy.co";
 
 type BadgeRow = {
   display_name: string | null;
@@ -71,26 +74,107 @@ const serviceLabel = (raw: string | null) => {
     .join(", ");
 };
 
-/** Understated status pill, seated on the portrait plate. */
-const StatusPill = ({ tone, label }: { tone: "green" | "amberred" | "neutral"; label: string }) => {
+/* ------------------------------------------------------------------ ground */
+
+const Ground = () => {
+  const burst = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        if (burst.current) burst.current.style.translate = `0 ${window.scrollY * 0.3}px`;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
+      {/* sunburst from the roundel, parallaxed at 30% of scroll */}
+      <div ref={burst} className="absolute left-1/2 top-[18vh] h-[150vmax] w-[150vmax] -translate-x-1/2">
+        <div className="verify-sunburst absolute inset-0 rounded-full" />
+      </div>
+      {/* centre lift, edges fall away */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(60% 45% at 50% 26%, hsl(var(--primary) / 0.22) 0%, transparent 70%), radial-gradient(120% 90% at 50% 50%, transparent 35%, hsl(207 75% 9% / 0.7) 100%)",
+        }}
+      />
+      <div className="verify-grain absolute inset-0" />
+      {[
+        { top: "7%", left: "8%", size: 16, delay: "0s" },
+        { top: "12%", right: "10%", size: 12, delay: "1.6s" },
+        { bottom: "22%", left: "12%", size: 13, delay: "3.1s" },
+        { bottom: "10%", right: "9%", size: 10, delay: "4.4s" },
+      ].map((s, i) => (
+        <Sparkle
+          key={i}
+          className="verify-sparkle absolute"
+          strokeWidth={1.4}
+          style={{
+            ...s,
+            width: s.size,
+            height: s.size,
+            color: "hsl(var(--gold))",
+            animationDelay: s.delay,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+/* -------------------------------------------------------------------- orb */
+
+const StatusOrb = ({ tone, label }: { tone: "green" | "amberred" | "neutral"; label: string }) => {
   const color =
     tone === "green"
       ? "hsl(var(--v-green))"
       : tone === "amberred"
         ? "hsl(var(--v-amberred))"
         : "hsl(var(--v-neutral))";
+  const still = tone === "neutral";
   return (
     <span
-      className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5"
+      className="inline-flex items-center gap-2.5 rounded-full py-1.5 pl-3 pr-4"
       style={{
-        backgroundColor: color,
-        color: "hsl(var(--v-card))",
-        boxShadow: `0 0 0 4px hsl(var(--v-card)), 0 6px 16px -8px ${color}`,
+        backgroundColor: "hsl(var(--v-tile))",
+        border: "1px solid hsl(var(--v-tile-border))",
       }}
     >
+      <span className="relative flex h-3.5 w-3.5 items-center justify-center">
+        {!still && (
+          <>
+            <span
+              className="verify-orb-ring absolute inset-0 rounded-full"
+              style={{ border: `1.5px solid ${color}` }}
+            />
+            <span
+              className="verify-orb-ring absolute inset-0 rounded-full"
+              style={{ border: `1.5px solid ${color}`, animationDelay: "1.2s" }}
+            />
+          </>
+        )}
+        {still && (
+          <span className="absolute inset-0 rounded-full" style={{ border: `1.5px solid ${color}`, opacity: 0.4 }} />
+        )}
+        <span
+          className={still ? "h-3.5 w-3.5 rounded-full" : "verify-orb h-3.5 w-3.5 rounded-full"}
+          style={{ backgroundColor: color }}
+        />
+      </span>
       <span
-        className="text-[10px] font-bold uppercase leading-none"
-        style={{ letterSpacing: "0.16em" }}
+        className="text-[11px] font-bold uppercase leading-none"
+        style={{ letterSpacing: "0.16em", color }}
       >
         {label}
       </span>
@@ -98,7 +182,8 @@ const StatusPill = ({ tone, label }: { tone: "green" | "amberred" | "neutral"; l
   );
 };
 
-/** A record tile — eyebrow label above the value, statement-of-account rhythm. */
+/* ------------------------------------------------------------ record tile */
+
 const RecordTile = ({
   icon,
   label,
@@ -132,7 +217,7 @@ const RecordTile = ({
         {label}
       </p>
       <p
-        className="tabular mt-0.5 text-[13.5px] font-semibold leading-snug"
+        className="tabular mt-0.5 text-sm font-semibold leading-snug"
         style={{ color: "hsl(var(--v-card-fg))" }}
       >
         {value}
@@ -140,6 +225,219 @@ const RecordTile = ({
     </div>
   </div>
 );
+
+/* ------------------------------------------------------------ vetting grid */
+
+const VET_CARDS = [
+  {
+    Icon: ShieldCheck,
+    label: "Background checked",
+    line: "Every Pro clears a Checkr background check before their first visit.",
+  },
+  {
+    Icon: IdCard,
+    label: "$1M liability insurance",
+    line: "Every Pro carries their own policy, verified by Tidy, not just claimed.",
+  },
+  {
+    Icon: Camera,
+    label: "Photo-verified visits",
+    line: "Before and after photos on every single job.",
+  },
+  {
+    Icon: UserRound,
+    label: "The same Pro every time",
+    line: "You are assigned one Pro, not whoever is free that day.",
+  },
+];
+
+const VettingGrid = () => (
+  <section className="mt-10">
+    <Reveal>
+      <h2
+        className="font-archivo text-center text-[19px] font-extrabold"
+        style={{ letterSpacing: "-0.01em", color: "hsl(0 0% 100% / 0.95)" }}
+      >
+        How Tidy vets every Pro
+      </h2>
+    </Reveal>
+    <div className="mt-5 grid grid-cols-2 gap-3">
+      {VET_CARDS.map(({ Icon, label, line }, i) => (
+        <Reveal key={label} delay={i * 90}>
+          <div
+            className="verify-lift h-full rounded-2xl p-4"
+            style={{
+              backgroundColor: "hsl(var(--v-navy-lift) / 0.72)",
+              border: "1px solid hsl(0 0% 100% / 0.09)",
+              boxShadow: "0 10px 24px -16px hsl(207 75% 4% / 0.8)",
+            }}
+          >
+            <Icon
+              className="verify-icon-draw verify-gold-icon h-[22px] w-[22px]"
+              strokeWidth={1.6}
+              style={{ color: "hsl(var(--gold))", animationDelay: `${i * 90}ms` }}
+            />
+            <p
+              className="mt-3 text-[13.5px] font-bold leading-snug"
+              style={{ color: "hsl(0 0% 100% / 0.96)" }}
+            >
+              {label}
+            </p>
+            <p className="mt-1.5 text-[12.5px] leading-snug" style={{ color: "hsl(0 0% 100% / 0.72)" }}>
+              {line}
+            </p>
+          </div>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+);
+
+/* --------------------------------------------------- badge diagram (404) */
+
+const BadgeDiagram = () => {
+  const callouts = [
+    { label: "A photo of your Pro" },
+    { label: "First name and last initial" },
+    { label: "A Pro number, TIDY-0000" },
+  ];
+  return (
+    <section className="mt-10">
+      <Reveal>
+        <h2
+          className="font-archivo text-center text-[19px] font-extrabold"
+          style={{ letterSpacing: "-0.01em", color: "hsl(0 0% 100% / 0.95)" }}
+        >
+          What a real Tidy badge looks like
+        </h2>
+      </Reveal>
+
+      <Reveal delay={90}>
+        <div
+          className="mt-5 rounded-2xl p-5"
+          style={{
+            backgroundColor: "hsl(var(--v-navy-lift) / 0.72)",
+            border: "1px solid hsl(0 0% 100% / 0.09)",
+          }}
+        >
+          {/* illustrated badge */}
+          <div
+            className="mx-auto w-[186px] rounded-xl px-4 py-4 text-center"
+            style={{ backgroundColor: "hsl(var(--v-card))", border: "1px solid hsl(var(--v-tile-border))" }}
+          >
+            <div
+              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
+              style={{ backgroundColor: "hsl(var(--v-tile))", border: "2px solid hsl(var(--v-tile-border))" }}
+            >
+              <UserRound className="h-7 w-7" style={{ color: "hsl(var(--v-tile-fg))" }} />
+            </div>
+            <p
+              className="font-archivo mt-2.5 text-[15px] font-extrabold"
+              style={{ color: "hsl(var(--v-card-fg))" }}
+            >
+              James R.
+            </p>
+            <code
+              className="tabular mt-1 inline-block rounded px-2 py-0.5 font-mono text-[11px] font-semibold"
+              style={{
+                letterSpacing: "0.08em",
+                backgroundColor: "hsl(var(--v-tile))",
+                color: "hsl(var(--primary))",
+              }}
+            >
+              TIDY-0421
+            </code>
+          </div>
+
+          <ul className="mt-5 space-y-3">
+            {callouts.map((c, i) => (
+              <Reveal as="li" key={c.label} delay={180 + i * 90}>
+                <span className="flex items-center gap-3">
+                  <span
+                    className="h-px w-8 shrink-0"
+                    style={{ background: "linear-gradient(90deg, transparent, hsl(var(--gold)))" }}
+                  />
+                  <span className="text-[13px]" style={{ color: "hsl(0 0% 100% / 0.85)" }}>
+                    {c.label}
+                  </span>
+                </span>
+              </Reveal>
+            ))}
+          </ul>
+        </div>
+      </Reveal>
+
+      <Reveal delay={120}>
+        <p className="mt-4 text-center text-sm" style={{ color: "hsl(0 0% 100% / 0.75)" }}>
+          If the badge in front of you is missing any of these, call us.
+        </p>
+      </Reveal>
+    </section>
+  );
+};
+
+/* -------------------------------------------------------- company block */
+
+const CompanyBlock = () => (
+  <Reveal>
+    <section
+      className="relative mt-10 overflow-hidden rounded-2xl px-5 py-6 text-center"
+      style={{ backgroundColor: "hsl(var(--v-navy-lift) / 0.85)" }}
+    >
+      <span
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent, hsl(var(--gold)), transparent)" }}
+      />
+      <div className="flex h-9 items-center justify-center [&_img]:!h-9 [&_img]:!w-auto">
+        <TidyLogo size="sm" />
+      </div>
+      <p className="mt-3 text-sm font-bold" style={{ color: "hsl(0 0% 100% / 0.95)" }}>
+        Tidy Home Concierge LLC
+      </p>
+      <p className="mt-1 text-[13px]" style={{ color: "hsl(0 0% 100% / 0.7)" }}>
+        Licensed and insured · Miami, Florida
+      </p>
+
+      <dl className="mt-5 space-y-2.5 text-left">
+        {[
+          ["Serving", "Pinecrest · Kendall · Kendall West"],
+          ["Hours", "Monday to Saturday, 8am to 6pm"],
+        ].map(([k, v]) => (
+          <div key={k} className="flex gap-3 text-[13px]">
+            <dt className="w-[68px] shrink-0 font-semibold" style={{ color: "hsl(0 0% 100% / 0.58)" }}>
+              {k}
+            </dt>
+            <dd style={{ color: "hsl(0 0% 100% / 0.92)" }}>{v}</dd>
+          </div>
+        ))}
+        <div className="flex gap-3 text-[13px]">
+          <dt className="w-[68px] shrink-0 font-semibold" style={{ color: "hsl(0 0% 100% / 0.58)" }}>
+            Contact
+          </dt>
+          <dd style={{ color: "hsl(0 0% 100% / 0.92)" }}>
+            <a href={PHONE_TEL} className="tabular font-semibold underline underline-offset-2">
+              {PHONE_DISPLAY}
+            </a>
+            {" · "}
+            <a href={`mailto:${EMAIL}`} className="underline underline-offset-2">
+              {EMAIL}
+            </a>
+          </dd>
+        </div>
+      </dl>
+
+      <p className="mt-5 text-[13px]" style={{ color: "hsl(0 0% 100% / 0.62)" }}>
+        Home care on a schedule. More life. Less chores.{" "}
+        <a href="https://jointidy.co" className="underline underline-offset-2" style={{ color: "hsl(0 0% 100% / 0.85)" }}>
+          jointidy.co
+        </a>
+      </p>
+    </section>
+  </Reveal>
+);
+
+/* ------------------------------------------------------------------ page */
 
 const VerifyPro = () => {
   const { token } = useParams();
@@ -169,13 +467,13 @@ const VerifyPro = () => {
   const services = serviceLabel(pro?.services ?? null);
   const showPhoto = state === "active" || state === "inactive";
 
+  const buttonBase =
+    "verify-press mt-6 flex h-[52px] w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold";
+
   return (
     <div
-      className="verify-page flex min-h-screen flex-col px-4 py-7 sm:py-12"
-      style={{
-        background:
-          "linear-gradient(180deg, hsl(var(--v-ground)) 0%, hsl(var(--v-ground-2)) 100%)",
-      }}
+      className="verify-page relative min-h-screen px-4 py-7 sm:py-12"
+      style={{ backgroundColor: "hsl(var(--v-navy))" }}
     >
       <Helmet>
         <title>Verify a Tidy Pro badge</title>
@@ -183,28 +481,20 @@ const VerifyPro = () => {
         <meta name="googlebot" content="noindex, nofollow" />
       </Helmet>
 
-      <main className="mx-auto w-full max-w-[26.25rem] flex-1">
+      <Ground />
+
+      <main className="relative mx-auto w-full max-w-[26.25rem]">
         <section
-          className="verify-card relative overflow-hidden rounded-[30px]"
+          className="verify-glass verify-sweep relative overflow-hidden"
           style={{
-            backgroundColor: "hsl(var(--v-card))",
-            boxShadow: "var(--v-shadow)",
-            border: "1px solid hsl(var(--v-hairline))",
+            backgroundColor: "hsl(var(--v-card) / 0.92)",
+            borderTop: "1px solid hsl(0 0% 100% / 0.9)",
+            border: "1px solid hsl(var(--v-hairline) / 0.9)",
           }}
         >
-          {/* Brand edge — the issuing mark of the document */}
-          <div
-            className="absolute inset-x-0 top-0 h-1.5"
-            style={{
-              background:
-                "linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--gold)) 50%, hsl(var(--primary)) 100%)",
-            }}
-          />
-
-          <div className="px-6 pb-7 pt-9 sm:px-8">
-            {/* Roundel */}
+          <div className="relative px-6 pb-7 pt-8 sm:px-8">
             <div className="flex h-10 items-center justify-center [&_img]:!h-10 [&_img]:!w-auto">
-              <TidyLogo size="sm" />
+              <TidyLogo size="sm" priority />
             </div>
 
             <p
@@ -222,18 +512,23 @@ const VerifyPro = () => {
 
             {/* ---- Identity plate ---- */}
             {showPhoto && pro && (
-              <div className="mt-7 text-center">
+              <div className="mt-6 text-center">
                 <div className="relative mx-auto h-[140px] w-[140px]">
+                  {/* the seal drawing itself around the photo, once */}
                   {state === "active" && (
-                    <div
-                      className="absolute -inset-1 rounded-full"
-                      style={{
-                        background:
-                          "linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold) / 0.35) 60%, hsl(var(--primary) / 0.35) 100%)",
-                        filter: "blur(2px)",
-                        opacity: 0.65,
-                      }}
-                    />
+                    <svg viewBox="0 0 140 140" className="absolute -inset-[10px] h-[160px] w-[160px]" aria-hidden>
+                      <circle
+                        className="verify-seal"
+                        cx="70"
+                        cy="70"
+                        r="67"
+                        fill="none"
+                        stroke="hsl(var(--gold))"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        transform="rotate(-90 70 70)"
+                      />
+                    </svg>
                   )}
                   {pro.badge_photo_url ? (
                     <img
@@ -258,17 +553,17 @@ const VerifyPro = () => {
                       <IdCard className="h-10 w-10" style={{ color: "hsl(var(--v-tile-fg))" }} />
                     </div>
                   )}
+                </div>
 
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-                    <StatusPill
-                      tone={state === "active" ? "green" : "amberred"}
-                      label={state === "active" ? "Verified" : "Not active"}
-                    />
-                  </div>
+                <div className="mt-5 flex justify-center">
+                  <StatusOrb
+                    tone={state === "active" ? "green" : "amberred"}
+                    label={state === "active" ? "Verified" : "Not active"}
+                  />
                 </div>
 
                 <h1
-                  className="font-archivo mt-7 text-[32px] font-extrabold leading-[1.05]"
+                  className="font-archivo mt-4 text-[32px] font-extrabold leading-[1.05]"
                   style={{
                     letterSpacing: "-0.02em",
                     color: state === "inactive" ? "hsl(var(--v-muted-fg))" : "hsl(var(--v-card-fg))",
@@ -285,7 +580,7 @@ const VerifyPro = () => {
                     Pro ID
                   </span>
                   <code
-                    className="tabular rounded-md px-2 py-0.5 font-mono text-[12px] font-semibold"
+                    className="tabular rounded-md px-2 py-0.5 font-mono text-xs font-semibold"
                     style={{
                       letterSpacing: "0.08em",
                       backgroundColor: "hsl(var(--v-tile))",
@@ -297,18 +592,9 @@ const VerifyPro = () => {
                   </code>
                 </div>
 
-                {state === "inactive" && (
-                  <p
-                    className="mt-2 text-[11px] font-bold uppercase"
-                    style={{ letterSpacing: "0.16em", color: "hsl(var(--v-amberred))" }}
-                  >
-                    Deactivated
-                  </p>
-                )}
-
                 {state === "active" && services && (
                   <p
-                    className="mt-3.5 inline-block rounded-lg px-3 py-1 text-[12px] font-semibold uppercase"
+                    className="mt-3.5 inline-block rounded-lg px-3 py-1 text-xs font-semibold uppercase"
                     style={{
                       letterSpacing: "0.08em",
                       backgroundColor: "hsl(var(--v-tile))",
@@ -324,7 +610,7 @@ const VerifyPro = () => {
 
             {state === "notfound" && (
               <div className="mt-8 text-center">
-                <StatusPill tone="neutral" label="Unrecognised" />
+                <StatusOrb tone="neutral" label="Unrecognised" />
                 <h1
                   className="font-archivo mt-5 text-[27px] font-extrabold leading-[1.1]"
                   style={{ letterSpacing: "-0.02em", color: "hsl(var(--v-card-fg))" }}
@@ -342,19 +628,12 @@ const VerifyPro = () => {
               <div className="mt-7 flex items-center justify-center">
                 <span
                   className="h-px flex-1"
-                  style={{
-                    background: "linear-gradient(90deg, transparent, hsl(var(--v-hairline)))",
-                  }}
+                  style={{ background: "linear-gradient(90deg, transparent, hsl(var(--v-hairline)))" }}
                 />
-                <span
-                  className="mx-4 h-1.5 w-1.5 rounded-full"
-                  style={{ backgroundColor: "hsl(var(--gold))" }}
-                />
+                <span className="mx-4 h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "hsl(var(--gold))" }} />
                 <span
                   className="h-px flex-1"
-                  style={{
-                    background: "linear-gradient(270deg, transparent, hsl(var(--v-hairline)))",
-                  }}
+                  style={{ background: "linear-gradient(270deg, transparent, hsl(var(--v-hairline)))" }}
                 />
               </div>
             )}
@@ -387,7 +666,7 @@ const VerifyPro = () => {
 
                 <a
                   href={PHONE_TEL}
-                  className="mt-7 flex h-12 w-full items-center justify-center rounded-xl text-sm font-semibold"
+                  className={buttonBase}
                   style={{
                     border: "1px solid hsl(var(--v-hairline))",
                     color: "hsl(var(--primary))",
@@ -419,8 +698,8 @@ const VerifyPro = () => {
                 </div>
                 <a
                   href={PHONE_TEL}
-                  className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold"
-                  style={{ backgroundColor: "hsl(var(--v-amberred))", color: "hsl(var(--v-card))" }}
+                  className={`${buttonBase} verify-shimmer`}
+                  style={{ backgroundColor: "hsl(var(--v-amberred))", color: "hsl(0 0% 100%)" }}
                 >
                   <Phone className="h-4 w-4" /> Call Tidy now · {PHONE_DISPLAY}
                 </a>
@@ -433,26 +712,10 @@ const VerifyPro = () => {
                 <p className="mt-6 text-sm leading-relaxed" style={{ color: "hsl(var(--v-card-fg))" }}>
                   This badge was not issued by Tidy, or the code was mistyped.
                 </p>
-                <div
-                  className="mt-4 flex items-start gap-4 rounded-2xl px-4 py-3.5"
-                  style={{
-                    backgroundColor: "hsl(var(--v-tile))",
-                    border: "1px solid hsl(var(--v-tile-border))",
-                  }}
-                >
-                  <ShieldCheck
-                    className="mt-0.5 h-[18px] w-[18px] shrink-0"
-                    style={{ color: "hsl(var(--primary))" }}
-                  />
-                  <p className="text-[13px] leading-snug" style={{ color: "hsl(var(--v-muted-fg))" }}>
-                    Every Tidy Pro carries a photo badge — with their name, a Pro number, and a code
-                    that resolves to this page.
-                  </p>
-                </div>
                 <a
                   href={PHONE_TEL}
-                  className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold"
-                  style={{ backgroundColor: "hsl(var(--v-amberred))", color: "hsl(var(--v-card))" }}
+                  className={`${buttonBase} verify-shimmer`}
+                  style={{ backgroundColor: "hsl(var(--v-amberred))", color: "hsl(0 0% 100%)" }}
                 >
                   <Phone className="h-4 w-4" /> Call Tidy now · {PHONE_DISPLAY}
                 </a>
@@ -489,17 +752,14 @@ const VerifyPro = () => {
           </div>
         </section>
 
-        {/* Below the fold — quiet, no pitch */}
-        <p className="mt-8 px-2 text-center text-sm leading-relaxed" style={{ color: "hsl(0 0% 100% / 0.55)" }}>
-          Tidy — home care on a schedule in Pinecrest, Kendall and Kendall West.{" "}
-          <a
-            href="https://jointidy.co"
-            className="underline underline-offset-2"
-            style={{ color: "hsl(0 0% 100% / 0.85)" }}
-          >
-            jointidy.co
-          </a>
-        </p>
+        {/* ---- Below the fold ---- */}
+        {state !== "loading" && (
+          <>
+            <VettingGrid />
+            {state === "notfound" && <BadgeDiagram />}
+            <CompanyBlock />
+          </>
+        )}
       </main>
     </div>
   );
