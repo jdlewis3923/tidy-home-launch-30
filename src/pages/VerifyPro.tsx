@@ -365,7 +365,7 @@ const VerifyPro = () => {
                 <div className="mt-6 space-y-3">
                   <RecordTile
                     index={0}
-                    icon={<Check className="h-4.5 w-4.5" strokeWidth={3} />}
+                    icon={<Check className="h-[18px] w-[18px]" strokeWidth={3} />}
                     label="Clearance"
                     value={cleared ? `Background checked · Checkr, ${cleared}` : "Background checked · Checkr"}
                   />
