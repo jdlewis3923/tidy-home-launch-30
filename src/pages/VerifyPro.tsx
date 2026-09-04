@@ -182,8 +182,8 @@ const VerifyPro = () => {
           }}
         >
           {/* Roundel */}
-          <div className="flex justify-center">
-            <TidyLogo size="sm" className="h-10 w-10" />
+          <div className="flex h-10 items-center justify-center [&_img]:h-10 [&_img]:w-auto">
+            <TidyLogo size="sm" />
           </div>
 
           {state === "loading" && (
