@@ -1179,8 +1179,17 @@ body.admin-hud > #root > * {
   18%  { transform: translateX(260%); }
   100% { transform: translateX(260%); }
 }
+@keyframes verify-flash {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50%      { opacity: 0.35; box-shadow: 0 0 12px 3px currentColor; }
+}
+@keyframes verify-flash-btn {
+  0%, 100% { filter: brightness(1); box-shadow: 0 8px 22px -12px hsl(0 0% 0% / 0.5); }
+  50%      { filter: brightness(1.22); box-shadow: 0 0 22px 2px hsl(var(--v-amberred) / 0.7); }
+}
 
 @media (prefers-reduced-motion: reduce) {
+
   .verify-sunburst, .verify-sparkle, .verify-glass, .verify-orb, .verify-orb-ring,
   .verify-seal, .verify-icon-draw path, .verify-icon-draw circle, .verify-icon-draw line,
   .verify-icon-draw polyline, .verify-icon-draw rect, .verify-shimmer::after, .verify-sweep::after {
