@@ -22,6 +22,7 @@ import {
   Award, X as XIcon, TrendingUp,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import ProBadgePanel from "@/components/admin/ProBadgePanel";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -100,6 +101,9 @@ type Applicant = {
   training_scheduled_at: string | null;
   training_no_show_count: number | null;
   out_of_service_area: boolean | null;
+  pro_number: string | null;
+  verify_token: string | null;
+  badge_status: string | null;
 };
 
 type TierCriterion = { label: string; met: boolean; actual: string };
@@ -305,7 +309,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved, wash_only, training_scheduled_at, training_no_show_count, out_of_service_area")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved, wash_only, training_scheduled_at, training_no_show_count, out_of_service_area, pro_number, verify_token, badge_status")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -834,6 +838,18 @@ export default function AdminApplicants() {
                   <QuickInfo icon={<MapPin className="h-4 w-4" />} label="ZIP" value={open.zip ?? "—"} />
                   <QuickInfo icon={<Clock className="h-4 w-4" />} label="Experience" value={open.experience_years != null ? `${open.experience_years}y` : "—"} />
                 </div>
+
+                {/* Badge — public /verify page controls */}
+                <ProBadgePanel
+                  applicantId={open.id}
+                  proNumber={open.pro_number}
+                  verifyToken={open.verify_token}
+                  badgeStatus={open.badge_status}
+                  onChanged={(next) => {
+                    setOpen((prev) => (prev ? { ...prev, badge_status: next } : prev));
+                    setRows((prev) => prev.map((r) => (r.id === open.id ? { ...r, badge_status: next } : r)));
+                  }}
+                />
 
                 {/* Application Answers — what they claimed on /apply */}
                 {(() => {
