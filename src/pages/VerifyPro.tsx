@@ -688,8 +688,8 @@ const VerifyPro = () => {
                 </div>
                 <a
                   href={PHONE_TEL}
-                  className={`${buttonBase} verify-shimmer`}
-                  style={{ backgroundColor: "hsl(var(--gold))", color: "hsl(var(--gold-foreground))" }}
+                  className={`${buttonBase} verify-flash-btn`}
+                  style={{ backgroundColor: "hsl(var(--v-amberred))", color: "hsl(0 0% 100%)" }}
                 >
                   <Phone className="h-4 w-4" /> Call Tidy now · {PHONE_DISPLAY}
                 </a>
@@ -704,8 +704,8 @@ const VerifyPro = () => {
                 </p>
                 <a
                   href={PHONE_TEL}
-                  className={`${buttonBase} verify-shimmer`}
-                  style={{ backgroundColor: "hsl(var(--gold))", color: "hsl(var(--gold-foreground))" }}
+                  className={`${buttonBase} verify-flash-btn`}
+                  style={{ backgroundColor: "hsl(var(--v-amberred))", color: "hsl(0 0% 100%)" }}
                 >
                   <Phone className="h-4 w-4" /> Call Tidy now · {PHONE_DISPLAY}
                 </a>
