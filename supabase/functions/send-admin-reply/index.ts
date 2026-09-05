@@ -7,7 +7,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const TIDY_FROM = "+17868291141";
+// Sending number comes from TWILIO_FROM_NUMBER only — never hardcoded.
+const TIDY_FROM = Deno.env.get("TWILIO_FROM_NUMBER");
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -89,6 +90,13 @@ Deno.serve(async (req) => {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+      }
+      if (!TIDY_FROM) {
+        console.error("[send-admin-reply] TWILIO_FROM_NUMBER is not configured — no SMS can be sent.");
+        return new Response(
+          JSON.stringify({ error: "TWILIO_FROM_NUMBER is not configured" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       }
       const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
       const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN_RAW}`);

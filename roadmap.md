@@ -3,9 +3,8 @@
 ## In progress
 
 1. Secrets
-   - CHECKR_API_KEY — pending (user will add when available)
-   - CHECKR_PACKAGE — pending (user will add when available)
-   - CHECKR_WEBHOOK_SECRET — pending (user will add when available)
+   - CHECKR_API_KEY / CHECKR_PACKAGE / CHECKR_WEBHOOK_SECRET — user has no Checkr account yet; do NOT ask again
+   - TWILIO_FROM_NUMBER — awaiting confirmation that (786) 829-1141 is the permanent sending number
    - BREVO_TEMPLATE_WELCOME_T1 — user declined to add now; code falls back to app_settings.brevo_template_welcome_t1
    - TWILIO_FROM_NUMBER — user declined to add now; code logs clear error when missing
 
