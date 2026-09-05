@@ -488,6 +488,7 @@ export type Database = {
           bg_check_notes: string | null
           bg_check_provider: string | null
           bg_check_status: string | null
+          bilingual: boolean | null
           bilingual_fluency_confirmed: boolean
           bond_status: string | null
           business_bank_account_confirmed: boolean
@@ -520,17 +521,20 @@ export type Database = {
           equipment_approved: boolean
           experience_years: number | null
           first_name: string
+          fl_license: boolean | null
           google_review_match_name: string | null
           has_supplies: boolean | null
           has_vehicle: boolean | null
           id: string
           insurance_expires_at: string | null
           insurance_status: string
+          insurance_willing: boolean | null
           jobber_id: string | null
           last_jobber_event_at: string | null
           last_name: string
           last_review_match_at: string | null
           last_visit_at: string | null
+          license_expiry: string | null
           notes_for_admin: string | null
           open_escalations_count: number
           out_of_service_area: boolean
@@ -571,6 +575,7 @@ export type Database = {
           bg_check_notes?: string | null
           bg_check_provider?: string | null
           bg_check_status?: string | null
+          bilingual?: boolean | null
           bilingual_fluency_confirmed?: boolean
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
@@ -603,17 +608,20 @@ export type Database = {
           equipment_approved?: boolean
           experience_years?: number | null
           first_name: string
+          fl_license?: boolean | null
           google_review_match_name?: string | null
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
           id?: string
           insurance_expires_at?: string | null
           insurance_status?: string
+          insurance_willing?: boolean | null
           jobber_id?: string | null
           last_jobber_event_at?: string | null
           last_name: string
           last_review_match_at?: string | null
           last_visit_at?: string | null
+          license_expiry?: string | null
           notes_for_admin?: string | null
           open_escalations_count?: number
           out_of_service_area?: boolean
@@ -654,6 +662,7 @@ export type Database = {
           bg_check_notes?: string | null
           bg_check_provider?: string | null
           bg_check_status?: string | null
+          bilingual?: boolean | null
           bilingual_fluency_confirmed?: boolean
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
@@ -686,17 +695,20 @@ export type Database = {
           equipment_approved?: boolean
           experience_years?: number | null
           first_name?: string
+          fl_license?: boolean | null
           google_review_match_name?: string | null
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
           id?: string
           insurance_expires_at?: string | null
           insurance_status?: string
+          insurance_willing?: boolean | null
           jobber_id?: string | null
           last_jobber_event_at?: string | null
           last_name?: string
           last_review_match_at?: string | null
           last_visit_at?: string | null
+          license_expiry?: string | null
           notes_for_admin?: string | null
           open_escalations_count?: number
           out_of_service_area?: boolean
