@@ -8,6 +8,7 @@ import {
   serviceUnits,
 } from '@/lib/dashboard-pricing';
 import { SIZE_PRICES, hasFreeAddonEntitlement } from '@/lib/pricing-canon';
+import { isServiceAvailable } from '@/lib/service-availability';
 
 interface Props {
   state: ConfigState;
@@ -24,7 +25,8 @@ export default function BundleNudge({ state, onChange }: Props) {
 
   const current = state.services[0];
   const candidates: ServiceType[] = ['lawn', 'detailing', 'cleaning'];
-  const suggest = candidates.find((s) => s !== current)!;
+  const suggest = candidates.find((s) => s !== current && isServiceAvailable(s));
+  if (!suggest) return null;
 
   const suggestFreq = defaultBundleFrequency[suggest];
   const fromPrice = getServiceStartingPrice(suggest);

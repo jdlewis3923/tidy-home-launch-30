@@ -33,7 +33,8 @@ import {
   type CanonService,
   type CanonSize,
 } from '@/lib/pricing-canon';
-import type { Frequency } from '@/lib/dashboard-pricing';
+import type { Frequency, ServiceType } from '@/lib/dashboard-pricing';
+import { isServiceAvailable } from '@/lib/service-availability';
 
 type CatalogRow = {
   addon_key: string;
@@ -124,7 +125,7 @@ export default function DashboardServices() {
   const sub = data.subscription;
   const planServices = ((sub?.services ?? []) as CanonService[]).filter(Boolean);
   const missingServices = (['cleaning', 'lawn', 'detailing'] as CanonService[]).filter(
-    (s) => !planServices.includes(s),
+    (s) => !planServices.includes(s) && isServiceAvailable(s as unknown as ServiceType),
   );
 
   useEffect(() => {
