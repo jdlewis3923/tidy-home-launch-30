@@ -1,29 +1,26 @@
 // Tidy — Zapier event emitter (Phase 6)
 //
-// All transactional email + SMS for Tidy is orchestrated through Zapier
-// (which calls Brevo + Twilio). Edge functions never call Brevo/Twilio
-// directly — they fire Zapier webhooks and let existing Zaps deliver.
+// Zapier feeds the Brevo email Zaps; SMS is dispatched directly through
+// send-twilio-sms. One secret per event: ZAP_<EVENT_NAME>_URL. A missing
+// URL is a graceful skip, not an error, so partial rollouts work.
 //
-// One secret per event: ZAP_<EVENT_NAME>_URL. If the secret is not set,
-// the request is logged as skipped (no error) so partial rollouts work.
-//
-// Auth: this function is service-role only. It is invoked by other edge
-// functions (stripe-webhook, jobber-webhook, account-provisioning) and
-// by the admin /admin/test-zapier route. JWT verification is handled at
-// the gateway by config.toml — we additionally require the Authorization
-// header to match the service role key OR a valid admin user JWT.
+// Hardening rules (prompt 4, part 1):
+//   - Every env var is read INSIDE the handler, never at module scope.
+//   - The whole handler body is wrapped in try/catch. A throw is logged to
+//     integration_logs and returned as HTTP 200 { ok: false, error } so a
+//     failing side effect never 500s the caller.
+//   - A missing required var returns a named "MISSING_ENV: X" error.
+//   - GET (or ?health=1) returns { ok, missing_env: [...] } without firing
+//     the side effect, so the admin Health panel can probe safely.
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { withLogging, logInvocation } from '../_shared/withLogging.ts';
+import { readEnv, readOptionalEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
 
-// Phase 6 active events. visit_* and password_reset are reserved (will be
-// wired in Phase 3 / future auth hook).
 const EventNameSchema = z.enum([
   'welcome_signup',
   'subscription_confirmed',
@@ -42,19 +39,6 @@ const BodySchema = z.object({
   lang: z.enum(['en', 'es']).default('en'),
   user_id: z.string().uuid().optional(),
 });
-
-function envUrlFor(eventName: string): string | undefined {
-  return Deno.env.get(`ZAP_${eventName.toUpperCase()}_URL`);
-}
-
-// ---------------------------------------------------------------------------
-// SMS templating + direct Twilio dispatch (Phase 6 architectural pivot)
-// ---------------------------------------------------------------------------
-//
-// Edge functions used to rely on Zapier to drive Twilio. The Zapier UI is
-// unworkable for SMS in our automation, so we now POST directly to Twilio via
-// the `send-twilio-sms` edge function. We KEEP the Zapier dispatch firing in
-// parallel because Brevo email Zaps still subscribe to the same webhooks.
 
 type SmsEventName =
   | 'welcome_signup'
@@ -87,21 +71,17 @@ function isSmsEvent(name: string): name is SmsEventName {
   return name in SMS_TEMPLATES;
 }
 
-/**
- * Fire a direct Twilio SMS via send-twilio-sms. Best-effort — never throws,
- * never blocks the Zapier dispatch.
- */
+/** Best-effort direct Twilio dispatch. Never throws. */
 async function dispatchTwilioSms(
+  supabaseUrl: string,
+  serviceKey: string,
   eventName: SmsEventName,
   payload: Record<string, unknown>,
   userId: string | undefined,
 ): Promise<{ attempted: boolean; ok: boolean; reason?: string; sid?: string | null }> {
   const phone = typeof payload.phone === 'string' ? payload.phone.trim() : '';
-  if (!phone) {
-    return { attempted: false, ok: false, reason: 'no_phone' };
-  }
+  if (!phone) return { attempted: false, ok: false, reason: 'no_phone' };
 
-  // Normalize to E.164 (assume US if 10 digits and no +).
   let to = phone;
   if (!to.startsWith('+')) {
     const digits = to.replace(/\D/g, '');
@@ -119,22 +99,24 @@ async function dispatchTwilioSms(
   }`;
 
   try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+    const res = await fetch(`${supabaseUrl}/functions/v1/send-twilio-sms`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        'Authorization': `Bearer ${serviceKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ to_phone_e164: to, body, idempotency_key }),
     });
     const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-    if (!res.ok) {
-      return { attempted: true, ok: false, reason: `http_${res.status}` };
-    }
+    if (!res.ok) return { attempted: true, ok: false, reason: `http_${res.status}` };
     return {
       attempted: true,
       ok: !!json.ok,
-      reason: typeof json.reason === 'string' ? json.reason : undefined,
+      reason: typeof json.reason === 'string'
+        ? json.reason
+        : typeof json.error === 'string'
+          ? json.error
+          : undefined,
       sid: (json.message_sid as string | undefined) ?? null,
     };
   } catch (err) {
@@ -143,31 +125,34 @@ async function dispatchTwilioSms(
   }
 }
 
-async function isAuthorized(req: Request): Promise<boolean> {
+/**
+ * Service-role bearer OR an admin user's access token.
+ *
+ * The token is validated with a service-role client so this path does not
+ * depend on SUPABASE_ANON_KEY being present in the function environment.
+ */
+async function isAuthorized(
+  req: Request,
+  supabaseUrl: string,
+  serviceKey: string,
+): Promise<boolean> {
   const auth = req.headers.get('Authorization') ?? '';
   if (!auth.startsWith('Bearer ')) return false;
-  const token = auth.slice(7);
+  const token = auth.slice(7).trim();
+  if (!token) return false;
 
-  // Service-role key (used by other edge functions + DB trigger via pg_net).
-  if (token === SUPABASE_SERVICE_ROLE_KEY) return true;
+  if (token === serviceKey) return true;
 
-  // Admin user JWT (used by /admin/test-zapier).
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: auth } },
+    const admin = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
     });
-    // getUser() validates the token against the auth server. getClaims() was
-    // used here before and fails outright under the signing-keys setup, which
-    // rejected every legitimate admin self-test with a 401.
-    const { data: userData, error } = await supabase.auth.getUser(token);
+    const { data: userData, error } = await admin.auth.getUser(token);
     const userId = userData?.user?.id;
     if (error || !userId) {
       console.error('[auth] getUser failed', error?.message ?? 'no user');
       return false;
     }
-    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
     const { data: roleRow } = await admin
       .from('user_roles')
       .select('role')
@@ -175,7 +160,8 @@ async function isAuthorized(req: Request): Promise<boolean> {
       .eq('role', 'admin')
       .maybeSingle();
     return !!roleRow;
-  } catch {
+  } catch (err) {
+    console.error('[auth] check threw', err instanceof Error ? err.message : err);
     return false;
   }
 }
@@ -184,86 +170,124 @@ Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
 
-  // Entry log BEFORE any work, so a crash still leaves a row in Health.
-  const finish = await logInvocation('zapier', 'send_zapier_event', { method: req.method });
-
-  if (req.method !== 'POST') {
-    await finish('error', 'method not allowed');
-    return jsonResponse({ ok: false, error: 'method not allowed' }, 405);
-  }
-
-  const ok = await isAuthorized(req);
-  if (!ok) {
-    await finish('error', 'unauthorized');
-    return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
-  }
-
-  let raw: unknown;
-  try {
-    raw = await req.json();
-  } catch {
-    await finish('error', 'invalid JSON body');
-    return jsonResponse({ ok: false, error: 'invalid JSON body' }, 400);
-  }
-
-  const parsed = BodySchema.safeParse(raw);
-  if (!parsed.success) {
-    await finish('error', 'validation_failed');
-    return jsonResponse(
-      { ok: false, error: 'validation_failed', details: parsed.error.flatten().fieldErrors },
-      400,
+  // ---- Health probe: no side effect, no auth, no secrets leaked ----
+  const url = new URL(req.url);
+  const wantsHealth = req.method === 'GET' || url.searchParams.get('health') === '1';
+  if (wantsHealth) {
+    const { missing } = readEnv(REQUIRED_ENV);
+    const configuredEvents = EventNameSchema.options.filter(
+      (e) => !!readOptionalEnv(`ZAP_${e.toUpperCase()}_URL`),
     );
+    return jsonResponse({
+      ok: missing.length === 0,
+      function: 'send-zapier-event',
+      missing_env: missing,
+      configured_events: configuredEvents,
+      unconfigured_events: EventNameSchema.options.filter((e) => !configuredEvents.includes(e)),
+    }, 200);
   }
 
-  const { event_name, payload, lang, user_id } = parsed.data;
+  // Entry log BEFORE any work, so a crash still leaves a row in Health.
+  let finish: (status: 'success' | 'error' | 'warning', msg?: string | null) => Promise<void>;
+  try {
+    finish = await logInvocation('zapier', 'send_zapier_event', { method: req.method });
+  } catch {
+    finish = async () => {};
+  }
 
-  // Run Zapier dispatch + direct Twilio dispatch in parallel.
-  // Zapier feeds Brevo emails; Twilio handles SMS directly post-pivot.
-  const zapierPromise = withLogging({
-    source: 'zapier',
-    event: event_name,
-    payload: { user_id, lang, payload },
-    fn: async () => {
-      const url = envUrlFor(event_name);
-      if (!url) {
-        console.log(`[send-zapier-event] no URL configured for ${event_name} — skipping`);
-        return { ok: true as const, skipped: 'no_url_configured' as const };
-      }
+  try {
+    if (req.method !== 'POST') {
+      await finish('error', 'method_not_allowed');
+      return jsonResponse({ ok: false, error: 'method_not_allowed' }, 200);
+    }
 
-      const body = { event_name, lang, user_id, ...payload };
+    const { values, missing } = readEnv(REQUIRED_ENV);
+    if (missing.length > 0) {
+      const err = missingEnvError(missing);
+      console.error(`[send-zapier-event] ${err}`);
+      await finish('error', err);
+      return jsonResponse({ ok: false, error: err, missing_env: missing }, 200);
+    }
+    const SUPABASE_URL = values.SUPABASE_URL;
+    const SERVICE_KEY = values.SUPABASE_SERVICE_ROLE_KEY;
 
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+    const authorized = await isAuthorized(req, SUPABASE_URL, SERVICE_KEY);
+    if (!authorized) {
+      await finish('error', 'unauthorized');
+      return jsonResponse(
+        {
+          ok: false,
+          error: 'unauthorized',
+          hint: 'send a service-role bearer token or an admin user access token',
+        },
+        401,
+      );
+    }
 
-      const text = await res.text().catch(() => '');
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      await finish('error', 'invalid_json_body');
+      return jsonResponse({ ok: false, error: 'invalid_json_body' }, 200);
+    }
 
-      if (!res.ok) {
-        throw new Error(`zapier ${event_name} returned ${res.status}: ${text.slice(0, 200)}`);
-      }
+    const parsed = BodySchema.safeParse(raw);
+    if (!parsed.success) {
+      await finish('error', 'validation_failed');
+      return jsonResponse(
+        { ok: false, error: 'validation_failed', details: parsed.error.flatten().fieldErrors },
+        200,
+      );
+    }
 
-      return { ok: true as const, status: res.status, dispatched: true as const };
-    },
-  }).catch((err) => {
+    const { event_name, payload, lang, user_id } = parsed.data;
+
+    const zapierPromise = withLogging({
+      source: 'zapier',
+      event: event_name,
+      payload: { user_id, lang, payload },
+      fn: async () => {
+        const zapUrl = readOptionalEnv(`ZAP_${event_name.toUpperCase()}_URL`);
+        if (!zapUrl) {
+          console.log(`[send-zapier-event] no URL configured for ${event_name} — skipping`);
+          return { ok: true as const, skipped: 'no_url_configured' as const };
+        }
+
+        const res = await fetch(zapUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event_name, lang, user_id, ...payload }),
+        });
+        const text = await res.text().catch(() => '');
+        if (!res.ok) {
+          throw new Error(`zapier ${event_name} returned ${res.status}: ${text.slice(0, 200)}`);
+        }
+        return { ok: true as const, status: res.status, dispatched: true as const };
+      },
+    }).catch((err) => {
+      const message = err instanceof Error ? err.message : 'unknown error';
+      console.error('[send-zapier-event] zapier failed', event_name, message);
+      return { ok: false as const, error: message };
+    });
+
+    const twilioPromise = isSmsEvent(event_name)
+      ? dispatchTwilioSms(SUPABASE_URL, SERVICE_KEY, event_name, payload, user_id)
+      : Promise.resolve({ attempted: false, ok: false, reason: 'event_not_sms' as const });
+
+    const [zapier, twilio] = await Promise.all([zapierPromise, twilioPromise]);
+
+    const overallOk = (zapier as { ok?: boolean }).ok !== false;
+    await finish(
+      overallOk ? 'success' : 'error',
+      overallOk ? null : (zapier as { error?: string }).error ?? 'zapier dispatch failed',
+    );
+    // Always 200: a failed side effect must not 500 the caller. Read `ok`.
+    return jsonResponse({ ok: overallOk, event_name, zapier, twilio }, 200);
+  } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('[send-zapier-event] zapier failed', event_name, message);
-    return { ok: false as const, error: message };
-  });
-
-  const twilioPromise = isSmsEvent(event_name)
-    ? dispatchTwilioSms(event_name, payload, user_id)
-    : Promise.resolve({ attempted: false, ok: false, reason: 'event_not_sms' as const });
-
-  const [zapier, twilio] = await Promise.all([zapierPromise, twilioPromise]);
-
-  // Overall ok = zapier ok (twilio is best-effort and reported separately).
-  const overallOk = (zapier as { ok?: boolean }).ok !== false;
-  await finish(
-    overallOk ? 'success' : 'error',
-    overallOk ? null : (zapier as { error?: string }).error ?? 'zapier dispatch failed',
-  );
-  return jsonResponse({ ok: overallOk, zapier, twilio }, overallOk ? 200 : 500);
+    console.error('[send-zapier-event] unhandled', message);
+    await finish('error', `unhandled: ${message}`);
+    return jsonResponse({ ok: false, error: message }, 200);
+  }
 });
-
