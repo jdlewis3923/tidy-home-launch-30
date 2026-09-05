@@ -133,6 +133,7 @@ export default function AdminCommand() {
   const [rules, setRules] = useState<AlertRule[]>([]);
   const [events, setEvents] = useState<AlertEvent[]>([]);
   const [scanSeries, setScanSeries] = useState<Record<string, number[]>>({});
+  const [needsAttention, setNeedsAttention] = useState<NeedsAttentionCustomer[]>([]);
 
   const load = useCallback(async () => {
     setRefreshing(true);
