@@ -4500,6 +4500,7 @@ export type Database = {
       }
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
+      nextval: { Args: { seq_name: string }; Returns: number }
       public_five_star_proof: { Args: never; Returns: Json }
       verify_pro_badge: {
         Args: { _token: string }
