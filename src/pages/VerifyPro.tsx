@@ -672,12 +672,14 @@ const VerifyPro = () => {
               </>
             )}
 
-            {/* ---- Not active: calm, factual, authoritative ---- */}
-            {state === "inactive" && (
+            {/* ---- Suspended / revoked: calm, factual, authoritative ---- */}
+            {(state === "suspended" || state === "revoked") && (
               <>
                 <div className="mt-6 space-y-3">
                   <p className="text-sm leading-relaxed" style={{ color: "hsl(var(--v-card-fg))" }}>
-                    This badge is no longer valid. This person does not currently work with Tidy.
+                    {state === "revoked"
+                      ? "This badge has been revoked. This person is no longer authorised to represent Tidy."
+                      : "This badge is currently suspended. This person is not scheduled for visits right now."}
                   </p>
                   <p
                     className="rounded-2xl px-4 py-3 text-sm font-semibold leading-relaxed"
