@@ -294,7 +294,7 @@ export default function ProIntake() {
           {step + 1} · {current.title}
         </h1>
         <p className="mt-1 text-xs font-semibold text-slate-500">
-          <span className="text-red-600">★</span> Required
+          <span className="text-red-600">*</span> Required
         </p>
 
         {current.note && (
@@ -409,7 +409,7 @@ function FieldRow({
   return (
     <div id={id}>
       <label htmlFor={`${id}-input`} className="block text-sm font-bold" style={{ color: NAVY }}>
-        {field.label} {field.required && <span className="text-red-600">★</span>}
+        {field.label} {field.required && <span className="text-red-600">*</span>}
       </label>
       {field.help && <p className="mt-0.5 text-xs text-slate-500">{field.help}</p>}
 
