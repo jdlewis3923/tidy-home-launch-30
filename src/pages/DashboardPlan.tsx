@@ -28,7 +28,7 @@ import ExistingAccountInline from '@/components/dashboard/ExistingAccountInline'
 // Quiet, lowercase Apple-tone microcopy. Step 0 is the new ZIP gate.
 const STEPS = [
   { heading: 'first — where do you live?',      sub: "we'll confirm we're in your area before anything else.", cta: '',             micro: 'set it once.' },
-  { heading: 'what should we handle?',          sub: 'one, two, or all three. bundle to save.',          cta: 'continue',     micro: 'set it once.' },
+  { heading: 'what should we handle?',          sub: 'cleaning is open now. lawn and detailing open soon.',          cta: 'continue',     micro: 'set it once.' },
   { heading: 'how often?',                      sub: 'change anytime. no lock-in.',                      cta: 'continue',     micro: 'set it once.' },
   { heading: 'tell us about your home',         sub: 'so we match the right pro and the right price.',  cta: 'continue',     micro: 'set it once.' },
   { heading: "we'll take it from here",         sub: 'name, address, how to get in.',                    cta: 'continue',     micro: 'set it once.' },
