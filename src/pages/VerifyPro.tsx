@@ -524,11 +524,11 @@ const VerifyPro = () => {
                     <img
                       src={pro.badge_photo_url}
                       alt={`${pro.display_name ?? "Tidy Pro"} badge photo`}
-                      className={`relative h-[140px] w-[140px] rounded-full object-cover ${state === "inactive" ? "grayscale" : ""}`}
+                      className={`relative h-[140px] w-[140px] rounded-full object-cover ${state === "active" ? "" : "grayscale"}`}
                       style={{
                         border: "3px solid hsl(var(--v-ring))",
                         boxShadow: "0 14px 30px -14px hsl(222 47% 8% / 0.5)",
-                        opacity: state === "inactive" ? 0.6 : 1,
+                        opacity: state === "active" ? 1 : 0.6,
                       }}
                     />
                   ) : (
