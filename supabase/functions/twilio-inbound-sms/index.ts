@@ -126,7 +126,11 @@ Deno.serve(async (req) => {
     let twilioError: string | null = null;
     const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
     const TWILIO_AUTH_TOKEN_RAW = Deno.env.get("TWILIO_AUTH_TOKEN");
-    if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN_RAW) {
+    if (!TIDY_FROM) {
+      twilioError = "TWILIO_FROM_NUMBER is not configured — no SMS reply sent.";
+      console.error("[twilio-inbound-sms]", twilioError);
+    }
+    if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN_RAW && TIDY_FROM) {
       try {
         const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
         const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN_RAW}`);

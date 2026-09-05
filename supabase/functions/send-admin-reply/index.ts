@@ -91,6 +91,13 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      if (!TIDY_FROM) {
+        console.error("[send-admin-reply] TWILIO_FROM_NUMBER is not configured — no SMS can be sent.");
+        return new Response(
+          JSON.stringify({ error: "TWILIO_FROM_NUMBER is not configured" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
       const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
       const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN_RAW}`);
       const sendResp = await fetch(url, {
