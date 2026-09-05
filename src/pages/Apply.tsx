@@ -199,6 +199,42 @@ export default function Apply() {
     }
   };
 
+  if (declined) {
+    return (
+      <main className="min-h-screen bg-navy-deep relative overflow-hidden flex items-center justify-center p-6">
+        <Helmet>
+          <title>{t("Not a fit at this time | Tidy")}</title>
+        </Helmet>
+        <div
+          className="absolute inset-0 opacity-60 pointer-events-none"
+          style={{ background: "radial-gradient(60% 50% at 50% 0%, hsl(var(--primary)/0.25), transparent 70%)" }}
+        />
+        <div
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{ background: "radial-gradient(40% 40% at 80% 80%, hsl(var(--gold)/0.2), transparent 70%)" }}
+        />
+        <div className="relative max-w-lg w-full rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-10 text-center shadow-2xl animate-calm-rise">
+          <div className="mx-auto h-16 w-16 rounded-full bg-white/10 ring-1 ring-white/30 flex items-center justify-center">
+            <ShieldCheck className="h-9 w-9 text-white/80" />
+          </div>
+          <h1 className="mt-6 font-display text-3xl font-black text-white tracking-tight">
+            {t("Not a fit at this time")}
+          </h1>
+          <p className="mt-3 text-white/70 leading-relaxed">{declined}</p>
+          <p className="mt-4 text-white/50 text-sm">
+            {t("If your situation changes, feel free to apply again.")}
+          </p>
+          <Link
+            to="/"
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white/10 text-white font-bold px-6 py-3 hover:bg-white/20 transition ring-1 ring-white/20"
+          >
+            <ArrowLeft className="h-4 w-4" /> {t("Back to Tidy")}
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   if (done) {
     return (
       <main className="min-h-screen bg-navy-deep relative overflow-hidden flex items-center justify-center p-6">
