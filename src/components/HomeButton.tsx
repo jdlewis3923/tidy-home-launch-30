@@ -19,6 +19,7 @@ const HIDE_ON_PREFIXES = [
   "/dashboard/confirmation",
   "/checkout",
   "/coming-soon",
+  "/intake/",
 ];
 
 export default function HomeButton() {
