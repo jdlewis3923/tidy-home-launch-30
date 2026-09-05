@@ -261,7 +261,19 @@ Deno.serve(async (req) => {
   const [stripe, checkr, brevo, docs, documenso] = await Promise.all([
     checkStripe(), checkCheckr(), checkBrevo(), checkDocuments(), checkDocumenso(),
   ]);
-  const checks: Check[] = [documenso, stripe, checkr, brevo.key, brevo.plan, docs];
+  const checks: Check[] = [
+    documenso,
+    stripe,
+    checkr,
+    brevo.key,
+    brevo.plan,
+    docs,
+    checkCheckrApiKey(),
+    checkCheckrPackage(),
+    checkCheckrWebhookSecret(),
+    checkBrevoWelcomeTemplate(),
+    checkTwilioFromNumber(),
+  ];
   const summary = {
     pass: checks.filter((c) => c.status === 'pass').length,
     warn: checks.filter((c) => c.status === 'warn').length,
