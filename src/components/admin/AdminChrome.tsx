@@ -33,6 +33,7 @@ const NAV = [
   { to: "/admin/leads",       label: "Leads",       icon: ClipboardList },
   { to: "/admin/reviews",     label: "Reviews",     icon: Star },
   { to: "/admin/applicants",  label: "Applicants",  icon: Users },
+  { to: "/admin/badges",      label: "Badges",      icon: ShieldCheck },
   { to: "/admin/onboarding",  label: "Onboarding",  icon: GraduationCap },
   { to: "/admin/pro-kits",    label: "Pro Kits",    icon: PackageCheck },
   { to: "/admin/tier-progression", label: "Tier",   icon: Award },
