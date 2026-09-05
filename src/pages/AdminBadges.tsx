@@ -188,16 +188,16 @@ export default function AdminBadges() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2">
-              {open.badge_status === "not_issued" || open.badge_status === "revoked" || open.badge_status === "suspended" ? (
+              {open.badge_status === "not_issued" ? (
                 <button
                   onClick={() => doAction(open.id, "issue")}
                   disabled={acting === open.id}
                   className="col-span-2 flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                 >
                   {acting === open.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                  {open.badge_status === "not_issued" ? "Issue badge" : "Reinstate badge"}
+                  Issue badge
                 </button>
-              ) : (
+              ) : open.badge_status === "active" ? (
                 <>
                   <button
                     onClick={() => doAction(open.id, "suspend")}
@@ -216,19 +216,27 @@ export default function AdminBadges() {
                     Revoke
                   </button>
                 </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => doAction(open.id, "reinstate")}
+                    disabled={acting === open.id}
+                    className="flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-50"
+                  >
+                    {acting === open.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
+                    Reinstate
+                  </button>
+                  <button
+                    onClick={() => doAction(open.id, "revoke")}
+                    disabled={acting === open.id || open.badge_status === "revoked"}
+                    className="flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-semibold text-red-800 hover:bg-red-100 disabled:opacity-50"
+                  >
+                    {acting === open.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldOff className="h-4 w-4" />}
+                    Revoke
+                  </button>
+                </>
               )}
             </div>
-
-            {open.badge_status === "active" && (
-              <button
-                onClick={() => doAction(open.id, "reinstate")}
-                disabled={acting === open.id}
-                className="mt-2 w-full flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-50"
-              >
-                {acting === open.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
-                Reinstate badge
-              </button>
-            )}
 
             <div className="mt-6">
               <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">
