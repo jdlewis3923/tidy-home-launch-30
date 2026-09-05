@@ -742,6 +742,44 @@ export type Database = {
         }
         Relationships: []
       }
+      badge_status_log: {
+        Row: {
+          applicant_id: string
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_status: string
+          note: string | null
+          old_status: string | null
+        }
+        Insert: {
+          applicant_id: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_status: string
+          note?: string | null
+          old_status?: string | null
+        }
+        Update: {
+          applicant_id?: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_status?: string
+          note?: string | null
+          old_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badge_status_log_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       band_reviews: {
         Row: {
           address: string | null
@@ -4400,6 +4438,10 @@ export type Database = {
       }
       call_edge_function: {
         Args: { _fn: string; _payload: Json }
+        Returns: undefined
+      }
+      change_badge_status: {
+        Args: { _applicant_id: string; _new_status: string; _note?: string }
         Returns: undefined
       }
       current_user_admin: { Args: never; Returns: boolean }

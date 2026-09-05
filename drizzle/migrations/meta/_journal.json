@@ -190,6 +190,13 @@
       "when": 1788617733095,
       "tag": "0026_apply_screening_gates",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1788617908853,
+      "tag": "0027_badge_status_lifecycle_log",
+      "breakpoints": true
     }
   ]
 }
