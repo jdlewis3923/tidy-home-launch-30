@@ -1,32 +1,41 @@
 /**
  * Badge panel for the admin Pro record: verify link, QR preview, Pro number,
- * live badge status, and a Deactivate / Reactivate toggle. Writing the status
- * changes the public /verify/:token page immediately.
+ * and live badge status. Status changes are managed from /admin/badges so the
+ * full lifecycle (issue, suspend, reinstate, revoke) is logged.
  */
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { Copy, Check, QrCode, ShieldOff, ShieldCheck, Loader2, ExternalLink } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Copy, Check, QrCode, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+
+const STATUS_PILL: Record<string, string> = {
+  active: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  suspended: "bg-amber-50 text-amber-700 ring-amber-200",
+  revoked: "bg-red-50 text-red-700 ring-red-200",
+  not_issued: "bg-slate-100 text-slate-700 ring-slate-200",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  active: "Active",
+  suspended: "Suspended",
+  revoked: "Revoked",
+  not_issued: "Not issued",
+};
 
 type Props = {
   applicantId: string;
   proNumber: string | null;
   verifyToken: string | null;
   badgeStatus: string | null;
-  onChanged?: (status: string) => void;
 };
 
-const ProBadgePanel = ({ applicantId, proNumber, verifyToken, badgeStatus, onChanged }: Props) => {
-  const [status, setStatus] = useState(badgeStatus ?? "active");
-  const [saving, setSaving] = useState(false);
+const ProBadgePanel = ({ applicantId, proNumber, verifyToken, badgeStatus }: Props) => {
   const [copied, setCopied] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
 
   const url = verifyToken ? `${window.location.origin}/verify/${verifyToken}` : null;
-
-  useEffect(() => { setStatus(badgeStatus ?? "active"); }, [badgeStatus]);
+  const status = badgeStatus || "not_issued";
 
   useEffect(() => {
     if (!url) return;
@@ -37,29 +46,13 @@ const ProBadgePanel = ({ applicantId, proNumber, verifyToken, badgeStatus, onCha
     return () => { cancelled = true; };
   }, [url]);
 
-  const toggle = async () => {
-    const next = status === "active" ? "inactive" : "active";
-    setSaving(true);
-    const { error } = await supabase
-      .from("applicants")
-      .update({ badge_status: next })
-      .eq("id", applicantId);
-    setSaving(false);
-    if (error) { toast.error(error.message); return; }
-    setStatus(next);
-    onChanged?.(next);
-    toast.success(next === "active" ? "Badge reactivated" : "Badge deactivated — the public page updates instantly");
-  };
-
-  const active = status === "active";
-
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-center gap-2">
         <QrCode className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-bold text-foreground">Badge</h3>
-        <span className={`ml-auto text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 ${active ? "bg-emerald-50 text-emerald-700 ring-emerald-200" : "bg-red-50 text-red-700 ring-red-200"}`}>
-          {active ? "Active" : status === "terminated" ? "Terminated" : "Deactivated"}
+        <span className={`ml-auto text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 ${STATUS_PILL[status] ?? STATUS_PILL.not_issued}`}>
+          {STATUS_LABEL[status] ?? status}
         </span>
       </div>
 
@@ -99,14 +92,8 @@ const ProBadgePanel = ({ applicantId, proNumber, verifyToken, badgeStatus, onCha
         </div>
       </div>
 
-      <Button
-        onClick={toggle}
-        disabled={saving || !verifyToken}
-        variant={active ? "outline" : "default"}
-        className={`mt-4 w-full ${active ? "text-red-600 border-red-200 hover:bg-red-50" : ""}`}
-      >
-        {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : active ? <ShieldOff className="mr-2 h-4 w-4" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
-        {active ? "Deactivate badge" : "Reactivate badge"}
+      <Button asChild variant="outline" className="mt-4 w-full">
+        <Link to={`/admin/badges?badge=${applicantId}`}>Manage badge</Link>
       </Button>
     </div>
   );

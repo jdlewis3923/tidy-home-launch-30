@@ -99,6 +99,7 @@ const Rate = lazy(() => import("./pages/Rate.tsx"));
 const VerifyPro = lazy(() => import("./pages/VerifyPro.tsx"));
 const ProIntake = lazy(() => import("./pages/ProIntake.tsx"));
 const AdminProKits = lazy(() => import("./pages/AdminProKits.tsx"));
+const AdminBadges = lazy(() => import("./pages/AdminBadges.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -280,6 +281,7 @@ const App = () => (
                   <Route path="/admin/alert-rules" element={<AdminAlertRules />} />
                   <Route path="/admin/onboarding" element={<AdminOnboarding />} />
                   <Route path="/admin/pro-kits" element={<AdminProKits />} />
+                  <Route path="/admin/badges" element={<AdminBadges />} />
                   <Route path="/admin/agents" element={<AdminAgents />} />
                   <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
                   <Route path="/admin/costs" element={<AdminCosts />} />

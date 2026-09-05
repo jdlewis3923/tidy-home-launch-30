@@ -13,7 +13,7 @@ import {
   CartesianGrid, ComposedChart, Area, Line, ReferenceLine, ResponsiveContainer,
   Tooltip as RTooltip, XAxis, YAxis,
 } from "recharts";
-import { Loader2, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { AlertTriangle, Loader2, RefreshCw, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -54,6 +54,16 @@ interface AlertEvent {
   threshold_value: number | null;
   suppressed_in_digest: boolean;
   status: "open" | "acknowledged" | "resolved" | string;
+}
+interface NeedsAttentionCustomer {
+  subscription_id: string;
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  monthly_total_cents: number;
+  preferred_pro_id: string | null;
+  retired_price: boolean;
+  missing_pro: boolean;
 }
 
 const ZIP_LABELS: Record<string, string> = {
@@ -123,16 +133,18 @@ export default function AdminCommand() {
   const [rules, setRules] = useState<AlertRule[]>([]);
   const [events, setEvents] = useState<AlertEvent[]>([]);
   const [scanSeries, setScanSeries] = useState<Record<string, number[]>>({});
+  const [needsAttention, setNeedsAttention] = useState<NeedsAttentionCustomer[]>([]);
 
   const load = useCallback(async () => {
     setRefreshing(true);
     const since = new Date(Date.now() - 30 * 86400_000).toISOString();
-    const [snapRes, planRes, ruleRes, evRes, scanRes] = await Promise.all([
+    const [snapRes, planRes, ruleRes, evRes, scanRes, attentionRes] = await Promise.all([
       supabase.from("kpi_snapshot").select("id, captured_at, window, metrics").order("captured_at", { ascending: false }).limit(200),
       supabase.from("kpi_plan").select("plan_month, month_label, cum_profit_planned, subs_planned, pros_required").order("plan_month"),
       supabase.from("alert_rule").select("code, domain, priority, title, action_text, enabled"),
       supabase.from("alert_event").select("id, rule_code, fired_at, severity, headline, detail, metric_value, threshold_value, suppressed_in_digest, status").order("fired_at", { ascending: false }).limit(200),
       supabase.from("qr_scan").select("zip, scanned_at").gte("scanned_at", since),
+      supabase.rpc("customers_needing_attention"),
     ]);
 
     const snaps = (snapRes.data ?? []) as unknown as Snapshot[];
@@ -141,6 +153,7 @@ export default function AdminCommand() {
     setPlan((planRes.data ?? []) as unknown as PlanRow[]);
     setRules((ruleRes.data ?? []) as unknown as AlertRule[]);
     setEvents((evRes.data ?? []) as unknown as AlertEvent[]);
+    setNeedsAttention((attentionRes.data ?? []) as unknown as NeedsAttentionCustomer[]);
 
     // Daily scan counts per ZIP for the trailing 30 days.
     const series: Record<string, number[]> = {};
@@ -449,7 +462,10 @@ export default function AdminCommand() {
           {/* 5 — ALERT FEED */}
           <AlertFeed events={events} ruleByCode={ruleByCode} onUpdate={updateEvent} />
 
-          {/* 6 — TRUST STRIP */}
+          {/* 6 — NEEDS ATTENTION */}
+          <NeedsAttentionPanel customers={needsAttention} />
+
+          {/* 7 — TRUST STRIP */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6">
             <h2 className="text-base font-semibold text-slate-900">Trust</h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
@@ -578,6 +594,65 @@ function FunnelTable({ funnel, scanSeries }: { funnel: Metrics; scanSeries: Reco
           })}
         </tbody>
       </table>
+    </section>
+  );
+}
+
+function NeedsAttentionPanel({ customers }: { customers: NeedsAttentionCustomer[] }) {
+  return (
+    <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6">
+      <div className="flex items-center gap-2">
+        <AlertTriangle className="h-5 w-5 text-rose-500" aria-hidden />
+        <h2 className="text-base font-semibold text-slate-900">Needs attention</h2>
+      </div>
+      {customers.length === 0 ? (
+        <p className="mt-3 text-sm text-slate-500">— no customers on retired SKUs or without an assigned Pro.</p>
+      ) : (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-xs min-w-[640px]">
+            <thead>
+              <tr className="text-left text-[11px] uppercase tracking-wide text-slate-500 border-b border-slate-100">
+                <th className="py-2 pr-3 font-semibold">Customer</th>
+                <th className="py-2 pr-3 font-semibold">Price</th>
+                <th className="py-2 pr-3 font-semibold">Issue</th>
+                <th className="py-2 pr-3 font-semibold">Action</th>
+              </tr>
+            </thead>
+            <tbody className="text-slate-800">
+              {customers.map((c) => (
+                <tr key={c.subscription_id} className="border-b border-slate-100 last:border-0">
+                  <td className="py-2.5 pr-3 whitespace-nowrap">
+                    {c.first_name || c.last_name ? `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() : "—"}
+                  </td>
+                  <td className="py-2.5 pr-3 whitespace-nowrap">{money(c.monthly_total_cents / 100)}</td>
+                  <td className="py-2.5 pr-3">
+                    <div className="flex flex-wrap gap-1.5">
+                      {c.retired_price && (
+                        <span className="inline-flex items-center rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-700">
+                          Retired SKU
+                        </span>
+                      )}
+                      {c.missing_pro && (
+                        <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                          No Pro assigned
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-2.5 pr-3">
+                    <Link
+                      to={`/admin/customers/${c.user_id}`}
+                      className="font-semibold text-blue-600 hover:underline"
+                    >
+                      Open customer
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 }

@@ -4,7 +4,7 @@ import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
   Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
   Award, ShieldCheck, RefreshCw, ClipboardList, Gauge, Star, SlidersHorizontal,
-  GraduationCap, PackageCheck,
+  GraduationCap, PackageCheck, Shield,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import CapacityBanner from "@/components/admin/CapacityBanner";
@@ -33,6 +33,7 @@ const NAV = [
   { to: "/admin/leads",       label: "Leads",       icon: ClipboardList },
   { to: "/admin/reviews",     label: "Reviews",     icon: Star },
   { to: "/admin/applicants",  label: "Applicants",  icon: Users },
+  { to: "/admin/badges",      label: "Badges",      icon: ShieldCheck },
   { to: "/admin/onboarding",  label: "Onboarding",  icon: GraduationCap },
   { to: "/admin/pro-kits",    label: "Pro Kits",    icon: PackageCheck },
   { to: "/admin/tier-progression", label: "Tier",   icon: Award },
@@ -103,15 +104,43 @@ export default function AdminChrome() {
     hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
   });
 
-  // Days-to-launch badge — counts down to 2026-05-26.
-  const launchDate = new Date(2026, 4, 26); // May = month 4 (0-indexed)
-  const today = new Date(time.getFullYear(), time.getMonth(), time.getDate());
-  const msPerDay = 1000 * 60 * 60 * 24;
-  const daysToLaunch = Math.ceil((launchDate.getTime() - today.getTime()) / msPerDay);
-  const launched = daysToLaunch <= 0;
-  const countdownLabel = launched
-    ? "LAUNCHED"
-    : `${daysToLaunch} day${daysToLaunch === 1 ? "" : "s"} to launch`;
+  // Live site status badge — reads the real site_live app_settings key.
+  const [siteMode, setSiteMode] = useState<"loading" | "dark" | "waitlist" | "live">("loading");
+  useEffect(() => {
+    if (!isAdminRoute) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("app_settings")
+          .select("value")
+          .eq("key", "site_live")
+          .maybeSingle();
+        if (cancelled) return;
+        if (error) {
+          console.error("[AdminChrome] site_live read failed:", error.message);
+          setSiteMode("dark");
+          return;
+        }
+        const raw = data?.value;
+        if (raw === true) setSiteMode("live");
+        else if (raw === false) setSiteMode("waitlist");
+        else setSiteMode("dark");
+      } catch (err) {
+        console.error("[AdminChrome] site_live read threw:", err);
+        if (!cancelled) setSiteMode("dark");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isAdminRoute]);
+
+  const modeConfig: Record<typeof siteMode, { label: string; color: string; border: string; title: string }> = {
+    loading: { label: "···", color: "hsl(var(--admin-text-dim))", border: "hsl(var(--admin-rail-border))", title: "Reading site_live…" },
+    dark: { label: "DARK", color: "#f87171", border: "rgba(248,113,113,0.35)", title: "site_live is missing or unreadable — public gate status is unknown" },
+    waitlist: { label: "WAITLIST", color: "#f5c518", border: "rgba(245,197,24,0.35)", title: "site_live = false — public visitors see the waitlist / Coming Soon page" },
+    live: { label: "LIVE", color: "#34d399", border: "rgba(52,211,153,0.35)", title: "site_live = true — public website is open" },
+  };
+  const mode = modeConfig[siteMode];
 
   return (
     <>
@@ -140,17 +169,22 @@ export default function AdminChrome() {
         </div>
         <div className="admin-hud-topbar__right">
           <AdminThemeToggle active />
-          {/* Days-to-launch countdown badge */}
+          {/* Real site_live status badge */}
           <span
             className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]"
             style={{
               backgroundColor: "hsl(var(--admin-chip-bg))",
-              color: "hsl(var(--admin-gold))",
-              border: "1px solid hsl(var(--admin-gold) / 0.35)",
+              color: mode.color,
+              border: `1px solid ${mode.border}`,
             }}
-            title={launched ? "Tidy is live." : `Launching ${launchDate.toDateString()}`}
+            title={mode.title}
           >
-            {countdownLabel}
+            {siteMode === "loading" ? mode.label : (
+              <>
+                <Shield className="h-2.5 w-2.5 mr-1" />
+                {mode.label}
+              </>
+            )}
           </span>
           <span
             className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]"

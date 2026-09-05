@@ -22,7 +22,11 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const STRIPE_CONNECT_API_KEY = Deno.env.get('STRIPE_CONNECT_API_KEY') ?? '';
 const CHECKR_API_KEY = Deno.env.get('CHECKR_API_KEY') ?? '';
+const CHECKR_PACKAGE = Deno.env.get('CHECKR_PACKAGE') ?? '';
+const CHECKR_WEBHOOK_SECRET = Deno.env.get('CHECKR_WEBHOOK_SECRET') ?? '';
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
+const BREVO_TEMPLATE_WELCOME_T1 = Deno.env.get('BREVO_TEMPLATE_WELCOME_T1') ?? '';
+const TWILIO_FROM_NUMBER = Deno.env.get('TWILIO_FROM_NUMBER') ?? '';
 const DOCUMENSO_API_KEY = Deno.env.get('DOCUMENSO_API_KEY') ?? '';
 
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -186,6 +190,57 @@ async function checkDocumenso(): Promise<Check> {
     detail: 'API key configured — open /admin/documenso-templates to verify signature fields.' };
 }
 
+function secretCheck(id: string, label: string, value: string, remediation: string): Check {
+  return value
+    ? { id, label, status: 'pass', detail: 'Configured' }
+    : { id, label, status: 'fail', detail: 'Missing', remediation };
+}
+
+function checkCheckrApiKey(): Check {
+  return secretCheck(
+    'secret_checkr_api_key',
+    'Secret: CHECKR_API_KEY',
+    CHECKR_API_KEY,
+    'Set CHECKR_API_KEY in Lovable Cloud secrets once your Checkr account is approved.',
+  );
+}
+
+function checkCheckrPackage(): Check {
+  return secretCheck(
+    'secret_checkr_package',
+    'Secret: CHECKR_PACKAGE',
+    CHECKR_PACKAGE,
+    'Set CHECKR_PACKAGE in Lovable Cloud secrets (e.g., the package slug Checkr assigned).',
+  );
+}
+
+function checkCheckrWebhookSecret(): Check {
+  return secretCheck(
+    'secret_checkr_webhook_secret',
+    'Secret: CHECKR_WEBHOOK_SECRET',
+    CHECKR_WEBHOOK_SECRET,
+    'Set CHECKR_WEBHOOK_SECRET in Lovable Cloud secrets once Checkr provides a webhook signing secret.',
+  );
+}
+
+function checkBrevoWelcomeTemplate(): Check {
+  return secretCheck(
+    'secret_brevo_template_welcome_t1',
+    'Secret: BREVO_TEMPLATE_WELCOME_T1',
+    BREVO_TEMPLATE_WELCOME_T1,
+    'Set BREVO_TEMPLATE_WELCOME_T1 in Lovable Cloud secrets (Brevo template ID for the Tier 1 welcome email).',
+  );
+}
+
+function checkTwilioFromNumber(): Check {
+  return secretCheck(
+    'secret_twilio_from_number',
+    'Secret: TWILIO_FROM_NUMBER',
+    TWILIO_FROM_NUMBER,
+    'Set TWILIO_FROM_NUMBER in Lovable Cloud secrets (Twilio E.164 sending number, e.g. +1...).',
+  );
+}
+
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'GET' && req.method !== 'POST') return jsonResponse({ error: 'method_not_allowed' }, 405);
@@ -206,7 +261,19 @@ Deno.serve(async (req) => {
   const [stripe, checkr, brevo, docs, documenso] = await Promise.all([
     checkStripe(), checkCheckr(), checkBrevo(), checkDocuments(), checkDocumenso(),
   ]);
-  const checks: Check[] = [documenso, stripe, checkr, brevo.key, brevo.plan, docs];
+  const checks: Check[] = [
+    documenso,
+    stripe,
+    checkr,
+    brevo.key,
+    brevo.plan,
+    docs,
+    checkCheckrApiKey(),
+    checkCheckrPackage(),
+    checkCheckrWebhookSecret(),
+    checkBrevoWelcomeTemplate(),
+    checkTwilioFromNumber(),
+  ];
   const summary = {
     pass: checks.filter((c) => c.status === 'pass').length,
     warn: checks.filter((c) => c.status === 'warn').length,

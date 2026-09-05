@@ -24,7 +24,7 @@ const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 
 const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
 const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
-const TWILIO_FROM = '+17868291141';
+const TWILIO_FROM = Deno.env.get('TWILIO_FROM_NUMBER');
 
 const BodySchema = z.object({
   to_phone_e164: z.string().regex(/^\+[1-9]\d{6,14}$/, 'must be E.164 like +17865551234'),
@@ -175,6 +175,14 @@ Deno.serve(async (req) => {
   if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
     return jsonResponse(
       { ok: false, error: 'twilio_not_configured' },
+      500,
+    );
+  }
+
+  if (!TWILIO_FROM) {
+    console.error('[send-twilio-sms] TWILIO_FROM_NUMBER is not set; no SMS can be sent');
+    return jsonResponse(
+      { ok: false, error: 'twilio_from_number_missing', message: 'TWILIO_FROM_NUMBER is not configured' },
       500,
     );
   }

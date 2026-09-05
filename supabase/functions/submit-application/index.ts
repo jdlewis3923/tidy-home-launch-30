@@ -29,6 +29,10 @@ const Body = z.object({
   has_vehicle:     z.boolean(),
   has_supplies:    z.boolean(),
   work_authorized: z.boolean(),
+  bilingual:         z.boolean(),
+  insurance_willing: z.boolean(),
+  fl_license:        z.boolean(),
+  license_expiry:    z.string().trim().max(20).optional(),
   description: z.string().max(500).optional(),
 });
 
@@ -43,6 +47,25 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
     }
     const data = parsed.data;
+
+    // Hard disqualifiers — mirror the client-side decline states.
+    if (!data.bilingual) {
+      return jsonResponse({ declined: true, reason: 'bilingual_required' }, 200);
+    }
+    if (!data.insurance_willing) {
+      return jsonResponse({ declined: true, reason: 'insurance_required' }, 200);
+    }
+    if (!data.fl_license) {
+      return jsonResponse({ declined: true, reason: 'fl_license_required' }, 200);
+    }
+    if (data.license_expiry) {
+      const exp = new Date(data.license_expiry);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (Number.isNaN(exp.getTime()) || exp < today) {
+        return jsonResponse({ error: 'invalid_license_expiry', message: 'Driver\'s licence expiry must be a valid future date.' }, 400);
+      }
+    }
 
     // Service-area ZIP gate (Tidy Miami: 33156 / 33183 / 33186).
     const SERVICE_ZIPS = ['33156', '33183', '33186'];
@@ -61,6 +84,10 @@ Deno.serve(async (req) => {
         experience_years: data.experience_years ?? null,
         has_vehicle:  data.has_vehicle,
         has_supplies: data.has_supplies,
+        bilingual: data.bilingual,
+        insurance_willing: data.insurance_willing,
+        fl_license: data.fl_license,
+        license_expiry: data.license_expiry ?? null,
         notes_for_admin: data.description ?? null,
         current_stage: 'applied',
         out_of_service_area: outOfArea,
@@ -91,6 +118,10 @@ Deno.serve(async (req) => {
         has_vehicle: data.has_vehicle,
         has_supplies: data.has_supplies,
         work_authorized: data.work_authorized,
+        bilingual: data.bilingual,
+        insurance_willing: data.insurance_willing,
+        fl_license: data.fl_license,
+        license_expiry: data.license_expiry ?? null,
         description: data.description ?? null,
       },
     });

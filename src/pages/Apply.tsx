@@ -42,6 +42,10 @@ type Form = {
   has_vehicle: YesNo | "";
   has_supplies: YesNo | "";
   work_authorized: YesNo | "";
+  bilingual: YesNo | "";
+  insurance_willing: YesNo | "";
+  fl_license: YesNo | "";
+  license_expiry: string;
   description: string;
 };
 
@@ -56,6 +60,10 @@ const EMPTY: Form = {
   has_vehicle: "",
   has_supplies: "",
   work_authorized: "",
+  bilingual: "",
+  insurance_willing: "",
+  fl_license: "",
+  license_expiry: "",
   description: "",
 };
 
@@ -73,6 +81,7 @@ export default function Apply() {
   const [form, setForm] = useState<Form>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [declined, setDeclined] = useState<string | null>(null);
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -124,6 +133,36 @@ export default function Apply() {
       toast({ title: t("US work authorization?"), variant: "destructive" });
       return;
     }
+    if (!form.bilingual) {
+      toast({ title: t("Bilingual English + Spanish?"), variant: "destructive" });
+      return;
+    }
+    if (!form.insurance_willing) {
+      toast({ title: t("Willing to carry GL insurance?"), variant: "destructive" });
+      return;
+    }
+    if (!form.fl_license) {
+      toast({ title: t("Valid Florida driver's licence?"), variant: "destructive" });
+      return;
+    }
+    if (form.fl_license === "yes" && !form.license_expiry) {
+      toast({ title: t("Driver's licence expiry date?"), variant: "destructive" });
+      return;
+    }
+
+    // Hard disqualifiers — do not create a candidate record.
+    if (form.bilingual === "no") {
+      setDeclined(t("This role requires fluent English and Spanish to communicate with our Miami customers."));
+      return;
+    }
+    if (form.insurance_willing === "no") {
+      setDeclined(t("Every Tidy Pro must carry a $1M/$2M general liability policy naming Tidy as Additional Insured before the first visit."));
+      return;
+    }
+    if (form.fl_license === "no") {
+      setDeclined(t("A valid Florida driver's licence is required to drive between appointments."));
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -139,10 +178,23 @@ export default function Apply() {
         has_vehicle: form.has_vehicle === "yes",
         has_supplies: form.has_supplies === "yes",
         work_authorized: form.work_authorized === "yes",
+        bilingual: form.bilingual === "yes",
+        insurance_willing: form.insurance_willing === "yes",
+        fl_license: form.fl_license === "yes",
+        license_expiry: form.license_expiry || undefined,
         description: form.description.trim() || undefined,
       };
       const { data, error } = await supabase.functions.invoke("submit-application", { body: payload });
       if (error) throw error;
+      if (data?.declined) {
+        const reasons: Record<string, string> = {
+          bilingual_required: t("This role requires fluent English and Spanish to communicate with our Miami customers."),
+          insurance_required: t("Every Tidy Pro must carry a $1M/$2M general liability policy naming Tidy as Additional Insured before the first visit."),
+          fl_license_required: t("A valid Florida driver's licence is required to drive between appointments."),
+        };
+        setDeclined(reasons[data.reason] ?? t("Not a fit at this time"));
+        return;
+      }
       setDone(true);
     } catch (err: any) {
       console.error(err);
@@ -155,6 +207,42 @@ export default function Apply() {
       setSubmitting(false);
     }
   };
+
+  if (declined) {
+    return (
+      <main className="min-h-screen bg-navy-deep relative overflow-hidden flex items-center justify-center p-6">
+        <Helmet>
+          <title>{t("Not a fit at this time | Tidy")}</title>
+        </Helmet>
+        <div
+          className="absolute inset-0 opacity-60 pointer-events-none"
+          style={{ background: "radial-gradient(60% 50% at 50% 0%, hsl(var(--primary)/0.25), transparent 70%)" }}
+        />
+        <div
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{ background: "radial-gradient(40% 40% at 80% 80%, hsl(var(--gold)/0.2), transparent 70%)" }}
+        />
+        <div className="relative max-w-lg w-full rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-10 text-center shadow-2xl animate-calm-rise">
+          <div className="mx-auto h-16 w-16 rounded-full bg-white/10 ring-1 ring-white/30 flex items-center justify-center">
+            <ShieldCheck className="h-9 w-9 text-white/80" />
+          </div>
+          <h1 className="mt-6 font-display text-3xl font-black text-white tracking-tight">
+            {t("Not a fit at this time")}
+          </h1>
+          <p className="mt-3 text-white/70 leading-relaxed">{declined}</p>
+          <p className="mt-4 text-white/50 text-sm">
+            {t("If your situation changes, feel free to apply again.")}
+          </p>
+          <Link
+            to="/"
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white/10 text-white font-bold px-6 py-3 hover:bg-white/20 transition ring-1 ring-white/20"
+          >
+            <ArrowLeft className="h-4 w-4" /> {t("Back to Tidy")}
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   if (done) {
     return (
@@ -418,6 +506,45 @@ export default function Apply() {
                 onChange={(v) => set("work_authorized", v)}
                 name="workauth"
               />
+
+                <YesNoBlock
+                  label={t("Do you speak both English and Spanish?") + " *"}
+                  value={form.bilingual}
+                  onChange={(v) => set("bilingual", v)}
+                  name="bilingual"
+                />
+
+                <YesNoBlock
+                  label={t("Are you willing to carry your own commercial general liability policy ($1,000,000 per occurrence / $2,000,000 aggregate) naming Tidy Home Concierge LLC as Additional Insured before your first paid visit?") + " *"}
+                  value={form.insurance_willing}
+                  onChange={(v) => set("insurance_willing", v)}
+                  name="insurance"
+                />
+                <p className="text-xs text-ink-faint -mt-3">
+                  {t("Roughly $25–60 a month. No LLC required. Tidy reimburses up to $50 a month toward the premium for your first three months.")}
+                </p>
+
+              <YesNoBlock
+                label={t("Do you have a valid Florida driver's licence?") + " *"}
+                value={form.fl_license}
+                onChange={(v) => set("fl_license", v)}
+                name="fl_license"
+              />
+              {form.fl_license === "yes" && (
+                <div>
+                  <Label htmlFor="license_expiry" className="text-ink">
+                    {t("Licence expiry date")} *
+                  </Label>
+                  <Input
+                    id="license_expiry"
+                    type="date"
+                    required
+                    value={form.license_expiry}
+                    onChange={(e) => set("license_expiry", e.target.value)}
+                    className="mt-1.5"
+                  />
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="description" className="text-ink">

@@ -105,6 +105,10 @@ type Applicant = {
   pro_number: string | null;
   verify_token: string | null;
   badge_status: string | null;
+  bilingual: boolean | null;
+  insurance_willing: boolean | null;
+  fl_license: boolean | null;
+  license_expiry: string | null;
 };
 
 type TierCriterion = { label: string; met: boolean; actual: string };
@@ -846,10 +850,6 @@ export default function AdminApplicants() {
                   proNumber={open.pro_number}
                   verifyToken={open.verify_token}
                   badgeStatus={open.badge_status}
-                  onChanged={(next) => {
-                    setOpen((prev) => (prev ? { ...prev, badge_status: next } : prev));
-                    setRows((prev) => prev.map((r) => (r.id === open.id ? { ...r, badge_status: next } : r)));
-                  }}
                 />
 
                 {/* Pro Intake & Kit Order */}
@@ -870,6 +870,10 @@ export default function AdminApplicants() {
                     { label: "Has transportation", value: yn(open.has_vehicle ?? submitted?.has_vehicle) },
                     { label: "Has equipment", value: yn(open.has_supplies ?? submitted?.has_supplies) },
                     { label: "US work authorized", value: yn(submitted?.work_authorized) },
+                    { label: "Bilingual English + Spanish", value: yn(open.bilingual ?? submitted?.bilingual) },
+                    { label: "Willing to carry GL insurance", value: yn(open.insurance_willing ?? submitted?.insurance_willing) },
+                    { label: "Valid Florida driver's licence", value: yn(open.fl_license ?? submitted?.fl_license) },
+                    { label: "Licence expiry", value: open.license_expiry ?? submitted?.license_expiry ?? null },
                     ...(open.wash_only
                       ? [{ label: "Detail capability", value: "Wash only — no pressure washer" }]
                       : []),

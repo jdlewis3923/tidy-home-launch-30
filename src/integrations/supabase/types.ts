@@ -488,6 +488,7 @@ export type Database = {
           bg_check_notes: string | null
           bg_check_provider: string | null
           bg_check_status: string | null
+          bilingual: boolean | null
           bilingual_fluency_confirmed: boolean
           bond_status: string | null
           business_bank_account_confirmed: boolean
@@ -520,17 +521,20 @@ export type Database = {
           equipment_approved: boolean
           experience_years: number | null
           first_name: string
+          fl_license: boolean | null
           google_review_match_name: string | null
           has_supplies: boolean | null
           has_vehicle: boolean | null
           id: string
           insurance_expires_at: string | null
           insurance_status: string
+          insurance_willing: boolean | null
           jobber_id: string | null
           last_jobber_event_at: string | null
           last_name: string
           last_review_match_at: string | null
           last_visit_at: string | null
+          license_expiry: string | null
           notes_for_admin: string | null
           open_escalations_count: number
           out_of_service_area: boolean
@@ -571,6 +575,7 @@ export type Database = {
           bg_check_notes?: string | null
           bg_check_provider?: string | null
           bg_check_status?: string | null
+          bilingual?: boolean | null
           bilingual_fluency_confirmed?: boolean
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
@@ -603,17 +608,20 @@ export type Database = {
           equipment_approved?: boolean
           experience_years?: number | null
           first_name: string
+          fl_license?: boolean | null
           google_review_match_name?: string | null
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
           id?: string
           insurance_expires_at?: string | null
           insurance_status?: string
+          insurance_willing?: boolean | null
           jobber_id?: string | null
           last_jobber_event_at?: string | null
           last_name: string
           last_review_match_at?: string | null
           last_visit_at?: string | null
+          license_expiry?: string | null
           notes_for_admin?: string | null
           open_escalations_count?: number
           out_of_service_area?: boolean
@@ -654,6 +662,7 @@ export type Database = {
           bg_check_notes?: string | null
           bg_check_provider?: string | null
           bg_check_status?: string | null
+          bilingual?: boolean | null
           bilingual_fluency_confirmed?: boolean
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
@@ -686,17 +695,20 @@ export type Database = {
           equipment_approved?: boolean
           experience_years?: number | null
           first_name?: string
+          fl_license?: boolean | null
           google_review_match_name?: string | null
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
           id?: string
           insurance_expires_at?: string | null
           insurance_status?: string
+          insurance_willing?: boolean | null
           jobber_id?: string | null
           last_jobber_event_at?: string | null
           last_name?: string
           last_review_match_at?: string | null
           last_visit_at?: string | null
+          license_expiry?: string | null
           notes_for_admin?: string | null
           open_escalations_count?: number
           out_of_service_area?: boolean
@@ -729,6 +741,44 @@ export type Database = {
           zip?: string | null
         }
         Relationships: []
+      }
+      badge_status_log: {
+        Row: {
+          applicant_id: string
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_status: string
+          note: string | null
+          old_status: string | null
+        }
+        Insert: {
+          applicant_id: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_status: string
+          note?: string | null
+          old_status?: string | null
+        }
+        Update: {
+          applicant_id?: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_status?: string
+          note?: string | null
+          old_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badge_status_log_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       band_reviews: {
         Row: {
@@ -4390,7 +4440,24 @@ export type Database = {
         Args: { _fn: string; _payload: Json }
         Returns: undefined
       }
+      change_badge_status: {
+        Args: { _applicant_id: string; _new_status: string; _note?: string }
+        Returns: undefined
+      }
       current_user_admin: { Args: never; Returns: boolean }
+      customers_needing_attention: {
+        Args: never
+        Returns: {
+          first_name: string
+          last_name: string
+          missing_pro: boolean
+          monthly_total_cents: number
+          preferred_pro_id: string
+          retired_price: boolean
+          subscription_id: string
+          user_id: string
+        }[]
+      }
       ensure_referral_code: { Args: never; Returns: string }
       founding_spots_left: { Args: { _zip: string }; Returns: number }
       gen_intake_token: { Args: never; Returns: string }
@@ -4446,6 +4513,7 @@ export type Database = {
       }
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
+      nextval: { Args: { seq_name: string }; Returns: number }
       public_five_star_proof: { Args: never; Returns: Json }
       verify_pro_badge: {
         Args: { _token: string }

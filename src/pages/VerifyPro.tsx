@@ -37,7 +37,7 @@ type BadgeRow = {
   pro_since: string | null;
 };
 
-type State = "loading" | "active" | "inactive" | "notfound";
+type State = "loading" | "active" | "suspended" | "revoked" | "notissued";
 
 const monthYear = (iso: string | null) => {
   if (!iso) return null;
@@ -443,7 +443,11 @@ const VerifyPro = () => {
         return;
       }
       setPro(row);
-      setState(row.badge_status === "active" ? "active" : "inactive");
+      const status = row.badge_status ?? "notissued";
+      if (status === "active") setState("active");
+      else if (status === "suspended") setState("suspended");
+      else if (status === "revoked") setState("revoked");
+      else setState("notissued");
     })();
     return () => { cancelled = true; };
   }, [token]);
@@ -451,7 +455,7 @@ const VerifyPro = () => {
   const since = monthYear(pro?.pro_since ?? null);
   const cleared = longDate(pro?.bg_check_cleared_at ?? null);
   const services = serviceLabel(pro?.services ?? null);
-  const showPhoto = state === "active" || state === "inactive";
+  const showPhoto = state === "active" || state === "suspended" || state === "revoked";
 
   const buttonBase =
     "verify-press mt-6 flex h-[52px] w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold";
@@ -520,11 +524,11 @@ const VerifyPro = () => {
                     <img
                       src={pro.badge_photo_url}
                       alt={`${pro.display_name ?? "Tidy Pro"} badge photo`}
-                      className={`relative h-[140px] w-[140px] rounded-full object-cover ${state === "inactive" ? "grayscale" : ""}`}
+                      className={`relative h-[140px] w-[140px] rounded-full object-cover ${state === "active" ? "" : "grayscale"}`}
                       style={{
                         border: "3px solid hsl(var(--v-ring))",
                         boxShadow: "0 14px 30px -14px hsl(222 47% 8% / 0.5)",
-                        opacity: state === "inactive" ? 0.6 : 1,
+                        opacity: state === "active" ? 1 : 0.6,
                       }}
                     />
                   ) : (
@@ -544,7 +548,7 @@ const VerifyPro = () => {
                 <div className="mt-5 flex justify-center">
                   <StatusOrb
                     tone={state === "active" ? "green" : "amberred"}
-                    label={state === "active" ? "Verified" : "Not active"}
+                    label={state === "active" ? "Verified" : state === "suspended" ? "Suspended" : state === "revoked" ? "Revoked" : "Not active"}
                   />
                 </div>
 
@@ -552,7 +556,7 @@ const VerifyPro = () => {
                   className="font-archivo mt-4 text-[32px] font-extrabold leading-[1.05]"
                   style={{
                     letterSpacing: "-0.02em",
-                    color: state === "inactive" ? "hsl(var(--v-muted-fg))" : "hsl(var(--v-card-fg))",
+                    color: state === "active" ? "hsl(var(--v-card-fg))" : "hsl(var(--v-muted-fg))",
                   }}
                 >
                   {pro.display_name ?? "Tidy Pro"}
@@ -571,14 +575,14 @@ const VerifyPro = () => {
                       letterSpacing: "0.08em",
                       backgroundColor: "hsl(var(--v-tile))",
                       border: "1px solid hsl(var(--v-tile-border))",
-                      color: state === "inactive" ? "hsl(var(--v-amberred))" : "hsl(var(--primary))",
+                      color: state === "active" ? "hsl(var(--primary))" : "hsl(var(--v-amberred))",
                     }}
                   >
                     {pro.pro_number ?? "—"}
                   </code>
                 </div>
 
-                {state === "active" && services && (
+                {(state === "active" || state === "suspended") && services && (
                   <p
                     className="mt-3.5 inline-block rounded-lg px-3 py-1 text-xs font-semibold uppercase"
                     style={{
@@ -594,7 +598,7 @@ const VerifyPro = () => {
               </div>
             )}
 
-            {state === "notfound" && (
+            {state === "notissued" && (
               <div className="mt-8 text-center">
                 <StatusOrb tone="neutral" label="Unrecognised" />
                 <h1
@@ -668,12 +672,14 @@ const VerifyPro = () => {
               </>
             )}
 
-            {/* ---- Not active: calm, factual, authoritative ---- */}
-            {state === "inactive" && (
+            {/* ---- Suspended / revoked: calm, factual, authoritative ---- */}
+            {(state === "suspended" || state === "revoked") && (
               <>
                 <div className="mt-6 space-y-3">
                   <p className="text-sm leading-relaxed" style={{ color: "hsl(var(--v-card-fg))" }}>
-                    This badge is no longer valid. This person does not currently work with Tidy.
+                    {state === "revoked"
+                      ? "This badge has been revoked. This person is no longer authorised to represent Tidy."
+                      : "This badge is currently suspended. This person is not scheduled for visits right now."}
                   </p>
                   <p
                     className="rounded-2xl px-4 py-3 text-sm font-semibold leading-relaxed"
@@ -696,8 +702,8 @@ const VerifyPro = () => {
               </>
             )}
 
-            {/* ---- Not found ---- */}
-            {state === "notfound" && (
+            {/* ---- Not issued / not found ---- */}
+            {state === "notissued" && (
               <>
                 <p className="mt-6 text-sm leading-relaxed" style={{ color: "hsl(var(--v-card-fg))" }}>
                   This badge was not issued by Tidy, or the code was mistyped.
@@ -734,7 +740,7 @@ const VerifyPro = () => {
             >
               {PHONE_DISPLAY}
             </a>
-            {(state === "inactive" || state === "notfound") && (
+            {(state === "suspended" || state === "revoked" || state === "notissued") && (
               <p className="text-sm font-semibold" style={{ color: "hsl(var(--v-amberred))" }}>
                 If you feel unsafe, call 911 first.
               </p>
@@ -746,7 +752,7 @@ const VerifyPro = () => {
         {state !== "loading" && (
           <>
             <VettingGrid />
-            {state === "notfound" && <BadgeDiagram />}
+            {state === "notissued" && <BadgeDiagram />}
             <CompanyBlock />
           </>
         )}

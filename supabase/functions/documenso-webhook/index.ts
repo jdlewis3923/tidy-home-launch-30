@@ -89,26 +89,26 @@ Deno.serve(async (req) => {
     // and links to /pro/tier-progression for the full explainer.
     const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
     const TIER_PROGRESSION_URL = "https://jointidy.co/pro/tier-progression";
-    // Template id resolution: app_settings first (admin-configurable), env var second.
+    // Template id resolution: env var first (Lovable Cloud secret), app_settings fallback.
     let welcomeTemplateId = 0;
     {
+      const envId = Number(Deno.env.get("BREVO_TEMPLATE_WELCOME_T1") ?? 0);
+      let settingsId = 0;
       const { data: setting } = await sb
         .from("app_settings")
         .select("value")
         .eq("key", "brevo_template_welcome_t1")
         .maybeSingle();
       const raw = setting?.value as { id?: number } | number | null | undefined;
-      welcomeTemplateId =
-        Number(typeof raw === "number" ? raw : raw?.id ?? raw ?? 0) ||
-        Number(Deno.env.get("BREVO_TEMPLATE_WELCOME_T1") ?? 0) ||
-        0;
+      settingsId = Number(typeof raw === "number" ? raw : raw?.id ?? raw ?? 0);
+      welcomeTemplateId = envId || settingsId || 0;
       if (!welcomeTemplateId) {
         console.error("[documenso-webhook] missing brevo_template_welcome_t1 template id");
         await sb.from("integration_logs").insert({
           source: "internal",
           event: "brevo.template_id_missing:brevo_template_welcome_t1",
           status: "error",
-          error_message: "No template id in app_settings.brevo_template_welcome_t1 or BREVO_TEMPLATE_WELCOME_T1; sent inline fallback HTML",
+          error_message: "No template id in BREVO_TEMPLATE_WELCOME_T1 or app_settings.brevo_template_welcome_t1; sent inline fallback HTML",
         }).then(() => {}, () => {});
       }
     }
