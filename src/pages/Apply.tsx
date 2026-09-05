@@ -186,6 +186,15 @@ export default function Apply() {
       };
       const { data, error } = await supabase.functions.invoke("submit-application", { body: payload });
       if (error) throw error;
+      if (data?.declined) {
+        const reasons: Record<string, string> = {
+          bilingual_required: t("This role requires fluent English and Spanish to communicate with our Miami customers."),
+          insurance_required: t("Every Tidy Pro must carry a $1M/$2M general liability policy naming Tidy as Additional Insured before the first visit."),
+          fl_license_required: t("A valid Florida driver's licence is required to drive between appointments."),
+        };
+        setDeclined(reasons[data.reason] ?? t("Not a fit at this time"));
+        return;
+      }
       setDone(true);
     } catch (err: any) {
       console.error(err);
