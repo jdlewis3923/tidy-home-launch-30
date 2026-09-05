@@ -548,7 +548,7 @@ const VerifyPro = () => {
                 <div className="mt-5 flex justify-center">
                   <StatusOrb
                     tone={state === "active" ? "green" : "amberred"}
-                    label={state === "active" ? "Verified" : "Not active"}
+                    label={state === "active" ? "Verified" : state === "suspended" ? "Suspended" : state === "revoked" ? "Revoked" : "Not active"}
                   />
                 </div>
 
