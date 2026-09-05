@@ -13,7 +13,7 @@ import {
   CartesianGrid, ComposedChart, Area, Line, ReferenceLine, ResponsiveContainer,
   Tooltip as RTooltip, XAxis, YAxis,
 } from "recharts";
-import { Loader2, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { AlertTriangle, Loader2, RefreshCw, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useHasRoleState } from "@/hooks/useHasRole";
