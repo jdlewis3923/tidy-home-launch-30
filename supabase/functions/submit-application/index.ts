@@ -29,6 +29,10 @@ const Body = z.object({
   has_vehicle:     z.boolean(),
   has_supplies:    z.boolean(),
   work_authorized: z.boolean(),
+  bilingual:         z.boolean(),
+  insurance_willing: z.boolean(),
+  fl_license:        z.boolean(),
+  license_expiry:    z.string().trim().max(20).optional(),
   description: z.string().max(500).optional(),
 });
 
