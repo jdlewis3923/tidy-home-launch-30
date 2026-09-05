@@ -105,13 +105,22 @@ async function a2pCheck(numberSid: string, phone: string): Promise<Check> {
         detail: `Number is in Messaging Service "${s.friendly_name ?? s.sid}" but no A2P 10DLC campaign is registered (HTTP ${usa2p.status}).`,
         remediation: 'Register a 10DLC brand and campaign in Twilio and attach this Messaging Service.' };
     }
-    const state = String(usa2p.json?.campaign_status ?? usa2p.json?.status ?? 'UNKNOWN');
+    const rec = usa2p.json?.compliance?.[0] ?? usa2p.json?.us_app_to_person?.[0] ?? usa2p.json ?? {};
+    const state = String(
+      rec?.campaign_status ?? rec?.status ?? usa2p.json?.campaign_status ?? 'UNKNOWN',
+    );
+    const useCase = rec?.us_app_to_person_usecase ? ` (use case ${rec.us_app_to_person_usecase})` : '';
+    if (state === 'UNKNOWN') {
+      return { id, label, status: 'fail',
+        detail: `No A2P 10DLC campaign found on Messaging Service "${s.friendly_name ?? s.sid}" — carriers filter unregistered long codes.`,
+        remediation: 'Register a 10DLC brand and campaign in Twilio for this Messaging Service, then re-run this check.' };
+    }
     if (/verified|approved|active|success/i.test(state)) {
       return { id, label, status: 'pass',
-        detail: `10DLC campaign ${state} on Messaging Service "${s.friendly_name ?? s.sid}".` };
+        detail: `10DLC campaign ${state} on Messaging Service "${s.friendly_name ?? s.sid}"${useCase}.` };
     }
     return { id, label, status: 'fail',
-      detail: `10DLC campaign status is ${state} on "${s.friendly_name ?? s.sid}" — carriers filter unregistered long codes.`,
+      detail: `10DLC campaign status is ${state} on "${s.friendly_name ?? s.sid}"${useCase} — carriers filter unregistered long codes.`,
       remediation: 'Finish 10DLC brand/campaign registration in Twilio before sending customer texts.' };
   }
 
