@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { AlertTriangle, Loader2, RefreshCw, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { MessagingReadinessBanner } from "@/components/admin/MessagingReadiness";
 import { Button } from "@/components/ui/button";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { toast } from "@/hooks/use-toast";
@@ -286,6 +287,8 @@ export default function AdminCommand() {
         </div>
       ) : (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+          <MessagingReadinessBanner />
+
           {/* 1 — STATUS BAR */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm px-5 sm:px-8 py-6">
             <p className={`text-2xl sm:text-4xl font-bold tracking-tight ${statusTone}`}>{statusText}</p>
