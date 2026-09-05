@@ -2,6 +2,23 @@
 
 ## In progress
 
+### Prompt 4 — Part 1: edge function hardening
+- [ ] Wrap every handler body in try/catch; log to integration_logs; return 200 { ok:false, error } instead of throwing
+- [ ] Read env vars inside the handler, never at module scope
+- [ ] Missing var -> named error "MISSING_ENV: X", return 200 ok:false
+- [ ] GET /health branch per function returning { ok, missing_env: [...] }
+- [ ] Report which functions were throwing and why
+
+### Prompt 4 — Part 2: Brevo template-only email
+- [ ] Secrets: BREVO_API_KEY, TWILIO_FROM_NUMBER, CHECKR_* (Checkr: user has none, do not ask)
+- [ ] send-brevo-email function: { template_id, to, params }, reject htmlContent, log all sends/failures
+- [ ] src/lib/emailTemplates.ts registry (EMAIL const); no numeric template literals elsewhere
+- [ ] documenso-webhook: drop BREVO_TEMPLATE_WELCOME_T1 + app_settings path, use EMAIL.CONTRACTOR_WELCOME_T1
+- [ ] Remove every inline email HTML fallback repo-wide
+- [ ] Required-params contract per template, fail loudly
+- [ ] Health section: row per secret + per edge function (configured/missing + last success)
+
+
 1. Secrets
    - CHECKR_API_KEY / CHECKR_PACKAGE / CHECKR_WEBHOOK_SECRET — user has no Checkr account yet; do NOT ask again
    - TWILIO_FROM_NUMBER — awaiting confirmation that (786) 829-1141 is the permanent sending number
