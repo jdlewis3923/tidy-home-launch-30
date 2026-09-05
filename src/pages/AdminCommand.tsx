@@ -138,12 +138,13 @@ export default function AdminCommand() {
   const load = useCallback(async () => {
     setRefreshing(true);
     const since = new Date(Date.now() - 30 * 86400_000).toISOString();
-    const [snapRes, planRes, ruleRes, evRes, scanRes] = await Promise.all([
+    const [snapRes, planRes, ruleRes, evRes, scanRes, attentionRes] = await Promise.all([
       supabase.from("kpi_snapshot").select("id, captured_at, window, metrics").order("captured_at", { ascending: false }).limit(200),
       supabase.from("kpi_plan").select("plan_month, month_label, cum_profit_planned, subs_planned, pros_required").order("plan_month"),
       supabase.from("alert_rule").select("code, domain, priority, title, action_text, enabled"),
       supabase.from("alert_event").select("id, rule_code, fired_at, severity, headline, detail, metric_value, threshold_value, suppressed_in_digest, status").order("fired_at", { ascending: false }).limit(200),
       supabase.from("qr_scan").select("zip, scanned_at").gte("scanned_at", since),
+      supabase.rpc("customers_needing_attention"),
     ]);
 
     const snaps = (snapRes.data ?? []) as unknown as Snapshot[];
@@ -152,6 +153,7 @@ export default function AdminCommand() {
     setPlan((planRes.data ?? []) as unknown as PlanRow[]);
     setRules((ruleRes.data ?? []) as unknown as AlertRule[]);
     setEvents((evRes.data ?? []) as unknown as AlertEvent[]);
+    setNeedsAttention((attentionRes.data ?? []) as unknown as NeedsAttentionCustomer[]);
 
     // Daily scan counts per ZIP for the trailing 30 days.
     const series: Record<string, number[]> = {};
