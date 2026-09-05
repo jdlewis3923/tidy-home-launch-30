@@ -116,11 +116,19 @@ Deno.serve(async (req) => {
   if (error) return jsonResponse({ error: 'lookup_failed', details: error.message }, 500);
   if (!kit) return jsonResponse({ error: 'not_found' }, 404);
 
+  // Advance the linked applicant one step along the hiring pipeline.
+  const PIPELINE = ['applied', 'background_check_review', 'interview_pending', 'offer_sent', 'contract_signed', 'oriented', 'active'];
   if (kit.applicant_id) {
-    await admin
+    const { data: appRow } = await admin
       .from('applicants')
-      .update({ current_stage: 'onboarding' })
-      .eq('id', kit.applicant_id);
+      .select('current_stage')
+      .eq('id', kit.applicant_id)
+      .maybeSingle();
+    const cur = appRow?.current_stage ?? 'applied';
+    const idx = PIPELINE.indexOf(cur);
+    if (idx >= 0 && idx < PIPELINE.length - 1) {
+      await admin.from('applicants').update({ current_stage: PIPELINE[idx + 1] }).eq('id', kit.applicant_id);
+    }
   }
 
   const warn = MAGNET_RISK.includes(String(kit.door_material ?? ''));
