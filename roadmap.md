@@ -14,3 +14,7 @@
 - Badge admin panel (/admin/badges, status log, suspended/revoked states) wired to public /verify
 - Command "Needs attention" panel (orphan/retired-SKU customers)
 - Site gate header reads real `site_live` value (DARK / WAITLIST / LIVE)
+
+## Launch (Sep 5 2026)
+- [ ] Turn site live (site_live = true)
+- [ ] Only House Cleaning selectable as a service until lawn/detail Pros are hired
