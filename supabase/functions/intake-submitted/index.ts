@@ -158,11 +158,11 @@ Deno.serve(async (req) => {
   try {
     await sendBrevoEmail({
       to: OWNER,
+      marketing: false,
       subject: `Intake received — ${display(kit.legal_name)} (${display(kit.service_line)})`,
-      html,
-      kind: 'transactional',
-      recipientType: 'internal',
-    } as never);
+      htmlContent: html,
+      label: 'intake-submitted',
+    });
   } catch (e) {
     console.error('intake-submitted email failed:', e instanceof Error ? e.message : String(e));
     return jsonResponse({ ok: true, emailed: false }, 200);
