@@ -287,7 +287,7 @@ function TwilioSelfTest() {
         <input
           value={to}
           onChange={(e) => setTo(e.target.value)}
-          placeholder="+17868291141"
+          placeholder="Your own mobile, e.g. +13055551234 (not the Tidy number)"
           className="rounded-md border border-slate-300 px-3 py-2 text-xs"
         />
         <input
