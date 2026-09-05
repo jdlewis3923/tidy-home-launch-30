@@ -99,6 +99,7 @@ const Rate = lazy(() => import("./pages/Rate.tsx"));
 const VerifyPro = lazy(() => import("./pages/VerifyPro.tsx"));
 const ProIntake = lazy(() => import("./pages/ProIntake.tsx"));
 const AdminProKits = lazy(() => import("./pages/AdminProKits.tsx"));
+const AdminBadges = lazy(() => import("./pages/AdminBadges.tsx"));
 
 const queryClient = new QueryClient();
 
