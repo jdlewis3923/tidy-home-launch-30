@@ -507,22 +507,22 @@ export default function Apply() {
                 name="workauth"
               />
 
-              <YesNoBlock
-                label={t("Do you speak both English and Spanish fluently?") + " *"}
-                value={form.bilingual}
-                onChange={(v) => set("bilingual", v)}
-                name="bilingual"
-              />
+                <YesNoBlock
+                  label={t("Do you speak both English and Spanish?") + " *"}
+                  value={form.bilingual}
+                  onChange={(v) => set("bilingual", v)}
+                  name="bilingual"
+                />
 
-              <YesNoBlock
-                label={t("Are you willing to carry your own commercial general liability policy ($1M/$2M) naming Tidy Home Concierge LLC as Additional Insured before your first paid visit?") + " *"}
-                value={form.insurance_willing}
-                onChange={(v) => set("insurance_willing", v)}
-                name="insurance"
-              />
-              <p className="text-xs text-ink-faint -mt-3">
-                {t("Roughly $25–60 a month. No LLC required. Tidy reimburses up to $50 a month toward the premium for your first three months.")}
-              </p>
+                <YesNoBlock
+                  label={t("Are you willing to carry your own commercial general liability policy ($1,000,000 per occurrence / $2,000,000 aggregate) naming Tidy Home Concierge LLC as Additional Insured before your first paid visit?") + " *"}
+                  value={form.insurance_willing}
+                  onChange={(v) => set("insurance_willing", v)}
+                  name="insurance"
+                />
+                <p className="text-xs text-ink-faint -mt-3">
+                  {t("Roughly $25–60 a month. No LLC required. Tidy reimburses up to $50 a month toward the premium for your first three months.")}
+                </p>
 
               <YesNoBlock
                 label={t("Do you have a valid Florida driver's licence?") + " *"}
