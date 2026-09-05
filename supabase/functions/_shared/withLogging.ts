@@ -107,3 +107,57 @@ export async function withLogging<T>(opts: WithLoggingOpts<T>): Promise<T> {
     throw err;
   }
 }
+
+/**
+ * Record an invocation at function entry — BEFORE any auth check, env read or
+ * work happens — so a crash still leaves a row in integration_logs and the
+ * Health page shows an error instead of silence.
+ *
+ * Never throws. Returns a finalizer that upgrades the row's status once the
+ * outcome is known.
+ */
+export async function logInvocation(
+  source: LogSource,
+  event: string,
+  payload?: unknown,
+): Promise<(status: LogStatus, error_message?: string | null) => Promise<void>> {
+  const start = performance.now();
+  let id: string | null = null;
+  const payload_hash = await hashPayload(payload).catch(() => null);
+
+  try {
+    const supabase = getServiceClient();
+    const { data } = await supabase
+      .from('integration_logs')
+      .insert({
+        source,
+        event: `${event}.invoked`,
+        status: 'warning',
+        latency_ms: 0,
+        payload_hash,
+        error_message: 'in_flight — no outcome recorded yet',
+      })
+      .select('id')
+      .maybeSingle();
+    id = (data as { id?: string } | null)?.id ?? null;
+  } catch (err) {
+    console.error('[logInvocation] failed to write entry row', err);
+  }
+
+  return async (status: LogStatus, error_message: string | null = null) => {
+    const latency_ms = Math.round(performance.now() - start);
+    try {
+      const supabase = getServiceClient();
+      if (id) {
+        await supabase
+          .from('integration_logs')
+          .update({ status, latency_ms, error_message: error_message?.slice(0, 1000) ?? null })
+          .eq('id', id);
+      } else {
+        await record(source, `${event}.invoked`, status, latency_ms, payload_hash, error_message);
+      }
+    } catch (err) {
+      console.error('[logInvocation] failed to finalize entry row', err);
+    }
+  };
+}

@@ -16,7 +16,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
-import { withLogging } from '../_shared/withLogging.ts';
+import { withLogging, logInvocation } from '../_shared/withLogging.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -83,9 +83,15 @@ async function isAuthorized(req: Request): Promise<boolean> {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: auth } },
     });
-    const { data: claims, error } = await supabase.auth.getClaims(token);
-    if (error || !claims?.claims?.sub) return false;
-    const userId = claims.claims.sub as string;
+    // getUser() validates the token against the auth server. getClaims() was
+    // used here before and fails outright under the signing-keys setup, which
+    // rejected every legitimate admin self-test with a 401.
+    const { data: userData, error } = await supabase.auth.getUser(token);
+    const userId = userData?.user?.id;
+    if (error || !userId) {
+      console.error('[auth] getUser failed', error?.message ?? 'no user');
+      return false;
+    }
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -168,11 +174,16 @@ Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
 
+  // Entry log BEFORE any work, so a crash still leaves a row in Health.
+  const finish = await logInvocation('twilio', 'send_twilio_sms', { method: req.method });
+
   if (req.method !== 'POST') {
+    await finish('error', 'method not allowed');
     return jsonResponse({ ok: false, error: 'method not allowed' }, 405);
   }
 
   if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
+    await finish('error', 'twilio_not_configured');
     return jsonResponse(
       { ok: false, error: 'twilio_not_configured' },
       500,
@@ -181,6 +192,7 @@ Deno.serve(async (req) => {
 
   if (!TWILIO_FROM) {
     console.error('[send-twilio-sms] TWILIO_FROM_NUMBER is not set; no SMS can be sent');
+    await finish('error', 'twilio_from_number_missing');
     return jsonResponse(
       { ok: false, error: 'twilio_from_number_missing', message: 'TWILIO_FROM_NUMBER is not configured' },
       500,
@@ -188,17 +200,22 @@ Deno.serve(async (req) => {
   }
 
   const ok = await isAuthorized(req);
-  if (!ok) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+  if (!ok) {
+    await finish('error', 'unauthorized');
+    return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+  }
 
   let raw: unknown;
   try {
     raw = await req.json();
   } catch {
+    await finish('error', 'invalid JSON body');
     return jsonResponse({ ok: false, error: 'invalid JSON body' }, 400);
   }
 
   const parsed = BodySchema.safeParse(raw);
   if (!parsed.success) {
+    await finish('error', 'validation_failed');
     return jsonResponse(
       { ok: false, error: 'validation_failed', details: parsed.error.flatten().fieldErrors },
       400,
@@ -210,11 +227,13 @@ Deno.serve(async (req) => {
 
   // Sunday quiet-day guard (America/New_York). Never send on Sundays.
   if (isSundayET()) {
+    await finish('success', 'skipped: sunday_quiet_hours');
     return jsonResponse({ ok: true, sent: false, reason: 'sunday_quiet_hours' }, 200);
   }
 
   // Quiet hours guard.
   if (isQuietHours()) {
+    await finish('success', 'skipped: quiet_hours');
     return jsonResponse({ ok: true, sent: false, reason: 'quiet_hours' }, 200);
   }
 
@@ -226,6 +245,7 @@ Deno.serve(async (req) => {
 
   // Dedupe check.
   if (await isDuplicate(admin, idempotencyHash)) {
+    await finish('success', 'skipped: duplicate_idempotency_key');
     return jsonResponse({ ok: true, sent: false, reason: 'duplicate_idempotency_key' }, 200);
   }
 
@@ -284,10 +304,12 @@ Deno.serve(async (req) => {
       twilio_sid: result.message_sid, status: 'sent',
       payload: { has_body: !!body, has_content_sid: !!content_sid },
     });
+    await finish('success');
     return jsonResponse(result, 200);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error';
     console.error('[send-twilio-sms] failed', message);
+    await finish('error', message);
     await logSmsSend({
       template_name: tplName, recipient: to_phone_e164, triggered_by,
       status: 'failed', error_message: message,

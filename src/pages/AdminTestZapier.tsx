@@ -249,7 +249,9 @@ export default function AdminTestZapier() {
 // Twilio direct-send self-test (Phase 6 pivot)
 // -----------------------------------------------------------------------------
 function TwilioSelfTest() {
-  const [to, setTo] = useState("+17868291141");
+  // Must NOT default to the Tidy sending number — Twilio rejects a send where
+  // To and From are the same number.
+  const [to, setTo] = useState("");
   const [body, setBody] = useState(
     "Tidy backend test — Phase 6 SMS now self-served via direct Twilio.",
   );
@@ -285,7 +287,7 @@ function TwilioSelfTest() {
         <input
           value={to}
           onChange={(e) => setTo(e.target.value)}
-          placeholder="+17868291141"
+          placeholder="Your own mobile, e.g. +13055551234 (not the Tidy number)"
           className="rounded-md border border-slate-300 px-3 py-2 text-xs"
         />
         <input
