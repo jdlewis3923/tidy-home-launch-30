@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { isServiceAvailable } from '@/lib/service-availability';
 import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote, sizeFor, VALID_ZIPS, calculatePricing } from '@/lib/dashboard-pricing';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,14 +86,17 @@ export default function DashboardPlan() {
         }
         const { data: row } = await supabase
           .from("subscriptions")
-          .select("status")
+          .select("status, stripe_subscription_id")
           .eq("user_id", uid)
           .in("status", ["active", "paused"])
+          .not("stripe_subscription_id", "is", null)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
         if (mounted) {
-          setHasExistingSub(!!row);
+          // Only a real Stripe-backed plan may block the builder. A stale local
+          // row with no Stripe subscription must never stop someone buying.
+          setHasExistingSub(!!row?.stripe_subscription_id);
           setCheckingSub(false);
         }
       } catch {
@@ -224,6 +226,15 @@ export default function DashboardPlan() {
           >
             {t("Go to Billing")} <ArrowRight className="h-4 w-4" />
           </Link>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => setHasExistingSub(false)}
+              className="text-xs font-medium text-ink-faint underline underline-offset-4 hover:text-ink"
+            >
+              {t("Build a new plan anyway")}
+            </button>
+          </div>
         </div>
       </CalmShell>
     );
