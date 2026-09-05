@@ -850,10 +850,6 @@ export default function AdminApplicants() {
                   proNumber={open.pro_number}
                   verifyToken={open.verify_token}
                   badgeStatus={open.badge_status}
-                  onChanged={(next) => {
-                    setOpen((prev) => (prev ? { ...prev, badge_status: next } : prev));
-                    setRows((prev) => prev.map((r) => (r.id === open.id ? { ...r, badge_status: next } : r)));
-                  }}
                 />
 
                 {/* Pro Intake & Kit Order */}
