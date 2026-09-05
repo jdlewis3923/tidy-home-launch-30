@@ -556,7 +556,7 @@ const VerifyPro = () => {
                   className="font-archivo mt-4 text-[32px] font-extrabold leading-[1.05]"
                   style={{
                     letterSpacing: "-0.02em",
-                    color: state === "inactive" ? "hsl(var(--v-muted-fg))" : "hsl(var(--v-card-fg))",
+                    color: state === "active" ? "hsl(var(--v-card-fg))" : "hsl(var(--v-muted-fg))",
                   }}
                 >
                   {pro.display_name ?? "Tidy Pro"}
