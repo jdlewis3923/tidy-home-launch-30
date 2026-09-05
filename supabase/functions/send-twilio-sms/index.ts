@@ -1,30 +1,37 @@
 // Tidy — Direct Twilio SMS sender (Phase 6, post-pivot)
 //
-// Replaces the Zapier→Twilio path for outbound SMS. Edge functions call this
-// directly with { to_phone_e164, body, idempotency_key } and we POST straight
-// to Twilio's REST API using Basic auth.
+// Edge functions call this with { to_phone_e164, body, idempotency_key } and we
+// POST straight to Twilio's REST API using Basic auth.
 //
 // Guards:
 //   - Send window: 08:00-18:00 America/New_York, Monday-Saturday only.
-//     (Tighter than FL FTSA 8am-8pm, and simpler to reason about.)
 //   - Idempotency: dedupes against integration_logs.payload_hash within 24h.
 //   - E.164 phone validation.
+//   - Never send to the Tidy sending number itself (Twilio rejects To == From).
 //
-// Auth: service role (called by other edge functions) OR admin user JWT
-// (for /admin/test-zapier-style self-tests). Same pattern as send-zapier-event.
+// Hardening rules (prompt 4, part 1):
+//   - Env vars are read INSIDE the handler, never at module scope.
+//   - The whole handler body is wrapped in try/catch; a throw is logged and
+//     returned as HTTP 200 { ok: false, error } so a failing side effect never
+//     500s the caller.
+//   - Missing required vars return a named "MISSING_ENV: X" error.
+//   - GET (or ?health=1) returns { ok, missing_env: [...] } with no side effect.
+//
+// Auth: service-role bearer OR an admin user's access token.
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { withLogging, logInvocation } from '../_shared/withLogging.ts';
+import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
-
-const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
-const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
-const TWILIO_FROM = Deno.env.get('TWILIO_FROM_NUMBER');
+const REQUIRED_ENV = [
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'TWILIO_ACCOUNT_SID',
+  'TWILIO_AUTH_TOKEN',
+  'TWILIO_FROM_NUMBER',
+] as const;
 
 const BodySchema = z.object({
   to_phone_e164: z.string().regex(/^\+[1-9]\d{6,14}$/, 'must be E.164 like +17865551234'),
@@ -38,21 +45,25 @@ const BodySchema = z.object({
   message: 'either body or content_sid required',
 });
 
-async function logSmsSend(args: {
-  template_name: string;
-  recipient: string;
-  triggered_by?: string | null;
-  twilio_sid?: string | null;
-  status: 'queued' | 'sent' | 'failed';
-  error_message?: string | null;
-  payload?: Record<string, unknown>;
-}) {
+async function logSmsSend(
+  supabaseUrl: string,
+  serviceKey: string,
+  args: {
+    template_name: string;
+    recipient: string;
+    triggered_by?: string | null;
+    twilio_sid?: string | null;
+    status: 'queued' | 'sent' | 'failed';
+    error_message?: string | null;
+    payload?: Record<string, unknown>;
+  },
+) {
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/email_send_log`, {
+    await fetch(`${supabaseUrl}/rest/v1/email_send_log`, {
       method: 'POST',
       headers: {
-        apikey: SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
         'Content-Type': 'application/json',
         Prefer: 'return=minimal',
       },
@@ -72,29 +83,28 @@ async function logSmsSend(args: {
   }
 }
 
-async function isAuthorized(req: Request): Promise<boolean> {
+async function isAuthorized(
+  req: Request,
+  supabaseUrl: string,
+  serviceKey: string,
+): Promise<boolean> {
   const auth = req.headers.get('Authorization') ?? '';
   if (!auth.startsWith('Bearer ')) return false;
-  const token = auth.slice(7);
+  const token = auth.slice(7).trim();
+  if (!token) return false;
 
-  if (token === SUPABASE_SERVICE_ROLE_KEY) return true;
+  if (token === serviceKey) return true;
 
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: auth } },
+    const admin = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
     });
-    // getUser() validates the token against the auth server. getClaims() was
-    // used here before and fails outright under the signing-keys setup, which
-    // rejected every legitimate admin self-test with a 401.
-    const { data: userData, error } = await supabase.auth.getUser(token);
+    const { data: userData, error } = await admin.auth.getUser(token);
     const userId = userData?.user?.id;
     if (error || !userId) {
       console.error('[auth] getUser failed', error?.message ?? 'no user');
       return false;
     }
-    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
     const { data: roleRow } = await admin
       .from('user_roles')
       .select('role')
@@ -102,26 +112,25 @@ async function isAuthorized(req: Request): Promise<boolean> {
       .eq('role', 'admin')
       .maybeSingle();
     return !!roleRow;
-  } catch {
+  } catch (err) {
+    console.error('[auth] check threw', err instanceof Error ? err.message : err);
     return false;
   }
 }
 
-/** Returns the current hour (0-23) in America/New_York. */
+/** Current hour (0-23) in America/New_York. */
 function easternHour(now = new Date()): number {
   const fmt = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/New_York',
     hour: 'numeric',
     hour12: false,
   });
-  const parts = fmt.formatToParts(now);
-  const hourPart = parts.find((p) => p.type === 'hour');
-  // Intl can return "24" at midnight in some runtimes — normalize.
+  const hourPart = fmt.formatToParts(now).find((p) => p.type === 'hour');
   const h = parseInt(hourPart?.value ?? '0', 10);
   return Number.isFinite(h) ? h % 24 : 0;
 }
 
-/** Returns weekday in America/New_York. 0 = Sunday, 6 = Saturday. */
+/** Weekday in America/New_York. 0 = Sunday, 6 = Saturday. */
 function easternWeekday(now = new Date()): number {
   const fmt = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/New_York',
@@ -137,7 +146,6 @@ function isSundayET(): boolean {
 
 function isQuietHours(): boolean {
   const h = easternHour();
-  // Tidy send window: 8:00 AM - 6:00 PM ET.
   return !(h >= 8 && h < 18);
 }
 
@@ -174,146 +182,189 @@ Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
 
-  // Entry log BEFORE any work, so a crash still leaves a row in Health.
-  const finish = await logInvocation('twilio', 'send_twilio_sms', { method: req.method });
-
-  if (req.method !== 'POST') {
-    await finish('error', 'method not allowed');
-    return jsonResponse({ ok: false, error: 'method not allowed' }, 405);
+  // ---- Health probe: no side effect, no auth, no secret values returned ----
+  const url = new URL(req.url);
+  const wantsHealth = req.method === 'GET' || url.searchParams.get('health') === '1';
+  if (wantsHealth) {
+    const { missing } = readEnv(REQUIRED_ENV);
+    return jsonResponse({
+      ok: missing.length === 0,
+      function: 'send-twilio-sms',
+      missing_env: missing,
+      quiet_hours_now: isQuietHours(),
+      sunday_now: isSundayET(),
+    }, 200);
   }
 
-  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
-    await finish('error', 'twilio_not_configured');
-    return jsonResponse(
-      { ok: false, error: 'twilio_not_configured' },
-      500,
-    );
-  }
-
-  if (!TWILIO_FROM) {
-    console.error('[send-twilio-sms] TWILIO_FROM_NUMBER is not set; no SMS can be sent');
-    await finish('error', 'twilio_from_number_missing');
-    return jsonResponse(
-      { ok: false, error: 'twilio_from_number_missing', message: 'TWILIO_FROM_NUMBER is not configured' },
-      500,
-    );
-  }
-
-  const ok = await isAuthorized(req);
-  if (!ok) {
-    await finish('error', 'unauthorized');
-    return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
-  }
-
-  let raw: unknown;
+  let finish: (status: 'success' | 'error' | 'warning', msg?: string | null) => Promise<void>;
   try {
-    raw = await req.json();
+    finish = await logInvocation('twilio', 'send_twilio_sms', { method: req.method });
   } catch {
-    await finish('error', 'invalid JSON body');
-    return jsonResponse({ ok: false, error: 'invalid JSON body' }, 400);
-  }
-
-  const parsed = BodySchema.safeParse(raw);
-  if (!parsed.success) {
-    await finish('error', 'validation_failed');
-    return jsonResponse(
-      { ok: false, error: 'validation_failed', details: parsed.error.flatten().fieldErrors },
-      400,
-    );
-  }
-
-  const { to_phone_e164, body, content_sid, content_variables, idempotency_key, template_name, triggered_by } = parsed.data;
-  const tplName = template_name ?? content_sid ?? 'sms-adhoc';
-
-  // Sunday quiet-day guard (America/New_York). Never send on Sundays.
-  if (isSundayET()) {
-    await finish('success', 'skipped: sunday_quiet_hours');
-    return jsonResponse({ ok: true, sent: false, reason: 'sunday_quiet_hours' }, 200);
-  }
-
-  // Quiet hours guard.
-  if (isQuietHours()) {
-    await finish('success', 'skipped: quiet_hours');
-    return jsonResponse({ ok: true, sent: false, reason: 'quiet_hours' }, 200);
-  }
-
-  const idempotencyHash = await sha256(idempotency_key);
-
-  const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
-  // Dedupe check.
-  if (await isDuplicate(admin, idempotencyHash)) {
-    await finish('success', 'skipped: duplicate_idempotency_key');
-    return jsonResponse({ ok: true, sent: false, reason: 'duplicate_idempotency_key' }, 200);
+    finish = async () => {};
   }
 
   try {
-    const result = await withLogging({
-      source: 'twilio',
-      event: 'sms.send',
-      payload: idempotency_key,
-      fn: async () => {
-        const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-        const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
+    if (req.method !== 'POST') {
+      await finish('error', 'method_not_allowed');
+      return jsonResponse({ ok: false, error: 'method_not_allowed' }, 200);
+    }
 
-        const form = new URLSearchParams({
-          From: TWILIO_FROM,
-          To: to_phone_e164,
-        });
-        if (content_sid) {
-          form.set('ContentSid', content_sid);
-          if (content_variables && Object.keys(content_variables).length > 0) {
-            form.set('ContentVariables', JSON.stringify(content_variables));
+    const { values, missing } = readEnv(REQUIRED_ENV);
+    if (missing.length > 0) {
+      const err = missingEnvError(missing);
+      console.error(`[send-twilio-sms] ${err} — no SMS can be sent`);
+      await finish('error', err);
+      return jsonResponse({ ok: false, sent: false, error: err, missing_env: missing }, 200);
+    }
+    const SUPABASE_URL = values.SUPABASE_URL;
+    const SERVICE_KEY = values.SUPABASE_SERVICE_ROLE_KEY;
+    const TWILIO_ACCOUNT_SID = values.TWILIO_ACCOUNT_SID;
+    const TWILIO_AUTH_TOKEN = values.TWILIO_AUTH_TOKEN;
+    const TWILIO_FROM = values.TWILIO_FROM_NUMBER;
+
+    const authorized = await isAuthorized(req, SUPABASE_URL, SERVICE_KEY);
+    if (!authorized) {
+      await finish('error', 'unauthorized');
+      return jsonResponse(
+        {
+          ok: false,
+          error: 'unauthorized',
+          hint: 'send a service-role bearer token or an admin user access token',
+        },
+        401,
+      );
+    }
+
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      await finish('error', 'invalid_json_body');
+      return jsonResponse({ ok: false, sent: false, error: 'invalid_json_body' }, 200);
+    }
+
+    const parsed = BodySchema.safeParse(raw);
+    if (!parsed.success) {
+      await finish('error', 'validation_failed');
+      return jsonResponse(
+        {
+          ok: false,
+          sent: false,
+          error: 'validation_failed',
+          details: parsed.error.flatten().fieldErrors,
+        },
+        200,
+      );
+    }
+
+    const {
+      to_phone_e164, body, content_sid, content_variables,
+      idempotency_key, template_name, triggered_by,
+    } = parsed.data;
+    const tplName = template_name ?? content_sid ?? 'sms-adhoc';
+
+    // Twilio always rejects To == From; catch it before spending a request.
+    if (to_phone_e164 === TWILIO_FROM) {
+      await finish('error', 'to_equals_from');
+      return jsonResponse({
+        ok: false,
+        sent: false,
+        error: 'to_equals_from',
+        message: 'Destination is the Tidy sending number. Use a different phone number.',
+      }, 200);
+    }
+
+    if (isSundayET()) {
+      await finish('success', 'skipped: sunday_quiet_hours');
+      return jsonResponse({ ok: true, sent: false, reason: 'sunday_quiet_hours' }, 200);
+    }
+
+    if (isQuietHours()) {
+      await finish('success', 'skipped: quiet_hours');
+      return jsonResponse({ ok: true, sent: false, reason: 'quiet_hours' }, 200);
+    }
+
+    const idempotencyHash = await sha256(idempotency_key);
+
+    const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    if (await isDuplicate(admin, idempotencyHash)) {
+      await finish('success', 'skipped: duplicate_idempotency_key');
+      return jsonResponse({ ok: true, sent: false, reason: 'duplicate_idempotency_key' }, 200);
+    }
+
+    try {
+      const result = await withLogging({
+        source: 'twilio',
+        event: 'sms.send',
+        payload: idempotency_key,
+        fn: async () => {
+          const apiUrl =
+            `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+          const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
+
+          const form = new URLSearchParams({ From: TWILIO_FROM, To: to_phone_e164 });
+          if (content_sid) {
+            form.set('ContentSid', content_sid);
+            if (content_variables && Object.keys(content_variables).length > 0) {
+              form.set('ContentVariables', JSON.stringify(content_variables));
+            }
+          } else if (body) {
+            form.set('Body', body);
           }
-        } else if (body) {
-          form.set('Body', body);
-        }
 
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${basic}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: form.toString(),
-        });
+          const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${basic}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: form.toString(),
+          });
 
-        const text = await res.text();
-        let json: Record<string, unknown> = {};
-        try { json = JSON.parse(text); } catch { /* keep raw */ }
+          const text = await res.text();
+          let json: Record<string, unknown> = {};
+          try { json = JSON.parse(text); } catch { /* keep raw */ }
 
-        if (!res.ok) {
-          throw new Error(
-            `twilio ${res.status}: ${(json.message as string) ?? text.slice(0, 300)}`,
-          );
-        }
+          if (!res.ok) {
+            throw new Error(
+              `twilio ${res.status}: ${(json.message as string) ?? text.slice(0, 300)}`,
+            );
+          }
 
-        return {
-          ok: true as const,
-          sent: true as const,
-          message_sid: (json.sid as string) ?? null,
-          status: (json.status as string) ?? null,
-        };
-      },
-    });
+          return {
+            ok: true as const,
+            sent: true as const,
+            message_sid: (json.sid as string) ?? null,
+            status: (json.status as string) ?? null,
+          };
+        },
+      });
 
-    await logSmsSend({
-      template_name: tplName, recipient: to_phone_e164, triggered_by,
-      twilio_sid: result.message_sid, status: 'sent',
-      payload: { has_body: !!body, has_content_sid: !!content_sid },
-    });
-    await finish('success');
-    return jsonResponse(result, 200);
+      await logSmsSend(SUPABASE_URL, SERVICE_KEY, {
+        template_name: tplName, recipient: to_phone_e164, triggered_by,
+        twilio_sid: result.message_sid, status: 'sent',
+        payload: { has_body: !!body, has_content_sid: !!content_sid },
+      });
+      await finish('success');
+      return jsonResponse(result, 200);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'unknown error';
+      console.error('[send-twilio-sms] failed', message);
+      await finish('error', message);
+      await logSmsSend(SUPABASE_URL, SERVICE_KEY, {
+        template_name: tplName, recipient: to_phone_e164, triggered_by,
+        status: 'failed', error_message: message,
+      });
+      // 200 with ok:false — a vendor failure must not 500 the caller.
+      return jsonResponse({ ok: false, sent: false, error: message }, 200);
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('[send-twilio-sms] failed', message);
-    await finish('error', message);
-    await logSmsSend({
-      template_name: tplName, recipient: to_phone_e164, triggered_by,
-      status: 'failed', error_message: message,
-    });
-    return jsonResponse({ ok: false, sent: false, error: message }, 500);
+    console.error('[send-twilio-sms] unhandled', message);
+    await finish('error', `unhandled: ${message}`);
+    return jsonResponse({ ok: false, sent: false, error: message }, 200);
   }
 });
