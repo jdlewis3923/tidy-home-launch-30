@@ -37,7 +37,7 @@ type BadgeRow = {
   pro_since: string | null;
 };
 
-type State = "loading" | "active" | "inactive" | "notfound";
+type State = "loading" | "active" | "suspended" | "revoked" | "notissued";
 
 const monthYear = (iso: string | null) => {
   if (!iso) return null;
