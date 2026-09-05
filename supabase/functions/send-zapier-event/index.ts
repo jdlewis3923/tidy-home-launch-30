@@ -156,9 +156,15 @@ async function isAuthorized(req: Request): Promise<boolean> {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: auth } },
     });
-    const { data: claims, error } = await supabase.auth.getClaims(token);
-    if (error || !claims?.claims?.sub) return false;
-    const userId = claims.claims.sub as string;
+    // getUser() validates the token against the auth server. getClaims() was
+    // used here before and fails outright under the signing-keys setup, which
+    // rejected every legitimate admin self-test with a 401.
+    const { data: userData, error } = await supabase.auth.getUser(token);
+    const userId = userData?.user?.id;
+    if (error || !userId) {
+      console.error('[auth] getUser failed', error?.message ?? 'no user');
+      return false;
+    }
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
