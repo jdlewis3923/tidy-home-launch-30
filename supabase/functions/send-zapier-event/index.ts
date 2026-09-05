@@ -16,7 +16,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
-import { withLogging } from '../_shared/withLogging.ts';
+import { withLogging, logInvocation } from '../_shared/withLogging.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -178,12 +178,17 @@ Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
 
+  // Entry log BEFORE any work, so a crash still leaves a row in Health.
+  const finish = await logInvocation('zapier', 'send_zapier_event', { method: req.method });
+
   if (req.method !== 'POST') {
+    await finish('error', 'method not allowed');
     return jsonResponse({ ok: false, error: 'method not allowed' }, 405);
   }
 
   const ok = await isAuthorized(req);
   if (!ok) {
+    await finish('error', 'unauthorized');
     return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
   }
 
@@ -191,11 +196,13 @@ Deno.serve(async (req) => {
   try {
     raw = await req.json();
   } catch {
+    await finish('error', 'invalid JSON body');
     return jsonResponse({ ok: false, error: 'invalid JSON body' }, 400);
   }
 
   const parsed = BodySchema.safeParse(raw);
   if (!parsed.success) {
+    await finish('error', 'validation_failed');
     return jsonResponse(
       { ok: false, error: 'validation_failed', details: parsed.error.flatten().fieldErrors },
       400,
@@ -247,6 +254,10 @@ Deno.serve(async (req) => {
 
   // Overall ok = zapier ok (twilio is best-effort and reported separately).
   const overallOk = (zapier as { ok?: boolean }).ok !== false;
+  await finish(
+    overallOk ? 'success' : 'error',
+    overallOk ? null : (zapier as { error?: string }).error ?? 'zapier dispatch failed',
+  );
   return jsonResponse({ ok: overallOk, zapier, twilio }, overallOk ? 200 : 500);
 });
 
