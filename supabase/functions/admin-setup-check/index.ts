@@ -22,7 +22,11 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const STRIPE_CONNECT_API_KEY = Deno.env.get('STRIPE_CONNECT_API_KEY') ?? '';
 const CHECKR_API_KEY = Deno.env.get('CHECKR_API_KEY') ?? '';
+const CHECKR_PACKAGE = Deno.env.get('CHECKR_PACKAGE') ?? '';
+const CHECKR_WEBHOOK_SECRET = Deno.env.get('CHECKR_WEBHOOK_SECRET') ?? '';
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
+const BREVO_TEMPLATE_WELCOME_T1 = Deno.env.get('BREVO_TEMPLATE_WELCOME_T1') ?? '';
+const TWILIO_FROM_NUMBER = Deno.env.get('TWILIO_FROM_NUMBER') ?? '';
 const DOCUMENSO_API_KEY = Deno.env.get('DOCUMENSO_API_KEY') ?? '';
 
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
