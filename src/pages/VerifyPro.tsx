@@ -582,7 +582,7 @@ const VerifyPro = () => {
                   </code>
                 </div>
 
-                {state === "active" && services && (
+                {(state === "active" || state === "suspended") && services && (
                   <p
                     className="mt-3.5 inline-block rounded-lg px-3 py-1 text-xs font-semibold uppercase"
                     style={{
