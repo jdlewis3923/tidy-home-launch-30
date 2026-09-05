@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ProBadgePanel from "@/components/admin/ProBadgePanel";
+import ProKitPanel from "@/components/admin/ProKitPanel";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -850,6 +851,9 @@ export default function AdminApplicants() {
                     setRows((prev) => prev.map((r) => (r.id === open.id ? { ...r, badge_status: next } : r)));
                   }}
                 />
+
+                {/* Pro Intake & Kit Order */}
+                <ProKitPanel applicantId={open.id} />
 
                 {/* Application Answers — what they claimed on /apply */}
                 {(() => {
