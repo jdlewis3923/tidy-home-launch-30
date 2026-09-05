@@ -702,8 +702,8 @@ const VerifyPro = () => {
               </>
             )}
 
-            {/* ---- Not found ---- */}
-            {state === "notfound" && (
+            {/* ---- Not issued / not found ---- */}
+            {state === "notissued" && (
               <>
                 <p className="mt-6 text-sm leading-relaxed" style={{ color: "hsl(var(--v-card-fg))" }}>
                   This badge was not issued by Tidy, or the code was mistyped.
