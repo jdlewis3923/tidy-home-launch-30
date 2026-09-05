@@ -455,7 +455,7 @@ const VerifyPro = () => {
   const since = monthYear(pro?.pro_since ?? null);
   const cleared = longDate(pro?.bg_check_cleared_at ?? null);
   const services = serviceLabel(pro?.services ?? null);
-  const showPhoto = state === "active" || state === "inactive";
+  const showPhoto = state === "active" || state === "suspended" || state === "revoked";
 
   const buttonBase =
     "verify-press mt-6 flex h-[52px] w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold";
