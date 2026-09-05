@@ -105,6 +105,10 @@ type Applicant = {
   pro_number: string | null;
   verify_token: string | null;
   badge_status: string | null;
+  bilingual: boolean | null;
+  insurance_willing: boolean | null;
+  fl_license: boolean | null;
+  license_expiry: string | null;
 };
 
 type TierCriterion = { label: string; met: boolean; actual: string };
