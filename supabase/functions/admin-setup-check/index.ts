@@ -190,6 +190,57 @@ async function checkDocumenso(): Promise<Check> {
     detail: 'API key configured — open /admin/documenso-templates to verify signature fields.' };
 }
 
+function secretCheck(id: string, label: string, value: string, remediation: string): Check {
+  return value
+    ? { id, label, status: 'pass', detail: 'Configured' }
+    : { id, label, status: 'fail', detail: 'Missing', remediation };
+}
+
+function checkCheckrApiKey(): Check {
+  return secretCheck(
+    'secret_checkr_api_key',
+    'Secret: CHECKR_API_KEY',
+    CHECKR_API_KEY,
+    'Set CHECKR_API_KEY in Lovable Cloud secrets once your Checkr account is approved.',
+  );
+}
+
+function checkCheckrPackage(): Check {
+  return secretCheck(
+    'secret_checkr_package',
+    'Secret: CHECKR_PACKAGE',
+    CHECKR_PACKAGE,
+    'Set CHECKR_PACKAGE in Lovable Cloud secrets (e.g., the package slug Checkr assigned).',
+  );
+}
+
+function checkCheckrWebhookSecret(): Check {
+  return secretCheck(
+    'secret_checkr_webhook_secret',
+    'Secret: CHECKR_WEBHOOK_SECRET',
+    CHECKR_WEBHOOK_SECRET,
+    'Set CHECKR_WEBHOOK_SECRET in Lovable Cloud secrets once Checkr provides a webhook signing secret.',
+  );
+}
+
+function checkBrevoWelcomeTemplate(): Check {
+  return secretCheck(
+    'secret_brevo_template_welcome_t1',
+    'Secret: BREVO_TEMPLATE_WELCOME_T1',
+    BREVO_TEMPLATE_WELCOME_T1,
+    'Set BREVO_TEMPLATE_WELCOME_T1 in Lovable Cloud secrets (Brevo template ID for the Tier 1 welcome email).',
+  );
+}
+
+function checkTwilioFromNumber(): Check {
+  return secretCheck(
+    'secret_twilio_from_number',
+    'Secret: TWILIO_FROM_NUMBER',
+    TWILIO_FROM_NUMBER,
+    'Set TWILIO_FROM_NUMBER in Lovable Cloud secrets (Twilio E.164 sending number, e.g. +1...).',
+  );
+}
+
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'GET' && req.method !== 'POST') return jsonResponse({ error: 'method_not_allowed' }, 405);
