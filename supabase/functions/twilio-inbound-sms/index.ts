@@ -10,7 +10,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const TIDY_FROM = "+17868291141";
+// Sending number comes from TWILIO_FROM_NUMBER only — never hardcoded.
+const TIDY_FROM = Deno.env.get("TWILIO_FROM_NUMBER");
 
 function validateTwilioSignature(
   authToken: string,
