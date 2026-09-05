@@ -4,8 +4,8 @@ import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
   Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
   Award, ShieldCheck, RefreshCw, ClipboardList, Gauge, Star, SlidersHorizontal,
-  GraduationCap,
-, PackageCheck } from "lucide-react";
+  GraduationCap, PackageCheck,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import CapacityBanner from "@/components/admin/CapacityBanner";
 import AdminSearch from "@/components/admin/AdminSearch";
