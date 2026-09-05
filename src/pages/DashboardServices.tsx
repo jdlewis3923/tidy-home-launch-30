@@ -33,7 +33,8 @@ import {
   type CanonService,
   type CanonSize,
 } from '@/lib/pricing-canon';
-import type { Frequency } from '@/lib/dashboard-pricing';
+import type { Frequency, ServiceType } from '@/lib/dashboard-pricing';
+import { isServiceAvailable } from '@/lib/service-availability';
 
 type CatalogRow = {
   addon_key: string;
