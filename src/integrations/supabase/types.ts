@@ -4445,6 +4445,19 @@ export type Database = {
         Returns: undefined
       }
       current_user_admin: { Args: never; Returns: boolean }
+      customers_needing_attention: {
+        Args: never
+        Returns: {
+          first_name: string
+          last_name: string
+          missing_pro: boolean
+          monthly_total_cents: number
+          preferred_pro_id: string
+          retired_price: boolean
+          subscription_id: string
+          user_id: string
+        }[]
+      }
       ensure_referral_code: { Args: never; Returns: string }
       founding_spots_left: { Args: { _zip: string }; Returns: number }
       gen_intake_token: { Args: never; Returns: string }
