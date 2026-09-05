@@ -462,7 +462,10 @@ export default function AdminCommand() {
           {/* 5 — ALERT FEED */}
           <AlertFeed events={events} ruleByCode={ruleByCode} onUpdate={updateEvent} />
 
-          {/* 6 — TRUST STRIP */}
+          {/* 6 — NEEDS ATTENTION */}
+          <NeedsAttentionPanel customers={needsAttention} />
+
+          {/* 7 — TRUST STRIP */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6">
             <h2 className="text-base font-semibold text-slate-900">Trust</h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
