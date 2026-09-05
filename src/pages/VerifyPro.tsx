@@ -443,7 +443,11 @@ const VerifyPro = () => {
         return;
       }
       setPro(row);
-      setState(row.badge_status === "active" ? "active" : "inactive");
+      const status = row.badge_status ?? "notissued";
+      if (status === "active") setState("active");
+      else if (status === "suspended") setState("suspended");
+      else if (status === "revoked") setState("revoked");
+      else setState("notissued");
     })();
     return () => { cancelled = true; };
   }, [token]);
