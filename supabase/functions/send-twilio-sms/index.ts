@@ -179,6 +179,14 @@ Deno.serve(async (req) => {
     );
   }
 
+  if (!TWILIO_FROM) {
+    console.error('[send-twilio-sms] TWILIO_FROM_NUMBER is not set; no SMS can be sent');
+    return jsonResponse(
+      { ok: false, error: 'twilio_from_number_missing', message: 'TWILIO_FROM_NUMBER is not configured' },
+      500,
+    );
+  }
+
   const ok = await isAuthorized(req);
   if (!ok) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
 
