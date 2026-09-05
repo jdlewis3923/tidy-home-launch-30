@@ -598,7 +598,7 @@ const VerifyPro = () => {
               </div>
             )}
 
-            {state === "notfound" && (
+            {state === "notissued" && (
               <div className="mt-8 text-center">
                 <StatusOrb tone="neutral" label="Unrecognised" />
                 <h1
