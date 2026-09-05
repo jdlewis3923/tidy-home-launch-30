@@ -176,6 +176,13 @@
       "when": 1788542459036,
       "tag": "0024_pro_badge_verification",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1788614858038,
+      "tag": "0025_create_pro_kit_intake",
+      "breakpoints": true
     }
   ]
 }
