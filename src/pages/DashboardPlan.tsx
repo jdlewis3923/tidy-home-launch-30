@@ -47,6 +47,16 @@ const STEP_NAMES = [
 const SERVICE_PARAM_MAP: Record<string, ServiceType> = {
   cleaning: 'cleaning', lawn: 'lawn', detailing: 'detailing',
 };
+
+/** Drop any service that is not open for signup yet (see service-availability). */
+function onlyAvailable(next: ConfigState): ConfigState {
+  const services = next.services.filter(isServiceAvailable);
+  const frequencies = { ...next.frequencies };
+  for (const key of Object.keys(frequencies) as ServiceType[]) {
+    if (!isServiceAvailable(key)) delete frequencies[key];
+  }
+  return { ...next, services, frequencies };
+}
 const PLAN_PARAM_MAP: Record<string, Frequency> = {
   monthly: 'monthly', biweekly: 'biweekly', weekly: 'weekly', full: 'biweekly',
 };
@@ -54,7 +64,7 @@ const PLAN_PARAM_MAP: Record<string, Frequency> = {
 export default function DashboardPlan() {
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(0);
-  const [state, setState] = useState<ConfigState>(loadState);
+  const [state, setState] = useState<ConfigState>(() => onlyAvailable(loadState()));
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [hasExistingSub, setHasExistingSub] = useState(false);
   const [checkingSub, setCheckingSub] = useState(true);
@@ -134,8 +144,9 @@ export default function DashboardPlan() {
           next.frequencies[svc] = svc === 'lawn' ? 'monthly' : 'biweekly';
         }
       }
-      saveState(next);
-      return next;
+      const gated = onlyAvailable(next);
+      saveState(gated);
+      return gated;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasExistingSub, checkingSub]);
