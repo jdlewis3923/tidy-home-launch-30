@@ -251,37 +251,31 @@ export default function DashboardPlan() {
 
         {step >= 1 && step <= 2 && <ExistingAccountInline />}
 
+        {/* One step at a time. Plain keyed container — never an exit-animated
+            wrapper, which could strand the previous step on screen and leave
+            the visitor with no options and a disabled continue button. */}
         <div className="relative overflow-x-hidden">
-          <AnimatePresence mode="wait" custom={direction} initial={false}>
-            <motion.div
-              key={`step-${step}`}
-              custom={direction}
-              initial={{ opacity: 0, x: direction === 0 ? 0 : direction * 32 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: direction * -32 }}
-              transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-            >
-              {step === 0 && (
-                <StepZipGate
-                  state={state}
-                  onChange={updateState}
-                  onValid={() => { setDirection(1); setStep(1); }}
-                />
-              )}
-              {step === 1 && (
-                <div className="space-y-4">
-                  <StepServices state={state} onChange={updateState} />
-                  <BundleNudge state={state} onChange={updateState} />
-                </div>
-              )}
-              {step === 2 && <StepFrequency state={state} onChange={updateState} />}
-              {step === 3 && <StepProperty  state={state} onChange={updateState} />}
-              {step === 4 && <StepDetails   state={state} onChange={updateState} />}
-              {step === 5 && <StepAddOns    state={state} onChange={updateState} />}
-              {step === 6 && <StepReview    state={state} onEdit={() => { setDirection(-1); setStep(1); }} />}
-              {step === 7 && <StepPayment   state={state} onChange={updateState} />}
-            </motion.div>
-          </AnimatePresence>
+          <div key={`step-${step}`} className="animate-calm-in">
+            {step === 0 && (
+              <StepZipGate
+                state={state}
+                onChange={updateState}
+                onValid={() => { setDirection(1); setStep(1); }}
+              />
+            )}
+            {step === 1 && (
+              <div className="space-y-4">
+                <StepServices state={state} onChange={updateState} />
+                <BundleNudge state={state} onChange={updateState} />
+              </div>
+            )}
+            {step === 2 && <StepFrequency state={state} onChange={updateState} />}
+            {step === 3 && <StepProperty  state={state} onChange={updateState} />}
+            {step === 4 && <StepDetails   state={state} onChange={updateState} />}
+            {step === 5 && <StepAddOns    state={state} onChange={updateState} />}
+            {step === 6 && <StepReview    state={state} onEdit={() => { setDirection(-1); setStep(1); }} />}
+            {step === 7 && <StepPayment   state={state} onChange={updateState} />}
+          </div>
         </div>
 
         {(step === 6 || step === 7) && customQuote && (
