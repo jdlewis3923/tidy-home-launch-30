@@ -439,7 +439,7 @@ const VerifyPro = () => {
       const row = (Array.isArray(data) ? data[0] : null) as BadgeRow | null;
       if (error || !row) {
         setPro(null);
-        setState("notfound");
+        setState("notissued");
         return;
       }
       setPro(row);
