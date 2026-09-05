@@ -17,6 +17,10 @@ export type ProKitRow = {
   status: string;
   submitted_at: string | null;
   created_at: string;
+  legal_name?: string | null;
+  badge_name?: string | null;
+  email?: string | null;
+  service_line?: string | null;
   [key: string]: unknown;
 };
 
@@ -129,7 +133,7 @@ export default function ProKitEditor({ kit, onSaved }: { kit: ProKitRow; onSaved
     const { id, token, created_at, ...rest } = draft as Record<string, unknown> & { id: string };
     const payload: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(rest)) payload[k] = v === "" ? null : v;
-    const { error } = await supabase.from("pro_kit").update(payload).eq("id", kit.id);
+    const { error } = await supabase.from("pro_kit").update(payload as never).eq("id", kit.id);
     setSaving(false);
     if (error) toast({ title: "Could not save", description: error.message, variant: "destructive" });
     else { toast({ title: "Kit saved" }); onSaved(); }
