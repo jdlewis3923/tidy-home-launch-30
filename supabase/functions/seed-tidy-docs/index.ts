@@ -1,4 +1,4 @@
-// Tidy — Seed 19 contractor PDFs into company_documents (admin-only, idempotent).
+// Tidy — Seed 21 contractor PDFs into company_documents (admin-only, idempotent).
 //
 // Inserts placeholder rows into `company_documents` for each known Tidy
 // contractor PDF. Files are uploaded later via /admin/documents — at which
@@ -41,6 +41,8 @@ const DOCS: Seed[] = [
   { filename: '17_Contract_ScheduleA.pdf', category: 'Contracts', description: 'Documenso Schedule A — independent contractor contract.' },
   { filename: '18_InterviewGuide_ProConversation.pdf', category: 'HR',    description: 'Interview guide and pro conversation script.' },
   { filename: '19_HiringPlaybook.pdf',            category: 'HR',          description: 'Tidy hiring process playbook — recruiter-ready SOP from application to first paid visit.' },
+  { filename: '20_ProIntakeKitOrder_Fillable.pdf', category: 'Onboarding', description: 'Pro Intake & Kit Order (fillable PDF) — contractor onboarding intake and kit order.' },
+  { filename: '21_ProIntakeKitOrder_Print.pdf',    category: 'Onboarding', description: 'Pro Intake & Kit Order (print) — printable contractor onboarding intake and kit order.' },
 ];
 
 Deno.serve(async (req) => {

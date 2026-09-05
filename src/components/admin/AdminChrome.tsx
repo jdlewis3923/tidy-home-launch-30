@@ -4,7 +4,7 @@ import {
   Activity, Inbox, BarChart3, Heart, FileText, Users,
   Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
   Award, ShieldCheck, RefreshCw, ClipboardList, Gauge, Star, SlidersHorizontal,
-  GraduationCap,
+  GraduationCap, PackageCheck,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import CapacityBanner from "@/components/admin/CapacityBanner";
@@ -34,6 +34,7 @@ const NAV = [
   { to: "/admin/reviews",     label: "Reviews",     icon: Star },
   { to: "/admin/applicants",  label: "Applicants",  icon: Users },
   { to: "/admin/onboarding",  label: "Onboarding",  icon: GraduationCap },
+  { to: "/admin/pro-kits",    label: "Pro Kits",    icon: PackageCheck },
   { to: "/admin/tier-progression", label: "Tier",   icon: Award },
   { to: "/admin/coi-review",  label: "COI",         icon: ShieldCheck },
   { to: "/admin/insurance",   label: "Insurance",   icon: ShieldCheck },

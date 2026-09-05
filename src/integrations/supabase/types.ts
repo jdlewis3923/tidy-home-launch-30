@@ -2641,6 +2641,170 @@ export type Database = {
           },
         ]
       }
+      pro_kit: {
+        Row: {
+          applicant_id: string | null
+          auto_insurance: string | null
+          badge_back: string | null
+          badge_name: string | null
+          cap: string | null
+          checkr_cleared: string | null
+          checkr_sent: string | null
+          coi_checks: Json
+          created_at: string
+          cross_trained: boolean | null
+          cross_which: string | null
+          days: Json
+          dl_expiry: string | null
+          dl_number: string | null
+          door_material: string | null
+          email: string | null
+          equip_confirmed: boolean | null
+          equip_gap: string | null
+          first_available: string | null
+          home_zip: string | null
+          hours: string | null
+          ica_signed: string | null
+          id: string
+          ins_carrier: string | null
+          ins_expiry: string | null
+          ins_policy: string | null
+          issued_by: string | null
+          issued_date: string | null
+          kit_done: Json
+          kit_issued: Json
+          legal_name: string | null
+          mail_address: string | null
+          max_drive: string | null
+          mobile: string | null
+          other_work: string | null
+          polo_cut: string | null
+          polo_size: string | null
+          pro_no: string | null
+          service_line: string | null
+          status: string
+          submitted_at: string | null
+          tee_cut: string | null
+          tee_size: string | null
+          token: string
+          vehicle: string | null
+          vehicle_2: string | null
+          vehicle_color: string | null
+          vest_size: string | null
+          visits_per_week: number | null
+        }
+        Insert: {
+          applicant_id?: string | null
+          auto_insurance?: string | null
+          badge_back?: string | null
+          badge_name?: string | null
+          cap?: string | null
+          checkr_cleared?: string | null
+          checkr_sent?: string | null
+          coi_checks?: Json
+          created_at?: string
+          cross_trained?: boolean | null
+          cross_which?: string | null
+          days?: Json
+          dl_expiry?: string | null
+          dl_number?: string | null
+          door_material?: string | null
+          email?: string | null
+          equip_confirmed?: boolean | null
+          equip_gap?: string | null
+          first_available?: string | null
+          home_zip?: string | null
+          hours?: string | null
+          ica_signed?: string | null
+          id?: string
+          ins_carrier?: string | null
+          ins_expiry?: string | null
+          ins_policy?: string | null
+          issued_by?: string | null
+          issued_date?: string | null
+          kit_done?: Json
+          kit_issued?: Json
+          legal_name?: string | null
+          mail_address?: string | null
+          max_drive?: string | null
+          mobile?: string | null
+          other_work?: string | null
+          polo_cut?: string | null
+          polo_size?: string | null
+          pro_no?: string | null
+          service_line?: string | null
+          status?: string
+          submitted_at?: string | null
+          tee_cut?: string | null
+          tee_size?: string | null
+          token?: string
+          vehicle?: string | null
+          vehicle_2?: string | null
+          vehicle_color?: string | null
+          vest_size?: string | null
+          visits_per_week?: number | null
+        }
+        Update: {
+          applicant_id?: string | null
+          auto_insurance?: string | null
+          badge_back?: string | null
+          badge_name?: string | null
+          cap?: string | null
+          checkr_cleared?: string | null
+          checkr_sent?: string | null
+          coi_checks?: Json
+          created_at?: string
+          cross_trained?: boolean | null
+          cross_which?: string | null
+          days?: Json
+          dl_expiry?: string | null
+          dl_number?: string | null
+          door_material?: string | null
+          email?: string | null
+          equip_confirmed?: boolean | null
+          equip_gap?: string | null
+          first_available?: string | null
+          home_zip?: string | null
+          hours?: string | null
+          ica_signed?: string | null
+          id?: string
+          ins_carrier?: string | null
+          ins_expiry?: string | null
+          ins_policy?: string | null
+          issued_by?: string | null
+          issued_date?: string | null
+          kit_done?: Json
+          kit_issued?: Json
+          legal_name?: string | null
+          mail_address?: string | null
+          max_drive?: string | null
+          mobile?: string | null
+          other_work?: string | null
+          polo_cut?: string | null
+          polo_size?: string | null
+          pro_no?: string | null
+          service_line?: string | null
+          status?: string
+          submitted_at?: string | null
+          tee_cut?: string | null
+          tee_size?: string | null
+          token?: string
+          vehicle?: string | null
+          vehicle_2?: string | null
+          vehicle_color?: string | null
+          vest_size?: string | null
+          visits_per_week?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_kit_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pro_notifications: {
         Row: {
           body: string | null
@@ -4229,6 +4393,7 @@ export type Database = {
       current_user_admin: { Args: never; Returns: boolean }
       ensure_referral_code: { Args: never; Returns: string }
       founding_spots_left: { Args: { _zip: string }; Returns: number }
+      gen_intake_token: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_customer_preferred_pro_options: {
         Args: { p_user_id: string }
@@ -4269,6 +4434,11 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      intake_load: { Args: { _token: string }; Returns: Json }
+      intake_save: {
+        Args: { _patch: Json; _submit?: boolean; _token: string }
+        Returns: Json
       }
       is_contractor_job_eligible: {
         Args: { _contractor_id: string }
