@@ -740,7 +740,7 @@ const VerifyPro = () => {
             >
               {PHONE_DISPLAY}
             </a>
-            {(state === "inactive" || state === "notfound") && (
+            {(state === "suspended" || state === "revoked" || state === "notissued") && (
               <p className="text-sm font-semibold" style={{ color: "hsl(var(--v-amberred))" }}>
                 If you feel unsafe, call 911 first.
               </p>
