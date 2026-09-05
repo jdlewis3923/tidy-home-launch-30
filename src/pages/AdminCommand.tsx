@@ -55,6 +55,16 @@ interface AlertEvent {
   suppressed_in_digest: boolean;
   status: "open" | "acknowledged" | "resolved" | string;
 }
+interface NeedsAttentionCustomer {
+  subscription_id: string;
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  monthly_total_cents: number;
+  preferred_pro_id: string | null;
+  retired_price: boolean;
+  missing_pro: boolean;
+}
 
 const ZIP_LABELS: Record<string, string> = {
   "33156": "Pinecrest",
