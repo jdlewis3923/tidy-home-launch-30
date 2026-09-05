@@ -168,17 +168,22 @@ export default function AdminChrome() {
         </div>
         <div className="admin-hud-topbar__right">
           <AdminThemeToggle active />
-          {/* Days-to-launch countdown badge */}
+          {/* Real site_live status badge */}
           <span
             className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]"
             style={{
               backgroundColor: "hsl(var(--admin-chip-bg))",
-              color: "hsl(var(--admin-gold))",
-              border: "1px solid hsl(var(--admin-gold) / 0.35)",
+              color: mode.color,
+              border: `1px solid ${mode.border}`,
             }}
-            title={launched ? "Tidy is live." : `Launching ${launchDate.toDateString()}`}
+            title={mode.title}
           >
-            {countdownLabel}
+            {siteMode === "loading" ? mode.label : (
+              <>
+                <Shield className="h-2.5 w-2.5 mr-1" />
+                {mode.label}
+              </>
+            )}
           </span>
           <span
             className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]"
