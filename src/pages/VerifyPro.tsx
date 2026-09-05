@@ -575,7 +575,7 @@ const VerifyPro = () => {
                       letterSpacing: "0.08em",
                       backgroundColor: "hsl(var(--v-tile))",
                       border: "1px solid hsl(var(--v-tile-border))",
-                      color: state === "inactive" ? "hsl(var(--v-amberred))" : "hsl(var(--primary))",
+                      color: state === "active" ? "hsl(var(--primary))" : "hsl(var(--v-amberred))",
                     }}
                   >
                     {pro.pro_number ?? "—"}
