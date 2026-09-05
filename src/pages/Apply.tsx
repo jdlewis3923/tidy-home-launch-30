@@ -42,6 +42,10 @@ type Form = {
   has_vehicle: YesNo | "";
   has_supplies: YesNo | "";
   work_authorized: YesNo | "";
+  bilingual: YesNo | "";
+  insurance_willing: YesNo | "";
+  fl_license: YesNo | "";
+  license_expiry: string;
   description: string;
 };
 
@@ -56,6 +60,10 @@ const EMPTY: Form = {
   has_vehicle: "",
   has_supplies: "",
   work_authorized: "",
+  bilingual: "",
+  insurance_willing: "",
+  fl_license: "",
+  license_expiry: "",
   description: "",
 };
 
