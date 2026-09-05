@@ -100,3 +100,13 @@ verify_jwt = false
 # handler only accepts a 1-5 star rating plus an optional comment.
 [functions.submit-visit-rating]
 verify_jwt = false
+
+# Admin self-tests and internal function-to-function calls use either a valid
+# admin access token or the service-role bearer. The edge gateway cannot
+# validate both token types consistently after signing-key migration, so each
+# handler performs the authorization check before reading the request body.
+[functions.send-zapier-event]
+verify_jwt = false
+
+[functions.send-twilio-sms]
+verify_jwt = false
