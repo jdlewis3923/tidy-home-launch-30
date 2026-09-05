@@ -598,6 +598,65 @@ function FunnelTable({ funnel, scanSeries }: { funnel: Metrics; scanSeries: Reco
   );
 }
 
+function NeedsAttentionPanel({ customers }: { customers: NeedsAttentionCustomer[] }) {
+  return (
+    <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6">
+      <div className="flex items-center gap-2">
+        <AlertTriangle className="h-5 w-5 text-rose-500" aria-hidden />
+        <h2 className="text-base font-semibold text-slate-900">Needs attention</h2>
+      </div>
+      {customers.length === 0 ? (
+        <p className="mt-3 text-sm text-slate-500">— no customers on retired SKUs or without an assigned Pro.</p>
+      ) : (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-xs min-w-[640px]">
+            <thead>
+              <tr className="text-left text-[11px] uppercase tracking-wide text-slate-500 border-b border-slate-100">
+                <th className="py-2 pr-3 font-semibold">Customer</th>
+                <th className="py-2 pr-3 font-semibold">Price</th>
+                <th className="py-2 pr-3 font-semibold">Issue</th>
+                <th className="py-2 pr-3 font-semibold">Action</th>
+              </tr>
+            </thead>
+            <tbody className="text-slate-800">
+              {customers.map((c) => (
+                <tr key={c.subscription_id} className="border-b border-slate-100 last:border-0">
+                  <td className="py-2.5 pr-3 whitespace-nowrap">
+                    {c.first_name || c.last_name ? `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() : "—"}
+                  </td>
+                  <td className="py-2.5 pr-3 whitespace-nowrap">{money(c.monthly_total_cents / 100)}</td>
+                  <td className="py-2.5 pr-3">
+                    <div className="flex flex-wrap gap-1.5">
+                      {c.retired_price && (
+                        <span className="inline-flex items-center rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-700">
+                          Retired SKU
+                        </span>
+                      )}
+                      {c.missing_pro && (
+                        <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                          No Pro assigned
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-2.5 pr-3">
+                    <Link
+                      to={`/admin/customers/${c.user_id}`}
+                      className="font-semibold text-blue-600 hover:underline"
+                    >
+                      Open customer
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function sevDot(sev: string) {
   if (sev === "red") return "bg-rose-500";
   if (sev === "amber") return "bg-amber-500";
