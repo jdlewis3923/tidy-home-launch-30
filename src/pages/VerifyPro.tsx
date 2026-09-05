@@ -752,7 +752,7 @@ const VerifyPro = () => {
         {state !== "loading" && (
           <>
             <VettingGrid />
-            {state === "notfound" && <BadgeDiagram />}
+            {state === "notissued" && <BadgeDiagram />}
             <CompanyBlock />
           </>
         )}
