@@ -124,7 +124,7 @@ export default function DashboardServices() {
   const sub = data.subscription;
   const planServices = ((sub?.services ?? []) as CanonService[]).filter(Boolean);
   const missingServices = (['cleaning', 'lawn', 'detailing'] as CanonService[]).filter(
-    (s) => !planServices.includes(s),
+    (s) => !planServices.includes(s) && isServiceAvailable(s as unknown as ServiceType),
   );
 
   useEffect(() => {
