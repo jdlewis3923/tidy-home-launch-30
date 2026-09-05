@@ -133,6 +133,36 @@ export default function Apply() {
       toast({ title: t("US work authorization?"), variant: "destructive" });
       return;
     }
+    if (!form.bilingual) {
+      toast({ title: t("Bilingual English + Spanish?"), variant: "destructive" });
+      return;
+    }
+    if (!form.insurance_willing) {
+      toast({ title: t("Willing to carry GL insurance?"), variant: "destructive" });
+      return;
+    }
+    if (!form.fl_license) {
+      toast({ title: t("Valid Florida driver's licence?"), variant: "destructive" });
+      return;
+    }
+    if (form.fl_license === "yes" && !form.license_expiry) {
+      toast({ title: t("Driver's licence expiry date?"), variant: "destructive" });
+      return;
+    }
+
+    // Hard disqualifiers — do not create a candidate record.
+    if (form.bilingual === "no") {
+      setDeclined(t("This role requires fluent English and Spanish to communicate with our Miami customers."));
+      return;
+    }
+    if (form.insurance_willing === "no") {
+      setDeclined(t("Every Tidy Pro must carry a $1M/$2M general liability policy naming Tidy as Additional Insured before the first visit."));
+      return;
+    }
+    if (form.fl_license === "no") {
+      setDeclined(t("A valid Florida driver's licence is required to drive between appointments."));
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -148,6 +178,10 @@ export default function Apply() {
         has_vehicle: form.has_vehicle === "yes",
         has_supplies: form.has_supplies === "yes",
         work_authorized: form.work_authorized === "yes",
+        bilingual: form.bilingual === "yes",
+        insurance_willing: form.insurance_willing === "yes",
+        fl_license: form.fl_license === "yes",
+        license_expiry: form.license_expiry || undefined,
         description: form.description.trim() || undefined,
       };
       const { data, error } = await supabase.functions.invoke("submit-application", { body: payload });
