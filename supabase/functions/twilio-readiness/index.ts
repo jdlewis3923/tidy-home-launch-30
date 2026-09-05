@@ -23,6 +23,8 @@ const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const SID = Deno.env.get('TWILIO_ACCOUNT_SID') ?? '';
 const TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN') ?? '';
 const FROM = (Deno.env.get('TWILIO_FROM_NUMBER') ?? '').trim();
+// Number to probe when the secret is unset — proposed, never assumed valid.
+const CANDIDATE_DEFAULT = '+17868291141';
 
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -118,24 +120,30 @@ async function a2pCheck(numberSid: string, phone: string): Promise<Check> {
     remediation: 'Create a Messaging Service in Twilio, register a 10DLC brand and campaign, and add this number to the service.' };
 }
 
-async function runChecks(): Promise<{ overall: Status; checks: Check[]; owned_numbers: string[]; from: string }> {
+async function runChecks(candidate?: string): Promise<{ overall: Status; checks: Check[]; owned_numbers: string[]; from: string; tested: string; source: 'secret' | 'candidate' }> {
   const checks: Check[] = [];
   const owned: string[] = [];
+
+  // Candidate mode: when the secret is unset we still probe the proposed
+  // number so the account's real numbers can be seen before saving anything.
+  const cand = (candidate ?? '').trim() || CANDIDATE_DEFAULT;
+  const phone = FROM || cand;
+  const source: 'secret' | 'candidate' = FROM ? 'secret' : 'candidate';
 
   // 1 — secret present
   if (!FROM) {
     checks.push({ id: 'twilio_from_set', label: 'TWILIO_FROM_NUMBER is set', status: 'fail',
-      detail: 'TWILIO_FROM_NUMBER is not set — no SMS of any kind can send.',
-      remediation: 'Save the Twilio sending number in E.164 form (e.g. +17865551234) as TWILIO_FROM_NUMBER.' });
-    return { overall: 'fail', checks, owned_numbers: owned, from: '' };
+      detail: `TWILIO_FROM_NUMBER is not set — no SMS of any kind can send. Testing candidate ${phone} against the account instead.`,
+      remediation: 'Save the verified Twilio sending number in E.164 form (e.g. +17865551234) as TWILIO_FROM_NUMBER.' });
+  } else {
+    checks.push({ id: 'twilio_from_set', label: 'TWILIO_FROM_NUMBER is set', status: 'pass', detail: FROM });
   }
-  checks.push({ id: 'twilio_from_set', label: 'TWILIO_FROM_NUMBER is set', status: 'pass', detail: FROM });
 
   if (!SID || !TOKEN) {
     checks.push({ id: 'twilio_credentials', label: 'Twilio account credentials', status: 'fail',
       detail: 'TWILIO_ACCOUNT_SID and/or TWILIO_AUTH_TOKEN are not set — the number cannot be verified against the account.',
       remediation: 'Save both TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN, then re-run this check.' });
-    return { overall: 'fail', checks, owned_numbers: owned, from: FROM };
+    return { overall: 'fail', checks, owned_numbers: owned, from: phone, tested: phone, source };
   }
 
   // 2 — owned by the account
@@ -146,43 +154,43 @@ async function runChecks(): Promise<{ overall: Status; checks: Check[]; owned_nu
     checks.push({ id: 'twilio_owned', label: 'Number is owned by the Twilio account', status: 'fail',
       detail: `Could not read IncomingPhoneNumbers (HTTP ${list.status}): ${list.text.slice(0, 160)}`,
       remediation: 'Verify TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN are current and have API access.' });
-    return { overall: 'fail', checks, owned_numbers: owned, from: FROM };
+    return { overall: 'fail', checks, owned_numbers: owned, from: phone, tested: phone, source };
   }
 
   const nums: any[] = list.json?.incoming_phone_numbers ?? [];
   for (const n of nums) if (n?.phone_number) owned.push(String(n.phone_number));
-  const match = nums.find((n) => String(n?.phone_number) === FROM);
+  const match = nums.find((n) => String(n?.phone_number) === phone);
 
   if (!match) {
     checks.push({ id: 'twilio_owned', label: 'Number is owned by the Twilio account', status: 'fail',
       detail: owned.length
-        ? `${FROM} cannot send — it is not owned by this Twilio account. The account owns: ${owned.join(', ')}.`
-        : `${FROM} cannot send — this Twilio account owns no phone numbers at all.`,
+        ? `${phone} cannot send — it is not owned by this Twilio account. The account owns: ${owned.join(', ')}.`
+        : `${phone} cannot send — this Twilio account owns no phone numbers at all.`,
       remediation: owned.length
-        ? `Set TWILIO_FROM_NUMBER to one of the owned numbers above.`
-        : 'Buy or port a number in Twilio, then set TWILIO_FROM_NUMBER to it.' });
-    return { overall: 'fail', checks, owned_numbers: owned, from: FROM };
+        ? `Set TWILIO_phone_NUMBER to one of the owned numbers above.`
+        : 'Buy or port a number in Twilio, then set TWILIO_phone_NUMBER to it.' });
+    return { overall: 'fail', checks, owned_numbers: owned, from: phone, tested: phone, source };
   }
   checks.push({ id: 'twilio_owned', label: 'Number is owned by the Twilio account', status: 'pass',
-    detail: `${FROM} found on the account${match.friendly_name ? ` ("${match.friendly_name}")` : ''}.` });
+    detail: `${phone} found on the account${match.friendly_name ? ` ("${match.friendly_name}")` : ''}.` });
 
   // 3 — SMS capability
   const smsCapable = Boolean(match?.capabilities?.sms);
   checks.push(smsCapable
     ? { id: 'twilio_sms_capable', label: 'Number supports SMS', status: 'pass', detail: 'Capabilities include SMS.' }
     : { id: 'twilio_sms_capable', label: 'Number supports SMS', status: 'fail',
-        detail: `${FROM} has no SMS capability (capabilities: ${Object.entries(match?.capabilities ?? {}).filter(([, v]) => v).map(([k]) => k).join(', ') || 'none'}).`,
-        remediation: 'Pick a Twilio number with SMS capability and set TWILIO_FROM_NUMBER to it.' });
+        detail: `${phone} has no SMS capability (capabilities: ${Object.entries(match?.capabilities ?? {}).filter(([, v]) => v).map(([k]) => k).join(', ') || 'none'}).`,
+        remediation: 'Pick a Twilio number with SMS capability and set TWILIO_phone_NUMBER to it.' });
 
   // 4 — carrier registration
   try {
-    checks.push(await a2pCheck(String(match.sid ?? ''), FROM));
+    checks.push(await a2pCheck(String(match.sid ?? ''), phone));
   } catch (e) {
     checks.push({ id: 'twilio_a2p', label: 'Carrier registration (A2P 10DLC / toll-free)', status: 'warn',
       detail: `Registration lookup failed: ${(e as Error).message}` });
   }
 
-  return { overall: worst(checks), checks, owned_numbers: owned, from: FROM };
+  return { overall: worst(checks), checks, owned_numbers: owned, from: phone, tested: phone, source };
 }
 
 Deno.serve(async (req) => {
@@ -203,7 +211,13 @@ Deno.serve(async (req) => {
   if (!roleRow) return jsonResponse({ error: 'forbidden' }, 403);
 
   try {
-    const result = await runChecks();
+    let candidate: string | undefined;
+    if (req.method === 'POST') {
+      const body = await req.json().catch(() => ({}));
+      const c = (body as { candidate?: unknown })?.candidate;
+      if (typeof c === 'string' && /^\+[1-9]\d{6,14}$/.test(c.trim())) candidate = c.trim();
+    }
+    const result = await runChecks(candidate);
     if (result.overall === 'fail') {
       console.error('[twilio-readiness] FAIL', JSON.stringify(result.checks));
     }
