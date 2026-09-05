@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { isServiceAvailable } from '@/lib/service-availability';
 import { ConfigState, ServiceType, Frequency, loadState, saveState, clearState, hasCustomQuote, sizeFor, VALID_ZIPS, calculatePricing } from '@/lib/dashboard-pricing';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,14 +86,17 @@ export default function DashboardPlan() {
         }
         const { data: row } = await supabase
           .from("subscriptions")
-          .select("status")
+          .select("status, stripe_subscription_id")
           .eq("user_id", uid)
           .in("status", ["active", "paused"])
+          .not("stripe_subscription_id", "is", null)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
         if (mounted) {
-          setHasExistingSub(!!row);
+          // Only a real Stripe-backed plan may block the builder. A stale local
+          // row with no Stripe subscription must never stop someone buying.
+          setHasExistingSub(!!row?.stripe_subscription_id);
           setCheckingSub(false);
         }
       } catch {
@@ -224,6 +226,15 @@ export default function DashboardPlan() {
           >
             {t("Go to Billing")} <ArrowRight className="h-4 w-4" />
           </Link>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => setHasExistingSub(false)}
+              className="text-xs font-medium text-ink-faint underline underline-offset-4 hover:text-ink"
+            >
+              {t("Build a new plan anyway")}
+            </button>
+          </div>
         </div>
       </CalmShell>
     );
@@ -251,37 +262,31 @@ export default function DashboardPlan() {
 
         {step >= 1 && step <= 2 && <ExistingAccountInline />}
 
+        {/* One step at a time. Plain keyed container — never an exit-animated
+            wrapper, which could strand the previous step on screen and leave
+            the visitor with no options and a disabled continue button. */}
         <div className="relative overflow-x-hidden">
-          <AnimatePresence mode="wait" custom={direction} initial={false}>
-            <motion.div
-              key={`step-${step}`}
-              custom={direction}
-              initial={{ opacity: 0, x: direction === 0 ? 0 : direction * 32 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: direction * -32 }}
-              transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-            >
-              {step === 0 && (
-                <StepZipGate
-                  state={state}
-                  onChange={updateState}
-                  onValid={() => { setDirection(1); setStep(1); }}
-                />
-              )}
-              {step === 1 && (
-                <div className="space-y-4">
-                  <StepServices state={state} onChange={updateState} />
-                  <BundleNudge state={state} onChange={updateState} />
-                </div>
-              )}
-              {step === 2 && <StepFrequency state={state} onChange={updateState} />}
-              {step === 3 && <StepProperty  state={state} onChange={updateState} />}
-              {step === 4 && <StepDetails   state={state} onChange={updateState} />}
-              {step === 5 && <StepAddOns    state={state} onChange={updateState} />}
-              {step === 6 && <StepReview    state={state} onEdit={() => { setDirection(-1); setStep(1); }} />}
-              {step === 7 && <StepPayment   state={state} onChange={updateState} />}
-            </motion.div>
-          </AnimatePresence>
+          <div key={`step-${step}`} className="animate-calm-in">
+            {step === 0 && (
+              <StepZipGate
+                state={state}
+                onChange={updateState}
+                onValid={() => { setDirection(1); setStep(1); }}
+              />
+            )}
+            {step === 1 && (
+              <div className="space-y-4">
+                <StepServices state={state} onChange={updateState} />
+                <BundleNudge state={state} onChange={updateState} />
+              </div>
+            )}
+            {step === 2 && <StepFrequency state={state} onChange={updateState} />}
+            {step === 3 && <StepProperty  state={state} onChange={updateState} />}
+            {step === 4 && <StepDetails   state={state} onChange={updateState} />}
+            {step === 5 && <StepAddOns    state={state} onChange={updateState} />}
+            {step === 6 && <StepReview    state={state} onEdit={() => { setDirection(-1); setStep(1); }} />}
+            {step === 7 && <StepPayment   state={state} onChange={updateState} />}
+          </div>
         </div>
 
         {(step === 6 || step === 7) && customQuote && (
