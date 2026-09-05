@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { MessagingReadinessCard } from "@/components/admin/MessagingReadiness";
 
 type Status = "pass" | "warn" | "fail";
 type Check = { id: string; label: string; status: Status; detail: string; remediation?: string };
@@ -83,6 +84,10 @@ export default function AdminSetupCheck() {
             <SummaryCard tone="fail" count={result.summary.fail} label="Failing" />
           </div>
         )}
+
+        <div className="mb-6">
+          <MessagingReadinessCard />
+        </div>
 
         <div className="space-y-3">
           {loading && !result ? (
