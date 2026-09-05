@@ -99,6 +99,10 @@ Deno.serve(async (req) => {
         has_vehicle: data.has_vehicle,
         has_supplies: data.has_supplies,
         work_authorized: data.work_authorized,
+        bilingual: data.bilingual,
+        insurance_willing: data.insurance_willing,
+        fl_license: data.fl_license,
+        license_expiry: data.license_expiry ?? null,
         description: data.description ?? null,
       },
     });
