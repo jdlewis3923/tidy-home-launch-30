@@ -48,6 +48,25 @@ Deno.serve(async (req) => {
     }
     const data = parsed.data;
 
+    // Hard disqualifiers — mirror the client-side decline states.
+    if (!data.bilingual) {
+      return jsonResponse({ declined: true, reason: 'bilingual_required' }, 200);
+    }
+    if (!data.insurance_willing) {
+      return jsonResponse({ declined: true, reason: 'insurance_required' }, 200);
+    }
+    if (!data.fl_license) {
+      return jsonResponse({ declined: true, reason: 'fl_license_required' }, 200);
+    }
+    if (data.license_expiry) {
+      const exp = new Date(data.license_expiry);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (Number.isNaN(exp.getTime()) || exp < today) {
+        return jsonResponse({ error: 'invalid_license_expiry', message: 'Driver\'s licence expiry must be a valid future date.' }, 400);
+      }
+    }
+
     // Service-area ZIP gate (Tidy Miami: 33156 / 33183 / 33186).
     const SERVICE_ZIPS = ['33156', '33183', '33186'];
     const normalizedZip = (data.zip ?? '').trim().slice(0, 5);
