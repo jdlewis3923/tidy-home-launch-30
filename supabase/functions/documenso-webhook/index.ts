@@ -89,62 +89,40 @@ Deno.serve(async (req) => {
     // and links to /pro/tier-progression for the full explainer.
     const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
     const TIER_PROGRESSION_URL = "https://jointidy.co/pro/tier-progression";
-    // Template id resolution: env var first (Lovable Cloud secret), app_settings fallback.
-    let welcomeTemplateId = 0;
-    {
-      const envId = Number(Deno.env.get("BREVO_TEMPLATE_WELCOME_T1") ?? 0);
-      let settingsId = 0;
-      const { data: setting } = await sb
-        .from("app_settings")
-        .select("value")
-        .eq("key", "brevo_template_welcome_t1")
-        .maybeSingle();
-      const raw = setting?.value as { id?: number } | number | null | undefined;
-      settingsId = Number(typeof raw === "number" ? raw : raw?.id ?? raw ?? 0);
-      welcomeTemplateId = envId || settingsId || 0;
-      if (!welcomeTemplateId) {
-        console.error("[documenso-webhook] missing brevo_template_welcome_t1 template id");
-        await sb.from("integration_logs").insert({
-          source: "internal",
-          event: "brevo.template_id_missing:brevo_template_welcome_t1",
-          status: "error",
-          error_message: "No template id in BREVO_TEMPLATE_WELCOME_T1 or app_settings.brevo_template_welcome_t1; sent inline fallback HTML",
-        }).then(() => {}, () => {});
-      }
-    }
+    // Single source of truth: the email template registry. No env var, no
+    // app_settings lookup, no inline HTML fallback — that dual path is exactly
+    // how the welcome mail drifted and template 64 never sent.
+    const welcomeTemplateId = EMAIL.CONTRACTOR_WELCOME_T1;
     if (BREVO_API_KEY && match.email) {
       try {
+        const params = {
+          first_name: match.first_name ?? "there",
+          tier_name: "Tidy Verified Pro",
+          tier_label: "Tier 1 — Tidy Verified Pro",
+          tier_progression_url: TIER_PROGRESSION_URL,
+        };
+        const missingParams = missingRequiredParams(welcomeTemplateId, params);
+        if (missingParams.length > 0) {
+          const err = `MISSING_PARAMS: CONTRACTOR_WELCOME_T1 requires ${missingParams.join(", ")}`;
+          console.error(`[documenso-webhook] ${err}`);
+          await sb.from("integration_logs").insert({
+            source: "internal",
+            event: "brevo.missing_params:CONTRACTOR_WELCOME_T1",
+            status: "error",
+            error_message: err,
+          }).then(() => {}, () => {});
+          throw new Error(err);
+        }
         // Contractor onboarding welcome — relationship mail, marketing: false.
         const res = await sendViaBrevo({
-          ...(welcomeTemplateId
-              ? { templateId: welcomeTemplateId }
-              : {
-                  // Inline fallback only when no template id is configured —
-                  // Brevo rejects htmlContent alongside templateId.
-                  subject: "Welcome to Tidy — you're a Verified Pro",
-                  htmlContent: `
-              <div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a">
-                <h1 style="margin:0 0 8px;font-size:24px">Welcome to Tidy, ${match.first_name ?? "Pro"}.</h1>
-                <p style="margin:0 0 16px">Congrats — you're officially a <strong>Tier 1 — Tidy Verified Pro</strong>. Tidy carries commercial GL coverage on every assignment so you can start earning on day one.</p>
-                <p style="margin:0 0 16px">Once you log 50+ visits with a 4.8+ rating and clean compliance, you'll unlock <strong>Tier 2 — Tidy Pro Partner</strong>: 45% pay split, $30 visit floor, premium $2M+ routes, and a $300/yr gear stipend.</p>
-                <p style="margin:24px 0">
-                  <a href="${TIER_PROGRESSION_URL}" style="background:#0f172a;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;display:inline-block">See how tier progression works →</a>
-                </p>
-                <p style="color:#64748b;font-size:13px;margin-top:24px">— The Tidy team</p>
-              </div>
-            `,
-                }),
+            templateId: welcomeTemplateId,
             to: [{ email: match.email, name: match.first_name ?? undefined }],
-            params: {
-              first_name: match.first_name ?? "there",
-              tier_name: "Tidy Verified Pro",
-              tier_label: "Tier 1 — Tidy Verified Pro",
-              tier_progression_url: TIER_PROGRESSION_URL,
-            },
+            params,
             tags: ["WELCOME-T1"],
             marketing: false,
             label: "documenso-webhook",
         });
+
         await sb.from("email_send_log").insert({
           template_name: "WELCOME-T1",
           channel: "brevo",
