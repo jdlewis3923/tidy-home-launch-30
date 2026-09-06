@@ -1266,3 +1266,44 @@ body.admin-hud > #root > * {
 @media (prefers-reduced-motion: reduce) {
   .pro-pulse-once, .pro-shimmer::after, .pro-skeleton, .pro-plane { animation: none !important; }
 }
+
+/* ---------------------------------------------------------------------------
+   Pro Portal — design elevation layer. Surface hierarchy, hairlines, near
+   invisible elevation, service accents, editorial type helpers.
+   --------------------------------------------------------------------------- */
+:root {
+  --pro-ground: 210 40% 97.5%;   /* #F5F8FC */
+  --pro-tint: 210 55% 96%;       /* pale blue information region */
+  --pro-line: 218 30% 90%;
+  --pro-lawn: 152 45% 34%;       /* restrained lawn accent */
+  --pro-car: 215 35% 38%;        /* slate car-care accent */
+  --pro-shadow-card: 0 4px 18px hsl(var(--pro-navy) / 0.05);
+  --pro-shadow-float: 0 10px 30px hsl(var(--pro-navy) / 0.08);
+}
+
+.pro-card { box-shadow: var(--pro-shadow-card); }
+.pro-float { box-shadow: var(--pro-shadow-float); }
+.pro-hair { border-color: hsl(var(--pro-navy) / 0.09); }
+.pro-eyebrow {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; line-height: 1.4;
+}
+.pro-num { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.pro-display { letter-spacing: -0.03em; line-height: 1.06; }
+
+/* Subtle South Florida texture for navy hero regions. */
+.pro-hero-texture {
+  background-image:
+    radial-gradient(120% 90% at 15% 0%, hsl(var(--pro-sky) / 0.35), transparent 60%),
+    radial-gradient(90% 80% at 100% 10%, hsl(var(--pro-blue) / 0.45), transparent 65%);
+}
+
+@keyframes pro-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.pro-rise { animation: pro-rise 0.32s cubic-bezier(0.22,0.61,0.36,1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pro-rise { animation: none !important; }
+}

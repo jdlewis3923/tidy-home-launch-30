@@ -8,7 +8,7 @@ import { Link, Navigate } from "react-router-dom";
 import { ChevronRight, Download, Wallet } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import {
-  EmptyState, ErrorState, MetricTile, ProCard, ScheduleSkeleton, StatusPill,
+  EmptyState, ErrorState, Eyebrow, HeroPanel, MetricTile, ProCard, ScheduleSkeleton, SectionHeader, StatusPill,
 } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
 import { downloadCsv, fetchBonuses, fetchPayoutWeeks, mondayOf, type PayoutWeek, type ProBonus } from "@/lib/pro-portal";
@@ -74,32 +74,44 @@ export default function ProEarnings() {
 
   return (
     <ProShell title="Earnings">
-      <div className="grid grid-cols-2 gap-3 p-4">
-        <MetricTile label="This week" value={money(thisWeekCents)} tone="green" hint={`${thisWeek.length} visits`} />
-        <MetricTile label="Pays out" value={nextFriday} tone="gold" hint="Friday" />
+      <section className="px-[18px] pt-4">
+        <HeroPanel className="pro-rise">
+          <Eyebrow className="text-[hsl(var(--pro-sky))]">Earned this week</Eyebrow>
+          <p className="pro-num pro-display mt-2 text-[34px] font-extrabold">{money(thisWeekCents)}</p>
+          <p className="mt-1 text-[14px] text-white/70">
+            {thisWeek.length} {thisWeek.length === 1 ? "visit" : "visits"} completed · pays {nextFriday}
+          </p>
+        </HeroPanel>
+      </section>
+
+      <div className="grid grid-cols-2 gap-3 px-[18px] pt-4">
         <MetricTile label="Lifetime pay" value={money(lifetimeCents)} />
-        <MetricTile label="Bonuses pending" value={money(pendingBonusCents)} tone={pendingBonusCents > 0 ? "amber" : "white"} />
+        <MetricTile
+          label="Bonuses pending"
+          value={money(pendingBonusCents)}
+          tone={pendingBonusCents > 0 ? "amber" : "tint"}
+        />
       </div>
 
       {!weeks && !error && <ScheduleSkeleton />}
       {error && <ErrorState title="Couldn't load your earnings" onRetry={() => setNonce((n) => n + 1)} />}
 
       {weeks && !error && (
-        <div className="px-4">
-          <div className="flex items-center justify-between pb-2">
-            <h2 className="text-[13px] font-extrabold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
-              Weekly pay
-            </h2>
-            {weeks.length > 0 && (
-              <button
-                type="button"
-                onClick={exportCsv}
-                className="inline-flex min-h-[44px] items-center gap-1.5 text-[14px] font-bold text-[hsl(var(--pro-blue))]"
-              >
-                <Download className="h-4 w-4" aria-hidden /> Export
-              </button>
-            )}
-          </div>
+        <div className="px-[18px] pt-6">
+          <SectionHeader
+            title="Weekly pay"
+            action={
+              weeks.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={exportCsv}
+                  className="inline-flex min-h-[44px] items-center gap-1.5 text-[14px] font-bold text-[hsl(var(--pro-blue))]"
+                >
+                  <Download className="h-4 w-4" aria-hidden strokeWidth={1.9} /> Export
+                </button>
+              ) : undefined
+            }
+          />
 
           {weeks.length === 0 ? (
             <EmptyState
@@ -108,12 +120,12 @@ export default function ProEarnings() {
               body="Your first week appears here after your first completed visit."
             />
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-[hsl(var(--pro-line))]">
+            <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white pro-card">
               {weeks.map((w) => (
                 <Link
                   key={w.id}
                   to={`/pro/earnings/${w.id}`}
-                  className="flex min-h-[64px] items-center gap-3 border-b border-[hsl(var(--pro-line))] bg-white px-4 last:border-0 active:bg-[hsl(var(--pro-ground))]"
+                  className="flex min-h-[66px] items-center gap-3 border-b border-[hsl(var(--pro-navy)/0.07)] bg-white px-4 last:border-0 active:bg-[hsl(var(--pro-tint))]"
                 >
                   <span className="min-w-0 flex-1">
                     <span className="block text-[15px] font-bold text-[hsl(var(--pro-ink))]">
@@ -126,7 +138,7 @@ export default function ProEarnings() {
                   <StatusPill tone={w.status === "paid" ? "green" : w.status === "processing" ? "blue" : "neutral"}>
                     {w.status}
                   </StatusPill>
-                  <span className="text-[16px] font-extrabold text-[hsl(var(--pro-ink))]">
+                  <span className="pro-num text-[17px] font-extrabold text-[hsl(var(--pro-ink))]">
                     {money(w.visit_pay_cents + w.bonus_cents)}
                   </span>
                   <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--pro-ink-soft))]" aria-hidden />
@@ -135,8 +147,8 @@ export default function ProEarnings() {
             </div>
           )}
 
-          <ProCard className="my-4" tone="blue">
-            <p className="text-[14px] font-semibold text-[hsl(var(--pro-ink))]">How pay works</p>
+          <ProCard className="my-5" tone="tint">
+            <p className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">How pay works</p>
             <p className="mt-1 text-[14px] text-[hsl(var(--pro-ink-soft))]">
               You're paid a flat amount for each completed visit. Weeks run Monday to Sunday and pay
               out the following Friday.

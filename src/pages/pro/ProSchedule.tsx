@@ -10,7 +10,7 @@ import { CalendarDays } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import InstallPrompt from "@/components/pro/portal/InstallPrompt";
 import {
-  EmptyState, ErrorState, MetricTile, ScheduleSkeleton, VisitRow, WarningBanner, ProButton,
+  EmptyState, ErrorState, Eyebrow, HeroPanel, ScheduleSkeleton, VisitRow, WarningBanner, ProButton,
 } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
 import { dayLabel, fetchNotifications, mondayOf, timeWindow } from "@/lib/pro-portal";
@@ -110,26 +110,36 @@ export default function ProSchedule() {
 
       {!loading && !error && (
         <>
-          <div className="grid grid-cols-2 gap-3 p-4">
-            <MetricTile label="Visits completed" value={String(me?.completed_visits ?? 0)} hint="All time" />
-            <MetricTile label="Earned this week" value={money(earnedCents)} tone="green" hint={`${completedThisWeek.length} visits`} />
-            <MetricTile label="Next payout" value={nextPayoutFriday} tone="gold" hint="Friday" />
-            <MetricTile
-              label="Insurance"
-              value={COI_LABEL[coi?.status ?? "none"]}
-              tone={coi?.status === "active" ? "green" : coi?.status === "expiring" || coi?.status === "under_review" ? "amber" : "red"}
-            />
-          </div>
+          <section className="px-[18px] pt-4">
+            <HeroPanel className="pro-rise">
+              <Eyebrow className="text-[hsl(var(--pro-sky))]">This week</Eyebrow>
+              <p className="pro-num pro-display mt-2 text-[34px] font-extrabold">{money(earnedCents)}</p>
+              <p className="mt-1 text-[14px] text-white/70">
+                {completedThisWeek.length} {completedThisWeek.length === 1 ? "visit" : "visits"} completed · pays{" "}
+                {nextPayoutFriday}
+              </p>
+              <div className="mt-4 flex gap-6 border-t border-white/12 pt-3.5">
+                <div>
+                  <Eyebrow className="text-white/55">Visits all time</Eyebrow>
+                  <p className="pro-num mt-1 text-[18px] font-bold">{me?.completed_visits ?? 0}</p>
+                </div>
+                <div>
+                  <Eyebrow className="text-white/55">Insurance</Eyebrow>
+                  <p className="mt-1 text-[18px] font-bold">{COI_LABEL[coi?.status ?? "none"]}</p>
+                </div>
+              </div>
+            </HeroPanel>
+          </section>
 
-          <div className="mx-4 mb-3 flex rounded-xl bg-white p-1 shadow-sm">
+          <div className="mx-[18px] mt-5 flex rounded-xl border border-[hsl(var(--pro-navy)/0.07)] bg-white p-1 pro-card">
             {(["this", "next"] as const).map((w) => (
               <button
                 key={w}
                 type="button"
                 onClick={() => setWeek(w)}
-                className={`min-h-[44px] flex-1 rounded-lg text-[14px] font-bold ${
+                className={`min-h-[44px] flex-1 rounded-[10px] text-[14px] font-bold transition-colors ${
                   week === w
-                    ? "bg-[hsl(var(--pro-blue))] text-white"
+                    ? "bg-[hsl(var(--pro-blue))] text-white shadow-[0_4px_12px_hsl(var(--pro-blue)/0.25)]"
                     : "text-[hsl(var(--pro-ink-soft))]"
                 }`}
               >
@@ -145,13 +155,17 @@ export default function ProSchedule() {
               body="New visits appear here as soon as Tidy assigns them to you."
             />
           ) : (
-            <div className="space-y-4 px-4">
+            <div className="space-y-6 px-[18px] pt-5">
               {grouped.map(([day, rows]) => (
                 <section key={day}>
-                  <h2 className="px-1 pb-2 text-[13px] font-extrabold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
-                    {day}
-                  </h2>
-                  <div className="overflow-hidden rounded-2xl border border-[hsl(var(--pro-line))] bg-white">
+                  <div className="flex items-center gap-3 pb-2.5">
+                    <h2 className="pro-eyebrow text-[hsl(var(--pro-ink))]">{day}</h2>
+                    <span aria-hidden className="h-px flex-1 bg-[hsl(var(--pro-navy)/0.08)]" />
+                    <span className="pro-num text-[12px] font-semibold text-[hsl(var(--pro-ink-soft))]">
+                      {rows.length} {rows.length === 1 ? "visit" : "visits"}
+                    </span>
+                  </div>
+                  <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white pro-card">
                     {rows.map((v) => (
                       <VisitRow
                         key={v.id}
@@ -173,6 +187,7 @@ export default function ProSchedule() {
           )}
         </>
       )}
+
 
       <InstallPrompt />
     </ProShell>

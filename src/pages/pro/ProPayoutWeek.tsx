@@ -60,7 +60,7 @@ export default function ProPayoutWeek() {
         <p className="p-6 text-[15px] text-[hsl(var(--pro-ink-soft))]">This pay week isn't available.</p>
       )}
       {state === "ready" && week && (
-        <div className="space-y-4 p-4">
+        <div className="space-y-5 px-[18px] py-4">
           <ProCard>
             <div className="flex items-start justify-between">
               <div>
@@ -87,7 +87,7 @@ export default function ProPayoutWeek() {
             <h2 className="pb-2 text-[13px] font-extrabold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
               Completed visits
             </h2>
-            <div className="overflow-hidden rounded-2xl border border-[hsl(var(--pro-line))]">
+            <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)]">
               {weekVisits.length === 0 && (
                 <p className="bg-white px-4 py-4 text-[14px] text-[hsl(var(--pro-ink-soft))]">
                   No completed visits recorded in this week.
@@ -96,7 +96,7 @@ export default function ProPayoutWeek() {
               {weekVisits.map((v) => (
                 <div
                   key={v.id}
-                  className="flex min-h-[60px] items-center justify-between border-b border-[hsl(var(--pro-line))] bg-white px-4 last:border-0"
+                  className="flex min-h-[60px] items-center justify-between border-b border-[hsl(var(--pro-navy)/0.07)] bg-white px-4 last:border-0"
                 >
                   <span className="min-w-0">
                     <span className="block text-[15px] font-bold text-[hsl(var(--pro-ink))]">
@@ -122,11 +122,11 @@ export default function ProPayoutWeek() {
               <h2 className="pb-2 text-[13px] font-extrabold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
                 Bonuses
               </h2>
-              <div className="overflow-hidden rounded-2xl border border-[hsl(var(--pro-line))]">
+              <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)]">
                 {weekBonuses.map((b) => (
                   <div
                     key={b.id}
-                    className="flex min-h-[56px] items-center justify-between border-b border-[hsl(var(--pro-line))] bg-white px-4 last:border-0"
+                    className="flex min-h-[56px] items-center justify-between border-b border-[hsl(var(--pro-navy)/0.07)] bg-white px-4 last:border-0"
                   >
                     <span className="text-[15px] font-semibold text-[hsl(var(--pro-ink))]">
                       {b.reason ?? b.bonus_type ?? "Bonus"}

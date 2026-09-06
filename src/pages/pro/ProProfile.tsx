@@ -67,7 +67,7 @@ export default function ProProfile() {
     <ProShell title="Profile">
       {loading && <ScheduleSkeleton />}
       {!loading && (
-        <div className="space-y-4 p-4">
+        <div className="space-y-5 px-[18px] py-4">
           <ProCard>
             <p className="text-[12px] font-bold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
               Signed in as
@@ -97,7 +97,7 @@ export default function ProProfile() {
                 <input
                   value={carrier}
                   onChange={(e) => setCarrier(e.target.value)}
-                  className="mt-1 min-h-[48px] w-full rounded-xl border border-[hsl(var(--pro-line))] bg-white px-4 text-[16px]"
+                  className="mt-1 min-h-[48px] w-full rounded-xl border border-[hsl(var(--pro-navy)/0.07)] bg-white px-4 text-[16px]"
                 />
               </label>
               <label className="block">
@@ -105,7 +105,7 @@ export default function ProProfile() {
                 <input
                   value={policy}
                   onChange={(e) => setPolicy(e.target.value)}
-                  className="mt-1 min-h-[48px] w-full rounded-xl border border-[hsl(var(--pro-line))] bg-white px-4 text-[16px]"
+                  className="mt-1 min-h-[48px] w-full rounded-xl border border-[hsl(var(--pro-navy)/0.07)] bg-white px-4 text-[16px]"
                 />
               </label>
               <label className="block">
@@ -114,7 +114,7 @@ export default function ProProfile() {
                   type="date"
                   value={expires}
                   onChange={(e) => setExpires(e.target.value)}
-                  className="mt-1 min-h-[48px] w-full rounded-xl border border-[hsl(var(--pro-line))] bg-white px-4 text-[16px]"
+                  className="mt-1 min-h-[48px] w-full rounded-xl border border-[hsl(var(--pro-navy)/0.07)] bg-white px-4 text-[16px]"
                 />
               </label>
               <label className="flex min-h-[52px] cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-[hsl(var(--pro-sky)/0.7)] bg-white px-4 text-[14px] font-bold text-[hsl(var(--pro-blue))]">
@@ -144,7 +144,7 @@ export default function ProProfile() {
             </div>
           </ProCard>
 
-          <div className="overflow-hidden rounded-2xl border border-[hsl(var(--pro-line))]">
+          <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)]">
             <SettingRow to="/pro/notifications" label="Notifications" />
             <SettingRow to="/pro/status" label="Badge and tier" />
             <SettingRow

@@ -7,7 +7,7 @@ import { Navigate } from "react-router-dom";
 import { BadgeCheck, ShieldCheck, Star } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import {
-  CopyLink, ErrorState, MetricTile, ProCard, ProgressRow, ScheduleSkeleton, StatusPill,
+  CopyLink, ErrorState, Eyebrow, HeroPanel, MetricTile, ProCard, ProgressRow, ScheduleSkeleton, StatusPill,
 } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
 import { TIER_2_GATES } from "@/lib/pro-pay";
@@ -29,46 +29,41 @@ export default function ProStatus() {
       {loading && <ScheduleSkeleton />}
       {!loading && error && <ErrorState title="Couldn't load your status" onRetry={reload} />}
       {!loading && !error && (
-        <div className="space-y-4 p-4">
-          <ProCard tone={tier2 ? "green" : "blue"}>
-            <div className="flex items-center justify-between">
+        <div className="space-y-5 px-[18px] py-4">
+          <HeroPanel className="pro-rise">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[12px] font-bold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
-                  Your tier
-                </p>
-                <p className="text-[22px] font-extrabold text-[hsl(var(--pro-ink))]">
+                <Eyebrow className="text-[hsl(var(--pro-sky))]">Your tier</Eyebrow>
+                <p className="pro-display mt-2 text-[28px] font-extrabold">
                   {tier2 ? "Tier 2 Pro" : "Tier 1 Verified"}
                 </p>
               </div>
-              <BadgeCheck className="h-9 w-9 text-[hsl(var(--pro-blue))]" aria-hidden />
+              <BadgeCheck
+                className={`h-9 w-9 shrink-0 ${tier2 ? "text-[hsl(var(--pro-gold))]" : "text-[hsl(var(--pro-sky))]"}`}
+                aria-hidden
+                strokeWidth={1.8}
+              />
             </div>
-            {tier2 ? (
-              <p className="mt-2 text-[14px] text-[hsl(var(--pro-ink-soft))]">
-                Tier 2 pay applies to your completed visits.
-              </p>
-            ) : (
-              <p className="mt-2 text-[14px] text-[hsl(var(--pro-ink-soft))]">
-                Tier 2 unlocks at {TIER_2_GATES.visits} completed visits, a {TIER_2_GATES.rating} rating
-                and {TIER_2_GATES.days} days active.
-              </p>
-            )}
-          </ProCard>
+            <p className="mt-2 text-[14px] leading-snug text-white/70">
+              {tier2
+                ? "Tier 2 pay applies to your completed visits."
+                : `Tier 2 unlocks at ${TIER_2_GATES.visits} completed visits, a ${TIER_2_GATES.rating} rating and ${TIER_2_GATES.days} days active.`}
+            </p>
+          </HeroPanel>
 
           <div className="grid grid-cols-2 gap-3">
             <MetricTile label="Visits completed" value={String(visitsDone)} />
             <MetricTile
               label="Customer rating"
               value={rating ? rating.toFixed(2) : "—"}
-              tone={rating >= TIER_2_GATES.rating ? "green" : "white"}
+              tone={rating >= TIER_2_GATES.rating ? "green" : "tint"}
               hint={rating ? undefined : "No ratings yet"}
             />
           </div>
 
           {!tier2 && (
             <ProCard>
-              <p className="text-[13px] font-extrabold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
-                Path to Tier 2
-              </p>
+              <p className="text-[17px] font-bold tracking-[-0.01em] text-[hsl(var(--pro-ink))]">Path to Tier 2</p>
               <ProgressRow
                 label="Completed visits"
                 current={visitsDone}

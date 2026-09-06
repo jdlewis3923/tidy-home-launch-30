@@ -21,20 +21,67 @@ export function ProCard({
 }: {
   children: ReactNode;
   className?: string;
-  tone?: "white" | "blue" | "green" | "amber" | "gold" | "red";
+  tone?: "white" | "blue" | "green" | "amber" | "gold" | "red" | "tint" | "navy";
 }) {
   const tones: Record<string, string> = {
-    white: "bg-white border-[hsl(var(--pro-line))]",
-    blue: "bg-[hsl(var(--pro-blue-soft))] border-[hsl(var(--pro-blue)/0.18)]",
-    green: "bg-[hsl(var(--pro-green-soft))] border-[hsl(var(--pro-green)/0.22)]",
-    amber: "bg-[hsl(var(--pro-amber-soft))] border-[hsl(var(--pro-amber)/0.3)]",
-    gold: "bg-[hsl(var(--pro-gold-soft))] border-[hsl(var(--pro-gold)/0.35)]",
-    red: "bg-[hsl(var(--pro-red-soft))] border-[hsl(var(--pro-red)/0.28)]",
+    white: "bg-white pro-hair pro-card",
+    tint: "bg-[hsl(var(--pro-tint))] border-[hsl(var(--pro-blue)/0.12)]",
+    navy: "bg-[hsl(var(--pro-navy))] border-white/10 text-white",
+    blue: "bg-[hsl(var(--pro-blue-soft))] border-[hsl(var(--pro-blue)/0.16)]",
+    green: "bg-[hsl(var(--pro-green-soft))] border-[hsl(var(--pro-green)/0.2)]",
+    amber: "bg-[hsl(var(--pro-amber-soft))] border-[hsl(var(--pro-amber)/0.28)]",
+    gold: "bg-[hsl(var(--pro-gold-soft))] border-[hsl(var(--pro-gold)/0.3)]",
+    red: "bg-[hsl(var(--pro-red-soft))] border-[hsl(var(--pro-red)/0.24)]",
   };
   return (
-    <div className={`rounded-2xl border p-4 ${tones[tone]} ${className}`}>{children}</div>
+    <div className={`rounded-[18px] border p-5 ${tones[tone]} ${className}`}>{children}</div>
   );
 }
+
+/** Uppercase micro-label used above titles and metrics. */
+export function Eyebrow({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <p className={`pro-eyebrow text-[hsl(var(--pro-ink-soft))] ${className}`}>{children}</p>;
+}
+
+/** Section heading with an optional trailing action, on a hairline baseline. */
+export function SectionHeader({
+  title,
+  action,
+  className = "",
+}: {
+  title: string;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`flex items-end justify-between gap-3 pb-2 ${className}`}>
+      <h2 className="text-[17px] font-bold tracking-[-0.01em] text-[hsl(var(--pro-ink))]">{title}</h2>
+      {action}
+    </div>
+  );
+}
+
+/**
+ * Navy brand region used to anchor the top of a screen. Frames information —
+ * never consumes a whole screen.
+ */
+export function HeroPanel({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-[22px] bg-[hsl(var(--pro-navy))] p-5 text-white pro-float ${className}`}
+    >
+      <div aria-hidden className="pro-hero-texture pointer-events-none absolute inset-0 opacity-60" />
+      <div className="relative">{children}</div>
+    </div>
+  );
+}
+
 
 /* ---------------- buttons ---------------- */
 
@@ -48,12 +95,13 @@ export const ProButton = forwardRef<HTMLButtonElement, BtnProps>(function ProBut
   ref,
 ) {
   const base =
-    "min-h-[48px] rounded-xl px-5 text-[15px] font-semibold transition-transform active:scale-[0.98] disabled:opacity-45 disabled:active:scale-100 inline-flex items-center justify-center gap-2";
+    "min-h-[50px] rounded-xl px-5 text-[15px] font-bold tracking-[-0.01em] transition-[transform,box-shadow,background-color] duration-150 active:scale-[0.98] disabled:opacity-45 disabled:shadow-none disabled:active:scale-100 inline-flex items-center justify-center gap-2";
   const styles: Record<string, string> = {
-    primary: "bg-[hsl(var(--pro-blue))] text-white",
-    secondary: "bg-[hsl(var(--pro-navy))] text-white",
+    primary:
+      "bg-[hsl(var(--pro-blue))] text-white shadow-[0_6px_16px_hsl(var(--pro-blue)/0.28)] hover:bg-[hsl(var(--pro-blue)/0.94)]",
+    secondary: "bg-[hsl(var(--pro-navy))] text-white shadow-[0_6px_16px_hsl(var(--pro-navy)/0.22)]",
     outlined:
-      "border-2 border-[hsl(var(--pro-blue))] text-[hsl(var(--pro-blue))] bg-white",
+      "border border-[hsl(var(--pro-blue)/0.35)] text-[hsl(var(--pro-blue))] bg-white",
     danger: "bg-[hsl(var(--pro-red))] text-white",
   };
   return (
@@ -73,40 +121,62 @@ export function StatusPill({
   children: ReactNode;
 }) {
   const tones: Record<string, string> = {
-    green: "bg-[hsl(var(--pro-green-soft))] text-[hsl(var(--pro-green))]",
-    amber: "bg-[hsl(var(--pro-amber-soft))] text-[hsl(var(--pro-amber))]",
-    gold: "bg-[hsl(var(--pro-gold-soft))] text-[hsl(38_80%_32%)]",
-    blue: "bg-[hsl(var(--pro-blue-soft))] text-[hsl(var(--pro-blue))]",
-    red: "bg-[hsl(var(--pro-red-soft))] text-[hsl(var(--pro-red))]",
-    neutral: "bg-[hsl(var(--pro-ground))] text-[hsl(var(--pro-ink-soft))]",
+    green: "bg-[hsl(var(--pro-green-soft))] text-[hsl(var(--pro-green))] ring-[hsl(var(--pro-green)/0.2)]",
+    amber: "bg-[hsl(var(--pro-amber-soft))] text-[hsl(38_80%_32%)] ring-[hsl(var(--pro-amber)/0.25)]",
+    gold: "bg-[hsl(var(--pro-gold-soft))] text-[hsl(38_80%_32%)] ring-[hsl(var(--pro-gold)/0.3)]",
+    blue: "bg-[hsl(var(--pro-blue-soft))] text-[hsl(var(--pro-blue))] ring-[hsl(var(--pro-blue)/0.18)]",
+    red: "bg-[hsl(var(--pro-red-soft))] text-[hsl(var(--pro-red))] ring-[hsl(var(--pro-red)/0.22)]",
+    neutral: "bg-[hsl(var(--pro-ground))] text-[hsl(var(--pro-ink-soft))] ring-[hsl(var(--pro-navy)/0.08)]",
   };
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-bold uppercase tracking-wide animate-in fade-in duration-300 ${tones[tone]}`}
+      className={`pro-eyebrow inline-flex items-center gap-1 rounded-full px-2.5 py-1 ring-1 animate-in fade-in duration-300 ${tones[tone]}`}
     >
       {children}
     </span>
   );
 }
 
-/* ---------------- service badge ---------------- */
+/* ---------------- service visual language ---------------- */
 
-const SERVICE_META: Record<string, { icon: typeof Sparkles; ring: string; label: string }> = {
-  cleaning: { icon: Sparkles, ring: "bg-[hsl(var(--pro-gold-soft))] text-[hsl(38_80%_34%)]", label: "House cleaning" },
-  lawn: { icon: Leaf, ring: "bg-[hsl(var(--pro-green-soft))] text-[hsl(var(--pro-green))]", label: "Lawn care" },
-  detailing: { icon: Car, ring: "bg-[hsl(var(--pro-blue-soft))] text-[hsl(var(--pro-blue))]", label: "Car care" },
+const SERVICE_META: Record<
+  string,
+  { icon: typeof Sparkles; ring: string; edge: string; label: string }
+> = {
+  cleaning: {
+    icon: Sparkles,
+    ring: "bg-[hsl(var(--pro-blue-soft))] text-[hsl(var(--pro-blue))]",
+    edge: "bg-[hsl(var(--pro-blue))]",
+    label: "House cleaning",
+  },
+  lawn: {
+    icon: Leaf,
+    ring: "bg-[hsl(var(--pro-green-soft))] text-[hsl(var(--pro-lawn))]",
+    edge: "bg-[hsl(var(--pro-lawn))]",
+    label: "Lawn care",
+  },
+  detailing: {
+    icon: Car,
+    ring: "bg-[hsl(210_40%_94%)] text-[hsl(var(--pro-car))]",
+    edge: "bg-[hsl(var(--pro-car))]",
+    label: "Car care",
+  },
 };
+
+export function serviceEdge(service?: string | null) {
+  return (SERVICE_META[service ?? ""] ?? SERVICE_META.cleaning).edge;
+}
 
 export function ServiceBadge({ service, size = 40 }: { service?: string | null; size?: number }) {
   const meta = SERVICE_META[service ?? ""] ?? SERVICE_META.cleaning;
   const Icon = meta.icon;
   return (
     <span
-      className={`grid shrink-0 place-items-center rounded-xl ${meta.ring}`}
+      className={`grid shrink-0 place-items-center rounded-[12px] ${meta.ring}`}
       style={{ width: size, height: size }}
       aria-label={meta.label}
     >
-      <Icon className="h-5 w-5" aria-hidden />
+      <Icon className="h-5 w-5" aria-hidden strokeWidth={1.9} />
     </span>
   );
 }
@@ -122,15 +192,30 @@ export function MetricTile({
   label: string;
   value: string;
   hint?: string;
-  tone?: "white" | "blue" | "green" | "amber" | "gold" | "red";
+  tone?: "white" | "blue" | "green" | "amber" | "gold" | "red" | "tint" | "navy";
 }) {
   return (
-    <ProCard tone={tone} className="p-3">
-      <p className="text-[11px] font-bold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">{label}</p>
-      <p className="mt-1 text-[22px] font-extrabold leading-tight text-[hsl(var(--pro-ink))]">{value}</p>
-      {hint && <p className="text-[12px] text-[hsl(var(--pro-ink-soft))]">{hint}</p>}
+    <ProCard tone={tone} className="p-4">
+      <Eyebrow className={tone === "navy" ? "text-white/60" : ""}>{label}</Eyebrow>
+      <p
+        className={`pro-num mt-1.5 text-[26px] font-extrabold leading-none ${
+          tone === "navy" ? "text-white" : "text-[hsl(var(--pro-ink))]"
+        }`}
+      >
+        {value}
+      </p>
+      {hint && (
+        <p
+          className={`mt-1.5 text-[12.5px] font-medium ${
+            tone === "navy" ? "text-white/65" : "text-[hsl(var(--pro-ink-soft))]"
+          }`}
+        >
+          {hint}
+        </p>
+      )}
     </ProCard>
   );
+
 }
 
 /* ---------------- visit row ---------------- */
@@ -159,30 +244,37 @@ export function VisitRow({
   return (
     <Link
       to={to}
-      className="flex min-h-[72px] items-center gap-3 border-b border-[hsl(var(--pro-line))] bg-white px-4 py-3 last:border-0 active:bg-[hsl(var(--pro-ground))]"
+      className="relative flex min-h-[76px] items-center gap-3.5 border-b border-[hsl(var(--pro-navy)/0.07)] bg-white px-4 py-3.5 pl-5 last:border-0 active:bg-[hsl(var(--pro-tint))]"
     >
+      <span aria-hidden className={`absolute bottom-3 left-0 top-3 w-[3px] rounded-r-full ${serviceEdge(service)}`} />
       <ServiceBadge service={service} />
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-[hsl(var(--pro-ink-soft))]">
-            <Clock className="h-3.5 w-3.5" aria-hidden /> {window}
+          <span className="pro-num inline-flex items-center gap-1 text-[13px] font-semibold text-[hsl(var(--pro-ink-soft))]">
+            <Clock className="h-3.5 w-3.5" aria-hidden strokeWidth={1.9} /> {window}
           </span>
           {isNext && <StatusPill tone="blue">Next</StatusPill>}
           {sample && <StatusPill tone="neutral">Sample</StatusPill>}
-          {completed && <Check className="h-4 w-4 text-[hsl(var(--pro-green))]" aria-label="Completed" />}
+          {completed && (
+            <span className="grid h-4 w-4 place-items-center rounded-full bg-[hsl(var(--pro-green))]">
+              <Check className="h-3 w-3 text-white" aria-label="Completed" strokeWidth={3} />
+            </span>
+          )}
         </span>
-        <span className="mt-0.5 block truncate text-[16px] font-bold text-[hsl(var(--pro-ink))]">
+        <span className="mt-1 block truncate text-[16px] font-bold tracking-[-0.01em] text-[hsl(var(--pro-ink))]">
           {street ?? "Address to be confirmed"}
         </span>
-        <span className="text-[13px] text-[hsl(var(--pro-ink-soft))]">{zip ?? ""}</span>
+        <span className="pro-num text-[13px] text-[hsl(var(--pro-ink-soft))]">{zip ?? ""}</span>
       </span>
       <span className="text-right">
-        <span className="block text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">{money(payCents)}</span>
+        <span className="pro-num block text-[19px] font-extrabold text-[hsl(var(--pro-ink))]">{money(payCents)}</span>
+        <span className="pro-eyebrow text-[hsl(var(--pro-ink-soft))]">Visit pay</span>
       </span>
-      <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--pro-ink-soft))]" aria-hidden />
+      <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--pro-navy)/0.28)]" aria-hidden />
     </Link>
   );
 }
+
 
 /* ---------------- banners, empty, error, skeleton ---------------- */
 
