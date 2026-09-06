@@ -297,6 +297,7 @@ const App = () => (
                   <Route path="/admin/onboarding" element={<AdminOnboarding />} />
                   <Route path="/admin/pro-kits" element={<AdminProKits />} />
                   <Route path="/admin/badges" element={<AdminBadges />} />
+                  <Route path="/admin/pro-assignments" element={<AdminProAssignments />} />
                   <Route path="/admin/agents" element={<AdminAgents />} />
                   <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
                   <Route path="/admin/costs" element={<AdminCosts />} />
