@@ -1204,3 +1204,65 @@ body.admin-hud > #root > * {
   .verify-sunburst { opacity: 0.05 !important; }
   .verify-grain { opacity: 0.03 !important; }
 }
+
+/* ---------------------------------------------------------------------------
+   Tidy Pro Portal tokens. Bright-sun, one-handed, 70-80% light: off-white
+   ground, white cards, navy/sky gradients for hero + header regions, pale
+   operational status surfaces. Never hardcode these colours in components.
+   --------------------------------------------------------------------------- */
+:root {
+  --pro-navy: 218 48% 12%;      /* #0F172A */
+  --pro-blue: 221 83% 53%;      /* #2563EB */
+  --pro-sky: 202 62% 62%;       /* #5EAEE0 */
+  --pro-ground: 210 33% 97%;    /* off-white page ground */
+  --pro-line: 214 28% 89%;
+  --pro-ink: 218 48% 12%;
+  --pro-ink-soft: 217 16% 42%;
+  --pro-green: 152 60% 36%;
+  --pro-green-soft: 152 55% 95%;
+  --pro-amber: 38 92% 45%;
+  --pro-amber-soft: 44 90% 94%;
+  --pro-gold: 45 96% 52%;
+  --pro-gold-soft: 45 94% 95%;
+  --pro-red: 0 72% 46%;
+  --pro-red-soft: 0 80% 96%;
+  --pro-blue-soft: 214 95% 96%;
+}
+
+/* One restrained pulse, never repeating. */
+@keyframes pro-pulse-once {
+  0% { box-shadow: 0 0 0 0 hsl(var(--pro-amber) / 0.45); }
+  70% { box-shadow: 0 0 0 12px hsl(var(--pro-amber) / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--pro-amber) / 0); }
+}
+.pro-pulse-once { animation: pro-pulse-once 1.4s ease-out 1; }
+
+@keyframes pro-shimmer-once {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(140%); }
+}
+.pro-shimmer::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 20%, hsl(0 0% 100% / 0.45) 50%, transparent 80%);
+  animation: pro-shimmer-once 1.1s ease-out 1;
+}
+
+@keyframes pro-skeleton {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.pro-skeleton {
+  background: hsl(var(--pro-blue-soft));
+  animation: pro-skeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes pro-plane {
+  0% { transform: translate(0,0) scale(1); opacity: 1; }
+  60% { transform: translate(26px,-22px) scale(0.85); opacity: 0; }
+  100% { transform: translate(26px,-22px) scale(0.85); opacity: 0; }
+}
+.pro-plane { animation: pro-plane 0.55s ease-in forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pro-pulse-once, .pro-shimmer::after, .pro-skeleton, .pro-plane { animation: none !important; }
+}
