@@ -13,6 +13,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
+import { readEnv } from '../_shared/handlerEnv.ts';
 import { verifyJobberWebhook } from '../_shared/jobber-client.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
