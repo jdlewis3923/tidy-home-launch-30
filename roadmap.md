@@ -53,3 +53,16 @@
 - [x] 2f required-params contract enforced (fails loudly, never sends `{{ params.x }}`)
 - [ ] 2e migrate remaining inline-HTML senders (~19 admin/ops functions still build their own HTML)
 - [ ] 2g Health panel rows per edge function with last successful invocation
+
+### Prompt 5 (Part 2 verification pass)
+- [x] 1 send-brevo-email live; health 200 {"ok":true,"missing_env":[]}
+- [x] 2 registry src/lib/emailTemplates.ts + edge mirror; no numeric IDs elsewhere
+- [x] 3 documenso welcome uses EMAIL.CONTRACTOR_WELCOME_T1; env + app_settings dual path deleted
+- [x] 4 no <!DOCTYPE / <table role="presentation" anywhere; all template-missing HTML fallbacks removed
+- [x] 5 visit_scheduled / on_the_way / complete now send from the registry (no Zap = no duplicates).
+      password_reset intentionally left to the auth system (it owns the token).
+- [x] 6 health GET added to documenso-webhook, coi-decision, jobber-webhook, promote-to-tier-2
+      (also removed jobber-webhook ?debug=secret-fingerprint, which echoed part of the signing secret)
+- [x] 7 no Zap touched; no ZAP_*_URL added or changed
+- [ ] remaining: request-addon approve/decline email + ~15 internal ops notices still build own HTML
+      (need Brevo templates that aren't in the 36-ID registry yet)

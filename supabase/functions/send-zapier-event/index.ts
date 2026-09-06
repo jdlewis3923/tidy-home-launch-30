@@ -18,8 +18,93 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { withLogging, logInvocation } from '../_shared/withLogging.ts';
 import { readEnv, readOptionalEnv, missingEnvError } from '../_shared/handlerEnv.ts';
+import { EMAIL, emailKeyForId, missingRequiredParams } from '../_shared/emailTemplates.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
+
+// Events with no Zap of their own are sent straight from the Brevo template
+// registry instead. Events that DO have a ZAP_*_URL never reach this map, so a
+// customer can never receive both a Zap copy and a direct copy.
+const EVENT_TEMPLATE: Record<string, number | undefined> = {
+  visit_scheduled: EMAIL.FIRST_VISIT_SCHEDULED,
+  visit_on_the_way: EMAIL.VISIT_REMINDER,
+  visit_complete: EMAIL.VISIT_RATING,
+  // password_reset is issued by the auth system itself, which owns the token —
+  // it must not be duplicated from here.
+  password_reset: undefined,
+};
+
+/**
+ * Sends an event's Brevo template through send-brevo-email.
+ * Returns null when the event has no template (caller then reports a skip).
+ * Never throws — a missing recipient or missing merge param is a named,
+ * logged failure, never a hand-built HTML fallback.
+ */
+async function dispatchBrevoTemplate(
+  supabaseUrl: string,
+  serviceKey: string,
+  eventName: string,
+  payload: Record<string, unknown>,
+  userId: string | undefined,
+): Promise<{ ok: boolean; emailed?: boolean; template?: string; error?: string } | null> {
+  const templateId = EVENT_TEMPLATE[eventName];
+  if (!templateId) return null;
+  const key = emailKeyForId(templateId) ?? String(templateId);
+
+  try {
+    // Recipient: explicit in the payload, else the linked profile's auth email.
+    let email = typeof payload.email === 'string' ? payload.email : '';
+    let name = typeof payload.first_name === 'string' ? payload.first_name : '';
+    if (!email && userId) {
+      const admin = createClient(supabaseUrl, serviceKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { data } = await admin.auth.admin.getUserById(userId);
+      email = data?.user?.email ?? '';
+      if (!name) {
+        const meta = (data?.user?.user_metadata ?? {}) as Record<string, unknown>;
+        name = typeof meta.first_name === 'string' ? meta.first_name : '';
+      }
+    }
+    if (!email) {
+      const error = `MISSING_RECIPIENT: ${eventName} has no email and no resolvable user`;
+      console.error(`[send-zapier-event] ${error}`);
+      return { ok: false, error };
+    }
+
+    const params: Record<string, unknown> = { ...payload, firstname: name || 'there' };
+    const missingParams = missingRequiredParams(templateId, params);
+    if (missingParams.length > 0) {
+      const error = `MISSING_PARAMS: ${key} requires ${missingParams.join(', ')}`;
+      console.error(`[send-zapier-event] ${error}`);
+      return { ok: false, error };
+    }
+
+    const res = await fetch(`${supabaseUrl}/functions/v1/send-brevo-email`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        template_id: templateId,
+        to: { email, name: name || undefined },
+        params,
+        tags: [eventName],
+      }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || body?.ok === false) {
+      const error = String(body?.error ?? `send-brevo-email ${res.status}`);
+      console.error(`[send-zapier-event] template send failed ${key}`, error);
+      return { ok: false, error };
+    }
+    console.log(`[send-zapier-event] sent ${key} for ${eventName}`);
+    return { ok: true, emailed: true, template: key };
+  } catch (err) {
+    const error = err instanceof Error ? err.message : 'unknown error';
+    console.error(`[send-zapier-event] template dispatch threw for ${eventName}`, error);
+    return { ok: false, error };
+  }
+}
+
 
 const EventNameSchema = z.enum([
   'welcome_signup',
@@ -182,8 +267,16 @@ Deno.serve(async (req) => {
       ok: missing.length === 0,
       function: 'send-zapier-event',
       missing_env: missing,
-      configured_events: configuredEvents,
-      unconfigured_events: EventNameSchema.options.filter((e) => !configuredEvents.includes(e)),
+      zapier_events: configuredEvents,
+      // Sent directly from the Brevo template registry (no Zap needed).
+      template_events: EventNameSchema.options.filter(
+        (e) => !configuredEvents.includes(e) && !!EVENT_TEMPLATE[e],
+      ),
+      // Genuinely nowhere to go — needs a Zap URL or a template.
+      unconfigured_events: EventNameSchema.options.filter(
+        (e) => !configuredEvents.includes(e) && !EVENT_TEMPLATE[e],
+      ),
+
     }, 200);
   }
 
@@ -250,7 +343,14 @@ Deno.serve(async (req) => {
       fn: async () => {
         const zapUrl = readOptionalEnv(`ZAP_${event_name.toUpperCase()}_URL`);
         if (!zapUrl) {
-          console.log(`[send-zapier-event] no URL configured for ${event_name} — skipping`);
+          // No Zap for this event. Rather than dying quietly, send the email
+          // ourselves from the Brevo template registry when one exists. Events
+          // with a Zap keep going to Zapier untouched, so nobody gets two copies.
+          const emailed = await dispatchBrevoTemplate(
+            SUPABASE_URL, SERVICE_KEY, event_name, payload, user_id,
+          );
+          if (emailed) return emailed;
+          console.log(`[send-zapier-event] no URL and no template for ${event_name} — skipping`);
           return { ok: true as const, skipped: 'no_url_configured' as const };
         }
 
@@ -270,6 +370,7 @@ Deno.serve(async (req) => {
       console.error('[send-zapier-event] zapier failed', event_name, message);
       return { ok: false as const, error: message };
     });
+
 
     const twilioPromise = isSmsEvent(event_name)
       ? dispatchTwilioSms(SUPABASE_URL, SERVICE_KEY, event_name, payload, user_id)
