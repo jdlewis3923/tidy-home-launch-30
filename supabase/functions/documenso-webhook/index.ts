@@ -20,7 +20,15 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
-  if (req.method !== "POST") return jsonResponse({ error: "method not allowed" }, 405);
+  // Health probe: no side effect, reports which secrets are missing.
+  if (req.method === "GET") {
+    const { missing } = readEnv([
+      "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "BREVO_API_KEY",
+    ] as const);
+    return jsonResponse({ ok: missing.length === 0, function: "documenso-webhook", missing_env: missing }, 200);
+  }
+  if (req.method !== "POST") return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
+
 
   const payload = await req.json().catch(() => null);
   if (!payload) return jsonResponse({ error: "invalid_json" }, 400);

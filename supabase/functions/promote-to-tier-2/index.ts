@@ -49,7 +49,15 @@ async function updateStripePaySplit(stripeAccountId: string | undefined, splitPc
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
-  if (req.method !== 'POST') return jsonResponse({ error: 'method_not_allowed' }, 405);
+  // Health probe: no side effect, reports which secrets are missing.
+  if (req.method === 'GET') {
+    const { missing } = readEnv([
+      'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'LOVABLE_API_KEY', 'BREVO_API_KEY', 'STRIPE_SECRET_KEY',
+    ] as const);
+    return jsonResponse({ ok: missing.length === 0, function: 'promote-to-tier-2', missing_env: missing }, 200);
+  }
+  if (req.method !== 'POST') return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
+
 
   const parsed = Body.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return jsonResponse({ error: 'invalid_body' }, 400);
