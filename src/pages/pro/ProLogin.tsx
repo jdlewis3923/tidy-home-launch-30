@@ -9,6 +9,7 @@ import ProHead, { ProMark } from "@/components/pro/portal/ProHead";
 import { ArrowLeft, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProButton } from "@/components/pro/portal/kit";
+import heroHome from "@/assets/miami-waterfront.webp";
 
 export default function ProLogin() {
   const navigate = useNavigate();
@@ -62,10 +63,17 @@ export default function ProLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--pro-ground))] font-sans">
+    <div className="relative min-h-screen bg-[hsl(var(--pro-navy))] font-sans">
       <ProHead title="Sign in · Tidy Pro Portal" />
 
-      <header className="flex items-center gap-2 bg-[hsl(var(--pro-navy))] px-2 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white">
+      <img
+        src={heroHome}
+        alt="South Florida home at golden hour"
+        className="absolute inset-x-0 top-0 h-[46vh] w-full object-cover"
+      />
+      <div className="absolute inset-x-0 top-0 h-[46vh] bg-gradient-to-b from-[hsl(var(--pro-navy)/0.55)] via-[hsl(var(--pro-navy)/0.7)] to-[hsl(var(--pro-navy))]" />
+
+      <header className="relative flex items-center gap-2 px-2 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white">
         <Link to="/pro/welcome" aria-label="Back" className="grid h-11 w-11 place-items-center rounded-full active:bg-white/10">
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </Link>
@@ -73,7 +81,19 @@ export default function ProLogin() {
         <span className="text-[15px] font-extrabold">Tidy Pro Portal</span>
       </header>
 
-      <main className="mx-auto max-w-md px-5 pt-8">
+      <main className="relative mx-auto max-w-md px-5 pb-16 pt-6">
+        <div className="flex flex-col items-center text-center text-white">
+          <img
+            src="/pro-icon-512.png"
+            alt="Tidy Pro"
+            className="h-20 w-20 rounded-[24%] shadow-[0_18px_40px_-16px_rgba(0,0,0,0.7)]"
+          />
+          <p className="mt-3 text-[12px] font-bold uppercase tracking-[0.35em] text-[hsl(var(--pro-sky))]">
+            Pro Portal
+          </p>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-white/10 bg-white p-5 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.6)]">
         <h1 className="text-[24px] font-extrabold text-[hsl(var(--pro-ink))]">Sign in</h1>
         <p className="mt-1 text-[14px] text-[hsl(var(--pro-ink-soft))]">
           Use the email Tidy set your account up with.
@@ -143,6 +163,7 @@ export default function ProLogin() {
         >
           Forgot password
         </button>
+        </div>
       </main>
     </div>
   );
