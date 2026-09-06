@@ -59,7 +59,7 @@ export default function ProStatus() {
             <MetricTile
               label="Customer rating"
               value={rating ? rating.toFixed(2) : "—"}
-              tone={rating >= TIER_2_GATES.rating ? "green" : "neutral"}
+              tone={rating >= TIER_2_GATES.rating ? "green" : "white"}
               hint={rating ? undefined : "No ratings yet"}
             />
           </div>

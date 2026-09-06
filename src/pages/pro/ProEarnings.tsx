@@ -78,7 +78,7 @@ export default function ProEarnings() {
         <MetricTile label="This week" value={money(thisWeekCents)} tone="green" hint={`${thisWeek.length} visits`} />
         <MetricTile label="Pays out" value={nextFriday} tone="gold" hint="Friday" />
         <MetricTile label="Lifetime pay" value={money(lifetimeCents)} />
-        <MetricTile label="Bonuses pending" value={money(pendingBonusCents)} tone={pendingBonusCents > 0 ? "amber" : "neutral"} />
+        <MetricTile label="Bonuses pending" value={money(pendingBonusCents)} tone={pendingBonusCents > 0 ? "amber" : "white"} />
       </div>
 
       {!weeks && !error && <ScheduleSkeleton />}
