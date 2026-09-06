@@ -25,10 +25,16 @@ const COI_LABEL: Record<string, string> = {
   expired: "Expired",
 };
 
+const PUSH_CARD_KEY = "tidy_pro_push_card_dismissed";
+
 export default function ProSchedule() {
   const { me, coi, visits, loading, error, reload, userId } = useProSession();
   const [week, setWeek] = useState<"this" | "next">("this");
   const [unread, setUnread] = useState(0);
+  const [showPushCard, setShowPushCard] = useState(
+    () => typeof window !== "undefined" && !localStorage.getItem(PUSH_CARD_KEY),
+  );
+
 
   useEffect(() => {
     if (!userId) return;
