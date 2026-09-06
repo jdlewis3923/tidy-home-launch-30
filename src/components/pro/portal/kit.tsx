@@ -21,20 +21,67 @@ export function ProCard({
 }: {
   children: ReactNode;
   className?: string;
-  tone?: "white" | "blue" | "green" | "amber" | "gold" | "red";
+  tone?: "white" | "blue" | "green" | "amber" | "gold" | "red" | "tint" | "navy";
 }) {
   const tones: Record<string, string> = {
-    white: "bg-white border-[hsl(var(--pro-line))]",
-    blue: "bg-[hsl(var(--pro-blue-soft))] border-[hsl(var(--pro-blue)/0.18)]",
-    green: "bg-[hsl(var(--pro-green-soft))] border-[hsl(var(--pro-green)/0.22)]",
-    amber: "bg-[hsl(var(--pro-amber-soft))] border-[hsl(var(--pro-amber)/0.3)]",
-    gold: "bg-[hsl(var(--pro-gold-soft))] border-[hsl(var(--pro-gold)/0.35)]",
-    red: "bg-[hsl(var(--pro-red-soft))] border-[hsl(var(--pro-red)/0.28)]",
+    white: "bg-white pro-hair pro-card",
+    tint: "bg-[hsl(var(--pro-tint))] border-[hsl(var(--pro-blue)/0.12)]",
+    navy: "bg-[hsl(var(--pro-navy))] border-white/10 text-white",
+    blue: "bg-[hsl(var(--pro-blue-soft))] border-[hsl(var(--pro-blue)/0.16)]",
+    green: "bg-[hsl(var(--pro-green-soft))] border-[hsl(var(--pro-green)/0.2)]",
+    amber: "bg-[hsl(var(--pro-amber-soft))] border-[hsl(var(--pro-amber)/0.28)]",
+    gold: "bg-[hsl(var(--pro-gold-soft))] border-[hsl(var(--pro-gold)/0.3)]",
+    red: "bg-[hsl(var(--pro-red-soft))] border-[hsl(var(--pro-red)/0.24)]",
   };
   return (
-    <div className={`rounded-2xl border p-4 ${tones[tone]} ${className}`}>{children}</div>
+    <div className={`rounded-[18px] border p-5 ${tones[tone]} ${className}`}>{children}</div>
   );
 }
+
+/** Uppercase micro-label used above titles and metrics. */
+export function Eyebrow({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <p className={`pro-eyebrow text-[hsl(var(--pro-ink-soft))] ${className}`}>{children}</p>;
+}
+
+/** Section heading with an optional trailing action, on a hairline baseline. */
+export function SectionHeader({
+  title,
+  action,
+  className = "",
+}: {
+  title: string;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`flex items-end justify-between gap-3 pb-2 ${className}`}>
+      <h2 className="text-[17px] font-bold tracking-[-0.01em] text-[hsl(var(--pro-ink))]">{title}</h2>
+      {action}
+    </div>
+  );
+}
+
+/**
+ * Navy brand region used to anchor the top of a screen. Frames information —
+ * never consumes a whole screen.
+ */
+export function HeroPanel({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-[22px] bg-[hsl(var(--pro-navy))] p-5 text-white pro-float ${className}`}
+    >
+      <div aria-hidden className="pro-hero-texture pointer-events-none absolute inset-0 opacity-60" />
+      <div className="relative">{children}</div>
+    </div>
+  );
+}
+
 
 /* ---------------- buttons ---------------- */
 
