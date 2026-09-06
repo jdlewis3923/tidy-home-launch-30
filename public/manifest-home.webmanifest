@@ -1,14 +1,17 @@
 {
-  "id": "/tidy-home",
-  "name": "Tidy Home",
+  "id": "/apps/tidy-home-customer-2026",
+  "name": "Tidy Home — Customer",
   "short_name": "Tidy Home",
   "description": "Your visits, plan and billing \u2014 all handled.",
   "start_url": "/dashboard",
-  "scope": "/",
+  "scope": "/dashboard",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0070C2",
   "theme_color": "#0070C2",
+  "categories": ["lifestyle", "house-home"],
+  "launch_handler": { "client_mode": "navigate-new" },
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/home-icon-192.png",

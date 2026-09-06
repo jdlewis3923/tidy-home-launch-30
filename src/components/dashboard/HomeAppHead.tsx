@@ -13,7 +13,7 @@ export default function HomeAppHead({ title = 'Your Tidy Home' }: { title?: stri
     <Helmet>
       <title>{title}</title>
       <meta name="robots" content="noindex, nofollow" />
-      <link rel="manifest" href="/manifest-home.webmanifest" />
+      <link rel="manifest" href="/manifest-home.webmanifest?v=20260906" />
       <meta name="theme-color" content="#0070C2" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="mobile-web-app-capable" content="yes" />

@@ -2,6 +2,12 @@
 
 ## In progress
 
+### Separate Tidy Home and Tidy Pro installs
+- [x] Give customer and contractor apps distinct permanent install identities
+- [x] Restrict customer scope to `/dashboard` and contractor scope to `/pro/`
+- [x] Declare the correct app metadata across every customer and contractor page
+- [x] Route `/pro` directly to the contractor center
+
 ### Prompt 4 — Part 1: edge function hardening
 - [ ] Wrap every handler body in try/catch; log to integration_logs; return 200 { ok:false, error } instead of throwing
 - [ ] Read env vars inside the handler, never at module scope
