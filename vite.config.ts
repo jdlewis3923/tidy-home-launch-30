@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
         // Precache only the app shell. Photos and hero art are big; caching
         // them up front made first load crawl, so they are cached lazily.
         globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
-        globIgnores: ["**/*-mobile-*", "**/node_modules/**"],
+        globIgnores: ["**/*-mobile-*", "**/Admin*.js", "**/node_modules/**"],
         maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
         navigateFallbackDenylist: [/^\/~oauth/],
         runtimeCaching: [
