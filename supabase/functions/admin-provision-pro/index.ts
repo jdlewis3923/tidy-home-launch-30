@@ -59,32 +59,38 @@ Deno.serve(async (req) => {
     if (!applicant) return jsonResponse({ ok: false, error: 'applicant_not_found' });
 
     let userId = applicant.contractor_id as string | null;
-    let password: string | null = null;
+    const redirectTo = parsed.data.redirect_to ?? DEFAULT_REDIRECT;
+    let invited = false;
 
     if (!userId) {
-      password = tempPassword();
-      const { data: created, error: createErr } = await admin.auth.admin.createUser({
-        email: applicant.email,
-        password,
-        email_confirm: true,
-        user_metadata: {
-          first_name: applicant.first_name,
-          last_name: applicant.last_name,
-          phone: applicant.phone,
-          is_pro: true,
+      const { data: inviteData, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(
+        applicant.email,
+        {
+          redirectTo,
+          data: {
+            first_name: applicant.first_name,
+            last_name: applicant.last_name,
+            phone: applicant.phone,
+            is_pro: true,
+          },
         },
-      });
-      if (createErr || !created?.user) {
-        // Email may already have an account — adopt it.
+      );
+      if (inviteErr || !inviteData?.user) {
+        // Email may already have an account — adopt it and send a set-password link.
         const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
         const found = list?.users?.find(
           (u) => (u.email ?? '').toLowerCase() === applicant.email.toLowerCase(),
         );
-        if (!found) return jsonResponse({ ok: false, error: createErr?.message ?? 'create_user_failed' });
+        if (!found) return jsonResponse({ ok: false, error: inviteErr?.message ?? 'invite_failed' });
         userId = found.id;
-        password = null;
+        await admin.auth.admin.generateLink({
+          type: 'recovery',
+          email: applicant.email,
+          options: { redirectTo },
+        });
       } else {
-        userId = created.user.id;
+        userId = inviteData.user.id;
+        invited = true;
       }
     }
 
@@ -98,8 +104,10 @@ Deno.serve(async (req) => {
       ok: true,
       user_id: userId,
       email: applicant.email,
-      temp_password: password,
-      note: password ? 'Share once; the Pro should reset it after first sign in.' : 'Existing login linked.',
+      invited,
+      note: invited
+        ? 'Invitation sent — the Pro sets their own password from the link.'
+        : 'Existing login linked; a set-password email was sent.',
     });
   } catch (e) {
     console.error('[admin-provision-pro] failed', (e as Error).message);
