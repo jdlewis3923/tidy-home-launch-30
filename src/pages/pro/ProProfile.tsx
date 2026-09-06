@@ -144,6 +144,8 @@ export default function ProProfile() {
             </div>
           </ProCard>
 
+          <PushOptIn />
+
           <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)]">
             <SettingRow to="/pro/notifications" label="Notifications" />
             <SettingRow to="/pro/status" label="Badge and tier" />
