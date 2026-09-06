@@ -2,19 +2,15 @@
  * Pro Portal entry screen — /pro/welcome
  * An app entry screen, not a marketing page.
  */
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import ProHead from "@/components/pro/portal/ProHead";
 import heroHome from "@/assets/miami-waterfront.webp";
 import tidyLogo from "@/assets/tidy-logo.png";
 
 export default function ProLanding() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[hsl(var(--pro-navy))] font-sans">
-      <Helmet>
-        <title>Tidy Pro Portal</title>
-        <meta name="robots" content="noindex, nofollow" />
-        <meta name="theme-color" content="#0F172A" />
-      </Helmet>
+      <ProHead title="Tidy Pro Portal" />
 
       <img
         src={heroHome}
@@ -25,7 +21,7 @@ export default function ProLanding() {
 
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(2.5rem,env(safe-area-inset-top))] text-white">
         <div className="flex flex-col items-center">
-          <img src={tidyLogo} alt="Tidy" className="h-20 w-20 rounded-full object-contain" />
+          <img src="/pro-icon-512.png" alt="Tidy Pro" className="h-24 w-24 rounded-[24%] shadow-[0_18px_40px_-16px_rgba(0,0,0,0.7)]" />
           <p className="mt-3 text-[12px] font-bold uppercase tracking-[0.35em] text-[hsl(var(--pro-sky))]">
             Pro Portal
           </p>

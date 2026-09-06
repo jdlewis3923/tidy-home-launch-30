@@ -4,8 +4,8 @@
  * shown on every authenticated screen.
  */
 import type { ReactNode } from "react";
-import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import ProHead, { ProMark } from "./ProHead";
 import { ArrowLeft, Bell, CalendarDays, CircleUser, DollarSign, Trophy } from "lucide-react";
 
 const NAV = [
@@ -40,7 +40,8 @@ export function ProTopBar({
             <ArrowLeft className="h-5 w-5" aria-hidden />
           </button>
         )}
-        <h1 className={`flex-1 truncate text-[18px] font-extrabold ${back === undefined ? "px-3" : ""}`}>
+        {back === undefined && <ProMark size={30} className="ml-2 mr-1" />}
+        <h1 className={`flex-1 truncate text-[18px] font-extrabold ${back === undefined ? "pl-1" : ""}`}>
           {title}
         </h1>
         {showBell && (
@@ -104,11 +105,7 @@ export default function ProShell({
 }) {
   return (
     <div className="min-h-screen bg-[hsl(var(--pro-ground))] font-sans">
-      <Helmet>
-        <title>{`${title} · Tidy Pro Portal`}</title>
-        <meta name="robots" content="noindex, nofollow" />
-        <meta name="theme-color" content="#0F172A" />
-      </Helmet>
+      <ProHead title={`${title} · Tidy Pro Portal`} />
       <ProTopBar title={title} back={back} showBell={showBell} unread={unread} />
       <main className={`mx-auto max-w-md ${nav ? "pb-28" : "pb-10"}`}>{children}</main>
       {nav && <ProBottomNav />}
