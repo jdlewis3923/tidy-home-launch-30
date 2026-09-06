@@ -98,6 +98,20 @@ const QrRedirect = lazy(() => import("./pages/QrRedirect.tsx"));
 const Rate = lazy(() => import("./pages/Rate.tsx"));
 const VerifyPro = lazy(() => import("./pages/VerifyPro.tsx"));
 const ProIntake = lazy(() => import("./pages/ProIntake.tsx"));
+
+/* Tidy Pro Portal — the installable app Pros work from day to day. */
+const ProLanding = lazy(() => import("./pages/pro/ProLanding.tsx"));
+const ProLogin = lazy(() => import("./pages/pro/ProLogin.tsx"));
+const ProFirstRun = lazy(() => import("./pages/pro/ProFirstRun.tsx"));
+const ProSchedule = lazy(() => import("./pages/pro/ProSchedule.tsx"));
+const ProVisit = lazy(() => import("./pages/pro/ProVisit.tsx"));
+const ProChecklist = lazy(() => import("./pages/pro/ProChecklist.tsx"));
+const ProPhotos = lazy(() => import("./pages/pro/ProPhotos.tsx"));
+const ProEarnings = lazy(() => import("./pages/pro/ProEarnings.tsx"));
+const ProPayoutWeek = lazy(() => import("./pages/pro/ProPayoutWeek.tsx"));
+const ProStatus = lazy(() => import("./pages/pro/ProStatus.tsx"));
+const ProProfile = lazy(() => import("./pages/pro/ProProfile.tsx"));
+const ProNotifications = lazy(() => import("./pages/pro/ProNotifications.tsx"));
 const AdminProKits = lazy(() => import("./pages/AdminProKits.tsx"));
 const AdminBadges = lazy(() => import("./pages/AdminBadges.tsx"));
 
@@ -332,6 +346,21 @@ const App = () => (
                   {/* Public Pro badge verification — no login, ever. */}
                   <Route path="/verify/:token" element={<VerifyPro />} />
                   <Route path="/intake/:token" element={<ProIntake />} />
+
+                  {/* Tidy Pro Portal — its own app shell, no site chrome. */}
+                  <Route path="/pro/welcome" element={<ProLanding />} />
+                  <Route path="/pro/login" element={<ProLogin />} />
+                  <Route path="/pro/first-run" element={<ProFirstRun />} />
+                  <Route path="/pro/schedule" element={<ProSchedule />} />
+                  <Route path="/pro/visit/:id" element={<ProVisit />} />
+                  <Route path="/pro/visit/:id/checklist" element={<ProChecklist />} />
+                  <Route path="/pro/visit/:id/photos" element={<ProPhotos />} />
+                  <Route path="/pro/earnings" element={<ProEarnings />} />
+                  <Route path="/pro/earnings/:weekId" element={<ProPayoutWeek />} />
+                  <Route path="/pro/status" element={<ProStatus />} />
+                  <Route path="/pro/profile" element={<ProProfile />} />
+                  <Route path="/pro/notifications" element={<ProNotifications />} />
+
 
 
                   <Route path="*" element={<NotFound />} />

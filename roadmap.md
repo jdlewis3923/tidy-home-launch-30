@@ -66,3 +66,9 @@
 - [x] 7 no Zap touched; no ZAP_*_URL added or changed
 - [ ] remaining: request-addon approve/decline email + ~15 internal ops notices still build own HTML
       (need Brevo templates that aren't in the 36-ID registry yet)
+
+## Tidy Pro Portal (installable app)
+- Done: /pro/welcome, /pro/login, first-run, schedule, visit detail (on-my-way, photo gate, complete), checklist, photos, earnings + pay week, status/tier, profile with COI upload, notifications.
+- Done: home-screen install (manifest + iOS meta) and one-time "Add to home screen" tip.
+- Not done on purpose: no offline caching / service worker.
+- Open: payout_weeks rows are created by ops; bonus payouts still manual.
