@@ -1,10 +1,10 @@
-// Tidy — admin action: provision a Pro login.
+// Tidy — admin action: invite a Pro.
 //
-// Creates (or adopts) the auth user for an applicant, links it to the
-// applicant row via contractor_id, and grants the 'pro' role in user_roles.
-// Until this runs, a hired contractor has no way into the Pro Portal.
+// Sends an invitation email so the Pro sets their own password; links the auth
+// user to the applicant row via contractor_id and grants the 'pro' role in
+// user_roles. The operator never sets or sees a Pro's password.
 //
-// Admin-only. Returns a one-time temporary password when a new login is made.
+// Admin-only. Until this runs, a hired contractor has no way into the Portal.
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
@@ -12,12 +12,12 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
-const BodySchema = z.object({ applicant_id: z.string().uuid() });
+const BodySchema = z.object({
+  applicant_id: z.string().uuid(),
+  redirect_to: z.string().url().max(500).optional(),
+});
+const DEFAULT_REDIRECT = 'https://jointidy.co/reset-password';
 
-function tempPassword(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(12));
-  return `Tidy-${Array.from(bytes, (b) => b.toString(36)).join('').slice(0, 14)}`;
-}
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
@@ -59,32 +59,38 @@ Deno.serve(async (req) => {
     if (!applicant) return jsonResponse({ ok: false, error: 'applicant_not_found' });
 
     let userId = applicant.contractor_id as string | null;
-    let password: string | null = null;
+    const redirectTo = parsed.data.redirect_to ?? DEFAULT_REDIRECT;
+    let invited = false;
 
     if (!userId) {
-      password = tempPassword();
-      const { data: created, error: createErr } = await admin.auth.admin.createUser({
-        email: applicant.email,
-        password,
-        email_confirm: true,
-        user_metadata: {
-          first_name: applicant.first_name,
-          last_name: applicant.last_name,
-          phone: applicant.phone,
-          is_pro: true,
+      const { data: inviteData, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(
+        applicant.email,
+        {
+          redirectTo,
+          data: {
+            first_name: applicant.first_name,
+            last_name: applicant.last_name,
+            phone: applicant.phone,
+            is_pro: true,
+          },
         },
-      });
-      if (createErr || !created?.user) {
-        // Email may already have an account — adopt it.
+      );
+      if (inviteErr || !inviteData?.user) {
+        // Email may already have an account — adopt it and send a set-password link.
         const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
         const found = list?.users?.find(
           (u) => (u.email ?? '').toLowerCase() === applicant.email.toLowerCase(),
         );
-        if (!found) return jsonResponse({ ok: false, error: createErr?.message ?? 'create_user_failed' });
+        if (!found) return jsonResponse({ ok: false, error: inviteErr?.message ?? 'invite_failed' });
         userId = found.id;
-        password = null;
+        await admin.auth.admin.generateLink({
+          type: 'recovery',
+          email: applicant.email,
+          options: { redirectTo },
+        });
       } else {
-        userId = created.user.id;
+        userId = inviteData.user.id;
+        invited = true;
       }
     }
 
@@ -98,8 +104,10 @@ Deno.serve(async (req) => {
       ok: true,
       user_id: userId,
       email: applicant.email,
-      temp_password: password,
-      note: password ? 'Share once; the Pro should reset it after first sign in.' : 'Existing login linked.',
+      invited,
+      note: invited
+        ? 'Invitation sent — the Pro sets their own password from the link.'
+        : 'Existing login linked; a set-password email was sent.',
     });
   } catch (e) {
     console.error('[admin-provision-pro] failed', (e as Error).message);

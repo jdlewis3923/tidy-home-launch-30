@@ -8,6 +8,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { FileUp, LogOut } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import { ProButton, ProCard, ScheduleSkeleton, SettingRow, StatusPill } from "@/components/pro/portal/kit";
+import PushOptIn from "@/components/pro/portal/PushOptIn";
 import { useProSession } from "@/hooks/useProSession";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -143,6 +144,8 @@ export default function ProProfile() {
               )}
             </div>
           </ProCard>
+
+          <PushOptIn />
 
           <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)]">
             <SettingRow to="/pro/notifications" label="Notifications" />

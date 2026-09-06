@@ -70,5 +70,11 @@
 ## Tidy Pro Portal (installable app)
 - Done: /pro/welcome, /pro/login, first-run, schedule, visit detail (on-my-way, photo gate, complete), checklist, photos, earnings + pay week, status/tier, profile with COI upload, notifications.
 - Done: home-screen install (manifest + iOS meta) and one-time "Add to home screen" tip.
-- Not done on purpose: no offline caching / service worker.
+- Offline app shell: vite-plugin-pwa (generateSW), NetworkFirst for pages, registered
+  only via src/lib/register-sw.ts (never in dev or Lovable preview; `?sw=off` kill switch).
+- Web push: pro-push edge function (key/subscribe/unsubscribe) + src/lib/pro-push.ts,
+  permission asked only from a tap, iOS explains home-screen step, re-enable in Profile.
+- Pro provisioning: admin-provision-pro now sends an email invitation; no temporary passwords.
+- Admin route assignments: /admin/pro-assignments (customer's Pro, single-visit override,
+  unassigned upcoming visits). Cross-Pro isolation verified on the live database.
 - Open: payout_weeks rows are created by ops; bonus payouts still manual.

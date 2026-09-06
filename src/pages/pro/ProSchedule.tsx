@@ -9,6 +9,7 @@ import { Navigate } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import InstallPrompt from "@/components/pro/portal/InstallPrompt";
+import PushOptIn from "@/components/pro/portal/PushOptIn";
 import {
   EmptyState, ErrorState, Eyebrow, HeroPanel, ScheduleSkeleton, VisitRow, WarningBanner, ProButton,
 } from "@/components/pro/portal/kit";
@@ -24,10 +25,16 @@ const COI_LABEL: Record<string, string> = {
   expired: "Expired",
 };
 
+const PUSH_CARD_KEY = "tidy_pro_push_card_dismissed";
+
 export default function ProSchedule() {
   const { me, coi, visits, loading, error, reload, userId } = useProSession();
   const [week, setWeek] = useState<"this" | "next">("this");
   const [unread, setUnread] = useState(0);
+  const [showPushCard, setShowPushCard] = useState(
+    () => typeof window !== "undefined" && !localStorage.getItem(PUSH_CARD_KEY),
+  );
+
 
   useEffect(() => {
     if (!userId) return;
@@ -188,6 +195,21 @@ export default function ProSchedule() {
         </>
       )}
 
+      {!loading && !error && showPushCard && (
+        <section className="px-[18px] pt-6">
+          <PushOptIn compact />
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.setItem(PUSH_CARD_KEY, "1");
+              setShowPushCard(false);
+            }}
+            className="mt-2 min-h-[44px] w-full text-[13px] font-semibold text-[hsl(var(--pro-ink-soft))]"
+          >
+            Not now
+          </button>
+        </section>
+      )}
 
       <InstallPrompt />
     </ProShell>
