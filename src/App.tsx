@@ -114,6 +114,7 @@ const ProProfile = lazy(() => import("./pages/pro/ProProfile.tsx"));
 const ProNotifications = lazy(() => import("./pages/pro/ProNotifications.tsx"));
 const AdminProKits = lazy(() => import("./pages/AdminProKits.tsx"));
 const AdminBadges = lazy(() => import("./pages/AdminBadges.tsx"));
+const AdminProAssignments = lazy(() => import("./pages/AdminProAssignments.tsx"));
 
 const queryClient = new QueryClient();
 
