@@ -244,30 +244,37 @@ export function VisitRow({
   return (
     <Link
       to={to}
-      className="flex min-h-[72px] items-center gap-3 border-b border-[hsl(var(--pro-line))] bg-white px-4 py-3 last:border-0 active:bg-[hsl(var(--pro-ground))]"
+      className="relative flex min-h-[76px] items-center gap-3.5 border-b border-[hsl(var(--pro-navy)/0.07)] bg-white px-4 py-3.5 pl-5 last:border-0 active:bg-[hsl(var(--pro-tint))]"
     >
+      <span aria-hidden className={`absolute bottom-3 left-0 top-3 w-[3px] rounded-r-full ${serviceEdge(service)}`} />
       <ServiceBadge service={service} />
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-[hsl(var(--pro-ink-soft))]">
-            <Clock className="h-3.5 w-3.5" aria-hidden /> {window}
+          <span className="pro-num inline-flex items-center gap-1 text-[13px] font-semibold text-[hsl(var(--pro-ink-soft))]">
+            <Clock className="h-3.5 w-3.5" aria-hidden strokeWidth={1.9} /> {window}
           </span>
           {isNext && <StatusPill tone="blue">Next</StatusPill>}
           {sample && <StatusPill tone="neutral">Sample</StatusPill>}
-          {completed && <Check className="h-4 w-4 text-[hsl(var(--pro-green))]" aria-label="Completed" />}
+          {completed && (
+            <span className="grid h-4 w-4 place-items-center rounded-full bg-[hsl(var(--pro-green))]">
+              <Check className="h-3 w-3 text-white" aria-label="Completed" strokeWidth={3} />
+            </span>
+          )}
         </span>
-        <span className="mt-0.5 block truncate text-[16px] font-bold text-[hsl(var(--pro-ink))]">
+        <span className="mt-1 block truncate text-[16px] font-bold tracking-[-0.01em] text-[hsl(var(--pro-ink))]">
           {street ?? "Address to be confirmed"}
         </span>
-        <span className="text-[13px] text-[hsl(var(--pro-ink-soft))]">{zip ?? ""}</span>
+        <span className="pro-num text-[13px] text-[hsl(var(--pro-ink-soft))]">{zip ?? ""}</span>
       </span>
       <span className="text-right">
-        <span className="block text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">{money(payCents)}</span>
+        <span className="pro-num block text-[19px] font-extrabold text-[hsl(var(--pro-ink))]">{money(payCents)}</span>
+        <span className="pro-eyebrow text-[hsl(var(--pro-ink-soft))]">Visit pay</span>
       </span>
-      <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--pro-ink-soft))]" aria-hidden />
+      <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--pro-navy)/0.28)]" aria-hidden />
     </Link>
   );
 }
+
 
 /* ---------------- banners, empty, error, skeleton ---------------- */
 
