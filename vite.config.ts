@@ -13,7 +13,37 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [
+    react(),
+    mode === "development" && componentTagger(),
+    // Offline app shell for the Pro Portal. Registration happens only in
+    // src/lib/register-sw.ts, which refuses dev and Lovable preview hosts.
+    VitePWA({
+      registerType: "autoUpdate",
+      injectRegister: null,
+      filename: "sw.js",
+      devOptions: { enabled: false },
+      manifest: false,
+      workbox: {
+        importScripts: ["push-sw.js"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
+        navigateFallbackDenylist: [/^\/~oauth/],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: { cacheName: "tidy-pages", networkTimeoutSeconds: 4 },
+          },
+          {
+            urlPattern: ({ url, request }) =>
+              url.origin === self.location.origin && ["style", "script", "image", "font"].includes(request.destination),
+            handler: "CacheFirst",
+            options: { cacheName: "tidy-assets", expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 } },
+          },
+        ],
+      },
+    }),
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
