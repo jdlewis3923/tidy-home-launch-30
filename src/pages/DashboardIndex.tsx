@@ -32,6 +32,9 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import DashboardTopNav from '@/components/dashboard/DashboardTopNav';
+import HomeAppHead from '@/components/dashboard/HomeAppHead';
+import HomeInstallPrompt from '@/components/dashboard/HomeInstallPrompt';
+
 import AddToNextVisitPanel from '@/components/dashboard/AddToNextVisitPanel';
 import AddonsYearStat from '@/components/dashboard/AddonsYearStat';
 import type { AddonService } from '@/lib/addon-catalog';
