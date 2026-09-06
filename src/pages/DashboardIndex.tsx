@@ -204,7 +204,10 @@ export default function DashboardIndex() {
 
   return (
     <div className="min-h-screen bg-cream text-ink">
+      <HomeAppHead />
       <DashboardTopNav initials={data.initials} />
+      <HomeInstallPrompt />
+
 
       {/* Welcome strip with very low-opacity hero wash */}
       <section className="relative overflow-hidden">
