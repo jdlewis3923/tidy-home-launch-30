@@ -9,6 +9,7 @@ import { Navigate } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import InstallPrompt from "@/components/pro/portal/InstallPrompt";
+import PushOptIn from "@/components/pro/portal/PushOptIn";
 import {
   EmptyState, ErrorState, Eyebrow, HeroPanel, ScheduleSkeleton, VisitRow, WarningBanner, ProButton,
 } from "@/components/pro/portal/kit";
