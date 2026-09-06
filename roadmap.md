@@ -9,6 +9,7 @@
 - [x] Route `/pro` directly to the contractor center
 - [x] Retire the legacy root-scoped Pro worker and limit the replacement to `/pro/`
 - [x] Keep the customer dashboard outside all contractor offline-worker control
+- [x] Give Tidy Home its own `/dashboard`-scoped installer worker
 - [x] Split public pages from dashboard/Pro startup bundles to reduce page-load time
 
 ### Prompt 4 — Part 1: edge function hardening

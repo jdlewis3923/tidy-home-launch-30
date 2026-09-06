@@ -6,6 +6,7 @@
  * Pro's schedule can never be served from a stale cache.
  */
 const PRO_SW_URL = "/pro-sw.js";
+const HOME_SW_URL = "/home-sw.js";
 const LEGACY_SW_URL = "/sw.js";
 
 function refused(): boolean {
@@ -45,9 +46,14 @@ export async function registerServiceWorker(): Promise<void> {
     await unregisterMatching([PRO_SW_URL]);
     return;
   }
-  if (!window.location.pathname.startsWith("/pro/")) return;
   try {
-    await navigator.serviceWorker.register(PRO_SW_URL, { scope: "/pro/" });
+    if (window.location.pathname === "/dashboard" || window.location.pathname.startsWith("/dashboard/")) {
+      await navigator.serviceWorker.register(HOME_SW_URL, { scope: "/dashboard" });
+      return;
+    }
+    if (window.location.pathname.startsWith("/pro/")) {
+      await navigator.serviceWorker.register(PRO_SW_URL, { scope: "/pro/" });
+    }
   } catch {
     // Offline support is best-effort; the app works without it.
   }
