@@ -4,12 +4,11 @@
  * account not provisioned, disabled account.
  */
 import { useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
+import ProHead, { ProMark } from "@/components/pro/portal/ProHead";
 import { ArrowLeft, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProButton } from "@/components/pro/portal/kit";
-import tidyLogo from "@/assets/tidy-logo.png";
 
 export default function ProLogin() {
   const navigate = useNavigate();
@@ -64,17 +63,13 @@ export default function ProLogin() {
 
   return (
     <div className="min-h-screen bg-[hsl(var(--pro-ground))] font-sans">
-      <Helmet>
-        <title>Sign in · Tidy Pro Portal</title>
-        <meta name="robots" content="noindex, nofollow" />
-        <meta name="theme-color" content="#0F172A" />
-      </Helmet>
+      <ProHead title="Sign in · Tidy Pro Portal" />
 
       <header className="flex items-center gap-2 bg-[hsl(var(--pro-navy))] px-2 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white">
         <Link to="/pro/welcome" aria-label="Back" className="grid h-11 w-11 place-items-center rounded-full active:bg-white/10">
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </Link>
-        <img src={tidyLogo} alt="" className="h-7 w-7 rounded-full object-contain" />
+        <ProMark size={30} />
         <span className="text-[15px] font-extrabold">Tidy Pro Portal</span>
       </header>
 

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#16233f"/>
+      <stop offset="55%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#0b2a55"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd75e"/>
+      <stop offset="100%" stop-color="#e0a806"/>
+    </linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5aa8ff"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+
+  <!-- navy squircle field -->
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="url(#navy)"/>
+
+  <!-- soft sweeps -->
+  <path d="M0 372 C150 300 330 356 512 250 L512 512 L0 512 Z" fill="#2563eb" opacity="0.16"/>
+  <path d="M0 440 C170 386 340 432 512 350 L512 512 L0 512 Z" fill="#5aa8ff" opacity="0.10"/>
+
+  <!-- shield -->
+  <path d="M256 66 L386 110 V236 c0 78 -55 128 -130 154 -75 -26 -130 -76 -130 -154 V110 Z"
+        fill="url(#sky)" opacity="0.18"/>
+  <path d="M256 66 L386 110 V236 c0 78 -55 128 -130 154 -75 -26 -130 -76 -130 -154 V110 Z"
+        fill="none" stroke="url(#gold)" stroke-width="11"/>
+
+  <!-- T lettermark -->
+  <path d="M188 150 h136 v40 h-46 v134 h-44 V190 h-46 Z" fill="#ffffff"/>
+
+  <!-- gold PRO bar -->
+  <rect x="188" y="408" width="136" height="36" rx="18" fill="url(#gold)"/>
+  <text x="256" y="433" text-anchor="middle" font-family="Poppins, Archivo, Helvetica, Arial, sans-serif"
+        font-size="22" font-weight="800" letter-spacing="5" fill="#0f172a">PRO</text>
+
+  <!-- sparkle -->
+  <path d="M400 116 l8 24 24 8 -24 8 -8 24 -8 -24 -24 -8 24 -8 Z" fill="#ffffff" opacity="0.92"/>
+</svg>
