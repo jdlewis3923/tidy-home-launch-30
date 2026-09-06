@@ -5,7 +5,8 @@
  * ?sw=off is present — and unregisters any stale worker in those cases, so a
  * Pro's schedule can never be served from a stale cache.
  */
-const SW_URL = "/sw.js";
+const PRO_SW_URL = "/pro-sw.js";
+const LEGACY_SW_URL = "/sw.js";
 
 function refused(): boolean {
   if (!import.meta.env.PROD) return true;
@@ -22,24 +23,31 @@ function refused(): boolean {
   return false;
 }
 
-async function unregisterMatching() {
+async function unregisterMatching(scriptUrls: string[]) {
   if (!("serviceWorker" in navigator)) return;
   const regs = await navigator.serviceWorker.getRegistrations();
   await Promise.allSettled(
     regs
-      .filter((r) => (r.active?.scriptURL ?? r.installing?.scriptURL ?? "").endsWith(SW_URL))
+      .filter((r) => {
+        const script = r.active?.scriptURL ?? r.installing?.scriptURL ?? "";
+        return scriptUrls.some((url) => script.endsWith(url));
+      })
       .map((r) => r.unregister()),
   );
 }
 
 export async function registerServiceWorker(): Promise<void> {
   if (!("serviceWorker" in navigator)) return;
+  // Remove the former root-scoped worker everywhere. It controlled /dashboard
+  // as well as /pro and caused Chrome to conflate both installable apps.
+  await unregisterMatching([LEGACY_SW_URL]);
   if (refused()) {
-    await unregisterMatching();
+    await unregisterMatching([PRO_SW_URL]);
     return;
   }
+  if (!window.location.pathname.startsWith("/pro/")) return;
   try {
-    await navigator.serviceWorker.register(SW_URL, { scope: "/" });
+    await navigator.serviceWorker.register(PRO_SW_URL, { scope: "/pro/" });
   } catch {
     // Offline support is best-effort; the app works without it.
   }
