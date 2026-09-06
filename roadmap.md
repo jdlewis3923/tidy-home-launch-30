@@ -35,3 +35,21 @@
 ## Launch (Sep 5 2026)
 - [x] Turn site live (site_live = true)
 - [x] Only House Cleaning selectable as a service until lawn/detail Pros are hired (see src/lib/service-availability.ts)
+
+## Prompt 4 status (updated)
+### Part 1 — edge function hardening: DONE
+- [x] handler-scope env reads via `_shared/handlerEnv.ts` (no module-scope throws)
+- [x] named `MISSING_ENV: X` errors, HTTP 200 `{ok:false}` instead of throwing
+- [x] entry logging to integration_logs before any work, wrapped so logging can never kill the function
+- [x] GET /health branch on send-zapier-event, send-twilio-sms, send-brevo-email
+- [x] explicit `verify_jwt = false` in config.toml so handlers do their own auth + logging
+- [x] all 8 self-tests re-run as admin: PASS
+
+### Part 2 — Brevo templates
+- [x] 2a secrets: BREVO_API_KEY + TWILIO_FROM_NUMBER configured. Checkr unavailable — DO NOT ASK AGAIN.
+- [x] 2b `send-brevo-email` (template_id/to/params only; rejects htmlContent, subject, unknown IDs)
+- [x] 2c registry `src/lib/emailTemplates.ts` + edge mirror `_shared/emailTemplates.ts`
+- [x] 2d documenso-webhook welcome now uses EMAIL.CONTRACTOR_WELCOME_T1; env/app_settings dual path + inline fallback deleted
+- [x] 2f required-params contract enforced (fails loudly, never sends `{{ params.x }}`)
+- [ ] 2e migrate remaining inline-HTML senders (~19 admin/ops functions still build their own HTML)
+- [ ] 2g Health panel rows per edge function with last successful invocation
