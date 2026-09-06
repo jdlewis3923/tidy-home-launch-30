@@ -10,6 +10,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { sendBrevoEmail as sendViaBrevo } from "../_shared/brevo-send.ts";
+import { EMAIL, missingRequiredParams } from "../_shared/emailTemplates.ts";
+
 
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
