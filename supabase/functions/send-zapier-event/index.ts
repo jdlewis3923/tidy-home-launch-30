@@ -250,7 +250,14 @@ Deno.serve(async (req) => {
       fn: async () => {
         const zapUrl = readOptionalEnv(`ZAP_${event_name.toUpperCase()}_URL`);
         if (!zapUrl) {
-          console.log(`[send-zapier-event] no URL configured for ${event_name} — skipping`);
+          // No Zap for this event. Rather than dying quietly, send the email
+          // ourselves from the Brevo template registry when one exists. Events
+          // with a Zap keep going to Zapier untouched, so nobody gets two copies.
+          const emailed = await dispatchBrevoTemplate(
+            SUPABASE_URL, SERVICE_KEY, event_name, payload, user_id,
+          );
+          if (emailed) return emailed;
+          console.log(`[send-zapier-event] no URL and no template for ${event_name} — skipping`);
           return { ok: true as const, skipped: 'no_url_configured' as const };
         }
 
@@ -270,6 +277,7 @@ Deno.serve(async (req) => {
       console.error('[send-zapier-event] zapier failed', event_name, message);
       return { ok: false as const, error: message };
     });
+
 
     const twilioPromise = isSmsEvent(event_name)
       ? dispatchTwilioSms(SUPABASE_URL, SERVICE_KEY, event_name, payload, user_id)
