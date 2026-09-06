@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProHead, { ProMark } from "./ProHead";
 import { ArrowLeft, Bell, CalendarDays, CircleUser, DollarSign, Trophy } from "lucide-react";
+import barBackdrop from "@/assets/miami-waterfront.webp";
 
 const NAV = [
   { to: "/pro/schedule", label: "Schedule", icon: CalendarDays },
@@ -28,8 +29,10 @@ export function ProTopBar({
 }) {
   const navigate = useNavigate();
   return (
-    <header className="sticky top-0 z-30 bg-gradient-to-b from-[hsl(var(--pro-navy))] to-[hsl(218_44%_18%)] px-2 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white">
-      <div className="flex min-h-[48px] items-center gap-1">
+    <header className="sticky top-0 z-30 overflow-hidden bg-[hsl(var(--pro-navy))] px-2 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white">
+      <img src={barBackdrop} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[hsl(var(--pro-navy)/0.7)] to-[hsl(var(--pro-navy)/0.95)]" />
+      <div className="relative flex min-h-[48px] items-center gap-1">
         {back !== undefined && (
           <button
             type="button"
