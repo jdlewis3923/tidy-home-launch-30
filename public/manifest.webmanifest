@@ -1,17 +1,35 @@
 {
+  "id": "/pro/",
   "name": "Tidy Pro Portal",
   "short_name": "Tidy Pro",
   "description": "Schedule, earnings and status for Tidy Pros.",
   "start_url": "/pro/schedule",
-  "scope": "/",
+  "scope": "/pro",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0070C2",
   "theme_color": "#0070C2",
   "icons": [
-    { "src": "/pro-icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/pro-icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/pro-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "/pro-apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+    {
+      "src": "/pro-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/pro-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/pro-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pro-apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
   ]
 }
