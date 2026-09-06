@@ -98,6 +98,20 @@ const QrRedirect = lazy(() => import("./pages/QrRedirect.tsx"));
 const Rate = lazy(() => import("./pages/Rate.tsx"));
 const VerifyPro = lazy(() => import("./pages/VerifyPro.tsx"));
 const ProIntake = lazy(() => import("./pages/ProIntake.tsx"));
+
+/* Tidy Pro Portal — the installable app Pros work from day to day. */
+const ProLanding = lazy(() => import("./pages/pro/ProLanding.tsx"));
+const ProLogin = lazy(() => import("./pages/pro/ProLogin.tsx"));
+const ProFirstRun = lazy(() => import("./pages/pro/ProFirstRun.tsx"));
+const ProSchedule = lazy(() => import("./pages/pro/ProSchedule.tsx"));
+const ProVisit = lazy(() => import("./pages/pro/ProVisit.tsx"));
+const ProChecklist = lazy(() => import("./pages/pro/ProChecklist.tsx"));
+const ProPhotos = lazy(() => import("./pages/pro/ProPhotos.tsx"));
+const ProEarnings = lazy(() => import("./pages/pro/ProEarnings.tsx"));
+const ProPayoutWeek = lazy(() => import("./pages/pro/ProPayoutWeek.tsx"));
+const ProStatus = lazy(() => import("./pages/pro/ProStatus.tsx"));
+const ProProfile = lazy(() => import("./pages/pro/ProProfile.tsx"));
+const ProNotifications = lazy(() => import("./pages/pro/ProNotifications.tsx"));
 const AdminProKits = lazy(() => import("./pages/AdminProKits.tsx"));
 const AdminBadges = lazy(() => import("./pages/AdminBadges.tsx"));
 
