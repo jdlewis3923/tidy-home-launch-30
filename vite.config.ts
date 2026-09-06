@@ -16,12 +16,13 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    // Offline app shell for the Pro Portal. Registration happens only in
-    // src/lib/register-sw.ts, which refuses dev and Lovable preview hosts.
+    // Offline app shell for the Pro Portal only. A root-scoped worker made
+    // Android treat the customer dashboard as the already-installed Pro app.
+    // Registration is restricted to /pro/ in src/lib/register-sw.ts.
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: null,
-      filename: "sw.js",
+      filename: "pro-sw.js",
       devOptions: { enabled: false },
       manifest: false,
       workbox: {
@@ -36,21 +37,21 @@ export default defineConfig(({ mode }) => ({
           {
             urlPattern: ({ request }) => request.mode === "navigate",
             handler: "NetworkFirst",
-            options: { cacheName: "tidy-pages", networkTimeoutSeconds: 3 },
+            options: { cacheName: "tidy-pro-pages", networkTimeoutSeconds: 1 },
           },
           {
             urlPattern: ({ url, request }) =>
               url.origin === (globalThis as unknown as { location: { origin: string } }).location.origin &&
               ["style", "script", "font"].includes(request.destination),
             handler: "StaleWhileRevalidate",
-            options: { cacheName: "tidy-assets", expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 30 } },
+            options: { cacheName: "tidy-pro-assets", expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 30 } },
           },
           {
             urlPattern: ({ url, request }) =>
               url.origin === (globalThis as unknown as { location: { origin: string } }).location.origin &&
               request.destination === "image",
             handler: "StaleWhileRevalidate",
-            options: { cacheName: "tidy-images", expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 7 } },
+            options: { cacheName: "tidy-pro-images", expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 7 } },
           },
         ],
       },

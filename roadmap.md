@@ -7,6 +7,9 @@
 - [x] Restrict customer scope to `/dashboard` and contractor scope to `/pro/`
 - [x] Declare the correct app metadata across every customer and contractor page
 - [x] Route `/pro` directly to the contractor center
+- [x] Retire the legacy root-scoped Pro worker and limit the replacement to `/pro/`
+- [x] Keep the customer dashboard outside all contractor offline-worker control
+- [x] Split public pages from dashboard/Pro startup bundles to reduce page-load time
 
 ### Prompt 4 — Part 1: edge function hardening
 - [ ] Wrap every handler body in try/catch; log to integration_logs; return 200 { ok:false, error } instead of throwing

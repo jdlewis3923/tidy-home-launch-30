@@ -21,15 +21,16 @@ const AdminChrome = lazy(() => import("@/components/admin/AdminChrome"));
 import { useSiteLive } from "@/hooks/useSiteLive";
 import { useHasRoleState } from "@/hooks/useHasRole";
 
-// Eager: homepage, terms/privacy, NotFound (small + always-needed)
-import Index from "./pages/Index.tsx";
-import ComingSoon from "./pages/ComingSoon.tsx";
-import Terms from "./pages/Terms.tsx";
-import Privacy from "./pages/Privacy.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import SignupRedirect from "./pages/SignupRedirect.tsx";
-import ReferralRedirect from "./pages/ReferralRedirect.tsx";
-import ThankYou from "./pages/ThankYou.tsx";
+// Route screens are all split so opening the dashboard or Pro Portal does not
+// download the public homepage and its media first.
+const Index = lazy(() => import("./pages/Index.tsx"));
+const ComingSoon = lazy(() => import("./pages/ComingSoon.tsx"));
+const Terms = lazy(() => import("./pages/Terms.tsx"));
+const Privacy = lazy(() => import("./pages/Privacy.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const SignupRedirect = lazy(() => import("./pages/SignupRedirect.tsx"));
+const ReferralRedirect = lazy(() => import("./pages/ReferralRedirect.tsx"));
+const ThankYou = lazy(() => import("./pages/ThankYou.tsx"));
 
 // Lazy: landing pages, auth, dashboard, checkout flows
 const HouseCleaning = lazy(() => import("./pages/HouseCleaning.tsx"));
@@ -167,7 +168,6 @@ const DoorhangerRescue = () => {
 
 const SiteGate = ({ children }: { children: React.ReactNode }) => {
   const { isLive, isLoading } = useSiteLive();
-  const { hasRole: isAdmin, isLoading: roleLoading } = useHasRoleState("admin");
   const location = useLocation();
   // ?preview=TOKEN → validated server side, then held in a session cookie.
   const [previewChecked, setPreviewChecked] = useState(() => !location.search.includes("preview="));
@@ -186,10 +186,16 @@ const SiteGate = ({ children }: { children: React.ReactNode }) => {
     ALWAYS_OPEN_PREFIXES.some((p) => location.pathname.startsWith(p)) ||
     // Narrow carve-out: the conversion hops open for door-hanger arrivals only.
     doorhangerGateAllows(location.pathname, location.search, getLandingSource());
-  if (isLoading || roleLoading || !previewChecked) return <RouteFallback />;
-  // Admins and staging previewers always see the full site — the toggle only
-  // affects everyone else.
-  if (!isLive && !isAdmin && !hasPreview && !isWhitelisted) return <ComingSoon />;
+  if (isLoading || !previewChecked) return <RouteFallback />;
+  // The live site does not need an auth request before every page can render.
+  if (isLive || hasPreview || isWhitelisted) return <>{children}</>;
+  return <AdminSiteGate>{children}</AdminSiteGate>;
+};
+
+const AdminSiteGate = ({ children }: { children: React.ReactNode }) => {
+  const { hasRole: isAdmin, isLoading } = useHasRoleState("admin");
+  if (isLoading) return <RouteFallback />;
+  if (!isAdmin) return <ComingSoon />;
   return <>{children}</>;
 };
 
