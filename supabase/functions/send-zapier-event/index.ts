@@ -267,8 +267,16 @@ Deno.serve(async (req) => {
       ok: missing.length === 0,
       function: 'send-zapier-event',
       missing_env: missing,
-      configured_events: configuredEvents,
-      unconfigured_events: EventNameSchema.options.filter((e) => !configuredEvents.includes(e)),
+      zapier_events: configuredEvents,
+      // Sent directly from the Brevo template registry (no Zap needed).
+      template_events: EventNameSchema.options.filter(
+        (e) => !configuredEvents.includes(e) && !!EVENT_TEMPLATE[e],
+      ),
+      // Genuinely nowhere to go — needs a Zap URL or a template.
+      unconfigured_events: EventNameSchema.options.filter(
+        (e) => !configuredEvents.includes(e) && !EVENT_TEMPLATE[e],
+      ),
+
     }, 200);
   }
 
