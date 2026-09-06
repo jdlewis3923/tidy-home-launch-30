@@ -42,22 +42,26 @@ const SERVICE_LABEL: Record<string, string> = {
 
 export const serviceLabel = (s: string) => SERVICE_LABEL[s] ?? s;
 
+let dashboardCache: Omit<DashboardData, 'loading' | 'refetch'> | null = null;
+
 export function useDashboardData(): DashboardData {
-  const [state, setState] = useState<DashboardData>({
-    loading: true,
-    isAuthed: false,
-    firstName: '',
-    initials: '',
-    profile: null,
-    subscription: null,
-    visits: [],
-    upcoming: [],
-    nextVisit: null,
-    lastCompleted: null,
-    nextInvoice: null,
-    invoices: [],
+  const [state, setState] = useState<DashboardData>(() => ({
+    loading: dashboardCache === null,
+    ...(dashboardCache ?? {
+      isAuthed: false,
+      firstName: '',
+      initials: '',
+      profile: null,
+      subscription: null,
+      visits: [],
+      upcoming: [],
+      nextVisit: null,
+      lastCompleted: null,
+      nextInvoice: null,
+      invoices: [],
+    }),
     refetch: () => {},
-  });
+  }));
 
   useEffect(() => {
     let cancelled = false;
@@ -121,8 +125,7 @@ export function useDashboardData(): DashboardData {
         .toUpperCase() || (user.email?.[0]?.toUpperCase() ?? 'T');
 
       if (!cancelled) {
-        setState({
-          loading: false,
+        const next = {
           isAuthed: true,
           firstName,
           initials,
@@ -134,6 +137,11 @@ export function useDashboardData(): DashboardData {
           lastCompleted,
           nextInvoice,
           invoices,
+        };
+        dashboardCache = next;
+        setState({
+          loading: false,
+          ...next,
           refetch: () => load(),
         });
       }

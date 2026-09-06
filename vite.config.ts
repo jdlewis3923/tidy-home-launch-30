@@ -56,6 +56,35 @@ export default defineConfig(({ mode }) => ({
         ],
       },
     }),
+    // Separate customer worker. Keeping it under /dashboard gives Android a
+    // second installable identity without letting it control the Pro Portal.
+    VitePWA({
+      registerType: "autoUpdate",
+      injectRegister: null,
+      filename: "home-sw.js",
+      devOptions: { enabled: false },
+      manifest: false,
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
+        globIgnores: ["**/*-mobile-*", "**/Admin*.js", "**/node_modules/**"],
+        maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
+        navigateFallbackDenylist: [/^\/(?!dashboard(?:\/|$))/, /^\/~oauth/],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: { cacheName: "tidy-home-pages", networkTimeoutSeconds: 1 },
+          },
+          {
+            urlPattern: ({ url, request }) =>
+              url.origin === (globalThis as unknown as { location: { origin: string } }).location.origin &&
+              ["style", "script", "font"].includes(request.destination),
+            handler: "StaleWhileRevalidate",
+            options: { cacheName: "tidy-home-assets", expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 } },
+          },
+        ],
+      },
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {

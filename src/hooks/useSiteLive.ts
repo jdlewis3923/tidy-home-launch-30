@@ -12,6 +12,24 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+let cachedSiteLive: boolean | null = null;
+let siteLiveRequest: Promise<boolean> | null = null;
+
+async function readSiteLive(): Promise<boolean> {
+  if (cachedSiteLive !== null) return cachedSiteLive;
+  if (siteLiveRequest) return siteLiveRequest;
+  siteLiveRequest = (async () => {
+    const { data, error } = await supabase.rpc("is_site_live");
+    if (error) throw error;
+    if (typeof data !== "boolean") throw new Error("Unexpected is_site_live payload");
+    cachedSiteLive = data;
+    return data;
+  })().finally(() => {
+    siteLiveRequest = null;
+  });
+  return siteLiveRequest;
+}
+
 export function useSiteLive(): { isLive: boolean; isLoading: boolean; refresh: () => void } {
   const [isLive, setIsLive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,17 +39,10 @@ export function useSiteLive(): { isLive: boolean; isLoading: boolean; refresh: (
     let cancelled = false;
     (async () => {
       try {
-        const { data, error } = await supabase.rpc("is_site_live");
+        if (tick > 0) cachedSiteLive = null;
+        const data = await readSiteLive();
         if (cancelled) return;
-        if (error) {
-          console.error("[useSiteLive] is_site_live failed — staying gated:", error.message);
-          setIsLive(false);
-        } else if (typeof data === "boolean") {
-          setIsLive(data);
-        } else {
-          console.error("[useSiteLive] unexpected is_site_live payload — staying gated:", data);
-          setIsLive(false);
-        }
+        setIsLive(data);
       } catch (err) {
         if (cancelled) return;
         console.error("[useSiteLive] is_site_live threw — staying gated:", err);
