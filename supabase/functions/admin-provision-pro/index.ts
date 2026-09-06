@@ -1,10 +1,10 @@
-// Tidy — admin action: provision a Pro login.
+// Tidy — admin action: invite a Pro.
 //
-// Creates (or adopts) the auth user for an applicant, links it to the
-// applicant row via contractor_id, and grants the 'pro' role in user_roles.
-// Until this runs, a hired contractor has no way into the Pro Portal.
+// Sends an invitation email so the Pro sets their own password; links the auth
+// user to the applicant row via contractor_id and grants the 'pro' role in
+// user_roles. The operator never sets or sees a Pro's password.
 //
-// Admin-only. Returns a one-time temporary password when a new login is made.
+// Admin-only. Until this runs, a hired contractor has no way into the Portal.
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
@@ -12,12 +12,12 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
-const BodySchema = z.object({ applicant_id: z.string().uuid() });
+const BodySchema = z.object({
+  applicant_id: z.string().uuid(),
+  redirect_to: z.string().url().max(500).optional(),
+});
+const DEFAULT_REDIRECT = 'https://jointidy.co/reset-password';
 
-function tempPassword(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(12));
-  return `Tidy-${Array.from(bytes, (b) => b.toString(36)).join('').slice(0, 14)}`;
-}
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
