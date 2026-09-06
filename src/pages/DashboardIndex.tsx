@@ -32,6 +32,9 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import DashboardTopNav from '@/components/dashboard/DashboardTopNav';
+import HomeAppHead from '@/components/dashboard/HomeAppHead';
+import HomeInstallPrompt from '@/components/dashboard/HomeInstallPrompt';
+
 import AddToNextVisitPanel from '@/components/dashboard/AddToNextVisitPanel';
 import AddonsYearStat from '@/components/dashboard/AddonsYearStat';
 import type { AddonService } from '@/lib/addon-catalog';
@@ -204,7 +207,10 @@ export default function DashboardIndex() {
 
   return (
     <div className="min-h-screen bg-cream text-ink">
+      <HomeAppHead />
       <DashboardTopNav initials={data.initials} />
+      <HomeInstallPrompt />
+
 
       {/* Welcome strip with very low-opacity hero wash */}
       <section className="relative overflow-hidden">

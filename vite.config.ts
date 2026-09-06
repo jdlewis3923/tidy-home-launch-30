@@ -36,7 +36,9 @@ export default defineConfig(({ mode }) => ({
           },
           {
             urlPattern: ({ url, request }) =>
-              url.origin === globalThis.location.origin && ["style", "script", "image", "font"].includes(request.destination),
+              url.origin === (globalThis as unknown as { location: { origin: string } }).location.origin && ["style", "script", "image", "font"].includes(request.destination),
+
+
             handler: "CacheFirst",
             options: { cacheName: "tidy-assets", expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 } },
           },

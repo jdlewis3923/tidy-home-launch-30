@@ -12,7 +12,9 @@ export default function ProHead({ title }: { title: string }) {
     <Helmet>
       <title>{title}</title>
       <meta name="robots" content="noindex, nofollow" />
+      <link rel="manifest" href="/manifest.webmanifest" />
       <meta name="theme-color" content="#0070C2" />
+
       <link rel="apple-touch-icon" sizes="180x180" href="/pro-apple-touch-icon.png" />
       <link rel="icon" type="image/png" sizes="512x512" href="/pro-icon-512.png" />
       <link rel="icon" type="image/png" sizes="192x192" href="/pro-icon-192.png" />
