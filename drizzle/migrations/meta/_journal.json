@@ -204,6 +204,13 @@
       "when": 1788618052956,
       "tag": "0028_add_nextval_helper",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1788660881412,
+      "tag": "0029_pro_portal_core",
+      "breakpoints": true
     }
   ]
 }
