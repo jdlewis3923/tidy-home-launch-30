@@ -347,6 +347,21 @@ const App = () => (
                   <Route path="/verify/:token" element={<VerifyPro />} />
                   <Route path="/intake/:token" element={<ProIntake />} />
 
+                  {/* Tidy Pro Portal — its own app shell, no site chrome. */}
+                  <Route path="/pro/welcome" element={<ProLanding />} />
+                  <Route path="/pro/login" element={<ProLogin />} />
+                  <Route path="/pro/first-run" element={<ProFirstRun />} />
+                  <Route path="/pro/schedule" element={<ProSchedule />} />
+                  <Route path="/pro/visit/:id" element={<ProVisit />} />
+                  <Route path="/pro/visit/:id/checklist" element={<ProChecklist />} />
+                  <Route path="/pro/visit/:id/photos" element={<ProPhotos />} />
+                  <Route path="/pro/earnings" element={<ProEarnings />} />
+                  <Route path="/pro/earnings/:weekId" element={<ProPayoutWeek />} />
+                  <Route path="/pro/status" element={<ProStatus />} />
+                  <Route path="/pro/profile" element={<ProProfile />} />
+                  <Route path="/pro/notifications" element={<ProNotifications />} />
+
+
 
                   <Route path="*" element={<NotFound />} />
                   </Routes>
