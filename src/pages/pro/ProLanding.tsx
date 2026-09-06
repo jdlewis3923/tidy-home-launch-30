@@ -5,7 +5,6 @@
 import { Link } from "react-router-dom";
 import ProHead from "@/components/pro/portal/ProHead";
 import heroHome from "@/assets/miami-waterfront.webp";
-import tidyLogo from "@/assets/tidy-logo.png";
 
 export default function ProLanding() {
   return (

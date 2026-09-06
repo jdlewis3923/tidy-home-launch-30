@@ -9,7 +9,6 @@ import ProHead, { ProMark } from "@/components/pro/portal/ProHead";
 import { ArrowLeft, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProButton } from "@/components/pro/portal/kit";
-import tidyLogo from "@/assets/tidy-logo.png";
 
 export default function ProLogin() {
   const navigate = useNavigate();
