@@ -188,6 +188,21 @@ export default function ProSchedule() {
         </>
       )}
 
+      {!loading && !error && showPushCard && (
+        <section className="px-[18px] pt-6">
+          <PushOptIn compact />
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.setItem(PUSH_CARD_KEY, "1");
+              setShowPushCard(false);
+            }}
+            className="mt-2 min-h-[44px] w-full text-[13px] font-semibold text-[hsl(var(--pro-ink-soft))]"
+          >
+            Not now
+          </button>
+        </section>
+      )}
 
       <InstallPrompt />
     </ProShell>
