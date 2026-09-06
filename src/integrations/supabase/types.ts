@@ -956,6 +956,33 @@ export type Database = {
         }
         Relationships: []
       }
+      checklist_templates: {
+        Row: {
+          active: boolean
+          id: string
+          label: string
+          section: string
+          service_type: string
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          id?: string
+          label: string
+          section: string
+          service_type: string
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          id?: string
+          label?: string
+          section?: string
+          service_type?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       company_documents: {
         Row: {
           archive_reason: string | null
@@ -2551,6 +2578,45 @@ export type Database = {
         }
         Relationships: []
       }
+      payout_weeks: {
+        Row: {
+          bonus_cents: number
+          created_at: string
+          id: string
+          paid_at: string | null
+          payout_date: string
+          pro_id: string
+          status: string
+          visit_pay_cents: number
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          bonus_cents?: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          payout_date: string
+          pro_id: string
+          status?: string
+          visit_pay_cents?: number
+          week_end: string
+          week_start: string
+        }
+        Update: {
+          bonus_cents?: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          payout_date?: string
+          pro_id?: string
+          status?: string
+          visit_pay_cents?: number
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       preferred_pro_changes: {
         Row: {
           changed_at: string
@@ -2597,14 +2663,18 @@ export type Database = {
         Row: {
           amount_cents: number
           blocked_reason: string | null
+          bonus_type: string | null
           created_at: string
           created_by: string | null
           currency: string
+          earned_at: string | null
           id: string
+          month_key: string | null
           paid_at: string | null
           period: string
           pro_id: string
           reason: string
+          related_visit_id: string | null
           review_id: string | null
           status: string
           stripe_transfer_id: string | null
@@ -2612,14 +2682,18 @@ export type Database = {
         Insert: {
           amount_cents: number
           blocked_reason?: string | null
+          bonus_type?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
+          earned_at?: string | null
           id?: string
+          month_key?: string | null
           paid_at?: string | null
           period: string
           pro_id: string
           reason?: string
+          related_visit_id?: string | null
           review_id?: string | null
           status?: string
           stripe_transfer_id?: string | null
@@ -2627,14 +2701,18 @@ export type Database = {
         Update: {
           amount_cents?: number
           blocked_reason?: string | null
+          bonus_type?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
+          earned_at?: string | null
           id?: string
+          month_key?: string | null
           paid_at?: string | null
           period?: string
           pro_id?: string
           reason?: string
+          related_visit_id?: string | null
           review_id?: string | null
           status?: string
           stripe_transfer_id?: string | null
@@ -4202,6 +4280,80 @@ export type Database = {
         }
         Relationships: []
       }
+      visit_checklist_items: {
+        Row: {
+          checked_at: string | null
+          id: string
+          pro_id: string
+          template_id: string
+          visit_id: string
+        }
+        Insert: {
+          checked_at?: string | null
+          id?: string
+          pro_id: string
+          template_id: string
+          visit_id: string
+        }
+        Update: {
+          checked_at?: string | null
+          id?: string
+          pro_id?: string
+          template_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_checklist_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_checklist_items_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visit_photos: {
+        Row: {
+          id: string
+          kind: string
+          pro_id: string
+          storage_path: string
+          uploaded_at: string
+          visit_id: string
+        }
+        Insert: {
+          id?: string
+          kind: string
+          pro_id: string
+          storage_path: string
+          uploaded_at?: string
+          visit_id: string
+        }
+        Update: {
+          id?: string
+          kind?: string
+          pro_id?: string
+          storage_path?: string
+          uploaded_at?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_photos_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       visit_ratings: {
         Row: {
           admin_review_notes: string | null
@@ -4327,49 +4479,94 @@ export type Database = {
       }
       visits: {
         Row: {
+          access_notes: string | null
+          assigned_pro_id: string | null
+          completed_at: string | null
           created_at: string
           crew_name: string | null
+          customer_first_name: string | null
+          gate_code: string | null
           id: string
+          is_sample: boolean
           jobber_job_id: string | null
           jobber_visit_id: string | null
           notes: string | null
+          on_my_way_at: string | null
+          parking_notes: string | null
+          pet_notes: string | null
+          scheduled_end: string | null
+          scheduled_start: string | null
           service: Database["public"]["Enums"]["service_type"]
+          service_type: string | null
           status: Database["public"]["Enums"]["visit_status"]
+          street: string | null
           subscription_id: string | null
           time_window: string | null
           updated_at: string
           user_id: string
           visit_date: string
+          visit_pay_cents: number | null
+          zip: string | null
         }
         Insert: {
+          access_notes?: string | null
+          assigned_pro_id?: string | null
+          completed_at?: string | null
           created_at?: string
           crew_name?: string | null
+          customer_first_name?: string | null
+          gate_code?: string | null
           id?: string
+          is_sample?: boolean
           jobber_job_id?: string | null
           jobber_visit_id?: string | null
           notes?: string | null
+          on_my_way_at?: string | null
+          parking_notes?: string | null
+          pet_notes?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
           service: Database["public"]["Enums"]["service_type"]
+          service_type?: string | null
           status?: Database["public"]["Enums"]["visit_status"]
+          street?: string | null
           subscription_id?: string | null
           time_window?: string | null
           updated_at?: string
           user_id: string
           visit_date: string
+          visit_pay_cents?: number | null
+          zip?: string | null
         }
         Update: {
+          access_notes?: string | null
+          assigned_pro_id?: string | null
+          completed_at?: string | null
           created_at?: string
           crew_name?: string | null
+          customer_first_name?: string | null
+          gate_code?: string | null
           id?: string
+          is_sample?: boolean
           jobber_job_id?: string | null
           jobber_visit_id?: string | null
           notes?: string | null
+          on_my_way_at?: string | null
+          parking_notes?: string | null
+          pet_notes?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
           service?: Database["public"]["Enums"]["service_type"]
+          service_type?: string | null
           status?: Database["public"]["Enums"]["visit_status"]
+          street?: string | null
           subscription_id?: string | null
           time_window?: string | null
           updated_at?: string
           user_id?: string
           visit_date?: string
+          visit_pay_cents?: number | null
+          zip?: string | null
         }
         Relationships: [
           {
@@ -4514,6 +4711,59 @@ export type Database = {
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
       nextval: { Args: { seq_name: string }; Returns: number }
+      pro_coi_state: {
+        Args: { _pro: string }
+        Returns: {
+          can_work: boolean
+          carrier: string
+          certificate_path: string
+          expires_at: string
+          policy_number: string
+          status: string
+        }[]
+      }
+      pro_get_me: {
+        Args: never
+        Returns: {
+          active_since: string
+          avg_rating: number
+          badge_status: string
+          badge_token: string
+          completed_visits: number
+          first_name: string
+          pro_id: string
+          pro_number: string
+          referral_code: string
+          tier: string
+        }[]
+      }
+      pro_get_visits: {
+        Args: { _from?: string; _to?: string }
+        Returns: {
+          access_notes: string
+          after_photos: number
+          before_photos: number
+          completed_at: string
+          customer_first_name: string
+          gate_code: string
+          id: string
+          is_sample: boolean
+          on_my_way_at: string
+          parking_notes: string
+          pet_notes: string
+          scheduled_end: string
+          scheduled_start: string
+          service_type: string
+          status: string
+          street: string
+          visit_pay_cents: number
+          zip: string
+        }[]
+      }
+      pro_visit_pay_cents: {
+        Args: { _frequency: string; _service_type: string; _tier?: string }
+        Returns: number
+      }
       public_five_star_proof: { Args: never; Returns: Json }
       verify_pro_badge: {
         Args: { _token: string }
@@ -4530,7 +4780,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "customer" | "crew" | "admin"
+      app_role: "customer" | "crew" | "admin" | "pro"
       invoice_status: "paid" | "pending" | "failed" | "refunded"
       kpi_action_type: "AUTO" | "MANUAL" | "INFO"
       kpi_alert_severity: "warn" | "critical"
@@ -4698,7 +4948,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["customer", "crew", "admin"],
+      app_role: ["customer", "crew", "admin", "pro"],
       invoice_status: ["paid", "pending", "failed", "refunded"],
       kpi_action_type: ["AUTO", "MANUAL", "INFO"],
       kpi_alert_severity: ["warn", "critical"],
