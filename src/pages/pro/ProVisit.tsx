@@ -80,7 +80,7 @@ export default function ProVisit() {
   if (loading) {
     return (
       <ProShell title="Visit" back="/pro/schedule">
-        <div className="space-y-4 p-4">
+        <div className="space-y-5 px-[18px] py-4">
           <Skeleton className="h-24" />
           <Skeleton className="h-40" />
           <Skeleton className="h-32" />
@@ -170,7 +170,7 @@ export default function ProVisit() {
 
         <Link
           to={`/pro/visit/${visit.id}/checklist`}
-          className="mt-3 flex min-h-[52px] items-center gap-3 rounded-2xl border border-[hsl(var(--pro-line))] bg-white px-4"
+          className="mt-3 flex min-h-[52px] items-center gap-3 rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white px-4"
         >
           <ListChecks className="h-5 w-5 text-[hsl(var(--pro-blue))]" aria-hidden />
           <span className="flex-1 text-[15px] font-bold text-[hsl(var(--pro-ink))]">View checklist</span>

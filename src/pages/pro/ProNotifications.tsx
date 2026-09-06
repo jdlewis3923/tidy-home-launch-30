@@ -44,7 +44,7 @@ export default function ProNotifications() {
             <article
               key={n.id}
               className={`rounded-2xl border bg-white p-4 ${
-                n.read_at ? "border-[hsl(var(--pro-line))]" : "border-[hsl(var(--pro-blue)/0.35)]"
+                n.read_at ? "border-[hsl(var(--pro-navy)/0.07)]" : "border-[hsl(var(--pro-blue)/0.35)]"
               }`}
             >
               <p className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">{n.title}</p>

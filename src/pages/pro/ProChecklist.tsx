@@ -63,7 +63,7 @@ export default function ProChecklist() {
                 <h2 className="px-1 pb-2 text-[13px] font-extrabold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
                   {section}
                 </h2>
-                <div className="overflow-hidden rounded-2xl border border-[hsl(var(--pro-line))]">
+                <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)]">
                   {items.map((r) => (
                     <ChecklistItemRow
                       key={r.id}
