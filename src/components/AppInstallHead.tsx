@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 
-const HOME_PATHS = ["/dashboard", "/account", "/billing", "/help"];
+const HOME_PATHS = ["/dashboard"];
 
 export default function AppInstallHead() {
   const { pathname } = useLocation();
