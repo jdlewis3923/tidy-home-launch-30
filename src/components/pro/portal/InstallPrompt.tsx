@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import { Share, Plus, X, SquarePlus } from "lucide-react";
 
-const KEY = "tidy_pro_install_prompt_dismissed";
+const KEY = "tidy_pro_install_prompt_dismissed_v2";
 
 function isStandalone(): boolean {
   return (
@@ -46,7 +46,7 @@ export default function InstallPrompt() {
           <X className="h-4 w-4" aria-hidden />
         </button>
         <p className="pr-8 text-[16px] font-extrabold text-[hsl(var(--pro-ink))]">
-          Add Tidy to your home screen
+          Install Tidy Pro
         </p>
         {ios ? (
           <ol className="mt-2 space-y-1.5 text-[14px] text-[hsl(var(--pro-ink-soft))]">

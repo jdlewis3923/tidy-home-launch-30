@@ -16,6 +16,7 @@ import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
 const ChatbotMount = lazy(() => import("@/components/chatbot/ChatbotMount"));
 import HomeButton from "@/components/HomeButton";
+import AppInstallHead from "@/components/AppInstallHead";
 const AdminChrome = lazy(() => import("@/components/admin/AdminChrome"));
 import { useSiteLive } from "@/hooks/useSiteLive";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -80,7 +81,6 @@ const AdminSocialLaunch = lazy(() => import("./pages/AdminSocialLaunch.tsx"));
 const AdminNextdoorVerify = lazy(() => import("./pages/AdminNextdoorVerify.tsx"));
 const AdminDocumensoTemplates = lazy(() => import("./pages/AdminDocumensoTemplates.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
-const ProDashboard = lazy(() => import("./pages/ProDashboard.tsx"));
 const ProJobView = lazy(() => import("./pages/ProJobView.tsx"));
 const AddonApproval = lazy(() => import("./pages/AddonApproval.tsx"));
 const ProTierProgression = lazy(() => import("./pages/ProTierProgression.tsx"));
@@ -203,6 +203,7 @@ const App = () => (
           <BrowserRouter>
             <PromoCaptureWatcher />
             <DoorhangerRescue />
+            <AppInstallHead />
 
                         <MetaPixel />
             <Suspense fallback={null}>
@@ -322,7 +323,7 @@ const App = () => (
                   {/* Capacity & hiring — fill %, ceiling dates, when to post the job. */}
                   <Route path="/admin/capacity" element={<AdminCapacity />} />
                   <Route path="/apply" element={<Apply />} />
-                  <Route path="/pro" element={<ProDashboard />} />
+                  <Route path="/pro" element={<Navigate to="/pro/schedule" replace />} />
                   <Route path="/pro/tier-progression" element={<ProTierProgression />} />
                   <Route path="/pro/review-bonus" element={<ProReviewBonuses />} />
                   <Route path="/pro/upload-coi" element={<ProUploadCoi />} />

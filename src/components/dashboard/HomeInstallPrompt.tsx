@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { Share, SquarePlus, X, Download, Sparkles } from 'lucide-react';
 
-const KEY = 'tidy_home_install_prompt_dismissed';
+const KEY = 'tidy_home_install_prompt_dismissed_v2';
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -82,9 +82,9 @@ export default function HomeInstallPrompt() {
             className="shrink-0 rounded-[22%] shadow-sm"
           />
           <div className="pr-6">
-            <p className="text-sm font-bold tracking-tight text-ink">Keep Tidy one tap away</p>
+            <p className="text-sm font-bold tracking-tight text-ink">Install Tidy Home</p>
             <p className="mt-0.5 text-xs leading-relaxed text-ink-soft">
-              Add Tidy to your home screen for your visits, plan and billing.
+              Customer app for your visits, plan and billing.
             </p>
           </div>
         </div>
