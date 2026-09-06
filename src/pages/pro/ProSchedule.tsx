@@ -10,7 +10,7 @@ import { CalendarDays } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import InstallPrompt from "@/components/pro/portal/InstallPrompt";
 import {
-  EmptyState, ErrorState, MetricTile, ScheduleSkeleton, VisitRow, WarningBanner, ProButton,
+  EmptyState, ErrorState, Eyebrow, HeroPanel, ScheduleSkeleton, VisitRow, WarningBanner, ProButton,
 } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
 import { dayLabel, fetchNotifications, mondayOf, timeWindow } from "@/lib/pro-portal";
