@@ -552,6 +552,7 @@ export type Database = {
           stage_entered_at: string | null
           stripe_account_id: string | null
           stripe_connect_complete: boolean
+          stripe_connect_status: string
           tier: string
           tier_advanced_at: string | null
           tier_offer_sent_at: string | null
@@ -563,6 +564,7 @@ export type Database = {
           training_scheduled_at: string | null
           updated_at: string
           verify_token: string | null
+          w9_status: string
           wash_only: boolean
           zip: string | null
         }
@@ -639,6 +641,7 @@ export type Database = {
           stage_entered_at?: string | null
           stripe_account_id?: string | null
           stripe_connect_complete?: boolean
+          stripe_connect_status?: string
           tier?: string
           tier_advanced_at?: string | null
           tier_offer_sent_at?: string | null
@@ -650,6 +653,7 @@ export type Database = {
           training_scheduled_at?: string | null
           updated_at?: string
           verify_token?: string | null
+          w9_status?: string
           wash_only?: boolean
           zip?: string | null
         }
@@ -726,6 +730,7 @@ export type Database = {
           stage_entered_at?: string | null
           stripe_account_id?: string | null
           stripe_connect_complete?: boolean
+          stripe_connect_status?: string
           tier?: string
           tier_advanced_at?: string | null
           tier_offer_sent_at?: string | null
@@ -737,6 +742,7 @@ export type Database = {
           training_scheduled_at?: string | null
           updated_at?: string
           verify_token?: string | null
+          w9_status?: string
           wash_only?: boolean
           zip?: string | null
         }
@@ -3838,6 +3844,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          assigned_pro_id: string | null
           band: string | null
           band_source: string | null
           band_verified_at: string | null
@@ -3878,6 +3885,7 @@ export type Database = {
           washing_allowed: boolean | null
         }
         Insert: {
+          assigned_pro_id?: string | null
           band?: string | null
           band_source?: string | null
           band_verified_at?: string | null
@@ -3918,6 +3926,7 @@ export type Database = {
           washing_allowed?: boolean | null
         }
         Update: {
+          assigned_pro_id?: string | null
           band?: string | null
           band_source?: string | null
           band_verified_at?: string | null
@@ -4610,6 +4619,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_assign_customer_pro: {
+        Args: { _applicant_id: string; _subscription_id: string }
+        Returns: undefined
+      }
       admin_get_jobber_refresh_token: { Args: never; Returns: string }
       admin_get_meta_secret: { Args: { _name: string }; Returns: string }
       admin_get_scheduler_paused: { Args: never; Returns: boolean }
@@ -4632,6 +4645,22 @@ export type Database = {
       admin_set_vapid_secret: {
         Args: { _name: string; _value: string }
         Returns: undefined
+      }
+      admin_set_visit_pro: {
+        Args: { _applicant_id: string; _visit_id: string }
+        Returns: undefined
+      }
+      admin_unassigned_visits: {
+        Args: never
+        Returns: {
+          customer_first_name: string
+          id: string
+          scheduled_start: string
+          service_type: string
+          street: string
+          subscription_id: string
+          zip: string
+        }[]
       }
       call_edge_function: {
         Args: { _fn: string; _payload: Json }
