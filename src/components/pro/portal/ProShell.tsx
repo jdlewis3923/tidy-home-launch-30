@@ -29,9 +29,10 @@ export function ProTopBar({
 }) {
   const navigate = useNavigate();
   return (
-    <header className="sticky top-0 z-30 overflow-hidden bg-[hsl(var(--pro-navy))] px-2 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white">
-      <img src={barBackdrop} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[hsl(var(--pro-navy)/0.7)] to-[hsl(var(--pro-navy)/0.95)]" />
+    <header className="sticky top-0 z-30 overflow-hidden bg-[hsl(var(--pro-navy))] px-2 pb-2.5 pt-[max(0.6rem,env(safe-area-inset-top))] text-white">
+      <img src={barBackdrop} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.22]" />
+      <div className="pointer-events-none absolute inset-0 pro-hero-texture opacity-50" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[hsl(var(--pro-navy)/0.55)] to-[hsl(var(--pro-navy)/0.92)]" />
       <div className="relative flex min-h-[48px] items-center gap-1">
         {back !== undefined && (
           <button
@@ -40,11 +41,13 @@ export function ProTopBar({
             onClick={() => (back ? navigate(back) : navigate(-1))}
             className="grid h-11 w-11 shrink-0 place-items-center rounded-full active:bg-white/10"
           >
-            <ArrowLeft className="h-5 w-5" aria-hidden />
+            <ArrowLeft className="h-5 w-5" aria-hidden strokeWidth={2} />
           </button>
         )}
         {back === undefined && <ProMark size={30} className="ml-2 mr-1" />}
-        <h1 className={`flex-1 truncate text-[18px] font-extrabold ${back === undefined ? "pl-1" : ""}`}>
+        <h1
+          className={`flex-1 truncate text-[18px] font-bold tracking-[-0.02em] ${back === undefined ? "pl-1" : ""}`}
+        >
           {title}
         </h1>
         {showBell && (
@@ -53,9 +56,9 @@ export function ProTopBar({
             aria-label={unread ? `${unread} unread notifications` : "Notifications"}
             className="relative grid h-11 w-11 place-items-center rounded-full active:bg-white/10"
           >
-            <Bell className="h-5 w-5" aria-hidden />
+            <Bell className="h-5 w-5" aria-hidden strokeWidth={1.9} />
             {unread > 0 && (
-              <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[hsl(var(--pro-sky))]" />
+              <span className="absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full bg-[hsl(var(--pro-gold))] ring-2 ring-[hsl(var(--pro-navy))]" />
             )}
           </Link>
         )}
@@ -67,7 +70,7 @@ export function ProTopBar({
 export function ProBottomNav() {
   const { pathname } = useLocation();
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-[hsl(var(--pro-line))] bg-white pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-[hsl(var(--pro-navy)/0.08)] bg-white/92 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
       <ul className="mx-auto flex max-w-md">
         {NAV.map(({ to, label, icon: Icon }) => {
           const active = pathname === to || pathname.startsWith(`${to}/`);
@@ -76,11 +79,17 @@ export function ProBottomNav() {
               <Link
                 to={to}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-[56px] flex-col items-center justify-center gap-1 text-[11px] font-bold ${
+                className={`relative flex min-h-[68px] flex-col items-center justify-center gap-1 pt-1.5 text-[11px] font-bold tracking-[-0.01em] ${
                   active ? "text-[hsl(var(--pro-blue))]" : "text-[hsl(var(--pro-ink-soft))]"
                 }`}
               >
-                <Icon className="h-5 w-5" aria-hidden strokeWidth={active ? 2.4 : 1.9} />
+                <span
+                  aria-hidden
+                  className={`absolute top-0 h-[3px] w-8 rounded-full transition-opacity ${
+                    active ? "bg-[hsl(var(--pro-blue))] opacity-100" : "opacity-0"
+                  }`}
+                />
+                <Icon className="h-[22px] w-[22px]" aria-hidden strokeWidth={active ? 2.3 : 1.8} />
                 {label}
               </Link>
             </li>
@@ -90,6 +99,7 @@ export function ProBottomNav() {
     </nav>
   );
 }
+
 
 export default function ProShell({
   title,
