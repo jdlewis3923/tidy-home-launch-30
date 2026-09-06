@@ -14,9 +14,9 @@ import { captureLandingSourceFromUrl } from "@/lib/landing-source";
 import { usePageViewTracking } from "@/hooks/usePageViewTracking";
 import RouteFallback from "@/components/RouteFallback";
 import { MetaPixel } from "@/components/marketing/MetaPixel";
-import ChatbotMount from "@/components/chatbot/ChatbotMount";
+const ChatbotMount = lazy(() => import("@/components/chatbot/ChatbotMount"));
 import HomeButton from "@/components/HomeButton";
-import AdminChrome from "@/components/admin/AdminChrome";
+const AdminChrome = lazy(() => import("@/components/admin/AdminChrome"));
 import { useSiteLive } from "@/hooks/useSiteLive";
 import { useHasRoleState } from "@/hooks/useHasRole";
 
@@ -205,9 +205,13 @@ const App = () => (
             <DoorhangerRescue />
 
                         <MetaPixel />
-            <ChatbotMount />
+            <Suspense fallback={null}>
+              <ChatbotMount />
+            </Suspense>
             <HomeButton />
-            <AdminChrome />
+            <Suspense fallback={null}>
+              <AdminChrome />
+            </Suspense>
             <RouteTracker>
               <SiteGate>
                 <Suspense fallback={<RouteFallback />}>
