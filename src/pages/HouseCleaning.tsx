@@ -104,7 +104,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "One flat price per visit, set by the size of your home: $139, $189 or $279. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Homes with 5+ bedrooms are quoted by hand.",
+      a: "One price per visit, set by the size of your home: $139, $189 or $279 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Homes with 5+ bedrooms are quoted by hand.",
     },
     {
       q: "Can I cancel anytime?",

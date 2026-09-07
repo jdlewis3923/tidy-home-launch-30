@@ -246,7 +246,7 @@ const translations: Record<string, string> = {
   "Nope — zero commitment! There are no contracts and no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month.":
     "¡Para nada — cero compromiso! Sin contratos y sin cargos por cancelación. Puedes cancelar cuando quieras, sin preguntas. Nos ganamos tu confianza cada mes.",
   "How often do services happen?": "¿Cada cuánto se hacen los servicios?",
-  "Totally up to you! Choose weekly, biweekly, or monthly for each service — and yes, you can mix and match. Want weekly lawn care but biweekly cleaning? Done. We build your plan around your life.":
+  "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan.":
     "¡Tú decides! Elige semanal, quincenal o mensual para cada servicio — y sí, puedes combinar. ¿Quieres jardín semanal pero limpieza quincenal? Listo. Armamos el plan a tu medida.",
   "Do I need to be home?": "¿Tengo que estar en casa?",
   "Not at all! Just give us access via a lockbox, gate code, or smart lock and our team handles everything while you're out living your best life. You'll get photo confirmation when each service is done.":
@@ -474,7 +474,7 @@ const translations: Record<string, string> = {
     "Reservé en menos de un minuto. El profesional es puntual, amable y minucioso.",
   // House Cleaning FAQs
   "What's the price and what's it based on?": "¿Cuál es el precio y de qué depende?",
-  "One flat price per visit, set by the size of your home: $139, $189 or $279. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Homes with 5+ bedrooms are quoted by hand.":
+  "One price per visit, set by the size of your home: $139, $189 or $279 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Homes with 5+ bedrooms are quoted by hand.":
     "Un precio fijo por visita, según el tamaño de tu casa: $139, $189 o $279. La frecuencia solo lo multiplica — mensual es una visita, quincenal dos y semanal cuatro. Las casas de 5+ recámaras las cotizamos a mano.",
   "Yes. No contracts, no cancellation fees. Pause, skip, or cancel from your dashboard anytime.":
     "Sí. Sin contratos, sin cargos por cancelación. Pausa, omite o cancela desde tu panel cuando quieras.",
@@ -525,7 +525,7 @@ const translations: Record<string, string> = {
   "They show up rain or shine. Locked price, never a surprise invoice.":
     "Llegan llueva o truene. Precio fijo, nunca una factura sorpresa.",
   // Lawn Care FAQs
-  "One flat price per visit, set by the size of your lawn: $45, $65 or $99. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Pick your best guess and we confirm the size from satellite imagery before your first visit.":
+  "One price per visit, set by the size of your lawn: $55, $75 or $109 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess and we confirm the size from satellite imagery before your first visit.":
     "Un precio fijo por visita, según el tamaño de tu jardín: $45, $65 o $99. La frecuencia solo lo multiplica — mensual es una visita, quincenal dos y semanal cuatro. Elige tu mejor estimación y confirmamos el tamaño con imágenes satelitales antes de la primera visita.",
 "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.":
     "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y recoger o triturar la grama. Los planes semanales incluyen poda de arbustos.",
@@ -770,7 +770,7 @@ const translations: Record<string, string> = {
   "Five simple steps — then your home runs on autopilot.":
     "Cinco pasos simples — y luego tu hogar funciona en piloto automático.",
   "Choose Your Services": "Elige Tus Servicios",
-  "Pick house cleaning, lawn care, Shine Complete — or all three. Select your preferred frequency for each.":
+  "Pick house cleaning, lawn care, Shine Complete — or all three. Choose the plan that fits each one.":
     "Elige limpieza del hogar, cuidado del jardín, Shine Complete — o los tres. Selecciona la frecuencia que prefieras para cada uno.",
   "Set Up Your Plan": "Configura Tu Plan",
   "Tell us about your home, choose your schedule, and review your price. Takes under 2 minutes.":
@@ -803,7 +803,7 @@ const translations: Record<string, string> = {
     "Casa extra grande (2,501–4,000 pies²): +$60 por visita. Terreno extra grande (4,001–7,500 pies² de grama cortable): +$30 por visita. Vehículo extra grande: +$30 por visita. Por encima de esos tamaños cotizamos de forma individual.",
   "Available as add-ons: pet-hair removal, headlight restoration.":
     "Disponibles como complementos: eliminación de pelo de mascotas, restauración de faros.",
-  "Choose weekly, biweekly, or monthly depending on the service — and mix and match freely. Car detailing is monthly or biweekly. Want weekly lawn care but biweekly cleaning? Done.":
+  "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan.":
     "Elige semanal, quincenal o mensual según el servicio, y combínalos libremente. El Shine Completes es mensual o quincenal. ¿Quieres jardinería semanal pero limpieza quincenal? Listo.",
   "What affects my price?": "¿Qué afecta mi precio?",
   "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees.":
@@ -840,7 +840,7 @@ const translations: Record<string, string> = {
     "Toca 'Empezar Mi Plan', elige tus servicios y tu horario, y completa el pago. Tu primera visita se confirma dentro de 24 horas.",
   "No contracts, no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month.":
     "Sin contratos, sin cargos por cancelación. Puedes cancelar cuando quieras, sin preguntas. Nos ganamos tu preferencia cada mes.",
-  "Choose weekly, biweekly, or monthly for each service — and mix and match freely. Want weekly lawn care but biweekly cleaning? Done.":
+  "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan.":
     "Elige semanal, quincenal o mensual para cada servicio — y combínalos libremente. ¿Quieres jardín semanal pero limpieza quincenal? Listo.",
   "Not at all. Provide access via a lockbox, gate code, or smart lock and our team handles everything. You'll get photo confirmation when each service is complete.":
     "Para nada. Danos acceso con una caja de llaves, un código de portón o una cerradura inteligente y nuestro profesional se encarga de todo. Recibirás confirmación con fotos cuando cada servicio esté completo.",

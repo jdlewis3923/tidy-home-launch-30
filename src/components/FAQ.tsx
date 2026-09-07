@@ -17,7 +17,7 @@ const preLaunchFAQ = [
   {
     title: "Services & Scheduling",
     items: [
-      { q: "How often do services happen?", a: "Totally up to you! Choose weekly, biweekly, or monthly for each service — and yes, you can mix and match. Want weekly lawn care but biweekly cleaning? Done. We build your plan around your life." },
+      { q: "How often do services happen?", a: "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan." },
       { q: "Do I need to be home?", a: "Not at all! Just give us access via a lockbox, gate code, or smart lock and our team handles everything while you're out living your best life. You'll get photo confirmation when each service is done." },
       { q: "Can I reschedule or pause?", a: "Absolutely! Life happens — just shoot us a message and we'll move things around for you. Need to pause for a vacation? No problem. We've got you covered." },
       { q: "What if it rains?", a: "No worries! If weather impacts an outdoor service, we'll automatically reschedule it for the next available day. Your subscription stays active and you won't miss a beat." },
@@ -64,7 +64,7 @@ const launchFAQ = [
   {
     title: "Services & Scheduling",
     items: [
-      { q: "How often do services happen?", a: "Choose weekly, biweekly, or monthly depending on the service — and mix and match freely. Car detailing is monthly or biweekly. Want weekly lawn care but biweekly cleaning? Done." },
+      { q: "How often do services happen?", a: "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan." },
       { q: "Do I need to be home?", a: "Not at all. Provide access via a lockbox, gate code, or smart lock and our team handles everything. You'll get photo confirmation when each service is complete." },
       { q: "Can I reschedule or pause?", a: "Yes — reschedule, pause for vacation, or skip a visit anytime through your dashboard or by contacting us. No penalties." },
       { q: "What if it rains?", a: "If weather impacts an outdoor service, we automatically reschedule for the next available day. Your subscription stays active." },
