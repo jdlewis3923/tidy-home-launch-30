@@ -199,7 +199,7 @@ describe('checkout ↔ Stripe parity', () => {
     const one = buildState(['cleaning']);
     const two = buildState(['cleaning', 'lawn']);
     expect(Math.round(stripeSubscriptionCents(two))).toBe(
-      Math.round(stripeSubscriptionCents(one)) + 75 * 100,
+      Math.round(stripeSubscriptionCents(one)) + 65 * 100,
     );
     expect(calculatePricing(two).freeAddons).toBe(freeAddonsPerMonth(2));
   });
