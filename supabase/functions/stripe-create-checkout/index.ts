@@ -176,14 +176,17 @@ Deno.serve(async (req) => {
         });
 
         // ---------- Resolve recurring prices by lookup key ----------
-        const serviceKeys = input.services.map((s) => SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize]);
+        // The cadence is part of the key; every price is monthly, quantity 1.
+        const serviceKeys = input.services.map((s) =>
+          lookupKeyFor(s.service, s.size as CanonSize, s.frequency as CanonCadence),
+        );
         const carWashKey = input.car_wash
           ? CAR_WASH_LOOKUP_KEYS[input.car_wash.size as CanonSize][input.car_wash.washes as WashCount]
           : null;
 
         const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
-          .select("lookup_key, service_type, stripe_price_id")
+          .select("lookup_key, service_type, stripe_price_id, price_cents")
           .in("lookup_key", carWashKey ? [...serviceKeys, carWashKey] : serviceKeys)
           .eq("active", true);
         if (priceErr) throw new Error(`catalog read failed: ${priceErr.message}`);
@@ -194,13 +197,72 @@ Deno.serve(async (req) => {
         // cleaning and lawn care are nontaxable services in Florida.
         const carCareIndices = new Set<number>();
 
+        /** Per-visit surcharge for a line, or 0. Above the band it is a quote. */
+        const surchargeFor = (service: string, sqFt?: number | null): number => {
+          if (!sqFt) return 0;
+          if (service === "cleaning") {
+            if (sqFt > CLEANING_SURCHARGE.maxSqFt) return -1;
+            return sqFt >= CLEANING_SURCHARGE.minSqFt ? CLEANING_SURCHARGE.perVisitDollars : 0;
+          }
+          if (service === "lawn") {
+            if (sqFt > LAWN_SURCHARGE.maxSqFt) return -1;
+            return sqFt >= LAWN_SURCHARGE.minSqFt ? LAWN_SURCHARGE.perVisitDollars : 0;
+          }
+          return 0;
+        };
+
+        // What each line costs the customer this month, for the parity check and
+        // for the subscription snapshot the webhook writes.
+        const planLines: Array<Record<string, unknown>> = [];
+
         for (const s of input.services) {
-          const key = SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize];
+          const cadence = s.frequency as CanonCadence;
+          const size = s.size as CanonSize;
+          const key = lookupKeyFor(s.service, size, cadence);
           const row = priceRows?.find((r) => r.lookup_key === key);
           if (!row) throw new Error(`no active catalog price for lookup_key ${key}`);
+
+          const surcharge = surchargeFor(s.service, s.sq_ft);
+          if (surcharge < 0) throw new Error("property_requires_quote");
+
           if (s.service === "detailing") carCareIndices.add(line_items.length);
-          line_items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, s.frequency) });
+          line_items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, cadence) });
+
+          const visits = visitsPerMonthFor(s.service, cadence);
+          if (surcharge > 0) {
+            // Surcharge is per visit, so it scales with cadence exactly like the plan.
+            line_items.push({
+              price_data: {
+                currency: "usd",
+                product_data: {
+                  name: `${s.service === "cleaning" ? "Larger home" : "Larger yard"} surcharge`,
+                },
+                unit_amount: surcharge * visits * 100,
+                recurring: { interval: "month" },
+              },
+              quantity: 1,
+            });
+          }
+
+          planLines.push({
+            service: s.service,
+            size_tier: size,
+            cadence,
+            surcharge_applied: surcharge > 0,
+            surcharge_cents: surcharge * 100,
+            visits_per_month: visits,
+            per_visit_cents: Math.round((perVisitPrice(s.service, size, cadence) + surcharge) * 100),
+            monthly_cents: Math.round(monthlyPrice(s.service, size, cadence, surcharge) * 100),
+            lookup_key: key,
+            stripe_price_id: row.stripe_price_id,
+            // Never shown to a customer — used when visits are created.
+            contractor_pay_cents:
+              Math.round(
+                contractorVisitPay({ service: s.service, size, cadence, surcharge: surcharge > 0 }) * 100,
+              ),
+          });
         }
+
 
         if (carWashKey) {
           const row = priceRows?.find((r) => r.lookup_key === carWashKey);
