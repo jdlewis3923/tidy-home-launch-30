@@ -235,18 +235,12 @@ Deno.serve(async (req) => {
 
           const visits = visitsPerMonthFor(s.service, cadence);
           if (surcharge > 0) {
-            // Surcharge is per visit, so it scales with cadence exactly like the plan.
-            line_items.push({
-              price_data: {
-                currency: "usd",
-                product_data: {
-                  name: `${s.service === "cleaning" ? "Larger home" : "Larger yard"} surcharge`,
-                },
-                unit_amount: surcharge * visits * 100,
-                recurring: { interval: "month" },
-              },
-              quantity: 1,
-            });
+            // One catalog surcharge price per service, per visit. Quantity carries
+            // the cadence, so switching cadence later stays correct.
+            const surKey = s.service === "cleaning" ? "surcharge_cleaning_xl" : "surcharge_lawn_xl";
+            const surRow = priceRows?.find((r) => r.lookup_key === surKey);
+            if (!surRow) throw new Error(`no active catalog price for lookup_key ${surKey}`);
+            line_items.push({ price: surRow.stripe_price_id, quantity: visits });
           }
 
           planLines.push({
