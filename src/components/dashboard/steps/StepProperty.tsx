@@ -55,7 +55,7 @@ function SizeReadout({
         {sizeHelpers[service][size]}.{' '}
         {perMonth
           ? 'the same every month.'
-          : `${formatMonthly(getServicePrice(state, service))} a month at the plan you picked, billed monthly.`}
+          : `${formatMonthly(getServicePrice(state, service))} at the plan you picked, billed monthly.`}
       </p>
     </div>
   );
