@@ -85,12 +85,12 @@ export default function StepFrequency({ state, onChange }: Props) {
           {(() => {
             const size = sizeFor(state, svc);
             if (!size || size === 'quote') return null;
-            const sticker = getSizePrice(svc, size);
+            const monthly = getServicePrice(state, svc);
             return (
               <p className="text-[11px] text-ink-faint animate-calm-in">
                 {serviceUnits[svc] === 'per_month'
-                  ? `${formatMonthly(sticker)} — the same every month.`
-                  : `${formatPerVisit(sticker)} — the same however often we come.`}
+                  ? `${formatMonthly(monthly)} — the same every month.`
+                  : `${formatMonthly(monthly)} — ${formatPlanCardDetail(state, svc)}.`}
               </p>
             );
           })()}
@@ -98,8 +98,9 @@ export default function StepFrequency({ state, onChange }: Props) {
       ))}
 
       <p className="text-xs text-ink-faint">
-        cleaning and lawn care are priced per visit, so how often we come is up to you. change it anytime — no lock-in.
+        coming more often lowers the price per visit — biweekly is 8% less a visit than monthly, weekly is 18% less. you are always billed monthly, and you can change it anytime.
       </p>
+
     </div>
   );
 }
