@@ -310,18 +310,28 @@ Deno.serve(async (req) => {
           for (const idx of carCareIndices) line_items[idx].tax_rates = [taxRateId];
         }
 
-        // ---------- Bundle gift: free car washes, never a percentage ----------
+        // ---------- Bundle gift: one free premium add-on, never a percentage ----------
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
         const freeAddons = freeAddonsPerMonth(uniqueServices);
 
         // ---------- Subscription metadata for the webhook ----------
+        const primary = planLines[0] as Record<string, unknown>;
         const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
           signed_up_at: new Date().toISOString(),
           user_id: user.id,
           services_json: JSON.stringify(input.services),
           sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
+          // service / size_tier / cadence / surcharge_applied, per service line.
+          plan_lines_json: JSON.stringify(planLines),
+          size_tier: String(primary?.size_tier ?? ""),
+          cadence: String(primary?.cadence ?? ""),
+          surcharge_applied: planLines.some((l) => l.surcharge_applied) ? "yes" : "no",
+          surcharge_cents: String(
+            planLines.reduce((sum, l) => sum + Number(l.surcharge_cents ?? 0), 0),
+          ),
           addons_json: JSON.stringify(input.addons),
+
           car_wash_json: input.car_wash ? JSON.stringify(input.car_wash) : "",
           free_addons_per_month: String(freeAddons),
           zip: input.zip,
