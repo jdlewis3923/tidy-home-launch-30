@@ -42,9 +42,9 @@ export const PER_VISIT_PRICES: Record<'cleaning' | 'lawn', Record<CanonSize, Rec
     3: { monthly: 279, biweekly: 257, weekly: 229 },
   },
   lawn: {
-    1: { monthly: 55, biweekly: 51, weekly: 45 },
-    2: { monthly: 75, biweekly: 69, weekly: 62 },
-    3: { monthly: 109, biweekly: 100, weekly: 89 },
+    1: { monthly: 45, biweekly: 41, weekly: 37 },
+    2: { monthly: 65, biweekly: 60, weekly: 53 },
+    3: { monthly: 99, biweekly: 91, weekly: 81 },
   },
 };
 
@@ -56,9 +56,9 @@ export const BILLED_MONTHLY: Record<CanonService, Record<CanonSize, Record<Canon
     3: { monthly: 279, biweekly: 514, weekly: 916 },
   },
   lawn: {
-    1: { monthly: 55, biweekly: 102, weekly: 180 },
-    2: { monthly: 75, biweekly: 138, weekly: 246 },
-    3: { monthly: 109, biweekly: 200, weekly: 358 },
+    1: { monthly: 45, biweekly: 82, weekly: 148 },
+    2: { monthly: 65, biweekly: 120, weekly: 212 },
+    3: { monthly: 99, biweekly: 182, weekly: 324 },
   },
   // Shine Complete has no frequency choice — one monthly plan per size.
   detailing: {
@@ -73,7 +73,7 @@ export const SHINE_MONTHLY: Record<CanonSize, number> = { 1: 149, 2: 179, 3: 239
 
 /**
  * The headline figure for a service at its smallest size: the MONTHLY BILL.
- * "House cleaning from $139 a month. Lawn care from $55 a month.
+ * "House cleaning from $139 a month. Lawn care from $45 a month.
  *  Shine Complete from $149 a month."
  */
 export const SIZE_PRICES: Record<CanonService, Record<CanonSize, number>> = {
@@ -353,9 +353,9 @@ export const CONTRACTOR_VISIT_PAY: Record<'cleaning' | 'lawn', Record<CanonSize,
     3: { monthly: 112, biweekly: 103, weekly: 92 },
   },
   lawn: {
-    1: { monthly: 22, biweekly: 20, weekly: 18 },
-    2: { monthly: 30, biweekly: 28, weekly: 25 },
-    3: { monthly: 44, biweekly: 40, weekly: 36 },
+    1: { monthly: 18, biweekly: 16, weekly: 15 },
+    2: { monthly: 26, biweekly: 24, weekly: 21 },
+    3: { monthly: 40, biweekly: 36, weekly: 32 },
   },
 };
 
