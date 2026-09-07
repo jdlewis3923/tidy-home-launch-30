@@ -111,7 +111,7 @@ const BundleInner = () => {
         )}
         canonical="https://jointidy.co/bundle"
         ogImage={heroImg}
-        priceRange="$45–$279"
+        priceRange="$55–$916"
       />
       <Navbar onOpenPopup={handleNavCta} />
       <StickyBookBar

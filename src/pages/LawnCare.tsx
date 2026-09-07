@@ -142,9 +142,9 @@ const config: ServiceLandingConfig = {
   seo: {
     title: "Lawn Care in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same Pro, no contracts. Book in about 2 minutes.",
+      "Lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Plans from $55 a month. Same Pro, no contracts. Book in about 2 minutes.",
     canonical: "https://jointidy.co/lawn-care",
-    priceRange: "$45–$99",
+    priceRange: "$55–$358",
     service: {
       name: "Lawn Care",
       serviceType: "Lawn Care",
