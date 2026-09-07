@@ -337,17 +337,27 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   const visits: any[] = [];
   for (const s of services) {
     const spacing = FREQ_DAYS[s.frequency] ?? 30;
+    const line = lineFor(s.service);
     for (let i = 0; i < 3; i++) {
       const d = new Date(baseDate.getTime() + i * spacing * 86_400_000);
       visits.push({
         user_id: userId,
         subscription_id: subRow.id,
         service: s.service,
+        service_type: s.service,
         visit_date: d.toISOString().slice(0, 10),
         time_window: timeWindowFromPreferred(meta.preferred_time),
         status: 'scheduled',
+        // Snapshot the plan and the pay AT CREATION, so a later price change
+        // never silently reprices work already scheduled or completed.
+        size_tier: line?.size_tier ?? s.size ?? null,
+        cadence: line?.cadence ?? s.frequency,
+        surcharge_applied: line?.surcharge_applied ?? false,
+        contractor_pay_cents: line?.contractor_pay_cents ?? null,
+        visit_pay_cents: line?.contractor_pay_cents ?? null,
       });
     }
+
   }
   if (visits.length > 0) {
     const { error: visitErr } = await supabase.from('visits').insert(visits);
