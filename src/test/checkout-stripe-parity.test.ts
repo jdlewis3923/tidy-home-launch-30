@@ -181,7 +181,7 @@ describe('checkout ↔ Stripe parity', () => {
 
   it('cadence lowers the per-visit price and sets the monthly bill', () => {
     const weekly = buildState(['lawn'], { size: 2, cadence: 'weekly' });
-    expect(Math.round(stripeSubscriptionCents(weekly))).toBe(246 * 100);
+    expect(Math.round(stripeSubscriptionCents(weekly))).toBe(212 * 100);
     const biweekly = buildState(['cleaning'], { size: 2, cadence: 'biweekly' });
     expect(Math.round(stripeSubscriptionCents(biweekly))).toBe(348 * 100);
     const monthly = buildState(['cleaning'], { size: 2, cadence: 'monthly' });

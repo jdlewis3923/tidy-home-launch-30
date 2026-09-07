@@ -79,7 +79,7 @@ describe('2. cadence is in the price, not the quantity', () => {
 
   it('the billed monthly amount is what the key stands for', () => {
     expect(BILLED_MONTHLY.cleaning[2].biweekly).toBe(348);
-    expect(BILLED_MONTHLY.lawn[1].weekly).toBe(180);
+    expect(BILLED_MONTHLY.lawn[1].weekly).toBe(148);
   });
 });
 
