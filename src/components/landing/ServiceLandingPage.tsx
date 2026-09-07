@@ -355,9 +355,14 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                       <span className="text-3xl font-extrabold text-foreground">{p.price}</span>
                       <span className="text-sm text-text-mid">{t(p.cadence)}</span>
                     </div>
+                    {/* The card leads with the monthly bill; the per-visit figure sits under it. */}
+                    {p.visitNote && (
+                      <p className="mt-1 text-xs leading-snug text-text-mid">{t(p.visitNote)}</p>
+                    )}
                     {p.sizeNote && (
                       <p className="mt-1 text-[11px] leading-snug text-text-light">{t(p.sizeNote)}</p>
                     )}
+
                     <p className="text-sm text-text-mid mt-3 flex-1">{t(p.description)}</p>
                     <Link
                       to={planCta.to}
