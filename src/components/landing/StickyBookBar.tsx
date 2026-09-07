@@ -8,7 +8,7 @@ import { usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
-  label: string;            // "House Cleaning · from $159/mo"
+  label: string;            // "House Cleaning · from $139/mo"
   /** Tracking surface, e.g. "lp_house-cleaning" */
   surface: string;
   /** Optional CTA overrides forwarded into /signup */

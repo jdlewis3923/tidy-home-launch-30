@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
     promote = { status: r.status };
     if (map.brevo_template_t2_confirmed) {
       brevo = await fireBrevoTemplate(map.brevo_template_t2_confirmed, { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
-        first_name: a.first_name, pay_split: '45%', floor: '$30', stipend: '$300',
+        first_name: a.first_name, pay_uplift: '+10% on every visit',
       });
     }
   } else {
