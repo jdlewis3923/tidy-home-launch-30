@@ -72,9 +72,9 @@ describe('three sizes, per-visit price by cadence', () => {
       3: { monthly: 279, biweekly: 257, weekly: 229 },
     });
     expect(PER_VISIT_PRICES.lawn).toEqual({
-      1: { monthly: 55, biweekly: 51, weekly: 45 },
-      2: { monthly: 75, biweekly: 69, weekly: 62 },
-      3: { monthly: 109, biweekly: 100, weekly: 89 },
+      1: { monthly: 45, biweekly: 41, weekly: 37 },
+      2: { monthly: 65, biweekly: 60, weekly: 53 },
+      3: { monthly: 99, biweekly: 91, weekly: 81 },
     });
   });
 
@@ -85,19 +85,19 @@ describe('three sizes, per-visit price by cadence', () => {
       3: { monthly: 279, biweekly: 514, weekly: 916 },
     });
     expect(BILLED_MONTHLY.lawn).toEqual({
-      1: { monthly: 55, biweekly: 102, weekly: 180 },
-      2: { monthly: 75, biweekly: 138, weekly: 246 },
-      3: { monthly: 109, biweekly: 200, weekly: 358 },
+      1: { monthly: 45, biweekly: 82, weekly: 148 },
+      2: { monthly: 65, biweekly: 120, weekly: 212 },
+      3: { monthly: 99, biweekly: 182, weekly: 324 },
     });
     expect(SHINE_MONTHLY).toEqual({ 1: 149, 2: 179, 3: 239 });
   });
 
   it('headline prices are the monthly bill', () => {
     expect(SIZE_PRICES.cleaning).toEqual({ 1: 139, 2: 189, 3: 279 });
-    expect(SIZE_PRICES.lawn).toEqual({ 1: 55, 2: 75, 3: 109 });
+    expect(SIZE_PRICES.lawn).toEqual({ 1: 45, 2: 65, 3: 99 });
     expect(SIZE_PRICES.detailing).toEqual({ 1: 149, 2: 179, 3: 239 });
     expect(HEADLINE_PRICE_COPY).toContain('House cleaning from $139 a month');
-    expect(HEADLINE_PRICE_COPY).toContain('Lawn care from $55 a month');
+    expect(HEADLINE_PRICE_COPY).toContain('Lawn care from $45 a month');
     expect(HEADLINE_PRICE_COPY).toContain('Shine Complete from $149 a month');
   });
 
@@ -138,7 +138,7 @@ describe('cadence is a volume curve, never a quantity', () => {
   it('the monthly bill is visits x per-visit price', () => {
     expect(monthlyPrice('cleaning', 2, 'biweekly')).toBe(348);
     expect(perVisitPrice('cleaning', 2, 'biweekly') * 2).toBe(348);
-    expect(monthlyPrice('lawn', 1, 'weekly')).toBe(180);
+    expect(monthlyPrice('lawn', 1, 'weekly')).toBe(148);
     expect(monthlyPrice('detailing', 2, 'weekly')).toBe(179);
   });
 
@@ -146,7 +146,7 @@ describe('cadence is a volume curve, never a quantity', () => {
     expect(CLEANING_SURCHARGE.perVisitDollars).toBe(60);
     expect(LAWN_SURCHARGE.perVisitDollars).toBe(30);
     expect(monthlyPrice('cleaning', 2, 'weekly', 60)).toBe(620 + 240);
-    expect(monthlyPrice('lawn', 2, 'biweekly', 30)).toBe(138 + 60);
+    expect(monthlyPrice('lawn', 2, 'biweekly', 30)).toBe(120 + 60);
   });
 });
 
@@ -158,9 +158,9 @@ describe('contractor pay is 40% of the visit price and never shown to a customer
       3: { monthly: 112, biweekly: 103, weekly: 92 },
     });
     expect(CONTRACTOR_VISIT_PAY.lawn).toEqual({
-      1: { monthly: 22, biweekly: 20, weekly: 18 },
-      2: { monthly: 30, biweekly: 28, weekly: 25 },
-      3: { monthly: 44, biweekly: 40, weekly: 36 },
+      1: { monthly: 18, biweekly: 16, weekly: 15 },
+      2: { monthly: 26, biweekly: 24, weekly: 21 },
+      3: { monthly: 40, biweekly: 36, weekly: 32 },
     });
   });
 
@@ -214,7 +214,7 @@ describe('bundling gives one free premium add-on, never a percentage or a wash',
       lawnChoice: 'standard',
     });
     expect(p.netTotal).toBe(p.subtotal);
-    expect(p.subtotal).toBe(348 + 246);
+    expect(p.subtotal).toBe(348 + 212);
     expect(p.freeAddons).toBe(1);
   });
 
@@ -251,6 +251,6 @@ describe('untouched programme rules', () => {
   });
 
   it('the entry price is a size 1 lawn, billed monthly', () => {
-    expect(ENTRY_PRICE_MONTHLY).toBe(55);
+    expect(ENTRY_PRICE_MONTHLY).toBe(45);
   });
 });

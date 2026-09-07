@@ -90,8 +90,8 @@ const translations: Record<string, string> = {
   "Every Month.": "Cada Mes.",
   "Scheduling, timing, and follow-through — handled.": "Programación, tiempos y seguimiento — resueltos.",
   "Set it once. We take care of the rest.": "Configúralo una vez. Nosotros nos encargamos del resto.",
-  "No contracts · Cancel anytime · From $55 a month": "Sin contratos · Cancela cuando quieras · Desde $55 al mes",
-  "Founding memberships · No commitment · From $55 a month": "Membresías fundadoras · Sin compromiso · Desde $55 al mes",
+  "No contracts · Cancel anytime · From $45 a month": "Sin contratos · Cancela cuando quieras · Desde $45 al mes",
+  "Founding memberships · No commitment · From $45 a month": "Membresías fundadoras · Sin compromiso · Desde $45 al mes",
   "See your price — 60 seconds →": "Ve tu precio — 60 segundos →",
   "We handle scheduling, timing, and everything in between.":
     "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
@@ -102,8 +102,8 @@ const translations: Record<string, string> = {
   "🌿 Lawn Care": "🌿 Cuidado del Jardín",
   "🚗 Shine Complete": "🚗 Shine Complete",
   "✓ Cancel Anytime": "✓ Cancela Cuando Quieras",
-  "Limited founding memberships · No commitment required · From $55 a month":
-    "Membresías fundadoras limitadas · Sin compromiso · Desde $55 al mes",
+  "Limited founding memberships · No commitment required · From $45 a month":
+    "Membresías fundadoras limitadas · Sin compromiso · Desde $45 al mes",
 
   // Proof bar
   "Miami Homeowners": "Propietarios en Miami",
@@ -438,7 +438,7 @@ const translations: Record<string, string> = {
 
   // Sticky bar labels
   "House Cleaning · from $139 a month": "Limpieza del Hogar · desde $139 al mes",
-  "Lawn Care · from $55 a month": "Cuidado del Jardín · desde $55 al mes",
+  "Lawn Care · from $45 a month": "Cuidado del Jardín · desde $45 al mes",
   "Shine Complete · from $149/mo": "Shine Complete · desde $149/mes",
   "Bundle your services · free monthly add-on": "Combina tus servicios · servicio adicional gratis al mes",
 
@@ -494,7 +494,7 @@ const translations: Record<string, string> = {
     "Al inscribirte, fijamos un día y horario recurrente. Recibes un aviso de llegada antes de cada visita. Reagenda cuando quieras desde tu panel.",
   "Reach out within 24 hours and we'll re-clean the area or credit your account — no questions asked.":
     "Avísanos en 24 horas y volvemos a limpiar el área o te acreditamos a tu cuenta — sin preguntas.",
-  "Already booking cleaning? Add lawn care from $55 a month.": "¿Ya tienes limpieza? Agrega jardín desde $55 al mes.",
+  "Already booking cleaning? Add lawn care from $45 a month.": "¿Ya tienes limpieza? Agrega jardín desde $45 al mes.",
   "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.":
     "Agrega un 2º servicio y te regalamos un lavado de carro cada mes — y nunca más coordinas dos proveedores.",
 
@@ -502,9 +502,9 @@ const translations: Record<string, string> = {
   "Monthly Lawn Care in Pinecrest + Kendall": "Cuidado Mensual del Jardín en Pinecrest + Kendall",
   "Mow, edge, blow. Same Pro. Locked price. Never surprise-billed.":
     "Cortar, bordear, soplar. El mismo profesional. Precio fijo. Sin facturas sorpresa.",
-  "From $55 a month": "Desde $55 al mes",
-  "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$55 a month** flat, same Pro, no surprise invoices.":
-    "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy es **$55 al mes**, precio fijo, el mismo profesional, sin facturas sorpresa.",
+  "From $45 a month": "Desde $45 al mes",
+  "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$45 a month** flat, same Pro, no surprise invoices.":
+    "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy es **$45 al mes**, precio fijo, el mismo profesional, sin facturas sorpresa.",
   // Lawn Care plans
   "One visit per month.": "Una visita al mes.",
   "Two visits per month.": "Dos visitas al mes.",
@@ -516,7 +516,7 @@ const translations: Record<string, string> = {
   "Weed-whack fence lines": "Recorte a lo largo de las cercas",
   "Bag or mulch clippings": "Recoger o triturar la grama cortada",
   "Bush trim (weekly)": "Poda de arbustos (semanal)",
-    "Locked $55 a month — never surprise-priced": "$55 al mes, precio fijo — nunca con precios sorpresa",
+    "Locked $45 a month — never surprise-priced": "$45 al mes, precio fijo — nunca con precios sorpresa",
   // Lawn Care testimonials
   "Lawn looks sharp every week without me lifting a finger. Best money I spend monthly.":
     "El jardín se ve impecable cada semana sin mover un dedo. El mejor dinero que gasto al mes.",
@@ -525,8 +525,8 @@ const translations: Record<string, string> = {
   "They show up rain or shine. Locked price, never a surprise invoice.":
     "Llegan llueva o truene. Precio fijo, nunca una factura sorpresa.",
   // Lawn Care FAQs
-  "One price per visit, set by the size of your lawn: $55, $75 or $109 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess and we confirm the size from satellite imagery before your first visit.":
-    "Un precio por visita, según el tamaño de tu jardín: $55, $75 o $109 en el plan mensual. Venir más seguido baja el precio por visita — quincenal es 8% menos por visita que mensual y semanal 18% menos. Siempre se cobra al mes. Elige tu mejor estimación y confirmamos el tamaño con imágenes satelitales antes de la primera visita.",
+  "One price per visit, set by the size of your lawn: $45, $65 or $99 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess and we confirm the size from satellite imagery before your first visit.":
+    "Un precio por visita, según el tamaño de tu jardín: $45, $65 o $99 en el plan mensual. Venir más seguido baja el precio por visita — quincenal es 8% menos por visita que mensual y semanal 18% menos. Siempre se cobra al mes. Elige tu mejor estimación y confirmamos el tamaño con imágenes satelitales antes de la primera visita.",
 "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.":
     "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y recoger o triturar la grama. Los planes semanales incluyen poda de arbustos.",
   "Who does the work?": "¿Quién hace el trabajo?",
@@ -746,7 +746,7 @@ const translations: Record<string, string> = {
     "Limpieza profunda, interior del horno, interior del refrigerador, ventanas interiores",
   "See plans & details": "Ver planes y detalles",
   "Best value · Pairs perfectly with cleaning": "Mejor valor · Combina perfecto con la limpieza",
-  "Biweekly from $102/mo": "Quincenal desde $102/mes",
+  "Biweekly from $82/mo": "Quincenal desde $82/mes",
   "Professional lawn maintenance to keep your Miami home's exterior sharp year-round. No scheduling required, ever.":
     "Mantenimiento profesional del jardín para que el exterior de tu casa en Miami luzca impecable todo el año. Sin programar nada, nunca.",
   "Edging along walkways & beds": "Bordeado de caminos y jardineras",
@@ -973,8 +973,8 @@ const translations: Record<string, string> = {
     "Tidy no es solo jardín — es un sistema para todo tu hogar.",
   "Start lawn care": "Empezar cuidado del jardín",
   "Start your plan": "Empieza tu plan",
-  "Lawn care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). Mow, edge, blow. Plans from $55 a month. Same Pro, no contracts. Book in about 2 minutes.":
-    "Cuidado del jardín en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Planes desde $55 al mes. El mismo profesional, sin contratos. Reserva en unos 2 minutos.",
+  "Lawn care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). Mow, edge, blow. Plans from $45 a month. Same Pro, no contracts. Book in about 2 minutes.":
+    "Cuidado del jardín en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Planes desde $45 al mes. El mismo profesional, sin contratos. Reserva en unos 2 minutos.",
   "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.":
     "Limpieza profesional del hogar, resuelta por nosotros. Semanal, quincenal o mensual.",
   "Tidy isn't just cleaning — it's a system for your entire home.":
@@ -1103,9 +1103,9 @@ const translations: Record<string, string> = {
   "$139/mo": "$139/mes",
   "$256/mo": "$256/mes",
   "$456/mo": "$456/mes",
-  "$55/mo": "$55/mes",
-  "$102/mo": "$102/mes",
-  "$180/mo": "$180/mes",
+  "$45/mo": "$45/mes",
+  "$82/mo": "$82/mes",
+  "$148/mo": "$148/mes",
   "$149/mo": "$149/mes",
   "$179/mo": "$179/mes",
   "$239/mo": "$239/mes",
@@ -1198,7 +1198,7 @@ const translations: Record<string, string> = {
   "per month, size 1": "por mes, tamaño 1",
   "Serving Pinecrest, Kendall and Kendall West — 33156, 33183, 33186":
     "Servimos Pinecrest y Kendall — 33156, 33183, 33186",
-  "from $55 a month": "desde $55 al mes",
+  "from $45 a month": "desde $45 al mes",
   "five-star reviews": "reseñas de cinco estrellas",
   "from neighbors in": "de vecinos en",
   "Pinecrest and Kendall": "Pinecrest y Kendall",
