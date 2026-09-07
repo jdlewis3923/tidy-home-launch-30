@@ -7,11 +7,12 @@ import {
   serviceLabels,
   serviceIcons,
   sizeFor,
-  getSizePrice,
+  getServicePrice,
+  formatPlanCardDetail,
   serviceUnits,
-  formatPerVisit,
   formatMonthly,
 } from '@/lib/dashboard-pricing';
+
 
 interface Props {
   state: ConfigState;
