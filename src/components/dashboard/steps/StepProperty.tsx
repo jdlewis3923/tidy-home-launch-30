@@ -6,6 +6,9 @@ import {
   formatMonthly,
   formatPerVisit,
   getSizePrice,
+  getPerVisitPrice,
+  getServicePrice,
+  surchargePerVisitFor,
   lawnChoiceHelpers,
   lawnChoiceLabels,
   serviceUnits,
@@ -140,7 +143,7 @@ export default function StepProperty({ state, onChange }: Props) {
             more bathrooms than your size allows moves the home up one size — bathrooms drive the
             length of a visit more than anything else.
           </p>
-          <SizeReadout service="cleaning" size={sizeFor(state, 'cleaning')} />
+          <SizeReadout service="cleaning" size={sizeFor(state, 'cleaning')} state={state} />
         </div>
       )}
 
@@ -161,7 +164,7 @@ export default function StepProperty({ state, onChange }: Props) {
 
           <p className="text-[11px] text-ink-faint">{LAWN_GUESS_NOTE}</p>
 
-          <SizeReadout service="lawn" size={sizeFor(state, 'lawn')} />
+          <SizeReadout service="lawn" size={sizeFor(state, 'lawn')} state={state} />
         </div>
       )}
 
@@ -231,7 +234,7 @@ export default function StepProperty({ state, onChange }: Props) {
           <p className="text-[11px] text-ink-faint">
             pet hair, sand and smoke are add-ons, never a bigger size.
           </p>
-          <SizeReadout service="detailing" size={sizeFor(state, 'detailing')} />
+          <SizeReadout service="detailing" size={sizeFor(state, 'detailing')} state={state} />
         </div>
       )}
     </div>
