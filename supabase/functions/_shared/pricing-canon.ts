@@ -2,6 +2,7 @@
 //
 // This file MUST stay identical in values to src/lib/pricing-canon.ts.
 // src/test/pricing-canon.test.ts parses both and fails on any divergence.
+
 export type CanonService = 'cleaning' | 'lawn' | 'detailing';
 export type CanonSize = 1 | 2 | 3;
 /** `quote` is not a size — it means the property is above size 3 and must never be auto-booked. */
@@ -11,20 +12,115 @@ export type PriceUnit = 'per_visit' | 'per_month';
 export type QuantityRule = 'cadence' | 'always_1';
 
 export const SIZES: CanonSize[] = [1, 2, 3];
+export const CADENCES: CanonCadence[] = ['monthly', 'biweekly', 'weekly'];
 
-/** Price in whole dollars, by service and size. Unit differs per service. */
+/** Visits performed (and billed) per month at each cadence. */
+export const VISITS_PER_MONTH: Record<CanonCadence, number> = {
+  monthly: 1,
+  biweekly: 2,
+  weekly: 4,
+};
+
+/** Volume curve on the per-visit price. Monthly is the reference. */
+export const CADENCE_FACTOR: Record<CanonCadence, number> = {
+  monthly: 1,
+  biweekly: 0.92,
+  weekly: 0.82,
+};
+
+/** Legacy alias — visits per month, NOT a price multiplier. */
+export const CADENCE_MULTIPLIER = VISITS_PER_MONTH;
+
+/**
+ * Per-visit price in whole dollars, by service, size and cadence.
+ * Shine Complete is not per visit — see SHINE_MONTHLY.
+ */
+export const PER_VISIT_PRICES: Record<'cleaning' | 'lawn', Record<CanonSize, Record<CanonCadence, number>>> = {
+  cleaning: {
+    1: { monthly: 139, biweekly: 128, weekly: 114 },
+    2: { monthly: 189, biweekly: 174, weekly: 155 },
+    3: { monthly: 279, biweekly: 257, weekly: 229 },
+  },
+  lawn: {
+    1: { monthly: 55, biweekly: 51, weekly: 45 },
+    2: { monthly: 75, biweekly: 69, weekly: 62 },
+    3: { monthly: 109, biweekly: 100, weekly: 89 },
+  },
+};
+
+/** The amount actually billed every month. This is what the customer pays. */
+export const BILLED_MONTHLY: Record<CanonService, Record<CanonSize, Record<CanonCadence, number>>> = {
+  cleaning: {
+    1: { monthly: 139, biweekly: 256, weekly: 456 },
+    2: { monthly: 189, biweekly: 348, weekly: 620 },
+    3: { monthly: 279, biweekly: 514, weekly: 916 },
+  },
+  lawn: {
+    1: { monthly: 55, biweekly: 102, weekly: 180 },
+    2: { monthly: 75, biweekly: 138, weekly: 246 },
+    3: { monthly: 109, biweekly: 200, weekly: 358 },
+  },
+  // Shine Complete has no frequency choice — one monthly plan per size.
+  detailing: {
+    1: { monthly: 149, biweekly: 149, weekly: 149 },
+    2: { monthly: 179, biweekly: 179, weekly: 179 },
+    3: { monthly: 239, biweekly: 239, weekly: 239 },
+  },
+};
+
+/** Shine Complete monthly price by size. */
+export const SHINE_MONTHLY: Record<CanonSize, number> = { 1: 149, 2: 179, 3: 239 };
+
+/**
+ * The headline figure for a service at its smallest size: the MONTHLY BILL.
+ * "House cleaning from $139 a month. Lawn care from $55 a month.
+ *  Shine Complete from $149 a month."
+ */
 export const SIZE_PRICES: Record<CanonService, Record<CanonSize, number>> = {
   cleaning: { 1: 139, 2: 189, 3: 279 },
-  lawn: { 1: 45, 2: 65, 3: 99 },
+  lawn: { 1: 55, 2: 75, 3: 109 },
   detailing: { 1: 149, 2: 179, 3: 239 },
 };
 
-/** Stripe lookup keys for the recurring service prices. */
-export const SERVICE_LOOKUP_KEYS: Record<CanonService, Record<CanonSize, string>> = {
-  cleaning: { 1: 'clean_1', 2: 'clean_2', 3: 'clean_3' },
-  lawn: { 1: 'lawn_1', 2: 'lawn_2', 3: 'lawn_3' },
-  detailing: { 1: 'shine_1', 2: 'shine_2', 3: 'shine_3' },
+/**
+ * Stripe lookup keys — 21 recurring prices, every one interval=month.
+ * Shine Complete has one key per size, reused across cadences because it has
+ * no cadence choice.
+ */
+export const SERVICE_LOOKUP_KEYS: Record<CanonService, Record<CanonSize, Record<CanonCadence, string>>> = {
+  cleaning: {
+    1: { monthly: 'clean_1_monthly', biweekly: 'clean_1_biweekly', weekly: 'clean_1_weekly' },
+    2: { monthly: 'clean_2_monthly', biweekly: 'clean_2_biweekly', weekly: 'clean_2_weekly' },
+    3: { monthly: 'clean_3_monthly', biweekly: 'clean_3_biweekly', weekly: 'clean_3_weekly' },
+  },
+  lawn: {
+    1: { monthly: 'lawn_1_monthly', biweekly: 'lawn_1_biweekly', weekly: 'lawn_1_weekly' },
+    2: { monthly: 'lawn_2_monthly', biweekly: 'lawn_2_biweekly', weekly: 'lawn_2_weekly' },
+    3: { monthly: 'lawn_3_monthly', biweekly: 'lawn_3_biweekly', weekly: 'lawn_3_weekly' },
+  },
+  detailing: {
+    1: { monthly: 'shine_1', biweekly: 'shine_1', weekly: 'shine_1' },
+    2: { monthly: 'shine_2', biweekly: 'shine_2', weekly: 'shine_2' },
+    3: { monthly: 'shine_3', biweekly: 'shine_3', weekly: 'shine_3' },
+  },
 };
+
+export function lookupKeyFor(service: CanonService, size: CanonSize, cadence: CanonCadence): string {
+  return SERVICE_LOOKUP_KEYS[service][size][cadenceFor(service, cadence)];
+}
+
+/** Shine Complete is always monthly, whatever the UI last remembered. */
+export function cadenceFor(service: CanonService, cadence: CanonCadence): CanonCadence {
+  return SERVICE_QUANTITY_RULE[service] === 'always_1' ? 'monthly' : cadence;
+}
+
+/** The 21 live recurring lookup keys, in catalogue order. */
+export const ALL_RECURRING_LOOKUP_KEYS: string[] = [
+  ...(['cleaning', 'lawn'] as const).flatMap((service) =>
+    SIZES.flatMap((size) => CADENCES.map((cadence) => SERVICE_LOOKUP_KEYS[service][size][cadence])),
+  ),
+  ...SIZES.map((size) => SERVICE_LOOKUP_KEYS.detailing[size].monthly),
+];
 
 export const SERVICE_UNIT: Record<CanonService, PriceUnit> = {
   cleaning: 'per_visit',
@@ -83,17 +179,47 @@ export const SIZE_HELPERS: Record<CanonService, Record<CanonSize, string>> = {
   },
 };
 
-/** Visits billed per month for each cadence. Per-visit services only. */
-export const CADENCE_MULTIPLIER: Record<CanonCadence, number> = {
-  monthly: 1,
-  biweekly: 2,
-  weekly: 4,
-};
+// ---------------------------------------------------------------------------
+// Surcharges — per visit, so they scale with cadence exactly like the plan.
+// Above these bands, and at 5+ bedrooms, the property goes to a quote form and
+// NEVER to checkout.
+// ---------------------------------------------------------------------------
+
+export const CLEANING_SURCHARGE = {
+  perVisitDollars: 60,
+  minSqFt: 2501,
+  maxSqFt: 4000,
+  label: '2,501–4,000 sq ft',
+} as const;
+
+export const LAWN_SURCHARGE = {
+  perVisitDollars: 30,
+  minSqFt: 4001,
+  maxSqFt: 7500,
+  label: '4,001–7,500 sq ft of turf',
+} as const;
+
+/** Cleaning surcharge per visit for a home's interior square footage. */
+export function cleaningSurchargePerVisit(sqft: number | null | undefined): number {
+  if (!sqft) return 0;
+  if (sqft > CLEANING_SURCHARGE.maxSqFt) return 0; // quote path, never priced here
+  return sqft >= CLEANING_SURCHARGE.minSqFt ? CLEANING_SURCHARGE.perVisitDollars : 0;
+}
+
+/** Lawn surcharge per visit for a yard's mowable turf area. */
+export function lawnSurchargePerVisit(sqft: number | null | undefined): number {
+  if (!sqft) return 0;
+  if (sqft > LAWN_SURCHARGE.maxSqFt) return 0;
+  return sqft >= LAWN_SURCHARGE.minSqFt ? LAWN_SURCHARGE.perVisitDollars : 0;
+}
+
+/** True when the property is above every purchasable band — quote by hand. */
+export function cleaningNeedsQuote(bedrooms: number, sqft?: number | null): boolean {
+  return bedrooms >= 5 || (!!sqft && sqft > CLEANING_SURCHARGE.maxSqFt);
+}
 
 // ---------------------------------------------------------------------------
 // Car Wash Add-On — per month, requires an active lawn or cleaning plan.
-// Renamed from "Driveway Add-On". Not to be confused with the one-time lawn
-// add-on "Driveway Pressure Wash", which cleans concrete.
 // ---------------------------------------------------------------------------
 
 export const CAR_WASH_ADDON_NAME = 'Car Wash Add-On';
@@ -119,14 +245,8 @@ export const CAR_WASH_QUANTITY_RULE: QuantityRule = 'always_1';
 // The bundle is a gift, not a discount. No percentages anywhere.
 //
 // The gift is ONE free premium add-on per month whenever the customer holds two
-// or more distinct services. There is no three-service tier and there is NO
-// free car wash: the only wash in the whole system is the $0.00 Maintenance
-// Wash scheduling row inside a Shine Complete subscription, which is never
-// billed separately, so a free car wash cannot be fulfilled by Stripe or
-// Jobber. The gift pool is the standard add-on catalogue minus specialist work
-// (see GIFT_ELIGIBLE_ADDONS in src/lib/addon-catalog.ts — Driveway Pressure
-// Wash is excluded). The CUSTOMER CHOOSES which add-on they take each month;
-// we never assign one.
+// or more distinct services. There is no three-service tier. The CUSTOMER
+// CHOOSES which add-on they take each month; we never assign one.
 // ---------------------------------------------------------------------------
 
 /** Free premium add-ons each month, by count of DISTINCT services in the plan. */
@@ -146,19 +266,25 @@ export const BUNDLE_GIFT_COPY = {
   two: 'Add a 2nd service — you pick one free premium add-on every month.',
 } as const;
 
-
 // ---------------------------------------------------------------------------
-// Entry price and referral
+// Entry prices and referral. Headline figures are MONTHLY BILLS.
 // ---------------------------------------------------------------------------
 
-/** The single company-wide entry price: lawn size 1, biweekly. */
-export const ENTRY_PRICE_MONTHLY = SIZE_PRICES.lawn[1] * CADENCE_MULTIPLIER.biweekly;
-/**
- * Public entry-price claim. Stated per visit, matching the printed door
- * hanger ("PLANS FROM $45 A VISIT"). Never quote a monthly entry price.
- */
-export const ENTRY_PRICE_PER_VISIT = SIZE_PRICES.lawn[1];
-export const ENTRY_PRICE_COPY = `from $${ENTRY_PRICE_PER_VISIT} a visit`;
+/** Lowest monthly bill per service. */
+export const ENTRY_MONTHLY: Record<CanonService, number> = {
+  cleaning: BILLED_MONTHLY.cleaning[1].monthly,
+  lawn: BILLED_MONTHLY.lawn[1].monthly,
+  detailing: SHINE_MONTHLY[1],
+};
+
+/** The single company-wide entry price: the cheapest monthly bill we sell. */
+export const ENTRY_PRICE_MONTHLY = ENTRY_MONTHLY.lawn;
+export const ENTRY_PRICE_COPY = `from $${ENTRY_PRICE_MONTHLY} a month`;
+
+export const HEADLINE_PRICE_COPY =
+  `House cleaning from $${ENTRY_MONTHLY.cleaning} a month. ` +
+  `Lawn care from $${ENTRY_MONTHLY.lawn} a month. ` +
+  `Shine Complete from $${ENTRY_MONTHLY.detailing} a month.`;
 
 /** Referral program — give $50, get $50. Unchanged. */
 export const REFERRAL_BONUS_CENTS = 5000;
@@ -176,35 +302,23 @@ export const FOUNDING_OFFER = {
     'First visit perfect or it’s free',
     'Capped at 25 founding homes per ZIP',
   ],
-  // NOTE: there is deliberately no "in exchange for a review" string here.
-  // Conditioning a perk on a review violates Google's review policy and can
-  // get the Business Profile suspended. The founding perks are unconditional.
   homesPerZip: 25,
 } as const;
 
 // ---------------------------------------------------------------------------
-// Trust claims — only what is provable. "Insured" is NOT published yet: the
-// general liability certificate is outstanding. Flip INSURANCE_VERIFIED to true
-// in one edit once the certificate is in hand; every insured/insurance claim in
-// customer-facing copy is gated on it.
+// Trust claims — only what is provable.
 // ---------------------------------------------------------------------------
 
 export const INSURANCE_VERIFIED = false;
 export const INSURED_CLAIM = 'Insured';
 
-/**
- * Badge/chip claim. "Vetted" is a RETIRED string — it is vague and
- * unsupportable. The only approved claim is "Background-Checked Pros".
- */
 export const VETTED_CLAIM = INSURANCE_VERIFIED
   ? 'Background-Checked & Insured'
   : 'Background-Checked Pros';
 
-/** Prose form used in sentences about who shows up. */
 export const VETTED_PROS_SENTENCE = INSURANCE_VERIFIED
   ? 'insured, background-checked'
   : 'background-checked';
-
 
 export const TRUST_CLAIMS = [
   'Background-Checked Pros',
@@ -223,28 +337,91 @@ export function trustClaims(): string[] {
 // ---------------------------------------------------------------------------
 
 export const SERVICE_AREA_ZIPS = ['33156', '33183', '33186'] as const;
-// Matches the /neighbor line exactly — Palmetto Bay is not in the served set.
 export const SERVICE_AREA_LINE = 'Serving Pinecrest, Kendall and Kendall West — 33156, 33183, 33186';
 export const SERVICE_AREA_SHORT = 'Pinecrest, Kendall & Palmetto Bay';
 
 // ---------------------------------------------------------------------------
-// Contractor pay — a share of LIST price with a per-visit floor.
+// CONTRACTOR PAY — 40% of the visit price. NEVER shown to a customer.
+// Figures are explicit dollars so no rounding rule can drift.
 // ---------------------------------------------------------------------------
 
-export const CONTRACTOR_PAY = {
-  tier1: { pct: 45, floorDollars: 30 },
-  tier2: { pct: 50, floorDollars: 35 },
-} as const;
+/** Pay per completed visit, by service, size and the plan's cadence. */
+export const CONTRACTOR_VISIT_PAY: Record<'cleaning' | 'lawn', Record<CanonSize, Record<CanonCadence, number>>> = {
+  cleaning: {
+    1: { monthly: 56, biweekly: 51, weekly: 46 },
+    2: { monthly: 76, biweekly: 70, weekly: 62 },
+    3: { monthly: 112, biweekly: 103, weekly: 92 },
+  },
+  lawn: {
+    1: { monthly: 22, biweekly: 20, weekly: 18 },
+    2: { monthly: 30, biweekly: 28, weekly: 25 },
+    3: { monthly: 44, biweekly: 40, weekly: 36 },
+  },
+};
 
-export function contractorPayForVisit(listDollars: number, tier: 1 | 2): number {
-  const rule = tier === 2 ? CONTRACTOR_PAY.tier2 : CONTRACTOR_PAY.tier1;
-  return Math.max((listDollars * rule.pct) / 100, rule.floorDollars);
+/** Shine Complete pay, by size. */
+export const CONTRACTOR_SHINE_PAY: Record<CanonSize, { maintenanceWash: number; fullDetail: number }> = {
+  1: { maintenanceWash: 17, fullDetail: 51 },
+  2: { maintenanceWash: 20, fullDetail: 61 },
+  3: { maintenanceWash: 27, fullDetail: 82 },
+};
+
+/** The pro's share of a surcharge, per visit. */
+export const CONTRACTOR_SURCHARGE_PAY = { cleaning: 24, lawn: 12 } as const;
+
+/** Tier 2 pros earn +10% on every figure, rounded to the dollar. */
+export const TIER_2_UPLIFT = 1.1;
+
+export function withTier(dollars: number, tier: 1 | 2): number {
+  return tier === 2 ? Math.round(dollars * TIER_2_UPLIFT) : dollars;
 }
+
+/**
+ * Pay for one visit. Surcharge share is added when the property carries one.
+ * A weekly cleaning plan's quarterly deep clean is paid as an EXTRA visit at
+ * the MONTHLY rate for that size — pass cadence 'monthly' for that visit.
+ */
+export function contractorVisitPay(args: {
+  service: CanonService;
+  size: CanonSize;
+  cadence: CanonCadence;
+  tier?: 1 | 2;
+  surcharge?: boolean;
+  /** Shine only: which kind of car visit this is. */
+  shineVisit?: 'maintenance_wash' | 'full_detail';
+}): number {
+  const tier = args.tier ?? 1;
+  if (args.service === 'detailing') {
+    const pay = CONTRACTOR_SHINE_PAY[args.size];
+    return withTier(args.shineVisit === 'full_detail' ? pay.fullDetail : pay.maintenanceWash, tier);
+  }
+  const base = CONTRACTOR_VISIT_PAY[args.service][args.size][cadenceFor(args.service, args.cadence)];
+  const surcharge = args.surcharge ? CONTRACTOR_SURCHARGE_PAY[args.service] : 0;
+  return withTier(base + surcharge, tier);
+}
+
+/** Pay for the quarterly deep clean that comes with a weekly cleaning plan. */
+export function quarterlyDeepCleanPay(size: CanonSize, tier: 1 | 2 = 1, surcharge = false): number {
+  return contractorVisitPay({ service: 'cleaning', size, cadence: 'monthly', tier, surcharge });
+}
+
+/**
+ * A visit that is free to the customer, or blocked through no fault of the pro,
+ * is PAID IN FULL.
+ */
+export const PAY_IN_FULL_WHEN_BLOCKED = true;
 
 // ---------------------------------------------------------------------------
 // Prices
 // ---------------------------------------------------------------------------
 
+/** Per-visit price for a size at a cadence. Shine returns its monthly price. */
+export function perVisitPrice(service: CanonService, size: CanonSize, cadence: CanonCadence): number {
+  if (service === 'detailing') return SHINE_MONTHLY[size];
+  return PER_VISIT_PRICES[service][size][cadence];
+}
+
+/** The headline (size-1-style) figure: monthly bill at the monthly cadence. */
 export function sizePrice(service: CanonService, size: CanonSize): number {
   return SIZE_PRICES[service][size];
 }
@@ -253,14 +430,35 @@ export function sizePriceCents(service: CanonService, size: CanonSize): number {
   return Math.round(sizePrice(service, size) * 100);
 }
 
-/** Stripe subscription quantity for a line. */
-export function quantityFor(service: CanonService, cadence: CanonCadence): number {
-  return SERVICE_QUANTITY_RULE[service] === 'always_1' ? 1 : CADENCE_MULTIPLIER[cadence];
+/** Every Stripe price is a flat monthly amount, so quantity is always 1. */
+export function quantityFor(_service: CanonService, _cadence: CanonCadence): number {
+  return 1;
 }
 
-/** Monthly billed amount for one service line. */
-export function monthlyPrice(service: CanonService, size: CanonSize, cadence: CanonCadence): number {
-  return sizePrice(service, size) * quantityFor(service, cadence);
+/** Visits a month for a service at a cadence. Shine is its own schedule. */
+export function visitsPerMonthFor(service: CanonService, cadence: CanonCadence): number {
+  return SERVICE_QUANTITY_RULE[service] === 'always_1' ? 1 : VISITS_PER_MONTH[cadence];
+}
+
+/** Monthly billed amount for one service line, including any surcharge. */
+export function monthlyPrice(
+  service: CanonService,
+  size: CanonSize,
+  cadence: CanonCadence,
+  surchargePerVisit = 0,
+): number {
+  const billed = BILLED_MONTHLY[service][size][cadenceFor(service, cadence)];
+  if (service === 'detailing') return billed;
+  return billed + surchargePerVisit * VISITS_PER_MONTH[cadence];
+}
+
+export function monthlyPriceCents(
+  service: CanonService,
+  size: CanonSize,
+  cadence: CanonCadence,
+  surchargePerVisit = 0,
+): number {
+  return Math.round(monthlyPrice(service, size, cadence, surchargePerVisit) * 100);
 }
 
 // ---------------------------------------------------------------------------
@@ -408,8 +606,6 @@ export const QUOTE_COPY = "Call for a quote — we'll price it by hand.";
 
 // ---------------------------------------------------------------------------
 // Car service variants — Car Wash and Car Detail are mutually exclusive.
-// Duration drives arrival windows and scheduling; admin-editable via
-// app_settings keys below (falls back to these defaults).
 // ---------------------------------------------------------------------------
 
 export type CarServiceCode = 'car_wash' | 'car_detail';
