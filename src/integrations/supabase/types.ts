@@ -3849,6 +3849,7 @@ export type Database = {
           band_source: string | null
           band_verified_at: string | null
           bundle_discount_pct: number
+          cadence: string | null
           cancel_at_period_end: boolean
           canceled_at: string | null
           car_service_code: string | null
@@ -3873,13 +3874,17 @@ export type Database = {
           next_billing_date: string | null
           pause_collection: string | null
           paused_until: string | null
+          plan_lines: Json
           preferred_pro_id: string | null
           services: Database["public"]["Enums"]["service_type"][]
           size: number | null
+          size_tier: number | null
           sizes_json: Json | null
           status: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
+          surcharge_applied: boolean
+          surcharge_cents: number
           updated_at: string
           user_id: string
           washing_allowed: boolean | null
@@ -3890,6 +3895,7 @@ export type Database = {
           band_source?: string | null
           band_verified_at?: string | null
           bundle_discount_pct?: number
+          cadence?: string | null
           cancel_at_period_end?: boolean
           canceled_at?: string | null
           car_service_code?: string | null
@@ -3914,13 +3920,17 @@ export type Database = {
           next_billing_date?: string | null
           pause_collection?: string | null
           paused_until?: string | null
+          plan_lines?: Json
           preferred_pro_id?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           size?: number | null
+          size_tier?: number | null
           sizes_json?: Json | null
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          surcharge_applied?: boolean
+          surcharge_cents?: number
           updated_at?: string
           user_id: string
           washing_allowed?: boolean | null
@@ -3931,6 +3941,7 @@ export type Database = {
           band_source?: string | null
           band_verified_at?: string | null
           bundle_discount_pct?: number
+          cadence?: string | null
           cancel_at_period_end?: boolean
           canceled_at?: string | null
           car_service_code?: string | null
@@ -3955,13 +3966,17 @@ export type Database = {
           next_billing_date?: string | null
           pause_collection?: string | null
           paused_until?: string | null
+          plan_lines?: Json
           preferred_pro_id?: string | null
           services?: Database["public"]["Enums"]["service_type"][]
           size?: number | null
+          size_tier?: number | null
           sizes_json?: Json | null
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          surcharge_applied?: boolean
+          surcharge_cents?: number
           updated_at?: string
           user_id?: string
           washing_allowed?: boolean | null
@@ -4490,7 +4505,9 @@ export type Database = {
         Row: {
           access_notes: string | null
           assigned_pro_id: string | null
+          cadence: string | null
           completed_at: string | null
+          contractor_pay_cents: number | null
           created_at: string
           crew_name: string | null
           customer_first_name: string | null
@@ -4501,26 +4518,32 @@ export type Database = {
           jobber_visit_id: string | null
           notes: string | null
           on_my_way_at: string | null
+          paid_in_full_reason: string | null
           parking_notes: string | null
           pet_notes: string | null
           scheduled_end: string | null
           scheduled_start: string | null
           service: Database["public"]["Enums"]["service_type"]
           service_type: string | null
+          size_tier: number | null
           status: Database["public"]["Enums"]["visit_status"]
           street: string | null
           subscription_id: string | null
+          surcharge_applied: boolean
           time_window: string | null
           updated_at: string
           user_id: string
           visit_date: string
+          visit_kind: string | null
           visit_pay_cents: number | null
           zip: string | null
         }
         Insert: {
           access_notes?: string | null
           assigned_pro_id?: string | null
+          cadence?: string | null
           completed_at?: string | null
+          contractor_pay_cents?: number | null
           created_at?: string
           crew_name?: string | null
           customer_first_name?: string | null
@@ -4531,26 +4554,32 @@ export type Database = {
           jobber_visit_id?: string | null
           notes?: string | null
           on_my_way_at?: string | null
+          paid_in_full_reason?: string | null
           parking_notes?: string | null
           pet_notes?: string | null
           scheduled_end?: string | null
           scheduled_start?: string | null
           service: Database["public"]["Enums"]["service_type"]
           service_type?: string | null
+          size_tier?: number | null
           status?: Database["public"]["Enums"]["visit_status"]
           street?: string | null
           subscription_id?: string | null
+          surcharge_applied?: boolean
           time_window?: string | null
           updated_at?: string
           user_id: string
           visit_date: string
+          visit_kind?: string | null
           visit_pay_cents?: number | null
           zip?: string | null
         }
         Update: {
           access_notes?: string | null
           assigned_pro_id?: string | null
+          cadence?: string | null
           completed_at?: string | null
+          contractor_pay_cents?: number | null
           created_at?: string
           crew_name?: string | null
           customer_first_name?: string | null
@@ -4561,19 +4590,23 @@ export type Database = {
           jobber_visit_id?: string | null
           notes?: string | null
           on_my_way_at?: string | null
+          paid_in_full_reason?: string | null
           parking_notes?: string | null
           pet_notes?: string | null
           scheduled_end?: string | null
           scheduled_start?: string | null
           service?: Database["public"]["Enums"]["service_type"]
           service_type?: string | null
+          size_tier?: number | null
           status?: Database["public"]["Enums"]["visit_status"]
           street?: string | null
           subscription_id?: string | null
+          surcharge_applied?: boolean
           time_window?: string | null
           updated_at?: string
           user_id?: string
           visit_date?: string
+          visit_kind?: string | null
           visit_pay_cents?: number | null
           zip?: string | null
         }
@@ -4669,6 +4702,17 @@ export type Database = {
       change_badge_status: {
         Args: { _applicant_id: string; _new_status: string; _note?: string }
         Returns: undefined
+      }
+      contractor_visit_pay_cents: {
+        Args: {
+          _cadence: string
+          _service: string
+          _size: number
+          _surcharge?: boolean
+          _tier?: string
+          _visit_kind?: string
+        }
+        Returns: number
       }
       current_user_admin: { Args: never; Returns: boolean }
       customers_needing_attention: {

@@ -28,7 +28,7 @@ const translations: Record<string, string> = {
   "Close chat": "Cerrar el chat",
   "Open chat with Tidy assistant": "Abrir el chat con el asistente de Tidy",
   "Hi! I'm Tidy's concierge assistant \u{1F44B} Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.":
-    "\u00a1Hola! Soy el asistente concierge de Tidy \u{1F44B} Preg\u00fantame lo que quieras sobre limpieza, jardiner\u00eda, detallado de carros, precios o nuestra zona de servicio.",
+    "\u00a1Hola! Soy el asistente concierge de Tidy \u{1F44B} Preg\u00fantame lo que quieras sobre limpieza, jardiner\u00eda, Shine Completes, precios o nuestra zona de servicio.",
   "Sending...": "Enviando...",
   "Ask about pricing, areas, services...": "Pregunta sobre precios, zonas, servicios...",
   "A human will be with you soon. You can also call us at":
@@ -61,7 +61,7 @@ const translations: Record<string, string> = {
   Home: "Inicio",
   "House Cleaning": "Limpieza del Hogar",
   "Lawn Care": "Cuidado del Jardín",
-  "Car Detailing": "Detallado de Carro",
+  "Shine Complete": "Shine Complete",
   "Bundle & Save": "Combo y Ahorra",
   Refer: "Refiere",
   Login: "Acceder",
@@ -90,20 +90,20 @@ const translations: Record<string, string> = {
   "Every Month.": "Cada Mes.",
   "Scheduling, timing, and follow-through — handled.": "Programación, tiempos y seguimiento — resueltos.",
   "Set it once. We take care of the rest.": "Configúralo una vez. Nosotros nos encargamos del resto.",
-  "No contracts · Cancel anytime · From $45 a visit": "Sin contratos · Cancela cuando quieras · Desde $45 por visita",
-  "Founding memberships · No commitment · From $45 a visit": "Membresías fundadoras · Sin compromiso · Desde $45 por visita",
+  "No contracts · Cancel anytime · From $55 a month": "Sin contratos · Cancela cuando quieras · Desde $55 al mes",
+  "Founding memberships · No commitment · From $55 a month": "Membresías fundadoras · Sin compromiso · Desde $55 al mes",
   "See your price — 60 seconds →": "Ve tu precio — 60 segundos →",
   "We handle scheduling, timing, and everything in between.":
     "Nosotros nos encargamos de la programación, los tiempos y todo lo demás.",
   "Just set it — we'll take care of the rest.": "Solo configúralo — nosotros nos encargamos del resto.",
-"Cleaning, lawn care, and car detailing — fully managed for you. No booking, no vendors, no reminders. Ever.":
-    "Limpieza, jardín y detallado de carro — lo manejamos todo nosotros. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
+"Cleaning, lawn care, and Shine Complete — fully managed for you. No booking, no vendors, no reminders. Ever.":
+    "Limpieza, jardín y Shine Complete — lo manejamos todo nosotros. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
   "🏠 House Cleaning": "🏠 Limpieza del Hogar",
   "🌿 Lawn Care": "🌿 Cuidado del Jardín",
-  "🚗 Car Detailing": "🚗 Detallado de Carro",
+  "🚗 Shine Complete": "🚗 Shine Complete",
   "✓ Cancel Anytime": "✓ Cancela Cuando Quieras",
-  "Limited founding memberships · No commitment required · From $45 a visit":
-    "Membresías fundadoras limitadas · Sin compromiso · Desde $45 por visita",
+  "Limited founding memberships · No commitment required · From $55 a month":
+    "Membresías fundadoras limitadas · Sin compromiso · Desde $55 al mes",
 
   // Proof bar
   "Miami Homeowners": "Propietarios en Miami",
@@ -234,8 +234,8 @@ const translations: Record<string, string> = {
 
   // FAQ Q&A (homepage)
   "What is Tidy?": "¿Qué es Tidy?",
-  "Great question! Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
-    "¡Buena pregunta! Tidy es una suscripción de servicios del hogar todo-en-uno en Miami — manejamos tu limpieza, jardín y detallado de carro en un solo plan mensual. Sin malabarear varios proveedores, sin perseguir cotizaciones. Una suscripción y todo queda impecable.",
+  "Great question! Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and Shine Complete all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
+    "¡Buena pregunta! Tidy es una suscripción de servicios del hogar todo-en-uno en Miami — manejamos tu limpieza, jardín y Shine Complete en un solo plan mensual. Sin malabarear varios proveedores, sin perseguir cotizaciones. Una suscripción y todo queda impecable.",
   "How do I sign up?": "¿Cómo me inscribo?",
   "Super easy — just tap the 'Get Early Access' button, fill out a quick 2-minute form with your name and contact info, and we'll reach out to confirm your spot and lock in your schedule. That's it!":
     "Súper fácil — toca el botón 'Solicitar Acceso', llena un formulario rápido de 2 minutos con tu nombre y contacto, y te llamamos para confirmar tu lugar y fijar tu horario. ¡Eso es todo!",
@@ -246,8 +246,8 @@ const translations: Record<string, string> = {
   "Nope — zero commitment! There are no contracts and no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month.":
     "¡Para nada — cero compromiso! Sin contratos y sin cargos por cancelación. Puedes cancelar cuando quieras, sin preguntas. Nos ganamos tu confianza cada mes.",
   "How often do services happen?": "¿Cada cuánto se hacen los servicios?",
-  "Totally up to you! Choose weekly, biweekly, or monthly for each service — and yes, you can mix and match. Want weekly lawn care but biweekly cleaning? Done. We build your plan around your life.":
-    "¡Tú decides! Elige semanal, quincenal o mensual para cada servicio — y sí, puedes combinar. ¿Quieres jardín semanal pero limpieza quincenal? Listo. Armamos el plan a tu medida.",
+  "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan.":
+    "La limpieza y el jardín vienen en planes mensuales, quincenales o semanales, y puedes combinarlos. Shine Complete es un solo plan mensual.",
   "Do I need to be home?": "¿Tengo que estar en casa?",
   "Not at all! Just give us access via a lockbox, gate code, or smart lock and our team handles everything while you're out living your best life. You'll get photo confirmation when each service is done.":
     "¡Para nada! Danos acceso con caja de seguridad, código de puerta o cerradura inteligente y nuestro profesional se encarga de todo mientras tú haces lo tuyo. Recibes confirmación con fotos al terminar cada servicio.",
@@ -263,7 +263,7 @@ const translations: Record<string, string> = {
   "What does lawn care include?": "¿Qué incluye el cuidado del jardín?",
   "We keep your curb appeal on point! Every visit includes professional mowing, clean edging along walkways and beds, and blowing all debris off your walkways and driveways. Your neighbors will notice the difference.":
     "¡Mantenemos tu fachada al máximo! Cada visita incluye corte profesional, bordeado limpio a lo largo de caminos y jardineras, y soplado de todos los escombros de caminos y entradas. Los vecinos van a notar la diferencia.",
-  "What does car detailing include?": "¿Qué incluye el detallado de carro?",
+  "What does Shine Complete include?": "¿Qué incluye el Shine Complete?",
   "Your ride deserves love too! We do a full exterior hand wash with wheel cleaning, thorough interior vacuum, and a complete interior surface wipe-down. Your car will look showroom-ready right in your driveway.":
     "¡Tu carro también merece cariño! Hacemos lavado exterior completo a mano con limpieza de ruedas, aspirado interior profundo y limpieza completa de superficies interiores. Tu carro va a lucir como nuevo en tu propio garaje.",
   "Are deep cleaning or restoration services included?": "¿Se incluyen limpiezas profundas o restauración?",
@@ -279,7 +279,7 @@ const translations: Record<string, string> = {
   "We'll pause your services and notify you right away via SMS and email so you can update your payment info. Once it's sorted, we'll get you back on schedule — easy as that.":
     "Pausamos tus servicios y te avisamos enseguida por SMS y correo para que actualices tu pago. Una vez resuelto, te ponemos de vuelta en horario — así de fácil.",
   "Can I change services later?": "¿Puedo cambiar servicios después?",
-  "Of course! Want to add car detailing or switch your cleaning frequency? Just reach out and any changes will kick in at your next billing cycle. We're flexible because your needs are too.":
+  "Of course! Want to add Shine Complete or switch your cleaning frequency? Just reach out and any changes will kick in at your next billing cycle. We're flexible because your needs are too.":
     "¡Por supuesto! ¿Quieres agregar detallado o cambiar la frecuencia de limpieza? Contáctanos y los cambios entran en tu próximo ciclo de facturación. Somos flexibles porque tus necesidades también lo son.",
   "Are contractors background-checked?": "¿Los contratistas tienen antecedentes verificados?",
   "Absolutely — your trust means everything to us. Every single contractor is screened through Checkr, and we require photo documentation after every visit so you can see exactly what was done. Quality and accountability are built into everything we do.":
@@ -351,7 +351,7 @@ const translations: Record<string, string> = {
   // Footer
   "House Cleaning Miami": "Limpieza del Hogar Miami",
   "Lawn Care Miami": "Cuidado del Jardín Miami",
-  "Car Detailing Miami": "Detallado de Carro Miami",
+  "Shine Complete Miami": "Shine Complete Miami",
   "Referral Program": "Programa de Referidos",
   Company: "Empresa",
   "Service Areas": "Áreas de Servicio",
@@ -377,7 +377,7 @@ const translations: Record<string, string> = {
   "Book in about 2 minutes": "Reserva en unos 2 minutos",
   "Locked price · No contracts · Cancel anytime": "Precio fijo · Sin contratos · Cancela cuando quieras",
   Plans: "Planes",
-  "Pick your cadence. Lock your price.": "Elige tu frecuencia. Asegura tu precio.",
+  "Pick your plan.": "Elige tu plan.",
   Choose: "Elige",
   "Every visit, every time.": "Cada visita, todas las veces.",
   "Three steps. Then never think about it.": "Tres pasos. Y no piensas más en eso.",
@@ -424,8 +424,8 @@ const translations: Record<string, string> = {
     "Servimos solo estas tres comunidades — así tu profesional es local, puntual y nunca varado en el tráfico.",
   "Kendall & Pinecrest": "Kendall y Pinecrest",
   "Built for Kendall & Pinecrest": "Hecho para Kendall y Pinecrest",
-  "Serving Kendall & Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.":
-    "Sirviendo Kendall y Pinecrest con suscripciones recurrentes de limpieza del hogar, cuidado del jardín y detallado de carro.",
+  "Serving Kendall & Pinecrest with recurring house cleaning, lawn care, and Shine Complete subscriptions.":
+    "Sirviendo Kendall y Pinecrest con suscripciones recurrentes de limpieza del hogar, cuidado del jardín y Shine Complete.",
   "A quick form · No contracts": "Un formulario rápido · Sin contratos",
   "A quick form to sign up. Same Pro. Locked price.":
     "Un formulario rápido para inscribirte. El mismo profesional. Precio fijo.",
@@ -437,8 +437,8 @@ const translations: Record<string, string> = {
   "Kendall West": "Kendall West",
 
   // Sticky bar labels
-  "House Cleaning · from $139 a visit": "Limpieza del Hogar · desde $139 por visita",
-  "Lawn Care · from $45 a visit": "Cuidado del Jardín · desde $45 por visita",
+  "House Cleaning · from $139 a month": "Limpieza del Hogar · desde $139 al mes",
+  "Lawn Care · from $55 a month": "Cuidado del Jardín · desde $55 al mes",
   "Shine Complete · from $149/mo": "Shine Complete · desde $149/mes",
   "Bundle your services · free monthly add-on": "Combina tus servicios · servicio adicional gratis al mes",
 
@@ -446,8 +446,8 @@ const translations: Record<string, string> = {
   "Monthly House Cleaning in Pinecrest + Kendall": "Limpieza Mensual del Hogar en Pinecrest + Kendall",
   "Same Pro. Locked rate. No contracts. Handle your home on autopilot.":
     "El mismo profesional. Tarifa fija. Sin contratos. Tu casa en piloto automático.",
-  "From $139 a visit": "Desde $139 por visita",
-  "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a visit** — with the same Pro every time.":
+  "From $139 a month": "Desde $139 por visita",
+  "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a month** — with the same Pro every time.":
     "Las limpiezas sueltas en Pinecrest cuestan en promedio **$180–$260**. Nuestros planes empiezan en **$139 por visita** — con el mismo profesional cada vez.",
   // House Cleaning plans
   "One visit per month, same Pro every time.": "Una visita al mes, el mismo Pro siempre.",
@@ -474,7 +474,7 @@ const translations: Record<string, string> = {
     "Reservé en menos de un minuto. El profesional es puntual, amable y minucioso.",
   // House Cleaning FAQs
   "What's the price and what's it based on?": "¿Cuál es el precio y de qué depende?",
-  "One flat price per visit, set by the size of your home: $139, $189 or $279. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Homes with 5+ bedrooms are quoted by hand.":
+  "One price per visit, set by the size of your home: $139, $189 or $279 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Homes with 5+ bedrooms are quoted by hand.":
     "Un precio fijo por visita, según el tamaño de tu casa: $139, $189 o $279. La frecuencia solo lo multiplica — mensual es una visita, quincenal dos y semanal cuatro. Las casas de 5+ recámaras las cotizamos a mano.",
   "Yes. No contracts, no cancellation fees. Pause, skip, or cancel from your dashboard anytime.":
     "Sí. Sin contratos, sin cargos por cancelación. Pausa, omite o cancela desde tu panel cuando quieras.",
@@ -494,7 +494,7 @@ const translations: Record<string, string> = {
     "Al inscribirte, fijamos un día y horario recurrente. Recibes un aviso de llegada antes de cada visita. Reagenda cuando quieras desde tu panel.",
   "Reach out within 24 hours and we'll re-clean the area or credit your account — no questions asked.":
     "Avísanos en 24 horas y volvemos a limpiar el área o te acreditamos a tu cuenta — sin preguntas.",
-  "Already booking cleaning? Add lawn care from $45 a visit.": "¿Ya tienes limpieza? Agrega jardín desde $45 por visita.",
+  "Already booking cleaning? Add lawn care from $55 a month.": "¿Ya tienes limpieza? Agrega jardín desde $55 al mes.",
   "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.":
     "Agrega un 2º servicio y te regalamos un lavado de carro cada mes — y nunca más coordinas dos proveedores.",
 
@@ -502,9 +502,9 @@ const translations: Record<string, string> = {
   "Monthly Lawn Care in Pinecrest + Kendall": "Cuidado Mensual del Jardín en Pinecrest + Kendall",
   "Mow, edge, blow. Same Pro. Locked price. Never surprise-billed.":
     "Cortar, bordear, soplar. El mismo profesional. Precio fijo. Sin facturas sorpresa.",
-  "From $45 a visit": "Desde $45 por visita",
-  "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$45 a visit** flat, same Pro, no surprise invoices.":
-    "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy es **$45 por visita**, precio fijo, el mismo profesional, sin facturas sorpresa.",
+  "From $55 a month": "Desde $55 al mes",
+  "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$55 a month** flat, same Pro, no surprise invoices.":
+    "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy es **$55 al mes**, precio fijo, el mismo profesional, sin facturas sorpresa.",
   // Lawn Care plans
   "One visit per month.": "Una visita al mes.",
   "Two visits per month.": "Dos visitas al mes.",
@@ -516,7 +516,7 @@ const translations: Record<string, string> = {
   "Weed-whack fence lines": "Recorte a lo largo de las cercas",
   "Bag or mulch clippings": "Recoger o triturar la grama cortada",
   "Bush trim (weekly)": "Poda de arbustos (semanal)",
-    "Locked $45 a visit — never surprise-priced": "$45 por visita, precio fijo — nunca con precios sorpresa",
+    "Locked $55 a month — never surprise-priced": "$55 al mes, precio fijo — nunca con precios sorpresa",
   // Lawn Care testimonials
   "Lawn looks sharp every week without me lifting a finger. Best $85 I spend monthly.":
     "El jardín se ve impecable cada semana sin mover un dedo. El mejor dinero que gasto al mes.",
@@ -525,8 +525,8 @@ const translations: Record<string, string> = {
   "They show up rain or shine. Locked price, never a surprise invoice.":
     "Llegan llueva o truene. Precio fijo, nunca una factura sorpresa.",
   // Lawn Care FAQs
-  "One flat price per visit, set by the size of your lawn: $45, $65 or $99. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Pick your best guess and we confirm the size from satellite imagery before your first visit.":
-    "Un precio fijo por visita, según el tamaño de tu jardín: $45, $65 o $99. La frecuencia solo lo multiplica — mensual es una visita, quincenal dos y semanal cuatro. Elige tu mejor estimación y confirmamos el tamaño con imágenes satelitales antes de la primera visita.",
+  "One price per visit, set by the size of your lawn: $55, $75 or $109 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess and we confirm the size from satellite imagery before your first visit.":
+    "Un precio por visita, según el tamaño de tu jardín: $55, $75 o $109 en el plan mensual. Venir más seguido baja el precio por visita — quincenal es 8% menos por visita que mensual y semanal 18% menos. Siempre se cobra al mes. Elige tu mejor estimación y confirmamos el tamaño con imágenes satelitales antes de la primera visita.",
 "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.":
     "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y recoger o triturar la grama. Los planes semanales incluyen poda de arbustos.",
   "Who does the work?": "¿Quién hace el trabajo?",
@@ -534,16 +534,16 @@ const translations: Record<string, string> = {
     "Reprogramamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa y tu precio no cambia.",
   "Reach out within 24 hours and we'll send your Pro back or credit your account — no questions asked.":
     "Avísanos en 24 horas y mandamos al profesional de vuelta o te acreditamos a tu cuenta — sin preguntas.",
-  "Already booking lawn? Add cleaning from $139 a visit.":
-    "¿Ya tienes jardín? Agrega limpieza desde $139 por visita.",
+  "Already booking lawn? Add cleaning from $139 a month.":
+    "¿Ya tienes jardín? Agrega limpieza desde $139 al mes.",
 
-  // Car Detailing LP
-  "Mobile Car Detailing in Pinecrest + Kendall": "Detallado Móvil de Carro en Pinecrest + Kendall",
+  // Shine Complete LP
+  "Shine Complete in Pinecrest + Kendall": "Shine Complete en Pinecrest + Kendall",
   "We come to your driveway. Ceramic-safe. Monthly interior + exterior.":
     "Vamos a tu garaje. Seguro para cerámica. Interior + exterior mensual.",
   "A good mobile detail runs **$120–$180 per appointment**. Shine Complete is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.":
     "Un buen detallado móvil cuesta **$120–$180 por cita**. Shine Complete es **$149/mes** por 3 lavados de mantenimiento al mes más 2 detallados completos al año — en tu entrada.",
-  // Car Detailing plans
+  // Shine Complete plans
   "Shine Complete · Size 1": "Shine Complete · Tamaño 1",
   "Shine Complete · Size 2": "Shine Complete · Tamaño 2",
   "Shine Complete · Size 3": "Shine Complete · Tamaño 3",
@@ -554,7 +554,7 @@ const translations: Record<string, string> = {
   "Trucks, 3-row SUVs and vans.": "Camionetas, SUV de 3 filas y vans.",
   "Interior + exterior, one vehicle.": "Interior + exterior, un vehículo.",
   "Interior + exterior, every two weeks, one vehicle.": "Interior + exterior, cada dos semanas, un vehículo.",
-  // Car Detailing included
+  // Shine Complete included
   "Exterior hand wash": "Lavado exterior a mano",
   "Ceramic-safe process": "Proceso seguro para cerámica",
   "Wheel + tire dress": "Limpieza de ruedas y abrillantado",
@@ -563,14 +563,14 @@ const translations: Record<string, string> = {
   "Pet-hair removal add-on": "Extra: retiro de pelo de mascota",
   "Headlight restoration add-on": "Extra: restauración de faros",
   "In your driveway": "En tu garaje",
-  // Car Detailing testimonials
+  // Shine Complete testimonials
   "They come to my driveway every month — car looks showroom-fresh, no drop-off needed.":
     "Vienen a mi garaje cada mes — el carro queda como nuevo, sin tener que llevarlo a ningún lado.",
   "Ceramic-safe process protects the coating. Interior is spotless every time.":
     "El proceso seguro para cerámica protege el recubrimiento. El interior queda impecable cada vez.",
   "Locked monthly price. Same detailer every visit. Best routine I've added all year.":
     "Precio mensual fijo. El mismo detallador cada visita. La mejor rutina que añadí en todo el año.",
-  // Car Detailing FAQs
+  // Shine Complete FAQs
   "Shine Complete is one flat monthly price set by what you drive: $149, $179 or $239. Every plan is 3 maintenance washes a month plus 2 full details a year.":
     "Shine Complete es un precio fijo mensual según lo que conduces: $149, $179 o $239. Todos los planes incluyen 3 lavados de mantenimiento al mes más 2 detallados completos al año.",
   "What's actually included?": "¿Qué se incluye exactamente?",
@@ -586,8 +586,8 @@ const translations: Record<string, string> = {
     "Las SUVs de 3 filas, camionetas grandes y vans grandes tienen un pequeño cargo adicional. Vans comerciales y camionetas elevadas necesitan una cotización rápida — la manejamos.",
   "Reach out within 24 hours and we'll send the detailer back or credit your account — no questions asked.":
     "Avísanos en 24 horas y mandamos al detallador de vuelta o te acreditamos a tu cuenta — sin preguntas.",
-  "Already on Shine Complete? Add cleaning from $139 a visit.":
-    "¿Ya tienes Shine Complete? Agrega limpieza desde $139 por visita.",
+  "Already on Shine Complete? Add cleaning from $139 a month.":
+    "¿Ya tienes Shine Complete? Agrega limpieza desde $139 al mes.",
 
   // Bundle page
   "Bundle your services — a free premium add-on every month": "Combina tus servicios — un servicio adicional premium gratis cada mes",
@@ -628,15 +628,15 @@ const translations: Record<string, string> = {
   // LP final CTA headlines (computed via template — list each one explicitly)
   "Ready to lock in your house cleaning?": "¿Listo para asegurar tu limpieza del hogar?",
   "Ready to lock in your lawn care?": "¿Listo para asegurar tu cuidado del jardín?",
-  "Ready to lock in your car detailing?": "¿Listo para asegurar tu detallado de carro?",
+  "Ready to lock in your Shine Complete?": "¿Listo para asegurar tu Shine Complete?",
 
   // SEO titles (browser tab) — translated for ES users
   "House Cleaning in Pinecrest + Kendall | Tidy Home Concierge":
     "Limpieza del Hogar en Pinecrest + Kendall | Tidy Home Concierge",
   "Lawn Care in Pinecrest + Kendall | Tidy Home Concierge":
     "Cuidado del Jardín en Pinecrest + Kendall | Tidy Home Concierge",
-  "Car Detailing in Pinecrest + Kendall | Tidy Home Concierge":
-    "Detallado de Carro en Pinecrest + Kendall | Tidy Home Concierge",
+  "Shine Complete in Pinecrest + Kendall | Tidy Home Concierge":
+    "Shine Complete en Pinecrest + Kendall | Tidy Home Concierge",
   "Bundle Your Services in Pinecrest + Kendall | Tidy Home Concierge":
     "Combina Tus Servicios en Pinecrest + Kendall | Tidy Home Concierge",
 
@@ -667,8 +667,8 @@ const translations: Record<string, string> = {
   "Back to Tidy": "Volver a Tidy",
   "Careers at Tidy — Apply to join Miami's home-service crew":
     "Empleos en Tidy — Aplica para unirte al equipo de servicios del hogar de Miami",
-  "Join Tidy's contractor network in Kendall and Pinecrest. Cleaning, lawn care, and car detailing pros — weekly pay, predictable routes.":
-    "Únete a la red de contratistas de Tidy en Kendall y Pinecrest. Profesionales de limpieza, jardinería y detallado de carros — pago semanal, rutas predecibles.",
+  "Join Tidy's contractor network in Kendall and Pinecrest. Cleaning, lawn care, and Shine Complete pros — weekly pay, predictable routes.":
+    "Únete a la red de contratistas de Tidy en Kendall y Pinecrest. Profesionales de limpieza, jardinería y Shine Completes — pago semanal, rutas predecibles.",
   "Back to site": "Volver al sitio",
   "Now hiring · Miami": "Contratando ahora · Miami",
   "2–3 business days": "2–3 días hábiles",
@@ -730,7 +730,7 @@ const translations: Record<string, string> = {
   "Most popular · Members often pair with lawn care":
     "Más popular · Los miembros suelen combinarlo con el cuidado del jardín",
   "From $149/mo": "Desde $149/mes",
-  "Biweekly from $278/mo": "Quincenal desde $278/mes",
+  "Biweekly from $256/mo": "Quincenal desde $256/mes",
   "Consistent interior care for a home that always feels reset. Handled on your schedule without lifting a finger.":
     "Cuidado interior constante para un hogar que siempre se siente renovado. Lo manejamos según tu horario sin que muevas un dedo.",
   Included: "Incluido",
@@ -746,7 +746,7 @@ const translations: Record<string, string> = {
     "Limpieza profunda, interior del horno, interior del refrigerador, ventanas interiores",
   "See plans & details": "Ver planes y detalles",
   "Best value · Pairs perfectly with cleaning": "Mejor valor · Combina perfecto con la limpieza",
-  "Biweekly from $90/mo": "Quincenal desde $90/mes",
+  "Biweekly from $102/mo": "Quincenal desde $102/mes",
   "Professional lawn maintenance to keep your Miami home's exterior sharp year-round. No scheduling required, ever.":
     "Mantenimiento profesional del jardín para que el exterior de tu casa en Miami luzca impecable todo el año. Sin programar nada, nunca.",
   "Edging along walkways & beds": "Bordeado de caminos y jardineras",
@@ -770,8 +770,8 @@ const translations: Record<string, string> = {
   "Five simple steps — then your home runs on autopilot.":
     "Cinco pasos simples — y luego tu hogar funciona en piloto automático.",
   "Choose Your Services": "Elige Tus Servicios",
-  "Pick house cleaning, lawn care, car detailing — or all three. Select your preferred frequency for each.":
-    "Elige limpieza del hogar, cuidado del jardín, detallado de carro — o los tres. Selecciona la frecuencia que prefieras para cada uno.",
+  "Pick house cleaning, lawn care, Shine Complete — or all three. Choose the plan that fits each one.":
+    "Elige limpieza del hogar, cuidado del jardín, Shine Complete — o los tres. Selecciona la frecuencia que prefieras para cada uno.",
   "Set Up Your Plan": "Configura Tu Plan",
   "Tell us about your home, choose your schedule, and review your price. Takes under 2 minutes.":
     "Cuéntanos sobre tu hogar, elige tu horario y revisa tu precio. Toma menos de 2 minutos.",
@@ -803,8 +803,6 @@ const translations: Record<string, string> = {
     "Casa extra grande (2,501–4,000 pies²): +$60 por visita. Terreno extra grande (4,001–7,500 pies² de grama cortable): +$30 por visita. Vehículo extra grande: +$30 por visita. Por encima de esos tamaños cotizamos de forma individual.",
   "Available as add-ons: pet-hair removal, headlight restoration.":
     "Disponibles como complementos: eliminación de pelo de mascotas, restauración de faros.",
-  "Choose weekly, biweekly, or monthly depending on the service — and mix and match freely. Car detailing is monthly or biweekly. Want weekly lawn care but biweekly cleaning? Done.":
-    "Elige semanal, quincenal o mensual según el servicio, y combínalos libremente. El detallado de carros es mensual o quincenal. ¿Quieres jardinería semanal pero limpieza quincenal? Listo.",
   "What affects my price?": "¿Qué afecta mi precio?",
   "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees.":
     "El precio depende de los servicios que elijas y con qué frecuencia los quieras — semanal, quincenal o mensual. Eso es todo. Sin cargos ocultos.",
@@ -819,11 +817,11 @@ const translations: Record<string, string> = {
     "Por supuesto. Cambia tu frecuencia, cambia de servicios o pausa cuando quieras desde tu panel o contactándonos.",
 
   // Footer
-  "Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Pinecrest, Kendall and Kendall West.":
-    "El servicio del hogar por suscripción de Miami. Limpieza del hogar, cuidado del jardín y detallado de carro — un solo plan mensual simple. Sirviendo Kendall + Pinecrest.",
+  "Miami's subscription home service. House cleaning, lawn care, and Shine Complete — one simple monthly plan. Serving Pinecrest, Kendall and Kendall West.":
+    "El servicio del hogar por suscripción de Miami. Limpieza del hogar, cuidado del jardín y Shine Complete — un solo plan mensual simple. Sirviendo Kendall + Pinecrest.",
   "© 2026 Tidy Home Concierge LLC · Miami, Florida": "© 2026 Tidy Home Concierge LLC · Miami, Florida",
-  "Serving 33183 Kendall · 33186 Kendall West · 33156 Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.":
-    "Sirviendo 33183 Kendall · 33186 Kendall West · 33156 Pinecrest con suscripciones recurrentes de limpieza del hogar, cuidado del jardín y detallado de carro.",
+  "Serving 33183 Kendall · 33186 Kendall West · 33156 Pinecrest with recurring house cleaning, lawn care, and Shine Complete subscriptions.":
+    "Sirviendo 33183 Kendall · 33186 Kendall West · 33156 Pinecrest con suscripciones recurrentes de limpieza del hogar, cuidado del jardín y Shine Complete.",
   "Coming soon": "Próximamente",
   "Join our team": "Únete a nuestro equipo",
   "Tidy on Instagram": "Tidy en Instagram",
@@ -834,14 +832,12 @@ const translations: Record<string, string> = {
   // FAQ — homepage
   "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one.":
     "Actualmente servimos Pinecrest (33156), Kendall (33183) y Kendall West (33186). Estamos lanzando primero en códigos postales selectos de Miami para asegurar un servicio de alta calidad desde el día uno.",
-  "Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
+  "Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and Shine Complete all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
     "Tidy es una suscripción todo en uno de servicios del hogar en Miami — nos encargamos de la limpieza de tu casa, el cuidado del jardín y el detallado de tu carro bajo un solo plan mensual. Sin coordinar varios proveedores, sin perseguir cotizaciones. Una sola suscripción y todo se mantiene impecable.",
   "Tap 'Start My Plan,' choose your services and schedule, and complete checkout. Your first visit is confirmed within 24 hours.":
     "Toca 'Empezar Mi Plan', elige tus servicios y tu horario, y completa el pago. Tu primera visita se confirma dentro de 24 horas.",
   "No contracts, no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month.":
     "Sin contratos, sin cargos por cancelación. Puedes cancelar cuando quieras, sin preguntas. Nos ganamos tu preferencia cada mes.",
-  "Choose weekly, biweekly, or monthly for each service — and mix and match freely. Want weekly lawn care but biweekly cleaning? Done.":
-    "Elige semanal, quincenal o mensual para cada servicio — y combínalos libremente. ¿Quieres jardín semanal pero limpieza quincenal? Listo.",
   "Not at all. Provide access via a lockbox, gate code, or smart lock and our team handles everything. You'll get photo confirmation when each service is complete.":
     "Para nada. Danos acceso con una caja de llaves, un código de portón o una cerradura inteligente y nuestro profesional se encarga de todo. Recibirás confirmación con fotos cuando cada servicio esté completo.",
   "Yes — reschedule, pause for vacation, or skip a visit anytime through your dashboard or by contacting us. No penalties.":
@@ -977,8 +973,8 @@ const translations: Record<string, string> = {
     "Tidy no es solo jardín — es un sistema para todo tu hogar.",
   "Start lawn care": "Empezar cuidado del jardín",
   "Start your plan": "Empieza tu plan",
-  "Lawn care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same Pro, no contracts. Book in about 2 minutes.":
-    "Cuidado del jardín en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Un precio fijo por visita desde $45. El mismo profesional, sin contratos. Reserva en unos 2 minutos.",
+  "Lawn care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). Mow, edge, blow. Plans from $55 a month. Same Pro, no contracts. Book in about 2 minutes.":
+    "Cuidado del jardín en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Planes desde $55 al mes. El mismo profesional, sin contratos. Reserva en unos 2 minutos.",
   "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.":
     "Limpieza profesional del hogar, resuelta por nosotros. Semanal, quincenal o mensual.",
   "Tidy isn't just cleaning — it's a system for your entire home.":
@@ -986,7 +982,7 @@ const translations: Record<string, string> = {
   "Book your cleaning": "Reserva tu limpieza",
   "House cleaning in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). One flat price per visit from $139. Same Pro, no contracts, eco-safe. Book in about 2 minutes.":
     "Limpieza del hogar en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Un precio fijo por visita desde $139. El mismo profesional, sin contratos, productos ecológicos. Reserva en unos 2 minutos.",
-  "Professional car detailing at your home. Ceramic-safe, monthly.":
+  "Professional Shine Complete at your home. Ceramic-safe, monthly.":
     "Detallado profesional de carros en tu casa. Seguro para cerámica, mensual.",
   "Same detailer every visit. Locked monthly price. Cancel anytime.":
     "El mismo detallador en cada visita. Precio mensual fijo. Cancela cuando quieras.",
@@ -1009,8 +1005,8 @@ const translations: Record<string, string> = {
   // Terms of Service page
   "Effective Date: March 25, 2026": "Fecha de vigencia: 25 de marzo de 2026",
   "1. Service Type": "1. Tipo de Servicio",
-  "Tidy provides recurring maintenance services including house cleaning, lawn care, and car detailing. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately. Services are performed by independent contractors engaged by Tidy. Tidy carries commercial general liability coverage on every Tidy assignment, and contractors are background-checked.":
-    "Tidy ofrece servicios de mantenimiento recurrente que incluyen limpieza del hogar, cuidado del jardín y detallado de carros. Tidy NO ofrece servicios de restauración, limpieza de materiales peligrosos ni servicios en condiciones extremas, a menos que se compren por separado. Los servicios son realizados por contratistas independientes contratados por Tidy. Tidy cuenta con cobertura de responsabilidad civil general en cada asignación, y los contratistas son verificados.",
+  "Tidy provides recurring maintenance services including house cleaning, lawn care, and Shine Complete. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately. Services are performed by independent contractors engaged by Tidy. Tidy carries commercial general liability coverage on every Tidy assignment, and contractors are background-checked.":
+    "Tidy ofrece servicios de mantenimiento recurrente que incluyen limpieza del hogar, cuidado del jardín y Shine Completes. Tidy NO ofrece servicios de restauración, limpieza de materiales peligrosos ni servicios en condiciones extremas, a menos que se compren por separado. Los servicios son realizados por contratistas independientes contratados por Tidy. Tidy cuenta con cobertura de responsabilidad civil general en cada asignación, y los contratistas son verificados.",
   "2. Service Scope Limitations": "2. Limitaciones del Alcance del Servicio",
   "Standard services include routine maintenance only. Not included: extreme buildup or neglect, hazardous materials, mold remediation, biohazard cleanup, heavy stain restoration, paint correction, construction debris cleanup.":
     "Los servicios estándar incluyen únicamente mantenimiento de rutina. No se incluye: acumulación extrema o abandono, materiales peligrosos, remediación de moho, limpieza de riesgo biológico, restauración de manchas severas, corrección de pintura ni limpieza de escombros de construcción.",
@@ -1092,10 +1088,10 @@ const translations: Record<string, string> = {
   "Tidy Home Concierge — Coming soon to Miami": "Tidy Home Concierge — Muy pronto en Miami",
   "Launching soon in Miami": "Muy pronto en Miami",
   "We're almost ready.": "Ya casi estamos listos.",
-  "Subscription home care in Kendall & Pinecrest — house cleaning, lawn care, and mobile car detailing. Hiring our founding crew now.":
-    "Cuidado del hogar por suscripción en Kendall y Pinecrest — limpieza del hogar, cuidado del jardín y detallado de carros a domicilio. Estamos contratando a nuestro equipo fundador.",
-  "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, car detailing. Opening soon.":
-    "Tidy Home Concierge es una empresa de servicios del hogar por suscripción en Miami que está contratando a su equipo fundador. Limpieza, jardín y detallado de carros. Abrimos muy pronto.",
+  "Subscription home care in Kendall & Pinecrest — house cleaning, lawn care, and mobile Shine Complete. Hiring our founding crew now.":
+    "Cuidado del hogar por suscripción en Kendall y Pinecrest — limpieza del hogar, cuidado del jardín y Shine Completes a domicilio. Estamos contratando a nuestro equipo fundador.",
+  "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, Shine Complete. Opening soon.":
+    "Tidy Home Concierge es una empresa de servicios del hogar por suscripción en Miami que está contratando a su equipo fundador. Limpieza, jardín y Shine Completes. Abrimos muy pronto.",
   "Opening soon in Miami": "Abrimos muy pronto en Miami",
   "Questions?": "¿Preguntas?",
   "Tidy Home Concierge LLC · Miami, FL": "Tidy Home Concierge LLC · Miami, FL",
@@ -1105,10 +1101,10 @@ const translations: Record<string, string> = {
   "Trusted across 33156 · 33183 · 33186": "Con la confianza de 33156 · 33183 · 33186",
   "/mo": "/mes",
   "$139/mo": "$139/mes",
-  "$278/mo": "$278/mes",
-  "$556/mo": "$556/mes",
-  "$45/mo": "$45/mes",
-  "$90/mo": "$90/mes",
+  "$256/mo": "$256/mes",
+  "$456/mo": "$456/mes",
+  "$55/mo": "$55/mes",
+  "$102/mo": "$102/mes",
   "$180/mo": "$180/mes",
   "$149/mo": "$149/mes",
   "$179/mo": "$179/mes",
@@ -1202,7 +1198,7 @@ const translations: Record<string, string> = {
   "per month, size 1": "por mes, tamaño 1",
   "Serving Pinecrest, Kendall and Kendall West — 33156, 33183, 33186":
     "Servimos Pinecrest y Kendall — 33156, 33183, 33186",
-  "from $45 a visit": "desde $45 por visita",
+  "from $55 a month": "desde $55 al mes",
   "five-star reviews": "reseñas de cinco estrellas",
   "from neighbors in": "de vecinos en",
   "Pinecrest and Kendall": "Pinecrest y Kendall",
@@ -1274,7 +1270,7 @@ const translations: Record<string, string> = {
   // Car Wash / Car Detail split — StepProperty
   "wash or detail?": "¿lavado o detallado?",
   "Car Wash": "Lavado de Carro",
-  "Car Detail": "Detallado de Carro",
+  "Car Detail": "Shine Complete",
   "Pick your arrival time": "Elige tu horario de llegada",
   "Done by ~{time}": "Listo antes de las ~{time}",
   "Included — a detail starts with a full exterior wash.":

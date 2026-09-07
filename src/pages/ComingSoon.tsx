@@ -10,7 +10,7 @@ const ComingSoon = () => {
   const routeSeo: Record<string, { title: string; description: string }> = {
     "/bundle": {
       title: "Bundle Home Services | Tidy Miami",
-      description: "Bundle cleaning, lawn care, and car detailing in Miami with one monthly Tidy plan.",
+      description: "Bundle cleaning, lawn care, and Shine Complete in Miami with one monthly Tidy plan.",
     },
     "/help": {
       title: "Help Center | Tidy Home Concierge",
@@ -27,7 +27,7 @@ const ComingSoon = () => {
   };
   const seo = routeSeo[pathname] ?? {
     title: "Tidy Home Concierge — Coming soon to Miami",
-    description: "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, car detailing. Opening soon.",
+    description: "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, Shine Complete. Opening soon.",
   };
   return (
     <>
@@ -78,7 +78,7 @@ const ComingSoon = () => {
 
           <p className="mt-4 max-w-xl text-base sm:text-lg font-light text-white/70">
             {t(
-              "Subscription home care in Kendall & Pinecrest — house cleaning, lawn care, and mobile car detailing. Hiring our founding crew now.",
+              "Subscription home care in Kendall & Pinecrest — house cleaning, lawn care, and mobile Shine Complete. Hiring our founding crew now.",
             )}
           </p>
 

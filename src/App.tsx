@@ -228,6 +228,9 @@ const App = () => (
                   <Route path="/house-cleaning" element={<HouseCleaning />} />
                   <Route path="/lawn-care" element={<LawnCare />} />
                   <Route path="/car-detailing" element={<CarDetailing />} />
+                  {/* Shine Complete is the product name; /car-detailing stays the canonical URL. */}
+                  <Route path="/shine-complete" element={<CarDetailing />} />
+
                   <Route path="/bundle" element={<Bundle />} />
 
                   {/* Short-slug aliases → canonical landing pages */}

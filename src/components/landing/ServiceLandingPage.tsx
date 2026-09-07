@@ -35,6 +35,9 @@ export interface PlanTier {
   isFromPrice?: boolean;
   /** Size qualifier shown under the price, e.g. "size 1 home — see sizes below". */
   sizeNote?: string;
+  /** Visits and per-visit figure under the monthly bill, e.g. "2 visits a month · $174 a visit". */
+  visitNote?: string;
+
   /** Numeric monthly price, used for select_plan / begin_checkout analytics. */
   priceValue?: number;
   /** Size this card is priced at, used for analytics. */
@@ -318,7 +321,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           <Reveal className="text-center mb-6">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Plans")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              {t("Pick your cadence. Lock your price.")}
+              {t("Pick your plan.")}
             </h2>
             <p className="mt-3 text-sm md:text-base text-text-mid max-w-xl mx-auto">
               {t("Set it once. We handle the rest — scheduling, reminders, the same Pro every visit.")}
@@ -352,9 +355,14 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                       <span className="text-3xl font-extrabold text-foreground">{p.price}</span>
                       <span className="text-sm text-text-mid">{t(p.cadence)}</span>
                     </div>
+                    {/* The card leads with the monthly bill; the per-visit figure sits under it. */}
+                    {p.visitNote && (
+                      <p className="mt-1 text-xs leading-snug text-text-mid">{t(p.visitNote)}</p>
+                    )}
                     {p.sizeNote && (
                       <p className="mt-1 text-[11px] leading-snug text-text-light">{t(p.sizeNote)}</p>
                     )}
+
                     <p className="text-sm text-text-mid mt-3 flex-1">{t(p.description)}</p>
                     <Link
                       to={planCta.to}

@@ -35,9 +35,10 @@ const PricingTable = () => {
           </h2>
           <p className="text-text-mid mt-4 max-w-xl mx-auto">
             {t(
-              "Cleaning and lawn care are priced per visit, so coming more often costs more only because we come more often. Shine Complete is a flat monthly price.",
+              "Size sets the price per visit for cleaning and lawn care. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Shine Complete is one flat monthly price.",
             )}
           </p>
+
         </FadeIn>
 
         <FadeIn delay={200}>
@@ -46,9 +47,10 @@ const PricingTable = () => {
               <thead>
                 <tr className="bg-navy text-primary-foreground">
                   <th className="text-left px-6 py-4 font-semibold">{t("Size")}</th>
-                  <th className="px-6 py-4 font-semibold">{t("House Cleaning")}<span className="block text-[11px] font-normal opacity-80">{t("per visit")}</span></th>
-                  <th className="px-6 py-4 font-semibold">{t("Lawn Care")}<span className="block text-[11px] font-normal opacity-80">{t("per visit")}</span></th>
+                  <th className="px-6 py-4 font-semibold">{t("House Cleaning")}<span className="block text-[11px] font-normal opacity-80">{t("monthly plan · per visit")}</span></th>
+                  <th className="px-6 py-4 font-semibold">{t("Lawn Care")}<span className="block text-[11px] font-normal opacity-80">{t("monthly plan · per visit")}</span></th>
                   <th className="px-6 py-4 font-semibold">{t("Shine Complete")}<span className="block text-[11px] font-normal opacity-80">{t("per month")}</span></th>
+
                 </tr>
               </thead>
               <tbody>

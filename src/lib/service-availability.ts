@@ -1,7 +1,7 @@
 /**
  * Which services customers can actually sign up for right now.
  *
- * Lawn care and car detailing stay closed until those Pros are hired. Flip a
+ * Lawn care and Shine Complete stay closed until those Pros are hired. Flip a
  * service back on by adding it to AVAILABLE_SERVICES — everything that shows a
  * service picker reads this one list, so nothing else needs editing.
  */

@@ -1,7 +1,7 @@
 // Florida sales tax guard.
 //
 // The taxability decision lives in the cart, not on the Stripe price objects:
-// car detailing becomes taxable at 7% (6% FL state + 1% Miami-Dade surtax) ONLY
+// Shine Complete becomes taxable at 7% (6% FL state + 1% Miami-Dade surtax) ONLY
 // when wax / sealant / ceramic coating is applied, and applying it makes the
 // whole transaction taxable. Cleaning (12A-1.0091) and lawn care are never
 // taxed. This test asserts all three cases against the real payload builder and

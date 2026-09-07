@@ -4,8 +4,8 @@ import heroImgWebp from "@/assets/lp-lawn-care.webp";
 import heroImgMobile from "@/assets/lp-lawn-care-mobile.jpg";
 import heroImgMobileWebp from "@/assets/lp-lawn-care-mobile.webp";
 
-// Card prices are the SIZE-1 lot price. Size 2 is $65 and size 3 is $99 a
-// visit, which is why every card says "From" and carries this qualifier.
+// Card prices are the SIZE-1 lot MONTHLY BILL. Size 2 and size 3 cost more,
+// which is why every card says "From" and carries this qualifier.
 const SIZE_NOTE = "size 1 lot — sizes 2 and 3 cost more, see sizes below";
 
 
@@ -22,10 +22,10 @@ const config: ServiceLandingConfig = {
     "Tidy isn't just lawn — it's a system for your entire home.",
   ctaPrimaryLabel: "Start lawn care",
   ctaPlanLabel: "Start your plan",
-  priceAnchor: "From $45 a visit",
-  stickyLabel: "Lawn Care · from $45 a visit",
+  priceAnchor: "From $55 a month",
+  stickyLabel: "Lawn Care · from $55 a month",
   savingsCallout:
-    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $45 a visit** flat, same Pro, no surprise invoices.",
+    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $55 a month** flat, same Pro, no surprise invoices.",
   heroImage: heroImg,
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
@@ -35,26 +35,28 @@ const config: ServiceLandingConfig = {
   plans: [
     {
       name: "Monthly",
-      price: "$45",
+      price: "$55",
       cadence: "/mo",
       planSlug: "monthly",
       description: "One visit per month.",
       isFromPrice: true,
+      visitNote: "1 visit a month · $55 a visit",
       sizeNote: SIZE_NOTE,
-      priceValue: 45,
+      priceValue: 55,
       size: 1,
       cadenceKey: "monthly",
     },
     {
       name: "Biweekly",
-      price: "$90",
+      price: "$102",
       cadence: "/mo",
       planSlug: "biweekly",
       description: "Two visits per month.",
       highlighted: true,
       isFromPrice: true,
+      visitNote: "2 visits a month · $51 a visit",
       sizeNote: SIZE_NOTE,
-      priceValue: 90,
+      priceValue: 102,
       size: 1,
       cadenceKey: "biweekly",
     },
@@ -65,6 +67,7 @@ const config: ServiceLandingConfig = {
       planSlug: "weekly",
       description: "Four visits per month.",
       isFromPrice: true,
+      visitNote: "4 visits a month · $45 a visit",
       sizeNote: SIZE_NOTE,
       priceValue: 180,
       size: 1,
@@ -104,7 +107,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "One flat price per visit, set by the size of your lawn: $45, $65 or $99. How often we come just multiplies it — monthly is one visit, biweekly two, weekly four. Pick your best guess and we confirm the size from satellite imagery before your first visit.",
+      a: "One price per visit, set by the size of your lawn: $55, $75 or $109 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess and we confirm the size from satellite imagery before your first visit.",
     },
     {
       q: "Can I cancel anytime?",
@@ -132,16 +135,16 @@ const config: ServiceLandingConfig = {
     },
   ],
   bundleCta: {
-    title: "Already booking lawn? Add cleaning from $139 a visit.",
+    title: "Already booking lawn? Add cleaning from $139 a month.",
     body: "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.",
     targetServices: "lawn,cleaning",
   },
   seo: {
     title: "Lawn Care in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. One flat price per visit from $45. Same Pro, no contracts. Book in about 2 minutes.",
+      "Lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Plans from $55 a month. Same Pro, no contracts. Book in about 2 minutes.",
     canonical: "https://jointidy.co/lawn-care",
-    priceRange: "$45–$99",
+    priceRange: "$55–$358",
     service: {
       name: "Lawn Care",
       serviceType: "Lawn Care",

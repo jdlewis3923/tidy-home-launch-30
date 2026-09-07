@@ -9,7 +9,7 @@ const Terms = () => {
     <div className="min-h-screen bg-background">
       <SeoHead
         title={t("Terms of Service | Tidy Home Concierge")}
-        description={t("Terms of Service for Tidy Home Concierge LLC — subscription cleaning, lawn care and car detailing in Miami ZIPs 33156, 33183 and 33186.")}
+        description={t("Terms of Service for Tidy Home Concierge LLC — subscription cleaning, lawn care and Shine Complete in Miami ZIPs 33156, 33183 and 33186.")}
         canonical="https://jointidy.co/terms"
       />
       <div className="max-w-3xl mx-auto px-4 py-16">
@@ -26,7 +26,7 @@ const Terms = () => {
             <h2 className="text-lg font-bold text-foreground">{t("1. Service Type")}</h2>
             <p>
               {t(
-                "Tidy provides recurring maintenance services including house cleaning, lawn care, and car detailing. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately. Services are performed by independent contractors engaged by Tidy. Tidy carries commercial general liability coverage on every Tidy assignment, and contractors are background-checked.",
+                "Tidy provides recurring maintenance services including house cleaning, lawn care, and Shine Complete. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately. Services are performed by independent contractors engaged by Tidy. Tidy carries commercial general liability coverage on every Tidy assignment, and contractors are background-checked.",
               )}
             </p>
           </section>

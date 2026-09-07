@@ -36,7 +36,7 @@ const launchSteps = [
   {
     num: 1,
     title: "Choose Your Services",
-    desc: "Pick house cleaning, lawn care, car detailing — or all three. Select your preferred frequency for each.",
+    desc: "Pick house cleaning, lawn care, Shine Complete — or all three. Choose the plan that fits each one.",
     icon: ClipboardList,
     gradient: "from-blue-500 to-blue-600",
   },

@@ -37,6 +37,8 @@ export interface CheckoutServiceLine {
   service: ServiceType;
   size: CanonSize;
   frequency: Frequency;
+  /** Interior sq ft (cleaning) or turf sq ft (lawn) — drives the surcharge. */
+  sq_ft?: number | null;
 }
 
 /** Exported for the checkout-parity test: builds the exact server payload. */
@@ -47,9 +49,12 @@ export function translate(config: ConfigState) {
       const size = sizeFor(config, svc);
       // Above size 3 is a quote — never auto-booked.
       if (!size || size === 'quote') return null;
-      return { service: svc, size, frequency } as CheckoutServiceLine;
+      const sq_ft =
+        svc === 'cleaning' ? config.homeSqFt ?? null : svc === 'lawn' ? config.turfSqFt ?? null : null;
+      return { service: svc, size, frequency, sq_ft } as CheckoutServiceLine;
     })
     .filter((x): x is CheckoutServiceLine => !!x);
+
 
   const addons: Array<{ addon_name: string; qty: number }> = (config.addOns ?? []).map((id) => ({
     addon_name: id,

@@ -8,7 +8,7 @@ const preLaunchFAQ = [
   {
     title: "Getting Started",
     items: [
-      { q: "What is Tidy?", a: "Great question! Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless." },
+      { q: "What is Tidy?", a: "Great question! Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and Shine Complete all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless." },
       { q: "How do I sign up?", a: "Super easy — just tap the 'Get Early Access' button, fill out a quick 2-minute form with your name and contact info, and we'll reach out to confirm your spot and lock in your schedule. That's it!" },
       { q: "Where is Tidy available?", a: "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one." },
       { q: "Is there a commitment?", a: "Nope — zero commitment! There are no contracts and no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month." },
@@ -17,7 +17,7 @@ const preLaunchFAQ = [
   {
     title: "Services & Scheduling",
     items: [
-      { q: "How often do services happen?", a: "Totally up to you! Choose weekly, biweekly, or monthly for each service — and yes, you can mix and match. Want weekly lawn care but biweekly cleaning? Done. We build your plan around your life." },
+      { q: "How often do services happen?", a: "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan." },
       { q: "Do I need to be home?", a: "Not at all! Just give us access via a lockbox, gate code, or smart lock and our team handles everything while you're out living your best life. You'll get photo confirmation when each service is done." },
       { q: "Can I reschedule or pause?", a: "Absolutely! Life happens — just shoot us a message and we'll move things around for you. Need to pause for a vacation? No problem. We've got you covered." },
       { q: "What if it rains?", a: "No worries! If weather impacts an outdoor service, we'll automatically reschedule it for the next available day. Your subscription stays active and you won't miss a beat." },
@@ -28,7 +28,7 @@ const preLaunchFAQ = [
     items: [
       { q: "What does house cleaning include?", a: "We cover all the essentials to keep your home feeling fresh — kitchen surfaces and countertops, full bathroom cleaning, dusting throughout, vacuuming and mopping all floors, and trash removal. Your home will look and feel amazing after every visit." },
       { q: "What does lawn care include?", a: "We keep your curb appeal on point! Every visit includes professional mowing, clean edging along walkways and beds, and blowing all debris off your walkways and driveways. Your neighbors will notice the difference." },
-      { q: "What does car detailing include?", a: "Your ride deserves love too! We do a full exterior hand wash with wheel cleaning, thorough interior vacuum, and a complete interior surface wipe-down. Your car will look showroom-ready right in your driveway." },
+      { q: "What does Shine Complete include?", a: "Your ride deserves love too! We do a full exterior hand wash with wheel cleaning, thorough interior vacuum, and a complete interior surface wipe-down. Your car will look showroom-ready right in your driveway." },
       { q: "Are deep cleaning or restoration services included?", a: "Tidy is designed for consistent, ongoing maintenance — the kind that keeps everything looking great week after week. If you need a one-time deep clean or restoration work, we offer those as add-ons. Just ask!" },
     ],
   },
@@ -38,7 +38,7 @@ const preLaunchFAQ = [
       { q: "How does billing work?", a: "Simple and transparent! You're billed monthly via Stripe — everything is automatic, fully secure, and you'll get a receipt every time. No surprise charges, ever." },
       { q: "Can I cancel anytime?", a: "Yes, 100%! No cancellation fees, no contracts, no awkward phone calls. If you ever want to cancel, just let us know and we'll take care of it immediately." },
       { q: "What if my payment fails?", a: "We'll pause your services and notify you right away via SMS and email so you can update your payment info. Once it's sorted, we'll get you back on schedule — easy as that." },
-      { q: "Can I change services later?", a: "Of course! Want to add car detailing or switch your cleaning frequency? Just reach out and any changes will kick in at your next billing cycle. We're flexible because your needs are too." },
+      { q: "Can I change services later?", a: "Of course! Want to add Shine Complete or switch your cleaning frequency? Just reach out and any changes will kick in at your next billing cycle. We're flexible because your needs are too." },
     ],
   },
   {
@@ -55,7 +55,7 @@ const launchFAQ = [
   {
     title: "Getting Started",
     items: [
-      { q: "What is Tidy?", a: "Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and car detailing all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless." },
+      { q: "What is Tidy?", a: "Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and Shine Complete all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless." },
       { q: "How do I sign up?", a: "Tap 'Start My Plan,' choose your services and schedule, and complete checkout. Your first visit is confirmed within 24 hours." },
       { q: "Where is Tidy available?", a: "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one." },
       { q: "Is there a commitment?", a: "No contracts, no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month." },
@@ -64,7 +64,7 @@ const launchFAQ = [
   {
     title: "Services & Scheduling",
     items: [
-      { q: "How often do services happen?", a: "Choose weekly, biweekly, or monthly depending on the service — and mix and match freely. Car detailing is monthly or biweekly. Want weekly lawn care but biweekly cleaning? Done." },
+      { q: "How often do services happen?", a: "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan." },
       { q: "Do I need to be home?", a: "Not at all. Provide access via a lockbox, gate code, or smart lock and our team handles everything. You'll get photo confirmation when each service is complete." },
       { q: "Can I reschedule or pause?", a: "Yes — reschedule, pause for vacation, or skip a visit anytime through your dashboard or by contacting us. No penalties." },
       { q: "What if it rains?", a: "If weather impacts an outdoor service, we automatically reschedule for the next available day. Your subscription stays active." },
@@ -76,7 +76,7 @@ const launchFAQ = [
     items: [
       { q: "What does house cleaning include?", a: "Kitchen surfaces, full bathroom cleaning, dusting throughout, vacuuming and mopping all floors, and trash removal with fresh liners." },
       { q: "What does lawn care include?", a: "Professional mowing to standard height, clean edging along walkways and beds, and debris blowing off walkways and driveways." },
-      { q: "What does car detailing include?", a: "Full exterior hand wash with wheel cleaning, interior vacuum with floor mats, and dashboard and surface wipe-down — right in your driveway." },
+      { q: "What does Shine Complete include?", a: "Full exterior hand wash with wheel cleaning, interior vacuum with floor mats, and dashboard and surface wipe-down — right in your driveway." },
       { q: "Can I add extra services or upgrades?", a: "Yes. Add-ons like deep cleaning, bed edge reset, leather conditioning, and more are available as one-time or recurring extras. You can add them anytime through your dashboard." },
       { q: "Are deep cleaning or restoration services included?", a: "Tidy is designed for consistent ongoing maintenance. Deep cleans and restoration work are available as add-ons — just ask." },
     ],

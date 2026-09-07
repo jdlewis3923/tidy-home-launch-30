@@ -4,16 +4,20 @@
 // src/lib/checkout.ts), resolves Stripe prices from stripe_catalog BY LOOKUP KEY,
 // builds line_items, and creates a subscription-mode Checkout Session.
 //
-// Model: three sizes (1/2/3) per service. Cleaning and lawn are per visit and
-// carry cadence as the item quantity (monthly 1, biweekly 2, weekly 4). Shine
-// Complete and the Car Wash Add-On are per month, always quantity 1.
+// Model: size sets the per-visit price, cadence applies the volume curve, and
+// the customer is ALWAYS billed monthly. Every plan price is interval=month at
+// the billed amount, so quantity is always 1 and the lookup key carries the
+// cadence (clean_2_biweekly, lawn_1_weekly, shine_3 ...).
 //
-// There is NO percentage discount and NO promo code. Bundling earns free car
-// washes. The one coupon that can reach a session is the referred friend's
-// $50-off-first-month (uncapped, duration "once"), validated server-side in
-// _shared/referral-discount.ts. Bundling never produces a coupon, so a bundle
-// plus a referral cannot double-discount, and the founding offer is a set of fulfilment promises recorded in
-// subscription metadata (the webhook writes them onto the subscription row).
+// Square-footage surcharges ride along as their own monthly line, priced per
+// visit x visits per month.
+//
+// There is NO percentage discount and NO promo code. Bundling earns one free
+// premium add-on a month, chosen by the customer. The one coupon that can reach
+// a session is the referral reward, validated server-side in
+// _shared/referral-discount.ts. The founding offer is a set of fulfilment
+// promises recorded in subscription metadata (the webhook writes them onto the
+// subscription row).
 
 import Stripe from "https://esm.sh/stripe@17.5.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
@@ -27,13 +31,21 @@ import {
 } from "../_shared/referral-discount.ts";
 import {
   CAR_WASH_LOOKUP_KEYS,
-  SERVICE_LOOKUP_KEYS,
+  CLEANING_SURCHARGE,
+  LAWN_SURCHARGE,
+  contractorVisitPay,
   freeAddonsPerMonth,
+  lookupKeyFor,
+  monthlyPrice,
+  perVisitPrice,
   quantityFor,
+  visitsPerMonthFor,
+  type CanonCadence,
   type CanonSize,
   type WashCount,
 } from "../_shared/pricing-canon.ts";
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
+
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -54,10 +66,13 @@ const CheckoutInputSchema = z.object({
         service: ServiceTypeEnum,
         size: SizeEnum,
         frequency: FrequencyEnum,
+        /** Interior sq ft (cleaning) or turf sq ft (lawn) — drives the surcharge. */
+        sq_ft: z.number().int().min(0).max(100000).nullable().optional(),
       }),
     )
     .min(1)
     .max(3),
+
   addons: z
     .array(z.object({ addon_name: z.string().min(1).max(64), qty: z.number().int().min(1).max(20) }))
     .max(50)
@@ -161,14 +176,17 @@ Deno.serve(async (req) => {
         });
 
         // ---------- Resolve recurring prices by lookup key ----------
-        const serviceKeys = input.services.map((s) => SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize]);
+        // The cadence is part of the key; every price is monthly, quantity 1.
+        const serviceKeys = input.services.map((s) =>
+          lookupKeyFor(s.service, s.size as CanonSize, s.frequency as CanonCadence),
+        );
         const carWashKey = input.car_wash
           ? CAR_WASH_LOOKUP_KEYS[input.car_wash.size as CanonSize][input.car_wash.washes as WashCount]
           : null;
 
         const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
-          .select("lookup_key, service_type, stripe_price_id")
+          .select("lookup_key, service_type, stripe_price_id, price_cents")
           .in("lookup_key", carWashKey ? [...serviceKeys, carWashKey] : serviceKeys)
           .eq("active", true);
         if (priceErr) throw new Error(`catalog read failed: ${priceErr.message}`);
@@ -179,13 +197,72 @@ Deno.serve(async (req) => {
         // cleaning and lawn care are nontaxable services in Florida.
         const carCareIndices = new Set<number>();
 
+        /** Per-visit surcharge for a line, or 0. Above the band it is a quote. */
+        const surchargeFor = (service: string, sqFt?: number | null): number => {
+          if (!sqFt) return 0;
+          if (service === "cleaning") {
+            if (sqFt > CLEANING_SURCHARGE.maxSqFt) return -1;
+            return sqFt >= CLEANING_SURCHARGE.minSqFt ? CLEANING_SURCHARGE.perVisitDollars : 0;
+          }
+          if (service === "lawn") {
+            if (sqFt > LAWN_SURCHARGE.maxSqFt) return -1;
+            return sqFt >= LAWN_SURCHARGE.minSqFt ? LAWN_SURCHARGE.perVisitDollars : 0;
+          }
+          return 0;
+        };
+
+        // What each line costs the customer this month, for the parity check and
+        // for the subscription snapshot the webhook writes.
+        const planLines: Array<Record<string, unknown>> = [];
+
         for (const s of input.services) {
-          const key = SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize];
+          const cadence = s.frequency as CanonCadence;
+          const size = s.size as CanonSize;
+          const key = lookupKeyFor(s.service, size, cadence);
           const row = priceRows?.find((r) => r.lookup_key === key);
           if (!row) throw new Error(`no active catalog price for lookup_key ${key}`);
+
+          const surcharge = surchargeFor(s.service, s.sq_ft);
+          if (surcharge < 0) throw new Error("property_requires_quote");
+
           if (s.service === "detailing") carCareIndices.add(line_items.length);
-          line_items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, s.frequency) });
+          line_items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, cadence) });
+
+          const visits = visitsPerMonthFor(s.service, cadence);
+          if (surcharge > 0) {
+            // Surcharge is per visit, so it scales with cadence exactly like the plan.
+            line_items.push({
+              price_data: {
+                currency: "usd",
+                product_data: {
+                  name: `${s.service === "cleaning" ? "Larger home" : "Larger yard"} surcharge`,
+                },
+                unit_amount: surcharge * visits * 100,
+                recurring: { interval: "month" },
+              },
+              quantity: 1,
+            });
+          }
+
+          planLines.push({
+            service: s.service,
+            size_tier: size,
+            cadence,
+            surcharge_applied: surcharge > 0,
+            surcharge_cents: surcharge * 100,
+            visits_per_month: visits,
+            per_visit_cents: Math.round((perVisitPrice(s.service, size, cadence) + surcharge) * 100),
+            monthly_cents: Math.round(monthlyPrice(s.service, size, cadence, surcharge) * 100),
+            lookup_key: key,
+            stripe_price_id: row.stripe_price_id,
+            // Never shown to a customer — used when visits are created.
+            contractor_pay_cents:
+              Math.round(
+                contractorVisitPay({ service: s.service, size, cadence, surcharge: surcharge > 0 }) * 100,
+              ),
+          });
         }
+
 
         if (carWashKey) {
           const row = priceRows?.find((r) => r.lookup_key === carWashKey);
@@ -233,18 +310,28 @@ Deno.serve(async (req) => {
           for (const idx of carCareIndices) line_items[idx].tax_rates = [taxRateId];
         }
 
-        // ---------- Bundle gift: free car washes, never a percentage ----------
+        // ---------- Bundle gift: one free premium add-on, never a percentage ----------
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
         const freeAddons = freeAddonsPerMonth(uniqueServices);
 
         // ---------- Subscription metadata for the webhook ----------
+        const primary = planLines[0] as Record<string, unknown>;
         const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
           signed_up_at: new Date().toISOString(),
           user_id: user.id,
           services_json: JSON.stringify(input.services),
           sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
+          // service / size_tier / cadence / surcharge_applied, per service line.
+          plan_lines_json: JSON.stringify(planLines),
+          size_tier: String(primary?.size_tier ?? ""),
+          cadence: String(primary?.cadence ?? ""),
+          surcharge_applied: planLines.some((l) => l.surcharge_applied) ? "yes" : "no",
+          surcharge_cents: String(
+            planLines.reduce((sum, l) => sum + Number(l.surcharge_cents ?? 0), 0),
+          ),
           addons_json: JSON.stringify(input.addons),
+
           car_wash_json: input.car_wash ? JSON.stringify(input.car_wash) : "",
           free_addons_per_month: String(freeAddons),
           zip: input.zip,

@@ -42,7 +42,7 @@ const JOB_CREATE = `
 const SERVICE_TITLE: Record<string, string> = {
   cleaning: 'Tidy — Recurring House Cleaning',
   lawn: 'Tidy — Recurring Lawn Care',
-  detailing: 'Tidy — Recurring Mobile Car Detailing',
+  detailing: 'Tidy — Recurring Shine Complete',
 };
 
 /**

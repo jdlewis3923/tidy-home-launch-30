@@ -255,8 +255,9 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
     if (currentPeriodEnd) {
       nextBillingDate = new Date(currentPeriodEnd * 1000).toISOString().slice(0, 10);
     }
-    // List price: quantity carries the cadence, so this is the real monthly bill.
-    // No percentage discounts exist in this model — bundling earns free car washes.
+    // Every plan price is a flat monthly amount, so the sum of the line amounts
+    // IS the monthly bill. No percentage discounts exist in this model —
+    // bundling earns one free premium add-on the customer chooses.
     for (const item of sub.items.data) {
       const amt = item.price.unit_amount ?? 0;
       monthlyTotalCents += amt * (item.quantity ?? 1);
@@ -268,6 +269,16 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   // never happen.
   const sizesJson = meta.sizes_json ? JSON.parse(meta.sizes_json) : {};
   const freeAddons = parseInt(meta.free_addons_per_month ?? '0', 10) || 0;
+  // service / size_tier / cadence / surcharge_applied / contractor_pay_cents per line.
+  const planLines: Array<{
+    service: string;
+    size_tier: number;
+    cadence: string;
+    surcharge_applied: boolean;
+    surcharge_cents: number;
+    contractor_pay_cents: number;
+  }> = meta.plan_lines_json ? JSON.parse(meta.plan_lines_json) : [];
+  const lineFor = (service: string) => planLines.find((l) => l.service === service);
 
   const { data: subRow, error: subErr } = await supabase
     .from('subscriptions')
@@ -283,6 +294,11 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       bundle_discount_pct: 0,
       size: services[0]?.size ?? null,
       sizes_json: sizesJson,
+      plan_lines: planLines,
+      size_tier: planLines[0]?.size_tier ?? services[0]?.size ?? null,
+      cadence: planLines[0]?.cadence ?? dominantFrequency,
+      surcharge_applied: planLines.some((l) => l.surcharge_applied),
+      surcharge_cents: planLines.reduce((sum, l) => sum + (l.surcharge_cents ?? 0), 0),
       free_addons_per_month: freeAddons,
       founding_zip: meta.founding_zip ?? meta.zip ?? null,
       founding_rate_locked: meta.founding_rate_locked === 'yes',
@@ -294,6 +310,7 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
     })
     .select('id')
     .single();
+
 
   if (subErr || !subRow) {
     throw new Error(`subscriptions insert failed: ${subErr?.message ?? 'no row returned'}`);
@@ -320,17 +337,27 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   const visits: any[] = [];
   for (const s of services) {
     const spacing = FREQ_DAYS[s.frequency] ?? 30;
+    const line = lineFor(s.service);
     for (let i = 0; i < 3; i++) {
       const d = new Date(baseDate.getTime() + i * spacing * 86_400_000);
       visits.push({
         user_id: userId,
         subscription_id: subRow.id,
         service: s.service,
+        service_type: s.service,
         visit_date: d.toISOString().slice(0, 10),
         time_window: timeWindowFromPreferred(meta.preferred_time),
         status: 'scheduled',
+        // Snapshot the plan and the pay AT CREATION, so a later price change
+        // never silently reprices work already scheduled or completed.
+        size_tier: line?.size_tier ?? s.size ?? null,
+        cadence: line?.cadence ?? s.frequency,
+        surcharge_applied: line?.surcharge_applied ?? false,
+        contractor_pay_cents: line?.contractor_pay_cents ?? null,
+        visit_pay_cents: line?.contractor_pay_cents ?? null,
       });
     }
+
   }
   if (visits.length > 0) {
     const { error: visitErr } = await supabase.from('visits').insert(visits);
