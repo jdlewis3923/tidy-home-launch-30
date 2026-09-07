@@ -47,9 +47,10 @@ const PricingTable = () => {
               <thead>
                 <tr className="bg-navy text-primary-foreground">
                   <th className="text-left px-6 py-4 font-semibold">{t("Size")}</th>
-                  <th className="px-6 py-4 font-semibold">{t("House Cleaning")}<span className="block text-[11px] font-normal opacity-80">{t("per visit")}</span></th>
-                  <th className="px-6 py-4 font-semibold">{t("Lawn Care")}<span className="block text-[11px] font-normal opacity-80">{t("per visit")}</span></th>
+                  <th className="px-6 py-4 font-semibold">{t("House Cleaning")}<span className="block text-[11px] font-normal opacity-80">{t("monthly plan · per visit")}</span></th>
+                  <th className="px-6 py-4 font-semibold">{t("Lawn Care")}<span className="block text-[11px] font-normal opacity-80">{t("monthly plan · per visit")}</span></th>
                   <th className="px-6 py-4 font-semibold">{t("Shine Complete")}<span className="block text-[11px] font-normal opacity-80">{t("per month")}</span></th>
+
                 </tr>
               </thead>
               <tbody>
