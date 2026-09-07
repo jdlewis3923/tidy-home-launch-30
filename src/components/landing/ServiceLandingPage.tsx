@@ -35,6 +35,9 @@ export interface PlanTier {
   isFromPrice?: boolean;
   /** Size qualifier shown under the price, e.g. "size 1 home — see sizes below". */
   sizeNote?: string;
+  /** Visits and per-visit figure under the monthly bill, e.g. "2 visits a month · $174 a visit". */
+  visitNote?: string;
+
   /** Numeric monthly price, used for select_plan / begin_checkout analytics. */
   priceValue?: number;
   /** Size this card is priced at, used for analytics. */
