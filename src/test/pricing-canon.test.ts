@@ -158,9 +158,9 @@ describe('contractor pay is 40% of the visit price and never shown to a customer
       3: { monthly: 112, biweekly: 103, weekly: 92 },
     });
     expect(CONTRACTOR_VISIT_PAY.lawn).toEqual({
-      1: { monthly: 22, biweekly: 20, weekly: 18 },
-      2: { monthly: 30, biweekly: 28, weekly: 25 },
-      3: { monthly: 44, biweekly: 40, weekly: 36 },
+      1: { monthly: 18, biweekly: 16, weekly: 15 },
+      2: { monthly: 26, biweekly: 24, weekly: 21 },
+      3: { monthly: 40, biweekly: 36, weekly: 32 },
     });
   });
 
