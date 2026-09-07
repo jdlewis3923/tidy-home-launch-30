@@ -1,40 +1,54 @@
 /**
- * Tidy Pro pay — the ONLY place per-visit pay figures live.
+ * Tidy Pro pay — the pro-facing view of the pay canon.
  *
- * Flat amount per completed visit, set by the route's frequency. Never a
- * percentage, never the customer's price. Figures come from Justin's canon
- * rate card (Sep 2026) and are mirrored in the database function
- * public.pro_visit_pay_cents so the UI and the ledger cannot drift.
+ * Pay is a flat amount per completed visit, set by the plan's SIZE and CADENCE.
+ * The figures live in `src/lib/pricing-canon.ts` (mirrored in the database
+ * function public.contractor_visit_pay_cents) so the portal and the ledger
+ * cannot drift. A percentage is never shown to a pro, and the customer's price
+ * is never exposed on any Pro screen or API response.
  *
- *   Service          Monthly  Biweekly  Weekly
- *   House cleaning     $64       $55      $46
- *   Lawn care          $34       $26      $25
- *   Car detailing      $64       $50       —
- *
- * Tier 2 Pro Partners earn +10% on every visit.
+ * Tier 2 Pro Partners earn +10% on every visit, rounded to the dollar.
  */
+import {
+  CONTRACTOR_SHINE_PAY,
+  CONTRACTOR_SURCHARGE_PAY,
+  CONTRACTOR_VISIT_PAY,
+  TIER_2_UPLIFT,
+  contractorVisitPay,
+  type CanonCadence,
+  type CanonSize,
+} from "@/lib/pricing-canon";
+
 export type ProServiceType = "cleaning" | "lawn" | "detailing";
-export type RouteFrequency = "monthly" | "biweekly" | "weekly";
+export type RouteFrequency = CanonCadence;
 
-export const PRO_VISIT_PAY_CENTS: Record<ProServiceType, Record<RouteFrequency, number | null>> = {
-  cleaning: { monthly: 6400, biweekly: 5500, weekly: 4600 },
-  lawn: { monthly: 3400, biweekly: 2600, weekly: 2500 },
-  detailing: { monthly: 6400, biweekly: 5000, weekly: null },
-};
-
-export const TIER_2_UPLIFT = 1.1;
+export { CONTRACTOR_VISIT_PAY, CONTRACTOR_SHINE_PAY, CONTRACTOR_SURCHARGE_PAY, TIER_2_UPLIFT };
 
 /** Service area — the only ZIPs any Pro screen may ever show. */
 export const PRO_SERVICE_ZIPS = ["33156", "33183", "33186"] as const;
 
+/**
+ * Pay in cents for one completed visit.
+ * `size` is the plan size (1/2/3); `surcharge` adds the pro's share of a
+ * larger-home or larger-yard surcharge. For Shine Complete, pass the visit kind.
+ */
 export function visitPayCents(
   service: ProServiceType,
   frequency: RouteFrequency,
   tier?: string | null,
+  opts?: { size?: CanonSize | null; surcharge?: boolean; shineVisit?: "maintenance_wash" | "full_detail" },
 ): number | null {
-  const base = PRO_VISIT_PAY_CENTS[service]?.[frequency] ?? null;
-  if (base === null) return null;
-  return tier === "tier_2_pro_partner" ? Math.round(base * TIER_2_UPLIFT) : base;
+  const size = (opts?.size ?? 1) as CanonSize;
+  if (!size) return null;
+  const dollars = contractorVisitPay({
+    service,
+    size,
+    cadence: frequency,
+    tier: tier === "tier_2_pro_partner" ? 2 : 1,
+    surcharge: opts?.surcharge ?? false,
+    shineVisit: opts?.shineVisit,
+  });
+  return Math.round(dollars * 100);
 }
 
 export const money = (cents?: number | null) =>
@@ -43,7 +57,7 @@ export const money = (cents?: number | null) =>
 export const SERVICE_LABEL: Record<string, string> = {
   cleaning: "House cleaning",
   lawn: "Lawn care",
-  detailing: "Car care",
+  detailing: "Shine Complete",
 };
 
 /** Tier 2 unlocks on all three, together. */
