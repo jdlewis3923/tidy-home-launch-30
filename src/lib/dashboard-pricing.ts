@@ -1,22 +1,35 @@
 import {
-  CADENCE_MULTIPLIER,
+  BILLED_MONTHLY,
+  CADENCE_FACTOR,
   CAR_WASH_LOOKUP_KEYS,
   CAR_WASH_PRICES,
+  CLEANING_SURCHARGE,
+  ENTRY_MONTHLY,
   ENTRY_PRICE_MONTHLY,
+  LAWN_SURCHARGE,
+  PER_VISIT_PRICES,
   REFERRAL_BONUS_CENTS,
   SERVICE_LOOKUP_KEYS,
   SERVICE_NAMES,
   SERVICE_QUANTITY_RULE,
   SERVICE_UNIT,
+  SHINE_MONTHLY,
   SIZE_HELPERS,
   SIZE_LABELS,
   SIZE_PRICES,
   SIZES,
   VEHICLE_CLASS_LABELS,
   VEHICLE_CLASS_SIZE,
+  VISITS_PER_MONTH,
+  cleaningSurchargePerVisit,
   freeAddonsPerMonth,
+  lawnSurchargePerVisit,
+  lookupKeyFor,
+  monthlyPrice,
+  perVisitPrice,
   quantityFor,
   sizeFromBedrooms,
+  type CanonCadence,
   type CanonService,
   type CanonSize,
   type SizeSelection,
@@ -30,9 +43,10 @@ export const REFERRAL_DISCOUNT_CENTS = REFERRAL_BONUS_CENTS;
 
 // Types
 export type ServiceType = CanonService;
-export type Frequency = 'monthly' | 'biweekly' | 'weekly';
+export type Frequency = CanonCadence;
 export type Size = CanonSize;
 export type { SizeSelection, VehicleClass, WashCount };
+
 
 /** Plain-language lawn answers. We never ask for turf area at checkout. */
 export type LawnChoice = 'small' | 'standard' | 'large' | 'over';
