@@ -33,12 +33,11 @@ async function fireBrevo(templateKey: string, to: { email: string; name: string 
   });
 }
 
-async function updateStripePaySplit(stripeAccountId: string | undefined, splitPct: number, floorCents: number) {
+async function updateStripePaySplit(stripeAccountId: string | undefined, upliftPct: number) {
   if (!stripeAccountId || !STRIPE_KEY) return;
   // Update Connect account metadata so payout calculations pick up the new tier.
   const body = new URLSearchParams();
-  body.append('metadata[pay_split_pct]', String(splitPct));
-  body.append('metadata[visit_floor_cents]', String(floorCents));
+  body.append('metadata[pay_uplift_pct]', String(upliftPct));
   body.append('metadata[tier]', 'tier_2_pro_partner');
   const res = await fetch(`https://api.stripe.com/v1/accounts/${stripeAccountId}`, {
     method: 'POST',
@@ -83,7 +82,7 @@ Deno.serve(async (req) => {
     metadata: { coi_document_id: parsed.data.coi_document_id ?? null },
   });
 
-  await updateStripePaySplit(parsed.data.stripe_account_id, 45, 3000);
+  await updateStripePaySplit(parsed.data.stripe_account_id, 10);
 
   await fireBrevo('brevo_template_t2_confirmed',
     { email: a.email, name: `${a.first_name} ${a.last_name}` },

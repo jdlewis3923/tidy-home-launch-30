@@ -36,8 +36,7 @@ async function fireBrevo(templateKey: string, to: { email: string; name: string 
 async function updateStripePaySplit(stripeAccountId: string | undefined) {
   if (!stripeAccountId || !STRIPE_KEY) return;
   const body = new URLSearchParams();
-  body.append('metadata[pay_split_pct]', '40');
-  body.append('metadata[visit_floor_cents]', '2500');
+  body.append('metadata[pay_uplift_pct]', '0');
   body.append('metadata[tier]', 'tier_1_verified');
   await fetch(`https://api.stripe.com/v1/accounts/${stripeAccountId}`, {
     method: 'POST',
