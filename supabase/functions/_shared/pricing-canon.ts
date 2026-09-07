@@ -78,7 +78,7 @@ export const SHINE_MONTHLY: Record<CanonSize, number> = { 1: 149, 2: 179, 3: 239
  */
 export const SIZE_PRICES: Record<CanonService, Record<CanonSize, number>> = {
   cleaning: { 1: 139, 2: 189, 3: 279 },
-  lawn: { 1: 55, 2: 75, 3: 109 },
+  lawn: { 1: 45, 2: 65, 3: 99 },
   detailing: { 1: 149, 2: 179, 3: 239 },
 };
 
