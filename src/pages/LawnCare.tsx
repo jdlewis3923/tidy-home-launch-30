@@ -4,8 +4,8 @@ import heroImgWebp from "@/assets/lp-lawn-care.webp";
 import heroImgMobile from "@/assets/lp-lawn-care-mobile.jpg";
 import heroImgMobileWebp from "@/assets/lp-lawn-care-mobile.webp";
 
-// Card prices are the SIZE-1 lot price. Size 2 is $65 and size 3 is $99 a
-// visit, which is why every card says "From" and carries this qualifier.
+// Card prices are the SIZE-1 lot MONTHLY BILL. Size 2 and size 3 cost more,
+// which is why every card says "From" and carries this qualifier.
 const SIZE_NOTE = "size 1 lot — sizes 2 and 3 cost more, see sizes below";
 
 
@@ -35,26 +35,28 @@ const config: ServiceLandingConfig = {
   plans: [
     {
       name: "Monthly",
-      price: "$45",
+      price: "$55",
       cadence: "/mo",
       planSlug: "monthly",
       description: "One visit per month.",
       isFromPrice: true,
+      visitNote: "1 visit a month · $55 a visit",
       sizeNote: SIZE_NOTE,
-      priceValue: 45,
+      priceValue: 55,
       size: 1,
       cadenceKey: "monthly",
     },
     {
       name: "Biweekly",
-      price: "$90",
+      price: "$102",
       cadence: "/mo",
       planSlug: "biweekly",
       description: "Two visits per month.",
       highlighted: true,
       isFromPrice: true,
+      visitNote: "2 visits a month · $51 a visit",
       sizeNote: SIZE_NOTE,
-      priceValue: 90,
+      priceValue: 102,
       size: 1,
       cadenceKey: "biweekly",
     },
@@ -65,6 +67,7 @@ const config: ServiceLandingConfig = {
       planSlug: "weekly",
       description: "Four visits per month.",
       isFromPrice: true,
+      visitNote: "4 visits a month · $45 a visit",
       sizeNote: SIZE_NOTE,
       priceValue: 180,
       size: 1,
