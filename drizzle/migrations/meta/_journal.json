@@ -225,6 +225,13 @@
       "when": 1788665332683,
       "tag": "0031_pro_route_ownership_and_tax_status",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1788816948337,
+      "tag": "0032_final_pricing_size_cadence_surcharge",
+      "breakpoints": true
     }
   ]
 }
