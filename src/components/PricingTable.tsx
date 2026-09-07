@@ -35,9 +35,10 @@ const PricingTable = () => {
           </h2>
           <p className="text-text-mid mt-4 max-w-xl mx-auto">
             {t(
-              "Cleaning and lawn care are priced per visit, so coming more often costs more only because we come more often. Shine Complete is a flat monthly price.",
+              "Size sets the price per visit for cleaning and lawn care. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Shine Complete is one flat monthly price.",
             )}
           </p>
+
         </FadeIn>
 
         <FadeIn delay={200}>
