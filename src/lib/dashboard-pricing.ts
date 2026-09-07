@@ -206,7 +206,7 @@ export { lookupKeyFor, perVisitPrice, monthlyPrice, ENTRY_MONTHLY, SHINE_MONTHLY
 
 /**
  * The service's headline figure: its lowest MONTHLY BILL.
- * Cleaning $139, lawn $55, Shine Complete $149 at size 1.
+ * Cleaning $139, lawn $45, Shine Complete $149 at size 1.
  */
 export function getSizePrice(service: ServiceType, size: Size): number {
   return SIZE_PRICES[service][size];
