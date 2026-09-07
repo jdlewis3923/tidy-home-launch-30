@@ -66,10 +66,13 @@ const CheckoutInputSchema = z.object({
         service: ServiceTypeEnum,
         size: SizeEnum,
         frequency: FrequencyEnum,
+        /** Interior sq ft (cleaning) or turf sq ft (lawn) — drives the surcharge. */
+        sq_ft: z.number().int().min(0).max(100000).nullable().optional(),
       }),
     )
     .min(1)
     .max(3),
+
   addons: z
     .array(z.object({ addon_name: z.string().min(1).max(64), qty: z.number().int().min(1).max(20) }))
     .max(50)
