@@ -4,16 +4,20 @@
 // src/lib/checkout.ts), resolves Stripe prices from stripe_catalog BY LOOKUP KEY,
 // builds line_items, and creates a subscription-mode Checkout Session.
 //
-// Model: three sizes (1/2/3) per service. Cleaning and lawn are per visit and
-// carry cadence as the item quantity (monthly 1, biweekly 2, weekly 4). Shine
-// Complete and the Car Wash Add-On are per month, always quantity 1.
+// Model: size sets the per-visit price, cadence applies the volume curve, and
+// the customer is ALWAYS billed monthly. Every plan price is interval=month at
+// the billed amount, so quantity is always 1 and the lookup key carries the
+// cadence (clean_2_biweekly, lawn_1_weekly, shine_3 ...).
 //
-// There is NO percentage discount and NO promo code. Bundling earns free car
-// washes. The one coupon that can reach a session is the referred friend's
-// $50-off-first-month (uncapped, duration "once"), validated server-side in
-// _shared/referral-discount.ts. Bundling never produces a coupon, so a bundle
-// plus a referral cannot double-discount, and the founding offer is a set of fulfilment promises recorded in
-// subscription metadata (the webhook writes them onto the subscription row).
+// Square-footage surcharges ride along as their own monthly line, priced per
+// visit x visits per month.
+//
+// There is NO percentage discount and NO promo code. Bundling earns one free
+// premium add-on a month, chosen by the customer. The one coupon that can reach
+// a session is the referral reward, validated server-side in
+// _shared/referral-discount.ts. The founding offer is a set of fulfilment
+// promises recorded in subscription metadata (the webhook writes them onto the
+// subscription row).
 
 import Stripe from "https://esm.sh/stripe@17.5.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
@@ -27,13 +31,21 @@ import {
 } from "../_shared/referral-discount.ts";
 import {
   CAR_WASH_LOOKUP_KEYS,
-  SERVICE_LOOKUP_KEYS,
+  CLEANING_SURCHARGE,
+  LAWN_SURCHARGE,
+  contractorVisitPay,
   freeAddonsPerMonth,
+  lookupKeyFor,
+  monthlyPrice,
+  perVisitPrice,
   quantityFor,
+  visitsPerMonthFor,
+  type CanonCadence,
   type CanonSize,
   type WashCount,
 } from "../_shared/pricing-canon.ts";
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
+
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
