@@ -96,6 +96,8 @@ export const defaultState: ConfigState = {
   frequencies: {},
   bedrooms: null,
   bathrooms: null,
+  homeSqFt: null,
+  turfSqFt: null,
   lawnChoice: null,
   vehicleClass: null,
   carWashes: null,
