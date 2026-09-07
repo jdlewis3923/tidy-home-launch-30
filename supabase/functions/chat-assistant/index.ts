@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
 
     const knowledge = kbRow?.content?.trim() || FALLBACK_KNOWLEDGE;
 
-    const systemPrompt = `You are Tidy's friendly concierge assistant. You help homeowners in Miami learn about Tidy Home Concierge's subscription cleaning, lawn care, and car detailing services.
+    const systemPrompt = `You are Tidy's friendly concierge assistant. You help homeowners in Miami learn about Tidy Home Concierge's subscription cleaning, lawn care, and Shine Complete services.
 
 RULES:
 - Answer ONLY using the BUSINESS KNOWLEDGE below. Do not invent prices, ZIPs, hours, or policies.

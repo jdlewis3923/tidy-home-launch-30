@@ -284,7 +284,7 @@ export default function Apply() {
     <main className="min-h-screen bg-navy-deep relative overflow-hidden">
       <SeoHead
         title={t("Careers at Tidy — Apply to join Miami's home-service crew")}
-        description={t("Join Tidy's contractor network in Kendall and Pinecrest. Cleaning, lawn care, and car detailing pros — weekly pay, predictable routes.")}
+        description={t("Join Tidy's contractor network in Kendall and Pinecrest. Cleaning, lawn care, and Shine Complete pros — weekly pay, predictable routes.")}
         canonical="https://jointidy.co/apply"
       />
 
@@ -469,7 +469,7 @@ export default function Apply() {
                 options={[
                   { v: "cleaning", l: t("House Cleaning") },
                   { v: "lawn", l: t("Lawn Care") },
-                  { v: "detail", l: t("Car Detailing") },
+                  { v: "detail", l: t("Shine Complete") },
                   { v: "multiple", l: t("Multiple") },
                 ]}
                 name="service"

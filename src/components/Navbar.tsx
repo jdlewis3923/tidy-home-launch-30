@@ -16,7 +16,7 @@ const NAV_ITEMS = [
   { label: "Home", to: "/" },
   { label: "House Cleaning", to: "/house-cleaning" },
   { label: "Lawn Care", to: "/lawn-care" },
-  { label: "Car Detailing", to: "/car-detailing" },
+  { label: "Shine Complete", to: "/car-detailing" },
   { label: "Bundle & Save", to: "/bundle" },
   { label: "Refer", to: "/refer" },
 ];

@@ -318,7 +318,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           <Reveal className="text-center mb-6">
             <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Plans")}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-              {t("Pick your cadence. Lock your price.")}
+              {t("Pick your plan.")}
             </h2>
             <p className="mt-3 text-sm md:text-base text-text-mid max-w-xl mx-auto">
               {t("Set it once. We handle the rest — scheduling, reminders, the same Pro every visit.")}

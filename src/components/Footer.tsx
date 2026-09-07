@@ -32,7 +32,7 @@ const Footer = () => {
           <div className="lg:col-span-5">
             <TidyLogo size="md" withBackground />
             <p className="mt-5 text-primary-foreground/65 text-sm leading-relaxed max-w-md">
-              {t("Miami's subscription home service. House cleaning, lawn care, and car detailing — one simple monthly plan. Serving Pinecrest, Kendall and Kendall West.")}
+              {t("Miami's subscription home service. House cleaning, lawn care, and Shine Complete — one simple monthly plan. Serving Pinecrest, Kendall and Kendall West.")}
             </p>
 
             {/* Service-area chips */}
@@ -113,7 +113,7 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-primary-foreground/60">
               <li><Link to="/house-cleaning" className="hover:text-primary-foreground transition-colors">{t("House Cleaning Miami")}</Link></li>
               <li><Link to="/lawn-care" className="hover:text-primary-foreground transition-colors">{t("Lawn Care Miami")}</Link></li>
-              <li><Link to="/car-detailing" className="hover:text-primary-foreground transition-colors">{t("Car Detailing Miami")}</Link></li>
+              <li><Link to="/car-detailing" className="hover:text-primary-foreground transition-colors">{t("Shine Complete Miami")}</Link></li>
               <li><Link to="/bundle" className="hover:text-primary-foreground transition-colors">{t("Bundle & Save")}</Link></li>
               <li><a href="#pricing" className="hover:text-primary-foreground transition-colors">{t("Pricing")}</a></li>
               <li><Link to="/refer" className="hover:text-primary-foreground transition-colors">{t("Referral Program")}</Link></li>
@@ -156,7 +156,7 @@ const Footer = () => {
             </div>
           </div>
           <p className="text-[10px] text-primary-foreground/25 mt-5 text-center leading-relaxed max-w-3xl mx-auto">
-            {t("Serving Kendall & Pinecrest with recurring house cleaning, lawn care, and car detailing subscriptions.")}
+            {t("Serving Kendall & Pinecrest with recurring house cleaning, lawn care, and Shine Complete subscriptions.")}
           </p>
         </div>
       </div>

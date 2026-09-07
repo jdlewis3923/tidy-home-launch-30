@@ -22,10 +22,10 @@ const config: ServiceLandingConfig = {
     "Tidy isn't just cleaning — it's a system for your entire home.",
   ctaPrimaryLabel: "Book your cleaning",
   ctaPlanLabel: "Start your plan",
-  priceAnchor: "From $139 a visit",
-  stickyLabel: "House Cleaning · from $139 a visit",
+  priceAnchor: "From $139 a month",
+  stickyLabel: "House Cleaning · from $139 a month",
   savingsCallout:
-    "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a visit** — with the same Pro every time.",
+    "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a month** — with the same Pro every time.",
   heroImage: heroImg,
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
@@ -48,7 +48,7 @@ const config: ServiceLandingConfig = {
     },
     {
       name: "Biweekly",
-      price: "$278",
+      price: "$256",
       cadence: "/mo",
       planSlug: "biweekly",
       description: "Two visits per month, priority scheduling.",
@@ -61,7 +61,7 @@ const config: ServiceLandingConfig = {
     },
     {
       name: "Weekly",
-      price: "$556",
+      price: "$456",
       cadence: "/mo",
       planSlug: "weekly",
       description: "Weekly visits, dedicated Pro, quarterly deep-clean.",
@@ -132,7 +132,7 @@ const config: ServiceLandingConfig = {
     },
   ],
   bundleCta: {
-    title: "Already booking cleaning? Add lawn care from $45 a visit.",
+    title: "Already booking cleaning? Add lawn care from $55 a month.",
     body: "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.",
     targetServices: "cleaning,lawn",
   },

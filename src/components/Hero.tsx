@@ -155,7 +155,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {["🏠 House Cleaning", "🌿 Lawn Care", "🚗 Car Detailing", "✓ Cancel Anytime"].map((pill) => (
+          {["🏠 House Cleaning", "🌿 Lawn Care", "🚗 Shine Complete", "✓ Cancel Anytime"].map((pill) => (
             <span
               key={pill}
               className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-sm text-primary-foreground font-medium"
@@ -183,8 +183,8 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         <p className="mt-4 text-xs text-primary-foreground/50">
           {t(
             CUSTOMER_DASHBOARD_ENABLED
-              ? "No contracts · Cancel anytime · From $45 a visit"
-              : "Founding memberships · No commitment · From $45 a visit",
+              ? "No contracts · Cancel anytime · From $55 a month"
+              : "Founding memberships · No commitment · From $55 a month",
           )}
         </p>
       </div>

@@ -37,7 +37,7 @@ export type DashboardData = {
 const SERVICE_LABEL: Record<string, string> = {
   cleaning: 'House Cleaning',
   lawn: 'Lawn Care',
-  detailing: 'Car Detailing',
+  detailing: 'Shine Complete',
 };
 
 export const serviceLabel = (s: string) => SERVICE_LABEL[s] ?? s;

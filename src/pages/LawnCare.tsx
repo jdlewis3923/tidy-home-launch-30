@@ -22,10 +22,10 @@ const config: ServiceLandingConfig = {
     "Tidy isn't just lawn — it's a system for your entire home.",
   ctaPrimaryLabel: "Start lawn care",
   ctaPlanLabel: "Start your plan",
-  priceAnchor: "From $45 a visit",
-  stickyLabel: "Lawn Care · from $45 a visit",
+  priceAnchor: "From $55 a month",
+  stickyLabel: "Lawn Care · from $55 a month",
   savingsCallout:
-    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $45 a visit** flat, same Pro, no surprise invoices.",
+    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $55 a month** flat, same Pro, no surprise invoices.",
   heroImage: heroImg,
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
@@ -132,7 +132,7 @@ const config: ServiceLandingConfig = {
     },
   ],
   bundleCta: {
-    title: "Already booking lawn? Add cleaning from $139 a visit.",
+    title: "Already booking lawn? Add cleaning from $139 a month.",
     body: "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.",
     targetServices: "lawn,cleaning",
   },

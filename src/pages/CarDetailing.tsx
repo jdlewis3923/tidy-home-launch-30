@@ -8,9 +8,9 @@ import heroImgMobileWebp from "@/assets/lp-car-detailing-mobile.webp";
 const config: ServiceLandingConfig = {
   serviceSlug: "car-detailing",
   signupServiceParam: "detailing",
-  eyebrow: "Car Detailing",
-  h1: "Mobile Car Detailing in Pinecrest + Kendall",
-  subhead: "Professional car detailing at your home. Ceramic-safe, monthly.",
+  eyebrow: "Shine Complete",
+  h1: "Shine Complete in Pinecrest + Kendall",
+  subhead: "Professional Shine Complete at your home. Ceramic-safe, monthly.",
   intentConfirm: "Same detailer every visit. Locked monthly price. Cancel anytime.",
   systemBridge: "Tidy isn't just detailing — it's a system for your entire home.",
   ctaPrimaryLabel: "Book detailing",
@@ -123,19 +123,19 @@ const config: ServiceLandingConfig = {
     },
   ],
   bundleCta: {
-    title: "Already on Shine Complete? Add cleaning from $139 a visit.",
+    title: "Already on Shine Complete? Add cleaning from $139 a month.",
     body: "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.",
     targetServices: "detailing,cleaning",
   },
   seo: {
-    title: "Car Detailing in Pinecrest + Kendall | Tidy Home Concierge",
+    title: "Shine Complete in Pinecrest + Kendall | Tidy Home Concierge",
     description:
       "Shine Complete mobile car care in Pinecrest and Kendall (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.",
     canonical: "https://jointidy.co/car-detailing",
     priceRange: "$149–$239",
     service: {
-      name: "Mobile Car Detailing",
-      serviceType: "Car Detailing",
+      name: "Shine Complete",
+      serviceType: "Shine Complete",
       description:
         "Shine Complete mobile car care in Pinecrest and Kendall. One flat monthly price set by vehicle size.",
       offers: [
