@@ -57,6 +57,11 @@ export interface ConfigState {
   /** Cleaning size, derived from bedrooms (+1 size when baths exceed the limit). */
   bedrooms: string | null;
   bathrooms: string | null;
+  /** Interior square footage band answer — drives the cleaning surcharge. */
+  homeSqFt: number | null;
+  /** Mowable turf area once confirmed — drives the lawn surcharge. */
+  turfSqFt: number | null;
+
   /** Lawn size, picked by eye — we confirm from aerial imagery before visit one. */
   lawnChoice: LawnChoice | null;
   /** Car care size, derived from what they drive. */
