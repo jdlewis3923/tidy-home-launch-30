@@ -22,10 +22,10 @@ const config: ServiceLandingConfig = {
     "Tidy isn't just lawn — it's a system for your entire home.",
   ctaPrimaryLabel: "Start lawn care",
   ctaPlanLabel: "Start your plan",
-  priceAnchor: "From $55 a month",
-  stickyLabel: "Lawn Care · from $55 a month",
+  priceAnchor: "From $45 a month",
+  stickyLabel: "Lawn Care · from $45 a month",
   savingsCallout:
-    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $55 a month** flat, same Pro, no surprise invoices.",
+    "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $45 a month** flat, same Pro, no surprise invoices.",
   heroImage: heroImg,
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
@@ -107,7 +107,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "One price per visit, set by the size of your lawn: $55, $75 or $109 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess and we confirm the size from satellite imagery before your first visit.",
+      a: "One price per visit, set by the size of your lawn: $45, $65 or $99 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess and we confirm the size from satellite imagery before your first visit.",
     },
     {
       q: "Can I cancel anytime?",
@@ -142,9 +142,9 @@ const config: ServiceLandingConfig = {
   seo: {
     title: "Lawn Care in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Plans from $55 a month. Same Pro, no contracts. Book in about 2 minutes.",
+      "Lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Plans from $45 a month. Same Pro, no contracts. Book in about 2 minutes.",
     canonical: "https://jointidy.co/lawn-care",
-    priceRange: "$55–$358",
+    priceRange: "$45–$324",
     service: {
       name: "Lawn Care",
       serviceType: "Lawn Care",

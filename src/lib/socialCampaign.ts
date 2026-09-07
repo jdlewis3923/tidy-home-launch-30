@@ -231,10 +231,10 @@ export const META_POSTS: CampaignPost[] = [
   },
   {
     post_number: 3,
-    title: "Lawn from $55 a month",
+    title: "Lawn from $45 a month",
     zip: "33186",
-    en: `Lawn care from $55 a month.\n\nMow, edge, trim, blow down. Clippings gone.`,
-    es: `Cuidado de grama desde $55 al mes.\n\nCortar, bordear, recortar y soplar. Sin recortes en el piso.`,
+    en: `Lawn care from $45 a month.\n\nMow, edge, trim, blow down. Clippings gone.`,
+    es: `Cuidado de grama desde $45 al mes.\n\nCortar, bordear, recortar y soplar. Sin recortes en el piso.`,
   },
   {
     post_number: 4,
@@ -289,8 +289,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 11,
     title: "Kendall lawns",
     zip: "33183",
-    en: `${N["33183"]} lawns grow year-round. Your Saturday doesn't have to.\n\nLawn care from $55 a month.`,
-    es: `La grama en ${N["33183"]} crece todo el año. Tu sábado no tiene por qué.\n\nCuidado de grama desde $55 al mes.`,
+    en: `${N["33183"]} lawns grow year-round. Your Saturday doesn't have to.\n\nLawn care from $45 a month.`,
+    es: `La grama en ${N["33183"]} crece todo el año. Tu sábado no tiene por qué.\n\nCuidado de grama desde $45 al mes.`,
   },
   {
     post_number: 12,
@@ -373,8 +373,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 23,
     title: "Big lots too",
     zip: "33183",
-    en: `Bigger lot: $75 or $109 a month at the monthly plan, depending on mowable turf. Same Pro, same day of the week.`,
-    es: `Terreno más grande: $75 o $109 al mes en el plan mensual, según la grama a cortar. El mismo equipo, el mismo día de la semana.`,
+    en: `Bigger lot: $65 or $99 a month at the monthly plan, depending on mowable turf. Same Pro, same day of the week.`,
+    es: `Terreno más grande: $65 o $99 al mes en el plan mensual, según la grama a cortar. El mismo equipo, el mismo día de la semana.`,
   },
   {
     post_number: 24,
@@ -435,10 +435,10 @@ export const META_POSTS: CampaignPost[] = [
   },
   {
     post_number: 32,
-    title: "Lawn care from $55 a month",
+    title: "Lawn care from $45 a month",
     zip: "33186",
-    en: `Lawn care in ${N["33186"]}, from $55 a month.\n\nMow, edge, trim and blow down — clippings hauled off, gate closed behind us.\n\nAdd it to cleaning or car care and it's all one plan, one bill.`,
-    es: `Cuidado de grama en ${N["33186"]}, desde $55 al mes.\n\nCortamos, bordeamos, recortamos y soplamos — nos llevamos los recortes y cerramos el portón al salir.\n\nCombínalo con limpieza o cuidado del carro: un solo plan, una sola factura.`,
+    en: `Lawn care in ${N["33186"]}, from $45 a month.\n\nMow, edge, trim and blow down — clippings hauled off, gate closed behind us.\n\nAdd it to cleaning or car care and it's all one plan, one bill.`,
+    es: `Cuidado de grama en ${N["33186"]}, desde $45 al mes.\n\nCortamos, bordeamos, recortamos y soplamos — nos llevamos los recortes y cerramos el portón al salir.\n\nCombínalo con limpieza o cuidado del carro: un solo plan, una sola factura.`,
   },
   {
     post_number: 33,
@@ -458,8 +458,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 35,
     title: "Saturdays back",
     zip: "33183",
-    en: `Nobody in ${N["33183"]} moved here to spend Saturday behind a mower.\n\nLawn from $55 a month, cleaning from $139. Set it once and it just happens.`,
-    es: `Nadie en ${N["33183"]} se mudó aquí para pasar el sábado detrás de una podadora.\n\nGrama desde $55 al mes, limpieza desde $139. Lo configuras una vez y simplemente pasa.`,
+    en: `Nobody in ${N["33183"]} moved here to spend Saturday behind a mower.\n\nLawn from $45 a month, cleaning from $139. Set it once and it just happens.`,
+    es: `Nadie en ${N["33183"]} se mudó aquí para pasar el sábado detrás de una podadora.\n\nGrama desde $45 al mes, limpieza desde $139. Lo configuras una vez y simplemente pasa.`,
   },
   {
     post_number: 36,
