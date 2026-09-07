@@ -192,25 +192,57 @@ export const serviceUnits = SERVICE_UNIT;
 export const serviceQuantityRules = SERVICE_QUANTITY_RULE;
 export const serviceLookupKeys = SERVICE_LOOKUP_KEYS;
 export const carWashLookupKeys = CAR_WASH_LOOKUP_KEYS;
+export const cadenceFactor = CADENCE_FACTOR;
+export const cleaningSurchargeBand = CLEANING_SURCHARGE;
+export const lawnSurchargeBand = LAWN_SURCHARGE;
+export { lookupKeyFor, perVisitPrice, monthlyPrice, ENTRY_MONTHLY, SHINE_MONTHLY, BILLED_MONTHLY, PER_VISIT_PRICES };
 
-/** Sticker price for a size: per visit for cleaning/lawn, per month for car care. */
+/**
+ * The service's headline figure: its lowest MONTHLY BILL.
+ * Cleaning $139, lawn $55, Shine Complete $149 at size 1.
+ */
 export function getSizePrice(service: ServiceType, size: Size): number {
   return SIZE_PRICES[service][size];
 }
 
-/** Visits billed per month at a cadence. */
+/** Visits performed and billed per month at a cadence. */
 export function visitsPerMonth(frequency: Frequency): number {
-  return CADENCE_MULTIPLIER[frequency];
+  return VISITS_PER_MONTH[frequency];
 }
 
-/** Monthly billed amount for one service line. */
+/** Per-visit price for the size and cadence in play. */
+export function getPerVisitPrice(state: ConfigState, service: ServiceType): number {
+  const size = sizeFor(state, service);
+  if (!size || size === 'quote') return 0;
+  return perVisitPrice(service, size, state.frequencies[service] ?? 'monthly');
+}
+
+/** Cleaning surcharge per visit for the home size answered at checkout. */
+export function cleaningSurcharge(state: ConfigState): number {
+  if (!state.services.includes('cleaning')) return 0;
+  return cleaningSurchargePerVisit(state.homeSqFt);
+}
+
+/** Lawn surcharge per visit — set once turf area is confirmed. */
+export function lawnSurcharge(state: ConfigState): number {
+  if (!state.services.includes('lawn')) return 0;
+  return lawnSurchargePerVisit(state.turfSqFt);
+}
+
+export function surchargePerVisitFor(state: ConfigState, service: ServiceType): number {
+  if (service === 'cleaning') return cleaningSurcharge(state);
+  if (service === 'lawn') return lawnSurcharge(state);
+  return 0;
+}
+
+/** The MONTHLY BILL for one service line — what the card leads with. */
 export function getServicePrice(state: ConfigState, service: ServiceType): number {
   const size = sizeFor(state, service);
   if (!size || size === 'quote') return 0;
   const freq = state.frequencies[service] ?? 'monthly';
-  if (SERVICE_QUANTITY_RULE[service] === 'always_1') return getSizePrice(service, size);
-  return getSizePrice(service, size) * visitsPerMonth(freq);
+  return monthlyPrice(service, size, freq, surchargePerVisitFor(state, service));
 }
+
 
 /** The Car Wash Add-On price per month, if selected. */
 export function getCarWashPrice(state: ConfigState): number {
