@@ -247,7 +247,7 @@ const translations: Record<string, string> = {
     "¡Para nada — cero compromiso! Sin contratos y sin cargos por cancelación. Puedes cancelar cuando quieras, sin preguntas. Nos ganamos tu confianza cada mes.",
   "How often do services happen?": "¿Cada cuánto se hacen los servicios?",
   "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan.":
-    "¡Tú decides! Elige semanal, quincenal o mensual para cada servicio — y sí, puedes combinar. ¿Quieres jardín semanal pero limpieza quincenal? Listo. Armamos el plan a tu medida.",
+    "La limpieza y el jardín vienen en planes mensuales, quincenales o semanales, y puedes combinarlos. Shine Complete es un solo plan mensual.",
   "Do I need to be home?": "¿Tengo que estar en casa?",
   "Not at all! Just give us access via a lockbox, gate code, or smart lock and our team handles everything while you're out living your best life. You'll get photo confirmation when each service is done.":
     "¡Para nada! Danos acceso con caja de seguridad, código de puerta o cerradura inteligente y nuestro profesional se encarga de todo mientras tú haces lo tuyo. Recibes confirmación con fotos al terminar cada servicio.",
@@ -803,8 +803,6 @@ const translations: Record<string, string> = {
     "Casa extra grande (2,501–4,000 pies²): +$60 por visita. Terreno extra grande (4,001–7,500 pies² de grama cortable): +$30 por visita. Vehículo extra grande: +$30 por visita. Por encima de esos tamaños cotizamos de forma individual.",
   "Available as add-ons: pet-hair removal, headlight restoration.":
     "Disponibles como complementos: eliminación de pelo de mascotas, restauración de faros.",
-  "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan.":
-    "Elige semanal, quincenal o mensual según el servicio, y combínalos libremente. El Shine Completes es mensual o quincenal. ¿Quieres jardinería semanal pero limpieza quincenal? Listo.",
   "What affects my price?": "¿Qué afecta mi precio?",
   "Pricing is based on the services you choose and how often you'd like them — weekly, biweekly, or monthly. That's it. No hidden fees.":
     "El precio depende de los servicios que elijas y con qué frecuencia los quieras — semanal, quincenal o mensual. Eso es todo. Sin cargos ocultos.",
@@ -840,8 +838,6 @@ const translations: Record<string, string> = {
     "Toca 'Empezar Mi Plan', elige tus servicios y tu horario, y completa el pago. Tu primera visita se confirma dentro de 24 horas.",
   "No contracts, no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month.":
     "Sin contratos, sin cargos por cancelación. Puedes cancelar cuando quieras, sin preguntas. Nos ganamos tu preferencia cada mes.",
-  "House cleaning and lawn care come as monthly, biweekly or weekly plans, and you can mix and match. Shine Complete is a single monthly plan.":
-    "Elige semanal, quincenal o mensual para cada servicio — y combínalos libremente. ¿Quieres jardín semanal pero limpieza quincenal? Listo.",
   "Not at all. Provide access via a lockbox, gate code, or smart lock and our team handles everything. You'll get photo confirmation when each service is complete.":
     "Para nada. Danos acceso con una caja de llaves, un código de portón o una cerradura inteligente y nuestro profesional se encarga de todo. Recibirás confirmación con fotos cuando cada servicio esté completo.",
   "Yes — reschedule, pause for vacation, or skip a visit anytime through your dashboard or by contacting us. No penalties.":
