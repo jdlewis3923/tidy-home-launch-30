@@ -184,10 +184,15 @@ Deno.serve(async (req) => {
           ? CAR_WASH_LOOKUP_KEYS[input.car_wash.size as CanonSize][input.car_wash.washes as WashCount]
           : null;
 
+        const surchargeKeys = ["surcharge_cleaning_xl", "surcharge_lawn_xl"];
         const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
           .select("lookup_key, service_type, stripe_price_id, price_cents")
-          .in("lookup_key", carWashKey ? [...serviceKeys, carWashKey] : serviceKeys)
+          .in("lookup_key", [
+            ...serviceKeys,
+            ...(carWashKey ? [carWashKey] : []),
+            ...surchargeKeys,
+          ])
           .eq("active", true);
         if (priceErr) throw new Error(`catalog read failed: ${priceErr.message}`);
 
