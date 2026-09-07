@@ -355,24 +355,41 @@ export function formatMonthly(amount: number): string {
   return `$${Number.isInteger(amount) ? amount : amount.toFixed(2)}/mo`;
 }
 
-/** How a service's sticker price reads on its own. */
+/** How a service's headline price reads on its own — always a monthly bill. */
 export function formatSizePrice(service: ServiceType, size: Size): string {
-  const price = getSizePrice(service, size);
-  return SERVICE_UNIT[service] === 'per_month' ? formatMonthly(price) : formatPerVisit(price);
+  return formatMonthly(getSizePrice(service, size));
+}
+
+/** The plan card's second line: "2 visits a month · $174 a visit". */
+export function formatPlanCardDetail(state: ConfigState, service: ServiceType): string {
+  const freq = state.frequencies[service] ?? 'monthly';
+  if (SERVICE_QUANTITY_RULE[service] === 'always_1') {
+    return '3 maintenance washes a month · 2 full details a year';
+  }
+  const visits = visitsPerMonth(freq);
+  const each = getPerVisitPrice(state, service) + surchargePerVisitFor(state, service);
+  return `${visits} visit${visits === 1 ? '' : 's'} a month · $${each} a visit`;
 }
 
 export function calculatePricing(state: ConfigState) {
   const servicePrices = state.services.map((s) => {
     const size = sizeFor(state, s);
+    const freq = state.frequencies[s] ?? 'monthly';
+    const surcharge = surchargePerVisitFor(state, s);
     return {
       service: s,
       size,
       unit: SERVICE_UNIT[s],
-      sticker: size && size !== 'quote' ? getSizePrice(s, size) : 0,
-      quantity: size && size !== 'quote' ? quantityFor(s, state.frequencies[s] ?? 'monthly') : 0,
+      /** Per-visit price at this cadence (Shine: its monthly price). */
+      sticker: size && size !== 'quote' ? perVisitPrice(s, size, freq) + surcharge : 0,
+      surchargePerVisit: surcharge,
+      visitsPerMonth: size && size !== 'quote' ? visitsPerMonth(freq) : 0,
+      quantity: size && size !== 'quote' ? quantityFor(s, freq) : 0,
+      /** The monthly bill for this line — what the customer pays. */
       price: getServicePrice(state, s),
     };
   });
+
 
   const servicesSubtotal = servicePrices.reduce((sum, sp) => sum + sp.price, 0);
   const carWashSubtotal = getCarWashPrice(state);
