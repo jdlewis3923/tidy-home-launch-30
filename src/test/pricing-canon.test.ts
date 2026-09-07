@@ -3,25 +3,46 @@
 // One source of truth: src/lib/pricing-canon.ts, mirrored byte-for-byte by
 // supabase/functions/_shared/pricing-canon.ts. This test fails if the two
 // diverge, if a page ships a stale number, or if a retired concept (four size
-// bands, percentage bundle discounts, promo codes) creeps back in.
+// bands, percentage bundle discounts, promo codes, cadence-as-quantity) creeps
+// back in.
+//
+// The model: size sets the per-visit price, cadence applies the volume curve
+// (monthly x1, biweekly x0.92, weekly x0.82), and the customer is ALWAYS billed
+// monthly. Every Stripe price is interval=month at the billed amount, so
+// quantity is always 1.
 import { GIFT_ELIGIBLE_ADDONS } from '@/lib/addon-catalog';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect } from 'vitest';
 import {
-  CADENCE_MULTIPLIER,
-  CAR_WASH_PRICES,
+  ALL_RECURRING_LOOKUP_KEYS,
+  BILLED_MONTHLY,
+  CADENCE_FACTOR,
+  CLEANING_SURCHARGE,
+  CONTRACTOR_SHINE_PAY,
+  CONTRACTOR_SURCHARGE_PAY,
+  CONTRACTOR_VISIT_PAY,
   ENTRY_PRICE_MONTHLY,
+  HEADLINE_PRICE_COPY,
+  LAWN_SURCHARGE,
+  PER_VISIT_PRICES,
   REFERRAL_BONUS_CENTS,
   SERVICE_LOOKUP_KEYS,
   SERVICE_QUANTITY_RULE,
   SERVICE_UNIT,
+  SHINE_MONTHLY,
   SIZES,
   SIZE_PRICES,
+  TIER_2_UPLIFT,
+  VISITS_PER_MONTH,
   FREE_ADDON_CUSTOMER_CHOICE,
+  contractorVisitPay,
   freeAddonsPerMonth,
+  lookupKeyFor,
   monthlyPrice,
+  perVisitPrice,
   quantityFor,
+  quarterlyDeepCleanPay,
   sizePrice,
   sizePriceCents,
   type CanonService,
@@ -39,23 +60,45 @@ describe('canon is mirrored on the server', () => {
   });
 });
 
-describe('three sizes, one flat price each', () => {
+describe('three sizes, per-visit price by cadence', () => {
   it('exposes exactly sizes 1, 2 and 3', () => {
     expect(SIZES).toEqual([1, 2, 3]);
   });
 
-  it('locks the per-visit and per-month prices', () => {
-    expect(SIZE_PRICES.cleaning).toEqual({ 1: 139, 2: 189, 3: 279 });
-    expect(SIZE_PRICES.lawn).toEqual({ 1: 45, 2: 65, 3: 99 });
-    expect(SIZE_PRICES.detailing).toEqual({ 1: 149, 2: 179, 3: 239 });
+  it('locks the per-visit prices (monthly / biweekly / weekly)', () => {
+    expect(PER_VISIT_PRICES.cleaning).toEqual({
+      1: { monthly: 139, biweekly: 128, weekly: 114 },
+      2: { monthly: 189, biweekly: 174, weekly: 155 },
+      3: { monthly: 279, biweekly: 257, weekly: 229 },
+    });
+    expect(PER_VISIT_PRICES.lawn).toEqual({
+      1: { monthly: 55, biweekly: 51, weekly: 45 },
+      2: { monthly: 75, biweekly: 69, weekly: 62 },
+      3: { monthly: 109, biweekly: 100, weekly: 89 },
+    });
   });
 
-  it('locks the car wash add-on prices', () => {
-    expect(CAR_WASH_PRICES).toEqual({
-      1: { 1: 39, 2: 75 },
-      2: { 1: 49, 2: 95 },
-      3: { 1: 65, 2: 129 },
+  it('locks the billed monthly amounts — the 21 Stripe prices', () => {
+    expect(BILLED_MONTHLY.cleaning).toEqual({
+      1: { monthly: 139, biweekly: 256, weekly: 456 },
+      2: { monthly: 189, biweekly: 348, weekly: 620 },
+      3: { monthly: 279, biweekly: 514, weekly: 916 },
     });
+    expect(BILLED_MONTHLY.lawn).toEqual({
+      1: { monthly: 55, biweekly: 102, weekly: 180 },
+      2: { monthly: 75, biweekly: 138, weekly: 246 },
+      3: { monthly: 109, biweekly: 200, weekly: 358 },
+    });
+    expect(SHINE_MONTHLY).toEqual({ 1: 149, 2: 179, 3: 239 });
+  });
+
+  it('headline prices are the monthly bill', () => {
+    expect(SIZE_PRICES.cleaning).toEqual({ 1: 139, 2: 189, 3: 279 });
+    expect(SIZE_PRICES.lawn).toEqual({ 1: 55, 2: 75, 3: 109 });
+    expect(SIZE_PRICES.detailing).toEqual({ 1: 149, 2: 179, 3: 239 });
+    expect(HEADLINE_PRICE_COPY).toContain('House cleaning from $139 a month');
+    expect(HEADLINE_PRICE_COPY).toContain('Lawn care from $55 a month');
+    expect(HEADLINE_PRICE_COPY).toContain('Shine Complete from $149 a month');
   });
 
   it('prices cleaning and lawn per visit, Shine Complete per month', () => {
@@ -74,22 +117,74 @@ describe('three sizes, one flat price each', () => {
   });
 });
 
-describe('cadence multiplies, it never discounts', () => {
-  it('monthly x1, biweekly x2, weekly x4', () => {
-    expect(CADENCE_MULTIPLIER).toEqual({ monthly: 1, biweekly: 2, weekly: 4 });
+describe('cadence is a volume curve, never a quantity', () => {
+  it('biweekly is 8% less per visit, weekly 18% less', () => {
+    expect(CADENCE_FACTOR).toEqual({ monthly: 1, biweekly: 0.92, weekly: 0.82 });
   });
 
-  it('per-visit services follow cadence; flat monthly services stay at 1', () => {
-    expect(SERVICE_QUANTITY_RULE.cleaning).toBe('cadence');
-    expect(SERVICE_QUANTITY_RULE.lawn).toBe('cadence');
+  it('visits a month are 1 / 2 / 4', () => {
+    expect(VISITS_PER_MONTH).toEqual({ monthly: 1, biweekly: 2, weekly: 4 });
+  });
+
+  it('every Stripe line is quantity 1 — the price already carries the cadence', () => {
+    for (const svc of ['cleaning', 'lawn', 'detailing'] as CanonService[]) {
+      for (const cad of ['monthly', 'biweekly', 'weekly'] as const) {
+        expect(quantityFor(svc, cad)).toBe(1);
+      }
+    }
     expect(SERVICE_QUANTITY_RULE.detailing).toBe('always_1');
-    expect(quantityFor('lawn', 'weekly')).toBe(4);
-    expect(quantityFor('detailing', 'weekly')).toBe(1);
   });
 
-  it('a weekly lawn costs four times a monthly one — no frequency discount', () => {
-    expect(monthlyPrice('lawn', 2, 'weekly')).toBe(sizePrice('lawn', 2) * 4);
-    expect(monthlyPrice('detailing', 2, 'weekly')).toBe(sizePrice('detailing', 2));
+  it('the monthly bill is visits x per-visit price', () => {
+    expect(monthlyPrice('cleaning', 2, 'biweekly')).toBe(348);
+    expect(perVisitPrice('cleaning', 2, 'biweekly') * 2).toBe(348);
+    expect(monthlyPrice('lawn', 1, 'weekly')).toBe(180);
+    expect(monthlyPrice('detailing', 2, 'weekly')).toBe(179);
+  });
+
+  it('surcharges scale with the cadence', () => {
+    expect(CLEANING_SURCHARGE.perVisitDollars).toBe(60);
+    expect(LAWN_SURCHARGE.perVisitDollars).toBe(30);
+    expect(monthlyPrice('cleaning', 2, 'weekly', 60)).toBe(620 + 240);
+    expect(monthlyPrice('lawn', 2, 'biweekly', 30)).toBe(138 + 60);
+  });
+});
+
+describe('contractor pay is 40% of the visit price and never shown to a customer', () => {
+  it('locks the cleaning and lawn pay tables', () => {
+    expect(CONTRACTOR_VISIT_PAY.cleaning).toEqual({
+      1: { monthly: 56, biweekly: 51, weekly: 46 },
+      2: { monthly: 76, biweekly: 70, weekly: 62 },
+      3: { monthly: 112, biweekly: 103, weekly: 92 },
+    });
+    expect(CONTRACTOR_VISIT_PAY.lawn).toEqual({
+      1: { monthly: 22, biweekly: 20, weekly: 18 },
+      2: { monthly: 30, biweekly: 28, weekly: 25 },
+      3: { monthly: 44, biweekly: 40, weekly: 36 },
+    });
+  });
+
+  it('locks Shine pay per wash and per full detail', () => {
+    expect(CONTRACTOR_SHINE_PAY[1]).toEqual({ maintenanceWash: 17, fullDetail: 51 });
+    expect(CONTRACTOR_SHINE_PAY[2]).toEqual({ maintenanceWash: 20, fullDetail: 61 });
+    expect(CONTRACTOR_SHINE_PAY[3]).toEqual({ maintenanceWash: 27, fullDetail: 82 });
+  });
+
+  it('surcharge share and Tier 2 uplift', () => {
+    expect(CONTRACTOR_SURCHARGE_PAY).toEqual({ cleaning: 24, lawn: 12 });
+    expect(TIER_2_UPLIFT).toBe(1.1);
+    expect(contractorVisitPay({ service: 'cleaning', size: 2, cadence: 'biweekly' })).toBe(70);
+    expect(contractorVisitPay({ service: 'cleaning', size: 2, cadence: 'biweekly', tier: 2 })).toBe(77);
+    expect(contractorVisitPay({ service: 'cleaning', size: 2, cadence: 'weekly', surcharge: true })).toBe(62 + 24);
+  });
+
+  it('a weekly plan quarterly deep clean pays the MONTHLY rate', () => {
+    expect(quarterlyDeepCleanPay(2)).toBe(CONTRACTOR_VISIT_PAY.cleaning[2].monthly);
+  });
+
+  it('no percentage share is ever presented in the pay canon', () => {
+    const canon = read('src/lib/pricing-canon.ts');
+    expect(canon).not.toMatch(/\b45%/);
   });
 });
 
@@ -119,7 +214,7 @@ describe('bundling gives one free premium add-on, never a percentage or a wash',
       lawnChoice: 'standard',
     });
     expect(p.netTotal).toBe(p.subtotal);
-    expect(p.subtotal).toBe(189 * 2 + 65 * 4);
+    expect(p.subtotal).toBe(348 + 246);
     expect(p.freeAddons).toBe(1);
   });
 
@@ -132,10 +227,15 @@ describe('bundling gives one free premium add-on, never a percentage or a wash',
 });
 
 describe('lookup keys are the only way to reach a recurring Stripe price', () => {
-  it('every service/size pair has the expected lookup key', () => {
-    expect(SERVICE_LOOKUP_KEYS.cleaning).toEqual({ 1: 'clean_1', 2: 'clean_2', 3: 'clean_3' });
-    expect(SERVICE_LOOKUP_KEYS.lawn).toEqual({ 1: 'lawn_1', 2: 'lawn_2', 3: 'lawn_3' });
-    expect(SERVICE_LOOKUP_KEYS.detailing).toEqual({ 1: 'shine_1', 2: 'shine_2', 3: 'shine_3' });
+  it('publishes exactly 21 cadence-specific keys', () => {
+    expect(ALL_RECURRING_LOOKUP_KEYS).toHaveLength(21);
+    expect(SERVICE_LOOKUP_KEYS.cleaning[2]).toEqual({
+      monthly: 'clean_2_monthly',
+      biweekly: 'clean_2_biweekly',
+      weekly: 'clean_2_weekly',
+    });
+    expect(SERVICE_LOOKUP_KEYS.lawn[1].weekly).toBe('lawn_1_weekly');
+    expect(lookupKeyFor('detailing', 3, 'weekly')).toBe('shine_3');
   });
 
   it('checkout never hardcodes a recurring price id', () => {
@@ -150,7 +250,7 @@ describe('untouched programme rules', () => {
     expect(REFERRAL_BONUS_CENTS).toBe(5000);
   });
 
-  it('the single entry price is a size 1 lawn, biweekly', () => {
-    expect(ENTRY_PRICE_MONTHLY).toBe(45 * 2);
+  it('the entry price is a size 1 lawn, billed monthly', () => {
+    expect(ENTRY_PRICE_MONTHLY).toBe(55);
   });
 });

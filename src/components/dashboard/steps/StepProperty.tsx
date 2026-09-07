@@ -6,6 +6,9 @@ import {
   formatMonthly,
   formatPerVisit,
   getSizePrice,
+  getPerVisitPrice,
+  getServicePrice,
+  surchargePerVisitFor,
   lawnChoiceHelpers,
   lawnChoiceLabels,
   serviceUnits,
@@ -25,7 +28,11 @@ interface Props {
 }
 
 /** Live size + price readout, shown as soon as we can work the size out. */
-function SizeReadout({ service, size }: { service: ServiceType; size: SizeSelection | null }) {
+function SizeReadout({
+  service,
+  size,
+  state,
+}: { service: ServiceType; size: SizeSelection | null; state: ConfigState }) {
   if (!size) return null;
   if (size === 'quote') {
     return (
@@ -34,18 +41,21 @@ function SizeReadout({ service, size }: { service: ServiceType; size: SizeSelect
       </p>
     );
   }
-  const price = getSizePrice(service, size);
+  const perMonth = serviceUnits[service] === 'per_month';
+  // Per-visit price at the cadence they picked, plus any surcharge for the size
+  // of the property — never the monthly-cadence figure at a weekly plan.
+  const perVisit = getPerVisitPrice(state, service) + surchargePerVisitFor(state, service);
   return (
     <div className="rounded-xl border border-hairline bg-cream-deep/40 px-4 py-3 animate-calm-in">
       <p className="text-sm font-semibold text-ink lowercase">
         {sizeLabels[service][size].toLowerCase()} —{' '}
-        {serviceUnits[service] === 'per_month' ? formatMonthly(price) : formatPerVisit(price)}
+        {perMonth ? formatMonthly(getSizePrice(service, size)) : formatPerVisit(perVisit)}
       </p>
       <p className="text-[11px] text-ink-faint mt-0.5">
         {sizeHelpers[service][size]}.{' '}
-        {serviceUnits[service] === 'per_month'
+        {perMonth
           ? 'the same every month.'
-          : 'the price per visit stays the same however often we come.'}
+          : `${formatMonthly(getServicePrice(state, service))} at the plan you picked, billed monthly.`}
       </p>
     </div>
   );
@@ -133,7 +143,7 @@ export default function StepProperty({ state, onChange }: Props) {
             more bathrooms than your size allows moves the home up one size — bathrooms drive the
             length of a visit more than anything else.
           </p>
-          <SizeReadout service="cleaning" size={sizeFor(state, 'cleaning')} />
+          <SizeReadout service="cleaning" size={sizeFor(state, 'cleaning')} state={state} />
         </div>
       )}
 
@@ -154,7 +164,7 @@ export default function StepProperty({ state, onChange }: Props) {
 
           <p className="text-[11px] text-ink-faint">{LAWN_GUESS_NOTE}</p>
 
-          <SizeReadout service="lawn" size={sizeFor(state, 'lawn')} />
+          <SizeReadout service="lawn" size={sizeFor(state, 'lawn')} state={state} />
         </div>
       )}
 
@@ -224,7 +234,7 @@ export default function StepProperty({ state, onChange }: Props) {
           <p className="text-[11px] text-ink-faint">
             pet hair, sand and smoke are add-ons, never a bigger size.
           </p>
-          <SizeReadout service="detailing" size={sizeFor(state, 'detailing')} />
+          <SizeReadout service="detailing" size={sizeFor(state, 'detailing')} state={state} />
         </div>
       )}
     </div>

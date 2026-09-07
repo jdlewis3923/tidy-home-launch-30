@@ -251,22 +251,23 @@ export function getServicePrice(state: ConfigState, service: ServiceType): numbe
 }
 
 
-/** The Car Wash Add-On price per month, if selected. */
-export function getCarWashPrice(state: ConfigState): number {
-  if (!state.carWashes) return 0;
-  const size = sizeForCarCare(state.vehicleClass);
-  if (!size || size === 'quote') return 0;
-  return CAR_WASH_PRICES[size][state.carWashes];
+/**
+ * RETIRED. The standalone Car Wash Add-On is no longer sold: the only wash in
+ * the system is the $0 maintenance wash inside Shine Complete, and every
+ * `wash_*` Stripe price is archived. Always 0.
+ */
+export function getCarWashPrice(_state: ConfigState): number {
+  return 0;
 }
 
-/** The Car Wash Add-On requires an active lawn or cleaning plan. */
-export function carWashEligible(state: ConfigState): boolean {
-  return state.services.includes('lawn') || state.services.includes('cleaning');
+/** RETIRED — the standalone Car Wash Add-On cannot be bought. */
+export function carWashEligible(_state: ConfigState): boolean {
+  return false;
 }
 
-/** True whenever a car-care selection (wash or detail) makes sense to show. */
+/** Car care is Shine Complete only. */
 export function carVariantAvailable(state: ConfigState): boolean {
-  return carWashEligible(state) || state.services.includes('detailing');
+  return state.services.includes('detailing');
 }
 
 /**

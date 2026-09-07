@@ -518,7 +518,7 @@ const translations: Record<string, string> = {
   "Bush trim (weekly)": "Poda de arbustos (semanal)",
     "Locked $55 a month — never surprise-priced": "$55 al mes, precio fijo — nunca con precios sorpresa",
   // Lawn Care testimonials
-  "Lawn looks sharp every week without me lifting a finger. Best $85 I spend monthly.":
+  "Lawn looks sharp every week without me lifting a finger. Best money I spend monthly.":
     "El jardín se ve impecable cada semana sin mover un dedo. El mejor dinero que gasto al mes.",
   "Edges are crisp, beds are clean, no debris left behind. Pure consistency.":
     "Los bordes salen limpios, las jardineras quedan despejadas, sin escombros. Pura consistencia.",

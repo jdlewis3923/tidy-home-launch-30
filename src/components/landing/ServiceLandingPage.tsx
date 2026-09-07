@@ -68,7 +68,7 @@ export interface ServiceLandingConfig {
   /** Optional secondary plan-CTA label tying to the system (e.g. "Start your plan"). */
   ctaPlanLabel?: string;
   priceAnchor: string;
-  /** Compact label for the sticky bar e.g. "House Cleaning · from $159/mo". */
+  /** Compact label for the sticky bar e.g. "House Cleaning · from $139/mo". */
   stickyLabel: string;
   /** Single line above the plans grid; wrap the price segment in **double asterisks**. */
   savingsCallout: string;

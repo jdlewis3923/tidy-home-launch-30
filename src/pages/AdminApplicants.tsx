@@ -1242,7 +1242,7 @@ export default function AdminApplicants() {
                         {isT2 && (
                           <div className="space-y-2">
                             <p className="text-sm text-slate-700">
-                              This Pro is on <span className="font-semibold text-amber-800">Tier 2 — Pro Partner</span> with 45% pay split and a $30 visit floor.
+                              This Pro is on <span className="font-semibold text-amber-800">Tier 2 — Pro Partner</span> earning the +10% Pro Partner uplift on every visit.
                             </p>
                             <Button
                               size="sm"
@@ -1422,7 +1422,7 @@ export default function AdminApplicants() {
               <AlertTriangle className="h-5 w-5 text-red-600" /> Return Pro to Tier 1?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {open ? `${open.first_name} ${open.last_name} will lose Pro Partner status, pay split returns to 40%, and the visit floor returns to $25.` : ""}
+              {open ? `${open.first_name} ${open.last_name} will lose Pro Partner status and the +10% Pro Partner uplift, returning to standard published route pay.` : ""}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

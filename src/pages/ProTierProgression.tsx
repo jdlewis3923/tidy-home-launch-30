@@ -65,8 +65,7 @@ export default function ProTierProgression() {
                 </div>
               </div>
               <p className="text-sm text-slate-600 mb-4">Default at hire. Tidy carries you.</p>
-              <Row label="Pay split" value="40% to Pro" />
-              <Row label="Per-visit floor" value="$25" />
+              <Row label="Visit pay" value="Published route pay" />
               <Row label="Routes" value="Standard" />
               <Row label="Insurance" value="Tidy provides GL during assignments" />
               <Row label="Badge" value="Verified Pro" />
@@ -83,8 +82,7 @@ export default function ProTierProgression() {
                 </div>
               </div>
               <p className="text-sm text-slate-700 mb-4">Unlocked after 50+ visits, a 4.8+ rating, and 60+ days active.</p>
-              <Row label="Pay split" value="45% to Pro" highlight />
-              <Row label="Per-visit floor" value="$30" highlight />
+              <Row label="Visit pay" value="Published route pay +10%" highlight />
               <Row label="Routes" value="Premium $2M+ homes" highlight />
               <Row label="Insurance" value="Pro carries own GL + auto COI" />
               <Row label="Badge" value="Pro Partner" highlight />
@@ -119,7 +117,7 @@ export default function ProTierProgression() {
               { n: 1, title: "Day 0 — Tier 2 offer sent", body: "Once you meet every criterion, Tidy emails your Pro Partner offer with a secure upload link." },
               { n: 2, title: "Day 1–10 — Bind your policies", body: "Most Pros bind GL ($1M/$2M aggregate) and commercial auto in 24–72 hours. We provide a list of partner brokers." },
               { n: 3, title: "Day 11–14 — Upload COI", body: "Drop your Certificate of Insurance into /pro/upload-coi. Our team reviews within one business day." },
-              { n: 4, title: "Confirmed", body: "On approval, your tier flips to Pro Partner instantly — the 45% split, the $30 per-visit floor, and premium routes unlock automatically." },
+              { n: 4, title: "Confirmed", body: "On approval, your tier flips to Pro Partner instantly — your +10% uplift on every visit and premium routes unlock automatically." },
             ].map((s) => (
               <div key={s.n} className="flex gap-4">
                 <div className="shrink-0 h-8 w-8 rounded-full bg-slate-900 text-white text-sm font-bold grid place-items-center">{s.n}</div>

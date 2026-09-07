@@ -1,6 +1,7 @@
 // return-to-tier-1
 // Admin-triggered: reverts a Tier 2 Pro back to Tier 1, updates Stripe pay-split
-// metadata to 40%/$25, fires the T1-RETURN Brevo email, logs the action.
+// metadata back to standard route pay (no Tier 2 uplift), fires the T1-RETURN
+// Brevo email, logs the action.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
@@ -35,8 +36,7 @@ async function fireBrevo(templateKey: string, to: { email: string; name: string 
 async function updateStripePaySplit(stripeAccountId: string | undefined) {
   if (!stripeAccountId || !STRIPE_KEY) return;
   const body = new URLSearchParams();
-  body.append('metadata[pay_split_pct]', '40');
-  body.append('metadata[visit_floor_cents]', '2500');
+  body.append('metadata[pay_uplift_pct]', '0');
   body.append('metadata[tier]', 'tier_1_verified');
   await fetch(`https://api.stripe.com/v1/accounts/${stripeAccountId}`, {
     method: 'POST',

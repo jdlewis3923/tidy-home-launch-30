@@ -1,29 +1,30 @@
 // Money guard. What we DISPLAY must equal what Stripe CHARGES.
 //
 //   client ConfigState
-//     -> src/lib/checkout.ts translate()             (the real payload builder)
-//     -> lookup_key per service/size                 (the real resolution path)
-//     -> cadence as subscription-item quantity       (the real server rule)
+//     -> src/lib/checkout.ts translate()              (the real payload builder)
+//     -> lookup_key per service/size/cadence          (the real resolution path)
+//     -> one monthly Stripe price, quantity 1         (the real server rule)
+//     -> surcharge as its own monthly line            (the real server rule)
 //     -> add-on price_cents from setup-stripe-catalog (the real catalog seed)
 //
-// There are no coupons and no percentage discounts in this model: bundling
-// earns one free premium add-on, so the charged subtotal is simply the sum of the
-// line items. If the two ever diverge again, this fails.
+// No coupons and no percentage discounts exist: bundling earns one free premium
+// add-on, so the charged subtotal is the sum of the line items.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { translate } from '@/lib/checkout';
 import { FLORIDA_TAX, cartTriggersFloridaTax, FL_SALES_TAX_COLLECTION_ENABLED } from '@/lib/florida-tax';
 import {
-  CAR_WASH_LOOKUP_KEYS,
-  CAR_WASH_PRICES,
-  SERVICE_LOOKUP_KEYS,
-  SIZE_PRICES,
+  BILLED_MONTHLY,
+  VISITS_PER_MONTH,
+  cleaningSurchargePerVisit,
   freeAddonsPerMonth,
+  lawnSurchargePerVisit,
+  lookupKeyFor,
+  monthlyPriceCents,
   quantityFor,
   type CanonSize,
   type VehicleClass,
-  type WashCount,
 } from '@/lib/pricing-canon';
 
 import {
@@ -56,18 +57,32 @@ const addonCatalog = loadAddons();
 /** Simulates the Stripe subscription amount in cents for a ConfigState. */
 function stripeSubscriptionCents(state: ConfigState): number {
   const { services, addons, car_wash } = translate(state);
+  // The standalone wash is retired: no wash line can be produced any more.
+  expect(car_wash).toBeUndefined();
 
   let subtotalCents = 0;
   for (const s of services) {
-    // The server resolves the price by lookup_key and sets the quantity from
-    // the cadence — mirrored exactly here.
-    const key = SERVICE_LOOKUP_KEYS[s.service][s.size];
-    expect(key, `${s.service}:${s.size}`).toBeTruthy();
-    subtotalCents += SIZE_PRICES[s.service][s.size] * 100 * quantityFor(s.service, s.frequency);
-  }
-  if (car_wash) {
-    expect(CAR_WASH_LOOKUP_KEYS[car_wash.size][car_wash.washes]).toBeTruthy();
-    subtotalCents += CAR_WASH_PRICES[car_wash.size][car_wash.washes] * 100;
+    const key = lookupKeyFor(s.service, s.size, s.frequency);
+    expect(key, `${s.service}:${s.size}:${s.frequency}`).toBeTruthy();
+    // One monthly price at quantity 1 — the key already carries the cadence.
+    expect(quantityFor(s.service, s.frequency)).toBe(1);
+    subtotalCents += BILLED_MONTHLY[s.service][s.size][s.service === 'detailing' ? 'monthly' : s.frequency] * 100;
+
+    // The surcharge is its own monthly line: per-visit amount x visits a month.
+    const perVisitSurcharge =
+      s.service === 'cleaning'
+        ? cleaningSurchargePerVisit(s.sq_ft)
+        : s.service === 'lawn'
+          ? lawnSurchargePerVisit(s.sq_ft)
+          : 0;
+    if (perVisitSurcharge > 0) {
+      subtotalCents += perVisitSurcharge * VISITS_PER_MONTH[s.frequency] * 100;
+    }
+    // Same figure the canon publishes for the whole line.
+    expect(
+      BILLED_MONTHLY[s.service][s.size][s.service === 'detailing' ? 'monthly' : s.frequency] * 100 +
+        perVisitSurcharge * VISITS_PER_MONTH[s.frequency] * 100,
+    ).toBe(monthlyPriceCents(s.service, s.size, s.frequency, perVisitSurcharge));
   }
   for (const a of addons) {
     const row = addonCatalog.find((r) => r.addon_name === a.addon_name);
@@ -101,7 +116,7 @@ const freq: Record<ServiceType, Frequency> = {
 
 function buildState(
   servicesIn: ServiceType[],
-  opts: { size?: CanonSize; addOns?: string[]; washes?: WashCount; cadence?: Frequency } = {},
+  opts: { size?: CanonSize; addOns?: string[]; cadence?: Frequency; homeSqFt?: number; turfSqFt?: number } = {},
 ): ConfigState {
   const size = opts.size ?? 2;
   const frequencies: Partial<Record<ServiceType, Frequency>> = {};
@@ -114,7 +129,9 @@ function buildState(
     bathrooms: servicesIn.includes('cleaning') ? bathrooms : null,
     lawnChoice: servicesIn.includes('lawn') ? lawnForSize[size] : null,
     vehicleClass: vehicleForSize[size],
-    carWashes: opts.washes ?? null,
+    homeSqFt: opts.homeSqFt ?? null,
+    turfSqFt: opts.turfSqFt ?? null,
+    carWashes: null,
     addOns: opts.addOns ?? [],
   });
 }
@@ -122,19 +139,16 @@ function buildState(
 describe('checkout ↔ Stripe parity', () => {
   it('the add-on seed is present and complete', () => {
     expect(addonCatalog.length).toBeGreaterThanOrEqual(15);
-    // The one-time driveway pressure wash survives the rebuild.
     expect(read('supabase/functions/setup-stripe-catalog/index.ts')).toMatch(/pressure/i);
   });
 
-  it('the server resolves prices by lookup key and sets cadence with quantity', () => {
+  it('the server resolves prices by lookup key and bills one monthly price', () => {
     const src = read('supabase/functions/stripe-create-checkout/index.ts');
     expect(src).toContain('lookup_key');
-    expect(src).toContain('quantityFor(s.service, s.frequency)');
-    expect(src).not.toContain('r.frequency === s.frequency');
+    expect(src).toContain('lookupKeyFor(s.service, size, cadence)');
+    expect(src).toContain('quantityFor(s.service, cadence)');
   });
 
-  // The ONE permitted coupon is the referred friend's $50-off-first-month
-  // (see src/test/referral-discount.test.ts). No percentages, no promo codes.
   it('no percentage or promo-code machinery reaches Stripe', () => {
     const src = read('supabase/functions/stripe-create-checkout/index.ts');
     for (const dead of ['TIDY_BUNDLE_', 'percent_off', 'allow_promotion_codes', 'promotion_code']) {
@@ -153,7 +167,8 @@ describe('checkout ↔ Stripe parity', () => {
       label: '3 services + add-ons',
       s: buildState(['cleaning', 'lawn', 'detailing'], { addOns: ['oven', 'bedEdgeReset', 'headlightRestoration'] }),
     },
-    { label: 'cleaning + car wash add-on', s: buildState(['cleaning'], { washes: 2 }) },
+    { label: 'cleaning with the larger-home surcharge', s: buildState(['cleaning'], { homeSqFt: 3200 }) },
+    { label: 'lawn with the larger-yard surcharge', s: buildState(['lawn'], { turfSqFt: 5200 }) },
     { label: 'detailing only + coating add-on', s: buildState(['detailing'], { addOns: ['clayBarCeramic'] }) },
   ];
 
@@ -164,11 +179,13 @@ describe('checkout ↔ Stripe parity', () => {
     });
   }
 
-  it('cadence multiplies the per-visit price, exactly', () => {
+  it('cadence lowers the per-visit price and sets the monthly bill', () => {
     const weekly = buildState(['lawn'], { size: 2, cadence: 'weekly' });
-    expect(Math.round(stripeSubscriptionCents(weekly))).toBe(65 * 4 * 100);
+    expect(Math.round(stripeSubscriptionCents(weekly))).toBe(246 * 100);
     const biweekly = buildState(['cleaning'], { size: 2, cadence: 'biweekly' });
-    expect(Math.round(stripeSubscriptionCents(biweekly))).toBe(189 * 2 * 100);
+    expect(Math.round(stripeSubscriptionCents(biweekly))).toBe(348 * 100);
+    const monthly = buildState(['cleaning'], { size: 2, cadence: 'monthly' });
+    expect(Math.round(stripeSubscriptionCents(monthly))).toBe(189 * 100);
   });
 
   it('Shine Complete stays flat however often the cadence field says', () => {
@@ -182,7 +199,7 @@ describe('checkout ↔ Stripe parity', () => {
     const one = buildState(['cleaning']);
     const two = buildState(['cleaning', 'lawn']);
     expect(Math.round(stripeSubscriptionCents(two))).toBe(
-      Math.round(stripeSubscriptionCents(one)) + 65 * 100,
+      Math.round(stripeSubscriptionCents(one)) + 75 * 100,
     );
     expect(calculatePricing(two).freeAddons).toBe(freeAddonsPerMonth(2));
   });
