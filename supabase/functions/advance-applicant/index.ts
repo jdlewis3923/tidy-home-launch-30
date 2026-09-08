@@ -279,8 +279,26 @@ Deno.serve(async (req) => {
   }
 
 
+  // SEND_CONTRACT PRE-CHECK: this action has silently emailed nothing for
+  // months because the contract PDF row was never uploaded (storage_path still
+  // `pending/...`) and the failure was swallowed. Refuse the transition up
+  // front instead of recording a fake "contract sent".
+  if (action === 'send_contract') {
+    const { data: preRow } = await admin
+      .from('applicants').select('service').eq('id', applicant_id).maybeSingle();
+    const preAttachments = await buildAttachments(filenamesFor('send_contract', roleKey(preRow?.service)));
+    if (!preAttachments.length) {
+      return jsonResponse({
+        error: 'contract_document_unavailable',
+        reason: 'No signable contract PDF is uploaded for this role, so no email would be sent. Upload the contract in company_documents / tidy-docs first.',
+        expected_filenames: filenamesFor('send_contract', roleKey(preRow?.service)),
+      }, 409);
+    }
+  }
+
   const update = applyTransition(action);
   if (notes) update.bg_check_notes = notes;
+
 
   // Schedule training: persist datetime.
   if (action === 'schedule_training' && scheduled_at) {
@@ -341,24 +359,54 @@ Deno.serve(async (req) => {
     if (stripeErr) console.error('[advance] stripe_connect_pending insert failed', stripeErr);
   }
 
-  // Documenso envelope dispatch on send_offer (fire-and-forget).
+  // Documenso envelope dispatch on send_offer.
+  // Previously fire-and-forget with console.error only, which is exactly why
+  // this never once produced an envelope and nobody found out. Now awaited,
+  // recorded in onboarding_events + admin_alerts, and surfaced to the caller.
+  let documensoResult: { ok: boolean; status?: number; error?: string; body?: unknown } | null = null;
   if (action === 'send_offer') {
-    queueMicrotask(async () => {
-      try {
-        const r = await fetch(`${SUPABASE_URL}/functions/v1/send-documenso-envelope`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ applicant_id: row.id }),
-        });
-        if (!r.ok) console.error('[advance] documenso dispatch http', r.status, await r.text().catch(() => ''));
-      } catch (e) {
-        console.error('[advance] documenso dispatch failed', e);
-      }
-    });
+    try {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/send-documenso-envelope`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ applicant_id: row.id }),
+      });
+      const body = await r.json().catch(() => ({}));
+      documensoResult = r.ok && (body as any)?.ok !== false
+        ? { ok: true, status: r.status, body }
+        : { ok: false, status: r.status, error: (body as any)?.error ?? `http_${r.status}`, body };
+    } catch (e) {
+      documensoResult = { ok: false, error: e instanceof Error ? e.message : String(e) };
+    }
+
+    if (!documensoResult.ok) {
+      console.error('[advance] documenso envelope FAILED', documensoResult);
+      await admin.from('admin_alerts').insert({
+        alert_type: 'documenso_envelope_failed',
+        title: `Documenso envelope failed for ${fullName}`,
+        body: documensoResult.error ?? 'unknown error',
+        context: { applicant_id: row.id, ...documensoResult },
+      }).then(() => {}, () => {});
+      await admin.from('onboarding_events').insert({
+        applicant_id: row.id,
+        event: 'send_offer_documenso_failed',
+        metadata: documensoResult as unknown as Record<string, unknown>,
+      }).then(() => {}, () => {});
+      return jsonResponse({
+        ok: false,
+        error: 'documenso_envelope_failed',
+        details: documensoResult,
+        applicant_id: row.id,
+        current_stage: row.current_stage,
+        note: 'Stage was advanced but NO signing envelope exists. Fix Documenso and re-run send_offer.',
+      }, 502);
+    }
   }
+
+
 
   // Checkr invitation dispatch on send_to_bg_check (fire-and-forget; safe if key unset).
   if (action === 'send_to_bg_check') {
@@ -457,15 +505,20 @@ Deno.serve(async (req) => {
   const tag = TEMPLATE_TAG[action];
   const applicantCopy = APPLICANT_COPY[action];
 
-  queueMicrotask(async () => {
-    const applicantHtml = brandedEmailHtml({
-      heading: applicantCopy.subject,
-      bodyHtml: applicantCopy.body,
-    });
-    const allAttachments = [
-      ...attachments,
-      ...(trainingIcsAttachment ? [trainingIcsAttachment] : []),
-    ];
+  // Emails are AWAITED and their failures surfaced. The old queueMicrotask +
+  // console.error pattern is what made send_contract look like it worked while
+  // sending nothing at all.
+  const applicantHtml = brandedEmailHtml({
+    heading: applicantCopy.subject,
+    bodyHtml: applicantCopy.body,
+  });
+  const allAttachments = [
+    ...attachments,
+    ...(trainingIcsAttachment ? [trainingIcsAttachment] : []),
+  ];
+
+  let applicantEmailError: string | null = null;
+  try {
     await sendBrevoEmail({
       toEmail: row.email, toName: fullName,
       subject: applicantCopy.subject, htmlContent: applicantHtml,
@@ -473,36 +526,79 @@ Deno.serve(async (req) => {
       attachments: allAttachments.length ? allAttachments : undefined,
       templateName: tag,
       triggeredBy: 'advance-applicant',
-    }).catch((e) => console.error('[advance] applicant email failed', e));
-
-    const adminHtml = brandedEmailHtml({
-      heading: SUBJECTS[action],
-      bodyHtml: `
-        <p><strong>${fullName}</strong> — ${row.service ?? 'unknown'} applicant</p>
-        <ul style="padding-left:18px">
-          <li>Stage: ${row.current_stage}</li>
-          <li>BG status: ${row.bg_check_status ?? '—'}</li>
-          <li>Action: ${action}</li>
-          <li>Attachments: ${attachments.map((a) => a.name).join(', ') || 'none'}</li>
-          ${notes ? `<li>Notes: ${notes}</li>` : ''}
-        </ul>
-      `,
-      ctaUrl: 'https://jointidy.co/admin/applicants',
-      ctaLabel: 'Open pipeline',
     });
+  } catch (e) {
+    applicantEmailError = e instanceof Error ? e.message : String(e);
+  }
+
+  if (applicantEmailError) {
+    console.error('[advance] applicant email FAILED', action, applicantEmailError);
+    await admin.from('admin_alerts').insert({
+      alert_type: 'applicant_email_failed',
+      title: `Applicant email failed (${action}) for ${fullName}`,
+      body: applicantEmailError,
+      context: { applicant_id: row.id, action, template: tag },
+    }).then(() => {}, () => {});
+    await admin.from('onboarding_events').insert({
+      applicant_id: row.id,
+      event: `${action}_email_failed`,
+      metadata: { error: applicantEmailError, template: tag },
+    }).then(() => {}, () => {});
+  }
+
+  const adminHtml = brandedEmailHtml({
+    heading: SUBJECTS[action],
+    bodyHtml: `
+      <p><strong>${fullName}</strong> — ${row.service ?? 'unknown'} applicant</p>
+      <ul style="padding-left:18px">
+        <li>Stage: ${row.current_stage}</li>
+        <li>BG status: ${row.bg_check_status ?? '—'}</li>
+        <li>Action: ${action}</li>
+        <li>Attachments: ${attachments.map((a) => a.name).join(', ') || 'none'}</li>
+        ${notes ? `<li>Notes: ${notes}</li>` : ''}
+      </ul>
+    `,
+    ctaUrl: 'https://jointidy.co/admin/applicants',
+    ctaLabel: 'Open pipeline',
+  });
+  let adminEmailError: string | null = null;
+  try {
     await sendBrevoEmail({
       toEmail: 'admin@jointidy.co', toName: 'Justin',
       subject: `${SUBJECTS[action]}: ${fullName}`, htmlContent: adminHtml,
       tags: [`admin-${tag}`],
       templateName: `admin-${tag}`,
       triggeredBy: 'advance-applicant',
-    }).catch((e) => console.error('[advance] admin email failed', e));
+    });
+  } catch (e) {
+    adminEmailError = e instanceof Error ? e.message : String(e);
+    console.error('[advance] admin email FAILED', action, adminEmailError);
+  }
 
-    // Sync transition to Tidy Master sheet (Applicants tab).
-    await admin.functions.invoke('sync-applicant-to-sheet', {
+  // Sync transition to Tidy Master sheet (Applicants tab) — non-blocking, but
+  // any failure is reported back rather than dropped.
+  let sheetSyncError: string | null = null;
+  try {
+    const { error: syncErr } = await admin.functions.invoke('sync-applicant-to-sheet', {
       body: { applicant_id: row.id, last_event: action, last_event_at: new Date().toISOString() },
-    }).catch((e) => console.error('[advance] sheet sync failed', e));
-  });
+    });
+    if (syncErr) sheetSyncError = syncErr.message;
+  } catch (e) {
+    sheetSyncError = e instanceof Error ? e.message : String(e);
+  }
+  if (sheetSyncError) console.error('[advance] sheet sync failed', sheetSyncError);
+
+  if (applicantEmailError) {
+    return jsonResponse({
+      ok: false,
+      error: 'applicant_email_failed',
+      details: applicantEmailError,
+      id: row.id,
+      current_stage: row.current_stage,
+      attachments_count: attachments.length,
+      requested_filenames: filenames,
+    }, 502);
+  }
 
   return jsonResponse({
     ok: true,
@@ -511,5 +607,8 @@ Deno.serve(async (req) => {
     bg_check_status: row.bg_check_status,
     attachments_count: attachments.length,
     requested_filenames: filenames,
+    documenso: documensoResult,
+    admin_email_error: adminEmailError,
+    sheet_sync_error: sheetSyncError,
   });
 });
