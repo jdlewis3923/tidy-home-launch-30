@@ -112,51 +112,34 @@ Deno.serve(async (req) => {
     });
     const all_keys_pass = lookup_keys.every((k) => k.pass);
 
-    // ---------- 2. quantity rules ----------
+    // ---------- 2. quantity rules: every plan line is quantity 1 ----------
     const quantity_rules = {
-      cleaning: {
-        monthly: quantityFor('cleaning', 'monthly'),
-        biweekly: quantityFor('cleaning', 'biweekly'),
-        weekly: quantityFor('cleaning', 'weekly'),
-      },
-      lawn: {
-        monthly: quantityFor('lawn', 'monthly'),
-        biweekly: quantityFor('lawn', 'biweekly'),
-        weekly: quantityFor('lawn', 'weekly'),
-      },
-      detailing: {
-        monthly: quantityFor('detailing', 'monthly'),
-        biweekly: quantityFor('detailing', 'biweekly'),
-        weekly: quantityFor('detailing', 'weekly'),
-      },
-      car_wash_addon: 1,
+      cleaning: { monthly: quantityFor('cleaning', 'monthly'), biweekly: quantityFor('cleaning', 'biweekly'), weekly: quantityFor('cleaning', 'weekly') },
+      lawn: { monthly: quantityFor('lawn', 'monthly'), biweekly: quantityFor('lawn', 'biweekly'), weekly: quantityFor('lawn', 'weekly') },
+      detailing: { monthly: quantityFor('detailing', 'monthly'), biweekly: quantityFor('detailing', 'biweekly'), weekly: quantityFor('detailing', 'weekly') },
+      surcharge_quantity_is_visits_per_month: true,
     };
-    const quantity_rules_pass =
-      quantity_rules.cleaning.monthly === 1 &&
-      quantity_rules.cleaning.biweekly === 2 &&
-      quantity_rules.cleaning.weekly === 4 &&
-      quantity_rules.lawn.monthly === 1 &&
-      quantity_rules.lawn.biweekly === 2 &&
-      quantity_rules.lawn.weekly === 4 &&
-      quantity_rules.detailing.monthly === 1 &&
-      quantity_rules.detailing.biweekly === 1 &&
-      quantity_rules.detailing.weekly === 1 &&
-      quantity_rules.car_wash_addon === 1;
+    const quantity_rules_pass = (['cleaning', 'lawn', 'detailing'] as CanonService[]).every((svc) =>
+      CADENCES.every((cad) => quantityFor(svc, cad) === 1),
+    );
 
-    // ---------- 3. the $427 reference cart, priced from LIVE Stripe ----------
-    const cleanTwo = found.get('clean_2');
-    const washTwoX1 = found.get('wash_2_x1');
+    // ---------- 3. the reference cart, priced from LIVE Stripe ----------
+    // Size 2 cleaning biweekly ($348) plus the extra-large surcharge at 2 visits
+    // a month ($120) = $468.00.
+    const cleanTwoBiweekly = found.get(lookupKeyFor('cleaning', 2, 'biweekly'));
+    const cleaningSurcharge = found.get('surcharge_cleaning_xl');
     const referenceCents =
-      cleanTwo?.unit_amount != null && washTwoX1?.unit_amount != null
-        ? cleanTwo.unit_amount * quantityFor('cleaning', 'biweekly') + washTwoX1.unit_amount * 1
+      cleanTwoBiweekly?.unit_amount != null && cleaningSurcharge?.unit_amount != null
+        ? cleanTwoBiweekly.unit_amount * 1 + cleaningSurcharge.unit_amount * 2
         : null;
     const reference_cart = {
-      description: 'clean_2 × 2 (biweekly) + wash_2_x1 × 1',
-      expected_total: '$427.00',
+      description: 'clean_2_biweekly × 1 + surcharge_cleaning_xl × 2 (visits a month)',
+      expected_total: '$468.00',
       actual_total: referenceCents === null ? null : `$${(referenceCents / 100).toFixed(2)}`,
       actual_cents: referenceCents,
-      pass: referenceCents === 42700,
+      pass: referenceCents === 46800,
     };
+
 
     // ---------- 4. no archived price is selectable ----------
     const { data: catalogRows, error: catErr } = await supabase
