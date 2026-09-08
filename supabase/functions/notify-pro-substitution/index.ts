@@ -16,6 +16,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import { notifyPro } from '../_shared/pro-notify.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -65,6 +66,25 @@ Deno.serve(async (req) => {
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  // The incoming Pro learns about the job first — this is time-critical, so it
+  // goes as a push and falls back to a text when push cannot reach them.
+  // Runs before any customer-side branching, since the Pro needs to know even
+  // when the customer never had a preferred Pro.
+  try {
+    await notifyPro(admin, {
+      contractor_id: new_contractor_id,
+      kind: 'visit_substitution',
+      title: 'New job added to your route',
+      body: 'A visit was moved to you. Open your schedule for the time and address.',
+      url: '/pro/schedule',
+      idempotency_key: `visit_substitution:${pro_visit_id ?? jobber_visit_id}:${new_contractor_id}`,
+      context: { pro_visit_id, jobber_visit_id, old_contractor_id },
+    });
+  } catch (e) {
+    console.error('[notify-pro-substitution] incoming pro notify failed', (e as Error).message);
+  }
+
 
   // Who is the customer on this visit?
   let userId: string | null = null;

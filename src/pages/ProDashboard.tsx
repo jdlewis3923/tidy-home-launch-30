@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import MyTierWidget from "@/components/pro/MyTierWidget";
 import InsuranceCard from "@/components/pro/InsuranceCard";
 import ProNotificationBell from "@/components/pro/ProNotificationBell";
+import PushOptIn from "@/components/pro/portal/PushOptIn";
 import { Skeleton } from "@/components/ui/skeleton";
 import AnimatedNumber from "@/components/motion/AnimatedNumber";
 import tidyLogo from "@/assets/tidy-logo.png";
@@ -255,6 +256,11 @@ export default function ProDashboard() {
         </div>
       </header>
       <OnboardingBanner />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-4 pt-4 sm:px-8">
+        <PushOptIn compact />
+      </div>
+
 
       <section className="relative z-10 mx-auto max-w-7xl px-4 pt-10 pb-6 sm:px-8 animate-fade-in">
         <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-primary">{dateLabel}</p>

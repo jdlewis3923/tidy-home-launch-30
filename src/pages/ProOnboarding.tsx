@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import tidyLogo from "@/assets/tidy-logo.png";
+import InstallAndNotifyStep from "@/components/pro/portal/InstallAndNotifyStep";
 
 type ApplicantRow = {
   id: string;
@@ -183,6 +184,7 @@ export default function ProOnboarding() {
             )}
 
             <div className="mt-8 space-y-3">
+              <InstallAndNotifyStep />
               {gates.map((g, i) => (
                 <div key={g.key}
                   className={`rounded-2xl border p-5 ${g.done ? "border-emerald-200 bg-emerald-50/50" : "border-slate-200 bg-white"}`}>

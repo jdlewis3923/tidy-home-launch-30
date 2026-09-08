@@ -53,6 +53,7 @@ Deno.serve(async (req) => {
       body: 'Do the scope they already booked. This will not count against your rating.',
       url: `/pro/job/${r.job_id}`,
       context: { addon_request_id: r.id, job_id: r.job_id },
+      idempotency_key: `addon_expired:${r.id}`,
     });
   }
 

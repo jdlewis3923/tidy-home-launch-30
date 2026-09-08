@@ -159,6 +159,7 @@ Deno.serve(async (req) => {
       body: 'Do the scope they already booked and note the condition. This will not count against your rating.',
       url: `/pro/job/${reqRow.job_id}`,
       context: { addon_request_id: reqRow.id, job_id: reqRow.job_id },
+      idempotency_key: `addon_declined:${reqRow.id}`,
     });
 
     return jsonResponse({ ok: true, status: 'declined' });
@@ -249,6 +250,7 @@ Deno.serve(async (req) => {
     body: `Paid. $${(proPayCents / 100).toFixed(2)} added to your pay for this visit.`,
     url: `/pro/job/${reqRow.job_id}`,
     context: { addon_request_id: reqRow.id, job_id: reqRow.job_id, pro_pay_cents: proPayCents },
+    idempotency_key: `addon_approved:${reqRow.id}`,
   });
 
   return jsonResponse({ ok: true, status: 'approved', pro_pay_cents: proPayCents });

@@ -10,6 +10,7 @@
  * Admin-only. Returns the public key so the UI can use it immediately.
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -49,8 +50,10 @@ Deno.serve(async (req) => {
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-  // Verify caller is an admin
+  // Verify caller: service role (used by the server-side bootstrap) or an admin.
   const authHeader = req.headers.get('Authorization') ?? '';
+  const isServiceRole = await isCronAuthorized(req);
+  if (!isServiceRole) {
   const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     global: { headers: { Authorization: authHeader } },
     auth: { persistSession: false },
@@ -69,6 +72,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+  }
 
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -76,7 +80,10 @@ Deno.serve(async (req) => {
 
   // Idempotency — if public key already in vault, just return it
   const { data: existing } = await admin.rpc('admin_get_vapid_public');
-  if (typeof existing === 'string' && existing.length > 0) {
+  const { data: existingPrivate } = await admin.rpc('admin_get_vapid_private');
+  const havePair = typeof existing === 'string' && existing.length > 0
+    && typeof existingPrivate === 'string' && existingPrivate.length > 0;
+  if (havePair) {
     return new Response(
       JSON.stringify({ ok: true, public_key: existing, generated: false }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },

@@ -13,12 +13,21 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const VAPID_PRIVATE = Deno.env.get('PWA_VAPID_PRIVATE_KEY') ?? '';
+// The private key lives in the encrypted vault (set server-side by
+// kpi-vapid-bootstrap) and, if present, an env secret wins. It is never
+// returned to any caller.
+const VAPID_PRIVATE_ENV = Deno.env.get('PWA_VAPID_PRIVATE_KEY') ?? '';
 const VAPID_SUBJECT = Deno.env.get('PWA_VAPID_SUBJECT') ?? 'mailto:admin@jointidy.co';
 
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
+
+async function getVapidPrivate(): Promise<string> {
+  if (VAPID_PRIVATE_ENV) return VAPID_PRIVATE_ENV;
+  const { data } = await admin.rpc('admin_get_vapid_private');
+  return typeof data === 'string' ? data : '';
+}
 
 async function getVapidPublic(): Promise<string> {
   const { data, error } = await admin.rpc('admin_get_vapid_public');
@@ -39,6 +48,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'user_id, title, body required' }, 400);
     }
 
+    const VAPID_PRIVATE = await getVapidPrivate();
     if (!VAPID_PRIVATE) {
       // Phase 4: this used to be a 200 with sent:0, so every push in the system
       // looked successful while nothing was ever delivered. Say it plainly.
@@ -60,8 +70,14 @@ Deno.serve(async (req) => {
       .eq('user_id', user_id);
     if (error) return jsonResponse({ error: error.message }, 500);
     if (!subs || subs.length === 0) {
-      // Not an error: the user simply has no device registered.
-      return jsonResponse({ ok: true, sent: 0, reason: 'no subscriptions' }, 200);
+      // Phase 4/5: never a 200 with sent:0. "Nobody was reached" is a
+      // failure the caller must see so the SMS fallback can fire.
+      return jsonResponse({
+        ok: false,
+        sent: 0,
+        error: 'no_active_subscription',
+        hint: 'This Pro has no device registered. Push cannot reach them.',
+      }, 404);
     }
 
     const payload = JSON.stringify({ title, body, url: url ?? '/admin/kpis' });
