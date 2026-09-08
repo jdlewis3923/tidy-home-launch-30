@@ -25,9 +25,16 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { resolveStripeSubscriptionId } from '../_shared/resolve-stripe-subscription-id.ts';
 import { resolveStripeCurrentPeriodEnd } from '../_shared/resolve-stripe-current-period-end.ts';
 import { loadPlanLines } from '../_shared/plan-lines.ts';
+import { stripeSecretKey } from '../_shared/stripe-mode.ts';
 
-const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
-const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+const STRIPE_SECRET_KEY = stripeSecretKey();
+// Live and test endpoints have different signing secrets. Both are accepted so
+// a test-mode run can be verified without disturbing the live endpoint.
+const WEBHOOK_SECRETS = [
+  Deno.env.get('STRIPE_WEBHOOK_SECRET'),
+  Deno.env.get('STRIPE_TEST_WEBHOOK_SECRET'),
+].filter((s): s is string => !!s && s.length > 0);
+const STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRETS[0];
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -106,13 +113,19 @@ Deno.serve(async (req) => {
     httpClient: Stripe.createFetchHttpClient(),
   });
 
-  let event: Stripe.Event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(rawBody, sig, STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'verify failed';
-    console.error('[stripe-webhook] signature verification failed', msg);
-    return new Response(`signature verification failed: ${msg}`, { status: 400 });
+  let event: Stripe.Event | null = null;
+  let lastErr = 'verify failed';
+  for (const secret of WEBHOOK_SECRETS) {
+    try {
+      event = await stripe.webhooks.constructEventAsync(rawBody, sig, secret);
+      break;
+    } catch (err) {
+      lastErr = err instanceof Error ? err.message : 'verify failed';
+    }
+  }
+  if (!event) {
+    console.error('[stripe-webhook] signature verification failed', lastErr);
+    return new Response(`signature verification failed: ${lastErr}`, { status: 400 });
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
