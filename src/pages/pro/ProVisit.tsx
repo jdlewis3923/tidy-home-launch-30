@@ -13,7 +13,7 @@ import {
   ErrorState, InfoRow, MapPreview, ProButton, ProCard, Skeleton, StatusPill,
 } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
-import { dayLabel, timeWindow, visitAction } from "@/lib/pro-portal";
+import { VISIT_KIND_LABEL, dayLabel, timeWindow, visitAction } from "@/lib/pro-portal";
 import { SERVICE_LABEL, money } from "@/lib/pro-pay";
 
 export default function ProVisit() {
