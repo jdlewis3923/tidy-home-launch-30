@@ -292,12 +292,27 @@ Deno.serve(async (req) => {
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
         const freeAddons = freeAddonsPerMonth(uniqueServices);
 
+        // The plan snapshot goes in a table; metadata carries only its id, so a
+        // two-service cart can never blow Stripe's 500-character value limit.
+        const planLinesId = await savePlanLines(supabase, {
+          userId: user.id,
+          lines: planLines,
+          source: "embedded_checkout",
+        });
+        if (!planLinesId) throw new Error("could not persist the plan snapshot");
+
+        const primary = planLines[0];
         const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
           signed_up_at: new Date().toISOString(),
           user_id: user.id,
-          services_json: JSON.stringify(input.services),
+          services_json: JSON.stringify(input.services.map((s) => ({ service: s.service, size: s.size, frequency: s.frequency }))),
           sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
+          plan_lines_id: planLinesId,
+          size_tier: String(primary?.size_tier ?? ""),
+          cadence: String(primary?.cadence ?? ""),
+          surcharge_applied: planLines.some((l) => l.surcharge_applied) ? "yes" : "no",
+          surcharge_cents: String(planLines.reduce((sum, l) => sum + l.surcharge_cents, 0)),
           addons_json: JSON.stringify(input.addons),
           car_wash_json: input.car_wash ? JSON.stringify(input.car_wash) : "",
           free_addons_per_month: String(freeAddons),
