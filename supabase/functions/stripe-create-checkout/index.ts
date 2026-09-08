@@ -170,6 +170,26 @@ Deno.serve(async (req) => {
     );
   }
 
+  // ---------- Recompute every size server-side ----------
+  for (const s of input.services) {
+    const check = checkServiceLine({
+      service: s.service,
+      claimedSize: s.size,
+      sqFt: s.sq_ft ?? null,
+      inputs: {
+        bedrooms: input.bedrooms ?? null,
+        bathrooms: input.bathrooms ?? null,
+        lawn_choice: input.lawn_choice ?? null,
+        turf_sq_ft: s.service === "lawn" ? s.sq_ft ?? null : null,
+        vehicle_class: input.vehicle_class ?? null,
+      },
+    });
+    if (!check.ok) {
+      return jsonResponse({ ok: false, error: check.error, detail: check.detail }, 400);
+    }
+  }
+
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
