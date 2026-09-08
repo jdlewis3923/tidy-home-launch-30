@@ -359,24 +359,54 @@ Deno.serve(async (req) => {
     if (stripeErr) console.error('[advance] stripe_connect_pending insert failed', stripeErr);
   }
 
-  // Documenso envelope dispatch on send_offer (fire-and-forget).
+  // Documenso envelope dispatch on send_offer.
+  // Previously fire-and-forget with console.error only, which is exactly why
+  // this never once produced an envelope and nobody found out. Now awaited,
+  // recorded in onboarding_events + admin_alerts, and surfaced to the caller.
+  let documensoResult: { ok: boolean; status?: number; error?: string; body?: unknown } | null = null;
   if (action === 'send_offer') {
-    queueMicrotask(async () => {
-      try {
-        const r = await fetch(`${SUPABASE_URL}/functions/v1/send-documenso-envelope`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ applicant_id: row.id }),
-        });
-        if (!r.ok) console.error('[advance] documenso dispatch http', r.status, await r.text().catch(() => ''));
-      } catch (e) {
-        console.error('[advance] documenso dispatch failed', e);
-      }
-    });
+    try {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/send-documenso-envelope`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ applicant_id: row.id }),
+      });
+      const body = await r.json().catch(() => ({}));
+      documensoResult = r.ok && (body as any)?.ok !== false
+        ? { ok: true, status: r.status, body }
+        : { ok: false, status: r.status, error: (body as any)?.error ?? `http_${r.status}`, body };
+    } catch (e) {
+      documensoResult = { ok: false, error: e instanceof Error ? e.message : String(e) };
+    }
+
+    if (!documensoResult.ok) {
+      console.error('[advance] documenso envelope FAILED', documensoResult);
+      await admin.from('admin_alerts').insert({
+        alert_type: 'documenso_envelope_failed',
+        title: `Documenso envelope failed for ${fullName}`,
+        body: documensoResult.error ?? 'unknown error',
+        context: { applicant_id: row.id, ...documensoResult },
+      }).then(() => {}, () => {});
+      await admin.from('onboarding_events').insert({
+        applicant_id: row.id,
+        event: 'send_offer_documenso_failed',
+        metadata: documensoResult as unknown as Record<string, unknown>,
+      }).then(() => {}, () => {});
+      return jsonResponse({
+        ok: false,
+        error: 'documenso_envelope_failed',
+        details: documensoResult,
+        applicant_id: row.id,
+        current_stage: row.current_stage,
+        note: 'Stage was advanced but NO signing envelope exists. Fix Documenso and re-run send_offer.',
+      }, 502);
+    }
   }
+
+
 
   // Checkr invitation dispatch on send_to_bg_check (fire-and-forget; safe if key unset).
   if (action === 'send_to_bg_check') {
