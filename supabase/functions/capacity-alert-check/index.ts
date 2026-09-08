@@ -19,7 +19,8 @@ const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
 const JUSTIN_PHONE = Deno.env.get('JUSTIN_ALERT_PHONE') ?? '';
 const ALERT_FROM_EMAIL = Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@jointidy.co';
 
-async function adminEmails(supabase: ReturnType<typeof createClient>): Promise<string[]> {
+// deno-lint-ignore no-explicit-any
+async function adminEmails(supabase: any): Promise<string[]> {
   const { data: roles } = await supabase.from('user_roles').select('user_id').eq('role', 'admin');
   const emails: string[] = [];
   for (const r of roles ?? []) {
@@ -96,15 +97,42 @@ Deno.serve(async (req) => {
       ].join('\n');
 
       if (JUSTIN_PHONE) {
+        // Phase 4: the payload must match send-twilio-sms' schema, and the
+        // channel is only recorded when Twilio actually took the message.
+        // notify_channels is the alert latch — a false 'sms' here would claim
+        // Justin was texted AND suppress every future alert for this service.
         try {
-          await supabase.functions.invoke('send-twilio-sms', {
-            body: { to: JUSTIN_PHONE, message: `${subject} — ${r.message}` },
+          const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              to_phone_e164: JUSTIN_PHONE,
+              body: `${subject} — ${r.message}`,
+              idempotency_key: `capacity-${dbKey}-${r.status}-${new Date().toISOString().slice(0, 10)}`,
+              template_name: 'capacity-alert',
+              triggered_by: 'capacity-alert-check',
+            }),
           });
-          channels.push('sms');
+          const payload = await res.json().catch(() => ({}));
+          if (res.ok && payload?.sent === true) channels.push('sms');
+          else if (res.status === 202 && payload?.queued === true) channels.push('sms_queued');
+          else {
+            console.error('[capacity-alert-check] sms failed', res.status, JSON.stringify(payload).slice(0, 300));
+            await supabase.from('admin_alerts').insert({
+              alert_type: 'capacity_alert_sms_failed',
+              title: `Capacity alert SMS failed: ${r.serviceName}`,
+              body: `HTTP ${res.status} — ${String(payload?.error ?? '').slice(0, 200)}`,
+              context: { service: dbKey, level: r.status },
+            }).then(() => {}, () => {});
+          }
         } catch (e) {
-          console.error('[capacity-alert-check] sms failed', e);
+          console.error('[capacity-alert-check] sms threw', e);
         }
       }
+
 
       if (BREVO_API_KEY) {
         const emails = await adminEmails(supabase);

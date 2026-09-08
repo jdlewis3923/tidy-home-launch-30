@@ -12,6 +12,9 @@ const corsHeaders = {
 
 // Sending number comes from TWILIO_FROM_NUMBER only — never hardcoded.
 const TIDY_FROM = Deno.env.get("TWILIO_FROM_NUMBER");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
 
 function validateTwilioSignature(
   authToken: string,
@@ -121,52 +124,62 @@ Deno.serve(async (req) => {
       ? result.reply
       : "Got your message — a real human gets back to you within 1 hour. — Tidy";
 
-    // Send via Twilio
+    // Send through send-twilio-sms so the FTSA send window, idempotency,
+    // delivery callback and logging apply. The AI must never reply at 11pm on
+    // a Sunday; outside the window the reply is parked in sms_outbox.
     let twilioOutboundSid: string | null = null;
     let twilioError: string | null = null;
-    const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
-    const TWILIO_AUTH_TOKEN_RAW = Deno.env.get("TWILIO_AUTH_TOKEN");
-    if (!TIDY_FROM) {
-      twilioError = "TWILIO_FROM_NUMBER is not configured — no SMS reply sent.";
+    let twilioQueued = false;
+    try {
+      const sendResp = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to_phone_e164: from,
+          body: replyToSend,
+          idempotency_key: `support-reply-${messageSid}`,
+          template_name: shouldAutoSend ? "support-ai-reply" : "support-human-ack",
+          triggered_by: "twilio-inbound-sms",
+        }),
+      });
+      const sendData = await sendResp.json().catch(() => ({}));
+      if (sendResp.status === 202 && sendData?.queued === true) {
+        twilioQueued = true;
+      } else if (!sendResp.ok || sendData?.sent !== true) {
+        twilioError = `send-twilio-sms ${sendResp.status}: ${String(sendData?.error ?? "").slice(0, 200)}`;
+        console.error("[twilio-inbound-sms]", twilioError);
+      } else {
+        twilioOutboundSid = sendData?.message_sid ?? null;
+      }
+    } catch (e) {
+      twilioError = e instanceof Error ? e.message : "twilio send failed";
       console.error("[twilio-inbound-sms]", twilioError);
     }
-    if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN_RAW && TIDY_FROM) {
-      try {
-        const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-        const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN_RAW}`);
-        const sendResp = await fetch(url, {
-          method: "POST",
-          headers: {
-            Authorization: `Basic ${basic}`,
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({ To: from, From: TIDY_FROM, Body: replyToSend }),
-        });
-        const sendData = await sendResp.json().catch(() => ({}));
-        if (!sendResp.ok) {
-          twilioError = `twilio ${sendResp.status}: ${JSON.stringify(sendData).slice(0, 200)}`;
-          console.error("[twilio-inbound-sms]", twilioError);
-        } else {
-          twilioOutboundSid = sendData?.sid || null;
-        }
-      } catch (e) {
-        twilioError = e instanceof Error ? e.message : "twilio send failed";
-        console.error("[twilio-inbound-sms]", twilioError);
-      }
-    } else {
-      twilioError = "TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN missing";
-      console.warn("[twilio-inbound-sms]", twilioError);
-    }
 
-    // Log outbound (auto_reply or escalation ack)
+
+    // Log outbound (auto_reply or escalation ack). A parked or failed reply is
+    // recorded as such — never as a delivered message.
     await supabase.from("support_messages").insert({
       conversation_id: convId!,
       direction: shouldAutoSend ? "auto_reply" : "outbound",
       sender_type: shouldAutoSend ? "ai" : "ai",
-      body: replyToSend,
+      body: twilioQueued ? `[queued for next send window] ${replyToSend}` : replyToSend,
       ai_confidence: result.confidence,
       twilio_sid: twilioOutboundSid,
     });
+
+    if (twilioError) {
+      await supabase.from("admin_alerts").insert({
+        alert_type: "support_reply_send_failed",
+        title: "A support reply was not delivered",
+        body: `${from}: ${twilioError}`,
+        context: { conversation_id: convId, message_sid: messageSid },
+      }).then(() => {}, () => {});
+    }
+
 
     // Update conversation status / counters
     const updates: Record<string, unknown> = {};

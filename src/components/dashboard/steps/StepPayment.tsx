@@ -138,25 +138,34 @@ export default function StepPayment({ state, onChange }: Props) {
       // TCPA: store the exact SMS wording the customer saw, plus whether they
       // opted in. Recorded for both outcomes so a "no" is provable too.
       {
-        const { recordConsent, SMS_CONSENT_VERSION, SMS_CONSENT_WORDING, TERMS_VERSION } =
+        const { recordConsentWithRetry, SMS_CONSENT_VERSION, SMS_CONSENT_WORDING, TERMS_VERSION } =
           await import('@/lib/consent');
-        void recordConsent({
-          kind: 'sms',
-          version: SMS_CONSENT_VERSION,
-          wording: SMS_CONSENT_WORDING,
-          granted: state.smsConsent === true,
-          email: state.email || undefined,
-        });
-        // Terms assent: subscribing is the affirmative act, so it is recorded
-        // with the exact wording shown next to the pay button (timestamp,
-        // version and IP are stamped server-side by record-consent).
-        void recordConsent({
-          kind: 'terms',
-          version: TERMS_VERSION,
-          wording: CHECKOUT_TERMS_WORDING,
-          granted: true,
-          email: state.email || undefined,
-        });
+        // AWAITED before the charge: this is the record we would rely on if a
+        // consent claim is ever made, so it must exist before money moves.
+        const [smsOk, termsOk] = await Promise.all([
+          recordConsentWithRetry({
+            kind: 'sms',
+            version: SMS_CONSENT_VERSION,
+            wording: SMS_CONSENT_WORDING,
+            granted: state.smsConsent === true,
+            email: state.email || undefined,
+          }),
+          // Terms assent: subscribing is the affirmative act, so it is recorded
+          // with the exact wording shown next to the pay button (timestamp,
+          // version and IP are stamped server-side by record-consent).
+          recordConsentWithRetry({
+            kind: 'terms',
+            version: TERMS_VERSION,
+            wording: CHECKOUT_TERMS_WORDING,
+            granted: true,
+            email: state.email || undefined,
+          }),
+        ]);
+        if (!smsOk || !termsOk) {
+          setError('We could not save your agreement just now. Please tap the button again.');
+          setSubmitting(false);
+          return;
+        }
       }
 
       if (STRIPE_INTEGRATION_ENABLED && embedded) {

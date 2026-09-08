@@ -60,8 +60,8 @@ export default function CustomerLogin() {
           setError(signUpError.message);
         } else {
           // Durable Terms/Privacy assent record (wording + version + server IP).
-          const { recordConsent, TERMS_VERSION, TERMS_CONSENT_WORDING } = await import('@/lib/consent');
-          void recordConsent({
+          const { recordConsentWithRetry, TERMS_VERSION, TERMS_CONSENT_WORDING } = await import('@/lib/consent');
+          await recordConsentWithRetry({
             kind: 'terms',
             version: TERMS_VERSION,
             wording: TERMS_CONSENT_WORDING,

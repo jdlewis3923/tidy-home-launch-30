@@ -81,35 +81,71 @@ Deno.serve(async (req) => {
     return new Response('not configured', { status: 503 });
   }
 
-  const sig = req.headers.get('stripe-signature');
-  if (!sig) return new Response('missing signature', { status: 400 });
-
-  const rawBody = await req.text();
-  const stripe = new Stripe(STRIPE_SECRET_KEY, {
+  let event: Stripe.Event | null = null;
+  const stripeForReplay = new Stripe(STRIPE_SECRET_KEY, {
     apiVersion: '2024-12-18.acacia',
     httpClient: Stripe.createFetchHttpClient(),
   });
 
-  let event: Stripe.Event | null = null;
-  let lastErr = 'verify failed';
-  for (const secret of WEBHOOK_SECRETS) {
+
+
+  // ---------- Internal replay path (admin recovery) ----------
+  // Requires the literal service-role key, constant-time compared. The event
+  // itself is re-fetched FROM STRIPE by id, so the caller cannot inject a
+  // forged payload — only name an event Stripe already has.
+  const replayHeader = req.headers.get('x-internal-replay');
+  if (replayHeader) {
+    const presented = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
+    let match = presented.length === SUPABASE_SERVICE_ROLE_KEY.length && presented.length > 0;
+    for (let i = 0; i < presented.length && match; i++) {
+      if (presented.charCodeAt(i) !== SUPABASE_SERVICE_ROLE_KEY.charCodeAt(i)) match = false;
+    }
+    if (!match) return new Response('unauthorized', { status: 401 });
     try {
-      event = await stripe.webhooks.constructEventAsync(rawBody, sig, secret);
-      break;
+      const replayed = await stripeForReplay.events.retrieve(replayHeader);
+      event = replayed as unknown as Stripe.Event;
     } catch (err) {
-      lastErr = err instanceof Error ? err.message : 'verify failed';
+      return new Response(
+        `replay retrieve failed: ${err instanceof Error ? err.message : 'unknown'}`,
+        { status: 400 },
+      );
     }
   }
+
   if (!event) {
-    console.error('[stripe-webhook] signature verification failed', lastErr);
-    return new Response(`signature verification failed: ${lastErr}`, { status: 400 });
+    const sig = req.headers.get('stripe-signature');
+    if (!sig) return new Response('missing signature', { status: 400 });
+
+    const rawBody = await req.text();
+    let lastErr = 'verify failed';
+    for (const secret of WEBHOOK_SECRETS) {
+      try {
+        event = await stripeForReplay.webhooks.constructEventAsync(rawBody, sig, secret);
+        break;
+      } catch (err) {
+        lastErr = err instanceof Error ? err.message : 'verify failed';
+      }
+    }
+    if (!event) {
+      console.error('[stripe-webhook] signature verification failed', lastErr);
+      return new Response(`signature verification failed: ${lastErr}`, { status: 400 });
+    }
   }
+  const stripe = stripeForReplay;
+
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
   // ---------- Idempotency: stripe_events table (unique on stripe_event_id) ----------
+  //
+  // Phase 4: a duplicate is only "already done" when the earlier attempt
+  // actually finished. If the stored row is still 'received' or ended in
+  // 'error', a resend from the Stripe dashboard (or admin-stripe-event-replay)
+  // MUST reprocess — otherwise a charged customer with no subscription can
+  // never be recovered.
+  let eventRowId: string | null = null;
   const { data: insertedEvt, error: insErr } = await supabase
     .from('stripe_events')
     .insert({
@@ -123,15 +159,36 @@ Deno.serve(async (req) => {
     .maybeSingle();
 
   if (insErr) {
-    // Unique violation (23505) → we've seen this event. Ack happily.
     if ((insErr as { code?: string }).code === '23505') {
-      return new Response('replay', { status: 200 });
+      const { data: prior } = await supabase
+        .from('stripe_events')
+        .select('id, status, replay_count')
+        .eq('stripe_event_id', event.id)
+        .maybeSingle();
+      if (prior && prior.status === 'processed') {
+        return new Response('replay: already processed', { status: 200 });
+      }
+      if (prior) {
+        await supabase
+          .from('stripe_events')
+          .update({
+            status: 'received',
+            replay_count: ((prior.replay_count as number) ?? 0) + 1,
+            last_replay_at: new Date().toISOString(),
+            error_message: null,
+          })
+          .eq('id', prior.id);
+        eventRowId = prior.id as string;
+        console.log('[stripe-webhook] replaying unfinished event', event.id, event.type);
+      }
+    } else {
+      console.error('[stripe-webhook] idempotency insert failed', insErr.message);
+      // Fall through and try to process anyway.
     }
-    console.error('[stripe-webhook] idempotency insert failed', insErr.message);
-    // Fall through and try to process anyway.
   }
 
-  const eventRowId: string | null = insertedEvt?.id ?? null;
+  if (!eventRowId) eventRowId = insertedEvt?.id ?? null;
+
   const start = performance.now();
 
   try {

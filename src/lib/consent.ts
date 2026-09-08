@@ -22,8 +22,9 @@ export const SMS_CONSENT_WORDING =
 type ConsentKind = 'terms' | 'sms';
 
 /**
- * Fire-and-forget consent write. Never blocks or fails the user's flow, but
- * always logs so a missing record is visible rather than silent.
+ * Writes a consent record and REPORTS whether it landed. This record is the
+ * FTSA/TCPA defense, so callers on the checkout path await it and retry rather
+ * than firing it into the void.
  */
 export async function recordConsent(opts: {
   kind: ConsentKind;
@@ -31,7 +32,7 @@ export async function recordConsent(opts: {
   wording: string;
   granted?: boolean;
   email?: string;
-}): Promise<void> {
+}): Promise<boolean> {
   try {
     const { data, error } = await supabase.functions.invoke('record-consent', {
       body: {
@@ -44,8 +45,19 @@ export async function recordConsent(opts: {
     });
     if (error || !(data as { ok?: boolean } | null)?.ok) {
       console.error('[record-consent]', error?.message ?? data);
+      return false;
     }
+    return true;
   } catch (err) {
     console.error('[record-consent] threw', err);
+    return false;
   }
+}
+
+/** One retry, because a single network blip should not cost us the record. */
+export async function recordConsentWithRetry(
+  opts: Parameters<typeof recordConsent>[0],
+): Promise<boolean> {
+  if (await recordConsent(opts)) return true;
+  return recordConsent(opts);
 }

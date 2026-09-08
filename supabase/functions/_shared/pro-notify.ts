@@ -31,10 +31,10 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<boolean
     return false;
   }
 
-  // Best effort push — a missing VAPID key or subscription must never fail
-  // the caller.
+  // Push is best-effort for the CALLER, but a failure must be visible in the
+  // logs and in admin_alerts — never reported as a delivered notification.
   try {
-    await fetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -47,8 +47,18 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<boolean
         url: n.url ?? '/pro',
       }),
     });
+    if (!res.ok) {
+      const detail = (await res.text().catch(() => '')).slice(0, 300);
+      console.error('[pro-notify] push NOT delivered', res.status, detail);
+      await admin.from('admin_alerts').insert({
+        alert_type: 'pro_push_failed',
+        title: 'A Pro notification push was not delivered',
+        body: `HTTP ${res.status} — ${detail}`,
+        context: { contractor_id: n.contractor_id, kind: n.kind },
+      }).then(() => {}, () => {});
+    }
   } catch (e) {
-    console.warn('[pro-notify] push failed', (e as Error).message);
+    console.error('[pro-notify] push failed', (e as Error).message);
   }
   return true;
 }

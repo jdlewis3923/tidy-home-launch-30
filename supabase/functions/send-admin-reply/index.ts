@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
     }
 
     let twilioSid: string | null = null;
+    let queued = false;
     if (conv.channel === "sms") {
       if (!conv.customer_phone_e164) {
         return new Response(JSON.stringify({ error: "no phone on conversation" }), {
@@ -83,43 +84,33 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
-      const TWILIO_AUTH_TOKEN_RAW = Deno.env.get("TWILIO_AUTH_TOKEN");
-      if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN_RAW) {
-        return new Response(JSON.stringify({ error: "twilio not configured" }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (!TIDY_FROM) {
-        console.error("[send-admin-reply] TWILIO_FROM_NUMBER is not configured — no SMS can be sent.");
-        return new Response(
-          JSON.stringify({ error: "TWILIO_FROM_NUMBER is not configured" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-      const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-      const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN_RAW}`);
-      const sendResp = await fetch(url, {
+      // Phase 4: route through send-twilio-sms so the FTSA send window,
+      // idempotency and delivery receipts apply to admin replies too.
+      const sendResp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-twilio-sms`, {
         method: "POST",
         headers: {
-          Authorization: `Basic ${basic}`,
-          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          "Content-Type": "application/json",
         },
-        body: new URLSearchParams({
-          To: conv.customer_phone_e164,
-          From: TIDY_FROM,
-          Body: body,
+        body: JSON.stringify({
+          to_phone_e164: conv.customer_phone_e164,
+          body,
+          idempotency_key: `admin-reply-${conversation_id}-${Date.now()}`,
+          template_name: "support-admin-reply",
+          triggered_by: "send-admin-reply",
         }),
       });
       const sendData = await sendResp.json().catch(() => ({}));
-      if (!sendResp.ok) {
+      if (sendResp.status === 202 && sendData?.queued === true) {
+        queued = true;
+      } else if (!sendResp.ok || sendData?.sent !== true) {
         return new Response(
-          JSON.stringify({ error: `twilio ${sendResp.status}`, details: sendData }),
+          JSON.stringify({ error: `sms_send_failed (${sendResp.status})`, details: sendData }),
           { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
+      } else {
+        twilioSid = sendData?.message_sid ?? null;
       }
-      twilioSid = sendData?.sid || null;
     }
     // For web: just inserting the row triggers realtime → widget renders it.
 
@@ -130,7 +121,7 @@ Deno.serve(async (req) => {
         direction: "outbound",
         sender_type: "admin",
         sender_user_id: userId,
-        body,
+        body: queued ? `[queued for next send window] ${body}` : body,
         twilio_sid: twilioSid,
       })
       .select("id")
@@ -138,9 +129,10 @@ Deno.serve(async (req) => {
     if (msgErr) throw msgErr;
 
     return new Response(
-      JSON.stringify({ ok: true, message_id: inserted.id, twilio_sid: twilioSid }),
+      JSON.stringify({ ok: true, message_id: inserted.id, twilio_sid: twilioSid, queued }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
+
   } catch (e) {
     console.error("[send-admin-reply] error", e);
     return new Response(

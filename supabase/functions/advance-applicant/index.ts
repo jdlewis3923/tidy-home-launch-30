@@ -374,23 +374,37 @@ Deno.serve(async (req) => {
 
 
 
-  // Checkr invitation dispatch on send_to_bg_check (fire-and-forget; safe if key unset).
+  // Checkr invitation dispatch on send_to_bg_check.
+  //
+  // Phase 4: AWAITED. The applicant is emailed a promise that the background
+  // check is coming, so a detached microtask that dies with the isolate is the
+  // exact send_offer failure again. A dispatch failure is surfaced and alerted.
+  let checkrDispatchError: string | null = null;
   if (action === 'send_to_bg_check') {
-    queueMicrotask(async () => {
-      try {
-        const r = await fetch(`${SUPABASE_URL}/functions/v1/checkr-invite`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ applicant_id: row.id }),
-        });
-        if (!r.ok) console.error('[advance] checkr-invite dispatch http', r.status, await r.text().catch(() => ''));
-      } catch (e) {
-        console.error('[advance] checkr-invite dispatch failed', e);
+    try {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/checkr-invite`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ applicant_id: row.id }),
+      });
+      if (!r.ok) {
+        checkrDispatchError = `checkr-invite ${r.status}: ${(await r.text().catch(() => '')).slice(0, 300)}`;
       }
-    });
+    } catch (e) {
+      checkrDispatchError = `checkr-invite threw: ${(e as Error).message}`;
+    }
+    if (checkrDispatchError) {
+      console.error('[advance]', checkrDispatchError);
+      await admin.from('admin_alerts').insert({
+        alert_type: 'checkr_invite_dispatch_failed',
+        title: `Background check invitation was NOT sent: ${row.email}`,
+        body: `${checkrDispatchError} — the applicant was told it is coming. Re-run send_to_bg_check.`,
+        context: { applicant_id: row.id },
+      }).then(() => {}, () => {});
+    }
   }
 
   // Build attachments from documents → signed URLs.

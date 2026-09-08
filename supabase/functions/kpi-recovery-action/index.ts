@@ -51,17 +51,44 @@ async function sendZap(url: string, body: Record<string, unknown>): Promise<bool
   }
 }
 
-async function sendSmsToJustin(s: SupabaseClient, message: string): Promise<boolean> {
+async function sendSmsToJustin(_s: SupabaseClient, message: string): Promise<boolean> {
   if (!JUSTIN_PHONE) return false;
+  // Payload must match send-twilio-sms' schema, and a non-2xx must be visible.
   try {
-    await s.functions.invoke("send-twilio-sms", {
-      body: { to: JUSTIN_PHONE, message },
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to_phone_e164: JUSTIN_PHONE,
+        body: message,
+        idempotency_key: `kpi-recovery-${await shortHash(message)}-${new Date().toISOString().slice(0, 13)}`,
+        template_name: "kpi-recovery-notice",
+        triggered_by: "kpi-recovery-action",
+      }),
     });
-    return true;
-  } catch {
+    const payload = await res.json().catch(() => ({}));
+    if (res.ok && payload?.sent === true) return true;
+    if (res.status === 202 && payload?.queued === true) return true;
+    console.error("[kpi-recovery] sms failed", res.status, JSON.stringify(payload).slice(0, 300));
+    return false;
+  } catch (e) {
+    console.error("[kpi-recovery] sms threw", e);
     return false;
   }
 }
+
+async function shortHash(input: string): Promise<string> {
+  const bytes = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .slice(0, 6)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 
 // ─── handlers ───
 const HANDLERS: Record<string, Handler> = {
@@ -364,27 +391,47 @@ const HANDLERS: Record<string, Handler> = {
   auto_notify_customers_delay: async (s) => {
     const { data: open } = await s.from("support_conversations").select("id, customer_phone_e164").eq("status", "open");
     let sent = 0;
+    let failed = 0;
+    // These customers were never actually told: the old payload used
+    // {to, message} and failed validation on every single conversation.
     for (const conv of open ?? []) {
       if (!conv.customer_phone_e164) continue;
       try {
-        await s.functions.invoke("send-twilio-sms", {
-          body: {
-            to: conv.customer_phone_e164,
-            message:
-              "Tidy here — quick heads up: our auto-assistant is briefly down. A real human will reply within an hour. Thanks for your patience.",
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            to_phone_e164: conv.customer_phone_e164,
+            body:
+              "Tidy here — quick heads up: our auto-assistant is briefly down. A real human will reply within an hour. Thanks for your patience.",
+            idempotency_key: `assistant-delay-${conv.id}-${new Date().toISOString().slice(0, 13)}`,
+            template_name: "assistant-delay-notice",
+            triggered_by: "kpi-recovery-action",
+          }),
         });
-        sent++;
-      } catch {
-        // Continue best-effort
+        const payload = await res.json().catch(() => ({}));
+        if (res.ok || res.status === 202) sent++;
+        else {
+          failed++;
+          console.error("[kpi-recovery] delay notice failed", conv.id, res.status, String(payload?.error ?? "").slice(0, 200));
+        }
+      } catch (e) {
+        failed++;
+        console.error("[kpi-recovery] delay notice threw", conv.id, (e as Error).message);
       }
     }
     return {
-      ok: true,
-      message: `Delay notice sent to ${sent} open conversations.`,
-      data: { sent },
+      ok: failed === 0,
+      message: failed === 0
+        ? `Delay notice sent to ${sent} open conversations.`
+        : `Delay notice sent to ${sent}; ${failed} FAILED — check /admin/health.`,
+      data: { sent, failed },
     };
   },
+
   auto_clean_hard_bounces: async () => ({
     ok: true,
     message:

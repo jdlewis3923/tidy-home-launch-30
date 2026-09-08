@@ -1,7 +1,9 @@
 // Tidy — Shared helper to notify Justin (Brevo email + PWA push + optional SMS).
 // All channels are best-effort: a failure in one does not block the others.
 
-import { sendBrevoEmail as sendViaBrevo } from './brevo-send.ts';
+import { BrevoSendError, sendBrevoEmail as sendViaBrevo } from './brevo-send.ts';
+
+export { BrevoSendError };
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -73,7 +75,8 @@ export async function sendBrevoEmail(opts: {
       triggered_by: opts.triggeredBy ?? null, status: 'failed',
       error_message: 'BREVO_API_KEY missing', payload: { subject: opts.subject },
     });
-    return null;
+    // Phase 4: no silent null. A caller must be able to see this.
+    throw new BrevoSendError({ sent: false, reason: 'no_api_key' }, 'notifyJustin');
   }
   // All sends go through the shared helper so marketing mail honors the Brevo
   // unsubscribe (blacklist) list. Defaults to relationship mail (marketing: false).
@@ -104,7 +107,9 @@ export async function sendBrevoEmail(opts: {
       error_message: `${result.reason ?? 'send failed'}${result.status ? ` (HTTP ${result.status})` : ''}`,
       payload: { subject: opts.subject, tags: opts.tags ?? [] },
     });
-    return null;
+    // Phase 4: a Brevo 500 used to read as a successful send. It now throws so
+    // every try/catch wrapped around this call becomes live code.
+    throw new BrevoSendError(result, 'notifyJustin');
   }
 
   console.log('[brevo] sent', { to: opts.toEmail, subject: opts.subject, messageId: result.messageId });
@@ -125,30 +130,47 @@ export async function sendPwaPushToJustin(title: string, body: string, url = '/a
     });
     const rows: Array<{ user_id: string }> = r.ok ? await r.json() : [];
     for (const row of rows) {
-      await fetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
+      // Phase 4: a push that returns 500 (or sent:0) must not read as success.
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: row.user_id, title, body, url }),
-      }).catch(()=>{});
+      }).catch((e) => { console.error('[push] fetch failed', (e as Error).message); return null; });
+      if (!res) continue;
+      if (!res.ok) {
+        console.error('[push] send-pwa-push failed', res.status, (await res.text().catch(() => '')).slice(0, 200));
+        continue;
+      }
+      const j = await res.json().catch(() => ({} as Record<string, unknown>));
+      if ((j as { sent?: number }).sent === 0) {
+        console.warn('[push] no device received the alert', j);
+      }
     }
   } catch (e) {
     console.error('[push] fanout failed', e);
   }
 }
 
-export async function sendTwilioSmsToJustin(message: string, idemKey: string) {
+export async function sendTwilioSmsToJustin(message: string, idemKey: string): Promise<boolean> {
   try {
-    await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         to_phone_e164: JUSTIN_PHONE,
         body: message,
         idempotency_key: idemKey,
+        triggered_by: 'notifyJustin',
       }),
     });
+    if (!res.ok && res.status !== 202) {
+      console.error('[sms] send failed', res.status, (await res.text().catch(() => '')).slice(0, 200));
+      return false;
+    }
+    return true;
   } catch (e) {
     console.error('[sms] send failed', e);
+    return false;
   }
 }
 
