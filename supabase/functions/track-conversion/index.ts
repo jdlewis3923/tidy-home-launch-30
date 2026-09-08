@@ -15,6 +15,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { withLogging } from '../_shared/withLogging.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
