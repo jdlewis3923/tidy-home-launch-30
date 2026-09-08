@@ -5017,7 +5017,9 @@ export type Database = {
         Args: { _contractor_id: string }
         Returns: boolean
       }
+      is_privileged_caller: { Args: never; Returns: boolean }
       is_scheduler_paused: { Args: never; Returns: boolean }
+      is_service_caller: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
       mark_visit_paid_in_full: {
         Args: {

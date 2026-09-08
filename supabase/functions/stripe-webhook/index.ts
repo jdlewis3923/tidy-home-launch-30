@@ -311,7 +311,7 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   }
 
 
-  const { data: subRow, error: subErr } = await supabase
+  const { data: insertedRow, error: subErr } = await supabase
     .from('subscriptions')
     .insert({
       user_id: userId,
@@ -343,10 +343,28 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
     .select('id')
     .single();
 
+  // Two Stripe events (invoice.paid and customer.subscription.*) can arrive at
+  // the same instant, so the unique index on stripe_subscription_id may reject
+  // the loser of that race. That is NOT an error: the row exists. Adopt it and
+  // continue — throwing here silently skipped the invoice row, the billing
+  // fields and the referral credit.
+  let subRow = insertedRow;
+  if (subErr && (subErr.code === '23505' || /duplicate key/i.test(subErr.message ?? '')) && stripeSubscriptionId) {
+    const { data: existing } = await supabase
+      .from('subscriptions')
+      .select('id')
+      .eq('stripe_subscription_id', stripeSubscriptionId)
+      .maybeSingle();
+    if (existing) {
+      console.log('[stripe-webhook] subscription already seeded, adopting', existing.id);
+      subRow = existing;
+    }
+  }
 
-  if (subErr || !subRow) {
+  if (!subRow) {
     throw new Error(`subscriptions insert failed: ${subErr?.message ?? 'no row returned'}`);
   }
+
 
 
 
@@ -397,9 +415,8 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
     preferred_day: meta.preferred_day,
     preferred_time: meta.preferred_time,
   });
-
-  await callJobberFn('jobber-sync-customer', { user_id: userId, subscription_id: subRow.id });
-  await callJobberFn('jobber-create-job', { subscription_id: subRow.id });
+  // Jobber decommissioned (Sep 2026) — dispatch lives in the Tidy Pro Portal.
+  // The former jobber-sync-customer / jobber-create-job calls are gone on purpose.
 }
 
 // =====================================================================
@@ -499,7 +516,18 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Ev
     } catch (err) {
       console.error('[stripe-webhook] invoice.paid seed attempt failed', err);
     }
+    // Even if seeding threw, a concurrent event may have written the row.
+    if (!userId) {
+      const { data: late } = await supabase
+        .from('subscriptions')
+        .select('id, user_id')
+        .eq('stripe_subscription_id', stripeSubId)
+        .maybeSingle();
+      userId = late?.user_id ?? userId;
+      localSubId = late?.id ?? localSubId;
+    }
   }
+
 
   if (!userId) {
     console.warn('[stripe-webhook] invoice.paid: no local subscription found for', stripeSubId);
@@ -541,18 +569,27 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Ev
     await supabase.rpc('generate_recurring_visits', { _subscription_id: localSubId, _horizon_days: 45 });
   }
 
-  // Capture card_brand + card_last4 for Billing UI display.
+  // Capture card_brand + card_last4 for Billing UI display. Newer Stripe API
+  // versions no longer expose invoice.charge, so fall back to the invoice's
+  // payment intent and its latest charge.
   try {
-    const chargeId = (invoice as unknown as { charge?: string | { id: string } }).charge;
-    const cid = typeof chargeId === 'string' ? chargeId : chargeId?.id ?? null;
-    if (localSubId && cid) {
-      const { default: StripeCtor } = await import('https://esm.sh/stripe@17.5.0?target=deno');
-      const s = new StripeCtor(STRIPE_SECRET_KEY!, {
-        apiVersion: '2024-12-18.acacia',
-        httpClient: StripeCtor.createFetchHttpClient(),
-      });
-      const charge = await s.charges.retrieve(cid);
-      const card = charge.payment_method_details?.card;
+    if (localSubId) {
+      const inv = invoice as unknown as {
+        charge?: string | { id: string };
+        payment_intent?: string | { id: string };
+      };
+      const cid = typeof inv.charge === 'string' ? inv.charge : inv.charge?.id ?? null;
+      const piId = typeof inv.payment_intent === 'string' ? inv.payment_intent : inv.payment_intent?.id ?? null;
+      let card: { brand?: string | null; last4?: string | null } | null | undefined = null;
+      if (cid) {
+        const charge = await stripe.charges.retrieve(cid);
+        card = charge.payment_method_details?.card;
+      } else if (piId) {
+        const pi = await stripe.paymentIntents.retrieve(piId, { expand: ['latest_charge'] });
+        const latest = pi.latest_charge as unknown as
+          { payment_method_details?: { card?: { brand?: string; last4?: string } } } | null;
+        card = latest?.payment_method_details?.card ?? null;
+      }
       if (card?.brand || card?.last4) {
         await supabase
           .from('subscriptions')
@@ -563,6 +600,7 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Ev
   } catch (err) {
     console.warn('[stripe-webhook] card details capture failed', err);
   }
+
 
   // HALF 2 — customer referral payout: credit the REFERRER $50 once, on the
   // referred customer's FIRST paid invoice.
