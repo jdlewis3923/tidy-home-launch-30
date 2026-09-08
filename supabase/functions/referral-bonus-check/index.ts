@@ -114,9 +114,9 @@ Deno.serve(async (req) => {
     if (!row.referee_contractor_id) { results.push({ id: row.id, skipped: "no_referee" }); continue; }
 
     const { count } = await admin
-      .from("pro_visits")
+      .from("visits")
       .select("id", { count: "exact", head: true })
-      .eq("contractor_id", row.referee_contractor_id)
+      .eq("assigned_pro_id", row.referee_contractor_id)
       .eq("status", "complete");
     if ((count ?? 0) < REFERRAL_THRESHOLD_VISITS) {
       results.push({ id: row.id, skipped: "below_threshold", visits: count ?? 0 });

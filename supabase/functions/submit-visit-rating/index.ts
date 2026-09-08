@@ -107,22 +107,16 @@ Deno.serve(async (req) => {
     let userId: string | null = null;
 
     if (raw) {
-      const pvQuery = admin.from('pro_visits').select('id, contractor_id').limit(1);
-      const { data: pv } = UUID_RE.test(raw)
-        ? await pvQuery.or(`id.eq.${raw},jobber_visit_id.eq.${raw}`)
-        : await pvQuery.eq('jobber_visit_id', raw);
-      if (pv && pv.length) {
-        proVisitId = pv[0].id;
-        contractorId = pv[0].contractor_id ?? null;
-      }
-
-      const vQuery = admin.from('visits').select('id, user_id').limit(1);
+      // visits is the only live source: it carries assigned_pro_id, so the
+      // rating attaches to the pro who actually did the work.
+      const vQuery = admin.from('visits').select('id, user_id, assigned_pro_id').limit(1);
       const { data: v } = UUID_RE.test(raw)
         ? await vQuery.or(`id.eq.${raw},jobber_visit_id.eq.${raw}`)
         : await vQuery.eq('jobber_visit_id', raw);
       if (v && v.length) {
         visitId = v[0].id;
         userId = v[0].user_id ?? null;
+        contractorId = v[0].assigned_pro_id ?? null;
       }
     }
 
@@ -182,14 +176,6 @@ Deno.serve(async (req) => {
     if (insErr) {
       console.error('[submit-visit-rating] insert failed', insErr.message);
       return jsonResponse({ ok: false, error: 'insert_failed' }, 500);
-    }
-
-    if (proVisitId) {
-      const { error: upErr } = await admin
-        .from('pro_visits')
-        .update({ customer_rating: stars })
-        .eq('id', proVisitId);
-      if (upErr) console.warn('[submit-visit-rating] pro_visits update failed', upErr.message);
     }
 
     if (needsFollowup) {

@@ -1,5 +1,6 @@
 // recalc-applicant-readiness — admin-only.
-// Reads pro_visits + google_reviews + complaints + escalations for a contractor
+// Reads visits (the live source of truth since Jobber was decommissioned) plus
+// visit_ratings + google_reviews + complaints + escalations for a contractor
 // and writes the recomputed counters/rates back to applicants. Also flips
 // tier_readiness_status to 'eligible' or 'not_eligible' based on Tier 2 gates.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
@@ -33,20 +34,40 @@ Deno.serve(async (req) => {
   if (!app?.contractor_id) return jsonResponse({ error: 'no_contractor_id' }, 400);
   const cid = app.contractor_id;
 
-  const [{ data: visits }, { data: reviews }, { count: complaints }, { count: escalations }] = await Promise.all([
-    admin.from('pro_visits').select('status, customer_rating, photos_count, photos_expected, completed_at').eq('contractor_id', cid),
+  const [{ data: visits }, { data: ratings0 }, { data: reviews }, { count: complaints }, { count: escalations }] = await Promise.all([
+    admin.from('visits').select('id, status, completed_at').eq('assigned_pro_id', cid),
+    admin.from('visit_ratings').select('rating, stars, excluded_from_average').eq('contractor_id', cid),
     admin.from('google_reviews').select('rating, posted_at').eq('contractor_id', cid).eq('is_seed', false),
     admin.from('complaints').select('id', { count: 'exact', head: true }).eq('contractor_id', cid).is('closed_at', null),
     admin.from('escalations').select('id', { count: 'exact', head: true }).eq('contractor_id', cid).is('resolved_at', null),
   ]);
 
-  const completed = (visits ?? []).filter((v) => v.status === 'complete').length;
-  const cancelled = (visits ?? []).filter((v) => v.status === 'cancelled').length;
-  const photosUp = (visits ?? []).reduce((s, v) => s + (v.photos_count ?? 0), 0);
-  const photosEx = (visits ?? []).reduce((s, v) => s + (v.photos_expected ?? 0), 0);
+  const completedRows = (visits ?? []).filter((v) => v.status === 'complete');
+  const completed = completedRows.length;
+  const cancelled = (visits ?? []).filter((v) => v.status === 'canceled' || v.status === 'cancelled').length;
   const lastVisit = (visits ?? []).map((v) => v.completed_at).filter(Boolean).sort().slice(-1)[0] ?? null;
 
-  const ratings = (reviews ?? []).map((r) => Number(r.rating ?? 0)).filter((n) => n > 0);
+  // Photo compliance from visit_photos — two per visit is the standard
+  // (one before, one after), which is what pro-visit-action enforces.
+  const ids = completedRows.map((v) => v.id);
+  let photosUp = 0;
+  if (ids.length) {
+    const { count } = await admin
+      .from('visit_photos')
+      .select('id', { count: 'exact', head: true })
+      .in('visit_id', ids);
+    photosUp = count ?? 0;
+  }
+  const photosEx = completed * 2;
+
+  // Customer ratings come from visit_ratings (the live rate link). Google
+  // reviews are folded in so a public 5-star still counts.
+  const ratings = [
+    ...(ratings0 ?? [])
+      .filter((r) => r.excluded_from_average !== true)
+      .map((r) => Number(r.stars ?? r.rating ?? 0)),
+    ...(reviews ?? []).map((r) => Number(r.rating ?? 0)),
+  ].filter((n) => n > 0);
   const avg = ratings.length ? Number((ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2)) : null;
 
   const cancelRate = (completed + cancelled) ? cancelled / (completed + cancelled) : 0;
