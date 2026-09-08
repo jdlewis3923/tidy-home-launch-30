@@ -2963,6 +2963,30 @@ export type Database = {
           },
         ]
       }
+      pro_notification_claims: {
+        Row: {
+          contractor_id: string
+          created_at: string
+          id: string
+          kind: string
+          scope: string
+        }
+        Insert: {
+          contractor_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          scope: string
+        }
+        Update: {
+          contractor_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          scope?: string
+        }
+        Relationships: []
+      }
       pro_notifications: {
         Row: {
           body: string | null
@@ -4891,6 +4915,10 @@ export type Database = {
       change_badge_status: {
         Args: { _applicant_id: string; _new_status: string; _note?: string }
         Returns: undefined
+      }
+      claim_pro_notification: {
+        Args: { _contractor_id: string; _kind: string; _scope: string }
+        Returns: boolean
       }
       contractor_visit_pay_cents: {
         Args: {
