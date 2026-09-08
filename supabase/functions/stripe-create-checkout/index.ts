@@ -33,7 +33,6 @@ import {
   CAR_WASH_LOOKUP_KEYS,
   CLEANING_SURCHARGE,
   LAWN_SURCHARGE,
-  contractorVisitPay,
   freeAddonsPerMonth,
   lookupKeyFor,
   monthlyPrice,

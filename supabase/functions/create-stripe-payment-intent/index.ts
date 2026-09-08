@@ -25,7 +25,6 @@ import {
 } from "../_shared/referral-discount.ts";
 import {
   CAR_WASH_LOOKUP_KEYS,
-  contractorVisitPay,
   freeAddonsPerMonth,
   lookupKeyFor,
   monthlyPrice,
