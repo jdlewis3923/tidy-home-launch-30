@@ -16,13 +16,16 @@ import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import {
-  CAR_WASH_LOOKUP_KEYS,
-  CAR_WASH_PRICES,
-  SERVICE_LOOKUP_KEYS,
-  SIZE_PRICES,
+  BILLED_MONTHLY,
+  CADENCES,
+  CLEANING_SURCHARGE,
+  LAWN_SURCHARGE,
+  SERVICE_QUANTITY_RULE,
+  SIZES,
+  lookupKeyFor,
   quantityFor,
-  type CanonSize,
-  type WashCount,
+  type CanonCadence,
+  type CanonService,
 } from '../_shared/pricing-canon.ts';
 
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
@@ -30,15 +33,20 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 
+// Every recurring key the site can resolve: cadence is part of the key, so it
+// must come from lookupKeyFor(service, size, cadence).
 const EXPECTED_CENTS: Record<string, number> = {};
-for (const size of [1, 2, 3] as CanonSize[]) {
-  EXPECTED_CENTS[SERVICE_LOOKUP_KEYS.cleaning[size]] = SIZE_PRICES.cleaning[size] * 100;
-  EXPECTED_CENTS[SERVICE_LOOKUP_KEYS.lawn[size]] = SIZE_PRICES.lawn[size] * 100;
-  EXPECTED_CENTS[SERVICE_LOOKUP_KEYS.detailing[size]] = SIZE_PRICES.detailing[size] * 100;
-  for (const washes of [1, 2] as WashCount[]) {
-    EXPECTED_CENTS[CAR_WASH_LOOKUP_KEYS[size][washes]] = CAR_WASH_PRICES[size][washes] * 100;
+for (const service of ['cleaning', 'lawn', 'detailing'] as CanonService[]) {
+  const cadences: CanonCadence[] =
+    SERVICE_QUANTITY_RULE[service] === 'always_1' ? ['monthly'] : [...CADENCES];
+  for (const size of SIZES) {
+    for (const cadence of cadences) {
+      EXPECTED_CENTS[lookupKeyFor(service, size, cadence)] = BILLED_MONTHLY[service][size][cadence] * 100;
+    }
   }
 }
+EXPECTED_CENTS['surcharge_cleaning_xl'] = CLEANING_SURCHARGE.perVisitDollars * 100;
+EXPECTED_CENTS['surcharge_lawn_xl'] = LAWN_SURCHARGE.perVisitDollars * 100;
 const ALL_KEYS = Object.keys(EXPECTED_CENTS);
 
 Deno.serve(async (req) => {
