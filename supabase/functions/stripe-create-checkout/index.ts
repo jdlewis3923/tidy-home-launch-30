@@ -46,7 +46,7 @@ import {
 } from "../_shared/pricing-canon.ts";
 import { checkServiceLine } from "../_shared/size-validation.ts";
 import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
-import { stripeMode, stripeSecretKey } from "../_shared/stripe-mode.ts";
+import { stripeSecretKey } from "../_shared/stripe-mode.ts";
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
 
 
