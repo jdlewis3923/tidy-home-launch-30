@@ -407,6 +407,13 @@
       "when": 1788911701879,
       "tag": "0057_fix_fail_open_service_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1788911737069,
+      "tag": "0058_guard_unauthorized_definer_functions",
+      "breakpoints": true
     }
   ]
 }
