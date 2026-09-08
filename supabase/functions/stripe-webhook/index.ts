@@ -24,6 +24,7 @@ import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { resolveStripeSubscriptionId } from '../_shared/resolve-stripe-subscription-id.ts';
 import { resolveStripeCurrentPeriodEnd } from '../_shared/resolve-stripe-current-period-end.ts';
+import { loadPlanLines } from '../_shared/plan-lines.ts';
 
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET');
@@ -270,15 +271,12 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   const sizesJson = meta.sizes_json ? JSON.parse(meta.sizes_json) : {};
   const freeAddons = parseInt(meta.free_addons_per_month ?? '0', 10) || 0;
   // service / size_tier / cadence / surcharge_applied / contractor_pay_cents per line.
-  const planLines: Array<{
-    service: string;
-    size_tier: number;
-    cadence: string;
-    surcharge_applied: boolean;
-    surcharge_cents: number;
-    contractor_pay_cents: number;
-  }> = meta.plan_lines_json ? JSON.parse(meta.plan_lines_json) : [];
+  const planLines = await loadPlanLines(supabase, meta);
   const lineFor = (service: string) => planLines.find((l) => l.service === service);
+  if (planLines.length === 0) {
+    console.error('[stripe-webhook] no plan snapshot for', stripeSubscriptionId, '— visit pay would be null');
+  }
+
 
   const { data: subRow, error: subErr } = await supabase
     .from('subscriptions')
