@@ -407,9 +407,43 @@ export function quarterlyDeepCleanPay(size: CanonSize, tier: 1 | 2 = 1, surcharg
 
 /**
  * A visit that is free to the customer, or blocked through no fault of the pro,
- * is PAID IN FULL.
+ * is PAID IN FULL. The reason is REQUIRED and audited — the database rejects a
+ * blocked visit without one. Pros may only report the first two themselves;
+ * the rest are admin-only.
  */
 export const PAY_IN_FULL_WHEN_BLOCKED = true;
+
+export const PAID_IN_FULL_REASONS = [
+  'customer_no_access',
+  'unsafe_conditions',
+  'customer_canceled_same_day',
+  'customer_free_visit',
+  'first_visit_guarantee',
+  'company_error',
+] as const;
+export type PaidInFullReason = (typeof PAID_IN_FULL_REASONS)[number];
+export const PRO_REPORTABLE_PAID_IN_FULL_REASONS: PaidInFullReason[] = ['customer_no_access', 'unsafe_conditions'];
+
+/** The pro's share of anything priced per job: base visits, surcharges and add-ons. */
+export const CONTRACTOR_PAY_SHARE = 0.4;
+
+/** Tier 2: +10% on the Tier 1 DOLLAR figure, rounded to the dollar. Cents in, cents out. */
+export function withTierCents(cents: number, tier: 1 | 2): number {
+  return tier === 2 ? Math.round((cents / 100) * TIER_2_UPLIFT) * 100 : cents;
+}
+
+/** Maps the applicants.tier column (the only two values its CHECK allows) to the pay tier. */
+export function payTierFor(tier: string | null | undefined): 1 | 2 {
+  return tier === 'tier_2_pro_partner' ? 2 : 1;
+}
+
+/**
+ * Pro pay for an approved walkaround add-on, in cents: 40% of the catalog
+ * price, then the Tier 2 uplift on the dollar figure. No other tier exists.
+ */
+export function addonContractorPayCents(amountCents: number, tier: string | null | undefined): number {
+  return withTierCents(Math.round(amountCents * CONTRACTOR_PAY_SHARE), payTierFor(tier));
+}
 
 // ---------------------------------------------------------------------------
 // Prices
