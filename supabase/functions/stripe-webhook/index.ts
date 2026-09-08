@@ -276,6 +276,7 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       frequency: dominantFrequency,
       monthly_total_cents: monthlyTotalCents,
       status: 'active',
+      stripe_status: 'active',
       stripe_subscription_id: stripeSubscriptionId,
       stripe_customer_id: stripeCustomerId,
       next_billing_date: nextBillingDate,
