@@ -10,7 +10,9 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
 
 const ADMIN_EMAIL = 'admin@jointidy.co';
-const JUSTIN_PHONE = '+17868291141';
+// One source of truth: the JUSTIN_ALERT_PHONE secret every alerting function
+// already reads. The literal stays only as a fallback if the secret is unset.
+const JUSTIN_PHONE = Deno.env.get('JUSTIN_ALERT_PHONE') ?? '+17868291141';
 const TIDY_LOGO = 'https://miami-home-simplify.lovable.app/icon-192.png';
 
 export type BrevoAttachment = { url?: string; content?: string; name: string };
