@@ -183,10 +183,17 @@ export function sizeFor(state: ConfigState, service: ServiceType): SizeSelection
   return sizeForCarCare(state.vehicleClass);
 }
 
-/** True when any selected service is above size 3 — quote by hand, never book. */
+/**
+ * True when the plan can't be booked online: any service above size 3, a home
+ * over 4,000 sq ft, or turf over 7,500 sq ft. Those go to the quote form.
+ */
 export function needsQuote(state: ConfigState): boolean {
-  return state.services.some((svc) => sizeFor(state, svc) === 'quote');
+  if (state.services.some((svc) => sizeFor(state, svc) === 'quote')) return true;
+  if (state.services.includes('cleaning') && (state.homeSqFt ?? 0) > CLEANING_SURCHARGE.maxSqFt) return true;
+  if (state.services.includes('lawn') && (state.turfSqFt ?? 0) > LAWN_SURCHARGE.maxSqFt) return true;
+  return false;
 }
+
 
 /** Kept for older call sites: a quote-sized plan is not purchasable. */
 export const hasCustomQuote = needsQuote;
