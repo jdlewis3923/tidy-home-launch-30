@@ -414,6 +414,13 @@
       "when": 1788911737069,
       "tag": "0058_guard_unauthorized_definer_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1788911829170,
+      "tag": "0059_generator_pay_from_canon",
+      "breakpoints": true
     }
   ]
 }
