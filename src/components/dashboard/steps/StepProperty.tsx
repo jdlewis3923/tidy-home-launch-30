@@ -106,6 +106,47 @@ const lawnOptions: LawnChoice[] = ['small', 'standard', 'large', 'over'];
 
 const vehicleOptions: VehicleClass[] = ['sedan', 'coupe', 'crossover', 'suv', 'suv3row', 'truck', 'van'];
 
+/** Square-footage question. Drives the surcharge and the quote cut-off. */
+function SqFtField({
+  label, helper, value, onChange, placeholder,
+}: {
+  label: string; helper: string; value: number | null;
+  onChange: (v: number | null) => void; placeholder: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">{label}</label>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0}
+        step={50}
+        value={value ?? ''}
+        placeholder={placeholder}
+        onChange={e => {
+          const raw = e.target.value.trim();
+          onChange(raw === '' ? null : Math.max(0, Math.round(Number(raw))));
+        }}
+        className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+      />
+      <p className="text-[11px] text-ink-faint">{helper}</p>
+    </div>
+  );
+}
+
+/** Shown the moment an answer lands outside what we can price online. */
+function QuoteNotice({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-hairline bg-cream-deep/40 px-4 py-3">
+      <p className="text-sm font-semibold text-ink lowercase">{children}</p>
+      <p className="text-[11px] text-ink-faint mt-0.5">
+        {QUOTE_COPY.toLowerCase()} give us a ring on {QUOTE_PHONE} — no payment today.
+      </p>
+    </div>
+  );
+}
+
+
 export default function StepProperty({ state, onChange }: Props) {
   const { t } = useLanguage();
   const hasCleaning = state.services.includes('cleaning');
