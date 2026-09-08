@@ -15,7 +15,22 @@ import type { Tables } from '@/integrations/supabase/types';
 
 type Profile = Tables<'profiles'>;
 type Subscription = Tables<'subscriptions'>;
-type Visit = Tables<'visits'>;
+/**
+ * Customer-visible visit shape. Contractor pay columns (visit_pay_cents,
+ * contractor_pay_cents) are deliberately absent — they are also revoked from
+ * the Data API role, so a customer cannot reach them by any route.
+ */
+export const CUSTOMER_VISIT_COLUMNS =
+  'id, user_id, subscription_id, service, service_type, visit_date, time_window, status, notes, scheduled_start, scheduled_end, street, zip, customer_first_name, assigned_pro_id, crew_name, jobber_visit_id, completed_at, on_my_way_at, is_sample, size_tier, cadence, surcharge_applied, visit_kind, created_at, updated_at';
+
+type Visit = Pick<
+  Tables<'visits'>,
+  | 'id' | 'user_id' | 'subscription_id' | 'service' | 'service_type' | 'visit_date'
+  | 'time_window' | 'status' | 'notes' | 'scheduled_start' | 'scheduled_end' | 'street'
+  | 'zip' | 'customer_first_name' | 'assigned_pro_id' | 'crew_name' | 'jobber_visit_id'
+  | 'completed_at' | 'on_my_way_at' | 'is_sample' | 'size_tier' | 'cadence'
+  | 'surcharge_applied' | 'visit_kind' | 'created_at' | 'updated_at'
+>;
 type Invoice = Tables<'invoices'>;
 
 export type DashboardData = {
