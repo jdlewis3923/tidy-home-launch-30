@@ -3909,6 +3909,7 @@ export type Database = {
           sizes_json: Json | null
           status: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id: string | null
+          stripe_status: string | null
           stripe_subscription_id: string | null
           surcharge_applied: boolean
           surcharge_cents: number
@@ -3955,6 +3956,7 @@ export type Database = {
           sizes_json?: Json | null
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
+          stripe_status?: string | null
           stripe_subscription_id?: string | null
           surcharge_applied?: boolean
           surcharge_cents?: number
@@ -4001,6 +4003,7 @@ export type Database = {
           sizes_json?: Json | null
           status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
+          stripe_status?: string | null
           stripe_subscription_id?: string | null
           surcharge_applied?: boolean
           surcharge_cents?: number
@@ -4543,6 +4546,7 @@ export type Database = {
           is_sample: boolean
           jobber_job_id: string | null
           jobber_visit_id: string | null
+          lifecycle_reason: string | null
           notes: string | null
           on_my_way_at: string | null
           paid_in_full_reason: string | null
@@ -4579,6 +4583,7 @@ export type Database = {
           is_sample?: boolean
           jobber_job_id?: string | null
           jobber_visit_id?: string | null
+          lifecycle_reason?: string | null
           notes?: string | null
           on_my_way_at?: string | null
           paid_in_full_reason?: string | null
@@ -4615,6 +4620,7 @@ export type Database = {
           is_sample?: boolean
           jobber_job_id?: string | null
           jobber_visit_id?: string | null
+          lifecycle_reason?: string | null
           notes?: string | null
           on_my_way_at?: string | null
           paid_in_full_reason?: string | null
@@ -4758,6 +4764,14 @@ export type Database = {
       ensure_referral_code: { Args: never; Returns: string }
       founding_spots_left: { Args: { _zip: string }; Returns: number }
       gen_intake_token: { Args: never; Returns: string }
+      generate_recurring_visits: {
+        Args: { _horizon_days?: number; _subscription_id?: string }
+        Returns: {
+          out_created: number
+          out_service: string
+          out_subscription_id: string
+        }[]
+      }
       generate_referral_code: { Args: never; Returns: string }
       get_customer_preferred_pro_options: {
         Args: { p_user_id: string }
