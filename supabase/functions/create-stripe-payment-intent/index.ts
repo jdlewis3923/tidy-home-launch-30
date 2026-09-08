@@ -348,8 +348,19 @@ Deno.serve(async (req) => {
           referral_code: (input.referral_code ?? "").trim().toUpperCase(),
         };
 
-        const idempotencyKey =
-          input.idempotency_key ?? (await deterministicKey(user.id, { items, ts: Math.floor(Date.now() / 60000) }));
+        // The key must change whenever the request changes. A client-supplied
+        // label like "cfg:33156:cleaning:2:biweekly" is stable across a changed
+        // surcharge, a changed Stripe mode or a changed price id, and Stripe
+        // rejects a reused key with different parameters — which is why editing
+        // a plan and retrying used to 500 forever. Always fingerprint the
+        // resolved line items and the mode, and treat the client label as a
+        // hint only.
+        const idempotencyKey = await deterministicKey(user.id, {
+          label: input.idempotency_key ?? "",
+          mode: stripeMode(),
+          items,
+        });
+
 
         // deno-lint-ignore no-explicit-any
         const subParams: any = {
