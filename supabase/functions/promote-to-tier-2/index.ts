@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
     metadata: { coi_document_id: parsed.data.coi_document_id ?? null },
   });
 
-  await updateStripePaySplit(parsed.data.stripe_account_id, 10);
+  await updateStripePaySplit(a.stripe_account_id ?? undefined, 10);
 
   await fireBrevo('brevo_template_t2_confirmed',
     { email: a.email, name: `${a.first_name} ${a.last_name}` },

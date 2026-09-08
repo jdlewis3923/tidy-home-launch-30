@@ -85,7 +85,15 @@ export function useDashboardData(): DashboardData {
           .maybeSingle(),
         supabase
           .from('visits')
-          .select('*')
+          // Explicit columns only. Contractor pay (visit_pay_cents,
+          // contractor_pay_cents) must never reach a customer's browser, and
+          // those columns are also revoked from the Data API role.
+          .select(
+            'id, user_id, subscription_id, service, service_type, visit_date, time_window, ' +
+              'status, notes, scheduled_start, scheduled_end, street, zip, customer_first_name, ' +
+              'assigned_pro_id, crew_name, jobber_visit_id, completed_at, on_my_way_at, ' +
+              'is_sample, size_tier, cadence, surcharge_applied, visit_kind, created_at, updated_at'
+          )
           .eq('user_id', user.id)
           .order('visit_date', { ascending: true }),
         supabase
