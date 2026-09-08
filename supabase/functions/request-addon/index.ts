@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
       .from('addon_requests')
       .insert({
         job_id,
-        pro_visit_id: visit.id,
+        // pro_visit_id intentionally unset: it FKs the retired pro_visits table.
         pro_id: proUserId,
         addon_name: 'Other — needs quote',
         addon_key: OTHER_ADDON_KEY,
@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
     .from('addon_requests')
     .insert({
       job_id,
-      pro_visit_id: visit.id,
+      // pro_visit_id intentionally unset: it FKs the retired pro_visits table.
       pro_id: proUserId,
       customer_id: customerId,
       addon_id: addon.id,

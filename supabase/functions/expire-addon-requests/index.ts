@@ -38,14 +38,7 @@ Deno.serve(async (req) => {
   for (const r of expired ?? []) {
     // Same rating protection as an explicit decline — the Pro did the right
     // thing and got no answer.
-    if (r.pro_visit_id) {
-      await admin.from('pro_visits').update({
-        condition_flagged: true,
-        condition_photo_url: r.photo_url,
-        condition_note: r.condition_note,
-        declined_addon_name: r.addon_name,
-      }).eq('id', r.pro_visit_id);
-    }
+    // pro_visits is retired; the expiry itself is the record on the request row.
     await notifyPro(admin, {
       contractor_id: r.pro_id,
       kind: 'addon_expired',
