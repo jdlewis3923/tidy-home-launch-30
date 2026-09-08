@@ -44,6 +44,8 @@ import {
   type CanonSize,
   type WashCount,
 } from "../_shared/pricing-canon.ts";
+import { checkServiceLine } from "../_shared/size-validation.ts";
+import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
 
 
@@ -72,6 +74,17 @@ const CheckoutInputSchema = z.object({
     )
     .min(1)
     .max(3),
+
+  // The UNDERLYING size inputs — the server recomputes size and rejects a
+  // mismatch, so a hand-crafted POST cannot buy a size it isn't.
+  bedrooms: z.number().int().min(0).max(20).nullable().optional(),
+  bathrooms: z.number().min(0).max(20).nullable().optional(),
+  lawn_choice: z.enum(["small", "standard", "large", "over"]).nullable().optional(),
+  vehicle_class: z
+    .enum(["sedan", "coupe", "suv", "crossover", "truck", "suv3row", "van"])
+    .nullable()
+    .optional(),
+
 
   addons: z
     .array(z.object({ addon_name: z.string().min(1).max(64), qty: z.number().int().min(1).max(20) }))
