@@ -60,24 +60,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'stripe_connect_invalid_key', reason }, 503);
   }
 
-  const auth = req.headers.get('Authorization') ?? '';
-  const apiKeyHeader = req.headers.get('apikey') ?? '';
-  const tokenSource = auth.startsWith('Bearer ') ? auth.replace('Bearer ', '').trim() : apiKeyHeader.trim();
-  if (!tokenSource) return jsonResponse({ error: 'unauthorized' }, 401);
-
-  const role = jwtRole(tokenSource);
-  if (role !== 'service_role') {
-    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: auth } },
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    const { data: userRes } = await userClient.auth.getUser();
-    const userId = userRes?.user?.id;
-    if (!userId) return jsonResponse({ error: 'unauthorized' }, 401);
-    const { data: roleRow } = await admin
-      .from('user_roles').select('role').eq('user_id', userId).eq('role', 'admin').maybeSingle();
-    if (!roleRow) return jsonResponse({ error: 'forbidden' }, 403);
-  }
+  // Bearer only — the `apikey` header is never validated by the gateway.
+  // Literal service-role key (constant-time) OR a signature-verified admin.
+  const authResult = await requireServiceOrAdmin(req);
+  if (!authResult.ok) return jsonResponse({ error: authResult.error }, authResult.status);
 
   const parsed = Body.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) {
