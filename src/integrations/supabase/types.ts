@@ -1618,6 +1618,7 @@ export type Database = {
       integration_logs: {
         Row: {
           created_at: string
+          detail: Json | null
           error_message: string | null
           event: string
           id: string
@@ -1628,6 +1629,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          detail?: Json | null
           error_message?: string | null
           event: string
           id?: string
@@ -1638,6 +1640,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          detail?: Json | null
           error_message?: string | null
           event?: string
           id?: string

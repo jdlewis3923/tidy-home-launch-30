@@ -1,16 +1,9 @@
 // jobber-oauth-callback — DECOMMISSIONED (Sep 2026).
 //
-// No tokens are exchanged or persisted. Inert stub.
+// No tokens are exchanged or stored. Inert, logged, always 200.
+import { serveJobberStub } from '../_shared/jobber-stub.ts';
 
-import { handleCors, jsonResponse } from '../_shared/cors.ts';
-
-Deno.serve(async (req) => {
-  const pre = handleCors(req);
-  if (pre) return pre;
-  return jsonResponse({
-    ok: false,
-    disabled: true,
-    reason: 'jobber_decommissioned',
-    detail: 'Jobber is no longer connected to the app.',
-  }, 410);
-});
+Deno.serve(serveJobberStub(
+  'jobber-oauth-callback',
+  'Jobber is decommissioned; no tokens are exchanged or stored.',
+));

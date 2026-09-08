@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ReviewsThisWeekCard from "@/components/admin/ReviewsThisWeekCard";
+import JobberStubCallers from "@/components/admin/JobberStubCallers";
 
 type Source =
   | "stripe"
@@ -333,6 +334,11 @@ export default function AdminHealth() {
         <div className="mt-6">
           <ReviewsThisWeekCard />
         </div>
+
+        <div className="mt-6">
+          <JobberStubCallers />
+        </div>
+
 
         {data && (
           <div className="mt-6 space-y-4">

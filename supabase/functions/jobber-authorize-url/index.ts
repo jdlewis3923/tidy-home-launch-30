@@ -1,17 +1,12 @@
 // jobber-authorize-url — DECOMMISSIONED (Sep 2026).
 //
-// There is no Jobber connection to authorize any more. Inert stub so the
-// admin surface cannot start an OAuth flow that reconnects a dead vendor.
+// There is no Jobber connection to authorize. This is an admin/browser path,
+// never a Zap target, so it stays inert with a 200 and a log row for
+// consistency with the other stubs.
+import { serveJobberStub } from '../_shared/jobber-stub.ts';
 
-import { handleCors, jsonResponse } from '../_shared/cors.ts';
-
-Deno.serve(async (req) => {
-  const pre = handleCors(req);
-  if (pre) return pre;
-  return jsonResponse({
-    ok: false,
-    disabled: true,
-    reason: 'jobber_decommissioned',
-    detail: 'Jobber is no longer connected to the app.',
-  }, 410);
-});
+Deno.serve(serveJobberStub(
+  'jobber-authorize-url',
+  'Jobber is decommissioned; there is no connection to authorize.',
+  { url: null },
+));

@@ -1,20 +1,10 @@
 // jobber-sync-customer — DECOMMISSIONED (Sep 2026).
 //
-// Customer records live in Lovable Cloud (profiles + subscriptions) and
-// dispatch is the Tidy Pro Portal. Existing subscriptions.jobber_client_id
-// values are left in place as dead data.
-//
-// Inert 200 stub: no Jobber call, no writes.
+// Customers live in Lovable Cloud; there is no external CRM to mirror into.
+import { serveJobberStub } from '../_shared/jobber-stub.ts';
 
-import { handleCors, jsonResponse } from '../_shared/cors.ts';
-
-Deno.serve(async (req) => {
-  const pre = handleCors(req);
-  if (pre) return pre;
-  return jsonResponse({
-    ok: true,
-    disabled: true,
-    reason: 'jobber_decommissioned',
-    detail: 'Customers are not mirrored to Jobber. This endpoint is inert.',
-  });
-});
+Deno.serve(serveJobberStub(
+  'jobber-sync-customer',
+  'Customer records are owned locally. This endpoint is inert.',
+  { jobber_client_id: null },
+));

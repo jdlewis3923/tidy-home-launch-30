@@ -372,6 +372,13 @@
       "when": 1788898029656,
       "tag": "0052_jobber_decommission_unschedule_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1788899128104,
+      "tag": "0053_integration_logs_detail_and_kpi_defs",
+      "breakpoints": true
     }
   ]
 }
