@@ -4784,6 +4784,15 @@ export type Database = {
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
       nextval: { Args: { seq_name: string }; Returns: number }
+      pro_capacity_stats_internal: {
+        Args: never
+        Returns: {
+          applicant_id: string
+          booked_pct: number
+          high_demand: boolean
+          preferred_by_count: number
+        }[]
+      }
       pro_coi_state: {
         Args: { _pro: string }
         Returns: {
