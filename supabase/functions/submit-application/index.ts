@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       if (Number.isNaN(exp.getTime()) || exp < today) {
-        return jsonResponse({ error: 'invalid_license_expiry', message: 'Driver\'s licence expiry must be a valid future date.' }, 400);
+        return jsonResponse({ error: 'invalid_license_expiry', message: 'Driver\'s license expiry must be a valid future date.' }, 400);
       }
     }
 

@@ -49,7 +49,7 @@ export default function ProTierProgression() {
             How Tier Progression Works at Tidy
           </h1>
           <p className="text-slate-600 mt-3 max-w-2xl mx-auto">
-            Every Pro starts at Tier 1 with full Tidy backing. Earn Tier 2 to unlock a higher pay split, a higher per-visit floor, and premium routes.
+            Every Pro starts at Tier 1 with full Tidy backing. Earn Tier 2 to unlock a +10% uplift on your pay for every visit, plus premium routes.
           </p>
         </div>
 
