@@ -53,24 +53,10 @@ async function fireZap(eventName: string, payload: unknown) {
   }
 }
 
-async function callJobberFn(fn: 'jobber-sync-customer' | 'jobber-create-job', body: unknown) {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/${fn}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      console.error(`[stripe-webhook] ${fn} failed`, res.status, text.slice(0, 200));
-    }
-  } catch (err) {
-    console.error(`[stripe-webhook] ${fn} dispatch threw`, err);
-  }
-}
+// Jobber decommissioned (Sep 2026): dispatch is the Tidy Pro Portal. The
+// former blocking jobber-sync-customer / jobber-create-job calls were removed
+// from provisioning — job creation had never once succeeded.
+
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok');

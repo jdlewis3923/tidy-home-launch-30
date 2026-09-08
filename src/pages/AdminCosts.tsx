@@ -77,8 +77,6 @@ export default function AdminCosts() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<CostEntry | null>(null);
   const [form, setForm] = useState<Partial<CostEntry>>(EMPTY_FORM);
-  const [syncing, setSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"date" | "amount">("date");
 
   const month = useMemo(() => monthBounds(), []);
@@ -195,22 +193,6 @@ export default function AdminCosts() {
     void fetchAll();
   };
 
-  const syncJobber = async () => {
-    setSyncing(true);
-    setSyncResult(null);
-    try {
-      const { data, error } = await supabase.functions.invoke("sync-jobber-payouts", {
-        body: { start_date: month.start, end_date: month.end },
-      });
-      if (error) throw error;
-      setSyncResult(`Synced ${data?.synced ?? 0} payouts (skipped ${data?.skipped ?? 0}, errors ${data?.error_count ?? 0}).`);
-      void fetchAll();
-    } catch (err) {
-      setSyncResult(`Error: ${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      setSyncing(false);
-    }
-  };
 
   if (forbidden) {
     return <div className="min-h-screen flex items-center justify-center p-8">
@@ -229,14 +211,10 @@ export default function AdminCosts() {
           </div>
           <div className="flex flex-wrap gap-2">
             <button onClick={openNew} className="px-3 py-1.5 text-sm rounded-md bg-slate-900 text-white hover:bg-slate-800">+ Add cost</button>
-            <button onClick={syncJobber} disabled={syncing} className="px-3 py-1.5 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-60">
-              {syncing ? "Syncing..." : "Sync Jobber payouts"}
-            </button>
             <button onClick={exportCsv} className="px-3 py-1.5 text-sm rounded-md border border-slate-300 bg-white hover:bg-slate-50">Export CSV</button>
           </div>
         </header>
 
-        {syncResult && <div className="text-xs text-slate-700 bg-white border border-slate-200 rounded p-2">{syncResult}</div>}
         {error && <div className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded p-3">{error}</div>}
 
         {/* At a glance */}
