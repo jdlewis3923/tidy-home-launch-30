@@ -151,9 +151,9 @@ const config: ServiceLandingConfig = {
       description:
         "Recurring lawn care in Pinecrest and Kendall. One flat price per visit set by the size of your lot.",
       offers: [
-        { name: "Size 1 lot (up to 2,000 sq ft turf)", price: 45, unit: "visit" },
-        { name: "Size 2 lot (2,001–3,500 sq ft turf)", price: 65, unit: "visit" },
-        { name: "Size 3 lot (3,501–5,000 sq ft turf)", price: 99, unit: "visit" },
+        { name: "Size 1 lot (up to 3,000 sq ft turf)", price: 45, unit: "visit" },
+        { name: "Size 2 lot (3,001–6,000 sq ft turf)", price: 65, unit: "visit" },
+        { name: "Size 3 lot (6,001–10,000 sq ft turf)", price: 99, unit: "visit" },
       ],
     },
   },

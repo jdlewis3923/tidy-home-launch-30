@@ -348,7 +348,7 @@ export default function ProDashboard() {
           <ModuleCard icon={<Sparkles className="h-5 w-5" />}
             kicker="Skills & badges"
             title="Unlock Detailing certification"
-            body="Adds $20–$45 per add-on visit"
+            body="Add-on pay is 40% of the catalog price"
             cta="Start training" href="/pro" />
           <ModuleCard icon={<Clock className="h-5 w-5" />}
             kicker="Schedule"

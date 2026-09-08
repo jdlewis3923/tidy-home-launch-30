@@ -872,8 +872,8 @@ export default function AdminApplicants() {
                     { label: "US work authorized", value: yn(submitted?.work_authorized) },
                     { label: "Bilingual English + Spanish", value: yn(open.bilingual ?? submitted?.bilingual) },
                     { label: "Willing to carry GL insurance", value: yn(open.insurance_willing ?? submitted?.insurance_willing) },
-                    { label: "Valid Florida driver's licence", value: yn(open.fl_license ?? submitted?.fl_license) },
-                    { label: "Licence expiry", value: open.license_expiry ?? submitted?.license_expiry ?? null },
+                    { label: "Valid Florida driver's license", value: yn(open.fl_license ?? submitted?.fl_license) },
+                    { label: "License expiry", value: open.license_expiry ?? submitted?.license_expiry ?? null },
                     ...(open.wash_only
                       ? [{ label: "Detail capability", value: "Wash only — no pressure washer" }]
                       : []),

@@ -142,11 +142,11 @@ export default function Apply() {
       return;
     }
     if (!form.fl_license) {
-      toast({ title: t("Valid Florida driver's licence?"), variant: "destructive" });
+      toast({ title: t("Valid Florida driver's license?"), variant: "destructive" });
       return;
     }
     if (form.fl_license === "yes" && !form.license_expiry) {
-      toast({ title: t("Driver's licence expiry date?"), variant: "destructive" });
+      toast({ title: t("Driver's license expiry date?"), variant: "destructive" });
       return;
     }
 
@@ -160,7 +160,7 @@ export default function Apply() {
       return;
     }
     if (form.fl_license === "no") {
-      setDeclined(t("A valid Florida driver's licence is required to drive between appointments."));
+      setDeclined(t("A valid Florida driver's license is required to drive between appointments."));
       return;
     }
 
@@ -190,7 +190,7 @@ export default function Apply() {
         const reasons: Record<string, string> = {
           bilingual_required: t("This role requires fluent English and Spanish to communicate with our Miami customers."),
           insurance_required: t("Every Tidy Pro must carry a $1M/$2M general liability policy naming Tidy as Additional Insured before the first visit."),
-          fl_license_required: t("A valid Florida driver's licence is required to drive between appointments."),
+          fl_license_required: t("A valid Florida driver's license is required to drive between appointments."),
         };
         setDeclined(reasons[data.reason] ?? t("Not a fit at this time"));
         return;
@@ -525,7 +525,7 @@ export default function Apply() {
                 </p>
 
               <YesNoBlock
-                label={t("Do you have a valid Florida driver's licence?") + " *"}
+                label={t("Do you have a valid Florida driver's license?") + " *"}
                 value={form.fl_license}
                 onChange={(v) => set("fl_license", v)}
                 name="fl_license"
@@ -533,7 +533,7 @@ export default function Apply() {
               {form.fl_license === "yes" && (
                 <div>
                   <Label htmlFor="license_expiry" className="text-ink">
-                    {t("Licence expiry date")} *
+                    {t("License expiry date")} *
                   </Label>
                   <Input
                     id="license_expiry"

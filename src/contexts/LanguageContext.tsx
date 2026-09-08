@@ -446,9 +446,9 @@ const translations: Record<string, string> = {
   "Monthly House Cleaning in Pinecrest + Kendall": "Limpieza Mensual del Hogar en Pinecrest + Kendall",
   "Same Pro. Locked rate. No contracts. Handle your home on autopilot.":
     "El mismo profesional. Tarifa fija. Sin contratos. Tu casa en piloto automático.",
-  "From $139 a month": "Desde $139 por visita",
+  "From $139 a month": "Desde $139 al mes",
   "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a month** — with the same Pro every time.":
-    "Las limpiezas sueltas en Pinecrest cuestan en promedio **$180–$260**. Nuestros planes empiezan en **$139 por visita** — con el mismo profesional cada vez.",
+    "Las limpiezas sueltas en Pinecrest cuestan en promedio **$180–$260**. Nuestros planes empiezan en **$139 al mes** — con el mismo profesional cada vez.",
   // House Cleaning plans
   "One visit per month, same Pro every time.": "Una visita al mes, el mismo Pro siempre.",
   "Two visits per month, priority scheduling.": "Dos visitas al mes, con prioridad en agendado.",
@@ -475,7 +475,7 @@ const translations: Record<string, string> = {
   // House Cleaning FAQs
   "What's the price and what's it based on?": "¿Cuál es el precio y de qué depende?",
   "One price per visit, set by the size of your home: $139, $189 or $279 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Homes with 5+ bedrooms are quoted by hand.":
-    "Un precio fijo por visita, según el tamaño de tu casa: $139, $189 o $279. La frecuencia solo lo multiplica — mensual es una visita, quincenal dos y semanal cuatro. Las casas de 5+ recámaras las cotizamos a mano.",
+    "Un precio por visita, según el tamaño de tu casa: $139, $189 o $279 en el plan mensual. Venir más seguido baja el precio por visita — quincenal es 8% menos por visita que mensual y semanal 18% menos. Siempre se cobra al mes. Las casas de 5+ recámaras las cotizamos a mano.",
   "Yes. No contracts, no cancellation fees. Pause, skip, or cancel from your dashboard anytime.":
     "Sí. Sin contratos, sin cargos por cancelación. Pausa, omite o cancela desde tu panel cuando quieras.",
   "What's your service area?": "¿Cuál es el área de servicio?",
@@ -485,7 +485,7 @@ const translations: Record<string, string> = {
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
 "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. A bed edge reset is available as an add-on.":
-    "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y recoger o triturar la grama cortada. La poda de setos y arbustos está disponible como servicio adicional.",
+    "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y recoger o triturar la grama cortada. El reajuste del borde de jardineras está disponible como servicio adicional.",
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, interior windows, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
   "Who does the cleaning?": "¿Quién hace la limpieza?",
@@ -496,7 +496,7 @@ const translations: Record<string, string> = {
     "Avísanos en 24 horas y volvemos a limpiar el área o te acreditamos a tu cuenta — sin preguntas.",
   "Already booking cleaning? Add lawn care from $45 a month.": "¿Ya tienes limpieza? Agrega jardín desde $45 al mes.",
   "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.":
-    "Agrega un 2º servicio y te regalamos un lavado de carro cada mes — y nunca más coordinas dos proveedores.",
+    "Agrega un 2º servicio y eliges un servicio adicional premium gratis cada mes — y nunca más coordinas dos proveedores.",
 
   // Lawn Care LP
   "Monthly Lawn Care in Pinecrest + Kendall": "Cuidado Mensual del Jardín en Pinecrest + Kendall",

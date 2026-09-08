@@ -574,7 +574,7 @@ export const CLEANING_PAID_ADDONS = [
   'dishes',
   'garage',
   'patio',
-  'organising',
+  'organizing',
 ];
 
 export const LAWN_INCLUDED = ['mow', 'edge', 'line-trim', 'blow clear of hard surfaces'];

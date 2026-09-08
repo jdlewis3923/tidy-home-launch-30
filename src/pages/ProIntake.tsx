@@ -73,7 +73,7 @@ const STEPS: Step[] = [
     short: "Vehicle",
     fields: [
       { name: "vehicle", label: "Year / make / model", type: "text", required: true, placeholder: "2019 Toyota Tacoma" },
-      { name: "vehicle_color", label: "Colour", type: "text", required: true },
+      { name: "vehicle_color", label: "Color", type: "text", required: true },
       { name: "vehicle_2", label: "Second vehicle (optional)", type: "text" },
       {
         name: "door_material",
@@ -106,8 +106,8 @@ const STEPS: Step[] = [
       { name: "ins_carrier", label: "Insurance carrier", type: "text", required: true },
       { name: "ins_policy", label: "Policy number", type: "text", required: true },
       { name: "ins_expiry", label: "Policy expiry", type: "date", required: true },
-      { name: "dl_number", label: "Driver's licence number", type: "text", required: true },
-      { name: "dl_expiry", label: "Licence expiry", type: "date", required: true },
+      { name: "dl_number", label: "Driver's license number", type: "text", required: true },
+      { name: "dl_expiry", label: "License expiry", type: "date", required: true },
       { name: "auto_insurance", label: "Auto insurance carrier and expiry", type: "text", required: true, placeholder: "GEICO — 04/2027" },
     ],
   },
