@@ -82,6 +82,12 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     car_wash,
     referral_code: config.referralCode?.trim() || undefined,
     zip: config.zip,
+    // The underlying size inputs — the server recomputes size and rejects a
+    // mismatch, so a hand-crafted POST can't buy a size it isn't.
+    bedrooms: config.bedrooms ? parseInt(config.bedrooms, 10) : null,
+    bathrooms: config.bathrooms ? parseFloat(config.bathrooms) : null,
+    lawn_choice: config.lawnChoice ?? null,
+    vehicle_class: config.vehicleClass ?? null,
     preferred_day: config.preferredDay,
     preferred_time: config.preferredTime,
     access_water_spigot: config.hasWaterSpigot ?? undefined,
