@@ -404,6 +404,11 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Str
   });
 }
 
+/** True only once the money is actually collected (or a trial has begun). */
+function paymentConfirmed(sub: Stripe.Subscription): boolean {
+  return sub.status === 'active' || sub.status === 'trialing';
+}
+
 // deno-lint-ignore no-explicit-any
 async function handleSubscriptionCreated(stripe: Stripe, supabase: any, event: Stripe.Event) {
   const sub = event.data.object as Stripe.Subscription;
@@ -414,11 +419,20 @@ async function handleSubscriptionCreated(stripe: Stripe, supabase: any, event: S
     // handled by checkout.session.completed. Skip silently.
     return;
   }
+  // The embedded path creates the subscription with payment_behavior
+  // default_incomplete, so this event fires BEFORE the card is confirmed.
+  // Seeding here would leave an active plan and three scheduled visits behind a
+  // closed tab with nothing collected. Wait for the payment.
+  if (!paymentConfirmed(sub)) {
+    console.log('[stripe-webhook] subscription.created not seeded — status', sub.status);
+    return;
+  }
   const stripeCustomerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null;
   await seedSubscriptionAndVisits(stripe, supabase, {
     userId, meta, stripeSubscriptionId: sub.id, stripeCustomerId,
   });
 }
+
 
 // deno-lint-ignore no-explicit-any
 async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Event) {
