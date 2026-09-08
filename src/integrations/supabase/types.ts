@@ -2999,6 +2999,60 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_push_outbox: {
+        Row: {
+          attempts: number
+          body: string | null
+          context: Json
+          contractor_id: string
+          created_at: string
+          id: string
+          idempotency_key: string
+          kind: string
+          last_error: string | null
+          queued_reason: string
+          release_after: string
+          sent_at: string | null
+          status: string
+          title: string
+          url: string | null
+        }
+        Insert: {
+          attempts?: number
+          body?: string | null
+          context?: Json
+          contractor_id: string
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          kind: string
+          last_error?: string | null
+          queued_reason?: string
+          release_after: string
+          sent_at?: string | null
+          status?: string
+          title: string
+          url?: string | null
+        }
+        Update: {
+          attempts?: number
+          body?: string | null
+          context?: Json
+          contractor_id?: string
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          kind?: string
+          last_error?: string | null
+          queued_reason?: string
+          release_after?: string
+          sent_at?: string | null
+          status?: string
+          title?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       pro_referrals: {
         Row: {
           blocked_reason: string | null
@@ -4781,6 +4835,20 @@ export type Database = {
       admin_get_scheduler_paused: { Args: never; Returns: boolean }
       admin_get_service_role_key: { Args: never; Returns: string }
       admin_get_vapid_public: { Args: never; Returns: string }
+      admin_pro_push_status: {
+        Args: never
+        Returns: {
+          applicant_id: string
+          badge_status: string
+          contractor_id: string
+          devices: number
+          first_name: string
+          has_fallback_phone: boolean
+          last_name: string
+          last_push_device_at: string
+          reachable: boolean
+        }[]
+      }
       admin_set_jobber_refresh_token: {
         Args: { _token: string }
         Returns: undefined

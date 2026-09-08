@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, ArrowLeft, BellOff, Bell, CheckCircle2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
+import ProPushStatus from "@/components/admin/ProPushStatus";
 
 interface Prefs {
   pwa_push_enabled: boolean;
@@ -263,6 +264,7 @@ export default function AdminNotificationSettings() {
             )}
           </>
         )}
+        <div className="mt-6"><ProPushStatus /></div>
       </main>
     </div>
   );

@@ -1,5 +1,8 @@
 // Tidy — sms-outbox-release (cron, every 15 minutes).
 //
+// Also drains public.pro_push_outbox: non-urgent Pro pushes held outside the
+// 08:00-18:00 ET Mon-Sat courtesy window. Same rule — held, never dropped.
+//
 // Drains public.sms_outbox: any message parked because it hit quiet hours or a
 // Sunday is sent as soon as the window opens. Nothing is destroyed; a message
 // that Twilio rejects is marked failed with the vendor error and raises an
@@ -35,8 +38,12 @@ Deno.serve(async (req) => {
       .from('sms_outbox')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'queued');
+    const { count: pushQueued } = await admin
+      .from('pro_push_outbox')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'queued');
     return jsonResponse({
-      ok: true, window_open: false, queued: count ?? 0,
+      ok: true, window_open: false, queued: count ?? 0, push_queued: pushQueued ?? 0,
       next_window: nextOpenWindow().toISOString(),
     });
   }
@@ -119,5 +126,71 @@ Deno.serve(async (req) => {
     }
   }
 
-  return jsonResponse({ ok: true, window_open: true, considered: rows?.length ?? 0, sent, failed, results });
+  // ------------------------- held Pro pushes -------------------------------
+  const { data: pushRows } = await admin
+    .from('pro_push_outbox')
+    .select('*')
+    .eq('status', 'queued')
+    .lte('release_after', new Date().toISOString())
+    .order('created_at', { ascending: true })
+    .limit(BATCH);
+
+  let pushSent = 0;
+  let pushFailed = 0;
+  const pushResults: Array<Record<string, unknown>> = [];
+  for (const row of pushRows ?? []) {
+    let errMessage: string | null = null;
+    let httpStatus = 0;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: row.contractor_id,
+          title: row.title,
+          body: row.body ?? '',
+          url: row.url ?? '/pro',
+        }),
+      });
+      httpStatus = res.status;
+      const payload = (await res.json().catch(() => ({}))) as { ok?: boolean; sent?: number; error?: string };
+      if (!res.ok || payload.ok !== true || (payload.sent ?? 0) < 1) {
+        errMessage = `send-pwa-push ${res.status}: ${String(payload.error ?? '').slice(0, 200)}`;
+      }
+    } catch (e) {
+      errMessage = (e as Error).message;
+    }
+
+    const attempts = (row.attempts as number) + 1;
+    if (!errMessage) {
+      await admin.from('pro_push_outbox').update({
+        status: 'sent', attempts, sent_at: new Date().toISOString(), last_error: null,
+      }).eq('id', row.id);
+      pushSent++;
+      pushResults.push({ id: row.id, kind: row.kind, status: 'sent' });
+      continue;
+    }
+    const terminal = attempts >= MAX_ATTEMPTS;
+    await admin.from('pro_push_outbox').update({
+      status: terminal ? 'failed' : 'queued',
+      attempts,
+      last_error: errMessage.slice(0, 500),
+      release_after: new Date(Date.now() + attempts * 15 * 60 * 1000).toISOString(),
+    }).eq('id', row.id);
+    pushFailed++;
+    pushResults.push({ id: row.id, kind: row.kind, status: terminal ? 'failed' : 'retry', http: httpStatus, error: errMessage });
+    if (terminal) {
+      await admin.from('admin_alerts').insert({
+        alert_type: 'pro_push_outbox_failed',
+        title: 'A held Pro notification could not be pushed',
+        body: `${row.kind} failed ${attempts} times: ${errMessage.slice(0, 200)}`,
+        context: { outbox_id: row.id, contractor_id: row.contractor_id },
+      }).then(() => {}, () => {});
+    }
+  }
+
+  return jsonResponse({
+    ok: true, window_open: true, considered: rows?.length ?? 0, sent, failed, results,
+    push_considered: pushRows?.length ?? 0, push_sent: pushSent, push_failed: pushFailed, push_results: pushResults,
+  });
 });
