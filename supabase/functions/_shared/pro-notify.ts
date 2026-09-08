@@ -58,6 +58,8 @@ export type ProNotification = {
   sms_body?: string;
   /** Stable key so a retried caller cannot double-deliver. */
   idempotency_key?: string;
+  /** Clock override — used only by the proof harness to test the window. */
+  now?: string;
 };
 
 export type ProNotifyResult = {
@@ -160,8 +162,9 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<ProNoti
   }
 
   // Non-urgent, outside the courtesy window: hold the push, don't drop it.
-  if (!urgent && !isWindowOpen()) {
-    const releaseAfter = nextOpenWindow();
+  const clock = n.now ? new Date(n.now) : new Date();
+  if (!urgent && !isWindowOpen(clock)) {
+    const releaseAfter = nextOpenWindow(clock);
     const { error: qErr } = await admin.from('pro_push_outbox').insert({
       contractor_id: n.contractor_id,
       kind: n.kind,
@@ -170,7 +173,7 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<ProNoti
       url: n.url ?? '/pro',
       context: n.context ?? {},
       idempotency_key: key,
-      queued_reason: closedReason() ?? 'quiet_hours',
+      queued_reason: closedReason(clock) ?? 'quiet_hours',
       release_after: releaseAfter.toISOString(),
     });
     // 23505 = already parked by an earlier identical call.

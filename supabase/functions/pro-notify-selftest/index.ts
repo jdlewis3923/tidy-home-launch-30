@@ -22,6 +22,7 @@ Deno.serve(async (req) => {
     body: body.body ?? 'Phase 5 proof run.',
     url: '/pro/schedule',
     idempotency_key: body.idempotency_key,
+    now: body.now,
   });
   return jsonResponse({ ok: true, result });
 });
