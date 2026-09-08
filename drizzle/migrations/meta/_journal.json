@@ -309,6 +309,13 @@
       "when": 1788878169069,
       "tag": "0043_fix_badge_trigger_pgcrypto_path",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1788878276623,
+      "tag": "0044_freeze_pay_on_blocked_visits",
+      "breakpoints": true
     }
   ]
 }
