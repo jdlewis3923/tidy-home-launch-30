@@ -4834,6 +4834,7 @@ export type Database = {
       admin_get_meta_secret: { Args: { _name: string }; Returns: string }
       admin_get_scheduler_paused: { Args: never; Returns: boolean }
       admin_get_service_role_key: { Args: never; Returns: string }
+      admin_get_vapid_private: { Args: never; Returns: string }
       admin_get_vapid_public: { Args: never; Returns: string }
       admin_pro_push_status: {
         Args: never
