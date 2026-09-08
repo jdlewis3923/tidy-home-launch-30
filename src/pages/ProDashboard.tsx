@@ -3,7 +3,7 @@
  *
  * Light, welcoming contractor console. White canvas, navy ink, Tidy
  * blue accents, gold for tier moments. All values are wired to live
- * Supabase tables (applicants, pro_visits, today_visits, google_reviews,
+ * Supabase tables (applicants, visits, today_visits, google_reviews,
  * stripe_payouts, pro_referrals) with realtime subscriptions so updates
  * land without refresh.
  */
@@ -97,13 +97,13 @@ export default function ProDashboard() {
             .gte("scheduled_at", todayStart.toISOString())
             .lte("scheduled_at", todayEnd.toISOString())
             .order("scheduled_at", { ascending: true }),
-          supabase.from("pro_visits")
-            .select("amount_cents")
-            .eq("contractor_id", userId).eq("status", "complete")
+          supabase.from("visits")
+            .select("amount_cents:visit_pay_cents")
+            .eq("assigned_pro_id", userId).eq("status", "complete")
             .gte("completed_at", weekStart),
-          supabase.from("pro_visits")
-            .select("amount_cents")
-            .eq("contractor_id", userId).eq("status", "complete")
+          supabase.from("visits")
+            .select("amount_cents:visit_pay_cents")
+            .eq("assigned_pro_id", userId).eq("status", "complete")
             .gte("completed_at", lastWeekStart).lt("completed_at", lastWeekEnd),
           supabase.from("google_reviews")
             .select("rating")
@@ -112,10 +112,9 @@ export default function ProDashboard() {
             .select("amount_cents, scheduled_at")
             .eq("contractor_id", userId)
             .order("scheduled_at", { ascending: false }).limit(1),
-          supabase.from("pro_visits")
+          supabase.from("visit_photos")
             .select("id", { count: "exact", head: true })
-            .eq("contractor_id", userId).eq("status", "complete")
-            .lt("photos_count", 1),
+            .eq("pro_id", userId).eq("kind", "after"),
           supabase.from("pro_referrals")
             .select("id", { count: "exact", head: true })
             .eq("referrer_contractor_id", userId).eq("status", "completed"),
@@ -138,8 +137,8 @@ export default function ProDashboard() {
           : "Friday";
 
         // Streak: simple — consecutive days with completed visits ending today
-        const { data: streakRows } = await supabase.from("pro_visits")
-          .select("completed_at").eq("contractor_id", userId).eq("status", "complete")
+        const { data: streakRows } = await supabase.from("visits")
+          .select("completed_at").eq("assigned_pro_id", userId).eq("status", "complete")
           .gte("completed_at", new Date(Date.now() - 60 * 86400000).toISOString())
           .order("completed_at", { ascending: false });
         const days = new Set<string>((streakRows ?? []).map((r: any) => r.completed_at?.slice(0, 10)));
@@ -181,7 +180,7 @@ export default function ProDashboard() {
 
       channels = [
         wire("applicants", `contractor_id=eq.${userId}`),
-        wire("pro_visits", `contractor_id=eq.${userId}`),
+        wire("visits", `assigned_pro_id=eq.${userId}`),
         wire("today_visits", `contractor_id=eq.${userId}`),
         wire("google_reviews", `contractor_id=eq.${userId}`),
         wire("stripe_payouts", `contractor_id=eq.${userId}`),
