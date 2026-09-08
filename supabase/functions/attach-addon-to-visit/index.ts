@@ -167,16 +167,8 @@ Deno.serve(async (req) => {
   if (status === 'pending_visit') {
     await admin.from('profiles').update({ last_addon_attached_at: new Date().toISOString() }).eq('user_id', userId);
 
-    // Trigger Jobber line-item write (fire-and-forget)
-    if (jobber_visit_id) {
-      try {
-        await fetch(`${SUPABASE_URL}/functions/v1/add-jobber-line-item`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jobber_visit_id, addon_name: addonName, addon_price: addonPriceDollars }),
-        });
-      } catch (err) { console.error('[attach-addon] jobber call failed', err); }
-    }
+    // Jobber decommissioned — the add-on rides the Pro Portal job card.
+
 
     // Brevo contact attrs + transactional email
     if (BREVO_API_KEY && userEmail) {

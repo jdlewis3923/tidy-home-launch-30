@@ -83,7 +83,7 @@ type Applicant = {
   open_escalations_count: number | null;
   tier_readiness_status: TierReadiness | null;
   tier_offer_sent_at: string | null;
-  // Live data status (Jobber + Google Reviews counters)
+  // Live data status (Google Reviews + visit counters)
   last_jobber_event_at: string | null;
   last_review_match_at: string | null;
   last_visit_at: string | null;
@@ -1294,7 +1294,7 @@ export default function AdminApplicants() {
                   </Card>
                 )}
 
-                {/* Live Data Status — Jobber + Reviews counters */}
+                {/* Live Data Status — Reviews + visit counters */}
                 <Card className="rounded-2xl border-slate-200">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
@@ -1302,7 +1302,6 @@ export default function AdminApplicants() {
                       <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">realtime</span>
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-xs">
-                      <LiveStat label="Last Jobber event" value={open.last_jobber_event_at ? relTime(open.last_jobber_event_at) : "never"} />
                       <LiveStat label="Last review match" value={open.last_review_match_at ? relTime(open.last_review_match_at) : "never"} />
                       <LiveStat label="Last visit" value={open.last_visit_at ? relTime(open.last_visit_at) : "—"} />
                       <LiveStat label="Total ratings" value={String(open.total_ratings_count ?? 0)} />

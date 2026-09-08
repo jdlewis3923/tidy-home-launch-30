@@ -24,7 +24,6 @@ const TRACKED_SOURCES = [
   'documenso',
   'checkr',
   'google',
-  'jobber',
   'zapier',
   'meta_capi',
   'openai',

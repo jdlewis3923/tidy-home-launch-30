@@ -17,7 +17,6 @@ type Source =
   | "documenso"
   | "checkr"
   | "google"
-  | "jobber"
   | "zapier"
   | "meta_capi"
   | "openai"
@@ -32,7 +31,6 @@ const SOURCE_LABEL: Record<Source, string> = {
   documenso: "Documenso — signing",
   checkr: "Checkr — background checks",
   google: "Google — sheets & reviews",
-  jobber: "Jobber — scheduling",
   zapier: "Zapier — automations",
   meta_capi: "Meta — ad tracking",
   openai: "AI assistant",
@@ -78,7 +76,6 @@ const SOURCE_ORDER: Source[] = [
   "documenso",
   "checkr",
   "google",
-  "jobber",
   "zapier",
   "meta_capi",
   "openai",
@@ -118,8 +115,6 @@ export default function AdminHealth() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetch, setLastFetch] = useState<number>(0);
-  const [reauthing, setReauthing] = useState(false);
-  const [reauthError, setReauthError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
   const [brandingSyncing, setBrandingSyncing] = useState(false);
@@ -189,25 +184,6 @@ export default function AdminHealth() {
     }
   }, []);
 
-  const handleJobberReauth = useCallback(async () => {
-    setReauthing(true);
-    setReauthError(null);
-    try {
-      const { data: resp, error: invokeErr } = await supabase.functions.invoke(
-        "jobber-authorize-url",
-        { body: {} },
-      );
-      if (invokeErr) throw new Error(invokeErr.message);
-      if (!resp?.ok || !resp?.authorize_url) {
-        throw new Error(resp?.error ?? "No authorize_url returned");
-      }
-      window.location.href = resp.authorize_url;
-    } catch (err) {
-      setReauthError(err instanceof Error ? err.message : "Failed to start re-auth");
-    } finally {
-      setReauthing(false);
-    }
-  }, []);
 
   const fetchHealth = useCallback(async () => {
     setLoading(true);
@@ -285,7 +261,7 @@ export default function AdminHealth() {
           <div>
             <h1 className="text-3xl font-black text-slate-900">Integration health</h1>
             <p className="mt-2 text-sm text-slate-600">
-              Last 24 hours of calls into Stripe, Jobber, Zapier, Meta CAPI and friends.
+              Last 24 hours of calls into Stripe, Zapier, Meta CAPI and friends.
               Aggregated from <code className="rounded bg-slate-200 px-1.5 py-0.5 text-xs">integration_logs</code>.
             </p>
           </div>
@@ -319,15 +295,6 @@ export default function AdminHealth() {
             </button>
             <button
               type="button"
-              onClick={handleJobberReauth}
-              disabled={reauthing}
-              className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
-              title="Opens Jobber OAuth in this tab. The new refresh token is auto-saved to vault."
-            >
-              {reauthing ? "Opening…" : "Re-authorize Jobber"}
-            </button>
-            <button
-              type="button"
               onClick={fetchHealth}
               disabled={loading}
               className="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
@@ -355,11 +322,6 @@ export default function AdminHealth() {
           </div>
         )}
 
-        {reauthError && (
-          <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
-            <strong>Re-auth failed:</strong> {reauthError}
-          </div>
-        )}
 
         {error && (
           <div className="mt-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">

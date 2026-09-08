@@ -582,8 +582,6 @@ const translations: Record<string, string> = {
     "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascotas y barra de arcilla con capa cerámica disponibles como extras.",
   "Who does the detailing?": "¿Quién hace el detallado?",
   "What about oversized or commercial vehicles?": "¿Y los vehículos grandes o comerciales?",
-  "3-row SUVs, full-size trucks, and large vans get a small upgrade fee. Commercial vans and lifted trucks need a quick custom quote — we'll handle it.":
-    "Las SUVs de 3 filas, camionetas grandes y vans grandes tienen un pequeño cargo adicional. Vans comerciales y camionetas elevadas necesitan una cotización rápida — la manejamos.",
   "Reach out within 24 hours and we'll send the detailer back or credit your account — no questions asked.":
     "Avísanos en 24 horas y mandamos al detallador de vuelta o te acreditamos a tu cuenta — sin preguntas.",
   "Already on Shine Complete? Add cleaning from $139 a month.":
@@ -799,8 +797,8 @@ const translations: Record<string, string> = {
   "🔧 Lawn Add-Ons": "🔧 Adicionales de Jardín",
   "🔧 Detailing Add-Ons": "🔧 Adicionales de Detallado",
   "one-time": "una sola vez",
-  "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Extra-large lot (4,001–7,500 sq ft mowable turf): +$30 per visit. Extra-large vehicle: +$30 per visit. Above those sizes we quote individually.":
-    "Casa extra grande (2,501–4,000 pies²): +$60 por visita. Terreno extra grande (4,001–7,500 pies² de grama cortable): +$30 por visita. Vehículo extra grande: +$30 por visita. Por encima de esos tamaños cotizamos de forma individual.",
+  "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Extra-large lot (4,001–7,500 sq ft mowable turf): +$30 per visit. Above those sizes we quote individually.":
+    "Casa extra grande (2,501–4,000 pies²): +$60 por visita. Terreno extra grande (4,001–7,500 pies² de grama cortable): +$30 por visita. Por encima de esos tamaños cotizamos de forma individual.",
   "Available as add-ons: pet-hair removal, headlight restoration.":
     "Disponibles como complementos: eliminación de pelo de mascotas, restauración de faros.",
   "What affects my price?": "¿Qué afecta mi precio?",
