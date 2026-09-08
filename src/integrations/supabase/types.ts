@@ -3693,6 +3693,7 @@ export type Database = {
           size: number | null
           sort_order: number
           stripe_price_id: string
+          stripe_price_id_test: string | null
           stripe_product_id: string | null
           unit: string | null
         }
@@ -3716,6 +3717,7 @@ export type Database = {
           size?: number | null
           sort_order?: number
           stripe_price_id: string
+          stripe_price_id_test?: string | null
           stripe_product_id?: string | null
           unit?: string | null
         }
@@ -3739,6 +3741,7 @@ export type Database = {
           size?: number | null
           sort_order?: number
           stripe_price_id?: string
+          stripe_price_id_test?: string | null
           stripe_product_id?: string | null
           unit?: string | null
         }
