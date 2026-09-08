@@ -3001,6 +3001,7 @@ export type Database = {
       }
       pro_referrals: {
         Row: {
+          blocked_reason: string | null
           bonus_cents: number
           bonus_paid_at: string | null
           completed_at: string | null
@@ -3011,8 +3012,10 @@ export type Database = {
           referral_code: string
           referrer_contractor_id: string
           status: string
+          stripe_transfer_id: string | null
         }
         Insert: {
+          blocked_reason?: string | null
           bonus_cents?: number
           bonus_paid_at?: string | null
           completed_at?: string | null
@@ -3023,8 +3026,10 @@ export type Database = {
           referral_code: string
           referrer_contractor_id: string
           status?: string
+          stripe_transfer_id?: string | null
         }
         Update: {
+          blocked_reason?: string | null
           bonus_cents?: number
           bonus_paid_at?: string | null
           completed_at?: string | null
@@ -3035,6 +3040,7 @@ export type Database = {
           referral_code?: string
           referrer_contractor_id?: string
           status?: string
+          stripe_transfer_id?: string | null
         }
         Relationships: []
       }
@@ -4747,6 +4753,10 @@ export type Database = {
         }
         Returns: number
       }
+      credit_payout_week: {
+        Args: { _at: string; _cents: number; _pro: string }
+        Returns: string
+      }
       current_user_admin: { Args: never; Returns: boolean }
       customers_needing_attention: {
         Args: never
@@ -4824,6 +4834,15 @@ export type Database = {
       }
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
+      mark_visit_paid_in_full: {
+        Args: {
+          _actor?: string
+          _note?: string
+          _reason: string
+          _visit_id: string
+        }
+        Returns: Json
+      }
       nextval: { Args: { seq_name: string }; Returns: number }
       pro_capacity_stats_internal: {
         Args: never
@@ -4872,6 +4891,7 @@ export type Database = {
           id: string
           is_sample: boolean
           on_my_way_at: string
+          paid_in_full_reason: string
           parking_notes: string
           pet_notes: string
           scheduled_end: string
@@ -4879,12 +4899,13 @@ export type Database = {
           service_type: string
           status: string
           street: string
+          visit_kind: string
           visit_pay_cents: number
           zip: string
         }[]
       }
-      pro_visit_pay_cents: {
-        Args: { _frequency: string; _service_type: string; _tier?: string }
+      pro_tier_uplift_cents: {
+        Args: { _base_cents: number; _pro_uid: string }
         Returns: number
       }
       public_five_star_proof: { Args: never; Returns: Json }
