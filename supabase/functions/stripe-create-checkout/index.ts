@@ -347,15 +347,26 @@ Deno.serve(async (req) => {
         const freeAddons = freeAddonsPerMonth(uniqueServices);
 
         // ---------- Subscription metadata for the webhook ----------
+        // The plan snapshot is a row; metadata carries its id only. Inlining the
+        // JSON blew Stripe's 500-character metadata value limit on any
+        // two-service cart, which killed every bundle signup.
+        const planLinesId = await savePlanLines(supabase, {
+          userId: user.id,
+          lines: planLines as unknown as PlanLine[],
+          source: "hosted_checkout",
+        });
+        if (!planLinesId) throw new Error("could not persist the plan snapshot");
+
         const primary = planLines[0] as Record<string, unknown>;
         const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
           signed_up_at: new Date().toISOString(),
           user_id: user.id,
-          services_json: JSON.stringify(input.services),
+          services_json: JSON.stringify(
+            input.services.map((s) => ({ service: s.service, size: s.size, frequency: s.frequency })),
+          ),
           sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
-          // service / size_tier / cadence / surcharge_applied, per service line.
-          plan_lines_json: JSON.stringify(planLines),
+          plan_lines_id: planLinesId,
           size_tier: String(primary?.size_tier ?? ""),
           cadence: String(primary?.cadence ?? ""),
           surcharge_applied: planLines.some((l) => l.surcharge_applied) ? "yes" : "no",
