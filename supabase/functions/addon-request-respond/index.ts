@@ -17,17 +17,13 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { notifyPro } from '../_shared/pro-notify.ts';
+// Pro share comes from canon: 40% of the catalog price, Tier 2 = +10% on the
+// dollar figure rounded to the dollar. There is no tier 3.
+import { addonContractorPayCents } from '../_shared/pricing-canon.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
-
-/** Pro share of an add-on, by tier. Same split as base visit pay. */
-const TIER_SHARE: Record<string, number> = {
-  tier_1_verified: 0.4,
-  tier_2_trusted: 0.45,
-  tier_3_elite: 0.5,
-};
 
 const BodySchema = z.object({
   token: z.string().min(32).max(128),
@@ -212,8 +208,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'payment_failed', detail }, 402);
   }
 
-  const share = TIER_SHARE[(pro?.tier as string) ?? 'tier_1_verified'] ?? 0.4;
-  const proPayCents = Math.round(reqRow.amount_cents * share);
+  const proPayCents = addonContractorPayCents(reqRow.amount_cents, pro?.tier as string | null);
 
   const { data: claimed } = await admin
     .from('addon_requests')

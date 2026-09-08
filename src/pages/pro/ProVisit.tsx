@@ -13,7 +13,7 @@ import {
   ErrorState, InfoRow, MapPreview, ProButton, ProCard, Skeleton, StatusPill,
 } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
-import { dayLabel, timeWindow, visitAction } from "@/lib/pro-portal";
+import { VISIT_KIND_LABEL, dayLabel, timeWindow, visitAction } from "@/lib/pro-portal";
 import { SERVICE_LABEL, money } from "@/lib/pro-pay";
 
 export default function ProVisit() {
@@ -126,6 +126,9 @@ export default function ProVisit() {
             {money(visit.visit_pay_cents)}
           </p>
           <div className="flex gap-2">
+            {visit.visit_kind && VISIT_KIND_LABEL[visit.visit_kind] && (
+              <StatusPill tone="blue">{VISIT_KIND_LABEL[visit.visit_kind]}</StatusPill>
+            )}
             {visit.is_sample && <StatusPill tone="neutral">Sample</StatusPill>}
             {visit.completed_at ? (
               <StatusPill tone="green">Completed</StatusPill>

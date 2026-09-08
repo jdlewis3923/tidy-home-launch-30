@@ -96,10 +96,13 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}));
   const period: string = /^\d{4}-\d{2}$/.test(body?.period) ? body.period : currentPeriod();
 
+  // 'blocked' rows are retried too: a Pro who finished Connect onboarding since
+  // the last run is paid on this one (the DB trigger also flips them back to
+  // pending; this is the belt to that brace).
   const { data: pending, error: pendErr } = await admin
     .from('pro_bonuses')
     .select('id, pro_id, amount_cents, review_id')
-    .eq('status', 'pending')
+    .in('status', ['pending', 'blocked'])
     .eq('period', period)
     .limit(1000);
   if (pendErr) return jsonResponse({ ok: false, error: pendErr.message }, 500);
@@ -144,9 +147,9 @@ Deno.serve(async (req) => {
 
       const { data: updated } = await admin
         .from('pro_bonuses')
-        .update({ status: 'paid', stripe_transfer_id: transfer.id, paid_at: paidAt })
+        .update({ status: 'paid', stripe_transfer_id: transfer.id, paid_at: paidAt, blocked_reason: null })
         .in('id', rowIds)
-        .eq('status', 'pending')
+        .in('status', ['pending', 'blocked'])
         .select('id');
 
       if (reviewIds.length > 0) {

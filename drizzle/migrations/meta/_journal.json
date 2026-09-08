@@ -288,6 +288,34 @@
       "when": 1788876587656,
       "tag": "0040_fix_generate_recurring_visits_ambiguous_column",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1788877845782,
+      "tag": "0041_visit_status_blocked",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1788877957659,
+      "tag": "0042_phase3_pay_correctness",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1788878169069,
+      "tag": "0043_fix_badge_trigger_pgcrypto_path",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1788878276623,
+      "tag": "0044_freeze_pay_on_blocked_visits",
+      "breakpoints": true
     }
   ]
 }

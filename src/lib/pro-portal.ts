@@ -30,6 +30,15 @@ export type ProVisit = {
   is_sample: boolean | null;
   before_photos: number | null;
   after_photos: number | null;
+  /** standard · maintenance_wash · full_detail · quarterly_deep_clean */
+  visit_kind?: string | null;
+  paid_in_full_reason?: string | null;
+};
+
+export const VISIT_KIND_LABEL: Record<string, string> = {
+  full_detail: "Full detail",
+  maintenance_wash: "Maintenance wash",
+  quarterly_deep_clean: "Quarterly deep clean",
 };
 
 export type ProMe = {
@@ -227,9 +236,13 @@ export async function signedPhotoUrl(path: string): Promise<string | null> {
 }
 
 /** Server-enforced visit actions. Returns the function's own {ok,error} shape. */
-export async function visitAction(visitId: string, action: "on_my_way" | "complete") {
+export async function visitAction(
+  visitId: string,
+  action: "on_my_way" | "complete" | "blocked",
+  blocked?: { reason: "customer_no_access" | "unsafe_conditions"; note: string },
+) {
   const { data, error } = await supabase.functions.invoke("pro-visit-action", {
-    body: { visit_id: visitId, action },
+    body: { visit_id: visitId, action, ...(action === "blocked" ? blocked : {}) },
   });
   if (error) return { ok: false as const, error: error.message };
   return data as { ok: boolean; error?: string; coi_status?: string; visit_pay_cents?: number };
