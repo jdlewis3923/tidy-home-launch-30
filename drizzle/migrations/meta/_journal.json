@@ -274,6 +274,13 @@
       "when": 1788833015532,
       "tag": "0038_stripe_catalog_test_price_ids",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1788876328405,
+      "tag": "0039_visit_lifecycle_engine",
+      "breakpoints": true
     }
   ]
 }
