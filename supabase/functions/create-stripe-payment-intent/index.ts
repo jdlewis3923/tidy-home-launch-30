@@ -25,12 +25,19 @@ import {
 } from "../_shared/referral-discount.ts";
 import {
   CAR_WASH_LOOKUP_KEYS,
-  SERVICE_LOOKUP_KEYS,
+  contractorVisitPay,
   freeAddonsPerMonth,
+  lookupKeyFor,
+  monthlyPrice,
+  perVisitPrice,
   quantityFor,
+  visitsPerMonthFor,
+  type CanonCadence,
   type CanonSize,
   type WashCount,
 } from "../_shared/pricing-canon.ts";
+import { checkServiceLine, surchargePerVisitFor } from "../_shared/size-validation.ts";
+import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
