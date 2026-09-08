@@ -745,8 +745,20 @@ async function handleInvoicePaymentActionRequired(supabase: any, event: Stripe.E
 }
 
 // deno-lint-ignore no-explicit-any
-async function handleSubscriptionUpdated(supabase: any, event: Stripe.Event) {
+async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, event: Stripe.Event) {
   const sub = event.data.object as Stripe.Subscription;
+
+  // The embedded path's subscription becomes active only when the card clears —
+  // this is where a confirmed payment gets its plan and its visits.
+  if (paymentConfirmed(sub) && sub.metadata?.user_id) {
+    await seedSubscriptionAndVisits(stripe, supabase, {
+      userId: sub.metadata.user_id,
+      meta: sub.metadata as Record<string, string>,
+      stripeSubscriptionId: sub.id,
+      stripeCustomerId: typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null,
+    });
+  }
+
   const status: 'active' | 'paused' | 'canceled' =
     sub.status === 'active' || sub.status === 'trialing'
       ? (sub.pause_collection ? 'paused' : 'active')
