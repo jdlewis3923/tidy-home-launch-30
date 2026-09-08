@@ -17,7 +17,7 @@ import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts';
 import { withLogging } from '../_shared/withLogging.ts';
-import { CAR_WASH_LOOKUP_KEYS, CAR_WASH_PRICES, SERVICE_LOOKUP_KEYS, SERVICE_NAMES, SERVICE_QUANTITY_RULE, SERVICE_UNIT, SIZE_PRICES, SIZES, type CanonSize, type CanonService, type WashCount } from '../_shared/pricing-canon.ts';
+import { BILLED_MONTHLY, CLEANING_SURCHARGE, LAWN_SURCHARGE, SERVICE_NAMES, SERVICE_QUANTITY_RULE, SERVICE_UNIT, SIZES, lookupKeyFor, type CanonCadence, type CanonSize, type CanonService } from '../_shared/pricing-canon.ts';
 
 const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -58,43 +58,69 @@ const SERVICE_SORT: Record<CanonService, number> = { cleaning: 10, lawn: 20, det
 /** Resolved from Stripe at run time by lookup_key — no price IDs hardcoded. */
 type LookupSpec = Omit<CatalogRow, 'stripe_price_id'> & { lookup_key: string };
 
-/** The 9 recurring service prices. */
+/**
+ * The 21 recurring plan prices: cleaning and lawn at every cadence, plus the
+ * three Shine Complete plans (one price each, no cadence choice). The lookup key
+ * carries the cadence, so it must be resolved with lookupKeyFor(service, size,
+ * cadence) — indexing SERVICE_LOOKUP_KEYS by size alone yields an object.
+ */
 const SERVICE_SPECS: LookupSpec[] = (['cleaning', 'lawn', 'detailing'] as CanonService[]).flatMap((service) =>
-  SIZES.map((size, i) => ({
-    service_type: service,
+  SIZES.flatMap((size, i) => {
+    const cadences: CanonCadence[] =
+      SERVICE_QUANTITY_RULE[service] === 'always_1' ? ['monthly'] : ['monthly', 'biweekly', 'weekly'];
+    return cadences.map((cadence, j) => ({
+      service_type: service,
+      frequency: null,
+      lookup_key: lookupKeyFor(service, size, cadence),
+      size,
+      unit: SERVICE_UNIT[service],
+      quantity_rule: SERVICE_QUANTITY_RULE[service],
+      per_visit: SERVICE_UNIT[service] === 'per_visit',
+      is_addon: false,
+      addon_name: null,
+      price_cents: BILLED_MONTHLY[service][size][cadence] * 100,
+      description: `${SERVICE_NAMES[service]} — size ${size}${
+        SERVICE_QUANTITY_RULE[service] === 'always_1' ? '' : `, ${cadence}`
+      }`,
+      sort_order: SERVICE_SORT[service] + i * 3 + j,
+    }));
+  }),
+);
+
+/** The two square-footage surcharge prices, billed per visit x visits a month. */
+const SURCHARGE_SPECS: LookupSpec[] = [
+  {
+    service_type: 'cleaning',
     frequency: null,
-    lookup_key: SERVICE_LOOKUP_KEYS[service][size],
-    size,
-    unit: SERVICE_UNIT[service],
-    quantity_rule: SERVICE_QUANTITY_RULE[service],
-    per_visit: SERVICE_UNIT[service] === 'per_visit',
+    lookup_key: 'surcharge_cleaning_xl',
+    size: null,
+    unit: 'per_visit',
+    quantity_rule: 'cadence',
+    per_visit: true,
     is_addon: false,
     addon_name: null,
-    price_cents: SIZE_PRICES[service][size] * 100,
-    description: `${SERVICE_NAMES[service]} — size ${size}`,
-    sort_order: SERVICE_SORT[service] + i,
-  })),
-);
-
-/** The 6 recurring Car Wash Add-On prices (per month, always quantity 1). */
-const CAR_WASH_SPECS: LookupSpec[] = SIZES.flatMap((size) =>
-  ([1, 2] as WashCount[]).map((washes) => ({
-    service_type: 'detailing' as CanonService,
+    price_cents: CLEANING_SURCHARGE.perVisitDollars * 100,
+    description: `Cleaning extra-large home — ${CLEANING_SURCHARGE.label}`,
+    sort_order: 60,
+  },
+  {
+    service_type: 'lawn',
     frequency: null,
-    lookup_key: CAR_WASH_LOOKUP_KEYS[size][washes],
-    size,
-    unit: 'per_month' as const,
-    quantity_rule: 'always_1' as const,
-    per_visit: false,
-    is_addon: true,
-    addon_name: `carWash${size}x${washes}`,
-    price_cents: CAR_WASH_PRICES[size][washes] * 100,
-    description: `Car Wash Add-On — size ${size}, ${washes} wash${washes > 1 ? 'es' : ''} a month`,
-    sort_order: 40 + size * 2 + washes,
-  })),
-);
+    lookup_key: 'surcharge_lawn_xl',
+    size: null,
+    unit: 'per_visit',
+    quantity_rule: 'cadence',
+    per_visit: true,
+    is_addon: false,
+    addon_name: null,
+    price_cents: LAWN_SURCHARGE.perVisitDollars * 100,
+    description: `Lawn extra-large lot — ${LAWN_SURCHARGE.label}`,
+    sort_order: 61,
+  },
+];
 
-const RECURRING_SPECS: LookupSpec[] = [...SERVICE_SPECS, ...CAR_WASH_SPECS];
+const RECURRING_SPECS: LookupSpec[] = [...SERVICE_SPECS, ...SURCHARGE_SPECS];
+
 
 const ADDON_ROWS: CatalogRow[] = [
 

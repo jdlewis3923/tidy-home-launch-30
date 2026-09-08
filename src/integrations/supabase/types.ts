@@ -2623,6 +2623,30 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_line_sets: {
+        Row: {
+          created_at: string
+          id: string
+          lines: Json
+          source: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lines: Json
+          source?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lines?: Json
+          source?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       preferred_pro_changes: {
         Row: {
           changed_at: string
@@ -3669,6 +3693,7 @@ export type Database = {
           size: number | null
           sort_order: number
           stripe_price_id: string
+          stripe_price_id_test: string | null
           stripe_product_id: string | null
           unit: string | null
         }
@@ -3692,6 +3717,7 @@ export type Database = {
           size?: number | null
           sort_order?: number
           stripe_price_id: string
+          stripe_price_id_test?: string | null
           stripe_product_id?: string | null
           unit?: string | null
         }
@@ -3715,6 +3741,7 @@ export type Database = {
           size?: number | null
           sort_order?: number
           stripe_price_id?: string
+          stripe_price_id_test?: string | null
           stripe_product_id?: string | null
           unit?: string | null
         }

@@ -260,6 +260,20 @@
       "when": 1788830606722,
       "tag": "0036_revoke_public_execute_pay_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1788831611751,
+      "tag": "0037_revoke_call_edge_function_and_plan_line_sets",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1788833015532,
+      "tag": "0038_stripe_catalog_test_price_ids",
+      "breakpoints": true
     }
   ]
 }

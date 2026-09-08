@@ -44,10 +44,13 @@ import {
   type CanonSize,
   type WashCount,
 } from "../_shared/pricing-canon.ts";
+import { checkServiceLine } from "../_shared/size-validation.ts";
+import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
+import { stripeMode, stripeSecretKey } from "../_shared/stripe-mode.ts";
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
 
 
-const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
+const STRIPE_SECRET_KEY = stripeSecretKey();
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SITE_URL = Deno.env.get("SITE_URL") ?? "https://jointidy.co";
@@ -72,6 +75,17 @@ const CheckoutInputSchema = z.object({
     )
     .min(1)
     .max(3),
+
+  // The UNDERLYING size inputs — the server recomputes size and rejects a
+  // mismatch, so a hand-crafted POST cannot buy a size it isn't.
+  bedrooms: z.number().int().min(0).max(20).nullable().optional(),
+  bathrooms: z.number().min(0).max(20).nullable().optional(),
+  lawn_choice: z.enum(["small", "standard", "large", "over"]).nullable().optional(),
+  vehicle_class: z
+    .enum(["sedan", "coupe", "suv", "crossover", "truck", "suv3row", "van"])
+    .nullable()
+    .optional(),
+
 
   addons: z
     .array(z.object({ addon_name: z.string().min(1).max(64), qty: z.number().int().min(1).max(20) }))
@@ -103,6 +117,15 @@ const CheckoutInputSchema = z.object({
   access_electrical_outlet: z.boolean().optional(),
   access_washing_allowed: z.boolean().optional(),
 });
+
+
+/** The price id for the active Stripe mode — test bookings use the test twin. */
+// deno-lint-ignore no-explicit-any
+function priceIdOf(row: any): string {
+  const id = stripeMode() === "test" ? row?.stripe_price_id_test ?? null : row?.stripe_price_id ?? null;
+  if (!id) throw new Error(`no ${stripeMode()}-mode price id for lookup_key ${row?.lookup_key ?? row?.addon_name}`);
+  return id;
+}
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
@@ -157,6 +180,26 @@ Deno.serve(async (req) => {
     );
   }
 
+  // ---------- Recompute every size server-side ----------
+  for (const s of input.services) {
+    const check = checkServiceLine({
+      service: s.service,
+      claimedSize: s.size,
+      sqFt: s.sq_ft ?? null,
+      inputs: {
+        bedrooms: input.bedrooms ?? null,
+        bathrooms: input.bathrooms ?? null,
+        lawn_choice: input.lawn_choice ?? null,
+        turf_sq_ft: s.service === "lawn" ? s.sq_ft ?? null : null,
+        vehicle_class: input.vehicle_class ?? null,
+      },
+    });
+    if (!check.ok) {
+      return jsonResponse({ ok: false, error: check.error, detail: check.detail }, 400);
+    }
+  }
+
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -187,7 +230,7 @@ Deno.serve(async (req) => {
         const surchargeKeys = ["surcharge_cleaning_xl", "surcharge_lawn_xl"];
         const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
-          .select("lookup_key, service_type, stripe_price_id, price_cents")
+          .select("lookup_key, service_type, stripe_price_id, stripe_price_id_test, price_cents")
           .in("lookup_key", [
             ...serviceKeys,
             ...(carWashKey ? [carWashKey] : []),
@@ -231,7 +274,7 @@ Deno.serve(async (req) => {
           if (surcharge < 0) throw new Error("property_requires_quote");
 
           if (s.service === "detailing") carCareIndices.add(line_items.length);
-          line_items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, cadence) });
+          line_items.push({ price: priceIdOf(row), quantity: quantityFor(s.service, cadence) });
 
           const visits = visitsPerMonthFor(s.service, cadence);
           if (surcharge > 0) {
@@ -240,7 +283,7 @@ Deno.serve(async (req) => {
             const surKey = s.service === "cleaning" ? "surcharge_cleaning_xl" : "surcharge_lawn_xl";
             const surRow = priceRows?.find((r) => r.lookup_key === surKey);
             if (!surRow) throw new Error(`no active catalog price for lookup_key ${surKey}`);
-            line_items.push({ price: surRow.stripe_price_id, quantity: visits });
+            line_items.push({ price: priceIdOf(surRow), quantity: visits });
           }
 
           planLines.push({
@@ -253,7 +296,7 @@ Deno.serve(async (req) => {
             per_visit_cents: Math.round((perVisitPrice(s.service, size, cadence) + surcharge) * 100),
             monthly_cents: Math.round(monthlyPrice(s.service, size, cadence, surcharge) * 100),
             lookup_key: key,
-            stripe_price_id: row.stripe_price_id,
+            stripe_price_id: priceIdOf(row),
             // Never shown to a customer — used when visits are created.
             contractor_pay_cents:
               Math.round(
@@ -267,14 +310,14 @@ Deno.serve(async (req) => {
           const row = priceRows?.find((r) => r.lookup_key === carWashKey);
           if (!row) throw new Error(`no active catalog price for lookup_key ${carWashKey}`);
           carCareIndices.add(line_items.length);
-          line_items.push({ price: row.stripe_price_id, quantity: 1 });
+          line_items.push({ price: priceIdOf(row), quantity: 1 });
         }
 
         // ---------- Resolve one-time add-on prices ----------
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
             .from("stripe_catalog")
-            .select("addon_name, service_type, stripe_price_id")
+            .select("addon_name, service_type, stripe_price_id, stripe_price_id_test")
             .eq("is_addon", true)
             .eq("active", true)
             .in(
@@ -287,7 +330,7 @@ Deno.serve(async (req) => {
             const row = addonRows?.find((r) => r.addon_name === a.addon_name);
             if (!row) continue; // unknown add-on — skip silently
             if (row.service_type === "detailing") carCareIndices.add(line_items.length);
-            line_items.push({ price: row.stripe_price_id, quantity: a.qty });
+            line_items.push({ price: priceIdOf(row), quantity: a.qty });
           }
         }
 
@@ -314,15 +357,26 @@ Deno.serve(async (req) => {
         const freeAddons = freeAddonsPerMonth(uniqueServices);
 
         // ---------- Subscription metadata for the webhook ----------
+        // The plan snapshot is a row; metadata carries its id only. Inlining the
+        // JSON blew Stripe's 500-character metadata value limit on any
+        // two-service cart, which killed every bundle signup.
+        const planLinesId = await savePlanLines(supabase, {
+          userId: user.id,
+          lines: planLines as unknown as PlanLine[],
+          source: "hosted_checkout",
+        });
+        if (!planLinesId) throw new Error("could not persist the plan snapshot");
+
         const primary = planLines[0] as Record<string, unknown>;
         const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
           signed_up_at: new Date().toISOString(),
           user_id: user.id,
-          services_json: JSON.stringify(input.services),
+          services_json: JSON.stringify(
+            input.services.map((s) => ({ service: s.service, size: s.size, frequency: s.frequency })),
+          ),
           sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
-          // service / size_tier / cadence / surcharge_applied, per service line.
-          plan_lines_json: JSON.stringify(planLines),
+          plan_lines_id: planLinesId,
           size_tier: String(primary?.size_tier ?? ""),
           cadence: String(primary?.cadence ?? ""),
           surcharge_applied: planLines.some((l) => l.surcharge_applied) ? "yes" : "no",

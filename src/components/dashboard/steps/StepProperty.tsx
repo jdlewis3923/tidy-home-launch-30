@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import {
   ConfigState,
   LawnChoice,
@@ -106,6 +107,47 @@ const lawnOptions: LawnChoice[] = ['small', 'standard', 'large', 'over'];
 
 const vehicleOptions: VehicleClass[] = ['sedan', 'coupe', 'crossover', 'suv', 'suv3row', 'truck', 'van'];
 
+/** Square-footage question. Drives the surcharge and the quote cut-off. */
+function SqFtField({
+  label, helper, value, onChange, placeholder,
+}: {
+  label: string; helper: string; value: number | null;
+  onChange: (v: number | null) => void; placeholder: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">{label}</label>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0}
+        step={50}
+        value={value ?? ''}
+        placeholder={placeholder}
+        onChange={e => {
+          const raw = e.target.value.trim();
+          onChange(raw === '' ? null : Math.max(0, Math.round(Number(raw))));
+        }}
+        className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+      />
+      <p className="text-[11px] text-ink-faint">{helper}</p>
+    </div>
+  );
+}
+
+/** Shown the moment an answer lands outside what we can price online. */
+function QuoteNotice({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-xl border border-hairline bg-cream-deep/40 px-4 py-3">
+      <p className="text-sm font-semibold text-ink lowercase">{children}</p>
+      <p className="text-[11px] text-ink-faint mt-0.5">
+        {QUOTE_COPY.toLowerCase()} give us a ring on {QUOTE_PHONE} — no payment today.
+      </p>
+    </div>
+  );
+}
+
+
 export default function StepProperty({ state, onChange }: Props) {
   const { t } = useLanguage();
   const hasCleaning = state.services.includes('cleaning');
@@ -143,9 +185,20 @@ export default function StepProperty({ state, onChange }: Props) {
             more bathrooms than your size allows moves the home up one size — bathrooms drive the
             length of a visit more than anything else.
           </p>
+          <SqFtField
+            label="home square footage"
+            placeholder="e.g. 1800"
+            value={state.homeSqFt}
+            onChange={v => onChange({ ...state, homeSqFt: v })}
+            helper="interior living space. 2,501–4,000 sq ft adds $60 a visit. above 4,000 we quote by hand."
+          />
+          {(state.homeSqFt ?? 0) > 4000 && (
+            <QuoteNotice>a home over 4,000 sq ft is quoted by hand</QuoteNotice>
+          )}
           <SizeReadout service="cleaning" size={sizeFor(state, 'cleaning')} state={state} />
         </div>
       )}
+
 
       {hasLawn && (
         <div className="space-y-4 animate-calm-in" style={{ animationDelay: '60ms' }}>
@@ -163,6 +216,17 @@ export default function StepProperty({ state, onChange }: Props) {
           </div>
 
           <p className="text-[11px] text-ink-faint">{LAWN_GUESS_NOTE}</p>
+
+          <SqFtField
+            label="mowable turf square footage"
+            placeholder="e.g. 3500"
+            value={state.turfSqFt}
+            onChange={v => onChange({ ...state, turfSqFt: v })}
+            helper="grass only, not the house or driveway. 4,001–7,500 sq ft adds $30 a visit. above 7,500 we quote by hand."
+          />
+          {(state.turfSqFt ?? 0) > 7500 && (
+            <QuoteNotice>turf over 7,500 sq ft is quoted by hand</QuoteNotice>
+          )}
 
           <SizeReadout service="lawn" size={sizeFor(state, 'lawn')} state={state} />
         </div>

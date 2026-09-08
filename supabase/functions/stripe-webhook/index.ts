@@ -24,9 +24,17 @@ import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { resolveStripeSubscriptionId } from '../_shared/resolve-stripe-subscription-id.ts';
 import { resolveStripeCurrentPeriodEnd } from '../_shared/resolve-stripe-current-period-end.ts';
+import { loadPlanLines } from '../_shared/plan-lines.ts';
+import { stripeSecretKey } from '../_shared/stripe-mode.ts';
 
-const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
-const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+const STRIPE_SECRET_KEY = stripeSecretKey();
+// Live and test endpoints have different signing secrets. Both are accepted so
+// a test-mode run can be verified without disturbing the live endpoint.
+const WEBHOOK_SECRETS = [
+  Deno.env.get('STRIPE_WEBHOOK_SECRET'),
+  Deno.env.get('STRIPE_TEST_WEBHOOK_SECRET'),
+].filter((s): s is string => !!s && s.length > 0);
+const STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRETS[0];
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -105,13 +113,19 @@ Deno.serve(async (req) => {
     httpClient: Stripe.createFetchHttpClient(),
   });
 
-  let event: Stripe.Event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(rawBody, sig, STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'verify failed';
-    console.error('[stripe-webhook] signature verification failed', msg);
-    return new Response(`signature verification failed: ${msg}`, { status: 400 });
+  let event: Stripe.Event | null = null;
+  let lastErr = 'verify failed';
+  for (const secret of WEBHOOK_SECRETS) {
+    try {
+      event = await stripe.webhooks.constructEventAsync(rawBody, sig, secret);
+      break;
+    } catch (err) {
+      lastErr = err instanceof Error ? err.message : 'verify failed';
+    }
+  }
+  if (!event) {
+    console.error('[stripe-webhook] signature verification failed', lastErr);
+    return new Response(`signature verification failed: ${lastErr}`, { status: 400 });
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -152,7 +166,7 @@ Deno.serve(async (req) => {
         await handleSubscriptionCreated(stripe, supabase, event);
         break;
       case 'customer.subscription.updated':
-        await handleSubscriptionUpdated(supabase, event);
+        await handleSubscriptionUpdated(stripe, supabase, event);
         break;
       case 'customer.subscription.deleted':
         await handleSubscriptionDeleted(supabase, event);
@@ -270,15 +284,12 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   const sizesJson = meta.sizes_json ? JSON.parse(meta.sizes_json) : {};
   const freeAddons = parseInt(meta.free_addons_per_month ?? '0', 10) || 0;
   // service / size_tier / cadence / surcharge_applied / contractor_pay_cents per line.
-  const planLines: Array<{
-    service: string;
-    size_tier: number;
-    cadence: string;
-    surcharge_applied: boolean;
-    surcharge_cents: number;
-    contractor_pay_cents: number;
-  }> = meta.plan_lines_json ? JSON.parse(meta.plan_lines_json) : [];
+  const planLines = await loadPlanLines(supabase, meta);
   const lineFor = (service: string) => planLines.find((l) => l.service === service);
+  if (planLines.length === 0) {
+    console.error('[stripe-webhook] no plan snapshot for', stripeSubscriptionId, '— visit pay would be null');
+  }
+
 
   const { data: subRow, error: subErr } = await supabase
     .from('subscriptions')
@@ -406,6 +417,11 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Str
   });
 }
 
+/** True only once the money is actually collected (or a trial has begun). */
+function paymentConfirmed(sub: Stripe.Subscription): boolean {
+  return sub.status === 'active' || sub.status === 'trialing';
+}
+
 // deno-lint-ignore no-explicit-any
 async function handleSubscriptionCreated(stripe: Stripe, supabase: any, event: Stripe.Event) {
   const sub = event.data.object as Stripe.Subscription;
@@ -416,11 +432,20 @@ async function handleSubscriptionCreated(stripe: Stripe, supabase: any, event: S
     // handled by checkout.session.completed. Skip silently.
     return;
   }
+  // The embedded path creates the subscription with payment_behavior
+  // default_incomplete, so this event fires BEFORE the card is confirmed.
+  // Seeding here would leave an active plan and three scheduled visits behind a
+  // closed tab with nothing collected. Wait for the payment.
+  if (!paymentConfirmed(sub)) {
+    console.log('[stripe-webhook] subscription.created not seeded — status', sub.status);
+    return;
+  }
   const stripeCustomerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null;
   await seedSubscriptionAndVisits(stripe, supabase, {
     userId, meta, stripeSubscriptionId: sub.id, stripeCustomerId,
   });
 }
+
 
 // deno-lint-ignore no-explicit-any
 async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Event) {
@@ -437,6 +462,33 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Ev
       .maybeSingle();
     userId = subRow?.user_id ?? null;
     localSubId = subRow?.id ?? null;
+  }
+
+  // A paid invoice IS the confirmation of payment. If nothing was seeded yet
+  // (the embedded path deliberately skips seeding while the card is unconfirmed),
+  // seed now from the subscription's own metadata.
+  if (!userId && stripeSubId) {
+    try {
+      const sub = await stripe.subscriptions.retrieve(stripeSubId);
+      const meta = (sub.metadata ?? {}) as Record<string, string>;
+      if (meta.user_id) {
+        await seedSubscriptionAndVisits(stripe, supabase, {
+          userId: meta.user_id,
+          meta,
+          stripeSubscriptionId: sub.id,
+          stripeCustomerId: typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null,
+        });
+        const { data: seeded } = await supabase
+          .from('subscriptions')
+          .select('id, user_id')
+          .eq('stripe_subscription_id', stripeSubId)
+          .maybeSingle();
+        userId = seeded?.user_id ?? null;
+        localSubId = seeded?.id ?? null;
+      }
+    } catch (err) {
+      console.error('[stripe-webhook] invoice.paid seed attempt failed', err);
+    }
   }
 
   if (!userId) {
@@ -733,8 +785,20 @@ async function handleInvoicePaymentActionRequired(supabase: any, event: Stripe.E
 }
 
 // deno-lint-ignore no-explicit-any
-async function handleSubscriptionUpdated(supabase: any, event: Stripe.Event) {
+async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, event: Stripe.Event) {
   const sub = event.data.object as Stripe.Subscription;
+
+  // The embedded path's subscription becomes active only when the card clears —
+  // this is where a confirmed payment gets its plan and its visits.
+  if (paymentConfirmed(sub) && sub.metadata?.user_id) {
+    await seedSubscriptionAndVisits(stripe, supabase, {
+      userId: sub.metadata.user_id,
+      meta: sub.metadata as Record<string, string>,
+      stripeSubscriptionId: sub.id,
+      stripeCustomerId: typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null,
+    });
+  }
+
   const status: 'active' | 'paused' | 'canceled' =
     sub.status === 'active' || sub.status === 'trialing'
       ? (sub.pause_collection ? 'paused' : 'active')

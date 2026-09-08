@@ -50,16 +50,78 @@ describe('1. the 21 lookup keys', () => {
     }
   });
 
-  it('both checkout paths resolve Stripe by lookup key, never by a price literal', () => {
+  it('both checkout paths resolve by a cadence-specific key string, never by size alone', () => {
     for (const p of [
       'supabase/functions/stripe-create-checkout/index.ts',
       'supabase/functions/create-stripe-payment-intent/index.ts',
     ]) {
       const src = read(p);
-      expect(src).toContain('lookup_key');
+      // A price literal would bypass the catalog entirely.
       expect(src).not.toMatch(/['"]price_[A-Za-z0-9]+['"]/);
+      // lookupKeyFor(service, size, cadence) returns a string. Indexing
+      // SERVICE_LOOKUP_KEYS by size alone returns the cadence OBJECT, which is
+      // what produced "no active catalog price for lookup_key [object Object]".
+      expect(src).toContain('lookupKeyFor(');
+      expect(src).not.toMatch(/SERVICE_LOOKUP_KEYS\[[^\]]+\]\[[^\]]+\](?!\[)/);
     }
   });
+
+  it('every resolved key is a cadence-specific string', () => {
+    const resolved = (['cleaning', 'lawn'] as const).flatMap((svc) =>
+      ([1, 2, 3] as CanonSize[]).flatMap((size) =>
+        (['monthly', 'biweekly', 'weekly'] as const).map((cad) => lookupKeyFor(svc, size, cad)),
+      ),
+    );
+    expect(resolved).toHaveLength(18);
+    for (const key of resolved) {
+      expect(typeof key).toBe('string');
+      expect(key).toMatch(/^(clean|lawn)_[123]_(monthly|biweekly|weekly)$/);
+    }
+    expect(lookupKeyFor('cleaning', 2, 'biweekly')).toBe('clean_2_biweekly');
+    expect(lookupKeyFor('lawn', 1, 'monthly')).toBe('lawn_1_monthly');
+  });
+
+  it('the surcharge rides one recurring price at quantity = visits per month', () => {
+    for (const p of [
+      'supabase/functions/stripe-create-checkout/index.ts',
+      'supabase/functions/create-stripe-payment-intent/index.ts',
+    ]) {
+      const src = read(p);
+      expect(src).toContain('surcharge_cleaning_xl');
+      expect(src).toContain('surcharge_lawn_xl');
+    }
+  });
+
+  it('the plan snapshot travels as a row id, never as JSON in Stripe metadata', () => {
+    for (const p of [
+      'supabase/functions/stripe-create-checkout/index.ts',
+      'supabase/functions/create-stripe-payment-intent/index.ts',
+    ]) {
+      const src = read(p);
+      expect(src).toContain('plan_lines_id');
+      expect(src).not.toContain('plan_lines_json: JSON.stringify');
+    }
+    // The webhook must read it back from the table.
+    expect(read('supabase/functions/stripe-webhook/index.ts')).toContain('loadPlanLines(');
+  });
+
+  it('nothing is seeded until the payment is confirmed', () => {
+    const src = read('supabase/functions/stripe-webhook/index.ts');
+    expect(src).toContain('function paymentConfirmed');
+    expect(src).toContain('if (!paymentConfirmed(sub))');
+  });
+
+  it('the server recomputes size from the underlying inputs', () => {
+    for (const p of [
+      'supabase/functions/stripe-create-checkout/index.ts',
+      'supabase/functions/create-stripe-payment-intent/index.ts',
+    ]) {
+      const src = read(p);
+      expect(src).toContain('checkServiceLine(');
+      expect(src).toContain('bedrooms');
+    }
+  });
+
 
   it('the live check exists and fails on any unresolved key', () => {
     const src = read('supabase/functions/verify-checkout-wiring/index.ts');

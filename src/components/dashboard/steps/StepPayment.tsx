@@ -105,7 +105,13 @@ export default function StepPayment({ state, onChange }: Props) {
     return {
       services, addons, car_wash,
       referral_code: state.referralCode?.trim() || undefined,
-      zip: state.zip, preferred_day: state.preferredDay, preferred_time: state.preferredTime,
+      zip: state.zip,
+      // Underlying size inputs — the server recomputes size and rejects a mismatch.
+      bedrooms: state.bedrooms ? parseInt(state.bedrooms, 10) : null,
+      bathrooms: state.bathrooms ? parseFloat(state.bathrooms) : null,
+      lawn_choice: state.lawnChoice ?? null,
+      vehicle_class: state.vehicleClass ?? null,
+      preferred_day: state.preferredDay, preferred_time: state.preferredTime,
       lang: language,
       idempotency_key: `cfg:${state.zip}:${services.map(s => `${s.service}:${s.size}:${s.frequency}`).sort().join(',')}:${addons.map(a => a.addon_name + 'x' + a.qty).sort().join(',')}`,
       gclid: attr.gclid, utm_source: attr.utm_source, utm_medium: attr.utm_medium,

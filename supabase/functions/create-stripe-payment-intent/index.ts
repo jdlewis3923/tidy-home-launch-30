@@ -25,14 +25,22 @@ import {
 } from "../_shared/referral-discount.ts";
 import {
   CAR_WASH_LOOKUP_KEYS,
-  SERVICE_LOOKUP_KEYS,
+  contractorVisitPay,
   freeAddonsPerMonth,
+  lookupKeyFor,
+  monthlyPrice,
+  perVisitPrice,
   quantityFor,
+  visitsPerMonthFor,
+  type CanonCadence,
   type CanonSize,
   type WashCount,
 } from "../_shared/pricing-canon.ts";
+import { checkServiceLine, surchargePerVisitFor } from "../_shared/size-validation.ts";
+import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
+import { stripeMode, stripeSecretKey } from "../_shared/stripe-mode.ts";
 
-const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
+const STRIPE_SECRET_KEY = stripeSecretKey();
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -42,11 +50,28 @@ const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
 const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
 const SizeEnum = z.union([z.literal(1), z.literal(2), z.literal(3)]);
 
+const VehicleClassEnum = z.enum(["sedan", "coupe", "suv", "crossover", "truck", "suv3row", "van"]);
+const LawnChoiceEnum = z.enum(["small", "standard", "large", "over"]);
+
 const InputSchema = z.object({
   services: z
-    .array(z.object({ service: ServiceTypeEnum, size: SizeEnum, frequency: FrequencyEnum }))
+    .array(
+      z.object({
+        service: ServiceTypeEnum,
+        size: SizeEnum,
+        frequency: FrequencyEnum,
+        /** Interior sq ft (cleaning) or turf sq ft (lawn) — drives the surcharge. */
+        sq_ft: z.number().int().min(0).max(100000).nullable().optional(),
+      }),
+    )
     .min(1)
     .max(3),
+  // The UNDERLYING size inputs. The server recomputes size from these and
+  // rejects a mismatch — a client-claimed size is never trusted.
+  bedrooms: z.number().int().min(0).max(20).nullable().optional(),
+  bathrooms: z.number().min(0).max(20).nullable().optional(),
+  lawn_choice: LawnChoiceEnum.nullable().optional(),
+  vehicle_class: VehicleClassEnum.nullable().optional(),
   addons: z
     .array(z.object({ addon_name: z.string().min(1).max(64), qty: z.number().int().min(1).max(20) }))
     .max(50)
@@ -83,6 +108,15 @@ async function deterministicKey(userId: string, payload: unknown): Promise<strin
     .slice(0, 48);
 }
 
+
+/** The price id for the active Stripe mode — test bookings use the test twin. */
+// deno-lint-ignore no-explicit-any
+function priceIdOf(row: any): string {
+  const id = stripeMode() === "test" ? row?.stripe_price_id_test ?? null : row?.stripe_price_id ?? null;
+  if (!id) throw new Error(`no ${stripeMode()}-mode price id for lookup_key ${row?.lookup_key ?? row?.addon_name}`);
+  return id;
+}
+
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
@@ -117,6 +151,26 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: "car_wash_requires_home_service" }, 400);
   }
 
+  // ---------- Recompute every size server-side ----------
+  for (const s of input.services) {
+    const check = checkServiceLine({
+      service: s.service,
+      claimedSize: s.size,
+      sqFt: s.sq_ft ?? null,
+      inputs: {
+        bedrooms: input.bedrooms ?? null,
+        bathrooms: input.bathrooms ?? null,
+        lawn_choice: input.lawn_choice ?? null,
+        turf_sq_ft: s.service === "lawn" ? s.sq_ft ?? null : null,
+        vehicle_class: input.vehicle_class ?? null,
+      },
+    });
+    if (!check.ok) {
+      return jsonResponse({ ok: false, error: check.error, detail: check.detail }, 400);
+    }
+  }
+
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -132,38 +186,78 @@ Deno.serve(async (req) => {
           httpClient: Stripe.createFetchHttpClient(),
         });
 
-        // Resolve recurring prices by lookup key.
-        const serviceKeys = input.services.map((s) => SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize]);
+        // ---------- Resolve recurring prices by lookup key ----------
+        // The cadence is PART of the key. Indexing SERVICE_LOOKUP_KEYS by size
+        // alone yields the {monthly,biweekly,weekly} object, which is why this
+        // path used to die on "[object Object]" before Stripe was ever called.
+        const serviceKeys = input.services.map((s) =>
+          lookupKeyFor(s.service, s.size as CanonSize, s.frequency as CanonCadence),
+        );
         const carWashKey = input.car_wash
           ? CAR_WASH_LOOKUP_KEYS[input.car_wash.size as CanonSize][input.car_wash.washes as WashCount]
           : null;
+        const surchargeKeys = ["surcharge_cleaning_xl", "surcharge_lawn_xl"];
 
         const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
-          .select("lookup_key, stripe_price_id")
-          .in("lookup_key", carWashKey ? [...serviceKeys, carWashKey] : serviceKeys)
+          .select("lookup_key, stripe_price_id, stripe_price_id_test")
+          .in("lookup_key", [...serviceKeys, ...(carWashKey ? [carWashKey] : []), ...surchargeKeys])
           .eq("active", true);
         if (priceErr) throw new Error(`catalog read failed: ${priceErr.message}`);
 
         // deno-lint-ignore no-explicit-any
         const items: any[] = [];
+        const planLines: PlanLine[] = [];
+
         for (const s of input.services) {
-          const key = SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize];
+          const cadence = s.frequency as CanonCadence;
+          const size = s.size as CanonSize;
+          const key = lookupKeyFor(s.service, size, cadence);
           const row = priceRows?.find((r) => r.lookup_key === key);
           if (!row) throw new Error(`no active catalog price for lookup_key ${key}`);
-          items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, s.frequency) });
+          items.push({ price: priceIdOf(row), quantity: quantityFor(s.service, cadence) });
+
+          // Square-footage surcharge: one recurring price, per visit, with the
+          // quantity carrying the cadence (monthly 1, biweekly 2, weekly 4).
+          const surcharge = surchargePerVisitFor(s.service, s.sq_ft ?? null);
+          const visits = visitsPerMonthFor(s.service, cadence);
+          if (surcharge > 0) {
+            const surKey = s.service === "cleaning" ? "surcharge_cleaning_xl" : "surcharge_lawn_xl";
+            const surRow = priceRows?.find((r) => r.lookup_key === surKey);
+            if (!surRow) throw new Error(`no active catalog price for lookup_key ${surKey}`);
+            items.push({ price: priceIdOf(surRow), quantity: visits });
+          }
+
+          planLines.push({
+            service: s.service,
+            size_tier: size,
+            cadence,
+            surcharge_applied: surcharge > 0,
+            surcharge_cents: surcharge * 100,
+            visits_per_month: visits,
+            per_visit_cents: Math.round((perVisitPrice(s.service, size, cadence) + surcharge) * 100),
+            monthly_cents: Math.round(monthlyPrice(s.service, size, cadence, surcharge) * 100),
+            lookup_key: key,
+            stripe_price_id: priceIdOf(row),
+            // Never shown to a customer — frozen onto every visit at creation.
+            contractor_pay_cents: Math.round(
+              contractorVisitPay({ service: s.service, size, cadence, surcharge: surcharge > 0 }) * 100,
+            ),
+          });
         }
+
         if (carWashKey) {
           const row = priceRows?.find((r) => r.lookup_key === carWashKey);
           if (!row) throw new Error(`no active catalog price for lookup_key ${carWashKey}`);
-          items.push({ price: row.stripe_price_id, quantity: 1 });
+          items.push({ price: priceIdOf(row), quantity: 1 });
         }
+
 
         // Resolve one-time add-ons
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
             .from("stripe_catalog")
-            .select("addon_name, stripe_price_id")
+            .select("addon_name, stripe_price_id, stripe_price_id_test")
             .eq("is_addon", true)
             .eq("active", true)
             .in(
@@ -174,7 +268,7 @@ Deno.serve(async (req) => {
           for (const a of input.addons) {
             const row = addonRows?.find((r) => r.addon_name === a.addon_name);
             if (!row) continue;
-            items.push({ price: row.stripe_price_id, quantity: a.qty });
+            items.push({ price: priceIdOf(row), quantity: a.qty });
           }
         }
 
@@ -208,12 +302,27 @@ Deno.serve(async (req) => {
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
         const freeAddons = freeAddonsPerMonth(uniqueServices);
 
+        // The plan snapshot goes in a table; metadata carries only its id, so a
+        // two-service cart can never blow Stripe's 500-character value limit.
+        const planLinesId = await savePlanLines(supabase, {
+          userId: user.id,
+          lines: planLines,
+          source: "embedded_checkout",
+        });
+        if (!planLinesId) throw new Error("could not persist the plan snapshot");
+
+        const primary = planLines[0];
         const subscriptionMetadata: Record<string, string> = {
           cohort: "founding_2026",
           signed_up_at: new Date().toISOString(),
           user_id: user.id,
-          services_json: JSON.stringify(input.services),
+          services_json: JSON.stringify(input.services.map((s) => ({ service: s.service, size: s.size, frequency: s.frequency }))),
           sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
+          plan_lines_id: planLinesId,
+          size_tier: String(primary?.size_tier ?? ""),
+          cadence: String(primary?.cadence ?? ""),
+          surcharge_applied: planLines.some((l) => l.surcharge_applied) ? "yes" : "no",
+          surcharge_cents: String(planLines.reduce((sum, l) => sum + l.surcharge_cents, 0)),
           addons_json: JSON.stringify(input.addons),
           car_wash_json: input.car_wash ? JSON.stringify(input.car_wash) : "",
           free_addons_per_month: String(freeAddons),
