@@ -184,9 +184,20 @@ export default function StepProperty({ state, onChange }: Props) {
             more bathrooms than your size allows moves the home up one size — bathrooms drive the
             length of a visit more than anything else.
           </p>
+          <SqFtField
+            label="home square footage"
+            placeholder="e.g. 1800"
+            value={state.homeSqFt}
+            onChange={v => onChange({ ...state, homeSqFt: v })}
+            helper="interior living space. 2,501–4,000 sq ft adds $60 a visit. above 4,000 we quote by hand."
+          />
+          {(state.homeSqFt ?? 0) > 4000 && (
+            <QuoteNotice>a home over 4,000 sq ft is quoted by hand</QuoteNotice>
+          )}
           <SizeReadout service="cleaning" size={sizeFor(state, 'cleaning')} state={state} />
         </div>
       )}
+
 
       {hasLawn && (
         <div className="space-y-4 animate-calm-in" style={{ animationDelay: '60ms' }}>
