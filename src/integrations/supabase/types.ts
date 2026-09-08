@@ -2623,6 +2623,30 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_line_sets: {
+        Row: {
+          created_at: string
+          id: string
+          lines: Json
+          source: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lines: Json
+          source?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lines?: Json
+          source?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       preferred_pro_changes: {
         Row: {
           changed_at: string
