@@ -10,7 +10,9 @@ import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Tables } from '@/integrations/supabase/types';
 
-type Visit = Tables<'visits'>;
+// Only the fields this calendar renders — the customer dashboard passes a
+// pay-free visit shape, so requiring the full row here would be wrong.
+type Visit = Pick<Tables<'visits'>, 'id' | 'visit_date' | 'service' | 'status'>;
 
 const SERVICE_DOT: Record<string, string> = {
   lawn: 'bg-emerald-500',
