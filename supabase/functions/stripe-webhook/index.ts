@@ -38,29 +38,6 @@ const STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRETS[0];
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-const FREQ_DAYS: Record<string, number> = { weekly: 7, biweekly: 14, monthly: 30 };
-
-function timeWindowFromPreferred(pref: string | null | undefined): string {
-  if (pref === 'morning') return '8:00 AM – 12:00 PM';
-  if (pref === 'afternoon') return '12:00 PM – 5:00 PM';
-  return '9:00 AM – 1:00 PM';
-}
-
-function nextVisitDate(preferredDay: string | null | undefined): Date {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const today = new Date();
-  if (preferredDay) {
-    const idx = days.indexOf(preferredDay);
-    if (idx >= 0) {
-      const dow = today.getDay();
-      let add = (idx - dow + 7) % 7;
-      if (add < 2) add += 7;
-      return new Date(today.getTime() + add * 86_400_000);
-    }
-  }
-  return new Date(today.getTime() + 5 * 86_400_000);
-}
-
 async function fireZap(eventName: string, payload: unknown) {
   try {
     await fetch(`${SUPABASE_URL}/functions/v1/send-zapier-event`, {
