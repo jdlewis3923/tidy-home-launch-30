@@ -78,3 +78,26 @@ export function digestText(
   const body = visits.slice(0, 5).map(visitLine).join('\n');
   return { title, body: count > 5 ? `${body}\n+${count - 5} more in the app` : body };
 }
+
+/**
+ * UTC instants bounding an Eastern calendar day, DST-correct (the offset is read
+ * from the zone itself rather than assumed to be -04:00).
+ */
+export function etDayRange(day: string): { start: string; end: string } {
+  const [y, m, d] = day.split('-').map(Number);
+  const noonUtc = new Date(Date.UTC(y, m - 1, d, 12));
+  const name = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    timeZoneName: 'longOffset',
+  })
+    .formatToParts(noonUtc)
+    .find((p) => p.type === 'timeZoneName')?.value ?? 'GMT-05:00';
+  const match = /GMT([+-])(\d{2}):(\d{2})/.exec(name);
+  const sign = match?.[1] === '+' ? 1 : -1;
+  const offsetMin = match ? sign * (Number(match[2]) * 60 + Number(match[3])) : -300;
+  const startMs = Date.UTC(y, m - 1, d, 0, 0, 0) - offsetMin * 60 * 1000;
+  return {
+    start: new Date(startMs).toISOString(),
+    end: new Date(startMs + 24 * 60 * 60 * 1000).toISOString(),
+  };
+}

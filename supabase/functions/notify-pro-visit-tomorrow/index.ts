@@ -10,7 +10,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { notifyPro } from '../_shared/pro-notify.ts';
-import { addDays, digestText, etDate, type DigestVisit } from '../_shared/pro-day-digest.ts';
+import { addDays, digestText, etDate, etDayRange, etDayRange, type DigestVisit } from '../_shared/pro-day-digest.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -35,8 +35,8 @@ Deno.serve(async (req) => {
     )
     .not('assigned_pro_id', 'is', null)
     .in('status', ['scheduled', 'on_the_way', 'in_progress'])
-    .gte('scheduled_start', `${day}T00:00:00-04:00`)
-    .lt('scheduled_start', `${day}T23:59:59-04:00`)
+    .gte('scheduled_start', etDayRange(day).start)
+    .lt('scheduled_start', etDayRange(day).end)
     .order('scheduled_start', { ascending: true });
   if (error) return jsonResponse({ ok: false, error: error.message }, 500);
 
