@@ -162,10 +162,12 @@ async function capacityBlock(s: SupabaseClient, c: KpiConstants, subs: Row[]) {
       s.from('applicants')
         .select('id, first_name, last_name, contractor_id, service, wash_only, available_minutes_week, current_stage, stage_entered_at, compliance_complete, training_passed, equipment_approved, contracts_signed, stripe_connect_complete'),
       s.from('pro_service_assignments').select('applicant_id, contractor_id, service, time_share, active').eq('active', true),
-      s.from('pro_visits').select('contractor_id, service_type, scheduled_at, status')
-        .gte('scheduled_at', new Date(now).toISOString()).lte('scheduled_at', in14),
-      s.from('pro_visits').select('id, jobber_visit_id, service_type, scheduled_at, customer_name, contractor_id, status')
-        .is('contractor_id', null).gte('scheduled_at', new Date(now).toISOString()).lte('scheduled_at', in72),
+      // visits is the live schedule (pro_visits retired with Jobber). Column
+      // names are aliased so the rest of this block is untouched.
+      s.from('visits').select('contractor_id:assigned_pro_id, service_type, scheduled_at:scheduled_start, status')
+        .gte('scheduled_start', new Date(now).toISOString()).lte('scheduled_start', in14),
+      s.from('visits').select('id, service_type, scheduled_at:scheduled_start, customer_name:customer_first_name, contractor_id:assigned_pro_id, status')
+        .is('assigned_pro_id', null).gte('scheduled_start', new Date(now).toISOString()).lte('scheduled_start', in72),
       s.from('applicants').select('current_stage, stage_entered_at'),
     ]);
 
@@ -314,7 +316,7 @@ async function trustBlock(s: SupabaseClient) {
   const [{ data: reviews }, { data: ratings }, { data: visits }, { data: attaches }] = await Promise.all([
     s.from('reviews').select('stars, reviewer_name, posted_at, status').gte('posted_at', since30),
     s.from('visit_ratings').select('stars, rating, contractor_id, created_at, excluded_from_average').gte('created_at', since30),
-    s.from('pro_visits').select('id, contractor_id, status, completed_at, customer_rating, condition_flagged, photos_count, photos_expected')
+    s.from('visits').select('id, contractor_id:assigned_pro_id, status, completed_at')
       .eq('status', 'complete').gte('completed_at', since30),
     s.from('addon_attaches').select('id, attached_at').gte('attached_at', since30),
   ]);

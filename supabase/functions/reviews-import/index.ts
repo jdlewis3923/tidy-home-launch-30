@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
   const toInsert = normalized.filter((r) => !existingSet.has(r.external_review_id));
   const skippedDupes = normalized.length - toInsert.length;
 
-  // Pull candidate pool: completed pro_visits joined to applicants, once.
+  // Pull candidate pool: completed visits joined to applicants, once.
   const { data: applicants } = await admin
     .from('applicants')
     .select('id, contractor_id, first_name, last_name, out_of_service_area')
@@ -68,8 +68,8 @@ Deno.serve(async (req) => {
   for (const row of toInsert) {
     const windowStart = new Date(new Date(row.posted_at).getTime() - CANDIDATE_WINDOW_DAYS * 86_400_000).toISOString();
     const { data: visits } = await admin
-      .from('pro_visits')
-      .select('id, contractor_id, customer_name, completed_at, customer_rating')
+      .from('visits')
+      .select('id, contractor_id:assigned_pro_id, customer_name:customer_first_name, completed_at')
       .eq('status', 'complete')
       .not('completed_at', 'is', null)
       .gte('completed_at', windowStart)

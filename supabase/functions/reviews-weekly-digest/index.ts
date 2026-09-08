@@ -125,8 +125,8 @@ Deno.serve(async (req) => {
         new Date(row.posted_at as string).getTime() - CANDIDATE_WINDOW_DAYS * 86_400_000,
       ).toISOString();
       const { data: visits } = await admin
-        .from('pro_visits')
-        .select('id, contractor_id, customer_name, completed_at, customer_rating')
+        .from('visits')
+        .select('id, contractor_id:assigned_pro_id, customer_name:customer_first_name, completed_at')
         .eq('status', 'complete')
         .not('completed_at', 'is', null)
         .gte('completed_at', windowStart)
