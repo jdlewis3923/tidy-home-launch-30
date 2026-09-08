@@ -253,6 +253,13 @@
       "when": 1788830347639,
       "tag": "0035_security_phase0_authorization_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1788830606722,
+      "tag": "0036_revoke_public_execute_pay_functions",
+      "breakpoints": true
     }
   ]
 }
