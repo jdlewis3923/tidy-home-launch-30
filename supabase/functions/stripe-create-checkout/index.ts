@@ -118,6 +118,15 @@ const CheckoutInputSchema = z.object({
   access_washing_allowed: z.boolean().optional(),
 });
 
+
+/** The price id for the active Stripe mode — test bookings use the test twin. */
+// deno-lint-ignore no-explicit-any
+function priceIdOf(row: any): string {
+  const id = stripeMode() === "test" ? row?.stripe_price_id_test ?? null : row?.stripe_price_id ?? null;
+  if (!id) throw new Error(`no ${stripeMode()}-mode price id for lookup_key ${row?.lookup_key ?? row?.addon_name}`);
+  return id;
+}
+
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
@@ -221,7 +230,7 @@ Deno.serve(async (req) => {
         const surchargeKeys = ["surcharge_cleaning_xl", "surcharge_lawn_xl"];
         const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
-          .select("lookup_key, service_type, stripe_price_id, price_cents")
+          .select("lookup_key, service_type, stripe_price_id, stripe_price_id_test, price_cents")
           .in("lookup_key", [
             ...serviceKeys,
             ...(carWashKey ? [carWashKey] : []),
@@ -265,7 +274,7 @@ Deno.serve(async (req) => {
           if (surcharge < 0) throw new Error("property_requires_quote");
 
           if (s.service === "detailing") carCareIndices.add(line_items.length);
-          line_items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, cadence) });
+          line_items.push({ price: priceIdOf(row), quantity: quantityFor(s.service, cadence) });
 
           const visits = visitsPerMonthFor(s.service, cadence);
           if (surcharge > 0) {
@@ -274,7 +283,7 @@ Deno.serve(async (req) => {
             const surKey = s.service === "cleaning" ? "surcharge_cleaning_xl" : "surcharge_lawn_xl";
             const surRow = priceRows?.find((r) => r.lookup_key === surKey);
             if (!surRow) throw new Error(`no active catalog price for lookup_key ${surKey}`);
-            line_items.push({ price: surRow.stripe_price_id, quantity: visits });
+            line_items.push({ price: priceIdOf(surRow), quantity: visits });
           }
 
           planLines.push({
@@ -287,7 +296,7 @@ Deno.serve(async (req) => {
             per_visit_cents: Math.round((perVisitPrice(s.service, size, cadence) + surcharge) * 100),
             monthly_cents: Math.round(monthlyPrice(s.service, size, cadence, surcharge) * 100),
             lookup_key: key,
-            stripe_price_id: row.stripe_price_id,
+            stripe_price_id: priceIdOf(row),
             // Never shown to a customer — used when visits are created.
             contractor_pay_cents:
               Math.round(
@@ -301,14 +310,14 @@ Deno.serve(async (req) => {
           const row = priceRows?.find((r) => r.lookup_key === carWashKey);
           if (!row) throw new Error(`no active catalog price for lookup_key ${carWashKey}`);
           carCareIndices.add(line_items.length);
-          line_items.push({ price: row.stripe_price_id, quantity: 1 });
+          line_items.push({ price: priceIdOf(row), quantity: 1 });
         }
 
         // ---------- Resolve one-time add-on prices ----------
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
             .from("stripe_catalog")
-            .select("addon_name, service_type, stripe_price_id")
+            .select("addon_name, service_type, stripe_price_id, stripe_price_id_test")
             .eq("is_addon", true)
             .eq("active", true)
             .in(
@@ -321,7 +330,7 @@ Deno.serve(async (req) => {
             const row = addonRows?.find((r) => r.addon_name === a.addon_name);
             if (!row) continue; // unknown add-on — skip silently
             if (row.service_type === "detailing") carCareIndices.add(line_items.length);
-            line_items.push({ price: row.stripe_price_id, quantity: a.qty });
+            line_items.push({ price: priceIdOf(row), quantity: a.qty });
           }
         }
 

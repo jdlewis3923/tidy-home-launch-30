@@ -108,6 +108,15 @@ async function deterministicKey(userId: string, payload: unknown): Promise<strin
     .slice(0, 48);
 }
 
+
+/** The price id for the active Stripe mode — test bookings use the test twin. */
+// deno-lint-ignore no-explicit-any
+function priceIdOf(row: any): string {
+  const id = stripeMode() === "test" ? row?.stripe_price_id_test ?? null : row?.stripe_price_id ?? null;
+  if (!id) throw new Error(`no ${stripeMode()}-mode price id for lookup_key ${row?.lookup_key ?? row?.addon_name}`);
+  return id;
+}
+
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
@@ -206,7 +215,7 @@ Deno.serve(async (req) => {
           const key = lookupKeyFor(s.service, size, cadence);
           const row = priceRows?.find((r) => r.lookup_key === key);
           if (!row) throw new Error(`no active catalog price for lookup_key ${key}`);
-          items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, cadence) });
+          items.push({ price: priceIdOf(row), quantity: quantityFor(s.service, cadence) });
 
           // Square-footage surcharge: one recurring price, per visit, with the
           // quantity carrying the cadence (monthly 1, biweekly 2, weekly 4).
@@ -216,7 +225,7 @@ Deno.serve(async (req) => {
             const surKey = s.service === "cleaning" ? "surcharge_cleaning_xl" : "surcharge_lawn_xl";
             const surRow = priceRows?.find((r) => r.lookup_key === surKey);
             if (!surRow) throw new Error(`no active catalog price for lookup_key ${surKey}`);
-            items.push({ price: surRow.stripe_price_id, quantity: visits });
+            items.push({ price: priceIdOf(surRow), quantity: visits });
           }
 
           planLines.push({
@@ -229,7 +238,7 @@ Deno.serve(async (req) => {
             per_visit_cents: Math.round((perVisitPrice(s.service, size, cadence) + surcharge) * 100),
             monthly_cents: Math.round(monthlyPrice(s.service, size, cadence, surcharge) * 100),
             lookup_key: key,
-            stripe_price_id: row.stripe_price_id,
+            stripe_price_id: priceIdOf(row),
             // Never shown to a customer — frozen onto every visit at creation.
             contractor_pay_cents: Math.round(
               contractorVisitPay({ service: s.service, size, cadence, surcharge: surcharge > 0 }) * 100,
@@ -240,7 +249,7 @@ Deno.serve(async (req) => {
         if (carWashKey) {
           const row = priceRows?.find((r) => r.lookup_key === carWashKey);
           if (!row) throw new Error(`no active catalog price for lookup_key ${carWashKey}`);
-          items.push({ price: row.stripe_price_id, quantity: 1 });
+          items.push({ price: priceIdOf(row), quantity: 1 });
         }
 
 
@@ -248,7 +257,7 @@ Deno.serve(async (req) => {
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
             .from("stripe_catalog")
-            .select("addon_name, stripe_price_id")
+            .select("addon_name, stripe_price_id, stripe_price_id_test")
             .eq("is_addon", true)
             .eq("active", true)
             .in(
@@ -259,7 +268,7 @@ Deno.serve(async (req) => {
           for (const a of input.addons) {
             const row = addonRows?.find((r) => r.addon_name === a.addon_name);
             if (!row) continue;
-            items.push({ price: row.stripe_price_id, quantity: a.qty });
+            items.push({ price: priceIdOf(row), quantity: a.qty });
           }
         }
 
