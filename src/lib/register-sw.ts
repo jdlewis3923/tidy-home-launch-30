@@ -5,7 +5,7 @@
  * ?sw=off is present — and unregisters any stale worker in those cases, so a
  * Pro's schedule can never be served from a stale cache.
  */
-const PRO_SW_URL = "/pro-sw.js";
+const PRO_SW_URL = "/push-sw.js";
 const HOME_SW_URL = "/home-sw.js";
 const LEGACY_SW_URL = "/sw.js";
 

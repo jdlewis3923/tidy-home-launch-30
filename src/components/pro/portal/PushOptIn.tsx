@@ -43,11 +43,11 @@ export default function PushOptIn({ compact = false }: { compact?: boolean }) {
     return (
       <div className={shell}>
         <p className="flex items-center gap-2 text-[15px] font-extrabold text-[hsl(var(--pro-ink))]">
-          <BellOff className="h-4 w-4 text-[hsl(var(--pro-ink-soft))]" aria-hidden /> Notifications can't turn on here
+          <BellOff className="h-4 w-4 text-[hsl(var(--pro-ink-soft))]" aria-hidden /> Enable job notifications
         </p>
         <p className="mt-1.5 text-[14px] text-[hsl(var(--pro-ink-soft))]">
-          Open jointidy.co/pro in Safari or Chrome on your phone — not inside another app — then add Tidy to your home
-          screen and open it from there. The button to turn them on shows up on this card.
+          Notifications are not available in this browser. Open jointidy.co/pro in Safari or Chrome, add Tidy Pro to
+          your home screen, then open the installed app and return here.
         </p>
       </div>
     );
@@ -58,7 +58,7 @@ export default function PushOptIn({ compact = false }: { compact?: boolean }) {
     return (
       <div className={shell}>
         <p className="flex items-center gap-2 text-[15px] font-extrabold text-[hsl(var(--pro-ink))]">
-          <BellRing className="h-4 w-4 text-[hsl(var(--pro-blue))]" aria-hidden /> Get notified about new visits
+          <BellRing className="h-4 w-4 text-[hsl(var(--pro-blue))]" aria-hidden /> Enable job notifications
         </p>
         <p className="mt-1.5 flex items-start gap-2 text-[14px] text-[hsl(var(--pro-ink-soft))]">
           <Share className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--pro-blue))]" aria-hidden />
