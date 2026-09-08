@@ -505,15 +505,20 @@ Deno.serve(async (req) => {
   const tag = TEMPLATE_TAG[action];
   const applicantCopy = APPLICANT_COPY[action];
 
-  queueMicrotask(async () => {
-    const applicantHtml = brandedEmailHtml({
-      heading: applicantCopy.subject,
-      bodyHtml: applicantCopy.body,
-    });
-    const allAttachments = [
-      ...attachments,
-      ...(trainingIcsAttachment ? [trainingIcsAttachment] : []),
-    ];
+  // Emails are AWAITED and their failures surfaced. The old queueMicrotask +
+  // console.error pattern is what made send_contract look like it worked while
+  // sending nothing at all.
+  const applicantHtml = brandedEmailHtml({
+    heading: applicantCopy.subject,
+    bodyHtml: applicantCopy.body,
+  });
+  const allAttachments = [
+    ...attachments,
+    ...(trainingIcsAttachment ? [trainingIcsAttachment] : []),
+  ];
+
+  let applicantEmailError: string | null = null;
+  try {
     await sendBrevoEmail({
       toEmail: row.email, toName: fullName,
       subject: applicantCopy.subject, htmlContent: applicantHtml,
@@ -521,36 +526,79 @@ Deno.serve(async (req) => {
       attachments: allAttachments.length ? allAttachments : undefined,
       templateName: tag,
       triggeredBy: 'advance-applicant',
-    }).catch((e) => console.error('[advance] applicant email failed', e));
-
-    const adminHtml = brandedEmailHtml({
-      heading: SUBJECTS[action],
-      bodyHtml: `
-        <p><strong>${fullName}</strong> — ${row.service ?? 'unknown'} applicant</p>
-        <ul style="padding-left:18px">
-          <li>Stage: ${row.current_stage}</li>
-          <li>BG status: ${row.bg_check_status ?? '—'}</li>
-          <li>Action: ${action}</li>
-          <li>Attachments: ${attachments.map((a) => a.name).join(', ') || 'none'}</li>
-          ${notes ? `<li>Notes: ${notes}</li>` : ''}
-        </ul>
-      `,
-      ctaUrl: 'https://jointidy.co/admin/applicants',
-      ctaLabel: 'Open pipeline',
     });
+  } catch (e) {
+    applicantEmailError = e instanceof Error ? e.message : String(e);
+  }
+
+  if (applicantEmailError) {
+    console.error('[advance] applicant email FAILED', action, applicantEmailError);
+    await admin.from('admin_alerts').insert({
+      alert_type: 'applicant_email_failed',
+      title: `Applicant email failed (${action}) for ${fullName}`,
+      body: applicantEmailError,
+      context: { applicant_id: row.id, action, template: tag },
+    }).then(() => {}, () => {});
+    await admin.from('onboarding_events').insert({
+      applicant_id: row.id,
+      event: `${action}_email_failed`,
+      metadata: { error: applicantEmailError, template: tag },
+    }).then(() => {}, () => {});
+  }
+
+  const adminHtml = brandedEmailHtml({
+    heading: SUBJECTS[action],
+    bodyHtml: `
+      <p><strong>${fullName}</strong> — ${row.service ?? 'unknown'} applicant</p>
+      <ul style="padding-left:18px">
+        <li>Stage: ${row.current_stage}</li>
+        <li>BG status: ${row.bg_check_status ?? '—'}</li>
+        <li>Action: ${action}</li>
+        <li>Attachments: ${attachments.map((a) => a.name).join(', ') || 'none'}</li>
+        ${notes ? `<li>Notes: ${notes}</li>` : ''}
+      </ul>
+    `,
+    ctaUrl: 'https://jointidy.co/admin/applicants',
+    ctaLabel: 'Open pipeline',
+  });
+  let adminEmailError: string | null = null;
+  try {
     await sendBrevoEmail({
       toEmail: 'admin@jointidy.co', toName: 'Justin',
       subject: `${SUBJECTS[action]}: ${fullName}`, htmlContent: adminHtml,
       tags: [`admin-${tag}`],
       templateName: `admin-${tag}`,
       triggeredBy: 'advance-applicant',
-    }).catch((e) => console.error('[advance] admin email failed', e));
+    });
+  } catch (e) {
+    adminEmailError = e instanceof Error ? e.message : String(e);
+    console.error('[advance] admin email FAILED', action, adminEmailError);
+  }
 
-    // Sync transition to Tidy Master sheet (Applicants tab).
-    await admin.functions.invoke('sync-applicant-to-sheet', {
+  // Sync transition to Tidy Master sheet (Applicants tab) — non-blocking, but
+  // any failure is reported back rather than dropped.
+  let sheetSyncError: string | null = null;
+  try {
+    const { error: syncErr } = await admin.functions.invoke('sync-applicant-to-sheet', {
       body: { applicant_id: row.id, last_event: action, last_event_at: new Date().toISOString() },
-    }).catch((e) => console.error('[advance] sheet sync failed', e));
-  });
+    });
+    if (syncErr) sheetSyncError = syncErr.message;
+  } catch (e) {
+    sheetSyncError = e instanceof Error ? e.message : String(e);
+  }
+  if (sheetSyncError) console.error('[advance] sheet sync failed', sheetSyncError);
+
+  if (applicantEmailError) {
+    return jsonResponse({
+      ok: false,
+      error: 'applicant_email_failed',
+      details: applicantEmailError,
+      id: row.id,
+      current_stage: row.current_stage,
+      attachments_count: attachments.length,
+      requested_filenames: filenames,
+    }, 502);
+  }
 
   return jsonResponse({
     ok: true,
@@ -559,5 +607,11 @@ Deno.serve(async (req) => {
     bg_check_status: row.bg_check_status,
     attachments_count: attachments.length,
     requested_filenames: filenames,
+    documenso: documensoResult,
+    admin_email_error: adminEmailError,
+    sheet_sync_error: sheetSyncError,
+  });
+});
+
   });
 });
