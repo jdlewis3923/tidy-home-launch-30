@@ -94,24 +94,10 @@ async function fetchMetaSpend(): Promise<ExternalResult> {
   }
 }
 
-async function fetchJobberJobsToday(): Promise<ExternalResult> {
-  const token = Deno.env.get("JOBBER_REFRESH_TOKEN");
-  if (!token) {
-    return {
-      kpi_code: "jobs_completed_today",
-      value: null,
-      status: "unknown",
-      context: { skipped: "Jobber not configured" },
-    };
-  }
-  // Jobber GraphQL access requires fresh access token via refresh-token flow handled elsewhere.
-  return {
-    kpi_code: "jobs_completed_today",
-    value: null,
-    status: "unknown",
-    context: { note: "Jobber GraphQL fetch not yet wired in KPI loop" },
-  };
-}
+// Jobber decommissioned (Sep 2026): fetchJobberJobsToday() was removed. It only
+// ever returned a null placeholder, and its kpi_code ("jobs_completed_today")
+// had no kpi_definitions row, so the whole insert failed the foreign key every
+// hour and this function returned 500. Completed jobs come from local visits.
 
 async function fetchGBPRating(): Promise<ExternalResult> {
   const accountId = Deno.env.get("GBP_ACCOUNT_ID");
@@ -139,26 +125,50 @@ Deno.serve(async (req) => {
     fetchGA4Sessions(),
     fetchGoogleAdsSpend(),
     fetchMetaSpend(),
-    fetchJobberJobsToday(),
     fetchGBPRating(),
   ]);
 
-  const rows = results.map((r) => ({
-    kpi_code: r.kpi_code,
-    value: r.value,
-    status: r.status,
-    context: r.context,
-  }));
-
-  const { error } = await supabase.from("kpi_snapshots").insert(rows);
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+  // kpi_snapshots.kpi_code is a foreign key onto kpi_definitions.code. A single
+  // unknown code used to fail the whole batch insert, so one stale fetcher took
+  // every other KPI down with it and returned 500 every hour. Resolve the known
+  // codes first, insert only those, and report the skipped ones instead of
+  // failing the run.
+  const { data: defs, error: defErr } = await supabase
+    .from("kpi_definitions")
+    .select("code");
+  if (defErr) {
+    return new Response(JSON.stringify({ error: `kpi_definitions read failed: ${defErr.message}` }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+  const known = new Set((defs ?? []).map((d: { code: string }) => d.code));
 
-  return new Response(JSON.stringify({ inserted: rows.length, results }), {
+  const rows = results
+    .filter((r) => known.has(r.kpi_code))
+    .map((r) => ({
+      kpi_code: r.kpi_code,
+      value: r.value,
+      status: r.status,
+      context: r.context,
+    }));
+  const skipped = results.filter((r) => !known.has(r.kpi_code)).map((r) => r.kpi_code);
+  if (skipped.length) {
+    console.warn("[kpi-external-fetch] no kpi_definitions row, skipped:", skipped.join(", "));
+  }
+
+  if (rows.length) {
+    const { error } = await supabase.from("kpi_snapshots").insert(rows);
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message, attempted: rows.length }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+
+  return new Response(JSON.stringify({ ok: true, inserted: rows.length, skipped, results }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
+

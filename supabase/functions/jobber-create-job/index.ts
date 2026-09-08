@@ -1,21 +1,11 @@
 // jobber-create-job — DECOMMISSIONED (Sep 2026).
 //
-// Job creation lives in the Tidy Pro Portal (visit generation + assignment).
-// The Jobber jobCreate mutation this used never succeeded once in production
-// ("JobCreateInput isn't a defined input type"), and it ran as a blocking
-// call inside stripe-webhook provisioning. Both call sites are removed.
-//
-// Inert 200 stub: no Jobber call, no writes.
+// Jobs and visits are created locally by the visit lifecycle engine. The Jobber
+// jobCreate mutation never once succeeded (invalid input type). Inert now.
+import { serveJobberStub } from '../_shared/jobber-stub.ts';
 
-import { handleCors, jsonResponse } from '../_shared/cors.ts';
-
-Deno.serve(async (req) => {
-  const pre = handleCors(req);
-  if (pre) return pre;
-  return jsonResponse({
-    ok: true,
-    disabled: true,
-    reason: 'jobber_decommissioned',
-    detail: 'Jobs are created in the Tidy Pro Portal. This endpoint is inert.',
-  });
-});
+Deno.serve(serveJobberStub(
+  'jobber-create-job',
+  'Recurring jobs are generated locally by the visit engine. This endpoint is inert.',
+  { jobber_job_ids: {} },
+));
