@@ -14,22 +14,24 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
+import { PRO_REPORTABLE_PAID_IN_FULL_REASONS } from '../_shared/pricing-canon.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
 
-const BodySchema = z.object({
-  visit_id: z.string().uuid(),
-  action: z.enum(['on_my_way', 'complete']),
-});
-
-function mondayOf(d: Date): Date {
-  const x = new Date(d);
-  x.setUTCHours(0, 0, 0, 0);
-  const diff = (x.getUTCDay() + 6) % 7;
-  x.setUTCDate(x.getUTCDate() - diff);
-  return x;
-}
-const iso = (d: Date) => d.toISOString().slice(0, 10);
+// 'blocked': the pro arrived and could not work through no fault of their own.
+// Canon pays it in full. Only the two pro-reportable reasons are accepted here,
+// a note is mandatory, and on_my_way must already have been sent — every case
+// is written to admin_alerts for review.
+const BodySchema = z.discriminatedUnion('action', [
+  z.object({ visit_id: z.string().uuid(), action: z.literal('on_my_way') }),
+  z.object({ visit_id: z.string().uuid(), action: z.literal('complete') }),
+  z.object({
+    visit_id: z.string().uuid(),
+    action: z.literal('blocked'),
+    reason: z.enum(PRO_REPORTABLE_PAID_IN_FULL_REASONS as [string, ...string[]]),
+    note: z.string().trim().min(10).max(500),
+  }),
+]);
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
@@ -60,11 +62,14 @@ Deno.serve(async (req) => {
 
     const { data: visit } = await admin
       .from('visits')
-      .select('id, assigned_pro_id, status, user_id, service_type, visit_pay_cents, scheduled_start, street, customer_first_name')
+      .select('id, assigned_pro_id, status, user_id, service_type, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, street, customer_first_name')
       .eq('id', visit_id)
       .maybeSingle();
     if (!visit || visit.assigned_pro_id !== uid) {
       return jsonResponse({ ok: false, error: 'visit_not_assigned_to_you' });
+    }
+    if (['complete', 'canceled', 'blocked', 'skipped'].includes(visit.status ?? '')) {
+      return jsonResponse({ ok: false, error: 'visit_not_open', status: visit.status });
     }
 
     // COI gate — viewing is fine, working is not.
@@ -108,6 +113,20 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: true, action, sms });
     }
 
+    if (action === 'blocked') {
+      if (!visit.on_my_way_at) return jsonResponse({ ok: false, error: 'on_my_way_required' });
+      const { reason, note } = parsed.data;
+      const { data: result, error: rpcErr } = await admin.rpc('mark_visit_paid_in_full', {
+        _visit_id: visit_id,
+        _reason: reason,
+        _note: note,
+        _actor: `pro:${uid}`,
+      });
+      if (rpcErr) return jsonResponse({ ok: false, error: rpcErr.message });
+      const out = result as { visit_pay_cents?: number } | null;
+      return jsonResponse({ ok: true, action, paid_in_full_reason: reason, visit_pay_cents: out?.visit_pay_cents ?? 0 });
+    }
+
     // action === 'complete'
     const { count: before } = await admin
       .from('visit_photos')
@@ -128,41 +147,30 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Pay = frozen Tier 1 base (contractor_pay_cents) + the uplift for the tier
+    // this pro holds RIGHT NOW. The base never moves; the tier is the pro's.
+    let pay = visit.visit_pay_cents ?? 0;
+    if (visit.contractor_pay_cents != null) {
+      const { data: resolved } = await admin.rpc('pro_tier_uplift_cents', {
+        _base_cents: visit.contractor_pay_cents,
+        _pro_uid: uid,
+      });
+      if (typeof resolved === 'number') pay = resolved;
+    }
+
     const now = new Date();
     await admin
       .from('visits')
-      .update({ completed_at: now.toISOString(), status: 'complete' })
+      .update({ completed_at: now.toISOString(), status: 'complete', visit_pay_cents: pay })
       .eq('id', visit_id);
 
     // Roll this Pro's payout week (Monday-Sunday, paid the following Friday).
-    const start = mondayOf(visit.scheduled_start ? new Date(visit.scheduled_start) : now);
-    const end = new Date(start);
-    end.setUTCDate(end.getUTCDate() + 6);
-    const friday = new Date(start);
-    friday.setUTCDate(friday.getUTCDate() + 11);
-    const pay = visit.visit_pay_cents ?? 0;
-
-    const { data: week } = await admin
-      .from('payout_weeks')
-      .select('id, visit_pay_cents')
-      .eq('pro_id', uid)
-      .eq('week_start', iso(start))
-      .maybeSingle();
-    if (week) {
-      await admin
-        .from('payout_weeks')
-        .update({ visit_pay_cents: (week.visit_pay_cents ?? 0) + pay })
-        .eq('id', week.id);
-    } else {
-      await admin.from('payout_weeks').insert({
-        pro_id: uid,
-        week_start: iso(start),
-        week_end: iso(end),
-        payout_date: iso(friday),
-        status: 'pending',
-        visit_pay_cents: pay,
-      });
-    }
+    const { error: creditErr } = await admin.rpc('credit_payout_week', {
+      _pro: uid,
+      _at: visit.scheduled_start ?? now.toISOString(),
+      _cents: pay,
+    });
+    if (creditErr) console.error('[pro-visit-action] payout credit failed', creditErr.message);
 
     const { data: applicant } = await admin
       .from('applicants')
