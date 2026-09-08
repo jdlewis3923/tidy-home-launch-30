@@ -32,15 +32,6 @@ const Body = z.object({
   return_url: z.string().url().optional(),
 });
 
-function jwtRole(t: string): string | null {
-  try {
-    const parts = t.split('.');
-    if (parts.length !== 3) return null;
-    const pad = (s: string) => s + '='.repeat((4 - (s.length % 4)) % 4);
-    const p = JSON.parse(atob(pad(parts[1].replace(/-/g, '+').replace(/_/g, '/'))));
-    return p?.role ?? null;
-  } catch { return null; }
-}
 
 async function stripePost(path: string, form: Record<string, string>): Promise<any> {
   const body = new URLSearchParams(form).toString();
