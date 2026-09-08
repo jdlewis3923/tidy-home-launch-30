@@ -826,6 +826,7 @@ async function handleSubscriptionDeleted(supabase: any, event: Stripe.Event) {
     .from('subscriptions')
     .update({
       status: 'canceled',
+      stripe_status: 'canceled',
       canceled_at: new Date().toISOString(),
     })
     .eq('stripe_subscription_id', sub.id);
