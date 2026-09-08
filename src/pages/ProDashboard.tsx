@@ -112,9 +112,10 @@ export default function ProDashboard() {
             .select("amount_cents, scheduled_at")
             .eq("contractor_id", userId)
             .order("scheduled_at", { ascending: false }).limit(1),
-          supabase.from("visit_photos")
-            .select("id", { count: "exact", head: true })
-            .eq("pro_id", userId).eq("kind", "after"),
+          supabase.from("visits")
+            .select("id")
+            .eq("assigned_pro_id", userId).eq("status", "complete")
+            .gte("completed_at", since30),
           supabase.from("pro_referrals")
             .select("id", { count: "exact", head: true })
             .eq("referrer_contractor_id", userId).eq("status", "completed"),
@@ -141,6 +142,21 @@ export default function ProDashboard() {
           .select("completed_at").eq("assigned_pro_id", userId).eq("status", "complete")
           .gte("completed_at", new Date(Date.now() - 60 * 86400000).toISOString())
           .order("completed_at", { ascending: false });
+        // Completed visits still missing an after photo.
+        let photosPending = 0;
+        {
+          const ids = ((photoRes.data ?? []) as Array<{ id: string }>).map((r) => r.id);
+          if (ids.length) {
+            const { data: withAfter } = await supabase
+              .from("visit_photos")
+              .select("visit_id")
+              .in("visit_id", ids)
+              .eq("kind", "after");
+            const have = new Set((withAfter ?? []).map((r: any) => r.visit_id));
+            photosPending = ids.filter((id) => !have.has(id)).length;
+          }
+        }
+
         const days = new Set<string>((streakRows ?? []).map((r: any) => r.completed_at?.slice(0, 10)));
         let streak = 0;
         const cursor = new Date(); cursor.setHours(0, 0, 0, 0);
@@ -163,7 +179,7 @@ export default function ProDashboard() {
           streakDays: streak,
           weekPayoutCents: payout?.amount_cents ?? weekCents,
           nextPayoutDay,
-          photosPending: photoRes.count ?? 0,
+          photosPending,
           referralCount: refRes.count ?? 0,
           referralBonusCents: Number((bonusRes as any)?.data?.value ?? 20000),
         });
