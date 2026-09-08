@@ -279,8 +279,26 @@ Deno.serve(async (req) => {
   }
 
 
+  // SEND_CONTRACT PRE-CHECK: this action has silently emailed nothing for
+  // months because the contract PDF row was never uploaded (storage_path still
+  // `pending/...`) and the failure was swallowed. Refuse the transition up
+  // front instead of recording a fake "contract sent".
+  if (action === 'send_contract') {
+    const { data: preRow } = await admin
+      .from('applicants').select('service').eq('id', applicant_id).maybeSingle();
+    const preAttachments = await buildAttachments(filenamesFor('send_contract', roleKey(preRow?.service)));
+    if (!preAttachments.length) {
+      return jsonResponse({
+        error: 'contract_document_unavailable',
+        reason: 'No signable contract PDF is uploaded for this role, so no email would be sent. Upload the contract in company_documents / tidy-docs first.',
+        expected_filenames: filenamesFor('send_contract', roleKey(preRow?.service)),
+      }, 409);
+    }
+  }
+
   const update = applyTransition(action);
   if (notes) update.bg_check_notes = notes;
+
 
   // Schedule training: persist datetime.
   if (action === 'schedule_training' && scheduled_at) {
