@@ -30,7 +30,11 @@ Deno.serve(async (req) => {
   const parsed = Body.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return jsonResponse({ error: 'invalid_body' }, 400);
 
-  const { data: app } = await admin.from('applicants').select('id, contractor_id').eq('id', parsed.data.applicant_id).single();
+  const { data: app } = await admin
+    .from('applicants')
+    .select('id, contractor_id, completed_visits')
+    .eq('id', parsed.data.applicant_id)
+    .single();
   if (!app?.contractor_id) return jsonResponse({ error: 'no_contractor_id' }, 400);
   const cid = app.contractor_id;
 
@@ -43,7 +47,10 @@ Deno.serve(async (req) => {
   ]);
 
   const completedRows = (visits ?? []).filter((v) => v.status === 'complete');
-  const completed = completedRows.length;
+  // Never ratchet a Pro's lifetime counter down. pro-visit-action is the
+  // authority that increments it as work is completed; a recalculation can
+  // only ever raise it to match the live schedule.
+  const completed = Math.max(completedRows.length, Number(app.completed_visits ?? 0));
   const cancelled = (visits ?? []).filter((v) => v.status === 'canceled' || v.status === 'cancelled').length;
   const lastVisit = (visits ?? []).map((v) => v.completed_at).filter(Boolean).sort().slice(-1)[0] ?? null;
 
@@ -58,7 +65,7 @@ Deno.serve(async (req) => {
       .in('visit_id', ids);
     photosUp = count ?? 0;
   }
-  const photosEx = completed * 2;
+  const photosEx = completedRows.length * 2;
 
   // Customer ratings come from visit_ratings (the live rate link). Google
   // reviews are folded in so a public 5-star still counts.
