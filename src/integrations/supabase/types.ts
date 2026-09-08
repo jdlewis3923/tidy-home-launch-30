@@ -4767,9 +4767,9 @@ export type Database = {
       generate_recurring_visits: {
         Args: { _horizon_days?: number; _subscription_id?: string }
         Returns: {
-          created: number
-          service: string
-          subscription_id: string
+          out_created: number
+          out_service: string
+          out_subscription_id: string
         }[]
       }
       generate_referral_code: { Args: never; Returns: string }
