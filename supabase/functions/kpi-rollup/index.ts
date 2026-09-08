@@ -162,10 +162,12 @@ async function capacityBlock(s: SupabaseClient, c: KpiConstants, subs: Row[]) {
       s.from('applicants')
         .select('id, first_name, last_name, contractor_id, service, wash_only, available_minutes_week, current_stage, stage_entered_at, compliance_complete, training_passed, equipment_approved, contracts_signed, stripe_connect_complete'),
       s.from('pro_service_assignments').select('applicant_id, contractor_id, service, time_share, active').eq('active', true),
-      s.from('pro_visits').select('contractor_id, service_type, scheduled_at, status')
-        .gte('scheduled_at', new Date(now).toISOString()).lte('scheduled_at', in14),
-      s.from('pro_visits').select('id, jobber_visit_id, service_type, scheduled_at, customer_name, contractor_id, status')
-        .is('contractor_id', null).gte('scheduled_at', new Date(now).toISOString()).lte('scheduled_at', in72),
+      // visits is the live schedule (pro_visits retired with Jobber). Column
+      // names are aliased so the rest of this block is untouched.
+      s.from('visits').select('contractor_id:assigned_pro_id, service_type, scheduled_at:scheduled_start, status')
+        .gte('scheduled_start', new Date(now).toISOString()).lte('scheduled_start', in14),
+      s.from('visits').select('id, service_type, scheduled_at:scheduled_start, customer_name:customer_first_name, contractor_id:assigned_pro_id, status')
+        .is('assigned_pro_id', null).gte('scheduled_start', new Date(now).toISOString()).lte('scheduled_start', in72),
       s.from('applicants').select('current_stage, stage_entered_at'),
     ]);
 
@@ -314,7 +316,7 @@ async function trustBlock(s: SupabaseClient) {
   const [{ data: reviews }, { data: ratings }, { data: visits }, { data: attaches }] = await Promise.all([
     s.from('reviews').select('stars, reviewer_name, posted_at, status').gte('posted_at', since30),
     s.from('visit_ratings').select('stars, rating, contractor_id, created_at, excluded_from_average').gte('created_at', since30),
-    s.from('pro_visits').select('id, contractor_id, status, completed_at, customer_rating, condition_flagged, photos_count, photos_expected')
+    s.from('visits').select('id, contractor_id:assigned_pro_id, status, completed_at')
       .eq('status', 'complete').gte('completed_at', since30),
     s.from('addon_attaches').select('id, attached_at').gte('attached_at', since30),
   ]);
@@ -330,11 +332,32 @@ async function trustBlock(s: SupabaseClient) {
   const avg30 = scored.length ? round(scored.reduce((a, r) => a + r.v, 0) / scored.length, 2) : null;
   const le3 = scored.filter((r) => r.v <= 3).length;
 
+  // A "perfect" visit = completed, both photos present, and no rating of 3 or
+  // less attached to it. Photos and ratings both live in their own tables now.
   const completed = visits ?? [];
-  const perfect = completed.filter(
-    (v) => !v.condition_flagged && (Number(v.customer_rating ?? 5) >= 4.5) &&
-      (Number(v.photos_count ?? 0) >= Number(v.photos_expected ?? 0)),
-  ).length;
+  const completedIds = completed.map((v) => v.id as string);
+  let perfect = 0;
+  if (completedIds.length) {
+    const [{ data: photoRows }, { data: ratingRows }] = await Promise.all([
+      s.from('visit_photos').select('visit_id, kind').in('visit_id', completedIds),
+      s.from('visit_ratings').select('visit_id, stars, rating').in('visit_id', completedIds),
+    ]);
+    const photoKinds = new Map<string, Set<string>>();
+    for (const r of photoRows ?? []) {
+      const set = photoKinds.get(r.visit_id as string) ?? new Set<string>();
+      set.add(String(r.kind));
+      photoKinds.set(r.visit_id as string, set);
+    }
+    const lowRated = new Set(
+      (ratingRows ?? [])
+        .filter((r) => Number(r.stars ?? r.rating ?? 5) <= 3)
+        .map((r) => r.visit_id as string),
+    );
+    perfect = completedIds.filter((id) => {
+      const kinds = photoKinds.get(id);
+      return !!kinds && kinds.has('before') && kinds.has('after') && !lowRated.has(id);
+    }).length;
+  }
 
   // per-Pro last 10 ratings
   const { data: recent } = await s.from('visit_ratings')

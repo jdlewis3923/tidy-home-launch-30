@@ -439,6 +439,13 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, event: Str
     ? session.customer
     : session.customer?.id ?? null;
 
+  // Same gate as the embedded path: never seed a plan and its visits before the
+  // money is collected. Hosted Checkout can complete a session unpaid.
+  if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required') {
+    console.log('[stripe-webhook] checkout.session.completed not seeded — payment_status', session.payment_status);
+    return;
+  }
+
   await seedSubscriptionAndVisits(stripe, supabase, {
     userId, meta, stripeSubscriptionId, stripeCustomerId,
   });

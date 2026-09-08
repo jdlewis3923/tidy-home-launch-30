@@ -386,6 +386,20 @@
       "when": 1788902717057,
       "tag": "0054_fix_security_definer_current_user_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1788909675950,
+      "tag": "0055_visit_substitution_live_trigger",
+      "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1788909721326,
+      "tag": "0056_retire_pro_visits_sql_readers",
+      "breakpoints": true
     }
   ]
 }

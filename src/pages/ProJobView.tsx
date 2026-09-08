@@ -18,13 +18,10 @@ const OTHER = "other_needs_quote";
 
 type Visit = {
   id: string;
-  jobber_visit_id: string;
   status: string;
   service_type: string | null;
   scheduled_at: string | null;
   before_photos_count: number;
-  before_photos_uploaded_at: string | null;
-  started_at: string | null;
 };
 
 type CatalogAddon = { id: string; addon_key: string; display_name: string; services: string[] | null };
@@ -61,12 +58,17 @@ export default function ProJobView() {
       setLoading(false);
       return;
     }
-    const [{ data: v }, { data: cat }, { data: reqs }] = await Promise.all([
+    const [{ data: v }, { data: beforeCount }, { data: cat }, { data: reqs }] = await Promise.all([
       supabase
-        .from("pro_visits")
-        .select("id, jobber_visit_id, status, service_type, scheduled_at, before_photos_count, before_photos_uploaded_at, started_at")
-        .eq("jobber_visit_id", jobId)
+        .from("visits")
+        .select("id, status, service_type, scheduled_start")
+        .eq("id", jobId)
         .maybeSingle(),
+      supabase
+        .from("visit_photos")
+        .select("id")
+        .eq("visit_id", jobId)
+        .eq("kind", "before"),
       supabase
         .from("addon_catalog")
         .select("id, addon_key, display_name, services")
@@ -78,7 +80,17 @@ export default function ProJobView() {
         .eq("job_id", jobId)
         .order("requested_at", { ascending: false }),
     ]);
-    setVisit((v as Visit) ?? null);
+    setVisit(
+      v
+        ? {
+            id: v.id,
+            status: v.status ?? "",
+            service_type: v.service_type ?? null,
+            scheduled_at: v.scheduled_start ?? null,
+            before_photos_count: beforeCount?.length ?? 0,
+          }
+        : null,
+    );
     setAddons((cat as CatalogAddon[]) ?? []);
     setRequests((reqs as RequestRow[]) ?? []);
     setLoading(false);
@@ -99,18 +111,17 @@ export default function ProJobView() {
       const { error } = await supabase.storage
         .from("job-condition-photos")
         .upload(path, file, { contentType: file.type || "image/jpeg" });
-      if (!error) uploaded += 1;
+      if (!error) {
+        uploaded += 1;
+        await supabase.from("visit_photos").insert({
+          visit_id: visit.id,
+          pro_id: userId,
+          kind: "before",
+          storage_path: path,
+        });
+      }
     }
     if (uploaded > 0) {
-      const count = (visit.before_photos_count ?? 0) + uploaded;
-      await supabase
-        .from("pro_visits")
-        .update({
-          before_photos_count: count,
-          before_photos_uploaded_at: new Date().toISOString(),
-          started_at: visit.started_at ?? new Date().toISOString(),
-        })
-        .eq("id", visit.id);
       await load();
       toast({ title: `${uploaded} before photo${uploaded > 1 ? "s" : ""} uploaded` });
     } else {
@@ -189,7 +200,7 @@ export default function ProJobView() {
     );
   }
 
-  const gateOpen = Boolean(visit.before_photos_uploaded_at);
+  const gateOpen = (visit.before_photos_count ?? 0) > 0;
   const pending = requests.find((r) => r.status === "pending");
   const service = (visit.service_type ?? "").toLowerCase();
   const relevant = addons.filter((a) => {

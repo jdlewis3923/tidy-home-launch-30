@@ -59,6 +59,9 @@ Deno.serve(async (req) => {
   }
 
   const { pro_visit_id, jobber_visit_id, old_contractor_id, new_contractor_id } = body;
+  // visit_id is the live schedule row (visits.id). pro_visit_id/jobber_visit_id
+  // are retired Jobber-era inputs kept only so old callers do not 400.
+  const visitId: string | null = (body as { visit_id?: string }).visit_id ?? null;
   if (!old_contractor_id || !new_contractor_id) {
     return jsonResponse({ ok: false, error: 'contractor ids required' }, 400);
   }
@@ -78,8 +81,8 @@ Deno.serve(async (req) => {
       title: 'New job added to your route',
       body: 'A visit was moved to you. Open your schedule for the time and address.',
       url: '/pro/schedule',
-      idempotency_key: `visit_substitution:${pro_visit_id ?? jobber_visit_id}:${new_contractor_id}`,
-      context: { pro_visit_id, jobber_visit_id, old_contractor_id },
+      idempotency_key: `visit_substitution:${visitId ?? pro_visit_id ?? jobber_visit_id}:${new_contractor_id}`,
+      context: { visit_id: visitId, old_contractor_id },
     });
   } catch (e) {
     console.error('[notify-pro-substitution] incoming pro notify failed', (e as Error).message);
@@ -89,21 +92,15 @@ Deno.serve(async (req) => {
   // Who is the customer on this visit?
   let userId: string | null = null;
   let scheduledAt: string | null = body.scheduled_at ?? null;
-  if (jobber_visit_id) {
+  if (visitId) {
     const { data: visit } = await admin
       .from('visits')
-      .select('user_id, visit_date, time_window')
-      .eq('jobber_visit_id', jobber_visit_id)
+      .select('user_id, scheduled_start')
+      .eq('id', visitId)
       .maybeSingle();
-    userId = (visit as { user_id?: string } | null)?.user_id ?? null;
-  }
-  if (!scheduledAt && pro_visit_id) {
-    const { data: pv } = await admin
-      .from('pro_visits')
-      .select('scheduled_at')
-      .eq('id', pro_visit_id)
-      .maybeSingle();
-    scheduledAt = (pv as { scheduled_at?: string } | null)?.scheduled_at ?? null;
+    const v = visit as { user_id?: string; scheduled_start?: string } | null;
+    userId = v?.user_id ?? null;
+    if (!scheduledAt) scheduledAt = v?.scheduled_start ?? null;
   }
   if (!userId) {
     return jsonResponse({ ok: true, sent: false, reason: 'no_customer_on_visit' });

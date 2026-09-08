@@ -93,14 +93,25 @@ Deno.serve(async (req) => {
   });
 
   // ---- the job must be this Pro's, started-eligible, and not complete -----
-  const { data: visit } = await admin
-    .from('pro_visits')
-    .select('id, contractor_id, status, service_type, before_photos_uploaded_at, jobber_visit_id')
-    .eq('jobber_visit_id', job_id)
-    .maybeSingle();
+  // job_id is the visits.id the Pro Portal shows. (Jobber is decommissioned;
+  // pro_visits is dead and jobber_visit_id is never populated any more.)
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const visitQuery = admin
+    .from('visits')
+    .select('id, assigned_pro_id, status, service_type')
+    .limit(1);
+  const { data: visitRows } = UUID_RE.test(job_id)
+    ? await visitQuery.eq('id', job_id)
+    : await visitQuery.eq('jobber_visit_id', job_id);
+  const visit = visitRows?.[0] ?? null;
   if (!visit) return jsonResponse({ ok: false, error: 'job_not_found' }, 404);
-  if (visit.contractor_id !== proUserId) return jsonResponse({ ok: false, error: 'not_your_job' }, 403);
-  if (!visit.before_photos_uploaded_at) {
+  if (visit.assigned_pro_id !== proUserId) return jsonResponse({ ok: false, error: 'not_your_job' }, 403);
+  const { count: beforeCount } = await admin
+    .from('visit_photos')
+    .select('id', { count: 'exact', head: true })
+    .eq('visit_id', visit.id)
+    .eq('kind', 'before');
+  if (!beforeCount) {
     return jsonResponse({ ok: false, error: 'before_photos_required' }, 409);
   }
   if (visit.status === 'complete' || visit.status === 'canceled' || visit.status === 'cancelled') {
@@ -137,7 +148,7 @@ Deno.serve(async (req) => {
       .from('addon_requests')
       .insert({
         job_id,
-        pro_visit_id: visit.id,
+        // pro_visit_id intentionally unset: it FKs the retired pro_visits table.
         pro_id: proUserId,
         addon_name: 'Other — needs quote',
         addon_key: OTHER_ADDON_KEY,
@@ -186,7 +197,7 @@ Deno.serve(async (req) => {
     .from('addon_requests')
     .insert({
       job_id,
-      pro_visit_id: visit.id,
+      // pro_visit_id intentionally unset: it FKs the retired pro_visits table.
       pro_id: proUserId,
       customer_id: customerId,
       addon_id: addon.id,

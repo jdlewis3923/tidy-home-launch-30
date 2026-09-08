@@ -29,8 +29,15 @@ const WEBHOOK_EVENTS = [
   'checkout.session.completed',
   'invoice.paid',
   'invoice.payment_failed',
+  // Without these two registered, Stripe never delivers them and the handlers
+  // in stripe-webhook can never fire — a customer who adds a new card after a
+  // failed charge would stay paused forever.
+  'invoice.payment_action_required',
+  'payment_method.attached',
+  'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
+  'customer.updated',
 ] as const;
 
 // ---------- Live catalog source-of-truth (backfilled, not created) ----------

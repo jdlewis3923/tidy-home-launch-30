@@ -143,14 +143,20 @@ Deno.serve(async (req) => {
     if (!claimed) return jsonResponse({ ok: false, error: 'already_resolved' }, 409);
 
     // B5 — the Pro flagged the condition and was told no. Protect their rating.
-    if (reqRow.pro_visit_id) {
-      await admin.from('pro_visits').update({
-        condition_flagged: true,
-        condition_photo_url: reqRow.photo_url,
-        condition_note: reqRow.condition_note,
+    // The declined condition is recorded on the request row itself; the
+    // Jobber-era pro_visits mirror is retired and no longer written.
+    await admin.from('admin_alerts').insert({
+      alert_type: 'addon_declined_condition',
+      title: `Declined add-on flagged on job ${reqRow.job_id}`,
+      body: reqRow.condition_note ?? null,
+      context: {
+        addon_request_id: reqRow.id,
+        job_id: reqRow.job_id,
+        pro_id: reqRow.pro_id,
         declined_addon_name: reqRow.addon_name,
-      }).eq('id', reqRow.pro_visit_id);
-    }
+        photo_url: reqRow.photo_url,
+      },
+    });
 
     await notifyPro(admin, {
       contractor_id: reqRow.pro_id,
@@ -235,12 +241,16 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'already_resolved' }, 409);
   }
 
-  if (reqRow.pro_visit_id) {
-    const { data: pv } = await admin
-      .from('pro_visits').select('addon_pay_cents').eq('id', reqRow.pro_visit_id).maybeSingle();
-    await admin.from('pro_visits').update({
-      addon_pay_cents: ((pv as { addon_pay_cents?: number } | null)?.addon_pay_cents ?? 0) + proPayCents,
-    }).eq('id', reqRow.pro_visit_id);
+  // Add-on pay rides on the visit itself (visits.visit_pay_cents), the same
+  // number the Pro Portal and payout week read.
+  {
+    const { data: liveVisit } = await admin
+      .from('visits').select('id, visit_pay_cents').eq('id', reqRow.job_id).maybeSingle();
+    if (liveVisit) {
+      await admin.from('visits').update({
+        visit_pay_cents: (liveVisit.visit_pay_cents ?? 0) + proPayCents,
+      }).eq('id', liveVisit.id);
+    }
   }
 
   await notifyPro(admin, {

@@ -54,10 +54,29 @@ Deno.serve(async (req) => {
   if (!parsed.success) return jsonResponse({ error: 'invalid_body' }, 400);
 
   const { data: a, error: fetchErr } = await admin.from('applicants')
-    .select('id, first_name, last_name, email, tier, completed_visits, avg_customer_rating')
+    .select('id, contractor_id, first_name, last_name, email, tier, completed_visits, avg_customer_rating')
     .eq('id', parsed.data.applicant_id).single();
   if (fetchErr || !a) return jsonResponse({ error: 'not_found' }, 404);
   if (a.tier !== 'tier_1_verified') return jsonResponse({ error: 'not_tier_1' }, 400);
+
+  // Counters are read live from visits / visit_ratings, never from the stale
+  // Jobber-era mirror. applicants values are only a fallback.
+  let completedVisits = a.completed_visits ?? 0;
+  let avgRating: number | null = a.avg_customer_rating ?? null;
+  if (a.contractor_id) {
+    const [{ count: liveVisits }, { data: liveRatings }] = await Promise.all([
+      admin.from('visits').select('id', { count: 'exact', head: true })
+        .eq('assigned_pro_id', a.contractor_id).eq('status', 'complete'),
+      admin.from('visit_ratings').select('rating, stars, excluded_from_average')
+        .eq('contractor_id', a.contractor_id),
+    ]);
+    completedVisits = liveVisits ?? 0;
+    const nums = (liveRatings ?? [])
+      .filter((r) => r.excluded_from_average !== true)
+      .map((r) => Number(r.stars ?? r.rating ?? 0))
+      .filter((n) => n > 0);
+    avgRating = nums.length ? Number((nums.reduce((x, y) => x + y, 0) / nums.length).toFixed(2)) : null;
+  }
 
   const now = new Date().toISOString();
   const { error: updErr } = await admin.from('applicants').update({
@@ -70,7 +89,7 @@ Deno.serve(async (req) => {
   await admin.from('onboarding_events').insert({
     applicant_id: a.id,
     event: 'tier_2_offer_sent',
-    metadata: { offered_by: uid, visits: a.completed_visits, rating: a.avg_customer_rating },
+    metadata: { offered_by: uid, visits: completedVisits, rating: avgRating, source: 'visits' },
   });
 
   await fireBrevo('brevo_template_t2_offer',
@@ -82,5 +101,5 @@ Deno.serve(async (req) => {
       deadline_days: 14,
     });
 
-  return jsonResponse({ ok: true, applicant_id: a.id, tier_readiness_status: 'offered' });
+  return jsonResponse({ ok: true, applicant_id: a.id, tier_readiness_status: 'offered', completed_visits: completedVisits, avg_customer_rating: avgRating });
 });

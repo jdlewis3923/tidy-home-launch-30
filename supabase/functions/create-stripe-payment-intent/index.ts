@@ -81,6 +81,11 @@ const InputSchema = z.object({
   zip: z.string().regex(/^\d{5}$/),
   preferred_day: z.string().max(20).optional(),
   preferred_time: z.string().max(20).optional(),
+  // On-site access answers — the hosted path already carries these and
+  // seedSubscriptionAndVisits reads them, so the embedded path must too.
+  access_water_spigot: z.boolean().optional(),
+  access_electrical_outlet: z.boolean().optional(),
+  access_washing_allowed: z.boolean().optional(),
   lang: z.enum(["en", "es"]).default("en"),
   idempotency_key: z.string().min(8).max(128).optional(),
   // Attribution
@@ -329,6 +334,9 @@ Deno.serve(async (req) => {
           zip: input.zip,
           preferred_day: input.preferred_day ?? "",
           preferred_time: input.preferred_time ?? "",
+          access_water_spigot: input.access_water_spigot === true ? "yes" : input.access_water_spigot === false ? "no" : "",
+          access_electrical_outlet: input.access_electrical_outlet === true ? "yes" : input.access_electrical_outlet === false ? "no" : "",
+          access_washing_allowed: input.access_washing_allowed === true ? "yes" : input.access_washing_allowed === false ? "no" : "",
           lang: input.lang,
           founding_zip: input.zip,
           founding_rate_locked: "yes",
