@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import {
   ConfigState,
   LawnChoice,
@@ -135,7 +136,7 @@ function SqFtField({
 }
 
 /** Shown the moment an answer lands outside what we can price online. */
-function QuoteNotice({ children }: { children: React.ReactNode }) {
+function QuoteNotice({ children }: { children: ReactNode }) {
   return (
     <div className="rounded-xl border border-hairline bg-cream-deep/40 px-4 py-3">
       <p className="text-sm font-semibold text-ink lowercase">{children}</p>
