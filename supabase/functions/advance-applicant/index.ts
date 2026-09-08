@@ -612,6 +612,3 @@ Deno.serve(async (req) => {
     sheet_sync_error: sheetSyncError,
   });
 });
-
-  });
-});
