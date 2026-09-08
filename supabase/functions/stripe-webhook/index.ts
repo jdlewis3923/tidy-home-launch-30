@@ -451,6 +451,33 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Ev
     localSubId = subRow?.id ?? null;
   }
 
+  // A paid invoice IS the confirmation of payment. If nothing was seeded yet
+  // (the embedded path deliberately skips seeding while the card is unconfirmed),
+  // seed now from the subscription's own metadata.
+  if (!userId && stripeSubId) {
+    try {
+      const sub = await stripe.subscriptions.retrieve(stripeSubId);
+      const meta = (sub.metadata ?? {}) as Record<string, string>;
+      if (meta.user_id) {
+        await seedSubscriptionAndVisits(stripe, supabase, {
+          userId: meta.user_id,
+          meta,
+          stripeSubscriptionId: sub.id,
+          stripeCustomerId: typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null,
+        });
+        const { data: seeded } = await supabase
+          .from('subscriptions')
+          .select('id, user_id')
+          .eq('stripe_subscription_id', stripeSubId)
+          .maybeSingle();
+        userId = seeded?.user_id ?? null;
+        localSubId = seeded?.id ?? null;
+      }
+    } catch (err) {
+      console.error('[stripe-webhook] invoice.paid seed attempt failed', err);
+    }
+  }
+
   if (!userId) {
     console.warn('[stripe-webhook] invoice.paid: no local subscription found for', stripeSubId);
     return;
