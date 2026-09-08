@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
           visit_id: v.id as string,
           customer_name: v.customer_name as string | null,
           completed_at: v.completed_at as string,
-          customer_rating: v.customer_rating as number | null,
+          customer_rating: null, // ratings live in visit_ratings now; scoring uses name/date signals
         } as AttributionCandidate;
       })
       .filter((c): c is AttributionCandidate => c !== null);

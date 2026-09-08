@@ -332,11 +332,32 @@ async function trustBlock(s: SupabaseClient) {
   const avg30 = scored.length ? round(scored.reduce((a, r) => a + r.v, 0) / scored.length, 2) : null;
   const le3 = scored.filter((r) => r.v <= 3).length;
 
+  // A "perfect" visit = completed, both photos present, and no rating of 3 or
+  // less attached to it. Photos and ratings both live in their own tables now.
   const completed = visits ?? [];
-  const perfect = completed.filter(
-    (v) => !v.condition_flagged && (Number(v.customer_rating ?? 5) >= 4.5) &&
-      (Number(v.photos_count ?? 0) >= Number(v.photos_expected ?? 0)),
-  ).length;
+  const completedIds = completed.map((v) => v.id as string);
+  let perfect = 0;
+  if (completedIds.length) {
+    const [{ data: photoRows }, { data: ratingRows }] = await Promise.all([
+      s.from('visit_photos').select('visit_id, kind').in('visit_id', completedIds),
+      s.from('visit_ratings').select('visit_id, stars, rating').in('visit_id', completedIds),
+    ]);
+    const photoKinds = new Map<string, Set<string>>();
+    for (const r of photoRows ?? []) {
+      const set = photoKinds.get(r.visit_id as string) ?? new Set<string>();
+      set.add(String(r.kind));
+      photoKinds.set(r.visit_id as string, set);
+    }
+    const lowRated = new Set(
+      (ratingRows ?? [])
+        .filter((r) => Number(r.stars ?? r.rating ?? 5) <= 3)
+        .map((r) => r.visit_id as string),
+    );
+    perfect = completedIds.filter((id) => {
+      const kinds = photoKinds.get(id);
+      return !!kinds && kinds.has('before') && kinds.has('after') && !lowRated.has(id);
+    }).length;
+  }
 
   // per-Pro last 10 ratings
   const { data: recent } = await s.from('visit_ratings')
