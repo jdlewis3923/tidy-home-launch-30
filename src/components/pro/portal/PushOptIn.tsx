@@ -35,11 +35,24 @@ export default function PushOptIn({ compact = false }: { compact?: boolean }) {
     setSubscribed(false);
   };
 
-  if (state === "unsupported") return null;
-
   const shell = compact
     ? "rounded-2xl border border-[hsl(var(--pro-blue)/0.25)] bg-white p-4"
     : "rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white p-4 pro-card";
+
+  if (state === "unsupported") {
+    return (
+      <div className={shell}>
+        <p className="flex items-center gap-2 text-[15px] font-extrabold text-[hsl(var(--pro-ink))]">
+          <BellOff className="h-4 w-4 text-[hsl(var(--pro-ink-soft))]" aria-hidden /> Notifications can't turn on here
+        </p>
+        <p className="mt-1.5 text-[14px] text-[hsl(var(--pro-ink-soft))]">
+          Open jointidy.co/pro in Safari or Chrome on your phone — not inside another app — then add Tidy to your home
+          screen and open it from there. The button to turn them on shows up on this card.
+        </p>
+      </div>
+    );
+  }
+
 
   if (state === "ios_needs_install") {
     return (

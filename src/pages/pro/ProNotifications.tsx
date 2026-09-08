@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
+import PushOptIn from "@/components/pro/portal/PushOptIn";
 import { EmptyState, ErrorState, ScheduleSkeleton } from "@/components/pro/portal/kit";
 import { fetchNotifications, markNotificationsRead, type ProNotification } from "@/lib/pro-portal";
 import { useProSession } from "@/hooks/useProSession";
@@ -33,6 +34,9 @@ export default function ProNotifications() {
 
   return (
     <ProShell title="Notifications" back="/pro/schedule">
+      <div className="px-4 pt-4">
+        <PushOptIn compact />
+      </div>
       {!rows && !error && <ScheduleSkeleton />}
       {error && <ErrorState title="Couldn't load notifications" onRetry={() => setNonce((n) => n + 1)} />}
       {rows && !error && rows.length === 0 && (
