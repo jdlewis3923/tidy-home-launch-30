@@ -14,6 +14,8 @@
 // own from Sheets.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
+import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -72,30 +74,55 @@ async function ensureTabs(token: string) {
   });
 }
 
-async function writeRange(token: string, range: string, values: unknown[][]) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?valueInputOption=RAW`;
-  await fetch(url, {
-    method: 'PUT',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ range, majorDimension: 'ROWS', values }),
-  });
+async function gfetch(url: string, init: RequestInit, what: string): Promise<Response> {
+  // Phase 4: every Google response is checked. A 429 between a clear and a
+  // write used to silently empty the master roster and still stamp success.
+  const res = await fetch(url, init);
+  if (!res.ok) {
+    const detail = (await res.text().catch(() => '')).slice(0, 400);
+    throw new Error(`google ${what} ${res.status}: ${detail}`);
+  }
+  return res;
 }
 
-async function clearRange(token: string, range: string) {
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}:clear`, {
-    method: 'POST', headers: { Authorization: `Bearer ${token}` },
-  });
+/**
+ * Write first, then clear only the rows BELOW the new data. The old order
+ * (clear the whole tab, then write) destroys the sheet if the write fails.
+ */
+async function replaceTab(token: string, tab: string, values: unknown[][]) {
+  await gfetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(`${tab}!A1`)}?valueInputOption=RAW`,
+    {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ range: `${tab}!A1`, majorDimension: 'ROWS', values }),
+    },
+    `write ${tab}`,
+  );
+  const firstStale = values.length + 1;
+  await gfetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(`${tab}!A${firstStale}:Z`)}:clear`,
+    { method: 'POST', headers: { Authorization: `Bearer ${token}` } },
+    `clear-tail ${tab}`,
+  );
 }
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
+
+  // Phase 4: this endpoint had no auth at all and rewrites the master roster.
+  const allowed = (await isCronAuthorized(req)) || (await requireServiceOrAdmin(req)).ok;
+  if (!allowed) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+
   if (!SA_JSON) return jsonResponse({ ok: false, skipped: 'GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON missing' }, 503);
 
   let token: string;
   try { token = await getAccessToken(); }
   catch (err) { return jsonResponse({ ok: false, error: (err as Error).message }, 500); }
 
-  try { await ensureTabs(token); } catch (_) { /* best-effort */ }
+  try { await ensureTabs(token); } catch (e) { console.warn('[sheets-master-sync] ensureTabs failed', (e as Error).message); }
+
+  try {
 
   // 1) Applicants
   const { data: apps } = await admin.from('applicants').select(
@@ -103,30 +130,26 @@ Deno.serve(async (req) => {
   );
   const aHeader = ['ApplicantID','FirstName','LastName','Email','Phone','ZIP','Service','Role','Stage','Tier','Readiness','CompletedVisits','AvgRating','CancelRate','ComplaintRate','PhotoRate','OpenEscalations','COIStatus','COIExpiresAt','ContractorID','JobberID','LastVisitAt','UpdatedAt'];
   const aRows = (apps ?? []).map((a) => [a.id,a.first_name,a.last_name,a.email,a.phone,a.zip,a.service,a.role,a.current_stage,a.tier,a.tier_readiness_status,a.completed_visits,a.avg_customer_rating,a.contractor_cancel_rate,a.complaint_rate,a.photo_compliance_rate,a.open_escalations_count,a.coi_review_status,a.coi_expires_at,a.contractor_id,a.jobber_id,a.last_visit_at,a.updated_at]);
-  await clearRange(token, 'Applicants!A:Z');
-  await writeRange(token, 'Applicants!A1', [aHeader, ...aRows]);
+  await replaceTab(token, 'Applicants', [aHeader, ...aRows]);
 
   // 2) Visits (last 500)
   const { data: visits } = await admin.from('pro_visits').select('id, contractor_id, jobber_visit_id, customer_name, service_type, scheduled_at, completed_at, status, customer_rating, photos_count, photos_expected, amount_cents').order('scheduled_at', { ascending: false }).limit(500);
   const vHeader = ['VisitID','ContractorID','JobberVisitID','Customer','Service','ScheduledAt','CompletedAt','Status','Rating','PhotosUploaded','PhotosExpected','AmountCents'];
   const vRows = (visits ?? []).map((v) => [v.id,v.contractor_id,v.jobber_visit_id,v.customer_name,v.service_type,v.scheduled_at,v.completed_at,v.status,v.customer_rating,v.photos_count,v.photos_expected,v.amount_cents]);
-  await clearRange(token, 'Visits!A:Z');
-  await writeRange(token, 'Visits!A1', [vHeader, ...vRows]);
+  await replaceTab(token, 'Visits', [vHeader, ...vRows]);
 
   // 3) Tier Readiness Snapshot
   const { data: snap } = await admin.from('applicants').select('id, first_name, last_name, tier, tier_readiness_status, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count').eq('current_stage','active');
   const sHeader = ['SnapshotAt','ApplicantID','Name','Tier','Readiness','Visits','AvgRating','CancelRate','ComplaintRate','PhotoRate','OpenEscalations'];
   const ts = new Date().toISOString();
   const sRows = (snap ?? []).map((a) => [ts, a.id, `${a.first_name} ${a.last_name}`, a.tier, a.tier_readiness_status, a.completed_visits, a.avg_customer_rating, a.contractor_cancel_rate, a.complaint_rate, a.photo_compliance_rate, a.open_escalations_count]);
-  await clearRange(token, 'Tier Readiness Snapshot!A:Z');
-  await writeRange(token, 'Tier Readiness Snapshot!A1', [sHeader, ...sRows]);
+  await replaceTab(token, 'Tier Readiness Snapshot', [sHeader, ...sRows]);
 
   // 4) Tier Audit Log
   const { data: events } = await admin.from('onboarding_events').select('id, applicant_id, event, metadata, created_at').in('event', ['tier_2_promoted','tier_returned_to_1','coi_approved','coi_rejected','readiness_recalculated']).order('created_at', { ascending: false }).limit(500);
   const eHeader = ['EventID','ApplicantID','Event','Metadata','CreatedAt'];
   const eRows = (events ?? []).map((e) => [e.id, e.applicant_id, e.event, JSON.stringify(e.metadata ?? {}), e.created_at]);
-  await clearRange(token, 'Tier Audit Log!A:Z');
-  await writeRange(token, 'Tier Audit Log!A1', [eHeader, ...eRows]);
+  await replaceTab(token, 'Tier Audit Log', [eHeader, ...eRows]);
 
   // Stamp last successful sync so admin chrome can display it.
   await admin.from('app_settings').upsert({
@@ -136,4 +159,16 @@ Deno.serve(async (req) => {
   }, { onConflict: 'key' });
 
   return jsonResponse({ ok: true, applicants: aRows.length, visits: vRows.length, snapshots: sRows.length, audit: eRows.length });
+  } catch (err) {
+    const message = (err as Error).message;
+    console.error('[sheets-master-sync] failed', message);
+    await admin.from('admin_alerts').insert({
+      alert_type: 'sheets_master_sync_failed',
+      title: 'Master Google Sheet sync failed',
+      body: message.slice(0, 400),
+      context: {},
+    }).then(() => {}, () => {});
+    // No success stamp on a failed run.
+    return jsonResponse({ ok: false, error: message }, 502);
+  }
 });

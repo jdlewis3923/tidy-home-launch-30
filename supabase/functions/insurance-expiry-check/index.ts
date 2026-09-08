@@ -9,7 +9,7 @@
 // eligibility (see public.is_contractor_job_eligible).
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
-import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import { sendBrevoEmail, sendBrevoEmailOrThrow } from '../_shared/brevo-send.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -66,10 +66,11 @@ async function fireBrevo(id: number, key: string, to: { email: string; name: str
     return;
   }
   // Contractor-ops (relationship) mail — marketing: false.
-  await sendBrevoEmail({
+  // Phase 4: throws on failure so the caller can skip the reminders_sent latch.
+  await sendBrevoEmailOrThrow({
     to: [to], templateId: id, params, marketing: false,
     transport: 'gateway', label: 'insurance-expiry-check',
-  }).catch((e) => console.error('[insurance-expiry] brevo failed', e));
+  });
 }
 
 
@@ -94,6 +95,7 @@ Deno.serve(async (req) => {
 
   let reminded = 0;
   let expired = 0;
+  let failed = 0;
 
   for (const r of rows ?? []) {
     const exp = String(r.expiration_date);
@@ -126,20 +128,37 @@ Deno.serve(async (req) => {
 
     await admin
       .from('contractor_insurance')
-      .update({
-        verification_status: 'expiring_soon',
-        ...(due ? { reminders_sent: [...sent, due] } : {}),
-      })
+      .update({ verification_status: 'expiring_soon' })
       .eq('id', r.id);
     if (a?.id) await admin.from('applicants').update({ insurance_status: 'expiring_soon' }).eq('id', a.id);
 
     if (due && a?.email) {
-      await fireBrevo(remindTpl, 'brevo_template_insurance_expiring', { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
-        first_name: a.first_name, expiration_date: exp, days_left: daysLeft, carrier_name: r.carrier_name ?? null,
-      });
+      // Phase 4: the reminders_sent milestone is recorded ONLY after the email
+      // is confirmed. It used to be written BEFORE the send, so one Brevo
+      // failure meant the contractor was never warned their coverage lapsed.
+      try {
+        await fireBrevo(remindTpl, 'brevo_template_insurance_expiring', { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
+          first_name: a.first_name, expiration_date: exp, days_left: daysLeft, carrier_name: r.carrier_name ?? null,
+        });
+      } catch (e) {
+        failed++;
+        const msg = (e as Error).message;
+        console.error('[insurance-expiry] reminder failed — milestone NOT latched', r.id, msg);
+        await admin.from('admin_alerts').insert({
+          alert_type: 'insurance_reminder_send_failed',
+          title: 'Insurance expiry reminder failed',
+          body: `${a.email} (${daysLeft} days left): ${msg.slice(0, 200)} — retries tomorrow.`,
+          context: { insurance_id: r.id, applicant_id: a.id ?? null, milestone: due },
+        }).then(() => {}, () => {});
+        continue;
+      }
+      await admin
+        .from('contractor_insurance')
+        .update({ reminders_sent: [...sent, due] })
+        .eq('id', r.id);
       reminded++;
     }
   }
 
-  return jsonResponse({ ok: true, checked: rows?.length ?? 0, reminded, expired });
+  return jsonResponse({ ok: failed === 0, checked: rows?.length ?? 0, reminded, expired, failed });
 });

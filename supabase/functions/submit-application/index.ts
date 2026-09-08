@@ -127,14 +127,31 @@ Deno.serve(async (req) => {
     });
 
     const fullName = `${data.first_name} ${data.last_name}`;
-    queueMicrotask(async () => {
-      await fetch(`${SUPABASE_URL}/functions/v1/applicant-applied-trigger`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicant_id: applicantId }),
-      }).catch((e) => console.error('[apply] trigger failed', e));
-      await sendPwaPushToJustin('New application', `${fullName} applied for ${data.service}`, '/admin/applicants');
-    });
+    // Phase 4: queueMicrotask work is killed when the isolate shuts down after
+    // the response. EdgeRuntime.waitUntil keeps it alive, and every failure is
+    // recorded rather than vanishing.
+    const followUp = (async () => {
+      try {
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/applicant-applied-trigger`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ applicant_id: applicantId }),
+        });
+        if (!r.ok) {
+          console.error('[apply] trigger http', r.status, (await r.text().catch(() => '')).slice(0, 300));
+        }
+      } catch (e) {
+        console.error('[apply] trigger failed', (e as Error).message);
+      }
+      try {
+        await sendPwaPushToJustin('New application', `${fullName} applied for ${data.service}`, '/admin/applicants');
+      } catch (e) {
+        console.error('[apply] push failed', (e as Error).message);
+      }
+    })();
+    const rt = (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } }).EdgeRuntime;
+    if (rt?.waitUntil) rt.waitUntil(followUp);
+    else await followUp;
 
     return jsonResponse({ id: applicantId, current_stage: 'applied' }, 200);
   } catch (e: any) {

@@ -1,29 +1,36 @@
-// Tidy — Direct Twilio SMS sender (Phase 6, post-pivot)
+// Tidy — Direct Twilio SMS sender (Phase 6, post-pivot; Phase 4 hardening)
 //
 // Edge functions call this with { to_phone_e164, body, idempotency_key } and we
 // POST straight to Twilio's REST API using Basic auth.
 //
 // Guards:
-//   - Send window: 08:00-18:00 America/New_York, Monday-Saturday only.
+//   - Send window: 08:00-18:00 America/New_York, Monday-Saturday only. A
+//     message outside the window is QUEUED in public.sms_outbox and released by
+//     the sms-outbox-release cron — never destroyed, never logged as success.
 //   - Idempotency: dedupes against integration_logs.payload_hash within 24h.
 //   - E.164 phone validation.
 //   - Never send to the Tidy sending number itself (Twilio rejects To == From).
+//   - StatusCallback is always set so delivery receipts reach
+//     twilio-status-callback → public.sms_delivery_events.
 //
-// Hardening rules (prompt 4, part 1):
-//   - Env vars are read INSIDE the handler, never at module scope.
-//   - The whole handler body is wrapped in try/catch; a throw is logged and
-//     returned as HTTP 200 { ok: false, error } so a failing side effect never
-//     500s the caller.
-//   - Missing required vars return a named "MISSING_ENV: X" error.
-//   - GET (or ?health=1) returns { ok, missing_env: [...] } with no side effect.
+// HTTP contract (Phase 4): failures return a NON-2xx status so every caller's
+// error handling actually fires.
+//   400 invalid JSON / validation failure / To == From
+//   401 unauthorized
+//   500 missing required env
+//   502 Twilio rejected the message
+//   202 queued for the next open window
+//   200 sent, or skipped as a duplicate
 //
 // Auth: service-role bearer OR an admin user's access token.
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { withLogging, logInvocation } from '../_shared/withLogging.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
+import { closedReason, isQuietHours, isSundayET, nextOpenWindow, queueSms } from '../_shared/sms-window.ts';
 
 const REQUIRED_ENV = [
   'SUPABASE_URL',
@@ -41,9 +48,12 @@ const BodySchema = z.object({
   idempotency_key: z.string().min(1).max(200),
   template_name: z.string().min(1).max(120).optional(),
   triggered_by: z.string().min(1).max(120).optional(),
+  /** Set by sms-outbox-release when draining a parked message. */
+  skip_window: z.boolean().optional(),
 }).refine((v) => !!v.body || !!v.content_sid, {
   message: 'either body or content_sid required',
 });
+
 
 async function logSmsSend(
   supabaseUrl: string,
@@ -118,36 +128,9 @@ async function isAuthorized(
   }
 }
 
-/** Current hour (0-23) in America/New_York. */
-function easternHour(now = new Date()): number {
-  const fmt = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/New_York',
-    hour: 'numeric',
-    hour12: false,
-  });
-  const hourPart = fmt.formatToParts(now).find((p) => p.type === 'hour');
-  const h = parseInt(hourPart?.value ?? '0', 10);
-  return Number.isFinite(h) ? h % 24 : 0;
-}
+// Send-window helpers live in _shared/sms-window.ts so every SMS path
+// (outbound alerts, AI replies, admin replies) uses the same clock.
 
-/** Weekday in America/New_York. 0 = Sunday, 6 = Saturday. */
-function easternWeekday(now = new Date()): number {
-  const fmt = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/New_York',
-    weekday: 'short',
-  });
-  const map: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-  return map[fmt.format(now)] ?? 0;
-}
-
-function isSundayET(): boolean {
-  return easternWeekday() === 0;
-}
-
-function isQuietHours(): boolean {
-  const h = easternHour();
-  return !(h >= 8 && h < 18);
-}
 
 async function sha256(input: string): Promise<string> {
   const bytes = new TextEncoder().encode(input);
@@ -158,7 +141,8 @@ async function sha256(input: string): Promise<string> {
 }
 
 async function isDuplicate(
-  admin: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   idempotencyHash: string,
 ): Promise<boolean> {
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -206,7 +190,7 @@ Deno.serve(async (req) => {
   try {
     if (req.method !== 'POST') {
       await finish('error', 'method_not_allowed');
-      return jsonResponse({ ok: false, error: 'method_not_allowed' }, 200);
+      return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
     }
 
     const { values, missing } = readEnv(REQUIRED_ENV);
@@ -214,7 +198,7 @@ Deno.serve(async (req) => {
       const err = missingEnvError(missing);
       console.error(`[send-twilio-sms] ${err} — no SMS can be sent`);
       await finish('error', err);
-      return jsonResponse({ ok: false, sent: false, error: err, missing_env: missing }, 200);
+      return jsonResponse({ ok: false, sent: false, error: err, missing_env: missing }, 500);
     }
     const SUPABASE_URL = values.SUPABASE_URL;
     const SERVICE_KEY = values.SUPABASE_SERVICE_ROLE_KEY;
@@ -222,7 +206,8 @@ Deno.serve(async (req) => {
     const TWILIO_AUTH_TOKEN = values.TWILIO_AUTH_TOKEN;
     const TWILIO_FROM = values.TWILIO_FROM_NUMBER;
 
-    const authorized = await isAuthorized(req, SUPABASE_URL, SERVICE_KEY);
+    // Cron jobs read the credential from Vault at call time, so accept that too.
+  const authorized = (await isAuthorized(req, SUPABASE_URL, SERVICE_KEY)) || (await isCronAuthorized(req));
     if (!authorized) {
       await finish('error', 'unauthorized');
       return jsonResponse(
@@ -240,11 +225,12 @@ Deno.serve(async (req) => {
       raw = await req.json();
     } catch {
       await finish('error', 'invalid_json_body');
-      return jsonResponse({ ok: false, sent: false, error: 'invalid_json_body' }, 200);
+      return jsonResponse({ ok: false, sent: false, error: 'invalid_json_body' }, 400);
     }
 
     const parsed = BodySchema.safeParse(raw);
     if (!parsed.success) {
+      // Phase 4: a bad payload MUST be a non-2xx so the caller's catch fires.
       await finish('error', 'validation_failed');
       return jsonResponse(
         {
@@ -253,13 +239,13 @@ Deno.serve(async (req) => {
           error: 'validation_failed',
           details: parsed.error.flatten().fieldErrors,
         },
-        200,
+        400,
       );
     }
 
     const {
       to_phone_e164, body, content_sid, content_variables,
-      idempotency_key, template_name, triggered_by,
+      idempotency_key, template_name, triggered_by, skip_window,
     } = parsed.data;
     const tplName = template_name ?? content_sid ?? 'sms-adhoc';
 
@@ -271,24 +257,34 @@ Deno.serve(async (req) => {
         sent: false,
         error: 'to_equals_from',
         message: 'Destination is the Tidy sending number. Use a different phone number.',
-      }, 200);
+      }, 400);
     }
-
-    if (isSundayET()) {
-      await finish('success', 'skipped: sunday_quiet_hours');
-      return jsonResponse({ ok: true, sent: false, reason: 'sunday_quiet_hours' }, 200);
-    }
-
-    if (isQuietHours()) {
-      await finish('success', 'skipped: quiet_hours');
-      return jsonResponse({ ok: true, sent: false, reason: 'quiet_hours' }, 200);
-    }
-
-    const idempotencyHash = await sha256(idempotency_key);
 
     const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
+
+    // ---- Send window: queue instead of destroy ----
+    const blocked = skip_window ? null : closedReason();
+    if (blocked) {
+      const releaseAfter = nextOpenWindow();
+      const q = await queueSms(
+        admin,
+        { to_phone_e164, body, content_sid, content_variables, idempotency_key, template_name: tplName, triggered_by },
+        blocked,
+        releaseAfter,
+      );
+      if (!q.queued) {
+        await finish('error', `queue_failed: ${q.error}`);
+        return jsonResponse({ ok: false, sent: false, error: 'queue_failed', details: q.error }, 500);
+      }
+      await finish('warning', `queued for next window (${blocked})`);
+      return jsonResponse({
+        ok: true, sent: false, queued: true, reason: blocked, release_after: q.release_after,
+      }, 202);
+    }
+
+    const idempotencyHash = await sha256(idempotency_key);
 
     if (await isDuplicate(admin, idempotencyHash)) {
       await finish('success', 'skipped: duplicate_idempotency_key');
@@ -314,6 +310,8 @@ Deno.serve(async (req) => {
           } else if (body) {
             form.set('Body', body);
           }
+          // Delivery receipts → twilio-status-callback → sms_delivery_events.
+          form.set('StatusCallback', `${SUPABASE_URL}/functions/v1/twilio-status-callback`);
 
           const res = await fetch(apiUrl, {
             method: 'POST',
@@ -358,13 +356,14 @@ Deno.serve(async (req) => {
         template_name: tplName, recipient: to_phone_e164, triggered_by,
         status: 'failed', error_message: message,
       });
-      // 200 with ok:false — a vendor failure must not 500 the caller.
-      return jsonResponse({ ok: false, sent: false, error: message }, 200);
+      // Phase 4: a vendor failure is a real failure — 502, not a silent 200.
+      return jsonResponse({ ok: false, sent: false, error: message }, 502);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error';
     console.error('[send-twilio-sms] unhandled', message);
     await finish('error', `unhandled: ${message}`);
-    return jsonResponse({ ok: false, sent: false, error: message }, 200);
+    return jsonResponse({ ok: false, sent: false, error: message }, 500);
   }
+
 });

@@ -3573,6 +3573,66 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_outbox: {
+        Row: {
+          attempts: number
+          body: string | null
+          content_sid: string | null
+          content_variables: Json | null
+          created_at: string
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          queued_reason: string | null
+          release_after: string
+          sent_at: string | null
+          status: string
+          template_name: string | null
+          to_phone_e164: string
+          triggered_by: string | null
+          twilio_sid: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          body?: string | null
+          content_sid?: string | null
+          content_variables?: Json | null
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          last_error?: string | null
+          queued_reason?: string | null
+          release_after?: string
+          sent_at?: string | null
+          status?: string
+          template_name?: string | null
+          to_phone_e164: string
+          triggered_by?: string | null
+          twilio_sid?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          body?: string | null
+          content_sid?: string | null
+          content_variables?: Json | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          last_error?: string | null
+          queued_reason?: string | null
+          release_after?: string
+          sent_at?: string | null
+          status?: string
+          template_name?: string | null
+          to_phone_e164?: string
+          triggered_by?: string | null
+          twilio_sid?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_launch_posts: {
         Row: {
           armed_at: string | null
@@ -3803,10 +3863,12 @@ export type Database = {
           error_message: string | null
           event_type: string
           id: string
+          last_replay_at: string | null
           livemode: boolean
           payload_summary: Json
           processed_at: string | null
           received_at: string
+          replay_count: number
           status: string
           stripe_event_id: string
         }
@@ -3815,10 +3877,12 @@ export type Database = {
           error_message?: string | null
           event_type: string
           id?: string
+          last_replay_at?: string | null
           livemode?: boolean
           payload_summary?: Json
           processed_at?: string | null
           received_at?: string
+          replay_count?: number
           status?: string
           stripe_event_id: string
         }
@@ -3827,10 +3891,12 @@ export type Database = {
           error_message?: string | null
           event_type?: string
           id?: string
+          last_replay_at?: string | null
           livemode?: boolean
           payload_summary?: Json
           processed_at?: string | null
           received_at?: string
+          replay_count?: number
           status?: string
           stripe_event_id?: string
         }
@@ -4695,6 +4761,21 @@ export type Database = {
         Args: { _applicant_id: string; _subscription_id: string }
         Returns: undefined
       }
+      admin_cron_health: {
+        Args: never
+        Returns: {
+          active: boolean
+          expected_interval_minutes: number
+          jobid: number
+          jobname: string
+          last_message: string
+          last_run_at: string
+          last_status: string
+          minutes_since: number
+          schedule: string
+          stale: boolean
+        }[]
+      }
       admin_get_jobber_refresh_token: { Args: never; Returns: string }
       admin_get_meta_secret: { Args: { _name: string }; Returns: string }
       admin_get_scheduler_paused: { Args: never; Returns: boolean }
@@ -4756,6 +4837,10 @@ export type Database = {
       credit_payout_week: {
         Args: { _at: string; _cents: number; _pro: string }
         Returns: string
+      }
+      cron_expected_interval_minutes: {
+        Args: { _schedule: string }
+        Returns: number
       }
       current_user_admin: { Args: never; Returns: boolean }
       customers_needing_attention: {

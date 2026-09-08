@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
 
   if (error) return jsonResponse({ error: error.message }, 500);
 
-  const result: Record<string, number> = { day_7: 0, day_14: 0, day_30: 0, skipped: 0 };
+  const result: Record<string, number> = { day_7: 0, day_14: 0, day_30: 0, skipped: 0, failed: 0 };
 
   for (const a of rows ?? []) {
     const d = daysAgo(a.stage_entered_at);
@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
 
     if (await alreadyNudgedToday(a.id, bucket)) { result.skipped++; continue; }
 
+    try {
     if (bucket === 'day_30') {
       await admin.from('applicants').update({
         current_stage: 'rejected',
@@ -77,7 +78,7 @@ Deno.serve(async (req) => {
         subject: 'Your Tidy application',
         htmlContent: html, tags: ['applicant-stale-auto-reject'],
         templateName: 'applicant-stale-auto-reject', triggeredBy: 'applicant-stale-nudge',
-      }).catch(() => {});
+      });
     } else {
       const isLast = bucket === 'day_14';
       const html = brandedEmailHtml({
@@ -94,7 +95,22 @@ Deno.serve(async (req) => {
         htmlContent: html, tags: [`applicant-nudge-${bucket}`],
         templateName: `applicant-nudge-${bucket}`, triggeredBy: 'applicant-stale-nudge',
         marketing: true,
-      }).catch(() => {});
+      });
+    }
+
+    } catch (e) {
+      // Phase 4: the 'already nudged' latch is written ONLY after a confirmed
+      // send, so a Brevo failure leaves the nudge retryable tomorrow.
+      result.failed = (result.failed ?? 0) + 1;
+      const msg = (e as Error).message;
+      console.error('[applicant-stale-nudge] send failed — latch NOT written', a.id, msg);
+      await admin.from('admin_alerts').insert({
+        alert_type: 'applicant_nudge_send_failed',
+        title: `Applicant ${bucket} nudge email failed`,
+        body: `${a.email}: ${msg.slice(0, 200)} — will retry on the next run.`,
+        context: { applicant_id: a.id, bucket },
+      }).then(() => {}, () => {});
+      continue;
     }
 
     await admin.from('onboarding_events').insert({
@@ -105,5 +121,5 @@ Deno.serve(async (req) => {
     result[bucket]++;
   }
 
-  return jsonResponse({ ok: true, ...result });
+  return jsonResponse({ ok: (result.failed ?? 0) === 0, ...result });
 });

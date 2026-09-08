@@ -14,13 +14,19 @@
 
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
+// One lane per vendor Tidy actually depends on. 'resend' is retired — Tidy
+// sends through Brevo.
 export type LogSource =
   | 'stripe'
   | 'jobber'
-  | 'resend'
+  | 'brevo'
+  | 'documenso'
+  | 'checkr'
   | 'twilio'
+  | 'google'
   | 'zapier'
   | 'meta_capi'
+  | 'openai'
   | 'internal';
 
 export type LogStatus = 'success' | 'error' | 'warning';

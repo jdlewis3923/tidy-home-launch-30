@@ -316,6 +316,41 @@
       "when": 1788878276623,
       "tag": "0044_freeze_pay_on_blocked_visits",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1788879641818,
+      "tag": "0045_phase4_failure_visibility",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1788880716657,
+      "tag": "0046_integration_logs_vendor_sources",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1788880808246,
+      "tag": "0047_speed_up_admin_cron_health",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1788880870273,
+      "tag": "0048_admin_cron_health_single_scan",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1788880954258,
+      "tag": "0049_admin_cron_health_distinct_on_timeout",
+      "breakpoints": true
     }
   ]
 }

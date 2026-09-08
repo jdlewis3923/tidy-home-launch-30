@@ -15,6 +15,8 @@
 // uses api.brevo.com with BREVO_API_KEY, as that is the only endpoint that
 // exposes contact state.
 
+import { logIntegrationEvent } from './integration-log.ts';
+
 export type BrevoRecipient = { email: string; name?: string };
 export type BrevoAttachment = { url?: string; content?: string; name: string };
 
@@ -160,17 +162,30 @@ export async function sendBrevoEmail(
   }
 
   let res: Response;
+  const started = Date.now();
   try {
     res = await doFetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
   } catch (e) {
     console.error(`[${label}] brevo network error`, (e as Error).message);
+    await logIntegrationEvent({
+      source: 'brevo', event: `email.send:${label}`, status: 'error',
+      latency_ms: Date.now() - started, error_message: (e as Error).message,
+    });
     return { sent: false, reason: 'network_error', blockedRecipients: blocked };
   }
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     console.error(`[${label}] brevo send failed`, res.status, text.slice(0, 500));
+    await logIntegrationEvent({
+      source: 'brevo', event: `email.send:${label}`, status: 'error',
+      latency_ms: Date.now() - started, error_message: `HTTP ${res.status}: ${text.slice(0, 300)}`,
+    });
     return { sent: false, reason: 'http_error', status: res.status, blockedRecipients: blocked };
   }
+  await logIntegrationEvent({
+    source: 'brevo', event: `email.send:${label}`, status: 'success',
+    latency_ms: Date.now() - started,
+  });
   const json = (await res.json().catch(() => ({}))) as { messageId?: string };
   return {
     sent: true,
@@ -179,3 +194,34 @@ export async function sendBrevoEmail(
     blockedRecipients: blocked,
   };
 }
+
+/**
+ * Phase 4: a transport failure that nobody can see is worse than a crash.
+ * sendBrevoEmail() returns { sent: false } — which every historical caller
+ * ignored — so use this variant wherever a failure must reach a catch block,
+ * suppress a dedupe latch, or fail the request.
+ *
+ * A recipient suppressed by the Brevo unsubscribe list is NOT an error: it
+ * returns { sent: false, reason: 'blacklisted' } without throwing.
+ */
+export class BrevoSendError extends Error {
+  readonly reason: SendBrevoEmailResult['reason'];
+  readonly status?: number;
+  constructor(result: SendBrevoEmailResult, label = 'brevo') {
+    super(`[${label}] brevo send failed: ${result.reason}${result.status ? ` (HTTP ${result.status})` : ''}`);
+    this.name = 'BrevoSendError';
+    this.reason = result.reason;
+    this.status = result.status;
+  }
+}
+
+export async function sendBrevoEmailOrThrow(
+  opts: SendBrevoEmailOptions,
+): Promise<SendBrevoEmailResult> {
+  const result = await sendBrevoEmail(opts);
+  if (!result.sent && result.reason !== 'blacklisted') {
+    throw new BrevoSendError(result, opts.label ?? 'brevo');
+  }
+  return result;
+}
+

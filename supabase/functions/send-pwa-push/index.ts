@@ -40,7 +40,15 @@ Deno.serve(async (req) => {
     }
 
     if (!VAPID_PRIVATE) {
-      return jsonResponse({ error: 'PWA_VAPID_PRIVATE_KEY not configured', sent: 0 }, 200);
+      // Phase 4: this used to be a 200 with sent:0, so every push in the system
+      // looked successful while nothing was ever delivered. Say it plainly.
+      console.error('[send-pwa-push] PWA_VAPID_PRIVATE_KEY is not set — no push can be delivered');
+      return jsonResponse({
+        ok: false,
+        sent: 0,
+        error: 'PWA_VAPID_PRIVATE_KEY not configured',
+        hint: 'Set PWA_VAPID_PRIVATE_KEY in Cloud secrets. Until then push is disabled, not silent.',
+      }, 500);
     }
 
     const vapidPublic = await getVapidPublic();
@@ -51,7 +59,10 @@ Deno.serve(async (req) => {
       .select('id, endpoint, p256dh, auth_key')
       .eq('user_id', user_id);
     if (error) return jsonResponse({ error: error.message }, 500);
-    if (!subs || subs.length === 0) return jsonResponse({ sent: 0, reason: 'no subscriptions' });
+    if (!subs || subs.length === 0) {
+      // Not an error: the user simply has no device registered.
+      return jsonResponse({ ok: true, sent: 0, reason: 'no subscriptions' }, 200);
+    }
 
     const payload = JSON.stringify({ title, body, url: url ?? '/admin/kpis' });
     let sent = 0; let failed = 0;
@@ -71,7 +82,10 @@ Deno.serve(async (req) => {
         }
       }
     }
-    return jsonResponse({ sent, failed });
+    if (sent === 0 && failed > 0) {
+      return jsonResponse({ ok: false, sent, failed, error: 'every push delivery failed' }, 502);
+    }
+    return jsonResponse({ ok: true, sent, failed });
   } catch (e: any) {
     console.error('[send-pwa-push] error', e);
     return jsonResponse({ error: e?.message ?? 'unknown' }, 500);

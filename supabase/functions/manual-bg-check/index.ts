@@ -88,8 +88,12 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'update_failed', details: updateErr.message }, 500);
   }
 
-  // Fire downstream notifications (best-effort).
-  queueMicrotask(async () => {
+  // Phase 4: AWAITED via EdgeRuntime.waitUntil. The adverse-action rejection
+  // email in the FAIL branch is sent after the stage is already 'rejected' —
+  // a detached microtask killed with the isolate meant the applicant was never
+  // told at all.
+  let notifyError: string | null = null;
+  const notify = (async () => {
     if (decision === 'clear') {
       const html = brandedEmailHtml({
         heading: 'Background check passed ✅',
@@ -132,7 +136,20 @@ Deno.serve(async (req) => {
       });
       await sendPwaPushToJustin('Applicant rejected', `${fullName} — bg check fail`, '/admin/applicants');
     }
+  })().catch(async (e) => {
+    notifyError = (e as Error).message;
+    console.error('[manual-bg-check] notification failed', notifyError);
+    await admin.from('admin_alerts').insert({
+      alert_type: 'bg_check_notification_failed',
+      title: `Background-check notification failed: ${fullName}`,
+      body: `${decision}: ${String(notifyError).slice(0, 200)}`,
+      context: { applicant_id, decision },
+    }).then(() => {}, () => {});
   });
 
-  return jsonResponse({ ok: true, applicant_id, current_stage: newStage, bg_check_status: decision });
+  const rt = (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } }).EdgeRuntime;
+  if (rt?.waitUntil) rt.waitUntil(notify);
+  else await notify;
+
+  return jsonResponse({ ok: true, applicant_id, current_stage: newStage, bg_check_status: decision, notify_error: notifyError });
 });

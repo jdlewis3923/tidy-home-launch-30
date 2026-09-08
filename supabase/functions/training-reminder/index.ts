@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     .limit(200);
   if (error) return jsonResponse({ error: error.message }, 500);
 
-  let sent = 0, skipped = 0;
+  let sent = 0, skipped = 0, failed = 0;
   for (const a of rows ?? []) {
     const { data: dupe } = await admin
       .from('onboarding_events')
@@ -46,12 +46,28 @@ Deno.serve(async (req) => {
       heading: 'Reminder: Tidy live training tomorrow',
       bodyHtml: `<p>Hi ${a.first_name ?? 'there'},</p><p>Quick reminder — your Tidy live training is scheduled for <strong>${when} (Miami time)</strong>.</p><p>Bring your equipment if you haven't already submitted photos. If something has come up, reply to this email so we can reschedule.</p>`,
     });
-    await sendBrevoEmail({
-      toEmail: a.email, toName: a.first_name ?? '',
-      subject: 'Reminder: Tidy live training tomorrow',
-      htmlContent: html, tags: ['applicant-training-reminder-24h'],
-      templateName: 'applicant-training-reminder-24h', triggeredBy: 'training-reminder',
-    }).catch(() => {});
+    // Phase 4: the latch is written ONLY after a confirmed send. Writing it
+    // unconditionally burned the single retry and the applicant heard nothing.
+    try {
+      await sendBrevoEmail({
+        toEmail: a.email, toName: a.first_name ?? '',
+        subject: 'Reminder: Tidy live training tomorrow',
+        htmlContent: html, tags: ['applicant-training-reminder-24h'],
+        templateName: 'applicant-training-reminder-24h', triggeredBy: 'training-reminder',
+      });
+    } catch (e) {
+      failed++;
+      const msg = (e as Error).message;
+      console.error('[training-reminder] send failed — latch NOT written', a.id, msg);
+      await admin.from('admin_alerts').insert({
+        alert_type: 'training_reminder_send_failed',
+        title: 'Training reminder email failed',
+        body: `${a.email}: ${msg.slice(0, 200)} — will retry on the next run.`,
+        context: { applicant_id: a.id },
+      }).then(() => {}, () => {});
+      continue;
+    }
+
     await admin.from('onboarding_events').insert({
       applicant_id: a.id, event: 'training_reminder_24h',
       metadata: { scheduled_at: a.training_scheduled_at },
@@ -59,5 +75,5 @@ Deno.serve(async (req) => {
     sent++;
   }
 
-  return jsonResponse({ ok: true, sent, skipped });
+  return jsonResponse({ ok: failed === 0, sent, skipped, failed });
 });

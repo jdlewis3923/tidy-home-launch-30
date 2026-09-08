@@ -15,19 +15,33 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 
+// Every vendor Tidy depends on gets a lane. 'resend' is gone — Tidy sends
+// through Brevo and never had a Resend account.
 const TRACKED_SOURCES = [
   'stripe',
-  'jobber',
-  'resend',
+  'brevo',
   'twilio',
+  'documenso',
+  'checkr',
+  'google',
+  'jobber',
   'zapier',
   'meta_capi',
+  'openai',
   'internal',
 ] as const;
 
 type Source = typeof TRACKED_SOURCES[number];
 
 interface SourceSummary {
+  /**
+   * healthy  — traffic, ≥95% success
+   * degraded — traffic, 80–95% success
+   * failing  — traffic, <80% success
+   * stale    — ZERO calls in 24h. Not the same as a quiet day: a dead
+   *            integration used to render identically to a healthy one.
+   */
+  state: 'healthy' | 'degraded' | 'failing' | 'stale';
   total_calls: number;
   success_count: number;
   error_count: number;
@@ -39,6 +53,7 @@ interface SourceSummary {
 
 function emptySummary(): SourceSummary {
   return {
+    state: 'stale',
     total_calls: 0,
     success_count: 0,
     error_count: 0,
@@ -97,23 +112,14 @@ Deno.serve(async (req) => {
 
         if (error) throw new Error(`integration_logs query failed: ${error.message}`);
 
-        const sources: Record<Source, SourceSummary> = {
-          stripe: emptySummary(),
-          jobber: emptySummary(),
-          resend: emptySummary(),
-          twilio: emptySummary(),
-          zapier: emptySummary(),
-          meta_capi: emptySummary(),
-          internal: emptySummary(),
-        };
-
-        // Track totals to compute averages without a second pass.
-        const latencySum: Record<Source, number> = {
-          stripe: 0, jobber: 0, resend: 0, twilio: 0, zapier: 0, meta_capi: 0, internal: 0,
-        };
-        const latencyN: Record<Source, number> = {
-          stripe: 0, jobber: 0, resend: 0, twilio: 0, zapier: 0, meta_capi: 0, internal: 0,
-        };
+        const sources = {} as Record<Source, SourceSummary>;
+        const latencySum = {} as Record<Source, number>;
+        const latencyN = {} as Record<Source, number>;
+        for (const src of TRACKED_SOURCES) {
+          sources[src] = emptySummary();
+          latencySum[src] = 0;
+          latencyN[src] = 0;
+        }
 
         for (const row of rows ?? []) {
           const src = row.source as Source;
@@ -142,6 +148,22 @@ Deno.serve(async (req) => {
           if (latencyN[src] > 0) {
             s.avg_latency_ms = Math.round(latencySum[src] / latencyN[src]);
           }
+          // Silence is a status of its own.
+          if (s.total_calls === 0) s.state = 'stale';
+          else if ((s.success_rate_pct ?? 0) >= 95) s.state = 'healthy';
+          else if ((s.success_rate_pct ?? 0) >= 80) s.state = 'degraded';
+          else s.state = 'failing';
+        }
+
+        // Cron staleness alarm covering every scheduled job.
+        let cron: unknown[] = [];
+        let cron_stale_count = 0;
+        try {
+          const { data: cronRows } = await supabase.rpc('admin_cron_health');
+          cron = (cronRows as unknown[]) ?? [];
+          cron_stale_count = (cron as Array<{ is_stale?: boolean }>).filter((c) => c.is_stale).length;
+        } catch (e) {
+          console.error('[admin-health] admin_cron_health failed', (e as Error).message);
         }
 
         return {
@@ -150,6 +172,9 @@ Deno.serve(async (req) => {
           as_of: new Date().toISOString(),
           total_rows_scanned: rows?.length ?? 0,
           sources,
+          stale_sources: TRACKED_SOURCES.filter((s) => sources[s].total_calls === 0),
+          cron,
+          cron_stale_count,
         };
       },
     });

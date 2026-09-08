@@ -12,14 +12,45 @@ import ReviewsThisWeekCard from "@/components/admin/ReviewsThisWeekCard";
 
 type Source =
   | "stripe"
-  | "jobber"
-  | "resend"
+  | "brevo"
   | "twilio"
+  | "documenso"
+  | "checkr"
+  | "google"
+  | "jobber"
   | "zapier"
   | "meta_capi"
+  | "openai"
   | "internal";
 
+type LaneState = "healthy" | "degraded" | "failing" | "stale";
+
+const SOURCE_LABEL: Record<Source, string> = {
+  stripe: "Stripe — payments",
+  brevo: "Brevo — email",
+  twilio: "Twilio — texts",
+  documenso: "Documenso — signing",
+  checkr: "Checkr — background checks",
+  google: "Google — sheets & reviews",
+  jobber: "Jobber — scheduling",
+  zapier: "Zapier — automations",
+  meta_capi: "Meta — ad tracking",
+  openai: "AI assistant",
+  internal: "Tidy internal",
+};
+
+interface CronHealthRow {
+  jobname: string;
+  schedule: string;
+  active: boolean;
+  last_run_at: string | null;
+  last_status: string | null;
+  minutes_since_last_run: number | null;
+  is_stale: boolean;
+}
+
 interface SourceSummary {
+  state: LaneState;
   total_calls: number;
   success_count: number;
   error_count: number;
@@ -35,25 +66,41 @@ interface HealthResponse {
   as_of: string;
   total_rows_scanned: number;
   sources: Record<Source, SourceSummary>;
+  stale_sources?: Source[];
+  cron?: CronHealthRow[];
+  cron_stale_count?: number;
 }
 
 const SOURCE_ORDER: Source[] = [
   "stripe",
+  "brevo",
+  "twilio",
+  "documenso",
+  "checkr",
+  "google",
   "jobber",
   "zapier",
   "meta_capi",
-  "resend",
-  "twilio",
+  "openai",
   "internal",
 ];
 
 const REFRESH_MS = 60_000;
 
-function rateTone(rate: number | null, total: number): string {
-  if (total === 0 || rate === null) return "bg-slate-50 text-slate-500";
-  if (rate >= 95) return "bg-emerald-50 text-emerald-800";
-  if (rate >= 80) return "bg-amber-50 text-amber-800";
+// No calls in 24 hours is STALE, not healthy. A dead integration used to look
+// exactly like a quiet day.
+function stateTone(state: LaneState): string {
+  if (state === "stale") return "bg-slate-100 text-slate-700";
+  if (state === "healthy") return "bg-emerald-50 text-emerald-800";
+  if (state === "degraded") return "bg-amber-50 text-amber-800";
   return "bg-rose-50 text-rose-800";
+}
+
+function stateLabel(state: LaneState): string {
+  if (state === "stale") return "STALE — no calls in 24h";
+  if (state === "healthy") return "Healthy";
+  if (state === "degraded") return "Degraded";
+  return "Failing";
 }
 
 function formatRelative(iso: string | null): string {
@@ -347,7 +394,8 @@ export default function AdminHealth() {
               <table className="w-full text-sm">
                 <thead className="bg-slate-100 text-xs uppercase tracking-wide text-slate-600">
                   <tr>
-                    <th className="px-4 py-3 text-left">Source</th>
+                    <th className="px-4 py-3 text-left">Integration</th>
+                    <th className="px-4 py-3 text-left">Status</th>
                     <th className="px-4 py-3 text-right">Calls</th>
                     <th className="px-4 py-3 text-right">Success</th>
                     <th className="px-4 py-3 text-right">Errors</th>
@@ -358,10 +406,12 @@ export default function AdminHealth() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {rows.map((r) => {
-                    const tone = rateTone(r.success_rate_pct, r.total_calls);
+                    const laneState: LaneState = r.state ?? (r.total_calls === 0 ? "stale" : "healthy");
+                    const tone = stateTone(laneState);
                     return (
                       <tr key={r.src} className={tone}>
-                        <td className="px-4 py-3 font-mono text-xs font-bold">{r.src}</td>
+                        <td className="px-4 py-3 text-xs font-bold">{SOURCE_LABEL[r.src] ?? r.src}</td>
+                        <td className="px-4 py-3 text-xs font-semibold">{stateLabel(laneState)}</td>
                         <td className="px-4 py-3 text-right tabular-nums">{r.total_calls}</td>
                         <td className="px-4 py-3 text-right tabular-nums">{r.success_count}</td>
                         <td className="px-4 py-3 text-right tabular-nums">{r.error_count}</td>
@@ -381,6 +431,36 @@ export default function AdminHealth() {
               </table>
             </div>
 
+            {data?.cron && data.cron.length > 0 && (
+              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className="flex items-center justify-between bg-slate-100 px-4 py-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-600">
+                    Scheduled jobs ({data.cron.length})
+                  </p>
+                  <p className={`text-xs font-semibold ${(data.cron_stale_count ?? 0) > 0 ? "text-rose-700" : "text-emerald-700"}`}>
+                    {(data.cron_stale_count ?? 0) > 0
+                      ? `${data.cron_stale_count} not running as scheduled`
+                      : "All running on schedule"}
+                  </p>
+                </div>
+                <table className="w-full text-sm">
+                  <tbody className="divide-y divide-slate-100">
+                    {data.cron.map((c) => (
+                      <tr key={c.jobname} className={c.is_stale ? "bg-rose-50 text-rose-800" : ""}>
+                        <td className="px-4 py-2 font-mono text-xs">{c.jobname}</td>
+                        <td className="px-4 py-2 font-mono text-xs text-slate-500">{c.schedule}</td>
+                        <td className="px-4 py-2 text-xs">{c.last_status ?? "never run"}</td>
+                        <td className="px-4 py-2 text-right text-xs">{formatRelative(c.last_run_at)}</td>
+                        <td className="px-4 py-2 text-right text-xs font-semibold">
+                          {c.is_stale ? "STALE" : "ok"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
             <div className="rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-600">
               <p className="font-semibold text-slate-800">Legend</p>
               <div className="mt-2 flex flex-wrap gap-4">
@@ -392,6 +472,10 @@ export default function AdminHealth() {
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <span className="inline-block h-3 w-3 rounded-sm bg-rose-200" /> &lt;80%
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="inline-block h-3 w-3 rounded-sm bg-slate-300" /> STALE — nothing
+                  called this integration in 24 hours
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <span className="inline-block h-3 w-3 rounded-sm bg-slate-200" /> No traffic in 24h

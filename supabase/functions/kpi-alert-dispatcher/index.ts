@@ -56,20 +56,41 @@ Deno.serve(async (req) => {
 
   const channels: string[] = ['dashboard'];
 
-  // SMS — critical only
+  // SMS — critical only. Payload must match send-twilio-sms' schema, and the
+  // channel is recorded only when the message was actually accepted.
   if (severity === 'critical' && JUSTIN_PHONE) {
     try {
-      await supabase.functions.invoke('send-twilio-sms', {
-        body: {
-          to: JUSTIN_PHONE,
-          message: `🚨 Tidy KPI CRITICAL: ${message} — open /admin/kpis`,
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          to_phone_e164: JUSTIN_PHONE,
+          body: `🚨 Tidy KPI CRITICAL: ${message} — open /admin/kpis`,
+          idempotency_key: `kpi-critical-${kpi_code}-${new Date().toISOString().slice(0, 13)}`,
+          template_name: 'kpi-critical-alert',
+          triggered_by: 'kpi-alert-dispatcher',
+        }),
       });
-      channels.push('sms');
+      const payload = await res.json().catch(() => ({}));
+      if (res.ok && payload?.sent === true) channels.push('sms');
+      else if (res.status === 202 && payload?.queued === true) channels.push('sms_queued');
+      else {
+        console.error('[dispatcher] SMS send failed:', res.status, JSON.stringify(payload).slice(0, 300));
+        await supabase.from('admin_alerts').insert({
+          alert_type: 'kpi_alert_sms_failed',
+          title: `KPI critical SMS failed: ${kpi_code}`,
+          body: `HTTP ${res.status} — ${String(payload?.error ?? '').slice(0, 200)}`,
+          context: { kpi_code, severity },
+        }).then(() => {}, () => {});
+      }
     } catch (e) {
-      console.error('[dispatcher] SMS send failed:', e);
+      console.error('[dispatcher] SMS send threw:', e);
     }
   }
+
 
   // Email — both severities → all admins
   const { data: roles } = await supabase
