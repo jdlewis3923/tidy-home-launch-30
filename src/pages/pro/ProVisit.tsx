@@ -7,7 +7,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Check, ListChecks, Send } from "lucide-react";
+import { AlertTriangle, Check, ListChecks, Send } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import {
   ErrorState, InfoRow, MapPreview, ProButton, ProCard, Skeleton, StatusPill,
@@ -22,7 +22,11 @@ export default function ProVisit() {
   const { visits, coi, loading, error, reload } = useProSession();
   const visit = useMemo(() => visits.find((v) => v.id === id) ?? null, [visits, id]);
 
-  const [busy, setBusy] = useState<null | "omw" | "complete">(null);
+  const [busy, setBusy] = useState<null | "omw" | "complete" | "blocked">(null);
+  const [blockOpen, setBlockOpen] = useState(false);
+  const [blockReason, setBlockReason] = useState<"customer_no_access" | "unsafe_conditions">("customer_no_access");
+  const [blockNote, setBlockNote] = useState("");
+  const [blockedDone, setBlockedDone] = useState(false);
   const [omwSent, setOmwSent] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState(false);
@@ -51,6 +55,33 @@ export default function ProVisit() {
     }
     setOmwSent(true);
     reload();
+  };
+
+  // Arrived and could not work through no fault of the pro. Canon pays the
+  // visit in full; the server re-checks that "on my way" was already sent.
+  const reportBlocked = async () => {
+    if (!visit) return;
+    setBusy("blocked");
+    setActionError(null);
+    const res = await visitAction(visit.id, "blocked", { reason: blockReason, note: blockNote.trim() });
+    setBusy(null);
+    if (!res.ok) {
+      setActionError(
+        res.error === "on_my_way_required"
+          ? "Send your on-my-way message first, then report this."
+          : res.error === "invalid_body"
+            ? "Add a little more detail (at least 10 characters)."
+            : "Couldn't report this visit.",
+      );
+      return;
+    }
+    setBlockOpen(false);
+    setBlockedDone(true);
+    setSuccess(true);
+    setTimeout(() => {
+      reload();
+      navigate("/pro/schedule");
+    }, 1600);
   };
 
   const complete = async () => {
@@ -105,7 +136,9 @@ export default function ProVisit() {
             <Check className="h-8 w-8 text-[hsl(var(--pro-green))]" aria-hidden />
           </span>
           <p className="mt-4 text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">
-            Visit complete — {money(visit.visit_pay_cents)} added to this week's earnings.
+            {blockedDone
+              ? `Reported — you're paid in full for this visit (${money(visit.visit_pay_cents)}).`
+              : `Visit complete — ${money(visit.visit_pay_cents)} added to this week's earnings.`}
           </p>
         </div>
       </ProShell>
@@ -222,6 +255,16 @@ export default function ProVisit() {
               One before photo and one after photo are required.
             </p>
           )}
+          <button
+            type="button"
+            disabled={busy !== null || blocked || !!visit.completed_at}
+            onClick={() => setBlockOpen(true)}
+            className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-[hsl(var(--pro-navy)/0.12)] bg-white text-[15px] font-bold text-[hsl(var(--pro-ink-soft))] disabled:opacity-50"
+          >
+            <AlertTriangle className="h-4 w-4 text-[hsl(var(--pro-amber))]" aria-hidden />
+            Can't work this visit
+          </button>
+
           {blocked && (
             <p className="text-center text-[13px] font-semibold text-[hsl(var(--pro-amber))]">
               Visit actions are paused until a valid certificate of insurance is on file.
@@ -229,6 +272,62 @@ export default function ProVisit() {
           )}
         </div>
       </div>
+
+      {blockOpen && (
+        <div className="fixed inset-0 z-40 flex items-end bg-black/40" onClick={() => setBlockOpen(false)}>
+          <div
+            className="mx-auto w-full max-w-md rounded-t-3xl bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">Can't work this visit?</p>
+            <p className="mt-1 text-[14px] text-[hsl(var(--pro-ink-soft))]">
+              You drove out, so you're paid in full. Tell us what stopped you.
+            </p>
+            <div className="mt-4 space-y-2">
+              {([
+                ["customer_no_access", "Couldn't get in — locked gate or no access"],
+                ["unsafe_conditions", "Unsafe to work — weather, animal or hazard"],
+              ] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setBlockReason(value)}
+                  className={`flex min-h-[52px] w-full items-center rounded-2xl border-2 px-4 text-left text-[15px] font-semibold ${
+                    blockReason === value
+                      ? "border-[hsl(var(--pro-blue))] bg-[hsl(var(--pro-blue)/0.06)] text-[hsl(var(--pro-ink))]"
+                      : "border-[hsl(var(--pro-navy)/0.1)] bg-white text-[hsl(var(--pro-ink-soft))]"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={blockNote}
+              onChange={(e) => setBlockNote(e.target.value)}
+              rows={3}
+              maxLength={500}
+              placeholder="What happened? (required)"
+              className="mt-3 w-full rounded-2xl border border-[hsl(var(--pro-navy)/0.12)] p-3 text-[15px] text-[hsl(var(--pro-ink))]"
+            />
+            <ProButton
+              full
+              className="mt-4"
+              disabled={busy === "blocked" || blockNote.trim().length < 10}
+              onClick={() => void reportBlocked()}
+            >
+              {busy === "blocked" ? "Sending…" : "Report and get paid in full"}
+            </ProButton>
+            <button
+              type="button"
+              onClick={() => setBlockOpen(false)}
+              className="mt-2 min-h-[44px] w-full text-[14px] font-bold text-[hsl(var(--pro-ink-soft))]"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {confirm && (
         <div className="fixed inset-0 z-40 flex items-end bg-black/40" onClick={() => setConfirm(false)}>
