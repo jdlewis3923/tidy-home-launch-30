@@ -342,38 +342,27 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       .eq('user_id', userId);
   }
 
-  // Seed first 3 visits per service.
-  const baseDate = nextVisitDate(meta.preferred_day);
-  // deno-lint-ignore no-explicit-any
-  const visits: any[] = [];
-  for (const s of services) {
-    const spacing = FREQ_DAYS[s.frequency] ?? 30;
-    const line = lineFor(s.service);
-    for (let i = 0; i < 3; i++) {
-      const d = new Date(baseDate.getTime() + i * spacing * 86_400_000);
-      visits.push({
-        user_id: userId,
-        subscription_id: subRow.id,
-        service: s.service,
-        service_type: s.service,
-        visit_date: d.toISOString().slice(0, 10),
-        time_window: timeWindowFromPreferred(meta.preferred_time),
-        status: 'scheduled',
-        // Snapshot the plan and the pay AT CREATION, so a later price change
-        // never silently reprices work already scheduled or completed.
-        size_tier: line?.size_tier ?? s.size ?? null,
-        cadence: line?.cadence ?? s.frequency,
-        surcharge_applied: line?.surcharge_applied ?? false,
-        contractor_pay_cents: line?.contractor_pay_cents ?? null,
-        visit_pay_cents: line?.contractor_pay_cents ?? null,
-      });
-    }
+  // Keep the profile's scheduling preferences current — the generator reads them.
+  if (meta.preferred_day || meta.preferred_time) {
+    await supabase
+      .from('profiles')
+      .update({
+        ...(meta.preferred_day ? { preferred_day: meta.preferred_day } : {}),
+        ...(meta.preferred_time ? { preferred_time: meta.preferred_time } : {}),
+      })
+      .eq('user_id', userId);
+  }
 
-  }
-  if (visits.length > 0) {
-    const { error: visitErr } = await supabase.from('visits').insert(visits);
-    if (visitErr) console.error('[stripe-webhook] visits insert failed', visitErr.message);
-  }
+  // Seed the first billing month(s) of visits per plan line. The generator is
+  // idempotent (unique on subscription + service + date) and the daily cron
+  // extends the horizon from here on. Each visit snapshots size, cadence,
+  // surcharge and contractor pay from plan_lines at creation.
+  const { data: generated, error: genErr } = await supabase.rpc('generate_recurring_visits', {
+    _subscription_id: subRow.id,
+    _horizon_days: 45,
+  });
+  if (genErr) console.error('[stripe-webhook] visit generation failed', genErr.message);
+  else console.log('[stripe-webhook] visits generated', JSON.stringify(generated));
 
   await fireZap('subscription_confirmed', {
     user_id: userId,
@@ -519,6 +508,16 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Ev
       updates.next_billing_date = new Date(invoice.lines.data[0].period.end * 1000).toISOString().slice(0, 10);
     }
     await supabase.from('subscriptions').update(updates).eq('id', localSubId);
+    // A plan held for a failed card (past_due / unpaid / incomplete) is paying
+    // again: reactivate it. Customer-initiated pauses (pause_collection) stay.
+    await supabase
+      .from('subscriptions')
+      .update({ status: 'active', stripe_status: 'active' })
+      .eq('id', localSubId)
+      .eq('status', 'paused')
+      .is('pause_collection', null);
+    // Paid period → make sure its visits exist.
+    await supabase.rpc('generate_recurring_visits', { _subscription_id: localSubId, _horizon_days: 45 });
   }
 
   // Capture card_brand + card_last4 for Billing UI display.
@@ -799,14 +798,7 @@ async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, event: S
     });
   }
 
-  const status: 'active' | 'paused' | 'canceled' =
-    sub.status === 'active' || sub.status === 'trialing'
-      ? (sub.pause_collection ? 'paused' : 'active')
-      : sub.status === 'paused'
-        ? 'paused'
-        : sub.status === 'canceled' || sub.status === 'incomplete_expired'
-          ? 'canceled'
-          : 'active';
+  const status = localStatusFor(sub);
 
   const currentPeriodEnd = resolveStripeCurrentPeriodEnd(sub);
   const next = currentPeriodEnd
@@ -817,12 +809,36 @@ async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, event: S
     .from('subscriptions')
     .update({
       status,
+      stripe_status: sub.status,
       next_billing_date: next,
       pause_collection: sub.pause_collection?.behavior ?? null,
       cancel_at_period_end: sub.cancel_at_period_end ?? false,
       canceled_at: sub.canceled_at ? new Date(sub.canceled_at * 1000).toISOString() : null,
     })
     .eq('stripe_subscription_id', sub.id);
+}
+
+/**
+ * Real Stripe state → local plan state. Only paying plans are active: a
+ * past_due / unpaid / incomplete plan leaves routing and its visits are held
+ * (the subscriptions trigger skips them) until the card clears.
+ */
+function localStatusFor(sub: Stripe.Subscription): 'active' | 'paused' | 'canceled' {
+  switch (sub.status) {
+    case 'active':
+    case 'trialing':
+      return sub.pause_collection ? 'paused' : 'active';
+    case 'paused':
+    case 'past_due':
+    case 'unpaid':
+    case 'incomplete':
+      return 'paused';
+    case 'canceled':
+    case 'incomplete_expired':
+      return 'canceled';
+    default:
+      return 'paused';
+  }
 }
 
 // deno-lint-ignore no-explicit-any
