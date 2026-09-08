@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
         await handleSubscriptionCreated(stripe, supabase, event);
         break;
       case 'customer.subscription.updated':
-        await handleSubscriptionUpdated(supabase, event);
+        await handleSubscriptionUpdated(stripe, supabase, event);
         break;
       case 'customer.subscription.deleted':
         await handleSubscriptionDeleted(supabase, event);
