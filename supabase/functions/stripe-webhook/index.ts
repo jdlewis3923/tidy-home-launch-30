@@ -28,11 +28,11 @@ import { loadPlanLines } from '../_shared/plan-lines.ts';
 import { stripeSecretKey } from '../_shared/stripe-mode.ts';
 
 const STRIPE_SECRET_KEY = stripeSecretKey();
-// Live and test endpoints have different signing secrets. Both are accepted so
-// a test-mode run can be verified without disturbing the live endpoint.
+// Live and test endpoints have different signing secrets. Try test first, then live,
+// so a test-mode run can be verified without disturbing the live endpoint.
 const WEBHOOK_SECRETS = [
-  Deno.env.get('STRIPE_WEBHOOK_SECRET'),
   Deno.env.get('STRIPE_TEST_WEBHOOK_SECRET'),
+  Deno.env.get('STRIPE_WEBHOOK_SECRET'),
 ].filter((s): s is string => !!s && s.length > 0);
 const STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRETS[0];
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
