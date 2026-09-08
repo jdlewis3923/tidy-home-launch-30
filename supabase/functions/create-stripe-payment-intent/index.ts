@@ -49,11 +49,28 @@ const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
 const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
 const SizeEnum = z.union([z.literal(1), z.literal(2), z.literal(3)]);
 
+const VehicleClassEnum = z.enum(["sedan", "coupe", "suv", "crossover", "truck", "suv3row", "van"]);
+const LawnChoiceEnum = z.enum(["small", "standard", "large", "over"]);
+
 const InputSchema = z.object({
   services: z
-    .array(z.object({ service: ServiceTypeEnum, size: SizeEnum, frequency: FrequencyEnum }))
+    .array(
+      z.object({
+        service: ServiceTypeEnum,
+        size: SizeEnum,
+        frequency: FrequencyEnum,
+        /** Interior sq ft (cleaning) or turf sq ft (lawn) — drives the surcharge. */
+        sq_ft: z.number().int().min(0).max(100000).nullable().optional(),
+      }),
+    )
     .min(1)
     .max(3),
+  // The UNDERLYING size inputs. The server recomputes size from these and
+  // rejects a mismatch — a client-claimed size is never trusted.
+  bedrooms: z.number().int().min(0).max(20).nullable().optional(),
+  bathrooms: z.number().min(0).max(20).nullable().optional(),
+  lawn_choice: LawnChoiceEnum.nullable().optional(),
+  vehicle_class: VehicleClassEnum.nullable().optional(),
   addons: z
     .array(z.object({ addon_name: z.string().min(1).max(64), qty: z.number().int().min(1).max(20) }))
     .max(50)
