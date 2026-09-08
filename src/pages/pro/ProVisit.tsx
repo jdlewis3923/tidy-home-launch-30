@@ -126,6 +126,9 @@ export default function ProVisit() {
             {money(visit.visit_pay_cents)}
           </p>
           <div className="flex gap-2">
+            {visit.visit_kind && VISIT_KIND_LABEL[visit.visit_kind] && (
+              <StatusPill tone="blue">{VISIT_KIND_LABEL[visit.visit_kind]}</StatusPill>
+            )}
             {visit.is_sample && <StatusPill tone="neutral">Sample</StatusPill>}
             {visit.completed_at ? (
               <StatusPill tone="green">Completed</StatusPill>
