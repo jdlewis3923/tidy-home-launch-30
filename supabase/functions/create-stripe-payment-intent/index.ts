@@ -38,7 +38,7 @@ import {
 } from "../_shared/pricing-canon.ts";
 import { checkServiceLine, surchargePerVisitFor } from "../_shared/size-validation.ts";
 import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
-import { stripeSecretKey } from "../_shared/stripe-mode.ts";
+import { stripeMode, stripeSecretKey } from "../_shared/stripe-mode.ts";
 
 const STRIPE_SECRET_KEY = stripeSecretKey();
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -191,7 +191,7 @@ Deno.serve(async (req) => {
 
         const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
-          .select("lookup_key, stripe_price_id")
+          .select("lookup_key, stripe_price_id, stripe_price_id_test")
           .in("lookup_key", [...serviceKeys, ...(carWashKey ? [carWashKey] : []), ...surchargeKeys])
           .eq("active", true);
         if (priceErr) throw new Error(`catalog read failed: ${priceErr.message}`);
