@@ -176,32 +176,72 @@ Deno.serve(async (req) => {
           httpClient: Stripe.createFetchHttpClient(),
         });
 
-        // Resolve recurring prices by lookup key.
-        const serviceKeys = input.services.map((s) => SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize]);
+        // ---------- Resolve recurring prices by lookup key ----------
+        // The cadence is PART of the key. Indexing SERVICE_LOOKUP_KEYS by size
+        // alone yields the {monthly,biweekly,weekly} object, which is why this
+        // path used to die on "[object Object]" before Stripe was ever called.
+        const serviceKeys = input.services.map((s) =>
+          lookupKeyFor(s.service, s.size as CanonSize, s.frequency as CanonCadence),
+        );
         const carWashKey = input.car_wash
           ? CAR_WASH_LOOKUP_KEYS[input.car_wash.size as CanonSize][input.car_wash.washes as WashCount]
           : null;
+        const surchargeKeys = ["surcharge_cleaning_xl", "surcharge_lawn_xl"];
 
         const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
           .select("lookup_key, stripe_price_id")
-          .in("lookup_key", carWashKey ? [...serviceKeys, carWashKey] : serviceKeys)
+          .in("lookup_key", [...serviceKeys, ...(carWashKey ? [carWashKey] : []), ...surchargeKeys])
           .eq("active", true);
         if (priceErr) throw new Error(`catalog read failed: ${priceErr.message}`);
 
         // deno-lint-ignore no-explicit-any
         const items: any[] = [];
+        const planLines: PlanLine[] = [];
+
         for (const s of input.services) {
-          const key = SERVICE_LOOKUP_KEYS[s.service][s.size as CanonSize];
+          const cadence = s.frequency as CanonCadence;
+          const size = s.size as CanonSize;
+          const key = lookupKeyFor(s.service, size, cadence);
           const row = priceRows?.find((r) => r.lookup_key === key);
           if (!row) throw new Error(`no active catalog price for lookup_key ${key}`);
-          items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, s.frequency) });
+          items.push({ price: row.stripe_price_id, quantity: quantityFor(s.service, cadence) });
+
+          // Square-footage surcharge: one recurring price, per visit, with the
+          // quantity carrying the cadence (monthly 1, biweekly 2, weekly 4).
+          const surcharge = surchargePerVisitFor(s.service, s.sq_ft ?? null);
+          const visits = visitsPerMonthFor(s.service, cadence);
+          if (surcharge > 0) {
+            const surKey = s.service === "cleaning" ? "surcharge_cleaning_xl" : "surcharge_lawn_xl";
+            const surRow = priceRows?.find((r) => r.lookup_key === surKey);
+            if (!surRow) throw new Error(`no active catalog price for lookup_key ${surKey}`);
+            items.push({ price: surRow.stripe_price_id, quantity: visits });
+          }
+
+          planLines.push({
+            service: s.service,
+            size_tier: size,
+            cadence,
+            surcharge_applied: surcharge > 0,
+            surcharge_cents: surcharge * 100,
+            visits_per_month: visits,
+            per_visit_cents: Math.round((perVisitPrice(s.service, size, cadence) + surcharge) * 100),
+            monthly_cents: Math.round(monthlyPrice(s.service, size, cadence, surcharge) * 100),
+            lookup_key: key,
+            stripe_price_id: row.stripe_price_id,
+            // Never shown to a customer — frozen onto every visit at creation.
+            contractor_pay_cents: Math.round(
+              contractorVisitPay({ service: s.service, size, cadence, surcharge: surcharge > 0 }) * 100,
+            ),
+          });
         }
+
         if (carWashKey) {
           const row = priceRows?.find((r) => r.lookup_key === carWashKey);
           if (!row) throw new Error(`no active catalog price for lookup_key ${carWashKey}`);
           items.push({ price: row.stripe_price_id, quantity: 1 });
         }
+
 
         // Resolve one-time add-ons
         if (input.addons.length > 0) {
