@@ -45,9 +45,16 @@ Deno.serve(async (req) => {
   const matched: Record<string, string> = {};
   const missing: string[] = [];
 
+  // The test mirror was created with a couple of differently spelled keys.
+  const ALIASES: Record<string, string[]> = {
+    surcharge_cleaning_xl: ["clean_surcharge_xl", "cleaning_surcharge_xl"],
+    surcharge_lawn_xl: ["lawn_surcharge_xl"],
+  };
+
   for (const row of rows ?? []) {
     const key = row.lookup_key as string;
-    const found = await stripe.prices.list({ lookup_keys: [key], active: true, limit: 1 });
+    const candidates = [key, ...(ALIASES[key] ?? [])];
+    const found = await stripe.prices.list({ lookup_keys: candidates, active: true, limit: 1 });
     const price = found.data[0];
     if (!price) {
       missing.push(key);
