@@ -4,6 +4,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { readEnv } from '../_shared/handlerEnv.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 
@@ -15,10 +16,12 @@ const STRIPE_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 
 const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false } });
 
+// stripe_account_id is NOT accepted from the caller — a caller-supplied account
+// id would be written to Stripe with the platform secret key. It is read from
+// the applicants row instead.
 const Body = z.object({
   applicant_id: z.string().uuid(),
   coi_document_id: z.string().optional(),
-  stripe_account_id: z.string().optional(),
 });
 
 async function fireBrevo(templateKey: string, to: { email: string; name: string }, params: Record<string, unknown>) {
@@ -58,12 +61,15 @@ Deno.serve(async (req) => {
   }
   if (req.method !== 'POST') return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
 
+  // Tier 2 is a permanent +10% on every visit — admin or service-role only.
+  const authResult = await requireServiceOrAdmin(req);
+  if (!authResult.ok) return jsonResponse({ ok: false, error: authResult.error }, authResult.status);
 
   const parsed = Body.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return jsonResponse({ error: 'invalid_body' }, 400);
 
   const { data: a, error } = await admin.from('applicants')
-    .select('id, first_name, last_name, email, tier')
+    .select('id, first_name, last_name, email, tier, stripe_account_id')
     .eq('id', parsed.data.applicant_id).single();
   if (error || !a) return jsonResponse({ error: 'not_found' }, 404);
   if (a.tier === 'tier_2_pro_partner') return jsonResponse({ ok: true, already: true });
@@ -82,7 +88,7 @@ Deno.serve(async (req) => {
     metadata: { coi_document_id: parsed.data.coi_document_id ?? null },
   });
 
-  await updateStripePaySplit(parsed.data.stripe_account_id, 10);
+  await updateStripePaySplit(a.stripe_account_id ?? undefined, 10);
 
   await fireBrevo('brevo_template_t2_confirmed',
     { email: a.email, name: `${a.first_name} ${a.last_name}` },

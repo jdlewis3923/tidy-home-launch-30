@@ -8,6 +8,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { sendBrevoEmail, brandedEmailHtml } from '../_shared/notifyJustin.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -90,33 +91,10 @@ Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
 
-  // Admin auth (or service-role bypass for internal cron).
-  const auth = req.headers.get('Authorization') ?? '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-  if (!token) return jsonResponse({ error: 'unauthorized' }, 401);
-
-  let isServiceRole = false;
-  try {
-    const parts = token.split('.');
-    if (parts.length === 3) {
-      const pad = (s: string) => s + '='.repeat((4 - (s.length % 4)) % 4);
-      const payload = JSON.parse(atob(pad(parts[1].replace(/-/g, '+').replace(/_/g, '/'))));
-      isServiceRole = payload?.role === 'service_role';
-    }
-  } catch { /* ignore */ }
-
-  if (!isServiceRole) {
-    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: auth } },
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    const { data: userRes } = await userClient.auth.getUser();
-    const userId = userRes?.user?.id;
-    if (!userId) return jsonResponse({ error: 'unauthorized' }, 401);
-    const { data: roleRow } = await admin
-      .from('user_roles').select('role').eq('user_id', userId).eq('role', 'admin').maybeSingle();
-    if (!roleRow) return jsonResponse({ error: 'forbidden' }, 403);
-  }
+  // Admin auth: literal service-role key (constant-time) OR a signature-verified
+  // admin session. JWT payload claims are never decoded or trusted.
+  const authResult = await requireServiceOrAdmin(req);
+  if (!authResult.ok) return jsonResponse({ error: authResult.error }, authResult.status);
 
   // Channel filter: ?channel=email | sms | all (default: all)
   const url = new URL(req.url);

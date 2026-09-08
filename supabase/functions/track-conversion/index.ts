@@ -15,6 +15,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { withLogging } from '../_shared/withLogging.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -225,63 +226,14 @@ async function sendMetaCAPI(body: Body): Promise<PlatformResult> {
 // ---------- auth ----------
 
 /**
- * Decode a JWT payload WITHOUT verifying the signature. Only safe to trust
- * when the call originates inside our own trust boundary (e.g. pg_net
- * dispatch from a SECURITY DEFINER trigger). The vault stores a placeholder
- * service-role JWT used for those internal dispatches; this lets us
- * recognize it without depending on signing-key alignment.
+ * Authorization: constant-time comparison against the literal service-role
+ * key, or a signature-verified admin session (admin.auth.getUser + user_roles).
+ * A JWT payload is never decoded and its `role` claim is never trusted — the
+ * anon key is public and an alg:none token costs nothing to forge.
  */
-function decodePayload(token: string): Record<string, unknown> | null {
-  const parts = token.split('.');
-  if (parts.length !== 3) return null;
-  try {
-    const padded = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const json = atob(padded + '==='.slice((padded.length + 3) % 4));
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-}
-
-const EXPECTED_ISS = `${SUPABASE_URL}/auth/v1`;
-
 async function isAuthorized(req: Request): Promise<boolean> {
-  const auth = req.headers.get('Authorization') ?? '';
-  if (!auth.startsWith('Bearer ')) return false;
-  const token = auth.slice(7);
-  // Fast path: exact match against the runtime service-role secret.
-  if (token === SUPABASE_SERVICE_ROLE_KEY) return true;
-  // Internal vault-issued service tokens (used by DB triggers via pg_net).
-  // We trust these only when the issuer matches our own project.
-  const payload = decodePayload(token);
-  if (
-    payload &&
-    payload.role === 'service_role' &&
-    payload.iss === EXPECTED_ISS
-  ) {
-    return true;
-  }
-  // Verified admin user JWT.
-  try {
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: auth } },
-    });
-    const { data: claims, error } = await sb.auth.getClaims(token);
-    if (error || !claims?.claims?.sub) return false;
-    const userId = claims.claims.sub as string;
-    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    const { data: row } = await admin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .maybeSingle();
-    return !!row;
-  } catch {
-    return false;
-  }
+  const result = await requireServiceOrAdmin(req);
+  return result.ok;
 }
 
 // ---------- handler ----------
