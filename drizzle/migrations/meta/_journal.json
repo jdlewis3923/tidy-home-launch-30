@@ -421,6 +421,13 @@
       "when": 1788911829170,
       "tag": "0059_generator_pay_from_canon",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1788911861950,
+      "tag": "0060_revoke_public_execute_schema_wide",
+      "breakpoints": true
     }
   ]
 }
