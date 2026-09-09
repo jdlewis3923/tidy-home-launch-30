@@ -491,6 +491,13 @@
       "when": 1788930884681,
       "tag": "0069_cron_health_capture_prune_and_speed",
       "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1788931469502,
+      "tag": "0070_cron_acks_durable_http_evidence",
+      "breakpoints": true
     }
   ]
 }
