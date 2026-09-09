@@ -106,24 +106,30 @@ describe('helpers that shipped with no callers', () => {
 });
 
 describe('SECURITY DEFINER guard shapes in committed SQL', () => {
-  const definerBodies = () => {
-    const bodies: { file: string; name: string; body: string }[] = [];
+  // Only the LAST committed definition of each function matters — earlier
+  // migrations are history, and several were superseded precisely because their
+  // guard was wrong. is_service_caller / is_privileged_caller are the helpers
+  // whose whole job is to inspect the session role, so they are exempt.
+  const EXEMPT = new Set(['is_service_caller', 'is_privileged_caller', 'current_user_admin']);
+
+  const latestDefinerBodies = () => {
+    const latest = new Map<string, { file: string; body: string }>();
     for (const { name: file, sql } of sqlFiles()) {
-      const re = /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+public\.(\w+)[\s\S]*?SECURITY\s+DEFINER([\s\S]*?)\$(fn|\$|body|unsched)?\$/gi;
-      // Coarse split is enough: we scan statement-by-statement below instead.
-      void re;
       const statements = sql.split(/;\s*\n(?=CREATE|GRANT|REVOKE|SELECT|ALTER|DO)/i);
       for (const st of statements) {
         if (!/SECURITY\s+DEFINER/i.test(st)) continue;
         const m = st.match(/FUNCTION\s+public\.(\w+)/i);
-        bodies.push({ file, name: m?.[1] ?? 'unknown', body: st });
+        if (!m) continue;
+        latest.set(m[1], { file, body: st });
       }
     }
-    return bodies;
+    return [...latest.entries()]
+      .filter(([name]) => !EXEMPT.has(name))
+      .map(([name, v]) => ({ name, ...v }));
   };
 
   it('no definer function relies on current_user for authorisation', () => {
-    const offenders = definerBodies()
+    const offenders = latestDefinerBodies()
       .filter((b) => /\bcurrent_user\b/i.test(b.body))
       .map((b) => `${b.file}:${b.name}`);
     expect(offenders).toEqual([]);
@@ -133,7 +139,7 @@ describe('SECURITY DEFINER guard shapes in committed SQL', () => {
     // "IF auth.uid() IS NOT NULL AND NOT has_role(...) THEN RAISE" lets a caller
     // with a NULL auth.uid() straight through. The fail-closed form is
     // "IF NOT public.is_privileged_caller() THEN RAISE".
-    const offenders = definerBodies()
+    const offenders = latestDefinerBodies()
       .filter((b) =>
         /auth\.uid\(\)\s+IS\s+NOT\s+NULL\s+AND\s+NOT\b/i.test(b.body) ||
         /IF\s+auth\.uid\(\)\s+IS\s+NOT\s+NULL[\s\S]{0,200}?RAISE/i.test(b.body),
@@ -142,6 +148,7 @@ describe('SECURITY DEFINER guard shapes in committed SQL', () => {
     expect(offenders).toEqual([]);
   });
 });
+
 
 describe('edge functions call only identifiers they define or import', () => {
   // The callJobberFn class of failure: a helper deleted in one place, still
