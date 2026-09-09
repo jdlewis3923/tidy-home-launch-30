@@ -28,7 +28,7 @@ const translations: Record<string, string> = {
   "Close chat": "Cerrar el chat",
   "Open chat with Tidy assistant": "Abrir el chat con el asistente de Tidy",
   "Hi! I'm Tidy's concierge assistant \u{1F44B} Ask me anything about cleaning, lawn care, detailing, pricing, or our service area.":
-    "\u00a1Hola! Soy el asistente concierge de Tidy \u{1F44B} Preg\u00fantame lo que quieras sobre limpieza, jardiner\u00eda, Shine Completes, precios o nuestra zona de servicio.",
+    "\u00a1Hola! Soy el asistente concierge de Tidy \u{1F44B} Preg\u00fantame lo que quieras sobre limpieza, jardiner\u00eda, Shine Complete, precios o nuestra zona de servicio.",
   "Sending...": "Enviando...",
   "Ask about pricing, areas, services...": "Pregunta sobre precios, zonas, servicios...",
   "A human will be with you soon. You can also call us at":
@@ -503,8 +503,8 @@ const translations: Record<string, string> = {
   "Mow, edge, blow. Same Pro. Locked price. Never surprise-billed.":
     "Cortar, bordear, soplar. El mismo profesional. Precio fijo. Sin facturas sorpresa.",
   "From $45 a month": "Desde $45 al mes",
-  "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **$45 a month** flat, same Pro, no surprise invoices.":
-    "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita**. Tidy es **$45 al mes**, precio fijo, el mismo profesional, sin facturas sorpresa.",
+  "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $45 a month** flat, same Pro, no surprise invoices.":
+    "La mayoría de los jardineros en Pinecrest cobran **$40–$60 por visita** y te re-cotizan después. Tidy es **desde $45 al mes**, precio fijo, el mismo profesional, sin facturas sorpresa.",
   // Lawn Care plans
   "One visit per month.": "Una visita al mes.",
   "Two visits per month.": "Dos visitas al mes.",
@@ -666,7 +666,7 @@ const translations: Record<string, string> = {
   "Careers at Tidy — Apply to join Miami's home-service crew":
     "Empleos en Tidy — Aplica para unirte al equipo de servicios del hogar de Miami",
   "Join Tidy's contractor network in Kendall and Pinecrest. Cleaning, lawn care, and Shine Complete pros — weekly pay, predictable routes.":
-    "Únete a la red de contratistas de Tidy en Kendall y Pinecrest. Profesionales de limpieza, jardinería y Shine Completes — pago semanal, rutas predecibles.",
+    "Únete a la red de contratistas de Tidy en Kendall y Pinecrest. Profesionales de limpieza, jardinería y Shine Complete — pago semanal, rutas predecibles.",
   "Back to site": "Volver al sitio",
   "Now hiring · Miami": "Contratando ahora · Miami",
   "2–3 business days": "2–3 días hábiles",
@@ -831,7 +831,7 @@ const translations: Record<string, string> = {
   "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one.":
     "Actualmente servimos Pinecrest (33156), Kendall (33183) y Kendall West (33186). Estamos lanzando primero en códigos postales selectos de Miami para asegurar un servicio de alta calidad desde el día uno.",
   "Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and Shine Complete all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless.":
-    "Tidy es una suscripción todo en uno de servicios del hogar en Miami — nos encargamos de la limpieza de tu casa, el cuidado del jardín y el detallado de tu carro bajo un solo plan mensual. Sin coordinar varios proveedores, sin perseguir cotizaciones. Una sola suscripción y todo se mantiene impecable.",
+    "Tidy es una suscripción todo en uno de servicios del hogar en Miami — nos encargamos de la limpieza de tu casa, el cuidado del jardín y Shine Complete bajo un solo plan mensual. Sin coordinar varios proveedores, sin perseguir cotizaciones. Una sola suscripción y todo se mantiene impecable.",
   "Tap 'Start My Plan,' choose your services and schedule, and complete checkout. Your first visit is confirmed within 24 hours.":
     "Toca 'Empezar Mi Plan', elige tus servicios y tu horario, y completa el pago. Tu primera visita se confirma dentro de 24 horas.",
   "No contracts, no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month.":
@@ -971,15 +971,15 @@ const translations: Record<string, string> = {
     "Tidy no es solo jardín — es un sistema para todo tu hogar.",
   "Start lawn care": "Empezar cuidado del jardín",
   "Start your plan": "Empieza tu plan",
-  "Lawn care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). Mow, edge, blow. Plans from $45 a month. Same Pro, no contracts. Book in about 2 minutes.":
-    "Cuidado del jardín en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Planes desde $45 al mes. El mismo profesional, sin contratos. Reserva en unos 2 minutos.",
+  "Lawn care in Pinecrest and Kendall (33156, 33183, 33186). Mow, edge, blow. Plans from $45 a month. Same Pro, no contracts. Book in about 2 minutes.":
+    "Cuidado del jardín en Pinecrest y Kendall (33156, 33183, 33186). Cortamos, bordeamos y soplamos. Planes desde $45 al mes. El mismo profesional, sin contratos. Reserva en unos 2 minutos.",
   "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.":
     "Limpieza profesional del hogar, resuelta por nosotros. Semanal, quincenal o mensual.",
   "Tidy isn't just cleaning — it's a system for your entire home.":
     "Tidy no es solo limpieza — es un sistema para todo tu hogar.",
   "Book your cleaning": "Reserva tu limpieza",
-  "House cleaning in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). One flat price per visit from $139. Same Pro, no contracts, eco-safe. Book in about 2 minutes.":
-    "Limpieza del hogar en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). Un precio fijo por visita desde $139. El mismo profesional, sin contratos, productos ecológicos. Reserva en unos 2 minutos.",
+  "House cleaning in Pinecrest and Kendall (33156, 33183, 33186). One flat price per visit from $139. Same Pro, no contracts, eco-safe. Book in about 2 minutes.":
+    "Limpieza del hogar en Pinecrest y Kendall (33156, 33183, 33186). Un precio fijo por visita desde $139. El mismo profesional, sin contratos, productos ecológicos. Reserva en unos 2 minutos.",
   "Professional Shine Complete at your home. Ceramic-safe, monthly.":
     "Detallado profesional de carros en tu casa. Seguro para cerámica, mensual.",
   "Same detailer every visit. Locked monthly price. Cancel anytime.":
@@ -987,10 +987,10 @@ const translations: Record<string, string> = {
   "Tidy isn't just detailing — it's a system for your entire home.":
     "Tidy no es solo detallado — es un sistema para todo tu hogar.",
   "Book detailing": "Reservar detallado",
-  "Shine Complete mobile car care in Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.":
-    "Shine Complete a domicilio en Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186). 3 lavados al mes más 2 detallados completos al año, desde $149/mes. Reserva en unos 2 minutos.",
-  "One flat price set by the size of your home, lawn or vehicle. Hold two or more services and you pick one free premium add-on every month — Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186).":
-    "Un precio fijo según el tamaño de tu casa, jardín o vehículo. Si tienes dos o más servicios, eliges un servicio adicional premium gratis cada mes — Pinecrest, Kendall y Palmetto Bay (33156, 33183, 33186).",
+  "Shine Complete mobile car care in Pinecrest and Kendall (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.":
+    "Shine Complete a domicilio en Pinecrest y Kendall (33156, 33183, 33186). 3 lavados al mes más 2 detallados completos al año, desde $149/mes. Reserva en unos 2 minutos.",
+  "One flat price set by the size of your home, lawn or vehicle. Hold two or more services and you pick one free premium add-on every month — Pinecrest, Kendall and Kendall West (33156, 33183, 33186).":
+    "Un precio fijo según el tamaño de tu casa, jardín o vehículo. Si tienes dos o más servicios, eliges un servicio adicional premium gratis cada mes — Pinecrest, Kendall y Kendall West (33156, 33183, 33186).",
   "About 2 minutes · No contracts": "Unos 2 minutos · Sin contratos",
   "Locked price · No contracts · Cancel anytime · Pause or reschedule anytime":
     "Precio fijo · Sin contratos · Cancela cuando quieras · Pausa o reagenda cuando quieras",
@@ -1004,7 +1004,7 @@ const translations: Record<string, string> = {
   "Effective Date: March 25, 2026": "Fecha de vigencia: 25 de marzo de 2026",
   "1. Service Type": "1. Tipo de Servicio",
   "Tidy provides recurring maintenance services including house cleaning, lawn care, and Shine Complete. Tidy does NOT provide restoration, hazardous cleanup, or extreme-condition services unless purchased separately. Services are performed by independent contractors engaged by Tidy. Tidy carries commercial general liability coverage on every Tidy assignment, and contractors are background-checked.":
-    "Tidy ofrece servicios de mantenimiento recurrente que incluyen limpieza del hogar, cuidado del jardín y Shine Completes. Tidy NO ofrece servicios de restauración, limpieza de materiales peligrosos ni servicios en condiciones extremas, a menos que se compren por separado. Los servicios son realizados por contratistas independientes contratados por Tidy. Tidy cuenta con cobertura de responsabilidad civil general en cada asignación, y los contratistas son verificados.",
+    "Tidy ofrece servicios de mantenimiento recurrente que incluyen limpieza del hogar, cuidado del jardín y Shine Complete. Tidy NO ofrece servicios de restauración, limpieza de materiales peligrosos ni servicios en condiciones extremas, a menos que se compren por separado. Los servicios son realizados por contratistas independientes contratados por Tidy. Tidy cuenta con cobertura de responsabilidad civil general en cada asignación, y los contratistas son verificados.",
   "2. Service Scope Limitations": "2. Limitaciones del Alcance del Servicio",
   "Standard services include routine maintenance only. Not included: extreme buildup or neglect, hazardous materials, mold remediation, biohazard cleanup, heavy stain restoration, paint correction, construction debris cleanup.":
     "Los servicios estándar incluyen únicamente mantenimiento de rutina. No se incluye: acumulación extrema o abandono, materiales peligrosos, remediación de moho, limpieza de riesgo biológico, restauración de manchas severas, corrección de pintura ni limpieza de escombros de construcción.",
@@ -1087,9 +1087,9 @@ const translations: Record<string, string> = {
   "Launching soon in Miami": "Muy pronto en Miami",
   "We're almost ready.": "Ya casi estamos listos.",
   "Subscription home care in Kendall & Pinecrest — house cleaning, lawn care, and mobile Shine Complete. Hiring our founding crew now.":
-    "Cuidado del hogar por suscripción en Kendall y Pinecrest — limpieza del hogar, cuidado del jardín y Shine Completes a domicilio. Estamos contratando a nuestro equipo fundador.",
+    "Cuidado del hogar por suscripción en Kendall y Pinecrest — limpieza del hogar, cuidado del jardín y Shine Complete a domicilio. Estamos contratando a nuestro equipo fundador.",
   "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, Shine Complete. Opening soon.":
-    "Tidy Home Concierge es una empresa de servicios del hogar por suscripción en Miami que está contratando a su equipo fundador. Limpieza, jardín y Shine Completes. Abrimos muy pronto.",
+    "Tidy Home Concierge es una empresa de servicios del hogar por suscripción en Miami que está contratando a su equipo fundador. Limpieza, jardín y Shine Complete. Abrimos muy pronto.",
   "Opening soon in Miami": "Abrimos muy pronto en Miami",
   "Questions?": "¿Preguntas?",
   "Tidy Home Concierge LLC · Miami, FL": "Tidy Home Concierge LLC · Miami, FL",
