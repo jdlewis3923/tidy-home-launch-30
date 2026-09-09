@@ -663,10 +663,6 @@ export const CAR_SERVICE_DEFAULT_DURATION_MINUTES: Record<CarServiceCode, number
   car_detail: 210,
 };
 
-export const CAR_SERVICE_ARRIVAL_WINDOW_MINUTES: Record<CarServiceCode, number> = {
-  car_wash: 60,
-  car_detail: 120,
-};
 
 /** app_settings keys an admin can edit to override the default duration. */
 export const CAR_SERVICE_DURATION_SETTINGS_KEY: Record<CarServiceCode, string> = {
