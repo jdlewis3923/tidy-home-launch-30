@@ -67,7 +67,7 @@ check(
      cross join unnest(array['anon','authenticated']) as r(rolname)
     where n.nspname='public'
       and p.proname in ('admin_get_service_role_key','admin_get_jobber_refresh_token',
-                        'admin_get_meta_secret','admin_get_vapid_public','admin_get_vapid_private',
+                        'admin_get_meta_secret','admin_get_vapid_private',
                         'admin_set_service_role_key','admin_set_meta_secret','admin_set_vapid_secret')
       and has_function_privilege(r.rolname, p.oid, 'EXECUTE')
     order by 1,2`,
@@ -144,8 +144,10 @@ check(
   `select 'payout_weeks' where has_table_privilege('anon','public.payout_weeks','SELECT')`,
 );
 
-// 4. Grants for every RPC the browser calls. Pass the list in from the repo:
-//    rg -o "rpc\('([a-z_]+)'" src --replace '$1' | sort -u | paste -sd,
+// 4. Grants for every RPC the browser calls (admin_get_vapid_public is deliberately
+//    callable by a signed-in user — the browser needs the public push key).
+//    Pass the list in from the repo:
+//    rg -o --no-filename "rpc\(\s*['\"]([a-z_0-9]+)['\"]" src --replace '$1' | sort -u | paste -sd,
 const RPC_LIST = process.env.TIDY_RPCS?.split(',').map((s) => s.trim()).filter(Boolean) ?? [];
 if (RPC_LIST.length) {
   check(
