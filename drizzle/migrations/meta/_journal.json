@@ -568,6 +568,13 @@
       "when": 1788933803712,
       "tag": "0080_retire_inert_jobber_addon_scan_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1788934165923,
+      "tag": "0081_revoke_anon_payout_weeks",
+      "breakpoints": true
     }
   ]
 }
