@@ -131,6 +131,11 @@ export default function DashboardIndex() {
     }
     if (activeModal === 'reschedule') {
       setRescheduleDate(data.nextVisit?.visit_date ?? '');
+      // Prefill the window from the visit itself when it is a canonical one.
+      const current = data.nextVisit?.time_window ?? '';
+      setRescheduleWindow(
+        (ARRIVAL_WINDOWS as readonly string[]).includes(current) ? current : ARRIVAL_WINDOW_MORNING,
+      );
     }
     if (activeModal === null) {
       setSubmitState('idle');
