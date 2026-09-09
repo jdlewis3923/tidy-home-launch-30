@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // sync-jobber-payouts — DECOMMISSIONED (Sep 2026).
 //
 // Pro pay is resolved from canon at visit creation and paid through Stripe

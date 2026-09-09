@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // jobber-sync-customer — DECOMMISSIONED (Sep 2026).
 //
 // Customers live in Lovable Cloud; there is no external CRM to mirror into.

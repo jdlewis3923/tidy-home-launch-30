@@ -7,7 +7,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 // are supposed to exist. This is that list, and cron-heartbeat diffs the live
 // cron.job table against it every hour.
 //
-// Keep it in step with drizzle/migrations/0074_cron_manifest_committed_schedules.sql
+// Keep it in step with the committed schedules in drizzle/migrations/0075..0080.
 // (src/test/cron-manifest.test.ts fails the build if the two drift, if a job
 // names a function that does not exist, or if a name here is not in cron.job's
 // committed schedule).

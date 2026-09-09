@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // add-jobber-line-item — DECOMMISSIONED (Sep 2026).
 //
 // Add-ons ride the Pro Portal job card and are billed through Stripe.

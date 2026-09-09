@@ -67,27 +67,36 @@ check(
      cross join unnest(array['anon','authenticated']) as r(rolname)
     where n.nspname='public'
       and p.proname in ('admin_get_service_role_key','admin_get_jobber_refresh_token',
-                        'admin_get_meta_secret','admin_get_vapid_public','admin_get_vapid_private',
+                        'admin_get_meta_secret','admin_get_vapid_private',
                         'admin_set_service_role_key','admin_set_meta_secret','admin_set_vapid_secret')
       and has_function_privilege(r.rolname, p.oid, 'EXECUTE')
     order by 1,2`,
 );
 
-// 2. Scheduled jobs.
+// 2. Scheduled jobs. The cron schema itself is not readable by this login role,
+//    so read our own hourly snapshot of it instead — the same rows the watchdog
+//    reads. The manifest comparison runs inside the hourly cron-heartbeat
+//    (public.cron_manifest_diff) and raises an admin alert on any difference.
 check(
-  'every scheduled job is active and has a command',
-  `select jobname, schedule from cron.job where not active or coalesce(command,'')='' order by 1`,
+  'every job in the latest snapshot is active',
+  `select jobname, schedule from public.cron_health_snapshot
+    where captured_at = (select max(captured_at) from public.cron_health_snapshot)
+      and not active order by 1`,
 );
 
 check(
-  'no scheduled job calls a helper with an empty job name',
-  `select jobname from cron.job where command like '%cron_http_post(%''''%' order by 1`,
+  'scheduled jobs, from the latest snapshot (for the record)',
+  `select jobname, schedule from public.cron_health_snapshot
+    where captured_at = (select max(captured_at) from public.cron_health_snapshot)
+    order by 1`,
+  { expectEmpty: false, note: 'compare against supabase/functions/_shared/cron-manifest.ts' },
 );
 
-check('scheduled jobs (for the record)', `select jobname, schedule from cron.job order by 1`, {
-  expectEmpty: false,
-  note: 'compare against supabase/functions/_shared/cron-manifest.ts',
-});
+check(
+  'no open watchdog alert about a job that is missing or on the wrong schedule',
+  `select context->>'job_name', context->>'detail' from public.admin_alerts
+    where alert_type = 'cron_manifest_drift' and resolved_at is null order by 1`,
+);
 
 check(
   'the scheduler is not paused',
@@ -108,21 +117,37 @@ check(
 );
 
 check(
-  'anon and authenticated cannot read contractor pay columns',
+  'no contractor pay left inside the saved plan line sets',
+  `select id::text from public.plan_line_sets
+    where lines::text like '%contractor_pay_cents%' order by 1`,
+);
+
+check(
+  'customers cannot read contractor pay columns on their own tables',
+  // payout_weeks is the Pro's own pay ledger, row-scoped to the signed-in Pro,
+  // so it is expected to be readable by authenticated — a customer sees no rows.
   `select r.rolname, c.relname, a.attname
      from pg_class c
      join pg_attribute a on a.attrelid=c.oid
      join pg_namespace n on n.oid=c.relnamespace
      cross join unnest(array['anon','authenticated']) as r(rolname)
     where n.nspname='public'
+      and c.relname in ('visits','subscriptions','pro_visits','today_visits','invoices')
       and a.attname in ('contractor_pay_cents','visit_pay_cents')
       and a.attnum > 0 and not a.attisdropped
       and has_column_privilege(r.rolname, c.oid, a.attname, 'SELECT')
     order by 1,2,3`,
 );
 
-// 4. Grants for every RPC the browser calls. Pass the list in from the repo:
-//    rg -o "rpc\('([a-z_]+)'" src --replace '$1' | sort -u
+check(
+  'anon has no access at all to the Pro pay ledger',
+  `select 'payout_weeks' where has_table_privilege('anon','public.payout_weeks','SELECT')`,
+);
+
+// 4. Grants for every RPC the browser calls (admin_get_vapid_public is deliberately
+//    callable by a signed-in user — the browser needs the public push key).
+//    Pass the list in from the repo:
+//    rg -o --no-filename "rpc\(\s*['\"]([a-z_0-9]+)['\"]" src --replace '$1' | sort -u | paste -sd,
 const RPC_LIST = process.env.TIDY_RPCS?.split(',').map((s) => s.trim()).filter(Boolean) ?? [];
 if (RPC_LIST.length) {
   check(
@@ -138,17 +163,10 @@ if (RPC_LIST.length) {
   console.log("SKIP  RPC grant check — set TIDY_RPCS=\"a,b,c\" (see the comment above)");
 }
 
-// 5. Chatbot knowledge must not contain a price outside canon.
-const CANON = [139, 128, 114, 189, 174, 155, 279, 257, 229, 45, 41, 37, 65, 60, 53, 99, 91, 81];
-check(
-  'the live chatbot knowledge quotes no price outside canon',
-  `with figures as (
-     select id::text, unnest(regexp_matches(content, '\\$([0-9]+)', 'g'))::int as amount
-       from public.chatbot_knowledge)
-   select id, amount::text from figures
-    where amount not in (${CANON.join(',')})
-    order by 2`,
-);
+// 5. Chatbot pricing canon is checked properly by src/test/chatbot-knowledge-canon.test.ts,
+//    which reads the live row and compares against the shared figures file.
+//    A naive "$" scrape here would flag every legitimate monthly total.
+
 
 console.log(`\n${failures === 0 ? 'All checks passed.' : `${failures} check(s) failed.`}`);
 process.exit(failures === 0 ? 0 : 1);

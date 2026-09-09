@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // jobber-authorize-url — DECOMMISSIONED (Sep 2026).
 //
 // There is no Jobber connection to authorize. This is an admin/browser path,
