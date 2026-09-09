@@ -31,6 +31,9 @@ verify_jwt = false
 
 # Public chatbot endpoint — anonymous homepage visitors must be able to chat.
 # Reads only the public chatbot_knowledge row; no secrets returned.
+[functions.chatbot-knowledge-figures]
+verify_jwt = false
+
 [functions.chat-assistant]
 verify_jwt = false
 
