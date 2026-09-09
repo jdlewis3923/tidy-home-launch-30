@@ -456,6 +456,13 @@
       "when": 1788919562877,
       "tag": "0064_repoint_cron_to_recording_helper",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1788919732396,
+      "tag": "0065_cron_health_snapshot_upsert",
+      "breakpoints": true
     }
   ]
 }
