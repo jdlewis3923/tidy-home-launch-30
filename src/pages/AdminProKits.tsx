@@ -103,9 +103,10 @@ export default function AdminProKits() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/40" onClick={() => setParams({})}>
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/70" onClick={() => setParams({})}>
           <div
-            className="h-full w-full max-w-xl overflow-x-hidden overflow-y-auto bg-card p-4 shadow-2xl sm:p-6"
+            className="h-full w-full max-w-xl overflow-x-hidden overflow-y-auto bg-card p-4 shadow-2xl backdrop-blur-2xl sm:p-6"
+            style={{ backgroundColor: "hsl(var(--card))" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
