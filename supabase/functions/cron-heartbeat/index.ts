@@ -221,9 +221,13 @@ Deno.serve(async (req) => {
     stale_count: stale.length,
     alerts_opened: alerted,
     alerts_resolved: resolved,
+    manifest_expected: EXPECTED_CRON_JOBS.length,
+    manifest_problem_count: manifestProblems.length,
+    manifest_problems: manifestProblems,
     stale_jobs: stale.map((j) => ({
       job: j.jobname, schedule: j.schedule, last_run_at: j.last_run_at,
       last_status: j.last_status, minutes_since: j.minutes_since,
     })),
   });
+
 });
