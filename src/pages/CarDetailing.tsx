@@ -8,15 +8,15 @@ import heroImgMobileWebp from "@/assets/lp-car-detailing-mobile.webp";
 const config: ServiceLandingConfig = {
   serviceSlug: "car-detailing",
   signupServiceParam: "detailing",
-  eyebrow: "Shine Complete",
+  eyebrow: "Car Care",
   h1: "Shine Complete in Pinecrest + Kendall",
-  subhead: "Professional Shine Complete at your home. Ceramic-safe, monthly.",
+  subhead: "3 maintenance washes a month plus 2 full details a year.",
   intentConfirm: "Same detailer every visit. Locked monthly price. Cancel anytime.",
   systemBridge: "Tidy isn't just detailing — it's a system for your entire home.",
   ctaPrimaryLabel: "Book detailing",
   ctaPlanLabel: "Start your plan",
   priceAnchor: "From $149/mo",
-  stickyLabel: "Shine Complete · from $149/mo",
+  stickyLabel: "Car Care · Shine Complete · from $149/mo",
   savingsCallout:
     "A good mobile detail runs **$120–$180 per appointment**. Shine Complete is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.",
   heroImage: heroImg,
@@ -28,7 +28,7 @@ const config: ServiceLandingConfig = {
   plans: [
     // Each card is one vehicle size, so the price is exact — no "From" here.
     {
-      name: "Shine Complete · Size 1",
+      name: "Car Care · Shine Complete · Size 1",
       price: "$149",
       cadence: "/mo",
       planSlug: "monthly",
@@ -40,7 +40,7 @@ const config: ServiceLandingConfig = {
       cadenceKey: "monthly",
     },
     {
-      name: "Shine Complete · Size 2",
+      name: "Car Care · Shine Complete · Size 2",
       price: "$179",
       cadence: "/mo",
       planSlug: "monthly",
@@ -53,7 +53,7 @@ const config: ServiceLandingConfig = {
       cadenceKey: "monthly",
     },
     {
-      name: "Shine Complete · Size 3",
+      name: "Car Care · Shine Complete · Size 3",
       price: "$239",
       cadence: "/mo",
       planSlug: "monthly",
