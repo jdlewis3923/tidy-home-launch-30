@@ -401,7 +401,7 @@ function FieldRow({
   onChange: (name: string, v: string | string[]) => void;
 }) {
   const id = `field-${field.name}`;
-  const base = `w-full rounded-xl border px-3.5 py-3 text-base text-slate-900 outline-none focus:ring-2 ${
+  const base = `min-h-[48px] w-full rounded-xl border px-3.5 py-3 text-base text-slate-900 outline-none focus:ring-2 ${
     error ? "border-red-500 focus:ring-red-200" : "border-slate-300 focus:ring-slate-200"
   }`;
   const selected = Array.isArray(value) ? value : [];
@@ -447,8 +447,37 @@ function FieldRow({
         ) : (
           <input
             id={`${id}-input`}
-            type={field.type === "number" ? "number" : field.type === "date" ? "date" : field.type}
-            inputMode={field.type === "number" ? "numeric" : undefined}
+            type={
+              field.type === "number"
+                ? "number"
+                : field.type === "date"
+                ? "date"
+                : field.type === "zip"
+                ? "text"
+                : field.type
+            }
+            inputMode={
+              field.type === "number" || field.type === "zip"
+                ? "numeric"
+                : field.type === "tel"
+                ? "tel"
+                : field.type === "email"
+                ? "email"
+                : undefined
+            }
+            autoComplete={
+              field.type === "tel"
+                ? "tel"
+                : field.type === "email"
+                ? "email"
+                : field.type === "zip"
+                ? "postal-code"
+                : undefined
+            }
+            maxLength={field.type === "zip" ? 5 : undefined}
+            pattern={field.type === "zip" ? "[0-9]{5}" : undefined}
+            autoCapitalize={field.type === "email" ? "none" : undefined}
+            spellCheck={field.type === "email" ? false : undefined}
             className={base}
             placeholder={field.placeholder}
             value={String(value ?? "")}
