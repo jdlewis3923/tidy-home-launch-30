@@ -109,31 +109,43 @@ const vehicleOptions: VehicleClass[] = ['sedan', 'coupe', 'crossover', 'suv', 's
 
 /** Square-footage question. Drives the surcharge and the quote cut-off. */
 function SqFtField({
-  label, helper, value, onChange, placeholder,
+  label, helper, value, onChange, placeholder, required = false, missingNote,
 }: {
   label: string; helper: string; value: number | null;
   onChange: (v: number | null) => void; placeholder: string;
+  required?: boolean; missingNote?: string;
 }) {
+  const missing = required && !(value && value > 0);
   return (
     <div className="space-y-1.5">
-      <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">{label}</label>
+      <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">
+        {label}{required ? ' *' : ''}
+      </label>
       <input
         type="number"
         inputMode="numeric"
         min={0}
         step={50}
+        required={required}
+        aria-required={required || undefined}
         value={value ?? ''}
         placeholder={placeholder}
         onChange={e => {
           const raw = e.target.value.trim();
           onChange(raw === '' ? null : Math.max(0, Math.round(Number(raw))));
         }}
-        className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+        className={`w-full rounded-lg border bg-white px-4 py-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink/10 ${
+          missing ? 'border-red-400 focus:border-red-500' : 'border-hairline focus:border-ink'
+        }`}
       />
       <p className="text-[11px] text-ink-faint">{helper}</p>
+      {missing && missingNote && (
+        <p className="text-[11px] font-medium text-red-600">{missingNote}</p>
+      )}
     </div>
   );
 }
+
 
 /** Shown the moment an answer lands outside what we can price online. */
 function QuoteNotice({ children }: { children: ReactNode }) {
