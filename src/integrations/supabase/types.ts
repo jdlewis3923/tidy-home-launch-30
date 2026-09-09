@@ -5155,6 +5155,7 @@ export type Database = {
         Returns: number
       }
       public_five_star_proof: { Args: never; Returns: Json }
+      repoint_cron_to_helper: { Args: { _job_name: string }; Returns: string }
       verify_pro_badge: {
         Args: { _token: string }
         Returns: {
