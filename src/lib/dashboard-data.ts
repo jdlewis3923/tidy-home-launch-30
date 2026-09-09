@@ -23,6 +23,14 @@ type Subscription = Tables<'subscriptions'>;
 export const CUSTOMER_VISIT_COLUMNS =
   'id, user_id, subscription_id, service, service_type, visit_date, time_window, status, notes, scheduled_start, scheduled_end, street, zip, customer_first_name, assigned_pro_id, crew_name, jobber_visit_id, completed_at, on_my_way_at, is_sample, size_tier, cadence, surcharge_applied, visit_kind, created_at, updated_at';
 
+/**
+ * Customer-visible subscription columns. Never `select('*')` here: a star
+ * select would ship any future pay/internal column straight to the browser.
+ */
+export const CUSTOMER_SUBSCRIPTION_COLUMNS =
+  'id, user_id, services, frequency, monthly_total_cents, status, next_billing_date, created_at, updated_at, bundle_discount_pct, card_brand, card_last4, cancel_at_period_end, canceled_at, paused_until, band, size, sizes_json, founding_rate_locked, founding_free_addon_first_visit, founding_free_addon_fulfilled_at, founding_review_promised, free_car_washes_per_month, founding_zip, free_addons_per_month, preferred_pro_id, has_water_spigot, has_electrical_outlet, washing_allowed, car_service_code, size_tier, cadence, surcharge_applied, surcharge_cents, plan_lines, stripe_status';
+
+
 type Visit = Pick<
   Tables<'visits'>,
   | 'id' | 'user_id' | 'subscription_id' | 'service' | 'service_type' | 'visit_date'
