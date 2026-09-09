@@ -19,7 +19,7 @@ import {
   SHINE_MONTHLY,
   SIZES,
 } from '@/lib/pricing-canon';
-import { ADDONS } from '@/lib/addon-catalog';
+import { ADDON_CATALOG } from '@/lib/addon-catalog';
 
 /** Every dollar figure the canon authorises inside customer-facing copy. */
 function canonFigures(): Set<number> {
@@ -35,7 +35,7 @@ function canonFigures(): Set<number> {
   }
   allowed.add(CLEANING_SURCHARGE.perVisitDollars);
   allowed.add(LAWN_SURCHARGE.perVisitDollars);
-  for (const addon of ADDONS) allowed.add(addon.price);
+  for (const addon of ADDON_CATALOG) allowed.add(addon.price);
   allowed.add(REFERRAL_BONUS_CENTS / 100); // referral: give $50 / get $50
 
   // Non-price figures that legitimately appear in the knowledge base.
