@@ -116,11 +116,55 @@ export default function DashboardServices() {
   const [preferredProId, setPreferredProId] = useState<string | null>(null);
   const [savingPreferredPro, setSavingPreferredPro] = useState(false);
 
-  // Add-a-service state
+  // Add-a-service state. The size is DERIVED from the same inputs the first
+  // plan collects — the server recomputes it and rejects a mismatch, and the
+  // square footage is what triggers the surcharge.
   const [newService, setNewService] = useState<CanonService | null>(null);
-  const [newSize, setNewSize] = useState<CanonSize>(1);
   const [newFrequency, setNewFrequency] = useState<Frequency>('monthly');
+  const [newBedrooms, setNewBedrooms] = useState<string>('');
+  const [newBathrooms, setNewBathrooms] = useState<string>('');
+  const [newHomeSqFt, setNewHomeSqFt] = useState<string>('');
+  const [newLawnChoice, setNewLawnChoice] = useState<LawnChoice | null>(null);
+  const [newTurfSqFt, setNewTurfSqFt] = useState<string>('');
+  const [newVehicleClass, setNewVehicleClass] = useState<VehicleClass | null>(null);
   const [startingCheckout, setStartingCheckout] = useState(false);
+
+  const newSqFt =
+    newService === 'cleaning'
+      ? Number(newHomeSqFt) || 0
+      : newService === 'lawn'
+        ? Number(newTurfSqFt) || 0
+        : 0;
+
+  const newSizeSelection =
+    newService === 'cleaning'
+      ? sizeForCleaning(newBedrooms || null, newBathrooms || null)
+      : newService === 'lawn'
+        ? sizeForLawnReconciled(newLawnChoice, Number(newTurfSqFt) || null)
+        : sizeForCarCare(newVehicleClass);
+
+  const newSize: CanonSize | null =
+    typeof newSizeSelection === 'number' ? (newSizeSelection as CanonSize) : null;
+
+  const newNeedsQuote =
+    newSizeSelection === 'quote' ||
+    (newService === 'cleaning' && newSqFt > CLEANING_SURCHARGE.maxSqFt) ||
+    (newService === 'lawn' && newSqFt > LAWN_SURCHARGE.maxSqFt);
+
+  const newReady = !!newService && !!newSize && !newNeedsQuote &&
+    (newService === 'detailing' || newSqFt > 0);
+
+  const resetNewService = (s: CanonService) => {
+    setNewService(s);
+    setNewFrequency(SERVICE_UNIT[s] === 'per_month' ? 'monthly' : 'biweekly');
+    setNewBedrooms('');
+    setNewBathrooms('');
+    setNewHomeSqFt('');
+    setNewLawnChoice(null);
+    setNewTurfSqFt('');
+    setNewVehicleClass(null);
+  };
+
 
   const sub = data.subscription;
   const planServices = ((sub?.services ?? []) as CanonService[]).filter(Boolean);
