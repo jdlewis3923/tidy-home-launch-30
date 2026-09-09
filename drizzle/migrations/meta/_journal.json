@@ -463,6 +463,13 @@
       "when": 1788919732396,
       "tag": "0065_cron_health_snapshot_upsert",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1788921134998,
+      "tag": "0066_retire_bundle_discount_tiers",
+      "breakpoints": true
     }
   ]
 }
