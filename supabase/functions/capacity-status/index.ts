@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
 
-  // Per-IP rate limit — this endpoint is reachable without a session.
+  // Per-IP rate limit — cheap guard in front of the auth check below.
   const limited = await enforceRateLimit(req, { bucket: 'capacity-status', limit: 60, windowSeconds: 60 });
   if (limited) return limited;
 
