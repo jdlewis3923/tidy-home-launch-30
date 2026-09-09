@@ -810,7 +810,7 @@ export default function DashboardServices() {
 
                       <button
                         type="button"
-                        disabled={startingCheckout}
+                        disabled={startingCheckout || !newReady}
                         onClick={addService}
                         className="inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] transition hover:bg-ink-soft disabled:opacity-60"
                       >
