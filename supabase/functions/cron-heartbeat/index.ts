@@ -89,6 +89,57 @@ Deno.serve(async (req) => {
   const jobs = (data ?? []) as CronRow[];
   const stale = jobs.filter((j) => j.active && j.stale);
 
+  // A job that was NEVER scheduled used to look exactly like a healthy system:
+  // the snapshot only knows about jobs that exist. Diff the live cron table
+  // against the repo manifest so "never created" alarms like "stopped running".
+  type Diff = { problem: string; job_name: string; detail: string };
+  let manifestProblems: Diff[] = [];
+  const { data: diffRows, error: diffErr } = await admin.rpc('cron_manifest_diff', {
+    _expected: manifestForRpc(),
+  });
+  if (diffErr) {
+    await admin.from('admin_alerts').insert({
+      alert_type: 'cron_manifest_check_failed',
+      title: 'Could not compare scheduled jobs against the expected list',
+      body: `cron_manifest_diff failed: ${diffErr.message}`,
+      context: { at: new Date().toISOString() },
+    });
+  } else {
+    manifestProblems = (diffRows ?? []) as Diff[];
+    for (const p of manifestProblems) {
+      const { data: existing } = await admin
+        .from('admin_alerts')
+        .select('id')
+        .eq('alert_type', 'cron_manifest_drift')
+        .is('resolved_at', null)
+        .contains('context', { job_name: p.job_name, problem: p.problem })
+        .limit(1);
+      if (existing?.length) continue;
+      const expected = EXPECTED_CRON_JOBS.find((j) => j.name === p.job_name);
+      await admin.from('admin_alerts').insert({
+        alert_type: 'cron_manifest_drift',
+        title: `Scheduled job ${p.problem.replace(/_/g, ' ')}: ${p.job_name}`,
+        body: [p.detail, expected ? `Purpose: ${expected.purpose}` : null].filter(Boolean).join(' '),
+        context: { job_name: p.job_name, problem: p.problem, detail: p.detail, at: new Date().toISOString() },
+      });
+    }
+    // Resolve drift alerts for jobs that are now correct.
+    const stillBroken = new Set(manifestProblems.map((p) => `${p.job_name}:${p.problem}`));
+    const { data: openDrift } = await admin
+      .from('admin_alerts')
+      .select('id, context')
+      .eq('alert_type', 'cron_manifest_drift')
+      .is('resolved_at', null)
+      .limit(200);
+    for (const row of openDrift ?? []) {
+      const ctx = (row as { context?: { job_name?: string; problem?: string } }).context ?? {};
+      if (!stillBroken.has(`${ctx.job_name}:${ctx.problem}`)) {
+        await admin.from('admin_alerts').update({ resolved_at: new Date().toISOString() }).eq('id', (row as { id: string }).id);
+      }
+    }
+  }
+
+
 
   // An empty snapshot is not "no problems" — it means the watchdog has nothing
   // to look at, which reads as all-green everywhere downstream.
