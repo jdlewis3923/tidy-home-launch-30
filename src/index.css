@@ -1208,7 +1208,7 @@ body.admin-hud > #root > * {
 /* ---------------------------------------------------------------------------
    Tidy Pro Portal tokens. Bright-sun, one-handed, 70-80% light: off-white
    ground, white cards, navy/sky gradients for hero + header regions, pale
-   operational status surfaces. Never hardcode these colours in components.
+   operational status surfaces. Never hardcode these colors in components.
    --------------------------------------------------------------------------- */
 :root {
   --pro-navy: 218 48% 12%;      /* #0F172A */
