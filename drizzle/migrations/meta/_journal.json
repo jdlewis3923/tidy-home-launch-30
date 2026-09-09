@@ -435,6 +435,13 @@
       "when": 1788912421195,
       "tag": "0061_cron_health_fast_lookup",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1788912774733,
+      "tag": "0062_cron_health_snapshot",
+      "breakpoints": true
     }
   ]
 }
