@@ -32,28 +32,14 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // Outside the window there is nothing to do — leave everything parked.
-  if (!isWindowOpen()) {
-    const { count } = await admin
-      .from('sms_outbox')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'queued');
-    const { count: pushQueued } = await admin
-      .from('pro_push_outbox')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'queued');
-    return jsonResponse({
-      ok: true, window_open: false, queued: count ?? 0, push_queued: pushQueued ?? 0,
-      next_window: nextOpenWindow().toISOString(),
-    });
-  }
-
   // ---- Expiry first: never deliver a message about a moment that has passed --
   //
   // A 15-minute add-on approval link parked at 18:20 on Saturday used to be
   // delivered Monday at 08:00, pointing at a request that died 38 hours before.
   // Anything past its expiry — or older than the hard ceiling, for rows queued
   // before expiry existed — is canceled, with the reason kept for the record.
+  // This runs whether or not the window is open: an expiry is a clock, not a
+  // courtesy.
   const nowIso = new Date().toISOString();
   const HARD_CEILING_HOURS = 24;
   const ceilingIso = new Date(Date.now() - HARD_CEILING_HOURS * 3_600_000).toISOString();
@@ -77,6 +63,24 @@ Deno.serve(async (req) => {
     }).eq('id', row.id).eq('status', 'queued');
     if (!cErr) canceled++;
   }
+
+  // Outside the window nothing else is sent — the rest stays parked.
+  if (!isWindowOpen()) {
+    const { count } = await admin
+      .from('sms_outbox')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'queued');
+    const { count: pushQueued } = await admin
+      .from('pro_push_outbox')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'queued');
+    return jsonResponse({
+      ok: true, window_open: false, queued: count ?? 0, push_queued: pushQueued ?? 0,
+      canceled, next_window: nextOpenWindow().toISOString(),
+    });
+  }
+
+
 
   const { data: rows, error } = await admin
     .from('sms_outbox')
