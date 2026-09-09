@@ -330,7 +330,7 @@ export default function DashboardServices() {
   };
 
   const addService = async () => {
-    if (!newService) return;
+    if (!newService || !newSize || !newReady) return;
     const zip = data.profile?.zip ?? sub?.founding_zip ?? '';
     if (!/^\d{5}$/.test(zip)) {
       toast({
@@ -342,10 +342,24 @@ export default function DashboardServices() {
     }
     setStartingCheckout(true);
     const lines: CheckoutServiceLine[] = [
-      { service: newService, size: newSize, frequency: newFrequency },
+      {
+        service: newService,
+        size: newSize,
+        frequency: newFrequency,
+        sq_ft: newSqFt || null,
+      },
     ];
     try {
-      await startAddServiceCheckout({ lines, zip, lang: language === 'es' ? 'es' : 'en' });
+      await startAddServiceCheckout({
+        lines,
+        zip,
+        lang: language === 'es' ? 'es' : 'en',
+        bedrooms: newService === 'cleaning' ? Number(newBedrooms.replace('+', '')) || null : null,
+        bathrooms: newService === 'cleaning' ? Number(newBathrooms.replace('+', '')) || null : null,
+        lawn_choice: newService === 'lawn' ? newLawnChoice : null,
+        vehicle_class: newService === 'detailing' ? newVehicleClass : null,
+      });
+
     } catch (err) {
       setStartingCheckout(false);
       toast({
