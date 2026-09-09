@@ -484,6 +484,13 @@
       "when": 1788929391185,
       "tag": "0068_cron_http_truth_repoint_and_purge_proof",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1788930884681,
+      "tag": "0069_cron_health_capture_prune_and_speed",
+      "breakpoints": true
     }
   ]
 }
