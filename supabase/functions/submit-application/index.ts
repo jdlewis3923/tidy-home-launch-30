@@ -10,6 +10,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendPwaPushToJustin } from '../_shared/notifyJustin.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -39,6 +40,10 @@ const Body = z.object({
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
+
+  // Per-IP rate limit — this endpoint is reachable without a session.
+  const limited = await enforceRateLimit(req, { bucket: 'submit-application', limit: 3, windowSeconds: 900 });
+  if (limited) return limited;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
 
   try {

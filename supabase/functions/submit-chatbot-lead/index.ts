@@ -5,6 +5,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 
 const admin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -22,6 +23,10 @@ const BodySchema = z.object({
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
+
+  // Per-IP rate limit — this endpoint is reachable without a session.
+  const limited = await enforceRateLimit(req, { bucket: 'submit-chatbot-lead', limit: 5, windowSeconds: 300 });
+  if (limited) return limited;
 
   let raw: unknown;
   try {

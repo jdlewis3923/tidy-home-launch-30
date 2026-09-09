@@ -18,6 +18,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { withLogging } from '../_shared/withLogging.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -242,6 +243,10 @@ async function isAuthorized(req: Request): Promise<boolean> {
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
+
+  // Per-IP rate limit — this endpoint is reachable without a session.
+  const limited = await enforceRateLimit(req, { bucket: 'track-conversion', limit: 60, windowSeconds: 60 });
+  if (limited) return limited;
 
   if (req.method !== 'POST') {
     return jsonResponse({ ok: false, error: 'method not allowed' }, 405);

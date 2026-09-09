@@ -12,6 +12,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -54,6 +55,10 @@ function decodeBase64(input: string): Uint8Array {
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
+
+  // Per-IP rate limit — this endpoint is reachable without a session.
+  const limited = await enforceRateLimit(req, { bucket: 'submit-insurance', limit: 5, windowSeconds: 900 });
+  if (limited) return limited;
   if (req.method !== 'POST') return jsonResponse({ error: 'method_not_allowed' }, 405);
 
   const parsed = Body.safeParse(await req.json().catch(() => ({})));

@@ -2,6 +2,7 @@
 // Same assistant + admin email path as SMS, but reply returned inline.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { runSupportAssistant, notifyAdminEmail, type SupportMsg } from "../_shared/support-assistant.ts";
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +12,10 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Per-IP rate limit — this endpoint is reachable without a session.
+  const limited = await enforceRateLimit(req, { bucket: 'chat-message', limit: 20, windowSeconds: 300 });
+  if (limited) return limited;
 
   try {
     const payload = await req.json();
