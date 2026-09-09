@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // jobber-create-job — DECOMMISSIONED (Sep 2026).
 //
 // Jobs and visits are created locally by the visit lifecycle engine. The Jobber

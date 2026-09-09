@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // jobber-schedule-sync — DECOMMISSIONED (Sep 2026).
 //
 // Dispatch is the Tidy Pro Portal. This used to poll Jobber's GraphQL API every

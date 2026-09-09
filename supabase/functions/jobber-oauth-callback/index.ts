@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // jobber-oauth-callback — DECOMMISSIONED (Sep 2026).
 //
 // No tokens are exchanged or stored. Inert, logged, always 200.

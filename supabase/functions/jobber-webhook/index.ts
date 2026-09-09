@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // jobber-webhook — DECOMMISSIONED (Sep 2026).
 //
 // Inbound Jobber events are acknowledged and discarded. No verification, no

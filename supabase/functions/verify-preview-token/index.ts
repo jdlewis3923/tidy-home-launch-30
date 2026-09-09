@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 import { enforceRateLimit } from '../_shared/rate-limit.ts';
 /**
  * verify-preview-token
