@@ -36,26 +36,36 @@ Deno.serve(async (req) => {
   //
   // A 15-minute add-on approval link parked at 18:20 on Saturday used to be
   // delivered Monday at 08:00, pointing at a request that died 38 hours before.
-  // Anything past its expiry — or older than the hard ceiling, for rows queued
-  // before expiry existed — is canceled, with the reason kept for the record.
-  // This runs whether or not the window is open: an expiry is a clock, not a
-  // courtesy.
+  // Expiry is the message's OWN deadline, never a flat clock: the send window
+  // skips Sunday, so anything parked Saturday evening legitimately waits ~37
+  // hours for Monday 08:00 and a hard 24h ceiling destroyed all of it — on-my-
+  // way texts, add-on approvals, support replies — in the most common parking
+  // window a Mon-Sat business has.
+  //
+  // Rows queued before expires_at existed have no deadline of their own, so the
+  // only safe fallback is measured from their own release time: still unsent a
+  // full day after the window they were waiting for opened.
   const nowIso = new Date().toISOString();
-  const HARD_CEILING_HOURS = 24;
-  const ceilingIso = new Date(Date.now() - HARD_CEILING_HOURS * 3_600_000).toISOString();
+  const GRACE_HOURS_AFTER_RELEASE = 24;
+  const staleReleaseIso = new Date(
+    Date.now() - GRACE_HOURS_AFTER_RELEASE * 3_600_000,
+  ).toISOString();
 
   const { data: expiredRows } = await admin
     .from('sms_outbox')
-    .select('id, template_name, expires_at, created_at')
+    .select('id, template_name, expires_at, created_at, release_after')
     .eq('status', 'queued')
-    .or(`expires_at.lte.${nowIso},created_at.lte.${ceilingIso}`)
+    .or(`expires_at.lte.${nowIso},release_after.lte.${staleReleaseIso}`)
     .limit(500);
 
   let canceled = 0;
   for (const row of expiredRows ?? []) {
-    const reason = row.expires_at && row.expires_at <= nowIso
+    const expired = !!row.expires_at && row.expires_at <= nowIso;
+    // Belt and braces: never cancel a row that is simply waiting for Monday.
+    if (!expired && (!row.release_after || row.release_after > staleReleaseIso)) continue;
+    const reason = expired
       ? `canceled: expired at ${row.expires_at}`
-      : `canceled: older than ${HARD_CEILING_HOURS}h (queued ${row.created_at})`;
+      : `canceled: still unsent ${GRACE_HOURS_AFTER_RELEASE}h after its release time (${row.release_after})`;
     const { error: cErr } = await admin.from('sms_outbox').update({
       status: 'canceled',
       last_error: reason,
@@ -63,6 +73,7 @@ Deno.serve(async (req) => {
     }).eq('id', row.id).eq('status', 'queued');
     if (!cErr) canceled++;
   }
+
 
   // Outside the window nothing else is sent — the rest stays parked.
   if (!isWindowOpen()) {
