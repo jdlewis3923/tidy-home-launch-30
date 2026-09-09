@@ -8,7 +8,10 @@ USING (key = 'site_live');
 REVOKE ALL ON FUNCTION public.current_user_admin() FROM public, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.current_user_admin() TO service_role;
 
-REVOKE ALL ON FUNCTION public.has_role(uuid, app_role) FROM public, anon, authenticated;
+-- Neutralized 2026-09-09: drizzle/migrations is authoritative and 0060 grants
+-- has_role to `authenticated` on purpose (RLS policies and admin RPCs call it).
+-- A replay of this REVOKE would break every admin RPC. See docs/MIGRATIONS.md.
+-- REVOKE ALL ON FUNCTION public.has_role(uuid, app_role) FROM public, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.has_role(uuid, app_role) TO service_role;
 
 REVOKE ALL ON FUNCTION public.is_contractor_job_eligible(uuid) FROM public, anon, authenticated;
