@@ -48,6 +48,36 @@ Deno.serve(async (req) => {
     });
   }
 
+  // ---- Expiry first: never deliver a message about a moment that has passed --
+  //
+  // A 15-minute add-on approval link parked at 18:20 on Saturday used to be
+  // delivered Monday at 08:00, pointing at a request that died 38 hours before.
+  // Anything past its expiry — or older than the hard ceiling, for rows queued
+  // before expiry existed — is canceled, with the reason kept for the record.
+  const nowIso = new Date().toISOString();
+  const HARD_CEILING_HOURS = 24;
+  const ceilingIso = new Date(Date.now() - HARD_CEILING_HOURS * 3_600_000).toISOString();
+
+  const { data: expiredRows } = await admin
+    .from('sms_outbox')
+    .select('id, template_name, expires_at, created_at')
+    .eq('status', 'queued')
+    .or(`expires_at.lte.${nowIso},created_at.lte.${ceilingIso}`)
+    .limit(500);
+
+  let canceled = 0;
+  for (const row of expiredRows ?? []) {
+    const reason = row.expires_at && row.expires_at <= nowIso
+      ? `canceled: expired at ${row.expires_at}`
+      : `canceled: older than ${HARD_CEILING_HOURS}h (queued ${row.created_at})`;
+    const { error: cErr } = await admin.from('sms_outbox').update({
+      status: 'canceled',
+      last_error: reason,
+      updated_at: nowIso,
+    }).eq('id', row.id).eq('status', 'queued');
+    if (!cErr) canceled++;
+  }
+
   const { data: rows, error } = await admin
     .from('sms_outbox')
     .select('*')
@@ -190,7 +220,7 @@ Deno.serve(async (req) => {
   }
 
   return jsonResponse({
-    ok: true, window_open: true, considered: rows?.length ?? 0, sent, failed, results,
+    ok: true, window_open: true, considered: rows?.length ?? 0, sent, failed, canceled, results,
     push_considered: pushRows?.length ?? 0, push_sent: pushSent, push_failed: pushFailed, push_results: pushResults,
   });
 });
