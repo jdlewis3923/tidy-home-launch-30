@@ -151,10 +151,17 @@ export default function OpenAlertsPanel() {
         <div className="border-t border-slate-200 px-4 py-3 text-[11px] text-slate-600">
           <p className="font-semibold text-slate-800">Also waiting</p>
           <ul className="mt-1 space-y-1">
-            {outbox.length > 0 && (
+            {waiting.length > 0 && (
               <li>
-                {outbox.length} text{outbox.length === 1 ? "" : "s"} queued or failed
-                {outbox[0]?.last_error ? ` — latest: ${outbox[0].last_error.slice(0, 120)}` : ""}
+                {waiting.length} text{waiting.length === 1 ? "" : "s"} queued or failed
+                {waiting[0]?.last_error ? ` — latest: ${waiting[0].last_error.slice(0, 120)}` : ""}
+              </li>
+            )}
+            {/* Canceled texts were never sent to anybody — they belong here, not nowhere. */}
+            {canceled.length > 0 && (
+              <li>
+                {canceled.length} text{canceled.length === 1 ? "" : "s"} canceled without being sent
+                {canceled[0]?.last_error ? ` — latest: ${canceled[0].last_error.slice(0, 120)}` : ""}
               </li>
             )}
             {stripeFailures.length > 0 && <li>{stripeFailures.length} payment events not processed</li>}
@@ -162,6 +169,7 @@ export default function OpenAlertsPanel() {
           </ul>
         </div>
       )}
+
     </div>
   );
 }
