@@ -498,6 +498,13 @@
       "when": 1788931469502,
       "tag": "0070_cron_acks_durable_http_evidence",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1788931683766,
+      "tag": "0071_cron_health_ack_regression_only",
+      "breakpoints": true
     }
   ]
 }
