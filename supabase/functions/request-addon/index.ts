@@ -186,12 +186,16 @@ Deno.serve(async (req) => {
   }
 
   // ---- who is the customer? ---------------------------------------------
+  // Resolved from the visit row already fetched above (by primary key), never
+  // from jobber_visit_id — that column is never populated any more, so this
+  // lookup used to return null and silently skip every customer notification.
   const { data: visitRow } = await admin
     .from('visits')
-    .select('user_id, service')
-    .eq('jobber_visit_id', job_id)
+    .select('user_id, service_type')
+    .eq('id', visit.id)
     .maybeSingle();
   const customerId = (visitRow as { user_id?: string } | null)?.user_id ?? null;
+
 
   const { data: reqRow, error: insErr } = await admin
     .from('addon_requests')
