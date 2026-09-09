@@ -199,7 +199,7 @@ const Neighbor = () => {
         {/* ── HERO: full-bleed photograph ───────────────────────────────── */}
         <section className="relative isolate min-h-[82svh] flex flex-col justify-end overflow-hidden">
           <picture>
-            <source media="(max-width: 767px)" srcSet={heroMobileAsset.url} type="image/jpeg" />
+            <source media="(max-width: 767px)" srcSet={heroMobileAsset.url} type="image/png" />
             <img
               src={heroAsset.url}
               alt="A landscaped Miami home entrance with palm trees at sunset"
