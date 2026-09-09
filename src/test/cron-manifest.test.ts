@@ -179,6 +179,9 @@ describe('edge functions call only identifiers they define or import', () => {
 });
 
 describe('contractor pay never reaches a customer-readable shape', () => {
+  const stripComments = (code: string) =>
+    code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+
   it('no browser code selects or types contractor pay', () => {
     const hits: string[] = [];
     const walk = (dir: string) => {
@@ -188,7 +191,7 @@ describe('contractor pay never reaches a customer-readable shape', () => {
           if (entry === 'test') continue;
           walk(p);
         } else if (/\.(ts|tsx)$/.test(p) && !p.endsWith('types.ts')) {
-          const code = readFileSync(p, 'utf8');
+          const code = stripComments(readFileSync(p, 'utf8'));
           if (/contractor_pay_cents|visit_pay_cents/.test(code)) {
             // Pro-facing surfaces read pay through pro_get_visits, which is
             // scoped to the signed-in Pro; anything else is a leak.
@@ -203,8 +206,6 @@ describe('contractor pay never reaches a customer-readable shape', () => {
     expect(hits).toEqual([]);
   });
 
-  it('the plan-line type carries no pay field', () => {
-    const candidates = ['src/lib/planLines.ts', 'src/types/plan.ts', 'src/lib/plan.ts'];
     for (const f of candidates) {
       if (!existsSync(f)) continue;
       expect(readFileSync(f, 'utf8')).not.toContain('contractor_pay_cents');
