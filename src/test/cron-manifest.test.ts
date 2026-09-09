@@ -206,7 +206,10 @@ describe('contractor pay never reaches a customer-readable shape', () => {
     expect(hits).toEqual([]);
   });
 
+  it('the plan-line type carries no pay field', () => {
+    const candidates = ['src/lib/planLines.ts', 'src/types/plan.ts', 'src/lib/plan.ts'];
     for (const f of candidates) {
+
       if (!existsSync(f)) continue;
       expect(readFileSync(f, 'utf8')).not.toContain('contractor_pay_cents');
     }
