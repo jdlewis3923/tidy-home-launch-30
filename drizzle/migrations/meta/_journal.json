@@ -519,6 +519,62 @@
       "when": 1788932711358,
       "tag": "0073_rate_limit_public_endpoints",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1788933624046,
+      "tag": "0074_cron_marker_probe",
+      "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1788933715241,
+      "tag": "0075_cron_manifest_hourly_and_diff",
+      "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1788933740868,
+      "tag": "0076_cron_social_posts_publisher_schedule",
+      "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1788933756486,
+      "tag": "0077_cron_sms_outbox_release_schedule",
+      "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1788933772212,
+      "tag": "0078_cron_kpi_realtime_schedule",
+      "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1788933786262,
+      "tag": "0079_cron_social_launch_publisher_schedule",
+      "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1788933803712,
+      "tag": "0080_retire_inert_jobber_addon_scan_schedule",
+      "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1788934165923,
+      "tag": "0081_revoke_anon_payout_weeks",
+      "breakpoints": true
     }
   ]
 }

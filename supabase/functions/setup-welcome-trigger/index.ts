@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — One-time setup helper for the welcome_signup DB trigger.
 //
 // The handle_welcome_signup trigger needs the SUPABASE_SERVICE_ROLE_KEY

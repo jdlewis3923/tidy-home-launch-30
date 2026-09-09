@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Twilio Delivery Status Callback
 //
 // Twilio POSTs form-encoded delivery receipts here for every outbound SMS on

@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Stub: generates a combined PDF (signed ICA + onboarding packet + Schedule A)
 // for a given contractor. Returns 200 with a placeholder until source docs flow in.
 

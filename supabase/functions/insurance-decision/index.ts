@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // insurance-decision — ADMIN ONLY.
 //
 // Approve / request update / reject / waive a contractor's General Liability

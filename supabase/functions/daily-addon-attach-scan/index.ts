@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // daily-addon-attach-scan — DECOMMISSIONED (Sep 2026).
 //
 // The only source of visits this scanner had was Jobber's GraphQL API, which

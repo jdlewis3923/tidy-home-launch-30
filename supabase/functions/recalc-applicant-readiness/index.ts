@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // recalc-applicant-readiness — admin-only.
 // Reads visits (the live source of truth since Jobber was decommissioned) plus
 // visit_ratings + google_reviews + complaints + escalations for a contractor

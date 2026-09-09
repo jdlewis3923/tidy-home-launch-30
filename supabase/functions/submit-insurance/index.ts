@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // submit-insurance — PUBLIC endpoint used by the Insurance step on /apply and by
 // a returning contractor uploading proof of coverage.
 //

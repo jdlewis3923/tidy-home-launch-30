@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Applicant Applied Trigger (public)
 //
 // Called by submit-application right after the applicants row is inserted.

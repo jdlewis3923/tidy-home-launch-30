@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — durable consent record (Terms assent + SMS/TCPA consent).
 //
 // Stores the exact wording the customer agreed to, the version, the

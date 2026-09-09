@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 /**
  * Returns ONLY the distinct dollar figures found in the live chatbot knowledge
  * row — the same row both readers pick with ORDER BY updated_at DESC LIMIT 1.

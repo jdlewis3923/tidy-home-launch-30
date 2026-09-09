@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — shared cron auth helper.
 //
 // pg_cron jobs must not embed any credential in cron.job.command, so they read

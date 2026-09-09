@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — shared service-role / admin authorization.
 //
 // NEVER decode a JWT and trust its claims. This repo is public and the anon

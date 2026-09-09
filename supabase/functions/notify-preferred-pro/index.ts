@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — A1. A customer named a Pro as their preferred Pro.
 //
 // Fired by the public.on_preferred_pro_changed trigger (pg_net), never by a

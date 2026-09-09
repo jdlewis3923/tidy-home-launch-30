@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Admin-only review bonus actions: approve / reject / reassign / bulk_approve.
 // Server enforces qualification (5 stars, reviewer not excluded) and the
 // monthly per-Pro cap (no rollover) from app_settings.review_bonus. Never

@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // insurance-expiry-check — daily cron (13:00 UTC).
 //
 // Continuing compliance AFTER onboarding. For every VERIFIED contractor policy:

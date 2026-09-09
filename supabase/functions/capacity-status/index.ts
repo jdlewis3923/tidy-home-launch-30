@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — capacity-status. Admin-only read of live capacity + hiring pressure.
 //
 // Returns one result per service plus the worst one, so the dashboard banner

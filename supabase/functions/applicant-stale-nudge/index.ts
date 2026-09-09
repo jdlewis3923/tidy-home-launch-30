@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Applicant Stale Nudge (cron, daily)
 //
 // Scans applicants whose stage hasn't changed in N days and is not 'active'

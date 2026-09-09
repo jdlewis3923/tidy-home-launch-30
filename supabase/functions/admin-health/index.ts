@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Phase 8 admin-health endpoint.
 //
 // Aggregates the last 24h of integration_logs into a per-source summary so

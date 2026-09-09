@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Customer skips a single upcoming visit.
 //
 // Auth-gated. Ownership of the visit is verified against the JWT user_id.

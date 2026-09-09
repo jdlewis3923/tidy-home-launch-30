@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — B3 timeout sweeper. A walkaround add-on request that nobody answers
 // within 15 minutes expires on its own: nothing is charged and the Pro is told
 // to do the booked scope only. Silence is a decline, and the Pro is never left

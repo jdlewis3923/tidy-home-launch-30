@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — One-shot car add-on restructure + Stripe duplicate cleanup.
 //
 // Admin (or service-role) only. Two modes:

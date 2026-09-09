@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — One-shot Stripe catalog setup + webhook auto-provisioning
 //
 // Admin-only. Backfills the 26 live Stripe Price IDs (already created in

@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Weekly Review Bonus digest + promotion/expiry sweep.
 //
 // Runs Mondays 8:00 AM ET (12:00 UTC) via pg_cron → x-cron-key auth.

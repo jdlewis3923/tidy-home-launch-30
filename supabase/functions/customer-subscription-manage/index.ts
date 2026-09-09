@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Customer subscription self-service (cancel / undo cancel / pause / resume)
 //
 // Auth-gated. The caller's subscription is always resolved from the verified

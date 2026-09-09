@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Training quiz submission (Phase 3).
 // Authoritative server-side scoring. Sets applicants.training_passed = true on pass.
 // On no_show counter increment, the admin can manually trigger; this endpoint

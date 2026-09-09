@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // E2E test for the documenso-webhook edge function.
 //
 // Seeds a fake applicant, posts a `document.completed` event referencing the

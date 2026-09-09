@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tiny public endpoint that returns the captured Meta Pixel ID so the
 // client-side Pixel snippet can self-configure. Vault is server-only,
 // so the SPA cannot read it directly — this exposes only the pixel id

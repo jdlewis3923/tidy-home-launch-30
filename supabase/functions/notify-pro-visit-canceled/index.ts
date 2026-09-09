@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — producer: "a job you had today is off".
 //
 // Dispatched by the public.visits_notify_pro_canceled_today trigger the moment a

@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — per-identifier rate limiting for the unauthenticated edge functions.
 //
 // The Supabase gateway rate limits AUTH endpoints only (sign-up/sign-in/OTP);

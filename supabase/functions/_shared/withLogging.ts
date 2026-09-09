@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Edge function instrumentation helper.
 //
 // Wraps any async work with timing + structured logging into the

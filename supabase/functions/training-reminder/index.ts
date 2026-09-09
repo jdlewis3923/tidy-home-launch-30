@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Training Reminder (cron, daily)
 //
 // Fires a 24-hour-before reminder email to applicants whose training is

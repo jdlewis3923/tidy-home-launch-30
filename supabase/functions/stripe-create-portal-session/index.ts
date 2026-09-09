@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Stripe Billing Portal Session
 //
 // Auth-gated. Looks up the user's stripe_customer_id from the most recent
