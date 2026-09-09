@@ -10,10 +10,14 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { withLogging } from "../_shared/withLogging.ts";
 import { resolveStripeCurrentPeriodEnd } from "../_shared/resolve-stripe-current-period-end.ts";
+import { stripeSecretKey } from "../_shared/stripe-mode.ts";
 
-const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
+// Mode-aware: in test mode this is STRIPE_TEST_SECRET_KEY. Reading
+// STRIPE_SECRET_KEY directly made cancel and pause 500 on a test-mode plan.
+const STRIPE_SECRET_KEY = stripeSecretKey();
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
 
 const MAX_PAUSE_DAYS = 60;
 
