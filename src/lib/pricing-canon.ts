@@ -152,7 +152,7 @@ export const SERVICE_QUANTITY_RULE: Record<CanonService, QuantityRule> = {
 export const SERVICE_NAMES: Record<CanonService, string> = {
   cleaning: 'House Cleaning',
   lawn: 'Lawn Care',
-  detailing: 'Shine Complete',
+  detailing: 'Car Care · Shine Complete',
 };
 
 /** Size labels, per service, in the customer's own words. */

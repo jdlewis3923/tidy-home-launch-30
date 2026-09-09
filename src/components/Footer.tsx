@@ -113,7 +113,7 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-primary-foreground/60">
               <li><Link to="/house-cleaning" className="hover:text-primary-foreground transition-colors">{t("House Cleaning Miami")}</Link></li>
               <li><Link to="/lawn-care" className="hover:text-primary-foreground transition-colors">{t("Lawn Care Miami")}</Link></li>
-              <li><Link to="/car-detailing" className="hover:text-primary-foreground transition-colors">{t("Shine Complete Miami")}</Link></li>
+              <li><Link to="/car-detailing" className="hover:text-primary-foreground transition-colors">{t("Car Care Miami")}</Link></li>
               <li><Link to="/bundle" className="hover:text-primary-foreground transition-colors">{t("Bundle & Save")}</Link></li>
               <li><a href="#pricing" className="hover:text-primary-foreground transition-colors">{t("Pricing")}</a></li>
               <li><Link to="/refer" className="hover:text-primary-foreground transition-colors">{t("Referral Program")}</Link></li>

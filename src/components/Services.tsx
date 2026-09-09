@@ -10,6 +10,7 @@ import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 const services = [
   {
     title: "House Cleaning",
+    subtitle: null as string | null,
     badge: "⭐ Most Popular",
     image: cleaningImg,
     lpHref: "/house-cleaning",
@@ -24,6 +25,7 @@ const services = [
   },
   {
     title: "Lawn Care",
+    subtitle: null as string | null,
     badge: null,
     image: lawnImg,
     lpHref: "/lawn-care",
@@ -37,7 +39,8 @@ const services = [
     accent: "border-t-success",
   },
   {
-    title: "Shine Complete",
+    title: "Car Care",
+    subtitle: "Shine Complete",
     badge: null,
     image: carImg,
     lpHref: "/car-detailing",
@@ -79,6 +82,7 @@ const Services = () => {
               </div>
               <div className="p-6 flex-1 flex flex-col">
                 <h3 className="text-xl font-bold text-foreground mb-1">{t(s.title)}</h3>
+                {s.subtitle && <p className="text-sm font-semibold text-muted-foreground mb-1">{t(s.subtitle)}</p>}
                 <p className="text-xs italic text-text-light mb-3">{t(s.anchor)}</p>
                 <div className="inline-flex gap-2 mb-4">
                   <span className="bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full">{t(s.priceMain)}</span>
