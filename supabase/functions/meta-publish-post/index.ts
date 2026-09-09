@@ -18,6 +18,8 @@
 // exists in our table before doing any work, and we never accept image
 // URLs / captions from the request body.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireServiceOrAdmin } from "../_shared/admin-auth.ts";
+import { isCronAuthorized } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -368,6 +370,14 @@ async function publishFacebookMultiPhoto(
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Authorization (audit item 6): knowing a post_id is NOT authorization. This
+  // function publishes to live Facebook/Instagram, so the caller must present
+  // the cron service credential or be a signed-in admin.
+  if (!(await isCronAuthorized(req))) {
+    const auth = await requireServiceOrAdmin(req);
+    if (!auth.ok) return json({ error: auth.error }, auth.status);
+  }
 
   let body: { post_id?: string } = {};
   try {
