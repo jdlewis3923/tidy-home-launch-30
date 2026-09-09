@@ -35,13 +35,55 @@ async function vaultServiceKey(): Promise<string | null> {
   }
 }
 
+/**
+ * One row per cron invocation, written from the receiving side.
+ *
+ * This is the only durable proof that a scheduled job reached its function: the
+ * pg_net response table keeps a single live row, cannot be indexed by us, and a
+ * lookup seq-scans gigabytes. A refused call (401) is recorded too — that is
+ * exactly the failure that used to leave the job showing green.
+ */
+async function recordCronAck(req: Request, authorized: boolean): Promise<void> {
+  if (!SUPABASE_URL || !SERVICE_KEY) return;
+  try {
+    const fn = new URL(req.url).pathname.split('/').filter(Boolean).pop() ?? 'unknown';
+    await fetch(`${SUPABASE_URL}/rest/v1/cron_acks`, {
+      method: 'POST',
+      headers: {
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({
+        job_name: req.headers.get('x-cron-job') ?? fn,
+        fn,
+        authorized,
+      }),
+    });
+  } catch (e) {
+    console.error('[cron-auth] ack write failed', (e as Error).message);
+  }
+}
+
 /** True when the caller presented the cron service credential. */
 export async function isCronAuthorized(req: Request): Promise<boolean> {
   const presented =
     req.headers.get('x-cron-key') ??
     (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
-  if (!presented) return false;
-  if (SERVICE_KEY && safeEquals(presented, SERVICE_KEY)) return true;
-  const vaultKey = await vaultServiceKey();
-  return !!vaultKey && safeEquals(presented, vaultKey);
+
+  let ok = false;
+  if (presented) {
+    if (SERVICE_KEY && safeEquals(presented, SERVICE_KEY)) ok = true;
+    else {
+      const vaultKey = await vaultServiceKey();
+      ok = !!vaultKey && safeEquals(presented, vaultKey);
+    }
+  }
+
+  // Only record calls that look like scheduled dispatches, so ad-hoc probes do
+  // not overwrite a job's real last-seen state.
+  if (req.headers.get('x-cron-job') || presented) await recordCronAck(req, ok);
+  return ok;
 }
+
