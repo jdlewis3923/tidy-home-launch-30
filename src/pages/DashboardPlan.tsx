@@ -191,8 +191,13 @@ export default function DashboardPlan() {
     if (step === 1) return state.services.length > 0;
     if (step === 2) return state.services.every(s => !!state.frequencies[s]);
     if (step === 3) {
+      // Square footage is required for cleaning and lawn: it is what triggers
+      // the surcharge, and the server now rejects a line without it.
+      if (state.services.includes('cleaning') && !(state.homeSqFt && state.homeSqFt > 0)) return false;
+      if (state.services.includes('lawn') && !(state.turfSqFt && state.turfSqFt > 0)) return false;
       return state.services.every(svc => !!sizeFor(state, svc));
     }
+
     if (step === 4) return !!(state.firstName && state.lastName && state.email && state.password && state.password.length >= 8 && state.phone && state.address && state.city && state.zip);
     return true;
   };
