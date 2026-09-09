@@ -170,6 +170,26 @@ export function sizeForLawn(choice: LawnChoice | null): SizeSelection | null {
   return choice === 'small' ? 1 : choice === 'standard' ? 2 : 3;
 }
 
+/**
+ * Lawn size once the measured turf area is in play. The by-eye answer and the
+ * turf figure encode the same bands; when they disagree the LARGER band wins,
+ * which is exactly what the server does — so the price shown is the price
+ * charged and a "small yard" answer can't buy a big yard.
+ */
+export function sizeForLawnReconciled(
+  choice: LawnChoice | null,
+  turfSqFt: number | null,
+): SizeSelection | null {
+  const fromChoice = sizeForLawn(choice);
+  const fromTurf = turfSqFt ? sizeFromTurfSqFt(turfSqFt) : null;
+  if (fromChoice === null && fromTurf === null) return null;
+  if (fromChoice === 'quote' || fromTurf === 'quote') return 'quote';
+  return Math.max(
+    typeof fromChoice === 'number' ? fromChoice : 0,
+    typeof fromTurf === 'number' ? fromTurf : 0,
+  ) as SizeSelection;
+}
+
 /** Car care size from what they drive. */
 export function sizeForCarCare(vehicleClass: VehicleClass | null): SizeSelection | null {
   if (!vehicleClass) return null;
@@ -179,9 +199,10 @@ export function sizeForCarCare(vehicleClass: VehicleClass | null): SizeSelection
 /** The size in play for a service, given the current answers. */
 export function sizeFor(state: ConfigState, service: ServiceType): SizeSelection | null {
   if (service === 'cleaning') return sizeForCleaning(state.bedrooms, state.bathrooms);
-  if (service === 'lawn') return sizeForLawn(state.lawnChoice);
+  if (service === 'lawn') return sizeForLawnReconciled(state.lawnChoice, state.turfSqFt);
   return sizeForCarCare(state.vehicleClass);
 }
+
 
 /**
  * True when the plan can't be booked online: any service above size 3, a home
