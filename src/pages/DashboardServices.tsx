@@ -643,11 +643,8 @@ export default function DashboardServices() {
                       <button
                         key={s}
                         type="button"
-                        onClick={() => {
-                          setNewService(s);
-                          setNewSize(1);
-                          setNewFrequency(SERVICE_UNIT[s] === 'per_month' ? 'monthly' : 'biweekly');
-                        }}
+                        onClick={() => resetNewService(s)}
+
                         className={`rounded-xl border-2 px-4 py-2 text-sm font-semibold transition ${
                           newService === s
                             ? 'border-ink bg-ink text-white'
