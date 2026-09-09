@@ -161,7 +161,9 @@ Deno.serve(async (req) => {
 
   return jsonResponse({
     ok: true,
+    scheduler_paused: paused,
     jobs_total: jobs.length,
+
     stale_count: stale.length,
     alerts_opened: alerted,
     alerts_resolved: resolved,
