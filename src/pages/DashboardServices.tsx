@@ -661,34 +661,133 @@ export default function DashboardServices() {
 
                   {newService && (
                     <div className="mt-5 space-y-5">
-                      <div>
-                        <h3 className="text-sm font-semibold text-ink-soft">{t('Size')}</h3>
-                        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                          {SIZES.map((size) => (
-                            <button
-                              key={size}
-                              type="button"
-                              onClick={() => setNewSize(size)}
-                              className={`rounded-xl border-2 p-3 text-left transition ${
-                                newSize === size
-                                  ? 'border-ink bg-ink text-white'
-                                  : 'border-[hsl(var(--hairline))] bg-white hover:border-ink/40'
-                              }`}
-                            >
-                              <div className="text-sm font-semibold">{SIZE_LABELS[newService][size]}</div>
-                              <div className={`text-[11px] ${newSize === size ? 'text-white/70' : 'text-ink-faint'}`}>
-                                {SIZE_HELPERS[newService][size]}
-                              </div>
-                              <div className="mt-1 text-sm font-bold tabular-nums">
-                                ${SIZE_PRICES[newService][size]}
-                                <span className="text-[11px] font-medium">
-                                  {SERVICE_UNIT[newService] === 'per_month' ? t('/mo') : t('/visit')}
-                                </span>
-                              </div>
-                            </button>
-                          ))}
+                      {newService === 'cleaning' && (
+                        <div className="space-y-3">
+                          <h3 className="text-sm font-semibold text-ink-soft">{t('Your home')}</h3>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="block text-xs font-medium text-ink-soft">
+                              {t('Bedrooms')} *
+                              <select
+                                value={newBedrooms}
+                                onChange={(e) => setNewBedrooms(e.target.value)}
+                                className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
+                              >
+                                <option value="">{t('Select')}</option>
+                                {['1', '2', '3', '4', '5+'].map((v) => (
+                                  <option key={v} value={v}>{v}</option>
+                                ))}
+                              </select>
+                            </label>
+                            <label className="block text-xs font-medium text-ink-soft">
+                              {t('Bathrooms')} *
+                              <select
+                                value={newBathrooms}
+                                onChange={(e) => setNewBathrooms(e.target.value)}
+                                className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
+                              >
+                                <option value="">{t('Select')}</option>
+                                {['1', '1.5', '2', '2.5', '3', '3.5', '4+'].map((v) => (
+                                  <option key={v} value={v}>{v}</option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
+                          <label className="block text-xs font-medium text-ink-soft">
+                            {t('Home square footage')} *
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={0}
+                              step={50}
+                              value={newHomeSqFt}
+                              onChange={(e) => setNewHomeSqFt(e.target.value)}
+                              placeholder="e.g. 1800"
+                              className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
+                            />
+                          </label>
+                          <p className="text-[11px] text-ink-faint">
+                            {t('Interior living space. 2,501–4,000 sq ft adds $60 a visit. Above 4,000 we quote by hand.')}
+                          </p>
                         </div>
-                      </div>
+                      )}
+
+                      {newService === 'lawn' && (
+                        <div className="space-y-3">
+                          <h3 className="text-sm font-semibold text-ink-soft">{t('Your yard')}</h3>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {(['small', 'standard', 'large', 'over'] as LawnChoice[]).map((choice) => (
+                              <button
+                                key={choice}
+                                type="button"
+                                onClick={() => setNewLawnChoice(choice)}
+                                className={`min-h-[44px] rounded-xl border-2 p-3 text-left text-sm font-semibold transition ${
+                                  newLawnChoice === choice
+                                    ? 'border-ink bg-ink text-white'
+                                    : 'border-[hsl(var(--hairline))] bg-white text-ink hover:border-ink/40'
+                                }`}
+                              >
+                                {lawnChoiceLabels[choice]}
+                              </button>
+                            ))}
+                          </div>
+                          <label className="block text-xs font-medium text-ink-soft">
+                            {t('Mowable turf square footage')} *
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={0}
+                              step={50}
+                              value={newTurfSqFt}
+                              onChange={(e) => setNewTurfSqFt(e.target.value)}
+                              placeholder="e.g. 3500"
+                              className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
+                            />
+                          </label>
+                          <p className="text-[11px] text-ink-faint">
+                            {t('Grass only. 4,001–7,500 sq ft adds $30 a visit. Above 7,500 we quote by hand.')}
+                          </p>
+                        </div>
+                      )}
+
+                      {newService === 'detailing' && (
+                        <label className="block text-xs font-medium text-ink-soft">
+                          {t('What do you drive?')} *
+                          <select
+                            value={newVehicleClass ?? ''}
+                            onChange={(e) => setNewVehicleClass((e.target.value || null) as VehicleClass | null)}
+                            className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
+                          >
+                            <option value="">{t('Select')}</option>
+                            {(Object.keys(vehicleClassLabels) as VehicleClass[]).map((vc) => (
+                              <option key={vc} value={vc}>{vehicleClassLabels[vc]}</option>
+                            ))}
+                          </select>
+                        </label>
+                      )}
+
+                      {newSize && !newNeedsQuote && (
+                        <div className="rounded-xl border border-[hsl(var(--hairline))] bg-cream p-3">
+                          <div className="text-sm font-semibold text-ink">
+                            {SIZE_LABELS[newService][newSize]}
+                          </div>
+                          <div className="text-[11px] text-ink-faint">
+                            {SIZE_HELPERS[newService][newSize]}
+                          </div>
+                          <div className="mt-1 text-sm font-bold tabular-nums text-ink">
+                            ${SIZE_PRICES[newService][newSize]}
+                            <span className="text-[11px] font-medium">
+                              {SERVICE_UNIT[newService] === 'per_month' ? t('/mo') : t('/visit')}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {newNeedsQuote && (
+                        <p className="rounded-xl border border-[hsl(var(--hairline))] bg-cream p-3 text-[11px] text-ink-soft">
+                          {t('This one we quote by hand. Message us and we’ll price it for you.')}
+                        </p>
+                      )}
+
 
                       {SERVICE_UNIT[newService] === 'per_visit' && (
                         <div>
