@@ -85,9 +85,12 @@ export default function OpenAlertsPanel() {
   const outbox = data?.sms_outbox ?? [];
   const stripeFailures = data?.stripe_failures ?? [];
   const smsFailures = data?.sms_delivery_failures ?? [];
+  const queryErrors = data?.errors ?? [];
+  const canceled = outbox.filter((o) => o.status === "canceled");
+  const waiting = outbox.filter((o) => o.status !== "canceled");
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className={`overflow-hidden rounded-xl border shadow-sm ${queryErrors.length > 0 ? "border-rose-300 bg-rose-50" : "border-slate-200 bg-white"}`}>
       <div className="flex items-center justify-between bg-slate-100 px-4 py-3">
         <p className="text-xs font-bold uppercase tracking-wide text-slate-600">
           Open failures ({alerts.length})
@@ -102,11 +105,24 @@ export default function OpenAlertsPanel() {
 
       {error && <p className="px-4 py-3 text-xs text-rose-700">{error}</p>}
 
-      {!error && alerts.length === 0 && !loading && (
+      {/* A check that could not run is not a clean bill of health. */}
+      {queryErrors.length > 0 && (
+        <div className="border-b border-rose-200 px-4 py-3 text-xs text-rose-800">
+          <p className="font-semibold">Some checks could not run — this list is incomplete</p>
+          <ul className="mt-1 space-y-1">
+            {queryErrors.map((e, i) => (
+              <li key={i}>{e}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {!error && queryErrors.length === 0 && alerts.length === 0 && !loading && (
         <p className="px-4 py-4 text-xs text-slate-600">
           Nothing unresolved right now.
         </p>
       )}
+
 
       {alerts.length > 0 && (
         <table className="w-full text-sm">
