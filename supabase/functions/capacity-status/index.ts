@@ -6,8 +6,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { computeCapacityFromDb } from '../_shared/capacity.ts';
-import {
 import { enforceRateLimit } from '../_shared/rate-limit.ts';
+import {
   BILLABLE_HOURS_PER_PRO_PER_MONTH,
   COMFORT_CEILING,
   HIRING_CYCLE_DAYS,
