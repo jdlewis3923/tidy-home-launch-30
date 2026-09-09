@@ -28,12 +28,24 @@ import {
   SIZE_LABELS,
   SIZE_HELPERS,
   SIZE_PRICES,
-  SIZES,
   SERVICE_UNIT,
+  CLEANING_SURCHARGE,
+  LAWN_SURCHARGE,
   type CanonService,
   type CanonSize,
 } from '@/lib/pricing-canon';
-import type { Frequency, ServiceType } from '@/lib/dashboard-pricing';
+import {
+  sizeForCleaning,
+  sizeForLawnReconciled,
+  sizeForCarCare,
+  lawnChoiceLabels,
+  vehicleClassLabels,
+  type Frequency,
+  type ServiceType,
+  type LawnChoice,
+  type VehicleClass,
+} from '@/lib/dashboard-pricing';
+
 import { isServiceAvailable } from '@/lib/service-availability';
 
 type CatalogRow = {
