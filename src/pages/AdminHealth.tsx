@@ -334,9 +334,15 @@ export default function AdminHealth() {
           </div>
         )}
 
+        {/* Anything that failed and is still unresolved, read from admin_alerts. */}
+        <div className="mt-6">
+          <OpenAlertsPanel />
+        </div>
+
         <div className="mt-6">
           <ReviewsThisWeekCard />
         </div>
+
 
         <div className="mt-6">
           <JobberStubCallers />
