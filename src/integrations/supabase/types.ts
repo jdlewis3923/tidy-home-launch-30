@@ -4625,6 +4625,7 @@ export type Database = {
           created_at: string
           customer_id: string | null
           excluded_from_average: boolean
+          followup_token: string | null
           google_prompted: boolean
           id: string
           job_id: string | null
@@ -4639,6 +4640,7 @@ export type Database = {
           stars: number | null
           user_agent: string | null
           user_id: string | null
+          verified: boolean
           visit_id: string | null
         }
         Insert: {
@@ -4650,6 +4652,7 @@ export type Database = {
           created_at?: string
           customer_id?: string | null
           excluded_from_average?: boolean
+          followup_token?: string | null
           google_prompted?: boolean
           id?: string
           job_id?: string | null
@@ -4664,6 +4667,7 @@ export type Database = {
           stars?: number | null
           user_agent?: string | null
           user_id?: string | null
+          verified?: boolean
           visit_id?: string | null
         }
         Update: {
@@ -4675,6 +4679,7 @@ export type Database = {
           created_at?: string
           customer_id?: string | null
           excluded_from_average?: boolean
+          followup_token?: string | null
           google_prompted?: boolean
           id?: string
           job_id?: string | null
@@ -4689,6 +4694,7 @@ export type Database = {
           stars?: number | null
           user_agent?: string | null
           user_id?: string | null
+          verified?: boolean
           visit_id?: string | null
         }
         Relationships: []
@@ -4759,6 +4765,7 @@ export type Database = {
           paid_in_full_reason: string | null
           parking_notes: string | null
           pet_notes: string | null
+          rate_token: string | null
           scheduled_end: string | null
           scheduled_start: string | null
           service: Database["public"]["Enums"]["service_type"]
@@ -4796,6 +4803,7 @@ export type Database = {
           paid_in_full_reason?: string | null
           parking_notes?: string | null
           pet_notes?: string | null
+          rate_token?: string | null
           scheduled_end?: string | null
           scheduled_start?: string | null
           service: Database["public"]["Enums"]["service_type"]
@@ -4833,6 +4841,7 @@ export type Database = {
           paid_in_full_reason?: string | null
           parking_notes?: string | null
           pet_notes?: string | null
+          rate_token?: string | null
           scheduled_end?: string | null
           scheduled_start?: string | null
           service?: Database["public"]["Enums"]["service_type"]
