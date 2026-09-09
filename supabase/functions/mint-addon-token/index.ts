@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Mint single-use magic-link token for /add/{token}.
 //
 // Service-role only. Used by send-addon-attach-sms.

@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Manual Background Check decision (admin-only)
 //
 // Justin clicks Mark CLEAR / CONSIDER / FAIL on /admin/applicants.

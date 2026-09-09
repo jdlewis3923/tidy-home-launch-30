@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 /**
  * kpi-alerts — evaluates every enabled alert_rule against the newest
  * kpi_snapshot and writes alert_event rows.

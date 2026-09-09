@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — verify-checkout-wiring. Proves the booking flow against LIVE Stripe.
 //
 // Checks, in order:

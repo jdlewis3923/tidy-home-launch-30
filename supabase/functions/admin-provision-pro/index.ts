@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — admin action: invite a Pro.
 //
 // Sends an invitation email so the Pro sets their own password; links the auth

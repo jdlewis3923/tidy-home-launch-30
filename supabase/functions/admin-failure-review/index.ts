@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — admin-failure-review.
 //
 // The reader that admin_alerts, stripe_events and sms_delivery_events never

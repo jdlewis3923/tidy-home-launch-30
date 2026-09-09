@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Equipment photo review (Phase 3, admin only).
 // POST { photo_id, decision: 'approved'|'rejected', reason?, notes? }
 // On every decision, recomputes whether the applicant has at least one

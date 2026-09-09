@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Pro push subscription endpoint.
 //
 // Three actions, all for the calling signed-in user only:

@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Create Stripe Subscription with embedded Payment Element
 //
 // Creates the Stripe Customer + Subscription server-side and returns the latest

@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — early-access lead capture (server-side write, source of truth).
 //
 // The website popup used to POST to Zapier with mode:"no-cors", which made the

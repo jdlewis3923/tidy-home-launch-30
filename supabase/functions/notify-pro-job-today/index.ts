@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — producer: "you have work today".
 //
 // Runs once each morning at 08:00 ET, before any visit starts. One notification

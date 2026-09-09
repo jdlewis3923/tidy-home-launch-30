@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 /**
  * kpi-rollup — computes the whole KPI picture and writes ONE kpi_snapshot row.
  *

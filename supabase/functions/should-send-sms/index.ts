@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Returns whether an SMS may be sent to a customer.
 //
 // Inputs: { user_id: uuid, sms_type: SmsType }

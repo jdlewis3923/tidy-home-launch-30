@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Returns whether PV4 review SMS may fire (90-day cap).
 // Updates profiles.last_pv4_review_request_at when allow=true and
 // commit=true (caller should pass commit=true after SMS actually sent).

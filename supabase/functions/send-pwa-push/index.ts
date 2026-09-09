@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Web Push helper (Phase A)
 //
 // Sends a Web Push notification to all of a user's registered subscriptions

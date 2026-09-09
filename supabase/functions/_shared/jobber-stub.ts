@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — inert Jobber stub helper (Sep 2026 decommission).
 //
 // Jobber is gone: dispatch is the Tidy Pro Portal. The former Jobber endpoints

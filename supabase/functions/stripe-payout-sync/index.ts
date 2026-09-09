@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // stripe-payout-sync — Stripe webhook listener for payout events. Captures the
 // payout amount, routes it to the connected contractor via the Stripe account
 // metadata.contractor_id, and stamps stripe_payouts.

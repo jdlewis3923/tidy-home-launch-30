@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Public visit rating intake (backs jointidy.co/rate).
 //
 // SECURITY MODEL (audit item 1)

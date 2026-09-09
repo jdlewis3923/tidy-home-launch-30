@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 /**
  * compute-kpi — Computes the ~14 DB-sourced KPIs and writes snapshots.
  *

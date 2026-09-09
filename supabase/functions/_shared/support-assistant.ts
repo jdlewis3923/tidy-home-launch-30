@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Shared assistant for SMS + Web support inbox.
 // Reuses the chatbot_knowledge base. Returns reply + self-reported confidence.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";

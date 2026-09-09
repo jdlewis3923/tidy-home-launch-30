@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Stripe Connect webhook receiver
 //
 // Listens for Connect platform events. Primary event we care about:

@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Web chat ingest endpoint. Public — no JWT required.
 // Same assistant + admin email path as SMS, but reply returned inline.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";

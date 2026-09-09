@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 /**
  * kpi-vapid-bootstrap — One-time generator for VAPID push keys.
  *

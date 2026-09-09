@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — dashboard support request capture (server-side write).
 //
 // Requires a signed-in caller: the row is always attributed to the JWT's

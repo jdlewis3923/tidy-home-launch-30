@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // coi-expiry-check — daily cron. Finds Pros whose COI is expiring within 30 days
 // or already expired, fires Brevo COI-EXPIRING reminder, and flips status to
 // expired when past the date. Best-effort.

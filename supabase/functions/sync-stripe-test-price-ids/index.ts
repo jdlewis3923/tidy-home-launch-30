@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Fills stripe_catalog.stripe_price_id_test from the Stripe TEST account.
 //
 // The catalog stores live price ids. A test-mode booking needs the test twin of

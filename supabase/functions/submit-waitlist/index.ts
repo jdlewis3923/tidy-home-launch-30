@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — waitlist capture (server-side write).
 //
 // The client cannot INSERT into public.waitlist (no anon grant, by design:

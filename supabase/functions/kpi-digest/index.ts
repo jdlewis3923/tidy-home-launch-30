@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 /**
  * kpi-digest — Sends scheduled KPI digest emails to admins.
  *

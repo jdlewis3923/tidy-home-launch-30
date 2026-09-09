@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Pro Intake & Kit Order submission notifier
 //
 // POST { token: string }

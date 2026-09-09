@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Backfill Stripe Customer metadata (admin-gated, idempotent)
 //
 // Walks all local subscriptions with a stripe_customer_id and ensures

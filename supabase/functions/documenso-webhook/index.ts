@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Documenso webhook receiver (signature-verified, fail-closed)
 //
 // Each applicant signs ONE bundled envelope (cleaning | lawn | detail).

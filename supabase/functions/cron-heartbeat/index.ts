@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — cron-heartbeat (cron, hourly at :07).
 //
 // Reads public.admin_cron_health() — every job in cron.job, not the three that

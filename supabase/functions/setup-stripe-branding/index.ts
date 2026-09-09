@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Stripe Branding & Config Sync (admin-gated, idempotent)
 //
 // Drives all Stripe Dashboard settings we can drive via API:

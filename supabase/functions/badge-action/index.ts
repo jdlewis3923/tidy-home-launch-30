@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 /**
  * badge-action — admin-only lifecycle actions for Pro badges.
  *

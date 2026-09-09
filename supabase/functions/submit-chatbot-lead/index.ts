@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — chatbot callback lead capture (server-side write).
 //
 // Mirrors submit-waitlist: no anon INSERT grant on public.chatbot_leads,

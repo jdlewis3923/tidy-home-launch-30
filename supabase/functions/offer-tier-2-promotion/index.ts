@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // offer-tier-2-promotion
 // Admin-triggered: marks an applicant's tier_readiness_status='offered',
 // fires the Brevo T2-OFFER email, logs an onboarding_event.

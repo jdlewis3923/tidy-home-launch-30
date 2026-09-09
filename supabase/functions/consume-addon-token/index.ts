@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Validates a /add/{token} token and returns a Supabase magic-link URL
 // the browser can navigate to in order to log the customer in.
 //

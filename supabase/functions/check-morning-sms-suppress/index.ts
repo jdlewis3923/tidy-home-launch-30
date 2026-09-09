@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Decides whether the 8:30am morning confirmation SMS should fire
 // for a given Jobber visit.
 //

@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Stripe Create Checkout Session
 //
 // Reads the flat CheckoutInputSchema from the client (translation lives in

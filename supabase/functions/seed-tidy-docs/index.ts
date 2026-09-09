@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Seed 21 contractor PDFs into company_documents (admin-only, idempotent).
 //
 // Inserts placeholder rows into `company_documents` for each known Tidy

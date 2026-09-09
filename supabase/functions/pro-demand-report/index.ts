@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — A5. Weekly high-demand report.
 //
 // A Pro crossing the "high demand" line is a hiring signal, not a customer

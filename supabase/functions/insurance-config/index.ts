@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // insurance-config — PUBLIC read-only endpoint.
 //
 // /apply is an anonymous page, so the non-secret insurance configuration is
