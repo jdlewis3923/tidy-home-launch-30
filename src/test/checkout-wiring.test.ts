@@ -229,8 +229,20 @@ describe('5. the standalone Car Wash Add-On is retired', () => {
 describe('6. the plan snapshot and the founding promise are persisted, not couponed', () => {
   it('checkout writes service, size_tier, cadence and surcharge_applied', () => {
     const src = read('supabase/functions/stripe-create-checkout/index.ts');
-    for (const field of ['size_tier', 'cadence', 'surcharge_applied', 'contractor_pay_cents']) {
+    for (const field of ['size_tier', 'cadence', 'surcharge_applied']) {
       expect(src).toContain(field);
+    }
+  });
+
+  // The plan-line snapshot lands in subscriptions.plan_lines, which the customer
+  // can read. Contractor pay must never be part of it.
+  it('neither checkout path puts contractor pay into the plan snapshot', () => {
+    for (const p of [
+      'supabase/functions/stripe-create-checkout/index.ts',
+      'supabase/functions/create-stripe-payment-intent/index.ts',
+      'supabase/functions/_shared/plan-lines.ts',
+    ]) {
+      expect(read(p)).not.toMatch(/contractor_pay_cents:/);
     }
   });
 

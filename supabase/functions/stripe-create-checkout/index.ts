@@ -33,7 +33,6 @@ import {
   CAR_WASH_LOOKUP_KEYS,
   CLEANING_SURCHARGE,
   LAWN_SURCHARGE,
-  contractorVisitPay,
   freeAddonsPerMonth,
   lookupKeyFor,
   monthlyPrice,
@@ -297,11 +296,9 @@ Deno.serve(async (req) => {
             monthly_cents: Math.round(monthlyPrice(s.service, size, cadence, surcharge) * 100),
             lookup_key: key,
             stripe_price_id: priceIdOf(row),
-            // Never shown to a customer — used when visits are created.
-            contractor_pay_cents:
-              Math.round(
-                contractorVisitPay({ service: s.service, size, cadence, surcharge: surcharge > 0 }) * 100,
-              ),
+            // Contractor pay is deliberately NOT part of the snapshot: the plan
+            // line is customer-readable. Visit pay is derived server-side from
+            // canon by generate_recurring_visits.
           });
         }
 

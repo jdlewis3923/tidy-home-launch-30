@@ -1,12 +1,15 @@
 // Plan-line snapshots.
 //
 // A plan line records, per service: size tier, cadence, whether a surcharge
-// applies, the monthly amount and the contractor pay frozen at creation. The
-// webhook needs it to create visits with the right pay.
+// applies and the monthly amount. It carries NO contractor pay — the snapshot
+// ends up in subscriptions.plan_lines, which the customer can read. Visit pay is
+// derived server-side from canon by generate_recurring_visits, and the pro's
+// tier uplift is applied at completion time.
 //
-// It is persisted to public.plan_line_sets and Stripe metadata carries only the
-// row id. Stripe caps a metadata VALUE at 500 characters, and the full JSON for
-// a two-service cart is 556 bytes — which is why every bundle signup failed.
+// It is persisted to public.plan_line_sets (service-role only) and Stripe
+// metadata carries only the row id. Stripe caps a metadata VALUE at 500
+// characters, and the full JSON for a two-service cart is 556 bytes — which is
+// why every bundle signup failed.
 
 export interface PlanLine {
   service: string;
@@ -19,7 +22,6 @@ export interface PlanLine {
   monthly_cents: number;
   lookup_key: string;
   stripe_price_id: string;
-  contractor_pay_cents: number;
 }
 
 /** Writes the snapshot and returns its row id, or null if the write failed. */
