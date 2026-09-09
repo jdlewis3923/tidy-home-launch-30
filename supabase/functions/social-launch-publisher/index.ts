@@ -15,6 +15,9 @@
  * verify_jwt=false; we never accept caption/image_url from the request body.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireServiceOrAdmin } from "../_shared/admin-auth.ts";
+import { isCronAuthorized } from "../_shared/cron-auth.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
