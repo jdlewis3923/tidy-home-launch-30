@@ -561,6 +561,13 @@
       "when": 1788933786262,
       "tag": "0079_cron_social_launch_publisher_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1788933803712,
+      "tag": "0080_retire_inert_jobber_addon_scan_schedule",
+      "breakpoints": true
     }
   ]
 }
