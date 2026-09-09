@@ -547,6 +547,13 @@
       "when": 1788933756486,
       "tag": "0077_cron_sms_outbox_release_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1788933772212,
+      "tag": "0078_cron_kpi_realtime_schedule",
+      "breakpoints": true
     }
   ]
 }
