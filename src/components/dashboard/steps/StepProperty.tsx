@@ -166,7 +166,7 @@ export default function StepProperty({ state, onChange }: Props) {
     <div className="space-y-10">
       {hasCleaning && (
         <div className="space-y-4 animate-calm-in">
-          <h3 className="text-sm font-semibold text-ink-soft lowercase">how many bedrooms and bathrooms?</h3>
+          <h3 className="text-sm font-semibold text-ink-soft lowercase">{t('how many bedrooms and bathrooms?')}</h3>
           <div className="grid gap-3 md:grid-cols-2">
             <SelectField
               label="bedrooms"
@@ -182,18 +182,17 @@ export default function StepProperty({ state, onChange }: Props) {
             />
           </div>
           <p className="text-[11px] text-ink-faint">
-            more bathrooms than your size allows moves the home up one size — bathrooms drive the
-            length of a visit more than anything else.
+            {t('more bathrooms than your size allows moves the home up one size — bathrooms drive the length of a visit more than anything else.')}
           </p>
           <SqFtField
-            label="home square footage"
+            label={t('home square footage')}
             placeholder="e.g. 1800"
             value={state.homeSqFt}
             onChange={v => onChange({ ...state, homeSqFt: v })}
-            helper="interior living space. 2,501–4,000 sq ft adds $60 a visit. above 4,000 we quote by hand."
+            helper={t('interior living space. 2,501–4,000 sq ft adds $60 a visit. above 4,000 we quote by hand.')}
           />
           {(state.homeSqFt ?? 0) > 4000 && (
-            <QuoteNotice>a home over 4,000 sq ft is quoted by hand</QuoteNotice>
+            <QuoteNotice>{t('a home over 4,000 sq ft is quoted by hand')}</QuoteNotice>
           )}
           <SizeReadout service="cleaning" size={sizeFor(state, 'cleaning')} state={state} />
         </div>
@@ -202,7 +201,7 @@ export default function StepProperty({ state, onChange }: Props) {
 
       {hasLawn && (
         <div className="space-y-4 animate-calm-in" style={{ animationDelay: '60ms' }}>
-          <h3 className="text-sm font-semibold text-ink-soft lowercase">roughly how big is your lawn?</h3>
+          <h3 className="text-sm font-semibold text-ink-soft lowercase">{t('roughly how big is your lawn?')}</h3>
           <div className="grid gap-2 md:grid-cols-2">
             {lawnOptions.map(choice => (
               <OptionCard
@@ -218,15 +217,16 @@ export default function StepProperty({ state, onChange }: Props) {
           <p className="text-[11px] text-ink-faint">{LAWN_GUESS_NOTE}</p>
 
           <SqFtField
-            label="mowable turf square footage"
+            label={t('mowable turf square footage')}
             placeholder="e.g. 3500"
             value={state.turfSqFt}
             onChange={v => onChange({ ...state, turfSqFt: v })}
-            helper="grass only, not the house or driveway. 4,001–7,500 sq ft adds $30 a visit. above 7,500 we quote by hand."
+            helper={t('grass only, not the house or driveway. 4,001–7,500 sq ft adds $30 a visit. above 7,500 we quote by hand.')}
           />
           {(state.turfSqFt ?? 0) > 7500 && (
-            <QuoteNotice>turf over 7,500 sq ft is quoted by hand</QuoteNotice>
+            <QuoteNotice>{t('turf over 7,500 sq ft is quoted by hand')}</QuoteNotice>
           )}
+
 
           <SizeReadout service="lawn" size={sizeFor(state, 'lawn')} state={state} />
         </div>

@@ -1306,6 +1306,50 @@ const translations: Record<string, string> = {
 
   // Admin Applicants — preferred pro count
   "Preferred by": "Preferido por",
+
+  // Pricing table (homepage)
+  "three sizes, one price each": "tres tamaños, un precio cada uno",
+  "Size sets the price per visit for cleaning and lawn care. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Shine Complete is one flat monthly price.":
+    "El tamaño define el precio por visita de limpieza y jardín. Venir más seguido baja el precio por visita — quincenal es 8% menos por visita que mensual, y semanal 18% menos. Siempre se factura mensualmente. Shine Complete es un precio fijo mensual.",
+  Size: "Tamaño",
+  "monthly plan · per visit": "plan mensual · por visita",
+  "per month": "al mes",
+  "5+ bedroom homes and yards over 10,000 sq ft are quoted by hand. Cancel anytime.":
+    "Las casas de 5+ recámaras y los jardines de más de 10,000 pies² se cotizan a mano. Cancela cuando quieras.",
+  "Add a 2nd service and you pick one free premium add-on every month. Add-ons — ovens, bed edges, pet hair and the like — are priced separately.":
+    "Agrega un segundo servicio y eliges un servicio adicional premium gratis cada mes. Los adicionales — hornos, bordes de jardineras, pelo de mascotas y similares — se cobran por separado.",
+  "Condo / up to 2 bedrooms": "Condominio / hasta 2 recámaras",
+  "House / 3 bedrooms": "Casa / 3 recámaras",
+  "Large house / 4 bedrooms": "Casa grande / 4 recámaras",
+  "max 2 baths": "máx. 2 baños",
+  "max 2.5 baths": "máx. 2.5 baños",
+  "max 3 baths": "máx. 3 baños",
+  "Small yard": "Jardín pequeño",
+  "Standard yard": "Jardín estándar",
+  "Large yard": "Jardín grande",
+  "up to 3,000 sq ft of turf": "hasta 3,000 pies² de césped",
+  "3,001–6,000 sq ft of turf": "3,001–6,000 pies² de césped",
+  "6,001–10,000 sq ft of turf": "6,001–10,000 pies² de césped",
+  "Sedan / coupe": "Sedán / coupé",
+  "SUV / crossover": "SUV / crossover",
+  "Truck / 3-row SUV / van": "Camioneta / SUV de 3 filas / van",
+  "coupe, sedan": "coupé, sedán",
+  "SUV, crossover": "SUV, crossover",
+  "truck, 3-row SUV, van": "camioneta, SUV de 3 filas, van",
+
+  // Checkout — property size and surcharge disclosure
+  "how many bedrooms and bathrooms?": "¿cuántas recámaras y baños?",
+  "roughly how big is your lawn?": "¿más o menos qué tan grande es tu jardín?",
+  "more bathrooms than your size allows moves the home up one size — bathrooms drive the length of a visit more than anything else.":
+    "más baños de los que permite tu tamaño suben la casa un tamaño — los baños definen la duración de la visita más que cualquier otra cosa.",
+  "home square footage": "pies cuadrados de la casa",
+  "interior living space. 2,501–4,000 sq ft adds $60 a visit. above 4,000 we quote by hand.":
+    "espacio interior habitable. 2,501–4,000 pies² agrega $60 por visita. arriba de 4,000 lo cotizamos a mano.",
+  "a home over 4,000 sq ft is quoted by hand": "una casa de más de 4,000 pies² se cotiza a mano",
+  "mowable turf square footage": "pies cuadrados de césped a cortar",
+  "grass only, not the house or driveway. 4,001–7,500 sq ft adds $30 a visit. above 7,500 we quote by hand.":
+    "solo el césped, no la casa ni la entrada. 4,001–7,500 pies² agrega $30 por visita. arriba de 7,500 lo cotizamos a mano.",
+  "turf over 7,500 sq ft is quoted by hand": "más de 7,500 pies² de césped se cotiza a mano",
 };
 
 
