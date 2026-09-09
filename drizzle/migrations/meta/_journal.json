@@ -470,6 +470,13 @@
       "when": 1788921134998,
       "tag": "0066_retire_bundle_discount_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1788926624178,
+      "tag": "0067_rating_integrity_tokens",
+      "breakpoints": true
     }
   ]
 }
