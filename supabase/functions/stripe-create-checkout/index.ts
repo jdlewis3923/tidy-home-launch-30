@@ -45,7 +45,7 @@ import {
 } from "../_shared/pricing-canon.ts";
 import { checkServiceLine } from "../_shared/size-validation.ts";
 import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
-import { stripeMode, stripeSecretKey } from "../_shared/stripe-mode.ts";
+import { stripeMode, stripeModeConflict, stripeSecretKey } from "../_shared/stripe-mode.ts";
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
 
 
@@ -132,6 +132,11 @@ Deno.serve(async (req) => {
 
   if (!STRIPE_SECRET_KEY) {
     return jsonResponse({ ok: false, error: "Stripe not configured" }, 500);
+  }
+  const modeConflict = stripeModeConflict();
+  if (modeConflict) {
+    console.error("[stripe-create-checkout]", modeConflict);
+    return jsonResponse({ ok: false, error: `Stripe misconfigured: ${modeConflict}` }, 500);
   }
 
   const authHeader = req.headers.get("Authorization");
