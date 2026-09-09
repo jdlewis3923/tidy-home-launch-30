@@ -49,7 +49,9 @@ interface CronHealthRow {
   stale: boolean;
   http_status?: number | null;
   http_error?: string | null;
+  captured_at?: string | null;
 }
+
 
 interface SourceSummary {
   state: LaneState;
@@ -71,6 +73,8 @@ interface HealthResponse {
   stale_sources?: Source[];
   cron?: CronHealthRow[];
   cron_stale_count?: number;
+  cron_captured_at?: string | null;
+
 }
 
 const SOURCE_ORDER: Source[] = [
@@ -408,43 +412,70 @@ export default function AdminHealth() {
               </table>
             </div>
 
-            {data?.cron && data.cron.length > 0 && (
-              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                <div className="flex items-center justify-between bg-slate-100 px-4 py-3">
-                  <p className="text-xs font-bold uppercase tracking-wide text-slate-600">
-                    Scheduled jobs ({data.cron.length})
-                  </p>
-                  <p className={`text-xs font-semibold ${(data.cron_stale_count ?? 0) > 0 ? "text-rose-700" : "text-emerald-700"}`}>
-                    {(data.cron_stale_count ?? 0) > 0
-                      ? `${data.cron_stale_count} not running as scheduled`
-                      : "All running on schedule"}
-                  </p>
+            {/* Always rendered. Hiding this panel when the snapshot was empty
+                meant a frozen or failed watchdog looked exactly like a healthy
+                system: no panel, no red, nothing to notice. */}
+            {(() => {
+              const rows = data?.cron ?? [];
+              const capturedAt = data?.cron_captured_at ?? rows[0]?.captured_at ?? null;
+              const ageMin = capturedAt
+                ? Math.round((Date.now() - new Date(capturedAt).getTime()) / 60000)
+                : null;
+              const frozen = ageMin === null || ageMin > 180;
+              const empty = rows.length === 0;
+              return (
+                <div className={`overflow-hidden rounded-xl border shadow-sm ${empty || frozen ? "border-rose-300 bg-rose-50" : "border-slate-200 bg-white"}`}>
+                  <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100 px-4 py-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-600">
+                      Scheduled jobs ({rows.length})
+                    </p>
+                    <p className={`text-xs font-semibold ${empty || frozen || (data?.cron_stale_count ?? 0) > 0 ? "text-rose-700" : "text-emerald-700"}`}>
+                      {empty
+                        ? "NOTHING IS BEING MONITORED"
+                        : (data?.cron_stale_count ?? 0) > 0
+                          ? `${data?.cron_stale_count} not running as scheduled`
+                          : "All running on schedule"}
+                    </p>
+                    <p className={`text-xs ${frozen ? "font-semibold text-rose-700" : "text-slate-500"}`}>
+                      {capturedAt
+                        ? `Checked ${formatRelative(capturedAt)}${frozen ? " — this check is stale" : ""}`
+                        : "Never checked"}
+                    </p>
+                  </div>
+                  {empty ? (
+                    <p className="px-4 py-4 text-xs font-semibold text-rose-800">
+                      The scheduled-job check returned no jobs. Treat every automatic
+                      job below as unverified until this list comes back.
+                    </p>
+                  ) : (
+                    <table className="w-full text-sm">
+                      <tbody className="divide-y divide-slate-100">
+                        {rows.map((c) => (
+                          <tr key={c.jobname} className={c.stale ? "bg-rose-50 text-rose-800" : ""}>
+                            <td className="px-4 py-2 font-mono text-xs">{c.jobname}</td>
+                            <td className="px-4 py-2 font-mono text-xs text-slate-500">{c.schedule}</td>
+                            <td className="px-4 py-2 text-xs">
+                              {c.last_status ?? "never run"}
+                              {typeof c.http_status === "number" && (
+                                <span className={c.http_status >= 400 ? "ml-1 font-semibold" : "ml-1 text-slate-500"}>
+                                  · replied {c.http_status}
+                                </span>
+                              )}
+                              {c.http_error ? <span className="ml-1 font-semibold">· {c.http_error.slice(0, 60)}</span> : null}
+                            </td>
+                            <td className="px-4 py-2 text-right text-xs">{formatRelative(c.last_run_at)}</td>
+                            <td className="px-4 py-2 text-right text-xs font-semibold">
+                              {c.stale ? "STALE" : "ok"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
-                <table className="w-full text-sm">
-                  <tbody className="divide-y divide-slate-100">
-                    {data.cron.map((c) => (
-                      <tr key={c.jobname} className={c.stale ? "bg-rose-50 text-rose-800" : ""}>
-                        <td className="px-4 py-2 font-mono text-xs">{c.jobname}</td>
-                        <td className="px-4 py-2 font-mono text-xs text-slate-500">{c.schedule}</td>
-                        <td className="px-4 py-2 text-xs">
-                          {c.last_status ?? "never run"}
-                          {typeof c.http_status === "number" && (
-                            <span className={c.http_status >= 400 ? "ml-1 font-semibold" : "ml-1 text-slate-500"}>
-                              · replied {c.http_status}
-                            </span>
-                          )}
-                          {c.http_error ? <span className="ml-1 font-semibold">· {c.http_error.slice(0, 60)}</span> : null}
-                        </td>
-                        <td className="px-4 py-2 text-right text-xs">{formatRelative(c.last_run_at)}</td>
-                        <td className="px-4 py-2 text-right text-xs font-semibold">
-                          {c.stale ? "STALE" : "ok"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+              );
+            })()}
+
 
             <div className="rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-600">
               <p className="font-semibold text-slate-800">Legend</p>

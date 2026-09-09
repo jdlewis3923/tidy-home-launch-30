@@ -48,12 +48,26 @@ Deno.serve(async (req) => {
   };
   if (!v.assigned_pro_id) return jsonResponse({ ok: true, skipped: 'no_assigned_pro' });
 
-  const { data: claimed } = await admin.rpc('claim_pro_notification', {
+  // The error matters as much as the value: a failed RPC returns null, which
+  // used to read as "already notified" and return 200 ok — so a Pro drove to a
+  // canceled job and nothing anywhere recorded it. The caller is a fire-and-
+  // forget trigger, so this response is the only place the truth can live.
+  const { data: claimed, error: claimErr } = await admin.rpc('claim_pro_notification', {
     _contractor_id: v.assigned_pro_id,
     _kind: 'visit_canceled_today',
     _scope: visitId,
   });
+  if (claimErr) {
+    await admin.from('admin_alerts').insert({
+      alert_type: 'pro_notification_undeliverable',
+      title: 'A Pro was not told a same-day job was canceled',
+      body: `claim_pro_notification failed for visit ${visitId}: ${claimErr.message}`,
+      context: { visit_id: visitId, contractor_id: v.assigned_pro_id, kind: 'visit_canceled_today' },
+    });
+    return jsonResponse({ ok: false, error: `claim_failed: ${claimErr.message}`, visit_id: visitId }, 500);
+  }
   if (claimed !== true) return jsonResponse({ ok: true, skipped: 'already_notified' });
+
 
   const where = [v.street, v.zip].filter(Boolean).join(', ') || 'the address in your app';
   const result = await notifyPro(admin, {

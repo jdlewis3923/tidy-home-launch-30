@@ -39,8 +39,11 @@ interface ReviewResponse {
   stripe_failures?: unknown[];
   sms_delivery_failures?: unknown[];
   sms_outbox?: OutboxRow[];
+  /** Per-query failures. Ignoring these printed "nothing unresolved" over a read that never happened. */
+  errors?: string[];
   error?: string;
 }
+
 
 function relative(iso: string | null): string {
   if (!iso) return "—";
@@ -82,9 +85,12 @@ export default function OpenAlertsPanel() {
   const outbox = data?.sms_outbox ?? [];
   const stripeFailures = data?.stripe_failures ?? [];
   const smsFailures = data?.sms_delivery_failures ?? [];
+  const queryErrors = data?.errors ?? [];
+  const canceled = outbox.filter((o) => o.status === "canceled");
+  const waiting = outbox.filter((o) => o.status !== "canceled");
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className={`overflow-hidden rounded-xl border shadow-sm ${queryErrors.length > 0 ? "border-rose-300 bg-rose-50" : "border-slate-200 bg-white"}`}>
       <div className="flex items-center justify-between bg-slate-100 px-4 py-3">
         <p className="text-xs font-bold uppercase tracking-wide text-slate-600">
           Open failures ({alerts.length})
@@ -99,11 +105,24 @@ export default function OpenAlertsPanel() {
 
       {error && <p className="px-4 py-3 text-xs text-rose-700">{error}</p>}
 
-      {!error && alerts.length === 0 && !loading && (
+      {/* A check that could not run is not a clean bill of health. */}
+      {queryErrors.length > 0 && (
+        <div className="border-b border-rose-200 px-4 py-3 text-xs text-rose-800">
+          <p className="font-semibold">Some checks could not run — this list is incomplete</p>
+          <ul className="mt-1 space-y-1">
+            {queryErrors.map((e, i) => (
+              <li key={i}>{e}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {!error && queryErrors.length === 0 && alerts.length === 0 && !loading && (
         <p className="px-4 py-4 text-xs text-slate-600">
           Nothing unresolved right now.
         </p>
       )}
+
 
       {alerts.length > 0 && (
         <table className="w-full text-sm">
@@ -132,10 +151,17 @@ export default function OpenAlertsPanel() {
         <div className="border-t border-slate-200 px-4 py-3 text-[11px] text-slate-600">
           <p className="font-semibold text-slate-800">Also waiting</p>
           <ul className="mt-1 space-y-1">
-            {outbox.length > 0 && (
+            {waiting.length > 0 && (
               <li>
-                {outbox.length} text{outbox.length === 1 ? "" : "s"} queued or failed
-                {outbox[0]?.last_error ? ` — latest: ${outbox[0].last_error.slice(0, 120)}` : ""}
+                {waiting.length} text{waiting.length === 1 ? "" : "s"} queued or failed
+                {waiting[0]?.last_error ? ` — latest: ${waiting[0].last_error.slice(0, 120)}` : ""}
+              </li>
+            )}
+            {/* Canceled texts were never sent to anybody — they belong here, not nowhere. */}
+            {canceled.length > 0 && (
+              <li>
+                {canceled.length} text{canceled.length === 1 ? "" : "s"} canceled without being sent
+                {canceled[0]?.last_error ? ` — latest: ${canceled[0].last_error.slice(0, 120)}` : ""}
               </li>
             )}
             {stripeFailures.length > 0 && <li>{stripeFailures.length} payment events not processed</li>}
@@ -143,6 +169,7 @@ export default function OpenAlertsPanel() {
           </ul>
         </div>
       )}
+
     </div>
   );
 }

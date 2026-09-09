@@ -238,7 +238,7 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<ProNoti
       title: 'A Pro notification push was not delivered',
       body: `${n.kind}: ${push.outcome}${push.detail ? ` — ${push.detail}` : ''}`,
       context: { contractor_id: n.contractor_id, kind: n.kind, urgent: false },
-    }).then(() => {}, () => {});
+    });
     return { ok: false, recorded: true, urgent, push: push.outcome, sms: 'not_needed', detail: push.detail };
   }
 
@@ -252,7 +252,11 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<ProNoti
       title: 'A time-critical Pro notification reached nobody',
       body: `${n.kind}: push ${push.outcome}, sms ${sms.outcome}${sms.detail ? ` — ${sms.detail}` : ''}`,
       context: { contractor_id: n.contractor_id, kind: n.kind, urgent: true },
-    }).then(() => {}, () => {});
+    });
+    // Awaited on purpose: fire-and-forget lost this alert whenever the isolate
+    // tore down right after the response — the one alert that says a
+    // time-critical notification reached nobody.
+    
   }
   return {
     ok: delivered,

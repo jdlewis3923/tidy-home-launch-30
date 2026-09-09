@@ -477,6 +477,13 @@
       "when": 1788926624178,
       "tag": "0067_rating_integrity_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1788929391185,
+      "tag": "0068_cron_http_truth_repoint_and_purge_proof",
+      "breakpoints": true
     }
   ]
 }

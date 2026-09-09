@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       .limit(100),
     admin.from('sms_outbox')
       .select('id, to_phone_e164, template_name, status, attempts, queued_reason, release_after, last_error, created_at')
-      .in('status', ['queued', 'failed'])
+      .in('status', ['queued', 'failed', 'canceled'])
       .order('created_at', { ascending: false })
       .limit(100),
     admin.rpc('admin_cron_health'),

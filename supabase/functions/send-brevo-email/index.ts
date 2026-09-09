@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
 
   let finish: (status: 'success' | 'error' | 'warning', msg?: string | null) => Promise<void>;
   try {
-    finish = await logInvocation('resend', 'send_brevo_email', { method: req.method });
+    finish = await logInvocation('brevo', 'send_brevo_email', { method: req.method });
   } catch {
     finish = async () => {};
   }
