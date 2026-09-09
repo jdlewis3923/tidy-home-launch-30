@@ -10,6 +10,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { sendBrevoEmail, brandedEmailHtml } from '../_shared/notifyJustin.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -135,7 +136,7 @@ Deno.serve(async (req) => {
   // 2. SMS — use send-twilio-sms with template_name + triggered_by labels.
   if (runSms) for (const sms of SMS_TEMPLATES) {
     try {
-      const r = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+      const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,

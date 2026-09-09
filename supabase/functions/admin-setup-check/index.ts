@@ -16,6 +16,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { isValidStripeSecretKey, stripeSecretKeyError } from '../_shared/stripe-keys.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -44,7 +45,7 @@ async function checkStripe(): Promise<Check> {
       remediation: 'Paste a valid Stripe Connect secret key (sk_live_… or sk_test_…) in Lovable Cloud secrets. Publishable/restricted/malformed keys are not accepted.' };
   }
   try {
-    const r = await fetch('https://api.stripe.com/v1/accounts?limit=1', {
+    const r = await vendorFetch('https://api.stripe.com/v1/accounts?limit=1', {
       headers: { Authorization: `Bearer ${STRIPE_CONNECT_API_KEY}` },
     });
     if (!r.ok) {
@@ -67,7 +68,7 @@ async function checkCheckr(): Promise<Check> {
       remediation: 'Set CHECKR_API_KEY once Checkr account is approved.' };
   }
   try {
-    const r = await fetch('https://api.checkr.com/v1/account', {
+    const r = await vendorFetch('https://api.checkr.com/v1/account', {
       headers: { Authorization: `Basic ${btoa(CHECKR_API_KEY + ':')}` },
     });
     if (!r.ok) return { id: 'checkr', label: 'Checkr background checks', status: 'fail',
@@ -87,7 +88,7 @@ async function checkBrevo(): Promise<{ key: Check; plan: Check }> {
     };
   }
   try {
-    const r = await fetch('https://api.brevo.com/v3/account', {
+    const r = await vendorFetch('https://api.brevo.com/v3/account', {
       headers: { 'api-key': BREVO_API_KEY, accept: 'application/json' },
     });
     if (!r.ok) {

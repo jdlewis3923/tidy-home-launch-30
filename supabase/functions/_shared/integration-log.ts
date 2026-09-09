@@ -1,3 +1,4 @@
+import { vendorFetch } from './http.ts';
 // Tidy — dependency-free integration logger.
 //
 // Writes one row to public.integration_logs over the REST endpoint, using only
@@ -41,7 +42,7 @@ export async function logIntegrationEvent(opts: {
   const key = env('SUPABASE_SERVICE_ROLE_KEY');
   if (!url || !key) return;
   try {
-    await fetch(`${url}/rest/v1/integration_logs`, {
+    await vendorFetch(`${url}/rest/v1/integration_logs`, {
       method: 'POST',
       headers: {
         apikey: key,

@@ -14,6 +14,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { isWindowOpen, nextOpenWindow } from '../_shared/sms-window.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -111,7 +112,7 @@ Deno.serve(async (req) => {
     let payload: Record<string, unknown> = {};
     let errMessage: string | null = null;
     try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+      const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -187,7 +188,7 @@ Deno.serve(async (req) => {
     let errMessage: string | null = null;
     let httpStatus = 0;
     try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
+      const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -6,6 +6,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -52,7 +53,7 @@ Deno.serve(async (req) => {
   // Stripe delete (only works for non-invoiced items)
   if (STRIPE_SECRET_KEY && row.stripe_invoice_item_id) {
     try {
-      await fetch(`https://api.stripe.com/v1/invoiceitems/${row.stripe_invoice_item_id}`, {
+      await vendorFetch(`https://api.stripe.com/v1/invoiceitems/${row.stripe_invoice_item_id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${STRIPE_SECRET_KEY}` },
       });

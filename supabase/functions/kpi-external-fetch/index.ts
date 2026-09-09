@@ -1,6 +1,7 @@
 // Fetches external KPI data (GA4, Google Ads, Meta, Jobber, GBP) and writes snapshots.
 // Most external APIs require additional secrets — handlers gracefully no-op until configured.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { vendorFetch } from '../_shared/http.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -75,7 +76,7 @@ async function fetchMetaSpend(): Promise<ExternalResult> {
     const url = `https://graph.facebook.com/v20.0/${adAccountId}/insights?fields=spend&time_range=${encodeURIComponent(
       JSON.stringify({ since: sinceStr, until: sinceStr })
     )}&access_token=${token}`;
-    const res = await fetch(url);
+    const res = await vendorFetch(url);
     const data = await res.json();
     const spend = parseFloat(data?.data?.[0]?.spend ?? "0");
     return {

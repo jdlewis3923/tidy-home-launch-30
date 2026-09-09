@@ -20,6 +20,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { withLogging } from '../_shared/withLogging.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const META_APP_ID = Deno.env.get('META_APP_ID') ?? '';
 const META_APP_SECRET = Deno.env.get('META_APP_SECRET') ?? '';
@@ -144,7 +145,7 @@ async function exchangeCode(code: string): Promise<ShortLivedTokenResponse> {
     redirect_uri: META_OAUTH_REDIRECT_URI,
     code,
   });
-  const res = await fetch(`${GRAPH}/oauth/access_token`, {
+  const res = await vendorFetch(`${GRAPH}/oauth/access_token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params.toString(),
@@ -162,7 +163,7 @@ async function exchangeForLongLived(shortToken: string): Promise<LongLivedTokenR
   url.searchParams.set('client_id', META_APP_ID);
   url.searchParams.set('client_secret', META_APP_SECRET);
   url.searchParams.set('fb_exchange_token', shortToken);
-  const res = await fetch(url.toString(), { method: 'GET' });
+  const res = await vendorFetch(url.toString(), { method: 'GET' });
   const json = await res.json();
   if (!res.ok || !json.access_token) {
     throw new Error(`long-lived exchange failed (${res.status}): ${JSON.stringify(json).slice(0, 300)}`);
@@ -180,7 +181,7 @@ async function listBusinesses(longToken: string): Promise<BusinessSummary[]> {
   url.searchParams.set('access_token', longToken);
   url.searchParams.set('fields', 'id,name');
   url.searchParams.set('limit', '100');
-  const res = await fetch(url.toString());
+  const res = await vendorFetch(url.toString());
   const json = await res.json();
   if (!res.ok) {
     throw new Error(`/me/businesses failed (${res.status}): ${JSON.stringify(json).slice(0, 300)}`);
@@ -200,7 +201,7 @@ async function listOwnedPixels(businessId: string, longToken: string): Promise<P
   url.searchParams.set('access_token', longToken);
   url.searchParams.set('fields', 'id,name,creation_time,is_unavailable');
   url.searchParams.set('limit', '100');
-  const res = await fetch(url.toString());
+  const res = await vendorFetch(url.toString());
   const json = await res.json();
   if (!res.ok) {
     throw new Error(`owned_pixels list failed (${res.status}): ${JSON.stringify(json).slice(0, 300)}`);
@@ -212,7 +213,7 @@ async function createPixelOnBusiness(businessId: string, longToken: string): Pro
   // CORRECT endpoint per Meta Graph API v19.0 — /adspixels (not /owned_pixels which is read-only).
   const url = new URL(`${GRAPH}/${businessId}/adspixels`);
   const body = new URLSearchParams({ name: TARGET_PIXEL_NAME, access_token: longToken });
-  const res = await fetch(url.toString(), {
+  const res = await vendorFetch(url.toString(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
@@ -238,7 +239,7 @@ async function listAdAccounts(businessId: string, longToken: string): Promise<Ad
     url.searchParams.set('access_token', longToken);
     url.searchParams.set('fields', 'id,account_id,name');
     url.searchParams.set('limit', '100');
-    const res = await fetch(url.toString());
+    const res = await vendorFetch(url.toString());
     const json = await res.json();
     if (res.ok && Array.isArray(json.data)) {
       out.push(...(json.data as AdAccountSummary[]));
@@ -254,7 +255,7 @@ async function createPixelOnAdAccount(adAccountId: string, longToken: string): P
   const id = adAccountId.startsWith('act_') ? adAccountId : `act_${adAccountId}`;
   const url = new URL(`${GRAPH}/${id}/adspixels`);
   const body = new URLSearchParams({ name: TARGET_PIXEL_NAME, access_token: longToken });
-  const res = await fetch(url.toString(), {
+  const res = await vendorFetch(url.toString(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),

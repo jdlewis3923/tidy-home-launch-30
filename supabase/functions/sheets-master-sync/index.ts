@@ -16,6 +16,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -46,7 +47,7 @@ async function getAccessToken(): Promise<string> {
   const sigB64 = btoa(String.fromCharCode(...sig)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
   const jwt = `${unsigned}.${sigB64}`;
 
-  const r = await fetch('https://oauth2.googleapis.com/token', {
+  const r = await vendorFetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
@@ -58,14 +59,14 @@ async function getAccessToken(): Promise<string> {
 
 async function ensureTabs(token: string) {
   // Get existing sheets
-  const meta = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?fields=sheets.properties`, {
+  const meta = await vendorFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?fields=sheets.properties`, {
     headers: { Authorization: `Bearer ${token}` },
   }).then((r) => r.json());
   const existing = new Set<string>((meta.sheets ?? []).map((s: any) => s.properties.title));
   const wanted = ['Applicants', 'Visits', 'Tier Readiness Snapshot', 'Tier Audit Log'];
   const missing = wanted.filter((t) => !existing.has(t));
   if (missing.length === 0) return;
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`, {
+  await vendorFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -77,7 +78,7 @@ async function ensureTabs(token: string) {
 async function gfetch(url: string, init: RequestInit, what: string): Promise<Response> {
   // Phase 4: every Google response is checked. A 429 between a clear and a
   // write used to silently empty the master roster and still stamp success.
-  const res = await fetch(url, init);
+  const res = await vendorFetch(url, init);
   if (!res.ok) {
     const detail = (await res.text().catch(() => '')).slice(0, 400);
     throw new Error(`google ${what} ${res.status}: ${detail}`);

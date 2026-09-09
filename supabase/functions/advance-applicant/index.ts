@@ -24,6 +24,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { sendBrevoEmail, brandedEmailHtml, type BrevoAttachment } from '../_shared/notifyJustin.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -332,7 +333,7 @@ Deno.serve(async (req) => {
   let documensoResult: { ok: boolean; status?: number; error?: string; body?: unknown } | null = null;
   if (action === 'send_offer') {
     try {
-      const r = await fetch(`${SUPABASE_URL}/functions/v1/send-documenso-envelope`, {
+      const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-documenso-envelope`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
@@ -382,7 +383,7 @@ Deno.serve(async (req) => {
   let checkrDispatchError: string | null = null;
   if (action === 'send_to_bg_check') {
     try {
-      const r = await fetch(`${SUPABASE_URL}/functions/v1/checkr-invite`, {
+      const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/checkr-invite`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
@@ -417,7 +418,7 @@ Deno.serve(async (req) => {
   let paymentSetupUrl: string | null = null;
   if (action === 'send_payment_setup') {
     try {
-      const r = await fetch(`${SUPABASE_URL}/functions/v1/stripe-connect-create`, {
+      const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/stripe-connect-create`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,

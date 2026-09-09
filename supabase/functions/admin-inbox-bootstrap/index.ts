@@ -3,6 +3,7 @@
 // Safe to leave deployed; gated by has_role('admin').
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { createHmac } from "node:crypto";
+import { vendorFetch } from '../_shared/http.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -55,7 +56,7 @@ Deno.serve(async (req) => {
       try {
         const basic = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
         const lookupUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/IncomingPhoneNumbers.json?PhoneNumber=${encodeURIComponent(TIDY_PHONE)}`;
-        const lookup = await fetch(lookupUrl, {
+        const lookup = await vendorFetch(lookupUrl, {
           headers: { Authorization: `Basic ${basic}` },
         });
         const lookupData = await lookup.json();
@@ -64,7 +65,7 @@ Deno.serve(async (req) => {
           out.configure = { ok: false, error: "phone not found in account", lookup: lookupData };
         } else {
           const updUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/IncomingPhoneNumbers/${sid}.json`;
-          const upd = await fetch(updUrl, {
+          const upd = await vendorFetch(updUrl, {
             method: "POST",
             headers: {
               Authorization: `Basic ${basic}`,
@@ -101,7 +102,7 @@ Deno.serve(async (req) => {
       const data = INBOUND_URL + sortedKeys.map((k) => k + params[k]).join("");
       const signature = createHmac("sha1", TWILIO_AUTH_TOKEN).update(data).digest("base64");
 
-      const resp = await fetch(INBOUND_URL, {
+      const resp = await vendorFetch(INBOUND_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

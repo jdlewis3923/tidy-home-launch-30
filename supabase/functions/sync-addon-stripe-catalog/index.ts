@@ -9,6 +9,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -17,7 +18,7 @@ const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 
 async function stripeForm(path: string, params: Record<string, string>): Promise<any> {
   const body = new URLSearchParams(params).toString();
-  const resp = await fetch(`https://api.stripe.com/v1/${path}`, {
+  const resp = await vendorFetch(`https://api.stripe.com/v1/${path}`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,

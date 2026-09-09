@@ -20,6 +20,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { requireServiceOrAdmin } from "../_shared/admin-auth.ts";
 import { isCronAuthorized } from "../_shared/cron-auth.ts";
+import { vendorFetch } from '../_shared/http.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -77,7 +78,7 @@ async function discoverIgUserId(userToken: string, businessId: string | null): P
   url.searchParams.set("access_token", userToken);
   url.searchParams.set("fields", "id,name,instagram_business_account");
   url.searchParams.set("limit", "100");
-  const res = await fetch(url.toString());
+  const res = await vendorFetch(url.toString());
   const data = await res.json();
   if (!res.ok) {
     throw new Error(`/me/accounts failed (${res.status}): ${JSON.stringify(data).slice(0, 400)}`);
@@ -94,7 +95,7 @@ async function discoverIgUserId(userToken: string, businessId: string | null): P
     const u2 = new URL(`${GRAPH}/${businessId}/instagram_business_accounts`);
     u2.searchParams.set("access_token", userToken);
     u2.searchParams.set("fields", "id,username");
-    const r2 = await fetch(u2.toString());
+    const r2 = await vendorFetch(u2.toString());
     const j2 = await r2.json();
     if (r2.ok && Array.isArray(j2.data) && j2.data.length > 0) {
       console.log(`[meta-publish-post] Discovered IG user id ${j2.data[0].id} via business edge`);
@@ -109,7 +110,7 @@ async function discoverFbPage(userToken: string): Promise<{ id: string; access_t
   url.searchParams.set("access_token", userToken);
   url.searchParams.set("fields", "id,name,access_token");
   url.searchParams.set("limit", "100");
-  const res = await fetch(url.toString());
+  const res = await vendorFetch(url.toString());
   const data = await res.json();
   if (!res.ok) {
     throw new Error(`/me/accounts (fb pages) failed (${res.status}): ${JSON.stringify(data).slice(0, 400)}`);
@@ -189,7 +190,7 @@ async function publishInstagram(
     caption,
     access_token: userToken,
   });
-  const cRes = await fetch(containerUrl.toString(), {
+  const cRes = await vendorFetch(containerUrl.toString(), {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: cBody.toString(),
@@ -206,7 +207,7 @@ async function publishInstagram(
   // Step 3: publish (with one retry on transient "not ready")
   const pubUrl = new URL(`${GRAPH}/${igUserId}/media_publish`);
   const doPublish = async () => {
-    const r = await fetch(pubUrl.toString(), {
+    const r = await vendorFetch(pubUrl.toString(), {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ creation_id: creationId, access_token: userToken }).toString(),
@@ -227,7 +228,7 @@ async function publishInstagram(
 async function waitForIgContainer(creationId: string, token: string, maxMs = 25000) {
   const started = Date.now();
   while (Date.now() - started < maxMs) {
-    const r = await fetch(
+    const r = await vendorFetch(
       `${GRAPH}/${creationId}?fields=status_code&access_token=${encodeURIComponent(token)}`,
     );
     const j = await r.json().catch(() => ({}));
@@ -252,7 +253,7 @@ async function publishInstagramCarousel(
       is_carousel_item: "true",
       access_token: userToken,
     });
-    const r = await fetch(u.toString(), {
+    const r = await vendorFetch(u.toString(), {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: b.toString(),
@@ -269,7 +270,7 @@ async function publishInstagramCarousel(
     caption,
     access_token: userToken,
   });
-  const pRes = await fetch(parentUrl.toString(), {
+  const pRes = await vendorFetch(parentUrl.toString(), {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: pBody.toString(),
@@ -281,7 +282,7 @@ async function publishInstagramCarousel(
   await waitForIgContainer(creationId, userToken);
   const pubUrl = new URL(`${GRAPH}/${igUserId}/media_publish`);
   const doPub = async () => {
-    const r = await fetch(pubUrl.toString(), {
+    const r = await vendorFetch(pubUrl.toString(), {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ creation_id: creationId, access_token: userToken }).toString(),
@@ -312,7 +313,7 @@ async function publishFacebook(
     published: "true",
     access_token: pageToken,
   });
-  const res = await fetch(url.toString(), {
+  const res = await vendorFetch(url.toString(), {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
@@ -339,7 +340,7 @@ async function publishFacebookMultiPhoto(
       published: "false",
       access_token: pageToken,
     });
-    const r = await fetch(u.toString(), {
+    const r = await vendorFetch(u.toString(), {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: b.toString(),
@@ -356,7 +357,7 @@ async function publishFacebookMultiPhoto(
     attached_media: JSON.stringify(attached),
     access_token: pageToken,
   });
-  const fRes = await fetch(feedUrl.toString(), {
+  const fRes = await vendorFetch(feedUrl.toString(), {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: fBody.toString(),

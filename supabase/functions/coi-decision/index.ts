@@ -7,6 +7,7 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { readEnv } from '../_shared/handlerEnv.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -88,7 +89,7 @@ Deno.serve(async (req) => {
 
   if (parsed.data.decision === 'approved') {
     // Promote to Tier 2 via the existing function (also flips Stripe metadata).
-    const r = await fetch(`${SUPABASE_URL}/functions/v1/promote-to-tier-2`, {
+    const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/promote-to-tier-2`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE}` },
       body: JSON.stringify({ applicant_id: a.id, stripe_account_id: parsed.data.stripe_account_id }),

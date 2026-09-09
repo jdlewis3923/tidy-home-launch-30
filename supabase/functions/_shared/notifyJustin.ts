@@ -2,6 +2,7 @@
 // All channels are best-effort: a failure in one does not block the others.
 
 import { BrevoSendError, sendBrevoEmail as sendViaBrevo } from './brevo-send.ts';
+import { vendorFetch } from './http.ts';
 
 export { BrevoSendError };
 
@@ -30,7 +31,7 @@ async function logEmailSend(row: {
   payload?: Record<string, unknown>;
 }) {
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/email_send_log`, {
+    await vendorFetch(`${SUPABASE_URL}/rest/v1/email_send_log`, {
       method: 'POST',
       headers: {
         apikey: SUPABASE_SERVICE_ROLE_KEY,
@@ -127,13 +128,13 @@ export async function sendBrevoEmail(opts: {
 export async function sendPwaPushToJustin(title: string, body: string, url = '/admin/applicants') {
   // Look up admin user_ids and fan out push to each.
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/user_roles?role=eq.admin&select=user_id`, {
+    const r = await vendorFetch(`${SUPABASE_URL}/rest/v1/user_roles?role=eq.admin&select=user_id`, {
       headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}` },
     });
     const rows: Array<{ user_id: string }> = r.ok ? await r.json() : [];
     for (const row of rows) {
       // Phase 4: a push that returns 500 (or sent:0) must not read as success.
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
+      const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: row.user_id, title, body, url }),
@@ -155,7 +156,7 @@ export async function sendPwaPushToJustin(title: string, body: string, url = '/a
 
 export async function sendTwilioSmsToJustin(message: string, idemKey: string): Promise<boolean> {
   try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+    const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({

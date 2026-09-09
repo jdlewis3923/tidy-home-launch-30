@@ -22,6 +22,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { preferenceAllows } from '../_shared/sms-policy.ts';
 import { isServiceOrZapAuthorized } from '../_shared/zap-auth.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -142,7 +143,7 @@ Deno.serve(async (req) => {
   else variant = 'A';
 
   // 7. Mint token
-  const tokenResp = await fetch(`${SUPABASE_URL}/functions/v1/mint-addon-token`, {
+  const tokenResp = await vendorFetch(`${SUPABASE_URL}/functions/v1/mint-addon-token`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id }),
@@ -195,7 +196,7 @@ Deno.serve(async (req) => {
 
   // Send via send-twilio-sms
   const idem = `addon_${user_id}_${jobber_visit_id ?? 'no_visit'}_${new Date().toISOString().slice(0,10)}`;
-  const smsResp = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+  const smsResp = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({

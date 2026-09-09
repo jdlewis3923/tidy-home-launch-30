@@ -21,6 +21,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { isValidStripeSecretKey, stripeSecretKeyError } from '../_shared/stripe-keys.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -64,7 +65,7 @@ async function stripeTransfer(destination: string, amountCents: number, descript
     description,
     'metadata[reason]': 'review_bonus',
   }).toString();
-  const res = await fetch('https://api.stripe.com/v1/transfers', {
+  const res = await vendorFetch('https://api.stripe.com/v1/transfers', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${STRIPE_CONNECT_API_KEY}`,

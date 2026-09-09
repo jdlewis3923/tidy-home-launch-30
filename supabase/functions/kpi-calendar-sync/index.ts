@@ -1,3 +1,4 @@
+import { vendorFetch } from '../_shared/http.ts';
 // Pulls today's events from Justin's primary Google Calendar via the Lovable connector gateway.
 // Used to compute calendar-derived KPIs (e.g., owner_focus_blocks) and to attach context to alerts.
 const corsHeaders = {
@@ -32,7 +33,7 @@ Deno.serve(async (req) => {
   });
 
   try {
-    const res = await fetch(`${GATEWAY_URL}/calendars/primary/events?${params}`, {
+    const res = await vendorFetch(`${GATEWAY_URL}/calendars/primary/events?${params}`, {
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "X-Connection-Api-Key": GOOGLE_CALENDAR_API_KEY,

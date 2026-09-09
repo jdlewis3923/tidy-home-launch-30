@@ -1,5 +1,6 @@
 // Admin sends a reply on behalf of Tidy. SMS goes via Twilio, web via realtime (DB insert).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { vendorFetch } from '../_shared/http.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,7 +87,7 @@ Deno.serve(async (req) => {
       }
       // Phase 4: route through send-twilio-sms so the FTSA send window,
       // idempotency and delivery receipts apply to admin replies too.
-      const sendResp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-twilio-sms`, {
+      const sendResp = await vendorFetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-twilio-sms`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,

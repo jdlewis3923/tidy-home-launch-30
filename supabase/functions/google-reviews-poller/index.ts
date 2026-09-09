@@ -15,6 +15,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -47,7 +48,7 @@ Deno.serve(async (req) => {
     `&reviews_sort=newest&reviews_no_translations=true` +
     `&key=${GOOGLE_PLACES_API_KEY}`;
 
-  const res = await fetch(url);
+  const res = await vendorFetch(url);
   if (!res.ok) {
     const txt = await res.text();
     return jsonResponse({ ok: false, error: `places api ${res.status}`, body: txt.slice(0, 400) }, 502);

@@ -10,6 +10,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -36,7 +37,7 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/stripe-webhook`, {
+  const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/stripe-webhook`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${SERVICE_KEY}`,

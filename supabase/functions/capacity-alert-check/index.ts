@@ -12,6 +12,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { computeCapacityFromDb } from '../_shared/capacity.ts';
 import { CAPACITY_SERVICE_DB_KEY, HIRING_CYCLE_DAYS } from '../_shared/capacity-config.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -102,7 +103,7 @@ Deno.serve(async (req) => {
         // notify_channels is the alert latch — a false 'sms' here would claim
         // Justin was texted AND suppress every future alert for this service.
         try {
-          const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+          const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
             method: 'POST',
             headers: {
               Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,

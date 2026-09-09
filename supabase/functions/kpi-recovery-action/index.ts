@@ -11,6 +11,7 @@
  */
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders, handleCors, jsonResponse } from "../_shared/cors.ts";
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -40,7 +41,7 @@ async function fetchAdminUsers(s: SupabaseClient): Promise<{ id: string; phone?:
 async function sendZap(url: string, body: Record<string, unknown>): Promise<boolean> {
   if (!url) return false;
   try {
-    await fetch(url, {
+    await vendorFetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -55,7 +56,7 @@ async function sendSmsToJustin(_s: SupabaseClient, message: string): Promise<boo
   if (!JUSTIN_PHONE) return false;
   // Payload must match send-twilio-sms' schema, and a non-2xx must be visible.
   try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+    const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
@@ -397,7 +398,7 @@ const HANDLERS: Record<string, Handler> = {
     for (const conv of open ?? []) {
       if (!conv.customer_phone_e164) continue;
       try {
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+        const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,

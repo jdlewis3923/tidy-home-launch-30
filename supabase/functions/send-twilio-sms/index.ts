@@ -31,6 +31,7 @@ import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { withLogging, logInvocation } from '../_shared/withLogging.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 import { closedReason, isQuietHours, isSundayET, nextOpenWindow, queueSms } from '../_shared/sms-window.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const REQUIRED_ENV = [
   'SUPABASE_URL',
@@ -74,7 +75,7 @@ async function logSmsSend(
   },
 ) {
   try {
-    await fetch(`${supabaseUrl}/rest/v1/email_send_log`, {
+    await vendorFetch(`${supabaseUrl}/rest/v1/email_send_log`, {
       method: 'POST',
       headers: {
         apikey: serviceKey,
@@ -328,7 +329,7 @@ Deno.serve(async (req) => {
           // Delivery receipts → twilio-status-callback → sms_delivery_events.
           form.set('StatusCallback', `${SUPABASE_URL}/functions/v1/twilio-status-callback`);
 
-          const res = await fetch(apiUrl, {
+          const res = await vendorFetch(apiUrl, {
             method: 'POST',
             headers: {
               'Authorization': `Basic ${basic}`,

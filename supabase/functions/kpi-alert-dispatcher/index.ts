@@ -11,6 +11,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendBrevoEmail as sendViaBrevo } from '../_shared/brevo-send.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -60,7 +61,7 @@ Deno.serve(async (req) => {
   // channel is recorded only when the message was actually accepted.
   if (severity === 'critical' && JUSTIN_PHONE) {
     try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+      const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,

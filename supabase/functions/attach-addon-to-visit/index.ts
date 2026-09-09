@@ -14,6 +14,7 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendBrevoEmail as sendViaBrevo } from '../_shared/brevo-send.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -122,7 +123,7 @@ Deno.serve(async (req) => {
         price: addon.stripe_price_id,
         description: `${addonName} — add-on for visit ${visit_date ?? ''}`.trim(),
       });
-      const resp = await fetch('https://api.stripe.com/v1/invoiceitems', {
+      const resp = await vendorFetch('https://api.stripe.com/v1/invoiceitems', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
@@ -173,7 +174,7 @@ Deno.serve(async (req) => {
     // Brevo contact attrs + transactional email
     if (BREVO_API_KEY && userEmail) {
       try {
-        await fetch(`https://api.brevo.com/v3/contacts/${encodeURIComponent(userEmail)}`, {
+        await vendorFetch(`https://api.brevo.com/v3/contacts/${encodeURIComponent(userEmail)}`, {
           method: 'PUT',
           headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({

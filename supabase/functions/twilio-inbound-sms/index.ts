@@ -3,6 +3,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { createHmac } from "node:crypto";
 import { runSupportAssistant, notifyAdminEmail, type SupportMsg } from "../_shared/support-assistant.ts";
+import { vendorFetch } from '../_shared/http.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -131,7 +132,7 @@ Deno.serve(async (req) => {
     let twilioError: string | null = null;
     let twilioQueued = false;
     try {
-      const sendResp = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+      const sendResp = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
