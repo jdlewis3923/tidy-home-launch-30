@@ -13,7 +13,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Bell, ChevronDown, Inbox, Calendar, FlaskConical, Gauge, Menu, X, Power } from 'lucide-react';
-import tidyLogo from '@/assets/tidy-logo.png';
+import tidyLogo from '@/assets/tidy-logo-trimmed.png';
 import { supabase } from '@/integrations/supabase/client';
 import { useHasRoleState } from '@/hooks/useHasRole';
 
@@ -64,7 +64,7 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
           <img
             src={tidyLogo}
             alt="Tidy"
-            className="h-12 w-auto sm:h-16 drop-shadow-[0_4px_14px_rgba(15,23,42,0.12)]"
+            className="h-11 w-auto sm:h-14 drop-shadow-[0_4px_14px_rgba(15,23,42,0.12)]"
           />
         </Link>
 
