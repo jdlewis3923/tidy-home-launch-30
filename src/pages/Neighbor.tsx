@@ -7,7 +7,7 @@ import SeoHead from "@/components/landing/SeoHead";
 import Reveal from "@/components/landing/Reveal";
 import LandingTicker from "@/components/landing/LandingTicker";
 import FiveStarBand from "@/components/landing/FiveStarBand";
-import TidyLogo from "@/components/TidyLogo";
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { buildSignupHref } from "@/lib/landing";
@@ -216,9 +216,6 @@ const Neighbor = () => {
 
 <div className="px-5 pb-8 pt-32 md:px-8 md:pb-16 md:pt-40">
             <div className="mx-auto w-full max-w-3xl">
-              <div className="mb-5">
-                <TidyLogo size="md" priority />
-              </div>
               <span className="inline-flex rounded-full bg-[#F7C618] px-3 py-1 text-[13px] font-extrabold uppercase tracking-wide text-[#0F1729]">
                 {t(FOUNDING_OFFER.headline)}
               </span>
