@@ -108,8 +108,28 @@ async function sendPush(n: ProNotification): Promise<{ outcome: PushOutcome; det
   }
 }
 
+/**
+ * How long an urgent Pro text is still worth delivering. After this it is
+ * cancelled rather than sent: a Pro who reads "customer approved the add-on"
+ * the next morning is worse off than one who never got the text.
+ */
+const URGENT_SMS_TTL_MINUTES: Record<string, number> = {
+  addon_approved: 30,
+  addon_declined: 30,
+  addon_expired: 30,
+  visit_canceled_today: 240,
+  visit_substitution: 240,
+  visit_assigned_today: 240,
+  visit_tomorrow: 720,
+};
+
 // deno-lint-ignore no-explicit-any
-async function smsFallback(admin: any, n: ProNotification, key: string): Promise<{ outcome: SmsOutcome; detail?: string }> {
+async function smsFallback(
+  admin: any,
+  n: ProNotification,
+  key: string,
+  urgent: boolean,
+): Promise<{ outcome: SmsOutcome; detail?: string }> {
   const { data: pro } = await admin
     .from('applicants')
     .select('phone')
@@ -132,9 +152,26 @@ async function smsFallback(admin: any, n: ProNotification, key: string): Promise
         idempotency_key: `sms-fallback:${key}`,
         template_name: `pro-${n.kind}`,
         triggered_by: 'pro-notify-fallback',
+        // Urgent means urgent: the courtesy window does not apply to a Pro who
+        // is standing in a customer's house waiting on an answer. Without this
+        // the 18:05 add-on approval was parked until 08:00 and still reported
+        // as delivered.
+        skip_window: urgent,
+        expires_at: urgent
+          ? new Date(Date.now() + (URGENT_SMS_TTL_MINUTES[n.kind] ?? 60) * 60_000).toISOString()
+          : undefined,
       }),
     });
-    if (res.status === 202) return { outcome: 'queued', detail: 'outside send window — parked in the outbox' };
+    if (res.status === 202) {
+      // Parked, not delivered. For an urgent kind this is a failure, and the
+      // caller must not report success.
+      return {
+        outcome: urgent ? 'failed' : 'queued',
+        detail: urgent
+          ? 'urgent text was parked outside the send window instead of sending'
+          : 'outside send window — parked in the outbox',
+      };
+    }
     if (res.ok) return { outcome: 'sent' };
     const detail = (await res.text().catch(() => '')).slice(0, 200);
     return { outcome: 'failed', detail: `HTTP ${res.status} ${detail}` };
@@ -205,8 +242,10 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<ProNoti
     return { ok: false, recorded: true, urgent, push: push.outcome, sms: 'not_needed', detail: push.detail };
   }
 
-  const sms = await smsFallback(admin, n, key);
-  const delivered = sms.outcome === 'sent' || sms.outcome === 'queued';
+  const sms = await smsFallback(admin, n, key, urgent);
+  // "Queued" is not "delivered". A time-critical message parked for the morning
+  // has not reached anybody, and saying otherwise is how this stayed hidden.
+  const delivered = sms.outcome === 'sent';
   if (!delivered) {
     await admin.from('admin_alerts').insert({
       alert_type: 'pro_notification_undeliverable',

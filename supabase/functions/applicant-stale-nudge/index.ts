@@ -62,13 +62,9 @@ Deno.serve(async (req) => {
 
     try {
     if (bucket === 'day_30') {
-      await admin.from('applicants').update({
-        current_stage: 'rejected',
-        rejected_at: new Date().toISOString(),
-        rejection_reason: 'Auto-rejected: 30 days inactive',
-        updated_at: new Date().toISOString(),
-      }).eq('id', a.id);
-
+      // Tell them FIRST, close the application second. Closing before the send
+      // meant a Brevo failure rejected someone silently and permanently — the
+      // query above excludes 'rejected', so they were never picked up again.
       const html = brandedEmailHtml({
         heading: 'Your Tidy application',
         bodyHtml: `<p>Hi ${a.first_name ?? 'there'},</p><p>We didn't hear back after a few check-ins, so we've closed your application for now. If you'd like to re-apply in the future, you're always welcome.</p>`,
@@ -79,6 +75,13 @@ Deno.serve(async (req) => {
         htmlContent: html, tags: ['applicant-stale-auto-reject'],
         templateName: 'applicant-stale-auto-reject', triggeredBy: 'applicant-stale-nudge',
       });
+
+      await admin.from('applicants').update({
+        current_stage: 'rejected',
+        rejected_at: new Date().toISOString(),
+        rejection_reason: 'Auto-rejected: 30 days inactive',
+        updated_at: new Date().toISOString(),
+      }).eq('id', a.id);
     } else {
       const isLast = bucket === 'day_14';
       const html = brandedEmailHtml({

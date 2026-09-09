@@ -105,10 +105,16 @@ Deno.serve(async (req) => {
             idempotency_key: `omw:${visit_id}`,
             template_name: 'pro_on_my_way',
             triggered_by: 'pro-visit-action',
+            // "On my way" is only true for the next few hours.
+            expires_at: new Date(Date.now() + 4 * 3_600_000).toISOString(),
           }),
         });
         const out = await res.json().catch(() => ({}));
-        sms = out?.ok === false ? `sms_failed:${out?.error ?? 'unknown'}` : 'sent';
+        // 202 means parked for the next window, not delivered. Reporting a
+        // parked text as "sent" is how a never-arriving heads-up looked fine.
+        sms = res.status === 202
+          ? 'queued_for_send_window'
+          : out?.ok === false ? `sms_failed:${out?.error ?? 'unknown'}` : 'sent';
       }
       return jsonResponse({ ok: true, action, sms });
     }

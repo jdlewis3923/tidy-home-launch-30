@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
   try {
     if (req.method !== 'POST') {
       await finish('error', 'method_not_allowed');
-      return jsonResponse({ ok: false, error: 'method_not_allowed' }, 200);
+      return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
     }
 
     const { values, missing } = readEnv(REQUIRED_ENV);
@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
       const err = missingEnvError(missing);
       console.error(`[send-brevo-email] ${err}`);
       await finish('error', err);
-      return jsonResponse({ ok: false, error: err, missing_env: missing }, 200);
+      return jsonResponse({ ok: false, error: err, missing_env: missing }, 500);
     }
 
     const authorized = await isAuthorized(
@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
       raw = await req.json();
     } catch {
       await finish('error', 'invalid_json_body');
-      return jsonResponse({ ok: false, error: 'invalid_json_body' }, 200);
+      return jsonResponse({ ok: false, error: 'invalid_json_body' }, 400);
     }
 
     const parsed = BodySchema.safeParse(raw);
@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
       await finish('error', 'validation_failed');
       return jsonResponse(
         { ok: false, error: 'validation_failed', details: parsed.error.flatten().fieldErrors },
-        200,
+        400,
       );
     }
 
@@ -148,12 +148,12 @@ Deno.serve(async (req) => {
       const err = 'HTML_NOT_ALLOWED: the Brevo template is the design; pass params only';
       console.error(`[send-brevo-email] ${err}`);
       await finish('error', err);
-      return jsonResponse({ ok: false, error: err }, 200);
+      return jsonResponse({ ok: false, error: err }, 400);
     }
     if (parsed.data.subject !== undefined) {
       const err = 'SUBJECT_NOT_ALLOWED: the subject lives in the Brevo template';
       await finish('error', err);
-      return jsonResponse({ ok: false, error: err }, 200);
+      return jsonResponse({ ok: false, error: err }, 400);
     }
 
     // Template must be registered — no stray numeric IDs.
@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
       const err = `UNKNOWN_TEMPLATE_ID: ${template_id} is not in the email template registry`;
       console.error(`[send-brevo-email] ${err}`);
       await finish('error', err);
-      return jsonResponse({ ok: false, error: err }, 200);
+      return jsonResponse({ ok: false, error: err }, 400);
     }
 
     // Fail loudly rather than deliver a mail showing a raw {{ params.x }}.
@@ -171,7 +171,7 @@ Deno.serve(async (req) => {
       const err = `MISSING_PARAMS: ${key} requires ${missingParams.join(', ')}`;
       console.error(`[send-brevo-email] ${err}`);
       await finish('error', err);
-      return jsonResponse({ ok: false, error: err, missing_params: missingParams }, 200);
+      return jsonResponse({ ok: false, error: err, missing_params: missingParams }, 400);
     }
 
     const recipients = normalizeRecipients(to);
@@ -198,7 +198,12 @@ Deno.serve(async (req) => {
       const err = `brevo ${res.status}: ${text.slice(0, 300)}`;
       console.error(`[send-brevo-email] send failed ${key}`, err);
       await finish('error', err);
-      return jsonResponse({ ok: false, error: err, template: key, status: res.status }, 200);
+      // A failed send must fail the HTTP call too: a 200 here told every caller
+      // the mail went out. Upstream 4xx is our payload's fault, 5xx is Brevo's.
+      return jsonResponse(
+        { ok: false, error: err, template: key, status: res.status },
+        res.status >= 400 && res.status < 500 ? 400 : 502,
+      );
     }
 
     let json: Record<string, unknown> = {};
@@ -217,6 +222,6 @@ Deno.serve(async (req) => {
     const message = err instanceof Error ? err.message : 'unknown error';
     console.error('[send-brevo-email] unhandled', message);
     await finish('error', `unhandled: ${message}`);
-    return jsonResponse({ ok: false, error: message }, 200);
+    return jsonResponse({ ok: false, error: message }, 500);
   }
 });

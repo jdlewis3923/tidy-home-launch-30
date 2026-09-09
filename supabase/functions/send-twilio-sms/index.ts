@@ -50,6 +50,11 @@ const BodySchema = z.object({
   triggered_by: z.string().min(1).max(120).optional(),
   /** Set by sms-outbox-release when draining a parked message. */
   skip_window: z.boolean().optional(),
+  /**
+   * ISO instant after which a parked copy of this message must be canceled
+   * instead of delivered — the event it refers to has passed by then.
+   */
+  expires_at: z.string().datetime().optional(),
 }).refine((v) => !!v.body || !!v.content_sid, {
   message: 'either body or content_sid required',
 });
@@ -245,7 +250,7 @@ Deno.serve(async (req) => {
 
     const {
       to_phone_e164, body, content_sid, content_variables,
-      idempotency_key, template_name, triggered_by, skip_window,
+      idempotency_key, template_name, triggered_by, skip_window, expires_at,
     } = parsed.data;
     const tplName = template_name ?? content_sid ?? 'sms-adhoc';
 
@@ -268,9 +273,19 @@ Deno.serve(async (req) => {
     const blocked = skip_window ? null : closedReason();
     if (blocked) {
       const releaseAfter = nextOpenWindow();
+      // Already stale before it is even parked: park nothing, say so plainly.
+      if (expires_at && new Date(expires_at).getTime() <= Date.now()) {
+        await finish('warning', 'expired_before_queue');
+        return jsonResponse({
+          ok: false, sent: false, queued: false, error: 'expired_before_queue', reason: blocked,
+        }, 200);
+      }
       const q = await queueSms(
         admin,
-        { to_phone_e164, body, content_sid, content_variables, idempotency_key, template_name: tplName, triggered_by },
+        {
+          to_phone_e164, body, content_sid, content_variables, idempotency_key,
+          template_name: tplName, triggered_by, expires_at: expires_at ?? null,
+        },
         blocked,
         releaseAfter,
       );
