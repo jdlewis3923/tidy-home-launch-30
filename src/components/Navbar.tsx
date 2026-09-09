@@ -51,13 +51,13 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
   if (CUSTOMER_DASHBOARD_ENABLED) {
     return (
       <nav className={`fixed top-0 left-0 right-0 z-50 bg-background border-b transition-shadow duration-300 ${scrolled ? "shadow-md" : ""}`}>
-        <div className="max-w-7xl mx-auto px-4 h-24 flex items-center justify-between">
-          <div className="flex items-center gap-3 shrink-0">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 h-24 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <Link to="/" aria-label="Tidy home" className="flex shrink-0 items-center">
               <TidyLogo size="nav" />
             </Link>
             <div className="relative">
-              <button className="p-2 rounded-lg hover:bg-muted transition-colors" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
+              <button className="p-1.5 sm:p-2 rounded-lg hover:bg-muted transition-colors" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
                 {menuOpen ? <X className="w-5 h-5 text-foreground" /> : <Menu className="w-5 h-5 text-foreground" />}
               </button>
               {menuOpen && (
@@ -87,12 +87,12 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex min-w-0 items-center gap-1.5 sm:gap-4">
             <LanguageToggle />
             <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">
               Login
             </Link>
-            <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: ctaText }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold whitespace-nowrap px-3.5 sm:px-5 py-2.5 rounded-lg text-[13px] sm:text-sm transition-colors animate-pulse-gold">
+            <button id="cta-navbar" data-track="cta_navbar" onClick={() => { pushEvent("cta_click", { cta_id: "navbar", cta_text: ctaText }); onOpenPopup(); }} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold whitespace-nowrap px-2.5 sm:px-5 py-2.5 rounded-lg text-[11px] sm:text-sm transition-colors animate-pulse-gold">
               {t(ctaText)}
             </button>
           </div>
