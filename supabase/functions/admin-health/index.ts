@@ -189,6 +189,7 @@ Deno.serve(async (req) => {
           stale_sources: TRACKED_SOURCES.filter((s) => sources[s].total_calls === 0),
           cron,
           cron_stale_count,
+          cron_captured_at,
         };
       },
     });
