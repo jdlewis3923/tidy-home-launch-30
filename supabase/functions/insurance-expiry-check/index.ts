@@ -9,6 +9,7 @@
 // eligibility (see public.is_contractor_job_eligible).
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { sendBrevoEmail, sendBrevoEmailOrThrow } from '../_shared/brevo-send.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -76,6 +77,12 @@ async function fireBrevo(id: number, key: string, to: { email: string; name: str
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
+
+  // This job emails contractors and flips job eligibility — it is not open to
+  // the public. Cron credential or service-role bearer only.
+  if (!(await isCronAuthorized(req))) {
+    return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+  }
 
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
