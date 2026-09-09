@@ -104,4 +104,50 @@ export async function vendorFetch(
   }
 }
 
+/**
+ * Bounds EVERY outbound call in the invocation, including the ones we never
+ * write by hand: supabase-js REST/auth/storage requests, `esm.sh` module
+ * fetches, any vendor SDK. Without this, a function that makes no literal
+ * `fetch` call is still unbounded — a hung database or gateway connection holds
+ * the invocation open with nothing to abort it.
+ *
+ * Runs on import, once, and is idempotent. The unbounded-host rule still
+ * applies, so model inference is unaffected.
+ */
+export function installGlobalFetchTimeout(): void {
+  const g = globalThis as typeof globalThis & { __tidyFetchBounded?: boolean };
+  if (g.__tidyFetchBounded) return;
+  g.__tidyFetchBounded = true;
+  const native = globalThis.fetch.bind(globalThis);
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === 'string'
+      ? input
+      : input instanceof URL
+        ? input.toString()
+        : (input as Request).url;
+    const budget = timeoutForUrl(url);
+    // An explicit caller signal means the caller owns cancellation already,
+    // but we still add our own deadline on top of it.
+    if (budget === null) return native(input as RequestInfo, init);
+    const controller = new AbortController();
+    const outer = init?.signal;
+    if (outer) {
+      if (outer.aborted) controller.abort(outer.reason);
+      else outer.addEventListener('abort', () => controller.abort(outer.reason), { once: true });
+    }
+    const timer = setTimeout(() => controller.abort(new HttpTimeoutError(url, budget)), budget);
+    return native(input as RequestInfo, { ...(init ?? {}), signal: controller.signal })
+      .catch((e) => {
+        if (controller.signal.aborted && controller.signal.reason instanceof HttpTimeoutError) {
+          throw controller.signal.reason;
+        }
+        throw e;
+      })
+      .finally(() => clearTimeout(timer));
+  }) as typeof fetch;
+}
+
+// Side effect on import: importing this module bounds the whole invocation.
+installGlobalFetchTimeout();
+
 export default vendorFetch;
