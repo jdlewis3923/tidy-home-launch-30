@@ -242,8 +242,10 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<ProNoti
     return { ok: false, recorded: true, urgent, push: push.outcome, sms: 'not_needed', detail: push.detail };
   }
 
-  const sms = await smsFallback(admin, n, key);
-  const delivered = sms.outcome === 'sent' || sms.outcome === 'queued';
+  const sms = await smsFallback(admin, n, key, urgent);
+  // "Queued" is not "delivered". A time-critical message parked for the morning
+  // has not reached anybody, and saying otherwise is how this stayed hidden.
+  const delivered = sms.outcome === 'sent';
   if (!delivered) {
     await admin.from('admin_alerts').insert({
       alert_type: 'pro_notification_undeliverable',
