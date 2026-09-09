@@ -88,6 +88,15 @@ Deno.serve(async (req) => {
   }
   const { job_id, addon_key, condition_note, photo_path } = parsed.data;
 
+  // The signed URL below is minted with the service role, which bypasses the
+  // job-condition-photos storage policy ("first folder = auth.uid()"). Enforce
+  // that same prefix here, or Pro A could hand us Pro B's path and receive a
+  // 7-day signed URL to another customer's home.
+  if (!photo_path.startsWith(`${proUserId}/`) || photo_path.includes('..')) {
+    return jsonResponse({ ok: false, error: 'photo_path_not_yours' }, 403);
+  }
+
+
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
