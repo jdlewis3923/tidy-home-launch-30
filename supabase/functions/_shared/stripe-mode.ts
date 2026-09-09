@@ -22,3 +22,21 @@ export function stripeSecretKey(): string | null {
     : Deno.env.get("STRIPE_SECRET_KEY");
   return key && key.length > 0 ? key : null;
 }
+
+/**
+ * Non-null when the configured secret key is from the OTHER environment than
+ * STRIPE_MODE says — e.g. STRIPE_MODE=live with an sk_test_ key. Callers should
+ * refuse to transact rather than create a charge in the wrong environment.
+ */
+export function stripeModeConflict(): string | null {
+  const mode = stripeMode();
+  const key = stripeSecretKey();
+  if (!key) return null;
+  const keyMode = key.startsWith("sk_test_") ? "test" : key.startsWith("sk_live_") ? "live" : null;
+  if (!keyMode) return "STRIPE secret key is not a recognizable sk_test_ / sk_live_ key";
+  if (keyMode !== mode) {
+    return `STRIPE_MODE is "${mode}" but the configured secret key is a ${keyMode}-mode key`;
+  }
+  return null;
+}
+
