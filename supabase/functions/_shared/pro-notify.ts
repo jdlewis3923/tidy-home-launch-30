@@ -108,8 +108,28 @@ async function sendPush(n: ProNotification): Promise<{ outcome: PushOutcome; det
   }
 }
 
+/**
+ * How long an urgent Pro text is still worth delivering. After this it is
+ * cancelled rather than sent: a Pro who reads "customer approved the add-on"
+ * the next morning is worse off than one who never got the text.
+ */
+const URGENT_SMS_TTL_MINUTES: Record<string, number> = {
+  addon_approved: 30,
+  addon_declined: 30,
+  addon_expired: 30,
+  visit_canceled_today: 240,
+  visit_substitution: 240,
+  visit_assigned_today: 240,
+  visit_tomorrow: 720,
+};
+
 // deno-lint-ignore no-explicit-any
-async function smsFallback(admin: any, n: ProNotification, key: string): Promise<{ outcome: SmsOutcome; detail?: string }> {
+async function smsFallback(
+  admin: any,
+  n: ProNotification,
+  key: string,
+  urgent: boolean,
+): Promise<{ outcome: SmsOutcome; detail?: string }> {
   const { data: pro } = await admin
     .from('applicants')
     .select('phone')
