@@ -126,6 +126,13 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   if (!STRIPE_SECRET_KEY) return jsonResponse({ ok: false, error: "Stripe not configured" }, 500);
+  // Refuse to transact when STRIPE_MODE and the secret key disagree.
+  const modeConflict = stripeModeConflict();
+  if (modeConflict) {
+    console.error("[create-stripe-payment-intent]", modeConflict);
+    return jsonResponse({ ok: false, error: `Stripe misconfigured: ${modeConflict}` }, 500);
+  }
+
 
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) return jsonResponse({ ok: false, error: "unauthorized" }, 401);
