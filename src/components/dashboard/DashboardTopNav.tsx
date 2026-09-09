@@ -64,7 +64,7 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
           <img
             src={tidyLogo}
             alt="Tidy"
-            className="h-12 w-auto sm:h-16 drop-shadow-[0_4px_14px_rgba(15,23,42,0.12)]"
+            className="h-11 w-auto sm:h-14 drop-shadow-[0_4px_14px_rgba(15,23,42,0.12)]"
           />
         </Link>
 
