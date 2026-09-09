@@ -554,6 +554,13 @@
       "when": 1788933772212,
       "tag": "0078_cron_kpi_realtime_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1788933786262,
+      "tag": "0079_cron_social_launch_publisher_schedule",
+      "breakpoints": true
     }
   ]
 }
