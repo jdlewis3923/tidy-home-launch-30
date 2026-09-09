@@ -273,9 +273,19 @@ Deno.serve(async (req) => {
     const blocked = skip_window ? null : closedReason();
     if (blocked) {
       const releaseAfter = nextOpenWindow();
+      // Already stale before it is even parked: park nothing, say so plainly.
+      if (expires_at && new Date(expires_at).getTime() <= Date.now()) {
+        await finish('warning', 'expired_before_queue');
+        return jsonResponse({
+          ok: false, sent: false, queued: false, error: 'expired_before_queue', reason: blocked,
+        }, 200);
+      }
       const q = await queueSms(
         admin,
-        { to_phone_e164, body, content_sid, content_variables, idempotency_key, template_name: tplName, triggered_by },
+        {
+          to_phone_e164, body, content_sid, content_variables, idempotency_key,
+          template_name: tplName, triggered_by, expires_at: expires_at ?? null,
+        },
         blocked,
         releaseAfter,
       );
