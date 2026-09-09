@@ -40,15 +40,17 @@ const COI_CHECKS = [
 
 const KIT_ITEMS = ["Badge", "Polo", "Tee", "Vest", "Cap", "Vehicle magnets", "Welcome letter"];
 
-const SECTIONS: { title: string; fields: [string, string, "text" | "date" | "number" | "textarea"][] }[] = [
+type KitFieldType = "text" | "date" | "number" | "textarea" | "tel" | "email" | "zip";
+
+const SECTIONS: { title: string; fields: [string, string, KitFieldType][] }[] = [
   {
     title: "Identity and contact",
     fields: [
       ["legal_name", "Full legal name", "text"],
       ["badge_name", "Badge name", "text"],
-      ["mobile", "Mobile", "text"],
-      ["email", "Email", "text"],
-      ["home_zip", "Home ZIP", "text"],
+      ["mobile", "Mobile", "tel"],
+      ["email", "Email", "email"],
+      ["home_zip", "Home ZIP", "zip"],
       ["mail_address", "Mailing address", "textarea"],
       ["badge_back", "Badge back language", "text"],
     ],
@@ -139,13 +141,14 @@ export default function ProKitEditor({ kit, onSaved }: { kit: ProKitRow; onSaved
     else { toast({ title: "Kit saved" }); onSaved(); }
   };
 
-  const input = "mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground";
+  const input =
+    "mt-1 min-h-[44px] w-full rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground sm:text-sm";
 
   return (
     <div className="mt-5 space-y-6">
       <div>
-        <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Status</label>
-        <select className={input} value={String(draft.status ?? "sent")} onChange={(e) => set("status", e.target.value)}>
+        <label htmlFor="kit-status" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Status</label>
+        <select id="kit-status" className={input} value={String(draft.status ?? "sent")} onChange={(e) => set("status", e.target.value)}>
           {Object.entries(KIT_STATUS_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -159,12 +162,29 @@ export default function ProKitEditor({ kit, onSaved }: { kit: ProKitRow; onSaved
           <div className="mt-2 grid gap-3 sm:grid-cols-2">
             {s.fields.map(([k, label, type]) => (
               <div key={k} className={type === "textarea" ? "sm:col-span-2" : ""}>
-                <label className="text-xs font-semibold text-foreground">{label}</label>
+                <label htmlFor={`kit-${k}`} className="text-xs font-semibold text-foreground">{label}</label>
                 {type === "textarea" ? (
-                  <textarea rows={2} className={input} value={String(draft[k] ?? "")} onChange={(e) => set(k, e.target.value)} />
+                  <textarea id={`kit-${k}`} rows={2} className={input} value={String(draft[k] ?? "")} onChange={(e) => set(k, e.target.value)} />
                 ) : (
                   <input
-                    type={type === "date" ? "date" : type === "number" ? "number" : "text"}
+                    id={`kit-${k}`}
+                    type={
+                      type === "date" ? "date"
+                      : type === "number" ? "number"
+                      : type === "tel" ? "tel"
+                      : type === "email" ? "email"
+                      : "text"
+                    }
+                    inputMode={
+                      type === "number" || type === "zip" ? "numeric"
+                      : type === "tel" ? "tel"
+                      : type === "email" ? "email"
+                      : undefined
+                    }
+                    autoComplete={
+                      type === "tel" ? "tel" : type === "email" ? "email" : type === "zip" ? "postal-code" : undefined
+                    }
+                    maxLength={type === "zip" ? 5 : undefined}
                     className={input}
                     value={String(draft[k] ?? "")}
                     onChange={(e) => set(k, type === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value)}
@@ -214,7 +234,7 @@ function CheckList({
               key={i}
               type="button"
               onClick={() => onToggle(i)}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
+              className={`min-h-[44px] rounded-lg border px-3 py-2 text-xs font-semibold ${
                 on ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground"
               }`}
             >

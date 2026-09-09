@@ -65,7 +65,8 @@ export default function AdminProKits() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search name, email or service line"
-            className="w-full bg-transparent text-sm text-foreground outline-none"
+            aria-label="Search kits"
+            className="h-11 w-full bg-transparent text-base text-foreground outline-none sm:text-sm"
           />
         </div>
 
@@ -104,12 +105,12 @@ export default function AdminProKits() {
       {open && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40" onClick={() => setParams({})}>
           <div
-            className="h-full w-full max-w-xl overflow-y-auto bg-card p-6 shadow-2xl"
+            className="h-full w-full max-w-xl overflow-x-hidden overflow-y-auto bg-card p-4 shadow-2xl sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-foreground">Kit record</h2>
-              <button onClick={() => setParams({})} className="text-sm font-semibold text-muted-foreground">Close</button>
+              <button onClick={() => setParams({})} className="min-h-[44px] px-2 text-sm font-semibold text-muted-foreground">Close</button>
             </div>
             <ProKitEditor kit={open} onSaved={load} />
           </div>
