@@ -2,7 +2,7 @@
  * Tidy Pro Portal — reusable component kit.
  *
  * One outline icon family (lucide), tap targets >= 44px, operational text
- * (pay + address) never shrunk. All colour comes from --pro-* tokens.
+ * (pay + address) never shrunk. All color comes from --pro-* tokens.
  */
 import { forwardRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
