@@ -621,6 +621,15 @@ body.admin-hud > #root {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+}
+/* On phones the HUD must never push the page into horizontal scroll. */
+@media (max-width: 640px) {
+  .admin-hud-topbar { padding: 0 10px; }
+  .admin-hud-topbar__right .admin-hud-meta,
+  .admin-hud-topbar__right .admin-hud-divider { display: none; }
+  .admin-hud-topbar__right .admin-hud-time { display: inline; }
 }
 .admin-hud-label {
   font-weight: 700;

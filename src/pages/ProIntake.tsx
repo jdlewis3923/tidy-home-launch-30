@@ -20,7 +20,7 @@ const NAVY = "#0A2A47";
 const YELLOW = "#FCCC00";
 const SUPPORT_EMAIL = "hello@jointidy.co";
 
-type FieldType = "text" | "tel" | "email" | "date" | "number" | "textarea" | "select" | "bool" | "multi";
+type FieldType = "text" | "zip" | "tel" | "email" | "date" | "number" | "textarea" | "select" | "bool" | "multi";
 
 type Field = {
   name: string;
@@ -50,7 +50,7 @@ const STEPS: Step[] = [
       { name: "badge_name", label: "Name for the badge", type: "text", required: true, help: "First name + last initial, exactly as it should print — confirm accents." },
       { name: "mobile", label: "Mobile", type: "tel", required: true, placeholder: "(786) 555-1234" },
       { name: "email", label: "Email", type: "email", required: true },
-      { name: "home_zip", label: "Home ZIP", type: "text", required: true, placeholder: "33183" },
+      { name: "home_zip", label: "Home ZIP", type: "zip", required: true, placeholder: "33183" },
       { name: "mail_address", label: "Mailing address for the kit", type: "textarea", required: true },
       { name: "badge_back", label: "Badge back language", type: "select", options: ["Spanish primary", "English primary", "No preference"] },
     ],
@@ -82,7 +82,7 @@ const STEPS: Step[] = [
         required: true,
         options: [
           "Steel — magnet holds",
-          "Aluminium — will NOT hold",
+          "Aluminum — will NOT hold",
           "Plastic or composite — will NOT hold",
           "Unsure",
         ],
@@ -128,7 +128,7 @@ const STEPS: Step[] = [
 
 const isEmpty = (v: unknown) => v === null || v === undefined || (Array.isArray(v) ? v.length === 0 : String(v).trim() === "");
 
-const MAGNET_RISK = ["Aluminium — will NOT hold", "Plastic or composite — will NOT hold", "Unsure"];
+const MAGNET_RISK = ["Aluminum — will NOT hold", "Aluminium — will NOT hold", "Plastic or composite — will NOT hold", "Unsure"];
 
 export default function ProIntake() {
   const { token = "" } = useParams();
@@ -334,7 +334,7 @@ export default function ProIntake() {
             ))}
             {step === 2 && MAGNET_RISK.includes(String(values.door_material ?? "")) && (
               <div className="rounded-xl border-2 border-red-500 bg-red-50 p-4 text-sm text-red-800">
-                <strong className="block">Magnets will not stick to aluminium or composite doors.</strong>
+                <strong className="block">Magnets will not stick to aluminum or composite doors.</strong>
                 Test with any household magnet on your front door before we order. We never tape or adhere anything to your vehicle.
               </div>
             )}
@@ -401,7 +401,7 @@ function FieldRow({
   onChange: (name: string, v: string | string[]) => void;
 }) {
   const id = `field-${field.name}`;
-  const base = `w-full rounded-xl border px-3.5 py-3 text-base text-slate-900 outline-none focus:ring-2 ${
+  const base = `min-h-[48px] w-full rounded-xl border px-3.5 py-3 text-base text-slate-900 outline-none focus:ring-2 ${
     error ? "border-red-500 focus:ring-red-200" : "border-slate-300 focus:ring-slate-200"
   }`;
   const selected = Array.isArray(value) ? value : [];
@@ -447,8 +447,37 @@ function FieldRow({
         ) : (
           <input
             id={`${id}-input`}
-            type={field.type === "number" ? "number" : field.type === "date" ? "date" : field.type}
-            inputMode={field.type === "number" ? "numeric" : undefined}
+            type={
+              field.type === "number"
+                ? "number"
+                : field.type === "date"
+                ? "date"
+                : field.type === "zip"
+                ? "text"
+                : field.type
+            }
+            inputMode={
+              field.type === "number" || field.type === "zip"
+                ? "numeric"
+                : field.type === "tel"
+                ? "tel"
+                : field.type === "email"
+                ? "email"
+                : undefined
+            }
+            autoComplete={
+              field.type === "tel"
+                ? "tel"
+                : field.type === "email"
+                ? "email"
+                : field.type === "zip"
+                ? "postal-code"
+                : undefined
+            }
+            maxLength={field.type === "zip" ? 5 : undefined}
+            pattern={field.type === "zip" ? "[0-9]{5}" : undefined}
+            autoCapitalize={field.type === "email" ? "none" : undefined}
+            spellCheck={field.type === "email" ? false : undefined}
             className={base}
             placeholder={field.placeholder}
             value={String(value ?? "")}
