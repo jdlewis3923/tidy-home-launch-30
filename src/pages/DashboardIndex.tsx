@@ -57,6 +57,12 @@ import {
   formatMoney,
   serviceLabel,
 } from '@/lib/dashboard-data';
+import {
+  ARRIVAL_WINDOWS,
+  ARRIVAL_WINDOW_MORNING,
+  ARRIVAL_WINDOW_PENDING_LABEL,
+  arrivalWindowLabel,
+} from '@/lib/arrival-windows';
 import { useLanguage } from '@/contexts/LanguageContext';
 import lawnImg from '@/assets/lawn-care.jpg';
 import cleaningImg from '@/assets/cleaning-interior.jpg';
@@ -81,7 +87,6 @@ const SERVICE_DOT_BG: Record<string, string> = {
   detailing: 'bg-violet-500',
 };
 
-const TIME_WINDOW_FALLBACK = '8:00 – 11:00 AM';
 
 export default function DashboardIndex() {
   const navigate = useNavigate();
@@ -99,8 +104,20 @@ export default function DashboardIndex() {
 
   // Controlled fields for support_requests modals.
   const [rescheduleDate, setRescheduleDate] = useState<string>('');
-  const [rescheduleWindow, setRescheduleWindow] = useState<string>('8:00 AM – 12:00 PM');
+  const [rescheduleWindow, setRescheduleWindow] = useState<string>(ARRIVAL_WINDOW_MORNING);
   const [noteText, setNoteText] = useState<string>('');
+
+  // Reschedule guardrails: never sooner than 2 days out, never a Sunday.
+  const minRescheduleDate = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 2);
+    return d.toISOString().slice(0, 10);
+  }, []);
+  const rescheduleIsSunday = useMemo(() => {
+    if (!rescheduleDate) return false;
+    const [y, m, d] = rescheduleDate.split('-').map(Number);
+    return new Date(y, m - 1, d).getDay() === 0;
+  }, [rescheduleDate]);
   const [accessGate, setAccessGate] = useState<string>('');
   const [accessParking, setAccessParking] = useState<string>('');
   const [accessPets, setAccessPets] = useState<string>('');
@@ -114,6 +131,11 @@ export default function DashboardIndex() {
     }
     if (activeModal === 'reschedule') {
       setRescheduleDate(data.nextVisit?.visit_date ?? '');
+      // Prefill the window from the visit itself when it is a canonical one.
+      const current = data.nextVisit?.time_window ?? '';
+      setRescheduleWindow(
+        (ARRIVAL_WINDOWS as readonly string[]).includes(current) ? current : ARRIVAL_WINDOW_MORNING,
+      );
     }
     if (activeModal === null) {
       setSubmitState('idle');
@@ -297,7 +319,7 @@ export default function DashboardIndex() {
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-ink-soft">
                       <span>{formatLongDate(data.nextVisit.visit_date)}</span>
                       <span>·</span>
-                      <span>{data.nextVisit.time_window || TIME_WINDOW_FALLBACK}</span>
+                      <span>{arrivalWindowLabel(data.nextVisit.time_window)}</span>
                       <span className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
                         <span className="relative inline-flex h-1.5 w-1.5">
                           <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 live-dot" />
@@ -443,7 +465,7 @@ export default function DashboardIndex() {
                               {serviceLabel(v.service)}
                             </span>
                             <span className="text-ink-faint">
-                              {v.time_window || TIME_WINDOW_FALLBACK}
+                              {arrivalWindowLabel(v.time_window)}
                             </span>
                           </li>
                         ))}
@@ -480,7 +502,7 @@ export default function DashboardIndex() {
                               </span>
                               <span className="block text-xs text-ink-soft">
                                 {serviceLabel(v.service)} · {formatLongDate(v.visit_date)},{' '}
-                                {v.time_window || TIME_WINDOW_FALLBACK}
+                                {arrivalWindowLabel(v.time_window)}
                               </span>
                             </span>
                           </button>
@@ -531,8 +553,10 @@ export default function DashboardIndex() {
                       {data.nextVisit ? (
                         <>
                           {serviceLabel(data.nextVisit.service)}{' '}
-                          {relativeDateLabel(data.nextVisit.visit_date).toLowerCase()} between{' '}
-                          {data.nextVisit.time_window || TIME_WINDOW_FALLBACK}.
+                          {relativeDateLabel(data.nextVisit.visit_date).toLowerCase()}
+                          {data.nextVisit.time_window
+                            ? ` between ${data.nextVisit.time_window}.`
+                            : `. ${ARRIVAL_WINDOW_PENDING_LABEL}.`}
                         </>
                       ) : (
                         <>We'll send you a heads-up before every visit.</>
@@ -582,7 +606,7 @@ export default function DashboardIndex() {
                       <div className="mt-1 flex items-center gap-3 text-sm text-ink-soft">
                         <span className="flex items-center gap-1">
                           <Clock className="h-3.5 w-3.5" />
-                          {data.lastCompleted.time_window || TIME_WINDOW_FALLBACK}
+                          {arrivalWindowLabel(data.lastCompleted.time_window)}
                         </span>
                         <span>·</span>
                         <span>Pro: {data.lastCompleted.crew_name ?? 'Your Tidy Pro'}</span>
@@ -639,7 +663,7 @@ export default function DashboardIndex() {
         }
         subtitle={
           data.nextVisit
-            ? `${formatLongDate(data.nextVisit.visit_date)} · ${data.nextVisit.time_window || TIME_WINDOW_FALLBACK}`
+            ? `${formatLongDate(data.nextVisit.visit_date)} · ${arrivalWindowLabel(data.nextVisit.time_window)}`
             : undefined
         }
         onClose={() => setActiveModal(null)}
@@ -673,7 +697,7 @@ export default function DashboardIndex() {
       <CalmModal
         open={activeModal === 'reschedule'}
         title="Reschedule visit"
-        subtitle="Pick a new date and time window. We'll confirm by text within the hour."
+        subtitle="Pick a new date and time window. We'll email you back the same day, Monday to Saturday, 8am to 6pm."
         onClose={() => setActiveModal(null)}
         primaryLabel={
           submitState === 'sending' ? 'Sending…' :
@@ -694,16 +718,21 @@ export default function DashboardIndex() {
           <input
             type="date"
             value={rescheduleDate}
+            min={minRescheduleDate}
             onChange={(e) => setRescheduleDate(e.target.value)}
             className="w-full rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-sm text-ink"
           />
+          {rescheduleIsSunday && (
+            <p className="text-xs font-medium text-red-600">We don't run visits on Sunday.</p>
+          )}
           <select
             value={rescheduleWindow}
             onChange={(e) => setRescheduleWindow(e.target.value)}
             className="w-full rounded-lg border border-[hsl(var(--hairline))] bg-white px-3 py-2 text-sm text-ink"
           >
-            <option>8:00 AM – 12:00 PM</option>
-            <option>12:00 PM – 5:00 PM</option>
+            {ARRIVAL_WINDOWS.map((w) => (
+              <option key={w} value={w}>{w}</option>
+            ))}
           </select>
         </div>
       </CalmModal>
@@ -967,7 +996,7 @@ function ScheduleList({
                   {serviceLabel(v.service)}
                 </span>
                 <span className="block text-xs text-ink-soft">
-                  {relativeDateLabel(v.visit_date)} · {v.time_window || TIME_WINDOW_FALLBACK}
+                  {relativeDateLabel(v.visit_date)} · {arrivalWindowLabel(v.time_window)}
                 </span>
               </span>
             </span>

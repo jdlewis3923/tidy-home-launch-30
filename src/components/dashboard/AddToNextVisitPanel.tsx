@@ -1,3 +1,4 @@
+import { arrivalWindowLabel } from '@/lib/arrival-windows';
 /**
  * "Add to your next visit" panel — pinned at top of /dashboard when a visit
  * is within 14 days. Suppression rules per spec.
@@ -33,7 +34,6 @@ interface Props {
   nextNextVisit: Visit | null;
 }
 
-const TIME_WINDOW_FALLBACK = '8:00 – 11:00 AM';
 
 // Customer-facing "detailing" tab maps to catalog "detail" service.
 const SERVICE_DB_KEY: Record<AddonService, string> = {
@@ -167,7 +167,7 @@ export default function AddToNextVisitPanel({ userId, services, nextVisit, nextN
             Add to your next visit
           </h2>
           <p className="text-sm text-ink-soft">
-            {SERVICE_LABELS[visitService] ?? 'Visit'} · {formatLongDate(targetVisit.visit_date)} · {targetVisit.time_window || TIME_WINDOW_FALLBACK}
+            {SERVICE_LABELS[visitService] ?? 'Visit'} · {formatLongDate(targetVisit.visit_date)} · {arrivalWindowLabel(targetVisit.time_window)}
           </p>
         </div>
 
