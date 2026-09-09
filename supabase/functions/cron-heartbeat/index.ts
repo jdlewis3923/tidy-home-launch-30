@@ -41,12 +41,24 @@ Deno.serve(async (req) => {
 
   // Read the hourly snapshot, not admin_cron_health(): over HTTP that RPC walks
   // the whole run history and times out (it 500'd every run, which the new
-  // response tracking is what finally showed). Refresh the snapshot first.
-  await admin.rpc('capture_cron_health');
+  // response tracking is what finally showed). Refresh the snapshot first — and
+  // if the refresh itself fails, say so: reading stale rows and reporting
+  // "ok, 0 stale" is how the watchdog could freeze without anyone knowing.
+  const { data: captured, error: capErr } = await admin.rpc('capture_cron_health');
+  if (capErr) {
+    await admin.from('admin_alerts').insert({
+      alert_type: 'cron_snapshot_failed',
+      title: 'The scheduled-job watchdog could not refresh',
+      body: `capture_cron_health failed: ${capErr.message}`,
+      context: { at: new Date().toISOString() },
+    });
+    return jsonResponse({ ok: false, error: `capture_cron_health failed: ${capErr.message}` }, 500);
+  }
   const { data, error } = await admin
     .from('cron_health_snapshot')
-    .select('jobid, jobname, schedule, active, last_run_at, last_status, last_message, expected_interval_minutes, minutes_since, stale, http_status, http_error');
+    .select('jobid, jobname, schedule, active, last_run_at, last_status, last_message, expected_interval_minutes, minutes_since, stale, http_status, http_error, captured_at');
   if (error) return jsonResponse({ ok: false, error: error.message }, 500);
+
 
   const jobs = (data ?? []) as CronRow[];
   const stale = jobs.filter((j) => j.active && j.stale);
