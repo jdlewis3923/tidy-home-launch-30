@@ -37,6 +37,13 @@ const Rate = () => {
     () => (params.get("customer") || params.get("customer_id") || "").trim(),
     [params],
   );
+  // Per-visit capability token from the SMS link. Without it (or a signed-in
+  // session) the rating is recorded but never attached to a visit or a Pro.
+  const rateToken = useMemo(
+    () => (params.get("t") || params.get("token") || "").trim(),
+    [params],
+  );
+
 
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
