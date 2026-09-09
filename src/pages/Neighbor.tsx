@@ -23,9 +23,8 @@ import {
   type ServiceType,
 } from "@/lib/dashboard-pricing";
 
-import heroAsset from "@/assets/neighbor-hero-v3.jpg.asset.json";
-import heroMobileAsset from "@/assets/neighbor-hero-mobile-v3.jpg.asset.json";
-import heroLoop from "@/assets/neighbor-hero-loop-v2.mp4.asset.json";
+import heroAsset from "@/assets/neighbor-hero-sunset-desktop.png.asset.json";
+import heroMobileAsset from "@/assets/neighbor-hero-sunset-mobile.png.asset.json";
 
 import cleaningJpg from "@/assets/cleaning-interior.jpg";
 import cleaningWebp from "@/assets/cleaning-interior.webp";
@@ -112,15 +111,6 @@ const Neighbor = () => {
   const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
   const [waitlistDone, setWaitlistDone] = useState(false);
   const [waitlistError, setWaitlistError] = useState<string | null>(null);
-  // Reduced-motion visitors keep the still hero photo; everyone else gets the loop.
-  const [motionOk, setMotionOk] = useState(false);
-
-  useEffect(() => {
-    setMotionOk(!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
-  }, []);
-
-
-
   useEffect(() => {
     if (langParam === "es") setLanguage("es");
     else if (langParam === "en") setLanguage("en");
@@ -209,34 +199,18 @@ const Neighbor = () => {
         {/* ── HERO: full-bleed photograph ───────────────────────────────── */}
         <section className="relative isolate min-h-[82svh] flex flex-col justify-end overflow-hidden">
           <picture>
-            <source media="(max-width: 767px)" srcSet={heroMobileAsset.url} type="image/jpeg" />
+            <source media="(max-width: 767px)" srcSet={heroMobileAsset.url} type="image/png" />
             <img
               src={heroAsset.url}
-              alt="A traditional South Miami home with barrel-tile roof, coral rock wall and paver driveway under a bright blue sky"
+              alt="A landscaped Miami home entrance with palm trees at sunset"
               width={1600}
               height={1195}
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className="absolute inset-0 -z-10 h-full w-full object-cover object-[center_35%] md:object-[center_40%]"
+              className="absolute inset-0 -z-10 h-full w-full object-cover object-center"
             />
           </picture>
-          {/* Living-photo loop: gentle palm sway and birds. Sits over the still
-              photo, which stays the poster and the reduced-motion fallback. */}
-          {motionOk && (
-            <video
-              src={heroLoop.url}
-              poster={heroAsset.url}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              aria-hidden="true"
-              tabIndex={-1}
-              className="absolute inset-0 -z-10 h-full w-full object-cover object-[center_35%] md:object-[center_40%]"
-            />
-          )}
           {/* Scrim — kept light so the blue sky and house stay visible. */}
           <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#0F1729]/95 via-[#0F1729]/45 to-transparent" />
 
