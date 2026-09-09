@@ -232,12 +232,15 @@ export default function StepProperty({ state, onChange }: Props) {
           <p className="text-[11px] text-ink-faint">{LAWN_GUESS_NOTE}</p>
 
           <SqFtField
+            required
             label={t('mowable turf square footage')}
             placeholder="e.g. 3500"
             value={state.turfSqFt}
             onChange={v => onChange({ ...state, turfSqFt: v })}
             helper={t('grass only, not the house or driveway. 4,001–7,500 sq ft adds $30 a visit. above 7,500 we quote by hand.')}
+            missingNote={t('we need this to price your visit correctly.')}
           />
+
           {(state.turfSqFt ?? 0) > 7500 && (
             <QuoteNotice>{t('turf over 7,500 sq ft is quoted by hand')}</QuoteNotice>
           )}
