@@ -168,7 +168,7 @@ Deno.serve(async (req) => {
           // supabase-js returns errors in the envelope, it does not throw.
           const { data: cronRows, error: cronErr } = await supabase
             .from('cron_health_snapshot')
-            .select('jobname, schedule, active, last_run_at, last_status, last_message, minutes_since, stale, captured_at')
+            .select('jobname, schedule, active, last_run_at, last_status, last_message, minutes_since, stale, captured_at, http_status, http_error, http_at')
             .order('jobname');
           if (cronErr) console.error('[admin-health] cron_health_snapshot failed', cronErr.message);
           cron = (cronRows as unknown[]) ?? [];
