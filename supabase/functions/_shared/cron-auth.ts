@@ -7,6 +7,7 @@
 // 'service_role_key' (resolved via the admin_get_service_role_key RPC).
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { vendorFetch } from './http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -47,7 +48,7 @@ async function recordCronAck(req: Request, authorized: boolean): Promise<void> {
   if (!SUPABASE_URL || !SERVICE_KEY) return;
   try {
     const fn = new URL(req.url).pathname.split('/').filter(Boolean).pop() ?? 'unknown';
-    await fetch(`${SUPABASE_URL}/rest/v1/cron_acks`, {
+    await vendorFetch(`${SUPABASE_URL}/rest/v1/cron_acks`, {
       method: 'POST',
       headers: {
         apikey: SERVICE_KEY,

@@ -1,5 +1,6 @@
 // Tidy chatbot — Lovable AI Gateway, streaming, knowledge-base grounded.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { vendorFetch } from '../_shared/http.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,7 +55,7 @@ RULES:
 BUSINESS KNOWLEDGE:
 ${knowledge}`;
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResp = await vendorFetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,

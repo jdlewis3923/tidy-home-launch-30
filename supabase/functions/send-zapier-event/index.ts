@@ -19,6 +19,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { withLogging, logInvocation } from '../_shared/withLogging.ts';
 import { readEnv, readOptionalEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 import { EMAIL, emailKeyForId, missingRequiredParams } from '../_shared/emailTemplates.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
 
@@ -80,7 +81,7 @@ async function dispatchBrevoTemplate(
       return { ok: false, error };
     }
 
-    const res = await fetch(`${supabaseUrl}/functions/v1/send-brevo-email`, {
+    const res = await vendorFetch(`${supabaseUrl}/functions/v1/send-brevo-email`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -184,7 +185,7 @@ async function dispatchTwilioSms(
   }`;
 
   try {
-    const res = await fetch(`${supabaseUrl}/functions/v1/send-twilio-sms`, {
+    const res = await vendorFetch(`${supabaseUrl}/functions/v1/send-twilio-sms`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${serviceKey}`,
@@ -354,7 +355,7 @@ Deno.serve(async (req) => {
           return { ok: true as const, skipped: 'no_url_configured' as const };
         }
 
-        const res = await fetch(zapUrl, {
+        const res = await vendorFetch(zapUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ event_name, lang, user_id, ...payload }),

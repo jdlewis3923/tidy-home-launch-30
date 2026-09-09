@@ -16,6 +16,7 @@
 // exposes contact state.
 
 import { logIntegrationEvent } from './integration-log.ts';
+import { vendorFetch } from './http.ts';
 
 export type BrevoRecipient = { email: string; name?: string };
 export type BrevoAttachment = { url?: string; content?: string; name: string };
@@ -81,7 +82,7 @@ export async function isBrevoBlacklisted(
   opts: { apiKey?: string; fetchImpl?: typeof fetch } = {},
 ): Promise<boolean> {
   const apiKey = opts.apiKey ?? env('BREVO_API_KEY');
-  const doFetch = opts.fetchImpl ?? fetch;
+  const doFetch = opts.fetchImpl ?? vendorFetch;
   if (!apiKey) return false;
   try {
     const res = await doFetch(`${BREVO_CONTACT_URL}/${encodeURIComponent(email)}`, {
@@ -104,7 +105,7 @@ export async function isBrevoBlacklisted(
 export async function sendBrevoEmail(
   opts: SendBrevoEmailOptions,
 ): Promise<SendBrevoEmailResult> {
-  const doFetch = opts.fetchImpl ?? fetch;
+  const doFetch = opts.fetchImpl ?? vendorFetch;
   const apiKey = opts.apiKey ?? env('BREVO_API_KEY');
   const lovableKey = opts.lovableApiKey ?? env('LOVABLE_API_KEY');
   const transport = opts.transport ?? 'direct';

@@ -19,6 +19,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { logInvocation } from '../_shared/withLogging.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 import { EMAIL, emailKeyForId, missingRequiredParams } from '../_shared/emailTemplates.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'BREVO_API_KEY'] as const;
 const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
@@ -183,7 +184,7 @@ Deno.serve(async (req) => {
     if (sender) payload.sender = sender;
     if (tags?.length) payload.tags = tags;
 
-    const res = await fetch(BREVO_URL, {
+    const res = await vendorFetch(BREVO_URL, {
       method: 'POST',
       headers: {
         'api-key': values.BREVO_API_KEY,

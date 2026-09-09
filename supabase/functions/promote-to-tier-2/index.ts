@@ -7,6 +7,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { readEnv } from '../_shared/handlerEnv.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -42,7 +43,7 @@ async function updateStripePaySplit(stripeAccountId: string | undefined, upliftP
   const body = new URLSearchParams();
   body.append('metadata[pay_uplift_pct]', String(upliftPct));
   body.append('metadata[tier]', 'tier_2_pro_partner');
-  const res = await fetch(`https://api.stripe.com/v1/accounts/${stripeAccountId}`, {
+  const res = await vendorFetch(`https://api.stripe.com/v1/accounts/${stripeAccountId}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${STRIPE_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     body,

@@ -6,6 +6,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { computeCapacityFromDb } from '../_shared/capacity.ts';
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 import {
   BILLABLE_HOURS_PER_PRO_PER_MONTH,
   COMFORT_CEILING,
@@ -21,6 +22,10 @@ const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
+
+  // Per-IP rate limit — cheap guard in front of the auth check below.
+  const limited = await enforceRateLimit(req, { bucket: 'capacity-status', limit: 60, windowSeconds: 60 });
+  if (limited) return limited;
 
   const authHeader = req.headers.get('Authorization');
   if (!authHeader) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);

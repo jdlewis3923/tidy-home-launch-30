@@ -26,6 +26,7 @@ import { resolveStripeSubscriptionId } from '../_shared/resolve-stripe-subscript
 import { resolveStripeCurrentPeriodEnd } from '../_shared/resolve-stripe-current-period-end.ts';
 import { loadPlanLines } from '../_shared/plan-lines.ts';
 import { stripeSecretKey } from '../_shared/stripe-mode.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const STRIPE_SECRET_KEY = stripeSecretKey();
 // Live and test endpoints have different signing secrets. Try test first, then live,
@@ -40,7 +41,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 async function fireZap(eventName: string, payload: unknown) {
   try {
-    await fetch(`${SUPABASE_URL}/functions/v1/send-zapier-event`, {
+    await vendorFetch(`${SUPABASE_URL}/functions/v1/send-zapier-event`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

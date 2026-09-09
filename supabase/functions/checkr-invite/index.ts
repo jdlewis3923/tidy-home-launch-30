@@ -11,6 +11,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -64,7 +65,7 @@ Deno.serve(async (req) => {
     // 1) Create candidate (or reuse existing)
     let candidateId = applicant.checkr_candidate_id ?? null;
     if (!candidateId) {
-      const candRes = await fetch(`${CHECKR_BASE}/candidates`, {
+      const candRes = await vendorFetch(`${CHECKR_BASE}/candidates`, {
         method: 'POST',
         headers: {
           Authorization: basicAuth(CHECKR_API_KEY),
@@ -89,7 +90,7 @@ Deno.serve(async (req) => {
     }
 
     // 2) Create invitation
-    const invRes = await fetch(`${CHECKR_BASE}/invitations`, {
+    const invRes = await vendorFetch(`${CHECKR_BASE}/invitations`, {
       method: 'POST',
       headers: {
         Authorization: basicAuth(CHECKR_API_KEY),

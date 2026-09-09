@@ -2,6 +2,7 @@
 // Reuses the chatbot_knowledge base. Returns reply + self-reported confidence.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { sendBrevoEmail as sendViaBrevo } from "./brevo-send.ts";
+import { vendorFetch } from './http.ts';
 
 export type SupportMsg = { role: "user" | "assistant"; content: string };
 
@@ -78,7 +79,7 @@ BUSINESS KNOWLEDGE:
 ${knowledge}`;
 
   try {
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResp = await vendorFetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,

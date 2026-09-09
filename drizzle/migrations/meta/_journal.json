@@ -512,6 +512,13 @@
       "when": 1788932052408,
       "tag": "0072_cron_health_from_own_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1788932711358,
+      "tag": "0073_rate_limit_public_endpoints",
+      "breakpoints": true
     }
   ]
 }

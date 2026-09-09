@@ -18,6 +18,7 @@
 //   - A misconfigured push path is never reported as a delivered notification.
 
 import { isWindowOpen, nextOpenWindow, closedReason } from './sms-window.ts';
+import { vendorFetch } from './http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -79,7 +80,7 @@ function defaultKey(n: ProNotification): string {
 // deno-lint-ignore no-explicit-any
 async function sendPush(n: ProNotification): Promise<{ outcome: PushOutcome; detail?: string }> {
   try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
+    const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -140,7 +141,7 @@ async function smsFallback(
 
   const text = n.sms_body ?? [n.title, n.body].filter(Boolean).join(' — ');
   try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+    const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

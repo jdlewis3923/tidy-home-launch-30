@@ -6,6 +6,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -38,7 +39,7 @@ async function updateStripePaySplit(stripeAccountId: string | undefined) {
   const body = new URLSearchParams();
   body.append('metadata[pay_uplift_pct]', '0');
   body.append('metadata[tier]', 'tier_1_verified');
-  await fetch(`https://api.stripe.com/v1/accounts/${stripeAccountId}`, {
+  await vendorFetch(`https://api.stripe.com/v1/accounts/${stripeAccountId}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${STRIPE_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     body,

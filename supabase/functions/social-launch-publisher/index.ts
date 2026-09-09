@@ -17,6 +17,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { requireServiceOrAdmin } from "../_shared/admin-auth.ts";
 import { isCronAuthorized } from "../_shared/cron-auth.ts";
+import { vendorFetch } from '../_shared/http.ts';
 
 
 const corsHeaders = {
@@ -74,14 +75,14 @@ async function publishToMeta(post: Post, sb: ReturnType<typeof createClient>): P
     cu.searchParams.set("access_token", pageToken);
     cu.searchParams.set("image_url", post.image_url);
     cu.searchParams.set("caption", post.caption);
-    const cr = await fetch(cu.toString(), { method: "POST" });
+    const cr = await vendorFetch(cu.toString(), { method: "POST" });
     const cj = await cr.json();
     if (!cr.ok) throw new Error(`IG container failed: ${JSON.stringify(cj).slice(0, 300)}`);
     // Publish container
     const pu = new URL(`${GRAPH}/${igUserId}/media_publish`);
     pu.searchParams.set("access_token", pageToken);
     pu.searchParams.set("creation_id", cj.id);
-    const pr = await fetch(pu.toString(), { method: "POST" });
+    const pr = await vendorFetch(pu.toString(), { method: "POST" });
     const pj = await pr.json();
     if (!pr.ok) throw new Error(`IG publish failed: ${JSON.stringify(pj).slice(0, 300)}`);
     result.ig = pj.id;
@@ -92,7 +93,7 @@ async function publishToMeta(post: Post, sb: ReturnType<typeof createClient>): P
     fu.searchParams.set("access_token", pageToken);
     fu.searchParams.set("url", post.image_url);
     fu.searchParams.set("caption", post.caption);
-    const fr = await fetch(fu.toString(), { method: "POST" });
+    const fr = await vendorFetch(fu.toString(), { method: "POST" });
     const fj = await fr.json();
     if (!fr.ok) throw new Error(`FB publish failed: ${JSON.stringify(fj).slice(0, 300)}`);
     result.fb = fj.post_id ?? fj.id;
@@ -120,7 +121,7 @@ async function publishToNextdoor(post: Post, sb: ReturnType<typeof createClient>
     });
     return { delivered: false, needs_manual: true };
   }
-  const r = await fetch(url, {
+  const r = await vendorFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

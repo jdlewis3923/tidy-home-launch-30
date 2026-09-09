@@ -15,6 +15,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 import { PRO_REPORTABLE_PAID_IN_FULL_REASONS } from '../_shared/pricing-canon.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
 
@@ -93,7 +94,7 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (profile?.phone) {
         const to = profile.phone.startsWith('+') ? profile.phone : `+1${profile.phone.replace(/\D/g, '')}`;
-        const res = await fetch(`${env.values.SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+        const res = await vendorFetch(`${env.values.SUPABASE_URL}/functions/v1/send-twilio-sms`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -1,3 +1,4 @@
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 /**
  * verify-preview-token
  *
@@ -44,6 +45,10 @@ function timingSafeEqual(a: string, b: string): boolean {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Per-IP rate limit — this endpoint is reachable without a session.
+  const limited = await enforceRateLimit(req, { bucket: 'verify-preview-token', limit: 10, windowSeconds: 600 });
+  if (limited) return limited;
   if (req.method !== "POST") return json({ valid: false }, 405);
 
   const expected = Deno.env.get("PREVIEW_ACCESS_TOKEN");

@@ -15,6 +15,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -40,7 +41,7 @@ function authHeader() {
 }
 
 async function twilio(url: string) {
-  const r = await fetch(url, { headers: authHeader() });
+  const r = await vendorFetch(url, { headers: authHeader() });
   const text = await r.text();
   let json: any = null;
   try { json = JSON.parse(text); } catch { /* non-JSON error body */ }

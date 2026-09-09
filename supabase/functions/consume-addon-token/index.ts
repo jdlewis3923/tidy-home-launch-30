@@ -10,6 +10,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -22,6 +23,10 @@ const BodySchema = z.object({
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
+
+  // Per-IP rate limit — this endpoint is reachable without a session.
+  const limited = await enforceRateLimit(req, { bucket: 'consume-addon-token', limit: 20, windowSeconds: 300 });
+  if (limited) return limited;
   if (req.method !== 'POST') return jsonResponse({ ok: false, error: 'method not allowed' }, 405);
 
   let raw: unknown;

@@ -9,6 +9,8 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendPwaPushToJustin } from '../_shared/notifyJustin.ts';
+import { vendorFetch } from '../_shared/http.ts';
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -38,6 +40,10 @@ const Body = z.object({
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
+
+  // Per-IP rate limit — this endpoint is reachable without a session.
+  const limited = await enforceRateLimit(req, { bucket: 'submit-application', limit: 3, windowSeconds: 900 });
+  if (limited) return limited;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
 
   try {
@@ -132,7 +138,7 @@ Deno.serve(async (req) => {
     // recorded rather than vanishing.
     const followUp = (async () => {
       try {
-        const r = await fetch(`${SUPABASE_URL}/functions/v1/applicant-applied-trigger`, {
+        const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/applicant-applied-trigger`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ applicant_id: applicantId }),

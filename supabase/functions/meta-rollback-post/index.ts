@@ -5,6 +5,7 @@
 // Graph API DELETE, clears the IDs in DB, and sets status to 'paused'
 // with an explanatory error_message.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { vendorFetch } from '../_shared/http.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,7 +35,7 @@ async function vaultGet(sb: ReturnType<typeof createClient>, name: string): Prom
 
 async function graphDelete(id: string, token: string): Promise<{ ok: boolean; status: number; body: unknown }> {
   const url = `${GRAPH}/${id}?access_token=${encodeURIComponent(token)}`;
-  const res = await fetch(url, { method: "DELETE" });
+  const res = await vendorFetch(url, { method: "DELETE" });
   let body: unknown = null;
   try { body = await res.json(); } catch (_e) { body = null; }
   return { ok: res.ok, status: res.status, body };

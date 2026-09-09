@@ -1,3 +1,4 @@
+import { vendorFetch } from '../_shared/http.ts';
 // Pre-schedules the day-90 retrospective on Justin's Google Calendar via the connector gateway.
 // Idempotent: skips creation if an event with the same summary already exists in the target window.
 const corsHeaders = {
@@ -33,7 +34,7 @@ Deno.serve(async (req) => {
     q: RETRO_SUMMARY,
     singleEvents: "true",
   });
-  const existing = await fetch(`${GATEWAY_URL}/calendars/primary/events?${checkParams}`, {
+  const existing = await vendorFetch(`${GATEWAY_URL}/calendars/primary/events?${checkParams}`, {
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "X-Connection-Api-Key": GOOGLE_CALENDAR_API_KEY,
@@ -55,7 +56,7 @@ Deno.serve(async (req) => {
     reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 60 * 24 }] },
   };
 
-  const res = await fetch(`${GATEWAY_URL}/calendars/primary/events`, {
+  const res = await vendorFetch(`${GATEWAY_URL}/calendars/primary/events`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
