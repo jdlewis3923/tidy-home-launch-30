@@ -1249,6 +1249,48 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_health_snapshot: {
+        Row: {
+          active: boolean | null
+          captured_at: string
+          expected_interval_minutes: number | null
+          jobid: number
+          jobname: string
+          last_message: string | null
+          last_run_at: string | null
+          last_status: string | null
+          minutes_since: number | null
+          schedule: string | null
+          stale: boolean | null
+        }
+        Insert: {
+          active?: boolean | null
+          captured_at?: string
+          expected_interval_minutes?: number | null
+          jobid: number
+          jobname: string
+          last_message?: string | null
+          last_run_at?: string | null
+          last_status?: string | null
+          minutes_since?: number | null
+          schedule?: string | null
+          stale?: boolean | null
+        }
+        Update: {
+          active?: boolean | null
+          captured_at?: string
+          expected_interval_minutes?: number | null
+          jobid?: number
+          jobname?: string
+          last_message?: string | null
+          last_run_at?: string | null
+          last_status?: string | null
+          minutes_since?: number | null
+          schedule?: string | null
+          stale?: boolean | null
+        }
+        Relationships: []
+      }
       cron_runs: {
         Row: {
           context: Json
@@ -4915,6 +4957,7 @@ export type Database = {
         Args: { _fn: string; _payload: Json }
         Returns: undefined
       }
+      capture_cron_health: { Args: never; Returns: number }
       change_badge_status: {
         Args: { _applicant_id: string; _new_status: string; _note?: string }
         Returns: undefined

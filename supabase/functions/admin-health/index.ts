@@ -155,20 +155,29 @@ Deno.serve(async (req) => {
         }
 
         // Cron staleness alarm covering every scheduled job.
+        //
+        // Read from public.cron_health_snapshot, not admin_cron_health(): cron.job
+        // carries row-level security keyed to the calling role, so over HTTP the
+        // RPC came back empty (and, on a long history, timed out) and this panel
+        // silently reported "no scheduled jobs" — the watchdog's own blind spot.
+        // An hourly in-database job records the snapshot instead.
         let cron: unknown[] = [];
         let cron_stale_count = 0;
+        let cron_captured_at: string | null = null;
         try {
-          // supabase-js returns errors in the envelope, it does not throw. The old
-          // code destructured only `data`, so a permission or SQL failure showed up
-          // as "no cron jobs" — a silent blind spot on the one panel meant to prove
-          // the schedulers are alive.
-          const { data: cronRows, error: cronErr } = await supabase.rpc('admin_cron_health');
-          if (cronErr) console.error('[admin-health] admin_cron_health failed', cronErr.message);
+          // supabase-js returns errors in the envelope, it does not throw.
+          const { data: cronRows, error: cronErr } = await supabase
+            .from('cron_health_snapshot')
+            .select('jobname, schedule, active, last_run_at, last_status, last_message, minutes_since, stale, captured_at')
+            .order('jobname');
+          if (cronErr) console.error('[admin-health] cron_health_snapshot failed', cronErr.message);
           cron = (cronRows as unknown[]) ?? [];
           // The column is `stale`, not `is_stale`; the old filter always counted 0.
           cron_stale_count = (cron as Array<{ stale?: boolean }>).filter((c) => c.stale).length;
+          cron_captured_at =
+            (cron[0] as { captured_at?: string } | undefined)?.captured_at ?? null;
         } catch (e) {
-          console.error('[admin-health] admin_cron_health threw', (e as Error).message);
+          console.error('[admin-health] cron_health_snapshot threw', (e as Error).message);
         }
 
         return {
@@ -180,6 +189,7 @@ Deno.serve(async (req) => {
           stale_sources: TRACKED_SOURCES.filter((s) => sources[s].total_calls === 0),
           cron,
           cron_stale_count,
+          cron_captured_at,
         };
       },
     });
