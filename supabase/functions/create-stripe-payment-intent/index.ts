@@ -424,10 +424,15 @@ Deno.serve(async (req) => {
         return {
           ok: true as const,
           client_secret: clientSecret,
+          // The browser compares this with its publishable key: a pk_test page
+          // can never confirm a live PaymentIntent, so the mismatch has to be
+          // caught before the customer taps Pay.
+          stripe_mode: stripeMode(),
           subscription_id: subscription.id,
           customer_id: customerId,
           free_addons_per_month: freeAddons,
         };
+
       },
     });
 
