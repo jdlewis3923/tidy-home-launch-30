@@ -39,8 +39,11 @@ interface ReviewResponse {
   stripe_failures?: unknown[];
   sms_delivery_failures?: unknown[];
   sms_outbox?: OutboxRow[];
+  /** Per-query failures. Ignoring these printed "nothing unresolved" over a read that never happened. */
+  errors?: string[];
   error?: string;
 }
+
 
 function relative(iso: string | null): string {
   if (!iso) return "—";

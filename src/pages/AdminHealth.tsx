@@ -49,7 +49,9 @@ interface CronHealthRow {
   stale: boolean;
   http_status?: number | null;
   http_error?: string | null;
+  captured_at?: string | null;
 }
+
 
 interface SourceSummary {
   state: LaneState;
