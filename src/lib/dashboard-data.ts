@@ -28,7 +28,7 @@ export const CUSTOMER_VISIT_COLUMNS =
  * select would ship any future pay/internal column straight to the browser.
  */
 export const CUSTOMER_SUBSCRIPTION_COLUMNS =
-  'id, user_id, services, frequency, monthly_total_cents, status, next_billing_date, created_at, updated_at, bundle_discount_pct, card_brand, card_last4, cancel_at_period_end, canceled_at, paused_until, band, size, sizes_json, founding_rate_locked, founding_free_addon_first_visit, founding_free_addon_fulfilled_at, founding_review_promised, free_car_washes_per_month, founding_zip, free_addons_per_month, preferred_pro_id, has_water_spigot, has_electrical_outlet, washing_allowed, car_service_code, size_tier, cadence, surcharge_applied, surcharge_cents, plan_lines, stripe_status';
+  'id, user_id, services, frequency, monthly_total_cents, status, next_billing_date, stripe_subscription_id, stripe_customer_id, pause_collection, latest_invoice_attempt_count, assigned_pro_id, band_source, band_verified_at, created_at, updated_at, bundle_discount_pct, card_brand, card_last4, cancel_at_period_end, canceled_at, paused_until, band, size, sizes_json, founding_rate_locked, founding_free_addon_first_visit, founding_free_addon_fulfilled_at, founding_review_promised, free_car_washes_per_month, founding_zip, free_addons_per_month, preferred_pro_id, has_water_spigot, has_electrical_outlet, washing_allowed, car_service_code, size_tier, cadence, surcharge_applied, surcharge_cents, plan_lines, stripe_status';
 
 
 type Visit = Pick<
@@ -101,7 +101,8 @@ export function useDashboardData(): DashboardData {
         supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle(),
         supabase
           .from('subscriptions')
-          .select('*')
+          // Explicit columns only — never star-select this table.
+          .select(CUSTOMER_SUBSCRIPTION_COLUMNS)
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -122,7 +123,7 @@ export function useDashboardData(): DashboardData {
       ]);
 
       const profile = profileRes.data ?? null;
-      const subscription = subRes.data ?? null;
+      const subscription = (subRes.data ?? null) as Subscription | null;
       const visits = visitsRes.data ?? [];
       const invoices = invRes.data ?? [];
 
