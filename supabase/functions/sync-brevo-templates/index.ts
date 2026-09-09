@@ -1,3 +1,4 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Stub: pulls Brevo /v3/templates list and upserts as company_documents
 // rows with category='Email Templates'. Currently a no-op that returns 200.
 
