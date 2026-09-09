@@ -218,7 +218,7 @@ Deno.serve(async (req) => {
   if (insErr || !reqRow) return jsonResponse({ ok: false, error: insErr?.message ?? 'insert_failed' }, 500);
 
   const link = `${SITE_URL}/addon/${reqRow.token}`;
-  const isCar = (visit.service_type ?? visitRow?.service ?? '').toLowerCase().includes('detail')
+  const isCar = (visit.service_type ?? visitRow?.service_type ?? '').toLowerCase().includes('detail')
     || (visit.service_type ?? '').toLowerCase().includes('car');
   const place = isCar ? 'vehicle' : 'home';
   const dollars = Math.round(reqRow.amount_cents / 100);
