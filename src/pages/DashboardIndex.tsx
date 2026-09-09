@@ -106,6 +106,18 @@ export default function DashboardIndex() {
   const [rescheduleDate, setRescheduleDate] = useState<string>('');
   const [rescheduleWindow, setRescheduleWindow] = useState<string>(ARRIVAL_WINDOW_MORNING);
   const [noteText, setNoteText] = useState<string>('');
+
+  // Reschedule guardrails: never sooner than 2 days out, never a Sunday.
+  const minRescheduleDate = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 2);
+    return d.toISOString().slice(0, 10);
+  }, []);
+  const rescheduleIsSunday = useMemo(() => {
+    if (!rescheduleDate) return false;
+    const [y, m, d] = rescheduleDate.split('-').map(Number);
+    return new Date(y, m - 1, d).getDay() === 0;
+  }, [rescheduleDate]);
   const [accessGate, setAccessGate] = useState<string>('');
   const [accessParking, setAccessParking] = useState<string>('');
   const [accessPets, setAccessPets] = useState<string>('');
