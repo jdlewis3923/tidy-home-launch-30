@@ -152,9 +152,26 @@ async function smsFallback(
         idempotency_key: `sms-fallback:${key}`,
         template_name: `pro-${n.kind}`,
         triggered_by: 'pro-notify-fallback',
+        // Urgent means urgent: the courtesy window does not apply to a Pro who
+        // is standing in a customer's house waiting on an answer. Without this
+        // the 18:05 add-on approval was parked until 08:00 and still reported
+        // as delivered.
+        skip_window: urgent,
+        expires_at: urgent
+          ? new Date(Date.now() + (URGENT_SMS_TTL_MINUTES[n.kind] ?? 60) * 60_000).toISOString()
+          : undefined,
       }),
     });
-    if (res.status === 202) return { outcome: 'queued', detail: 'outside send window — parked in the outbox' };
+    if (res.status === 202) {
+      // Parked, not delivered. For an urgent kind this is a failure, and the
+      // caller must not report success.
+      return {
+        outcome: urgent ? 'failed' : 'queued',
+        detail: urgent
+          ? 'urgent text was parked outside the send window instead of sending'
+          : 'outside send window — parked in the outbox',
+      };
+    }
     if (res.ok) return { outcome: 'sent' };
     const detail = (await res.text().catch(() => '')).slice(0, 200);
     return { outcome: 'failed', detail: `HTTP ${res.status} ${detail}` };
