@@ -97,14 +97,18 @@ export default function ProDashboard() {
             .gte("scheduled_at", todayStart.toISOString())
             .lte("scheduled_at", todayEnd.toISOString())
             .order("scheduled_at", { ascending: true }),
-          supabase.from("visits")
-            .select("amount_cents:visit_pay_cents")
-            .eq("assigned_pro_id", userId).eq("status", "complete")
-            .gte("completed_at", weekStart),
-          supabase.from("visits")
-            .select("amount_cents:visit_pay_cents")
-            .eq("assigned_pro_id", userId).eq("status", "complete")
-            .gte("completed_at", lastWeekStart).lt("completed_at", lastWeekEnd),
+          // Pay lives behind pro_get_visits(): visits.visit_pay_cents is NOT
+          // granted to the browser role, so selecting it directly returned
+          // permission denied and this screen rendered $0.
+          supabase.rpc("pro_get_visits", {
+            _from: weekStart.slice(0, 10),
+            _to: new Date().toISOString().slice(0, 10),
+          }),
+          supabase.rpc("pro_get_visits", {
+            _from: lastWeekStart.slice(0, 10),
+            _to: lastWeekEnd.slice(0, 10),
+          }),
+
           supabase.from("google_reviews")
             .select("rating")
             .eq("contractor_id", userId).eq("is_seed", false).gte("posted_at", since30),
@@ -126,8 +130,12 @@ export default function ProDashboard() {
 
         if (cancelled) return;
 
-        const weekCents = (weekRes.data ?? []).reduce((s: number, r: any) => s + (r.amount_cents ?? 0), 0);
-        const lastWeekCents = (lastWeekRes.data ?? []).reduce((s: number, r: any) => s + (r.amount_cents ?? 0), 0);
+        const payOf = (rows: any) =>
+          ((rows ?? []) as any[])
+            .filter((r) => r.status === "complete")
+            .reduce((s: number, r: any) => s + (r.visit_pay_cents ?? 0), 0);
+        const weekCents = payOf(weekRes.data);
+        const lastWeekCents = payOf(lastWeekRes.data);
         const ratings = (ratingRes.data ?? []).map((r: any) => r.rating).filter(Boolean);
         const rating30d = ratings.length ? ratings.reduce((s: number, n: number) => s + n, 0) / ratings.length : 0;
 

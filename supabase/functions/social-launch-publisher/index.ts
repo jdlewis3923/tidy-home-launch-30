@@ -15,6 +15,9 @@
  * verify_jwt=false; we never accept caption/image_url from the request body.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireServiceOrAdmin } from "../_shared/admin-auth.ts";
+import { isCronAuthorized } from "../_shared/cron-auth.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -183,6 +186,13 @@ async function processPost(sb: ReturnType<typeof createClient>, post: Post): Pro
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Authorization (audit item 6): this publishes to live Facebook/Instagram.
+  // A bare unauthenticated POST used to drain the whole armed queue.
+  if (!(await isCronAuthorized(req))) {
+    const auth = await requireServiceOrAdmin(req);
+    if (!auth.ok) return json({ error: auth.error }, auth.status);
+  }
+
   const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -199,13 +209,17 @@ Deno.serve(async (req) => {
   let q = sb
     .from("social_launch_posts")
     .select("id,channel,post_number,scheduled_for,caption,image_url,status,notes")
-    .is("posted_at", null);
+    .is("posted_at", null)
+    // The armed filter is NOT optional: a post_id must never let an unposted
+    // draft, or something scheduled for next month, publish immediately.
+    .eq("status", "armed");
 
   if (onlyId) {
     q = q.eq("id", onlyId);
   } else {
-    q = q.eq("status", "armed").lte("scheduled_for", new Date().toISOString()).limit(20);
+    q = q.lte("scheduled_for", new Date().toISOString()).limit(20);
   }
+
 
   const { data: posts, error } = await q;
   if (error) return json({ error: error.message }, 500);

@@ -38,8 +38,23 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
   }
 
-  // Use the caller's JWT to call the admin RPC (RPC self-checks via has_role).
-  const { error: rpcErr } = await userClient.rpc('admin_set_service_role_key', {
+  // Admin check, then call the RPC with the SERVICE-ROLE client: 0058/0060
+  // revoked EXECUTE on admin_set_service_role_key from `authenticated`, so the
+  // old user-client call is permission-denied and this path was dead.
+  const { data: roleRow } = await createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', claims.claims.sub as string)
+    .eq('role', 'admin')
+    .maybeSingle();
+  if (!roleRow) return jsonResponse({ ok: false, error: 'forbidden' }, 403);
+
+  const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { error: rpcErr } = await adminClient.rpc('admin_set_service_role_key', {
     _key: SUPABASE_SERVICE_ROLE_KEY,
   });
 
