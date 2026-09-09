@@ -1249,6 +1249,30 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_acks: {
+        Row: {
+          at: string
+          authorized: boolean
+          fn: string
+          id: number
+          job_name: string | null
+        }
+        Insert: {
+          at?: string
+          authorized?: boolean
+          fn: string
+          id?: number
+          job_name?: string | null
+        }
+        Update: {
+          at?: string
+          authorized?: boolean
+          fn?: string
+          id?: number
+          job_name?: string | null
+        }
+        Relationships: []
+      }
       cron_health_snapshot: {
         Row: {
           active: boolean | null
