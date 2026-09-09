@@ -37,7 +37,8 @@ const services = [
     accent: "border-t-success",
   },
   {
-    title: "Shine Complete",
+    title: "Car Care",
+    subtitle: "Shine Complete",
     badge: null,
     image: carImg,
     lpHref: "/car-detailing",
