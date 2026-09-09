@@ -158,11 +158,17 @@ Deno.serve(async (req) => {
         let cron: unknown[] = [];
         let cron_stale_count = 0;
         try {
-          const { data: cronRows } = await supabase.rpc('admin_cron_health');
+          // supabase-js returns errors in the envelope, it does not throw. The old
+          // code destructured only `data`, so a permission or SQL failure showed up
+          // as "no cron jobs" — a silent blind spot on the one panel meant to prove
+          // the schedulers are alive.
+          const { data: cronRows, error: cronErr } = await supabase.rpc('admin_cron_health');
+          if (cronErr) console.error('[admin-health] admin_cron_health failed', cronErr.message);
           cron = (cronRows as unknown[]) ?? [];
-          cron_stale_count = (cron as Array<{ is_stale?: boolean }>).filter((c) => c.is_stale).length;
+          // The column is `stale`, not `is_stale`; the old filter always counted 0.
+          cron_stale_count = (cron as Array<{ stale?: boolean }>).filter((c) => c.stale).length;
         } catch (e) {
-          console.error('[admin-health] admin_cron_health failed', (e as Error).message);
+          console.error('[admin-health] admin_cron_health threw', (e as Error).message);
         }
 
         return {
