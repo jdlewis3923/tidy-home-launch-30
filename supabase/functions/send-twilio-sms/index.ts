@@ -50,6 +50,11 @@ const BodySchema = z.object({
   triggered_by: z.string().min(1).max(120).optional(),
   /** Set by sms-outbox-release when draining a parked message. */
   skip_window: z.boolean().optional(),
+  /**
+   * ISO instant after which a parked copy of this message must be canceled
+   * instead of delivered — the event it refers to has passed by then.
+   */
+  expires_at: z.string().datetime().optional(),
 }).refine((v) => !!v.body || !!v.content_sid, {
   message: 'either body or content_sid required',
 });
@@ -245,7 +250,7 @@ Deno.serve(async (req) => {
 
     const {
       to_phone_e164, body, content_sid, content_variables,
-      idempotency_key, template_name, triggered_by, skip_window,
+      idempotency_key, template_name, triggered_by, skip_window, expires_at,
     } = parsed.data;
     const tplName = template_name ?? content_sid ?? 'sms-adhoc';
 
