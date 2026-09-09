@@ -505,6 +505,13 @@
       "when": 1788931683766,
       "tag": "0071_cron_health_ack_regression_only",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1788932052408,
+      "tag": "0072_cron_health_from_own_tables",
+      "breakpoints": true
     }
   ]
 }

@@ -59,9 +59,35 @@ Deno.serve(async (req) => {
     .select('jobid, jobname, schedule, active, last_run_at, last_status, last_message, expected_interval_minutes, minutes_since, stale, http_status, http_error, captured_at');
   if (error) return jsonResponse({ ok: false, error: error.message }, 500);
 
+  // A paused scheduler silently swallows every HTTP dispatch: cron_http_post
+  // returns null and no job ever reaches its function. Reporting "0 stale" in
+  // that state is the loudest false green there is.
+  const { data: pausedRow } = await admin
+    .from('app_settings')
+    .select('value')
+    .eq('key', 'scheduler_paused')
+    .maybeSingle();
+  const paused = (pausedRow as { value?: unknown } | null)?.value === true;
+  if (paused) {
+    const { data: openPaused } = await admin
+      .from('admin_alerts')
+      .select('id')
+      .eq('alert_type', 'scheduler_paused')
+      .is('resolved_at', null)
+      .limit(1);
+    if (!openPaused?.length) {
+      await admin.from('admin_alerts').insert({
+        alert_type: 'scheduler_paused',
+        title: 'Scheduled jobs are paused — nothing is running',
+        body: 'scheduler_paused is on, so every scheduled job returns without calling its function. Texts, digests, bonuses and expiry sweeps are not happening.',
+        context: { at: new Date().toISOString() },
+      });
+    }
+  }
 
   const jobs = (data ?? []) as CronRow[];
   const stale = jobs.filter((j) => j.active && j.stale);
+
 
   // An empty snapshot is not "no problems" — it means the watchdog has nothing
   // to look at, which reads as all-green everywhere downstream.
@@ -135,7 +161,9 @@ Deno.serve(async (req) => {
 
   return jsonResponse({
     ok: true,
+    scheduler_paused: paused,
     jobs_total: jobs.length,
+
     stale_count: stale.length,
     alerts_opened: alerted,
     alerts_resolved: resolved,
