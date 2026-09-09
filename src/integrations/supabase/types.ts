@@ -1303,24 +1303,36 @@ export type Database = {
       cron_runs: {
         Row: {
           context: Json
+          http_error: string | null
+          http_status: number | null
           id: string
           job_name: string
           request_id: number | null
+          responded_at: string | null
           scheduled_at: string
+          timed_out: boolean | null
         }
         Insert: {
           context?: Json
+          http_error?: string | null
+          http_status?: number | null
           id?: string
           job_name: string
           request_id?: number | null
+          responded_at?: string | null
           scheduled_at?: string
+          timed_out?: boolean | null
         }
         Update: {
           context?: Json
+          http_error?: string | null
+          http_status?: number | null
           id?: string
           job_name?: string
           request_id?: number | null
+          responded_at?: string | null
           scheduled_at?: string
+          timed_out?: boolean | null
         }
         Relationships: []
       }
