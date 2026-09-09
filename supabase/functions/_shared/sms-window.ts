@@ -103,6 +103,9 @@ export async function queueSms(
     triggered_by: row.triggered_by ?? null,
     queued_reason: reason,
     release_after: releaseAfter.toISOString(),
+    // A parked message that outlives the thing it is about must never be
+    // delivered late. sms-outbox-release cancels anything past this instant.
+    expires_at: row.expires_at ?? null,
     status: 'queued',
   });
   if (error) {
