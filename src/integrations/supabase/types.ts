@@ -1254,6 +1254,9 @@ export type Database = {
           active: boolean | null
           captured_at: string
           expected_interval_minutes: number | null
+          http_at: string | null
+          http_error: string | null
+          http_status: number | null
           jobid: number
           jobname: string
           last_message: string | null
@@ -1267,6 +1270,9 @@ export type Database = {
           active?: boolean | null
           captured_at?: string
           expected_interval_minutes?: number | null
+          http_at?: string | null
+          http_error?: string | null
+          http_status?: number | null
           jobid: number
           jobname: string
           last_message?: string | null
@@ -1280,6 +1286,9 @@ export type Database = {
           active?: boolean | null
           captured_at?: string
           expected_interval_minutes?: number | null
+          http_at?: string | null
+          http_error?: string | null
+          http_status?: number | null
           jobid?: number
           jobname?: string
           last_message?: string | null
@@ -3703,6 +3712,7 @@ export type Database = {
           content_sid: string | null
           content_variables: Json | null
           created_at: string
+          expires_at: string | null
           id: string
           idempotency_key: string
           last_error: string | null
@@ -3722,6 +3732,7 @@ export type Database = {
           content_sid?: string | null
           content_variables?: Json | null
           created_at?: string
+          expires_at?: string | null
           id?: string
           idempotency_key: string
           last_error?: string | null
@@ -3741,6 +3752,7 @@ export type Database = {
           content_sid?: string | null
           content_variables?: Json | null
           created_at?: string
+          expires_at?: string | null
           id?: string
           idempotency_key?: string
           last_error?: string | null
@@ -4985,6 +4997,10 @@ export type Database = {
         Args: { _schedule: string }
         Returns: number
       }
+      cron_http_post: {
+        Args: { _fn: string; _job_name: string; _payload?: Json }
+        Returns: number
+      }
       current_user_admin: { Args: never; Returns: boolean }
       customers_needing_attention: {
         Args: never
@@ -5139,6 +5155,7 @@ export type Database = {
         Returns: number
       }
       public_five_star_proof: { Args: never; Returns: Json }
+      repoint_cron_to_helper: { Args: { _job_name: string }; Returns: string }
       verify_pro_badge: {
         Args: { _token: string }
         Returns: {

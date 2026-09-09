@@ -39,7 +39,13 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data, error } = await admin.rpc('admin_cron_health');
+  // Read the hourly snapshot, not admin_cron_health(): over HTTP that RPC walks
+  // the whole run history and times out (it 500'd every run, which the new
+  // response tracking is what finally showed). Refresh the snapshot first.
+  await admin.rpc('capture_cron_health');
+  const { data, error } = await admin
+    .from('cron_health_snapshot')
+    .select('jobid, jobname, schedule, active, last_run_at, last_status, last_message, expected_interval_minutes, minutes_since, stale, http_status, http_error');
   if (error) return jsonResponse({ ok: false, error: error.message }, 500);
 
   const jobs = (data ?? []) as CronRow[];

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ReviewsThisWeekCard from "@/components/admin/ReviewsThisWeekCard";
 import JobberStubCallers from "@/components/admin/JobberStubCallers";
+import OpenAlertsPanel from "@/components/admin/OpenAlertsPanel";
 
 type Source =
   | "stripe"
@@ -44,8 +45,10 @@ interface CronHealthRow {
   active: boolean;
   last_run_at: string | null;
   last_status: string | null;
-  minutes_since_last_run: number | null;
-  is_stale: boolean;
+  minutes_since: number | null;
+  stale: boolean;
+  http_status?: number | null;
+  http_error?: string | null;
 }
 
 interface SourceSummary {
@@ -331,9 +334,15 @@ export default function AdminHealth() {
           </div>
         )}
 
+        {/* Anything that failed and is still unresolved, read from admin_alerts. */}
+        <div className="mt-6">
+          <OpenAlertsPanel />
+        </div>
+
         <div className="mt-6">
           <ReviewsThisWeekCard />
         </div>
+
 
         <div className="mt-6">
           <JobberStubCallers />
@@ -414,13 +423,21 @@ export default function AdminHealth() {
                 <table className="w-full text-sm">
                   <tbody className="divide-y divide-slate-100">
                     {data.cron.map((c) => (
-                      <tr key={c.jobname} className={c.is_stale ? "bg-rose-50 text-rose-800" : ""}>
+                      <tr key={c.jobname} className={c.stale ? "bg-rose-50 text-rose-800" : ""}>
                         <td className="px-4 py-2 font-mono text-xs">{c.jobname}</td>
                         <td className="px-4 py-2 font-mono text-xs text-slate-500">{c.schedule}</td>
-                        <td className="px-4 py-2 text-xs">{c.last_status ?? "never run"}</td>
+                        <td className="px-4 py-2 text-xs">
+                          {c.last_status ?? "never run"}
+                          {typeof c.http_status === "number" && (
+                            <span className={c.http_status >= 400 ? "ml-1 font-semibold" : "ml-1 text-slate-500"}>
+                              · replied {c.http_status}
+                            </span>
+                          )}
+                          {c.http_error ? <span className="ml-1 font-semibold">· {c.http_error.slice(0, 60)}</span> : null}
+                        </td>
                         <td className="px-4 py-2 text-right text-xs">{formatRelative(c.last_run_at)}</td>
                         <td className="px-4 py-2 text-right text-xs font-semibold">
-                          {c.is_stale ? "STALE" : "ok"}
+                          {c.stale ? "STALE" : "ok"}
                         </td>
                       </tr>
                     ))}

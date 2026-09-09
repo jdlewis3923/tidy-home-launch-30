@@ -442,6 +442,27 @@
       "when": 1788912774733,
       "tag": "0062_cron_health_snapshot",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1788919489203,
+      "tag": "0063_sms_outbox_expiry_and_cron_http_truth",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1788919562877,
+      "tag": "0064_repoint_cron_to_recording_helper",
+      "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1788919732396,
+      "tag": "0065_cron_health_snapshot_upsert",
+      "breakpoints": true
     }
   ]
 }
