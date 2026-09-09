@@ -35,7 +35,13 @@ export function sizeFromLawnChoice(choice: LawnChoice): SizeSelection {
   return choice === "small" ? 1 : choice === "standard" ? 2 : 3;
 }
 
-/** The size the server derives, or null when the inputs are not sufficient. */
+/**
+ * The size the server derives, or null when the inputs are not sufficient.
+ *
+ * Lawn carries TWO independent encodings of the same bands — the by-eye answer
+ * and the measured turf area. They must agree; when they don't we take the
+ * LARGER band so a "small yard" answer can never buy a 7,000 sq ft yard.
+ */
 export function recomputeSize(service: CanonService, inputs: SizeInputs): SizeSelection | null {
   if (service === "cleaning") {
     const beds = inputs.bedrooms ?? 0;
@@ -44,9 +50,14 @@ export function recomputeSize(service: CanonService, inputs: SizeInputs): SizeSe
     return sizeFromBedrooms(beds, baths);
   }
   if (service === "lawn") {
-    if (inputs.lawn_choice) return sizeFromLawnChoice(inputs.lawn_choice);
-    if (inputs.turf_sq_ft) return sizeFromTurfSqFt(inputs.turf_sq_ft);
-    return null;
+    const fromChoice = inputs.lawn_choice ? sizeFromLawnChoice(inputs.lawn_choice) : null;
+    const fromTurf = inputs.turf_sq_ft ? sizeFromTurfSqFt(inputs.turf_sq_ft) : null;
+    if (fromChoice === null && fromTurf === null) return null;
+    if (fromChoice === "quote" || fromTurf === "quote") return "quote";
+    return Math.max(
+      typeof fromChoice === "number" ? fromChoice : 0,
+      typeof fromTurf === "number" ? fromTurf : 0,
+    ) as SizeSelection;
   }
   if (!inputs.vehicle_class) return null;
   return VEHICLE_CLASS_SIZE[inputs.vehicle_class] ?? null;
@@ -55,9 +66,14 @@ export function recomputeSize(service: CanonService, inputs: SizeInputs): SizeSe
 export interface SizeCheckResult {
   ok: boolean;
   /** Machine-readable reason when ok is false. */
-  error?: "size_inputs_missing" | "size_mismatch" | "property_requires_quote";
+  error?:
+    | "size_inputs_missing"
+    | "size_mismatch"
+    | "property_requires_quote"
+    | "sq_ft_required";
   detail?: string;
 }
+
 
 /**
  * Validates one service line: the claimed size must equal the recomputed one,
@@ -70,10 +86,17 @@ export function checkServiceLine(args: {
   inputs: SizeInputs;
 }): SizeCheckResult {
   const { service, claimedSize, sqFt, inputs } = args;
+  // Square footage is REQUIRED for the two per-visit services: it is the only
+  // input that triggers the surcharge (cleaning +$60, lawn +$30 a visit) and
+  // the pro's surcharge share. A blank field used to buy the smaller price.
+  if ((service === "cleaning" || service === "lawn") && !sqFt) {
+    return { ok: false, error: "sq_ft_required", detail: service };
+  }
   const recomputed = recomputeSize(service, inputs);
   if (recomputed === null) {
     return { ok: false, error: "size_inputs_missing", detail: service };
   }
+
   if (recomputed === "quote") {
     return { ok: false, error: "property_requires_quote", detail: service };
   }

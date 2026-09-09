@@ -37,7 +37,7 @@ import {
 } from "../_shared/pricing-canon.ts";
 import { checkServiceLine, surchargePerVisitFor } from "../_shared/size-validation.ts";
 import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
-import { stripeMode, stripeSecretKey } from "../_shared/stripe-mode.ts";
+import { stripeMode, stripeModeConflict, stripeSecretKey } from "../_shared/stripe-mode.ts";
 
 const STRIPE_SECRET_KEY = stripeSecretKey();
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -126,6 +126,13 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   if (!STRIPE_SECRET_KEY) return jsonResponse({ ok: false, error: "Stripe not configured" }, 500);
+  // Refuse to transact when STRIPE_MODE and the secret key disagree.
+  const modeConflict = stripeModeConflict();
+  if (modeConflict) {
+    console.error("[create-stripe-payment-intent]", modeConflict);
+    return jsonResponse({ ok: false, error: `Stripe misconfigured: ${modeConflict}` }, 500);
+  }
+
 
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) return jsonResponse({ ok: false, error: "unauthorized" }, 401);
@@ -424,10 +431,15 @@ Deno.serve(async (req) => {
         return {
           ok: true as const,
           client_secret: clientSecret,
+          // The browser compares this with its publishable key: a pk_test page
+          // can never confirm a live PaymentIntent, so the mismatch has to be
+          // caught before the customer taps Pay.
+          stripe_mode: stripeMode(),
           subscription_id: subscription.id,
           customer_id: customerId,
           free_addons_per_month: freeAddons,
         };
+
       },
     });
 

@@ -14,6 +14,26 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string | 
 
 let cached: Promise<Stripe | null> | null = null;
 
+/** 'test' | 'live' | null — read from the publishable key prefix. */
+export function publishableKeyMode(): 'test' | 'live' | null {
+  if (!PUBLISHABLE_KEY) return null;
+  if (PUBLISHABLE_KEY.startsWith('pk_test_')) return 'test';
+  if (PUBLISHABLE_KEY.startsWith('pk_live_')) return 'live';
+  return null;
+}
+
+/**
+ * True when the page's publishable key is in a different Stripe environment
+ * than the server. Confirming a live PaymentIntent with pk_test Stripe.js
+ * always fails, so the caller must fall back to hosted Checkout instead.
+ */
+export function stripeModeMismatch(serverMode: string | null | undefined): boolean {
+  if (!serverMode) return false;
+  const clientMode = publishableKeyMode();
+  if (!clientMode) return true;
+  return clientMode !== serverMode;
+}
+
 export function getStripe(): Promise<Stripe | null> | null {
   if (!PUBLISHABLE_KEY) return null;
   if (!cached) cached = loadStripe(PUBLISHABLE_KEY);
@@ -21,5 +41,6 @@ export function getStripe(): Promise<Stripe | null> | null {
 }
 
 export function isEmbeddedCheckoutAvailable(): boolean {
-  return Boolean(PUBLISHABLE_KEY);
+  return publishableKeyMode() !== null;
 }
+

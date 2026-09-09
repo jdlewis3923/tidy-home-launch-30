@@ -132,17 +132,29 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
  * uses — same lookup keys, same cadence-as-quantity rule, same referral and
  * attribution handling. No percentage discounts: bundling stays the free
  * premium add-on, which the webhook records on the subscription row.
+ *
+ * The SIZE INPUTS are mandatory here for the same reason they are on the first
+ * plan: the server recomputes the size from them and rejects a line without
+ * them, so an upsell that sent only a size used to 400 every time.
  */
 export async function startAddServiceCheckout(args: {
   lines: CheckoutServiceLine[];
   zip: string;
   lang?: 'en' | 'es';
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  lawn_choice?: 'small' | 'standard' | 'large' | 'over' | null;
+  vehicle_class?: string | null;
 }): Promise<void> {
   const attribution = getUtmAttribution();
   const body = {
     services: args.lines,
     addons: [],
     zip: args.zip,
+    bedrooms: args.bedrooms ?? null,
+    bathrooms: args.bathrooms ?? null,
+    lawn_choice: args.lawn_choice ?? null,
+    vehicle_class: args.vehicle_class ?? null,
     lang: args.lang ?? ('en' as const),
     gclid: attribution.gclid,
     utm_source: attribution.utm_source,
@@ -155,6 +167,7 @@ export async function startAddServiceCheckout(args: {
     qr_zip: getQrZip() ?? undefined,
     qr_route: getQrRoute() ?? undefined,
   };
+
 
   const { data, error } = await supabase.functions.invoke(
     STRIPE_FUNCTIONS.CREATE_CHECKOUT,

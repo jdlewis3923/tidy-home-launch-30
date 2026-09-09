@@ -28,12 +28,24 @@ import {
   SIZE_LABELS,
   SIZE_HELPERS,
   SIZE_PRICES,
-  SIZES,
   SERVICE_UNIT,
+  CLEANING_SURCHARGE,
+  LAWN_SURCHARGE,
   type CanonService,
   type CanonSize,
 } from '@/lib/pricing-canon';
-import type { Frequency, ServiceType } from '@/lib/dashboard-pricing';
+import {
+  sizeForCleaning,
+  sizeForLawnReconciled,
+  sizeForCarCare,
+  lawnChoiceLabels,
+  vehicleClassLabels,
+  type Frequency,
+  type ServiceType,
+  type LawnChoice,
+  type VehicleClass,
+} from '@/lib/dashboard-pricing';
+
 import { isServiceAvailable } from '@/lib/service-availability';
 
 type CatalogRow = {
@@ -116,11 +128,55 @@ export default function DashboardServices() {
   const [preferredProId, setPreferredProId] = useState<string | null>(null);
   const [savingPreferredPro, setSavingPreferredPro] = useState(false);
 
-  // Add-a-service state
+  // Add-a-service state. The size is DERIVED from the same inputs the first
+  // plan collects — the server recomputes it and rejects a mismatch, and the
+  // square footage is what triggers the surcharge.
   const [newService, setNewService] = useState<CanonService | null>(null);
-  const [newSize, setNewSize] = useState<CanonSize>(1);
   const [newFrequency, setNewFrequency] = useState<Frequency>('monthly');
+  const [newBedrooms, setNewBedrooms] = useState<string>('');
+  const [newBathrooms, setNewBathrooms] = useState<string>('');
+  const [newHomeSqFt, setNewHomeSqFt] = useState<string>('');
+  const [newLawnChoice, setNewLawnChoice] = useState<LawnChoice | null>(null);
+  const [newTurfSqFt, setNewTurfSqFt] = useState<string>('');
+  const [newVehicleClass, setNewVehicleClass] = useState<VehicleClass | null>(null);
   const [startingCheckout, setStartingCheckout] = useState(false);
+
+  const newSqFt =
+    newService === 'cleaning'
+      ? Number(newHomeSqFt) || 0
+      : newService === 'lawn'
+        ? Number(newTurfSqFt) || 0
+        : 0;
+
+  const newSizeSelection =
+    newService === 'cleaning'
+      ? sizeForCleaning(newBedrooms || null, newBathrooms || null)
+      : newService === 'lawn'
+        ? sizeForLawnReconciled(newLawnChoice, Number(newTurfSqFt) || null)
+        : sizeForCarCare(newVehicleClass);
+
+  const newSize: CanonSize | null =
+    typeof newSizeSelection === 'number' ? (newSizeSelection as CanonSize) : null;
+
+  const newNeedsQuote =
+    newSizeSelection === 'quote' ||
+    (newService === 'cleaning' && newSqFt > CLEANING_SURCHARGE.maxSqFt) ||
+    (newService === 'lawn' && newSqFt > LAWN_SURCHARGE.maxSqFt);
+
+  const newReady = !!newService && !!newSize && !newNeedsQuote &&
+    (newService === 'detailing' || newSqFt > 0);
+
+  const resetNewService = (s: CanonService) => {
+    setNewService(s);
+    setNewFrequency(SERVICE_UNIT[s] === 'per_month' ? 'monthly' : 'biweekly');
+    setNewBedrooms('');
+    setNewBathrooms('');
+    setNewHomeSqFt('');
+    setNewLawnChoice(null);
+    setNewTurfSqFt('');
+    setNewVehicleClass(null);
+  };
+
 
   const sub = data.subscription;
   const planServices = ((sub?.services ?? []) as CanonService[]).filter(Boolean);
@@ -286,7 +342,7 @@ export default function DashboardServices() {
   };
 
   const addService = async () => {
-    if (!newService) return;
+    if (!newService || !newSize || !newReady) return;
     const zip = data.profile?.zip ?? sub?.founding_zip ?? '';
     if (!/^\d{5}$/.test(zip)) {
       toast({
@@ -298,10 +354,24 @@ export default function DashboardServices() {
     }
     setStartingCheckout(true);
     const lines: CheckoutServiceLine[] = [
-      { service: newService, size: newSize, frequency: newFrequency },
+      {
+        service: newService,
+        size: newSize,
+        frequency: newFrequency,
+        sq_ft: newSqFt || null,
+      },
     ];
     try {
-      await startAddServiceCheckout({ lines, zip, lang: language === 'es' ? 'es' : 'en' });
+      await startAddServiceCheckout({
+        lines,
+        zip,
+        lang: language === 'es' ? 'es' : 'en',
+        bedrooms: newService === 'cleaning' ? Number(newBedrooms.replace('+', '')) || null : null,
+        bathrooms: newService === 'cleaning' ? Number(newBathrooms.replace('+', '')) || null : null,
+        lawn_choice: newService === 'lawn' ? newLawnChoice : null,
+        vehicle_class: newService === 'detailing' ? newVehicleClass : null,
+      });
+
     } catch (err) {
       setStartingCheckout(false);
       toast({
@@ -585,11 +655,8 @@ export default function DashboardServices() {
                       <button
                         key={s}
                         type="button"
-                        onClick={() => {
-                          setNewService(s);
-                          setNewSize(1);
-                          setNewFrequency(SERVICE_UNIT[s] === 'per_month' ? 'monthly' : 'biweekly');
-                        }}
+                        onClick={() => resetNewService(s)}
+
                         className={`rounded-xl border-2 px-4 py-2 text-sm font-semibold transition ${
                           newService === s
                             ? 'border-ink bg-ink text-white'
@@ -603,34 +670,133 @@ export default function DashboardServices() {
 
                   {newService && (
                     <div className="mt-5 space-y-5">
-                      <div>
-                        <h3 className="text-sm font-semibold text-ink-soft">{t('Size')}</h3>
-                        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                          {SIZES.map((size) => (
-                            <button
-                              key={size}
-                              type="button"
-                              onClick={() => setNewSize(size)}
-                              className={`rounded-xl border-2 p-3 text-left transition ${
-                                newSize === size
-                                  ? 'border-ink bg-ink text-white'
-                                  : 'border-[hsl(var(--hairline))] bg-white hover:border-ink/40'
-                              }`}
-                            >
-                              <div className="text-sm font-semibold">{SIZE_LABELS[newService][size]}</div>
-                              <div className={`text-[11px] ${newSize === size ? 'text-white/70' : 'text-ink-faint'}`}>
-                                {SIZE_HELPERS[newService][size]}
-                              </div>
-                              <div className="mt-1 text-sm font-bold tabular-nums">
-                                ${SIZE_PRICES[newService][size]}
-                                <span className="text-[11px] font-medium">
-                                  {SERVICE_UNIT[newService] === 'per_month' ? t('/mo') : t('/visit')}
-                                </span>
-                              </div>
-                            </button>
-                          ))}
+                      {newService === 'cleaning' && (
+                        <div className="space-y-3">
+                          <h3 className="text-sm font-semibold text-ink-soft">{t('Your home')}</h3>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="block text-xs font-medium text-ink-soft">
+                              {t('Bedrooms')} *
+                              <select
+                                value={newBedrooms}
+                                onChange={(e) => setNewBedrooms(e.target.value)}
+                                className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
+                              >
+                                <option value="">{t('Select')}</option>
+                                {['1', '2', '3', '4', '5+'].map((v) => (
+                                  <option key={v} value={v}>{v}</option>
+                                ))}
+                              </select>
+                            </label>
+                            <label className="block text-xs font-medium text-ink-soft">
+                              {t('Bathrooms')} *
+                              <select
+                                value={newBathrooms}
+                                onChange={(e) => setNewBathrooms(e.target.value)}
+                                className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
+                              >
+                                <option value="">{t('Select')}</option>
+                                {['1', '1.5', '2', '2.5', '3', '3.5', '4+'].map((v) => (
+                                  <option key={v} value={v}>{v}</option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
+                          <label className="block text-xs font-medium text-ink-soft">
+                            {t('Home square footage')} *
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={0}
+                              step={50}
+                              value={newHomeSqFt}
+                              onChange={(e) => setNewHomeSqFt(e.target.value)}
+                              placeholder="e.g. 1800"
+                              className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
+                            />
+                          </label>
+                          <p className="text-[11px] text-ink-faint">
+                            {t('Interior living space. 2,501–4,000 sq ft adds $60 a visit. Above 4,000 we quote by hand.')}
+                          </p>
                         </div>
-                      </div>
+                      )}
+
+                      {newService === 'lawn' && (
+                        <div className="space-y-3">
+                          <h3 className="text-sm font-semibold text-ink-soft">{t('Your yard')}</h3>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {(['small', 'standard', 'large', 'over'] as LawnChoice[]).map((choice) => (
+                              <button
+                                key={choice}
+                                type="button"
+                                onClick={() => setNewLawnChoice(choice)}
+                                className={`min-h-[44px] rounded-xl border-2 p-3 text-left text-sm font-semibold transition ${
+                                  newLawnChoice === choice
+                                    ? 'border-ink bg-ink text-white'
+                                    : 'border-[hsl(var(--hairline))] bg-white text-ink hover:border-ink/40'
+                                }`}
+                              >
+                                {lawnChoiceLabels[choice]}
+                              </button>
+                            ))}
+                          </div>
+                          <label className="block text-xs font-medium text-ink-soft">
+                            {t('Mowable turf square footage')} *
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={0}
+                              step={50}
+                              value={newTurfSqFt}
+                              onChange={(e) => setNewTurfSqFt(e.target.value)}
+                              placeholder="e.g. 3500"
+                              className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
+                            />
+                          </label>
+                          <p className="text-[11px] text-ink-faint">
+                            {t('Grass only. 4,001–7,500 sq ft adds $30 a visit. Above 7,500 we quote by hand.')}
+                          </p>
+                        </div>
+                      )}
+
+                      {newService === 'detailing' && (
+                        <label className="block text-xs font-medium text-ink-soft">
+                          {t('What do you drive?')} *
+                          <select
+                            value={newVehicleClass ?? ''}
+                            onChange={(e) => setNewVehicleClass((e.target.value || null) as VehicleClass | null)}
+                            className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
+                          >
+                            <option value="">{t('Select')}</option>
+                            {(Object.keys(vehicleClassLabels) as VehicleClass[]).map((vc) => (
+                              <option key={vc} value={vc}>{vehicleClassLabels[vc]}</option>
+                            ))}
+                          </select>
+                        </label>
+                      )}
+
+                      {newSize && !newNeedsQuote && (
+                        <div className="rounded-xl border border-[hsl(var(--hairline))] bg-cream p-3">
+                          <div className="text-sm font-semibold text-ink">
+                            {SIZE_LABELS[newService][newSize]}
+                          </div>
+                          <div className="text-[11px] text-ink-faint">
+                            {SIZE_HELPERS[newService][newSize]}
+                          </div>
+                          <div className="mt-1 text-sm font-bold tabular-nums text-ink">
+                            ${SIZE_PRICES[newService][newSize]}
+                            <span className="text-[11px] font-medium">
+                              {SERVICE_UNIT[newService] === 'per_month' ? t('/mo') : t('/visit')}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {newNeedsQuote && (
+                        <p className="rounded-xl border border-[hsl(var(--hairline))] bg-cream p-3 text-[11px] text-ink-soft">
+                          {t('This one we quote by hand. Message us and we’ll price it for you.')}
+                        </p>
+                      )}
+
 
                       {SERVICE_UNIT[newService] === 'per_visit' && (
                         <div>
@@ -656,7 +822,7 @@ export default function DashboardServices() {
 
                       <button
                         type="button"
-                        disabled={startingCheckout}
+                        disabled={startingCheckout || !newReady}
                         onClick={addService}
                         className="inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] transition hover:bg-ink-soft disabled:opacity-60"
                       >

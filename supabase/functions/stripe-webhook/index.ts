@@ -564,14 +564,36 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Ev
       updates.next_billing_date = new Date(invoice.lines.data[0].period.end * 1000).toISOString().slice(0, 10);
     }
     await supabase.from('subscriptions').update(updates).eq('id', localSubId);
-    // A plan held for a failed card (past_due / unpaid / incomplete) is paying
-    // again: reactivate it. Customer-initiated pauses (pause_collection) stay.
-    await supabase
+    // A plan held for a failed card is paying again: reactivate it. The dunning
+    // ladder pauses with behavior 'mark_uncollectible', so paying the same card
+    // has to clear THAT pause too — otherwise the customer pays and gets no
+    // service until they happen to re-add a card. Customer-initiated pauses
+    // (behavior 'void') are left exactly as the customer set them.
+    const { data: paidSub } = await supabase
       .from('subscriptions')
-      .update({ status: 'active', stripe_status: 'active' })
+      .select('status, pause_collection, stripe_subscription_id')
       .eq('id', localSubId)
-      .eq('status', 'paused')
-      .is('pause_collection', null);
+      .maybeSingle();
+
+    if (paidSub?.pause_collection === 'mark_uncollectible') {
+      if (paidSub.stripe_subscription_id) {
+        try {
+          await stripe.subscriptions.update(paidSub.stripe_subscription_id, { pause_collection: '' });
+        } catch (err) {
+          console.error('[stripe-webhook] could not clear dunning pause', err);
+        }
+      }
+      await supabase
+        .from('subscriptions')
+        .update({ status: 'active', stripe_status: 'active', pause_collection: null, paused_until: null })
+        .eq('id', localSubId);
+    } else if (paidSub?.status === 'paused' && !paidSub.pause_collection) {
+      await supabase
+        .from('subscriptions')
+        .update({ status: 'active', stripe_status: 'active' })
+        .eq('id', localSubId);
+    }
+
     // Paid period → make sure its visits exist.
     await supabase.rpc('generate_recurring_visits', { _subscription_id: localSubId, _horizon_days: 45 });
   }
