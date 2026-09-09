@@ -183,7 +183,19 @@ export default function StepPayment({ state, onChange }: Props) {
           setSubmitting(false);
           return;
         }
+        // A pk_test page cannot confirm a live PaymentIntent (or vice versa).
+        // Say so loudly in the console and pay on the hosted page instead, so
+        // a key/mode mismatch can never silently break every payment.
+        if (stripeModeMismatch(data.stripe_mode as string | undefined)) {
+          console.error(
+            '[stripe] publishable key mode does not match the server STRIPE_MODE — falling back to hosted Checkout.',
+          );
+          await startCheckout({ config: state, lang: language });
+          setSubmitting(false);
+          return;
+        }
         setClientSecret(data.client_secret as string);
+
         // Keep submitting=true until the user finishes paying (UI shows form, no double-submit possible).
       } else {
         // Hosted-checkout path — always reachable, regardless of any flag state.
