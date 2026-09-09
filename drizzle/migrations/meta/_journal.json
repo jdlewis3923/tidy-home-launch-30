@@ -526,6 +526,13 @@
       "when": 1788933624046,
       "tag": "0074_cron_marker_probe",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1788933715241,
+      "tag": "0075_cron_manifest_hourly_and_diff",
+      "breakpoints": true
     }
   ]
 }

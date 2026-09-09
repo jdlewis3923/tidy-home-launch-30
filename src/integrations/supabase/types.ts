@@ -5067,6 +5067,14 @@ export type Database = {
         Args: { _fn: string; _job_name: string; _payload?: Json }
         Returns: number
       }
+      cron_manifest_diff: {
+        Args: { _expected: Json }
+        Returns: {
+          detail: string
+          job_name: string
+          problem: string
+        }[]
+      }
       current_user_admin: { Args: never; Returns: boolean }
       customers_needing_attention: {
         Args: never
@@ -5081,6 +5089,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      dispatch_due_social_posts: { Args: never; Returns: number }
       ensure_referral_code: { Args: never; Returns: string }
       founding_spots_left: { Args: { _zip: string }; Returns: number }
       gen_intake_token: { Args: never; Returns: string }
