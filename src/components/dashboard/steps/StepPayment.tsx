@@ -24,7 +24,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { provisionAccount } from '@/lib/account-provisioning';
 import { STRIPE_INTEGRATION_ENABLED } from '@/lib/dashboard-config';
 import { supabase } from '@/integrations/supabase/client';
-import { getStripe, isEmbeddedCheckoutAvailable } from '@/lib/stripe-client';
+import { getStripe, isEmbeddedCheckoutAvailable, stripeModeMismatch } from '@/lib/stripe-client';
 import EmbeddedPaymentForm from '@/components/dashboard/EmbeddedPaymentForm';
 import { getLandingSource, getQrPlacement, getQrRoute, getQrZip } from "@/lib/landing-source";
 import { getUtmAttribution } from '@/lib/utm';
