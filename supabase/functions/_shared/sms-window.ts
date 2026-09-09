@@ -80,6 +80,12 @@ export type OutboxRow = {
   idempotency_key: string;
   template_name?: string | null;
   triggered_by?: string | null;
+  /**
+   * ISO instant after which this message is pointless (the add-on window shut,
+   * the visit already happened). Parked messages past it are canceled, never
+   * sent — a late text is worse than no text.
+   */
+  expires_at?: string | null;
 };
 
 /**
