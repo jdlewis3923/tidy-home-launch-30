@@ -86,10 +86,17 @@ export function checkServiceLine(args: {
   inputs: SizeInputs;
 }): SizeCheckResult {
   const { service, claimedSize, sqFt, inputs } = args;
+  // Square footage is REQUIRED for the two per-visit services: it is the only
+  // input that triggers the surcharge (cleaning +$60, lawn +$30 a visit) and
+  // the pro's surcharge share. A blank field used to buy the smaller price.
+  if ((service === "cleaning" || service === "lawn") && !sqFt) {
+    return { ok: false, error: "sq_ft_required", detail: service };
+  }
   const recomputed = recomputeSize(service, inputs);
   if (recomputed === null) {
     return { ok: false, error: "size_inputs_missing", detail: service };
   }
+
   if (recomputed === "quote") {
     return { ok: false, error: "property_requires_quote", detail: service };
   }
