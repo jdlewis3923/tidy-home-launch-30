@@ -71,7 +71,9 @@ Deno.serve(async (req) => {
         if (error) console.warn('[submit-visit-rating] followup alert failed', error.message);
       });
 
-      sendBrevoEmail({
+      // Awaited on purpose: this is the highest-value customer alert we have,
+      // and a detached promise dies when the response is returned.
+      await sendBrevoEmail({
         to: OPS_ALERT_EMAIL,
         marketing: false,
         subject: `Make-it-right request (${fStars}★) — customer explained`,
@@ -198,7 +200,8 @@ Deno.serve(async (req) => {
       });
       if (alertErr) console.warn('[submit-visit-rating] alert insert failed', alertErr.message);
 
-      sendBrevoEmail({
+      // Awaited: the low-rating ops alert must not be dropped at shutdown.
+      await sendBrevoEmail({
         to: OPS_ALERT_EMAIL,
         marketing: false,
         subject: `Low visit rating (${stars}★) — needs follow-up`,
