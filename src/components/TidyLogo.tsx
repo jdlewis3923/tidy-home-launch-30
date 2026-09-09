@@ -28,7 +28,7 @@ const TidyLogo = ({ size = "md", withBackground = false, priority = false }: { s
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}
         decoding="async"
-        className={`${sizes[size]} object-contain`}
+        className={`${sizes[size]} max-w-none shrink-0 object-contain`}
       />
     </picture>
   );

@@ -52,8 +52,8 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
     return (
       <nav className={`fixed top-0 left-0 right-0 z-50 bg-background border-b transition-shadow duration-300 ${scrolled ? "shadow-md" : ""}`}>
         <div className="max-w-7xl mx-auto px-4 h-24 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/" aria-label="Tidy home" className="flex items-center">
+          <div className="flex items-center gap-3 shrink-0">
+            <Link to="/" aria-label="Tidy home" className="flex shrink-0 items-center">
               <TidyLogo size="nav" />
             </Link>
             <div className="relative">
@@ -106,7 +106,7 @@ const Navbar = ({ onOpenPopup }: NavbarProps) => {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 bg-background border-b transition-shadow duration-300 ${scrolled ? "shadow-md" : ""}`}>
       <div className="max-w-7xl mx-auto px-4 h-24 flex items-center justify-between">
-        <Link to="/" aria-label="Tidy home" className="flex items-center">
+        <Link to="/" aria-label="Tidy home" className="flex shrink-0 items-center">
           <TidyLogo size="nav" />
         </Link>
 
