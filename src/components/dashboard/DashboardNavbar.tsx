@@ -10,7 +10,7 @@ export default function DashboardNavbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-md">
       <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-3">
-        <Link to="/dashboard" className="flex items-center"><img src={tidyLogo} alt="Tidy" className="h-[72px] w-auto" /></Link>
+        <Link to="/dashboard" className="flex items-center"><img src={tidyLogo} alt="Tidy" className="h-14 w-auto" /></Link>
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-6">
