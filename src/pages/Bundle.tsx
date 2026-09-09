@@ -107,7 +107,7 @@ const BundleInner = () => {
       <SeoHead
         title={t("Bundle Your Services in Pinecrest + Kendall | Tidy Home Concierge")}
         description={t(
-          "One flat price set by the size of your home, lawn or vehicle. Hold two or more services and you pick one free premium add-on every month — Pinecrest, Kendall and Palmetto Bay (33156, 33183, 33186).",
+          "One flat price set by the size of your home, lawn or vehicle. Hold two or more services and you pick one free premium add-on every month — Pinecrest, Kendall and Kendall West (33156, 33183, 33186).",
         )}
         canonical="https://jointidy.co/bundle"
         ogImage={heroImg}

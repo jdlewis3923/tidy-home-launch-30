@@ -56,7 +56,7 @@ const launchFAQ = [
     title: "Getting Started",
     items: [
       { q: "What is Tidy?", a: "Tidy is an all-in-one home services subscription — we handle your house cleaning, lawn care, and Shine Complete all under one simple monthly plan. No juggling multiple providers, no chasing quotes. Just one subscription and everything stays spotless." },
-      { q: "How do I sign up?", a: "Tap 'Start My Plan,' choose your services and schedule, and complete checkout. Your first visit is confirmed within 24 hours." },
+      { q: "How do I sign up?", a: "Tap 'Start My Plan,' choose your services and schedule, and complete checkout. We'll confirm your first visit date with you by text." },
       { q: "Where is Tidy available?", a: "We currently serve Pinecrest (33156), Kendall (33183), and Kendall West (33186). We're launching in select Miami ZIP codes first to ensure consistently high-quality service from day one." },
       { q: "Is there a commitment?", a: "No contracts, no cancellation fees. You can cancel anytime, no questions asked. We earn your business every single month." },
     ],

@@ -338,7 +338,7 @@ export function trustClaims(): string[] {
 
 export const SERVICE_AREA_ZIPS = ['33156', '33183', '33186'] as const;
 export const SERVICE_AREA_LINE = 'Serving Pinecrest, Kendall and Kendall West — 33156, 33183, 33186';
-export const SERVICE_AREA_SHORT = 'Pinecrest, Kendall & Palmetto Bay';
+export const SERVICE_AREA_SHORT = 'Pinecrest, Kendall & Kendall West';
 
 // ---------------------------------------------------------------------------
 // CONTRACTOR PAY — 40% of the visit price. NEVER shown to a customer.
