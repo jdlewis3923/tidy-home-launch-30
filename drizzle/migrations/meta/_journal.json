@@ -428,6 +428,13 @@
       "when": 1788911861950,
       "tag": "0060_revoke_public_execute_schema_wide",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1788912421195,
+      "tag": "0061_cron_health_fast_lookup",
+      "breakpoints": true
     }
   ]
 }
