@@ -11,7 +11,7 @@ const TidyLogo = ({ size = "md", withBackground = false, priority = false }: { s
   // withBackground prop kept for API compatibility but no longer renders a white circle —
   // the logo now floats directly on the surface for a cleaner, larger presence.
   const sizes = {
-    nav: "h-14 md:h-16 w-auto",
+    nav: "h-16 md:h-20 w-auto",
     sm: "h-12 w-auto",
     md: "h-20 md:h-24 w-auto",
     lg: "h-40 md:h-44 w-auto",
