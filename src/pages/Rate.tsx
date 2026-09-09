@@ -57,6 +57,7 @@ const Rate = () => {
   // unmounted by then, so the panel owns its own field and posts back against
   // the rating row rather than trying to focus a field that no longer exists.
   const [ratingId, setRatingId] = useState<string | null>(null);
+  const [followupToken, setFollowupToken] = useState<string | null>(null);
   const [followupOpen, setFollowupOpen] = useState(false);
   const [followup, setFollowup] = useState("");
   const [followupSending, setFollowupSending] = useState(false);
@@ -75,11 +76,13 @@ const Rate = () => {
           comment,
           job_id: jobId || undefined,
           customer_id: customerId || undefined,
+          rate_token: rateToken || undefined,
           lang: document.documentElement.lang === "es" ? "es" : "en",
         },
       });
       if (fnError || !data?.ok) throw new Error(fnError?.message || "failed");
       setRatingId(typeof data?.rating_id === "string" ? data.rating_id : null);
+      setFollowupToken(typeof data?.followup_token === "string" ? data.followup_token : null);
       setDone(true);
       pushEvent("visit_rating", { stars: rating, has_comment: comment.trim().length > 0 });
     } catch {
@@ -103,7 +106,7 @@ const Rate = () => {
     try {
       if (!ratingId) throw new Error("no_rating_id");
       const { data, error: fnError } = await supabase.functions.invoke("submit-visit-rating", {
-        body: { rating_id: ratingId, comment: note },
+        body: { rating_id: ratingId, comment: note, followup_token: followupToken ?? undefined },
       });
       if (fnError || !data?.ok) throw new Error(fnError?.message || "failed");
       setFollowupSent(true);
