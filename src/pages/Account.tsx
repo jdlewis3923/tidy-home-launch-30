@@ -182,7 +182,7 @@ export default function Account() {
             ? "Update access & pets"
             : "Update preferences"
         }
-        subtitle="Send us a quick note and we'll update your file within the hour."
+        subtitle="Send us a quick note and we'll email you back the same day, Monday to Saturday, 8am to 6pm."
       >
         <p className="text-sm text-ink-soft">
           For now, please text us at{" "}
