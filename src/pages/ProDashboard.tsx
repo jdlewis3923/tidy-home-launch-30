@@ -130,8 +130,12 @@ export default function ProDashboard() {
 
         if (cancelled) return;
 
-        const weekCents = (weekRes.data ?? []).reduce((s: number, r: any) => s + (r.amount_cents ?? 0), 0);
-        const lastWeekCents = (lastWeekRes.data ?? []).reduce((s: number, r: any) => s + (r.amount_cents ?? 0), 0);
+        const payOf = (rows: any) =>
+          ((rows ?? []) as any[])
+            .filter((r) => r.status === "complete")
+            .reduce((s: number, r: any) => s + (r.visit_pay_cents ?? 0), 0);
+        const weekCents = payOf(weekRes.data);
+        const lastWeekCents = payOf(lastWeekRes.data);
         const ratings = (ratingRes.data ?? []).map((r: any) => r.rating).filter(Boolean);
         const rating30d = ratings.length ? ratings.reduce((s: number, n: number) => s + n, 0) / ratings.length : 0;
 
