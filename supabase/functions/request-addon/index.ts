@@ -250,6 +250,10 @@ Deno.serve(async (req) => {
             idempotency_key: `addon-request-${reqRow.id}`,
             template_name: 'addon-request-approval',
             triggered_by: 'request-addon',
+            // The approval link dies with the request. If quiet hours park this
+            // text, it must be canceled — never delivered pointing at a window
+            // that shut hours ago.
+            expires_at: (reqRow as { expires_at?: string | null }).expires_at ?? undefined,
           }),
         });
         const json = await res.json().catch(() => ({}));
