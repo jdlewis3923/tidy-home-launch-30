@@ -3535,6 +3535,27 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit_hits: {
+        Row: {
+          bucket: string
+          created_at: string
+          id: number
+          identifier: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          id?: number
+          identifier: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          id?: number
+          identifier?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           converted_at: string | null
@@ -5200,6 +5221,15 @@ export type Database = {
         Returns: number
       }
       public_five_star_proof: { Args: never; Returns: Json }
+      rate_limit_take: {
+        Args: {
+          _bucket: string
+          _identifier: string
+          _limit: number
+          _window_seconds: number
+        }
+        Returns: Json
+      }
       repoint_cron_to_helper: { Args: { _job_name: string }; Returns: string }
       verify_pro_badge: {
         Args: { _token: string }
