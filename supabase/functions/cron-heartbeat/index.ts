@@ -63,6 +63,27 @@ Deno.serve(async (req) => {
   const jobs = (data ?? []) as CronRow[];
   const stale = jobs.filter((j) => j.active && j.stale);
 
+  // An empty snapshot is not "no problems" — it means the watchdog has nothing
+  // to look at, which reads as all-green everywhere downstream.
+  if (jobs.length === 0) {
+    const { data: openEmpty } = await admin
+      .from('admin_alerts')
+      .select('id')
+      .eq('alert_type', 'cron_snapshot_empty')
+      .is('resolved_at', null)
+      .limit(1);
+    if (!openEmpty?.length) {
+      await admin.from('admin_alerts').insert({
+        alert_type: 'cron_snapshot_empty',
+        title: 'The scheduled-job watchdog has no jobs to check',
+        body: `capture_cron_health returned ${captured ?? 0} rows. Nothing is being monitored.`,
+        context: { captured_rows: captured ?? 0, at: new Date().toISOString() },
+      });
+    }
+    return jsonResponse({ ok: false, error: 'cron_snapshot_empty', jobs_total: 0 }, 500);
+  }
+
+
   let alerted = 0;
   for (const j of stale) {
     // One open alert per job — don't spam an hourly duplicate.
