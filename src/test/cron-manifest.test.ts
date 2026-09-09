@@ -106,15 +106,20 @@ describe('helpers that shipped with no callers', () => {
 });
 
 describe('SECURITY DEFINER guard shapes in committed SQL', () => {
-  // Only the LAST committed definition of each function matters — earlier
-  // migrations are history, and several were superseded precisely because their
-  // guard was wrong. is_service_caller / is_privileged_caller are the helpers
-  // whose whole job is to inspect the session role, so they are exempt.
+  // 0054 sweeps every definer body that still guards on current_user and 0058
+  // does the same for the fail-open null-auth.uid() shape, so anything defined
+  // BEFORE those sweeps is repaired on a rebuild. Only definitions committed at
+  // or after the sweep can reintroduce the bug — that is what this checks, and
+  // scripts/live-audit.mjs checks the live bodies as the final authority.
+  const SWEEP_FROM = 54;
+  // These helpers exist precisely to inspect the session role.
   const EXEMPT = new Set(['is_service_caller', 'is_privileged_caller', 'current_user_admin']);
 
   const latestDefinerBodies = () => {
     const latest = new Map<string, { file: string; body: string }>();
     for (const { name: file, sql } of sqlFiles()) {
+      const seq = Number(file.slice(0, 4));
+      if (!Number.isFinite(seq) || seq < SWEEP_FROM) continue;
       const statements = sql.split(/;\s*\n(?=CREATE|GRANT|REVOKE|SELECT|ALTER|DO)/i);
       for (const st of statements) {
         if (!/SECURITY\s+DEFINER/i.test(st)) continue;
@@ -127,6 +132,7 @@ describe('SECURITY DEFINER guard shapes in committed SQL', () => {
       .filter(([name]) => !EXEMPT.has(name))
       .map(([name, v]) => ({ name, ...v }));
   };
+
 
   it('no definer function relies on current_user for authorisation', () => {
     const offenders = latestDefinerBodies()
