@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import tidyLogo from '@/assets/tidy-logo.png';
+import tidyLogo from '@/assets/tidy-logo-trimmed.png';
 
 export default function DashboardNavbar() {
   const [open, setOpen] = useState(false);
