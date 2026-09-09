@@ -115,7 +115,7 @@ export default function StepDetails({ state, onChange }: Props) {
           >
             <option value="">no preference</option>
             <option value="morning">morning · 8am–12pm</option>
-            <option value="afternoon">afternoon · 12pm–6pm</option>
+            <option value="afternoon">afternoon · 12pm–5pm</option>
           </select>
         </div>
       </div>
