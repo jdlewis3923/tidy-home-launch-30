@@ -911,7 +911,7 @@ const translations: Record<string, string> = {
     "Antecedentes Verificados · Visitas Verificadas con Fotos · Primera visita perfecta o es gratis",
   "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
     "Un servicio adicional premium gratis en tu primera visita · Primera visita perfecta o es gratis · Solo 25 casas fundadoras por código postal",
-  "One free premium add-on on your first visit — $45 value": "Un servicio adicional gratis en la primera visita — valor de $45",
+  "One free premium add-on on your first visit — you choose it": "Un servicio adicional gratis en la primera visita — tú lo eliges",
   "MORE LIFE. LESS CHORES.": "MÁS VIDA. MENOS TAREAS.",
   "See your price in 60 seconds. No contract.": "Ve tu precio en 60 segundos. Sin contrato.",
   "or call": "o llama al",
