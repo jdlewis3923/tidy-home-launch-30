@@ -268,8 +268,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 8,
     title: "Free premium add-on",
     zip: "33183",
-    en: `One free premium add-on on your first visit — $45 value. You choose it. No conditions.`,
-    es: `Un servicio premium gratis en tu primera visita. Tú lo eliges. Sin condiciones.`,
+    en: `One free premium add-on on your first visit. You choose it, from an oven clean to a driveway pressure wash. No conditions.`,
+    es: `Un servicio premium gratis en tu primera visita. Tú lo eliges, desde una limpieza de horno hasta un lavado a presión de la entrada. Sin condiciones.`,
   },
   {
     post_number: 9,
