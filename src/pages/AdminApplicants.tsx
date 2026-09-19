@@ -94,6 +94,11 @@ type Applicant = {
   photos_expected_count: number | null;
   checkr_candidate_id: string | null;
   checkr_invitation_id: string | null;
+  checkr_report_id: string | null;
+  checkr_report_status: string | null;
+  bg_check_ordered_at: string | null;
+  checkr_last_webhook_at: string | null;
+  bg_check_manual_review: boolean | null;
   stripe_account_id: string | null;
   stripe_connect_complete: boolean | null;
   training_passed: boolean | null;
@@ -277,6 +282,7 @@ export default function AdminApplicants() {
 
   const [open, setOpen] = useState<Applicant | null>(null);
   const [bgNotes, setBgNotes] = useState("");
+  const [resendingCheckr, setResendingCheckr] = useState<string | null>(null);
   const [bgNotesDirty, setBgNotesDirty] = useState(false);
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [events, setEvents] = useState<Array<{ id: string; event: string; metadata: any; created_at: string }>>([]);
@@ -314,7 +320,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved, wash_only, training_scheduled_at, training_no_show_count, out_of_service_area, pro_number, verify_token, badge_status")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, checkr_report_id, checkr_report_status, bg_check_ordered_at, checkr_last_webhook_at, bg_check_manual_review, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved, wash_only, training_scheduled_at, training_no_show_count, out_of_service_area, pro_number, verify_token, badge_status")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -493,6 +499,25 @@ export default function AdminApplicants() {
     };
     toast.success(friendly[action]);
     if (open) await fetchEvents(open.id);
+    fetchRows();
+  };
+
+  // Resend the Checkr invitation (for when their email lands in spam).
+  // Checkr emails the candidate directly; Tidy never collects SSN/DOB/licence.
+  const resendCheckrInvite = async (applicantId: string) => {
+    setResendingCheckr(applicantId);
+    const { data, error } = await supabase.functions.invoke("checkr-invite", {
+      body: { applicant_id: applicantId, resend: true },
+    });
+    setResendingCheckr(null);
+    const payload = data as { ok?: boolean; error?: string } | null;
+    if (error || payload?.error || payload?.ok === false) {
+      toast.error("Could not resend the Checkr invitation", {
+        description: error?.message ?? payload?.error ?? "unknown",
+      });
+      return;
+    }
+    toast.success("Checkr invitation resent");
     fetchRows();
   };
 
@@ -760,7 +785,28 @@ export default function AdminApplicants() {
                   <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 shrink-0 ${STAGE_PILL[stage] ?? STAGE_PILL.applied}`}>
                     {STAGE_LABEL[stage] ?? stage}
                   </span>
-                  <span className={`h-2.5 w-2.5 rounded-full ring-2 shrink-0 ${BG_DOT[bg] ?? BG_DOT.pending}`} title={`BG: ${bg}`} />
+                  <span className="hidden lg:flex flex-col items-end shrink-0 w-40 text-[11px] leading-tight">
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-slate-700">
+                      <span className={`h-2.5 w-2.5 rounded-full ring-2 ${BG_DOT[bg] ?? BG_DOT.pending}`} />
+                      BG: {a.bg_check_manual_review ? "review needed" : bg}
+                    </span>
+                    <span className="text-slate-500">
+                      Ordered {a.bg_check_ordered_at ? relTime(a.bg_check_ordered_at) : "—"} · Back{" "}
+                      {a.bg_check_completed_at ? relTime(a.bg_check_completed_at) : "—"}
+                    </span>
+                    {a.checkr_invitation_id && (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); resendCheckrInvite(a.id); }}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); resendCheckrInvite(a.id); } }}
+                        className="mt-0.5 text-[#1FA1F0] hover:underline font-semibold"
+                      >
+                        {resendingCheckr === a.id ? "Resending…" : "Resend Checkr invitation"}
+                      </span>
+                    )}
+                  </span>
+                  <span className={`lg:hidden h-2.5 w-2.5 rounded-full ring-2 shrink-0 ${BG_DOT[bg] ?? BG_DOT.pending}`} title={`BG: ${bg}`} />
                   {proCapacity[a.id] !== undefined && (
                     <span
                       className={`hidden lg:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-md ring-1 shrink-0 ${proCapacity[a.id].high_demand ? "bg-purple-50 text-purple-700 ring-purple-200" : "bg-slate-50 text-slate-600 ring-slate-200"}`}
@@ -939,6 +985,18 @@ export default function AdminApplicants() {
                       {open.checkr_candidate_id && (
                         <div className="text-[11px] text-slate-500 font-mono break-all">
                           candidate: {open.checkr_candidate_id}
+                          {open.checkr_report_id ? ` · report: ${open.checkr_report_id}` : ""}
+                        </div>
+                      )}
+                      <div className="text-[11px] text-slate-500">
+                        Ordered {open.bg_check_ordered_at ? relTime(open.bg_check_ordered_at) : "—"}
+                        {" · "}
+                        Came back {open.bg_check_completed_at ? relTime(open.bg_check_completed_at) : "—"}
+                        {open.checkr_report_status ? ` · ${open.checkr_report_status}` : ""}
+                      </div>
+                      {open.bg_check_manual_review && (
+                        <div className="text-[11px] font-semibold text-amber-800 bg-amber-50 ring-1 ring-amber-200 rounded-md px-2 py-1">
+                          Needs manual review — adverse action is a human decision. No one is auto-rejected.
                         </div>
                       )}
                       <div className="flex gap-2">
@@ -950,8 +1008,20 @@ export default function AdminApplicants() {
                         >
                           {submitting === "send_to_bg_check"
                             ? <Loader2 className="h-4 w-4 animate-spin" />
-                            : open.checkr_invitation_id ? "Resend invitation" : "Send Checkr invitation"}
+                            : open.checkr_invitation_id ? "Re-order check" : "Send Checkr invitation"}
                         </Button>
+                        {open.checkr_invitation_id && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={resendingCheckr === open.id}
+                            onClick={() => resendCheckrInvite(open.id)}
+                          >
+                            {resendingCheckr === open.id
+                              ? <Loader2 className="h-4 w-4 animate-spin" />
+                              : "Resend Checkr invitation"}
+                          </Button>
+                        )}
                       </div>
                     </div>
 
