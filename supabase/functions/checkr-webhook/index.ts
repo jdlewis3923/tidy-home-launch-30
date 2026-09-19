@@ -1,76 +1,113 @@
+import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Checkr webhook receiver
 //
-// Receives Checkr platform callbacks. Verifies signature with
-// CHECKR_WEBHOOK_SECRET. On `report.completed` (and similar terminal events),
-// maps Checkr's report status to our internal bg outcome and re-uses
-// `advance-applicant` so the existing email/PDF/notify flow fires unchanged.
+// Signature verification is MANDATORY. Every request is HMAC-SHA256 checked
+// against CHECKR_WEBHOOK_SECRET before anything else happens:
+//   - secret unset          → 503, nothing processed
+//   - header missing        → 401
+//   - signature mismatch    → 401
 //
-// Mapping (per spec):
-//   clear, engaged     → 'consider' (Justin reviews edge cases)
-//   suspended, consider → 'consider'
-//   dispute, canceled  → 'fail'
+// Handled events:
+//   invitation.completed        → candidate finished Checkr's form
+//   report.completed            → clear → advance to contracts sent
+//                                 consider / suspended → hold + manual review
+//   report.engaged              → hold + manual review
+//   report.pre_adverse_action   → hold + manual review (legal steps are human)
+//   report.post_adverse_action  → hold + manual review
 //
-// If CHECKR_WEBHOOK_SECRET is unset we still accept the payload but log a
-// warning — useful for local plumbing tests before the secret is live.
+// Nobody is ever auto-rejected: adverse action has legal steps a human takes.
+// Tidy stores only Checkr ids, status and timestamps — never an SSN, date of
+// birth or driver's licence number.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { logIntegrationEvent } from '../_shared/integration-log.ts';
+import { readEnv, readOptionalEnv } from '../_shared/handlerEnv.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const CHECKR_WEBHOOK_SECRET = Deno.env.get('CHECKR_WEBHOOK_SECRET') ?? '';
+const HANDLED = new Set([
+  'invitation.completed',
+  'report.completed',
+  'report.engaged',
+  'report.pre_adverse_action',
+  'report.post_adverse_action',
+]);
 
-const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
-
-type Action = 'clear' | 'consider' | 'fail';
-
-function mapCheckrStatus(status: string | undefined | null): Action {
-  const s = (status ?? '').toLowerCase();
-  if (s === 'clear' || s === 'engaged') return 'consider';
-  if (s === 'suspended' || s === 'consider') return 'consider';
-  if (s === 'dispute' || s === 'canceled' || s === 'cancelled') return 'fail';
-  // Unknown → consider (safe default; Justin reviews)
-  return 'consider';
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return mismatch === 0;
 }
 
-async function verifySignature(rawBody: string, signatureHeader: string | null): Promise<boolean> {
-  if (!CHECKR_WEBHOOK_SECRET) return true; // soft-pass when not configured yet
-  if (!signatureHeader) return false;
+async function hmacHex(secret: string, body: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
-    'raw', enc.encode(CHECKR_WEBHOOK_SECRET),
-    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
   );
-  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(rawBody));
-  const hex = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('');
-  // Checkr sends "sha256=<hex>" or just hex depending on configuration — accept both.
-  const provided = signatureHeader.replace(/^sha256=/i, '').trim().toLowerCase();
-  return provided === hex;
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(body));
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
 
+  const secret = readOptionalEnv('CHECKR_WEBHOOK_SECRET');
   const rawBody = await req.text();
+
+  // --- Gate 1: the secret must exist. Fail closed, never soft-pass. ---
+  if (!secret) {
+    console.error('[checkr-webhook] CHECKR_WEBHOOK_SECRET not set — rejecting');
+    await logIntegrationEvent({
+      source: 'checkr', event: 'webhook_rejected', status: 'error',
+      error_message: 'CHECKR_WEBHOOK_SECRET not configured',
+    });
+    return jsonResponse({ error: 'webhook_secret_not_configured' }, 503);
+  }
+
+  // --- Gate 2: signature present and matching. ---
   const sigHeader = req.headers.get('X-Checkr-Signature') ?? req.headers.get('x-checkr-signature');
-  const valid = await verifySignature(rawBody, sigHeader);
-  if (!valid) {
-    console.warn('[checkr-webhook] invalid signature');
+  if (!sigHeader) {
+    await logIntegrationEvent({
+      source: 'checkr', event: 'webhook_rejected', status: 'error',
+      error_message: 'missing signature header',
+    });
+    return jsonResponse({ error: 'missing_signature' }, 401);
+  }
+  const expected = await hmacHex(secret, rawBody);
+  const provided = sigHeader.replace(/^sha256=/i, '').trim().toLowerCase();
+  if (!timingSafeEqual(provided, expected)) {
+    console.warn('[checkr-webhook] signature mismatch');
+    await logIntegrationEvent({
+      source: 'checkr', event: 'webhook_rejected', status: 'error',
+      error_message: 'signature mismatch',
+    });
     return jsonResponse({ error: 'invalid_signature' }, 401);
   }
 
-  let payload: any;
+  const env = readEnv(['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const);
+  if (env.missing.length) return jsonResponse({ error: `MISSING_ENV: ${env.missing.join(', ')}` }, 500);
+  const admin = createClient(env.values.SUPABASE_URL, env.values.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  let payload: Record<string, unknown>;
   try { payload = JSON.parse(rawBody); }
   catch { return jsonResponse({ error: 'invalid_json' }, 400); }
 
-  const eventType: string = payload?.type ?? payload?.event ?? '';
-  const obj = payload?.data?.object ?? payload?.object ?? {};
+  const eventType: string = String((payload as any)?.type ?? (payload as any)?.event ?? '');
+  const obj = ((payload as any)?.data?.object ?? (payload as any)?.object ?? {}) as Record<string, any>;
   const candidateId: string | undefined = obj?.candidate_id ?? obj?.id;
+  const reportId: string | undefined = eventType.startsWith('report.') ? (obj?.id ?? undefined) : undefined;
   const reportStatus: string | undefined = obj?.status;
+  const now = new Date().toISOString();
+
+  await logIntegrationEvent({
+    source: 'checkr',
+    event: `webhook:${eventType || 'unknown'}`,
+    status: 'success',
+  });
 
   // Locate the applicant by Checkr candidate id.
   let applicantId: string | null = null;
@@ -80,48 +117,93 @@ Deno.serve(async (req) => {
     applicantId = row?.id ?? null;
   }
 
-  // Always log raw payload to onboarding_events for audit/debug.
   if (applicantId) {
     await admin.from('onboarding_events').insert({
       applicant_id: applicantId,
       event: `checkr_webhook:${eventType || 'unknown'}`,
-      metadata: { payload },
+      // Checkr's object carries no SSN/DOB/DL fields; we still store only ids + status.
+      metadata: { event: eventType, candidate_id: candidateId, report_id: reportId ?? null, status: reportStatus ?? null },
     });
   } else {
     console.warn('[checkr-webhook] no applicant for candidate', candidateId, eventType);
   }
 
-  // Only act on terminal report events.
-  const terminal = eventType.startsWith('report.') &&
-    (eventType.endsWith('.completed') || eventType.endsWith('.suspended') ||
-     eventType.endsWith('.disputed') || eventType.endsWith('.canceled'));
-  if (!terminal || !applicantId) {
+  if (!HANDLED.has(eventType) || !applicantId) {
     return jsonResponse({ ok: true, applied: false, event: eventType });
   }
 
-  const action: Action = mapCheckrStatus(reportStatus);
+  const update: Record<string, unknown> = {
+    checkr_last_webhook_at: now,
+    updated_at: now,
+    bg_check_provider: 'checkr',
+  };
+  if (reportId) update.checkr_report_id = reportId;
+  if (reportStatus) update.checkr_report_status = reportStatus;
 
-  // Reuse advance-applicant for downstream emails/PDFs/notifications.
-  try {
-    const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/advance-applicant`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        applicant_id: applicantId,
-        action,
-        notes: `Checkr report ${reportStatus ?? 'unknown'} (${eventType})`,
-      }),
-    });
-    if (!r.ok) {
-      const txt = await r.text().catch(() => '');
-      console.error('[checkr-webhook] advance-applicant failed', r.status, txt);
+  let outcome: 'pending' | 'clear' | 'review' = 'pending';
+
+  if (eventType === 'invitation.completed') {
+    update.bg_check_status = 'pending';
+    update.checkr_report_status = 'invitation_completed';
+  } else if (eventType === 'report.completed') {
+    const s = (reportStatus ?? '').toLowerCase();
+    if (s === 'clear') {
+      outcome = 'clear';
+      update.bg_check_status = 'clear';
+      update.bg_check_completed_at = now;
+      update.bg_check_manual_review = false;
+    } else {
+      // consider, suspended, anything unexpected — hold in bg_check.
+      outcome = 'review';
+      update.bg_check_status = s === 'suspended' ? 'suspended' : 'consider';
+      update.bg_check_completed_at = now;
+      update.bg_check_manual_review = true;
+      update.current_stage = 'bg_check';
     }
-  } catch (e) {
-    console.error('[checkr-webhook] advance dispatch failed', e);
+  } else {
+    // engaged / pre_adverse_action / post_adverse_action — always a human call.
+    outcome = 'review';
+    update.bg_check_status = 'consider';
+    update.bg_check_manual_review = true;
+    update.current_stage = 'bg_check';
   }
 
-  return jsonResponse({ ok: true, applied: true, mapped_action: action, event: eventType });
+  const { error: updErr } = await admin.from('applicants').update(update).eq('id', applicantId);
+  if (updErr) {
+    console.error('[checkr-webhook] applicant update failed', updErr.message);
+    await logIntegrationEvent({
+      source: 'checkr', event: 'webhook_apply', status: 'error', error_message: updErr.message,
+    });
+    return jsonResponse({ error: 'update_failed' }, 500);
+  }
+
+  if (outcome === 'clear') {
+    // Clear report → send the contract (Tidy's "contracts sent" stage).
+    try {
+      const r = await vendorFetch(`${env.values.SUPABASE_URL}/functions/v1/advance-applicant`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${env.values.SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          applicant_id: applicantId,
+          action: 'send_contract',
+          notes: `Checkr report clear (${eventType})`,
+        }),
+      });
+      if (!r.ok) console.error('[checkr-webhook] advance-applicant failed', r.status);
+    } catch (e) {
+      console.error('[checkr-webhook] advance dispatch failed', (e as Error).message);
+    }
+  } else if (outcome === 'review') {
+    await admin.from('admin_alerts').insert({
+      alert_type: 'checkr_report_needs_review',
+      title: `Checkr report needs manual review (candidate ${candidateId ?? 'unknown'})`,
+      context: { applicant_id: applicantId, report_id: reportId ?? null, status: reportStatus ?? null, event: eventType },
+      body: `Checkr report came back "${reportStatus ?? eventType}" — held in bg_check for manual review. Adverse action requires a human decision; nobody was auto-rejected.`,
+    });
+  }
+
+  return jsonResponse({ ok: true, applied: true, event: eventType, outcome });
 });

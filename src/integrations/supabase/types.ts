@@ -485,7 +485,9 @@ export type Database = {
           badge_photo_url: string | null
           badge_status: string
           bg_check_completed_at: string | null
+          bg_check_manual_review: boolean
           bg_check_notes: string | null
+          bg_check_ordered_at: string | null
           bg_check_provider: string | null
           bg_check_status: string | null
           bilingual: boolean | null
@@ -494,6 +496,9 @@ export type Database = {
           business_bank_account_confirmed: boolean
           checkr_candidate_id: string | null
           checkr_invitation_id: string | null
+          checkr_last_webhook_at: string | null
+          checkr_report_id: string | null
+          checkr_report_status: string | null
           coi_auto_status: string | null
           coi_carrier_name: string | null
           coi_effective_date: string | null
@@ -574,7 +579,9 @@ export type Database = {
           badge_photo_url?: string | null
           badge_status?: string
           bg_check_completed_at?: string | null
+          bg_check_manual_review?: boolean
           bg_check_notes?: string | null
+          bg_check_ordered_at?: string | null
           bg_check_provider?: string | null
           bg_check_status?: string | null
           bilingual?: boolean | null
@@ -583,6 +590,9 @@ export type Database = {
           business_bank_account_confirmed?: boolean
           checkr_candidate_id?: string | null
           checkr_invitation_id?: string | null
+          checkr_last_webhook_at?: string | null
+          checkr_report_id?: string | null
+          checkr_report_status?: string | null
           coi_auto_status?: string | null
           coi_carrier_name?: string | null
           coi_effective_date?: string | null
@@ -663,7 +673,9 @@ export type Database = {
           badge_photo_url?: string | null
           badge_status?: string
           bg_check_completed_at?: string | null
+          bg_check_manual_review?: boolean
           bg_check_notes?: string | null
+          bg_check_ordered_at?: string | null
           bg_check_provider?: string | null
           bg_check_status?: string | null
           bilingual?: boolean | null
@@ -672,6 +684,9 @@ export type Database = {
           business_bank_account_confirmed?: boolean
           checkr_candidate_id?: string | null
           checkr_invitation_id?: string | null
+          checkr_last_webhook_at?: string | null
+          checkr_report_id?: string | null
+          checkr_report_status?: string | null
           coi_auto_status?: string | null
           coi_carrier_name?: string | null
           coi_effective_date?: string | null
