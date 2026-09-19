@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import ReviewsThisWeekCard from "@/components/admin/ReviewsThisWeekCard";
 import JobberStubCallers from "@/components/admin/JobberStubCallers";
 import OpenAlertsPanel from "@/components/admin/OpenAlertsPanel";
+import CheckrReadinessCard from "@/components/admin/CheckrReadiness";
+
 
 type Source =
   | "stripe"
@@ -344,8 +346,13 @@ export default function AdminHealth() {
         </div>
 
         <div className="mt-6">
+          <CheckrReadinessCard />
+        </div>
+
+        <div className="mt-6">
           <ReviewsThisWeekCard />
         </div>
+
 
 
         <div className="mt-6">
