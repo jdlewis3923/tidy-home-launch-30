@@ -199,7 +199,8 @@ Deno.serve(async (req) => {
   } else if (outcome === 'review') {
     await admin.from('admin_alerts').insert({
       alert_type: 'checkr_report_needs_review',
-      severity: 'high',
+      title: `Checkr report needs manual review (candidate ${candidateId ?? 'unknown'})`,
+      context: { applicant_id: applicantId, report_id: reportId ?? null, status: reportStatus ?? null, event: eventType },
       body: `Checkr report came back "${reportStatus ?? eventType}" — held in bg_check for manual review. Adverse action requires a human decision; nobody was auto-rejected.`,
     });
   }

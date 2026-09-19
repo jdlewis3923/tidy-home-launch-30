@@ -113,3 +113,17 @@ verify_jwt = false
 
 [functions.send-twilio-sms]
 verify_jwt = false
+
+# Checkr posts webhooks without an Authorization header. Every request is
+# HMAC-SHA256 verified against CHECKR_WEBHOOK_SECRET inside the handler and
+# rejected when the secret is unset, the header is missing, or it mismatches.
+[functions.checkr-webhook]
+verify_jwt = false
+
+# Admin-triggered Checkr calls. The handler authorizes an admin session or the
+# service-role bearer itself (requireServiceOrAdmin) before reading the body.
+[functions.checkr-invite]
+verify_jwt = false
+
+[functions.checkr-readiness]
+verify_jwt = false
