@@ -950,8 +950,19 @@ function DrillDown({
               </div>
               <ul className="text-xs text-rose-800 space-y-1">
                 {alerts.map((a) => (
-                  <li key={a.id}>
-                    <span className="font-semibold uppercase">{a.severity}</span> · {a.message}
+                  <li key={a.id} className="flex items-start justify-between gap-2">
+                    <span>
+                      <span className="font-semibold uppercase">{a.severity}</span> · {a.message}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={resolving}
+                      onClick={() => onResolveAlert(a.id)}
+                      className="h-7 shrink-0 border-rose-300 bg-white px-2 text-[11px] font-semibold text-rose-800 hover:bg-rose-100"
+                    >
+                      Resolved
+                    </Button>
                   </li>
                 ))}
               </ul>
