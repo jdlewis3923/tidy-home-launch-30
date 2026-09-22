@@ -638,6 +638,16 @@ export default function AdminKpis() {
                 {alerts.length > 3 ? ` +${alerts.length - 3} more` : ""}
               </p>
             </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={resolving}
+              onClick={() => resolveAlerts(alerts.map((a) => a.id))}
+              className="h-8 shrink-0 border-rose-300 bg-white text-xs font-semibold text-rose-800 hover:bg-rose-100"
+            >
+              {resolving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : null}
+              Clear all
+            </Button>
           </div>
         </div>
       )}
