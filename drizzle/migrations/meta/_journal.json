@@ -589,6 +589,41 @@
       "when": 1790087342065,
       "tag": "0083_hiring_autopilot_foundation",
       "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1790088364827,
+      "tag": "0084_calendar_task_key",
+      "breakpoints": true
+    },
+    {
+      "idx": 85,
+      "version": "7",
+      "when": 1790088762527,
+      "tag": "0085_hiring_autopilot_cron_schedules",
+      "breakpoints": true
+    },
+    {
+      "idx": 86,
+      "version": "7",
+      "when": 1790088834723,
+      "tag": "0086_fix_pro_number_sequence_call",
+      "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1790088916408,
+      "tag": "0087_applicants_hiring_tier_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "7",
+      "when": 1790089219222,
+      "tag": "0088_admin_alerts_dedupe_unique",
+      "breakpoints": true
     }
   ]
 }

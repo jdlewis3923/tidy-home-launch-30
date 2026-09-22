@@ -6,9 +6,12 @@ import carImg from "@/assets/car-detailing.jpg";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
+import { useServiceGates, type GateService } from "@/hooks/useServiceGates";
+import WaitlistCapture from "@/components/dashboard/WaitlistCapture";
 
 const services = [
   {
+    gate: "cleaning" as GateService,
     title: "House Cleaning",
     subtitle: null as string | null,
     badge: "⭐ Most Popular",
@@ -24,6 +27,7 @@ const services = [
     accent: "border-t-primary",
   },
   {
+    gate: "lawn" as GateService,
     title: "Lawn Care",
     subtitle: null as string | null,
     badge: null,
@@ -39,6 +43,7 @@ const services = [
     accent: "border-t-success",
   },
   {
+    gate: "car_care" as GateService,
     title: "Car Care",
     subtitle: "Shine Complete",
     badge: null,
@@ -57,6 +62,7 @@ const services = [
 
 const Services = () => {
   const { t } = useLanguage();
+  const { live } = useServiceGates();
   return (
     <section id="services" className="bg-background py-20 px-4">
       <div className="max-w-6xl mx-auto">
@@ -84,10 +90,18 @@ const Services = () => {
                 <h3 className="text-xl font-bold text-foreground mb-1">{t(s.title)}</h3>
                 {s.subtitle && <p className="text-sm font-semibold text-muted-foreground mb-1">{t(s.subtitle)}</p>}
                 <p className="text-xs italic text-text-light mb-3">{t(s.anchor)}</p>
+                {live[s.gate] ? (
                 <div className="inline-flex gap-2 mb-4">
                   <span className="bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full">{t(s.priceMain)}</span>
                   <span className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full">{t(s.priceSub)}</span>
                 </div>
+                ) : (
+                  <div className="mb-4">
+                    <span className="bg-muted text-muted-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                      {t("Opening soon — join the list")}
+                    </span>
+                  </div>
+                )}
                 <p className="text-sm text-text-mid mb-4">{t(s.description)}</p>
 
                 {/* Included - always shown */}
@@ -125,13 +139,17 @@ const Services = () => {
                 )}
 
                 <div className="mt-auto pt-4">
-                  <Link
-                    to={s.lpHref}
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-deep transition-colors"
-                  >
-                    {t("See plans & details")}
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  {live[s.gate] ? (
+                    <Link
+                      to={s.lpHref}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-deep transition-colors"
+                    >
+                      {t("See plans & details")}
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  ) : (
+                    <WaitlistCapture zip="" source={`service_card_${s.gate}`} onReset={() => undefined} />
+                  )}
                 </div>
               </div>
             </div>

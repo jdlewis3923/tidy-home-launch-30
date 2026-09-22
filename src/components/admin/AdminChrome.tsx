@@ -25,6 +25,7 @@ import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
 const NAV = [
   { to: "/admin/command",     label: "Command",     icon: Activity },
   { to: "/admin/kpis",        label: "KPIs",        icon: BarChart3 },
+  { to: "/admin/alerts",      label: "Alerts",      icon: Bell },
   { to: "/admin/alert-rules", label: "Rules",       icon: SlidersHorizontal },
   { to: "/admin/capacity",    label: "Capacity",    icon: Gauge },
   { to: "/admin/health",      label: "Health",      icon: Heart },
@@ -46,7 +47,7 @@ const NAV = [
   { to: "/admin/costs",       label: "Costs",       icon: DollarSign },
   { to: "/admin/site-status", label: "Site",        icon: Power },
   { to: "/admin/chatbot-knowledge", label: "Chatbot", icon: BookOpen },
-  { to: "/admin/settings/notifications", label: "Alerts", icon: Bell },
+  { to: "/admin/settings/notifications", label: "Notify", icon: Bell },
   { to: "/admin/test-zapier", label: "Zapier",      icon: Zap },
 ];
 
@@ -85,6 +86,24 @@ export default function AdminChrome() {
     };
     fetchSync();
     const id = setInterval(fetchSync, 60_000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [isAdminRoute]);
+
+  // Open alert count for the rail badge. Read from the database, so it stays
+  // truthful even when digest email delivery is broken.
+  const [openAlerts, setOpenAlerts] = useState(0);
+  useEffect(() => {
+    if (!isAdminRoute) return;
+    let cancelled = false;
+    const fetchAlerts = async () => {
+      const { count } = await supabase
+        .from("admin_alerts")
+        .select("id", { count: "exact", head: true })
+        .is("resolved_at", null);
+      if (!cancelled) setOpenAlerts(count ?? 0);
+    };
+    fetchAlerts();
+    const id = setInterval(fetchAlerts, 60_000);
     return () => { cancelled = true; clearInterval(id); };
   }, [isAdminRoute]);
 
@@ -215,6 +234,14 @@ export default function AdminChrome() {
             >
               <Icon className="h-4 w-4" />
               <span className="admin-hud-rail__label">{label}</span>
+              {to === "/admin/alerts" && openAlerts > 0 && (
+                <span
+                  className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-bold text-white"
+                  aria-label={`${openAlerts} open alerts`}
+                >
+                  {openAlerts}
+                </span>
+              )}
             </Link>
           );
         })}

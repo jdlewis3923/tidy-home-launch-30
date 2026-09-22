@@ -24,6 +24,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import ProBadgePanel from "@/components/admin/ProBadgePanel";
 import ProKitPanel from "@/components/admin/ProKitPanel";
+import CallQueue from "@/components/admin/hiring/CallQueue";
+import AddApplicants from "@/components/admin/hiring/AddApplicants";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -268,6 +270,7 @@ function daysSince(iso?: string | null): number {
 // ---------- Component ----------
 export default function AdminApplicants() {
   const { hasRole, isLoading: roleLoading } = useHasRoleState("admin");
+  const [tab, setTab] = useState<"queue" | "pipeline">("queue");
   const [rows, setRows] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -643,16 +646,38 @@ export default function AdminApplicants() {
             <Button variant="outline" size="sm" onClick={exportCsv} disabled={!filtered.length}>
               <Download className="h-4 w-4 mr-1" /> Export CSV
             </Button>
+            <AddApplicants onDone={fetchRows} />
             <Button size="sm" className="bg-[#1FA1F0] hover:bg-[#1990da] text-white"
               onClick={() => toast.info("Manual add coming soon — share /apply for now")}>
               <Plus className="h-4 w-4 mr-1" /> Add manually
             </Button>
           </div>
 
+          {/* Call Queue is the daily driver, so it is the default view. */}
+          <div className="w-full flex gap-1 border-t border-slate-100 pt-2">
+            {([["queue", "Call Queue"], ["pipeline", "Pipeline"]] as const).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTab(key)}
+                className={`min-h-11 rounded-lg px-4 text-sm font-semibold ${
+                  tab === key ? "bg-[#1FA1F0] text-white" : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+      {tab === "queue" && (
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+          <CallQueue />
+        </div>
+      )}
+
+      <div className={`max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6 ${tab === "queue" ? "hidden" : ""}`}>
         {/* ---------- Stat cards ---------- */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <StatCard label="Applied"   count={stats.applied.count}   delta={stats.applied.delta}   tone="yellow" />

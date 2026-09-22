@@ -11,6 +11,7 @@ import { useHasRoleState } from "@/hooks/useHasRole";
 import { useSiteLive } from "@/hooks/useSiteLive";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
+import ServiceGateCards from "@/components/admin/hiring/ServiceGateCards";
 
 const AdminSiteStatus = () => {
   const { hasRole, isLoading: roleLoading } = useHasRoleState("admin");
@@ -70,7 +71,7 @@ const AdminSiteStatus = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4">
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-2xl">
         <Link to="/admin/health" className="text-sm text-slate-500 hover:text-slate-700">← Admin</Link>
         <h1 className="mt-4 text-3xl font-semibold text-slate-900">Site status</h1>
         <p className="mt-2 text-slate-600">
@@ -101,6 +102,8 @@ const AdminSiteStatus = () => {
             />
           </div>
         </div>
+
+        <ServiceGateCards />
 
         <div className="mt-6 text-sm text-slate-500 space-y-2">
           <p>

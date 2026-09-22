@@ -11,6 +11,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendPwaPushToJustin } from '../_shared/notifyJustin.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { enforceRateLimit } from '../_shared/rate-limit.ts';
+import { scoreApplicant } from '../_shared/hiring/score.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -78,33 +79,75 @@ Deno.serve(async (req) => {
     const normalizedZip = (data.zip ?? '').trim().slice(0, 5);
     const outOfArea = normalizedZip.length === 5 && !SERVICE_ZIPS.includes(normalizedZip);
 
-    const { data: row, error: insertErr } = await admin
-      .from('applicants')
-      .insert({
-        first_name: data.first_name,
-        last_name:  data.last_name,
-        email:      data.email.toLowerCase(),
-        phone:      data.phone ?? null,
-        zip:        data.zip ?? null,
-        service:    data.service,
-        experience_years: data.experience_years ?? null,
-        has_vehicle:  data.has_vehicle,
-        has_supplies: data.has_supplies,
-        bilingual: data.bilingual,
-        insurance_willing: data.insurance_willing,
-        fl_license: data.fl_license,
-        license_expiry: data.license_expiry ?? null,
-        notes_for_admin: data.description ?? null,
-        current_stage: 'applied',
-        out_of_service_area: outOfArea,
-      })
-      .select('id')
-      .single();
-    if (insertErr || !row) {
-      console.error('[apply] insert failed', insertErr);
-      return jsonResponse({ error: 'insert_failed', details: insertErr?.message }, 500);
+    // Hiring autopilot: every /apply submission is scored on the way in and
+    // lands in the Call Queue. 'multiple' creates one row per service so each
+    // service's queue ranks them independently.
+    const SERVICE_MAP: Record<string, string[]> = {
+      cleaning: ['cleaning'],
+      lawn: ['lawn'],
+      detail: ['car_care'],
+      multiple: ['cleaning', 'lawn', 'car_care'],
+    };
+    const queueServices = SERVICE_MAP[data.service] ?? [data.service];
+    const tri = (v: boolean | null | undefined) => (v == null ? 'unknown' : v ? 'yes' : 'no');
+
+    let applicantId = '';
+    for (const queueService of queueServices) {
+      const scored = scoreApplicant({
+        service: queueService,
+        city_or_zip: data.zip ?? null,
+        applied_on: new Date().toISOString().slice(0, 10),
+        years_in_service: data.experience_years ?? null,
+        has_insurance: data.insurance_willing ?? null,
+        notes: data.description ?? null,
+        bilingual: tri(data.bilingual) as 'yes' | 'no' | 'unknown',
+        drivers_license: tri(data.fl_license) as 'yes' | 'no' | 'unknown',
+        own_equipment: tri(data.has_supplies) as 'yes' | 'no' | 'unknown',
+      });
+
+      const { data: row, error: insertErr } = await admin
+        .from('applicants')
+        .insert({
+          first_name: data.first_name,
+          last_name:  data.last_name,
+          email:      data.email.toLowerCase(),
+          phone:      data.phone ?? null,
+          zip:        data.zip ?? null,
+          service:    queueServices.length > 1 ? queueService : data.service,
+          experience_years: data.experience_years ?? null,
+          has_vehicle:  data.has_vehicle,
+          has_supplies: data.has_supplies,
+          bilingual: data.bilingual,
+          insurance_willing: data.insurance_willing,
+          fl_license: data.fl_license,
+          license_expiry: data.license_expiry ?? null,
+          notes_for_admin: data.description ?? null,
+          current_stage: 'applied',
+          out_of_service_area: outOfArea,
+          // Autopilot fields
+          source: 'apply_form',
+          applied_on: new Date().toISOString().slice(0, 10),
+          city_or_zip: data.zip ?? null,
+          years_in_service: data.experience_years ?? null,
+          has_insurance: data.insurance_willing ?? null,
+          bilingual_gate: tri(data.bilingual),
+          drivers_license: tri(data.fl_license),
+          own_equipment: tri(data.has_supplies),
+          score: scored.score,
+          hiring_tier: scored.tier,
+          flags: scored.flags,
+          drive_minutes: scored.drive_minutes,
+          queue_state: scored.queue_state,
+        })
+        .select('id')
+        .single();
+      if (insertErr || !row) {
+        console.error('[apply] insert failed', insertErr);
+        return jsonResponse({ error: 'insert_failed', details: insertErr?.message }, 500);
+      }
+      if (!applicantId) applicantId = row.id;
     }
-    const applicantId = row.id;
+
 
     // Log onboarding event with full form payload.
     await admin.from('onboarding_events').insert({
