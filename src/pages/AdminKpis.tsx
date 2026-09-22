@@ -736,6 +736,8 @@ export default function AdminKpis() {
           completions={stepCompletions[drillDef.code] ?? []}
           onClose={() => setDrillCode(null)}
           onActionRan={load}
+          onResolveAlert={(id) => resolveAlerts([id])}
+          resolving={resolving}
         />
       )}
 
