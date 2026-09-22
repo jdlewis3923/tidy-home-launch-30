@@ -277,30 +277,51 @@ export type Database = {
       }
       admin_alerts: {
         Row: {
+          action_label: string | null
+          action_url: string | null
           alert_type: string
           body: string | null
+          category: string | null
           context: Json
           created_at: string
+          dedupe_key: string | null
+          due_date: string | null
           id: string
+          level: string
           resolved_at: string | null
+          snoozed_until: string | null
           title: string
         }
         Insert: {
+          action_label?: string | null
+          action_url?: string | null
           alert_type: string
           body?: string | null
+          category?: string | null
           context?: Json
           created_at?: string
+          dedupe_key?: string | null
+          due_date?: string | null
           id?: string
+          level?: string
           resolved_at?: string | null
+          snoozed_until?: string | null
           title: string
         }
         Update: {
+          action_label?: string | null
+          action_url?: string | null
           alert_type?: string
           body?: string | null
+          category?: string | null
           context?: Json
           created_at?: string
+          dedupe_key?: string | null
+          due_date?: string | null
           id?: string
+          level?: string
           resolved_at?: string | null
+          snoozed_until?: string | null
           title?: string
         }
         Relationships: []
@@ -480,8 +501,10 @@ export type Database = {
       }
       applicants: {
         Row: {
+          applied_on: string | null
           available_minutes_week: number
           avg_customer_rating: number | null
+          background_check_ok: string | null
           badge_photo_url: string | null
           badge_status: string
           bg_check_completed_at: string | null
@@ -492,13 +515,16 @@ export type Database = {
           bg_check_status: string | null
           bilingual: boolean | null
           bilingual_fluency_confirmed: boolean
+          bilingual_gate: string | null
           bond_status: string | null
           business_bank_account_confirmed: boolean
+          call_at: string | null
           checkr_candidate_id: string | null
           checkr_invitation_id: string | null
           checkr_last_webhook_at: string | null
           checkr_report_id: string | null
           checkr_report_status: string | null
+          city_or_zip: string | null
           coi_auto_status: string | null
           coi_carrier_name: string | null
           coi_effective_date: string | null
@@ -521,28 +547,40 @@ export type Database = {
           created_at: string
           current_stage: string | null
           documenso_document_ids: Json
+          drive_minutes: number | null
+          drivers_license: string | null
           ein: string | null
           email: string
           equipment_approved: boolean
+          experience_matches_resume: string | null
           experience_years: number | null
           first_name: string
+          first_texted_at: string | null
           fl_license: boolean | null
+          flags: string[]
+          followed_up_at: string | null
           google_review_match_name: string | null
+          has_insurance: boolean | null
           has_supplies: boolean | null
           has_vehicle: boolean | null
           id: string
           insurance_expires_at: string | null
           insurance_status: string
           insurance_willing: boolean | null
+          is_test_row: boolean
           jobber_id: string | null
           last_jobber_event_at: string | null
           last_name: string
           last_review_match_at: string | null
           last_visit_at: string | null
           license_expiry: string | null
+          notes: string | null
           notes_for_admin: string | null
           open_escalations_count: number
+          opening_id: string | null
           out_of_service_area: boolean
+          own_equipment: string | null
+          owner_operator: boolean | null
           phone: string | null
           photo_compliance_rate: number | null
           photos_expected_count: number
@@ -550,20 +588,27 @@ export type Database = {
           pro_number: string | null
           pro_partner_interest: string | null
           pro_since: string | null
+          queue_state: string
+          reads_texts: string | null
           rejected_at: string | null
           rejection_reason: string | null
+          replied_at: string | null
           role: string | null
+          score: number | null
           service: string | null
+          source: string | null
           stage_entered_at: string | null
           stripe_account_id: string | null
           stripe_connect_complete: boolean
           stripe_connect_status: string
           tier: string
           tier_advanced_at: string | null
+          tier_hint: string | null
           tier_offer_sent_at: string | null
           tier_offered_by: string | null
           tier_readiness_status: string
           total_ratings_count: number
+          trade_job_current: boolean | null
           training_no_show_count: number
           training_passed: boolean
           training_scheduled_at: string | null
@@ -571,11 +616,17 @@ export type Database = {
           verify_token: string | null
           w9_status: string
           wash_only: boolean
+          watch_for: string | null
+          why: string | null
+          work_authorized: string | null
+          years_in_service: number | null
           zip: string | null
         }
         Insert: {
+          applied_on?: string | null
           available_minutes_week?: number
           avg_customer_rating?: number | null
+          background_check_ok?: string | null
           badge_photo_url?: string | null
           badge_status?: string
           bg_check_completed_at?: string | null
@@ -586,13 +637,16 @@ export type Database = {
           bg_check_status?: string | null
           bilingual?: boolean | null
           bilingual_fluency_confirmed?: boolean
+          bilingual_gate?: string | null
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
+          call_at?: string | null
           checkr_candidate_id?: string | null
           checkr_invitation_id?: string | null
           checkr_last_webhook_at?: string | null
           checkr_report_id?: string | null
           checkr_report_status?: string | null
+          city_or_zip?: string | null
           coi_auto_status?: string | null
           coi_carrier_name?: string | null
           coi_effective_date?: string | null
@@ -615,28 +669,40 @@ export type Database = {
           created_at?: string
           current_stage?: string | null
           documenso_document_ids?: Json
+          drive_minutes?: number | null
+          drivers_license?: string | null
           ein?: string | null
           email: string
           equipment_approved?: boolean
+          experience_matches_resume?: string | null
           experience_years?: number | null
           first_name: string
+          first_texted_at?: string | null
           fl_license?: boolean | null
+          flags?: string[]
+          followed_up_at?: string | null
           google_review_match_name?: string | null
+          has_insurance?: boolean | null
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
           id?: string
           insurance_expires_at?: string | null
           insurance_status?: string
           insurance_willing?: boolean | null
+          is_test_row?: boolean
           jobber_id?: string | null
           last_jobber_event_at?: string | null
           last_name: string
           last_review_match_at?: string | null
           last_visit_at?: string | null
           license_expiry?: string | null
+          notes?: string | null
           notes_for_admin?: string | null
           open_escalations_count?: number
+          opening_id?: string | null
           out_of_service_area?: boolean
+          own_equipment?: string | null
+          owner_operator?: boolean | null
           phone?: string | null
           photo_compliance_rate?: number | null
           photos_expected_count?: number
@@ -644,20 +710,27 @@ export type Database = {
           pro_number?: string | null
           pro_partner_interest?: string | null
           pro_since?: string | null
+          queue_state?: string
+          reads_texts?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
+          replied_at?: string | null
           role?: string | null
+          score?: number | null
           service?: string | null
+          source?: string | null
           stage_entered_at?: string | null
           stripe_account_id?: string | null
           stripe_connect_complete?: boolean
           stripe_connect_status?: string
           tier?: string
           tier_advanced_at?: string | null
+          tier_hint?: string | null
           tier_offer_sent_at?: string | null
           tier_offered_by?: string | null
           tier_readiness_status?: string
           total_ratings_count?: number
+          trade_job_current?: boolean | null
           training_no_show_count?: number
           training_passed?: boolean
           training_scheduled_at?: string | null
@@ -665,11 +738,17 @@ export type Database = {
           verify_token?: string | null
           w9_status?: string
           wash_only?: boolean
+          watch_for?: string | null
+          why?: string | null
+          work_authorized?: string | null
+          years_in_service?: number | null
           zip?: string | null
         }
         Update: {
+          applied_on?: string | null
           available_minutes_week?: number
           avg_customer_rating?: number | null
+          background_check_ok?: string | null
           badge_photo_url?: string | null
           badge_status?: string
           bg_check_completed_at?: string | null
@@ -680,13 +759,16 @@ export type Database = {
           bg_check_status?: string | null
           bilingual?: boolean | null
           bilingual_fluency_confirmed?: boolean
+          bilingual_gate?: string | null
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
+          call_at?: string | null
           checkr_candidate_id?: string | null
           checkr_invitation_id?: string | null
           checkr_last_webhook_at?: string | null
           checkr_report_id?: string | null
           checkr_report_status?: string | null
+          city_or_zip?: string | null
           coi_auto_status?: string | null
           coi_carrier_name?: string | null
           coi_effective_date?: string | null
@@ -709,28 +791,40 @@ export type Database = {
           created_at?: string
           current_stage?: string | null
           documenso_document_ids?: Json
+          drive_minutes?: number | null
+          drivers_license?: string | null
           ein?: string | null
           email?: string
           equipment_approved?: boolean
+          experience_matches_resume?: string | null
           experience_years?: number | null
           first_name?: string
+          first_texted_at?: string | null
           fl_license?: boolean | null
+          flags?: string[]
+          followed_up_at?: string | null
           google_review_match_name?: string | null
+          has_insurance?: boolean | null
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
           id?: string
           insurance_expires_at?: string | null
           insurance_status?: string
           insurance_willing?: boolean | null
+          is_test_row?: boolean
           jobber_id?: string | null
           last_jobber_event_at?: string | null
           last_name?: string
           last_review_match_at?: string | null
           last_visit_at?: string | null
           license_expiry?: string | null
+          notes?: string | null
           notes_for_admin?: string | null
           open_escalations_count?: number
+          opening_id?: string | null
           out_of_service_area?: boolean
+          own_equipment?: string | null
+          owner_operator?: boolean | null
           phone?: string | null
           photo_compliance_rate?: number | null
           photos_expected_count?: number
@@ -738,20 +832,27 @@ export type Database = {
           pro_number?: string | null
           pro_partner_interest?: string | null
           pro_since?: string | null
+          queue_state?: string
+          reads_texts?: string | null
           rejected_at?: string | null
           rejection_reason?: string | null
+          replied_at?: string | null
           role?: string | null
+          score?: number | null
           service?: string | null
+          source?: string | null
           stage_entered_at?: string | null
           stripe_account_id?: string | null
           stripe_connect_complete?: boolean
           stripe_connect_status?: string
           tier?: string
           tier_advanced_at?: string | null
+          tier_hint?: string | null
           tier_offer_sent_at?: string | null
           tier_offered_by?: string | null
           tier_readiness_status?: string
           total_ratings_count?: number
+          trade_job_current?: boolean | null
           training_no_show_count?: number
           training_passed?: boolean
           training_scheduled_at?: string | null
@@ -759,6 +860,10 @@ export type Database = {
           verify_token?: string | null
           w9_status?: string
           wash_only?: boolean
+          watch_for?: string | null
+          why?: string | null
+          work_authorized?: string | null
+          years_in_service?: number | null
           zip?: string | null
         }
         Relationships: []
@@ -878,6 +983,48 @@ export type Database = {
           discount_pct?: number
           service_count?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      calendar_tasks: {
+        Row: {
+          body: string | null
+          created_at: string
+          done_at: string | null
+          fixed_rule: string | null
+          heads_up_days: number
+          id: string
+          next_due_date: string | null
+          offset_days_from_launch: number | null
+          recurring: boolean
+          sort_key: number
+          title: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          done_at?: string | null
+          fixed_rule?: string | null
+          heads_up_days?: number
+          id?: string
+          next_due_date?: string | null
+          offset_days_from_launch?: number | null
+          recurring?: boolean
+          sort_key?: number
+          title: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          done_at?: string | null
+          fixed_rule?: string | null
+          heads_up_days?: number
+          id?: string
+          next_due_date?: string | null
+          offset_days_from_launch?: number | null
+          recurring?: boolean
+          sort_key?: number
+          title?: string
         }
         Relationships: []
       }
@@ -1564,6 +1711,59 @@ export type Database = {
         }
         Relationships: []
       }
+      hiring_openings: {
+        Row: {
+          created_at: string
+          filled_at: string | null
+          filled_by_applicant_id: string | null
+          forecast_trigger_date: string | null
+          id: string
+          indeed_sponsorship_paused: boolean
+          post_by_date: string | null
+          posted_at: string | null
+          service: string
+          slot_number: number
+          status: string
+          trigger_reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          filled_at?: string | null
+          filled_by_applicant_id?: string | null
+          forecast_trigger_date?: string | null
+          id?: string
+          indeed_sponsorship_paused?: boolean
+          post_by_date?: string | null
+          posted_at?: string | null
+          service: string
+          slot_number?: number
+          status?: string
+          trigger_reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          filled_at?: string | null
+          filled_by_applicant_id?: string | null
+          forecast_trigger_date?: string | null
+          id?: string
+          indeed_sponsorship_paused?: boolean
+          post_by_date?: string | null
+          posted_at?: string | null
+          service?: string
+          slot_number?: number
+          status?: string
+          trigger_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hiring_openings_filled_by_applicant_id_fkey"
+            columns: ["filled_by_applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurance_audit_log: {
         Row: {
           action: string
@@ -1802,6 +2002,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      job_listing_templates: {
+        Row: {
+          body: string
+          service: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          service: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          service?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       jobber_webhook_log: {
         Row: {
@@ -3698,6 +3919,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_gates: {
+        Row: {
+          auto_mode: boolean
+          business_policy_bound: boolean
+          business_policy_doc_url: string | null
+          business_policy_effective: string | null
+          business_policy_expires: string | null
+          business_policy_required: boolean
+          go_live_scheduled_for: string | null
+          is_live: boolean
+          last_change_reason: string | null
+          last_changed_at: string
+          service: string
+        }
+        Insert: {
+          auto_mode?: boolean
+          business_policy_bound?: boolean
+          business_policy_doc_url?: string | null
+          business_policy_effective?: string | null
+          business_policy_expires?: string | null
+          business_policy_required?: boolean
+          go_live_scheduled_for?: string | null
+          is_live?: boolean
+          last_change_reason?: string | null
+          last_changed_at?: string
+          service: string
+        }
+        Update: {
+          auto_mode?: boolean
+          business_policy_bound?: boolean
+          business_policy_doc_url?: string | null
+          business_policy_effective?: string | null
+          business_policy_expires?: string | null
+          business_policy_required?: boolean
+          go_live_scheduled_for?: string | null
+          is_live?: boolean
+          last_change_reason?: string | null
+          last_changed_at?: string
+          service?: string
+        }
+        Relationships: []
       }
       sms_delivery_events: {
         Row: {
