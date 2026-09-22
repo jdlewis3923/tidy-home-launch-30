@@ -6,7 +6,7 @@
  * status logic mirrors supabase/functions/_shared/pro-onboarding.ts so the admin
  * view and the emails can never disagree.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
