@@ -582,6 +582,13 @@
       "when": 1789794761541,
       "tag": "0082_checkr_report_tracking_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1790087342065,
+      "tag": "0083_hiring_autopilot_foundation",
+      "breakpoints": true
     }
   ]
 }
