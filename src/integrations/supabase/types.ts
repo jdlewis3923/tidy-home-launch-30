@@ -534,6 +534,8 @@ export type Database = {
           coi_policy_number: string | null
           coi_review_notes: string | null
           coi_review_status: string
+          coi_token: string | null
+          coi_token_expires_at: string | null
           coi_uploaded_at: string | null
           complaint_count: number
           complaint_rate: number | null
@@ -577,6 +579,9 @@ export type Database = {
           license_expiry: string | null
           notes: string | null
           notes_for_admin: string | null
+          onboarding_email_sent_at: string | null
+          onboarding_reminder_count: number
+          onboarding_reminder_last_at: string | null
           open_escalations_count: number
           opening_id: string | null
           out_of_service_area: boolean
@@ -657,6 +662,8 @@ export type Database = {
           coi_policy_number?: string | null
           coi_review_notes?: string | null
           coi_review_status?: string
+          coi_token?: string | null
+          coi_token_expires_at?: string | null
           coi_uploaded_at?: string | null
           complaint_count?: number
           complaint_rate?: number | null
@@ -700,6 +707,9 @@ export type Database = {
           license_expiry?: string | null
           notes?: string | null
           notes_for_admin?: string | null
+          onboarding_email_sent_at?: string | null
+          onboarding_reminder_count?: number
+          onboarding_reminder_last_at?: string | null
           open_escalations_count?: number
           opening_id?: string | null
           out_of_service_area?: boolean
@@ -780,6 +790,8 @@ export type Database = {
           coi_policy_number?: string | null
           coi_review_notes?: string | null
           coi_review_status?: string
+          coi_token?: string | null
+          coi_token_expires_at?: string | null
           coi_uploaded_at?: string | null
           complaint_count?: number
           complaint_rate?: number | null
@@ -823,6 +835,9 @@ export type Database = {
           license_expiry?: string | null
           notes?: string | null
           notes_for_admin?: string | null
+          onboarding_email_sent_at?: string | null
+          onboarding_reminder_count?: number
+          onboarding_reminder_last_at?: string | null
           open_escalations_count?: number
           opening_id?: string | null
           out_of_service_area?: boolean
@@ -3177,6 +3192,7 @@ export type Database = {
           tee_cut: string | null
           tee_size: string | null
           token: string
+          token_expires_at: string | null
           vehicle: string | null
           vehicle_2: string | null
           vehicle_color: string | null
@@ -3228,6 +3244,7 @@ export type Database = {
           tee_cut?: string | null
           tee_size?: string | null
           token?: string
+          token_expires_at?: string | null
           vehicle?: string | null
           vehicle_2?: string | null
           vehicle_color?: string | null
@@ -3279,6 +3296,7 @@ export type Database = {
           tee_cut?: string | null
           tee_size?: string | null
           token?: string
+          token_expires_at?: string | null
           vehicle?: string | null
           vehicle_2?: string | null
           vehicle_color?: string | null
@@ -5267,6 +5285,10 @@ export type Database = {
       admin_get_service_role_key: { Args: never; Returns: string }
       admin_get_vapid_private: { Args: never; Returns: string }
       admin_get_vapid_public: { Args: never; Returns: string }
+      admin_onboarding_tokens: {
+        Args: { _applicant_id: string; _regenerate?: boolean }
+        Returns: Json
+      }
       admin_pro_push_status: {
         Args: never
         Returns: {
@@ -5328,6 +5350,7 @@ export type Database = {
         Args: { _contractor_id: string; _kind: string; _scope: string }
         Returns: boolean
       }
+      coi_token_load: { Args: { _token: string }; Returns: Json }
       contractor_visit_pay_cents: {
         Args: {
           _cadence: string
@@ -5377,6 +5400,7 @@ export type Database = {
       ensure_referral_code: { Args: never; Returns: string }
       founding_spots_left: { Args: { _zip: string }; Returns: number }
       gen_intake_token: { Args: never; Returns: string }
+      gen_onboarding_token: { Args: never; Returns: string }
       generate_recurring_visits: {
         Args: { _horizon_days?: number; _subscription_id?: string }
         Returns: {
