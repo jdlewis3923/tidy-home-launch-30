@@ -206,11 +206,11 @@ export function reminderEmailHtml(
 
   const html = `<!doctype html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,sans-serif;color:#0f172a">
     <div style="max-width:600px;margin:0 auto;background:#ffffff">
-      <div style="background:#0f172a;padding:18px 24px">
-        <img src="${LOGO}" alt="Tidy" width="40" height="40" style="vertical-align:middle;border-radius:8px;border:0"/>
-        <span style="color:#ffffff;font-weight:700;font-size:18px;margin-left:10px;vertical-align:middle">Tidy</span>
-      </div>
-      <div style="height:4px;background:#f5c518"></div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a"><tr>
+        <td style="padding:16px 24px" valign="middle" align="left"><img src="${LOGO}" alt="Tidy" width="42" height="42" style="display:block;width:42px;height:42px;border:0"/></td>
+        <td style="padding:16px 24px;font:700 13px Arial,sans-serif;color:#ffffff;line-height:1.35;text-align:right" valign="middle" align="right">More life.<br/><span style="color:#FCCC00">Less chores.</span></td>
+      </tr></table>
+      <div style="height:4px;background:#FCCC00"></div>
       <div style="padding:26px 24px">
         <h1 style="margin:0 0 6px;font-size:21px">Hi ${firstName}, ${state.outstanding.length === 1 ? 'one thing' : `${state.outstanding.length} things`} left before your first visit</h1>
         <p style="margin:0 0 18px;font:14px Arial,sans-serif;color:#64748b">Hola ${firstName}, ${state.outstanding.length === 1 ? 'queda una cosa' : `quedan ${state.outstanding.length} cosas`} antes de su primera visita. About ${state.outstanding.length * 5} minutes total.</p>
@@ -228,7 +228,7 @@ export function reminderEmailHtml(
         </p>
       </div>
       <div style="padding:16px 24px;color:#94a3b8;font-size:12px;border-top:1px solid #e2e8f0">
-        Tidy Home Concierge LLC · Miami, FL · jointidy.co · (786) 829-1141 · You are receiving this because you are completing onboarding as an independent contractor with Tidy.
+        Tidy Home Concierge LLC · 2121 Biscayne Blvd #1562, Miami, FL 33137 · jointidy.co · (786) 829-1141 · You are receiving this because you are completing onboarding as an independent contractor with Tidy.
       </div>
     </div></body></html>`;
 
