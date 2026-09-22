@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     .select(
       'id, first_name, last_name, email, current_stage, bg_check_status, checkr_invitation_id, checkr_report_status, coi_token, coi_token_expires_at, coi_pdf_url, coi_review_status, onboarding_email_sent_at, onboarding_reminder_count, onboarding_reminder_last_at',
     )
-    .eq('current_stage', 'offer')
+    .in('current_stage', ['offer', 'offer_sent'])
     .not('onboarding_email_sent_at', 'is', null);
 
   if (error) {
