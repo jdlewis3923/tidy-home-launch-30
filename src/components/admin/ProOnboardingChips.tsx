@@ -83,6 +83,29 @@ export default function ProOnboardingChips({
     coi: applicant.coi_token ?? null,
     intake: kitToken ?? null,
   });
+  const [kit, setKit] = useState<string | null>(kitStatus ?? null);
+
+  // The caller usually doesn't already hold the kit row, so load it here.
+  useEffect(() => {
+    if (kitStatus !== undefined && kitToken !== undefined) return;
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("pro_kit")
+        .select("token, status")
+        .eq("applicant_id", applicant.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!alive || !data) return;
+      setKit(data.status ?? null);
+      setTokens((t) => ({ ...t, intake: t.intake ?? data.token ?? null }));
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [applicant.id, kitStatus, kitToken]);
+
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://jointidy.co";
   const coiUrl = tokens.coi ? `${origin}/coi/${tokens.coi}` : null;
