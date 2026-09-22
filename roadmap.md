@@ -13,3 +13,8 @@
 - [ ] Checkr API key / package slug / webhook secret — approval still pending on Checkr's side.
       Until then the welcome email says the background check is coming and Justin sends the
       Checkr invitation manually; no dead button is shown.
+
+## Pro onboarding — status 2026-09-22
+- Done: token pages (/coi/:token, /intake/:token), onboarding email (Brevo 64), reminders job scheduled 9:15 AM ET, admin status chips with resend/copy-link/new-links, end-to-end test passed and test record deleted.
+- Blocked: Checkr secrets (API key, package slug, webhook secret) — background check invite is sent manually until then.
+- Open question: street address for the CAN-SPAM footer.
