@@ -228,7 +228,7 @@ export function reminderEmailHtml(
         </p>
       </div>
       <div style="padding:16px 24px;color:#94a3b8;font-size:12px;border-top:1px solid #e2e8f0">
-        Tidy Home Concierge LLC · 2121 Biscayne Blvd #1562, Miami, FL 33137 · You are receiving this because you are completing onboarding as an independent contractor with Tidy.
+        Tidy Home Concierge LLC · Miami, FL · jointidy.co · (786) 829-1141 · You are receiving this because you are completing onboarding as an independent contractor with Tidy.
       </div>
     </div></body></html>`;
 
