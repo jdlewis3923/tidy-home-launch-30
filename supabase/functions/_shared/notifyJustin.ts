@@ -14,7 +14,7 @@ const ADMIN_EMAIL = 'admin@jointidy.co';
 // One source of truth: the JUSTIN_ALERT_PHONE secret every alerting function
 // already reads. The literal stays only as a fallback if the secret is unset.
 const JUSTIN_PHONE = Deno.env.get('JUSTIN_ALERT_PHONE') ?? '+17868291141';
-const TIDY_LOGO = 'https://miami-home-simplify.lovable.app/icon-192.png';
+const TIDY_LOGO = 'https://raw.githubusercontent.com/jdlewis3923/tidy-home-launch-30/main/tidy-logo-circle.png';
 
 export type BrevoAttachment = { url?: string; content?: string; name: string };
 
@@ -199,7 +199,7 @@ export function brandedEmailHtml(opts: {
       ${cta ? `<div style="margin-top:24px">${cta}</div>` : ''}
     </div>
     <div style="padding:16px 24px;color:#94a3b8;font-size:12px;border-top:1px solid #e2e8f0">
-      Tidy Home Concierge LLC · Miami, FL
+      Tidy Home Concierge LLC · 2121 Biscayne Blvd #1562, Miami, FL 33137
     </div>
   </div></body></html>`;
 }
