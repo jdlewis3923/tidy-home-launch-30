@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
 
-  if (!isCronAuthorized(req)) {
+  if (!(await isCronAuthorized(req))) {
     const auth = await requireServiceOrAdmin(req);
     if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
   }
