@@ -349,6 +349,58 @@ export default function AdminKpis() {
     if (authed === true && !forbidden) load();
   }, [load, authed, forbidden]);
 
+  // ─────── Resolve alerts ───────
+  // Writes resolved_at, drops the row from the list immediately, then recomputes
+  // so the KPI tile's colour reflects the fix instead of staying red.
+  const [resolving, setResolving] = useState(false);
+  const [rechecking, setRechecking] = useState(false);
+
+  const recheckNow = useCallback(async () => {
+    setRechecking(true);
+    try {
+      const { error } = await supabase.functions.invoke("compute-kpi", { body: {} });
+      if (error) throw error;
+      await load();
+      toast({ title: "Indicators re-checked", description: "Colours now reflect the latest data." });
+    } catch (err) {
+      toast({
+        title: "Could not re-check indicators",
+        description: err instanceof Error ? err.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setRechecking(false);
+    }
+  }, [load]);
+
+  const resolveAlerts = useCallback(
+    async (ids: string[]) => {
+      if (ids.length === 0) return;
+      setResolving(true);
+      const { data: authData } = await supabase.auth.getUser();
+      const { error } = await supabase
+        .from("kpi_alerts")
+        .update({
+          resolved_at: new Date().toISOString(),
+          acknowledged_at: new Date().toISOString(),
+          acknowledged_by: authData.user?.id ?? null,
+        })
+        .in("id", ids);
+      setResolving(false);
+      if (error) {
+        toast({ title: "Could not mark it resolved", description: error.message, variant: "destructive" });
+        return;
+      }
+      setAlerts((prev) => prev.filter((a) => !ids.includes(a.id)));
+      toast({
+        title: ids.length > 1 ? `${ids.length} items cleared` : "Marked resolved",
+        description: "Re-checking the indicator…",
+      });
+      await recheckNow();
+    },
+    [recheckNow],
+  );
+
   const grouped = useMemo(() => {
     const out: Record<KpiCategory, KpiDefinition[]> = {
       acquisition: [],
