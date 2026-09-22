@@ -373,7 +373,37 @@ Deno.serve(async (req) => {
     }
   }
 
-
+  // On send_offer the Pro gets ONE onboarding email (Brevo template 64) that
+  // carries all three actions — background check, insurance certificate, sizes
+  // and kit — each behind its own private token link. It replaces the old
+  // generic offer email, so we skip that one below rather than sending two.
+  let onboardingEmailError: string | null = null;
+  if (action === 'send_offer') {
+    try {
+      const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/pro-onboarding-email`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ applicant_id: row.id }),
+      });
+      if (!r.ok) {
+        onboardingEmailError = `pro-onboarding-email ${r.status}: ${(await r.text().catch(() => '')).slice(0, 300)}`;
+      }
+    } catch (e) {
+      onboardingEmailError = `pro-onboarding-email threw: ${(e as Error).message}`;
+    }
+    if (onboardingEmailError) {
+      console.error('[advance]', onboardingEmailError);
+      await admin.from('admin_alerts').insert({
+        alert_type: 'pro_onboarding_email_failed',
+        title: `Onboarding email was NOT sent: ${row.email}`,
+        body: `${onboardingEmailError} — resend it from the Pro's record.`,
+        context: { applicant_id: row.id },
+      }).then(() => {}, () => {});
+    }
+  }
 
   // Checkr invitation dispatch on send_to_bg_check.
   //
