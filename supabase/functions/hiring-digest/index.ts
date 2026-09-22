@@ -105,8 +105,10 @@ Deno.serve(async (req) => {
 
   const result = await sendBrevoEmail({
     to: TO, marketing: false, subject, htmlContent: html,
+    sender: { name: 'Tidy Operating System', email: Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@jointidy.co' },
     tags: ['admin-digest', edition], label: 'hiring-digest',
   });
+
 
   await admin.from('integration_logs').insert({
     source: 'brevo',
