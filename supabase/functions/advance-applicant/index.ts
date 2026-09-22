@@ -531,18 +531,19 @@ Deno.serve(async (req) => {
   let applicantEmailError: string | null = null;
   // send_offer already sent the single onboarding email above; a second,
   // conflicting offer email would undo the whole point of it.
-  try {
-    if (action === 'send_offer') throw { skip: true };
-    await sendBrevoEmail({
-      toEmail: row.email, toName: fullName,
-      subject: applicantCopy.subject, htmlContent: applicantHtml,
-      tags: [tag],
-      attachments: allAttachments.length ? allAttachments : undefined,
-      templateName: tag,
-      triggeredBy: 'advance-applicant',
-    });
-  } catch (e) {
-    applicantEmailError = e instanceof Error ? e.message : String(e);
+  if (action !== 'send_offer') {
+    try {
+      await sendBrevoEmail({
+        toEmail: row.email, toName: fullName,
+        subject: applicantCopy.subject, htmlContent: applicantHtml,
+        tags: [tag],
+        attachments: allAttachments.length ? allAttachments : undefined,
+        templateName: tag,
+        triggeredBy: 'advance-applicant',
+      });
+    } catch (e) {
+      applicantEmailError = e instanceof Error ? e.message : String(e);
+    }
   }
 
   if (applicantEmailError) {
