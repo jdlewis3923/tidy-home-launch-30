@@ -118,6 +118,7 @@ Deno.serve(async (req) => {
         marketing: false,
         subject,
         htmlContent: html,
+        sender: { name: 'Tidy Home Concierge', email: Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@jointidy.co' },
         tags: ['pro-onboarding-reminder'],
         label: 'pro-onboarding-reminders',
       });
