@@ -592,6 +592,17 @@ export default function AdminKpis() {
               )}
               <span className="hidden sm:inline">Refresh</span>
             </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={recheckNow}
+              disabled={rechecking}
+              title="Recompute every indicator from live data"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs"
+            >
+              {rechecking ? <Loader2 className="h-3.5 w-3.5 animate-spin sm:mr-1.5" /> : <Wrench className="h-3.5 w-3.5 sm:mr-1.5" />}
+              <span className="hidden sm:inline">Re-check now</span>
+            </Button>
           </div>
         </div>
       </header>
