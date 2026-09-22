@@ -139,7 +139,7 @@ export default function CoiTokenUpload() {
     <div className="min-h-screen bg-background px-4 py-10">
       <div className="mx-auto w-full max-w-2xl space-y-6">
         <div className="flex justify-center">
-          <TidyLogo variant="nav" />
+          <TidyLogo size="nav" />
         </div>
         {children}
       </div>
