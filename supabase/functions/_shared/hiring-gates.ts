@@ -176,19 +176,25 @@ export async function applyGate(
     await admin.from('service_gates').update({ go_live_scheduled_for: null }).eq('service', svc);
   }
 
-  const failed = result.conditions.filter((c) => !c.ok).map((c) => c.label).join('; ');
-  await writeAlert(admin, {
-    level: 'critical',
-    category: 'site',
-    title: `${name} is not live — a gate failed`,
-    body: `Failing: ${failed}. Existing subscriptions are untouched; new signup shows "Opening soon — join the list".`,
-    action_label: 'Open Site settings',
-    action_url: '/admin/site-status',
-    dedupe_key: `gate_red_${svc}`,
-    context: { service: svc, conditions: result.conditions },
-  });
+  // A service that has simply not launched yet is not news. Only alert when a
+  // live service was pulled down, or a scheduled go-live had to be cancelled.
+  const wasExpectedLive = result.is_live || !!result.scheduled_for;
+  if (wasExpectedLive) {
+    const failed = result.conditions.filter((c) => !c.ok).map((c) => c.label).join('; ');
+    await writeAlert(admin, {
+      level: 'critical',
+      category: 'site',
+      title: `${name} is not live — a gate failed`,
+      body: `Failing: ${failed}. Existing subscriptions are untouched; new signup shows "Opening soon — join the list".`,
+      action_label: 'Open Site settings',
+      action_url: '/admin/site-status',
+      dedupe_key: `gate_red_${svc}`,
+      context: { service: svc, conditions: result.conditions },
+    });
+  }
   return { action: result.is_live ? 'pulled_live' : 'stays_not_live' };
 }
+
 
 /** Flip any service whose scheduled go-live time has arrived. */
 export async function promoteDueGoLives(admin: SupabaseClient): Promise<string[]> {
