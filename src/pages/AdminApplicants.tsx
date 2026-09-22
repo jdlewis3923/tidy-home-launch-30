@@ -24,6 +24,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import ProBadgePanel from "@/components/admin/ProBadgePanel";
 import ProKitPanel from "@/components/admin/ProKitPanel";
+import ProOnboardingChips from "@/components/admin/ProOnboardingChips";
 import CallQueue from "@/components/admin/hiring/CallQueue";
 import AddApplicants from "@/components/admin/hiring/AddApplicants";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -998,6 +999,9 @@ export default function AdminApplicants() {
                         {submitting === "fail" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldX className="h-4 w-4 mr-1" /> FAIL</>}
                       </Button>
                     </div>
+
+                    {/* One onboarding email, three token links. */}
+                    <ProOnboardingChips applicant={open as never} onRefresh={() => { void fetchRows(); }} />
 
                     {/* Checkr integration */}
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">

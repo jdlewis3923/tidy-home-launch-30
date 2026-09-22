@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome to Tidy</title></head>
+<body style="margin:0;padding:0;background:#eef2f7;font-family:Arial,Helvetica,sans-serif;color:#0f172a">
+<div style="max-width:620px;margin:0 auto;background:#ffffff">
+
+  <div style="background:#0f172a;padding:18px 24px">
+    <img src="https://jointidy.co/favicon-512x512.png" alt="Tidy" width="42" height="42" style="vertical-align:middle;border-radius:9px;border:0;display:inline-block"/>
+    <span style="color:#ffffff;font-weight:700;font-size:19px;margin-left:10px;vertical-align:middle">Tidy Home Concierge</span>
+  </div>
+  <div style="height:4px;background:#f5c518"></div>
+
+  <div style="padding:28px 24px 8px">
+    <h1 style="margin:0 0 10px;font-size:23px;line-height:1.25">You're in, {{ params.first_name }}. Everything you need is right here.</h1>
+    <p style="margin:0 0 6px;font-size:15px;line-height:1.6;color:#475569">Three things to finish before your first visit. About 15 minutes total.</p>
+    <p style="margin:0 0 4px;font-size:15px;line-height:1.6;color:#64748b">Ya está dentro, {{ params.first_name }}. Aquí tiene todo en un solo lugar: tres cosas antes de su primera visita, unos 15 minutos en total.</p>
+  </div>
+
+  <!-- 1. Background check -->
+  <div style="padding:14px 24px">
+    <div style="border:1px solid #e2e8f0;border-radius:12px;padding:18px">
+      <p style="margin:0;font-size:17px;font-weight:700">1. Background check — we pay for it</p>
+      <p style="margin:8px 0 0;font-size:14px;line-height:1.6;color:#475569">Checkr, our screening partner, emails you directly and collects everything itself. Tidy never sees or stores those details.</p>
+      <p style="margin:6px 0 0;font-size:14px;line-height:1.6;color:#64748b">Verificación de antecedentes: nosotros la pagamos. Checkr le escribe directamente y recoge los datos; Tidy nunca los ve ni los guarda.</p>
+      {% if params.checkr_url %}
+      <p style="margin:14px 0 0"><a href="{{ params.checkr_url }}" style="display:inline-block;background:#f5c518;color:#0f172a;font-weight:700;font-size:15px;padding:13px 22px;border-radius:10px;text-decoration:none">Start the background check / Comenzar</a></p>
+      {% else %}
+      <p style="margin:14px 0 0;font-size:14px;line-height:1.6;color:#64748b">Your invitation is on its way — expect it within a day. Nothing for you to do yet.<br/>Su invitación está en camino, llega dentro de un día. Todavía no tiene que hacer nada.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 2. Insurance -->
+  <div style="padding:6px 24px">
+    <div style="border:1px solid #e2e8f0;border-radius:12px;padding:18px">
+      <p style="margin:0;font-size:17px;font-weight:700">2. Your insurance certificate</p>
+      <p style="margin:8px 0 0;font-size:14px;line-height:1.6;color:#475569">A commercial general liability policy, $1,000,000 per occurrence and $2,000,000 aggregate, listing <strong>Tidy Home Concierge LLC</strong> as Additional Insured. It must be active and verified before your first paid visit. Tidy reimburses up to $50 a month toward your premium for your first 3 months, paid with your Friday deposit once the certificate is verified.</p>
+      <p style="margin:6px 0 0;font-size:14px;line-height:1.6;color:#64748b">Una póliza de responsabilidad civil comercial, $1,000,000 por incidente y $2,000,000 en agregado, con <strong>Tidy Home Concierge LLC</strong> como Asegurado Adicional. Debe estar activa y verificada antes de su primera visita pagada. Tidy le reembolsa hasta $50 al mes de su prima durante los primeros 3 meses, con su depósito del viernes, una vez verificado el certificado.</p>
+      <p style="margin:14px 0 0"><a href="{{ params.coi_url }}" style="display:inline-block;background:#f5c518;color:#0f172a;font-weight:700;font-size:15px;padding:13px 22px;border-radius:10px;text-decoration:none">Upload your certificate / Subir su certificado</a></p>
+    </div>
+  </div>
+
+  <!-- 3. Intake + kit -->
+  <div style="padding:6px 24px">
+    <div style="border:1px solid #e2e8f0;border-radius:12px;padding:18px">
+      <p style="margin:0;font-size:17px;font-weight:700">3. Your sizes and kit</p>
+      <p style="margin:8px 0 0;font-size:14px;line-height:1.6;color:#475569">Shirt size, vehicle and availability, so your polos, vest and badge are ready on day one. Your kit is provided by Tidy.</p>
+      <p style="margin:6px 0 0;font-size:14px;line-height:1.6;color:#64748b">Sus tallas y su kit: talla de camisa, vehículo y disponibilidad, para que sus polos, chaleco y credencial estén listos el primer día. Tidy le entrega el kit.</p>
+      <p style="margin:14px 0 0"><a href="{{ params.intake_url }}" style="display:inline-block;background:#f5c518;color:#0f172a;font-weight:700;font-size:15px;padding:13px 22px;border-radius:10px;text-decoration:none">Send your sizes / Enviar sus tallas</a></p>
+    </div>
+  </div>
+
+  <!-- After -->
+  <div style="padding:18px 24px 0">
+    <p style="margin:0;font-size:15px;line-height:1.6;color:#475569"><strong>Once all three are done:</strong> Justin confirms, your contract is signed, your kit is issued, and your route starts.</p>
+    <p style="margin:6px 0 0;font-size:15px;line-height:1.6;color:#64748b">Cuando termine las tres: Justin confirma, se firma su contrato, se entrega su kit y comienza su ruta.</p>
+  </div>
+
+  <!-- Pay -->
+  <div style="padding:18px 24px 0">
+    <div style="border:1px solid #e2e8f0;border-radius:12px;padding:18px;background:#f8fafc">
+      <p style="margin:0;font-size:16px;font-weight:700">How you're paid</p>
+      <p style="margin:8px 0 0;font-size:14px;line-height:1.6;color:#475569">Per job, sized by the home, every Friday, as an independent contractor.</p>
+      <p style="margin:4px 0 12px;font-size:14px;line-height:1.6;color:#64748b">Por trabajo, según el tamaño de la casa, cada viernes, como contratista independiente.</p>
+      <table width="100%" style="border-collapse:collapse;font-size:14px;color:#334155">
+        <tr><td style="padding:6px 0;border-bottom:1px solid #e2e8f0"><strong>House cleaning</strong> / Limpieza</td><td style="padding:6px 0;border-bottom:1px solid #e2e8f0;text-align:right">$56 &nbsp;·&nbsp; $76 &nbsp;·&nbsp; $112 per visit</td></tr>
+        <tr><td style="padding:6px 0;border-bottom:1px solid #e2e8f0"><strong>Lawn care</strong> / Césped</td><td style="padding:6px 0;border-bottom:1px solid #e2e8f0;text-align:right">$18 &nbsp;·&nbsp; $26 &nbsp;·&nbsp; $40 per visit</td></tr>
+        <tr><td style="padding:6px 0;border-bottom:1px solid #e2e8f0"><strong>Car care</strong> — wash / lavado</td><td style="padding:6px 0;border-bottom:1px solid #e2e8f0;text-align:right">$16 &nbsp;·&nbsp; $20 &nbsp;·&nbsp; $26 per job</td></tr>
+        <tr><td style="padding:6px 0"><strong>Car care</strong> — full detail / detalle completo</td><td style="padding:6px 0;text-align:right">$78 &nbsp;·&nbsp; $88 &nbsp;·&nbsp; $115 per job</td></tr>
+      </table>
+      <p style="margin:12px 0 0;font-size:13px;line-height:1.6;color:#64748b">Three figures are the three job sizes, smallest to largest. / Las tres cifras son los tres tamaños, de menor a mayor.</p>
+    </div>
+  </div>
+
+  <!-- Tier 2 -->
+  <div style="padding:18px 24px 0">
+    <p style="margin:0;font-size:14px;line-height:1.6;color:#475569">Tier 2 — Tidy Pro Partner: 50 completed visits, a 4.8+ rating, and 60 days with Tidy. It raises your rate at every job size. Insurance is required at both tiers. <a href="{{ params.tier_progression_url }}" style="color:#2563eb">See the path</a>.</p>
+    <p style="margin:6px 0 0;font-size:14px;line-height:1.6;color:#64748b">Nivel 2 — Tidy Pro Partner: 50 visitas completadas, calificación de 4.8+ y 60 días con Tidy. Aumenta su tarifa en todos los tamaños. El seguro es obligatorio en ambos niveles.</p>
+  </div>
+
+  <div style="padding:18px 24px 26px">
+    <p style="margin:0;font-size:14px;line-height:1.6;color:#475569">Questions go to <a href="mailto:hello@jointidy.co" style="color:#2563eb">hello@jointidy.co</a>, Monday to Saturday, 8:00 AM–6:00 PM ET.</p>
+    <p style="margin:6px 0 0;font-size:14px;line-height:1.6;color:#64748b">Preguntas: hello@jointidy.co, lunes a sábado, 8:00 AM–6:00 PM ET.</p>
+  </div>
+
+  <div style="padding:16px 24px;border-top:1px solid #e2e8f0;font-size:12px;line-height:1.6;color:#94a3b8">
+    Tidy Home Concierge LLC · Miami, FL · jointidy.co · (786) 829-1141<br/>
+    You are receiving this because you are onboarding as a 1099 independent contractor with Tidy. <a href="{{ unsubscribe }}" style="color:#94a3b8">Unsubscribe</a>.
+  </div>
+
+</div>
+</body>
+</html>

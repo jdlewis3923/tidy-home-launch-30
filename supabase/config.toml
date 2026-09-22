@@ -147,3 +147,18 @@ verify_jwt = false
 
 [functions.hiring-queue-transitions]
 verify_jwt = false
+
+# Pro onboarding: one email, three token links. coi-token-submit is public by
+# design — the long random token in the URL is the authorization, it expires
+# after 30 days, and the endpoint is rate limited per IP.
+[functions.coi-token-submit]
+verify_jwt = false
+
+[functions.pro-onboarding-email]
+verify_jwt = false
+
+[functions.pro-onboarding-reminders]
+verify_jwt = false
+
+[functions.brevo-template-admin]
+verify_jwt = false
