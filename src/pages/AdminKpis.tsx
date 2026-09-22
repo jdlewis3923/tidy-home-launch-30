@@ -860,6 +860,8 @@ function DrillDown({
   completions,
   onClose,
   onActionRan,
+  onResolveAlert,
+  resolving,
 }: {
   def: KpiDefinition;
   snap: KpiSnapshot | undefined;
@@ -868,6 +870,8 @@ function DrillDown({
   completions: { id: string; step_index: number; notes: string | null; completed_at: string }[];
   onClose: () => void;
   onActionRan: () => void;
+  onResolveAlert: (id: string) => void;
+  resolving: boolean;
 }) {
   const t = statusTone((snap?.status ?? "unknown") as KpiStatus);
 
