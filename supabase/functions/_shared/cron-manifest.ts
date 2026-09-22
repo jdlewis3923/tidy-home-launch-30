@@ -68,6 +68,13 @@ export const EXPECTED_CRON_JOBS: ExpectedCronJob[] = [
   { name: 'kpi-calendar-sync-daily', schedule: '0 10 * * *', kind: 'http', fn: 'kpi-calendar-sync', purpose: 'Syncs the KPI review calendar.' },
 
   // --- ops / marketing ---
+  { name: 'hiring-forecast-daily', schedule: '0 7 * * *', kind: 'http', fn: 'hiring-forecast', purpose: 'Next-hire forecast per service (2:00 AM ET).' },
+  { name: 'hiring-rescore-daily', schedule: '15 7 * * *', kind: 'http', fn: 'hiring-rescore', purpose: 'Nightly applicant rescoring (2:15 AM ET).' },
+  { name: 'hiring-gates-hourly', schedule: '5 * * * *', kind: 'http', fn: 'hiring-gates', purpose: 'Service live/not-live gate check.' },
+  { name: 'hiring-queue-transitions-hourly', schedule: '20 * * * *', kind: 'http', fn: 'hiring-queue-transitions', purpose: 'Call queue follow-up and cold transitions.' },
+  { name: 'hiring-calendar-daily', schedule: '50 11 * * *', kind: 'http', fn: 'hiring-calendar', purpose: 'Year-one calendar tasks and heads-ups (6:50 AM ET).' },
+  { name: 'hiring-digest-morning', schedule: '0 12 * * *', kind: 'http', fn: 'hiring-digest', purpose: 'Open-alert digest email (7:00 AM ET).' },
+  { name: 'hiring-digest-evening', schedule: '0 23 * * *', kind: 'http', fn: 'hiring-digest', purpose: 'Evening digest with tomorrow\'s calls (6:00 PM ET).' },
   { name: 'cron-heartbeat', schedule: '7 * * * *', kind: 'http', fn: 'cron-heartbeat', purpose: 'The watchdog itself.' },
   { name: 'sheets-master-sync-1h', schedule: '15 * * * *', kind: 'http', fn: 'sheets-master-sync', purpose: 'Mirrors operational data to the master sheet.' },
   { name: 'social-launch-publisher', schedule: '*/5 * * * *', kind: 'http', fn: 'social-launch-publisher', purpose: 'Publishes queued launch posts.' },

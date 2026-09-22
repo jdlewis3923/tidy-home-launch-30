@@ -563,6 +563,7 @@ export type Database = {
           has_insurance: boolean | null
           has_supplies: boolean | null
           has_vehicle: boolean | null
+          hiring_tier: string | null
           id: string
           insurance_expires_at: string | null
           insurance_status: string
@@ -685,6 +686,7 @@ export type Database = {
           has_insurance?: boolean | null
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
+          hiring_tier?: string | null
           id?: string
           insurance_expires_at?: string | null
           insurance_status?: string
@@ -807,6 +809,7 @@ export type Database = {
           has_insurance?: boolean | null
           has_supplies?: boolean | null
           has_vehicle?: boolean | null
+          hiring_tier?: string | null
           id?: string
           insurance_expires_at?: string | null
           insurance_status?: string
@@ -998,6 +1001,7 @@ export type Database = {
           offset_days_from_launch: number | null
           recurring: boolean
           sort_key: number
+          task_key: string | null
           title: string
         }
         Insert: {
@@ -1011,6 +1015,7 @@ export type Database = {
           offset_days_from_launch?: number | null
           recurring?: boolean
           sort_key?: number
+          task_key?: string | null
           title: string
         }
         Update: {
@@ -1024,6 +1029,7 @@ export type Database = {
           offset_days_from_launch?: number | null
           recurring?: boolean
           sort_key?: number
+          task_key?: string | null
           title?: string
         }
         Relationships: []

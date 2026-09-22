@@ -127,3 +127,23 @@ verify_jwt = false
 
 [functions.checkr-readiness]
 verify_jwt = false
+
+# Hiring & launch autopilot. Each handler authorizes an admin session or the
+# service-role bearer itself (requireServiceOrAdmin) before doing any work.
+[functions.hiring-extract-indeed]
+verify_jwt = false
+
+[functions.hiring-mark-hired]
+verify_jwt = false
+
+[functions.hiring-gates]
+verify_jwt = false
+
+[functions.hiring-forecast]
+verify_jwt = false
+
+[functions.hiring-rescore]
+verify_jwt = false
+
+[functions.hiring-queue-transitions]
+verify_jwt = false
