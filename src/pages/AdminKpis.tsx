@@ -349,6 +349,58 @@ export default function AdminKpis() {
     if (authed === true && !forbidden) load();
   }, [load, authed, forbidden]);
 
+  // ─────── Resolve alerts ───────
+  // Writes resolved_at, drops the row from the list immediately, then recomputes
+  // so the KPI tile's colour reflects the fix instead of staying red.
+  const [resolving, setResolving] = useState(false);
+  const [rechecking, setRechecking] = useState(false);
+
+  const recheckNow = useCallback(async () => {
+    setRechecking(true);
+    try {
+      const { error } = await supabase.functions.invoke("compute-kpi", { body: {} });
+      if (error) throw error;
+      await load();
+      toast({ title: "Indicators re-checked", description: "Colours now reflect the latest data." });
+    } catch (err) {
+      toast({
+        title: "Could not re-check indicators",
+        description: err instanceof Error ? err.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setRechecking(false);
+    }
+  }, [load]);
+
+  const resolveAlerts = useCallback(
+    async (ids: string[]) => {
+      if (ids.length === 0) return;
+      setResolving(true);
+      const { data: authData } = await supabase.auth.getUser();
+      const { error } = await supabase
+        .from("kpi_alerts")
+        .update({
+          resolved_at: new Date().toISOString(),
+          acknowledged_at: new Date().toISOString(),
+          acknowledged_by: authData.user?.id ?? null,
+        })
+        .in("id", ids);
+      setResolving(false);
+      if (error) {
+        toast({ title: "Could not mark it resolved", description: error.message, variant: "destructive" });
+        return;
+      }
+      setAlerts((prev) => prev.filter((a) => !ids.includes(a.id)));
+      toast({
+        title: ids.length > 1 ? `${ids.length} items cleared` : "Marked resolved",
+        description: "Re-checking the indicator…",
+      });
+      await recheckNow();
+    },
+    [recheckNow],
+  );
+
   const grouped = useMemo(() => {
     const out: Record<KpiCategory, KpiDefinition[]> = {
       acquisition: [],
@@ -540,6 +592,17 @@ export default function AdminKpis() {
               )}
               <span className="hidden sm:inline">Refresh</span>
             </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={recheckNow}
+              disabled={rechecking}
+              title="Recompute every indicator from live data"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs"
+            >
+              {rechecking ? <Loader2 className="h-3.5 w-3.5 animate-spin sm:mr-1.5" /> : <Wrench className="h-3.5 w-3.5 sm:mr-1.5" />}
+              <span className="hidden sm:inline">Re-check now</span>
+            </Button>
           </div>
         </div>
       </header>
@@ -575,6 +638,16 @@ export default function AdminKpis() {
                 {alerts.length > 3 ? ` +${alerts.length - 3} more` : ""}
               </p>
             </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={resolving}
+              onClick={() => resolveAlerts(alerts.map((a) => a.id))}
+              className="h-8 shrink-0 border-rose-300 bg-white text-xs font-semibold text-rose-800 hover:bg-rose-100"
+            >
+              {resolving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : null}
+              Clear all
+            </Button>
           </div>
         </div>
       )}
@@ -663,6 +736,8 @@ export default function AdminKpis() {
           completions={stepCompletions[drillDef.code] ?? []}
           onClose={() => setDrillCode(null)}
           onActionRan={load}
+          onResolveAlert={(id) => resolveAlerts([id])}
+          resolving={resolving}
         />
       )}
 
@@ -785,6 +860,8 @@ function DrillDown({
   completions,
   onClose,
   onActionRan,
+  onResolveAlert,
+  resolving,
 }: {
   def: KpiDefinition;
   snap: KpiSnapshot | undefined;
@@ -793,6 +870,8 @@ function DrillDown({
   completions: { id: string; step_index: number; notes: string | null; completed_at: string }[];
   onClose: () => void;
   onActionRan: () => void;
+  onResolveAlert: (id: string) => void;
+  resolving: boolean;
 }) {
   const t = statusTone((snap?.status ?? "unknown") as KpiStatus);
 
@@ -871,8 +950,19 @@ function DrillDown({
               </div>
               <ul className="text-xs text-rose-800 space-y-1">
                 {alerts.map((a) => (
-                  <li key={a.id}>
-                    <span className="font-semibold uppercase">{a.severity}</span> · {a.message}
+                  <li key={a.id} className="flex items-start justify-between gap-2">
+                    <span>
+                      <span className="font-semibold uppercase">{a.severity}</span> · {a.message}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={resolving}
+                      onClick={() => onResolveAlert(a.id)}
+                      className="h-7 shrink-0 border-rose-300 bg-white px-2 text-[11px] font-semibold text-rose-800 hover:bg-rose-100"
+                    >
+                      Resolved
+                    </Button>
                   </li>
                 ))}
               </ul>
