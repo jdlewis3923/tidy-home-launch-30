@@ -138,6 +138,12 @@ Deno.serve(async (req) => {
   const token = typeof body?.token === 'string' ? body.token : '';
   if (token.length < 10) return jsonResponse({ error: 'invalid_token' }, 400);
 
+  // Preview mode (admin "send a test to me"): both emails go to one address and
+  // nothing on the record changes — no stage advance, no timestamps.
+  const previewTo = typeof body?.preview_to === 'string' && body.preview_to.includes('@')
+    ? body.preview_to
+    : null;
+
   const { data: kit, error } = await admin.from('pro_kit').select('*').eq('token', token).maybeSingle();
   if (error) return jsonResponse({ error: 'lookup_failed', details: error.message }, 500);
   if (!kit) return jsonResponse({ error: 'not_found' }, 404);
@@ -147,11 +153,11 @@ Deno.serve(async (req) => {
   const summary = kitOrderSummary(row as never);
   const badgeUrl = kit.badge_photo_token ? `${SITE}/badge/${kit.badge_photo_token}` : null;
 
-  await admin.from('pro_kit').update({ kit_summary: summary }).eq('id', kit.id);
+  if (!previewTo) await admin.from('pro_kit').update({ kit_summary: summary }).eq('id', kit.id);
 
   // Advance the linked applicant one step along the hiring pipeline.
   const PIPELINE = ['applied', 'background_check_review', 'interview_pending', 'offer_sent', 'contract_signed', 'oriented', 'active'];
-  if (kit.applicant_id) {
+  if (kit.applicant_id && !previewTo) {
     const { data: appRow } = await admin
       .from('applicants')
       .select('current_stage')
@@ -230,13 +236,14 @@ Deno.serve(async (req) => {
       <span style="color:#64748b">Su kit llega normalmente en 7 a 10 días.</span>
     </p>`);
 
+  const prefix = previewTo ? '[TEST] ' : '';
   let ownerSent = false;
   let proSent = false;
   try {
     await sendBrevoEmail({
-      to: OWNER,
+      to: previewTo ?? OWNER,
       marketing: false,
-      subject: `Kit ready to order — ${display(kit.legal_name)} (${KIT_SERVICE_LABEL[serviceKey].en})`,
+      subject: `${prefix}Kit ready to order — ${display(kit.legal_name)} (${KIT_SERVICE_LABEL[serviceKey].en})`,
       htmlContent: ownerHtml,
       label: 'intake-submitted',
     });
@@ -245,19 +252,22 @@ Deno.serve(async (req) => {
     console.error('intake-submitted owner email failed:', e instanceof Error ? e.message : String(e));
   }
 
-  if (kit.email) {
+  const proRecipient = previewTo ?? (kit.email ? String(kit.email) : null);
+  if (proRecipient) {
     try {
       await sendBrevoEmail({
-        to: String(kit.email),
+        to: proRecipient,
         marketing: false,
-        subject: 'Your Tidy kit is on the way — one photo left / Su kit de Tidy va en camino',
+        subject: `${prefix}Your Tidy kit is on the way — one photo left / Su kit de Tidy va en camino`,
         htmlContent: proHtml,
         label: 'pro-kit-confirmation',
       });
       proSent = true;
-      await admin.from('pro_kit')
-        .update({ pro_confirm_email_sent_at: new Date().toISOString() })
-        .eq('id', kit.id);
+      if (!previewTo) {
+        await admin.from('pro_kit')
+          .update({ pro_confirm_email_sent_at: new Date().toISOString() })
+          .eq('id', kit.id);
+      }
     } catch (e) {
       console.error('intake-submitted pro email failed:', e instanceof Error ? e.message : String(e));
     }

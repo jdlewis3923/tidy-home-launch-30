@@ -8,7 +8,7 @@ import { arrivalWindowLabel } from '@/lib/arrival-windows';
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Check, X, Loader2, Sparkles } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { addonIcon } from '@/lib/addonIcons';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { AddonService } from '@/lib/addon-catalog';
@@ -42,12 +42,8 @@ const SERVICE_DB_KEY: Record<AddonService, string> = {
   detailing: 'detail',
 };
 
-// Lucide names from DB are kebab-case; component names are PascalCase.
-function pascalize(name: string): string {
-  return name.split('-').map(p => p ? p[0].toUpperCase() + p.slice(1) : '').join('');
-}
 function IconFor({ name }: { name: string | null }) {
-  const Cmp = (name && (LucideIcons as any)[pascalize(name)]) ?? LucideIcons.Sparkles;
+  const Cmp = addonIcon(name);
   return <Cmp className="h-4 w-4" />;
 }
 

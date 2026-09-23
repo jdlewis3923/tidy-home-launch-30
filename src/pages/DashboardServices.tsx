@@ -13,7 +13,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import * as LucideIcons from 'lucide-react';
+import { addonIcon } from '@/lib/addonIcons';
 import { ArrowRight, Check, Gift, Loader2, Plus, Sparkles, User, X } from 'lucide-react';
 import DashboardTopNav from '@/components/dashboard/DashboardTopNav';
 import RouteFallback from '@/components/RouteFallback';
@@ -89,11 +89,9 @@ const FREQUENCY_LABEL: Record<Frequency, string> = {
   weekly: 'Weekly',
 };
 
-const pascalize = (name: string) =>
-  name.split('-').map((p) => (p ? p[0].toUpperCase() + p.slice(1) : '')).join('');
 
 function IconFor({ name }: { name: string | null }) {
-  const Cmp = (name && (LucideIcons as never as Record<string, typeof Sparkles>)[pascalize(name)]) ?? Sparkles;
+  const Cmp = addonIcon(name);
   return <Cmp className="h-4 w-4" />;
 }
 
