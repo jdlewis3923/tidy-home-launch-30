@@ -627,7 +627,7 @@ Deno.serve(async (req) => {
     requested_filenames: filenames,
     documenso: documensoResult,
     admin_email_error: adminEmailError,
-    sheet_sync_error: sheetSyncError,
+    sheet_sync_error: null,
     checkr_invitation_sent: action === 'send_to_bg_check' ? checkrInvitationSent : null,
     checkr_error: checkrDispatchError,
     onboarding_email_sent: sendsOnboardingEmail ? onboardingEmailSent : null,
