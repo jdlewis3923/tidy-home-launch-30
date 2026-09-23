@@ -239,7 +239,7 @@ const AdminDocuments = () => {
 
   if (roleLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+      <div className="admin-page flex items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
@@ -250,7 +250,7 @@ const AdminDocuments = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 print:bg-white print:text-black">
+    <div className="admin-page print:bg-white print:text-black">
       <Helmet>
         <title>Documents Library — Tidy Admin</title>
         <meta name="robots" content="noindex,nofollow" />
@@ -262,16 +262,16 @@ const AdminDocuments = () => {
         `}</style>
       </Helmet>
 
-      <header className="border-b border-white/10 bg-slate-900/60 backdrop-blur sticky top-0 z-30 no-print">
+      <header className="admin-page-header sticky top-10 z-30 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
-            <Button asChild variant="ghost" size="sm" className="text-white/70 hover:text-white">
+            <Button asChild variant="ghost" size="sm">
               <Link to="/admin/kpis">
                 <ArrowLeft className="h-4 w-4 mr-1" /> KPIs
               </Link>
             </Button>
             <h1 className="text-xl font-semibold">Documents Library</h1>
-            <Badge variant="outline" className="border-amber-400/40 text-amber-300">Admin</Badge>
+            <Badge variant="outline" className="border-primary/40 text-primary">Admin</Badge>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -287,13 +287,13 @@ const AdminDocuments = () => {
                 await fetchDocs();
               }}
               variant="outline"
-              className="border-white/20 text-white hover:bg-white/10"
+              className="border-border"
             >
               Re-seed company docs
             </Button>
             <Button
               onClick={() => setUploadOpen(true)}
-              className="bg-amber-400 hover:bg-amber-300 text-slate-900 font-semibold"
+              className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold"
             >
               <Upload className="h-4 w-4 mr-2" /> Add Document
             </Button>
@@ -304,28 +304,28 @@ const AdminDocuments = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <div className="flex items-center gap-3 flex-wrap no-print">
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search filename, tag, or content…"
-              className="pl-9 bg-slate-900 border-white/10 text-white placeholder:text-white/40"
+              className="pl-9"
             />
           </div>
-          <div className="flex gap-1 rounded-md bg-slate-900 border border-white/10 p-1">
+          <div className="admin-page-surface flex gap-1 rounded-md border p-1">
             {(["all", "active", "archived"] as ArchiveFilter[]).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1 text-xs uppercase tracking-wide rounded ${
-                  filter === f ? "bg-amber-400 text-slate-900 font-semibold" : "text-white/60 hover:text-white"
+                  filter === f ? "bg-gold text-gold-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {f}
               </button>
             ))}
           </div>
-          <div className="text-xs text-white/50">
+          <div className="text-xs text-muted-foreground">
             {loading ? "Loading…" : `${filtered.length} of ${docs.length}`}
           </div>
         </div>
