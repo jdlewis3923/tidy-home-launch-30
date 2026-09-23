@@ -31,9 +31,9 @@ interface AlertRow {
 }
 
 const GROUPS = [
-  { key: "critical", label: "Critical", tone: "border-rose-300 bg-rose-50" },
-  { key: "action", label: "Action", tone: "border-amber-300 bg-amber-50" },
-  { key: "warning", label: "Warning", tone: "border-slate-300 bg-slate-50" },
+  { key: "critical", label: "Critical", tone: "admin-state-critical" },
+  { key: "action", label: "Action", tone: "admin-state-warning" },
+  { key: "warning", label: "Warning", tone: "admin-page-surface" },
 ] as const;
 
 export default function AdminAlerts() {
@@ -127,11 +127,11 @@ export default function AdminAlerts() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="admin-page">
       <Helmet><title>Alerts · Tidy Admin</title><meta name="robots" content="noindex" /></Helmet>
 
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4 md:px-6">
+      <header className="admin-page-header">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 md:px-6">
           <div>
             <h1 className="flex items-center gap-2 text-lg font-bold text-slate-900">
               <Bell className="h-5 w-5" /> Alerts
@@ -144,7 +144,7 @@ export default function AdminAlerts() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 md:px-6">
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">
         {GROUPS.map((group) => {
           const items = open.filter((r) => (r.level ?? "warning") === group.key);
           return (

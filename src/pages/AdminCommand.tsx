@@ -279,18 +279,18 @@ export default function AdminCommand() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="admin-page">
       <Helmet>
         <title>Command · Tidy Admin</title>
         <meta name="description" content="Tidy command center: profit versus plan, capacity runway, ZIP funnel, alerts and trust metrics." />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <header className="bg-[#0f172a] text-white">
+      <header className="admin-page-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl font-bold">Command</h1>
-            <p className="text-xs text-white/60">Newest rollup drives every number on this page.</p>
+            <p className="text-xs text-muted-foreground">Newest rollup drives every number on this page.</p>
           </div>
           <nav className="ml-auto flex items-center gap-2">
             <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs">
@@ -315,10 +315,10 @@ export default function AdminCommand() {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
           <MessagingReadinessBanner />
 
-          <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="bg-[#00568C] text-white px-5 py-4 flex flex-wrap items-center gap-3">
-              <div><h2 className="text-lg font-bold">Workday</h2><p className="text-xs text-white/70">Today’s activity, newest first.</p></div>
-              <div className="ml-auto flex gap-1">{(["today", "yesterday", "week"] as WorkdayRange[]).map((range) => <Button key={range} size="sm" variant="ghost" className={workdayRange === range ? "bg-white text-[#00325A]" : "text-white hover:bg-white/10 hover:text-white"} onClick={() => setWorkdayRange(range)}>{range === "week" ? "Last 7 days" : range[0].toUpperCase() + range.slice(1)}</Button>)}</div>
+          <section className="admin-page-surface rounded-lg border overflow-hidden">
+            <div className="bg-primary text-primary-foreground px-5 py-4 flex flex-wrap items-center gap-3">
+              <div><h2 className="text-lg font-bold">Workday</h2><p className="text-xs text-primary-foreground/75">Today’s activity, newest first.</p></div>
+              <div className="ml-auto flex gap-1">{(["today", "yesterday", "week"] as WorkdayRange[]).map((range) => <Button key={range} size="sm" variant="ghost" className={workdayRange === range ? "bg-background text-foreground" : "text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"} onClick={() => setWorkdayRange(range)}>{range === "week" ? "Last 7 days" : range[0].toUpperCase() + range.slice(1)}</Button>)}</div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-5 border-b border-slate-200">
               {[
@@ -327,10 +327,10 @@ export default function AdminCommand() {
                 ["Emails failed", todayWorkday.filter((r) => r.event_type === "email" && ["failed", "bounced"].includes(r.status ?? "")).length],
                 ["Calls booked", todayWorkday.filter((r) => r.event_type === "call_booked").length],
                 ["Waiting on me", todayWorkday.filter((r) => r.waiting_on_admin).length],
-              ].map(([label, value]) => <button key={String(label)} type="button" onClick={() => label === "Waiting on me" && setWaitingOnly((v) => !v)} className={`p-4 text-left border-r border-slate-200 ${label === "Waiting on me" && waitingOnly ? "bg-amber-50" : ""}`}><span className="block text-2xl font-bold">{value}</span><span className="text-xs text-slate-500">{label}</span></button>)}
+              ].map(([label, value]) => <button key={String(label)} type="button" onClick={() => label === "Waiting on me" && setWaitingOnly((v) => !v)} className={`p-4 text-left border-r border-slate-200 ${label === "Waiting on me" && waitingOnly ? "admin-state-warning" : ""}`}><span className="block text-2xl font-bold">{value}</span><span className="text-xs text-slate-500">{label}</span></button>)}
             </div>
             <div className="divide-y divide-slate-200">
-              {visibleWorkday.length === 0 ? <div className="p-8 text-center text-sm text-slate-500"><Clock3 className="mx-auto mb-2 h-5 w-5" />No activity in this window.</div> : visibleWorkday.map((event) => <div key={event.id} className={`grid gap-2 p-4 sm:grid-cols-[72px_1fr_auto] sm:items-center ${event.status === "failed" || event.status === "bounced" ? "bg-red-50" : ""}`}>
+              {visibleWorkday.length === 0 ? <div className="p-8 text-center text-sm text-slate-500"><Clock3 className="mx-auto mb-2 h-5 w-5" />No activity in this window.</div> : visibleWorkday.map((event) => <div key={event.id} className={`grid gap-2 p-4 sm:grid-cols-[72px_1fr_auto] sm:items-center ${event.status === "failed" || event.status === "bounced" ? "admin-state-critical" : ""}`}>
                 <time className="font-mono text-xs text-slate-500">{new Date(event.occurred_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</time>
                 <div><p className="text-sm font-semibold text-slate-900">{event.title}</p>{event.detail && <p className="mt-0.5 text-xs text-slate-500">{event.detail}</p>}</div>
                 {event.action_url && <Button asChild size="sm" variant="outline"><Link to={event.action_url}>{event.action_label ?? "Open"}<ExternalLink className="ml-1 h-3 w-3" /></Link></Button>}
