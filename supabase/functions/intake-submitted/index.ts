@@ -153,11 +153,11 @@ Deno.serve(async (req) => {
   const summary = kitOrderSummary(row as never);
   const badgeUrl = kit.badge_photo_token ? `${SITE}/badge/${kit.badge_photo_token}` : null;
 
-  await admin.from('pro_kit').update({ kit_summary: summary }).eq('id', kit.id);
+  if (!previewTo) await admin.from('pro_kit').update({ kit_summary: summary }).eq('id', kit.id);
 
   // Advance the linked applicant one step along the hiring pipeline.
   const PIPELINE = ['applied', 'background_check_review', 'interview_pending', 'offer_sent', 'contract_signed', 'oriented', 'active'];
-  if (kit.applicant_id) {
+  if (kit.applicant_id && !previewTo) {
     const { data: appRow } = await admin
       .from('applicants')
       .select('current_stage')
