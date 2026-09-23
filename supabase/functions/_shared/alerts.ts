@@ -7,6 +7,7 @@ import '../_shared/http.ts';
 // caller. So this function only ever writes a row, deduped on dedupe_key.
 
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { tidyEmailShell } from './email-brand.ts';
 
 export type AlertLevel = 'action' | 'warning' | 'critical';
 export type AlertCategory = 'hiring' | 'site' | 'calendar' | 'capacity' | 'insurance';
@@ -64,9 +65,13 @@ export async function writeAlert(
           sender: { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' },
           subject: `Tidy critical: ${alert.title}`,
 
-          htmlContent:
-            `<p><strong>${alert.title}</strong></p><p>${alert.body ?? ''}</p>` +
-            (alert.action_url ? `<p><a href="https://jointidy.co${alert.action_url}">${alert.action_label ?? 'Open'}</a></p>` : ''),
+          htmlContent: tidyEmailShell({
+            heading: alert.title,
+            eyebrow: 'Tidy critical alert',
+            bodyHtml: `<p>${alert.body ?? ''}</p>`,
+            ctaUrl: alert.action_url ? `https://jointidy.co${alert.action_url}` : undefined,
+            ctaLabel: alert.action_label ?? 'Open alert',
+          }),
           tags: ['admin-critical'],
           label: 'critical-alert',
         });

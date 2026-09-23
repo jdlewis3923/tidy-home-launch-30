@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 // Deno-style specifier resolves fine under vitest since the helper is plain TS.
 import { sendBrevoEmail } from '../../supabase/functions/_shared/brevo-send';
+import { brandHostedTemplate } from '../../supabase/functions/_shared/email-brand';
 
 const SEND_URL = 'https://connector-gateway.lovable.dev/brevo/smtp/email';
 const CONTACT_PREFIX = 'https://connector-gateway.lovable.dev/brevo/contacts/';
@@ -91,5 +92,64 @@ describe('sendBrevoEmail opt-out enforcement', () => {
     expect(res.sent).toBe(true);
     expect(calls).toEqual([SEND_URL]);
     expect(calls.some((c) => c.startsWith(CONTACT_PREFIX))).toBe(false);
+  });
+});
+
+describe('sendBrevoEmail Tidy branding enforcement', () => {
+  it('wraps every code-generated HTML email in the shared Tidy design', async () => {
+    let payload: Record<string, unknown> = {};
+    const { impl } = mockFetch((_url, init) => {
+      payload = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
+      return { status: 201, body: { messageId: 'branded-1' } };
+    });
+    await sendBrevoEmail({
+      to: 'person@example.com',
+      subject: 'A Tidy update',
+      htmlContent: '<p>Plain content</p>',
+      marketing: false,
+      apiKey: 'test-key',
+      lovableApiKey: 'test-lovable-key',
+      fetchImpl: impl,
+    });
+    const html = String(payload.htmlContent ?? '');
+    expect(html).toContain('data-tidy-email="branded"');
+    expect(html).toContain('https://jointidy.co/favicon-512x512.png');
+    expect(html).toContain('Cleaning');
+    expect(html).toContain('Lawn');
+    expect(html).toContain('Car Care');
+    expect(html).toContain('2121 Biscayne Blvd #1562');
+    expect(html).toContain('<p>Plain content</p>');
+  });
+
+  it('does not nest an already branded email', async () => {
+    let payload: Record<string, unknown> = {};
+    const { impl } = mockFetch((_url, init) => {
+      payload = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
+      return { status: 201, body: { messageId: 'branded-2' } };
+    });
+    const branded = '<!doctype html><html data-tidy-email="branded"><body>Ready</body></html>';
+    await sendBrevoEmail({
+      to: 'person@example.com', htmlContent: branded, marketing: false,
+      apiKey: 'test-key', lovableApiKey: 'test-lovable-key', fetchImpl: impl,
+    });
+    expect(payload.htmlContent).toBe(branded);
+  });
+});
+
+describe('hosted Tidy template branding', () => {
+  it('upgrades the logo and inserts the white service strip without losing merge fields', () => {
+    const source = '<!doctype html><html><body><table><!-- Brand bar --><tr><td style="background:#0f172a"><img src="https://raw.githubusercontent.com/jdlewis3923/tidy-home-launch-30/main/tidy-logo-circle.png"></td></tr><!-- Hero banner --><tr><td>Hello {{ params.first_name }}</td></tr></table></body></html>';
+    const result = brandHostedTemplate(source, 'Welcome');
+    expect(result.changed).toBe(true);
+    expect(result.html).toContain('https://jointidy.co/favicon-512x512.png');
+    expect(result.html).toContain('data-tidy-service-strip="true"');
+    expect(result.html).toContain('{{ params.first_name }}');
+  });
+
+  it('wraps a plain hosted template in the complete Tidy shell', () => {
+    const result = brandHostedTemplate('<html><body><p>Hello {{ contact.FIRSTNAME }}</p></body></html>', 'Hello');
+    expect(result.mode).toBe('wrapped');
+    expect(result.html).toContain('data-tidy-email="branded"');
+    expect(result.html).toContain('{{ contact.FIRSTNAME }}');
   });
 });

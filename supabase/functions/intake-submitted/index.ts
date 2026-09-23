@@ -17,6 +17,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import { tidyEmailShell } from '../_shared/email-brand.ts';
 import {
   kitContentsLine,
   kitItemsFor,
@@ -30,7 +31,6 @@ import {
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SITE = 'https://jointidy.co';
-const LOGO = `${SITE}/favicon-512x512.png`;
 const OWNER = 'hello@jointidy.co';
 
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -115,18 +115,7 @@ function display(v: unknown): string {
 }
 
 function shell(inner: string): string {
-  return `<!doctype html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,sans-serif;color:#0f172a">
-  <div style="max-width:640px;margin:0 auto;background:#ffffff">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a"><tr>
-      <td style="padding:16px 24px" valign="middle" align="left"><img src="${LOGO}" alt="Tidy" width="42" height="42" style="display:block;width:42px;height:42px;border:0"/></td>
-      <td style="padding:16px 24px;font:700 13px Arial,sans-serif;color:#ffffff;line-height:1.35;text-align:right" valign="middle" align="right">More life.<br/><span style="color:#FCCC00">Less chores.</span></td>
-    </tr></table>
-    <div style="height:4px;background:#FCCC00"></div>
-    <div style="padding:26px 24px">${inner}</div>
-    <div style="padding:16px 24px;color:#94a3b8;font-size:12px;border-top:1px solid #e2e8f0">
-      Tidy Home Concierge LLC · 2121 Biscayne Blvd #1562, Miami, FL 33137 · jointidy.co · (786) 829-1141
-    </div>
-  </div></body></html>`;
+  return tidyEmailShell({ bodyHtml: inner });
 }
 
 Deno.serve(async (req) => {
