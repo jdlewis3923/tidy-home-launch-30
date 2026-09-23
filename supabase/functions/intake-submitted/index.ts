@@ -138,6 +138,12 @@ Deno.serve(async (req) => {
   const token = typeof body?.token === 'string' ? body.token : '';
   if (token.length < 10) return jsonResponse({ error: 'invalid_token' }, 400);
 
+  // Preview mode (admin "send a test to me"): both emails go to one address and
+  // nothing on the record changes — no stage advance, no timestamps.
+  const previewTo = typeof body?.preview_to === 'string' && body.preview_to.includes('@')
+    ? body.preview_to
+    : null;
+
   const { data: kit, error } = await admin.from('pro_kit').select('*').eq('token', token).maybeSingle();
   if (error) return jsonResponse({ error: 'lookup_failed', details: error.message }, 500);
   if (!kit) return jsonResponse({ error: 'not_found' }, 404);
