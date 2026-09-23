@@ -464,17 +464,17 @@ export default function AdminKpis() {
 
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="admin-page">
       <Helmet>
         <title>KPI Command Center · Tidy</title>
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
       {/* Header — navy with gold accent. Stacks vertically on mobile so iPhone widths render correctly. */}
-      <header className="bg-[#0f172a] text-white">
+      <header className="admin-page-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="min-w-0">
-            <p className="text-[10px] sm:text-xs uppercase tracking-widest text-[#f5c518] font-semibold">
+            <p className="text-[10px] sm:text-xs uppercase tracking-widest text-[hsl(var(--admin-gold))] font-semibold">
               Tidy · Operating System
             </p>
             <h1 className="text-xl sm:text-3xl font-semibold mt-1 leading-tight">

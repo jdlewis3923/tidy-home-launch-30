@@ -598,18 +598,18 @@ export default function AdminApplicants() {
   const stepIdx = stageIndex(open?.current_stage);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <main className="admin-page">
       <Helmet><title>Applicants | Tidy Admin</title></Helmet>
 
       <SetupCheckBanner />
 
       {/* ---------- Header bar ---------- */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
+      <header className="admin-page-header sticky top-10 z-20">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <Link to="/admin/kpis"><Button variant="ghost" size="sm"><ArrowLeft className="h-4 w-4 mr-1" /> KPIs</Button></Link>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-[#0D1117] tracking-tight">Applicants</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Applicants</h1>
               <p className="text-xs md:text-sm text-slate-500">
                 Tidy hiring pipeline · {totalCount} total · {activeCount} active
               </p>
@@ -648,7 +648,7 @@ export default function AdminApplicants() {
               <Download className="h-4 w-4 mr-1" /> Export CSV
             </Button>
             <AddApplicants onDone={fetchRows} />
-            <Button size="sm" className="bg-[#1FA1F0] hover:bg-[#1990da] text-white"
+            <Button size="sm"
               onClick={() => toast.info("Manual add coming soon — share /apply for now")}>
               <Plus className="h-4 w-4 mr-1" /> Add manually
             </Button>
@@ -662,7 +662,7 @@ export default function AdminApplicants() {
                 type="button"
                 onClick={() => setTab(key)}
                 className={`min-h-11 rounded-lg px-4 text-sm font-semibold ${
-                  tab === key ? "bg-[#1FA1F0] text-white" : "text-slate-600 hover:bg-slate-100"
+                  tab === key ? "bg-primary text-primary-foreground" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 {label}
