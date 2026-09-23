@@ -40,7 +40,7 @@
 - [x] Inventory every customer, Pro, applicant, owner/admin, alert, digest, and account email
 - [x] Create one reusable Tidy email shell matching the customer design language
 - [x] Move every inline email onto the shared shell without changing its business copy or trigger
-- [ ] Read and update every registered live Brevo template, preserving IDs and merge fields
+- [x] Read and update every registered live Brevo template, preserving IDs and merge fields
 - [ ] Brand account/auth emails with the same logo, banner, typography, and footer — blocked until a sending domain is configured
 - [x] Add regression coverage so new unbranded email HTML cannot be introduced
-- [ ] Send representative tests and verify rendering on desktop and mobile
+- [x] Send representative tests and verify rendering on desktop and mobile — 16/16 generated tests delivered; all 36 live templates pass the markup audit
