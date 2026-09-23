@@ -236,13 +236,14 @@ Deno.serve(async (req) => {
       <span style="color:#64748b">Su kit llega normalmente en 7 a 10 días.</span>
     </p>`);
 
+  const prefix = previewTo ? '[TEST] ' : '';
   let ownerSent = false;
   let proSent = false;
   try {
     await sendBrevoEmail({
-      to: OWNER,
+      to: previewTo ?? OWNER,
       marketing: false,
-      subject: `Kit ready to order — ${display(kit.legal_name)} (${KIT_SERVICE_LABEL[serviceKey].en})`,
+      subject: `${prefix}Kit ready to order — ${display(kit.legal_name)} (${KIT_SERVICE_LABEL[serviceKey].en})`,
       htmlContent: ownerHtml,
       label: 'intake-submitted',
     });
@@ -251,19 +252,22 @@ Deno.serve(async (req) => {
     console.error('intake-submitted owner email failed:', e instanceof Error ? e.message : String(e));
   }
 
-  if (kit.email) {
+  const proRecipient = previewTo ?? (kit.email ? String(kit.email) : null);
+  if (proRecipient) {
     try {
       await sendBrevoEmail({
-        to: String(kit.email),
+        to: proRecipient,
         marketing: false,
-        subject: 'Your Tidy kit is on the way — one photo left / Su kit de Tidy va en camino',
+        subject: `${prefix}Your Tidy kit is on the way — one photo left / Su kit de Tidy va en camino`,
         htmlContent: proHtml,
         label: 'pro-kit-confirmation',
       });
       proSent = true;
-      await admin.from('pro_kit')
-        .update({ pro_confirm_email_sent_at: new Date().toISOString() })
-        .eq('id', kit.id);
+      if (!previewTo) {
+        await admin.from('pro_kit')
+          .update({ pro_confirm_email_sent_at: new Date().toISOString() })
+          .eq('id', kit.id);
+      }
     } catch (e) {
       console.error('intake-submitted pro email failed:', e instanceof Error ? e.message : String(e));
     }
