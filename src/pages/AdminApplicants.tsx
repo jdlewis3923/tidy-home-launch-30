@@ -1041,6 +1041,13 @@ export default function AdminApplicants() {
                     {/* One onboarding email, three token links. */}
                     <ProOnboardingChips applicant={open as never} onRefresh={() => { void fetchRows(); }} />
 
+                    {/* Every onboarding email, one button each. */}
+                    <OnboardingEmailButtons
+                      applicantId={open.id}
+                      applicantEmail={open.email}
+                      onRefresh={() => { void fetchRows(); }}
+                    />
+
                     {/* Checkr integration */}
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
                       <div className="flex items-center justify-between">
