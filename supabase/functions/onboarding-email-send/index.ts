@@ -22,6 +22,25 @@ import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { EMAIL } from '../_shared/emailTemplates.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { ensureTidyEmailBranding } from '../_shared/email-brand.ts';
+
+/** Fetch a Brevo-hosted template and fill its {{ params.x }} fields for preview. */
+async function renderTemplate(id: number, params: Record<string, string>) {
+  const r = await vendorFetch(`https://connector-gateway.lovable.dev/brevo/smtp/templates/${id}`, {
+    headers: {
+      Authorization: `Bearer ${Deno.env.get('LOVABLE_API_KEY') ?? ''}`,
+      'X-Connection-Api-Key': Deno.env.get('BREVO_API_KEY') ?? '',
+      Accept: 'application/json',
+    },
+  });
+  if (!r.ok) throw new Error(`template ${id} ${r.status}`);
+  const t = await r.json();
+  const fill = (x: string) =>
+    String(x ?? '')
+      .replace(/\{\{\s*params\.(\w+)[^}]*\}\}/g, (_m, k) => params[k] ?? '')
+      .replace(/\{%[^%]*%\}/g, '');
+  return { subject: fill(t.subject), html: fill(t.htmlContent) };
+}
 import { loadOnboarding, reminderEmailHtml, OWNER_EMAIL, SITE } from '../_shared/pro-onboarding.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -44,7 +63,7 @@ export const ONBOARDING_EMAIL_KEYS = [
 const Body = z.object({
   applicant_id: z.string().uuid(),
   email: z.enum(ONBOARDING_EMAIL_KEYS),
-  mode: z.enum(['pro', 'test']).default('test'),
+  mode: z.enum(['pro', 'test', 'preview']).default('test'),
 });
 
 function templateIdFor(key: string): number | null {
@@ -78,6 +97,35 @@ Deno.serve(async (req) => {
   const { applicant, kit, state } = loaded;
   const recipient = test ? OWNER_EMAIL : applicant.email;
   if (!recipient) return jsonResponse({ error: 'applicant_has_no_email' }, 400);
+
+  // Preview: exactly what the Pro would receive — nothing is sent or logged.
+  if (mode === 'preview') {
+    const first = applicant.first_name ?? 'there';
+    try {
+      if (key === 'reminder') {
+        const outstanding = state.outstanding.length ? state : { ...state, outstanding: ['insurance', 'intake'] as never };
+        const { subject, html } = reminderEmailHtml(first, outstanding as never, 2);
+        return jsonResponse({ ok: true, to: recipient, subject, html: ensureTidyEmailBranding(html, subject) });
+      }
+      if (key === 'kit_order') {
+        return jsonResponse({ ok: true, to: recipient, subject: 'Your Tidy kit is on its way', html: null,
+          note: 'This email is built from the Pro\'s submitted sizes. Use "Test to me" to see it exactly.' });
+      }
+      const id = key === 'welcome' ? EMAIL.CONTRACTOR_WELCOME_T1 : templateIdFor(key)!;
+      const { subject, html } = await renderTemplate(id, {
+        first_name: first,
+        checkr_url: state.checkr_url ?? '',
+        coi_url: state.coi_url ?? '',
+        upload_coi_url: state.coi_url ?? '',
+        intake_url: state.intake_url ?? '',
+        tier_progression_url: `${SITE}/pro/tier-progression`,
+        pay_uplift: '+10% on every visit',
+      });
+      return jsonResponse({ ok: true, to: recipient, subject, html });
+    } catch (e) {
+      return jsonResponse({ ok: false, error: 'preview_failed', reason: (e as Error).message }, 502);
+    }
+  }
 
   const subjectPrefix = test ? '[TEST] ' : '';
   const firstName = applicant.first_name ?? 'there';
