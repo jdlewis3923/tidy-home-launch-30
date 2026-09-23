@@ -15,7 +15,8 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 //   report.pre_adverse_action   → hold + manual review (legal steps are human)
 //   report.post_adverse_action  → hold + manual review
 //
-// Nobody is ever auto-rejected: adverse action has legal steps a human takes.
+// clear → clear email + onboarding email. post_adverse_action (after Checkr's
+// legally required notice period) → automatic rejection email.
 // Tidy stores only Checkr ids, status and timestamps — never an SSN, date of
 // birth or driver's licence number.
 
@@ -140,7 +141,7 @@ Deno.serve(async (req) => {
   if (reportId) update.checkr_report_id = reportId;
   if (reportStatus) update.checkr_report_status = reportStatus;
 
-  let outcome: 'pending' | 'clear' | 'review' = 'pending';
+  let outcome: 'pending' | 'clear' | 'review' | 'reject' = 'pending';
 
   if (eventType === 'invitation.completed') {
     update.bg_check_status = 'pending';
@@ -160,8 +161,15 @@ Deno.serve(async (req) => {
       update.bg_check_manual_review = true;
       update.current_stage = 'bg_check';
     }
+  } else if (eventType === 'report.post_adverse_action') {
+    // Checkr has already delivered the legally required pre-adverse notice and
+    // waiting period — the final decision is made, so send the rejection.
+    outcome = 'reject';
+    update.bg_check_status = 'fail';
+    update.bg_check_completed_at = now;
+    update.bg_check_manual_review = false;
   } else {
-    // engaged / pre_adverse_action / post_adverse_action — always a human call.
+    // engaged / pre_adverse_action — always a human call.
     outcome = 'review';
     update.bg_check_status = 'consider';
     update.bg_check_manual_review = true;
@@ -177,31 +185,38 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'update_failed' }, 500);
   }
 
-  if (outcome === 'clear') {
-    // Clear report → send the contract (Tidy's "contracts sent" stage).
+  const callFn = async (fn: string, body: Record<string, unknown>) => {
     try {
-      const r = await vendorFetch(`${env.values.SUPABASE_URL}/functions/v1/advance-applicant`, {
+      const r = await vendorFetch(`${env.values.SUPABASE_URL}/functions/v1/${fn}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${env.values.SUPABASE_SERVICE_ROLE_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          applicant_id: applicantId,
-          action: 'send_contract',
-          notes: `Checkr report clear (${eventType})`,
-        }),
+        body: JSON.stringify(body),
       });
-      if (!r.ok) console.error('[checkr-webhook] advance-applicant failed', r.status);
+      if (!r.ok) console.error(`[checkr-webhook] ${fn} failed`, r.status);
+      return r.ok;
     } catch (e) {
-      console.error('[checkr-webhook] advance dispatch failed', (e as Error).message);
+      console.error(`[checkr-webhook] ${fn} dispatch failed`, (e as Error).message);
+      return false;
     }
+  };
+
+  if (outcome === 'clear') {
+    // Clear → "your check is clear" email, then the next-step onboarding
+    // email (insurance + sizes/kit links) if it has not gone out yet.
+    await callFn('advance-applicant', { applicant_id: applicantId, action: 'clear', notes: `Checkr report clear (${eventType})` });
+    const { data: a } = await admin.from('applicants').select('onboarding_email_sent_at').eq('id', applicantId).maybeSingle();
+    if (!a?.onboarding_email_sent_at) await callFn('pro-onboarding-email', { applicant_id: applicantId });
+  } else if (outcome === 'reject') {
+    await callFn('advance-applicant', { applicant_id: applicantId, action: 'fail', notes: `Checkr adverse action final (${eventType})` });
   } else if (outcome === 'review') {
     await admin.from('admin_alerts').insert({
       alert_type: 'checkr_report_needs_review',
       title: `Checkr report needs manual review (candidate ${candidateId ?? 'unknown'})`,
       context: { applicant_id: applicantId, report_id: reportId ?? null, status: reportStatus ?? null, event: eventType },
-      body: `Checkr report came back "${reportStatus ?? eventType}" — held in bg_check for manual review. Adverse action requires a human decision; nobody was auto-rejected.`,
+      body: `Checkr report came back "${reportStatus ?? eventType}". To reject, start Adverse Action in Checkr — once it completes, the rejection email sends automatically. To approve, press CLEAR on the applicant.`,
     });
   }
 
