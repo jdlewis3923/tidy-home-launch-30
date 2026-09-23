@@ -176,38 +176,19 @@ async function fetchDashboard(): Promise<DashboardPayload | null> {
         .trim()
         .toUpperCase() || (user.email?.[0]?.toUpperCase() ?? 'T');
 
-      if (!cancelled) {
-        const next = {
-          isAuthed: true,
-          firstName,
-          initials,
-          profile,
-          subscription,
-          visits,
-          upcoming,
-          nextVisit,
-          lastCompleted,
-          nextInvoice,
-          invoices,
-        };
-        dashboardCache = next;
-        setState({
-          loading: false,
-          ...next,
-          refetch: () => load(),
-        });
-      }
-    };
-
-    load();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => load());
-    return () => {
-      cancelled = true;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
-
-  return state;
+      return {
+        isAuthed: true,
+        firstName,
+        initials,
+        profile,
+        subscription,
+        visits,
+        upcoming,
+        nextVisit,
+        lastCompleted,
+        nextInvoice,
+        invoices,
+      };
 }
 
 /** Friendly "Tomorrow / Today / Mon May 16" for a YYYY-MM-DD string. */
