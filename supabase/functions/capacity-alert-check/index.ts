@@ -18,7 +18,6 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
 const JUSTIN_PHONE = Deno.env.get('JUSTIN_ALERT_PHONE') ?? '';
-const ALERT_FROM_EMAIL = Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@jointidy.co';
 
 // deno-lint-ignore no-explicit-any
 async function adminEmails(supabase: any): Promise<string[]> {
@@ -143,7 +142,7 @@ Deno.serve(async (req) => {
             subject,
             htmlContent: `<pre style="font:14px/1.6 monospace">${body}</pre><p><a href="https://jointidy.co/admin/capacity">Open the capacity dashboard</a></p>`,
             marketing: false,
-            sender: { name: 'Tidy Capacity Alerts', email: ALERT_FROM_EMAIL },
+            sender: { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' },
             label: 'capacity-alert-check',
           });
           if (sent.sent) channels.push('email');

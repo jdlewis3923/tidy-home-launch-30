@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
 
   try {
     const { publicKey, privateKey } = await generateVapidKeyPair();
-    const subject = 'mailto:admin@jointidy.co';
+    const subject = 'mailto:hello@jointidy.co';
 
     const setSecret = async (name: string, value: string) => {
       const { error } = await admin.rpc('admin_set_vapid_secret', { _name: name, _value: value });

@@ -117,6 +117,7 @@ Deno.serve(async (req) => {
           experience_years: data.experience_years ?? null,
           has_vehicle:  data.has_vehicle,
           has_supplies: data.has_supplies,
+          work_authorized: tri(data.work_authorized),
           bilingual: data.bilingual,
           insurance_willing: data.insurance_willing,
           fl_license: data.fl_license,

@@ -2,8 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 // Deno-style specifier resolves fine under vitest since the helper is plain TS.
 import { sendBrevoEmail } from '../../supabase/functions/_shared/brevo-send';
 
-const SEND_URL = 'https://api.brevo.com/v3/smtp/email';
-const CONTACT_PREFIX = 'https://api.brevo.com/v3/contacts/';
+const SEND_URL = 'https://connector-gateway.lovable.dev/brevo/smtp/email';
+const CONTACT_PREFIX = 'https://connector-gateway.lovable.dev/brevo/contacts/';
 
 function mockFetch(handler: (url: string, init?: RequestInit) => { status: number; body?: unknown } | Error) {
   const calls: string[] = [];
@@ -27,6 +27,7 @@ const base = {
   templateId: 42,
   params: { first_name: 'Jane' },
   apiKey: 'test-key',
+  lovableApiKey: 'test-lovable-key',
 };
 
 describe('sendBrevoEmail opt-out enforcement', () => {

@@ -10,10 +10,8 @@
 //                        (a Brevo outage must not silently kill mail).
 //  - marketing: false -> no lookup, send directly (relationship / ops mail).
 //
-// Transport: 'direct' hits api.brevo.com with the api-key header. 'gateway'
-// routes through the Lovable connector gateway. The blacklist lookup always
-// uses api.brevo.com with BREVO_API_KEY, as that is the only endpoint that
-// exposes contact state.
+// All traffic routes through the linked Brevo connection. Keeping a single
+// transport prevents direct-IP allowlists and per-function secrets drifting.
 
 import { logIntegrationEvent } from './integration-log.ts';
 import { vendorFetch } from './http.ts';
@@ -32,7 +30,7 @@ export interface SendBrevoEmailOptions {
   sender?: { name: string; email: string };
   tags?: string[];
   attachment?: BrevoAttachment[];
-  /** 'direct' (default) or 'gateway' */
+  /** Kept for source compatibility. All sends use the gateway. */
   transport?: 'direct' | 'gateway';
   /** Overrides, mainly for tests. */
   apiKey?: string;
@@ -50,9 +48,10 @@ export interface SendBrevoEmailResult {
   blockedRecipients?: string[];
 }
 
-const BREVO_DIRECT_URL = 'https://api.brevo.com/v3/smtp/email';
 const BREVO_GATEWAY_URL = 'https://connector-gateway.lovable.dev/brevo/smtp/email';
-const BREVO_CONTACT_URL = 'https://api.brevo.com/v3/contacts';
+const BREVO_CONTACT_URL = 'https://connector-gateway.lovable.dev/brevo/contacts';
+const DEFAULT_SENDER = { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' };
+const MAX_ATTEMPTS = 3;
 
 function env(name: string): string | undefined {
   // Deno at runtime; undefined under vitest/node.
@@ -79,15 +78,20 @@ function normalizeRecipients(
  */
 export async function isBrevoBlacklisted(
   email: string,
-  opts: { apiKey?: string; fetchImpl?: typeof fetch } = {},
+  opts: { apiKey?: string; lovableApiKey?: string; fetchImpl?: typeof fetch } = {},
 ): Promise<boolean> {
   const apiKey = opts.apiKey ?? env('BREVO_API_KEY');
+  const lovableApiKey = opts.lovableApiKey ?? env('LOVABLE_API_KEY');
   const doFetch = opts.fetchImpl ?? vendorFetch;
-  if (!apiKey) return false;
+  if (!apiKey || !lovableApiKey) return false;
   try {
     const res = await doFetch(`${BREVO_CONTACT_URL}/${encodeURIComponent(email)}`, {
       method: 'GET',
-      headers: { 'api-key': apiKey, accept: 'application/json' },
+      headers: {
+        Authorization: `Bearer ${lovableApiKey}`,
+        'X-Connection-Api-Key': apiKey,
+        accept: 'application/json',
+      },
     });
     if (res.status === 404) return false;
     if (!res.ok) {
@@ -108,7 +112,6 @@ export async function sendBrevoEmail(
   const doFetch = opts.fetchImpl ?? vendorFetch;
   const apiKey = opts.apiKey ?? env('BREVO_API_KEY');
   const lovableKey = opts.lovableApiKey ?? env('LOVABLE_API_KEY');
-  const transport = opts.transport ?? 'direct';
   const label = opts.label ?? 'brevo';
 
   let recipients = normalizeRecipients(opts.to);
@@ -117,7 +120,7 @@ export async function sendBrevoEmail(
     console.warn(`[${label}] BREVO_API_KEY missing — not sending`);
     return { sent: false, reason: 'no_api_key' };
   }
-  if (transport === 'gateway' && !lovableKey) {
+  if (!lovableKey) {
     console.warn(`[${label}] LOVABLE_API_KEY missing — not sending`);
     return { sent: false, reason: 'no_api_key' };
   }
@@ -126,7 +129,7 @@ export async function sendBrevoEmail(
   if (opts.marketing) {
     const keep: BrevoRecipient[] = [];
     for (const r of recipients) {
-      if (await isBrevoBlacklisted(r.email, { apiKey, fetchImpl: doFetch })) {
+      if (await isBrevoBlacklisted(r.email, { apiKey, lovableApiKey: lovableKey, fetchImpl: doFetch })) {
         blocked.push(r.email);
       } else {
         keep.push(r);
@@ -146,26 +149,30 @@ export async function sendBrevoEmail(
   if (opts.params) body.params = opts.params;
   if (opts.subject) body.subject = opts.subject;
   if (opts.htmlContent) body.htmlContent = opts.htmlContent;
-  if (opts.sender) body.sender = opts.sender;
+  body.sender = opts.sender ?? DEFAULT_SENDER;
   if (opts.tags?.length) body.tags = opts.tags;
   if (opts.attachment?.length) body.attachment = opts.attachment;
 
-  const url = transport === 'gateway' ? BREVO_GATEWAY_URL : BREVO_DIRECT_URL;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     accept: 'application/json',
+    Authorization: `Bearer ${lovableKey}`,
+    'X-Connection-Api-Key': apiKey,
   };
-  if (transport === 'gateway') {
-    headers.Authorization = `Bearer ${lovableKey}`;
-    headers['X-Connection-Api-Key'] = apiKey;
-  } else {
-    headers['api-key'] = apiKey;
-  }
 
   let res: Response;
   const started = Date.now();
   try {
-    res = await doFetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+    let attempt = 0;
+    while (true) {
+      attempt += 1;
+      res = await doFetch(BREVO_GATEWAY_URL, { method: 'POST', headers, body: JSON.stringify(body) });
+      const retryable = res.status === 429 || res.status >= 500;
+      if (!retryable || attempt >= MAX_ATTEMPTS) break;
+      const retryAfter = Number(res.headers.get('retry-after') ?? '0');
+      const waitMs = retryAfter > 0 ? Math.min(retryAfter * 1000, 5000) : 250 * (2 ** (attempt - 1));
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
   } catch (e) {
     console.error(`[${label}] brevo network error`, (e as Error).message);
     await logIntegrationEvent({

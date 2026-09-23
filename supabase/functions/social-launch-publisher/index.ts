@@ -114,7 +114,7 @@ async function publishToNextdoor(post: Post, sb: ReturnType<typeof createClient>
     await sb.from("email_send_log").insert({
       channel: "internal",
       template_name: "nextdoor_manual_post_required",
-      recipient: "admin@jointidy.co",
+      recipient: "hello@jointidy.co",
       status: "failed",
       error_message: "ZAPIER_NEXTDOOR_WEBHOOK_URL not configured",
       payload: { post_id: post.id, post_number: post.post_number, image_url: post.image_url },
@@ -175,7 +175,7 @@ async function processPost(sb: ReturnType<typeof createClient>, post: Post): Pro
     await sb.from("email_send_log").insert({
       channel: "internal",
       template_name: "social_launch_publish_failed",
-      recipient: "admin@jointidy.co",
+      recipient: "hello@jointidy.co",
       status: "failed",
       error_message: msg,
       payload: { post_id: post.id, channel: post.channel, post_number: post.post_number },

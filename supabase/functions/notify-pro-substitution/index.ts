@@ -21,7 +21,7 @@ import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const ALERT_FROM_EMAIL = Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@jointidy.co';
+const ALERT_FROM_EMAIL = 'hello@jointidy.co';
 
 const URGENT_WINDOW_MS = 2 * 60 * 60 * 1000;
 

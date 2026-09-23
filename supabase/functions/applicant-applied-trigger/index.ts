@@ -5,13 +5,13 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 // Sends two Brevo emails:
 //   1. "Thanks for applying to Tidy" → confirmation to the applicant
 //      (signed Justin Lewis, Tidy Home Concierge)
-//   2. Admin alert to admin@jointidy.co with applicant snapshot + direct
+//   2. Admin alert to hello@jointidy.co with applicant snapshot + direct
 //      link to /admin/applicants
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
-import { sendBrevoEmail, brandedEmailHtml } from '../_shared/notifyJustin.ts';
+import { ADMIN_EMAIL, sendBrevoEmail, brandedEmailHtml } from '../_shared/notifyJustin.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -31,12 +31,24 @@ Deno.serve(async (req) => {
 
   const { data: a, error } = await admin
     .from('applicants')
-    .select('id, first_name, last_name, email, phone, service, zip, out_of_service_area')
+    .select('*')
     .eq('id', parsed.data.applicant_id).single();
   if (error || !a) return jsonResponse({ error: 'not_found' }, 404);
 
   const fullName = `${a.first_name} ${a.last_name}`;
   const oosa = (a as any).out_of_service_area === true;
+  const answerFields: Array<[string, string]> = [
+    ['email', 'Email'], ['phone', 'Phone'], ['zip', 'ZIP'], ['service', 'Service'],
+    ['experience_years', 'Years of experience'], ['has_vehicle', 'Transportation'],
+    ['has_supplies', 'Own equipment'], ['work_authorized', 'Work authorization'],
+    ['bilingual', 'Bilingual'], ['insurance_willing', 'Willing to carry insurance'],
+    ['fl_license', 'Florida license'], ['license_expiry', 'License expiry'],
+    ['notes_for_admin', 'About their experience'], ['drive_minutes', 'Estimated drive time'],
+  ];
+  const answerRows = answerFields
+    .filter(([key]) => a[key] !== null && a[key] !== undefined && a[key] !== '')
+    .map(([key, label]) => `<li><strong>${label}:</strong> ${typeof a[key] === 'boolean' ? (a[key] ? 'Yes' : 'No') : String(a[key])}</li>`)
+    .join('');
 
   // 1. Confirmation to applicant — different copy for out-of-service-area.
   const applicantHtml = brandedEmailHtml({
@@ -73,18 +85,16 @@ Deno.serve(async (req) => {
     heading: 'New contractor application',
     bodyHtml: `
       <p><strong>${fullName}</strong> just applied for <strong>${a.service}</strong>.</p>
+      <p><strong>Score:</strong> ${a.score ?? '—'} &nbsp; <strong>Tier:</strong> ${a.hiring_tier ?? '—'}</p>
       <ul style="padding-left:18px;line-height:1.7">
-        <li><strong>Email:</strong> ${a.email}</li>
-        <li><strong>Phone:</strong> ${a.phone ?? '—'}</li>
-        <li><strong>ZIP:</strong> ${a.zip ?? '—'}</li>
-        <li><strong>Service:</strong> ${a.service}</li>
+        ${answerRows}
       </ul>
     `,
     ctaUrl: drawerUrl,
     ctaLabel: 'Open applicant in admin',
   });
   await sendBrevoEmail({
-    toEmail: 'admin@jointidy.co', toName: 'Justin',
+    toEmail: ADMIN_EMAIL, toName: 'Justin',
     subject: `New applicant: ${fullName} (${a.service})`,
     htmlContent: adminHtml,
     tags: ['admin-new-applicant'],
@@ -92,10 +102,17 @@ Deno.serve(async (req) => {
     triggeredBy: 'applicant-applied-trigger',
   }).catch((e) => console.error('[applicant-applied] admin email failed', e));
 
-  // 3. Sync to Tidy Master sheet (Applicants tab) — non-blocking.
-  admin.functions.invoke('sync-applicant-to-sheet', {
-    body: { applicant_id: a.id, last_event: 'applicant_submitted', last_event_at: new Date().toISOString() },
-  }).catch((e) => console.error('[applicant-applied] sheet sync failed', e));
+  await admin.from('admin_alerts').insert({
+    alert_type: 'new_applicant',
+    level: 'action',
+    category: 'hiring',
+    title: `New applicant: ${fullName}, ${a.service}, tier ${a.hiring_tier ?? '—'}`,
+    body: `ZIP ${a.zip ?? '—'} · score ${a.score ?? '—'}`,
+    action_label: 'View applicant',
+    action_url: drawerUrl,
+    dedupe_key: `new-applicant:${a.id}`,
+    context: { applicant_id: a.id, service: a.service, zip: a.zip, score: a.score, tier: a.hiring_tier },
+  }).then(() => {}, (e) => console.error('[applicant-applied] alert failed', e));
 
   return jsonResponse({ ok: true });
 });

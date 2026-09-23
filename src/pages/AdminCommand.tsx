@@ -13,7 +13,7 @@ import {
   CartesianGrid, ComposedChart, Area, Line, ReferenceLine, ResponsiveContainer,
   Tooltip as RTooltip, XAxis, YAxis,
 } from "recharts";
-import { AlertTriangle, Loader2, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { AlertTriangle, Loader2, RefreshCw, SlidersHorizontal, Clock3, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MessagingReadinessBanner } from "@/components/admin/MessagingReadiness";
 import { Button } from "@/components/ui/button";
@@ -66,6 +66,11 @@ interface NeedsAttentionCustomer {
   retired_price: boolean;
   missing_pro: boolean;
 }
+interface WorkdayEvent {
+  id: string; occurred_at: string; event_type: string; title: string; detail: string | null;
+  status: string | null; action_label: string | null; action_url: string | null; waiting_on_admin: boolean;
+}
+type WorkdayRange = "today" | "yesterday" | "week";
 
 const ZIP_LABELS: Record<string, string> = {
   "33156": "Pinecrest",
@@ -135,17 +140,21 @@ export default function AdminCommand() {
   const [events, setEvents] = useState<AlertEvent[]>([]);
   const [scanSeries, setScanSeries] = useState<Record<string, number[]>>({});
   const [needsAttention, setNeedsAttention] = useState<NeedsAttentionCustomer[]>([]);
+  const [workday, setWorkday] = useState<WorkdayEvent[]>([]);
+  const [workdayRange, setWorkdayRange] = useState<WorkdayRange>("today");
+  const [waitingOnly, setWaitingOnly] = useState(false);
 
   const load = useCallback(async () => {
     setRefreshing(true);
     const since = new Date(Date.now() - 30 * 86400_000).toISOString();
-    const [snapRes, planRes, ruleRes, evRes, scanRes, attentionRes] = await Promise.all([
+    const [snapRes, planRes, ruleRes, evRes, scanRes, attentionRes, workdayRes] = await Promise.all([
       supabase.from("kpi_snapshot").select("id, captured_at, window, metrics").order("captured_at", { ascending: false }).limit(200),
       supabase.from("kpi_plan").select("plan_month, month_label, cum_profit_planned, subs_planned, pros_required").order("plan_month"),
       supabase.from("alert_rule").select("code, domain, priority, title, action_text, enabled"),
       supabase.from("alert_event").select("id, rule_code, fired_at, severity, headline, detail, metric_value, threshold_value, suppressed_in_digest, status").order("fired_at", { ascending: false }).limit(200),
       supabase.from("qr_scan").select("zip, scanned_at").gte("scanned_at", since),
       supabase.rpc("customers_needing_attention"),
+      supabase.from("admin_workday_events").select("id, occurred_at, event_type, title, detail, status, action_label, action_url, waiting_on_admin").gte("occurred_at", new Date(Date.now() - 7 * 86400_000).toISOString()).order("occurred_at", { ascending: false }).limit(500),
     ]);
 
     const snaps = (snapRes.data ?? []) as unknown as Snapshot[];
@@ -155,6 +164,7 @@ export default function AdminCommand() {
     setRules((ruleRes.data ?? []) as unknown as AlertRule[]);
     setEvents((evRes.data ?? []) as unknown as AlertEvent[]);
     setNeedsAttention((attentionRes.data ?? []) as unknown as NeedsAttentionCustomer[]);
+    setWorkday((workdayRes.data ?? []) as unknown as WorkdayEvent[]);
 
     // Daily scan counts per ZIP for the trailing 30 days.
     const series: Record<string, number[]> = {};
@@ -177,6 +187,22 @@ export default function AdminCommand() {
   useEffect(() => {
     if (hasRole) void load();
   }, [hasRole, load]);
+  useEffect(() => {
+    if (!hasRole) return;
+    const channel = supabase.channel("admin-workday-live").on("postgres_changes", { event: "INSERT", schema: "public", table: "admin_workday_events" }, (payload) => {
+      setWorkday((rows) => [payload.new as WorkdayEvent, ...rows]);
+    }).subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [hasRole]);
+
+  const visibleWorkday = useMemo(() => {
+    const now = new Date();
+    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const start = workdayRange === "today" ? startToday : workdayRange === "yesterday" ? startToday - 86400_000 : startToday - 6 * 86400_000;
+    const end = workdayRange === "yesterday" ? startToday : Infinity;
+    return workday.filter((row) => { const at = new Date(row.occurred_at).getTime(); return at >= start && at < end && (!waitingOnly || row.waiting_on_admin); });
+  }, [workday, workdayRange, waitingOnly]);
+  const todayWorkday = useMemo(() => { const start = new Date(); start.setHours(0, 0, 0, 0); return workday.filter((row) => new Date(row.occurred_at) >= start); }, [workday]);
 
   const m = snap?.metrics ?? {};
   const profit = (m.profit ?? {}) as Metrics;
@@ -288,6 +314,29 @@ export default function AdminCommand() {
       ) : (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
           <MessagingReadinessBanner />
+
+          <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="bg-[#00568C] text-white px-5 py-4 flex flex-wrap items-center gap-3">
+              <div><h2 className="text-lg font-bold">Workday</h2><p className="text-xs text-white/70">Today’s activity, newest first.</p></div>
+              <div className="ml-auto flex gap-1">{(["today", "yesterday", "week"] as WorkdayRange[]).map((range) => <Button key={range} size="sm" variant="ghost" className={workdayRange === range ? "bg-white text-[#00325A]" : "text-white hover:bg-white/10 hover:text-white"} onClick={() => setWorkdayRange(range)}>{range === "week" ? "Last 7 days" : range[0].toUpperCase() + range.slice(1)}</Button>)}</div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 border-b border-slate-200">
+              {[
+                ["Applications", todayWorkday.filter((r) => r.event_type === "application_submitted").length],
+                ["Emails sent", todayWorkday.filter((r) => r.event_type === "email" && ["sent", "delivered"].includes(r.status ?? "")).length],
+                ["Emails failed", todayWorkday.filter((r) => r.event_type === "email" && ["failed", "bounced"].includes(r.status ?? "")).length],
+                ["Calls booked", todayWorkday.filter((r) => r.event_type === "call_booked").length],
+                ["Waiting on me", todayWorkday.filter((r) => r.waiting_on_admin).length],
+              ].map(([label, value]) => <button key={String(label)} type="button" onClick={() => label === "Waiting on me" && setWaitingOnly((v) => !v)} className={`p-4 text-left border-r border-slate-200 ${label === "Waiting on me" && waitingOnly ? "bg-amber-50" : ""}`}><span className="block text-2xl font-bold">{value}</span><span className="text-xs text-slate-500">{label}</span></button>)}
+            </div>
+            <div className="divide-y divide-slate-200">
+              {visibleWorkday.length === 0 ? <div className="p-8 text-center text-sm text-slate-500"><Clock3 className="mx-auto mb-2 h-5 w-5" />No activity in this window.</div> : visibleWorkday.map((event) => <div key={event.id} className={`grid gap-2 p-4 sm:grid-cols-[72px_1fr_auto] sm:items-center ${event.status === "failed" || event.status === "bounced" ? "bg-red-50" : ""}`}>
+                <time className="font-mono text-xs text-slate-500">{new Date(event.occurred_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</time>
+                <div><p className="text-sm font-semibold text-slate-900">{event.title}</p>{event.detail && <p className="mt-0.5 text-xs text-slate-500">{event.detail}</p>}</div>
+                {event.action_url && <Button asChild size="sm" variant="outline"><Link to={event.action_url}>{event.action_label ?? "Open"}<ExternalLink className="ml-1 h-3 w-3" /></Link></Button>}
+              </div>)}
+            </div>
+          </section>
 
           {/* 1 — STATUS BAR */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm px-5 sm:px-8 py-6">

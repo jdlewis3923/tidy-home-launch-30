@@ -140,7 +140,7 @@ export async function notifyAdminEmail(opts: {
   const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
   if (!BREVO_API_KEY) return { ok: false, error: "BREVO_API_KEY not set" };
 
-  const adminEmail = "admin@jointidy.co";
+  const adminEmail = "hello@jointidy.co";
   const conversationUrl = `https://jointidy.co/admin/inbox?c=${opts.conversationId}`;
   const subject = opts.escalated
     ? `🚨 Tidy support: ${opts.channel.toUpperCase()} from ${opts.customerLabel}`

@@ -19,10 +19,9 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { logInvocation } from '../_shared/withLogging.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 import { EMAIL, emailKeyForId, missingRequiredParams } from '../_shared/emailTemplates.ts';
-import { vendorFetch } from '../_shared/http.ts';
+import { sendBrevoEmailOrThrow } from '../_shared/brevo-send.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'BREVO_API_KEY'] as const;
-const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
 
 const KNOWN_TEMPLATE_IDS = Object.values(EMAIL) as number[];
 
@@ -176,39 +175,16 @@ Deno.serve(async (req) => {
     }
 
     const recipients = normalizeRecipients(to);
-    const payload: Record<string, unknown> = {
-      templateId: Number(template_id),
+    const result = await sendBrevoEmailOrThrow({
       to: recipients,
+      marketing: false,
+      templateId: Number(template_id),
       params,
-    };
-    if (sender) payload.sender = sender;
-    if (tags?.length) payload.tags = tags;
-
-    const res = await vendorFetch(BREVO_URL, {
-      method: 'POST',
-      headers: {
-        'api-key': values.BREVO_API_KEY,
-        'Content-Type': 'application/json',
-        accept: 'application/json',
-      },
-      body: JSON.stringify(payload),
+      sender,
+      tags,
+      label: `send-brevo-email:${key}`,
+      transport: 'gateway',
     });
-
-    const text = await res.text().catch(() => '');
-    if (!res.ok) {
-      const err = `brevo ${res.status}: ${text.slice(0, 300)}`;
-      console.error(`[send-brevo-email] send failed ${key}`, err);
-      await finish('error', err);
-      // A failed send must fail the HTTP call too: a 200 here told every caller
-      // the mail went out. Upstream 4xx is our payload's fault, 5xx is Brevo's.
-      return jsonResponse(
-        { ok: false, error: err, template: key, status: res.status },
-        res.status >= 400 && res.status < 500 ? 400 : 502,
-      );
-    }
-
-    let json: Record<string, unknown> = {};
-    try { json = JSON.parse(text); } catch { /* keep raw */ }
 
     console.log(`[send-brevo-email] sent ${key} (template ${template_id})`);
     await finish('success');
@@ -216,7 +192,7 @@ Deno.serve(async (req) => {
       ok: true,
       template: key,
       template_id,
-      message_id: (json.messageId as string) ?? null,
+      message_id: result.messageId ?? null,
       recipients: recipients.length,
     }, 200);
   } catch (err) {

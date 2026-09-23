@@ -123,9 +123,15 @@ export default function CallQueue() {
     [],
   );
 
-  const onText = (row: QueueRow) => {
+  const onText = async (row: QueueRow) => {
     const isFollowUp = row.queue_state === "follow_up_due";
     const body = isFollowUp ? text2(fullName(row)) : text1(fullName(row), row.service);
+    await supabase.from("admin_workday_events").insert({
+      event_type: "text_prepared", applicant_id: row.id, actor_type: "admin",
+      title: `Text prepared — ${fullName(row)}`, detail: isFollowUp ? "Follow-up template" : "First-contact template",
+      status: "prepared", action_label: "View applicant", action_url: `/admin/applicants?id=${row.id}`,
+      metadata: { template: isFollowUp ? "text_2" : "text_1" },
+    });
     window.location.href = smsLink(row.phone, body);
     if (isFollowUp) {
       patch(row.id, { queue_state: "followed_up", followed_up_at: new Date().toISOString() },
