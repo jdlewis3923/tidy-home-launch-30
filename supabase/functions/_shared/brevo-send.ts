@@ -15,7 +15,7 @@
 
 import { logIntegrationEvent } from './integration-log.ts';
 import { vendorFetch } from './http.ts';
-import { ensureTidyEmailBranding } from './email-brand.ts';
+import { brandHostedTemplate, ensureTidyEmailBranding, isTidyEmailCompliant } from './email-brand.ts';
 
 export type BrevoRecipient = { email: string; name?: string };
 export type BrevoAttachment = { url?: string; content?: string; name: string };
@@ -43,7 +43,7 @@ export interface SendBrevoEmailOptions {
 
 export interface SendBrevoEmailResult {
   sent: boolean;
-  reason?: 'blacklisted' | 'no_api_key' | 'no_recipient' | 'http_error' | 'network_error';
+  reason?: 'blacklisted' | 'no_api_key' | 'no_recipient' | 'branding_error' | 'http_error' | 'network_error';
   status?: number;
   messageId?: string | null;
   blockedRecipients?: string[];
@@ -51,6 +51,7 @@ export interface SendBrevoEmailResult {
 
 const BREVO_GATEWAY_URL = 'https://connector-gateway.lovable.dev/brevo/smtp/email';
 const BREVO_CONTACT_URL = 'https://connector-gateway.lovable.dev/brevo/contacts';
+const BREVO_TEMPLATE_URL = 'https://connector-gateway.lovable.dev/brevo/smtp/templates';
 const DEFAULT_SENDER = { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' };
 const MAX_ATTEMPTS = 3;
 
@@ -162,6 +163,38 @@ export async function sendBrevoEmail(
     Authorization: `Bearer ${lovableKey}`,
     'X-Connection-Api-Key': apiKey,
   };
+
+  // Hosted templates are checked immediately before every send. If someone
+  // changes one in Brevo, Tidy repairs it first; if repair fails, the email is
+  // blocked rather than sending dark, plain, or with the wrong logo.
+  if (opts.templateId) {
+    try {
+      const templateResponse = await doFetch(`${BREVO_TEMPLATE_URL}/${Number(opts.templateId)}`, {
+        method: 'GET', headers,
+      });
+      if (!templateResponse.ok) {
+        console.error(`[${label}] template branding check failed`, templateResponse.status);
+        return { sent: false, reason: 'branding_error', status: templateResponse.status, blockedRecipients: blocked };
+      }
+      const template = await templateResponse.json() as { subject?: string; name?: string; htmlContent?: string };
+      const branded = brandHostedTemplate(
+        template.htmlContent ?? '',
+        template.subject ?? template.name ?? opts.subject ?? 'A Tidy update',
+      );
+      if (branded.changed) {
+        const repairResponse = await doFetch(`${BREVO_TEMPLATE_URL}/${Number(opts.templateId)}`, {
+          method: 'PUT', headers, body: JSON.stringify({ htmlContent: branded.html }),
+        });
+        if (!repairResponse.ok || !isTidyEmailCompliant(branded.html)) {
+          console.error(`[${label}] template branding repair failed`, repairResponse.status);
+          return { sent: false, reason: 'branding_error', status: repairResponse.status, blockedRecipients: blocked };
+        }
+      }
+    } catch (e) {
+      console.error(`[${label}] template branding guard error`, (e as Error).message);
+      return { sent: false, reason: 'branding_error', blockedRecipients: blocked };
+    }
+  }
 
   let res: Response;
   const started = Date.now();

@@ -46,3 +46,4 @@
 - [x] Send representative tests and verify rendering on desktop and mobile — 16/16 generated tests delivered; all 36 live templates pass the markup audit
 
 - [x] Light-mode-only email design with a relevant hero icon focal point in every email (36/36 live templates re-branded, 16/16 test emails sent)
+- [x] Replace the favicon “T” with the official full TIDY wordmark and add fail-closed branding preflight to every hosted-template send

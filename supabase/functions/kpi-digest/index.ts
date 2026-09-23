@@ -111,10 +111,10 @@ function buildEmailHtml(
 
   return `
     <div style="font-family:system-ui,-apple-system,sans-serif;max-width:600px;margin:0 auto;background:#f8fafc;padding:24px;">
-      <div style="background:#0f172a;color:#fff;padding:24px;border-radius:12px 12px 0 0;">
-        <div style="color:#f5c518;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Tidy · Operating System</div>
+      <div style="background:#f4f8fc;color:#0f172a;padding:24px;border-radius:12px 12px 0 0;">
+        <div style="color:#8a6a00;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Tidy · Operating System</div>
         <div style="font-size:24px;font-weight:600;margin-top:4px;">${variantTitle}</div>
-        <div style="color:#94a3b8;font-size:13px;margin-top:4px;">${today}</div>
+        <div style="color:#64748b;font-size:13px;margin-top:4px;">${today}</div>
       </div>
       <div style="background:#fff;padding:0;border-radius:0 0 12px 12px;border:1px solid #e2e8f0;border-top:0;">
         ${
