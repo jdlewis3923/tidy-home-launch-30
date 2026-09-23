@@ -20,7 +20,7 @@
 - Open question: street address for the CAN-SPAM footer.
 
 ## Admin operations rebuild — requested 2026-09-22
-- [ ] Repair the Brevo credential path; repeated manual API-key entry is not being accepted by the connector gateway
+- [ ] Repair the Brevo credential path; connector setup reports it cannot verify credentials after repeated API-key entry
 - [ ] Consolidate all Brevo sends, replace admin recipient with hello@jointidy.co, preserve detailed send logs, and verify a two-email application send
 - [ ] Stop repeated Google Sheets 403 alerts by disabling applicant sync or making it log quietly
 - [ ] Repair and verify the daily insurance expiry job
