@@ -13,6 +13,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import {
   sendBrevoEmail,
+  ADMIN_EMAIL,
   sendPwaPushToJustin,
   sendTwilioSmsToJustin,
   brandedEmailHtml,
@@ -102,7 +103,7 @@ Deno.serve(async (req) => {
         ctaUrl: 'https://jointidy.co/admin/applicants',
         ctaLabel: 'Open pipeline',
       });
-      await sendBrevoEmail({ toEmail: 'admin@jointidy.co', toName: 'Justin', subject: `BG check PASSED: ${fullName}`, htmlContent: html });
+      await sendBrevoEmail({ toEmail: ADMIN_EMAIL, toName: 'Justin', subject: `BG check PASSED: ${fullName}`, htmlContent: html });
       await sendPwaPushToJustin('BG check passed', `${fullName} ready for interview`, '/admin/applicants');
     } else if (decision === 'consider') {
       const html = brandedEmailHtml({
@@ -111,7 +112,7 @@ Deno.serve(async (req) => {
         ctaUrl: 'https://jointidy.co/admin/applicants',
         ctaLabel: 'Review now',
       });
-      await sendBrevoEmail({ toEmail: 'admin@jointidy.co', toName: 'Justin', subject: `BG check REVIEW: ${fullName}`, htmlContent: html });
+      await sendBrevoEmail({ toEmail: ADMIN_EMAIL, toName: 'Justin', subject: `BG check REVIEW: ${fullName}`, htmlContent: html });
       await sendPwaPushToJustin('BG check needs review', `${fullName} — CONSIDER`, '/admin/applicants');
       await sendTwilioSmsToJustin(
         `Tidy: ${fullName} bg-check CONSIDER. Review at jointidy.co/admin/applicants`,

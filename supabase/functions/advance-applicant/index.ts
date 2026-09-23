@@ -23,7 +23,7 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
-import { sendBrevoEmail, brandedEmailHtml, type BrevoAttachment } from '../_shared/notifyJustin.ts';
+import { ADMIN_EMAIL, sendBrevoEmail, brandedEmailHtml, type BrevoAttachment } from '../_shared/notifyJustin.ts';
 import { vendorFetch } from '../_shared/http.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -579,7 +579,7 @@ Deno.serve(async (req) => {
   let adminEmailError: string | null = null;
   try {
     await sendBrevoEmail({
-      toEmail: 'admin@jointidy.co', toName: 'Justin',
+      toEmail: ADMIN_EMAIL, toName: 'Justin',
       subject: `${SUBJECTS[action]}: ${fullName}`, htmlContent: adminHtml,
       tags: [`admin-${tag}`],
       templateName: `admin-${tag}`,
@@ -589,19 +589,6 @@ Deno.serve(async (req) => {
     adminEmailError = e instanceof Error ? e.message : String(e);
     console.error('[advance] admin email FAILED', action, adminEmailError);
   }
-
-  // Sync transition to Tidy Master sheet (Applicants tab) — non-blocking, but
-  // any failure is reported back rather than dropped.
-  let sheetSyncError: string | null = null;
-  try {
-    const { error: syncErr } = await admin.functions.invoke('sync-applicant-to-sheet', {
-      body: { applicant_id: row.id, last_event: action, last_event_at: new Date().toISOString() },
-    });
-    if (syncErr) sheetSyncError = syncErr.message;
-  } catch (e) {
-    sheetSyncError = e instanceof Error ? e.message : String(e);
-  }
-  if (sheetSyncError) console.error('[advance] sheet sync failed', sheetSyncError);
 
   if (applicantEmailError) {
     return jsonResponse({

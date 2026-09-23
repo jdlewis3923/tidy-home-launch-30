@@ -115,6 +115,10 @@ Deno.serve(async (req) => {
   const allowed = (await isCronAuthorized(req)) || (await requireServiceOrAdmin(req)).ok;
   if (!allowed) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
 
+  // Disabled until the Google project has the Sheets API enabled. Returning a
+  // quiet success prevents an hourly 403 from flooding operator alerts.
+  return jsonResponse({ ok: true, skipped: 'disabled_pending_google_sheets_api' });
+
   if (!SA_JSON) return jsonResponse({ ok: false, skipped: 'GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON missing' }, 503);
 
   let token: string;

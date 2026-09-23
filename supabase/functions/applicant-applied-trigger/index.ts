@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
     heading: 'New contractor application',
     bodyHtml: `
       <p><strong>${fullName}</strong> just applied for <strong>${a.service}</strong>.</p>
-      <p><strong>Score:</strong> ${a.application_score ?? '—'} &nbsp; <strong>Tier:</strong> ${a.application_tier ?? '—'}</p>
+      <p><strong>Score:</strong> ${a.score ?? '—'} &nbsp; <strong>Tier:</strong> ${a.hiring_tier ?? '—'}</p>
       <ul style="padding-left:18px;line-height:1.7">
         ${answerRows}
       </ul>
@@ -98,18 +98,13 @@ Deno.serve(async (req) => {
     alert_type: 'new_applicant',
     level: 'action',
     category: 'hiring',
-    title: `New applicant: ${fullName}, ${a.service}, tier ${a.application_tier ?? '—'}`,
-    body: `ZIP ${a.zip ?? '—'} · score ${a.application_score ?? '—'}`,
+    title: `New applicant: ${fullName}, ${a.service}, tier ${a.hiring_tier ?? '—'}`,
+    body: `ZIP ${a.zip ?? '—'} · score ${a.score ?? '—'}`,
     action_label: 'View applicant',
     action_url: drawerUrl,
     dedupe_key: `new-applicant:${a.id}`,
-    context: { applicant_id: a.id, service: a.service, zip: a.zip, score: a.application_score, tier: a.application_tier },
+    context: { applicant_id: a.id, service: a.service, zip: a.zip, score: a.score, tier: a.hiring_tier },
   }).then(() => {}, (e) => console.error('[applicant-applied] alert failed', e));
-
-  // 3. Sync to Tidy Master sheet (Applicants tab) — non-blocking.
-  admin.functions.invoke('sync-applicant-to-sheet', {
-    body: { applicant_id: a.id, last_event: 'applicant_submitted', last_event_at: new Date().toISOString() },
-  }).catch((e) => console.error('[applicant-applied] sheet sync failed', e));
 
   return jsonResponse({ ok: true });
 });

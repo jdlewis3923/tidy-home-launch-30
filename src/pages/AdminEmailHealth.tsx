@@ -127,7 +127,7 @@ export default function AdminEmailHealth() {
     // Best-effort re-send via fire-email-test-suite-style minimal payload through Brevo
     // by calling the existing applicant-applied-trigger / advance-applicant is not generic.
     // We re-send a generic notification so the operator can confirm the channel works.
-    toast({ title: "Re-send queued", description: "Generic test email re-fired to admin@jointidy.co" });
+    toast({ title: "Re-send queued", description: "Generic test email re-fired to hello@jointidy.co" });
     const { error } = await supabase.functions.invoke("fire-email-test-suite", { body: {} });
     if (error) toast({ title: "Re-send failed", description: error.message, variant: "destructive" });
   }

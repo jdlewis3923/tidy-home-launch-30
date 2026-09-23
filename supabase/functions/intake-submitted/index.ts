@@ -130,6 +130,15 @@ Deno.serve(async (req) => {
     if (idx >= 0 && idx < PIPELINE.length - 1) {
       await admin.from('applicants').update({ current_stage: PIPELINE[idx + 1] }).eq('id', kit.applicant_id);
     }
+    await admin.from('onboarding_events').insert({
+      applicant_id: kit.applicant_id,
+      event: 'intake_submitted',
+      metadata: {
+        shirt_size: kit.shirt_size ?? null,
+        vehicle: kit.vehicle_make_model ?? kit.vehicle ?? null,
+        service_line: kit.service_line ?? null,
+      },
+    });
   }
 
   const warn = MAGNET_RISK.includes(String(kit.door_material ?? ''));
