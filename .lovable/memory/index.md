@@ -8,6 +8,7 @@ Never show platform badges (e.g., Edit with Lovable). EN/ES bilingual support re
 Copywriting must be concise, low cognitive load. Never use words like "easy" or "convenient".
 Supabase auth, GTM tracking.
 Transactional email/SMS: edge functions fire Zapier webhooks only — never call Brevo/Twilio/Resend directly. Existing Zaps render Brevo templates + send Twilio SMS.
+Every outgoing email must use the complete Tidy email design: proper logo, navy/gold header, white icon banner, structured content, and legal footer.
 
 ## Memories
 - [Pricing Canon](mem://features/pricing-canon) — Single source for all prices, 10/15% bundle discounts, $50 referral, FL tax off
@@ -43,3 +44,4 @@ Transactional email/SMS: edge functions fire Zapier webhooks only — never call
 - [Customer Dashboard Home](mem://features/customer-dashboard-home) — Live state-aware command center at /dashboard with summary cards, calendar, recent photo proof, referral, quick action modals
 - [Chatbot Knowledge](mem://features/chatbot-knowledge) — Never string-replace the KB row; insert a new row, canon-guarded by a live test
 - [Pro Kit Standard](mem://features/pro-kit-standard) — Per-service kit contents, optional magnets with $15/month credit, automatic kit order flow
+- [Email Design System](mem://style/email-design-system) — Required Tidy branding and layout for every recipient and email type
