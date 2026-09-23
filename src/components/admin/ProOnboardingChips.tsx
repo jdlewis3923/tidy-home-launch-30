@@ -121,6 +121,16 @@ export default function ProOnboardingChips({
   };
 
   const resendEmail = async () => {
+    // Confirm every repeat send so the same email can't be fired at a Pro
+    // over and over by an accidental double click.
+    if (
+      applicant.onboarding_email_sent_at &&
+      !window.confirm(
+        `This Pro was already emailed ${new Date(applicant.onboarding_email_sent_at).toLocaleString()}. Send it again?`,
+      )
+    ) {
+      return;
+    }
     setBusy("email");
     const { data, error } = await supabase.functions.invoke("pro-onboarding-email", {
       body: { applicant_id: applicant.id },
@@ -181,10 +191,15 @@ export default function ProOnboardingChips({
           New links
         </Button>
       </div>
-      {applicant.onboarding_email_sent_at && (
+      {applicant.onboarding_email_sent_at ? (
         <p className="text-[11px] text-muted-foreground">
           Onboarding email sent {new Date(applicant.onboarding_email_sent_at).toLocaleString()} ·{" "}
-          {applicant.onboarding_reminder_count ?? 0} reminder(s). Links last 30 days.
+          {applicant.onboarding_reminder_count ?? 0} reminder(s). Links last 30 days. Includes the
+          background check, insurance certificate and sizes and kit.
+        </p>
+      ) : (
+        <p className="text-[11px] text-muted-foreground">
+          Nothing emailed yet. One email covers the background check, insurance certificate, and sizes and kit.
         </p>
       )}
     </div>

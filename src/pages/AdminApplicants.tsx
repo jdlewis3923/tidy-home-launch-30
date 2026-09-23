@@ -74,6 +74,12 @@ type Applicant = {
   notes_for_admin: string | null;
   compliance_complete: boolean | null;
   bilingual_fluency_confirmed: boolean | null;
+  // Onboarding (one email, three token links)
+  coi_token?: string | null;
+  coi_pdf_url?: string | null;
+  coi_review_status?: string | null;
+  onboarding_email_sent_at?: string | null;
+  onboarding_reminder_count?: number | null;
   // Tier progression
   tier: TierKey | null;
   tier_advanced_at: string | null;
@@ -324,7 +330,7 @@ export default function AdminApplicants() {
     setLoading(true);
     const { data, error } = await supabase
       .from("applicants")
-      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, checkr_report_id, checkr_report_status, bg_check_ordered_at, checkr_last_webhook_at, bg_check_manual_review, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved, wash_only, training_scheduled_at, training_no_show_count, out_of_service_area, pro_number, verify_token, badge_status")
+      .select("id, first_name, last_name, email, phone, service, zip, experience_years, has_vehicle, has_supplies, current_stage, stage_entered_at, bg_check_status, bg_check_provider, bg_check_notes, bg_check_completed_at, rejection_reason, rejected_at, created_at, updated_at, notes_for_admin, compliance_complete, bilingual_fluency_confirmed, tier, tier_advanced_at, pro_partner_interest, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count, tier_readiness_status, tier_offer_sent_at, last_jobber_event_at, last_review_match_at, last_visit_at, total_ratings_count, contractor_cancel_count, complaint_count, photos_uploaded_count, photos_expected_count, checkr_candidate_id, checkr_invitation_id, checkr_report_id, checkr_report_status, bg_check_ordered_at, checkr_last_webhook_at, bg_check_manual_review, stripe_account_id, stripe_connect_complete, training_passed, equipment_approved, wash_only, training_scheduled_at, training_no_show_count, out_of_service_area, pro_number, verify_token, badge_status, coi_token, coi_pdf_url, coi_review_status, onboarding_email_sent_at, onboarding_reminder_count")
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error(error);
@@ -468,6 +474,17 @@ export default function AdminApplicants() {
   }, [rows]);
 
   // ----- Actions -----
+  // Anything that emails or texts the applicant asks for confirmation first, so
+  // the same message can't be fired at someone over and over by accident.
+  const SEND_CONFIRM: Partial<Record<AdvanceAction, string>> = {
+    send_to_bg_check: "Send the background check and next-steps email to this applicant now?",
+    send_offer: "Send the offer and onboarding email to this applicant now?",
+    send_contract: "Send the contract for signature now?",
+    send_payment_setup: "Send the payment setup link now?",
+    schedule_interview: "Send the interview invitation now?",
+    fail: "Reject this applicant and send the rejection email? This cannot be undone.",
+  };
+
   const runAction = async (action: AdvanceAction, extra?: { scheduled_at?: string }) => {
     if (!open) return;
     // Bilingual gate — block APPROVE (clear) and SEND OFFER if not confirmed
@@ -477,6 +494,8 @@ export default function AdminApplicants() {
       });
       return;
     }
+    const ask = SEND_CONFIRM[action];
+    if (ask && !window.confirm(ask)) return;
     setSubmitting(action);
     const { data, error } = await supabase.functions.invoke("advance-applicant", {
       body: { applicant_id: open.id, action, notes: bgNotes || undefined, ...extra },
@@ -501,7 +520,25 @@ export default function AdminApplicants() {
       schedule_training: "Live training scheduled",
       mark_no_show: "Marked as no-show",
     };
-    toast.success(friendly[action]);
+    // Truthful reporting: the server now says whether the invitation and the
+    // next-steps email actually left. Never claim a send that did not happen.
+    const res = data as {
+      checkr_invitation_sent?: boolean | null;
+      checkr_error?: string | null;
+      onboarding_email_sent?: boolean | null;
+      onboarding_email_error?: string | null;
+    } | null;
+    if (action === "send_to_bg_check" && res?.checkr_invitation_sent !== true) {
+      toast.error("Background check was NOT sent", {
+        description: res?.checkr_error ?? "The background check service is not connected yet.",
+      });
+    } else if (res?.onboarding_email_sent === false) {
+      toast.error("Next-steps email was NOT sent", {
+        description: res?.onboarding_email_error ?? "unknown",
+      });
+    } else {
+      toast.success(friendly[action]);
+    }
     if (open) await fetchEvents(open.id);
     fetchRows();
   };
@@ -509,15 +546,16 @@ export default function AdminApplicants() {
   // Resend the Checkr invitation (for when their email lands in spam).
   // Checkr emails the candidate directly; Tidy never collects SSN/DOB/licence.
   const resendCheckrInvite = async (applicantId: string) => {
+    if (!window.confirm("Send the background check invitation to this applicant again?")) return;
     setResendingCheckr(applicantId);
     const { data, error } = await supabase.functions.invoke("checkr-invite", {
       body: { applicant_id: applicantId, resend: true },
     });
     setResendingCheckr(null);
-    const payload = data as { ok?: boolean; error?: string } | null;
-    if (error || payload?.error || payload?.ok === false) {
-      toast.error("Could not resend the Checkr invitation", {
-        description: error?.message ?? payload?.error ?? "unknown",
+    const payload = data as { ok?: boolean; error?: string; skipped?: boolean } | null;
+    if (error || payload?.error || payload?.ok !== true || payload?.skipped) {
+      toast.error("Background check was NOT sent", {
+        description: error?.message ?? payload?.error ?? "The background check service is not connected yet.",
       });
       return;
     }
@@ -992,10 +1030,10 @@ export default function AdminApplicants() {
                       <Button onClick={() => runAction("clear")} disabled={!!submitting || open.bg_check_status === "clear" || !open.bilingual_fluency_confirmed} title={!open.bilingual_fluency_confirmed ? "Bilingual fluency not confirmed — cannot approve" : ""} className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50">
                         {submitting === "clear" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldCheck className="h-4 w-4 mr-1" /> CLEAR</>}
                       </Button>
-                      <Button onClick={() => runAction("consider")} disabled={!!submitting} className="bg-amber-500 hover:bg-amber-600 text-white">
+                      <Button onClick={() => runAction("consider")} disabled={!!submitting || open.bg_check_status === "consider"} title={open.bg_check_status === "consider" ? "Already marked for review" : ""} className="bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50">
                         {submitting === "consider" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldAlert className="h-4 w-4 mr-1" /> CONSIDER</>}
                       </Button>
-                      <Button onClick={() => runAction("fail")} disabled={!!submitting} className="bg-red-600 hover:bg-red-700 text-white">
+                      <Button onClick={() => runAction("fail")} disabled={!!submitting || open.bg_check_status === "fail"} title={open.bg_check_status === "fail" ? "Already failed" : ""} className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50">
                         {submitting === "fail" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldX className="h-4 w-4 mr-1" /> FAIL</>}
                       </Button>
                     </div>
@@ -1028,16 +1066,21 @@ export default function AdminApplicants() {
                           Needs manual review — adverse action is a human decision. No one is auto-rejected.
                         </div>
                       )}
-                      <div className="flex gap-2">
+                      {/* Once the invitation is out, the send button is spent:
+                          it greys out and only the confirmed resend remains. */}
+                      <div className="flex flex-wrap items-center gap-2">
                         <Button
                           size="sm"
                           variant="outline"
-                          disabled={!!submitting}
+                          disabled={!!submitting || !!open.checkr_invitation_id}
+                          title={open.checkr_invitation_id ? "Already sent — use Resend below" : ""}
                           onClick={() => runAction("send_to_bg_check")}
                         >
                           {submitting === "send_to_bg_check"
                             ? <Loader2 className="h-4 w-4 animate-spin" />
-                            : open.checkr_invitation_id ? "Re-order check" : "Send Checkr invitation"}
+                            : open.checkr_invitation_id
+                              ? `Sent ${open.bg_check_ordered_at ? relTime(open.bg_check_ordered_at) : ""}`.trim()
+                              : "Send Checkr invitation"}
                         </Button>
                         {open.checkr_invitation_id && (
                           <Button
@@ -1050,6 +1093,11 @@ export default function AdminApplicants() {
                               ? <Loader2 className="h-4 w-4 animate-spin" />
                               : "Resend Checkr invitation"}
                           </Button>
+                        )}
+                        {!open.checkr_invitation_id && open.bg_check_ordered_at && (
+                          <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 ring-1 ring-amber-200 rounded-md px-2 py-1">
+                            Nothing sent yet — background check service not connected
+                          </span>
                         )}
                       </div>
                     </div>
