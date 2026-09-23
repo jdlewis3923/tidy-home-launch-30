@@ -74,6 +74,12 @@ type Applicant = {
   notes_for_admin: string | null;
   compliance_complete: boolean | null;
   bilingual_fluency_confirmed: boolean | null;
+  // Onboarding (one email, three token links)
+  coi_token?: string | null;
+  coi_pdf_url?: string | null;
+  coi_review_status?: string | null;
+  onboarding_email_sent_at?: string | null;
+  onboarding_reminder_count?: number | null;
   // Tier progression
   tier: TierKey | null;
   tier_advanced_at: string | null;
