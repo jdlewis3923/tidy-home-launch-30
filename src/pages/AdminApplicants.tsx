@@ -540,6 +540,7 @@ export default function AdminApplicants() {
   // Resend the Checkr invitation (for when their email lands in spam).
   // Checkr emails the candidate directly; Tidy never collects SSN/DOB/licence.
   const resendCheckrInvite = async (applicantId: string) => {
+    if (!window.confirm("Send the background check invitation to this applicant again?")) return;
     setResendingCheckr(applicantId);
     const { data, error } = await supabase.functions.invoke("checkr-invite", {
       body: { applicant_id: applicantId, resend: true },
