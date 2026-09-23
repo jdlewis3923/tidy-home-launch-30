@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ProBadgePanel from "@/components/admin/ProBadgePanel";
 import ProKitPanel from "@/components/admin/ProKitPanel";
 import ProOnboardingChips from "@/components/admin/ProOnboardingChips";
+import OnboardingEmailButtons from "@/components/admin/OnboardingEmailButtons";
 import CallQueue from "@/components/admin/hiring/CallQueue";
 import AddApplicants from "@/components/admin/hiring/AddApplicants";
 import { useHasRoleState } from "@/hooks/useHasRole";

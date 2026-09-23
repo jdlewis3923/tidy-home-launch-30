@@ -202,6 +202,25 @@ const AdminSiteGate = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/** The admin shell is only needed on admin screens — visitors never download it. */
+const AdminOnly = ({ children }: { children: React.ReactNode }) => {
+  const { pathname } = useLocation();
+  if (!pathname.startsWith("/admin")) return null;
+  return <>{children}</>;
+};
+
+/** The chat widget loads once the page is idle, so it never delays first paint. */
+const DeferUntilIdle = ({ children }: { children: React.ReactNode }) => {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const idle = (window as unknown as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
+    if (idle) { const id = idle(() => setReady(true)); return () => (window as unknown as { cancelIdleCallback?: (i: number) => void }).cancelIdleCallback?.(id); }
+    const t = window.setTimeout(() => setReady(true), 1200);
+    return () => window.clearTimeout(t);
+  }, []);
+  return ready ? <>{children}</> : null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <HelmetProvider>
@@ -214,14 +233,20 @@ const App = () => (
             <DoorhangerRescue />
             <AppInstallHead />
 
-                        <MetaPixel />
-            <Suspense fallback={null}>
-              <ChatbotMount />
-            </Suspense>
+            <DeferUntilIdle>
+              <MetaPixel />
+            </DeferUntilIdle>
+            <DeferUntilIdle>
+              <Suspense fallback={null}>
+                <ChatbotMount />
+              </Suspense>
+            </DeferUntilIdle>
             <HomeButton />
-            <Suspense fallback={null}>
-              <AdminChrome />
-            </Suspense>
+            <AdminOnly>
+              <Suspense fallback={null}>
+                <AdminChrome />
+              </Suspense>
+            </AdminOnly>
             <RouteTracker>
               <SiteGate>
                 <Suspense fallback={<RouteFallback />}>

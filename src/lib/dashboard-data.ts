@@ -90,12 +90,37 @@ export function useDashboardData(): DashboardData {
     let cancelled = false;
 
     const load = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
-      if (!user) {
-        if (!cancelled) setState((s) => ({ ...s, loading: false, isAuthed: false }));
+      // Several cards on one screen ask for the same data at the same moment.
+      // One request is shared between them instead of repeating every read.
+      if (!inflight) inflight = fetchDashboard().finally(() => { inflight = null; });
+      const next = await inflight;
+      if (cancelled) return;
+      if (!next) {
+        setState((s) => ({ ...s, loading: false, isAuthed: false }));
         return;
       }
+      dashboardCache = next;
+      setState({ loading: false, ...next, refetch: () => load() });
+    };
+
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => { inflight = null; void load(); });
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  return state;
+}
+
+type DashboardPayload = Omit<DashboardData, 'loading' | 'refetch'>;
+let inflight: Promise<DashboardPayload | null> | null = null;
+
+async function fetchDashboard(): Promise<DashboardPayload | null> {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+      if (!user) return null;
 
       const [profileRes, subRes, visitsRes, invRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle(),
@@ -151,38 +176,19 @@ export function useDashboardData(): DashboardData {
         .trim()
         .toUpperCase() || (user.email?.[0]?.toUpperCase() ?? 'T');
 
-      if (!cancelled) {
-        const next = {
-          isAuthed: true,
-          firstName,
-          initials,
-          profile,
-          subscription,
-          visits,
-          upcoming,
-          nextVisit,
-          lastCompleted,
-          nextInvoice,
-          invoices,
-        };
-        dashboardCache = next;
-        setState({
-          loading: false,
-          ...next,
-          refetch: () => load(),
-        });
-      }
-    };
-
-    load();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => load());
-    return () => {
-      cancelled = true;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
-
-  return state;
+      return {
+        isAuthed: true,
+        firstName,
+        initials,
+        profile,
+        subscription,
+        visits,
+        upcoming,
+        nextVisit,
+        lastCompleted,
+        nextInvoice,
+        invoices,
+      };
 }
 
 /** Friendly "Tomorrow / Today / Mon May 16" for a YYYY-MM-DD string. */
