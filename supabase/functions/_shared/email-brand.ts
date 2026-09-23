@@ -8,7 +8,8 @@
  */
 
 export const TIDY_SITE = 'https://jointidy.co';
-export const TIDY_LOGO = `${TIDY_SITE}/favicon-512x512.png`;
+/** Official full TIDY wordmark. The favicon/standalone "T" is not an email logo. */
+export const TIDY_LOGO = 'https://vcdhpsfuilrrrqfhfsjt.supabase.co/storage/v1/object/public/social-images/brand%2Ftidy-logo-email.png';
 export const TIDY_OWNER_EMAIL = 'hello@jointidy.co';
 export const TIDY_EMAIL_MARKER = 'data-tidy-email="branded"';
 export const TIDY_ART_MARKER = 'data-tidy-hero-art="true"';
@@ -73,7 +74,7 @@ export function emailButton(url: string, label: string): string {
 
 export function emailServiceStrip(): string {
   const service = (icon: string, label: string) => `<td width="33.33%" align="center" style="padding:13px 5px"><span style="display:inline-block;width:28px;height:28px;border-radius:14px;background:#f4f8fc;font:16px/28px Arial,sans-serif;text-align:center;vertical-align:middle">${icon}</span><span style="padding-left:7px;font:700 11px Arial,sans-serif;color:#334155;vertical-align:middle">${label}</span></td>`;
-  return `<tr><td style="background:#ffffff;border-bottom:1px solid #e6edf5;padding:0 20px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${service('🧼', 'Cleaning')}${service('🌿', 'Lawn')}${service('🚗', 'Car Care')}</tr></table></td></tr>`;
+  return `<tr data-tidy-service-strip="true"><td style="background:#ffffff;border-bottom:1px solid #e6edf5;padding:0 20px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${service('🧼', 'Cleaning')}${service('🌿', 'Lawn')}${service('🚗', 'Car Care')}</tr></table></td></tr>`;
 }
 
 export function tidyEmailShell(opts: TidyEmailShellOptions): string {
@@ -88,23 +89,32 @@ export function tidyEmailShell(opts: TidyEmailShellOptions): string {
     : '';
 
   return `<!doctype html><html lang="en" ${TIDY_EMAIL_MARKER}><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>${opts.heading ?? 'Tidy Home Concierge'}</title></head><body style="margin:0;padding:0;background:#f6f9fc;-webkit-text-size-adjust:100%;font-family:Arial,sans-serif;color:#0f172a"><div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#f6f9fc">${preview}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f9fc"><tr><td align="center" style="padding:28px 12px 36px"><table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #e9eff7;border-radius:14px;overflow:hidden">
-    <tr><td style="background:#ffffff;padding:18px 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><a href="${TIDY_SITE}"><img src="${TIDY_LOGO}" alt="Tidy Home Concierge" width="46" height="46" style="display:block;width:46px;height:46px;border:0"></a></td><td valign="middle" align="right" style="font:700 13px/1.35 Arial,sans-serif;color:#0f172a">More life.<br><span style="color:#b48a00">Less chores.</span></td></tr></table></td></tr>
+    <tr><td style="background:#ffffff;padding:16px 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><a href="${TIDY_SITE}"><img src="${TIDY_LOGO}" alt="Tidy Home Concierge" width="106" height="88" style="display:block;width:106px;height:88px;object-fit:contain;border:0"></a></td><td valign="middle" align="right" style="font:700 13px/1.35 Arial,sans-serif;color:#0f172a">More life.<br><span style="color:#b48a00">Less chores.</span></td></tr></table></td></tr>
     <tr><td style="height:4px;background:#FCCC00;font-size:0;line-height:0">&nbsp;</td></tr>
     ${emailServiceStrip()}
     ${emailHeroArt(art)}
     <tr><td style="padding:28px 28px 30px">${opts.eyebrow ? `<p style="margin:0 0 8px;font:700 11px Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;color:#2563eb">${opts.eyebrow}</p>` : ''}${heading}<div style="font:15px/1.65 Arial,sans-serif;color:#475569">${opts.bodyHtml}</div>${cta}</td></tr>
-    <tr><td style="background:#f7fafd;border-top:1px solid #e6edf5;padding:20px 28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><img src="${TIDY_LOGO}" alt="Tidy" width="32" height="32" style="display:block;width:32px;height:32px;border:0"></td><td align="right" style="font:11px/1.65 Arial,sans-serif;color:#5b6b80">Tidy Home Concierge LLC<br>2121 Biscayne Blvd #1562, Miami, FL 33137<br><a href="${TIDY_SITE}" style="color:#5b6b80">jointidy.co</a> · (786) 829-1141${context}</td></tr></table></td></tr>
+    <tr><td style="background:#f7fafd;border-top:1px solid #e6edf5;padding:20px 28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><img src="${TIDY_LOGO}" alt="Tidy" width="58" height="48" style="display:block;width:58px;height:48px;object-fit:contain;border:0"></td><td align="right" style="font:11px/1.65 Arial,sans-serif;color:#5b6b80">Tidy Home Concierge LLC<br>2121 Biscayne Blvd #1562, Miami, FL 33137<br><a href="${TIDY_SITE}" style="color:#5b6b80">jointidy.co</a> · (786) 829-1141${context}</td></tr></table></td></tr>
   </table></td></tr></table></body></html>`;
 }
 
 export function ensureTidyEmailBranding(html: string, subject?: string): string {
-  if (html.includes(TIDY_EMAIL_MARKER)) return html;
+  if (isTidyEmailCompliant(html)) return html;
   return tidyEmailShell({
     heading: subject,
     previewText: subject,
     bodyHtml: lightenEmailHtml(html),
     artTopic: `${subject ?? ''} ${html.slice(0, 400)}`,
   });
+}
+
+/** Fail-closed definition used by both generated mail and hosted templates. */
+export function isTidyEmailCompliant(html: string): boolean {
+  return html.includes(TIDY_EMAIL_MARKER) &&
+    html.includes(TIDY_LOGO) &&
+    html.includes('data-tidy-service-strip="true"') &&
+    html.includes(TIDY_ART_MARKER) &&
+    !/(background(?:-color)?\s*:\s*#(?:0f172a|0b1220|111827|1e293b)|bgcolor\s*=\s*"#(?:0f172a|0b1220|111827|1e293b)")/i.test(html);
 }
 
 /** Dark panels are not allowed in Tidy email — swap them for light surfaces. */
@@ -134,23 +144,18 @@ export function lightenEmailHtml(html: string): string {
 /** Upgrade a provider-hosted template in place without touching its subject or merge fields. */
 export function brandHostedTemplate(html: string, heading: string): { html: string; changed: boolean; mode: 'updated' | 'wrapped' | 'unchanged' } {
   const art = pickEmailArt(heading);
-  if (
-    html.includes(TIDY_EMAIL_MARKER) &&
-    html.includes(TIDY_LOGO) &&
-    html.includes('data-tidy-service-strip') &&
-    html.includes(TIDY_ART_MARKER) &&
-    !/(background(?:-color)?\s*:\s*#(?:0f172a|0b1220|111827|1e293b)|bgcolor\s*=\s*"#(?:0f172a|0b1220|111827|1e293b)")/i.test(html)
-  ) {
+  if (isTidyEmailCompliant(html)) {
     return { html, changed: false, mode: 'unchanged' };
   }
 
   let next = lightenEmailHtml(
     html
       .split('https://raw.githubusercontent.com/jdlewis3923/tidy-home-launch-30/main/tidy-logo-circle.png').join(TIDY_LOGO)
+      .split(`${TIDY_SITE}/favicon-512x512.png`).join(TIDY_LOGO)
       .replace(/<html(?![^>]*data-tidy-email)/i, `<html ${TIDY_EMAIL_MARKER}`),
   );
 
-  const strip = emailServiceStrip().replace('<tr>', '<tr data-tidy-service-strip="true">');
+  const strip = emailServiceStrip();
   const hero = emailHeroArt(art);
 
   if (!next.includes('data-tidy-service-strip')) {

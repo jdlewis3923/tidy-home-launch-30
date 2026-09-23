@@ -14,8 +14,9 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import { brandHostedTemplate } from '../_shared/email-brand.ts';
 
-const BREVO = 'https://api.brevo.com/v3/smtp';
+const BREVO = 'https://connector-gateway.lovable.dev/brevo/smtp';
 
 const Body = z.object({
   id: z.number().int().positive(),
@@ -35,8 +36,14 @@ Deno.serve(async (req) => {
   if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
 
   const apiKey = Deno.env.get('BREVO_API_KEY') ?? '';
-  if (!apiKey) return jsonResponse({ error: 'BREVO_API_KEY not configured' }, 503);
-  const headers = { 'api-key': apiKey, 'Content-Type': 'application/json', accept: 'application/json' };
+  const lovableApiKey = Deno.env.get('LOVABLE_API_KEY') ?? '';
+  if (!apiKey || !lovableApiKey) return jsonResponse({ error: 'email connection not configured' }, 503);
+  const headers = {
+    Authorization: `Bearer ${lovableApiKey}`,
+    'X-Connection-Api-Key': apiKey,
+    'Content-Type': 'application/json',
+    accept: 'application/json',
+  };
 
   if (req.method === 'GET') {
     const id = new URL(req.url).searchParams.get('id') ?? '';
@@ -53,7 +60,7 @@ Deno.serve(async (req) => {
   if (!parsed.success) {
     return jsonResponse({ error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
   }
-  const { id, test_to, params, ...patch } = parsed.data;
+  const { id, test_to, params, ...requestedPatch } = parsed.data;
 
   if (test_to) {
     const result = await sendBrevoEmail({
@@ -68,7 +75,15 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: true, sent_to: test_to, message_id: result.messageId ?? null });
   }
 
-  if (!Object.keys(patch).length) return jsonResponse({ error: 'nothing_to_update' }, 400);
+  if (!Object.keys(requestedPatch).length) return jsonResponse({ error: 'nothing_to_update' }, 400);
+
+  const patch = { ...requestedPatch };
+  if (patch.htmlContent) {
+    patch.htmlContent = brandHostedTemplate(
+      patch.htmlContent,
+      patch.subject ?? patch.name ?? 'A Tidy update',
+    ).html;
+  }
 
   const res = await vendorFetch(`${BREVO}/templates/${id}`, {
     method: 'PUT',

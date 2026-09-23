@@ -5,12 +5,24 @@ import { brandHostedTemplate } from '../../supabase/functions/_shared/email-bran
 
 const SEND_URL = 'https://connector-gateway.lovable.dev/brevo/smtp/email';
 const CONTACT_PREFIX = 'https://connector-gateway.lovable.dev/brevo/contacts/';
+const TEMPLATE_PREFIX = 'https://connector-gateway.lovable.dev/brevo/smtp/templates/';
+const OFFICIAL_LOGO = 'https://vcdhpsfuilrrrqfhfsjt.supabase.co/storage/v1/object/public/social-images/brand%2Ftidy-logo-email.png';
+const COMPLIANT_TEMPLATE = `<!doctype html><html data-tidy-email="branded"><body><img src="${OFFICIAL_LOGO}"><table><tr data-tidy-service-strip="true"><td>Services</td></tr><tr data-tidy-hero-art="true"><td>✨</td></tr></table></body></html>`;
 
 function mockFetch(handler: (url: string, init?: RequestInit) => { status: number; body?: unknown } | Error) {
   const calls: string[] = [];
   const impl = vi.fn(async (url: unknown, init?: RequestInit) => {
     const u = String(url);
     calls.push(u);
+    if (u.startsWith(TEMPLATE_PREFIX)) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ subject: 'Test', htmlContent: COMPLIANT_TEMPLATE }),
+        text: async () => JSON.stringify({ subject: 'Test', htmlContent: COMPLIANT_TEMPLATE }),
+        headers: new Headers(),
+      } as unknown as Response;
+    }
     const out = handler(u, init);
     if (out instanceof Error) throw out;
     return {
@@ -18,6 +30,7 @@ function mockFetch(handler: (url: string, init?: RequestInit) => { status: numbe
       status: out.status,
       json: async () => out.body ?? {},
       text: async () => JSON.stringify(out.body ?? {}),
+      headers: new Headers(),
     } as unknown as Response;
   });
   return { impl: impl as unknown as typeof fetch, calls };
@@ -90,7 +103,7 @@ describe('sendBrevoEmail opt-out enforcement', () => {
     const { impl, calls } = mockFetch(() => ({ status: 201, body: { messageId: 'mid-5' } }));
     const res = await sendBrevoEmail({ ...base, marketing: false, fetchImpl: impl });
     expect(res.sent).toBe(true);
-    expect(calls).toEqual([SEND_URL]);
+    expect(calls).toEqual([TEMPLATE_PREFIX + '42', SEND_URL]);
     expect(calls.some((c) => c.startsWith(CONTACT_PREFIX))).toBe(false);
   });
 });
@@ -113,7 +126,7 @@ describe('sendBrevoEmail Tidy branding enforcement', () => {
     });
     const html = String(payload.htmlContent ?? '');
     expect(html).toContain('data-tidy-email="branded"');
-    expect(html).toContain('https://jointidy.co/favicon-512x512.png');
+    expect(html).toContain(OFFICIAL_LOGO);
     expect(html).toContain('Cleaning');
     expect(html).toContain('Lawn');
     expect(html).toContain('Car Care');
@@ -158,7 +171,9 @@ describe('sendBrevoEmail Tidy branding enforcement', () => {
       to: 'person@example.com', htmlContent: branded, marketing: false,
       apiKey: 'test-key', lovableApiKey: 'test-lovable-key', fetchImpl: impl,
     });
-    expect(payload.htmlContent).toBe(branded);
+    expect(payload.htmlContent).not.toBe(branded);
+    expect(String(payload.htmlContent)).toContain(OFFICIAL_LOGO);
+    expect(String(payload.htmlContent)).toContain('data-tidy-hero-art="true"');
   });
 });
 
@@ -167,7 +182,7 @@ describe('hosted Tidy template branding', () => {
     const source = '<!doctype html><html><body><table><!-- Brand bar --><tr><td style="background:#0f172a"><img src="https://raw.githubusercontent.com/jdlewis3923/tidy-home-launch-30/main/tidy-logo-circle.png"></td></tr><!-- Hero banner --><tr><td>Hello {{ params.first_name }}</td></tr></table></body></html>';
     const result = brandHostedTemplate(source, 'Welcome');
     expect(result.changed).toBe(true);
-    expect(result.html).toContain('https://jointidy.co/favicon-512x512.png');
+    expect(result.html).toContain(OFFICIAL_LOGO);
     expect(result.html).toContain('data-tidy-service-strip="true"');
     expect(result.html).toContain('{{ params.first_name }}');
   });
