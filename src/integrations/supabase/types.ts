@@ -2752,6 +2752,42 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_review_items: {
+        Row: {
+          created_at: string
+          detail: string | null
+          document_ref: string | null
+          id: string
+          resolved_at: string | null
+          resolved_note: string | null
+          status: string
+          title: string
+          trigger_note: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          document_ref?: string | null
+          id?: string
+          resolved_at?: string | null
+          resolved_note?: string | null
+          status?: string
+          title: string
+          trigger_note?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          document_ref?: string | null
+          id?: string
+          resolved_at?: string | null
+          resolved_note?: string | null
+          status?: string
+          title?: string
+          trigger_note?: string | null
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           calendar_enabled: boolean
@@ -3208,6 +3244,9 @@ export type Database = {
           auto_insurance: string | null
           badge_back: string | null
           badge_name: string | null
+          badge_photo_path: string | null
+          badge_photo_token: string | null
+          badge_photo_uploaded_at: string | null
           cap: string | null
           checkr_cleared: string | null
           checkr_sent: string | null
@@ -3234,15 +3273,21 @@ export type Database = {
           issued_date: string | null
           kit_done: Json
           kit_issued: Json
+          kit_summary: string | null
           legal_name: string | null
+          magnet_test: string | null
+          magnets_opt_in: boolean | null
           mail_address: string | null
           max_drive: string | null
           mobile: string | null
           other_work: string | null
           polo_cut: string | null
           polo_size: string | null
+          pro_confirm_email_sent_at: string | null
           pro_no: string | null
           service_line: string | null
+          shirt_cut: string | null
+          shirt_size: string | null
           status: string
           submitted_at: string | null
           tee_cut: string | null
@@ -3251,7 +3296,12 @@ export type Database = {
           token_expires_at: string | null
           vehicle: string | null
           vehicle_2: string | null
+          vehicle_ad_signed_at: string | null
+          vehicle_ad_signed_name: string | null
           vehicle_color: string | null
+          vehicle_make: string | null
+          vehicle_model: string | null
+          vehicle_year: string | null
           vest_size: string | null
           visits_per_week: number | null
         }
@@ -3260,6 +3310,9 @@ export type Database = {
           auto_insurance?: string | null
           badge_back?: string | null
           badge_name?: string | null
+          badge_photo_path?: string | null
+          badge_photo_token?: string | null
+          badge_photo_uploaded_at?: string | null
           cap?: string | null
           checkr_cleared?: string | null
           checkr_sent?: string | null
@@ -3286,15 +3339,21 @@ export type Database = {
           issued_date?: string | null
           kit_done?: Json
           kit_issued?: Json
+          kit_summary?: string | null
           legal_name?: string | null
+          magnet_test?: string | null
+          magnets_opt_in?: boolean | null
           mail_address?: string | null
           max_drive?: string | null
           mobile?: string | null
           other_work?: string | null
           polo_cut?: string | null
           polo_size?: string | null
+          pro_confirm_email_sent_at?: string | null
           pro_no?: string | null
           service_line?: string | null
+          shirt_cut?: string | null
+          shirt_size?: string | null
           status?: string
           submitted_at?: string | null
           tee_cut?: string | null
@@ -3303,7 +3362,12 @@ export type Database = {
           token_expires_at?: string | null
           vehicle?: string | null
           vehicle_2?: string | null
+          vehicle_ad_signed_at?: string | null
+          vehicle_ad_signed_name?: string | null
           vehicle_color?: string | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_year?: string | null
           vest_size?: string | null
           visits_per_week?: number | null
         }
@@ -3312,6 +3376,9 @@ export type Database = {
           auto_insurance?: string | null
           badge_back?: string | null
           badge_name?: string | null
+          badge_photo_path?: string | null
+          badge_photo_token?: string | null
+          badge_photo_uploaded_at?: string | null
           cap?: string | null
           checkr_cleared?: string | null
           checkr_sent?: string | null
@@ -3338,15 +3405,21 @@ export type Database = {
           issued_date?: string | null
           kit_done?: Json
           kit_issued?: Json
+          kit_summary?: string | null
           legal_name?: string | null
+          magnet_test?: string | null
+          magnets_opt_in?: boolean | null
           mail_address?: string | null
           max_drive?: string | null
           mobile?: string | null
           other_work?: string | null
           polo_cut?: string | null
           polo_size?: string | null
+          pro_confirm_email_sent_at?: string | null
           pro_no?: string | null
           service_line?: string | null
+          shirt_cut?: string | null
+          shirt_size?: string | null
           status?: string
           submitted_at?: string | null
           tee_cut?: string | null
@@ -3355,7 +3428,12 @@ export type Database = {
           token_expires_at?: string | null
           vehicle?: string | null
           vehicle_2?: string | null
+          vehicle_ad_signed_at?: string | null
+          vehicle_ad_signed_name?: string | null
           vehicle_color?: string | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_year?: string | null
           vest_size?: string | null
           visits_per_week?: number | null
         }
@@ -5393,6 +5471,7 @@ export type Database = {
           zip: string
         }[]
       }
+      badge_photo_load: { Args: { _token: string }; Returns: Json }
       call_edge_function: {
         Args: { _fn: string; _payload: Json }
         Returns: undefined

@@ -175,8 +175,8 @@ const STEP_BODY: Record<StepKey, { en: string; es: string; cta: { en: string; es
     cta: { en: 'Upload your certificate', es: 'Subir su certificado' },
   },
   intake: {
-    en: 'Shirt size, vehicle and availability, so your polos, vest and badge are ready on day one.',
-    es: 'Talla de camisa, vehículo y disponibilidad, para que sus polos, chaleco y credencial estén listos el primer día.',
+    en: 'Shirt size and availability, so your shirts and photo ID badge are ready on day one. Tidy provides your kit at no cost to you. You can also choose Tidy magnets for your vehicle — optional, with a $15 a month vehicle advertising credit on your Friday deposit while they are on.',
+    es: 'Talla de camisa y disponibilidad, para que sus camisas y su credencial con foto estén listas el primer día. Tidy le entrega su kit sin costo. También puede elegir imanes de Tidy para su vehículo: son opcionales, con un crédito de publicidad de $15 al mes en su depósito del viernes mientras estén puestos.',
     cta: { en: 'Send your sizes', es: 'Enviar sus tallas' },
   },
 };

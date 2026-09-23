@@ -25,6 +25,7 @@ import {
   ChevronDown,
   Loader2,
 } from "lucide-react";
+import LegalReviewPanel from "@/components/admin/LegalReviewPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { Button } from "@/components/ui/button";
@@ -302,6 +303,7 @@ const AdminDocuments = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        <LegalReviewPanel />
         <div className="flex items-center gap-3 flex-wrap no-print">
           <div className="relative flex-1 min-w-[220px]">
             <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />

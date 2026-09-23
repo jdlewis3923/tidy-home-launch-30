@@ -11,6 +11,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Search } from "lucide-react";
 import ProKitEditor, { KIT_STATUS_LABEL, type ProKitRow } from "@/components/admin/ProKitEditor";
+import { kitContentsLine } from "@/lib/proKit";
 
 const STATUS_PILL: Record<string, string> = {
   sent: "bg-slate-100 text-slate-700 ring-slate-200",
@@ -92,6 +93,13 @@ export default function AdminProKits() {
                     {r.service_line || "—"} ·{" "}
                     {r.submitted_at ? new Date(r.submitted_at).toLocaleDateString() : "not submitted"}
                   </p>
+                  {r.submitted_at && (
+                    <p className="truncate text-xs text-muted-foreground">
+                      Ready to order: {kitContentsLine(r.service_line)}
+                      {r.magnets_opt_in === true ? " + vehicle magnets" : ""}
+                      {r.shirt_size ? ` · shirt ${String(r.shirt_size)}` : ""}
+                    </p>
+                  )}
                 </div>
                 <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${STATUS_PILL[r.status] ?? STATUS_PILL.sent}`}>
                   {KIT_STATUS_LABEL[r.status] ?? r.status}
