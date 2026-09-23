@@ -1060,16 +1060,21 @@ export default function AdminApplicants() {
                           Needs manual review — adverse action is a human decision. No one is auto-rejected.
                         </div>
                       )}
-                      <div className="flex gap-2">
+                      {/* Once the invitation is out, the send button is spent:
+                          it greys out and only the confirmed resend remains. */}
+                      <div className="flex flex-wrap items-center gap-2">
                         <Button
                           size="sm"
                           variant="outline"
-                          disabled={!!submitting}
+                          disabled={!!submitting || !!open.checkr_invitation_id}
+                          title={open.checkr_invitation_id ? "Already sent — use Resend below" : ""}
                           onClick={() => runAction("send_to_bg_check")}
                         >
                           {submitting === "send_to_bg_check"
                             ? <Loader2 className="h-4 w-4 animate-spin" />
-                            : open.checkr_invitation_id ? "Re-order check" : "Send Checkr invitation"}
+                            : open.checkr_invitation_id
+                              ? `Sent ${open.bg_check_ordered_at ? relTime(open.bg_check_ordered_at) : ""}`.trim()
+                              : "Send Checkr invitation"}
                         </Button>
                         {open.checkr_invitation_id && (
                           <Button
@@ -1082,6 +1087,11 @@ export default function AdminApplicants() {
                               ? <Loader2 className="h-4 w-4 animate-spin" />
                               : "Resend Checkr invitation"}
                           </Button>
+                        )}
+                        {!open.checkr_invitation_id && open.bg_check_ordered_at && (
+                          <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 ring-1 ring-amber-200 rounded-md px-2 py-1">
+                            Nothing sent yet — background check service not connected
+                          </span>
                         )}
                       </div>
                     </div>
