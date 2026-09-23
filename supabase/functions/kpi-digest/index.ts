@@ -19,7 +19,6 @@ import { sendBrevoEmail as sendViaBrevo } from '../_shared/brevo-send.ts';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
-const ALERT_FROM_EMAIL = Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@jointidy.co';
 
 type Variant = 'morning_pulse' | 'midday_check' | 'evening_close' | 'weekly_review' | 'launch_window';
 
@@ -82,7 +81,7 @@ async function sendBrevoEmail(to: string[], subject: string, html: string) {
   // Internal admin ops digest — marketing: false.
   const r = await sendViaBrevo({
     to, subject, htmlContent: html, marketing: false,
-    sender: { name: 'Tidy Operating System', email: ALERT_FROM_EMAIL },
+    sender: { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' },
     label: 'kpi-digest',
   });
   return r.sent;

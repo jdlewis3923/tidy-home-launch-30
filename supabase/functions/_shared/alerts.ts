@@ -61,7 +61,7 @@ export async function writeAlert(
         const res = await sendBrevoEmail({
           to: 'hello@jointidy.co',
           marketing: false,
-          sender: { name: 'Tidy Operating System', email: Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@jointidy.co' },
+          sender: { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' },
           subject: `Tidy critical: ${alert.title}`,
 
           htmlContent:

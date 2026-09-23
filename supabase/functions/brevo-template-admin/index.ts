@@ -13,6 +13,7 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 
 const BREVO = 'https://api.brevo.com/v3/smtp';
 
@@ -55,14 +56,16 @@ Deno.serve(async (req) => {
   const { id, test_to, params, ...patch } = parsed.data;
 
   if (test_to) {
-    const res = await vendorFetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ to: [{ email: test_to }], templateId: id, params: params ?? {} }),
+    const result = await sendBrevoEmail({
+      to: test_to,
+      marketing: false,
+      templateId: id,
+      params: params ?? {},
+      label: 'brevo-template-admin-test',
+      transport: 'gateway',
     });
-    const body = await res.text();
-    if (!res.ok) return jsonResponse({ error: 'brevo_error', status: res.status, body: body.slice(0, 600) }, res.status);
-    return jsonResponse({ ok: true, sent_to: test_to, brevo: body ? JSON.parse(body) : null });
+    if (!result.sent) return jsonResponse({ error: 'brevo_error', status: result.status, reason: result.reason }, result.status ?? 502);
+    return jsonResponse({ ok: true, sent_to: test_to, message_id: result.messageId ?? null });
   }
 
   if (!Object.keys(patch).length) return jsonResponse({ error: 'nothing_to_update' }, 400);

@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
       event: 'intake_submitted',
       metadata: {
         shirt_size: kit.shirt_size ?? null,
-        vehicle: kit.vehicle_make_model ?? kit.vehicle ?? null,
+        vehicle: kit.vehicle ?? null,
         service_line: kit.service_line ?? null,
       },
     });

@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
 
   const result = await sendBrevoEmail({
     to: TO, marketing: false, subject, htmlContent: html,
-    sender: { name: 'Tidy Operating System', email: Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@jointidy.co' },
+    sender: { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' },
     tags: ['admin-digest', edition], label: 'hiring-digest',
   });
 
