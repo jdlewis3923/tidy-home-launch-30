@@ -102,7 +102,7 @@ export function ensureTidyEmailBranding(html: string, subject?: string): string 
   return tidyEmailShell({
     heading: subject,
     previewText: subject,
-    bodyHtml: html,
+    bodyHtml: lightenEmailHtml(html),
     artTopic: `${subject ?? ''} ${html.slice(0, 400)}`,
   });
 }
