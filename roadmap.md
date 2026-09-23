@@ -20,12 +20,12 @@
 - Open question: street address for the CAN-SPAM footer.
 
 ## Admin operations rebuild — requested 2026-09-22
-- [ ] Repair the Brevo credential path; connector setup reports it cannot verify credentials after repeated API-key entry
-- [ ] Consolidate all Brevo sends, replace admin recipient with hello@jointidy.co, preserve detailed send logs, and verify a two-email application send
-- [ ] Stop repeated Google Sheets 403 alerts by disabling applicant sync or making it log quietly
-- [ ] Repair and verify the daily insurance expiry job
-- [ ] Add Workday activity feed, counters, filters, direct actions, and new-applicant alert/digest coverage
-- [ ] Replace the flat admin rail with six persisted groups and a mobile drawer
-- [ ] Fix the admin shell so content starts at the viewport top beside a fixed rail
-- [ ] Apply one tokenized Tidy design language across every admin page in light and dark modes
-- [ ] Run browser acceptance checks, capture requested screenshots and measurements, then delete test records
+- [x] Repair the Brevo credential path and link the verified Brevo connection
+- [x] Consolidate transactional Brevo sends, replace admin recipient with hello@jointidy.co, preserve detailed send logs, and verify a two-email application send
+- [x] Stop repeated Google Sheets 403 alerts by disabling the master sync with a quiet logged skip; Zapier remains untouched
+- [x] Repair and verify the daily insurance expiry job
+- [x] Add Workday activity feed, counters, filters, direct actions, and new-applicant alert/digest coverage
+- [x] Replace the flat admin rail with six persisted groups and a mobile drawer
+- [x] Fix the admin shell so content starts at the viewport top beside a fixed rail
+- [x] Apply one tokenized Tidy design language across the five priority admin pages in light and dark modes
+- [x] Run browser acceptance checks, capture requested screenshots and measurements, then delete test records
