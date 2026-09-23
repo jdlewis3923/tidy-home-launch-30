@@ -26,6 +26,9 @@ export type KitItem = {
   es: string;
   /** How many to order. */
   qty: number;
+  /** Plural forms, written out so Spanish adjectives agree. */
+  enPlural?: string;
+  esPlural?: string;
   /** True when the line is sized from the Pro's answers. */
   sized?: "shirt" | "vest";
 };
@@ -40,16 +43,16 @@ const BADGE: KitItem = { en: "Photo ID badge", es: "Credencial con foto", qty: 1
 
 export const KIT_BY_SERVICE: Record<KitServiceKey, KitItem[]> = {
   cleaning: [
-    { en: "Embroidered polo", es: "Polo bordado", qty: 2, sized: "shirt" },
+    { en: "Embroidered polo", es: "Polo bordado", enPlural: "embroidered polos", esPlural: "polos bordados", qty: 2, sized: "shirt" },
     BADGE,
   ],
   lawn: [
-    { en: "Tee", es: "Camiseta", qty: 2, sized: "shirt" },
-    { en: "Hi-vis vest", es: "Chaleco de alta visibilidad", qty: 2, sized: "vest" },
+    { en: "Tee", es: "Camiseta", enPlural: "tees", esPlural: "camisetas", qty: 2, sized: "shirt" },
+    { en: "Hi-vis vest", es: "Chaleco de alta visibilidad", enPlural: "hi-vis vests", esPlural: "chalecos de alta visibilidad", qty: 2, sized: "vest" },
     BADGE,
   ],
   car: [
-    { en: "Tee", es: "Camiseta", qty: 2, sized: "shirt" },
+    { en: "Tee", es: "Camiseta", enPlural: "tees", esPlural: "camisetas", qty: 2, sized: "shirt" },
     BADGE,
   ],
 };
@@ -74,7 +77,7 @@ export function kitIncludesVest(service: string | null | undefined): boolean {
 /** Short human list, e.g. "2 embroidered polos + photo ID badge". */
 export function kitContentsLine(service: string | null | undefined, lang: "en" | "es" = "en"): string {
   return kitItemsFor(service)
-    .map((i) => (i.qty > 1 ? `${i.qty} ${plural(i[lang], lang)}` : lcFirst(i[lang])))
+    .map((i) => (i.qty > 1 ? `${i.qty} ${i[lang === "en" ? "enPlural" : "esPlural"] ?? plural(i[lang], lang)}` : lcFirst(i[lang])))
     .join(" + ");
 }
 
