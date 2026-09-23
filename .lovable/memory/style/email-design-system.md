@@ -8,7 +8,7 @@ Every outgoing email â€” customer, Pro, applicant, owner/admin, alert, digest â€
 
 Rules:
 - Light mode only. No dark/navy panels or hero overlays anywhere. Navy (#0f172a) is text only; backgrounds are white, #f6f9fc, #f4f8fc, or a soft topic tint.
-- Official full TIDY wordmark only: https://jointidy.co/tidy-logo-email.png. Never use the favicon/standalone T, GitHub-hosted art, or any substitute logo.
+- Official full TIDY wordmark only, served from the permanent public email asset. Never use the favicon/standalone T, GitHub-hosted art, or any substitute logo.
 - Structure: white header with logo + "More life. Less chores.", gold hairline, white Cleaning/Lawn/Car Care icon strip, hero art band, content cards, light legal footer.
 - Every email has a visual focal point: a large relevant icon inside a white circle on a soft gradient tint, chosen by `pickEmailArt()` from the subject (background check, insurance, kit, visit, billing, reviews, referrals, hiring, digest, alert, account, welcome).
 - Never plain/boring text emails. No emails without art.

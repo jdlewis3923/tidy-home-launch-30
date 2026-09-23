@@ -9,7 +9,7 @@
 
 export const TIDY_SITE = 'https://jointidy.co';
 /** Official full TIDY wordmark. The favicon/standalone "T" is not an email logo. */
-export const TIDY_LOGO = `${TIDY_SITE}/tidy-logo-email.png`;
+export const TIDY_LOGO = 'https://vcdhpsfuilrrrqfhfsjt.supabase.co/storage/v1/object/public/social-images/brand%2Ftidy-logo-email.png';
 export const TIDY_OWNER_EMAIL = 'hello@jointidy.co';
 export const TIDY_EMAIL_MARKER = 'data-tidy-email="branded"';
 export const TIDY_ART_MARKER = 'data-tidy-hero-art="true"';
