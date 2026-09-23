@@ -373,12 +373,57 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Checkr invitation dispatch on send_to_bg_check — BEFORE the onboarding
+  // email, so the email can carry the live background-check button.
+  //
+  // Phase 4: AWAITED. The applicant is emailed a promise that the background
+  // check is coming, so a detached microtask that dies with the isolate is the
+  // exact send_offer failure again. A dispatch failure is surfaced and alerted.
+  //
+  // checkr-invite answers 200 with { ok: false, skipped: true } when Checkr is
+  // not configured. That used to read as success and the admin was told the
+  // invitation was sent when nothing left the building — treat it as failure.
+  let checkrDispatchError: string | null = null;
+  let checkrInvitationSent = false;
+  if (action === 'send_to_bg_check') {
+    try {
+      const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/checkr-invite`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ applicant_id: row.id }),
+      });
+      const j = await r.json().catch(() => ({})) as { ok?: boolean; skipped?: boolean; error?: string };
+      if (!r.ok) {
+        checkrDispatchError = `checkr-invite ${r.status}: ${j.error ?? 'unknown'}`;
+      } else if (j.ok !== true || j.skipped) {
+        checkrDispatchError = `checkr-invite did not send: ${j.error ?? 'background check is not connected yet'}`;
+      } else {
+        checkrInvitationSent = true;
+      }
+    } catch (e) {
+      checkrDispatchError = `checkr-invite threw: ${(e as Error).message}`;
+    }
+    if (checkrDispatchError) {
+      console.error('[advance]', checkrDispatchError);
+      await admin.from('admin_alerts').insert({
+        alert_type: 'checkr_invite_dispatch_failed',
+        title: `Background check invitation was NOT sent: ${row.email}`,
+        body: `${checkrDispatchError} — re-run send_to_bg_check once it is connected.`,
+        context: { applicant_id: row.id },
+      }).then(() => {}, () => {});
+    }
+  }
+
   // On send_offer AND send_to_bg_check the Pro gets ONE onboarding email
   // (Brevo template 64) that carries all three actions — background check,
   // insurance certificate, sizes and kit — each behind its own private token
   // link. It replaces the old generic offer email, so we skip that one below
   // rather than sending two.
   let onboardingEmailError: string | null = null;
+  let onboardingEmailSent = false;
   const sendsOnboardingEmail = action === 'send_offer' || action === 'send_to_bg_check';
   if (sendsOnboardingEmail) {
     try {
@@ -392,6 +437,8 @@ Deno.serve(async (req) => {
       });
       if (!r.ok) {
         onboardingEmailError = `pro-onboarding-email ${r.status}: ${(await r.text().catch(() => '')).slice(0, 300)}`;
+      } else {
+        onboardingEmailSent = true;
       }
     } catch (e) {
       onboardingEmailError = `pro-onboarding-email threw: ${(e as Error).message}`;
@@ -402,39 +449,6 @@ Deno.serve(async (req) => {
         alert_type: 'pro_onboarding_email_failed',
         title: `Onboarding email was NOT sent: ${row.email}`,
         body: `${onboardingEmailError} — resend it from the Pro's record.`,
-        context: { applicant_id: row.id },
-      }).then(() => {}, () => {});
-    }
-  }
-
-  // Checkr invitation dispatch on send_to_bg_check.
-  //
-  // Phase 4: AWAITED. The applicant is emailed a promise that the background
-  // check is coming, so a detached microtask that dies with the isolate is the
-  // exact send_offer failure again. A dispatch failure is surfaced and alerted.
-  let checkrDispatchError: string | null = null;
-  if (action === 'send_to_bg_check') {
-    try {
-      const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/checkr-invite`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ applicant_id: row.id }),
-      });
-      if (!r.ok) {
-        checkrDispatchError = `checkr-invite ${r.status}: ${(await r.text().catch(() => '')).slice(0, 300)}`;
-      }
-    } catch (e) {
-      checkrDispatchError = `checkr-invite threw: ${(e as Error).message}`;
-    }
-    if (checkrDispatchError) {
-      console.error('[advance]', checkrDispatchError);
-      await admin.from('admin_alerts').insert({
-        alert_type: 'checkr_invite_dispatch_failed',
-        title: `Background check invitation was NOT sent: ${row.email}`,
-        body: `${checkrDispatchError} — the applicant was told it is coming. Re-run send_to_bg_check.`,
         context: { applicant_id: row.id },
       }).then(() => {}, () => {});
     }
