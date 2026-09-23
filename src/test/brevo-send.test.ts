@@ -119,6 +119,32 @@ describe('sendBrevoEmail Tidy branding enforcement', () => {
     expect(html).toContain('Car Care');
     expect(html).toContain('2121 Biscayne Blvd #1562');
     expect(html).toContain('<p>Plain content</p>');
+    // Light mode only: no dark panels anywhere.
+    expect(html).not.toMatch(/background(?:-color)?\s*:\s*#0f172a/i);
+    expect(html).not.toMatch(/bgcolor\s*=\s*"#0f172a"/i);
+    expect(html).toContain('data-tidy-hero-art="true"');
+  });
+
+  it('lightens dark panels inside the caller HTML and keeps a hero focal point', async () => {
+    let payload: Record<string, unknown> = {};
+    const { impl } = mockFetch((_url, init) => {
+      payload = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
+      return { status: 201, body: { messageId: 'branded-3' } };
+    });
+    await sendBrevoEmail({
+      to: 'person@example.com',
+      subject: 'Your visit is confirmed',
+      htmlContent: '<div style="background:#0f172a"><p style="color:#ffffff">Dark block</p></div>',
+      marketing: false,
+      apiKey: 'test-key',
+      lovableApiKey: 'test-lovable-key',
+      fetchImpl: impl,
+    });
+    const html = String(payload.htmlContent ?? '');
+    expect(html).not.toMatch(/background\s*:\s*#0f172a/i);
+    expect(html).not.toMatch(/color\s*:\s*#ffffff/i);
+    expect(html).toContain('data-tidy-hero-art="true"');
+    expect(html).toContain('🗓️');
   });
 
   it('does not nest an already branded email', async () => {
