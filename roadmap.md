@@ -44,3 +44,5 @@
 - [ ] Brand account/auth emails with the same logo, banner, typography, and footer — blocked until a sending domain is configured
 - [x] Add regression coverage so new unbranded email HTML cannot be introduced
 - [x] Send representative tests and verify rendering on desktop and mobile — 16/16 generated tests delivered; all 36 live templates pass the markup audit
+
+- [x] Light-mode-only email design with a relevant hero icon focal point in every email (36/36 live templates re-branded, 16/16 test emails sent)
