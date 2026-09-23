@@ -35,3 +35,12 @@
 - Magnets optional on all three services, $15/month advertising credit with the Friday deposit, signed vehicle advertising agreement first, household magnet test before ordering.
 - Intake submission now auto-builds the vendor order, emails the owner and the Pro (badge photo link). No manual send step.
 - Open: legal review of the vehicle advertising agreement + ICA before the 10th signed Pro (tracked in /admin/documents).
+
+## Email design standardization (requested 2026-09-23)
+- [ ] Inventory every customer, Pro, applicant, owner/admin, alert, digest, and account email
+- [ ] Create one reusable Tidy email shell matching the customer design language
+- [ ] Move every inline email onto the shared shell without changing its business copy or trigger
+- [ ] Read and update every registered live Brevo template, preserving IDs and merge fields
+- [ ] Brand account/auth emails with the same logo, banner, typography, and footer
+- [ ] Add regression coverage so new unbranded email HTML cannot be introduced
+- [ ] Send representative tests and verify rendering on desktop and mobile
