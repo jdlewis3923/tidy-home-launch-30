@@ -121,6 +121,16 @@ export default function ProOnboardingChips({
   };
 
   const resendEmail = async () => {
+    // Confirm every repeat send so the same email can't be fired at a Pro
+    // over and over by an accidental double click.
+    if (
+      applicant.onboarding_email_sent_at &&
+      !window.confirm(
+        `This Pro was already emailed ${new Date(applicant.onboarding_email_sent_at).toLocaleString()}. Send it again?`,
+      )
+    ) {
+      return;
+    }
     setBusy("email");
     const { data, error } = await supabase.functions.invoke("pro-onboarding-email", {
       body: { applicant_id: applicant.id },
