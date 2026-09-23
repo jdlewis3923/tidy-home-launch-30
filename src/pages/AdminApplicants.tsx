@@ -546,10 +546,10 @@ export default function AdminApplicants() {
       body: { applicant_id: applicantId, resend: true },
     });
     setResendingCheckr(null);
-    const payload = data as { ok?: boolean; error?: string } | null;
-    if (error || payload?.error || payload?.ok === false) {
-      toast.error("Could not resend the Checkr invitation", {
-        description: error?.message ?? payload?.error ?? "unknown",
+    const payload = data as { ok?: boolean; error?: string; skipped?: boolean } | null;
+    if (error || payload?.error || payload?.ok !== true || payload?.skipped) {
+      toast.error("Background check was NOT sent", {
+        description: error?.message ?? payload?.error ?? "The background check service is not connected yet.",
       });
       return;
     }
