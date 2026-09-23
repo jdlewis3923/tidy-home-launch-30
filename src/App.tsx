@@ -215,13 +215,17 @@ const App = () => (
             <AppInstallHead />
 
                         <MetaPixel />
-            <Suspense fallback={null}>
-              <ChatbotMount />
-            </Suspense>
+            <DeferUntilIdle>
+              <Suspense fallback={null}>
+                <ChatbotMount />
+              </Suspense>
+            </DeferUntilIdle>
             <HomeButton />
-            <Suspense fallback={null}>
-              <AdminChrome />
-            </Suspense>
+            <AdminOnly>
+              <Suspense fallback={null}>
+                <AdminChrome />
+              </Suspense>
+            </AdminOnly>
             <RouteTracker>
               <SiteGate>
                 <Suspense fallback={<RouteFallback />}>
