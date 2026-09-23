@@ -65,7 +65,7 @@ export function brandHostedTemplate(html: string, heading: string): { html: stri
   }
 
   let next = html
-    .replaceAll('https://raw.githubusercontent.com/jdlewis3923/tidy-home-launch-30/main/tidy-logo-circle.png', TIDY_LOGO)
+    .split('https://raw.githubusercontent.com/jdlewis3923/tidy-home-launch-30/main/tidy-logo-circle.png').join(TIDY_LOGO)
     .replace(/<html(?![^>]*data-tidy-email)/i, `<html ${TIDY_EMAIL_MARKER}`);
 
   const strip = emailServiceStrip().replace('<tr>', '<tr data-tidy-service-strip="true">');
