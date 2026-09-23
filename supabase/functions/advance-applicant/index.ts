@@ -373,12 +373,14 @@ Deno.serve(async (req) => {
     }
   }
 
-  // On send_offer the Pro gets ONE onboarding email (Brevo template 64) that
-  // carries all three actions — background check, insurance certificate, sizes
-  // and kit — each behind its own private token link. It replaces the old
-  // generic offer email, so we skip that one below rather than sending two.
+  // On send_offer AND send_to_bg_check the Pro gets ONE onboarding email
+  // (Brevo template 64) that carries all three actions — background check,
+  // insurance certificate, sizes and kit — each behind its own private token
+  // link. It replaces the old generic offer email, so we skip that one below
+  // rather than sending two.
   let onboardingEmailError: string | null = null;
-  if (action === 'send_offer') {
+  const sendsOnboardingEmail = action === 'send_offer' || action === 'send_to_bg_check';
+  if (sendsOnboardingEmail) {
     try {
       const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/pro-onboarding-email`, {
         method: 'POST',
