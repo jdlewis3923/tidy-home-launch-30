@@ -26,6 +26,7 @@ import ProBadgePanel from "@/components/admin/ProBadgePanel";
 import ProKitPanel from "@/components/admin/ProKitPanel";
 import ProOnboardingChips from "@/components/admin/ProOnboardingChips";
 import OnboardingEmailButtons from "@/components/admin/OnboardingEmailButtons";
+import ApplicantInfoEditor from "@/components/admin/ApplicantInfoEditor";
 import CallQueue from "@/components/admin/hiring/CallQueue";
 import AddApplicants from "@/components/admin/hiring/AddApplicants";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -1008,6 +1009,8 @@ export default function AdminApplicants() {
                   );
                 })()}
 
+
+                <ApplicantInfoEditor applicant={open} onSaved={() => { void fetchRows(); }} />
 
                 {open.notes_for_admin && (
                   <Card className="rounded-2xl border-slate-200">
