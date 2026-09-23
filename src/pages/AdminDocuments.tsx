@@ -250,7 +250,7 @@ const AdminDocuments = () => {
   }
 
   return (
-    <div className="admin-page print:bg-white print:text-black">
+    <main className="admin-page print:bg-white print:text-black">
       <Helmet>
         <title>Documents Library — Tidy Admin</title>
         <meta name="robots" content="noindex,nofollow" />
@@ -301,7 +301,7 @@ const AdminDocuments = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <div className="flex items-center gap-3 flex-wrap no-print">
           <div className="relative flex-1 min-w-[220px]">
             <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -360,7 +360,7 @@ const AdminDocuments = () => {
             )}
           </div>
         )}
-      </main>
+      </div>
 
       <UploadModal
         open={uploadOpen}
@@ -378,7 +378,7 @@ const AdminDocuments = () => {
         onDownload={handleDownload}
         onPrint={handlePrint}
       />
-    </div>
+    </main>
   );
 };
 
@@ -405,37 +405,37 @@ const CategoryCard = ({
 }) => {
   const [open, setOpen] = useState(true);
   return (
-    <Card className="bg-slate-900/60 border-white/10">
+    <Card className="admin-page-surface">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger className="w-full">
-          <div className="flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors">
+          <div className="flex items-center justify-between px-5 py-4 hover:bg-muted/50 transition-colors">
             <div className="flex items-center gap-3">
-              <FileText className="h-5 w-5 text-amber-300" />
-              <span className="font-semibold text-white">{category}</span>
-              <Badge variant="outline" className="border-white/15 text-white/70">{docs.length}</Badge>
+              <FileText className="h-5 w-5 text-gold" />
+              <span className="font-semibold text-foreground">{category}</span>
+              <Badge variant="outline">{docs.length}</Badge>
             </div>
             <ChevronDown
-              className={`h-4 w-4 text-white/50 transition-transform ${open ? "rotate-180" : ""}`}
+              className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
             />
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="pt-0 pb-4 space-y-2">
             {docs.length === 0 ? (
-              <p className="text-sm text-white/40 px-3 py-6 text-center">No documents in this category.</p>
+              <p className="text-sm text-muted-foreground px-3 py-6 text-center">No documents in this category.</p>
             ) : (
               docs.map((d) => (
                 <div
                   key={d.id}
                   className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3 ${
                     d.archived_at
-                      ? "border-white/5 bg-slate-950/40 opacity-60"
-                      : "border-white/10 bg-slate-950/60"
+                      ? "border-border bg-muted/40 opacity-60"
+                      : "border-border bg-background/60"
                   }`}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-white truncate">{d.filename}</span>
+                      <span className="font-medium text-foreground truncate">{d.filename}</span>
                       {d.archived_at && (
                         <Badge variant="outline" className="border-white/20 text-white/60 text-[10px]">
                           archived

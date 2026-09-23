@@ -279,7 +279,7 @@ export default function AdminCommand() {
   }
 
   return (
-    <div className="admin-page">
+    <main className="admin-page">
       <Helmet>
         <title>Command · Tidy Admin</title>
         <meta name="description" content="Tidy command center: profit versus plan, capacity runway, ZIP funnel, alerts and trust metrics." />
@@ -299,7 +299,7 @@ export default function AdminCommand() {
             <Button asChild variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-8 px-2.5 text-xs">
               <Link to="/admin/kpis">KPIs</Link>
             </Button>
-            <Button size="sm" onClick={load} disabled={refreshing} className="bg-[#f5c518] hover:bg-[#f5c518]/90 text-[#0f172a] font-semibold h-8 px-3 text-xs">
+            <Button size="sm" onClick={load} disabled={refreshing} className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold h-8 px-3 text-xs">
               {refreshing ? <Loader2 className="h-3.5 w-3.5 animate-spin sm:mr-1.5" /> : <RefreshCw className="h-3.5 w-3.5 sm:mr-1.5" />}
               <span className="hidden sm:inline">Refresh</span>
             </Button>
@@ -312,7 +312,7 @@ export default function AdminCommand() {
           <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading command view…
         </div>
       ) : (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
           <MessagingReadinessBanner />
 
           <section className="admin-page-surface rounded-lg border overflow-hidden">
@@ -540,9 +540,9 @@ export default function AdminCommand() {
               <Tile label="Add-on attach rate" value={pct(trust.addon_attach_rate_30d, 0)} />
             </div>
           </section>
-        </main>
+        </div>
       )}
-    </div>
+    </main>
   );
 }
 

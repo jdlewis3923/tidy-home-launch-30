@@ -127,7 +127,7 @@ export default function AdminAlerts() {
   );
 
   return (
-    <div className="admin-page">
+    <main className="admin-page">
       <Helmet><title>Alerts · Tidy Admin</title><meta name="robots" content="noindex" /></Helmet>
 
       <header className="admin-page-header">
@@ -144,7 +144,7 @@ export default function AdminAlerts() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">
+      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">
         {GROUPS.map((group) => {
           const items = open.filter((r) => (r.level ?? "warning") === group.key);
           return (
@@ -179,7 +179,7 @@ export default function AdminAlerts() {
                 {doneToday.map((r) => <li key={r.id}>{r.title}</li>)}
               </ul>}
         </section>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }

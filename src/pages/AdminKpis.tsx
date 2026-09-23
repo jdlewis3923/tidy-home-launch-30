@@ -583,7 +583,7 @@ export default function AdminKpis() {
               size="sm"
               onClick={load}
               disabled={refreshing}
-              className="bg-[#f5c518] hover:bg-[#f5c518]/90 text-[#0f172a] border-0 font-semibold h-8 px-3 text-xs ml-auto sm:ml-0"
+              className="bg-gold hover:bg-gold/90 text-gold-foreground border-0 font-semibold h-8 px-3 text-xs ml-auto sm:ml-0"
             >
               {refreshing ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin sm:mr-1.5" />
@@ -612,7 +612,7 @@ export default function AdminKpis() {
       </div>
 
       {/* Hero status strip */}
-      <div className="bg-white border-b border-slate-200">
+      <div className="admin-page-surface border-x-0 border-t-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
           <HeroStat label="On target"     count={heroCounts.green}    tone="green"    onClick={() => setStatusListFor("green")} />
           <HeroStat label="Warning"       count={heroCounts.warn}     tone="warn"     onClick={() => setStatusListFor("warn")} />
@@ -623,7 +623,7 @@ export default function AdminKpis() {
 
       {/* Open alerts banner */}
       {alerts.length > 0 && (
-        <div className="bg-rose-50 border-b border-rose-200">
+        <div className="admin-state-critical border-x-0 border-t-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-rose-600 mt-0.5 shrink-0" />
             <div className="flex-1">
@@ -674,7 +674,7 @@ export default function AdminKpis() {
             return (
               <section
                 key={cat}
-                className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+                className="admin-page-surface rounded-lg border overflow-hidden"
               >
                 <button
                   type="button"
