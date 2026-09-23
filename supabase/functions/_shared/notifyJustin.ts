@@ -10,7 +10,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
 
-const ADMIN_EMAIL = 'admin@jointidy.co';
+export const ADMIN_EMAIL = 'hello@jointidy.co';
 // One source of truth: the JUSTIN_ALERT_PHONE secret every alerting function
 // already reads. The literal stays only as a fallback if the secret is unset.
 const JUSTIN_PHONE = Deno.env.get('JUSTIN_ALERT_PHONE') ?? '+17868291141';
@@ -87,11 +87,12 @@ export async function sendBrevoEmail(opts: {
     to: [{ email: opts.toEmail, name: opts.toName ?? opts.toEmail }],
     subject: opts.subject,
     htmlContent: opts.htmlContent,
-    sender: { name: 'Tidy', email: 'no-reply@jointidy.co' },
+    sender: { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' },
     tags: opts.tags,
     attachment: opts.attachments,
     marketing: opts.marketing ?? false,
     label: 'notifyJustin',
+    transport: 'gateway',
   });
 
   if (!result.sent) {
