@@ -464,7 +464,7 @@ export default function AdminKpis() {
 
 
   return (
-    <div className="admin-page">
+    <main className="admin-page">
       <Helmet>
         <title>KPI Command Center · Tidy</title>
         <meta name="robots" content="noindex,nofollow" />
@@ -653,7 +653,7 @@ export default function AdminKpis() {
       )}
 
       {/* Sections */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-4">
         {loading ? (
           <div className="py-20 flex items-center justify-center text-slate-500">
             <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading KPIs…
@@ -724,7 +724,7 @@ export default function AdminKpis() {
             );
           })
         )}
-      </main>
+      </div>
 
       {/* Drill-down sheet */}
       {drillDef && (
@@ -755,7 +755,7 @@ export default function AdminKpis() {
           onSnapshotsChange={setSnapshots}
         />
       )}
-    </div>
+    </main>
   );
 }
 

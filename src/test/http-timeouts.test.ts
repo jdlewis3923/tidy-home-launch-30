@@ -9,7 +9,7 @@ describe('vendor timeouts', () => {
 
   it('has a per-vendor deadline for every money/messaging vendor', () => {
     expect(timeoutForUrl('https://api.twilio.com/2010-04-01/Accounts/x/Messages.json')).toBe(10_000);
-    expect(timeoutForUrl('https://api.brevo.com/v3/smtp/email')).toBe(15_000);
+    expect(timeoutForUrl('https://connector-gateway.lovable.dev/brevo/smtp/email')).toBe(15_000);
     expect(timeoutForUrl('https://api.stripe.com/v1/subscriptions')).toBe(20_000);
     expect(timeoutForUrl('https://graph.facebook.com/v21.0/me')).toBe(20_000);
     expect(timeoutForUrl('https://api.checkr.com/v1/invitations')).toBe(15_000);
