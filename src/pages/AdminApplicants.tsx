@@ -468,6 +468,17 @@ export default function AdminApplicants() {
   }, [rows]);
 
   // ----- Actions -----
+  // Anything that emails or texts the applicant asks for confirmation first, so
+  // the same message can't be fired at someone over and over by accident.
+  const SEND_CONFIRM: Partial<Record<AdvanceAction, string>> = {
+    send_to_bg_check: "Send the background check and next-steps email to this applicant now?",
+    send_offer: "Send the offer and onboarding email to this applicant now?",
+    send_contract: "Send the contract for signature now?",
+    send_payment_setup: "Send the payment setup link now?",
+    schedule_interview: "Send the interview invitation now?",
+    fail: "Reject this applicant and send the rejection email? This cannot be undone.",
+  };
+
   const runAction = async (action: AdvanceAction, extra?: { scheduled_at?: string }) => {
     if (!open) return;
     // Bilingual gate — block APPROVE (clear) and SEND OFFER if not confirmed
@@ -477,6 +488,8 @@ export default function AdminApplicants() {
       });
       return;
     }
+    const ask = SEND_CONFIRM[action];
+    if (ask && !window.confirm(ask)) return;
     setSubmitting(action);
     const { data, error } = await supabase.functions.invoke("advance-applicant", {
       body: { applicant_id: open.id, action, notes: bgNotes || undefined, ...extra },
@@ -501,7 +514,25 @@ export default function AdminApplicants() {
       schedule_training: "Live training scheduled",
       mark_no_show: "Marked as no-show",
     };
-    toast.success(friendly[action]);
+    // Truthful reporting: the server now says whether the invitation and the
+    // next-steps email actually left. Never claim a send that did not happen.
+    const res = data as {
+      checkr_invitation_sent?: boolean | null;
+      checkr_error?: string | null;
+      onboarding_email_sent?: boolean | null;
+      onboarding_email_error?: string | null;
+    } | null;
+    if (action === "send_to_bg_check" && res?.checkr_invitation_sent !== true) {
+      toast.error("Background check was NOT sent", {
+        description: res?.checkr_error ?? "The background check service is not connected yet.",
+      });
+    } else if (res?.onboarding_email_sent === false) {
+      toast.error("Next-steps email was NOT sent", {
+        description: res?.onboarding_email_error ?? "unknown",
+      });
+    } else {
+      toast.success(friendly[action]);
+    }
     if (open) await fetchEvents(open.id);
     fetchRows();
   };
