@@ -90,6 +90,36 @@ export function useDashboardData(): DashboardData {
     let cancelled = false;
 
     const load = async () => {
+      // Several cards on one screen ask for the same data at the same moment.
+      // One request is shared between them instead of repeating every read.
+      if (!inflight) inflight = fetchDashboard().finally(() => { inflight = null; });
+      const next = await inflight;
+      if (cancelled) return;
+      if (!next) {
+        setState((s) => ({ ...s, loading: false, isAuthed: false }));
+        return;
+      }
+      dashboardCache = next;
+      setState({ loading: false, ...next, refetch: () => load() });
+    };
+
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => { inflight = null; void load(); });
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  return state;
+}
+
+type DashboardPayload = Omit<DashboardData, 'loading' | 'refetch'>;
+let inflight: Promise<DashboardPayload | null> | null = null;
+
+async function fetchDashboard(): Promise<DashboardPayload | null> {
+  {
+    {
       const { data: sessionData } = await supabase.auth.getSession();
       const user = sessionData.session?.user;
       if (!user) {
