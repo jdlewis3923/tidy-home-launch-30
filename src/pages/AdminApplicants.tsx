@@ -1024,10 +1024,10 @@ export default function AdminApplicants() {
                       <Button onClick={() => runAction("clear")} disabled={!!submitting || open.bg_check_status === "clear" || !open.bilingual_fluency_confirmed} title={!open.bilingual_fluency_confirmed ? "Bilingual fluency not confirmed — cannot approve" : ""} className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50">
                         {submitting === "clear" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldCheck className="h-4 w-4 mr-1" /> CLEAR</>}
                       </Button>
-                      <Button onClick={() => runAction("consider")} disabled={!!submitting} className="bg-amber-500 hover:bg-amber-600 text-white">
+                      <Button onClick={() => runAction("consider")} disabled={!!submitting || open.bg_check_status === "consider"} title={open.bg_check_status === "consider" ? "Already marked for review" : ""} className="bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50">
                         {submitting === "consider" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldAlert className="h-4 w-4 mr-1" /> CONSIDER</>}
                       </Button>
-                      <Button onClick={() => runAction("fail")} disabled={!!submitting} className="bg-red-600 hover:bg-red-700 text-white">
+                      <Button onClick={() => runAction("fail")} disabled={!!submitting || open.bg_check_status === "fail"} title={open.bg_check_status === "fail" ? "Already failed" : ""} className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50">
                         {submitting === "fail" ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldX className="h-4 w-4 mr-1" /> FAIL</>}
                       </Button>
                     </div>
