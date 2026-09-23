@@ -652,6 +652,13 @@
       "when": 1790119936521,
       "tag": "0092_fix_onboarding_token_search_path",
       "breakpoints": true
+    },
+    {
+      "idx": 93,
+      "version": "7",
+      "when": 1790122386603,
+      "tag": "0093_admin_workday_activity",
+      "breakpoints": true
     }
   ]
 }

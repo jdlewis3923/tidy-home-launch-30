@@ -326,6 +326,62 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_workday_events: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          actor_type: string
+          actor_user_id: string | null
+          applicant_id: string | null
+          detail: string | null
+          event_type: string
+          id: string
+          metadata: Json
+          occurred_at: string
+          status: string | null
+          title: string
+          waiting_on_admin: boolean
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          actor_type?: string
+          actor_user_id?: string | null
+          applicant_id?: string | null
+          detail?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          status?: string | null
+          title: string
+          waiting_on_admin?: boolean
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          actor_type?: string
+          actor_user_id?: string | null
+          applicant_id?: string | null
+          detail?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          status?: string | null
+          title?: string
+          waiting_on_admin?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_workday_events_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alert_event: {
         Row: {
           acknowledged_at: string | null
