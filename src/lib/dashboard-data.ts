@@ -118,14 +118,9 @@ type DashboardPayload = Omit<DashboardData, 'loading' | 'refetch'>;
 let inflight: Promise<DashboardPayload | null> | null = null;
 
 async function fetchDashboard(): Promise<DashboardPayload | null> {
-  {
-    {
       const { data: sessionData } = await supabase.auth.getSession();
       const user = sessionData.session?.user;
-      if (!user) {
-        if (!cancelled) setState((s) => ({ ...s, loading: false, isAuthed: false }));
-        return;
-      }
+      if (!user) return null;
 
       const [profileRes, subRes, visitsRes, invRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle(),
