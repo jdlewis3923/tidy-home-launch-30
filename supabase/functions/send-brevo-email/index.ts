@@ -19,7 +19,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { logInvocation } from '../_shared/withLogging.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 import { EMAIL, emailKeyForId, missingRequiredParams } from '../_shared/emailTemplates.ts';
-import { sendBrevoEmail, sendBrevoEmailOrThrow } from '../_shared/brevo-send.ts';
+import { sendBrevoEmailOrThrow } from '../_shared/brevo-send.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'BREVO_API_KEY'] as const;
 

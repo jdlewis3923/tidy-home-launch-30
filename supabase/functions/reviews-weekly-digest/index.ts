@@ -27,7 +27,7 @@ import { attribute, type AttributionCandidate } from '../_shared/review-attribut
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const ALERT_FROM_EMAIL = Deno.env.get('ALERT_FROM_EMAIL') ?? 'alerts@jointidy.co';
+const ALERT_FROM_EMAIL = 'hello@jointidy.co';
 const ADMIN_BASE_URL = Deno.env.get('ADMIN_BASE_URL') ?? 'https://jointidy.co';
 
 const BATCH_SIZE = 200;

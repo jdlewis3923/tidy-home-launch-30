@@ -22,7 +22,7 @@ import { DAY_MS, round } from '../_shared/kpi-engine.ts';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
-const OWNER_EMAIL = Deno.env.get('KPI_DIGEST_TO') ?? 'admin@jointidy.co';
+const OWNER_EMAIL = Deno.env.get('KPI_DIGEST_TO') ?? 'hello@jointidy.co';
 const APP_URL = 'https://jointidy.co';
 
 type Row = Record<string, any>;

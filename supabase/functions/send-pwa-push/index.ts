@@ -18,7 +18,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 // kpi-vapid-bootstrap) and, if present, an env secret wins. It is never
 // returned to any caller.
 const VAPID_PRIVATE_ENV = Deno.env.get('PWA_VAPID_PRIVATE_KEY') ?? '';
-const VAPID_SUBJECT = Deno.env.get('PWA_VAPID_SUBJECT') ?? 'mailto:admin@jointidy.co';
+const VAPID_SUBJECT = Deno.env.get('PWA_VAPID_SUBJECT') ?? 'mailto:hello@jointidy.co';
 
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },

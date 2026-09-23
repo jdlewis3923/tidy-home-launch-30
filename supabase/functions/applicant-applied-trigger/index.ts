@@ -37,9 +37,17 @@ Deno.serve(async (req) => {
 
   const fullName = `${a.first_name} ${a.last_name}`;
   const oosa = (a as any).out_of_service_area === true;
-  const answerRows = Object.entries(a)
-    .filter(([key, value]) => !['id', 'created_at', 'updated_at', 'coi_token', 'intake_token', 'verify_token'].includes(key) && value !== null && value !== '')
-    .map(([key, value]) => `<li><strong>${key.replaceAll('_', ' ')}:</strong> ${Array.isArray(value) ? value.join(', ') : typeof value === 'object' ? JSON.stringify(value) : String(value)}</li>`)
+  const answerFields: Array<[string, string]> = [
+    ['email', 'Email'], ['phone', 'Phone'], ['zip', 'ZIP'], ['service', 'Service'],
+    ['experience_years', 'Years of experience'], ['has_vehicle', 'Transportation'],
+    ['has_supplies', 'Own equipment'], ['work_authorized', 'Work authorization'],
+    ['bilingual', 'Bilingual'], ['insurance_willing', 'Willing to carry insurance'],
+    ['fl_license', 'Florida license'], ['license_expiry', 'License expiry'],
+    ['notes_for_admin', 'About their experience'], ['drive_minutes', 'Estimated drive time'],
+  ];
+  const answerRows = answerFields
+    .filter(([key]) => a[key] !== null && a[key] !== undefined && a[key] !== '')
+    .map(([key, label]) => `<li><strong>${label}:</strong> ${typeof a[key] === 'boolean' ? (a[key] ? 'Yes' : 'No') : String(a[key])}</li>`)
     .join('');
 
   // 1. Confirmation to applicant — different copy for out-of-service-area.

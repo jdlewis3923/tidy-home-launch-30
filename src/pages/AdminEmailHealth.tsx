@@ -133,7 +133,7 @@ export default function AdminEmailHealth() {
   }
 
   async function runTestSuite() {
-    if (!confirm("Fire test send for ALL backend-triggered templates? This sends ~20 emails/SMS to admin@jointidy.co.")) return;
+    if (!confirm("Fire test send for ALL backend-triggered templates? This sends ~20 emails/SMS to hello@jointidy.co.")) return;
     setRunning(true);
     setTestResult(null);
 
