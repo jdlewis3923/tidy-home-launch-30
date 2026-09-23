@@ -42,3 +42,4 @@ Transactional email/SMS: edge functions fire Zapier webhooks only — never call
 - [Transactional Messaging](mem://integrations/transactional-messaging) — Phase 4/5 rule: fire Zapier webhooks, never Brevo/Twilio/Resend direct from edge functions
 - [Customer Dashboard Home](mem://features/customer-dashboard-home) — Live state-aware command center at /dashboard with summary cards, calendar, recent photo proof, referral, quick action modals
 - [Chatbot Knowledge](mem://features/chatbot-knowledge) — Never string-replace the KB row; insert a new row, canon-guarded by a live test
+- [Pro Kit Standard](mem://features/pro-kit-standard) — Per-service kit contents, optional magnets with $15/month credit, automatic kit order flow

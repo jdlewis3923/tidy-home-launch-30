@@ -100,6 +100,7 @@ const QrRedirect = lazy(() => import("./pages/QrRedirect.tsx"));
 const Rate = lazy(() => import("./pages/Rate.tsx"));
 const VerifyPro = lazy(() => import("./pages/VerifyPro.tsx"));
 const ProIntake = lazy(() => import("./pages/ProIntake.tsx"));
+const BadgePhoto = lazy(() => import("./pages/BadgePhoto.tsx"));
 const CoiTokenUpload = lazy(() => import("./pages/CoiTokenUpload.tsx"));
 
 /* Tidy Pro Portal — the installable app Pros work from day to day. */
@@ -365,6 +366,8 @@ const App = () => (
                   {/* Public Pro badge verification — no login, ever. */}
                   <Route path="/verify/:token" element={<VerifyPro />} />
                   <Route path="/intake/:token" element={<ProIntake />} />
+                  {/* Badge photo upload from the kit confirmation email — token only. */}
+                  <Route path="/badge/:token" element={<BadgePhoto />} />
                   {/* Insurance certificate upload from the onboarding email — token only. */}
                   <Route path="/coi/:token" element={<CoiTokenUpload />} />
 

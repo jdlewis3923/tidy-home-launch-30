@@ -1,19 +1,31 @@
 import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
-// Tidy — Pro Intake & Kit Order submission notifier
+// Tidy — Pro Intake & Kit Order submission handler
 //
 // POST { token: string }
 // - Loads the pro_kit row by token (service role)
+// - Builds the ready-to-order kit summary from the new kit standard and stores
+//   it on the row, so /admin/pro-kits has a paste-ready vendor order
 // - Advances the linked applicant's stage when one is linked
-// - Emails hello@jointidy.co every submitted field, grouped by section
+// - Emails hello@jointidy.co the same summary plus every submitted field
+// - Emails the Pro one confirmation: what is coming, that it is free, and the
+//   badge photo upload link (no separate message, ever)
 //
-// No SMS is sent from this flow: TWILIO_FROM_NUMBER is unset and the send
-// would fail silently.
+// Copy rules: Tidy provides, the Pro chooses. Never "employee".
 //
 // The logo is a stable public path, never a rotated asset hash.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import {
+  kitContentsLine,
+  kitItemsFor,
+  kitOrderSummary,
+  kitServiceKey,
+  KIT_SERVICE_LABEL,
+  MAGNET_CREDIT_MONTHLY_USD,
+  magnetTestHolds,
+} from '../_shared/pro-kit.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -24,8 +36,6 @@ const OWNER = 'hello@jointidy.co';
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
-
-const MAGNET_RISK = ['Aluminium — will NOT hold', 'Plastic or composite — will NOT hold', 'Unsure'];
 
 const SECTIONS: { title: string; fields: [string, string][] }[] = [
   {
@@ -43,21 +53,23 @@ const SECTIONS: { title: string; fields: [string, string][] }[] = [
   {
     title: 'Apparel sizing',
     fields: [
-      ['polo_size', 'Polo size'],
-      ['polo_cut', 'Polo cut'],
-      ['tee_size', 'Tee size'],
-      ['tee_cut', 'Tee cut'],
-      ['vest_size', 'Vest'],
+      ['shirt_size', 'Shirt size'],
+      ['shirt_cut', 'Shirt cut'],
+      ['vest_size', 'Hi-vis vest (lawn only)'],
       ['cap', 'Cap'],
     ],
   },
   {
-    title: 'Vehicle and magnets',
+    title: 'Vehicle advertising',
     fields: [
-      ['vehicle', 'Year / make / model'],
+      ['magnets_opt_in', 'Wants magnets'],
+      ['vehicle_year', 'Vehicle year'],
+      ['vehicle_make', 'Make'],
+      ['vehicle_model', 'Model'],
       ['vehicle_color', 'Color'],
-      ['vehicle_2', 'Second vehicle'],
-      ['door_material', 'Door material'],
+      ['magnet_test', "Magnet sticks to driver's door"],
+      ['vehicle_ad_signed_name', 'Agreement signed by'],
+      ['vehicle_ad_signed_at', 'Agreement signed at'],
     ],
   },
   {
@@ -75,8 +87,6 @@ const SECTIONS: { title: string; fields: [string, string][] }[] = [
       ['ins_carrier', 'Insurance carrier'],
       ['ins_policy', 'Policy number'],
       ['ins_expiry', 'Policy expiry'],
-      ['dl_number', "Driver's license number"],
-      ['dl_expiry', 'License expiry'],
       ['auto_insurance', 'Auto insurance'],
     ],
   },
@@ -104,6 +114,21 @@ function display(v: unknown): string {
   return String(v);
 }
 
+function shell(inner: string): string {
+  return `<!doctype html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,sans-serif;color:#0f172a">
+  <div style="max-width:640px;margin:0 auto;background:#ffffff">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a"><tr>
+      <td style="padding:16px 24px" valign="middle" align="left"><img src="${LOGO}" alt="Tidy" width="42" height="42" style="display:block;width:42px;height:42px;border:0"/></td>
+      <td style="padding:16px 24px;font:700 13px Arial,sans-serif;color:#ffffff;line-height:1.35;text-align:right" valign="middle" align="right">More life.<br/><span style="color:#FCCC00">Less chores.</span></td>
+    </tr></table>
+    <div style="height:4px;background:#FCCC00"></div>
+    <div style="padding:26px 24px">${inner}</div>
+    <div style="padding:16px 24px;color:#94a3b8;font-size:12px;border-top:1px solid #e2e8f0">
+      Tidy Home Concierge LLC · 2121 Biscayne Blvd #1562, Miami, FL 33137 · jointidy.co · (786) 829-1141
+    </div>
+  </div></body></html>`;
+}
+
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
@@ -116,6 +141,13 @@ Deno.serve(async (req) => {
   const { data: kit, error } = await admin.from('pro_kit').select('*').eq('token', token).maybeSingle();
   if (error) return jsonResponse({ error: 'lookup_failed', details: error.message }, 500);
   if (!kit) return jsonResponse({ error: 'not_found' }, 404);
+
+  const row = kit as Record<string, unknown>;
+  const serviceKey = kitServiceKey(kit.service_line);
+  const summary = kitOrderSummary(row as never);
+  const badgeUrl = kit.badge_photo_token ? `${SITE}/badge/${kit.badge_photo_token}` : null;
+
+  await admin.from('pro_kit').update({ kit_summary: summary }).eq('id', kit.id);
 
   // Advance the linked applicant one step along the hiring pipeline.
   const PIPELINE = ['applied', 'background_check_review', 'interview_pending', 'offer_sent', 'contract_signed', 'oriented', 'active'];
@@ -135,13 +167,13 @@ Deno.serve(async (req) => {
       event: 'intake_submitted',
       metadata: {
         shirt_size: kit.shirt_size ?? null,
-        vehicle: kit.vehicle ?? null,
         service_line: kit.service_line ?? null,
+        magnets_opt_in: kit.magnets_opt_in ?? null,
       },
     });
   }
 
-  const warn = MAGNET_RISK.includes(String(kit.door_material ?? ''));
+  const magnetHold = kit.magnets_opt_in === true && !magnetTestHolds(kit.magnet_test);
   const adminLink = `${SITE}/admin/pro-kits?kit=${kit.id}`;
 
   const rows = SECTIONS.map((s) => `
@@ -149,42 +181,87 @@ Deno.serve(async (req) => {
     ${s.fields
       .map(
         ([k, label]) => `<tr><td style="padding:3px 0;font:14px Arial,sans-serif;color:#334155">
-          <strong style="color:#0f172a">${esc(label)}:</strong> ${esc(display((kit as Record<string, unknown>)[k]))}
+          <strong style="color:#0f172a">${esc(label)}:</strong> ${esc(display(row[k]))}
         </td></tr>`,
       )
       .join('')}
   `).join('');
 
-  const html = `
-  <div style="background:#f1f5f9;padding:24px">
-    <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden">
-      <div style="background:#0A2A47;padding:20px;text-align:center">
-        <img src="${LOGO}" alt="Tidy" width="48" height="48" style="display:inline-block;border:0" />
-      </div>
-      <div style="padding:24px">
-        ${warn ? `<p style="margin:0 0 16px;padding:12px;border:2px solid #dc2626;border-radius:10px;background:#fef2f2;font:700 15px Arial,sans-serif;color:#991b1b">DO NOT ORDER MAGNETS — door material must be verified in person.</p>` : ''}
-        <h1 style="margin:0;font:800 20px Arial,sans-serif;color:#0A2A47">Intake received</h1>
-        <p style="margin:6px 0 0;font:14px Arial,sans-serif;color:#64748b">${esc(display(kit.legal_name))} · ${esc(display(kit.service_line))}</p>
-        <table style="width:100%;border-collapse:collapse">${rows}</table>
-        <p style="margin:24px 0 0">
-          <a href="${adminLink}" style="display:inline-block;background:#FCCC00;color:#0A2A47;font:700 14px Arial,sans-serif;padding:12px 18px;border-radius:10px;text-decoration:none">Open the admin record</a>
-        </p>
-      </div>
-    </div>
-  </div>`;
+  const ownerHtml = shell(`
+    ${magnetHold ? `<p style="margin:0 0 16px;padding:12px;border:2px solid #dc2626;border-radius:10px;background:#fef2f2;font:700 15px Arial,sans-serif;color:#991b1b">DO NOT ORDER MAGNETS — the driver's door will not hold one (or was not tested).</p>` : ''}
+    <h1 style="margin:0;font:800 20px Arial,sans-serif;color:#0A2A47">Kit ready to order</h1>
+    <p style="margin:6px 0 0;font:14px Arial,sans-serif;color:#64748b">${esc(display(kit.legal_name))} · ${esc(KIT_SERVICE_LABEL[serviceKey].en)}</p>
+    <p style="margin:18px 0 6px;font:700 13px Arial,sans-serif;color:#0A2A47;text-transform:uppercase;letter-spacing:.08em">Paste-ready vendor order</p>
+    <pre style="margin:0;padding:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font:13px/1.5 Menlo,Consolas,monospace;color:#0f172a;white-space:pre-wrap">${esc(summary)}</pre>
+    <table style="width:100%;border-collapse:collapse">${rows}</table>
+    <p style="margin:24px 0 0">
+      <a href="${adminLink}" style="display:inline-block;background:#FCCC00;color:#0A2A47;font:700 14px Arial,sans-serif;padding:12px 18px;border-radius:10px;text-decoration:none">Open the kit record</a>
+    </p>`);
 
+  const contentsEn = kitContentsLine(serviceKey);
+  const contentsEs = kitContentsLine(serviceKey, 'es');
+  const magnetsYes = kit.magnets_opt_in === true;
+  const itemList = kitItemsFor(serviceKey)
+    .map((i) => `<li style="margin:4px 0">${i.qty} × ${esc(i.en)} / ${esc(i.es)}</li>`)
+    .join('');
+
+  const proHtml = shell(`
+    <h1 style="margin:0 0 4px;font-size:21px">Your Tidy kit is on the way, ${esc(display(kit.badge_name))}</h1>
+    <p style="margin:0 0 18px;font:14px Arial,sans-serif;color:#64748b">Su kit de Tidy está en camino.</p>
+    <p style="margin:0 0 6px;font:15px Arial,sans-serif;color:#0f172a"><strong>Tidy provides this at no cost to you:</strong></p>
+    <p style="margin:0 0 10px;font:14px Arial,sans-serif;color:#64748b">Tidy le entrega esto sin ningún costo para usted:</p>
+    <ul style="margin:0 0 6px;padding-left:20px;font:15px Arial,sans-serif;color:#334155">${itemList}</ul>
+    <p style="margin:0 0 18px;font:13px Arial,sans-serif;color:#94a3b8">${esc(contentsEn)} / ${esc(contentsEs)}</p>
+    ${magnetsYes ? `<p style="margin:0 0 18px;font:14px Arial,sans-serif;color:#334155">
+      You chose vehicle magnets, so a $${MAGNET_CREDIT_MONTHLY_USD}/month vehicle advertising credit goes out with your Friday deposit while they are on your car. You can take them off at any time.<br/>
+      <span style="color:#64748b">Eligió los imanes, así que un crédito de $${MAGNET_CREDIT_MONTHLY_USD} al mes sale con su depósito del viernes mientras estén en su carro. Puede quitarlos cuando quiera.</span>
+    </p>` : `<p style="margin:0 0 18px;font:14px Arial,sans-serif;color:#334155">
+      You chose not to have vehicle magnets. Nothing else about your work changes, and you can change your mind any time.<br/>
+      <span style="color:#64748b">Eligió no llevar imanes. Nada más en su trabajo cambia, y puede cambiar de opinión cuando quiera.</span>
+    </p>`}
+    <p style="margin:0 0 6px;font:15px Arial,sans-serif;color:#0f172a"><strong>One thing left: your badge photo.</strong></p>
+    <p style="margin:0 0 10px;font:14px Arial,sans-serif;color:#334155">
+      Head and shoulders, in your Tidy shirt, plain background. If your shirts have not arrived yet, send the photo once they do.<br/>
+      <span style="color:#64748b">Cabeza y hombros, con su camisa de Tidy, fondo sencillo. Si sus camisas aún no llegan, envíe la foto cuando lleguen.</span>
+    </p>
+    ${badgeUrl ? `<p style="margin:12px 0 0"><a href="${badgeUrl}" style="display:inline-block;background:#f5c518;color:#0f172a;font:700 15px Arial,sans-serif;padding:13px 22px;border-radius:10px;text-decoration:none">Send your badge photo / Enviar su foto</a></p>` : ''}
+    <p style="margin:22px 0 0;font:14px Arial,sans-serif;color:#475569">
+      Your kit typically arrives in 7 to 10 days. Questions: <a href="mailto:${OWNER}" style="color:#2563eb">${OWNER}</a>.<br/>
+      <span style="color:#64748b">Su kit llega normalmente en 7 a 10 días.</span>
+    </p>`);
+
+  let ownerSent = false;
+  let proSent = false;
   try {
     await sendBrevoEmail({
       to: OWNER,
       marketing: false,
-      subject: `Intake received — ${display(kit.legal_name)} (${display(kit.service_line)})`,
-      htmlContent: html,
+      subject: `Kit ready to order — ${display(kit.legal_name)} (${KIT_SERVICE_LABEL[serviceKey].en})`,
+      htmlContent: ownerHtml,
       label: 'intake-submitted',
     });
+    ownerSent = true;
   } catch (e) {
-    console.error('intake-submitted email failed:', e instanceof Error ? e.message : String(e));
-    return jsonResponse({ ok: true, emailed: false }, 200);
+    console.error('intake-submitted owner email failed:', e instanceof Error ? e.message : String(e));
   }
 
-  return jsonResponse({ ok: true, emailed: true });
+  if (kit.email) {
+    try {
+      await sendBrevoEmail({
+        to: String(kit.email),
+        marketing: false,
+        subject: 'Your Tidy kit is on the way — one photo left / Su kit de Tidy va en camino',
+        htmlContent: proHtml,
+        label: 'pro-kit-confirmation',
+      });
+      proSent = true;
+      await admin.from('pro_kit')
+        .update({ pro_confirm_email_sent_at: new Date().toISOString() })
+        .eq('id', kit.id);
+    } catch (e) {
+      console.error('intake-submitted pro email failed:', e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  return jsonResponse({ ok: true, owner_emailed: ownerSent, pro_emailed: proSent, magnet_hold: magnetHold });
 });

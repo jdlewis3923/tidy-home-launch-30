@@ -666,6 +666,20 @@
       "when": 1790123714713,
       "tag": "0094_insurance_expiry_cron_authority",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1790173863660,
+      "tag": "0095_pro_kit_standard_magnets_legal_review",
+      "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1790174383316,
+      "tag": "0096_badge_photo_storage_policies",
+      "breakpoints": true
     }
   ]
 }

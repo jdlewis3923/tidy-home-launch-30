@@ -29,3 +29,9 @@
 - [x] Fix the admin shell so content starts at the viewport top beside a fixed rail
 - [x] Apply one tokenized Tidy design language across the five priority admin pages in light and dark modes
 - [x] Run browser acceptance checks, capture requested screenshots and measurements, then delete test records
+
+## Pro kit standard (new, 2026-09)
+- Cleaning: 2 embroidered polos + photo ID badge (no vest). Lawn: 2 tees + 2 hi-vis vests + badge. Car care: 2 tees + badge.
+- Magnets optional on all three services, $15/month advertising credit with the Friday deposit, signed vehicle advertising agreement first, household magnet test before ordering.
+- Intake submission now auto-builds the vendor order, emails the owner and the Pro (badge photo link). No manual send step.
+- Open: legal review of the vehicle advertising agreement + ICA before the 10th signed Pro (tracked in /admin/documents).

@@ -1,14 +1,23 @@
 /**
  * ProKitEditor — editable admin view of a pro_kit row.
  *
- * Shows the Pro's submitted answers plus the admin-only fields (COI checks,
- * Checkr dates, ICA date, Pro number, kit issued checklist, issued date and
- * completed by) that are deliberately absent from the public intake form.
+ * Shows the Pro's submitted answers, the exact kit for their service with the
+ * sizes filled in, the magnet choice, a paste-ready vendor order, plus the
+ * admin-only fields (COI checks, Checkr dates, ICA date, Pro number, issued
+ * checklist) that are deliberately absent from the public intake form.
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Copy, Loader2 } from "lucide-react";
+import {
+  KIT_SERVICE_LABEL,
+  kitItemsFor,
+  kitOrderSummary,
+  kitServiceKey,
+  magnetTestHolds,
+  MAGNET_CREDIT_MONTHLY_USD,
+} from "@/lib/proKit";
 
 export type ProKitRow = {
   id: string;
@@ -38,8 +47,6 @@ const COI_CHECKS = [
   "Certificate filed in company documents",
 ];
 
-const KIT_ITEMS = ["Badge", "Polo", "Tee", "Vest", "Cap", "Vehicle magnets", "Welcome letter"];
-
 type KitFieldType = "text" | "date" | "number" | "textarea" | "tel" | "email" | "zip";
 
 const SECTIONS: { title: string; fields: [string, string, KitFieldType][] }[] = [
@@ -58,21 +65,21 @@ const SECTIONS: { title: string; fields: [string, string, KitFieldType][] }[] = 
   {
     title: "Apparel",
     fields: [
-      ["polo_size", "Polo size", "text"],
-      ["polo_cut", "Polo cut", "text"],
-      ["tee_size", "Tee size", "text"],
-      ["tee_cut", "Tee cut", "text"],
-      ["vest_size", "Vest", "text"],
+      ["shirt_size", "Shirt size", "text"],
+      ["shirt_cut", "Shirt cut", "text"],
+      ["vest_size", "Hi-vis vest (lawn only)", "text"],
       ["cap", "Cap", "text"],
     ],
   },
   {
-    title: "Vehicle",
+    title: "Vehicle advertising",
     fields: [
-      ["vehicle", "Year / make / model", "text"],
+      ["vehicle_year", "Vehicle year", "text"],
+      ["vehicle_make", "Make", "text"],
+      ["vehicle_model", "Model", "text"],
       ["vehicle_color", "Color", "text"],
-      ["vehicle_2", "Second vehicle", "text"],
-      ["door_material", "Door material", "text"],
+      ["magnet_test", "Magnet sticks to driver's door", "text"],
+      ["vehicle_ad_signed_name", "Agreement signed by", "text"],
     ],
   },
   {
@@ -89,8 +96,6 @@ const SECTIONS: { title: string; fields: [string, string, KitFieldType][] }[] = 
       ["ins_carrier", "Insurance carrier", "text"],
       ["ins_policy", "Policy number", "text"],
       ["ins_expiry", "Policy expiry", "date"],
-      ["dl_number", "License number", "text"],
-      ["dl_expiry", "License expiry", "date"],
       ["auto_insurance", "Auto insurance", "text"],
     ],
   },
@@ -119,6 +124,14 @@ const SECTIONS: { title: string; fields: [string, string, KitFieldType][] }[] = 
 
 const asArray = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
 
+/** Fulfilment checklist: exactly the items this Pro's service includes. */
+export function kitChecklistItems(service: string | null | undefined, magnets: boolean): string[] {
+  const items = kitItemsFor(service).map((i) => (i.qty > 1 ? `${i.qty} × ${i.en}` : i.en));
+  if (magnets) items.push("2 × Vehicle magnet");
+  items.push("Welcome letter");
+  return items;
+}
+
 export default function ProKitEditor({ kit, onSaved }: { kit: ProKitRow; onSaved: () => void }) {
   const [draft, setDraft] = useState<Record<string, unknown>>({ ...kit });
   const [saving, setSaving] = useState(false);
@@ -130,11 +143,21 @@ export default function ProKitEditor({ kit, onSaved }: { kit: ProKitRow; onSaved
     set(k, list.includes(item) ? list.filter((x) => x !== item) : [...list, item]);
   };
 
+  const serviceKey = kitServiceKey(String(draft.service_line ?? ""));
+  const magnets = draft.magnets_opt_in === true;
+  const checklist = useMemo(
+    () => kitChecklistItems(String(draft.service_line ?? ""), magnets),
+    [draft.service_line, magnets],
+  );
+  const summary = useMemo(() => kitOrderSummary(draft as never), [draft]);
+  const magnetBlocked = magnets && !magnetTestHolds(String(draft.magnet_test ?? ""));
+
   const save = async () => {
     setSaving(true);
-    const { id, token, created_at, ...rest } = draft as Record<string, unknown> & { id: string };
+    const { id, token, created_at, badge_photo_token, ...rest } = draft as Record<string, unknown> & { id: string };
     const payload: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(rest)) payload[k] = v === "" ? null : v;
+    payload.kit_summary = summary;
     const { error } = await supabase.from("pro_kit").update(payload as never).eq("id", kit.id);
     setSaving(false);
     if (error) toast({ title: "Could not save", description: error.message, variant: "destructive" });
@@ -154,6 +177,49 @@ export default function ProKitEditor({ kit, onSaved }: { kit: ProKitRow; onSaved
         <p className="mt-1 text-xs text-muted-foreground">
           Intake link: <code>jointidy.co/intake/{kit.token}</code>
         </p>
+      </div>
+
+      {/* Ready to order — exactly what to buy for this Pro. */}
+      <div className="rounded-xl border border-border bg-muted/40 p-4">
+        <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          Ready to order · {KIT_SERVICE_LABEL[serviceKey].en}
+        </h3>
+        <ul className="mt-2 space-y-1 text-sm text-foreground">
+          {checklist.map((i) => <li key={i}>· {i}</li>)}
+        </ul>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {magnets
+            ? `Magnets opted in — $${MAGNET_CREDIT_MONTHLY_USD}/month vehicle advertising credit with the Friday deposit.`
+            : "Magnets declined — nothing else changes."}
+        </p>
+        {magnetBlocked && (
+          <p className="mt-2 rounded-lg admin-state-critical px-3 py-2 text-xs font-bold">
+            Do not order magnets — the driver's door will not hold one, or it was not tested.
+          </p>
+        )}
+        {magnets && !draft.vehicle_ad_signed_at && (
+          <p className="mt-2 rounded-lg admin-state-warning px-3 py-2 text-xs font-bold">
+            Vehicle advertising agreement not signed yet — magnets stay on hold.
+          </p>
+        )}
+        <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-3 text-xs text-foreground">
+          {summary}
+        </pre>
+        <button
+          type="button"
+          onClick={() => { navigator.clipboard.writeText(summary); toast({ title: "Vendor order copied" }); }}
+          className="mt-2 inline-flex h-10 items-center gap-1.5 rounded-lg border border-border px-3 text-xs font-bold text-foreground"
+        >
+          <Copy className="h-3.5 w-3.5" /> Copy vendor order
+        </button>
+        {typeof draft.badge_photo_token === "string" && (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Badge photo link: <code>jointidy.co/badge/{String(draft.badge_photo_token)}</code>
+            {draft.badge_photo_uploaded_at
+              ? ` · received ${new Date(String(draft.badge_photo_uploaded_at)).toLocaleDateString()}`
+              : " · not received yet"}
+          </p>
+        )}
       </div>
 
       {SECTIONS.map((s) => (
@@ -196,10 +262,24 @@ export default function ProKitEditor({ kit, onSaved }: { kit: ProKitRow; onSaved
         </div>
       ))}
 
+      <div>
+        <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Vehicle magnets</h3>
+        <select
+          aria-label="Vehicle magnets"
+          className={input}
+          value={draft.magnets_opt_in === true ? "yes" : draft.magnets_opt_in === false ? "no" : ""}
+          onChange={(e) => set("magnets_opt_in", e.target.value === "yes" ? true : e.target.value === "no" ? false : null)}
+        >
+          <option value="">Not answered</option>
+          <option value="yes">Opted in</option>
+          <option value="no">Declined</option>
+        </select>
+      </div>
+
       <CheckList title="Days available" items={["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]} selected={asArray(draft.days)} onToggle={(i) => toggle("days", i)} />
       <CheckList title="COI checks" items={COI_CHECKS} selected={asArray(draft.coi_checks)} onToggle={(i) => toggle("coi_checks", i)} />
-      <CheckList title="Kit issued" items={KIT_ITEMS} selected={asArray(draft.kit_issued)} onToggle={(i) => toggle("kit_issued", i)} />
-      <CheckList title="Kit handed over" items={KIT_ITEMS} selected={asArray(draft.kit_done)} onToggle={(i) => toggle("kit_done", i)} />
+      <CheckList title="Kit ordered" items={checklist} selected={asArray(draft.kit_issued)} onToggle={(i) => toggle("kit_issued", i)} />
+      <CheckList title="Kit handed over" items={checklist} selected={asArray(draft.kit_done)} onToggle={(i) => toggle("kit_done", i)} />
 
       <button
         onClick={save}
