@@ -140,7 +140,7 @@ export function MessagingReadinessBanner({ enabled = true }: { enabled?: boolean
       <div className="flex items-start gap-3">
         <XCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-red-800">Text messages will not send</h2>
+          <h2 className="text-base font-semibold text-red-800">Account suspended at Twilio — fix billing there.</h2>
           {error ? (
             <p className="text-sm text-red-700 mt-1">{error}</p>
           ) : (
@@ -150,9 +150,9 @@ export function MessagingReadinessBanner({ enabled = true }: { enabled?: boolean
               ))}
             </ul>
           )}
-          <Link to="/admin/setup-check" className="inline-block mt-2 text-sm font-semibold text-red-800 underline">
-            Open Health → Messaging readiness
-          </Link>
+          <a href="https://console.twilio.com/" target="_blank" rel="noreferrer" className="inline-block mt-2 text-sm font-semibold text-red-800 underline">
+            Open Twilio console
+          </a>
         </div>
       </div>
     </section>

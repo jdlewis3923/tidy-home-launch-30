@@ -61,22 +61,22 @@
     /* ---- Admin surface tokens (light theme = current Tidy brand palette) ----
        Every admin surface below reads these, so the dark theme only has to
        redefine the values under `.dark` — no component hardcodes a color. */
-    --admin-canvas-1: 210 40% 99%;
-    --admin-canvas-2: 214 32% 95%;
+    --admin-canvas-1: 204 64% 97%; /* #F2F7FB */
+    --admin-canvas-2: 204 64% 97%;
     --admin-surface: 0 0% 100%;
     --admin-surface-a: 0.96;
     --admin-input: 0 0% 100%;
     --admin-text: 222 30% 24%;
-    --admin-text-strong: 222 47% 11%;
+    --admin-text-strong: 210 56% 11%; /* #0C1B2A */
     --admin-text-dim: 215 20% 34%;
-    --admin-text-muted: 215 16% 45%;
+    --admin-text-muted: 211 16% 42%; /* #5A6B7D */
     --admin-placeholder: 215 16% 55%;
     --admin-bar: 0 0% 100%;
     --admin-bar-text: 222 20% 32%;
     --admin-bar-dim: 215 16% 45%;
     --admin-rail-text: 215 16% 42%;
     --admin-rail-hover-text: 222 47% 11%;
-    --admin-hairline: 215 25% 70%;
+    --admin-hairline: 208 35% 89%; /* #D9E3EC */
     --admin-vignette: 215 25% 55%;
     --admin-vignette-a: 0.16;
     /* Gold needs a lower lightness to stay legible on a light ground. */
@@ -520,16 +520,16 @@ body.admin-hud {
    below the slim top status bar, and add comfortable horizontal/vertical
    padding so dashboards never feel bunched. */
 body.admin-hud > #root {
-  padding-top: 48px; /* topbar + breathing room */
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-top: 48px;
+  padding-left: 0;
+  padding-right: 0;
   padding-bottom: 32px;
 }
 @media (min-width: 1024px) {
   body.admin-hud > #root {
-    padding-left: 88px; /* nav rail width + gutter */
-    padding-right: 28px;
-    padding-top: 56px;
+    padding-left: 248px;
+    padding-right: 0;
+    padding-top: 40px;
   }
 }
 
@@ -540,8 +540,7 @@ body.admin-hud > #root {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse at top, hsl(var(--admin-canvas-1)) 0%, hsl(var(--admin-canvas-2)) 60%);
+  background: hsl(var(--admin-canvas-2));
 }
 .admin-hud-grid {
   position: absolute;
@@ -595,17 +594,13 @@ body.admin-hud > #root {
 .admin-hud-topbar {
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: 32px;
+  height: 40px;
   z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  background: linear-gradient(
-    to bottom,
-    hsl(var(--admin-bar) / 0.95),
-    hsl(var(--admin-bar) / 0.82)
-  );
+  background: #00325A;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid hsl(var(--primary) / 0.18);
@@ -624,6 +619,8 @@ body.admin-hud > #root {
   min-width: 0;
   overflow: hidden;
 }
+.admin-hud-topbar__center { margin-left: auto; margin-right: 12px; }
+.admin-mobile-menu { display: inline-flex; color: white; }
 /* On phones the HUD must never push the page into horizontal scroll. */
 @media (max-width: 640px) {
   .admin-hud-topbar { padding: 0 10px; }
@@ -667,19 +664,15 @@ body.admin-hud > #root {
 /* ---- Left nav rail (desktop only) ---- */
 .admin-hud-rail {
   position: fixed;
-  top: 32px; bottom: 0; left: 0;
-  width: 64px;
+  top: 40px; bottom: 0; left: 0;
+  width: 248px;
   z-index: 49;
   display: none;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 4px;
-  padding: 14px 0;
-  background: linear-gradient(
-    to right,
-    hsl(var(--admin-bar) / 0.94),
-    hsl(var(--admin-bar) / 0.7)
-  );
+  padding: 14px 12px 28px;
+  background: #00325A;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-right: 1px solid hsl(var(--primary) / 0.15);
@@ -689,22 +682,29 @@ body.admin-hud > #root {
 .admin-hud-rail::-webkit-scrollbar { display: none; }
 @media (min-width: 1024px) {
   .admin-hud-rail { display: flex; }
+  .admin-mobile-menu { display: none; }
 }
+.admin-hud-rail__brand { display:flex;align-items:center;gap:10px;padding:4px 10px 16px;color:#fff;font:700 13px "JetBrains Mono",monospace;letter-spacing:.18em; }
+.admin-nav-group { margin-bottom: 4px; }
+.admin-nav-group__trigger { width:100%;height:38px;justify-content:flex-start;gap:9px;color:#d9e3ec;font:700 11px "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase; }
+.admin-nav-group__trigger:hover { background:#00568C;color:#fff; }
+.admin-nav-group__items { margin:2px 0 8px 16px;padding-left:8px;border-left:1px solid rgb(217 227 236 / .25); }
+.admin-nav-badge { margin-left:auto;min-width:20px;border-radius:999px;background:#B42318;color:white;padding:1px 6px;text-align:center;font:700 10px "JetBrains Mono",monospace; }
 .admin-hud-rail__item {
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  width: 52px;
-  padding: 8px 4px;
-  border-radius: 10px;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
   color: hsl(var(--admin-rail-text));
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8.5px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   text-decoration: none;
   transition: all 180ms var(--ease-tidy);
@@ -714,9 +714,9 @@ body.admin-hud > #root {
   background: hsl(var(--primary) / 0.08);
 }
 .admin-hud-rail__item.is-active {
-  color: hsl(var(--admin-gold));
-  background: hsl(var(--primary) / 0.14);
-  box-shadow: inset 2px 0 0 hsl(var(--admin-gold)), 0 0 24px -8px hsl(var(--primary) / 0.6);
+  color: #fff;
+  background: #00568C;
+  box-shadow: inset 3px 0 0 #FFCF00;
 }
 .admin-hud-rail__item.is-active::before {
   content: "";
@@ -731,6 +731,11 @@ body.admin-hud > #root {
   margin-top: 2px;
   white-space: nowrap;
 }
+.admin-status-chip { display:flex;align-items:center;gap:4px;padding:2px 7px;border:1px solid rgb(255 255 255 / .28);border-radius:999px;color:#fff; }
+.admin-status-chip.is-live { color:#7ce3a0; }.admin-status-chip.is-waitlist { color:#FFCF00; }.admin-status-chip.is-dark { color:#ff8c82; }
+.admin-mobile-drawer { position:fixed;inset:0;z-index:80; }.admin-mobile-backdrop { position:absolute;inset:0;background:rgb(12 27 42 / .65); }.admin-mobile-panel { position:relative;width:min(86vw,280px);height:100%;background:#00325A; }.admin-mobile-panel .admin-hud-rail { display:flex;position:absolute;inset:0;width:100%;padding-top:54px; }.admin-mobile-close { position:absolute;right:10px;top:8px;z-index:2;color:white; }
+.admin-capacity-banner { position:fixed;z-index:52;top:40px;left:0;right:0; }
+@media (min-width:1024px){ .admin-capacity-banner { left:248px; } }
 
 /* ---- Re-skin common surfaces inside admin pages ---- */
 /* Soften plain white backgrounds so existing pages instantly look HUD-native
