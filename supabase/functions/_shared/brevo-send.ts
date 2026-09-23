@@ -15,6 +15,7 @@
 
 import { logIntegrationEvent } from './integration-log.ts';
 import { vendorFetch } from './http.ts';
+import { ensureTidyEmailBranding } from './email-brand.ts';
 
 export type BrevoRecipient = { email: string; name?: string };
 export type BrevoAttachment = { url?: string; content?: string; name: string };
@@ -148,7 +149,9 @@ export async function sendBrevoEmail(
   if (opts.templateId) body.templateId = Number(opts.templateId);
   if (opts.params) body.params = opts.params;
   if (opts.subject) body.subject = opts.subject;
-  if (opts.htmlContent) body.htmlContent = opts.htmlContent;
+  // Every code-generated email gets the complete Tidy shell. Template-driven
+  // sends remain untouched because their design lives in the provider template.
+  if (opts.htmlContent) body.htmlContent = ensureTidyEmailBranding(opts.htmlContent, opts.subject);
   body.sender = opts.sender ?? DEFAULT_SENDER;
   if (opts.tags?.length) body.tags = opts.tags;
   if (opts.attachment?.length) body.attachment = opts.attachment;

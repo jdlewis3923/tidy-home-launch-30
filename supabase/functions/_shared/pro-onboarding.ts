@@ -13,11 +13,10 @@ import './http.ts'; // bounds every outbound call in this invocation (timeouts)
  * home, every Friday — no percentage model, no floors, no stipend, no bonuses.
  */
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { tidyEmailShell, TIDY_OWNER_EMAIL, TIDY_SITE } from './email-brand.ts';
 
-export const SITE = 'https://jointidy.co';
-/** Stable public asset path — never a build-hashed filename. */
-export const LOGO = `${SITE}/favicon-512x512.png`;
-export const OWNER_EMAIL = 'hello@jointidy.co';
+export const SITE = TIDY_SITE;
+export const OWNER_EMAIL = TIDY_OWNER_EMAIL;
 
 export type StepStatus = 'not_sent' | 'sent' | 'received' | 'verified';
 export type StepKey = 'background_check' | 'insurance' | 'intake';
@@ -204,15 +203,13 @@ export function reminderEmailHtml(
       </div>`;
   }).join('');
 
-  const html = `<!doctype html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,sans-serif;color:#0f172a">
-    <div style="max-width:600px;margin:0 auto;background:#ffffff">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a"><tr>
-        <td style="padding:16px 24px" valign="middle" align="left"><img src="${LOGO}" alt="Tidy" width="42" height="42" style="display:block;width:42px;height:42px;border:0"/></td>
-        <td style="padding:16px 24px;font:700 13px Arial,sans-serif;color:#ffffff;line-height:1.35;text-align:right" valign="middle" align="right">More life.<br/><span style="color:#FCCC00">Less chores.</span></td>
-      </tr></table>
-      <div style="height:4px;background:#FCCC00"></div>
-      <div style="padding:26px 24px">
-        <h1 style="margin:0 0 6px;font-size:21px">Hi ${firstName}, ${state.outstanding.length === 1 ? 'one thing' : `${state.outstanding.length} things`} left before your first visit</h1>
+  const heading = `Hi ${firstName}, ${state.outstanding.length === 1 ? 'one thing' : `${state.outstanding.length} things`} left before your first visit`;
+  const html = tidyEmailShell({
+    heading,
+    eyebrow: 'Pro onboarding · Incorporación de Pro',
+    previewText: heading,
+    recipientContext: 'You are receiving this because you are completing onboarding as an independent contractor with Tidy.',
+    bodyHtml: `
         <p style="margin:0 0 18px;font:14px Arial,sans-serif;color:#64748b">Hola ${firstName}, ${state.outstanding.length === 1 ? 'queda una cosa' : `quedan ${state.outstanding.length} cosas`} antes de su primera visita. About ${state.outstanding.length * 5} minutes total.</p>
         ${blocks}
         <p style="margin:22px 0 0;font:14px Arial,sans-serif;color:#475569">
@@ -226,11 +223,8 @@ export function reminderEmailHtml(
         <p style="margin:16px 0 0;font:14px Arial,sans-serif;color:#475569">
           Questions: <a href="mailto:${OWNER_EMAIL}" style="color:#2563eb">${OWNER_EMAIL}</a>, Mon–Sat 8:00 AM–6:00 PM ET.
         </p>
-      </div>
-      <div style="padding:16px 24px;color:#94a3b8;font-size:12px;border-top:1px solid #e2e8f0">
-        Tidy Home Concierge LLC · 2121 Biscayne Blvd #1562, Miami, FL 33137 · jointidy.co · (786) 829-1141 · You are receiving this because you are completing onboarding as an independent contractor with Tidy.
-      </div>
-    </div></body></html>`;
+    `,
+  });
 
   return {
     subject: `Tidy onboarding — ${state.outstanding.length === 1 ? '1 thing' : `${state.outstanding.length} things`} still to finish (day ${dayCount})`,

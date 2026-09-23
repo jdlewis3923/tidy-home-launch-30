@@ -2,6 +2,7 @@
 // All channels are best-effort: a failure in one does not block the others.
 
 import { BrevoSendError, sendBrevoEmail as sendViaBrevo } from './brevo-send.ts';
+import { tidyEmailShell } from './email-brand.ts';
 import { vendorFetch } from './http.ts';
 
 export { BrevoSendError };
@@ -14,7 +15,6 @@ export const ADMIN_EMAIL = 'hello@jointidy.co';
 // One source of truth: the JUSTIN_ALERT_PHONE secret every alerting function
 // already reads. The literal stays only as a fallback if the secret is unset.
 const JUSTIN_PHONE = Deno.env.get('JUSTIN_ALERT_PHONE') ?? '+17868291141';
-const TIDY_LOGO = 'https://raw.githubusercontent.com/jdlewis3923/tidy-home-launch-30/main/tidy-logo-circle.png';
 
 export type BrevoAttachment = { url?: string; content?: string; name: string };
 
@@ -184,23 +184,11 @@ export function brandedEmailHtml(opts: {
   ctaUrl?: string;
   ctaLabel?: string;
 }): string {
-  const cta = opts.ctaUrl
-    ? `<a href="${opts.ctaUrl}" style="display:inline-block;background:#f5c518;color:#0f172a;font-weight:700;padding:12px 22px;border-radius:8px;text-decoration:none;font-family:Arial,sans-serif">${opts.ctaLabel ?? 'View'}</a>`
-    : '';
-  return `<!doctype html><html><body style="margin:0;background:#ffffff;font-family:Arial,sans-serif;color:#0f172a">
-  <div style="max-width:560px;margin:0 auto;padding:0">
-    <div style="background:#0f172a;padding:18px 24px">
-      <img src="${TIDY_LOGO}" alt="Tidy" width="44" height="44" style="vertical-align:middle;border-radius:8px"/>
-      <span style="color:#ffffff;font-weight:700;font-size:18px;margin-left:10px;vertical-align:middle">Tidy</span>
-    </div>
-    <div style="height:4px;background:#f5c518"></div>
-    <div style="padding:28px 24px">
-      <h1 style="margin:0 0 14px;font-size:22px;color:#0f172a">${opts.heading}</h1>
-      <div style="font-size:15px;line-height:1.55;color:#475569">${opts.bodyHtml}</div>
-      ${cta ? `<div style="margin-top:24px">${cta}</div>` : ''}
-    </div>
-    <div style="padding:16px 24px;color:#94a3b8;font-size:12px;border-top:1px solid #e2e8f0">
-      Tidy Home Concierge LLC · 2121 Biscayne Blvd #1562, Miami, FL 33137
-    </div>
-  </div></body></html>`;
+  return tidyEmailShell({
+    heading: opts.heading,
+    previewText: opts.heading,
+    bodyHtml: opts.bodyHtml,
+    ctaUrl: opts.ctaUrl,
+    ctaLabel: opts.ctaLabel,
+  });
 }
