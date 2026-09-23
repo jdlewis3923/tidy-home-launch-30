@@ -1,251 +1,160 @@
-import { useEffect, useState } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
-  Activity, Inbox, BarChart3, Heart, FileText, Users,
-  Megaphone, DollarSign, Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays,
-  Award, ShieldCheck, RefreshCw, ClipboardList, Gauge, Star, SlidersHorizontal,
-  GraduationCap, PackageCheck, Shield,
+  Activity, Inbox, BarChart3, Heart, FileText, Users, Megaphone, DollarSign,
+  Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays, Award, ShieldCheck,
+  ClipboardList, Gauge, Star, SlidersHorizontal, GraduationCap, PackageCheck,
+  Shield, Menu, X, ChevronDown, BriefcaseBusiness, Landmark, Settings,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import CapacityBanner from "@/components/admin/CapacityBanner";
 import AdminSearch from "@/components/admin/AdminSearch";
 import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
+import { Button } from "@/components/ui/button";
 
-/**
- * AdminChrome — Iron-Man HUD shell injected on every /admin/* route.
- *
- * Renders ONLY a fixed ambient background + a slim top status rail + a
- * floating side nav rail. It does NOT wrap page content (zero risk to
- * existing layouts) — pages still render normally on top, they just get
- * a far cooler canvas.
- *
- * Brand-aligned: navy-deep base, primary blue + gold accents, restrained motion.
- */
+type NavItem = { to: string; label: string; icon: typeof Activity; badge?: "alerts" };
+type NavGroup = { label: string; icon: typeof Activity; items: NavItem[] };
 
-const NAV = [
-  { to: "/admin/command",     label: "Command",     icon: Activity },
-  { to: "/admin/kpis",        label: "KPIs",        icon: BarChart3 },
-  { to: "/admin/alerts",      label: "Alerts",      icon: Bell },
-  { to: "/admin/alert-rules", label: "Rules",       icon: SlidersHorizontal },
-  { to: "/admin/capacity",    label: "Capacity",    icon: Gauge },
-  { to: "/admin/health",      label: "Health",      icon: Heart },
-  { to: "/admin/email-health", label: "Email",      icon: Mail },
-  { to: "/admin/inbox",       label: "Inbox",       icon: Inbox },
-  { to: "/admin/leads",       label: "Leads",       icon: ClipboardList },
-  { to: "/admin/reviews",     label: "Reviews",     icon: Star },
-  { to: "/admin/applicants",  label: "Applicants",  icon: Users },
-  { to: "/admin/badges",      label: "Badges",      icon: ShieldCheck },
-  { to: "/admin/onboarding",  label: "Onboarding",  icon: GraduationCap },
-  { to: "/admin/pro-kits",    label: "Pro Kits",    icon: PackageCheck },
-  { to: "/admin/tier-progression", label: "Tier",   icon: Award },
-  { to: "/admin/coi-review",  label: "COI",         icon: ShieldCheck },
-  { to: "/admin/insurance",   label: "Insurance",   icon: ShieldCheck },
-  { to: "/admin/orientations", label: "Orientations", icon: CalendarDays },
-  { to: "/admin/documents",   label: "Docs",        icon: FileText },
-  { to: "/admin/schedule",    label: "Schedule",    icon: Megaphone },
-  { to: "/admin/agents",      label: "Agents",      icon: Bot },
-  { to: "/admin/costs",       label: "Costs",       icon: DollarSign },
-  { to: "/admin/site-status", label: "Site",        icon: Power },
-  { to: "/admin/chatbot-knowledge", label: "Chatbot", icon: BookOpen },
-  { to: "/admin/settings/notifications", label: "Notify", icon: Bell },
-  { to: "/admin/test-zapier", label: "Zapier",      icon: Zap },
+const GROUPS: NavGroup[] = [
+  { label: "Today", icon: Activity, items: [
+    { to: "/admin/command", label: "Command", icon: Activity },
+    { to: "/admin/kpis", label: "KPIs", icon: BarChart3 },
+    { to: "/admin/alerts", label: "Alerts", icon: Bell, badge: "alerts" },
+    { to: "/admin/schedule", label: "Schedule", icon: CalendarDays },
+  ]},
+  { label: "Hiring", icon: BriefcaseBusiness, items: [
+    { to: "/admin/applicants", label: "Applicants", icon: Users },
+    { to: "/admin/onboarding", label: "Onboarding", icon: GraduationCap },
+    { to: "/admin/pro-kits", label: "Pro Kits", icon: PackageCheck },
+    { to: "/admin/badges", label: "Badges", icon: ShieldCheck },
+    { to: "/admin/tier-progression", label: "Tier", icon: Award },
+    { to: "/admin/orientations", label: "Orientations", icon: CalendarDays },
+  ]},
+  { label: "Compliance", icon: Shield, items: [
+    { to: "/admin/coi-review", label: "COI", icon: ShieldCheck },
+    { to: "/admin/insurance", label: "Insurance", icon: ShieldCheck },
+    { to: "/admin/documents", label: "Docs", icon: FileText },
+  ]},
+  { label: "Customers", icon: Users, items: [
+    { to: "/admin/leads", label: "Leads", icon: ClipboardList },
+    { to: "/admin/inbox", label: "Inbox", icon: Inbox },
+    { to: "/admin/reviews", label: "Reviews", icon: Star },
+  ]},
+  { label: "Money", icon: Landmark, items: [
+    { to: "/admin/costs", label: "Costs", icon: DollarSign },
+    { to: "/admin/capacity", label: "Capacity", icon: Gauge },
+    { to: "/admin/alert-rules", label: "Rules", icon: SlidersHorizontal },
+  ]},
+  { label: "System", icon: Settings, items: [
+    { to: "/admin/health", label: "Health", icon: Heart },
+    { to: "/admin/email-health", label: "Email & SMS", icon: Mail },
+    { to: "/admin/site-status", label: "Site", icon: Power },
+    { to: "/admin/chatbot-knowledge", label: "Chatbot", icon: BookOpen },
+    { to: "/admin/agents", label: "Agents", icon: Bot },
+    { to: "/admin/settings/notifications", label: "Notify", icon: Bell },
+    { to: "/admin/test-zapier", label: "Zapier", icon: Zap },
+  ]},
 ];
 
-function syncRel(iso: string | null) {
+const NAV = GROUPS.flatMap((group) => group.items);
+const OPEN_KEY = "tidy.admin.nav-groups";
+
+function relativeTime(iso: string | null) {
   if (!iso) return "—";
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (minutes < 1) return "now";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  return hours < 24 ? `${hours}h` : `${Math.floor(hours / 24)}d`;
 }
 
 export default function AdminChrome() {
   const { pathname } = useLocation();
-  const [time, setTime] = useState(() => new Date());
   const isAdminRoute = pathname.startsWith("/admin");
+  const [time, setTime] = useState(() => new Date());
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [openAlerts, setOpenAlerts] = useState(0);
+  const [lastSync, setLastSync] = useState<string | null>(null);
+  const [siteMode, setSiteMode] = useState<"loading" | "dark" | "waitlist" | "live">("loading");
+  const currentGroup = useMemo(() => GROUPS.find((group) => group.items.some((item) => pathname === item.to || pathname.startsWith(`${item.to}/`)))?.label, [pathname]);
+  const [openGroups, setOpenGroups] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(OPEN_KEY) ?? '["Today"]'); } catch { return ["Today"]; }
+  });
 
+  useEffect(() => {
+    if (!isAdminRoute) return;
+    document.body.classList.add("admin-hud");
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    setDrawerOpen(false);
+    if (currentGroup) setOpenGroups((groups) => groups.includes(currentGroup) ? groups : [...groups, currentGroup]);
+    return () => document.body.classList.remove("admin-hud");
+  }, [isAdminRoute, pathname, currentGroup]);
+
+  useEffect(() => { try { localStorage.setItem(OPEN_KEY, JSON.stringify(openGroups)); } catch { /* unavailable */ } }, [openGroups]);
   useEffect(() => {
     if (!isAdminRoute) return;
     const id = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(id);
   }, [isAdminRoute]);
-
-  // Last successful sheets-master-sync — refreshes every 60s.
-  const [lastSync, setLastSync] = useState<string | null>(null);
   useEffect(() => {
     if (!isAdminRoute) return;
     let cancelled = false;
-    const fetchSync = async () => {
-      const { data } = await supabase.from("app_settings").select("value").eq("key", "sheets_master_sync_last_at").maybeSingle();
+    const refresh = async () => {
+      const [alerts, sync, site] = await Promise.all([
+        supabase.from("admin_alerts").select("id", { count: "exact", head: true }).is("resolved_at", null),
+        supabase.from("app_settings").select("value").eq("key", "sheets_master_sync_last_at").maybeSingle(),
+        supabase.from("app_settings").select("value").eq("key", "site_live").maybeSingle(),
+      ]);
       if (cancelled) return;
-      const v = data?.value as { at?: string } | null;
-      setLastSync(v?.at ?? null);
+      setOpenAlerts(alerts.count ?? 0);
+      const syncValue = sync.data?.value as { at?: string } | null;
+      setLastSync(syncValue?.at ?? null);
+      setSiteMode(site.error ? "dark" : site.data?.value === true ? "live" : "waitlist");
     };
-    fetchSync();
-    const id = setInterval(fetchSync, 60_000);
+    void refresh();
+    const id = setInterval(refresh, 60_000);
     return () => { cancelled = true; clearInterval(id); };
-  }, [isAdminRoute]);
-
-  // Open alert count for the rail badge. Read from the database, so it stays
-  // truthful even when digest email delivery is broken.
-  const [openAlerts, setOpenAlerts] = useState(0);
-  useEffect(() => {
-    if (!isAdminRoute) return;
-    let cancelled = false;
-    const fetchAlerts = async () => {
-      const { count } = await supabase
-        .from("admin_alerts")
-        .select("id", { count: "exact", head: true })
-        .is("resolved_at", null);
-      if (!cancelled) setOpenAlerts(count ?? 0);
-    };
-    fetchAlerts();
-    const id = setInterval(fetchAlerts, 60_000);
-    return () => { cancelled = true; clearInterval(id); };
-  }, [isAdminRoute]);
-
-  // Toggle a body class so CSS can re-skin admin surfaces site-wide
-  useEffect(() => {
-    if (isAdminRoute) {
-      document.body.classList.add("admin-hud");
-    } else {
-      document.body.classList.remove("admin-hud");
-    }
-    return () => document.body.classList.remove("admin-hud");
   }, [isAdminRoute]);
 
   if (!isAdminRoute) return null;
+  const toggleGroup = (label: string) => setOpenGroups((groups) => groups.includes(label) ? groups.filter((group) => group !== label) : [...groups, label]);
+  const stamp = time.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+  const siteLabel = siteMode === "live" ? "LIVE" : siteMode === "waitlist" ? "WAITLIST" : siteMode === "dark" ? "UNKNOWN" : "···";
 
-  const stamp = time.toLocaleTimeString("en-US", {
-    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
-  });
-
-  // Live site status badge — reads the real site_live app_settings key.
-  const [siteMode, setSiteMode] = useState<"loading" | "dark" | "waitlist" | "live">("loading");
-  useEffect(() => {
-    if (!isAdminRoute) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const { data, error } = await supabase
-          .from("app_settings")
-          .select("value")
-          .eq("key", "site_live")
-          .maybeSingle();
-        if (cancelled) return;
-        if (error) {
-          console.error("[AdminChrome] site_live read failed:", error.message);
-          setSiteMode("dark");
-          return;
-        }
-        const raw = data?.value;
-        if (raw === true) setSiteMode("live");
-        else if (raw === false) setSiteMode("waitlist");
-        else setSiteMode("dark");
-      } catch (err) {
-        console.error("[AdminChrome] site_live read threw:", err);
-        if (!cancelled) setSiteMode("dark");
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [isAdminRoute]);
-
-  const modeConfig: Record<typeof siteMode, { label: string; color: string; border: string; title: string }> = {
-    loading: { label: "···", color: "hsl(var(--admin-text-dim))", border: "hsl(var(--admin-rail-border))", title: "Reading site_live…" },
-    dark: { label: "DARK", color: "#f87171", border: "rgba(248,113,113,0.35)", title: "site_live is missing or unreadable — public gate status is unknown" },
-    waitlist: { label: "WAITLIST", color: "#f5c518", border: "rgba(245,197,24,0.35)", title: "site_live = false — public visitors see the waitlist / Coming Soon page" },
-    live: { label: "LIVE", color: "#34d399", border: "rgba(52,211,153,0.35)", title: "site_live = true — public website is open" },
-  };
-  const mode = modeConfig[siteMode];
-
-  return (
-    <>
-      {/* === Fixed ambient HUD background === */}
-      <div className="admin-hud-bg" aria-hidden="true">
-        <div className="admin-hud-grid" />
-        <div className="admin-hud-glow admin-hud-glow--blue" />
-        <div className="admin-hud-glow admin-hud-glow--gold" />
-        <div className="admin-hud-scanline" />
-        <div className="admin-hud-vignette" />
-      </div>
-
-      {/* === Capacity + hiring alert — must be visible without scrolling === */}
-      <CapacityBanner />
-
-      {/* === Slim top status rail === */}
-      <div className="admin-hud-topbar" role="status" aria-label="Admin status">
-        <div className="admin-hud-topbar__left">
-          <span className="admin-hud-dot" />
-          <span className="admin-hud-label">TIDY · COMMAND</span>
-          <span className="admin-hud-divider" />
-          <span className="admin-hud-path">{pathname.replace("/admin", "ADMIN") || "ADMIN"}</span>
-        </div>
-        <div className="admin-hud-topbar__center">
-          <AdminSearch nav={NAV.map(({ to, label }) => ({ to, label }))} />
-        </div>
-        <div className="admin-hud-topbar__right">
-          <AdminThemeToggle active />
-          {/* Real site_live status badge */}
-          <span
-            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]"
-            style={{
-              backgroundColor: "hsl(var(--admin-chip-bg))",
-              color: mode.color,
-              border: `1px solid ${mode.border}`,
-            }}
-            title={mode.title}
-          >
-            {siteMode === "loading" ? mode.label : (
-              <>
-                <Shield className="h-2.5 w-2.5 mr-1" />
-                {mode.label}
-              </>
-            )}
-          </span>
-          <span
-            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]"
-            style={{ backgroundColor: "hsl(var(--admin-chip-bg))", color: "hsl(var(--admin-text-dim))", border: "1px solid hsl(var(--admin-rail-border))" }}
-            title={lastSync ? `sheets-master-sync last ran ${new Date(lastSync).toLocaleString()}` : "sheets-master-sync has not run yet"}
-          >
-            <RefreshCw className="h-2.5 w-2.5" />
-            Sync · {syncRel(lastSync)}
-          </span>
-          <span className="admin-hud-meta">SYS</span>
-          <Activity className="h-3 w-3" style={{ color: "hsl(var(--admin-gold))" }} />
-          <span className="admin-hud-meta">·</span>
-          <span className="admin-hud-meta admin-hud-time">{stamp}</span>
-          <span className="admin-hud-meta">UTC-5</span>
-        </div>
-      </div>
-
-      {/* === Floating left nav rail (desktop only) === */}
-      <nav className="admin-hud-rail" aria-label="Admin navigation">
-        {NAV.map(({ to, label, icon: Icon }) => {
-          const active = pathname === to || pathname.startsWith(to + "/");
-          return (
-            <Link
-              key={to}
-              to={to}
-              className={`admin-hud-rail__item ${active ? "is-active" : ""}`}
-              aria-current={active ? "page" : undefined}
-            >
-              <Icon className="h-4 w-4" />
-              <span className="admin-hud-rail__label">{label}</span>
-              {to === "/admin/alerts" && openAlerts > 0 && (
-                <span
-                  className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-bold text-white"
-                  aria-label={`${openAlerts} open alerts`}
-                >
-                  {openAlerts}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-    </>
+  const rail = (
+    <nav className="admin-hud-rail" aria-label="Admin navigation">
+      <div className="admin-hud-rail__brand"><span className="admin-hud-dot" /><span>TIDY</span></div>
+      {GROUPS.map((group) => {
+        const open = openGroups.includes(group.label);
+        const badge = group.items.reduce((sum, item) => sum + (item.badge === "alerts" ? openAlerts : 0), 0);
+        const GroupIcon = group.icon;
+        return <div className="admin-nav-group" key={group.label}>
+          <Button type="button" variant="ghost" className="admin-nav-group__trigger" onClick={() => toggleGroup(group.label)} aria-expanded={open}>
+            <GroupIcon className="h-4 w-4" /><span>{group.label}</span>{badge > 0 && <span className="admin-nav-badge">{badge}</span>}<ChevronDown className={`ml-auto h-4 w-4 ${open ? "rotate-180" : ""}`} />
+          </Button>
+          {open && <div className="admin-nav-group__items">{group.items.map(({ to, label, icon: Icon, badge: itemBadge }) => {
+            const active = pathname === to || pathname.startsWith(`${to}/`);
+            return <Link key={to} to={to} className={`admin-hud-rail__item ${active ? "is-active" : ""}`} aria-current={active ? "page" : undefined}>
+              <Icon className="h-4 w-4" /><span>{label}</span>{itemBadge === "alerts" && openAlerts > 0 && <span className="admin-nav-badge">{openAlerts}</span>}
+            </Link>;
+          })}</div>}
+        </div>;
+      })}
+    </nav>
   );
+
+  return <>
+    <div className="admin-hud-bg" aria-hidden="true" />
+    <CapacityBanner />
+    <div className="admin-hud-topbar" role="status" aria-label="Admin status">
+      <div className="admin-hud-topbar__left">
+        <Button className="admin-mobile-menu" variant="ghost" size="icon" onClick={() => setDrawerOpen(true)} aria-label="Open admin navigation"><Menu className="h-4 w-4" /></Button>
+        <span className="admin-hud-dot" /><span className="admin-hud-label">TIDY · COMMAND</span><span className="admin-hud-path">{pathname.replace("/admin", "ADMIN") || "ADMIN"}</span>
+      </div>
+      <div className="admin-hud-topbar__center"><AdminSearch nav={NAV.map(({ to, label }) => ({ to, label }))} /></div>
+      <div className="admin-hud-topbar__right"><AdminThemeToggle active /><span className={`admin-status-chip is-${siteMode}`}><Shield className="h-3 w-3" />{siteLabel}</span><span className="admin-hud-meta">SYNC · {relativeTime(lastSync)}</span><span className="admin-hud-meta admin-hud-time">{stamp}</span></div>
+    </div>
+    {rail}
+    {drawerOpen && <div className="admin-mobile-drawer"><button className="admin-mobile-backdrop" onClick={() => setDrawerOpen(false)} aria-label="Close admin navigation" /><div className="admin-mobile-panel"><Button variant="ghost" size="icon" className="admin-mobile-close" onClick={() => setDrawerOpen(false)} aria-label="Close admin navigation"><X className="h-5 w-5" /></Button>{rail}</div></div>}
+  </>;
 }
