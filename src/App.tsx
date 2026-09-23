@@ -233,7 +233,9 @@ const App = () => (
             <DoorhangerRescue />
             <AppInstallHead />
 
-                        <MetaPixel />
+            <DeferUntilIdle>
+              <MetaPixel />
+            </DeferUntilIdle>
             <DeferUntilIdle>
               <Suspense fallback={null}>
                 <ChatbotMount />
