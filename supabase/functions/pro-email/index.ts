@@ -13,7 +13,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { vendorFetch } from '../_shared/http.ts';
-import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { EMAIL } from '../_shared/emailTemplates.ts';
 import { ensureTidyEmailBranding, TIDY_OWNER_EMAIL } from '../_shared/email-brand.ts';
 import { loadFive } from '../_shared/pro-five.ts';
@@ -70,7 +69,7 @@ Deno.serve(async (req) => {
   const { applicant_id, email: key, mode, lang, reason } = parsed.data;
 
   let rec;
-  try { rec = await loadFive(admin, applicant_id, { mintTokens: mode !== 'preview' || true }); }
+  try { rec = await loadFive(admin, applicant_id, { mintTokens: true }); }
   catch { return jsonResponse({ error: 'applicant_not_found' }, 404); }
   const a = rec.applicant;
   const first = a.first_name ?? 'there';
@@ -133,6 +132,5 @@ Deno.serve(async (req) => {
     }
     if (Object.keys(patch).length) await admin.from('applicants').update(patch).eq('id', applicant_id);
   }
-  void sendBrevoEmail; // imported for type parity with other senders
   return jsonResponse({ ok: res.sent, sent_to: to, reason: res.reason, at: new Date().toISOString() }, res.sent ? 200 : 502);
 });
