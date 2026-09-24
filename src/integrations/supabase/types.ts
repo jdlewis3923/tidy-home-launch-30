@@ -555,8 +555,47 @@ export type Database = {
           },
         ]
       }
+      applicant_field_audit: {
+        Row: {
+          applicant_id: string
+          changed_at: string
+          changed_by: string | null
+          field: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+        }
+        Insert: {
+          applicant_id: string
+          changed_at?: string
+          changed_by?: string | null
+          field: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          applicant_id?: string
+          changed_at?: string
+          changed_by?: string | null
+          field?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applicant_field_audit_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       applicants: {
         Row: {
+          all_set_sent_at: string | null
           applied_on: string | null
           available_minutes_week: number
           avg_customer_rating: number | null
@@ -575,6 +614,9 @@ export type Database = {
           bond_status: string | null
           business_bank_account_confirmed: boolean
           call_at: string | null
+          chase_alerted_at: string | null
+          chase_count: number
+          chase_last_at: string | null
           checkr_candidate_id: string | null
           checkr_invitation_id: string | null
           checkr_last_webhook_at: string | null
@@ -597,6 +639,13 @@ export type Database = {
           complaint_rate: number | null
           completed_visits: number
           compliance_complete: boolean | null
+          contract_doc_version: string | null
+          contract_sent_at: string | null
+          contract_signed_ip: string | null
+          contract_signed_name: string | null
+          contract_signed_pdf_path: string | null
+          contract_signed_ua: string | null
+          contract_token: string | null
           contractor_cancel_count: number
           contractor_cancel_rate: number | null
           contractor_id: string | null
@@ -617,6 +666,7 @@ export type Database = {
           fl_license: boolean | null
           flags: string[]
           followed_up_at: string | null
+          gate_confirmations: Json
           google_review_match_name: string | null
           has_insurance: boolean | null
           has_supplies: boolean | null
@@ -648,6 +698,7 @@ export type Database = {
           photos_expected_count: number
           photos_uploaded_count: number
           pro_number: string | null
+          pro_number_reserved: string | null
           pro_partner_interest: string | null
           pro_since: string | null
           queue_state: string
@@ -657,9 +708,11 @@ export type Database = {
           replied_at: string | null
           role: string | null
           score: number | null
+          score_overridden: boolean
           service: string | null
           source: string | null
           stage_entered_at: string | null
+          start_date: string | null
           stripe_account_id: string | null
           stripe_connect_complete: boolean
           stripe_connect_status: string
@@ -685,6 +738,7 @@ export type Database = {
           zip: string | null
         }
         Insert: {
+          all_set_sent_at?: string | null
           applied_on?: string | null
           available_minutes_week?: number
           avg_customer_rating?: number | null
@@ -703,6 +757,9 @@ export type Database = {
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
           call_at?: string | null
+          chase_alerted_at?: string | null
+          chase_count?: number
+          chase_last_at?: string | null
           checkr_candidate_id?: string | null
           checkr_invitation_id?: string | null
           checkr_last_webhook_at?: string | null
@@ -725,6 +782,13 @@ export type Database = {
           complaint_rate?: number | null
           completed_visits?: number
           compliance_complete?: boolean | null
+          contract_doc_version?: string | null
+          contract_sent_at?: string | null
+          contract_signed_ip?: string | null
+          contract_signed_name?: string | null
+          contract_signed_pdf_path?: string | null
+          contract_signed_ua?: string | null
+          contract_token?: string | null
           contractor_cancel_count?: number
           contractor_cancel_rate?: number | null
           contractor_id?: string | null
@@ -745,6 +809,7 @@ export type Database = {
           fl_license?: boolean | null
           flags?: string[]
           followed_up_at?: string | null
+          gate_confirmations?: Json
           google_review_match_name?: string | null
           has_insurance?: boolean | null
           has_supplies?: boolean | null
@@ -776,6 +841,7 @@ export type Database = {
           photos_expected_count?: number
           photos_uploaded_count?: number
           pro_number?: string | null
+          pro_number_reserved?: string | null
           pro_partner_interest?: string | null
           pro_since?: string | null
           queue_state?: string
@@ -785,9 +851,11 @@ export type Database = {
           replied_at?: string | null
           role?: string | null
           score?: number | null
+          score_overridden?: boolean
           service?: string | null
           source?: string | null
           stage_entered_at?: string | null
+          start_date?: string | null
           stripe_account_id?: string | null
           stripe_connect_complete?: boolean
           stripe_connect_status?: string
@@ -813,6 +881,7 @@ export type Database = {
           zip?: string | null
         }
         Update: {
+          all_set_sent_at?: string | null
           applied_on?: string | null
           available_minutes_week?: number
           avg_customer_rating?: number | null
@@ -831,6 +900,9 @@ export type Database = {
           bond_status?: string | null
           business_bank_account_confirmed?: boolean
           call_at?: string | null
+          chase_alerted_at?: string | null
+          chase_count?: number
+          chase_last_at?: string | null
           checkr_candidate_id?: string | null
           checkr_invitation_id?: string | null
           checkr_last_webhook_at?: string | null
@@ -853,6 +925,13 @@ export type Database = {
           complaint_rate?: number | null
           completed_visits?: number
           compliance_complete?: boolean | null
+          contract_doc_version?: string | null
+          contract_sent_at?: string | null
+          contract_signed_ip?: string | null
+          contract_signed_name?: string | null
+          contract_signed_pdf_path?: string | null
+          contract_signed_ua?: string | null
+          contract_token?: string | null
           contractor_cancel_count?: number
           contractor_cancel_rate?: number | null
           contractor_id?: string | null
@@ -873,6 +952,7 @@ export type Database = {
           fl_license?: boolean | null
           flags?: string[]
           followed_up_at?: string | null
+          gate_confirmations?: Json
           google_review_match_name?: string | null
           has_insurance?: boolean | null
           has_supplies?: boolean | null
@@ -904,6 +984,7 @@ export type Database = {
           photos_expected_count?: number
           photos_uploaded_count?: number
           pro_number?: string | null
+          pro_number_reserved?: string | null
           pro_partner_interest?: string | null
           pro_since?: string | null
           queue_state?: string
@@ -913,9 +994,11 @@ export type Database = {
           replied_at?: string | null
           role?: string | null
           score?: number | null
+          score_overridden?: boolean
           service?: string | null
           source?: string | null
           stage_entered_at?: string | null
+          start_date?: string | null
           stripe_account_id?: string | null
           stripe_connect_complete?: boolean
           stripe_connect_status?: string
@@ -1317,6 +1400,50 @@ export type Database = {
           source?: string
         }
         Relationships: []
+      }
+      contract_signatures: {
+        Row: {
+          applicant_id: string
+          document_id: string | null
+          document_version: string
+          id: string
+          ip_address: string | null
+          signed_at: string
+          signed_pdf_path: string | null
+          typed_name: string
+          user_agent: string | null
+        }
+        Insert: {
+          applicant_id: string
+          document_id?: string | null
+          document_version: string
+          id?: string
+          ip_address?: string | null
+          signed_at?: string
+          signed_pdf_path?: string | null
+          typed_name: string
+          user_agent?: string | null
+        }
+        Update: {
+          applicant_id?: string
+          document_id?: string | null
+          document_version?: string
+          id?: string
+          ip_address?: string | null
+          signed_at?: string
+          signed_pdf_path?: string | null
+          typed_name?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_signatures_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contractor_insurance: {
         Row: {
@@ -3245,6 +3372,9 @@ export type Database = {
           badge_back: string | null
           badge_name: string | null
           badge_photo_path: string | null
+          badge_photo_retake_reason: string | null
+          badge_photo_reviewed_at: string | null
+          badge_photo_status: string | null
           badge_photo_token: string | null
           badge_photo_uploaded_at: string | null
           cap: string | null
@@ -3261,6 +3391,7 @@ export type Database = {
           email: string | null
           equip_confirmed: boolean | null
           equip_gap: string | null
+          expected_delivery_date: string | null
           first_available: string | null
           home_zip: string | null
           hours: string | null
@@ -3311,6 +3442,9 @@ export type Database = {
           badge_back?: string | null
           badge_name?: string | null
           badge_photo_path?: string | null
+          badge_photo_retake_reason?: string | null
+          badge_photo_reviewed_at?: string | null
+          badge_photo_status?: string | null
           badge_photo_token?: string | null
           badge_photo_uploaded_at?: string | null
           cap?: string | null
@@ -3327,6 +3461,7 @@ export type Database = {
           email?: string | null
           equip_confirmed?: boolean | null
           equip_gap?: string | null
+          expected_delivery_date?: string | null
           first_available?: string | null
           home_zip?: string | null
           hours?: string | null
@@ -3377,6 +3512,9 @@ export type Database = {
           badge_back?: string | null
           badge_name?: string | null
           badge_photo_path?: string | null
+          badge_photo_retake_reason?: string | null
+          badge_photo_reviewed_at?: string | null
+          badge_photo_status?: string | null
           badge_photo_token?: string | null
           badge_photo_uploaded_at?: string | null
           cap?: string | null
@@ -3393,6 +3531,7 @@ export type Database = {
           email?: string | null
           equip_confirmed?: boolean | null
           equip_gap?: string | null
+          expected_delivery_date?: string | null
           first_available?: string | null
           home_zip?: string | null
           hours?: string | null
@@ -5486,6 +5625,7 @@ export type Database = {
         Returns: boolean
       }
       coi_token_load: { Args: { _token: string }; Returns: Json }
+      contract_load: { Args: { _token: string }; Returns: Json }
       contractor_visit_pay_cents: {
         Args: {
           _cadence: string
@@ -5608,6 +5748,7 @@ export type Database = {
         Returns: Json
       }
       nextval: { Args: { seq_name: string }; Returns: number }
+      pro_all_five: { Args: { _applicant_id: string }; Returns: boolean }
       pro_capacity_stats_internal: {
         Args: never
         Returns: {
