@@ -108,11 +108,15 @@ Deno.serve(async (req) => {
     file_size_bytes: bytes.byteLength, current_version: true,
   });
   const advance = !['oriented', 'active'].includes(a.current_stage ?? '');
-  await admin.from('applicants').update({
+  const { error: upErr } = await admin.from('applicants').update({
     contracts_signed: true, contracts_signed_at: signedAt.toISOString(), contract_signed_name: typed,
     contract_signed_ip: ip, contract_signed_ua: ua, contract_doc_version: doc.version,
     contract_signed_pdf_path: path, ...(advance ? { current_stage: 'contract_signed' } : {}),
   }).eq('id', a.id);
+  if (upErr) {
+    console.error('[contract-sign] record update failed', upErr.message);
+    return jsonResponse({ error: 'record_update_failed' }, 500);
+  }
   await admin.from('onboarding_events').insert({ applicant_id: a.id, event: 'contract_signed', metadata: { version: doc.version, ip } });
 
   const { data: link } = await admin.storage.from(BUCKET).createSignedUrl(path, 60 * 60 * 24 * 30);

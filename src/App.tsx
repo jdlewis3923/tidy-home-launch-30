@@ -101,6 +101,7 @@ const Rate = lazy(() => import("./pages/Rate.tsx"));
 const VerifyPro = lazy(() => import("./pages/VerifyPro.tsx"));
 const ProIntake = lazy(() => import("./pages/ProIntake.tsx"));
 const BadgePhoto = lazy(() => import("./pages/BadgePhoto.tsx"));
+const ContractSign = lazy(() => import("./pages/ContractSign.tsx"));
 const CoiTokenUpload = lazy(() => import("./pages/CoiTokenUpload.tsx"));
 
 /* Tidy Pro Portal — the installable app Pros work from day to day. */
@@ -152,7 +153,7 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFoundingOfferShown, doorhangerGateAllows } from "@/lib/doorhanger";
 import { getLandingSource } from "@/lib/landing-source";
 
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/addon/", "/q/", "/neighbor", "/rate", "/verify/", "/intake", "/coi"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/addon/", "/q/", "/neighbor", "/rate", "/verify/", "/intake", "/coi", "/contract/", "/photo/", "/badge/"];
 
 // The printed door hangers point at /dashboard/plan?src=doorhanger_en — a
 // neighbour with no account should see the founding offer first. Bounce them to
@@ -393,6 +394,8 @@ const App = () => (
                   <Route path="/intake/:token" element={<ProIntake />} />
                   {/* Badge photo upload from the kit confirmation email — token only. */}
                   <Route path="/badge/:token" element={<BadgePhoto />} />
+                  <Route path="/photo/:token" element={<BadgePhoto />} />
+                  <Route path="/contract/:token" element={<ContractSign />} />
                   {/* Insurance certificate upload from the onboarding email — token only. */}
                   <Route path="/coi/:token" element={<CoiTokenUpload />} />
 

@@ -26,7 +26,8 @@ import ProBadgePanel from "@/components/admin/ProBadgePanel";
 import ProKitPanel from "@/components/admin/ProKitPanel";
 import ProOnboardingChips from "@/components/admin/ProOnboardingChips";
 import OnboardingEmailButtons from "@/components/admin/OnboardingEmailButtons";
-import ApplicantInfoEditor from "@/components/admin/ApplicantInfoEditor";
+import ProRecordEditor from "@/components/admin/ProRecordEditor";
+import BulkEditBar from "@/components/admin/BulkEditBar";
 import CallQueue from "@/components/admin/hiring/CallQueue";
 import AddApplicants from "@/components/admin/hiring/AddApplicants";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -293,6 +294,7 @@ export default function AdminApplicants() {
   const [confirmReturnTier1, setConfirmReturnTier1] = useState(false);
 
   const [open, setOpen] = useState<Applicant | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bgNotes, setBgNotes] = useState("");
   const [resendingCheckr, setResendingCheckr] = useState<string | null>(null);
   const [bgNotesDirty, setBgNotesDirty] = useState(false);
@@ -806,6 +808,7 @@ export default function AdminApplicants() {
           <EmptyState hasAny={rows.length > 0} />
         ) : (
           <div className="space-y-2">
+            <BulkEditBar ids={[...selectedIds]} onDone={() => { setSelectedIds(new Set()); void fetchRows(); }} />
             {filtered.map((a) => {
               const r = roleOf(a.service);
               const stage = a.current_stage ?? "applied";
@@ -818,8 +821,12 @@ export default function AdminApplicants() {
                 : a.out_of_service_area ? "bg-slate-100/70 border-slate-300 hover:bg-slate-100"
                 : "bg-white border-slate-200 hover:bg-blue-50/40 hover:border-blue-200";
               return (
+                <div key={a.id} className="flex items-center gap-2">
+                <input type="checkbox" aria-label={`Select ${a.first_name} ${a.last_name}`} className="h-5 w-5 shrink-0"
+                  checked={selectedIds.has(a.id)}
+                  onChange={(e) => setSelectedIds((s) => { const n = new Set(s); e.target.checked ? n.add(a.id) : n.delete(a.id); return n; })} />
                 <button
-                  key={a.id}
+                  
                   onClick={() => setOpen(a)}
                   className={`group w-full text-left rounded-2xl border p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-all ${staleTone}`}
                 >
@@ -827,7 +834,7 @@ export default function AdminApplicants() {
                     {initials(a.first_name, a.last_name)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-[#0D1117] truncate">{a.first_name} {a.last_name}</div>
+                    <div className="font-semibold text-[#0D1117] truncate">{a.first_name} {a.last_name}{a.pro_number && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-bold text-amber-800">{a.pro_number}</span>}</div>
                     <div className="text-xs text-slate-500 truncate">{a.email}</div>
                   </div>
                   <div className="hidden sm:flex items-center gap-2 shrink-0">
@@ -892,6 +899,7 @@ export default function AdminApplicants() {
                   <span className="hidden md:inline text-xs text-slate-500 shrink-0 w-20 text-right">{relTime(a.created_at)}</span>
                   <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-[#1FA1F0] transition-colors shrink-0" />
                 </button>
+                </div>
               );
             })}
           </div>
@@ -1010,7 +1018,7 @@ export default function AdminApplicants() {
                 })()}
 
 
-                <ApplicantInfoEditor applicant={open} onSaved={() => { void fetchRows(); }} />
+                <ProRecordEditor applicantId={open.id} onSaved={() => { void fetchRows(); }} />
 
                 {open.notes_for_admin && (
                   <Card className="rounded-2xl border-slate-200">
