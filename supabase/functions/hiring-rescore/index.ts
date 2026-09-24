@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
     .select(
       'id, service, city_or_zip, zip, applied_on, years_in_service, owner_operator, has_insurance, ' +
       'trade_job_current, experience_matches_resume, tier_hint, notes, bilingual_gate, drivers_license, ' +
-      'work_authorized, own_equipment, background_check_ok, reads_texts, queue_state, score, hiring_tier',
+      'work_authorized, own_equipment, background_check_ok, reads_texts, queue_state, score, hiring_tier, score_overridden',
     );
 
   if (error) {
@@ -76,11 +76,14 @@ Deno.serve(async (req) => {
 
     const keepState = HUMAN_STATES.has(String(row.queue_state)) && r.queue_state !== 'disqualified';
     const patch: Record<string, unknown> = {
-      score: r.score,
-      hiring_tier: r.tier,
       flags: r.flags,
       drive_minutes: r.drive_minutes,
     };
+    // A score/tier set by hand is never undone by the nightly job.
+    if (!(row as { score_overridden?: boolean }).score_overridden) {
+      patch.score = r.score;
+      patch.hiring_tier = r.tier;
+    }
     if (!keepState) patch.queue_state = r.queue_state;
 
     const { error: upErr } = await admin.from('applicants').update(patch).eq('id', row.id);
