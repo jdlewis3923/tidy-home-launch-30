@@ -1,6 +1,7 @@
 import '../_shared/http.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { EMAIL } from '../_shared/emailTemplates.ts';
 import { brandHostedTemplate } from '../_shared/email-brand.ts';
 import { vendorFetch } from '../_shared/http.ts';
@@ -24,8 +25,10 @@ function headers(): Record<string, string> | null {
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
-  const auth = await requireServiceOrAdmin(req);
-  if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
+  if (!(await isCronAuthorized(req))) {
+    const auth = await requireServiceOrAdmin(req);
+    if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
+  }
 
   const h = headers();
   if (!h) return jsonResponse({ error: 'email_connection_not_configured' }, 503);

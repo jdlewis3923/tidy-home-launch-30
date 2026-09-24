@@ -26,7 +26,8 @@ const BUCKET = 'company-docs';
 async function currentIca() {
   const { data } = await admin.from('company_documents')
     .select('id, filename, storage_path, uploaded_at')
-    .ilike('filename', '%ICA%').not('filename', 'ilike', 'ICA-signed%').not('tags', 'cs', '{signed}')
+    .eq('category', 'Contracts').ilike('filename', '%IndependentContractorAgreement%')
+    .not('filename', 'ilike', 'ICA-signed%').not('tags', 'cs', '{signed}')
     .eq('current_version', true).is('archived_at', null)
     .order('uploaded_at', { ascending: false }).limit(1).maybeSingle();
   if (!data) return null;

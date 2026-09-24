@@ -12,36 +12,44 @@ export const TIDY_SITE = 'https://jointidy.co';
 export const TIDY_LOGO = 'https://vcdhpsfuilrrrqfhfsjt.supabase.co/storage/v1/object/public/social-images/brand%2Ftidy-logo-email.png';
 export const TIDY_OWNER_EMAIL = 'hello@jointidy.co';
 export const TIDY_EMAIL_MARKER = 'data-tidy-email="branded"';
-export const TIDY_ART_MARKER = 'data-tidy-hero-art="true"';
+export const TIDY_ART_MARKER = 'data-tidy-hero-photo="true"';
+/** Retired emoji-circle hero. Hosted templates carrying it are upgraded in place. */
+const LEGACY_ART_ROW = /<tr data-tidy-hero-art="true">[\s\S]*?<\/p>\s*<\/td><\/tr>/gi;
+const LEGACY_STRIP_ROW = /<tr data-tidy-service-strip="true">[\s\S]*?<\/table><\/td><\/tr>/i;
+
+const PHOTO_BASE = 'https://vcdhpsfuilrrrqfhfsjt.supabase.co/storage/v1/object/public/social-images/brand%2Femail%2F';
 
 export interface TidyEmailArt {
-  icon: string;
+  /** Photographic banner (1200x500, light, Miami). */
+  image: string;
   label: string;
-  tintFrom: string;
-  tintTo: string;
+  alt: string;
 }
 
+const photo = (name: string, label: string, alt: string): TidyEmailArt => ({ image: `${PHOTO_BASE}${name}.jpg`, label, alt });
+
+// Order matters: the first match wins.
 const ART: Array<{ match: RegExp; art: TidyEmailArt }> = [
-  { match: /(background check|checkr|screening)/i, art: { icon: '🛡️', label: 'Background check', tintFrom: '#eef4ff', tintTo: '#f8fbff' } },
-  { match: /(insurance|coi|certificate|liability)/i, art: { icon: '📄', label: 'Insurance', tintFrom: '#eef7f2', tintTo: '#f9fdfb' } },
-  { match: /(kit|uniform|polo|badge|magnet|shirt|size)/i, art: { icon: '👕', label: 'Your Tidy kit', tintFrom: '#fff7e0', tintTo: '#fffdf6' } },
-  { match: /(visit|appointment|schedule|booking|arriv|reschedul)/i, art: { icon: '🗓️', label: 'Your visit', tintFrom: '#eef4ff', tintTo: '#f9fbff' } },
-  { match: /(clean)/i, art: { icon: '🧼', label: 'Cleaning', tintFrom: '#eef6ff', tintTo: '#f9fcff' } },
-  { match: /(lawn|yard|mow)/i, art: { icon: '🌿', label: 'Lawn', tintFrom: '#eff8ed', tintTo: '#fafdf9' } },
-  { match: /(car care|shine complete|detail)/i, art: { icon: '🚗', label: 'Car Care', tintFrom: '#eef3fb', tintTo: '#fafcff' } },
-  { match: /(payment|invoice|receipt|billing|payout|deposit|card)/i, art: { icon: '💳', label: 'Billing', tintFrom: '#f3f1ff', tintTo: '#fbfaff' } },
-  { match: /(review|rating|feedback|star)/i, art: { icon: '⭐', label: 'Your feedback', tintFrom: '#fff6de', tintTo: '#fffdf5' } },
-  { match: /(referral|refer a|friend|credit)/i, art: { icon: '🎁', label: 'Referrals', tintFrom: '#fdf0f6', tintTo: '#fffafd' } },
-  { match: /(applicant|apply|hiring|interview|offer|candidate)/i, art: { icon: '🤝', label: 'Hiring', tintFrom: '#eef4ff', tintTo: '#f9fbff' } },
-  { match: /(digest|report|summary|kpi|weekly|metrics)/i, art: { icon: '📊', label: 'Your snapshot', tintFrom: '#eef6f9', tintTo: '#fafdfe' } },
-  { match: /(alert|urgent|failed|attention|issue|action required)/i, art: { icon: '🔔', label: 'Needs a look', tintFrom: '#fff1ec', tintTo: '#fffbf9' } },
-  { match: /(password|sign in|log in|verify|confirm your email|account)/i, art: { icon: '🔐', label: 'Your account', tintFrom: '#eef2fb', tintTo: '#fafbff' } },
-  { match: /(welcome|onboard|getting started|next step)/i, art: { icon: '✨', label: 'Welcome to Tidy', tintFrom: '#fff8e3', tintTo: '#fffdf7' } },
+  { match: /(contract|agreement|signed|signature|firma)/i, art: photo('contract', 'Contractor agreement', 'A signed agreement on a sunlit desk') },
+  { match: /(badge photo|photo|retake|foto)/i, art: photo('photo', 'Badge photo', 'A portrait being taken against a plain wall') },
+  { match: /(background check|checkr|screening)/i, art: photo('verify', 'Background check', 'A checklist being reviewed in a bright entryway') },
+  { match: /(insurance|coi|certificate|liability)/i, art: photo('verify', 'Insurance', 'A checklist being reviewed in a bright entryway') },
+  { match: /(kit|uniform|polo|badge|magnet|shirt|size)/i, art: photo('kit', 'Your Tidy kit', 'Folded polos, a badge and a vest on a table') },
+  { match: /(all set|you're set|ready to start|welcome|onboard|getting started|next step|bienvenid)/i, art: photo('welcome', 'Welcome to Tidy', 'A Tidy Pro arriving at a bright Miami home') },
+  { match: /(visit|appointment|schedule|booking|arriv|reschedul)/i, art: photo('visit', 'Your visit', 'A phone and calendar on a sunny desk') },
+  { match: /(lawn|yard|mow)/i, art: photo('lawn', 'Lawn', 'A manicured lawn in front of a Miami home') },
+  { match: /(car care|shine complete|detail)/i, art: photo('car', 'Car Care', 'A freshly washed car in a sunny driveway') },
+  { match: /(clean)/i, art: photo('cleaning', 'Cleaning', 'A spotless sunlit living room') },
+  { match: /(payment|invoice|receipt|billing|payout|deposit|card)/i, art: photo('billing', 'Billing', 'A card and receipt on a white desk') },
+  { match: /(review|rating|feedback|star|referral|refer a|friend|credit|neighbor)/i, art: photo('community', 'Your neighbors', 'Neighbors chatting over a white fence') },
+  { match: /(applicant|apply|hiring|interview|offer|candidate)/i, art: photo('welcome', 'Hiring', 'A Tidy Pro arriving at a bright Miami home') },
+  { match: /(digest|report|summary|kpi|weekly|metrics|alert|urgent|failed|attention|issue|action required)/i, art: photo('report', 'Your snapshot', 'A laptop with a soft chart by a window') },
+  { match: /(password|sign in|log in|verify|confirm your email|account)/i, art: photo('home', 'Your account', 'A bright Miami home at golden hour') },
 ];
 
-const DEFAULT_ART: TidyEmailArt = { icon: '🏡', label: 'Tidy Home Concierge', tintFrom: '#eef4ff', tintTo: '#fafcff' };
+const DEFAULT_ART: TidyEmailArt = photo('home', 'Tidy Home Concierge', 'A bright Miami home at golden hour');
 
-/** Pick a relevant hero illustration for an email based on its subject/heading. */
+/** Pick a relevant photographic banner for an email based on its subject/heading. */
 export function pickEmailArt(topic?: string): TidyEmailArt {
   if (!topic) return DEFAULT_ART;
   for (const entry of ART) if (entry.match.test(topic)) return entry.art;
@@ -49,10 +57,7 @@ export function pickEmailArt(topic?: string): TidyEmailArt {
 }
 
 export function emailHeroArt(art: TidyEmailArt): string {
-  return `<tr ${TIDY_ART_MARKER}><td align="center" style="background:${art.tintTo};background-image:linear-gradient(160deg,${art.tintFrom},${art.tintTo});padding:26px 24px 22px;border-bottom:1px solid #e9eff7">
-    <table role="presentation" cellpadding="0" cellspacing="0"><tr><td align="center" width="88" height="88" style="width:88px;height:88px;background:#ffffff;border-radius:44px;font:38px/88px Arial,sans-serif;text-align:center;box-shadow:0 6px 18px rgba(15,23,42,0.08)">${art.icon}</td></tr></table>
-    <p style="margin:12px 0 0;font:700 11px Arial,sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:#64748b">${art.label}</p>
-  </td></tr>`;
+  return `<tr ${TIDY_ART_MARKER}><td style="padding:0;background:#f4f8fc;font-size:0;line-height:0"><img src="${art.image}" alt="${art.alt}" width="600" height="250" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>`;
 }
 
 export interface TidyEmailShellOptions {
@@ -73,8 +78,8 @@ export function emailButton(url: string, label: string): string {
 }
 
 export function emailServiceStrip(): string {
-  const service = (icon: string, label: string) => `<td width="33.33%" align="center" style="padding:13px 5px"><span style="display:inline-block;width:28px;height:28px;border-radius:14px;background:#f4f8fc;font:16px/28px Arial,sans-serif;text-align:center;vertical-align:middle">${icon}</span><span style="padding-left:7px;font:700 11px Arial,sans-serif;color:#334155;vertical-align:middle">${label}</span></td>`;
-  return `<tr data-tidy-service-strip="true"><td style="background:#ffffff;border-bottom:1px solid #e6edf5;padding:0 20px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${service('🧼', 'Cleaning')}${service('🌿', 'Lawn')}${service('🚗', 'Car Care')}</tr></table></td></tr>`;
+  const dot = '<span style="color:#FCCC00;padding:0 10px">&#9679;</span>';
+  return `<tr data-tidy-service-strip="true"><td align="center" style="background:#ffffff;border-bottom:1px solid #eef2f7;padding:12px 20px;font:700 10px Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#475569">Cleaning${dot}Lawn${dot}Car Care</td></tr>`;
 }
 
 export function tidyEmailShell(opts: TidyEmailShellOptions): string {
@@ -91,8 +96,8 @@ export function tidyEmailShell(opts: TidyEmailShellOptions): string {
   return `<!doctype html><html lang="en" ${TIDY_EMAIL_MARKER}><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>${opts.heading ?? 'Tidy Home Concierge'}</title></head><body style="margin:0;padding:0;background:#f6f9fc;-webkit-text-size-adjust:100%;font-family:Arial,sans-serif;color:#0f172a"><div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#f6f9fc">${preview}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f9fc"><tr><td align="center" style="padding:28px 12px 36px"><table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #e9eff7;border-radius:14px;overflow:hidden">
     <tr><td style="background:#ffffff;padding:16px 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><a href="${TIDY_SITE}"><img src="${TIDY_LOGO}" alt="Tidy Home Concierge" width="106" height="88" style="display:block;width:106px;height:88px;object-fit:contain;border:0"></a></td><td valign="middle" align="right" style="font:700 13px/1.35 Arial,sans-serif;color:#0f172a">More life.<br><span style="color:#b48a00">Less chores.</span></td></tr></table></td></tr>
     <tr><td style="height:4px;background:#FCCC00;font-size:0;line-height:0">&nbsp;</td></tr>
-    ${emailServiceStrip()}
     ${emailHeroArt(art)}
+    ${emailServiceStrip()}
     <tr><td style="padding:28px 28px 30px">${opts.eyebrow ? `<p style="margin:0 0 8px;font:700 11px Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;color:#2563eb">${opts.eyebrow}</p>` : ''}${heading}<div style="font:15px/1.65 Arial,sans-serif;color:#475569">${opts.bodyHtml}</div>${cta}</td></tr>
     <tr><td style="background:#f7fafd;border-top:1px solid #e6edf5;padding:20px 28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><img src="${TIDY_LOGO}" alt="Tidy" width="58" height="48" style="display:block;width:58px;height:48px;object-fit:contain;border:0"></td><td align="right" style="font:11px/1.65 Arial,sans-serif;color:#5b6b80">Tidy Home Concierge LLC<br>2121 Biscayne Blvd #1562, Miami, FL 33137<br><a href="${TIDY_SITE}" style="color:#5b6b80">jointidy.co</a> · (786) 829-1141${context}</td></tr></table></td></tr>
   </table></td></tr></table></body></html>`;
@@ -150,6 +155,7 @@ export function brandHostedTemplate(html: string, heading: string): { html: stri
 
   let next = lightenEmailHtml(
     html
+      .replace(LEGACY_ART_ROW, '')
       .split('https://raw.githubusercontent.com/jdlewis3923/tidy-home-launch-30/main/tidy-logo-circle.png').join(TIDY_LOGO)
       .split(`${TIDY_SITE}/favicon-512x512.png`).join(TIDY_LOGO)
       .replace(/<html(?![^>]*data-tidy-email)/i, `<html ${TIDY_EMAIL_MARKER}`),
@@ -157,6 +163,11 @@ export function brandHostedTemplate(html: string, heading: string): { html: stri
 
   const strip = emailServiceStrip();
   const hero = emailHeroArt(art);
+
+  // Legacy strip (emoji icons) + missing photo: swap in photo banner + new strip.
+  if (LEGACY_STRIP_ROW.test(next) && !next.includes(TIDY_ART_MARKER)) {
+    next = next.replace(LEGACY_STRIP_ROW, `${hero}${strip}`);
+  }
 
   if (!next.includes('data-tidy-service-strip')) {
     if (next.includes('<!-- Hero banner -->')) {
@@ -174,7 +185,7 @@ export function brandHostedTemplate(html: string, heading: string): { html: stri
       }
     }
   } else if (!next.includes(TIDY_ART_MARKER)) {
-    next = next.replace(/(<tr data-tidy-service-strip="true">[\s\S]*?<\/tr>)/i, `$1${hero}`);
+    next = next.replace(/(<tr data-tidy-service-strip="true">[\s\S]*?<\/tr>)/i, `${hero}$1`);
   }
 
   return { html: next, changed: next !== html, mode: next === html ? 'unchanged' : 'updated' };
