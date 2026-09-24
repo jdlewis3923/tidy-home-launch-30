@@ -687,6 +687,13 @@
       "when": 1790259819019,
       "tag": "0097_pro_contract_photo_numbers_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "7",
+      "when": 1790260170509,
+      "tag": "0098_pro_all_set_trigger",
+      "breakpoints": true
     }
   ]
 }

@@ -5748,6 +5748,7 @@ export type Database = {
         Returns: Json
       }
       nextval: { Args: { seq_name: string }; Returns: number }
+      pro_all_five: { Args: { _applicant_id: string }; Returns: boolean }
       pro_capacity_stats_internal: {
         Args: never
         Returns: {
