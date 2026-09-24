@@ -98,6 +98,13 @@ export default function ProRecordEditor({ applicantId, onSaved }: { applicantId:
       ({ error } = await supabase.from("pro_kit").update(patch as never).eq("id", kit.id));
     } else {
       let full = { ...patch };
+      // Keep every bilingual field in sync so the pipeline badge matches the record.
+      const bi = "bilingual_gate" in patch ? patch.bilingual_gate
+        : "bilingual" in patch ? (patch.bilingual == null ? null : patch.bilingual ? "yes" : "no")
+        : "bilingual_fluency_confirmed" in patch ? (patch.bilingual_fluency_confirmed ? "yes" : "no") : undefined;
+      if (bi !== undefined) {
+        full = { ...full, bilingual_gate: bi ?? "unknown", bilingual: bi === "yes" ? true : bi === "no" ? false : null, bilingual_fluency_confirmed: bi === "yes" };
+      }
       if ("score" in patch || "hiring_tier" in patch) full.score_overridden = true;
       else if (Object.keys(patch).some((k) => SCORE_KEYS.has(k))) full = { ...full, ...rescore({ ...a, ...patch }) };
       ({ error } = await supabase.from("applicants").update(full as never).eq("id", a.id));
