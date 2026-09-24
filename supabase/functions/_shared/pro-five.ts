@@ -34,14 +34,16 @@ export async function ensureContractToken(admin: SupabaseClient, applicant: { id
 export async function loadFive(admin: SupabaseClient, id: string, opts: { mintTokens?: boolean } = {}): Promise<FiveRecord> {
   const { data: applicant, error } = await admin.from('applicants').select('*').eq('id', id).maybeSingle();
   if (error || !applicant) throw new Error('applicant_not_found');
-  const { data: kit } = await admin.from('pro_kit').select('*').eq('applicant_id', id)
-    .order('created_at', { ascending: false }).limit(1).maybeSingle();
+  const getKit = async () => (await admin.from('pro_kit').select('*').eq('applicant_id', id)
+    .order('created_at', { ascending: false }).limit(1).maybeSingle()).data;
+  let kit = await getKit();
 
   if (opts.mintTokens) {
     if (!applicant.coi_token || !kit?.token) {
       try {
         const t = await ensureOnboardingTokens(admin, id);
         applicant.coi_token = applicant.coi_token ?? t.coi_token;
+        kit = await getKit();
       } catch { /* links stay null */ }
     }
     applicant.contract_token = await ensureContractToken(admin, applicant);
