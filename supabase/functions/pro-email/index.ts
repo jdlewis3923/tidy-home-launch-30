@@ -12,6 +12,7 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { EMAIL } from '../_shared/emailTemplates.ts';
 import { ensureTidyEmailBranding, TIDY_OWNER_EMAIL } from '../_shared/email-brand.ts';
@@ -62,8 +63,10 @@ Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
-  const auth = await requireServiceOrAdmin(req);
-  if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
+  if (!(await isCronAuthorized(req.clone()))) {
+    const auth = await requireServiceOrAdmin(req);
+    if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
+  }
   const parsed = Body.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return jsonResponse({ error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
   const { applicant_id, email: key, mode, lang, reason } = parsed.data;
