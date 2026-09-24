@@ -694,6 +694,20 @@
       "when": 1790260170509,
       "tag": "0098_pro_all_set_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "7",
+      "when": 1790260779001,
+      "tag": "0099_test_rows_get_test_pro_numbers",
+      "breakpoints": true
+    },
+    {
+      "idx": 100,
+      "version": "7",
+      "when": 1790260884165,
+      "tag": "0100_fix_all_set_trigger_record_access",
+      "breakpoints": true
     }
   ]
 }

@@ -10,6 +10,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Search, ShieldCheck, ShieldOff, ShieldAlert, Shield, ExternalLink, History } from "lucide-react";
 import { toast } from "sonner";
+import BadgePhotoReview from "@/components/admin/BadgePhotoReview";
 
 const STATUS_PILL: Record<string, string> = {
   active: "bg-emerald-100 text-emerald-800 ring-emerald-200",
@@ -118,6 +119,8 @@ export default function AdminBadges() {
         <p className="mt-1 text-sm text-muted-foreground">
           Issue, suspend, reinstate, or revoke Pro badges. The public /verify page reflects changes immediately.
         </p>
+
+        <div className="mt-5"><BadgePhotoReview /></div>
 
         <div className="mt-5 flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2">
           <Search className="h-4 w-4 text-muted-foreground" />
