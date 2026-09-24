@@ -15,7 +15,7 @@ const EMAILS: { key: string; label: string }[] = [
   { key: "background_check", label: "Background check invite" },
   { key: "insurance_request", label: "Insurance request" },
   { key: "contract", label: "Contract to sign" },
-  { key: "badge_photo", label: "Badge photo" },
+  { key: "badge_photo", label: "Photo ID upload (badge photo)" },
   { key: "photo_retake", label: "Ask for another photo" },
   { key: "all_set", label: "You're all set" },
   { key: "missing", label: "Missing items" },

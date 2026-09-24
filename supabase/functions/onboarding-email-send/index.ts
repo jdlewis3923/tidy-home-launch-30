@@ -58,6 +58,8 @@ export const ONBOARDING_EMAIL_KEYS = [
   'insurance_approved',
   'insurance_rejected',
   'insurance_expiring',
+  'contract',
+  'photo_id',
 ] as const;
 
 const Body = z.object({
@@ -95,6 +97,22 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'applicant_not_found' }, 404);
   }
   const { applicant, kit, state } = loaded;
+  // Contract + photo ID upload: built by pro-email (same builders as the Send menu).
+  if (key === 'contract' || key === 'photo_id') {
+    const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/pro-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}` },
+      body: JSON.stringify({
+        applicant_id,
+        email: key === 'contract' ? 'contract' : 'badge_photo',
+        mode: mode === 'pro' ? 'send' : mode,
+      }),
+    });
+    const out = await r.json().catch(() => ({}));
+    if (mode === 'preview') return jsonResponse(out, r.ok ? 200 : 502);
+    return jsonResponse({ ...out, ok: r.ok && out?.ok === true }, r.ok ? 200 : 502);
+  }
+
   const recipient = test ? OWNER_EMAIL : applicant.email;
   if (!recipient) return jsonResponse({ error: 'applicant_has_no_email' }, 400);
 
@@ -108,8 +126,17 @@ Deno.serve(async (req) => {
         return jsonResponse({ ok: true, to: recipient, subject, html: ensureTidyEmailBranding(html, subject) });
       }
       if (key === 'kit_order') {
-        return jsonResponse({ ok: true, to: recipient, subject: 'Your Tidy kit is on its way', html: null,
-          note: 'This email is built from the Pro\'s submitted sizes. Use "Test to me" to see it exactly.' });
+        if (!kit?.token) {
+          return jsonResponse({ ok: false, error: 'preview_failed', reason: 'This Pro has not submitted the sizes/kit form yet, so there is no kit email to show.' }, 400);
+        }
+        const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/intake-submitted`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}` },
+          body: JSON.stringify({ token: kit.token, render_only: true }),
+        });
+        const out = await r.json().catch(() => ({}));
+        if (!r.ok || !out?.html) throw new Error(out?.error ?? `kit preview ${r.status}`);
+        return jsonResponse({ ok: true, to: recipient, subject: out.subject, html: out.html });
       }
       const id = key === 'welcome' ? EMAIL.CONTRACTOR_WELCOME_T1 : templateIdFor(key)!;
       const { subject, html } = await renderTemplate(id, {
@@ -121,7 +148,7 @@ Deno.serve(async (req) => {
         tier_progression_url: `${SITE}/pro/tier-progression`,
         pay_uplift: '+10% on every visit',
       });
-      return jsonResponse({ ok: true, to: recipient, subject, html });
+      return jsonResponse({ ok: true, to: recipient, subject, html: ensureTidyEmailBranding(html, subject) });
     } catch (e) {
       return jsonResponse({ ok: false, error: 'preview_failed', reason: (e as Error).message }, 502);
     }
