@@ -16,3 +16,8 @@ Rules:
 - Mobile-safe: table layout, inline styles, Arial fallbacks, light-only color-scheme meta.
 - Hosted Brevo templates are upgraded in place by `brandHostedTemplate()` via the `brevo-brand-audit` function; IDs, subjects, and merge fields are never altered.
 - Every hosted-template send runs a fail-closed preflight: repair branding first, or block the send. A marker alone can never bypass validation.
+
+## Visual focal point (updated)
+- Every email opens with a full-width photographic banner (light, bright Miami scenes) chosen by topic via pickEmailArt(). Photos live in the public social-images bucket under brand/email/.
+- Emoji or icon-circle hero art is retired — user found it cheap. Never use emojis as the focal point or in the service strip.
+- Service strip is text only: CLEANING · LAWN · CAR CARE with gold dots.

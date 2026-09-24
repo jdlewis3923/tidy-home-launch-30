@@ -57,8 +57,7 @@ export function pickEmailArt(topic?: string): TidyEmailArt {
 }
 
 export function emailHeroArt(art: TidyEmailArt): string {
-  return `<tr ${TIDY_ART_MARKER}><td style="padding:0;background:#f4f8fc;font-size:0;line-height:0"><img src="${art.image}" alt="${art.alt}" width="600" height="250" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>
-    <tr><td style="padding:14px 28px 0;background:#ffffff"><p style="margin:0;font:700 10px Arial,sans-serif;letter-spacing:1.8px;text-transform:uppercase;color:#94a3b8">${art.label}</p></td></tr>`;
+  return `<tr ${TIDY_ART_MARKER}><td style="padding:0;background:#f4f8fc;font-size:0;line-height:0"><img src="${art.image}" alt="${art.alt}" width="600" height="250" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>`;
 }
 
 export interface TidyEmailShellOptions {
