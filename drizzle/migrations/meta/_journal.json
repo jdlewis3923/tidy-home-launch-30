@@ -680,6 +680,13 @@
       "when": 1790174383316,
       "tag": "0096_badge_photo_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "7",
+      "when": 1790259819019,
+      "tag": "0097_pro_contract_photo_numbers_audit",
+      "breakpoints": true
     }
   ]
 }
