@@ -1,3 +1,4 @@
+import { ensureTidyEmailBranding } from '../_shared/email-brand.ts';
 import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Pro Intake & Kit Order submission handler
 //
@@ -132,6 +133,7 @@ Deno.serve(async (req) => {
   const previewTo = typeof body?.preview_to === 'string' && body.preview_to.includes('@')
     ? body.preview_to
     : null;
+  const renderOnly = body?.render_only === true;
 
   const { data: kit, error } = await admin.from('pro_kit').select('*').eq('token', token).maybeSingle();
   if (error) return jsonResponse({ error: 'lookup_failed', details: error.message }, 500);
@@ -142,11 +144,11 @@ Deno.serve(async (req) => {
   const summary = kitOrderSummary(row as never);
   const badgeUrl = kit.badge_photo_token ? `${SITE}/badge/${kit.badge_photo_token}` : null;
 
-  if (!previewTo) await admin.from('pro_kit').update({ kit_summary: summary }).eq('id', kit.id);
+  if (!previewTo && !renderOnly) await admin.from('pro_kit').update({ kit_summary: summary }).eq('id', kit.id);
 
   // Advance the linked applicant one step along the hiring pipeline.
   const PIPELINE = ['applied', 'background_check_review', 'interview_pending', 'offer_sent', 'contract_signed', 'oriented', 'active'];
-  if (kit.applicant_id && !previewTo) {
+  if (kit.applicant_id && !previewTo && !renderOnly) {
     const { data: appRow } = await admin
       .from('applicants')
       .select('current_stage')
@@ -224,6 +226,11 @@ Deno.serve(async (req) => {
       Your kit typically arrives in 7 to 10 days. Questions: <a href="mailto:${OWNER}" style="color:#2563eb">${OWNER}</a>.<br/>
       <span style="color:#64748b">Su kit llega normalmente en 7 a 10 días.</span>
     </p>`);
+
+  if (renderOnly) {
+    const subject = 'Your Tidy kit is on the way — one photo left / Su kit de Tidy va en camino';
+    return jsonResponse({ ok: true, subject, html: ensureTidyEmailBranding(proHtml, subject) });
+  }
 
   const prefix = previewTo ? '[TEST] ' : '';
   let ownerSent = false;

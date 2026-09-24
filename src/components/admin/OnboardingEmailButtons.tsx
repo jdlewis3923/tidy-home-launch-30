@@ -20,7 +20,9 @@ type EmailKey =
   | "kit_order"
   | "insurance_approved"
   | "insurance_rejected"
-  | "insurance_expiring";
+  | "insurance_expiring"
+  | "contract"
+  | "photo_id";
 
 const EMAILS: { key: EmailKey; title: string; note: string }[] = [
   {
@@ -32,6 +34,16 @@ const EMAILS: { key: EmailKey; title: string; note: string }[] = [
     key: "reminder",
     title: "Reminder — what is still missing",
     note: "Lists only the steps this Pro has not finished yet.",
+  },
+  {
+    key: "contract",
+    title: "Contractor agreement — sign",
+    note: "Link to read and sign the independent contractor agreement.",
+  },
+  {
+    key: "photo_id",
+    title: "Photo ID upload",
+    note: "Link to upload the photo for the Tidy ID badge.",
   },
   {
     key: "kit_order",
