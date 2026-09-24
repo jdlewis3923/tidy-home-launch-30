@@ -8,6 +8,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { loadFive } from '../_shared/pro-five.ts';
 import { allSetEmail } from '../_shared/pro-emails.ts';
 import { sendProEmail } from '../_shared/pro-send.ts';
@@ -19,8 +20,11 @@ const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
-  const auth = await requireServiceOrAdmin(req);
-  if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
+  // Database triggers call with the Vault service key; admins call with their session.
+  if (!(await isCronAuthorized(req))) {
+    const auth = await requireServiceOrAdmin(req);
+    if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
+  }
   const body = await req.json().catch(() => ({}));
   const id = typeof body?.applicant_id === 'string' ? body.applicant_id : '';
   if (!id) return jsonResponse({ error: 'applicant_id required' }, 400);
