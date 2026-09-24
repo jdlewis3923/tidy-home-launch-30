@@ -157,7 +157,7 @@ describe('sendBrevoEmail Tidy branding enforcement', () => {
     expect(html).not.toMatch(/background\s*:\s*#0f172a/i);
     expect(html).not.toMatch(/color\s*:\s*#ffffff/i);
     expect(html).toContain('data-tidy-hero-photo="true"');
-    expect(html).toContain('🗓️');
+    expect(html).toContain('email%2Fvisit.jpg');
   });
 
   it('does not nest an already branded email', async () => {
