@@ -214,6 +214,9 @@ export default function ProOnboardingChips({
         <Button size="sm" variant="outline" onClick={() => copy(intakeUrl, "Intake")}>
           <Copy className="mr-1 h-3.5 w-3.5" /> Copy intake link
         </Button>
+        <Button size="sm" variant="outline" onClick={() => copy(photoUrl, "Photo ID")}>
+          <Copy className="mr-1 h-3.5 w-3.5" /> Copy photo link
+        </Button>
         <Button size="sm" variant="ghost" disabled={busy !== null} onClick={newLinks}>
           {busy === "links" ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-1 h-3.5 w-3.5" />}
           New links
