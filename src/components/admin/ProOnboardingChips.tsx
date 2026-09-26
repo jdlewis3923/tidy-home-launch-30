@@ -84,6 +84,11 @@ export default function ProOnboardingChips({
     intake: kitToken ?? null,
   });
   const [kit, setKit] = useState<string | null>(kitStatus ?? null);
+  const [photo, setPhoto] = useState<{ status: string | null; uploadedAt: string | null; token: string | null }>({
+    status: null,
+    uploadedAt: null,
+    token: null,
+  });
 
   // The caller usually doesn't already hold the kit row, so load it here.
   useEffect(() => {
@@ -92,7 +97,7 @@ export default function ProOnboardingChips({
     (async () => {
       const { data } = await supabase
         .from("pro_kit")
-        .select("token, status")
+        .select("token, status, badge_photo_status, badge_photo_uploaded_at, badge_photo_token")
         .eq("applicant_id", applicant.id)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -100,11 +105,25 @@ export default function ProOnboardingChips({
       if (!alive || !data) return;
       setKit(data.status ?? null);
       setTokens((t) => ({ ...t, intake: t.intake ?? data.token ?? null }));
+      setPhoto({
+        status: data.badge_photo_status ?? null,
+        uploadedAt: data.badge_photo_uploaded_at ?? null,
+        token: data.badge_photo_token ?? null,
+      });
     })();
     return () => {
       alive = false;
     };
   }, [applicant.id, kitStatus, kitToken]);
+
+  const photoStatus: StepStatus =
+    photo.status === "approved"
+      ? "verified"
+      : photo.status === "pending" || photo.uploadedAt
+        ? "received"
+        : photo.token
+          ? "sent"
+          : "not_sent";
 
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://jointidy.co";
