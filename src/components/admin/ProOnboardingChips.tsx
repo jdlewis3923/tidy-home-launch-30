@@ -84,6 +84,11 @@ export default function ProOnboardingChips({
     intake: kitToken ?? null,
   });
   const [kit, setKit] = useState<string | null>(kitStatus ?? null);
+  const [photo, setPhoto] = useState<{ status: string | null; uploadedAt: string | null; token: string | null }>({
+    status: null,
+    uploadedAt: null,
+    token: null,
+  });
 
   // The caller usually doesn't already hold the kit row, so load it here.
   useEffect(() => {
@@ -92,7 +97,7 @@ export default function ProOnboardingChips({
     (async () => {
       const { data } = await supabase
         .from("pro_kit")
-        .select("token, status")
+        .select("token, status, badge_photo_status, badge_photo_uploaded_at, badge_photo_token")
         .eq("applicant_id", applicant.id)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -100,16 +105,31 @@ export default function ProOnboardingChips({
       if (!alive || !data) return;
       setKit(data.status ?? null);
       setTokens((t) => ({ ...t, intake: t.intake ?? data.token ?? null }));
+      setPhoto({
+        status: data.badge_photo_status ?? null,
+        uploadedAt: data.badge_photo_uploaded_at ?? null,
+        token: data.badge_photo_token ?? null,
+      });
     })();
     return () => {
       alive = false;
     };
   }, [applicant.id, kitStatus, kitToken]);
 
+  const photoStatus: StepStatus =
+    photo.status === "approved"
+      ? "verified"
+      : photo.status === "pending" || photo.uploadedAt
+        ? "received"
+        : photo.token
+          ? "sent"
+          : "not_sent";
+
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://jointidy.co";
   const coiUrl = tokens.coi ? `${origin}/coi/${tokens.coi}` : null;
   const intakeUrl = tokens.intake ? `${origin}/intake/${tokens.intake}` : null;
+  const photoUrl = photo.token ? `${origin}/photo/${photo.token}` : null;
 
   const copy = async (url: string | null, what: string) => {
     if (!url) {
@@ -174,7 +194,15 @@ export default function ProOnboardingChips({
         <Chip label="Background check" status={backgroundCheckStatus(applicant)} />
         <Chip label="Insurance" status={insuranceStatus(applicant)} />
         <Chip label="Intake" status={intakeStatus(kitStatus, tokens.intake)} />
+        <Chip label="Photo ID" status={photoStatus} />
       </div>
+      {photo.uploadedAt && (
+        <p className="text-[11px] text-muted-foreground">
+          Photo ID uploaded {new Date(photo.uploadedAt).toLocaleString()}
+          {photo.status === "pending" ? " — waiting for your review on the badges page." : ""}
+          {photo.status === "retake" ? " — retake requested." : ""}
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         <Button size="sm" variant="outline" disabled={busy !== null} onClick={resendEmail}>
           {busy === "email" ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Mail className="mr-1 h-3.5 w-3.5" />}
@@ -185,6 +213,9 @@ export default function ProOnboardingChips({
         </Button>
         <Button size="sm" variant="outline" onClick={() => copy(intakeUrl, "Intake")}>
           <Copy className="mr-1 h-3.5 w-3.5" /> Copy intake link
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => copy(photoUrl, "Photo ID")}>
+          <Copy className="mr-1 h-3.5 w-3.5" /> Copy photo link
         </Button>
         <Button size="sm" variant="ghost" disabled={busy !== null} onClick={newLinks}>
           {busy === "links" ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-1 h-3.5 w-3.5" />}
