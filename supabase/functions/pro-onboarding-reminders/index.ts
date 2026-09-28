@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
     if (!row.email) { results.push({ applicant_id: row.id, action: 'no_email' }); continue; }
 
     const built = missingEmail(row.first_name ?? 'there', rec.missing.map((k) => ({ key: k, url: rec.urls[k] })));
-    const res = await sendProEmail(admin, { applicantId: row.id, key: 'missing', to: row.email, name: row.first_name ?? undefined, built, triggeredBy: 'pro-onboarding-reminders' });
+    const res = await sendProEmail(admin, { applicantId: row.id, key: 'missing', to: row.email, name: row.first_name ?? undefined, built, triggeredBy: 'pro-onboarding-reminders', mode: 'auto' });
     const nowIso = new Date().toISOString();
     if (res.sent) {
       await admin.from('applicants').update({ chase_count: sentCount + 1, chase_last_at: nowIso }).eq('id', row.id);

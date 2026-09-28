@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
         const date = String(body.date ?? '');
         if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return jsonResponse({ error: 'date_required' }, 400);
         if (!kit?.id) return jsonResponse({ error: 'no_kit_record', missing: ['intake'] }, 409);
-        await admin.from('pro_kit').update({ expected_delivery_date: date, status: 'ordered' }).eq('id', kit.id);
+        await admin.from('pro_kit').update({ expected_delivery_date: date, status: 'kit_ordered' }).eq('id', kit.id);
         await move('kit_ordered');
         // Gate C is checked inside pro-all-set; it moves the stage to all_set if it sends.
         await vendorFetch(`${URL_}/functions/v1/pro-all-set`, {

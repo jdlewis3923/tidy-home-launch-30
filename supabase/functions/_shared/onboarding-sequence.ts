@@ -78,7 +78,7 @@ const conf = (f: GateFacts, k: string) => yes((f.gate_confirmations ?? {})[k]);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneOk = (p?: string | null) => !!p && p.replace(/\D/g, '').length >= 10;
 const emailOk = (e?: string | null) => !!e && EMAIL_RE.test(e);
-const INTAKE_DONE = ['submitted', 'ready_to_order', 'ordered', 'shipped', 'delivered', 'issued'];
+const INTAKE_DONE = ['submitted', 'kit_ordered', 'kit_issued'];
 
 export const bgClear = (f: GateFacts) => f.bg_check_status === 'clear';
 export const coiVerified = (f: GateFacts, now = Date.now()) =>
