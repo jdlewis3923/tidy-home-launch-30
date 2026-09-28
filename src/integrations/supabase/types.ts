@@ -1313,12 +1313,15 @@ export type Database = {
       }
       company_documents: {
         Row: {
+          admin_only: boolean
           archive_reason: string | null
           archived_at: string | null
           brevo_template_id: number | null
           category: string
           contractor_id: string | null
           current_version: boolean
+          description: string | null
+          doc_key: string | null
           documenso_doc_id: string | null
           file_size_bytes: number | null
           filename: string
@@ -1327,16 +1330,20 @@ export type Database = {
           searchable_text: string | null
           storage_path: string
           tags: string[]
+          title: string | null
           uploaded_at: string
           uploaded_by: string | null
         }
         Insert: {
+          admin_only?: boolean
           archive_reason?: string | null
           archived_at?: string | null
           brevo_template_id?: number | null
           category: string
           contractor_id?: string | null
           current_version?: boolean
+          description?: string | null
+          doc_key?: string | null
           documenso_doc_id?: string | null
           file_size_bytes?: number | null
           filename: string
@@ -1345,16 +1352,20 @@ export type Database = {
           searchable_text?: string | null
           storage_path: string
           tags?: string[]
+          title?: string | null
           uploaded_at?: string
           uploaded_by?: string | null
         }
         Update: {
+          admin_only?: boolean
           archive_reason?: string | null
           archived_at?: string | null
           brevo_template_id?: number | null
           category?: string
           contractor_id?: string | null
           current_version?: boolean
+          description?: string | null
+          doc_key?: string | null
           documenso_doc_id?: string | null
           file_size_bytes?: number | null
           filename?: string
@@ -1363,6 +1374,7 @@ export type Database = {
           searchable_text?: string | null
           storage_path?: string
           tags?: string[]
+          title?: string | null
           uploaded_at?: string
           uploaded_by?: string | null
         }
