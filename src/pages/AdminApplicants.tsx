@@ -13,6 +13,7 @@
  * - Mobile responsive
  */
 import ViewSequenceLink from "@/components/admin/ViewSequenceLink";
+import NextActionCard from "@/components/admin/NextActionCard";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";
@@ -1178,97 +1179,7 @@ export default function AdminApplicants() {
                   <CardContent className="p-4 space-y-3">
                     <h3 className="font-semibold text-[#0D1117]">Pipeline</h3>
 
-                    {/* Advance Stage — contextual to current stage */}
-                    {(() => {
-                      const stage = open.current_stage ?? "applied";
-                      const bgPassed = open.bg_check_status === "clear";
-                      const acts: Array<{ label: string; action: AdvanceAction }> = [];
-                      if (stage === "applied") {
-                        acts.push({ label: "Schedule Interview", action: "schedule_interview" });
-                        acts.push({ label: "Send to BG Check", action: "send_to_bg_check" });
-                      } else if (stage === "interview_pending") {
-                        acts.push({ label: "Send to BG Check", action: "send_to_bg_check" });
-                      } else if (
-                        (stage === "background_check_pending" || stage === "background_check_review") && bgPassed
-                      ) {
-                        acts.push({ label: "Send Offer", action: "send_offer" });
-                      } else if (stage === "offer_sent") {
-                        acts.push({ label: "Send Contract", action: "send_contract" });
-                      } else if (stage === "contract_signed") {
-                        acts.push({ label: "Schedule Orientation", action: "mark_oriented" });
-                      } else if (stage === "oriented") {
-                        acts.push({ label: "Activate", action: "activate" });
-                      }
-                      if (!acts.length) return null;
-                      return (
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                          <div className="text-[11px] uppercase tracking-wide font-semibold text-slate-600 mb-2">Advance Stage</div>
-                          <div className="flex flex-wrap gap-2">
-                            {acts.map((a) => (
-                              <Button
-                                key={a.action}
-                                size="sm"
-                                disabled={!!submitting}
-                                onClick={() => runAction(a.action)}
-                                className="bg-[#1FA1F0] hover:bg-[#1990da] text-white disabled:opacity-50"
-                              >
-                                {submitting === a.action ? <Loader2 className="h-4 w-4 animate-spin" /> : a.label}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    <ol className="space-y-2">
-                      {PIPELINE_STEPS.map((step, i) => {
-                        const done = i < stepIdx;
-                        const current = i === stepIdx;
-                        return (
-                          <li key={step.key} className="flex items-center gap-3">
-                            <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ring-2 ${
-                              done ? "bg-emerald-500 text-white ring-emerald-200"
-                                : current ? "bg-[#1FA1F0] text-white ring-blue-200"
-                                : "bg-slate-100 text-slate-400 ring-slate-200"
-                            }`}>
-                              {done ? <Check className="h-4 w-4" /> : i + 1}
-                            </div>
-                            <span className={`text-sm ${current ? "font-semibold text-[#0D1117]" : done ? "text-slate-600" : "text-slate-400"}`}>
-                              {step.label}
-                            </span>
-                          </li>
-                        );
-                      })}
-                    </ol>
-                    <div className="pt-2 border-t border-slate-100 flex flex-wrap gap-2">
-                      {open.current_stage === "interview_pending" && (
-                        <Button size="sm" disabled={!!submitting || !open.bilingual_fluency_confirmed} title={!open.bilingual_fluency_confirmed ? "Bilingual fluency not confirmed — cannot send envelope" : ""} onClick={() => runAction("send_offer")} className="bg-[#1FA1F0] hover:bg-[#1990da] text-white disabled:opacity-50">Send Documenso envelope</Button>
-                      )}
-                      {open.current_stage === "background_check_review" && (
-                        <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("schedule_interview")}>Schedule interview</Button>
-                      )}
-                      {open.current_stage === "offer_sent" && (
-                        <Button size="sm" disabled={!!submitting} onClick={() => runAction("send_contract")} className="bg-[#1FA1F0] hover:bg-[#1990da] text-white">Send contract</Button>
-                      )}
-                      {open.current_stage === "contract_signed" && (
-                        <Button size="sm" disabled={!!submitting} onClick={() => runAction("mark_oriented")} className="bg-teal-600 hover:bg-teal-700 text-white">Mark orientation complete</Button>
-                      )}
-                      {open.current_stage === "oriented" && (
-                        <Button
-                          size="sm"
-                          disabled={!!submitting || !open.compliance_complete}
-                          title={open.compliance_complete ? "" : "Compliance docs required (COI / bond / auto / EIN) before activation"}
-                          onClick={() => runAction("activate")}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
-                        >
-                          Activate{!open.compliance_complete ? " (compliance required)" : ""}
-                        </Button>
-                      )}
-                      {/* Always allow scheduling if not yet scheduled */}
-                      {!["interview_pending", "offer_sent", "contract_signed", "oriented", "active", "rejected"].includes(open.current_stage ?? "") && (
-                        <Button size="sm" variant="outline" disabled={!!submitting} onClick={() => runAction("schedule_interview")}>Schedule interview</Button>
-                      )}
-                    </div>
+                    <NextActionCard applicant={open as never} onDone={() => { void fetchRows(); }} />
                   </CardContent>
                 </Card>
 
