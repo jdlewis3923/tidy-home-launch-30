@@ -120,8 +120,8 @@ Deno.serve(async (req) => {
       case 'decline': built = declineEmail(first, L); break;
       case 'interview_confirmed':
       case 'interview_reminder':
-        if (!a.call_at) return jsonResponse({ error: 'no_interview_time' }, 400);
-        built = interviewEmail(first, a.call_at, key === 'interview_reminder', L); break;
+        if (!(a as any).call_at) return jsonResponse({ error: 'no_interview_time' }, 400);
+        built = interviewEmail(first, (a as any).call_at, key === 'interview_reminder', L); break;
       case 'first_route': built = firstRouteEmail(first, L); break;
     }
   } catch (e) {

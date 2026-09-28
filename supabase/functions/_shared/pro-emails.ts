@@ -245,3 +245,35 @@ export function missingEmail(first: string, missing: { key: FiveKey; url: string
 }
 
 export const SITE = TIDY_SITE;
+
+// ------------------------------------------------------------ sequence emails
+const fmtEt = (iso: string, es = false) => new Intl.DateTimeFormat(es ? 'es-US' : 'en-US', {
+  timeZone: 'America/New_York', weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit',
+}).format(new Date(iso));
+
+/** #2 Interview confirmed / #2r reminder two hours before. */
+export function interviewEmail(first: string, whenIso: string, reminder: boolean, lang: Lang = 'both'): Built {
+  const whenEn = fmtEt(whenIso), whenEs = fmtEt(whenIso, true);
+  const subject = reminder
+    ? pick(lang, `Reminder: your Tidy call is at ${whenEn}`, `Recordatorio: su llamada con Tidy es el ${whenEs}`)
+    : pick(lang, `Your Tidy interview is confirmed — ${whenEn}`, `Su entrevista con Tidy está confirmada — ${whenEs}`);
+  const html = shell(lang, subject,
+    para(lang, `Hi ${esc(first)}, ${reminder ? 'a quick reminder: ' : ''}we will call you on <strong>${esc(whenEn)}</strong> (Eastern) from <strong>(786) 829-1141</strong>.`,
+      `Hola ${esc(first)}, ${reminder ? 'un recordatorio: ' : ''}le llamaremos el <strong>${esc(whenEs)}</strong> (hora del Este) desde el <strong>(786) 829-1141</strong>.`) +
+    para(lang, 'Please have ready: your equipment list, your drive time to Pinecrest, and a pen.',
+      'Por favor tenga listo: su lista de equipo, su tiempo de manejo a Pinecrest y un bolígrafo.') + help(lang),
+    'calendar interview');
+  return { subject, html, text: `${subject}\n\n${txt(lang, `We will call you on ${whenEn} (Eastern) from (786) 829-1141. Have ready: your equipment list, your drive time to Pinecrest, and a pen.`, `Le llamaremos el ${whenEs} desde el (786) 829-1141. Tenga listo: su lista de equipo, su tiempo de manejo a Pinecrest y un bolígrafo.`)}` };
+}
+
+/** #7 Your first route — sent when you mark the Pro active. */
+export function firstRouteEmail(first: string, lang: Lang = 'both'): Built {
+  const subject = pick(lang, `${first}, your first Tidy route`, `${first}, su primera ruta con Tidy`);
+  const html = shell(lang, subject,
+    para(lang, `Hi ${esc(first)}, you are active. Your schedule — addresses, days and arrival windows — is in the Pro app.`,
+      `Hola ${esc(first)}, ya está activo. Su horario — direcciones, días y horarios de llegada — está en la app Pro.`) +
+    para(lang, 'At each home: do the walkaround before you start, and the check before you leave. Photos go in the app.',
+      'En cada casa: haga el recorrido antes de empezar y la revisión antes de salir. Las fotos van en la app.') + help(lang),
+    'visit route schedule', { url: `${TIDY_SITE}/pro/schedule`, label: 'Open my schedule' });
+  return { subject, html, text: `${subject}\n\n${txt(lang, `You are active. Your schedule is in the Pro app: ${TIDY_SITE}/pro/schedule`, `Ya está activo. Su horario está en la app Pro: ${TIDY_SITE}/pro/schedule`)}` };
+}
