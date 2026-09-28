@@ -6,6 +6,7 @@
  * (sparklines), alert_event / alert_rule (feed). No hardcoded readings: when a
  * metric is null the UI renders an em dash + "no data yet".
  */
+import ViewSequenceLink from "@/components/admin/ViewSequenceLink";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";

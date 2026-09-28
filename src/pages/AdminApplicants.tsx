@@ -12,6 +12,7 @@
  * - Loading skeletons, friendly empty state, confirm-before-reject modal
  * - Mobile responsive
  */
+import ViewSequenceLink from "@/components/admin/ViewSequenceLink";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";
