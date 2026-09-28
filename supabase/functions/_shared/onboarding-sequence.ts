@@ -19,7 +19,7 @@ export const STAGE_INFO: Record<SequenceStage, { label: string; waitingOn: 'you'
   interview_booked: { label: 'Interview booked', waitingOn: 'you' },
   waiting: { label: 'Waiting on them', waitingOn: 'them' },
   contract_sent: { label: 'Contract sent', waitingOn: 'them' },
-  signed: { label: 'Signed — review photo', waitingOn: 'you' },
+  signed: { label: 'Signed — badge photo', waitingOn: 'them' },
   photo_approved: { label: 'Photo approved', waitingOn: 'you' },
   kit_ordered: { label: 'Kit ordered', waitingOn: 'auto' },
   all_set: { label: 'All set', waitingOn: 'you' },
