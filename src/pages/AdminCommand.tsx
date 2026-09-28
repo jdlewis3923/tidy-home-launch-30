@@ -7,6 +7,7 @@
  * metric is null the UI renders an em dash + "no data yet".
  */
 import ViewSequenceLink from "@/components/admin/ViewSequenceLink";
+import WorkdayBoard from "@/components/admin/WorkdayBoard";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";
@@ -321,6 +322,7 @@ export default function AdminCommand() {
               <div><h2 className="text-lg font-bold">Workday</h2><p className="text-xs text-primary-foreground/75">Today’s activity, newest first.</p><ViewSequenceLink className="mt-1 text-primary-foreground" /></div>
               <div className="ml-auto flex gap-1">{(["today", "yesterday", "week"] as WorkdayRange[]).map((range) => <Button key={range} size="sm" variant="ghost" className={workdayRange === range ? "bg-background text-foreground" : "text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"} onClick={() => setWorkdayRange(range)}>{range === "week" ? "Last 7 days" : range[0].toUpperCase() + range.slice(1)}</Button>)}</div>
             </div>
+            <WorkdayBoard />
             <div className="grid grid-cols-2 md:grid-cols-5 border-b border-slate-200">
               {[
                 ["Applications", todayWorkday.filter((r) => r.event_type === "application_submitted").length],
