@@ -709,6 +709,8 @@ export type Database = {
           role: string | null
           score: number | null
           score_overridden: boolean
+          sequence_stage: string | null
+          sequence_stage_entered_at: string | null
           service: string | null
           source: string | null
           stage_entered_at: string | null
@@ -852,6 +854,8 @@ export type Database = {
           role?: string | null
           score?: number | null
           score_overridden?: boolean
+          sequence_stage?: string | null
+          sequence_stage_entered_at?: string | null
           service?: string | null
           source?: string | null
           stage_entered_at?: string | null
@@ -995,6 +999,8 @@ export type Database = {
           role?: string | null
           score?: number | null
           score_overridden?: boolean
+          sequence_stage?: string | null
+          sequence_stage_entered_at?: string | null
           service?: string | null
           source?: string | null
           stage_entered_at?: string | null
@@ -4223,6 +4229,47 @@ export type Database = {
           {
             foreignKeyName: "reviews_matched_pro_id_fkey"
             columns: ["matched_pro_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sequence_email_queue: {
+        Row: {
+          applicant_id: string
+          created_at: string
+          due_at: string
+          email_key: string
+          id: string
+          reason: string
+          released_at: string | null
+          result: string | null
+        }
+        Insert: {
+          applicant_id: string
+          created_at?: string
+          due_at: string
+          email_key: string
+          id?: string
+          reason: string
+          released_at?: string | null
+          result?: string | null
+        }
+        Update: {
+          applicant_id?: string
+          created_at?: string
+          due_at?: string
+          email_key?: string
+          id?: string
+          reason?: string
+          released_at?: string | null
+          result?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sequence_email_queue_applicant_id_fkey"
+            columns: ["applicant_id"]
             isOneToOne: false
             referencedRelation: "applicants"
             referencedColumns: ["id"]

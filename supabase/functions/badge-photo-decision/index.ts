@@ -34,6 +34,7 @@ Deno.serve(async (req) => {
     await admin.from('pro_kit').update({ badge_photo_status: 'approved', badge_photo_reviewed_at: now, badge_photo_retake_reason: null }).eq('id', kitId);
     if (kit.applicant_id) {
       await admin.from('applicants').update({ badge_photo_url: kit.badge_photo_path }).eq('id', kit.applicant_id);
+      await admin.from('applicants').update({ sequence_stage: 'photo_approved' }).eq('id', kit.applicant_id).eq('sequence_stage', 'signed');
       await admin.from('onboarding_events').insert({ applicant_id: kit.applicant_id, event: 'badge_photo_approved', metadata: {} });
       await vendorFetch(`${URL_}/functions/v1/pro-all-set`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE}` },

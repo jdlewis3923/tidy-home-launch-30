@@ -11,6 +11,7 @@ import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { loadFive } from '../_shared/pro-five.ts';
 import { allSetEmail } from '../_shared/pro-emails.ts';
+import { gateMissing } from '../_shared/onboarding-sequence.ts';
 import { sendProEmail } from '../_shared/pro-send.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
@@ -33,6 +34,12 @@ Deno.serve(async (req) => {
   try { rec = await loadFive(admin, id); } catch { return jsonResponse({ error: 'not_found' }, 404); }
   if (rec.missing.length) return jsonResponse({ ok: true, action: 'not_ready', missing: rec.missing });
   if (!rec.applicant.email) return jsonResponse({ ok: false, error: 'no_email' }, 400);
+  // Gate C: all five green AND a kit date (and the certificate verified, not just uploaded).
+  const gateC = gateMissing('C', {
+    ...rec.applicant, kit_status: rec.kit?.status ?? null, badge_photo_status: rec.kit?.badge_photo_status ?? null,
+    expected_delivery_date: rec.kit?.expected_delivery_date ?? null,
+  } as never);
+  if (gateC.length) return jsonResponse({ ok: true, action: 'not_ready', missing: gateC });
 
   // Claim atomically so two triggers can never send twice.
   const { data: claimed } = await admin.from('applicants')
@@ -48,8 +55,9 @@ Deno.serve(async (req) => {
   });
   const res = await sendProEmail(admin, {
     applicantId: id, key: 'all_set', to: rec.applicant.email, name: rec.applicant.first_name ?? undefined,
-    built, triggeredBy: 'pro-all-set',
+    built, triggeredBy: 'pro-all-set', mode: 'auto',
   });
   if (!res.sent) await admin.from('applicants').update({ all_set_sent_at: null }).eq('id', id);
+  else await admin.from('applicants').update({ sequence_stage: 'all_set' }).eq('id', id).in('sequence_stage', ['kit_ordered', 'photo_approved', 'signed']);
   return jsonResponse({ ok: res.sent, action: res.sent ? 'sent' : 'failed', reason: res.reason });
 });

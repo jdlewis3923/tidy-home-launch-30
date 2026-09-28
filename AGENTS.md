@@ -1,0 +1,1 @@
+- Onboarding sequence: stages/gates/email inventory live in `_shared/onboarding-sequence.ts` (mirrored to `src/lib/onboardingSequence.ts`, parity-tested); stage moves only via `sequence-advance`, and every Pro email passes `sendProEmail`'s guard — why: one definition, one door, auditable order.
