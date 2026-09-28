@@ -931,8 +931,10 @@ export default function AdminApplicants() {
                       )}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 ${STAGE_PILL[open.current_stage ?? "applied"]}`}>
+                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 inline-flex items-center gap-2 ${STAGE_PILL[open.current_stage ?? "applied"]}`}>
                         {STAGE_LABEL[open.current_stage ?? "applied"]}
+                        <span aria-hidden>·</span>
+                        <ViewSequenceLink />
                       </span>
                       <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 bg-white ring-slate-200 text-slate-700 inline-flex items-center gap-1.5">
                         <span className={`h-2 w-2 rounded-full ${BG_DOT[open.bg_check_status ?? "pending"]}`} />
