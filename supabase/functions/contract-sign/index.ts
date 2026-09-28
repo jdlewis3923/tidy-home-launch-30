@@ -114,6 +114,7 @@ Deno.serve(async (req) => {
     contracts_signed: true, contracts_signed_at: signedAt.toISOString(), contract_signed_name: typed,
     contract_signed_ip: ip, contract_signed_ua: ua, contract_doc_version: doc.version,
     contract_signed_pdf_path: path, ...(advance ? { current_stage: 'contract_signed' } : {}),
+    ...(['applied', 'screening', 'interview_booked', 'waiting', 'contract_sent'].includes(a.sequence_stage ?? 'contract_sent') ? { sequence_stage: 'signed' } : {}),
   }).eq('id', a.id);
   if (upErr) {
     console.error('[contract-sign] record update failed', upErr.message);
@@ -130,6 +131,12 @@ Deno.serve(async (req) => {
     applicantId: null, key: 'contract_signed_owner', to: TIDY_OWNER_EMAIL,
     built: { ...built, subject: `Signed: ${typed} — contractor agreement` }, triggeredBy: 'contract-sign', attachment,
   });
+
+  // Stage 7 is automatic: the badge-photo email (#5) goes through the send door as an automated email.
+  await vendorFetch(`${URL_}/functions/v1/pro-email`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE}` },
+    body: JSON.stringify({ applicant_id: a.id, email: 'badge_photo', mode: 'send', sequence: 'auto' }),
+  }).catch(() => null);
 
   await vendorFetch(`${URL_}/functions/v1/pro-all-set`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE}` },
