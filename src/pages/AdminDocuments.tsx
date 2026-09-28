@@ -84,6 +84,10 @@ type Doc = {
   archived_at: string | null;
   archive_reason: string | null;
   searchable_text: string | null;
+  title?: string | null;
+  description?: string | null;
+  doc_key?: string | null;
+  admin_only?: boolean | null;
 };
 
 type ArchiveFilter = "all" | "active" | "archived";
@@ -437,7 +441,13 @@ const CategoryCard = ({
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-foreground truncate">{d.filename}</span>
+                      <span className="font-medium text-foreground truncate">{d.title || d.filename}</span>
+                      {d.admin_only && (
+                        <Badge variant="outline" className="text-[10px]">admin only</Badge>
+                      )}
+                      {d.doc_key && (
+                        <Badge variant="outline" className="text-[10px]">{d.archived_at ? "older version" : "current version"}</Badge>
+                      )}
                       {d.archived_at && (
                         <Badge variant="outline" className="border-white/20 text-white/60 text-[10px]">
                           archived
@@ -454,8 +464,9 @@ const CategoryCard = ({
                         </Badge>
                       ))}
                     </div>
+                    {d.description && <p className="text-xs text-muted-foreground mt-1">{d.description}</p>}
                     <div className="text-xs text-white/40 mt-1">
-                      {formatDate(d.uploaded_at)} · {formatBytes(d.file_size_bytes)} · {d.mime_type ?? "unknown"}
+                      {d.title ? `${d.filename} · ` : ""}Uploaded {formatDate(d.uploaded_at)} · {formatBytes(d.file_size_bytes)} · {d.mime_type ?? "unknown"}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 no-print">
@@ -478,9 +489,11 @@ const CategoryCard = ({
                         <Button size="sm" variant="ghost" onClick={() => onPrint(d)} className="text-white/80 hover:text-white">
                           <Printer className="h-4 w-4 mr-1" /> Print
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => onCopyLink(d)} className="text-white/80 hover:text-white">
-                          <LinkIcon className="h-4 w-4 mr-1" /> Link
-                        </Button>
+                        {!d.admin_only && (
+                          <Button size="sm" variant="ghost" onClick={() => onCopyLink(d)} className="text-white/80 hover:text-white">
+                            <LinkIcon className="h-4 w-4 mr-1" /> Link
+                          </Button>
+                        )}
                       </>
                     )}
                     {!d.archived_at && (
@@ -593,6 +606,11 @@ const UploadModal = ({
         current_version: true,
         uploaded_by: uid ?? null,
         searchable_text: searchable,
+        // New versions inherit identity so older copies stay grouped and accessible.
+        title: existing?.title ?? null,
+        description: existing?.description ?? null,
+        doc_key: existing?.doc_key ?? null,
+        admin_only: existing?.admin_only ?? false,
       });
       if (insErr) throw insErr;
 
