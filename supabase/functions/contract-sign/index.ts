@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
   if (token.length < 20) return jsonResponse({ error: 'invalid_request' }, 400);
 
   const { data: a } = await admin.from('applicants')
-    .select('id, first_name, last_name, email, contracts_signed, current_stage')
+    .select('id, first_name, last_name, email, contracts_signed, current_stage, sequence_stage')
     .eq('contract_token', token).maybeSingle();
   if (!a) return jsonResponse({ error: 'not_found' }, 404);
 
