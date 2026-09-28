@@ -19,7 +19,7 @@ import { ensureTidyEmailBranding, TIDY_OWNER_EMAIL } from '../_shared/email-bran
 import { loadFive } from '../_shared/pro-five.ts';
 import {
   allSetEmail, backgroundCheckEmail, badgePhotoEmail, contractEmail, declineEmail,
-  insuranceRequestEmail, missingEmail, PHOTO_RETAKE_REASONS, type Built, type Lang, type RetakeReason,
+  insuranceRequestEmail, missingEmail, interviewEmail, firstRouteEmail, PHOTO_RETAKE_REASONS, type Built, type Lang, type RetakeReason,
 } from '../_shared/pro-emails.ts';
 import { sendProEmail } from '../_shared/pro-send.ts';
 
@@ -30,6 +30,7 @@ const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: fals
 export const PRO_EMAIL_KEYS = [
   'onboarding', 'background_check', 'insurance_request', 'contract', 'badge_photo',
   'photo_retake', 'all_set', 'missing', 'decline', 'tier2_offer',
+  'interview_confirmed', 'interview_reminder', 'first_route',
 ] as const;
 
 const Body = z.object({
@@ -38,6 +39,8 @@ const Body = z.object({
   mode: z.enum(['preview', 'send', 'test']).default('preview'),
   lang: z.enum(['both', 'en', 'es']).default('both'),
   reason: z.string().max(40).optional(),
+  /** manual = admin Send menu override (default); transition/auto = fired by the sequence. */
+  sequence: z.enum(['manual', 'transition', 'auto']).default('manual'),
 });
 
 async function hostedTemplate(id: number, params: Record<string, string>): Promise<Built> {
@@ -63,13 +66,15 @@ Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
+  let actor = 'service';
   if (!(await isCronAuthorized(req.clone()))) {
     const auth = await requireServiceOrAdmin(req);
     if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
+    if (auth.kind === 'admin') actor = `admin:${auth.userId}`;
   }
   const parsed = Body.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return jsonResponse({ error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
-  const { applicant_id, email: key, mode, lang, reason } = parsed.data;
+  const { applicant_id, email: key, mode, lang, reason, sequence } = parsed.data;
 
   let rec;
   try { rec = await loadFive(admin, applicant_id, { mintTokens: true }); }
@@ -113,6 +118,11 @@ Deno.serve(async (req) => {
         if (!rec.missing.length) note = 'Nothing is missing — preview shows a sample.';
         break;
       case 'decline': built = declineEmail(first, L); break;
+      case 'interview_confirmed':
+      case 'interview_reminder':
+        if (!a.call_at) return jsonResponse({ error: 'no_interview_time' }, 400);
+        built = interviewEmail(first, a.call_at, key === 'interview_reminder', L); break;
+      case 'first_route': built = firstRouteEmail(first, L); break;
     }
   } catch (e) {
     return jsonResponse({ ok: false, error: 'build_failed', reason: (e as Error).message }, 502);
@@ -125,15 +135,17 @@ Deno.serve(async (req) => {
   const b = mode === 'test' ? { ...built!, subject: `[TEST] ${built!.subject}` } : built!;
   const res = await sendProEmail(admin, {
     applicantId: mode === 'test' ? null : applicant_id, key, to, name: mode === 'test' ? 'Tidy (test)' : first,
-    built: b, triggeredBy: auth.kind === 'admin' ? `admin:${auth.userId}` : 'service',
+    built: b, triggeredBy: actor, mode: sequence,
   });
   if (res.sent && mode === 'send') {
     const patch: Record<string, unknown> = {};
     if (key === 'contract') patch.contract_sent_at = new Date().toISOString();
+    if (key === 'onboarding') patch.onboarding_email_sent_at = new Date().toISOString();
     if (key === 'photo_retake') {
       await admin.from('pro_kit').update({ badge_photo_status: 'retake_requested', badge_photo_retake_reason: reason ?? 'blurry', badge_photo_reviewed_at: new Date().toISOString() }).eq('id', rec.kit!.id);
     }
     if (Object.keys(patch).length) await admin.from('applicants').update(patch).eq('id', applicant_id);
   }
-  return jsonResponse({ ok: res.sent, sent_to: to, reason: res.reason, at: new Date().toISOString() }, res.sent ? 200 : 502);
+  const status = res.sent ? 200 : (res.blocked || res.deferred) ? 409 : 502;
+  return jsonResponse({ ok: res.sent, sent_to: to, reason: res.reason, blocked: !!res.blocked, deferred: !!res.deferred, out_of_sequence: res.outOfSequence ?? null, at: new Date().toISOString() }, status);
 });
