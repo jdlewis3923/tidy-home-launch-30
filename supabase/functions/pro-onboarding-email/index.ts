@@ -89,6 +89,15 @@ Deno.serve(async (req) => {
   }
 
   const nowIso = new Date().toISOString();
+  await admin.from('email_send_log').insert({
+    template_name: 'pro:onboarding',
+    channel: 'email',
+    recipient: applicant.email,
+    triggered_by: 'pro-onboarding-email',
+    status: sent ? 'sent' : 'failed',
+    error_message: sent ? null : failure,
+    payload: { applicant_id, template_id: EMAIL.CONTRACTOR_WELCOME_T1, outstanding: state.outstanding },
+  }).then(() => {}, () => {});
   if (sent) {
     await admin
       .from('applicants')
