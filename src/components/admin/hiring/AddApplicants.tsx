@@ -331,7 +331,7 @@ export default function AddApplicants({ onDone }: { onDone: () => void }) {
                 <p className="mt-2 text-xs text-slate-500">Check these, then save.</p>
                 <div className="mt-3 space-y-2">
                   {([
-                    ["name", "Name"], ["phone", "Phone"], ["city_or_zip", "City or ZIP"],
+                    ["name", "Name"], ["email", "Email"], ["phone", "Phone"], ["city_or_zip", "City or ZIP"],
                     ["applied_on", "Applied on"], ["years_in_service", "Years in this trade"],
                     ["why", "Why call them"], ["watch_for", "Watch for"], ["notes", "Notes"],
                   ] as const).map(([key, label]) => (
