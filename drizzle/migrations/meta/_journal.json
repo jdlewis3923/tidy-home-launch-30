@@ -722,6 +722,13 @@
       "when": 1790611861723,
       "tag": "0102_onboarding_sequence_stage_and_queue",
       "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1790880431788,
+      "tag": "0103_applicants_admin_insert",
+      "breakpoints": true
     }
   ]
 }
