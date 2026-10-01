@@ -29,6 +29,7 @@ import ProKitPanel from "@/components/admin/ProKitPanel";
 import ProOnboardingChips from "@/components/admin/ProOnboardingChips";
 import OnboardingEmailButtons from "@/components/admin/OnboardingEmailButtons";
 import ProRecordEditor from "@/components/admin/ProRecordEditor";
+import ApplicantInfoEditor from "@/components/admin/ApplicantInfoEditor";
 import BulkEditBar from "@/components/admin/BulkEditBar";
 import CallQueue from "@/components/admin/hiring/CallQueue";
 import AddApplicants from "@/components/admin/hiring/AddApplicants";
@@ -1022,6 +1023,7 @@ export default function AdminApplicants() {
                 })()}
 
 
+                <ApplicantInfoEditor applicant={open as never} onSaved={() => { void fetchRows(); }} />
                 <ProRecordEditor applicantId={open.id} onSaved={() => { void fetchRows(); }} />
 
                 {open.notes_for_admin && (
