@@ -193,8 +193,19 @@ export default function ProOnboardingChips({
       <div className="flex flex-wrap items-center gap-2">
         <Chip label="Background check" status={backgroundCheckStatus(applicant)} />
         <Chip label="Insurance" status={insuranceStatus(applicant)} />
-        <Chip label="Intake" status={intakeStatus(kitStatus, tokens.intake)} />
+        <Chip label="Sizes & kit form" status={intakeStatus(kit, tokens.intake)} />
+        <Chip
+          label="Contract"
+          status={(applicant as { contracts_signed?: boolean | null }).contracts_signed ? "verified" : (applicant as { contract_token?: string | null }).contract_token ? "sent" : "not_sent"}
+        />
         <Chip label="Photo ID" status={photoStatus} />
+      </div>
+      {backgroundCheckStatus(applicant) === "not_sent" && (
+        <p className="text-[11px] text-muted-foreground">
+          Background check: the onboarding email lists it as a to-do, but no Checkr invite link can go out until Checkr is connected.
+        </p>
+      )}
+      <div className="hidden">
       </div>
       {photo.uploadedAt && (
         <p className="text-[11px] text-muted-foreground">
