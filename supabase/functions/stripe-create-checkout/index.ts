@@ -387,6 +387,12 @@ Deno.serve(async (req) => {
           if (!["active", "trialing", "paused"].includes(current.status)) {
             throw new Error("existing_subscription_not_active");
           }
+          const currentRecurringPriceIds = new Set(
+            current.items.data.map((item) => item.price.id),
+          );
+          if (line_items.some((item) => currentRecurringPriceIds.has(item.price))) {
+            throw new Error("service_already_on_subscription");
+          }
           const existingLines = Array.isArray(localSub.plan_lines) ? localSub.plan_lines : [];
           const combinedLines = [...existingLines, ...planLines] as PlanLine[];
           const combinedServices = [...new Set([...existingServices, service])];
