@@ -476,18 +476,20 @@ export function UploadTile({
   );
 }
 
-export function PhotoThumb({ url, onRemove }: { url: string | null; onRemove: () => void }) {
+export function PhotoThumb({ url, onRemove }: { url: string | null; onRemove?: () => void }) {
   return (
     <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-[hsl(var(--pro-ground))]">
       {url && <img src={url} alt="Visit photo" className="h-full w-full object-cover" />}
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label="Remove photo"
-        className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-[hsl(var(--pro-red))]"
-      >
-        <Trash2 className="h-3.5 w-3.5" aria-hidden />
-      </button>
+      {onRemove && (
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label="Remove photo"
+          className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-[hsl(var(--pro-red))]"
+        >
+          <Trash2 className="h-3.5 w-3.5" aria-hidden />
+        </button>
+      )}
     </div>
   );
 }

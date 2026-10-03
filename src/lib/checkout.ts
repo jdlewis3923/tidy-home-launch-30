@@ -128,10 +128,9 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
 /**
  * Add a service to an existing plan.
  *
- * Goes through the same `stripe-create-checkout` function the initial plan
- * uses — same lookup keys, same cadence-as-quantity rule, same referral and
- * attribution handling. No percentage discounts: bundling stays the free
- * premium add-on, which the webhook records on the subscription row.
+ * Goes through the same server-side price validation as the initial plan, but
+ * appends the service to the member's existing Stripe subscription. It never
+ * creates a second subscription or a second monthly bill.
  *
  * The SIZE INPUTS are mandatory here for the same reason they are on the first
  * plan: the server recomputes the size from them and rejects a line without
@@ -145,7 +144,7 @@ export async function startAddServiceCheckout(args: {
   bathrooms?: number | null;
   lawn_choice?: 'small' | 'standard' | 'large' | 'over' | null;
   vehicle_class?: string | null;
-}): Promise<void> {
+}): Promise<{ effective: 'next_combined_invoice' }> {
   const attribution = getUtmAttribution();
   const body = {
     services: args.lines,
@@ -166,6 +165,7 @@ export async function startAddServiceCheckout(args: {
     qr_placement: getQrPlacement() ?? undefined,
     qr_zip: getQrZip() ?? undefined,
     qr_route: getQrRoute() ?? undefined,
+    add_to_existing: true,
   };
 
 
@@ -178,9 +178,8 @@ export async function startAddServiceCheckout(args: {
     console.error('[add-service checkout] failed', error);
     throw error;
   }
-  if (!data?.ok || !data?.checkout_url) {
-    throw new Error(data?.error ?? 'Checkout session did not return a redirect URL');
+  if (!data?.ok || !data?.subscription_updated) {
+    throw new Error(data?.error ?? 'The existing subscription could not be updated');
   }
-
-  window.location.href = data.checkout_url as string;
+  return { effective: 'next_combined_invoice' };
 }

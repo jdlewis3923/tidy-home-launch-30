@@ -17,8 +17,7 @@ type Loaded = VisitPhoto & { url: string | null };
 
 export default function ProPhotos() {
   const { id } = useParams<{ id: string }>();
-  const { userId, reload } = useProSession();
-  const { visits } = useProSession();
+  const { userId, visits, reload } = useProSession();
   const [photos, setPhotos] = useState<Loaded[] | null>(null);
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -44,7 +43,7 @@ export default function ProPhotos() {
   }, [load]);
 
   const pick = async (kind: "before" | "after", files: FileList) => {
-    if (!id || !userId) return;
+    if (!id || !userId || completed) return;
     setBusy(true);
     setUploadError(null);
     try {
@@ -91,7 +90,7 @@ export default function ProPhotos() {
               </h2>
               <UploadTile
                 label={`Add ${kind} photos`}
-                disabled={busy}
+                disabled={busy || completed}
                 onPick={(files) => void pick(kind, files)}
               />
               {group(kind).length > 0 && (

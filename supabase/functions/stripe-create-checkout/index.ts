@@ -116,6 +116,7 @@ const CheckoutInputSchema = z.object({
   access_water_spigot: z.boolean().optional(),
   access_electrical_outlet: z.boolean().optional(),
   access_washing_allowed: z.boolean().optional(),
+  add_to_existing: z.boolean().default(false),
 });
 
 
@@ -164,6 +165,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: "validation_failed", details: parsed.error.flatten() }, 400);
   }
   const input = parsed.data;
+
+  if (input.add_to_existing && (input.services.length !== 1 || input.addons.length > 0 || input.car_wash)) {
+    return jsonResponse({ ok: false, error: "add_service_requires_one_recurring_service" }, 400);
+  }
 
   if (!SERVICE_ZIPS.has(input.zip)) {
     return jsonResponse({ ok: false, error: "zip_outside_service_area" }, 400);
@@ -358,6 +363,83 @@ Deno.serve(async (req) => {
         // ---------- Bundle gift: one free premium add-on, never a percentage ----------
         const uniqueServices = new Set(input.services.map((s) => s.service)).size;
         const freeAddons = freeAddonsPerMonth(uniqueServices);
+
+        // Dashboard add-service: append to the member's existing Stripe
+        // subscription. No second Checkout Session, subscription, invoice, or
+        // monthly charge is created. The new line begins on the next combined
+        // renewal; proration is deliberately disabled.
+        if (input.add_to_existing) {
+          const { data: localSub, error: localErr } = await supabase
+            .from("subscriptions")
+            .select("id, stripe_subscription_id, services, plan_lines, sizes_json")
+            .eq("user_id", user.id)
+            .in("status", ["active", "paused"])
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (localErr || !localSub?.stripe_subscription_id) throw new Error("existing_subscription_not_found");
+
+          const existingServices = Array.isArray(localSub.services) ? localSub.services : [];
+          const service = input.services[0].service;
+          if (existingServices.includes(service)) throw new Error("service_already_on_subscription");
+
+          const current = await stripe.subscriptions.retrieve(localSub.stripe_subscription_id);
+          if (!["active", "trialing", "paused"].includes(current.status)) {
+            throw new Error("existing_subscription_not_active");
+          }
+          const existingLines = Array.isArray(localSub.plan_lines) ? localSub.plan_lines : [];
+          const combinedLines = [...existingLines, ...planLines] as PlanLine[];
+          const combinedServices = [...new Set([...existingServices, service])];
+          const combinedSizes = {
+            ...((localSub.sizes_json && typeof localSub.sizes_json === "object") ? localSub.sizes_json : {}),
+            [service]: input.services[0].size,
+          };
+          const combinedPlanLinesId = await savePlanLines(supabase, {
+            userId: user.id,
+            lines: combinedLines,
+            source: "add_service_existing_subscription",
+          });
+          if (!combinedPlanLinesId) throw new Error("could_not_persist_combined_plan");
+
+          const updated = await stripe.subscriptions.update(localSub.stripe_subscription_id, {
+            items: line_items.map((item) => ({ price: item.price, quantity: item.quantity })),
+            proration_behavior: "none",
+            metadata: {
+              ...current.metadata,
+              services_json: JSON.stringify(combinedServices.map((name) => {
+                const line = combinedLines.find((entry) => entry.service === name);
+                return { service: name, size: line?.size_tier, frequency: line?.cadence };
+              })),
+              sizes_json: JSON.stringify(combinedSizes),
+              plan_lines_id: combinedPlanLinesId,
+              free_addons_per_month: String(freeAddonsPerMonth(combinedServices.length)),
+            },
+          });
+          const monthlyTotalCents = updated.items.data.reduce(
+            (sum, item) => sum + (item.price.unit_amount ?? 0) * (item.quantity ?? 1),
+            0,
+          );
+          const { error: updateErr } = await supabase
+            .from("subscriptions")
+            .update({
+              services: combinedServices,
+              sizes_json: combinedSizes,
+              plan_lines: combinedLines,
+              monthly_total_cents: monthlyTotalCents,
+              free_addons_per_month: freeAddonsPerMonth(combinedServices.length),
+              surcharge_applied: combinedLines.some((line) => line.surcharge_applied),
+              surcharge_cents: combinedLines.reduce((sum, line) => sum + Number(line.surcharge_cents ?? 0), 0),
+            })
+            .eq("id", localSub.id);
+          if (updateErr) throw new Error(`local_subscription_update_failed:${updateErr.message}`);
+
+          return {
+            ok: true as const,
+            subscription_updated: true,
+            stripe_subscription_id: updated.id,
+            effective: "next_combined_invoice",
+          };
+        }
 
         // ---------- Subscription metadata for the webhook ----------
         // The plan snapshot is a row; metadata carries its id only. Inlining the
