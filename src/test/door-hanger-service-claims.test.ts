@@ -5,7 +5,7 @@ const read = (path: string) => fs.readFileSync(path, "utf8");
 describe("door-hanger service claims", () => {
   it("keeps the Terms notice at 48 hours", () => {
     const terms = read("src/pages/Terms.tsx");
-    expect(terms).toContain("Notify us within 48 hours of any service issue.");
+    expect(terms).toContain('t("Notify us within 48 hours of any service issue.")');
     expect(terms).not.toContain("within 24 hours of any service issue");
   });
   it("requires both photo kinds before completion", () => {

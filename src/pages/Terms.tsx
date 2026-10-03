@@ -72,7 +72,7 @@ const Terms = () => {
           </section>
           <section>
             <h2 className="text-lg font-bold text-foreground">{t("8. Satisfaction")}</h2>
-            <p>{t("Notify us within 48 hours of any service issue. We will make reasonable efforts to resolve it.")}</p>
+            <p>{t("Notify us within 48 hours of any service issue.")}</p>
           </section>
           <section>
             <h2 className="text-lg font-bold text-foreground">{t("9. SMS Communications")}</h2>
