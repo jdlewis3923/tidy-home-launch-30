@@ -757,6 +757,13 @@
       "when": 1791037274293,
       "tag": "0107_founding_homes_per_zip_inbox_redo",
       "breakpoints": true
+    },
+    {
+      "idx": 108,
+      "version": "7",
+      "when": 1791039247663,
+      "tag": "0108_lock_completed_visit_photos",
+      "breakpoints": true
     }
   ]
 }
