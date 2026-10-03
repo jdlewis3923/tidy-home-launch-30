@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from "react";
+import { RESERVATIONS_MODE } from "@/lib/launch";
 import { initScrollTracking } from "@/lib/tracking";
 import Navbar from "@/components/Navbar";
 import AnnouncementTicker from "@/components/AnnouncementTicker";
@@ -56,13 +57,14 @@ const Index = () => {
 
   // Auto-fire popup on page load (only when dashboard is OFF)
   useEffect(() => {
+    if (RESERVATIONS_MODE) return; // the reservation flow replaces the email popup
     if (canShowPopup()) setPopupOpen(true);
   }, [canShowPopup]);
 
   // Exit intent (only when dashboard is OFF)
   useEffect(() => {
     const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0 && canShowPopup() && !popupOpen) {
+      if (!RESERVATIONS_MODE && e.clientY <= 0 && canShowPopup() && !popupOpen) {
         setPopupOpen(true);
       }
     };

@@ -23,6 +23,14 @@ import TrustStrip from '@/components/dashboard/TrustStrip';
 import BundleNudge from '@/components/dashboard/BundleNudge';
 import CustomQuoteModal from '@/components/dashboard/CustomQuoteModal';
 import ExistingAccountInline from '@/components/dashboard/ExistingAccountInline';
+import StepReserve from '@/components/dashboard/steps/StepReserve';
+import { RESERVATIONS_MODE, FOUNDING_CAP } from '@/lib/launch';
+
+/** Set by /reserve/confirm/:token — the personal Convert link. */
+export const CLAIM_KEY = 'tidy_reservation_claim';
+function readClaim(): { token: string; state: Partial<ConfigState> } | null {
+  try { const raw = sessionStorage.getItem(CLAIM_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
+}
 
 // Quiet, lowercase Apple-tone microcopy. Step 0 is the new ZIP gate.
 const STEPS = [
@@ -34,12 +42,13 @@ const STEPS = [
   { heading: 'anything extra this first visit?', sub: 'one-time. add only what you want.',                cta: 'review',       micro: 'set it once.', skip: 'no thanks — review →' },
   { heading: 'your home, handled.',             sub: 'review your plan before we begin.',                cta: 'looks right',  micro: 'almost done.' },
   { heading: "you're all set.",                 sub: 'secure checkout · cancel anytime.',                cta: 'confirm subscription', micro: 'final step.' },
+  { heading: `Reserve one of ${FOUNDING_CAP} founding spots.`, sub: '', cta: '', micro: 'one screen.' },
 ];
 
 // Analytics-only step names — kept separate from the display copy so a wording
 // tweak never breaks the funnel report.
 const STEP_NAMES = [
-  'zip_gate', 'services', 'frequency', 'property', 'details', 'add_ons', 'review', 'payment',
+  'zip_gate', 'services', 'frequency', 'property', 'details', 'add_ons', 'review', 'payment', 'reserve',
 ];
 
 
@@ -50,6 +59,8 @@ const SERVICE_PARAM_MAP: Record<string, ServiceType> = {
 
 /** Drop any service that is not open for signup yet (see service-availability). */
 function onlyAvailable(next: ConfigState): ConfigState {
+  // Reservations: every service is reservable from day one.
+  if (RESERVATIONS_MODE && !readClaim()) return next;
   const services = next.services.filter(isServiceAvailable);
   const frequencies = { ...next.frequencies };
   for (const key of Object.keys(frequencies) as ServiceType[]) {
@@ -64,7 +75,12 @@ const PLAN_PARAM_MAP: Record<string, Frequency> = {
 export default function DashboardPlan() {
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(0);
-  const [state, setState] = useState<ConfigState>(() => onlyAvailable(loadState()));
+  const [claim] = useState(readClaim);
+  const reserving = RESERVATIONS_MODE && !claim;
+  const [state, setState] = useState<ConfigState>(() => {
+    const c = readClaim();
+    return c ? { ...loadState(), ...c.state, password: '' } as ConfigState : onlyAvailable(loadState());
+  });
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [hasExistingSub, setHasExistingSub] = useState(false);
   const [checkingSub, setCheckingSub] = useState(true);
@@ -118,6 +134,7 @@ export default function DashboardPlan() {
     const bundleParam = params.get('bundle');
 
     // Skip ZIP gate if user already has a valid in-area zip stored.
+    if (claim) { setStep(4); return; }
     if (state.zip && VALID_ZIPS.includes(state.zip)) {
       setStep(1);
     }
@@ -204,6 +221,8 @@ export default function DashboardPlan() {
 
   const next = () => {
     if (step === 6 && customQuote) { setQuoteOpen(true); return; }
+    if (reserving && step === 3) { setDirection(1); setStep(6); return; }
+    if (reserving && step === 6) { setDirection(1); setStep(8); return; }
     if (step < STEPS.length - 1) {
       setDirection(1);
       setStep(step + 1);
@@ -212,6 +231,8 @@ export default function DashboardPlan() {
   };
 
   const back = () => {
+    if (reserving && step === 6) { setDirection(-1); setStep(3); return; }
+    if (reserving && step === 8) { setDirection(-1); setStep(6); return; }
     if (step > 0) {
       setDirection(-1);
       setStep(step - 1);
@@ -219,6 +240,10 @@ export default function DashboardPlan() {
   };
 
   const stepInfo = STEPS[step];
+  // Reservations visit zip → services → cadence → home → price → reserve.
+  const RES_ORDER = [0, 1, 2, 3, 6, 8];
+  const shownStep = reserving ? Math.max(0, RES_ORDER.indexOf(step)) : step;
+  const shownTotal = reserving ? RES_ORDER.length : STEPS.length - 1;
 
   if (hasExistingSub) {
     return (
@@ -246,9 +271,9 @@ export default function DashboardPlan() {
   }
 
   return (
-    <CalmShell step={step} totalSteps={STEPS.length} microcopy={stepInfo.micro}>
+    <CalmShell step={shownStep} totalSteps={shownTotal} microcopy={stepInfo.micro}>
       <div className="space-y-6">
-        <ProgressBar currentStep={step} totalSteps={STEPS.length} />
+        <ProgressBar currentStep={shownStep} totalSteps={shownTotal} />
 
         {/* Above-the-fold trust strip — visible on every step. */}
         <TrustStrip />
@@ -257,12 +282,12 @@ export default function DashboardPlan() {
 
         <div className="animate-calm-in" key={`heading-${step}`}>
           <h1
-            className="text-3xl md:text-[34px] font-bold text-ink lowercase"
+            className={`text-3xl md:text-[34px] font-bold text-ink ${step === 8 ? '' : 'lowercase'}`}
             style={{ letterSpacing: '-0.025em', lineHeight: 1.05 }}
           >
             {stepInfo.heading}
           </h1>
-          <p className="mt-2 text-sm text-ink-faint lowercase">{stepInfo.sub}</p>
+          {stepInfo.sub && <p className="mt-2 text-sm text-ink-faint lowercase">{reserving && step === 6 ? 'your price. reserve it — no card today.' : reserving && step === 1 ? 'cleaning, lawn and car care — all three are reservable now.' : stepInfo.sub}</p>}
         </div>
 
         {step >= 1 && step <= 2 && <ExistingAccountInline />}
@@ -281,7 +306,7 @@ export default function DashboardPlan() {
             )}
             {step === 1 && (
               <div className="space-y-4">
-                <StepServices state={state} onChange={updateState} />
+                <StepServices state={state} onChange={updateState} allowAll={reserving} />
                 <BundleNudge state={state} onChange={updateState} />
               </div>
             )}
@@ -291,6 +316,7 @@ export default function DashboardPlan() {
             {step === 5 && <StepAddOns    state={state} onChange={updateState} />}
             {step === 6 && <StepReview    state={state} onEdit={() => { setDirection(-1); setStep(1); }} />}
             {step === 7 && <StepPayment   state={state} onChange={updateState} />}
+            {step === 8 && <StepReserve   state={state} onChange={updateState} />}
           </div>
         </div>
 
@@ -334,7 +360,7 @@ export default function DashboardPlan() {
               className="ml-auto group relative overflow-hidden rounded-xl px-7 py-3.5 text-sm font-semibold shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] ring-1 ring-[hsl(var(--ink))] transition-all hover:shadow-[0_20px_44px_-10px_hsl(var(--ink)/0.7)] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 lowercase"
             >
               <span className="relative inline-flex items-center gap-1.5">
-                {customQuote && step === 6 ? 'get my plan' : stepInfo.cta}
+                {customQuote && step === 6 ? 'get my plan' : reserving && step === 6 ? 'Reserve your spot' : stepInfo.cta}
                 <span className="transition-transform group-hover:translate-x-0.5">→</span>
               </span>
             </button>
@@ -342,7 +368,7 @@ export default function DashboardPlan() {
         )}
 
         {/* Back button on payment step (no advance — payment form handles it). */}
-        {step === 7 && (
+        {(step === 7 || step === 8) && (
           <div className="flex items-center pt-2">
             <button
               type="button"

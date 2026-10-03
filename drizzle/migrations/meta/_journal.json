@@ -743,6 +743,13 @@
       "when": 1791035392015,
       "tag": "0105_pro_partner_rating_from_visits",
       "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "7",
+      "when": 1791036023150,
+      "tag": "0106_reservations",
+      "breakpoints": true
     }
   ]
 }
