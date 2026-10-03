@@ -8,7 +8,7 @@ import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { TIDY_SITE } from '../_shared/email-brand.ts';
 import { queueSms, isWindowOpen, nextOpenWindow } from '../_shared/sms-window.ts';
 import { toE164 } from '../_shared/member-followups.ts';
-import { convertEmail } from '../_shared/reservation-emails.ts';
+import { convertEmail, logEmail } from '../_shared/reservation-emails.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 const Body = z.object({
@@ -36,6 +36,7 @@ Deno.serve(async (req) => {
 
   await admin.from('reservations').update({ invite_token: t, invited_at: new Date().toISOString(), status: 'invited', assigned_day: b.day, assigned_window: b.window, assigned_pro_first_name: b.pro_first_name }).eq('id', r.id);
   const sent = await sendBrevoEmail({ to: { email: r.email, name: r.first_name }, marketing: false, subject: msg.subject, htmlContent: msg.html, label: 'reservation-convert', tags: ['reservation'] });
+  await logEmail(admin, 'reservation-convert', r.email, msg.subject, sent, 'reservation-admin');
   let sms: string = 'no_consent';
   const phone = toE164(r.phone);
   if (phone && r.sms_consent) {

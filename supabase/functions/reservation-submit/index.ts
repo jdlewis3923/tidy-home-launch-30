@@ -9,7 +9,7 @@ import { tidyEmailShell, TIDY_OWNER_EMAIL } from '../_shared/email-brand.ts';
 import { queueSms, isWindowOpen, nextOpenWindow } from '../_shared/sms-window.ts';
 import { toE164 } from '../_shared/member-followups.ts';
 import { FOUNDING_CAP, RESERVATION_ALERTS, RESERVABLE_SERVICES } from '../_shared/launch.ts';
-import { esc, reservationConfirmEmail, reservationConfirmSms, svcLabel } from '../_shared/reservation-emails.ts';
+import { esc, logEmail, reservationConfirmEmail, reservationConfirmSms, svcLabel } from '../_shared/reservation-emails.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Any day'] as const;
@@ -67,6 +67,7 @@ Deno.serve(async (req) => {
   const em = reservationConfirmEmail(row);
   const sent = await sendBrevoEmail({ to: { email: row.email, name: row.first_name }, marketing: false, subject: em.subject, htmlContent: em.html, label: 'reservation-confirm', tags: ['reservation'] });
   out.email = sent.sent ? 'sent' : sent.reason;
+  await logEmail(admin, 'reservation-confirm', row.email, em.subject, sent, 'reservation-submit');
   // Member confirmation text (only with consent; parked in the outbox like every text).
   const phone = toE164(row.phone);
   if (phone && row.sms_consent) {
@@ -78,8 +79,10 @@ Deno.serve(async (req) => {
   // Owner notice + Workday line.
   const summary = `${services.map(svcLabel).join(', ')} · ${row.zip} · ${row.preferred_day} ${row.preferred_time}`;
   await admin.from('admin_workday_events').insert({ event_type: 'reservation_new', actor_type: 'customer', title: `New reservation · ${row.first_name} ${row.last_name?.[0] ?? ''}.`, detail: summary + (waitlist.length ? ` · waitlist: ${waitlist.map(svcLabel).join(', ')}` : ''), action_label: 'Open reservations', action_url: '/admin/reservations', metadata: { reservation_id: row.id, is_test: row.is_test_row } });
-  await sendBrevoEmail({ to: TIDY_OWNER_EMAIL, marketing: false, subject: `New reservation — ${row.first_name} · ${summary}`, label: 'reservation-owner',
+  const ownerSubject = `New reservation — ${row.first_name} · ${summary}`;
+  const ownerSent = await sendBrevoEmail({ to: TIDY_OWNER_EMAIL, marketing: false, subject: `New reservation — ${row.first_name} · ${summary}`, label: 'reservation-owner',
     htmlContent: tidyEmailShell({ heading: 'A new founding reservation', eyebrow: 'Reservations', bodyHtml: `<p><b>${esc(row.first_name)} ${esc(row.last_name)}</b> · ${esc(row.email)} · ${esc(row.phone)}</p><p>${esc(summary)}<br>${esc(row.street)} ${esc(row.zip)}<br>Est. $${(monthlyCents / 100).toFixed(2)}/mo · heard via ${esc(row.heard_from)}</p>`, ctaUrl: 'https://jointidy.co/admin/reservations', ctaLabel: 'Open reservations' }) });
+  await logEmail(admin, 'reservation-owner', TIDY_OWNER_EMAIL, ownerSubject, ownerSent, 'reservation-submit');
 
   // Hiring triggers (count every reservation for the service, waitlist included).
   for (const s of services) {

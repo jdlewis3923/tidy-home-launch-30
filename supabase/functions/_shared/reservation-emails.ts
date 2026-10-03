@@ -41,3 +41,13 @@ export function convertEmail(r: { first_name: string; assigned_day: string; assi
   });
   return { subject: `${r.first_name}, confirm your Tidy day and time`, html, sms: `Tidy: ${line} ${link}` };
 }
+
+/** Every reservation send is written to the email history. */
+// deno-lint-ignore no-explicit-any
+export async function logEmail(admin: any, template: string, to: string, subject: string, res: { sent: boolean; reason?: string; messageId?: string | null }, by: string) {
+  await admin.from('email_send_log').insert({
+    channel: 'email', template_name: template, recipient: to, status: res.sent ? 'sent' : 'failed',
+    error_message: res.sent ? null : (res.reason ?? 'unknown'), brevo_message_id: res.messageId ?? null,
+    triggered_by: by, payload: { subject },
+  });
+}
