@@ -1,6 +1,6 @@
 import { ConfigState, ServiceType } from '@/lib/dashboard-pricing';
 import { SERVICE_WAITLIST_NOTE, isServiceAvailable as baseAvailable } from '@/lib/service-availability';
-import { useFoundingCounts, isFull } from '@/hooks/useFoundingCounts';
+import { useFoundingCounts, isZipFull } from '@/hooks/useFoundingCounts';
 
 interface Props {
   state: ConfigState;
@@ -62,7 +62,7 @@ export default function StepServices({ state, onChange, allowAll = false }: Prop
                 <div className="flex-1 min-w-0">
                   <h3 className={`text-lg font-semibold lowercase ${selected ? 'text-white' : 'text-ink'}`}>{svc.name}</h3>
                   <p className={`text-xs mt-0.5 ${selected && available ? 'text-white/70' : 'text-ink-faint'}`}>
-                    {!available ? SERVICE_WAITLIST_NOTE : allowAll && isFull(counts, svc.id) ? 'founding group full — join the waitlist' : svc.whisper}
+                    {!available ? SERVICE_WAITLIST_NOTE : allowAll && isZipFull(counts, state.zip) ? 'founding group full — join the waitlist' : svc.whisper}
                   </p>
                 </div>
                 {available ? (
