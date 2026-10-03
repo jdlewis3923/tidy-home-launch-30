@@ -64,6 +64,9 @@ const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.t
 const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
 const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
 const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
+const AdminReservations = lazy(() => import("./pages/AdminReservations.tsx"));
+const Reserved = lazy(() => import("./pages/Reserved.tsx"));
+const ReserveConfirm = lazy(() => import("./pages/ReserveConfirm.tsx"));
 const AdminCommand = lazy(() => import("./pages/AdminCommand.tsx"));
 const AdminAlertRules = lazy(() => import("./pages/AdminAlertRules.tsx"));
 const AdminAlerts = lazy(() => import("./pages/AdminAlerts.tsx"));
@@ -335,6 +338,7 @@ const App = () => (
                   <Route path="/admin/schedule" element={<AdminSchedule />} />
                   {/* Permanent KPI Command Center — admins only. */}
                   <Route path="/admin/kpis" element={<AdminKpis />} />
+                  <Route path="/admin/reservations" element={<AdminReservations />} />
                   {/* Command center — default admin landing view. */}
                   <Route path="/admin" element={<Navigate to="/admin/command" replace />} />
                   <Route path="/admin/command" element={<AdminCommand />} />
@@ -391,6 +395,8 @@ const App = () => (
                   {/* Post-visit SMS rating link — no login, identifier optional. */}
                   <Route path="/rate" element={<Rate />} />
                   <Route path="/redo" element={<Redo />} />
+                  <Route path="/reserved" element={<Reserved />} />
+                  <Route path="/reserve/confirm/:token" element={<ReserveConfirm />} />
                   <Route path="/go/:id" element={<GoAsk />} />
 
                   {/* Public Pro badge verification — no login, ever. */}
