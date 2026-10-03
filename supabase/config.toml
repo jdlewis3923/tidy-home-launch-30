@@ -162,3 +162,14 @@ verify_jwt = false
 
 [functions.brevo-template-admin]
 verify_jwt = false
+
+# Founding reservations. reservation-submit and reservation-claim are public by
+# design (rate limited; the claim token is the authorization).
+[functions.reservation-submit]
+verify_jwt = false
+
+[functions.reservation-claim]
+verify_jwt = false
+
+[functions.reservation-admin]
+verify_jwt = false
