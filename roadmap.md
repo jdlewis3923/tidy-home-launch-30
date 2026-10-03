@@ -56,3 +56,10 @@
 - [ ] Review ask after visit 2 (+ once after visit 5); referral ask evening after visit 3; never same week
 - [ ] Test member redo flow, screenshots (quote, checkout, hero), test Pro past 50 visits
 - Texts queue until Twilio billing is fixed (user choice)
+
+## Door-hanger claims audit (requested 2026-10-03)
+- [ ] Change Terms service-issue notice from 24 to 48 hours and log it as wording already changed for legal review
+- [ ] Verify completion requires before/after photos and expose the real photos on each member visit record
+- [ ] Verify initial multi-service checkout and add-service billing produce one subscription, one monthly charge and one invoice; repair any split path
+- [ ] Replace every cross-service “one Pro” claim in site, account, email sources and chatbot knowledge with service-specific consistency wording
+- [ ] Add regression coverage and verify the member photo record and billing invariants
