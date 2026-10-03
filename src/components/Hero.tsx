@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { RESERVATIONS_MODE, LAUNCH_DATE_LONG, FOUNDING_CAP } from "@/lib/launch";
 import FoundingCounter from "@/components/FoundingCounter";
-import heroImg from "@/assets/hero-miami-home.jpg";
 import heroImgMobile from "@/assets/hero-miami-home-mobile.jpg";
 import heroVideo from "@/assets/hero-loop-hq.mp4.asset.json";
 import heroPoster from "@/assets/hero-poster.jpg.asset.json";
-import heroWideVideo from "@/assets/hero-wide-loop.mp4.asset.json";
-import heroWidePoster from "@/assets/hero-wide-poster.jpg.asset.json";
+import heroWideVideo from "@/assets/homepage-desktop-hero.mp4.asset.json";
+import heroWidePoster from "@/assets/homepage-desktop-hero-poster.jpg.asset.json";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
@@ -49,7 +48,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           decoding="async"
         />
       )}
-      {/* Desktop/laptop: widescreen animated loop (swaying palms, drifting clouds, distant birds). */}
+      {/* Desktop/laptop: original full-resolution widescreen upload. */}
       {motionOk ? (
         <video
           src={heroWideVideo.url}
@@ -58,17 +57,17 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           loop
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-[center_55%] hidden md:block"
         />
       ) : (
         <img
-          src={heroImg}
-          alt="Modern Miami home with palm trees and a detailed black car in the driveway"
+          src={heroWidePoster.url}
+          alt="Miami home opening onto a pool and palm-lined driveway at sunset"
           className="absolute inset-0 w-full h-full object-cover object-[center_55%] hidden md:block"
-          width={1602}
-          height={982}
+          width={1920}
+          height={1080}
           fetchPriority="high"
           decoding="async"
         />
