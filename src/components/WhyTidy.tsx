@@ -10,8 +10,8 @@ const reasons = [
   },
   {
     icon: "✅",
-    title: "First Visit Perfect or Free",
-    desc: "First visit perfect or it's free. After that, if it isn't perfect, we fix it fast. No contracts. Cancel anytime.",
+    title: "The 48-hour guarantee",
+    desc: "If anything about your visit isn't right, tell us within 48 hours and we'll send your pro back to fix it at no charge. No forms, no argument.",
   },
   {
     icon: "🛡️",

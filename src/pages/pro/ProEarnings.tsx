@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ChevronRight, Download, Wallet } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
+import { proPartnerCountLine, useProPartner } from "@/components/pro/ProPartnerStrip";
 import {
   EmptyState, ErrorState, Eyebrow, HeroPanel, MetricTile, ProCard, ScheduleSkeleton, SectionHeader, StatusPill,
 } from "@/components/pro/portal/kit";
@@ -18,6 +19,7 @@ const shortDate = (iso: string) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
 export default function ProEarnings() {
+  const partner = useProPartner();
   const { me, visits, userId, loading } = useProSession();
   const [weeks, setWeeks] = useState<PayoutWeek[] | null>(null);
   const [bonuses, setBonuses] = useState<ProBonus[]>([]);
@@ -72,8 +74,10 @@ export default function ProEarnings() {
 
   if (!loading && !userId) return <Navigate to="/pro/welcome" replace />;
 
+  const partnerLine = proPartnerCountLine(partner);
   return (
     <ProShell title="Earnings">
+      {partnerLine && <p className="px-[18px] pt-3 text-[13px] font-semibold text-foreground" data-testid="pro-partner-count">{partnerLine}</p>}
       <section className="px-[18px] pt-4">
         <HeroPanel className="pro-rise">
           <Eyebrow className="text-[hsl(var(--pro-sky))]">Earned this week</Eyebrow>

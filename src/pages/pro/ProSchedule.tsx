@@ -10,6 +10,7 @@ import { CalendarDays } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import InstallPrompt from "@/components/pro/portal/InstallPrompt";
 import PushOptIn from "@/components/pro/portal/PushOptIn";
+import ProPartnerStrip from "@/components/pro/ProPartnerStrip";
 import {
   EmptyState, ErrorState, Eyebrow, HeroPanel, ScheduleSkeleton, VisitRow, WarningBanner, ProButton,
 } from "@/components/pro/portal/kit";
@@ -94,6 +95,7 @@ export default function ProSchedule() {
 
   return (
     <ProShell title={greeting} showBell unread={unread}>
+      <ProPartnerStrip />
       {coi && (coi.status === "expired" || coi.status === "none") && (
         <WarningBanner
           pulse

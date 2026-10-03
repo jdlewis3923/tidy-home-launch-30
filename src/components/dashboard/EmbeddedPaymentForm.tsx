@@ -12,6 +12,7 @@
  */
 import { useState } from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import GuaranteeLine from '@/components/GuaranteeLine';
 import type { Stripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Lock } from 'lucide-react';
 
@@ -76,6 +77,7 @@ function PayInner({ returnUrl, onError }: { returnUrl: string; onError?: (msg: s
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <PaymentElement options={{ layout: 'tabs' }} />
+      <GuaranteeLine />
       <button
         type="submit"
         disabled={!stripe || submitting}

@@ -320,7 +320,7 @@ const Neighbor = () => {
               {[
                 t("Locked founding rate"),
                 t("One free premium add-on"),
-                t("First visit perfect or it’s free"),
+                t("Not right? We come back within 48 hours. Free."),
                 t("Same Pro every visit"),
               ].map(item => (
                 <li key={item} className="text-[13px] font-bold uppercase tracking-wide text-white/80 md:text-[15px]">

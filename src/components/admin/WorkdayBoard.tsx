@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import RedoTasks from "./RedoTasks";
 import { STAGE_INFO, NEXT_ACTION, type SequenceStage } from "@/lib/onboardingSequence";
 
 type Row = { id: string; first_name: string | null; last_name: string | null; sequence_stage: SequenceStage; sequence_stage_entered_at: string | null; is_test_row?: boolean | null };
@@ -42,9 +43,12 @@ export default function WorkdayBoard() {
   );
 
   return (
+    <>
+    <RedoTasks />
     <div className="flex flex-wrap gap-4 px-5 py-4 border-b border-border">
       <Col title="Waiting on me" list={col("you")} />
       <Col title="Waiting on them" list={col("them")} />
     </div>
+    </>
   );
 }

@@ -26,6 +26,7 @@ type ProRow = {
   complaint_rate: number | null;
   photo_compliance_rate: number | null;
   open_escalations_count: number;
+  days_active?: number;
 };
 
 type Criterion = {
@@ -39,10 +40,6 @@ type Criterion = {
 function buildCriteria(p: ProRow): Criterion[] {
   const visits = p.completed_visits ?? 0;
   const rating = p.avg_customer_rating ?? 0;
-  const cancel = p.contractor_cancel_rate ?? 1;
-  const complaint = p.complaint_rate ?? 1;
-  const photo = p.photo_compliance_rate ?? 0;
-  const esc = p.open_escalations_count ?? 0;
   return [
     {
       icon: <TrendingUp className="h-3.5 w-3.5" />,
@@ -52,10 +49,7 @@ function buildCriteria(p: ProRow): Criterion[] {
       progressing: visits > 0 && visits < 50,
     },
     { icon: <Star className="h-3.5 w-3.5" />, label: "Rating", value: rating.toFixed(1), met: rating >= 4.8 },
-    { icon: <XCircle className="h-3.5 w-3.5" />, label: "Cancel rate", value: `${(cancel * 100).toFixed(0)}%`, met: cancel < 0.05 },
-    { icon: <AlertOctagon className="h-3.5 w-3.5" />, label: "Complaints", value: `${(complaint * 100).toFixed(0)}%`, met: complaint < 0.02 },
-    { icon: <Camera className="h-3.5 w-3.5" />, label: "Photo compliance", value: `${(photo * 100).toFixed(0)}%`, met: photo >= 0.95 },
-    { icon: <ShieldCheck className="h-3.5 w-3.5" />, label: "Open escalations", value: `${esc}`, met: esc === 0 },
+    { icon: <Clock className="h-3.5 w-3.5" />, label: "Days active", value: `${Math.min(p.days_active ?? 0, 60)}/60`, met: (p.days_active ?? 0) >= 60 },
   ];
 }
 
@@ -78,7 +72,9 @@ export default function MyTierWidget() {
           .select("id, first_name, tier, tier_advanced_at, completed_visits, avg_customer_rating, contractor_cancel_rate, complaint_rate, photo_compliance_rate, open_escalations_count")
           .eq("contractor_id", userId)
           .maybeSingle();
-        if (!cancelled) setPro((data as ProRow | null) ?? null);
+        const { data: st } = await supabase.rpc("pro_partner_progress");
+        const days = (st as { days_active?: number } | null)?.days_active ?? 0;
+        if (!cancelled) setPro(data ? ({ ...(data as ProRow), days_active: days }) : null);
       };
 
       await fetchRow();
@@ -190,7 +186,7 @@ export default function MyTierWidget() {
       <div className="relative mt-6">
         <div className="flex items-baseline justify-between mb-2">
           <span className="text-xs font-medium text-slate-700">
-            {visits} / 50 visits to Pro Partner readiness
+            {visits} / 50 visits to Pro Partner · raise applies automatically
           </span>
           <span className="font-display text-lg font-bold text-primary tabular-nums">{pct}%</span>
         </div>

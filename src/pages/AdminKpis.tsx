@@ -1,3 +1,4 @@
+import RedoRateCard from "@/components/admin/RedoRateCard";
 /**
  * /admin/kpis — Permanent KPI Command Center
  *
@@ -606,6 +607,7 @@ export default function AdminKpis() {
           </div>
         </div>
       </header>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4"><RedoRateCard /></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
         <SmsVolumeHealthCard />

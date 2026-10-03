@@ -299,7 +299,7 @@ export const FOUNDING_OFFER = {
   promises: [
     'Your founding rate is locked — your price never rises',
     'One free premium add-on on your first visit — you choose it',
-    'First visit perfect or it’s free',
+    'Not right? We come back within 48 hours. Free.',
     'Capped at 25 founding homes per ZIP',
   ],
   homesPerZip: 25,

@@ -1,3 +1,4 @@
+import ProPraiseHistory from "@/components/admin/ProPraiseHistory";
 /**
  * Admin Applicants Pipeline — /admin/applicants
  *
@@ -1024,6 +1025,7 @@ export default function AdminApplicants() {
 
 
                 <ApplicantInfoEditor applicant={open as never} onSaved={() => { void fetchRows(); }} />
+                <ProPraiseHistory applicantId={(open as { id: string }).id} />
                 <ProRecordEditor applicantId={open.id} onSaved={() => { void fetchRows(); }} />
 
                 {open.notes_for_admin && (

@@ -26,6 +26,7 @@ import { STRIPE_INTEGRATION_ENABLED } from '@/lib/dashboard-config';
 import { supabase } from '@/integrations/supabase/client';
 import { getStripe, isEmbeddedCheckoutAvailable, stripeModeMismatch } from '@/lib/stripe-client';
 import EmbeddedPaymentForm from '@/components/dashboard/EmbeddedPaymentForm';
+import GuaranteeLine from '@/components/GuaranteeLine';
 import { getLandingSource, getQrPlacement, getQrRoute, getQrZip } from "@/lib/landing-source";
 import { getUtmAttribution } from '@/lib/utm';
 
@@ -483,7 +484,7 @@ export default function StepPayment({ state, onChange }: Props) {
           <ul className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-ink-faint">
             <li>· founding rate locked — your price never rises.</li>
             <li>· one free premium add-on on your first visit.</li>
-            <li>· first visit perfect or it's free.</li>
+            <li>· not right? we come back within 48 hours. free.</li>
             <li>· only 25 founding homes per zip code.</li>
             {/* No review condition: perks are unconditional (Google policy). */}
           </ul>
@@ -495,6 +496,9 @@ export default function StepPayment({ state, onChange }: Props) {
           {error}
         </div>
       )}
+
+      {/* 48-hour guarantee — directly above the pay button. */}
+      {!customQuote && !clientSecret && <GuaranteeLine />}
 
       {/* Embedded Payment Element (mounts after we have a client_secret). */}
       {clientSecret && stripePromise ? (

@@ -31,6 +31,8 @@ const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const SignupRedirect = lazy(() => import("./pages/SignupRedirect.tsx"));
 const ReferralRedirect = lazy(() => import("./pages/ReferralRedirect.tsx"));
 const ThankYou = lazy(() => import("./pages/ThankYou.tsx"));
+const Redo = lazy(() => import("./pages/Redo.tsx"));
+const GoAsk = lazy(() => import("./pages/GoAsk.tsx"));
 
 // Lazy: landing pages, auth, dashboard, checkout flows
 const HouseCleaning = lazy(() => import("./pages/HouseCleaning.tsx"));
@@ -388,6 +390,8 @@ const App = () => (
 
                   {/* Post-visit SMS rating link — no login, identifier optional. */}
                   <Route path="/rate" element={<Rate />} />
+                  <Route path="/redo" element={<Redo />} />
+                  <Route path="/go/:id" element={<GoAsk />} />
 
                   {/* Public Pro badge verification — no login, ever. */}
                   <Route path="/verify/:token" element={<VerifyPro />} />

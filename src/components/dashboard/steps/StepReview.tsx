@@ -1,4 +1,5 @@
 import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, sizeLabels, sizeFor, serviceUnits, frequencyVisitCopy, formatPerVisit, formatMonthly, hasCustomQuote } from '@/lib/dashboard-pricing';
+import GuaranteeLine from '@/components/GuaranteeLine';
 
 interface Props {
   state: ConfigState;
@@ -110,6 +111,7 @@ export default function StepReview({ state, onEdit }: Props) {
                 ${firstMonthTotal.toFixed(2)}
               </p>
             </div>
+            <GuaranteeLine className="mt-4" />
           </>
         ) : (
           <>
@@ -142,7 +144,7 @@ export default function StepReview({ state, onEdit }: Props) {
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-[11px] text-ink-faint">
-        {['cancel anytime', 'background-checked pros', 'photo verified', 'satisfaction guarantee'].map(t => (
+        {['cancel anytime', 'background-checked pros', 'photo verified', '48-hour guarantee'].map(t => (
           <div key={t} className="flex items-center gap-2">
             <span className="h-1 w-1 rounded-full bg-ink/40" />
             <span>{t}</span>

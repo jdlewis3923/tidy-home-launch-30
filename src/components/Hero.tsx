@@ -155,7 +155,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {["🏠 House Cleaning", "🌿 Lawn Care", "🚗 Shine Complete", "✓ Cancel Anytime"].map((pill) => (
+          {["🏠 House Cleaning", "🌿 Lawn Care", "🚗 Shine Complete"].map((pill) => (
             <span
               key={pill}
               className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-sm text-primary-foreground font-medium"
@@ -180,12 +180,9 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           {t(CUSTOMER_DASHBOARD_ENABLED ? "See your price — 60 seconds →" : "Request Early Access →")}
         </button>
 
-        <p className="mt-4 text-xs text-primary-foreground/50">
-          {t(
-            CUSTOMER_DASHBOARD_ENABLED
-              ? "No contracts · Cancel anytime · From $45 a month"
-              : "Founding memberships · No commitment · From $45 a month",
-          )}
+        <p className="mt-4 text-xs text-primary-foreground/60" data-testid="hero-trust-line">
+          {t(CUSTOMER_DASHBOARD_ENABLED ? "No contracts · Cancel anytime ·" : "Founding memberships · No commitment ·")}{" "}
+          <strong className="font-bold text-primary-foreground">{t("48-hour guarantee")}</strong>
         </p>
       </div>
     </section>

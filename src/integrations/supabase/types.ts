@@ -2933,6 +2933,45 @@ export type Database = {
         }
         Relationships: []
       }
+      member_asks: {
+        Row: {
+          acted_at: string | null
+          created_at: string
+          id: string
+          is_test_row: boolean
+          kind: string
+          release_after: string
+          seq: number
+          status: string
+          user_id: string
+          visit_id: string | null
+        }
+        Insert: {
+          acted_at?: string | null
+          created_at?: string
+          id?: string
+          is_test_row?: boolean
+          kind: string
+          release_after: string
+          seq?: number
+          status?: string
+          user_id: string
+          visit_id?: string | null
+        }
+        Update: {
+          acted_at?: string | null
+          created_at?: string
+          id?: string
+          is_test_row?: boolean
+          kind?: string
+          release_after?: string
+          seq?: number
+          status?: string
+          user_id?: string
+          visit_id?: string | null
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           calendar_enabled: boolean
@@ -3664,6 +3703,51 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_praise: {
+        Row: {
+          applicant_id: string | null
+          contractor_id: string | null
+          created_at: string
+          id: string
+          is_test_row: boolean
+          member_first_name: string | null
+          message: string
+          quote: string | null
+          rating_id: string | null
+          sms_status: string
+          stars: number | null
+          visit_id: string | null
+        }
+        Insert: {
+          applicant_id?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_row?: boolean
+          member_first_name?: string | null
+          message: string
+          quote?: string | null
+          rating_id?: string | null
+          sms_status?: string
+          stars?: number | null
+          visit_id?: string | null
+        }
+        Update: {
+          applicant_id?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_row?: boolean
+          member_first_name?: string | null
+          message?: string
+          quote?: string | null
+          rating_id?: string | null
+          sms_status?: string
+          stars?: number | null
+          visit_id?: string | null
+        }
+        Relationships: []
+      }
       pro_push_outbox: {
         Row: {
           attempts: number
@@ -4106,6 +4190,81 @@ export type Database = {
           identifier?: string
         }
         Relationships: []
+      }
+      redo_requests: {
+        Row: {
+          admin_notes: string | null
+          applicant_id: string | null
+          created_at: string
+          due_at: string
+          id: string
+          is_test_row: boolean
+          note: string | null
+          pro_id: string | null
+          redo_visit_id: string | null
+          requested_at: string
+          resolved_at: string | null
+          scheduled_at: string | null
+          scheduled_for: string | null
+          source: string
+          status: string
+          user_id: string | null
+          visit_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          applicant_id?: string | null
+          created_at?: string
+          due_at?: string
+          id?: string
+          is_test_row?: boolean
+          note?: string | null
+          pro_id?: string | null
+          redo_visit_id?: string | null
+          requested_at?: string
+          resolved_at?: string | null
+          scheduled_at?: string | null
+          scheduled_for?: string | null
+          source?: string
+          status?: string
+          user_id?: string | null
+          visit_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          applicant_id?: string | null
+          created_at?: string
+          due_at?: string
+          id?: string
+          is_test_row?: boolean
+          note?: string | null
+          pro_id?: string | null
+          redo_visit_id?: string | null
+          requested_at?: string
+          resolved_at?: string | null
+          scheduled_at?: string | null
+          scheduled_for?: string | null
+          source?: string
+          status?: string
+          user_id?: string | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redo_requests_redo_visit_id_fkey"
+            columns: ["redo_visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redo_requests_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       referrals: {
         Row: {
@@ -5447,6 +5606,7 @@ export type Database = {
           customer_first_name: string | null
           gate_code: string | null
           id: string
+          is_redo: boolean
           is_sample: boolean
           jobber_job_id: string | null
           jobber_visit_id: string | null
@@ -5457,6 +5617,8 @@ export type Database = {
           parking_notes: string | null
           pet_notes: string | null
           rate_token: string | null
+          redo_of_visit_id: string | null
+          redo_request_id: string | null
           scheduled_end: string | null
           scheduled_start: string | null
           service: Database["public"]["Enums"]["service_type"]
@@ -5485,6 +5647,7 @@ export type Database = {
           customer_first_name?: string | null
           gate_code?: string | null
           id?: string
+          is_redo?: boolean
           is_sample?: boolean
           jobber_job_id?: string | null
           jobber_visit_id?: string | null
@@ -5495,6 +5658,8 @@ export type Database = {
           parking_notes?: string | null
           pet_notes?: string | null
           rate_token?: string | null
+          redo_of_visit_id?: string | null
+          redo_request_id?: string | null
           scheduled_end?: string | null
           scheduled_start?: string | null
           service: Database["public"]["Enums"]["service_type"]
@@ -5523,6 +5688,7 @@ export type Database = {
           customer_first_name?: string | null
           gate_code?: string | null
           id?: string
+          is_redo?: boolean
           is_sample?: boolean
           jobber_job_id?: string | null
           jobber_visit_id?: string | null
@@ -5533,6 +5699,8 @@ export type Database = {
           parking_notes?: string | null
           pet_notes?: string | null
           rate_token?: string | null
+          redo_of_visit_id?: string | null
+          redo_request_id?: string | null
           scheduled_end?: string | null
           scheduled_start?: string | null
           service?: Database["public"]["Enums"]["service_type"]
@@ -5551,6 +5719,13 @@ export type Database = {
           zip?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "visits_redo_of_visit_id_fkey"
+            columns: ["redo_of_visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "visits_subscription_id_fkey"
             columns: ["subscription_id"]
@@ -5621,6 +5796,7 @@ export type Database = {
         Args: { _applicant_id: string; _regenerate?: boolean }
         Returns: Json
       }
+      admin_pro_partner_status: { Args: { _applicant: string }; Returns: Json }
       admin_pro_push_status: {
         Args: never
         Returns: {
@@ -5868,6 +6044,9 @@ export type Database = {
           zip: string
         }[]
       }
+      pro_partner_progress: { Args: never; Returns: Json }
+      pro_partner_status: { Args: { _applicant: string }; Returns: Json }
+      pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
       pro_tier_uplift_cents: {
         Args: { _base_cents: number; _pro_uid: string }
         Returns: number

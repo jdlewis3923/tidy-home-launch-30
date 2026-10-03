@@ -729,6 +729,20 @@
       "when": 1790880431788,
       "tag": "0103_applicants_admin_insert",
       "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "7",
+      "when": 1791035136394,
+      "tag": "0104_guarantee_redo_praise_asks_pro_partner",
+      "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "7",
+      "when": 1791035392015,
+      "tag": "0105_pro_partner_rating_from_visits",
+      "breakpoints": true
     }
   ]
 }

@@ -4,10 +4,10 @@ import { VETTED_CLAIM } from "@/lib/pricing-canon";
 // One claim per slot. VETTED_CLAIM already reads "Background-Checked Pros",
 // so the adjacent duplicate slot was removed.
 // "Satisfaction Guaranteed" is RETIRED — unbounded promise, no defined remedy.
-// The approved guarantee is "First visit perfect or it's free".
+// The approved guarantee is the 48-hour guarantee.
 const signals = [
   VETTED_CLAIM,
-  "First visit perfect or it's free",
+  "48-hour guarantee",
   "Serving Pinecrest, Kendall and Kendall West.",
 ];
 
