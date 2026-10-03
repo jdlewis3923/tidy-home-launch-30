@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
-type Task = { id: string; title: string; detail: string | null; created_at: string; action_url: string | null };
+type Task = { id: string; title: string; detail: string | null; occurred_at: string; action_url: string | null };
 
 export default function ReservationTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const load = async () => {
-    const { data } = await supabase.from("admin_workday_events").select("id, title, detail, created_at, action_url")
-      .eq("event_type", "reservation_threshold").eq("status", "open").order("created_at", { ascending: true });
+    const { data } = await supabase.from("admin_workday_events").select("id, title, detail, occurred_at, action_url")
+      .eq("event_type", "reservation_threshold").eq("status", "open").order("occurred_at", { ascending: true });
     setTasks((data ?? []) as Task[]);
   };
   useEffect(() => { load(); }, []);
