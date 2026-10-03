@@ -15,6 +15,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { isWindowOpen, nextOpenWindow } from '../_shared/sms-window.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { alertSmsFailure } from '../_shared/sms-failure.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -54,7 +55,7 @@ Deno.serve(async (req) => {
 
   const { data: expiredRows } = await admin
     .from('sms_outbox')
-    .select('id, template_name, expires_at, created_at, release_after')
+    .select('id, template_name, to_phone_e164, expires_at, created_at, release_after')
     .eq('status', 'queued')
     .or(`expires_at.lte.${nowIso},release_after.lte.${staleReleaseIso}`)
     .limit(500);
@@ -72,7 +73,7 @@ Deno.serve(async (req) => {
       last_error: reason,
       updated_at: nowIso,
     }).eq('id', row.id).eq('status', 'queued');
-    if (!cErr) canceled++;
+    if (!cErr) { canceled++; await alertSmsFailure(admin, { phone: row.to_phone_e164, template: row.template_name, error: reason, key: row.id, status: 'canceled' }); }
   }
 
 
@@ -163,12 +164,7 @@ Deno.serve(async (req) => {
     results.push({ id: row.id, to: row.to_phone_e164, status: terminal ? 'failed' : 'retry', http: httpStatus, error: errMessage });
 
     if (terminal) {
-      await admin.from('admin_alerts').insert({
-        alert_type: 'sms_outbox_failed',
-        title: 'A queued text could not be delivered',
-        body: `${row.template_name ?? 'sms'} to ${row.to_phone_e164} failed ${attempts} times: ${errMessage.slice(0, 200)}`,
-        context: { outbox_id: row.id, triggered_by: row.triggered_by },
-      }).then(() => {}, () => {});
+      await alertSmsFailure(admin, { phone: row.to_phone_e164, template: row.template_name, error: `failed ${attempts} times: ${errMessage}`, key: row.id });
     }
   }
 

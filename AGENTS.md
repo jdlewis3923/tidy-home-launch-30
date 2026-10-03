@@ -1,3 +1,5 @@
 - Onboarding sequence: stages/gates/email inventory live in `_shared/onboarding-sequence.ts` (mirrored to `src/lib/onboardingSequence.ts`, parity-tested); stage moves only via `sequence-advance`, and every Pro email passes `sendProEmail`'s guard — why: one definition, one door, auditable order.
 - Launch date, founding cap and reservations mode live only in `src/lib/launch.ts` (mirrored byte-for-byte to `supabase/functions/_shared/launch.ts`, parity-tested) — why: change the date once.
 - Reservations never touch Stripe; the paid subscription marks a reservation converted by email match (DB trigger) — why: Stripe products stay frozen.
+- Failed or expired texts always raise an admin alert via `_shared/sms-failure.ts` (direct sends in send-twilio-sms, queued ones in sms-outbox-release) — why: no text ever fails silently.
+- Inbox redos go through `redo-request` with `message_id`; the clock starts at the member's message time — why: the guarantee promises "reply here within 48 hours".

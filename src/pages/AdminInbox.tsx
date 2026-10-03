@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Send, MessageCircle, Smartphone, User, Bot, Shield, Search } from "lucide-react";
+import { Loader2, RotateCcw, Clock, Send, MessageCircle, Smartphone, User, Bot, Shield, Search } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -185,6 +185,34 @@ export default function AdminInbox() {
     };
   }, [activeId]);
 
+  // Threads with a member message inside 48h of a completed visit — the guarantee window.
+  const [flags, setFlags] = useState<Array<{ conversation_id: string; message_id: string; visit_id: string; sent_at: string; redo_exists: boolean }>>([]);
+  const [redoBusy, setRedoBusy] = useState<string | null>(null);
+  const [redoDone, setRedoDone] = useState<Record<string, string>>({});
+  const loadFlags = useCallback(async () => {
+    const { data } = await supabase.rpc("inbox_redo_flags");
+    setFlags(data ?? []);
+  }, []);
+  useEffect(() => { if (authed === "yes") loadFlags(); }, [authed, loadFlags, conversations]);
+  const flaggedConv = useMemo(() => new Set(flags.filter((f) => !f.redo_exists).map((f) => f.conversation_id)), [flags]);
+
+  const createRedo = useCallback(async (messageId: string) => {
+    if (redoBusy) return;
+    if (!window.confirm("Create a free redo from this message? The 48-hour clock starts from when the member sent it.")) return;
+    setRedoBusy(messageId);
+    const { data, error } = await supabase.functions.invoke("redo-request", { body: { message_id: messageId } });
+    setRedoBusy(null);
+    if (error || !data?.ok) {
+      const code = data?.error ?? "";
+      toast.error(code === "no_visit_found" ? "No completed visit found for this member." : "Couldn't create the redo.");
+      return;
+    }
+    const due = data.due_at ? format(new Date(data.due_at), "EEE h:mm a") : "";
+    setRedoDone((d) => ({ ...d, [messageId]: data.already ? "Redo already exists for this visit" : `Redo created · schedule by ${due}` }));
+    toast.success(data.already ? "A redo already exists for that visit." : "Redo created — it's at the top of Workday.");
+    loadFlags();
+  }, [redoBusy, loadFlags]);
+
   const filtered = useMemo(() => {
     let list = conversations;
     if (filter !== "all") list = list.filter((c) => c.status === filter);
@@ -319,6 +347,9 @@ export default function AdminInbox() {
                           {channelIcon(c.channel)}
                           <span className="truncate">{customerLabel(c)}</span>
                         </div>
+                        {flaggedConv.has(c.id) && (
+                          <Badge data-testid="redo-flag" className="text-[10px] gap-1"><Clock className="h-3 w-3" />48h</Badge>
+                        )}
                         {c.status === "escalated" && (
                           <Badge variant="destructive" className="text-[10px]">
                             ESC
@@ -420,6 +451,18 @@ export default function AdminInbox() {
                               </span>
                             </div>
                             <div className="whitespace-pre-wrap">{m.body}</div>
+                            {m.direction === "inbound" && m.sender_type === "customer" && (
+                              <div className="mt-2 border-t border-border/60 pt-2">
+                                {redoDone[m.id] ? (
+                                  <span className="text-[11px] font-medium">{redoDone[m.id]}</span>
+                                ) : (
+                                  <Button size="sm" variant={flags.some((f) => f.message_id === m.id && !f.redo_exists) ? "default" : "outline"} className="h-7 gap-1 text-xs" disabled={redoBusy === m.id} onClick={() => createRedo(m.id)}>
+                                    {redoBusy === m.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
+                                    Create redo
+                                  </Button>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}

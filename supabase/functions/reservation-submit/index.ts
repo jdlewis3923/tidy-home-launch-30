@@ -49,8 +49,12 @@ Deno.serve(async (req) => {
   const services = Array.from(new Set(b.services));
   const lines = b.lines.filter((l) => services.includes(l.service));
 
-  const waitlist: string[] = [];
-  for (const s of services) if ((await serviceCount(s, false)) >= FOUNDING_CAP) waitlist.push(s);
+  // Founding homes are counted per ZIP, one per household. A full ZIP waitlists every service;
+  // a household already holding a founding spot keeps it when it adds services.
+  const { data: st } = await admin.rpc('founding_home_status', { _street: b.street, _zip: b.zip });
+  const status = Array.isArray(st) ? st[0] : st;
+  const zipFull = !status?.already && (status?.homes ?? 0) >= FOUNDING_CAP;
+  const waitlist: string[] = zipFull ? [...services] : [];
   const monthlyCents = Math.round(lines.filter((l) => !waitlist.includes(l.service)).reduce((n, l) => n + l.monthly, 0) * 100);
 
   const { data: row, error } = await admin.from('reservations').insert({

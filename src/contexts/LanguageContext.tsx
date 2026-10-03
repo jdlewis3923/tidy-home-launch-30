@@ -304,8 +304,6 @@ const translations: Record<string, string> = {
   "Absolutely — your trust means everything to us. Every single contractor is screened through Checkr, and we require photo documentation after every visit so you can see exactly what was done. Quality and accountability are built into everything we do.":
     "Absolutamente — tu confianza lo es todo. Cada contratista está completamente verificado, y exigimos documentación con fotos después de cada visita para que veas exactamente lo que se hizo. Calidad y responsabilidad en todo lo que hacemos.",
   "What if I'm not satisfied?": "¿Y si no quedo satisfecho?",
-  "We want you to love every service! If something isn't right, just reach out within 24 hours and we'll make it right — whether that means a re-service or a credit. Your satisfaction is our top priority.":
-    "¡Queremos que ames cada servicio! Si algo no está bien, contáctanos en 24 horas y lo resolvemos — ya sea con otro servicio o un crédito. Tu satisfacción es nuestra prioridad.",
   "How do I contact support?": "¿Cómo contacto a soporte?",
   "We're here for you! Email us at hello@jointidy.co and we'll get back to you within 1 hour during business hours. Real people, real answers, real fast.":
     "¡Estamos para ti! Escríbenos a hello@jointidy.co y te respondemos en 1 hora durante horario laboral. Personas reales, respuestas reales, súper rápido.",
@@ -511,8 +509,6 @@ const translations: Record<string, string> = {
   "How is scheduling handled?": "¿Cómo se maneja el horario?",
   "After signup, we lock in a recurring day and time window. You'll get an ETA reminder before every visit. Reschedule anytime from your dashboard.":
     "Al inscribirte, fijamos un día y horario recurrente. Recibes un aviso de llegada antes de cada visita. Reagenda cuando quieras desde tu panel.",
-  "Reach out within 24 hours and we'll re-clean the area or credit your account — no questions asked.":
-    "Avísanos en 24 horas y volvemos a limpiar el área o te acreditamos a tu cuenta — sin preguntas.",
   "Already booking cleaning? Add lawn care from $45 a month.": "¿Ya tienes limpieza? Agrega jardín desde $45 al mes.",
   "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.":
     "Agrega un 2º servicio y eliges un servicio adicional premium gratis cada mes — y nunca más coordinas dos proveedores.",
@@ -551,8 +547,6 @@ const translations: Record<string, string> = {
   "Who does the work?": "¿Quién hace el trabajo?",
   "We automatically reschedule to the next available day. Your subscription stays active and your price doesn't change.":
     "Reprogramamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa y tu precio no cambia.",
-  "Reach out within 24 hours and we'll send your Pro back or credit your account — no questions asked.":
-    "Avísanos en 24 horas y mandamos al profesional de vuelta o te acreditamos a tu cuenta — sin preguntas.",
   "Already booking lawn? Add cleaning from $139 a month.":
     "¿Ya tienes jardín? Agrega limpieza desde $139 al mes.",
 
@@ -601,8 +595,6 @@ const translations: Record<string, string> = {
     "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Pelo de mascotas y barra de arcilla con capa cerámica disponibles como extras.",
   "Who does the detailing?": "¿Quién hace el detallado?",
   "What about oversized or commercial vehicles?": "¿Y los vehículos grandes o comerciales?",
-  "Reach out within 24 hours and we'll send the detailer back or credit your account — no questions asked.":
-    "Avísanos en 24 horas y mandamos al detallador de vuelta o te acreditamos a tu cuenta — sin preguntas.",
   "Already on Shine Complete? Add cleaning from $139 a month.":
     "¿Ya tienes Shine Complete? Agrega limpieza desde $139 al mes.",
 
@@ -890,8 +882,6 @@ const translations: Record<string, string> = {
   "Are professionals background-checked?": "¿Los profesionales tienen antecedentes verificados?",
   "Every professional is screened through Checkr and required to submit photo documentation after each service.":
     "Cada profesional pasa por una revisión a través de Checkr y debe enviar documentación con fotos después de cada servicio.",
-  "Reach out within 24 hours and we'll make it right — re-service or credit, no questions asked. Your satisfaction is our top priority.":
-    "Contáctanos dentro de 24 horas y lo resolvemos — repetimos el servicio o te damos un crédito, sin preguntas. Tu satisfacción es nuestra prioridad.",
   "What if something goes wrong during a visit?": "¿Qué pasa si algo sale mal durante una visita?",
   "Contact us immediately and we'll make it right — a redo at no charge, or a credit if you prefer.":
     "Contáctanos de inmediato y lo resolveremos — repetimos el servicio sin costo o te damos un crédito si lo prefieres.",
@@ -1190,6 +1180,10 @@ const translations: Record<string, string> = {
     "Limpieza, grama y cuidado del carro en un solo plan. Un precio fijo por visita.",
   "No contract. Cancel anytime.": "Sin contrato. Cancela cuando quieras.",
   of: "de",
+  "founding homes reserved": "hogares fundadores reservados",
+  "across": "entre",
+  "The founding group in": "El grupo fundador en",
+  "is full · waitlist open": "está completo · lista de espera abierta",
   "founding spots left in": "lugares de fundador disponibles en",
   "Founding pricing is capped at 25 homes in": "El precio de fundador está limitado a 25 hogares en",
   "Founding spots in": "Los lugares de fundador en",

@@ -4208,6 +4208,7 @@ export type Database = {
           scheduled_for: string | null
           source: string
           status: string
+          support_message_id: string | null
           user_id: string | null
           visit_id: string
         }
@@ -4227,6 +4228,7 @@ export type Database = {
           scheduled_for?: string | null
           source?: string
           status?: string
+          support_message_id?: string | null
           user_id?: string | null
           visit_id: string
         }
@@ -4246,6 +4248,7 @@ export type Database = {
           scheduled_for?: string | null
           source?: string
           status?: string
+          support_message_id?: string | null
           user_id?: string | null
           visit_id?: string
         }
@@ -6010,6 +6013,25 @@ export type Database = {
       }
       dispatch_due_social_posts: { Args: never; Returns: number }
       ensure_referral_code: { Args: never; Returns: string }
+      founding_address_key: {
+        Args: { _street: string; _zip: string }
+        Returns: string
+      }
+      founding_home_counts: {
+        Args: never
+        Returns: {
+          cap: number
+          homes: number
+          zip: string
+        }[]
+      }
+      founding_home_status: {
+        Args: { _street: string; _zip: string }
+        Returns: {
+          already: boolean
+          homes: number
+        }[]
+      }
       founding_spot_counts: {
         Args: never
         Returns: {
@@ -6069,6 +6091,28 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      inbox_message_visit: {
+        Args: { _message_id: string }
+        Returns: {
+          body: string
+          completed_at: string
+          conversation_id: string
+          message_id: string
+          sent_at: string
+          user_id: string
+          visit_id: string
+        }[]
+      }
+      inbox_redo_flags: {
+        Args: never
+        Returns: {
+          conversation_id: string
+          message_id: string
+          redo_exists: boolean
+          sent_at: string
+          visit_id: string
+        }[]
       }
       intake_load: { Args: { _token: string }; Returns: Json }
       intake_save: {
@@ -6172,6 +6216,7 @@ export type Database = {
         Returns: Json
       }
       repoint_cron_to_helper: { Args: { _job_name: string }; Returns: string }
+      sms_recipient_name: { Args: { _phone: string }; Returns: string }
       verify_pro_badge: {
         Args: { _token: string }
         Returns: {

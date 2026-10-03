@@ -45,7 +45,7 @@ const preLaunchFAQ = [
     title: "Trust & Quality",
     items: [
       { q: "Are contractors background-checked?", a: "Absolutely — your trust means everything to us. Every single contractor is screened through Checkr, and we require photo documentation after every visit so you can see exactly what was done. Quality and accountability are built into everything we do." },
-      { q: "What if I'm not satisfied?", a: "We want you to love every service! If something isn't right, just reach out within 24 hours and we'll make it right — whether that means a re-service or a credit. Your satisfaction is our top priority." },
+      { q: "What if I'm not satisfied?", a: "If anything about your visit isn't right, tell us within 48 hours and we'll send your pro back to fix it at no charge. No forms, no argument." },
       { q: "How do I contact support?", a: "We're here for you! Email us at hello@jointidy.co and we'll get back to you within 1 hour during business hours. Real people, real answers, real fast." },
     ],
   },
@@ -95,7 +95,7 @@ const launchFAQ = [
     title: "Trust & Quality",
     items: [
       { q: "Are professionals background-checked?", a: "Every professional is screened through Checkr and required to submit photo documentation after each service." },
-      { q: "What if I'm not satisfied?", a: "Reach out within 24 hours and we'll make it right — re-service or credit, no questions asked. Your satisfaction is our top priority." },
+      { q: "What if I'm not satisfied?", a: "If anything about your visit isn't right, tell us within 48 hours and we'll send your pro back to fix it at no charge. No forms, no argument." },
       { q: "What if something goes wrong during a visit?", a: "Contact us immediately and we'll make it right — a redo at no charge, or a credit if you prefer." },
       { q: "How do I contact support?", a: "Email hello@jointidy.co and we'll respond within 1 hour during business hours. Real people, real answers." },
     ],
