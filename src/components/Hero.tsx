@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { RESERVATIONS_MODE, LAUNCH_DATE_LONG, FOUNDING_CAP } from "@/lib/launch";
+import FoundingCounter from "@/components/FoundingCounter";
 import heroImg from "@/assets/hero-miami-home.jpg";
 import heroImgMobile from "@/assets/hero-miami-home-mobile.jpg";
 import heroVideo from "@/assets/hero-loop-hq.mp4.asset.json";
@@ -181,9 +183,12 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         </button>
 
         <p className="mt-4 text-xs text-primary-foreground/60" data-testid="hero-trust-line">
-          {t(CUSTOMER_DASHBOARD_ENABLED ? "No contracts · Cancel anytime ·" : "Founding memberships · No commitment ·")}{" "}
+          {RESERVATIONS_MODE
+            ? <>{t(`First visits begin ${LAUNCH_DATE_LONG}`)} · {FOUNDING_CAP} {t("founding homes")} · {t("No contracts")} ·{" "}</>
+            : <>{t(CUSTOMER_DASHBOARD_ENABLED ? "No contracts · Cancel anytime ·" : "Founding memberships · No commitment ·")}{" "}</>}
           <strong className="font-bold text-primary-foreground">{t("48-hour guarantee")}</strong>
         </p>
+        {RESERVATIONS_MODE && <div className="mt-3"><FoundingCounter tone="dark" /></div>}
       </div>
     </section>
   );

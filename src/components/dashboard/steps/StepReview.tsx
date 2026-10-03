@@ -129,9 +129,9 @@ export default function StepReview({ state, onEdit }: Props) {
         <div className="mt-5 h-px bg-hairline" />
 
         <dl className="mt-4 grid gap-2 text-[12px] text-ink-soft">
-          <div className="flex justify-between"><dt className="text-ink-faint">address</dt><dd className="text-right">{state.address}, {state.city} {state.zip}</dd></div>
-          <div className="flex justify-between"><dt className="text-ink-faint">preferred</dt><dd className="text-right lowercase">{state.preferredDay || 'no preference'} {state.preferredTime ? (state.preferredTime === 'morning' ? 'mornings' : 'afternoons') : ''}</dd></div>
-          <div className="flex justify-between"><dt className="text-ink-faint">account</dt><dd className="text-right">{state.email}</dd></div>
+          {state.address && <div className="flex justify-between"><dt className="text-ink-faint">address</dt><dd className="text-right">{state.address}, {state.city} {state.zip}</dd></div>}
+          {state.address && <div className="flex justify-between"><dt className="text-ink-faint">preferred</dt><dd className="text-right lowercase">{state.preferredDay || 'no preference'} {state.preferredTime ? (state.preferredTime === 'morning' ? 'mornings' : 'afternoons') : ''}</dd></div>}
+          {state.email && <div className="flex justify-between"><dt className="text-ink-faint">account</dt><dd className="text-right">{state.email}</dd></div>}
         </dl>
 
         <button

@@ -1,9 +1,12 @@
 import { ConfigState, ServiceType } from '@/lib/dashboard-pricing';
-import { SERVICE_WAITLIST_NOTE, isServiceAvailable } from '@/lib/service-availability';
+import { SERVICE_WAITLIST_NOTE, isServiceAvailable as baseAvailable } from '@/lib/service-availability';
+import { useFoundingCounts, isFull } from '@/hooks/useFoundingCounts';
 
 interface Props {
   state: ConfigState;
   onChange: (s: ConfigState) => void;
+  /** Reservations: every service can be picked. */
+  allowAll?: boolean;
 }
 
 const services: { id: ServiceType; name: string; icon: string; whisper: string }[] = [
@@ -12,7 +15,9 @@ const services: { id: ServiceType; name: string; icon: string; whisper: string }
   { id: 'detailing',name: 'detailing',icon: '🚗', whisper: 'we come to your driveway.' },
 ];
 
-export default function StepServices({ state, onChange }: Props) {
+export default function StepServices({ state, onChange, allowAll = false }: Props) {
+  const isServiceAvailable = (id: ServiceType) => allowAll || baseAvailable(id);
+  const { data: counts } = useFoundingCounts();
   const toggle = (id: ServiceType) => {
     if (!isServiceAvailable(id)) return;
     const has = state.services.includes(id);
@@ -57,7 +62,7 @@ export default function StepServices({ state, onChange }: Props) {
                 <div className="flex-1 min-w-0">
                   <h3 className={`text-lg font-semibold lowercase ${selected ? 'text-white' : 'text-ink'}`}>{svc.name}</h3>
                   <p className={`text-xs mt-0.5 ${selected && available ? 'text-white/70' : 'text-ink-faint'}`}>
-                    {available ? svc.whisper : SERVICE_WAITLIST_NOTE}
+                    {!available ? SERVICE_WAITLIST_NOTE : allowAll && isFull(counts, svc.id) ? 'founding group full — join the waitlist' : svc.whisper}
                   </p>
                 </div>
                 {available ? (

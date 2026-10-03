@@ -283,7 +283,7 @@ export default function DashboardPlan() {
           >
             {stepInfo.heading}
           </h1>
-          {stepInfo.sub && <p className="mt-2 text-sm text-ink-faint lowercase">{reserving && step === 6 ? 'your price. reserve it — no card today.' : stepInfo.sub}</p>}
+          {stepInfo.sub && <p className="mt-2 text-sm text-ink-faint lowercase">{reserving && step === 6 ? 'your price. reserve it — no card today.' : reserving && step === 1 ? 'cleaning, lawn and car care — all three are reservable now.' : stepInfo.sub}</p>}
         </div>
 
         {step >= 1 && step <= 2 && <ExistingAccountInline />}
