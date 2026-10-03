@@ -131,7 +131,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What if I'm not satisfied?",
-      a: "Reach out within 24 hours and we'll send your Pro back or credit your account — no questions asked.",
+      a: "If anything about your visit isn't right, tell us within 48 hours and we'll send your pro back to fix it at no charge. No forms, no argument.",
     },
   ],
   bundleCta: {

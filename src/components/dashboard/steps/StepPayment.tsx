@@ -320,22 +320,6 @@ export default function StepPayment({ state, onChange }: Props) {
         </div>
       </div>
 
-      {/* 24-Hour Re-do Guarantee — prominent near price summary. */}
-      <div
-        className={`flex items-center gap-3 rounded-xl border-2 border-gold/40 bg-gold/10 px-4 py-3 ${reveal(0)}`}
-        style={{ transitionDelay: '180ms' }}
-      >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold/20 ring-1 ring-gold/50">
-          <BadgeCheck className="h-5 w-5 text-gold" strokeWidth={2.25} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-[13px] font-bold text-ink leading-tight">24-hour Re-do Guarantee</p>
-          <p className="text-[11px] text-ink-soft mt-0.5 leading-snug">
-            Not happy? We make it right within 24 hours.
-          </p>
-        </div>
-      </div>
-
       {/* Pre-checkout trust badge row — background-checked / cancel anytime. */}
       <div
         className={`grid grid-cols-2 gap-2 sm:grid-cols-4 ${reveal(0)}`}
