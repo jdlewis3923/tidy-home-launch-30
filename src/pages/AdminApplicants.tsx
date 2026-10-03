@@ -13,6 +13,7 @@ import ProPraiseHistory from "@/components/admin/ProPraiseHistory";
  * - Loading skeletons, friendly empty state, confirm-before-reject modal
  * - Mobile responsive
  */
+import ProReviewBonusChip from "@/components/admin/ProReviewBonusChip";
 import ViewSequenceLink from "@/components/admin/ViewSequenceLink";
 import NextActionCard from "@/components/admin/NextActionCard";
 import { useEffect, useMemo, useState, useCallback } from "react";
@@ -954,6 +955,7 @@ export default function AdminApplicants() {
                           Bilingual: ❌ NOT confirmed
                         </span>
                       )}
+                      <ProReviewBonusChip proId={open.id} />
                     </div>
                     <div className="mt-2 text-[11px] text-slate-500">
                       Applied {relTime(open.created_at)} · Updated {relTime(open.updated_at ?? open.stage_entered_at ?? open.created_at)}

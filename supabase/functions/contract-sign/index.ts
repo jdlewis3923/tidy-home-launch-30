@@ -11,6 +11,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
  * assigns the Pro number). Listed for lawyer review with the ICA items.
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { REVIEW_BONUS_LINE, REVIEW_BONUS_LINE_ES } from '../_shared/review-bonus.ts';
 import { PDFDocument, StandardFonts, rgb } from 'https://esm.sh/pdf-lib@1.17.1';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { vendorFetch } from '../_shared/http.ts';
@@ -78,6 +79,22 @@ Deno.serve(async (req) => {
   const dl = await admin.storage.from(BUCKET).download(doc.storage_path);
   if (dl.error || !dl.data) return jsonResponse({ error: 'agreement_unavailable' }, 500);
   const pdf = await PDFDocument.load(new Uint8Array(await dl.data.arrayBuffer()));
+  // Compensation clause addendum — Review bonus (on the lawyer list as a new clause).
+  const comp = pdf.addPage([612, 792]);
+  {
+    const f = await pdf.embedFont(StandardFonts.Helvetica); const fb = await pdf.embedFont(StandardFonts.HelveticaBold);
+    let cy = 720;
+    const wrap = (t: string, ff = f, size = 11) => {
+      const words = t.replace(/[^\x20-\x7E\u00A0-\u00FF]/g, (ch) => (ch === '\u2014' ? '-' : ch === '\u2019' ? "'" : '')).split(' ');
+      let ln = '';
+      for (const w of words) { const n = ln ? `${ln} ${w}` : w; if (ff.widthOfTextAtSize(n, size) > 490) { comp.drawText(ln, { x: 60, y: cy, size, font: ff }); cy -= size + 6; ln = w; } else ln = n; }
+      if (ln) { comp.drawText(ln, { x: 60, y: cy, size, font: ff }); cy -= size + 12; }
+    };
+    wrap('Compensation - Review bonus / Compensacion - Bono por resena', fb, 14);
+    wrap(REVIEW_BONUS_LINE);
+    wrap(REVIEW_BONUS_LINE_ES);
+    wrap('A review qualifies only when it is from a member with at least one completed visit served by the Contractor, is rated five stars, and names the Contractor. Each member can generate one review bonus in total. There is no monthly or annual cap.', f, 10);
+  }
   const page = pdf.addPage([612, 792]);
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);

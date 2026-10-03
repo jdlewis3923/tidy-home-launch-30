@@ -3322,8 +3322,11 @@ export type Database = {
           currency: string
           earned_at: string | null
           id: string
+          member_display: string | null
+          member_user_id: string | null
           month_key: string | null
           paid_at: string | null
+          payout_week_id: string | null
           period: string
           pro_id: string
           reason: string
@@ -3341,8 +3344,11 @@ export type Database = {
           currency?: string
           earned_at?: string | null
           id?: string
+          member_display?: string | null
+          member_user_id?: string | null
           month_key?: string | null
           paid_at?: string | null
+          payout_week_id?: string | null
           period: string
           pro_id: string
           reason?: string
@@ -3360,8 +3366,11 @@ export type Database = {
           currency?: string
           earned_at?: string | null
           id?: string
+          member_display?: string | null
+          member_user_id?: string | null
           month_key?: string | null
           paid_at?: string | null
+          payout_week_id?: string | null
           period?: string
           pro_id?: string
           reason?: string
@@ -3371,6 +3380,13 @@ export type Database = {
           stripe_transfer_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pro_bonuses_payout_week_id_fkey"
+            columns: ["payout_week_id"]
+            isOneToOne: false
+            referencedRelation: "payout_weeks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pro_bonuses_pro_id_fkey"
             columns: ["pro_id"]
@@ -5950,6 +5966,16 @@ export type Database = {
           zip: string
         }[]
       }
+      approve_review_bonus: {
+        Args: {
+          _member: string
+          _pro: string
+          _review_date: string
+          _review_text: string
+          _stars: number
+        }
+        Returns: Json
+      }
       badge_photo_load: { Args: { _token: string }; Returns: Json }
       call_edge_function: {
         Args: { _fn: string; _payload: Json }
@@ -6201,6 +6227,7 @@ export type Database = {
       pro_partner_progress: { Args: never; Returns: Json }
       pro_partner_status: { Args: { _applicant: string }; Returns: Json }
       pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
+      pro_review_bonus_total: { Args: { _pro?: string }; Returns: number }
       pro_tier_uplift_cents: {
         Args: { _base_cents: number; _pro_uid: string }
         Returns: number
@@ -6216,6 +6243,12 @@ export type Database = {
         Returns: Json
       }
       repoint_cron_to_helper: { Args: { _job_name: string }; Returns: string }
+      review_bonus_next_friday: { Args: never; Returns: string }
+      review_bonus_precheck: {
+        Args: { _member: string; _pro: string; _stars: number }
+        Returns: Json
+      }
+      review_kpis: { Args: never; Returns: Json }
       sms_recipient_name: { Args: { _phone: string }; Returns: string }
       verify_pro_badge: {
         Args: { _token: string }

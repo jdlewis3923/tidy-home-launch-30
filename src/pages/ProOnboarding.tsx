@@ -105,7 +105,7 @@ export default function ProOnboarding() {
       key: "training",
       icon: <GraduationCap className="h-5 w-5" />,
       title: "Pass the training quiz",
-      body: "10 short questions on jobsite conduct, photos, payments, and safety. Pass with 8 correct.",
+      body: "10 short questions on jobsite conduct, photos, payments, and safety. Pass with 8 correct. Review bonus — $25. Every five-star Google review from a member you've served that names you pays $25, added to that Friday's deposit. One per member.",
       done: applicant.training_passed,
       action: (
         <Button asChild className="bg-primary hover:bg-primary-deep">

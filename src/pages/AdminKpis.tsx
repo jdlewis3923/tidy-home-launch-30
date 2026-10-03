@@ -1,4 +1,5 @@
 import RedoRateCard from "@/components/admin/RedoRateCard";
+import ReviewKpiStrip from "@/components/admin/ReviewKpiStrip";
 import ReservationConversionCard from "@/components/admin/ReservationConversionCard";
 /**
  * /admin/kpis — Permanent KPI Command Center
@@ -727,6 +728,7 @@ export default function AdminKpis() {
             );
           })
         )}
+        <ReviewKpiStrip />
       </div>
 
       {/* Drill-down sheet */}

@@ -4,6 +4,7 @@ import { Navigate, Link } from "react-router-dom";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import ReviewBonusRecorder from "@/components/admin/ReviewBonusRecorder";
 
 type ReviewRow = {
   id: string; reviewer_name: string | null; stars: number; comment: string | null; posted_at: string;
@@ -101,7 +102,7 @@ export default function AdminReviews() {
       if (b.status === "paid") e.paid++;
       map.set(b.pro_id, e);
     }
-    return [...map.values()].map((e) => ({ ...e, capRemaining: Math.max(0, 4 - e.approved - e.paid) }));
+    return [...map.values()].map((e) => ({ ...e, totalCents: bonuses.filter((b) => b.pro_id === e.pro_id && b.bonus_type === "review_bonus" && b.status !== "blocked").reduce((n, b) => n + (b.amount_cents ?? 0), 0) }));
   }, [rows, bonuses, monthKey]);
 
   return (
@@ -111,19 +112,20 @@ export default function AdminReviews() {
           <h1 className="text-2xl font-black text-foreground">Reviews & bonuses</h1>
           <div className="flex gap-2">
             <Link to="/admin/reviews/import" className="rounded-lg border border-border px-3 py-2 text-xs font-semibold">Import</Link>
-            <button onClick={bulkApprove} className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground">Bulk approve (high-confidence, past hold)</button>
-          </div>
+                      </div>
         </div>
+
+        <ReviewBonusRecorder pros={pros} onApproved={fetchAll} />
 
         <div className="rounded-xl border border-border bg-card p-4">
           <h2 className="mb-2 text-sm font-bold">This month's leaderboard ({monthKey})</h2>
           <table className="w-full text-xs">
-            <thead><tr className="text-left text-muted-foreground"><th>Pro</th><th>5★ named</th><th>Approved</th><th>Paid</th><th>Cap remaining</th></tr></thead>
+            <thead><tr className="text-left text-muted-foreground"><th>Pro</th><th>5★ named</th><th>Approved</th><th>Paid</th><th>Review bonuses (all time)</th></tr></thead>
             <tbody>
               {leaderboard.map((e) => (
                 <tr key={e.pro_id} className="border-t border-border">
                   <td className="py-1">{proName(e.pro_id)}</td>
-                  <td>{e.fiveStar}</td><td>{e.approved}</td><td>{e.paid}</td><td>{e.capRemaining}</td>
+                  <td>{e.fiveStar}</td><td>{e.approved}</td><td>{e.paid}</td><td>${(e.totalCents / 100).toFixed(0)}</td>
                 </tr>
               ))}
               {leaderboard.length === 0 && <tr><td colSpan={5} className="py-3 text-center text-muted-foreground">No matched reviews this month</td></tr>}

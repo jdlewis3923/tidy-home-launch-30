@@ -81,6 +81,8 @@ export type ProBonus = {
   month_key: string | null;
   reason: string | null;
   status: string | null;
+  member_display?: string | null;
+  payout_week_id?: string | null;
 };
 
 export type ProNotification = {
@@ -133,7 +135,7 @@ export async function fetchPayoutWeeks(): Promise<PayoutWeek[]> {
 export async function fetchBonuses(proId: string): Promise<ProBonus[]> {
   const { data, error } = await supabase
     .from("pro_bonuses")
-    .select("id, bonus_type, amount_cents, earned_at, month_key, reason, status")
+    .select("id, bonus_type, amount_cents, earned_at, month_key, reason, status, member_display, payout_week_id")
     .eq("pro_id", proId)
     .order("earned_at", { ascending: false });
   if (error) throw error;

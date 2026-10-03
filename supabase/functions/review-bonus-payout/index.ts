@@ -105,6 +105,7 @@ Deno.serve(async (req) => {
     .select('id, pro_id, amount_cents, review_id')
     .in('status', ['pending', 'blocked'])
     .eq('period', period)
+    .is('payout_week_id', null) // review bonuses on a Friday payout week ride with that week's deposit
     .limit(1000);
   if (pendErr) return jsonResponse({ ok: false, error: pendErr.message }, 500);
 

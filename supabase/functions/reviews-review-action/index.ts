@@ -1,8 +1,6 @@
 import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — Admin-only review bonus actions: approve / reject / reassign / bulk_approve.
-// Server enforces qualification (5 stars, reviewer not excluded) and the
-// monthly per-Pro cap (no rollover) from app_settings.review_bonus. Never
-// trust client-computed eligibility.
+// Reject / reassign only. Bonus approval lives in public.approve_review_bonus.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
@@ -60,67 +58,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: true });
   }
 
+  // Approval moved to approve_review_bonus (Admin → Review Bonuses): one $25
+  // bonus per member, no monthly cap, no hold, credited to the next Friday payout.
   if (action === 'approve' || action === 'bulk_approve') {
-    const reviewIds: string[] = action === 'approve' ? [body?.review_id].filter(Boolean) : (Array.isArray(body?.review_ids) ? body.review_ids : []);
-    if (reviewIds.length === 0) return jsonResponse({ ok: false, error: 'no_review_ids' }, 400);
-
-    const { data: reviews, error: revErr } = await admin.from('reviews').select('*').in('id', reviewIds);
-    if (revErr) return jsonResponse({ ok: false, error: revErr.message }, 500);
-
-    const outcomes: Array<{ review_id: string; ok: boolean; reason?: string }> = [];
-    const now = Date.now();
-
-    // Running per-pro-per-period counts so a batch can't blow past the cap.
-    const periodCountCache = new Map<string, number>();
-
-    for (const review of reviews ?? []) {
-      const reason = (r: string) => outcomes.push({ review_id: review.id, ok: false, reason: r });
-
-      if (!review.matched_pro_id) { reason('no_matched_pro'); continue; }
-      if (review.status === 'approved' || review.status === 'paid') { reason('already_approved'); continue; }
-      if (review.status === 'rejected') { reason('already_rejected'); continue; }
-      if (review.stars !== 5) { reason('not_5_stars'); continue; }
-      if (policy.excluded_reviewer_names.map((n) => n.toLowerCase()).includes((review.reviewer_name ?? '').trim().toLowerCase())) {
-        reason('excluded_reviewer_name'); continue;
-      }
-      const postedMs = new Date(review.posted_at).getTime();
-      const holdOk = now >= postedMs + policy.hold_days * 86_400_000;
-      if (!holdOk) { reason('within_hold_period'); continue; }
-      if (action === 'bulk_approve' && review.match_confidence !== 'high') { reason('not_high_confidence'); continue; }
-
-      const period = review.posted_at.slice(0, 7); // YYYY-MM
-      const cacheKey = `${review.matched_pro_id}:${period}`;
-      let count = periodCountCache.get(cacheKey);
-      if (count === undefined) {
-        const { count: dbCount } = await admin
-          .from('pro_bonuses')
-          .select('id', { count: 'exact', head: true })
-          .eq('pro_id', review.matched_pro_id)
-          .eq('period', period)
-          .in('status', ['pending', 'paid']);
-        count = dbCount ?? 0;
-      }
-      if (count >= policy.cap_per_month) { reason('monthly_cap_reached'); continue; }
-
-      const { error: bonusErr } = await admin.from('pro_bonuses').insert({
-        pro_id: review.matched_pro_id,
-        amount_cents: policy.amount_cents,
-        currency: 'usd',
-        reason: 'review_bonus',
-        review_id: review.id,
-        period,
-        status: 'pending',
-        created_by: userData.user.id,
-      });
-      if (bonusErr) { reason(`bonus_insert_failed:${bonusErr.message}`); continue; }
-
-      periodCountCache.set(cacheKey, count + 1);
-
-      await admin.from('reviews').update({ status: 'approved', approved_by: userData.user.id, approved_at: new Date().toISOString() }).eq('id', review.id);
-      outcomes.push({ review_id: review.id, ok: true });
-    }
-
-    return jsonResponse({ ok: true, outcomes });
+    return jsonResponse({ ok: false, error: 'retired — approve from the Review Bonuses form (member + Pro required)' }, 410);
   }
 
   return jsonResponse({ ok: false, error: 'unknown_action' }, 400);
