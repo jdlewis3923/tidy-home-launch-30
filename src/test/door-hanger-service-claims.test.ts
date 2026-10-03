@@ -10,9 +10,11 @@ describe("door-hanger service claims", () => {
   });
   it("requires both photo kinds before completion", () => {
     const action = read("supabase/functions/pro-visit-action/index.ts");
+    const migration = read("drizzle/migrations/0108_lock_completed_visit_photos.sql");
     expect(action).toContain("error: 'photos_required'");
     expect(action).toContain(".eq('kind', 'before')");
     expect(action).toContain(".eq('kind', 'after')");
+    expect(migration).toContain("completed_visit_photo_record_locked");
   });
   it("serves private proof only after verifying customer ownership", () => {
     const endpoint = read("supabase/functions/customer-visit-photos/index.ts");
