@@ -369,7 +369,12 @@ export default function DashboardServices() {
         lawn_choice: newService === 'lawn' ? newLawnChoice : null,
         vehicle_class: newService === 'detailing' ? newVehicleClass : null,
       });
-
+      setStartingCheckout(false);
+      toast({
+        title: t('Service added'),
+        description: t('It will appear on your next combined monthly bill.'),
+      });
+      data.refetch();
     } catch (err) {
       setStartingCheckout(false);
       toast({
@@ -593,7 +598,7 @@ export default function DashboardServices() {
                 {t('Preferred Pro')}
               </h2>
               <p className="mt-2 text-sm text-ink-soft">
-                {t("Choose a Pro if you'd like the same person whenever possible.")}
+                {t("Choose a Pro for this service whenever possible. The same pro for each service, every visit.")}
               </p>
 
               {loadingPros ? (
@@ -829,10 +834,10 @@ export default function DashboardServices() {
                         ) : (
                           <ArrowRight className="h-4 w-4" />
                         )}
-                        {t('Continue to checkout')}
+                        {t('Add to my subscription')}
                       </button>
                       <p className="text-[11px] text-ink-faint">
-                        {t('Prices are the same as your first plan. Cancel any time.')}
+                        {t('Prices are the same as your first plan. It appears on your next combined monthly bill.')}
                       </p>
                     </div>
                   )}

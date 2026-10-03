@@ -324,7 +324,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               {t("Pick your plan.")}
             </h2>
             <p className="mt-3 text-sm md:text-base text-text-mid max-w-xl mx-auto">
-              {t("Set it once. We handle the rest — scheduling, reminders, the same Pro every visit.")}
+              {t("Set it once. We handle the rest — scheduling, reminders, the same pro for each service, every visit.")}
             </p>
             <p className="mt-2 text-xs text-text-light">{t("No contracts · Cancel, pause, or reschedule anytime")}</p>
           </Reveal>
@@ -509,7 +509,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       {/* FINAL CTA — rich navy with bouncing logo + sparkles */}
       <LpFinalCta
         headline={t(`Ready to lock in your ${config.eyebrow.toLowerCase()}?`)}
-        subhead={t("A quick form to sign up. Same Pro. Locked price.")}
+        subhead={t("A quick form to sign up. The same pro for each service, every visit. Locked price.")}
         ctaLabel={t("Start your plan")}
         trackingId={`lp_${config.serviceSlug}_final`}
         service={config.signupServiceParam}

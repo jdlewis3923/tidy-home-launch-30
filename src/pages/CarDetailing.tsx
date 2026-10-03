@@ -11,7 +11,7 @@ const config: ServiceLandingConfig = {
   eyebrow: "Car Care",
   h1: "Shine Complete in Pinecrest + Kendall",
   subhead: "3 maintenance washes a month plus 2 full details a year.",
-  intentConfirm: "Same detailer every visit. Locked monthly price. Cancel anytime.",
+  intentConfirm: "The same pro for each service, every visit. Locked monthly price. Cancel anytime.",
   systemBridge: "Tidy isn't just detailing — it's a system for your entire home.",
   ctaPrimaryLabel: "Book detailing",
   ctaPlanLabel: "Start your plan",
@@ -82,8 +82,8 @@ const config: ServiceLandingConfig = {
 
   trustCards: [
     {
-      title: "Same Pro",
-      body: "Your same pro every visit, not a rotating marketplace roster.",
+      title: "Consistent specialist",
+      body: "The same pro for each service, every visit.",
     },
     {
       title: "Photo-Verified",
@@ -114,7 +114,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "Who does the detailing?",
-      a: "Background-checked detailers. Same detailer every visit so they learn your vehicle.",
+      a: "Background-checked detailers. The same pro for each service, every visit.",
     },
     {
       q: "What about oversized or commercial vehicles?",

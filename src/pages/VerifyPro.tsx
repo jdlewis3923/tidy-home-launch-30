@@ -232,8 +232,8 @@ const VET_CARDS = [
   },
   {
     Icon: UserRound,
-    label: "The same Pro every time",
-    line: "You are assigned one Pro, not whoever is free that day.",
+    label: "Consistent service teams",
+    line: "The same pro for each service, every visit.",
   },
 ];
 

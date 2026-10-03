@@ -324,7 +324,7 @@ export const TRUST_CLAIMS = [
   'Background-Checked Pros',
   'Photo-Verified Every Visit',
   'Cancel Anytime',
-  'Same Pro Every Time',
+  'The same pro for each service, every visit',
   'Serving Kendall & Pinecrest',
 ] as const;
 

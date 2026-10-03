@@ -172,14 +172,14 @@ export const NEXTDOOR_POSTS: CampaignPost[] = [
     post_number: 1,
     title: "Founding neighbors in Pinecrest",
     zip: "33156",
-    en: `Hi ${N["33156"]} — we're Tidy, and we're open here.\n\nCleaning, lawn and mobile car care on one plan. Same Pro every visit. One flat price per visit. Cancel anytime.\n\nWe're taking 25 founding homes in ${N["33156"]}. Founding neighbors lock their rate for life and get one free premium add-on on the first visit.\n\nQuestions welcome — I read every comment.\n\n— Justin Lewis · Founder`,
+    en: `Hi ${N["33156"]} — we're Tidy, and we're open here.\n\nCleaning, lawn and mobile car care on one plan. The same pro for each service, every visit. One flat price per visit. Cancel anytime.\n\nWe're taking 25 founding homes in ${N["33156"]}. Founding neighbors lock their rate for life and get one free premium add-on on the first visit.\n\nQuestions welcome — I read every comment.\n\n— Justin Lewis · Founder`,
     es: `Hola ${N["33156"]} — somos Tidy y ya estamos abiertos aquí.\n\nLimpieza, grama y cuidado del carro a domicilio en un solo plan. El mismo Pro en cada visita. Un precio fijo por visita. Cancela cuando quieras.\n\nEstamos tomando 25 hogares fundadores en ${N["33156"]}. Los vecinos fundadores fijan su precio de por vida y reciben un servicio premium gratis en la primera visita.\n\nPregunta lo que quieras — leo cada comentario.\n\n— Justin Lewis · Fundador`,
   },
   {
     post_number: 2,
-    title: "Same Pro every visit",
+    title: "A consistent pro for each service",
     zip: "33156",
-    en: `The same Pro, every visit.\n\nEvery Tidy Pro is background-checked and covered by insurance, and you keep the same one — they learn your gate code, your dog's name, which room matters most.`,
+    en: `The same pro for each service, every visit.\n\nEvery Tidy Pro is background-checked and covered by insurance, and each specialist learns the details that matter for their service.`,
     es: `El mismo Pro, en cada visita.\n\nCada Pro de Tidy pasa verificación de antecedentes y está cubierto por seguro, y siempre te toca el mismo — aprende el código del portón, el nombre del perro y cuál cuarto importa más.`,
   },
   {
@@ -247,7 +247,7 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 5,
     title: "One plan, three services",
     zip: "33183",
-    en: `Three services. One plan. One bill. One Pro who knows your house.`,
+    en: `Three services. One plan. One bill. The same pro for each service, every visit.`,
     es: `Tres servicios. Un plan. Una factura. Un equipo que conoce tu casa.`,
   },
   {

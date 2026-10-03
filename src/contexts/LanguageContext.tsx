@@ -627,7 +627,8 @@ const translations: Record<string, string> = {
     "Dos o más servicios — eliges 1 servicio adicional premium gratis cada mes",
   "Your choice from the add-on list, applied automatically at checkout":
     "Tú eliges de la lista de servicios adicionales, se aplica automáticamente al pagar",
-  "One subscription, one bill, one Pro": "Una suscripción, una factura, un Pro",
+  "One subscription, one bill — the same pro for each service, every visit":
+    "Una suscripción, una factura — el mismo profesional para cada servicio, en cada visita",
   "Same locked price every month": "El mismo precio fijo cada mes",
   "Cancel or adjust anytime": "Cancela o ajusta cuando quieras",
   "Serving 33156 · 33183 · 33186 only": "Sirviendo solo 33156 · 33183 · 33186",
@@ -1033,8 +1034,18 @@ const translations: Record<string, string> = {
   "You can cancel at any time from the Billing page in your account. Cancellation takes effect at the end of the billing period you have already paid for, so you keep the visits in that period and no further charge is made. We do not prorate or refund the period already paid. You can undo a cancellation any time before it takes effect. You can also pause your plan for up to 60 days from the Billing page, during which no charges are made and we hold your slot. You can skip an individual visit from your dashboard, which does not change your billing for that period.":
     "Puedes cancelar en cualquier momento desde la página de Facturación en tu cuenta. La cancelación entra en vigor al final del período de facturación que ya pagaste, por lo que conservas las visitas de ese período y no se realiza ningún cargo adicional. No prorrateamos ni reembolsamos el período ya pagado. Puedes deshacer una cancelación en cualquier momento antes de que entre en vigor. También puedes pausar tu plan hasta por 60 días desde la página de Facturación; durante la pausa no se realizan cargos y reservamos tu lugar. Puedes omitir una visita individual desde tu panel, lo cual no cambia la facturación de ese período.",
   "8. Satisfaction": "8. Satisfacción",
-  "Notify us within 24 hours of any service issue. We will make reasonable efforts to resolve it.":
-    "Notifícanos dentro de 24 horas sobre cualquier problema con el servicio. Haremos esfuerzos razonables para resolverlo.",
+  "Notify us within 48 hours of any service issue.":
+    "Notifícanos dentro de 48 horas sobre cualquier problema con el servicio.",
+  "The same pro for each service, every visit.": "El mismo profesional para cada servicio, en cada visita.",
+  "The same pro for each service, every visit": "El mismo profesional para cada servicio, en cada visita",
+  "The Same Pro for Each Service, Every Visit": "El Mismo Profesional para Cada Servicio, en Cada Visita",
+  "Consistent specialist": "Especialista constante",
+  "Choose a Pro for this service whenever possible. The same pro for each service, every visit.":
+    "Elige un profesional para este servicio cuando sea posible. El mismo profesional para cada servicio, en cada visita.",
+  "Set it once. We handle the rest — scheduling, reminders, the same pro for each service, every visit.":
+    "Configúralo una vez. Nosotros nos encargamos del resto — programación, recordatorios y el mismo profesional para cada servicio, en cada visita.",
+  "A quick form to sign up. The same pro for each service, every visit. Locked price.":
+    "Un formulario rápido para inscribirte. El mismo profesional para cada servicio, en cada visita. Precio fijo.",
   "9. SMS Communications": "9. Comunicaciones por SMS",
   "By checking the SMS consent box and providing your phone number, you expressly consent to receive recurring automated promotional and informational text messages from Tidy Home Concierge LLC, including service updates, appointment reminders, and exclusive offers, at the phone number provided. Message frequency varies.":
     "Al marcar la casilla de consentimiento de SMS y proporcionar tu número de teléfono, aceptas expresamente recibir mensajes de texto automatizados recurrentes, promocionales e informativos, de Tidy Home Concierge LLC, incluidos avisos de servicio, recordatorios de citas y ofertas exclusivas, al número proporcionado. La frecuencia de los mensajes varía.",

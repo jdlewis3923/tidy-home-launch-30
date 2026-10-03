@@ -894,6 +894,15 @@ async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, event: S
     ? new Date(currentPeriodEnd * 1000).toISOString().slice(0, 10)
     : null;
 
+  const services = sub.metadata?.services_json
+    ? JSON.parse(sub.metadata.services_json) as Array<{ service: string; size?: number; frequency?: string }>
+    : [];
+  const planLines = await loadPlanLines(supabase, sub.metadata as Record<string, string>);
+  const monthlyTotalCents = sub.items.data.reduce(
+    (sum, item) => sum + (item.price.unit_amount ?? 0) * (item.quantity ?? 1),
+    0,
+  );
+
   await supabase
     .from('subscriptions')
     .update({
@@ -903,8 +912,28 @@ async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, event: S
       pause_collection: sub.pause_collection?.behavior ?? null,
       cancel_at_period_end: sub.cancel_at_period_end ?? false,
       canceled_at: sub.canceled_at ? new Date(sub.canceled_at * 1000).toISOString() : null,
+      ...(services.length > 0 ? { services: services.map((row) => row.service) } : {}),
+      ...(planLines.length > 0 ? {
+        plan_lines: planLines,
+        monthly_total_cents: monthlyTotalCents,
+        free_addons_per_month: parseInt(sub.metadata?.free_addons_per_month ?? '0', 10) || 0,
+        sizes_json: sub.metadata?.sizes_json ? JSON.parse(sub.metadata.sizes_json) : {},
+        surcharge_applied: planLines.some((line) => line.surcharge_applied),
+        surcharge_cents: planLines.reduce((sum, line) => sum + Number(line.surcharge_cents ?? 0), 0),
+      } : {}),
     })
     .eq('stripe_subscription_id', sub.id);
+
+  if (planLines.length > 0) {
+    const { data: local } = await supabase
+      .from('subscriptions')
+      .select('id')
+      .eq('stripe_subscription_id', sub.id)
+      .maybeSingle();
+    if (local?.id) {
+      await supabase.rpc('generate_recurring_visits', { _subscription_id: local.id, _horizon_days: 45 });
+    }
+  }
 }
 
 /**

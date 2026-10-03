@@ -17,7 +17,7 @@ const config: ServiceLandingConfig = {
   subhead:
     "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.",
   intentConfirm:
-    "Same Pro every visit. Locked monthly price. Cancel anytime.",
+    "The same pro for each service, every visit. Locked monthly price. Cancel anytime.",
   systemBridge:
     "Tidy isn't just cleaning — it's a system for your entire home.",
   ctaPrimaryLabel: "Book your cleaning",
@@ -25,7 +25,7 @@ const config: ServiceLandingConfig = {
   priceAnchor: "From $139 a month",
   stickyLabel: "House Cleaning · from $139 a month",
   savingsCallout:
-    "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a month** — with the same Pro every time.",
+    "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a month** — with the same pro for each service, every visit.",
   heroImage: heroImg,
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
@@ -39,7 +39,7 @@ const config: ServiceLandingConfig = {
       price: "$139",
       cadence: "/mo",
       planSlug: "monthly",
-      description: "One visit per month, same Pro every time.",
+      description: "One visit per month, with the same pro for each service, every visit.",
       isFromPrice: true,
       visitNote: "1 visit a month · $139 a visit",
       sizeNote: SIZE_NOTE,
@@ -83,7 +83,7 @@ const config: ServiceLandingConfig = {
     "Bedroom tidy + linen change",
     "Trash out",
     "Eco-safe products",
-    "Same Pro every visit",
+    "The same pro for each service, every visit",
     "Photo-verified after every visit",
   ],
   addOnsNote: "Available as add-ons: inside oven, inside fridge, interior windows, deep baseboard scrub, laundry (wash/dry/fold), inside kitchen cabinets.",
@@ -91,8 +91,8 @@ const config: ServiceLandingConfig = {
     "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Above that size we quote individually.",
   trustCards: [
     {
-      title: "Same Pro",
-      body: "Your same pro every visit, not a rotating marketplace roster.",
+      title: "Consistent specialist",
+      body: "The same pro for each service, every visit.",
     },
     {
       title: "Photo-Verified",
@@ -123,7 +123,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "Who does the cleaning?",
-      a: "Screened professionals. Same Pro every visit so they learn your home.",
+      a: "Screened professionals. The same pro for each service, every visit.",
     },
     {
       q: "How is scheduling handled?",
@@ -142,7 +142,7 @@ const config: ServiceLandingConfig = {
   seo: {
     title: "House Cleaning in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "House cleaning in Pinecrest and Kendall (33156, 33183, 33186). One flat price per visit from $139. Same Pro, no contracts, eco-safe. Book in about 2 minutes.",
+      "House cleaning in Pinecrest and Kendall (33156, 33183, 33186). One flat price per visit from $139. The same pro for each service, every visit. No contracts, eco-safe. Book in about 2 minutes.",
     canonical: "https://jointidy.co/house-cleaning",
     priceRange: "$139–$279",
     service: {

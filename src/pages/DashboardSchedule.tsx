@@ -147,9 +147,16 @@ export default function DashboardSchedule() {
                           <p className="text-sm font-semibold text-ink">{serviceLabel(v.service)}</p>
                           <p className="text-xs text-ink-soft">{formatLongDate(v.visit_date)}</p>
                         </div>
-                        <span className="shrink-0 rounded-full bg-cream px-2 py-0.5 text-[10px] font-semibold text-ink-soft">
-                          {t(STATUS_LABEL[v.status] ?? v.status)}
-                        </span>
+                        <div className="flex shrink-0 flex-col items-end gap-2">
+                          <span className="rounded-full bg-cream px-2 py-0.5 text-[10px] font-semibold text-ink-soft">
+                            {t(STATUS_LABEL[v.status] ?? v.status)}
+                          </span>
+                          {v.status === 'complete' && (
+                            <Link to={`/dashboard/visit/${v.id}`} className="text-xs font-semibold text-[hsl(var(--primary))]">
+                              {t('View photos')}
+                            </Link>
+                          )}
+                        </div>
                       </li>
                     ))}
                   </ul>

@@ -1,7 +1,7 @@
 /**
  * Admin — Pro route assignments (/admin/pro-assignments)
  *
- * Route ownership, not per-visit dispatch: a customer gets one Pro, and every
+ * Route ownership, not per-visit dispatch: each customer service gets a Pro, and every
  * visit created after that inherits it automatically (trigger
  * visits_inherit_assigned_pro). This screen does the three things ops needs:
  *   1. assign or change a customer's Pro
@@ -126,7 +126,7 @@ export default function AdminProAssignments() {
       <header className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Pro assignments</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          One Pro per customer. New visits inherit the route automatically; single visits can be overridden for
+          The same pro for each service, every visit. New visits inherit the route automatically; single visits can be overridden for
           coverage without changing route ownership.
         </p>
       </header>
