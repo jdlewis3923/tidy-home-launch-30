@@ -13,7 +13,7 @@ import tidyLogo from "@/assets/tidy-logo.png";
 
 const CALLOUTS = [
   { icon: CalendarDays, title: "Today's work", body: "Every visit, time window and address in one list." },
-  { icon: DollarSign, title: "Your pay", body: "A flat amount per completed visit, and the Friday it lands." },
+  { icon: DollarSign, title: "Your pay", body: "A flat amount per completed visit, and the Friday it lands. Review bonus — $25. Every five-star Google review from a member you've served that names you pays $25, added to that Friday's deposit. One per member." },
   { icon: Trophy, title: "Your standing", body: "Visits, rating and days active — your path to Tier 2." },
 ];
 

@@ -51,7 +51,7 @@ export default function ProPayoutWeek() {
     if (!week) return [];
     const start = new Date(`${week.week_start}T00:00:00`);
     const end = new Date(`${week.week_end}T23:59:59`);
-    return bonuses.filter((b) => b.earned_at && new Date(b.earned_at) >= start && new Date(b.earned_at) <= end);
+    return bonuses.filter((b) => (b.payout_week_id ? b.payout_week_id === week.id : b.earned_at && new Date(b.earned_at) >= start && new Date(b.earned_at) <= end));
   }, [bonuses, week]);
 
   const partnerLine = proPartnerCountLine(partner);
@@ -133,7 +133,7 @@ export default function ProPayoutWeek() {
                     className="flex min-h-[56px] items-center justify-between border-b border-[hsl(var(--pro-navy)/0.07)] bg-white px-4 last:border-0"
                   >
                     <span className="text-[15px] font-semibold text-[hsl(var(--pro-ink))]">
-                      {b.reason ?? b.bonus_type ?? "Bonus"}
+                      {b.bonus_type === "review_bonus" ? `Review bonus${b.member_display ? ` — ${b.member_display}` : ""}` : (b.reason ?? b.bonus_type ?? "Bonus")}
                     </span>
                     <span className="text-[16px] font-extrabold text-[hsl(var(--pro-green))]">
                       {money(b.amount_cents)}

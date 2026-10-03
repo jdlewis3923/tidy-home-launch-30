@@ -764,6 +764,20 @@
       "when": 1791039247663,
       "tag": "0108_lock_completed_visit_photos",
       "breakpoints": true
+    },
+    {
+      "idx": 109,
+      "version": "7",
+      "when": 1791042238211,
+      "tag": "0109_review_bonus_one_per_member",
+      "breakpoints": true
+    },
+    {
+      "idx": 110,
+      "version": "7",
+      "when": 1791042442729,
+      "tag": "0110_review_bonus_paid_with_week",
+      "breakpoints": true
     }
   ]
 }

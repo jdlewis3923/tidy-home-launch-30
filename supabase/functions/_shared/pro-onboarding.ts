@@ -10,9 +10,10 @@ import './http.ts'; // bounds every outbound call in this invocation (timeouts)
  *
  * Copy rules enforced here: Pros are 1099 independent contractors, never
  * "employees"; the kit is provided, never required; pay is per job, sized by the
- * home, every Friday — no percentage model, no floors, no stipend, no bonuses.
+ * home, every Friday — no percentage model, no floors, no stipend; the only bonus is the $25 review bonus (one per member).
  */
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { REVIEW_BONUS_LINE, REVIEW_BONUS_LINE_ES } from './review-bonus.ts';
 import { tidyEmailShell, TIDY_OWNER_EMAIL, TIDY_SITE } from './email-brand.ts';
 
 export const SITE = TIDY_SITE;
@@ -219,6 +220,10 @@ export function reminderEmailHtml(
         <p style="margin:16px 0 0;font:14px Arial,sans-serif;color:#475569">
           You are paid per job, sized by the home, every Friday.<br/>
           <span style="color:#64748b">Se paga por trabajo, según el tamaño de la casa, cada viernes.</span>
+        </p>
+        <p style="margin:16px 0 0;font:14px Arial,sans-serif;color:#475569">
+          <strong>${REVIEW_BONUS_LINE}</strong><br/>
+          <span style="color:#64748b">${REVIEW_BONUS_LINE_ES}</span>
         </p>
         <p style="margin:16px 0 0;font:14px Arial,sans-serif;color:#475569">
           Questions: <a href="mailto:${OWNER_EMAIL}" style="color:#2563eb">${OWNER_EMAIL}</a>, Mon–Sat 8:00 AM–6:00 PM ET.

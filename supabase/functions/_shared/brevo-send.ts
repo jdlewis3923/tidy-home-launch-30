@@ -39,6 +39,8 @@ export interface SendBrevoEmailOptions {
   fetchImpl?: typeof fetch;
   /** Free-form label used in logs only. */
   label?: string;
+  /** ISO time — Brevo holds the message until then. */
+  scheduledAt?: string;
 }
 
 export interface SendBrevoEmailResult {
@@ -156,6 +158,7 @@ export async function sendBrevoEmail(
   body.sender = opts.sender ?? DEFAULT_SENDER;
   if (opts.tags?.length) body.tags = opts.tags;
   if (opts.attachment?.length) body.attachment = opts.attachment;
+  if (opts.scheduledAt && new Date(opts.scheduledAt).getTime() > Date.now() + 60_000) body.scheduledAt = opts.scheduledAt;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',

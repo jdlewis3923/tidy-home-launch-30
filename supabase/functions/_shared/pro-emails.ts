@@ -11,6 +11,7 @@
  */
 import { tidyEmailShell, emailButton, pickEmailArt, TIDY_OWNER_EMAIL, TIDY_SITE } from './email-brand.ts';
 import { CONTRACTOR_VISIT_PAY, CONTRACTOR_SHINE_PAY } from './pricing-canon.ts';
+import { REVIEW_BONUS_LINE, REVIEW_BONUS_LINE_ES } from './review-bonus.ts';
 import { kitContentsLine, kitServiceKey } from './pro-kit.ts';
 
 export type Lang = 'both' | 'en' | 'es';
@@ -222,11 +223,12 @@ export function allSetEmail(a: { first: string; pro_number: string | null; servi
       '<strong>Su primera ruta:</strong> Justin le envía el horario con direcciones, día y franja horaria. Las mismas casas cada visita. Un recorrido antes de empezar y una revisión antes de irse.') +
     para(lang, '<strong>Pay:</strong> per job, sized by the home, paid every Friday for every job finished that week.', '<strong>Pago:</strong> por trabajo, según el tamaño de la casa, cada viernes por cada trabajo terminado esa semana.') +
     pay.html +
+    para(lang, `<strong>${REVIEW_BONUS_LINE.split('. ')[0]}.</strong> ${REVIEW_BONUS_LINE.split('. ').slice(1).join('. ')}`, `<strong>${REVIEW_BONUS_LINE_ES.split('. ')[0]}.</strong> ${REVIEW_BONUS_LINE_ES.split('. ').slice(1).join('. ')}`) +
     para(lang, '<strong>Insurance reimbursement:</strong> up to $50 a month for your first three months, added to your Friday deposit, starting with the first one.',
       '<strong>Reembolso del seguro:</strong> hasta $50 al mes durante sus primeros tres meses, sumado a su depósito del viernes, desde el primero.') +
     help(lang);
   const html = shell(lang, subject, body, 'welcome sparkle');
-  const text = `${subject}\n\n${(Object.keys(FIVE_LABEL) as FiveKey[]).map((k) => `✓ ${pick(lang, FIVE_LABEL[k][0], FIVE_LABEL[k][1])}`).join('\n')}\n\n${pick(lang, 'Pro number', 'Número de Pro')}: ${num}\n${txt(lang, `Arriving: ${kitEn}. Expected: ${when}.`, `Llega: ${kitEs}. Fecha: ${when}.`)}\n\n${pay.text}\n\n${helpText(lang)}`;
+  const text = `${subject}\n\n${(Object.keys(FIVE_LABEL) as FiveKey[]).map((k) => `✓ ${pick(lang, FIVE_LABEL[k][0], FIVE_LABEL[k][1])}`).join('\n')}\n\n${pick(lang, 'Pro number', 'Número de Pro')}: ${num}\n${txt(lang, `Arriving: ${kitEn}. Expected: ${when}.`, `Llega: ${kitEs}. Fecha: ${when}.`)}\n\n${pay.text}\n\n${pick(lang, REVIEW_BONUS_LINE, REVIEW_BONUS_LINE_ES)}\n\n${helpText(lang)}`;
   return { subject, html, text };
 }
 

@@ -112,15 +112,15 @@ export async function afterVisitComplete(admin: any, visit: Visit, now = new Dat
       .eq('user_id', visit.user_id).not('completed_at', 'is', null).eq('is_redo', false);
     const n = count ?? 0;
     out.member_visit_count = n;
-    if (phone) {
-      if (n === 2) out.review_ask = await queueAsk(admin, visit, 'review', 1, soon(now, 2), phone, first, profile);
+    if (phone || email) {
+      if (n === 2) out.review_ask = await queueAsk(admin, visit, 'review', 1, soon(now, 2), phone, first, profile, email);
       if (n === 5) {
         const { data: firstAsk } = await admin.from('member_asks').select('acted_at').eq('user_id', visit.user_id).eq('kind', 'review').eq('seq', 1).maybeSingle();
         out.review_ask = firstAsk && !firstAsk.acted_at
-          ? await queueAsk(admin, visit, 'review', 2, soon(now, 2), phone, first, profile)
+          ? await queueAsk(admin, visit, 'review', 2, soon(now, 2), phone, first, profile, email)
           : 'skipped_already_acted_or_never_asked';
       }
-      if (n === 3) out.referral_ask = await queueAsk(admin, visit, 'referral', 1, eveningET(now), phone, first, profile);
+      if (n === 3 && phone) out.referral_ask = await queueAsk(admin, visit, 'referral', 1, eveningET(now), phone, first, profile, null);
     }
   } catch (e) {
     out.error = (e as Error).message;
@@ -129,7 +129,7 @@ export async function afterVisitComplete(admin: any, visit: Visit, now = new Dat
   return out;
 }
 
-async function queueAsk(admin: any, visit: Visit, kind: 'review' | 'referral', seq: number, planned: Date, phone: string, first: string, profile: any) {
+async function queueAsk(admin: any, visit: Visit, kind: 'review' | 'referral', seq: number, planned: Date, phone: string | null, first: string, profile: any, email: string | null = null) {
   // Never a review ask and a referral ask in the same week.
   const other = kind === 'review' ? 'referral' : 'review';
   const { data: others } = await admin.from('member_asks').select('release_after').eq('user_id', visit.user_id).eq('kind', other);
@@ -149,12 +149,26 @@ async function queueAsk(admin: any, visit: Visit, kind: 'review' | 'referral', s
   const body = kind === 'review'
     ? `Hi ${first}, glad your Tidy visits are going well. Would you leave us a quick Google review? One tap: ${link}`
     : `Hi ${first}, know a neighbor who'd like this? Give $50, get $50. One tap to share your link: ${link}`;
-  const r = await queueSms(admin, {
-    to_phone_e164: phone, body, idempotency_key: `ask:${ask.id}`, template_name: `${kind}_ask`, triggered_by: 'member-followups',
-    expires_at: new Date(release.getTime() + 3 * 86_400_000).toISOString(),
-  }, `${kind}_ask`, release);
-  await admin.from('member_asks').update({ status: r.queued ? 'sent' : 'skipped' }).eq('id', ask.id);
-  return { id: ask.id, release_after: release.toISOString(), queued: r.queued };
+  const r = phone
+    ? await queueSms(admin, {
+        to_phone_e164: phone, body, idempotency_key: `ask:${ask.id}`, template_name: `${kind}_ask`, triggered_by: 'member-followups',
+        expires_at: new Date(release.getTime() + 3 * 86_400_000).toISOString(),
+      }, `${kind}_ask`, release)
+    : { queued: false };
+  // Review asks also go by email, released at the same moment, same one-tap link.
+  let emailed = false;
+  if (kind === 'review' && email) {
+    const html = tidyEmailShell({
+      heading: 'Would you leave us a Google review?', eyebrow: 'One tap',
+      bodyHtml: `<p>Hi ${first}, glad your Tidy visits are going well. A quick Google review helps your neighbors find us.</p>${emailButton(link, 'Leave a Google review')}`,
+      artTopic: 'review',
+    });
+    const e = await sendBrevoEmail({ to: email, marketing: false, subject: 'One tap: a quick Google review?', htmlContent: html,
+      tags: ['review-ask'], label: `review-ask-${seq}`, scheduledAt: release.toISOString() }).catch(() => ({ sent: false }));
+    emailed = !!(e as { sent?: boolean }).sent;
+  }
+  await admin.from('member_asks').update({ status: r.queued || emailed ? 'sent' : 'skipped' }).eq('id', ask.id);
+  return { id: ask.id, release_after: release.toISOString(), queued: r.queued, emailed };
 }
 
 /** Promote to Pro Partner automatically when 50 visits · 4.8 · 60 days are all met. */

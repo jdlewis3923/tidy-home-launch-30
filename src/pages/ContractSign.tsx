@@ -4,6 +4,7 @@
  * English above Spanish.
  */
 import { useEffect, useState } from "react";
+import { REVIEW_BONUS_LINE, REVIEW_BONUS_LINE_ES } from "@/lib/reviewBonus";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { AlertTriangle, CheckCircle2, Download, Loader2, PenLine } from "lucide-react";
@@ -95,6 +96,7 @@ export default function ContractSign() {
               {doc.url ? (
                 <>
                   <iframe title="Independent Contractor Agreement" src={doc.url} className="mt-4 h-[60vh] w-full rounded-xl border border-slate-200" />
+                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700"><p className="font-bold">Compensation — review bonus</p><p className="mt-1">{REVIEW_BONUS_LINE}</p><p className="mt-1 text-slate-500">{REVIEW_BONUS_LINE_ES}</p></div>
                   <a href={doc.url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700 underline">
                     <Download className="h-4 w-4" /> Download the agreement / Descargar el contrato
                   </a>
