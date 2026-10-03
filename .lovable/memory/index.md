@@ -45,3 +45,4 @@ Every outgoing email must use the complete Tidy email design: proper logo, navy/
 - [Chatbot Knowledge](mem://features/chatbot-knowledge) — Never string-replace the KB row; insert a new row, canon-guarded by a live test
 - [Pro Kit Standard](mem://features/pro-kit-standard) — Per-service kit contents, optional magnets with $15/month credit, automatic kit order flow
 - [Email Design System](mem://style/email-design-system) — Required Tidy branding and layout for every recipient and email type
+- [Founding homes](mem://features/founding-homes) — 25 homes per ZIP, one per household, waitlist per ZIP
