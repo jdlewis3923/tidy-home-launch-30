@@ -7,6 +7,7 @@
  * metric is null the UI renders an em dash + "no data yet".
  */
 import ViewSequenceLink from "@/components/admin/ViewSequenceLink";
+import ReservationsForecast from "@/components/admin/ReservationsForecast";
 import WorkdayBoard from "@/components/admin/WorkdayBoard";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
@@ -316,6 +317,7 @@ export default function AdminCommand() {
       ) : (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
           <MessagingReadinessBanner />
+          <ReservationsForecast compact />
 
           <section className="admin-page-surface rounded-lg border overflow-hidden">
             <div className="bg-primary text-primary-foreground px-5 py-4 flex flex-wrap items-center gap-3">

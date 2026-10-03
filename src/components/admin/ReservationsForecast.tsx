@@ -57,7 +57,6 @@ export default function ReservationsForecast({ compact = false }: { compact?: bo
       <div className="mt-4 grid gap-3 sm:grid-cols-4">
         <Stat label="Total reservations" value={String(f.total)} testid="fc-total" />
         <Stat label="Est. monthly revenue" value={`$${f.monthly.toFixed(0)}`} testid="fc-revenue" />
-        {RESERVABLE_SERVICES.slice(0, 2).map((s) => null)}
       </div>
       <table className="mt-4 w-full text-sm">
         <thead><tr className="text-xs text-muted-foreground"><th className="text-left font-medium">Service</th><th className="text-right font-medium">Reserved</th><th className="text-right font-medium">Waitlist</th><th className="text-right font-medium">Est. $/mo</th><th className="text-right font-medium">Visits / week</th></tr></thead>
