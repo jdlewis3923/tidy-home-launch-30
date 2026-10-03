@@ -1039,6 +1039,9 @@ const translations: Record<string, string> = {
   "The same pro for each service, every visit.": "El mismo profesional para cada servicio, en cada visita.",
   "The same pro for each service, every visit": "El mismo profesional para cada servicio, en cada visita",
   "The Same Pro for Each Service, Every Visit": "El Mismo Profesional para Cada Servicio, en Cada Visita",
+  "Consistent specialist": "Especialista constante",
+  "Choose a Pro for this service whenever possible. The same pro for each service, every visit.":
+    "Elige un profesional para este servicio cuando sea posible. El mismo profesional para cada servicio, en cada visita.",
   "Set it once. We handle the rest — scheduling, reminders, the same pro for each service, every visit.":
     "Configúralo una vez. Nosotros nos encargamos del resto — programación, recordatorios y el mismo profesional para cada servicio, en cada visita.",
   "A quick form to sign up. The same pro for each service, every visit. Locked price.":

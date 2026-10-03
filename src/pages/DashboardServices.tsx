@@ -598,7 +598,7 @@ export default function DashboardServices() {
                 {t('Preferred Pro')}
               </h2>
               <p className="mt-2 text-sm text-ink-soft">
-                {t("Choose a Pro if you'd like the same person whenever possible.")}
+                {t("Choose a Pro for this service whenever possible. The same pro for each service, every visit.")}
               </p>
 
               {loadingPros ? (
