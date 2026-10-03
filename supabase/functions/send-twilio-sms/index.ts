@@ -24,6 +24,7 @@
 //
 // Auth: service-role bearer OR an admin user's access token.
 
+import { alertSmsFailure } from '../_shared/sms-failure.ts';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
@@ -372,6 +373,8 @@ Deno.serve(async (req) => {
         template_name: tplName, recipient: to_phone_e164, triggered_by,
         status: 'failed', error_message: message,
       });
+      // Outbox retries raise their own alert on the final attempt; direct sends alert now.
+      if (!skip_window) await alertSmsFailure(admin, { phone: to_phone_e164, template: tplName, error: message, key: idempotencyHash });
       // Phase 4: a vendor failure is a real failure — 502, not a silent 200.
       return jsonResponse({ ok: false, sent: false, error: message }, 502);
     }
