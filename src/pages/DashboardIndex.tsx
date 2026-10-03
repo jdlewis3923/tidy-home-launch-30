@@ -64,9 +64,6 @@ import {
   arrivalWindowLabel,
 } from '@/lib/arrival-windows';
 import { useLanguage } from '@/contexts/LanguageContext';
-import lawnImg from '@/assets/lawn-care.jpg';
-import cleaningImg from '@/assets/cleaning-interior.jpg';
-import detailImg from '@/assets/car-detailing.jpg';
 import heroWash from '@/assets/hero-miami-home.jpg';
 import RedoButton from '@/components/dashboard/RedoButton';
 
@@ -74,12 +71,6 @@ const SERVICE_ICON: Record<string, string> = {
   lawn: '🌿',
   cleaning: '🏠',
   detailing: '🚗',
-};
-
-const SERVICE_PHOTO: Record<string, string> = {
-  lawn: lawnImg,
-  cleaning: cleaningImg,
-  detailing: detailImg,
 };
 
 const SERVICE_DOT_BG: Record<string, string> = {
@@ -353,12 +344,12 @@ export default function DashboardIndex() {
                       <span>{SERVICE_ICON[data.lastCompleted.service]}</span>
                       <span>{serviceLabel(data.lastCompleted.service)}</span>
                     </div>
-                    <button
-                      type="button"
+                    <Link
+                      to={`/dashboard/visit/${data.lastCompleted.id}`}
                       className="mt-3 w-full rounded-lg border border-[hsl(var(--hairline))] py-2 text-sm font-medium text-[hsl(var(--primary))] transition hover:bg-cream"
                     >
                       View details
-                    </button>
+                    </Link>
                     {data.lastCompleted.status === 'complete' && data.lastCompleted.completed_at && (
                       <RedoButton className="mt-2" visitId={data.lastCompleted.id} completedAt={data.lastCompleted.completed_at} />
                     )}
@@ -589,14 +580,10 @@ export default function DashboardIndex() {
 
               {data.lastCompleted ? (
                 <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-[260px_1fr]">
-                  <div className="relative h-44 overflow-hidden rounded-xl bg-cream">
-                    <img
-                      src={SERVICE_PHOTO[data.lastCompleted.service]}
-                      alt={`${serviceLabel(data.lastCompleted.service)} proof`}
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full bg-ink/85 px-2.5 py-1 text-[11px] font-semibold text-white">
-                      <Camera className="h-3 w-3" /> Photo proof
+                  <div className="flex h-44 items-center justify-center rounded-xl bg-[hsl(var(--primary))]/5">
+                    <div className="text-center text-[hsl(var(--primary))]">
+                      <Camera className="mx-auto h-8 w-8" />
+                      <p className="mt-2 text-xs font-semibold">Photo-verified visit</p>
                     </div>
                   </div>
                   <div className="flex flex-col justify-between">
@@ -617,12 +604,12 @@ export default function DashboardIndex() {
                       </div>
                     </div>
                     <div className="mt-4 flex gap-2">
-                      <button
-                        type="button"
+                      <Link
+                        to={`/dashboard/visit/${data.lastCompleted.id}`}
                         className="rounded-lg border border-[hsl(var(--hairline))] px-4 py-2 text-sm font-medium text-ink transition hover:bg-cream"
                       >
-                        View details
-                      </button>
+                        View photos
+                      </Link>
                       <button
                         type="button"
                         className="rounded-lg px-4 py-2 text-sm font-medium text-[hsl(var(--primary))] hover:underline"

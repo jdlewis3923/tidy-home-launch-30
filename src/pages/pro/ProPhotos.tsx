@@ -18,10 +18,12 @@ type Loaded = VisitPhoto & { url: string | null };
 export default function ProPhotos() {
   const { id } = useParams<{ id: string }>();
   const { userId, reload } = useProSession();
+  const { visits } = useProSession();
   const [photos, setPhotos] = useState<Loaded[] | null>(null);
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const completed = visits.some((visit) => visit.id === id && visit.status === "complete");
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -63,6 +65,7 @@ export default function ProPhotos() {
   };
 
   const remove = async (photo: Loaded) => {
+    if (completed) return;
     setBusy(true);
     try {
       await removeVisitPhoto(photo);
@@ -94,7 +97,7 @@ export default function ProPhotos() {
               {group(kind).length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-3">
                   {group(kind).map((p) => (
-                    <PhotoThumb key={p.id} url={p.url} onRemove={() => void remove(p)} />
+                     <PhotoThumb key={p.id} url={p.url} onRemove={completed ? undefined : () => void remove(p)} />
                   ))}
                 </div>
               )}
@@ -109,6 +112,11 @@ export default function ProPhotos() {
             One before photo and one after photo are required to complete a visit. Photos are private
             to Tidy and the customer's own visit record.
           </p>
+           {completed && (
+             <p className="text-[13px] font-semibold text-[hsl(var(--pro-green))]">
+               Visit complete — its photo record is locked.
+             </p>
+           )}
         </div>
       )}
     </ProShell>

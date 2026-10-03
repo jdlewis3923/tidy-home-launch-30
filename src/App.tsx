@@ -50,6 +50,7 @@ const DashboardIndex = lazy(() => import("./pages/DashboardIndex.tsx"));
 const DashboardPlan = lazy(() => import("./pages/DashboardPlan.tsx"));
 const DashboardServices = lazy(() => import("./pages/DashboardServices.tsx"));
 const DashboardSchedule = lazy(() => import("./pages/DashboardSchedule.tsx"));
+const DashboardVisit = lazy(() => import("./pages/DashboardVisit.tsx"));
 const DashboardConfirmation = lazy(() => import("./pages/DashboardConfirmation.tsx"));
 const Account = lazy(() => import("./pages/Account.tsx"));
 const Billing = lazy(() => import("./pages/Billing.tsx"));
@@ -308,6 +309,10 @@ const App = () => (
                   <Route
                     path="/dashboard/schedule"
                     element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardSchedule /> : <Navigate to="/" replace />}
+                  />
+                  <Route
+                    path="/dashboard/visit/:id"
+                    element={CUSTOMER_DASHBOARD_ENABLED ? <DashboardVisit /> : <Navigate to="/" replace />}
                   />
                   <Route
                     path="/dashboard/confirmation"
