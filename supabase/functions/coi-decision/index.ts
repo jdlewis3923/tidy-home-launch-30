@@ -1,7 +1,6 @@
 // coi-decision — admin-only. Approves or rejects a COI submission, fires the
 // matching Brevo template (T2-CONFIRMED on approve, COI-REJECTED on reject),
-// and promotes the applicant to tier_2_pro_partner on approve via the existing
-// promote-to-tier-2 function (which also flips Stripe Connect metadata).
+// Approval no longer promotes: Pro Partner is automatic on 50 visits · 4.8 · 60 days.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
@@ -88,18 +87,9 @@ Deno.serve(async (req) => {
   let promote: unknown = null;
 
   if (parsed.data.decision === 'approved') {
-    // Promote to Tier 2 via the existing function (also flips Stripe metadata).
-    const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/promote-to-tier-2`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE}` },
-      body: JSON.stringify({ applicant_id: a.id, stripe_account_id: parsed.data.stripe_account_id }),
-    });
-    promote = { status: r.status };
-    if (map.brevo_template_t2_confirmed) {
-      brevo = await fireBrevoTemplate(map.brevo_template_t2_confirmed, { email: a.email, name: `${a.first_name} ${a.last_name}` }, {
-        first_name: a.first_name, pay_uplift: '+10% on every visit',
-      });
-    }
+    // Pro Partner no longer depends on insurance. It is granted automatically
+    // at 50 visits · 4.8 average · 60 days active (pro_partner_try_promote).
+    promote = { skipped: 'pro_partner_is_automatic' };
   } else {
     if (map.brevo_template_coi_rejected) {
       brevo = await fireBrevoTemplate(map.brevo_template_coi_rejected, { email: a.email, name: `${a.first_name} ${a.last_name}` }, {

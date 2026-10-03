@@ -22,8 +22,8 @@ const foundingCards = [
   },
   {
     icon: "🛡️",
-    title: "First visit perfect or it's free",
-    desc: "Not happy? We make it right within 24 hours — re-service or credit, no questions asked.",
+    title: "The 48-hour guarantee",
+    desc: "If anything about your visit isn't right, tell us within 48 hours and we'll send your pro back to fix it at no charge. No forms, no argument.",
   },
 ];
 
@@ -80,12 +80,12 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
         </div>
 
         <p className="mt-10 text-sm text-primary-foreground/80">
-          {t("Background-Checked · Photo-Verified Visits · First visit perfect or it's free")}
+          {t("Background-Checked · Photo-Verified Visits · 48-hour guarantee")}
         </p>
 
         <p className="mt-3 text-sm text-primary-foreground/80">
           {t(
-            "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP",
+            "One free premium add-on on your first visit · 48-hour guarantee · Only 25 founding homes per ZIP",
           )}
         </p>
 

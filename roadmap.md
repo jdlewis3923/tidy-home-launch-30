@@ -47,3 +47,12 @@
 
 - [x] Light-mode-only email design with a relevant hero icon focal point in every email (36/36 live templates re-branded, 16/16 test emails sent)
 - [x] Replace the favicon “T” with the official full TIDY wordmark and add fail-closed branding preflight to every hosted-template send
+
+## Growth + quality pass (requested 2026-10-03)
+- [ ] 48-hour guarantee copy: quote screen, checkout, hero trust line (+ remove Cancel Anytime chip), home section, welcome email, post-visit text/email; replace "First visit perfect" everywhere
+- [ ] Redo system: member button (visit record + email), admin Redo task in Workday with 48h clock, free redo visit, Pro paid 50%, >2 redos/60d alert, redo-rate KPI
+- [ ] Pro Partner = 50 visits · 4.8 avg · 60 days (replaces $1M insurance rule); progress strip; auto-apply + notify; weekly pay summary count
+- [ ] Same-day praise forward to Pro by text (5★ or positive comment), logged; negative → admin only
+- [ ] Review ask after visit 2 (+ once after visit 5); referral ask evening after visit 3; never same week
+- [ ] Test member redo flow, screenshots (quote, checkout, hero), test Pro past 50 visits
+- Texts queue until Twilio billing is fixed (user choice)

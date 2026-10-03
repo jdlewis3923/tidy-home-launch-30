@@ -160,7 +160,7 @@ const LeadPopup = ({ isOpen, onClose, onSuccess }: LeadPopupProps) => {
           </p>
           <p className="text-slate-300/70 text-sm mt-3 max-w-sm mx-auto leading-relaxed">
             {t(
-              "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP",
+              "One free premium add-on on your first visit · 48-hour guarantee · Only 25 founding homes per ZIP",
             )}
           </p>
         </div>

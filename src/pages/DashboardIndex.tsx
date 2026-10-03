@@ -68,6 +68,7 @@ import lawnImg from '@/assets/lawn-care.jpg';
 import cleaningImg from '@/assets/cleaning-interior.jpg';
 import detailImg from '@/assets/car-detailing.jpg';
 import heroWash from '@/assets/hero-miami-home.jpg';
+import RedoButton from '@/components/dashboard/RedoButton';
 
 const SERVICE_ICON: Record<string, string> = {
   lawn: '🌿',
@@ -358,6 +359,9 @@ export default function DashboardIndex() {
                     >
                       View details
                     </button>
+                    {data.lastCompleted.status === 'complete' && data.lastCompleted.completed_at && (
+                      <RedoButton className="mt-2" visitId={data.lastCompleted.id} completedAt={data.lastCompleted.completed_at} />
+                    )}
                   </>
                 )}
               </SummaryCard>

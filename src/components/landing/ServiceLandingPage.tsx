@@ -398,7 +398,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <BadgeCheck className="w-4 h-4 text-gold" />
-              {t("First visit perfect or it's free")}
+              {t("Not right? We come back within 48 hours. Free.")}
             </span>
           </div>
 

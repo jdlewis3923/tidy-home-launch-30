@@ -78,6 +78,17 @@ const translations: Record<string, string> = {
   "Background-Checked": "Antecedentes Verificados",
   "Background-Checked Pros": "Profesionales con Antecedentes Verificados",
   "Same Pro Every Time": "El Mismo Profesional Cada Visita",
+  // 48-hour guarantee (2026-10)
+  "Not right? We come back within 48 hours. Free.": "¿Algo no quedó bien? Volvemos dentro de 48 horas. Gratis.",
+  "The 48-hour guarantee": "La garantía de 48 horas",
+  "48-hour guarantee": "Garantía de 48 horas",
+  "If anything about your visit isn't right, tell us within 48 hours and we'll send your pro back to fix it at no charge. No forms, no argument.": "Si algo de tu visita no quedó bien, avísanos dentro de 48 horas y enviamos a tu Pro de vuelta a arreglarlo sin costo. Sin formularios y sin discusiones.",
+  "No contracts · Cancel anytime ·": "Sin contratos · Cancela cuando quieras ·",
+  "Founding memberships · No commitment ·": "Membresías fundadoras · Sin compromiso ·",
+  "Background-Checked · Photo-Verified Visits · 48-hour guarantee": "Antecedentes Verificados · Visitas Verificadas con Fotos · Garantía de 48 horas",
+  "One free premium add-on on your first visit · 48-hour guarantee · Only 25 founding homes per ZIP": "Un servicio adicional premium gratis en tu primera visita · Garantía de 48 horas · Solo 25 casas fundadoras por código postal",
+  "Something wasn't right": "Algo no quedó bien",
+  "Something not right? Reply here within 48 hours and we'll come back.": "¿Algo no quedó bien? Responde aquí dentro de 48 horas y volvemos.",
   "Cancel Anytime": "Cancela Cuando Quieras",
   "Photo Verified Every Visit": "Fotos Verificadas en Cada Visita",
   "No Long-Term Contracts": "Sin Contratos a Largo Plazo",
@@ -204,7 +215,7 @@ const translations: Record<string, string> = {
     "Todo funciona automáticamente. Sin programar. Sin coordinar. Sin pensar en ello después de inscribirte.",
   "Satisfaction Guarantee": "Garantía de Satisfacción",
   "First visit perfect or it's free. After that, if it isn't perfect, we fix it fast. No contracts. Cancel anytime.":
-    "Primera visita perfecta o es gratis. Después, si no es perfecto, lo arreglamos rápido. Sin contratos. Cancela cuando quieras.",
+    "Garantía de 48 horas. Después, si no es perfecto, lo arreglamos rápido. Sin contratos. Cancela cuando quieras.",
   "Every professional is background-checked through Checkr. Photo verification submitted after every visit.":
     "Cada profesional tiene sus antecedentes revisados a través de Checkr. Verificación con fotos después de cada visita.",
   "Always on Schedule": "Siempre a Tiempo",
@@ -908,9 +919,9 @@ const translations: Record<string, string> = {
   "Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and lock in founding-member pricing.":
     "Tidy está aceptando un grupo limitado de miembros fundadores en Pinecrest, Kendall y Kendall West. Únete temprano y asegura el precio de miembro fundador.",
   "Background-Checked · Photo-Verified Visits · First visit perfect or it's free":
-    "Antecedentes Verificados · Visitas Verificadas con Fotos · Primera visita perfecta o es gratis",
+    "Antecedentes Verificados · Visitas Verificadas con Fotos · Garantía de 48 horas",
   "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
-    "Un servicio adicional premium gratis en tu primera visita · Primera visita perfecta o es gratis · Solo 25 casas fundadoras por código postal",
+    "Un servicio adicional premium gratis en tu primera visita · Garantía de 48 horas · Solo 25 casas fundadoras por código postal",
   "One free premium add-on on your first visit — you choose it": "Un servicio adicional gratis en la primera visita — tú lo eliges",
   "MORE LIFE. LESS CHORES.": "MÁS VIDA. MENOS TAREAS.",
   "See your price in 60 seconds. No contract.": "Ve tu precio en 60 segundos. Sin contrato.",
@@ -923,7 +934,7 @@ const translations: Record<string, string> = {
   "Choose the day and time that suits you.": "Elige el día y la hora que te convenga.",
   "Meet your Pro": "Conoce a tu Pro",
   "The same background-checked Pro, every visit.": "El mismo Pro verificado, en cada visita.",
-  "First visit perfect or it's free": "Primera visita perfecta o es gratis",
+  "First visit perfect or it's free": "Garantía de 48 horas",
   "Only 25 founding homes per ZIP": "Solo 25 casas fundadoras por código postal",
 
   // Refer page
@@ -1167,7 +1178,7 @@ const translations: Record<string, string> = {
   // The Spanish wording here is the exact copy printed on the tear-off card.
   "Founding neighbor offer": "Oferta de vecino fundador",
   "Your founding rate is locked — your price never rises": "Tu tarifa de fundador queda fija — tu precio nunca sube",
-  "First visit perfect or it’s free": "Primera visita perfecta o es gratis",
+  "First visit perfect or it’s free": "Garantía de 48 horas",
   "Capped at 25 founding homes per ZIP": "Limitado a 25 hogares fundadores por código postal",
   "Be one of the first 25 homes on your street":
     "Sé uno de los primeros 25 hogares de tu calle",

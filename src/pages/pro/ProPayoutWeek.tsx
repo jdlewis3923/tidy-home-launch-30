@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import ProShell from "@/components/pro/portal/ProShell";
+import { proPartnerCountLine, useProPartner } from "@/components/pro/ProPartnerStrip";
 import { ErrorState, ProCard, ScheduleSkeleton, StatusPill } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
 import { fetchBonuses, fetchPayoutWeeks, type PayoutWeek, type ProBonus } from "@/lib/pro-portal";
@@ -14,6 +15,7 @@ const shortDate = (iso: string) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
 export default function ProPayoutWeek() {
+  const partner = useProPartner();
   const { weekId } = useParams<{ weekId: string }>();
   const { visits, me, userId } = useProSession();
   const [week, setWeek] = useState<PayoutWeek | null>(null);
@@ -52,8 +54,10 @@ export default function ProPayoutWeek() {
     return bonuses.filter((b) => b.earned_at && new Date(b.earned_at) >= start && new Date(b.earned_at) <= end);
   }, [bonuses, week]);
 
+  const partnerLine = proPartnerCountLine(partner);
   return (
     <ProShell title="Pay week" back="/pro/earnings">
+      {partnerLine && <p className="px-[18px] pt-3 text-[13px] font-semibold text-foreground" data-testid="pro-partner-count">{partnerLine}</p>}
       {state === "loading" && <ScheduleSkeleton />}
       {state === "error" && <ErrorState title="Couldn't load this pay week" onRetry={() => setNonce((n) => n + 1)} />}
       {state === "ready" && !week && (

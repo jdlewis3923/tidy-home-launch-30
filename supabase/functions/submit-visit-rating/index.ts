@@ -30,6 +30,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { enforceRateLimit } from '../_shared/rate-limit.ts';
+import { queueSms, isWindowOpen, nextOpenWindow } from '../_shared/sms-window.ts';
+import { maybePromoteProPartner, toE164 } from '../_shared/member-followups.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -75,6 +77,65 @@ async function callerUserId(
   } catch {
     return null;
   }
+}
+
+
+async function sentiment(comment: string): Promise<'positive' | 'negative' | 'neutral'> {
+  const key = Deno.env.get('LOVABLE_API_KEY');
+  if (!key || !comment) return 'neutral';
+  try {
+    const r = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash-lite',
+        messages: [
+          { role: 'system', content: 'Classify a home-service customer comment. Reply with exactly one word: positive, negative, or neutral. Any complaint, even mild, is negative.' },
+          { role: 'user', content: comment.slice(0, 1000) },
+        ],
+      }),
+    });
+    if (!r.ok) return 'neutral';
+    const j = await r.json();
+    const w = String(j?.choices?.[0]?.message?.content ?? '').toLowerCase();
+    return w.includes('negative') ? 'negative' : w.includes('positive') ? 'positive' : 'neutral';
+  } catch { return 'neutral'; }
+}
+
+/** Forward praise to the Pro by text, same day. Negative feedback never auto-forwards. */
+// deno-lint-ignore no-explicit-any
+async function forwardPraise(admin: any, a: { ratingId: string; visitId: string; contractorId: string; stars: number; comment: string }) {
+  const mood = a.comment ? await sentiment(a.comment) : 'neutral';
+  const positive = a.stars === 5 ? true : a.stars === 4 && mood === 'positive';
+  if (!positive) return { forwarded: false, mood };
+  const quote = a.comment && mood !== 'negative' ? a.comment.replace(/\s+/g, ' ').trim().slice(0, 240) : '';
+  const { data: v } = await admin.from('visits').select('customer_first_name, scheduled_start, visit_date, is_sample').eq('id', a.visitId).maybeSingle();
+  const { data: pro } = await admin.from('applicants').select('id, first_name, phone, is_test_row').eq('contractor_id', a.contractorId).maybeSingle();
+  const member = (v?.customer_first_name ?? '').trim() || 'A member';
+  const when = v?.scheduled_start ?? (v?.visit_date ? `${v.visit_date}T12:00:00-05:00` : null);
+  const day = when ? new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'long' }).format(new Date(when)) : null;
+  const where = day ? `${member} on your ${day} route` : member;
+  const message = quote
+    ? `${where} said: "${quote}" Thought you should see that.`
+    : `${where} gave you 5 stars. Thought you should see that.`;
+  const phone = toE164(pro?.phone);
+  let status = 'no_phone';
+  if (phone) {
+    const now = new Date();
+    const release = isWindowOpen(now) ? now : nextOpenWindow(now);
+    const q = await queueSms(admin, {
+      to_phone_e164: phone, body: message, idempotency_key: `praise:${a.ratingId}`,
+      template_name: 'pro_praise', triggered_by: 'submit-visit-rating',
+      expires_at: new Date(now.getTime() + 3 * 86_400_000).toISOString(),
+    }, 'praise_forward', release);
+    status = q.queued ? 'queued' : 'failed';
+  }
+  await admin.from('pro_praise').insert({
+    rating_id: a.ratingId, visit_id: a.visitId, contractor_id: a.contractorId, applicant_id: pro?.id ?? null,
+    member_first_name: member, stars: a.stars, quote: quote || null, message, sms_status: status,
+    is_test_row: !!pro?.is_test_row || !!v?.is_sample,
+  });
+  return { forwarded: true, mood, sms: status };
 }
 
 Deno.serve(async (req) => {
@@ -304,8 +365,18 @@ Deno.serve(async (req) => {
       }).catch((e) => console.warn('[submit-visit-rating] brevo alert failed', (e as Error).message));
     }
 
+    let praise: unknown = null;
+    let proPartner: unknown = null;
+    if (verified && visitId && contractorId && inserted?.id && !needsFollowup) {
+      praise = await forwardPraise(admin, { ratingId: inserted.id, visitId, contractorId, stars, comment }).catch((e) => ({ error: (e as Error).message }));
+      const { data: ap } = await admin.from('applicants').select('id').eq('contractor_id', contractorId).maybeSingle();
+      proPartner = ap?.id ? await maybePromoteProPartner(admin, ap.id) : null;
+    }
+
     return jsonResponse({
       ok: true,
+      praise,
+      pro_partner: proPartner,
       matched: verified,
       stars,
       rating_id: inserted?.id ?? null,

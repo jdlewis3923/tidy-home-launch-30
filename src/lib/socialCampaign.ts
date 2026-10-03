@@ -8,7 +8,7 @@
  * The hook is the founding offer:
  *   - founding rate locked for life
  *   - one free premium add-on on the first visit
- *   - first visit perfect or it's free
+ *   - 48-hour guarantee
  *   - capped at 25 founding homes per ZIP
  *
  * The calendar start date is NOT hardcoded — it is stored in
@@ -198,10 +198,10 @@ export const NEXTDOOR_POSTS: CampaignPost[] = [
   },
   {
     post_number: 5,
-    title: "First visit perfect or it's free",
+    title: "The 48-hour guarantee",
     zip: "33186",
-    en: `First visit perfect or it's free. That's the whole promise.\n\nIf the first visit isn't right, tell us and you don't pay for it. No forms, no argument.\n\n${N["33186"]} — founding spots are capped at 25 homes.`,
-    es: `Primera visita perfecta o es gratis. Esa es toda la promesa.\n\nSi la primera visita no queda bien, dínoslo y no la pagas. Sin formularios y sin discusiones.\n\n${N["33186"]} — los lugares fundadores están limitados a 25 hogares.`,
+    en: `The 48-hour guarantee. That's the whole promise.\n\nIf anything about your visit isn't right, tell us within 48 hours and we'll send your pro back to fix it at no charge. No forms, no argument.\n\n${N["33186"]} — founding spots are capped at 25 homes.`,
+    es: `La garantía de 48 horas. Esa es toda la promesa.\n\nSi algo de tu visita no quedó bien, avísanos dentro de 48 horas y enviamos a tu Pro de vuelta a arreglarlo sin costo. Sin formularios y sin discusiones.\n\n${N["33186"]} — los lugares fundadores están limitados a 25 hogares.`,
   },
   {
     post_number: 6,
@@ -275,8 +275,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 9,
     title: "Perfect or free",
     zip: "33186",
-    en: `First visit perfect or it's free.\n\nSay the word and you don't pay for it.`,
-    es: `Primera visita perfecta o es gratis.\n\nSolo dilo y no la pagas.`,
+    en: `Not right? We come back within 48 hours. Free.\n\nSay the word and your pro comes back.`,
+    es: `¿Algo no quedó bien? Volvemos dentro de 48 horas. Gratis.\n\nSolo dilo y tu Pro vuelve.`,
   },
   {
     post_number: 10,
@@ -324,8 +324,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 16,
     title: "Founding in Pinecrest",
     zip: "33156",
-    en: `Founding neighbor in ${N["33156"]}: locked rate, one free premium add-on, first visit perfect or free.`,
-    es: `Vecino fundador en ${N["33156"]}: precio fijo, un servicio premium gratis y primera visita perfecta o gratis.`,
+    en: `Founding neighbor in ${N["33156"]}: locked rate, one free premium add-on, 48-hour guarantee.`,
+    es: `Vecino fundador en ${N["33156"]}: precio fijo, un servicio premium gratis y garantía de 48 horas.`,
   },
   {
     post_number: 17,
@@ -422,16 +422,16 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 30,
     title: "Claim a founding spot",
     zip: "33186",
-    en: `Founding neighbor: rate locked for life, one free premium add-on, first visit perfect or it's free. 25 homes per ZIP.`,
-    es: `Vecino fundador: precio fijo de por vida, un servicio premium gratis y primera visita perfecta o gratis. 25 hogares por código postal.`,
+    en: `Founding neighbor: rate locked for life, one free premium add-on, 48-hour guarantee. 25 homes per ZIP.`,
+    es: `Vecino fundador: precio fijo de por vida, un servicio premium gratis y garantía de 48 horas. 25 hogares por código postal.`,
   },
   // ── Moved off Nextdoor (its cadence is one post every two weeks) ───────────
   {
     post_number: 31,
     title: "House cleaning, same Pro",
     zip: "33183",
-    en: `House cleaning in ${N["33183"]}, from $139 a month for a size 1 home.\n\nKitchen, baths, floors and dusting. Same Pro every visit, so nobody has to be shown where anything goes twice.\n\nFirst visit perfect or it's free.`,
-    es: `Limpieza de casa en ${N["33183"]}, desde $139 al mes para un hogar tamaño 1.\n\nCocina, baños, pisos y polvo. El mismo equipo en cada visita, así nadie tiene que explicar dos veces dónde va cada cosa.\n\nPrimera visita perfecta o es gratis.`,
+    en: `House cleaning in ${N["33183"]}, from $139 a month for a size 1 home.\n\nKitchen, baths, floors and dusting. Same Pro every visit, so nobody has to be shown where anything goes twice.\n\n48-hour guarantee.`,
+    es: `Limpieza de casa en ${N["33183"]}, desde $139 al mes para un hogar tamaño 1.\n\nCocina, baños, pisos y polvo. El mismo equipo en cada visita, así nadie tiene que explicar dos veces dónde va cada cosa.\n\nGarantía de 48 horas.`,
   },
   {
     post_number: 32,
@@ -465,8 +465,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 36,
     title: "Founding spots in Kendall West",
     zip: "33186",
-    en: `Founding neighbor, plainly:\n\nYour rate is locked for life. One free premium add-on on the first visit. First visit perfect or it's free. Capped at 25 homes in ${N["33186"]}.\n\nNo contract. Cancel anytime.`,
-    es: `Vecino fundador, en simple:\n\nTu precio queda fijo de por vida. Un servicio premium gratis en la primera visita. Primera visita perfecta o es gratis. Limitado a 25 hogares en ${N["33186"]}.\n\nSin contrato. Cancela cuando quieras.`,
+    en: `Founding neighbor, plainly:\n\nYour rate is locked for life. One free premium add-on on the first visit. 48-hour guarantee. Capped at 25 homes in ${N["33186"]}.\n\nNo contract. Cancel anytime.`,
+    es: `Vecino fundador, en simple:\n\nTu precio queda fijo de por vida. Un servicio premium gratis en la primera visita. Garantía de 48 horas. Limitado a 25 hogares en ${N["33186"]}.\n\nSin contrato. Cancela cuando quieras.`,
   },
 ];
 

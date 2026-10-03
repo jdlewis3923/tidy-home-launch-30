@@ -16,6 +16,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 import { PRO_REPORTABLE_PAID_IN_FULL_REASONS } from '../_shared/pricing-canon.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { afterVisitComplete, maybePromoteProPartner } from '../_shared/member-followups.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
 
@@ -63,7 +64,7 @@ Deno.serve(async (req) => {
 
     const { data: visit } = await admin
       .from('visits')
-      .select('id, assigned_pro_id, status, user_id, service_type, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, street, customer_first_name')
+      .select('id, assigned_pro_id, status, user_id, service_type, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, street, customer_first_name, rate_token, is_redo, redo_request_id')
       .eq('id', visit_id)
       .maybeSingle();
     if (!visit || visit.assigned_pro_id !== uid) {
@@ -184,6 +185,16 @@ Deno.serve(async (req) => {
       .select('id, completed_visits')
       .eq('contractor_id', uid)
       .maybeSingle();
+    // A 48-hour-guarantee return visit closes its Redo task and never counts
+    // toward Pro Partner or the member's review/referral timing.
+    if (visit.is_redo) {
+      if (visit.redo_request_id) {
+        await admin.from('redo_requests').update({ status: 'completed', resolved_at: now.toISOString() }).eq('id', visit.redo_request_id);
+      }
+      if (applicant) await admin.from('applicants').update({ last_visit_at: now.toISOString() }).eq('id', applicant.id);
+      return jsonResponse({ ok: true, action, visit_pay_cents: pay, redo: true });
+    }
+
     if (applicant) {
       await admin
         .from('applicants')
@@ -191,7 +202,11 @@ Deno.serve(async (req) => {
         .eq('id', applicant.id);
     }
 
-    return jsonResponse({ ok: true, action, visit_pay_cents: pay });
+    const followups = await afterVisitComplete(admin, { id: visit.id, user_id: visit.user_id, rate_token: visit.rate_token, service_type: visit.service_type }, now);
+    // Pro Partner: applies automatically, no approval — the raise starts on the next visit.
+    const proPartner = applicant ? await maybePromoteProPartner(admin, applicant.id) : null;
+
+    return jsonResponse({ ok: true, action, visit_pay_cents: pay, followups, pro_partner: proPartner });
   } catch (e) {
     console.error('[pro-visit-action] failed', (e as Error).message);
     return jsonResponse({ ok: false, error: (e as Error).message });

@@ -11,6 +11,7 @@ import SeoHead from "@/components/landing/SeoHead";
 // Lazy-load below-fold sections
 const TrustBar = lazy(() => import("@/components/TrustBar"));
 const Services = lazy(() => import("@/components/Services"));
+const GuaranteeSection = lazy(() => import("@/components/GuaranteeSection"));
 const HowItWorks = lazy(() => import("@/components/HowItWorks"));
 const BeforeAfter = lazy(() => import("@/components/BeforeAfter"));
 const WhoItsFor = lazy(() => import("@/components/WhoItsFor"));
@@ -85,6 +86,7 @@ const Index = () => {
       <Suspense fallback={null}>
         <TrustBar />
         <Services />
+        <GuaranteeSection />
         <HowItWorks onOpenPopup={handleCTA} />
         <BeforeAfter />
         <WhoItsFor />
