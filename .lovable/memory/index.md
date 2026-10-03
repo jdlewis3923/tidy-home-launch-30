@@ -9,6 +9,7 @@ Copywriting must be concise, low cognitive load. Never use words like "easy" or 
 Supabase auth, GTM tracking.
 Transactional email/SMS: edge functions fire Zapier webhooks only — never call Brevo/Twilio/Resend directly. Existing Zaps render Brevo templates + send Twilio SMS.
 Every outgoing email must use the complete Tidy email design: proper logo, navy/gold header, white icon banner, structured content, and legal footer.
+Never imply one Pro handles different services. Say “the same pro for each service, every visit” (Spanish: “el mismo profesional para cada servicio, en cada visita”).
 
 ## Memories
 - [Pricing Canon](mem://features/pricing-canon) — Single source for all prices, 10/15% bundle discounts, $50 referral, FL tax off
@@ -46,3 +47,4 @@ Every outgoing email must use the complete Tidy email design: proper logo, navy/
 - [Pro Kit Standard](mem://features/pro-kit-standard) — Per-service kit contents, optional magnets with $15/month credit, automatic kit order flow
 - [Email Design System](mem://style/email-design-system) — Required Tidy branding and layout for every recipient and email type
 - [Founding homes](mem://features/founding-homes) — 25 homes per ZIP, one per household, waitlist per ZIP
+- [Door-hanger service claims](mem://features/door-hanger-service-claims) — 48-hour Terms promise, photo proof, one combined bill, service-specific Pro wording
