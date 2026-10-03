@@ -4317,6 +4317,108 @@ export type Database = {
         }
         Relationships: []
       }
+      reservations: {
+        Row: {
+          assigned_day: string | null
+          assigned_pro_first_name: string | null
+          assigned_window: string | null
+          city: string
+          converted_at: string | null
+          created_at: string
+          email: string
+          first_name: string
+          heard_from: string
+          heard_other: string | null
+          id: string
+          invite_token: string | null
+          invited_at: string | null
+          is_test_row: boolean
+          lang: string
+          last_name: string
+          lines: Json
+          monthly_cents: number
+          phone: string
+          preferred_day: string
+          preferred_time: string
+          quote: Json
+          services: string[]
+          sms_consent: boolean
+          status: string
+          street: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string | null
+          waitlist_services: string[]
+          zip: string
+        }
+        Insert: {
+          assigned_day?: string | null
+          assigned_pro_first_name?: string | null
+          assigned_window?: string | null
+          city?: string
+          converted_at?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          heard_from: string
+          heard_other?: string | null
+          id?: string
+          invite_token?: string | null
+          invited_at?: string | null
+          is_test_row?: boolean
+          lang?: string
+          last_name?: string
+          lines?: Json
+          monthly_cents?: number
+          phone: string
+          preferred_day: string
+          preferred_time: string
+          quote?: Json
+          services: string[]
+          sms_consent?: boolean
+          status?: string
+          street: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          waitlist_services?: string[]
+          zip: string
+        }
+        Update: {
+          assigned_day?: string | null
+          assigned_pro_first_name?: string | null
+          assigned_window?: string | null
+          city?: string
+          converted_at?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          heard_from?: string
+          heard_other?: string | null
+          id?: string
+          invite_token?: string | null
+          invited_at?: string | null
+          is_test_row?: boolean
+          lang?: string
+          last_name?: string
+          lines?: Json
+          monthly_cents?: number
+          phone?: string
+          preferred_day?: string
+          preferred_time?: string
+          quote?: Json
+          services?: string[]
+          sms_consent?: boolean
+          status?: string
+          street?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          waitlist_services?: string[]
+          zip?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           approved_at: string | null
@@ -5908,6 +6010,14 @@ export type Database = {
       }
       dispatch_due_social_posts: { Args: never; Returns: number }
       ensure_referral_code: { Args: never; Returns: string }
+      founding_spot_counts: {
+        Args: never
+        Returns: {
+          cap: number
+          reserved: number
+          service: string
+        }[]
+      }
       founding_spots_left: { Args: { _zip: string }; Returns: number }
       gen_intake_token: { Args: never; Returns: string }
       gen_onboarding_token: { Args: never; Returns: string }
