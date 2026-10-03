@@ -22,6 +22,7 @@ const Body = z.object({
   visit_id: z.string().uuid().optional(),
   note: z.string().trim().max(500).optional(),
   source: z.enum(['dashboard', 'email']).optional(),
+  message_id: z.string().uuid().optional(),
   is_test: z.boolean().optional(),
 });
 
@@ -61,12 +62,33 @@ Deno.serve(async (req) => {
 
     const parsed = Body.safeParse(await req.json().catch(() => ({})));
     if (!parsed.success) return jsonResponse({ ok: false, error: 'invalid_body' }, 400);
-    const { token, visit_id, note, source, is_test } = parsed.data;
-    const v = await resolveVisit(token, visit_id, uid);
+    const { token, visit_id, source, is_test, message_id } = parsed.data;
+    let note = parsed.data.note;
+    let v: Awaited<ReturnType<typeof resolveVisit>> = null;
+    let requestedAt = new Date();
+    let fromInbox = false;
+    if (message_id) {
+      // Admin, from the support inbox: the member's message is the note and the
+      // 48-hour clock starts when the member sent it, not when the admin tapped.
+      if (!uid) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+      const { data: isAdmin } = await admin.rpc('has_role', { _user_id: uid, _role: 'admin' });
+      if (!isAdmin) return jsonResponse({ ok: false, error: 'forbidden' }, 403);
+      const { data: rows } = await admin.rpc('inbox_message_visit', { _message_id: message_id });
+      const m = Array.isArray(rows) ? rows[0] : rows;
+      if (!m) return jsonResponse({ ok: false, error: 'message_not_found' }, 404);
+      if (!m.visit_id) return jsonResponse({ ok: false, error: 'no_visit_found' }, 404);
+      const { data } = await admin.from('visits').select('id, user_id, assigned_pro_id, service_type, scheduled_start, visit_date, completed_at, status, customer_first_name, is_redo, rate_token').eq('id', m.visit_id).maybeSingle();
+      v = data;
+      note = (m.body ?? '').slice(0, 500);
+      requestedAt = new Date(m.sent_at);
+      fromInbox = true;
+    } else {
+      v = await resolveVisit(token, visit_id, uid);
+    }
     if (!v) return jsonResponse({ ok: false, error: 'not_found' }, 404);
     if (v.is_redo) return jsonResponse({ ok: false, error: 'redo_of_redo' }, 400);
     if (!v.completed_at) return jsonResponse({ ok: false, error: 'not_completed' }, 400);
-    if (Date.now() - new Date(v.completed_at).getTime() > WINDOW_MS) return jsonResponse({ ok: false, error: 'window_closed' }, 400);
+    if (!fromInbox && Date.now() - new Date(v.completed_at).getTime() > WINDOW_MS) return jsonResponse({ ok: false, error: 'window_closed' }, 400);
 
     const { data: existing } = await admin.from('redo_requests').select('id, due_at').eq('visit_id', v.id).neq('status', 'canceled').maybeSingle();
     if (existing) return jsonResponse({ ok: true, already: true, redo_id: existing.id, due_at: existing.due_at });
@@ -75,11 +97,11 @@ Deno.serve(async (req) => {
       ? await admin.from('applicants').select('id, first_name, last_name').eq('contractor_id', v.assigned_pro_id).maybeSingle()
       : { data: null };
 
-    const now = new Date();
+    const now = requestedAt;
     const due = new Date(now.getTime() + WINDOW_MS);
     const { data: redo, error } = await admin.from('redo_requests').insert({
       visit_id: v.id, user_id: v.user_id, pro_id: v.assigned_pro_id, applicant_id: applicant?.id ?? null,
-      note: note || null, source: source ?? (token ? 'email' : 'dashboard'),
+      note: note || null, source: fromInbox ? 'inbox' : (source ?? (token ? 'email' : 'dashboard')), support_message_id: message_id ?? null,
       requested_at: now.toISOString(), due_at: due.toISOString(), is_test_row: !!is_test,
     }).select('id').single();
     if (error) {
