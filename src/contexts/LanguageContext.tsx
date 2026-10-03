@@ -1036,6 +1036,13 @@ const translations: Record<string, string> = {
   "8. Satisfaction": "8. Satisfacción",
   "Notify us within 48 hours of any service issue. We will make reasonable efforts to resolve it.":
     "Notifícanos dentro de 48 horas sobre cualquier problema con el servicio. Haremos esfuerzos razonables para resolverlo.",
+  "The same pro for each service, every visit.": "El mismo profesional para cada servicio, en cada visita.",
+  "The same pro for each service, every visit": "El mismo profesional para cada servicio, en cada visita",
+  "The Same Pro for Each Service, Every Visit": "El Mismo Profesional para Cada Servicio, en Cada Visita",
+  "Set it once. We handle the rest — scheduling, reminders, the same pro for each service, every visit.":
+    "Configúralo una vez. Nosotros nos encargamos del resto — programación, recordatorios y el mismo profesional para cada servicio, en cada visita.",
+  "A quick form to sign up. The same pro for each service, every visit. Locked price.":
+    "Un formulario rápido para inscribirte. El mismo profesional para cada servicio, en cada visita. Precio fijo.",
   "9. SMS Communications": "9. Comunicaciones por SMS",
   "By checking the SMS consent box and providing your phone number, you expressly consent to receive recurring automated promotional and informational text messages from Tidy Home Concierge LLC, including service updates, appointment reminders, and exclusive offers, at the phone number provided. Message frequency varies.":
     "Al marcar la casilla de consentimiento de SMS y proporcionar tu número de teléfono, aceptas expresamente recibir mensajes de texto automatizados recurrentes, promocionales e informativos, de Tidy Home Concierge LLC, incluidos avisos de servicio, recordatorios de citas y ofertas exclusivas, al número proporcionado. La frecuencia de los mensajes varía.",

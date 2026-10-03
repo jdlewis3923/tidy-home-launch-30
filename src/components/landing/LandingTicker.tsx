@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 // service-area section and the footer.
 const ITEMS = [
   "Background-Checked Pros",
-  "Same Pro Every Visit",
+  "The Same Pro for Each Service, Every Visit",
   "Locked Monthly Price",
   "Cancel Anytime",
   "Photo Verified Visits",

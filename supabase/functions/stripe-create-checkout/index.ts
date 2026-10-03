@@ -403,6 +403,7 @@ Deno.serve(async (req) => {
 
           const updated = await stripe.subscriptions.update(localSub.stripe_subscription_id, {
             items: line_items.map((item) => ({ price: item.price, quantity: item.quantity })),
+            payment_behavior: "error_if_incomplete",
             proration_behavior: "none",
             metadata: {
               ...current.metadata,
@@ -432,6 +433,11 @@ Deno.serve(async (req) => {
             })
             .eq("id", localSub.id);
           if (updateErr) throw new Error(`local_subscription_update_failed:${updateErr.message}`);
+          const { error: generateErr } = await supabase.rpc("generate_recurring_visits", {
+            _subscription_id: localSub.id,
+            _horizon_days: 45,
+          });
+          if (generateErr) throw new Error(`visit_generation_failed:${generateErr.message}`);
 
           return {
             ok: true as const,
