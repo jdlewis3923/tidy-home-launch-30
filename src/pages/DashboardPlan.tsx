@@ -240,6 +240,10 @@ export default function DashboardPlan() {
   };
 
   const stepInfo = STEPS[step];
+  // Reservations visit zip → services → cadence → home → price → reserve.
+  const RES_ORDER = [0, 1, 2, 3, 6, 8];
+  const shownStep = reserving ? Math.max(0, RES_ORDER.indexOf(step)) : step;
+  const shownTotal = reserving ? RES_ORDER.length : STEPS.length - 1;
 
   if (hasExistingSub) {
     return (
@@ -267,9 +271,9 @@ export default function DashboardPlan() {
   }
 
   return (
-    <CalmShell step={step} totalSteps={STEPS.length} microcopy={stepInfo.micro}>
+    <CalmShell step={shownStep} totalSteps={shownTotal} microcopy={stepInfo.micro}>
       <div className="space-y-6">
-        <ProgressBar currentStep={step} totalSteps={STEPS.length} />
+        <ProgressBar currentStep={shownStep} totalSteps={shownTotal} />
 
         {/* Above-the-fold trust strip — visible on every step. */}
         <TrustStrip />

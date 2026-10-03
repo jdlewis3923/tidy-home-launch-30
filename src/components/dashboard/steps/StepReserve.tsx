@@ -89,8 +89,8 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
         <span className={label}>{t('morning or afternoon')} *</span>
         <div className="grid grid-cols-2 gap-2">
           {(['morning', 'afternoon'] as const).map((v) => (
-            <button key={v} type="button" onClick={() => set('preferredTime', v)} aria-pressed={state.preferredTime === v}
-              className={`rounded-lg border px-4 py-3 text-sm font-semibold ${state.preferredTime === v ? 'border-ink bg-ink text-primary-foreground' : 'border-hairline bg-white text-ink'}`}>
+            <button key={v} type="button" onClick={() => set('preferredTime', v)} aria-pressed={state.preferredTime === v} style={state.preferredTime === v ? { backgroundColor: 'hsl(var(--ink))', color: '#ffffff' } : undefined}
+              className={`rounded-lg border px-4 py-3 text-sm font-semibold ${state.preferredTime === v ? 'border-ink text-white' : 'border-hairline bg-white text-ink'}`}>
               {t(v === 'morning' ? 'Morning' : 'Afternoon')}
             </button>
           ))}
@@ -101,8 +101,8 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
         <span className={label}>{t('how did you hear about us?')} *</span>
         <div className="flex flex-wrap gap-2">
           {HEARD.map(([v, l]) => (
-            <button key={v} type="button" onClick={() => setHeard(v)} aria-pressed={heard === v}
-              className={`rounded-full border px-3.5 py-2 text-xs font-semibold ${heard === v ? 'border-ink bg-ink text-primary-foreground' : 'border-hairline bg-white text-ink'}`}>{t(l)}</button>
+            <button key={v} type="button" onClick={() => setHeard(v)} aria-pressed={heard === v} style={heard === v ? { backgroundColor: 'hsl(var(--ink))', color: '#ffffff' } : undefined}
+              className={`rounded-full border px-3.5 py-2 text-xs font-semibold ${heard === v ? 'border-ink text-white' : 'border-hairline bg-white text-ink'}`}>{t(l)}</button>
           ))}
         </div>
         {heard === 'other' && <input className={input} placeholder={t('Tell us where')} value={heardOther} onChange={(e) => setHeardOther(e.target.value)} />}
@@ -115,7 +115,8 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
 
       {err && <p className="text-sm text-destructive">{err}</p>}
       <button type="button" onClick={submit} disabled={!ready || busy} data-testid="reserve-submit"
-        className="w-full rounded-xl bg-ink px-7 py-4 text-sm font-semibold text-primary-foreground shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] disabled:opacity-40">
+        style={{ backgroundColor: 'hsl(var(--ink))', color: '#ffffff' }}
+        className="w-full rounded-xl px-7 py-4 text-sm font-semibold shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] disabled:opacity-40">
         {busy ? t('Reserving…') : allFull ? t('Join the waitlist') : t('Reserve your spot')}
       </button>
     </div>
