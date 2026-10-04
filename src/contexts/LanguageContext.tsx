@@ -119,6 +119,7 @@ const translations: Record<string, string> = {
     "Limpieza, jardín y Shine Complete — lo manejamos todo nosotros. Sin reservas, sin proveedores, sin recordatorios. Nunca.",
   "🏠 House Cleaning": "🏠 Limpieza del Hogar",
   "🌿 Lawn Care": "🌿 Cuidado del Jardín",
+  "🚗 Car Care": "🚗 Cuidado del Auto",
   "🚗 Shine Complete": "🚗 Shine Complete",
   "✓ Cancel Anytime": "✓ Cancela Cuando Quieras",
   "Limited founding memberships · No commitment required · From $45 a month":
