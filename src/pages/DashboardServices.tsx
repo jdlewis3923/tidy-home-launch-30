@@ -651,7 +651,7 @@ export default function DashboardServices() {
               ) : (
                 <>
                   <p className="mt-2 text-sm text-ink-soft">
-                    {t('Two or more services earns one free premium add-on every month.')}
+                    {t('Two services earn one free premium add-on a month. Three earn two.')}
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
