@@ -76,7 +76,7 @@ const config: ServiceLandingConfig = {
     "In your driveway",
     "Background-checked pros",
   ],
-  addOnsNote: "Available as add-ons: pet hair removal, clay bar & ceramic coat, headlight restoration, interior protect & condition.",
+  addOnsNote: "Available as add-ons: pet hair removal, interior protect & condition, clay bar & ceramic coat.",
   surchargeNote:
     "Lifted trucks, commercial vans and oversized vehicles are quoted individually.",
 
@@ -110,7 +110,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's actually included?",
-      a: "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair removal, clay bar & ceramic coat, headlight restoration, and interior protect & condition are available as add-ons.",
+      a: "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair removal, interior protect & condition, and clay bar & ceramic coat are available as add-ons.",
     },
     {
       q: "Who does the detailing?",

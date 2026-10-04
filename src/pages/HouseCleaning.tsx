@@ -86,7 +86,7 @@ const config: ServiceLandingConfig = {
     "The same pro for each service, every visit",
     "Photo-verified after every visit",
   ],
-  addOnsNote: "Available as add-ons: inside oven, inside fridge, interior windows, deep baseboard scrub, laundry (wash/dry/fold), inside kitchen cabinets.",
+  addOnsNote: "Available as add-ons: inside oven, inside fridge, interior windows.",
   surchargeNote:
     "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Above that size we quote individually.",
   trustCards: [

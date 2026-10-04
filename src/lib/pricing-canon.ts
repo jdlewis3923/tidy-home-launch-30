@@ -259,13 +259,13 @@ export const CAR_WASH_QUANTITY_RULE: QuantityRule = 'always_1';
 // The bundle is a gift, not a discount. No percentages anywhere.
 //
 // The gift is ONE free premium add-on per month whenever the customer holds two
-// or more distinct services. There is no three-service tier. The CUSTOMER
+// or more distinct services, and TWO at three services. The CUSTOMER
 // CHOOSES which add-on they take each month; we never assign one.
 // ---------------------------------------------------------------------------
 
 /** Free premium add-ons each month, by count of DISTINCT services in the plan. */
 export function freeAddonsPerMonth(serviceCount: number): number {
-  return serviceCount >= 2 ? 1 : 0;
+  return serviceCount >= 3 ? 2 : serviceCount >= 2 ? 1 : 0;
 }
 
 /** True when the plan earns the monthly free add-on. */
@@ -581,14 +581,6 @@ export const CLEANING_PAID_ADDONS = [
   'inside oven',
   'inside fridge',
   'interior windows',
-  'baseboards',
-  'blinds',
-  'walls',
-  'laundry',
-  'dishes',
-  'garage',
-  'patio',
-  'organizing',
 ];
 
 export const LAWN_INCLUDED = ['mow', 'edge', 'line-trim', 'blow clear of hard surfaces'];

@@ -165,7 +165,7 @@ describe('checkout ↔ Stripe parity', () => {
     { label: '3 services · weekly', s: buildState(['cleaning', 'lawn', 'detailing'], { cadence: 'weekly' }) },
     {
       label: '3 services + add-ons',
-      s: buildState(['cleaning', 'lawn', 'detailing'], { addOns: ['oven', 'bedEdgeReset', 'headlightRestoration'] }),
+      s: buildState(['cleaning', 'lawn', 'detailing'], { addOns: ['oven', 'bedEdgeReset', 'clayBarCeramic'] }),
     },
     { label: 'cleaning with the larger-home surcharge', s: buildState(['cleaning'], { homeSqFt: 3200 }) },
     { label: 'lawn with the larger-yard surcharge', s: buildState(['lawn'], { turfSqFt: 5200 }) },

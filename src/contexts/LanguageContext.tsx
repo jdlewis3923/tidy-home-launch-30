@@ -316,18 +316,18 @@ const translations: Record<string, string> = {
   "Check →": "Verificar →",
 
   // Add-on catalogue + bundle small print (batch 15/16)
-  "Inside oven, inside fridge, interior windows, baseboard scrub, laundry, inside kitchen cabinets":
-    "Interior del horno, interior del refrigerador, ventanas interiores, limpieza de zócalos, lavandería, interior de gabinetes de cocina",
-  "Weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens":
-    "Remoción de maleza, limpieza de hojas y escombros, reajuste del borde de jardineras, ventanas y mosquiteros exteriores",
-  "Pet hair removal, clay bar & ceramic coat, headlight restoration, interior protect & condition":
-    "Remoción de pelo de mascotas, barra de arcilla y capa cerámica, restauración de faros, protección y acondicionamiento del interior",
-  "Available as add-ons: inside oven, inside fridge, interior windows, deep baseboard scrub, laundry (wash/dry/fold), inside kitchen cabinets.":
-    "Disponibles como servicios adicionales: interior del horno, interior del refrigerador, ventanas interiores, limpieza profunda de zócalos, lavandería (lavado/secado/doblado), interior de gabinetes de cocina.",
-  "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens. Driveway pressure wash is specialist work, quoted separately.":
-    "Disponibles como servicios adicionales: remoción de maleza, limpieza de hojas y escombros, reajuste del borde de jardineras, ventanas y mosquiteros exteriores. El lavado a presión de la entrada es trabajo especializado y se cotiza aparte.",
-  "Available as add-ons: pet hair removal, clay bar & ceramic coat, headlight restoration, interior protect & condition.":
-    "Disponibles como servicios adicionales: remoción de pelo de mascotas, barra de arcilla y capa cerámica, restauración de faros, protección y acondicionamiento del interior.",
+  "Inside oven, inside fridge, interior windows":
+    "Interior del horno, interior del refrigerador, ventanas interiores",
+  "Weed removal, leaf & debris cleanup, bed edge reset":
+    "Remoción de maleza, limpieza de hojas y escombros, reajuste del borde de jardineras",
+  "Pet hair removal, interior protect & condition, clay bar & ceramic coat":
+    "Remoción de pelo de mascotas, protección y acondicionamiento del interior, barra de arcilla y capa cerámica",
+  "Available as add-ons: inside oven, inside fridge, interior windows.":
+    "Disponibles como servicios adicionales: interior del horno, interior del refrigerador, ventanas interiores.",
+  "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset.":
+    "Disponibles como servicios adicionales: remoción de maleza, limpieza de hojas y escombros, reajuste del borde de jardineras.",
+  "Available as add-ons: pet hair removal, interior protect & condition, clay bar & ceramic coat.":
+    "Disponibles como servicios adicionales: remoción de pelo de mascotas, protección y acondicionamiento del interior, barra de arcilla y capa cerámica.",
   "from": "desde",
   "Figures assume monthly service for each service. Your price changes with the visit frequency you choose.":
     "Las cifras asumen servicio mensual para cada servicio. Tu precio cambia según la frecuencia de visitas que elijas.",
@@ -587,8 +587,8 @@ const translations: Record<string, string> = {
   "Shine Complete is one flat monthly price set by what you drive: $149, $179 or $239. Every plan is 3 maintenance washes a month plus 2 full details a year.":
     "Shine Complete es un precio fijo mensual según lo que conduces: $149, $179 o $239. Todos los planes incluyen 3 lavados de mantenimiento al mes más 2 detallados completos al año.",
   "What's actually included?": "¿Qué se incluye exactamente?",
-  "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair removal, clay bar & ceramic coat, headlight restoration, and interior protect & condition are available as add-ons.":
-    "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Remoción de pelo de mascotas, barra de arcilla y capa cerámica, restauración de faros, y protección y acondicionamiento del interior están disponibles como servicios adicionales.",
+  "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair removal, interior protect & condition, and clay bar & ceramic coat are available as add-ons.":
+    "Lavado exterior a mano con productos seguros para cerámica, limpieza de ruedas y abrillantado, aspirado interior, limpieza de tablero y consola, y cristales interiores y exteriores. Remoción de pelo de mascotas, protección y acondicionamiento del interior, y barra de arcilla y capa cerámica están disponibles como servicios adicionales.",
   "3-row SUVs, full-size trucks and vans are size 3 at $239/mo — a size, never a surcharge. Commercial vans and lifted trucks we price by hand.":
     "Las SUVs de 3 filas, camionetas grandes y vans son tamaño 3 a $239/mes — es un tamaño, nunca un cargo extra. Las vans comerciales y camionetas elevadas las cotizamos a mano.",
   "Exterior hand wash with ceramic-safe products, wheel and tire dress, interior vacuum, dashboard and console wipe-down, and interior + exterior glass. Pet hair and clay bar & ceramic coat available as add-ons.":
