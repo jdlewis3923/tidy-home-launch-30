@@ -3,14 +3,14 @@
 // Change the date here, copy this file over the mirror, done.
 
 /** First visits begin on this date (YYYY-MM-DD, Miami time). */
-export const LAUNCH_DATE_ISO = '2026-11-09';
+export const LAUNCH_DATE_ISO = '2026-11-16';
 /** Founding spots per service. */
 export const FOUNDING_CAP = 25;
 /** While true the quote ends in "Reserve your spot" instead of checkout. */
 export const RESERVATIONS_MODE = true;
 
 const d = new Date(`${LAUNCH_DATE_ISO}T12:00:00Z`);
-/** e.g. "Monday, November 9" */
+/** e.g. "Monday, November 16" */
 export const LAUNCH_DATE_LONG = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' });
 /** e.g. "lunes, 9 de noviembre" */
 export const LAUNCH_DATE_LONG_ES = d.toLocaleDateString('es-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' });

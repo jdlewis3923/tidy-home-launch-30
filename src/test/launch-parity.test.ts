@@ -7,7 +7,7 @@ describe("launch canon", () => {
     expect(readFileSync("supabase/functions/_shared/launch.ts", "utf8")).toBe(readFileSync("src/lib/launch.ts", "utf8"));
   });
   it("renders the published start date", () => {
-    expect(LAUNCH_DATE_LONG).toBe("Monday, November 9");
+    expect(LAUNCH_DATE_LONG).toBe("Monday, November 16");
     expect(FOUNDING_CAP).toBe(25);
   });
 });

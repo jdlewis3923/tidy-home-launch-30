@@ -37,6 +37,7 @@
     --radius: 0.5rem;
 
     --navy: 222 47% 11%;
+    --service-hero-overlay: 206.667 100% 17.647%;
     --review-navy: 206 100% 18%;
     --review-yellow: 49 100% 50%;
     --navy-deep: 224 71% 4%;
@@ -199,6 +200,9 @@
 }
 
 @layer utilities {
+  .service-hero-scrim {
+    background: linear-gradient(to bottom, hsl(var(--service-hero-overlay) / .55) 0%, hsl(var(--service-hero-overlay) / .25) 60%, hsl(var(--service-hero-overlay) / .25) 100%);
+  }
   .text-balance {
     text-wrap: balance;
   }

@@ -13,14 +13,14 @@ const config: ServiceLandingConfig = {
   serviceSlug: "house-cleaning",
   signupServiceParam: "cleaning",
   eyebrow: "House Cleaning",
-  h1: "Monthly House Cleaning in Pinecrest + Kendall",
+  h1: "House Cleaning in Pinecrest & Kendall",
   subhead:
     "Professional house cleaning, handled for you. Weekly, biweekly, or monthly.",
   intentConfirm:
     "The same pro for each service, every visit. Locked monthly price. Cancel anytime.",
   systemBridge:
     "Tidy isn't just cleaning — it's a system for your entire home.",
-  ctaPrimaryLabel: "Book your cleaning",
+  ctaPrimaryLabel: "Reserve your spot",
   ctaPlanLabel: "Start your plan",
   priceAnchor: "From $139 a month",
   stickyLabel: "House Cleaning · from $139 a month",

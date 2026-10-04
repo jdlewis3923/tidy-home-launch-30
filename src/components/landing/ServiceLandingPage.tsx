@@ -15,6 +15,7 @@ import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import { PHONE_DISPLAY, PHONE_TEL, SERVICE_AREA_TRUST } from "@/lib/landing";
+import { LAUNCH_DATE_LONG } from "@/lib/launch";
 import { pushEvent, trackSelectPlan, useViewPricingObserver } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
@@ -238,7 +239,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           />
         </picture>
 
-        <div className="absolute inset-0 bg-navy/65" />
+         <div className="absolute inset-0 service-hero-scrim" />
         <SparkleField />
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
@@ -279,8 +280,8 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               >
                 {t(config.ctaPrimaryLabel ?? "Book in about 2 minutes")} <span className="arrow">→</span>
               </Link>
-              <span className="mt-2 text-xs text-primary-foreground/70">
-                {t("A quick form · No contracts")}
+               <span className="mt-2 text-xs text-primary-foreground/90">
+                 {t("No card, no account")} · {t(`First visits begin ${LAUNCH_DATE_LONG}`)}
               </span>
             </div>
             <a

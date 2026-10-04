@@ -13,14 +13,14 @@ const config: ServiceLandingConfig = {
   serviceSlug: "lawn-care",
   signupServiceParam: "lawn",
   eyebrow: "Lawn Care",
-  h1: "Monthly Lawn Care in Pinecrest + Kendall",
+  h1: "Lawn Care in Pinecrest & Kendall",
   subhead:
     "Reliable lawn care, done right every time. Mow, edge, blow.",
   intentConfirm:
     "The same pro for each service, every visit. Locked monthly price. Cancel anytime.",
   systemBridge:
     "Tidy isn't just lawn — it's a system for your entire home.",
-  ctaPrimaryLabel: "Start lawn care",
+  ctaPrimaryLabel: "Reserve your spot",
   ctaPlanLabel: "Start your plan",
   priceAnchor: "From $45 a month",
   stickyLabel: "Lawn Care · from $45 a month",
