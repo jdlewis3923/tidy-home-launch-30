@@ -19,7 +19,7 @@ type Cache = {
 
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY') ?? '';
 const MAPS_CONN_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY') ?? '';
-const FIELD_MASK = 'rating,userRatingCount,googleMapsUri,reviews';
+const FIELD_MASK = 'displayName,rating,userRatingCount,googleMapsUri,reviews';
 
 async function fetchGoogle() {
   const path = `places/v1/places/${encodeURIComponent(PLACE_ID)}`;
@@ -35,6 +35,9 @@ async function fetchGoogle() {
       });
   if (!res.ok) throw new Error(`places ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const j = await res.json();
+  // Guard: never show another business's reviews as ours.
+  const name = String(j.displayName?.text ?? '');
+  if (!/tidy\s*home/i.test(name)) throw new Error(`place is "${name}", not Tidy Home Concierge`);
   const reviews = (j.reviews ?? []).map((r: any) => ({
     id: r.name ?? null,
     author: r.authorAttribution?.displayName ?? null,
@@ -60,6 +63,23 @@ Deno.serve(async (req) => {
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
   const url = new URL(req.url);
   const force = url.searchParams.get('refresh') === '1';
+
+  // Admin-entered verbatim list wins when present (Google listing unverified).
+  const { data: manual } = await admin.from('google_listing_manual').select('*').eq('id', 'tidy').maybeSingle();
+  if (manual) {
+    const { data: rows } = await admin.from('site_google_reviews').select('*').eq('is_published', true).order('review_date', { ascending: false });
+    if (rows?.length) {
+      return jsonResponse({
+        available: true, source: 'manual', rating: Number(manual.rating), total_count: manual.total_count,
+        maps_uri: manual.listing_url, fetched_at: manual.verified_at,
+        reviews: rows.map((r) => ({
+          id: r.id, author: r.author_name, author_photo: r.author_photo_url, rating: r.rating,
+          relative_time: null, publish_time: r.review_date, text: r.review_text, review_uri: r.review_url,
+          neighborhood: r.neighborhood, service: r.service,
+        })),
+      }, 200, { 'Cache-Control': 'public, max-age=600' });
+    }
+  }
 
   const { data: cached } = await admin.from('google_listing_cache').select('*').eq('id', 'tidy').maybeSingle<Cache>();
   const fresh = cached && Date.now() - new Date(cached.fetched_at).getTime() < TTL_MS;
