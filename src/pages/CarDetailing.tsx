@@ -9,16 +9,16 @@ const config: ServiceLandingConfig = {
   serviceSlug: "car-detailing",
   signupServiceParam: "detailing",
   eyebrow: "Car Care",
-  h1: "Shine Complete in Pinecrest + Kendall",
+  h1: "Car Care in Pinecrest + Kendall",
   subhead: "3 maintenance washes a month plus 2 full details a year.",
   intentConfirm: "The same pro for each service, every visit. Locked monthly price. Cancel anytime.",
   systemBridge: "Tidy isn't just detailing — it's a system for your entire home.",
   ctaPrimaryLabel: "Book detailing",
   ctaPlanLabel: "Start your plan",
   priceAnchor: "From $149/mo",
-  stickyLabel: "Car Care · Shine Complete · from $149/mo",
+  stickyLabel: "Car Care · from $149/mo",
   savingsCallout:
-    "A good mobile detail runs **$120–$180 per appointment**. Shine Complete is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.",
+    "A good mobile detail runs **$120–$180 per appointment**. Car Care is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.",
   heroImage: heroImg,
   heroImageWebp: heroImgWebp,
   heroImageMobile: heroImgMobile,
@@ -28,7 +28,7 @@ const config: ServiceLandingConfig = {
   plans: [
     // Each card is one vehicle size, so the price is exact — no "From" here.
     {
-      name: "Car Care · Shine Complete · Size 1",
+      name: "Car Care · Size 1",
       price: "$149",
       cadence: "/mo",
       planSlug: "monthly",
@@ -40,7 +40,7 @@ const config: ServiceLandingConfig = {
       cadenceKey: "monthly",
     },
     {
-      name: "Car Care · Shine Complete · Size 2",
+      name: "Car Care · Size 2",
       price: "$179",
       cadence: "/mo",
       planSlug: "monthly",
@@ -53,7 +53,7 @@ const config: ServiceLandingConfig = {
       cadenceKey: "monthly",
     },
     {
-      name: "Car Care · Shine Complete · Size 3",
+      name: "Car Care · Size 3",
       price: "$239",
       cadence: "/mo",
       planSlug: "monthly",
@@ -98,7 +98,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "Shine Complete is one flat monthly price set by what you drive: $149, $179 or $239. Every plan is 3 maintenance washes a month plus 2 full details a year.",
+      a: "Car Care is one flat monthly price set by what you drive: $149, $179 or $239. Every plan is 3 maintenance washes a month plus 2 full details a year.",
     },
     {
       q: "Can I cancel anytime?",
@@ -126,21 +126,21 @@ const config: ServiceLandingConfig = {
     },
   ],
   bundleCta: {
-    title: "Already on Shine Complete? Add cleaning from $139 a month.",
+    title: "Already on Car Care? Add cleaning from $139 a month.",
     body: "Add a 2nd service and you pick one free premium add-on every month — and you never coordinate two providers again.",
     targetServices: "detailing,cleaning",
   },
   seo: {
-    title: "Shine Complete in Pinecrest + Kendall | Tidy Home Concierge",
+    title: "Car Care in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "Shine Complete mobile car care in Pinecrest and Kendall (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.",
+      "Car care at your home in Pinecrest and Kendall (33156, 33183, 33186). 3 washes a month plus 2 full details a year, from $149/mo. Book in about 2 minutes.",
     canonical: "https://jointidy.co/car-detailing",
     priceRange: "$149–$239",
     service: {
-      name: "Shine Complete",
-      serviceType: "Shine Complete",
+      name: "Car Care",
+      serviceType: "Car Care",
       description:
-        "Shine Complete mobile car care in Pinecrest and Kendall. One flat monthly price set by vehicle size.",
+        "Car care at your home in Pinecrest and Kendall. One flat monthly price set by vehicle size.",
       offers: [
         { name: "Size 1 vehicle (sedans, coupes)", price: 149, unit: "month" },
         { name: "Size 2 vehicle (crossovers, 2-row SUVs)", price: 179, unit: "month" },

@@ -205,7 +205,7 @@ describe('checkout ↔ Stripe parity', () => {
     }
   });
 
-  it('Shine Complete stays flat however often the cadence field says', () => {
+  it('Car Care stays flat however often the cadence field says', () => {
     const monthly = buildState(['detailing'], { size: 2, cadence: 'monthly' });
     const weekly = buildState(['detailing'], { size: 2, cadence: 'weekly' });
     expect(stripeSubscriptionCents(weekly)).toBe(stripeSubscriptionCents(monthly));

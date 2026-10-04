@@ -15,7 +15,7 @@ export const SERVICE_CODES: ServiceCode[] = ['house_clean', 'car_wash', 'car_det
 export const SERVICE_NAMES: Record<ServiceCode, string> = {
   house_clean: 'House Cleaning',
   car_wash: 'Car Wash',
-  car_detail: 'Shine Complete',
+  car_detail: 'Car Care',
 };
 
 /** `service_type` / subscription service key each code maps to in the DB. */

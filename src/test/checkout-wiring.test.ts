@@ -44,7 +44,7 @@ describe('1. the 21 lookup keys', () => {
       for (const cadence of ['monthly', 'biweekly', 'weekly'] as const) {
         expect(SERVICE_LOOKUP_KEYS.cleaning[size][cadence]).toBe(`clean_${size}_${cadence}`);
         expect(SERVICE_LOOKUP_KEYS.lawn[size][cadence]).toBe(`lawn_${size}_${cadence}`);
-        // Shine Complete has one plan, so every cadence resolves to one key.
+        // Car Care has one plan, so every cadence resolves to one key.
         expect(lookupKeyFor('detailing', size, cadence)).toBe(`shine_${size}`);
       }
     }

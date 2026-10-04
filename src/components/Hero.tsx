@@ -166,7 +166,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
 
         <div>
           <div className="flex flex-nowrap justify-center gap-1.5 md:gap-3 mb-5 md:mb-8">
-            {/* Visitor-facing label is "Car Care"; "Shine Complete" stays as the product name on the pricing page. */}
+            {/* Visitor-facing label is "Car Care"; "Car Care" stays as the product name on the pricing page. */}
             {["🏠 House Cleaning", "🌿 Lawn Care", "🚗 Car Care"].map((pill) => (
               <span
                 key={pill}

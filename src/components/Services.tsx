@@ -48,7 +48,7 @@ const services = [
   {
     gate: "car_care" as GateService,
     title: "Car Care",
-    subtitle: "Shine Complete",
+    subtitle: "Car Care",
     badge: null,
     image: carImg,
     lpHref: "/car-detailing",

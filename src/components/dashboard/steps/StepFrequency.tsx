@@ -52,7 +52,7 @@ export default function StepFrequency({ state, onChange }: Props) {
 
           {serviceUnits[svc] === 'per_month' ? (
             <p className="text-[11px] text-ink-faint">
-              shine complete is a flat monthly price — 3 maintenance washes a month plus 2 full details a year.
+              car care is a flat monthly price — 3 maintenance washes a month plus 2 full details a year.
             </p>
           ) : (
           <div className="grid grid-cols-3 gap-2">

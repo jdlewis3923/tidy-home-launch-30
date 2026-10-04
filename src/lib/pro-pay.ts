@@ -30,7 +30,7 @@ export const PRO_SERVICE_ZIPS = ["33156", "33183", "33186"] as const;
 /**
  * Pay in cents for one completed visit.
  * `size` is the plan size (1/2/3); `surcharge` adds the pro's share of a
- * larger-home or larger-yard surcharge. For Shine Complete, pass the visit kind.
+ * larger-home or larger-yard surcharge. For Car Care, pass the visit kind.
  */
 export function visitPayCents(
   service: ProServiceType,
@@ -57,7 +57,7 @@ export const money = (cents?: number | null) =>
 export const SERVICE_LABEL: Record<string, string> = {
   cleaning: "House cleaning",
   lawn: "Lawn care",
-  detailing: "Shine Complete",
+  detailing: "Car Care",
 };
 
 /** Tier 2 unlocks on all three, together. */

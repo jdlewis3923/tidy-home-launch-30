@@ -7,7 +7,7 @@
  * Each service line carries its SIZE (1/2/3) plus the cadence. The server
  * resolves Stripe by lookup_key and turns cadence into the subscription item
  * quantity (monthly 1, biweekly 2, weekly 4) for per-visit services only;
- * Shine Complete and the Car Wash Add-On are always quantity 1.
+ * Car Care and the Car Wash Add-On are always quantity 1.
  *
  * There are no promo codes: the founding offer is a set of fulfilment promises
  * written onto the subscription row, not a coupon.

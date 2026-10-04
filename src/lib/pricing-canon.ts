@@ -8,7 +8,7 @@
  *  - The customer is ALWAYS billed monthly. Every Stripe price is interval=month
  *    at the BILLED amount, quantity 1.
  *  - House Cleaning and Lawn Care have nine plans each (3 sizes x 3 cadences).
- *    Shine Complete is one monthly plan per size — no frequency choice.
+ *    Car Care is one monthly plan per size — no frequency choice.
  *
  * Stripe is referenced by lookup_key, never by price ID.
  *
@@ -47,7 +47,7 @@ export const CADENCE_MULTIPLIER = VISITS_PER_MONTH;
 
 /**
  * Per-visit price in whole dollars, by service, size and cadence.
- * Shine Complete is not per visit — see SHINE_MONTHLY.
+ * Car Care is not per visit — see SHINE_MONTHLY.
  */
 export const PER_VISIT_PRICES: Record<'cleaning' | 'lawn', Record<CanonSize, Record<CanonCadence, number>>> = {
   cleaning: {
@@ -74,7 +74,7 @@ export const BILLED_MONTHLY: Record<CanonService, Record<CanonSize, Record<Canon
     2: { monthly: 65, biweekly: 120, weekly: 212 },
     3: { monthly: 99, biweekly: 182, weekly: 324 },
   },
-  // Shine Complete has no frequency choice — one monthly plan per size.
+  // Car Care has no frequency choice — one monthly plan per size.
   detailing: {
     1: { monthly: 149, biweekly: 149, weekly: 149 },
     2: { monthly: 179, biweekly: 179, weekly: 179 },
@@ -82,13 +82,13 @@ export const BILLED_MONTHLY: Record<CanonService, Record<CanonSize, Record<Canon
   },
 };
 
-/** Shine Complete monthly price by size. */
+/** Car Care monthly price by size. */
 export const SHINE_MONTHLY: Record<CanonSize, number> = { 1: 149, 2: 179, 3: 239 };
 
 /**
  * The headline figure for a service at its smallest size: the MONTHLY BILL.
  * "House cleaning from $139 a month. Lawn care from $45 a month.
- *  Shine Complete from $149 a month."
+ *  Car Care from $149 a month."
  */
 export const SIZE_PRICES: Record<CanonService, Record<CanonSize, number>> = {
   cleaning: { 1: 139, 2: 189, 3: 279 },
@@ -98,7 +98,7 @@ export const SIZE_PRICES: Record<CanonService, Record<CanonSize, number>> = {
 
 /**
  * Stripe lookup keys — 21 recurring prices, every one interval=month.
- * Shine Complete has one key per size, reused across cadences because it has
+ * Car Care has one key per size, reused across cadences because it has
  * no cadence choice.
  */
 export const SERVICE_LOOKUP_KEYS: Record<CanonService, Record<CanonSize, Record<CanonCadence, string>>> = {
@@ -123,7 +123,7 @@ export function lookupKeyFor(service: CanonService, size: CanonSize, cadence: Ca
   return SERVICE_LOOKUP_KEYS[service][size][cadenceFor(service, cadence)];
 }
 
-/** Shine Complete is always monthly, whatever the UI last remembered. */
+/** Car Care is always monthly, whatever the UI last remembered. */
 export function cadenceFor(service: CanonService, cadence: CanonCadence): CanonCadence {
   return SERVICE_QUANTITY_RULE[service] === 'always_1' ? 'monthly' : cadence;
 }
@@ -152,7 +152,7 @@ export const SERVICE_QUANTITY_RULE: Record<CanonService, QuantityRule> = {
 export const SERVICE_NAMES: Record<CanonService, string> = {
   cleaning: 'House Cleaning',
   lawn: 'Lawn Care',
-  detailing: 'Car Care · Shine Complete',
+  detailing: 'Car Care',
 };
 
 /** Size labels, per service, in the customer's own words. */
@@ -298,7 +298,7 @@ export const ENTRY_PRICE_COPY = `from $${ENTRY_PRICE_MONTHLY} a month`;
 export const HEADLINE_PRICE_COPY =
   `House cleaning from $${ENTRY_MONTHLY.cleaning} a month. ` +
   `Lawn care from $${ENTRY_MONTHLY.lawn} a month. ` +
-  `Shine Complete from $${ENTRY_MONTHLY.detailing} a month.`;
+  `Car Care from $${ENTRY_MONTHLY.detailing} a month.`;
 
 /** Referral program — give $50, get $50. Unchanged. */
 export const REFERRAL_BONUS_CENTS = 5000;
@@ -373,7 +373,7 @@ export const CONTRACTOR_VISIT_PAY: Record<'cleaning' | 'lawn', Record<CanonSize,
   },
 };
 
-/** Shine Complete pay, by size. */
+/** Car Care pay, by size. */
 export const CONTRACTOR_SHINE_PAY: Record<CanonSize, { maintenanceWash: number; fullDetail: number }> = {
   1: { maintenanceWash: 16, fullDetail: 78 },
   2: { maintenanceWash: 20, fullDetail: 88 },

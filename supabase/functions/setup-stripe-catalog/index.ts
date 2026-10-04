@@ -70,7 +70,7 @@ type LookupSpec = Omit<CatalogRow, 'stripe_price_id'> & { lookup_key: string };
 
 /**
  * The 21 recurring plan prices: cleaning and lawn at every cadence, plus the
- * three Shine Complete plans (one price each, no cadence choice). The lookup key
+ * three Car Care plans (one price each, no cadence choice). The lookup key
  * carries the cadence, so it must be resolved with lookupKeyFor(service, size,
  * cadence) — indexing SERVICE_LOOKUP_KEYS by size alone yields an object.
  */
@@ -150,7 +150,7 @@ const ADDON_ROWS: CatalogRow[] = [
   { service_type: null, frequency: null, lookup_key: 'addon_bed_edge_reset', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'bedEdgeReset', stripe_price_id: 'price_1UAUZWD7AxvAjJGvFI0Z7BDl', price_cents: 6500, description: 'Bed Edge Reset', active: true, sort_order: 300 },
   { service_type: null, frequency: null, lookup_key: 'addon_exterior_windows_screens', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'exteriorWindows', stripe_price_id: 'price_1UAUdCD7AxvAjJGvJqdbCKw9', price_cents: 8500, description: 'Exterior Windows & Screens', active: false, sort_order: 303 },
   { service_type: null, frequency: null, lookup_key: 'addon_driveway_pressure_wash', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'pressureWash', stripe_price_id: 'price_1TNCjrD7AxvAjJGv3cHMAlq6', price_cents: 15000, description: 'Driveway Pressure Wash', active: false, sort_order: 304 },
-  // Shine Complete (4). Ozone Odor Treatment, Engine Bay Clean and Ceramic Spray
+  // Car Care (4). Ozone Odor Treatment, Engine Bay Clean and Ceramic Spray
   // Coat are retired — their Stripe prices are archived.
   { service_type: null, frequency: null, lookup_key: 'addon_pet_hair', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'petHair', stripe_price_id: 'price_1TNCl6D7AxvAjJGvxirYq3hZ', price_cents: 4500, description: 'Pet Hair Removal', active: true, sort_order: 401 },
   { service_type: null, frequency: null, lookup_key: 'addon_clay_bar_ceramic_coat', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'clayBarCeramic', stripe_price_id: 'price_1UAYd6D7AxvAjJGver1hsniC', price_cents: 9500, description: 'Clay Bar & Ceramic Coat', active: true, sort_order: 250 },

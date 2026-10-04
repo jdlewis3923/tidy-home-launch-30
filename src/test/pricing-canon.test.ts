@@ -98,10 +98,10 @@ describe('three sizes, per-visit price by cadence', () => {
     expect(SIZE_PRICES.detailing).toEqual({ 1: 149, 2: 179, 3: 239 });
     expect(HEADLINE_PRICE_COPY).toContain('House cleaning from $139 a month');
     expect(HEADLINE_PRICE_COPY).toContain('Lawn care from $45 a month');
-    expect(HEADLINE_PRICE_COPY).toContain('Shine Complete from $149 a month');
+    expect(HEADLINE_PRICE_COPY).toContain('Car Care from $149 a month');
   });
 
-  it('prices cleaning and lawn per visit, Shine Complete per month', () => {
+  it('prices cleaning and lawn per visit, Car Care per month', () => {
     expect(SERVICE_UNIT.cleaning).toBe('per_visit');
     expect(SERVICE_UNIT.lawn).toBe('per_visit');
     expect(SERVICE_UNIT.detailing).toBe('per_month');
