@@ -11,6 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BILLED_MONTHLY,
+  CAR_WASH_PRICES,
   CADENCES,
   CLEANING_SURCHARGE,
   LAWN_SURCHARGE,
