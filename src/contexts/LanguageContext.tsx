@@ -156,17 +156,14 @@ const translations: Record<string, string> = {
   // How it works
   "Simple process": "Proceso simple",
   "Get 5–10 hours back every week": "Recupera 5–10 horas cada semana",
-  "How it works — three steps, then you never think about it again.":
-    "Cómo funciona — tres pasos, y nunca más piensas en ello.",
-  "Choose Your Plan": "Elige Tu Plan",
-  "Select your services and frequency. About 2 minutes. See pricing before you pay.":
-    "Selecciona tus servicios y frecuencia. Unos 2 minutos. Ve los precios antes de pagar.",
-  "We Handle Everything": "Nosotros Nos Encargamos",
-  "Your assigned professional shows up on time. You receive an ETA before every visit.":
-    "Un profesional verificado y con antecedentes revisados llega a tiempo. Recibes un estimado antes de cada visita.",
-  "You Never Think About It Again": "Nunca Más Piensas en Ello",
-  "Recurring scheduling, automatic billing, photo verification after every visit. No reminders. No rebooking. No effort.":
-    "Programación recurrente, facturación automática, verificación con fotos después de cada visita. Sin recordatorios. Sin reagendar. Sin esfuerzo.",
+  "Three steps — then your home runs on autopilot.": "Tres pasos — y tu hogar funciona en piloto automático.",
+  "Pick your services and how often": "Elige tus servicios y tu frecuencia",
+  "Cleaning, lawn, car care — any one, any two, or all three.": "Limpieza, jardín, cuidado del auto — uno, dos o los tres.",
+  "We confirm your day and your Pro": "Confirmamos tu día y tu Pro",
+  "Same person every visit. Background-checked and insured.": "La misma persona en cada visita. Antecedentes verificados y con seguro.",
+  "That's it": "Eso es todo",
+  "Photo-verified every visit. Not right? We come back within 48 hours, free.": "Foto verificada en cada visita. ¿No quedó bien? Volvemos dentro de 48 horas, gratis.",
+  "Our 48-hour guarantee": "Nuestra garantía de 48 horas",
   "Design Your Plan →": "Diseña Tu Plan →",
 
   // Before/After
