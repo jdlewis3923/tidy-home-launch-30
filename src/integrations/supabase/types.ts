@@ -4444,6 +4444,42 @@ export type Database = {
         }
         Relationships: []
       }
+      review_bonus_audit: {
+        Row: {
+          actor_user_id: string | null
+          bonus_id: string | null
+          checks: Json | null
+          created_at: string
+          id: string
+          member_user_id: string | null
+          outcome: string
+          pro_id: string | null
+          stars: number | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          bonus_id?: string | null
+          checks?: Json | null
+          created_at?: string
+          id?: string
+          member_user_id?: string | null
+          outcome: string
+          pro_id?: string | null
+          stars?: number | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          bonus_id?: string | null
+          checks?: Json | null
+          created_at?: string
+          id?: string
+          member_user_id?: string | null
+          outcome?: string
+          pro_id?: string | null
+          stars?: number | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           approved_at: string | null

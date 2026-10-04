@@ -46,6 +46,13 @@ Deno.serve(async (req) => {
       }
       const template = await read.json() as LiveTemplate;
       const current = template.htmlContent ?? '';
+      if (new URL(req.url).searchParams.get('scan') === 'pay') {
+        // Read-only: surface any car-care pay figure that is not canon (16/20/26 · 78/88/115).
+        const text = current.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
+        const hits = [...text.matchAll(/.{0,70}\$(?:17|27|51|61|82)\b.{0,70}/g)].map((m) => m[0]);
+        results.push({ id, name: template.name ?? null, ok: true, hits });
+        continue;
+      }
       const branded = brandHostedTemplate(current, template.subject ?? template.name ?? 'A Tidy update');
       if (apply && branded.changed) {
         const write = await vendorFetch(`${GATEWAY}/${id}`, {

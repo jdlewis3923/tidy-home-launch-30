@@ -361,9 +361,9 @@ export const CONTRACTOR_VISIT_PAY: Record<'cleaning' | 'lawn', Record<CanonSize,
 
 /** Shine Complete pay, by size. */
 export const CONTRACTOR_SHINE_PAY: Record<CanonSize, { maintenanceWash: number; fullDetail: number }> = {
-  1: { maintenanceWash: 17, fullDetail: 51 },
-  2: { maintenanceWash: 20, fullDetail: 61 },
-  3: { maintenanceWash: 27, fullDetail: 82 },
+  1: { maintenanceWash: 16, fullDetail: 78 },
+  2: { maintenanceWash: 20, fullDetail: 88 },
+  3: { maintenanceWash: 26, fullDetail: 115 },
 };
 
 /** The pro's share of a surcharge, per visit. */

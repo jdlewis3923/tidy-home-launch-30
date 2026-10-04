@@ -40,3 +40,11 @@ restoration $79, interior protect & condition $55.
 Guards: `src/test/pricing-canon.test.ts` and
 `src/test/checkout-stripe-parity.test.ts` fail on any drift between canon,
 client display, Stripe catalog, DB tiers, and the charged amount.
+
+Car care pay (locked 21 Sep 2026): maintenance wash $16/$20/$26, full detail $78/$88/$115
+(sedan-coupe / SUV-crossover / truck-3row-van). $17/$27/$51/$61/$82 were WRONG — never use.
+Car Wash Add-On pay: x1 16/20/26, x2 32/40/52.
+Stripe metadata (live AND test must mirror): plans carry contractor_pay_per_visit,
+budget_hours_per_visit (clean 2.20/3.10/4.45, lawn 0.60/0.95/1.50), visits_per_month (1/2/4);
+shine_N carries wash_pay, washes_per_month 3, detail_pay, details_per_year 2;
+wash and add-on prices carry contractor_pay in dollars.
