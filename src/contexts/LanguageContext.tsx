@@ -1332,6 +1332,15 @@ const translations: Record<string, string> = {
   "Preferred by": "Preferido por",
 
   // Pricing table (homepage)
+  "Once a month": "Una vez al mes",
+  "Every 2 weeks": "Cada 2 semanas",
+  "How often should we come?": "¿Con qué frecuencia debemos ir?",
+  "1 visit a month": "1 visita al mes",
+  "2 visits a month": "2 visitas al mes",
+  "4 visits a month": "4 visitas al mes",
+  "How often does someone come?": "¿Con qué frecuencia viene alguien?",
+  "You choose — weekly, every two weeks, or once a month, for cleaning and lawn care alike. The more often we come, the less each visit costs. Car Care is a set package: 3 washes every month plus 2 full details a year. Change how often any time from your account. Nothing locks you in.":
+    "Tú eliges: semanal, cada dos semanas o una vez al mes, tanto para limpieza como para jardín. Cuanto más seguido vamos, menos cuesta cada visita. Cuidado del Auto es un paquete fijo: 3 lavados al mes más 2 detallados completos al año. Cambia la frecuencia cuando quieras desde tu cuenta. Sin compromisos.",
   "three sizes, one price each": "tres tamaños, un precio cada uno",
   "Size sets the price per visit for cleaning and lawn care. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Shine Complete is one flat monthly price.":
     "El tamaño define el precio por visita de limpieza y jardín. Venir más seguido baja el precio por visita — quincenal es 8% menos por visita que mensual, y semanal 18% menos. Siempre se factura mensualmente. Shine Complete es un precio fijo mensual.",
