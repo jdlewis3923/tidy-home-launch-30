@@ -1,8 +1,6 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
-import heroImg from "@/assets/lp-house-cleaning.jpg";
-import heroImgWebp from "@/assets/lp-house-cleaning.webp";
-import heroImgMobile from "@/assets/lp-house-cleaning-mobile.jpg";
-import heroImgMobileWebp from "@/assets/lp-house-cleaning-mobile.webp";
+import heroDesktopAsset from "@/assets/service-cleaning-desktop.png.asset.json";
+import heroMobileAsset from "@/assets/service-cleaning-mobile.png.asset.json";
 
 // Every card price below is the SIZE-1 price, which is why each card says
 // "From" and carries the size qualifier. Size 2 is $189 and size 3 is $279 a
@@ -26,13 +24,11 @@ const config: ServiceLandingConfig = {
   stickyLabel: "House Cleaning · from $139 a month",
   savingsCallout:
     "One-off cleanings in Pinecrest average **$180–$260**. Our plans start at **$139 a month** — with the same pro for each service, every visit.",
-  heroImage: heroImg,
-  heroImageWebp: heroImgWebp,
-  heroImageMobile: heroImgMobile,
-  heroImageMobileWebp: heroImgMobileWebp,
-  heroDimensions: [1920, 1080],
-  heroMobileDimensions: [900, 1599],
-  heroAlt: "Bright, freshly cleaned modern Miami living room",
+  heroImage: heroDesktopAsset.url,
+  heroImageMobile: heroMobileAsset.url,
+  heroDimensions: [1459, 972],
+  heroMobileDimensions: [848, 1508],
+  heroAlt: "Tidy cleaning professional caring for a modern Miami kitchen",
   plans: [
     {
       name: "Monthly",

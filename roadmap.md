@@ -4,6 +4,7 @@
 - [x] Category headlines with “&”, Shine Complete as car subtitle, and reservation buttons/date line across cleaning, lawn, and car pages.
 - [x] Shared lighter service-photo scrim with measured readable headlines; solid navy bundle hero.
 - [x] Set the canonical first-visit date to November 16 in both mirrors; check phone/desktop and parity tests.
+- [x] Replace each service page with its matching worker photo in dedicated phone and desktop crops.
 
 ## Homepage cadence pricing (requested 2026-10-04)
 - [x] Show catalog monthly totals for all three cleaning and lawn cadences with visible visit counts; keep Shine Complete fixed.

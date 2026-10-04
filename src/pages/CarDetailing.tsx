@@ -1,8 +1,6 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
-import heroImg from "@/assets/lp-car-detailing.jpg";
-import heroImgWebp from "@/assets/lp-car-detailing.webp";
-import heroImgMobile from "@/assets/lp-car-detailing-mobile.jpg";
-import heroImgMobileWebp from "@/assets/lp-car-detailing-mobile.webp";
+import heroDesktopAsset from "@/assets/service-car-care-desktop.png.asset.json";
+import heroMobileAsset from "@/assets/service-car-care-mobile.png.asset.json";
 
 
 const config: ServiceLandingConfig = {
@@ -19,12 +17,11 @@ const config: ServiceLandingConfig = {
   stickyLabel: "Car Care · from $149/mo",
   savingsCallout:
     "A good mobile detail runs **$120–$180 per appointment**. Car Care is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.",
-  heroImage: heroImg,
-  heroImageWebp: heroImgWebp,
-  heroImageMobile: heroImgMobile,
-  heroImageMobileWebp: heroImgMobileWebp,
-  heroDimensions: [1920, 1080],
-  heroAlt: "Pristine freshly detailed black SUV in a Miami driveway",
+  heroImage: heroDesktopAsset.url,
+  heroImageMobile: heroMobileAsset.url,
+  heroDimensions: [1386, 923],
+  heroMobileDimensions: [848, 1508],
+  heroAlt: "Tidy car care professional detailing a vehicle in a Miami driveway",
   plans: [
     // Each card is one vehicle size, so the price is exact — no "From" here.
     {

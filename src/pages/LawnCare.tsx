@@ -1,8 +1,6 @@
 import ServiceLandingPage, { ServiceLandingConfig } from "@/components/landing/ServiceLandingPage";
-import heroImg from "@/assets/lp-lawn-care.jpg";
-import heroImgWebp from "@/assets/lp-lawn-care.webp";
-import heroImgMobile from "@/assets/lp-lawn-care-mobile.jpg";
-import heroImgMobileWebp from "@/assets/lp-lawn-care-mobile.webp";
+import heroDesktopAsset from "@/assets/service-lawn-desktop.png.asset.json";
+import heroMobileAsset from "@/assets/service-lawn-mobile.png.asset.json";
 
 // Card prices are the SIZE-1 lot MONTHLY BILL. Size 2 and size 3 cost more,
 // which is why every card says "From" and carries this qualifier.
@@ -26,12 +24,11 @@ const config: ServiceLandingConfig = {
   stickyLabel: "Lawn Care · from $45 a month",
   savingsCallout:
     "Most Pinecrest lawn pros charge **$40–$60 per visit** and re-quote you later. Tidy is **from $45 a month** flat, with the same pro for each service, every visit, and no surprise invoices.",
-  heroImage: heroImg,
-  heroImageWebp: heroImgWebp,
-  heroImageMobile: heroImgMobile,
-  heroImageMobileWebp: heroImgMobileWebp,
-  heroDimensions: [1920, 1122],
-  heroAlt: "Freshly mowed striped emerald lawn at a Pinecrest home",
+  heroImage: heroDesktopAsset.url,
+  heroImageMobile: heroMobileAsset.url,
+  heroDimensions: [1316, 876],
+  heroMobileDimensions: [805, 1432],
+  heroAlt: "Tidy lawn professional edging a manicured Pinecrest lawn",
   plans: [
     {
       name: "Monthly",

@@ -224,7 +224,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               {config.heroImageMobileWebp && (
                 <source media="(max-width: 639px)" srcSet={config.heroImageMobileWebp} type="image/webp" />
               )}
-              <source media="(max-width: 639px)" srcSet={config.heroImageMobile} type="image/jpeg" />
+              <source media="(max-width: 639px)" srcSet={config.heroImageMobile} />
             </>
           )}
           {config.heroImageWebp && <source srcSet={config.heroImageWebp} type="image/webp" />}
