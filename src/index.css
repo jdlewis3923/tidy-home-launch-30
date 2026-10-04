@@ -213,9 +213,9 @@
     content: "";
     position: absolute;
     z-index: -1;
-    inset: -0.7rem -1rem;
+    inset: -3rem -8rem;
     pointer-events: none;
-    background: radial-gradient(ellipse 75% 85% at center, hsl(var(--navy) / .82) 0%, hsl(var(--navy) / .75) 55%, transparent 100%);
+    background: radial-gradient(ellipse 55% 55% at center, hsl(var(--navy) / .84) 0%, hsl(var(--navy) / .8) 55%, transparent 100%);
   }
   .text-balance {
     text-wrap: balance;
