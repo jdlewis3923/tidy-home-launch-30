@@ -22,7 +22,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
   }, []);
 
   return (
-    <section className="relative min-h-[90vh] flex items-start md:items-center justify-center overflow-hidden">
+    <section className="relative h-[88vh] md:h-auto md:min-h-[90vh] flex items-start md:items-center justify-center overflow-hidden">
       {/* Mobile (portrait source matches portrait viewport): animated loop. */}
       {motionOk ? (
         <video
@@ -73,6 +73,16 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
       )}
 
       <div className="absolute inset-0 bg-navy/45" />
+      {/* Mobile scrims: keep the pill/headline and the launch lines readable over the video. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 md:hidden bg-[linear-gradient(to_bottom,rgba(0,30,60,0.55)_0%,rgba(0,30,60,0)_28%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 md:hidden bg-[linear-gradient(to_bottom,rgba(0,50,90,0)_55%,rgba(0,50,90,0.45)_100%)]"
+      />
+
 
 
 
