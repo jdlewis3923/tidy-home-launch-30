@@ -165,9 +165,9 @@ describe('contractor pay is 40% of the visit price and never shown to a customer
   });
 
   it('locks Shine pay per wash and per full detail', () => {
-    expect(CONTRACTOR_SHINE_PAY[1]).toEqual({ maintenanceWash: 17, fullDetail: 51 });
-    expect(CONTRACTOR_SHINE_PAY[2]).toEqual({ maintenanceWash: 20, fullDetail: 61 });
-    expect(CONTRACTOR_SHINE_PAY[3]).toEqual({ maintenanceWash: 27, fullDetail: 82 });
+    expect(CONTRACTOR_SHINE_PAY[1]).toEqual({ maintenanceWash: 16, fullDetail: 78 });
+    expect(CONTRACTOR_SHINE_PAY[2]).toEqual({ maintenanceWash: 20, fullDetail: 88 });
+    expect(CONTRACTOR_SHINE_PAY[3]).toEqual({ maintenanceWash: 26, fullDetail: 115 });
   });
 
   it('surcharge share and Tier 2 uplift', () => {
