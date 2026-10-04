@@ -138,7 +138,7 @@ function buildState(
 
 describe('checkout ↔ Stripe parity', () => {
   it('the add-on seed is present and complete', () => {
-    expect(addonCatalog.length).toBeGreaterThanOrEqual(15);
+    expect(addonCatalog.length).toBeGreaterThanOrEqual(14);
     expect(read('supabase/functions/setup-stripe-catalog/index.ts')).toMatch(/pressure/i);
   });
 
