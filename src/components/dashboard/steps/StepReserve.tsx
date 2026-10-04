@@ -1,3 +1,4 @@
+import RatingLine from '@/components/reviews/RatingLine';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -114,6 +115,7 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
       </label>
 
       {err && <p className="text-sm text-destructive">{err}</p>}
+      <RatingLine />
       <button type="button" onClick={submit} disabled={!ready || busy} data-testid="reserve-submit"
         style={{ backgroundColor: 'hsl(var(--ink))', color: '#ffffff' }}
         className="w-full rounded-xl px-7 py-4 text-sm font-semibold shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] disabled:opacity-40">
