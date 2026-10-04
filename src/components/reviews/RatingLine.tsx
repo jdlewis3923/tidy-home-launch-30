@@ -11,7 +11,7 @@ export default function RatingLine() {
     <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[12px] text-ink-soft" data-testid="rating-line">
       <Stars value={listing.rating} size={14} />
       <span>
-        <span className="font-semibold text-ink tabular-nums">{formatRating(listing.rating)}</span> {t("from")}{" "}
+        <span className="font-semibold text-ink tabular-nums">{formatRating(listing.rating)}</span> {t("rating from")}{" "}
         {listing.total_count} {t(listing.total_count === 1 ? "Google review" : "Google reviews")}
       </span>
       <span className="text-ink-faint">·</span>

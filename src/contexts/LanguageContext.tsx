@@ -329,6 +329,14 @@ const translations: Record<string, string> = {
   "Available as add-ons: pet hair removal, interior protect & condition, clay bar & ceramic coat.":
     "Disponibles como servicios adicionales: remoción de pelo de mascotas, protección y acondicionamiento del interior, barra de arcilla y capa cerámica.",
   "from": "desde",
+  "rating from": "de",
+  "review on Google": "reseña en Google",
+  "reviews on Google": "reseñas en Google",
+  "Google review": "reseña de Google",
+  "Google reviews": "reseñas de Google",
+  "Read them →": "Léelas →",
+  "Neighbors who already use us.": "Vecinos que ya nos usan.",
+  "Every review below is on our Google listing. Read them there →": "Cada reseña aquí está en nuestro perfil de Google. Léelas allí →",
   "Figures assume monthly service for each service. Your price changes with the visit frequency you choose.":
     "Las cifras asumen servicio mensual para cada servicio. Tu precio cambia según la frecuencia de visitas que elijas.",
   "Paint correction": "Corrección de pintura",
