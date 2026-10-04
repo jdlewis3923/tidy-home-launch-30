@@ -22,7 +22,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
   }, []);
 
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[90vh] flex items-start md:items-center justify-center overflow-hidden">
       {/* Mobile (portrait source matches portrait viewport): animated loop. */}
       {motionOk ? (
         <video
@@ -134,7 +134,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         </div>
       </div>
 
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-20 md:pt-0">
         <div className="inline-flex items-center bg-primary/20 border border-primary/30 rounded-full px-4 py-1.5 mb-6">
           <span className="w-2 h-2 rounded-full bg-success mr-2 animate-pulse-dot" />
           <span className="text-xs font-medium text-primary-foreground">
