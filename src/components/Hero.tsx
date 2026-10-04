@@ -135,26 +135,26 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
       </div>
 
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-20 md:pt-0">
-        <div className="inline-flex items-center bg-primary/20 border border-primary/30 rounded-full px-4 py-1.5 mb-6">
+        <div className="inline-flex items-center bg-primary/20 border border-primary/30 rounded-full px-4 py-1.5 mb-4 md:mb-6">
           <span className="w-2 h-2 rounded-full bg-success mr-2 animate-pulse-dot" />
           <span className="text-xs font-medium text-primary-foreground">
             {t("Now accepting homes in Kendall & Pinecrest · Limited spots")}
           </span>
         </div>
 
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-primary-foreground leading-tight mb-6">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-primary-foreground leading-tight mb-4 md:mb-6">
           {t("Your Home.")}
           <br />
           {t("On Autopilot.")}
         </h1>
 
-        <p className="text-lg md:text-xl font-light text-primary-foreground/80 max-w-2xl mx-auto mb-8 leading-relaxed">
+        <p className="text-lg md:text-xl font-light text-primary-foreground/80 max-w-2xl mx-auto mb-5 md:mb-8 leading-relaxed">
           {t("Scheduling, timing, and follow-through — handled.")}
           <br />
           {t("Set it once. We take care of the rest.")}
         </p>
 
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
+        <div className="flex flex-wrap justify-center gap-3 mb-6 md:mb-8">
           {["🏠 House Cleaning", "🌿 Lawn Care", "🚗 Shine Complete"].map((pill) => (
             <span
               key={pill}
