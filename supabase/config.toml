@@ -173,3 +173,6 @@ verify_jwt = false
 
 [functions.reservation-admin]
 verify_jwt = false
+
+[functions.google-reviews-public]
+verify_jwt = false
