@@ -203,6 +203,11 @@
   .service-hero-scrim {
     background: linear-gradient(to bottom, hsl(var(--service-hero-overlay) / .55) 0%, hsl(var(--service-hero-overlay) / .25) 60%, hsl(var(--service-hero-overlay) / .25) 100%);
   }
+  .service-hero-headline {
+    /* A dark halo keeps white lettering legible over bright rooms and skies
+       without darkening the entire service photo again. */
+    text-shadow: 0 1px 3px hsl(var(--navy)), 0 0 12px hsl(var(--navy));
+  }
   .text-balance {
     text-wrap: balance;
   }

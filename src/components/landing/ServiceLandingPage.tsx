@@ -245,7 +245,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t(config.eyebrow)}</span>
-          <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
+          <h1 className="service-hero-headline mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
             {t(config.h1)}
           </h1>
           <p className="mt-5 text-lg md:text-xl font-light text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
