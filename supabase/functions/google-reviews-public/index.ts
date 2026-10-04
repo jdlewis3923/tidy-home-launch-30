@@ -17,14 +17,22 @@ type Cache = {
   reviews: unknown[]; fetched_at: string; last_error: string | null;
 };
 
+const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY') ?? '';
+const MAPS_CONN_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY') ?? '';
+const FIELD_MASK = 'rating,userRatingCount,googleMapsUri,reviews';
+
 async function fetchGoogle() {
-  const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(PLACE_ID)}`, {
-    headers: {
-      'X-Goog-Api-Key': API_KEY,
-      'X-Goog-FieldMask': 'rating,userRatingCount,googleMapsUri,reviews',
-    },
-    signal: AbortSignal.timeout(10_000),
-  });
+  const path = `places/v1/places/${encodeURIComponent(PLACE_ID)}`;
+  // Prefer the Google Maps connector; fall back to the project's own key.
+  const res = LOVABLE_API_KEY && MAPS_CONN_KEY
+    ? await fetch(`https://connector-gateway.lovable.dev/google_maps/${path}`, {
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, 'X-Connection-Api-Key': MAPS_CONN_KEY, 'X-Goog-FieldMask': FIELD_MASK },
+        signal: AbortSignal.timeout(10_000),
+      })
+    : await fetch(`https://places.googleapis.com/v1/${path}`, {
+        headers: { 'X-Goog-Api-Key': API_KEY, 'X-Goog-FieldMask': FIELD_MASK },
+        signal: AbortSignal.timeout(10_000),
+      });
   if (!res.ok) throw new Error(`places ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const j = await res.json();
   const reviews = (j.reviews ?? []).map((r: any) => ({
@@ -58,7 +66,7 @@ Deno.serve(async (req) => {
 
   let row: Cache | null = cached ?? null;
   let source = 'cache';
-  if ((!fresh || force) && API_KEY && PLACE_ID) {
+  if ((!fresh || force) && (API_KEY || MAPS_CONN_KEY) && PLACE_ID) {
     try {
       const g = await fetchGoogle();
       const up = { id: 'tidy', ...g, fetched_at: new Date().toISOString(), last_error: null, last_error_at: null };
