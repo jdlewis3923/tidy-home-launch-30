@@ -334,28 +334,25 @@ export function freeAddons(state: ConfigState): number {
 }
 
 // One-time add-ons. Size covers the property — add-ons are extra tasks only.
-export const addOnData: Record<string, { name: string; price: number; service: ServiceType; description: string; specialist?: boolean }> = {
+// Exactly nine, three per service: each one every Pro in that service can
+// deliver with the kit already required of them. Retired add-ons stay switched
+// off in the catalog records and never return here.
+// giftEligible = may be picked as the free bundle add-on ($55 and under).
+export const addOnData: Record<string, { name: string; price: number; service: ServiceType; description: string; giftEligible: boolean }> = {
   // House Cleaning
-  oven: { name: 'Inside Oven Clean', price: 45, service: 'cleaning', description: 'Deep clean inside your oven' },
-  fridge: { name: 'Inside Fridge Clean', price: 35, service: 'cleaning', description: 'Interior fridge scrub & wipe-down' },
-  interiorWindows: { name: 'Interior Windows', price: 55, service: 'cleaning', description: 'All interior glass cleaned' },
-  baseboards: { name: 'Deep Baseboard Scrub', price: 35, service: 'cleaning', description: 'Hand-detailed baseboards' },
-  laundry: { name: 'Laundry — Wash, Dry & Fold (1 load)', price: 30, service: 'cleaning', description: 'One load, washed, dried, and folded' },
-  cabinets: { name: 'Inside Kitchen Cabinets', price: 50, service: 'cleaning', description: 'Wipe inside all kitchen cabinets' },
+  oven: { name: 'Inside Oven Clean', price: 45, service: 'cleaning', description: 'Deep clean inside your oven', giftEligible: true },
+  fridge: { name: 'Inside Fridge Clean', price: 35, service: 'cleaning', description: 'Interior fridge scrub & wipe-down', giftEligible: true },
+  interiorWindows: { name: 'Interior Windows', price: 55, service: 'cleaning', description: 'Interior glass reachable from the floor — no ladder', giftEligible: true },
 
   // Lawn Care
-  weed: { name: 'Weed Removal — Garden Beds', price: 45, service: 'lawn', description: 'Manual weed pulling in beds' },
-  leaf: { name: 'Leaf & Debris Cleanup', price: 55, service: 'lawn', description: 'Full yard leaf and debris removal' },
-  bedEdgeReset: { name: 'Bed Edge Reset', price: 65, service: 'lawn', description: 'Clean vertical edge cut where beds meet turf — mulch stays in, grass stays out' },
-  exteriorWindows: { name: 'Exterior Windows & Screens', price: 85, service: 'lawn', description: 'Exterior window and screen rinse — ground floor only, no ladder work' },
-  pressureWash: { name: 'Driveway Pressure Wash', price: 150, service: 'lawn', description: 'Concrete driveway and walkway pressure clean', specialist: true },
+  weed: { name: 'Weed Removal — Garden Beds', price: 45, service: 'lawn', description: 'Manual weed pulling in beds', giftEligible: true },
+  leaf: { name: 'Leaf & Debris Cleanup', price: 55, service: 'lawn', description: 'Full yard leaf and debris removal', giftEligible: true },
+  bedEdgeReset: { name: 'Bed Edge Reset', price: 65, service: 'lawn', description: 'Clean vertical edge cut where beds meet turf — mulch stays in, grass stays out', giftEligible: false },
 
-
-  // Car care — condition surcharges live here, never in a size.
-  petHair: { name: 'Pet Hair Removal', price: 45, service: 'detailing', description: 'Thorough pet hair extraction' },
-  clayBarCeramic: { name: 'Clay Bar & Ceramic Coat', price: 95, service: 'detailing', description: 'Clay bar paint decontamination then a ceramic spray coat — about 6 months of protection' },
-  headlightRestoration: { name: 'Headlight Restoration', price: 79, service: 'detailing', description: 'Wet-sand, polish and UV-seal both headlights back to clear — the UV sealant keeps them from re-yellowing' },
-  interiorProtect: { name: 'Interior Protect & Condition', price: 55, service: 'detailing', description: 'Dash, door panels and seats cleaned and conditioned with UV protection' },
+  // Car care
+  petHair: { name: 'Pet Hair Removal', price: 45, service: 'detailing', description: 'Thorough pet hair extraction', giftEligible: true },
+  interiorProtect: { name: 'Interior Protect & Condition', price: 55, service: 'detailing', description: 'Dash, door panels and seats cleaned and conditioned with UV protection', giftEligible: true },
+  clayBarCeramic: { name: 'Clay Bar & Ceramic Coat', price: 95, service: 'detailing', description: 'Clay bar paint decontamination then a ceramic spray coat — about 6 months of protection', giftEligible: false },
 };
 
 // ---------------------------------------------------------------------------

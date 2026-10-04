@@ -101,7 +101,7 @@ const PricingTable = () => {
                     <td className="px-6 py-4 text-foreground/80">
                       <span className="font-semibold block">${BILLED_MONTHLY.detailing[r.size].monthly}/mo</span>
                       <span className="block text-xs text-muted-foreground">{t("3 washes a month + 2 full details a year")}</span>
-                      <span className="text-xs text-text-light">{t(r.detailing.label)} · {t(r.detailing.helper)}</span>
+                      <span className="text-xs text-text-light">{t(r.detailing.label)}</span>
                     </td>
                   </tr>
                 ))}
