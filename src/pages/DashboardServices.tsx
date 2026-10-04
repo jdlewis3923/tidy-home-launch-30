@@ -56,6 +56,7 @@ type CatalogRow = {
   lucide_icon: string | null;
   sort_order: number;
   is_specialist: boolean;
+  gift_eligible: boolean;
 };
 
 type ProOption = {
@@ -218,7 +219,7 @@ export default function DashboardServices() {
       const [catalogRes, attachRes] = await Promise.all([
         supabase
           .from('addon_catalog')
-          .select('addon_key, display_name, price_cents, services, lucide_icon, sort_order, is_specialist')
+          .select('addon_key, display_name, price_cents, services, lucide_icon, sort_order, is_specialist, gift_eligible')
           .eq('is_active', true)
           .order('sort_order', { ascending: true }),
         supabase
@@ -256,7 +257,7 @@ export default function DashboardServices() {
     return catalog.filter((a) => a.services.includes(dbKey));
   }, [catalog, activeService]);
 
-  const giftPool = visibleAddons.filter((a) => !a.is_specialist);
+  const giftPool = visibleAddons.filter((a) => a.gift_eligible);
 
   const attach = async (addon: CatalogRow, free: boolean) => {
     setWorking(addon.addon_key);
@@ -650,7 +651,7 @@ export default function DashboardServices() {
               ) : (
                 <>
                   <p className="mt-2 text-sm text-ink-soft">
-                    {t('Two or more services earns one free premium add-on every month.')}
+                    {t('Two services earn one free premium add-on a month. Three earn two.')}
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">

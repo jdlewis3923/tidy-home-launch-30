@@ -23,7 +23,7 @@ const services = [
     description: "Consistent interior care for a home that always feels reset. Handled on your schedule without lifting a finger.",
     checks: ["Kitchen & bathroom deep clean", "Floors vacuumed & mopped", "Dusting all surfaces & fixtures", "Trash removal & liner replacement"],
     excludes: ["Deep carpet shampooing", "Window exterior washing", "Garage or attic cleaning"],
-    addOns: "Inside oven, inside fridge, interior windows, baseboard scrub, laundry, inside kitchen cabinets",
+    addOns: "Inside oven, inside fridge, interior windows",
     accent: "border-t-primary",
   },
   {
@@ -39,7 +39,7 @@ const services = [
     description: "Professional lawn maintenance to keep your Miami home's exterior sharp year-round. No scheduling required, ever.",
     checks: ["Mowing to standard height", "Edging along walkways & beds", "Debris blowing & full cleanup", "Weekly or biweekly cadence"],
     excludes: ["Tree trimming or removal", "Irrigation system repair", "Landscape design or planting"],
-    addOns: "Weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens",
+    addOns: "Weed removal, leaf & debris cleanup, bed edge reset",
     accent: "border-t-success",
   },
   {
@@ -55,7 +55,7 @@ const services = [
     description: "Driveway-ready detailing at your door. We come to you — exterior wash, interior vacuum, surface cleaning.",
     checks: ["Exterior hand wash & wheels", "Interior vacuum & floor mats", "Dashboard & surface wipe-down", "3 maintenance washes every month"],
     excludes: ["Paint correction", "Paint sealant machine application"],
-    addOns: "Pet hair removal, clay bar & ceramic coat, headlight restoration, interior protect & condition",
+    addOns: "Pet hair removal, interior protect & condition, clay bar & ceramic coat",
     accent: "border-t-violet-500",
   },
 ];

@@ -1,6 +1,6 @@
-// Tidy — Add-on catalog for "Add to your next visit" panel.
-// Mirrors the spec; stripe_price_id should be set after running setup-stripe-catalog.
-// For now we use the catalog identifiers and look up Stripe price ids server-side.
+// Tidy — Add-on catalog (client mirror of public.addon_catalog live rows).
+// Exactly nine live add-ons, three per service. Stripe is referenced by
+// lookup_key only. Retired add-ons stay switched off in the database records.
 
 export type AddonService = 'cleaning' | 'lawn' | 'detailing';
 
@@ -9,41 +9,33 @@ export type Addon = {
   name: string;
   price: number;
   service: AddonService;
+  /** Stable Stripe lookup_key. */
+  lookupKey: string;
   /** Lucide icon name */
   icon: string;
   /** Items that "feel one-time" — pushed to bottom if bought in last 60 days */
   oneTimeFeel?: boolean;
-  /**
-   * Specialist work: quoted and scheduled separately, and never part of the
-   * free monthly add-on gift for bundled plans.
-   */
-  specialist?: boolean;
+  /** May be picked as the free monthly bundle add-on ($55 and under). */
+  giftEligible: boolean;
 };
 
 export const ADDON_CATALOG: Addon[] = [
   // Cleaning
-  { key: 'inside_oven',        name: 'Inside Oven Clean',     price: 45, service: 'cleaning', icon: 'Flame' },
-  { key: 'inside_fridge',      name: 'Inside Fridge Clean',   price: 35, service: 'cleaning', icon: 'Refrigerator' },
-  { key: 'interior_windows',   name: 'Interior Windows',      price: 55, service: 'cleaning', icon: 'PanelTop' },
-  { key: 'baseboard_scrub',    name: 'Deep Baseboard Scrub',  price: 35, service: 'cleaning', icon: 'Brush' },
-  { key: 'laundry_wdf',        name: 'Laundry W/D/F',         price: 30, service: 'cleaning', icon: 'Shirt' },
-  { key: 'inside_cabinets',    name: 'Inside Kitchen Cabinets', price: 50, service: 'cleaning', icon: 'Boxes' },
+  { key: 'inside_oven_clean',   name: 'Inside Oven Clean',   price: 45, service: 'cleaning', lookupKey: 'addon_inside_oven',      icon: 'Flame',        giftEligible: true },
+  { key: 'inside_fridge_clean', name: 'Inside Fridge Clean', price: 35, service: 'cleaning', lookupKey: 'addon_inside_fridge',    icon: 'Refrigerator', giftEligible: true },
+  { key: 'interior_windows',    name: 'Interior Windows',    price: 55, service: 'cleaning', lookupKey: 'addon_interior_windows', icon: 'PanelTop',     giftEligible: true },
   // Lawn
-  { key: 'weed_removal',       name: 'Weed Removal',          price: 45, service: 'lawn', icon: 'Sprout' },
-  { key: 'leaf_cleanup',       name: 'Leaf & Debris Cleanup', price: 55, service: 'lawn', icon: 'Leaf' },
-  { key: 'bed_edge_reset',     name: 'Bed Edge Reset',        price: 65, service: 'lawn', icon: 'Scissors' },
-  { key: 'exterior_windows_screens', name: 'Exterior Windows & Screens', price: 85, service: 'lawn', icon: 'PanelTop' },
-  { key: 'driveway_pressure',  name: 'Driveway Pressure Wash', price: 150, service: 'lawn', icon: 'Wind', oneTimeFeel: true, specialist: true },
-  // Detail
-  { key: 'pet_hair',           name: 'Pet Hair Removal',      price: 45, service: 'detailing', icon: 'Dog' },
-  { key: 'clay_bar_ceramic',   name: 'Clay Bar & Ceramic Coat', price: 95, service: 'detailing', icon: 'Sparkles', oneTimeFeel: true },
-  { key: 'headlight_restoration', name: 'Headlight Restoration', price: 79, service: 'detailing', icon: 'Lightbulb', oneTimeFeel: true },
-  { key: 'interior_protect',   name: 'Interior Protect & Condition', price: 55, service: 'detailing', icon: 'ShieldCheck' },
+  { key: 'weed_removal',        name: 'Weed Removal — Garden Beds', price: 45, service: 'lawn', lookupKey: 'addon_weed_removal',  icon: 'Sprout',   giftEligible: true },
+  { key: 'leaf_debris_cleanup', name: 'Leaf & Debris Cleanup',      price: 55, service: 'lawn', lookupKey: 'addon_leaf_debris',   icon: 'Leaf',     giftEligible: true },
+  { key: 'bed_edge_reset',      name: 'Bed Edge Reset',             price: 65, service: 'lawn', lookupKey: 'addon_bed_edge_reset', icon: 'Scissors', giftEligible: false },
+  // Car care
+  { key: 'pet_hair_removal',           name: 'Pet Hair Removal',             price: 45, service: 'detailing', lookupKey: 'addon_pet_hair',               icon: 'Dog',         giftEligible: true },
+  { key: 'interior_protect_condition', name: 'Interior Protect & Condition', price: 55, service: 'detailing', lookupKey: 'addon_interior_protect',       icon: 'ShieldCheck', giftEligible: true },
+  { key: 'clay_bar_ceramic_coat',      name: 'Clay Bar & Ceramic Coat',      price: 95, service: 'detailing', lookupKey: 'addon_clay_bar_ceramic_coat', icon: 'Sparkles', oneTimeFeel: true, giftEligible: false },
 ];
 
 /** The pool the free monthly add-on for bundled plans is picked from. */
-export const GIFT_ELIGIBLE_ADDONS = ADDON_CATALOG.filter((a) => !a.specialist);
-
+export const GIFT_ELIGIBLE_ADDONS = ADDON_CATALOG.filter((a) => a.giftEligible);
 
 export const SERVICE_LABELS: Record<AddonService, string> = {
   cleaning: 'Cleaning',

@@ -106,9 +106,11 @@ export type Database = {
           addon_key: string
           created_at: string
           display_name: string
+          gift_eligible: boolean
           id: string
           is_active: boolean
           is_specialist: boolean
+          lookup_key: string | null
           lucide_icon: string | null
           price_cents: number
           services: string[]
@@ -121,9 +123,11 @@ export type Database = {
           addon_key: string
           created_at?: string
           display_name: string
+          gift_eligible?: boolean
           id?: string
           is_active?: boolean
           is_specialist?: boolean
+          lookup_key?: string | null
           lucide_icon?: string | null
           price_cents: number
           services?: string[]
@@ -136,9 +140,11 @@ export type Database = {
           addon_key?: string
           created_at?: string
           display_name?: string
+          gift_eligible?: boolean
           id?: string
           is_active?: boolean
           is_specialist?: boolean
+          lookup_key?: string | null
           lucide_icon?: string | null
           price_cents?: number
           services?: string[]

@@ -11,6 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BILLED_MONTHLY,
+  CAR_WASH_PRICES,
   CADENCES,
   CLEANING_SURCHARGE,
   LAWN_SURCHARGE,
@@ -36,6 +37,7 @@ function canonFigures(): Set<number> {
   allowed.add(CLEANING_SURCHARGE.perVisitDollars);
   allowed.add(LAWN_SURCHARGE.perVisitDollars);
   for (const addon of ADDON_CATALOG) allowed.add(addon.price);
+  for (const s of [1, 2, 3] as const) for (const n of [1, 2] as const) allowed.add(CAR_WASH_PRICES[s][n]); // Car Wash Add-On
   allowed.add(REFERRAL_BONUS_CENTS / 100); // referral: give $50 / get $50
 
   // Non-price figures that legitimately appear in the knowledge base.

@@ -85,7 +85,7 @@ const config: ServiceLandingConfig = {
     "Background-checked pros",
     "Locked price — never surprise-priced",
   ],
-  addOnsNote: "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset, exterior windows & screens. Driveway pressure wash is specialist work, quoted separately.",
+  addOnsNote: "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset.",
   surchargeNote:
     "Extra-large lot (4,001–7,500 sq ft of mowable turf): +$30 per visit. Above that size we quote individually.",
 

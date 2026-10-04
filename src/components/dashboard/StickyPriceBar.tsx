@@ -53,7 +53,7 @@ export default function StickyPriceBar({ state, currentStep }: Props) {
             </div>
             <p className="text-[11px] text-ink-faint">
               {pricing.freeAddons > 0
-                ? 'you pick 1 free premium add-on a month'
+                ? `you pick ${pricing.freeAddons} free premium add-on${pricing.freeAddons > 1 ? 's' : ''} a month`
                 : state.services.length >= 2 && !hasFullPricing
                   ? 'your free monthly add-on will apply'
                   : 'cancel anytime'}

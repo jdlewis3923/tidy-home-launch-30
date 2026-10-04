@@ -296,7 +296,7 @@ export default function Billing() {
               {t("Add a service")} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <p className="mt-2 text-xs text-ink-faint">
-              {t("Two or more services earns one free premium add-on every month.")}
+              {t("Two services earn one free premium add-on a month. Three earn two.")}
             </p>
 
             {sub && (

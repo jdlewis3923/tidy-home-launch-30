@@ -6,6 +6,7 @@ import {
   SizeSelection,
   formatMonthly,
   formatPerVisit,
+  frequencyVisitCopy,
   getSizePrice,
   getPerVisitPrice,
   getServicePrice,
@@ -50,13 +51,13 @@ function SizeReadout({
     <div className="rounded-xl border border-hairline bg-cream-deep/40 px-4 py-3 animate-calm-in">
       <p className="text-sm font-semibold text-ink lowercase">
         {sizeLabels[service][size].toLowerCase()} —{' '}
-        {perMonth ? formatMonthly(getSizePrice(service, size)) : formatPerVisit(perVisit)}
+        {perMonth
+          ? formatMonthly(getSizePrice(service, size))
+          : `${formatPerVisit(perVisit)} · ${frequencyVisitCopy[state.frequencies[service] ?? 'monthly']} · ${formatMonthly(getServicePrice(state, service))}`}
       </p>
       <p className="text-[11px] text-ink-faint mt-0.5">
         {sizeHelpers[service][size]}.{' '}
-        {perMonth
-          ? 'the same every month.'
-          : `${formatMonthly(getServicePrice(state, service))} at the plan you picked, billed monthly.`}
+        {perMonth ? 'the same every month.' : 'billed monthly.'}
       </p>
     </div>
   );

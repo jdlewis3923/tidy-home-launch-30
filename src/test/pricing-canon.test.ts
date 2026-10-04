@@ -193,15 +193,15 @@ describe('bundling gives one free premium add-on, never a percentage or a wash',
     expect(freeAddonsPerMonth(0)).toBe(0);
     expect(freeAddonsPerMonth(1)).toBe(0);
     expect(freeAddonsPerMonth(2)).toBe(1);
-    expect(freeAddonsPerMonth(3)).toBe(1);
-    expect(freeAddonsPerMonth(4)).toBe(1);
+    expect(freeAddonsPerMonth(3)).toBe(2);
+    expect(freeAddonsPerMonth(4)).toBe(2);
   });
 
   it('the gift pool is the add-on catalogue and the customer chooses', () => {
     expect(FREE_ADDON_CUSTOMER_CHOICE).toBe(true);
     expect(GIFT_ELIGIBLE_ADDONS.length).toBeGreaterThan(0);
-    expect(GIFT_ELIGIBLE_ADDONS.some((a) => a.key === 'driveway_pressure')).toBe(false);
-    expect(GIFT_ELIGIBLE_ADDONS.every((a) => !a.specialist)).toBe(true);
+    expect(GIFT_ELIGIBLE_ADDONS.every((a) => a.price <= 55)).toBe(true);
+    expect(GIFT_ELIGIBLE_ADDONS.map((a) => a.key).sort()).toEqual(['inside_fridge_clean','inside_oven_clean','interior_protect_condition','interior_windows','leaf_debris_cleanup','pet_hair_removal','weed_removal']);
   });
 
   it('calculatePricing applies no discount to the subtotal', () => {

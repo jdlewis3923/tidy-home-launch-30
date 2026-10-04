@@ -67,13 +67,13 @@ Deno.serve(async (req) => {
   // Look up addon from catalog (single source of truth)
   const { data: addon, error: addonErr } = await admin
     .from('addon_catalog')
-    .select('addon_key, display_name, price_cents, services, stripe_price_id, is_active, is_specialist')
+    .select('addon_key, display_name, price_cents, services, lookup_key, is_active, is_specialist, gift_eligible')
     .eq('addon_key', addon_key)
     .maybeSingle();
   if (addonErr) return jsonResponse({ ok: false, error: 'catalog_fetch_failed', detail: addonErr.message }, 500);
   if (!addon || !addon.is_active) return jsonResponse({ ok: false, error: 'unknown_addon' }, 404);
-  if (!addon.stripe_price_id) {
-    return jsonResponse({ ok: false, error: 'addon_missing_stripe_price', detail: 'Run sync-addon-stripe-catalog' }, 409);
+  if (!addon.lookup_key) {
+    return jsonResponse({ ok: false, error: 'addon_missing_lookup_key', detail: 'Run reconcile-addon-catalog' }, 409);
   }
   const addonName = addon.display_name as string;
   const addonPriceDollars = (addon.price_cents as number) / 100;
@@ -94,8 +94,8 @@ Deno.serve(async (req) => {
     if (allowance < 1) {
       return jsonResponse({ ok: false, error: 'no_free_addon_allowance' }, 409);
     }
-    if (addon.is_specialist) {
-      // Specialist work is quoted and scheduled separately — never the gift.
+    if (!addon.gift_eligible) {
+      // Only the $55-and-under pool is ever the gift.
       return jsonResponse({ ok: false, error: 'addon_not_gift_eligible' }, 409);
     }
     const { count: usedThisMonth } = await admin
@@ -118,9 +118,17 @@ Deno.serve(async (req) => {
     // Nothing is charged — no Stripe invoice item at all.
   } else if (STRIPE_SECRET_KEY && sub?.stripe_customer_id) {
     try {
+      // Integrations reference lookup_key, never a stored price id.
+      const lk = await vendorFetch(
+        `https://api.stripe.com/v1/prices?active=true&limit=1&lookup_keys[]=${encodeURIComponent(addon.lookup_key as string)}`,
+        { headers: { 'Authorization': `Bearer ${STRIPE_SECRET_KEY}` } },
+      );
+      const lkJson = await lk.json();
+      const resolvedPriceId = lkJson?.data?.[0]?.id as string | undefined;
+      if (!resolvedPriceId) throw new Error(`no active Stripe price for ${addon.lookup_key}`);
       const form = new URLSearchParams({
         customer: sub.stripe_customer_id,
-        price: addon.stripe_price_id,
+        price: resolvedPriceId,
         description: `${addonName} — add-on for visit ${visit_date ?? ''}`.trim(),
       });
       const resp = await vendorFetch('https://api.stripe.com/v1/invoiceitems', {
@@ -150,7 +158,7 @@ Deno.serve(async (req) => {
     user_id: userId,
     jobber_visit_id: jobber_visit_id ?? null,
     stripe_invoice_item_id: stripeInvoiceItemId,
-    stripe_addon_price_id: addon.stripe_price_id,
+    stripe_addon_price_id: addon.lookup_key,
     addon_key,
     addon_name: addonName,
     addon_price_cents: addon.price_cents,
