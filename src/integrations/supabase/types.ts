@@ -1891,6 +1891,33 @@ export type Database = {
         }
         Relationships: []
       }
+      google_listing_manual: {
+        Row: {
+          id: string
+          listing_url: string
+          rating: number
+          total_count: number
+          updated_at: string
+          verified_at: string
+        }
+        Insert: {
+          id?: string
+          listing_url: string
+          rating: number
+          total_count: number
+          updated_at?: string
+          verified_at?: string
+        }
+        Update: {
+          id?: string
+          listing_url?: string
+          rating?: number
+          total_count?: number
+          updated_at?: string
+          verified_at?: string
+        }
+        Relationships: []
+      }
       google_reviewer_neighborhoods: {
         Row: {
           author_name: string
@@ -4688,6 +4715,51 @@ export type Database = {
           last_change_reason?: string | null
           last_changed_at?: string
           service?: string
+        }
+        Relationships: []
+      }
+      site_google_reviews: {
+        Row: {
+          author_name: string
+          author_photo_url: string | null
+          created_at: string
+          id: string
+          is_published: boolean
+          neighborhood: string | null
+          rating: number
+          review_date: string
+          review_text: string
+          review_url: string | null
+          service: string | null
+          verified_at: string
+        }
+        Insert: {
+          author_name: string
+          author_photo_url?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          neighborhood?: string | null
+          rating: number
+          review_date: string
+          review_text: string
+          review_url?: string | null
+          service?: string | null
+          verified_at?: string
+        }
+        Update: {
+          author_name?: string
+          author_photo_url?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          neighborhood?: string | null
+          rating?: number
+          review_date?: string
+          review_text?: string
+          review_url?: string | null
+          service?: string | null
+          verified_at?: string
         }
         Relationships: []
       }
