@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { RESERVATIONS_MODE, LAUNCH_DATE_LONG, FOUNDING_CAP } from "@/lib/launch";
 import FoundingCounter from "@/components/FoundingCounter";
-import heroImgMobile from "@/assets/hero-miami-home-mobile.jpg";
-import heroVideo from "@/assets/hero-loop-hq.mp4.asset.json";
-import heroPoster from "@/assets/hero-poster.jpg.asset.json";
+import heroVideo from "@/assets/homepage-mobile-hero-20261004.mp4.asset.json";
+import heroPoster from "@/assets/homepage-mobile-hero-poster-20261004.jpg.asset.json";
 import heroWideVideo from "@/assets/homepage-desktop-hero.mp4.asset.json";
 import heroWidePoster from "@/assets/homepage-desktop-hero-poster.jpg.asset.json";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -39,8 +38,8 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         />
       ) : (
         <img
-          src={heroImgMobile}
-          alt="Modern Miami home with pool and palm trees"
+          src={heroPoster.url}
+          alt="Miami home at sunset"
           className="absolute inset-0 w-full h-full object-cover object-center md:hidden"
           width={1080}
           height={1920}
@@ -48,7 +47,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           decoding="async"
         />
       )}
-      {/* Desktop/laptop: original full-resolution widescreen upload. */}
+      {/* Desktop/laptop, including mobile browsers using Desktop site mode. */}
       {motionOk ? (
         <video
           src={heroWideVideo.url}
