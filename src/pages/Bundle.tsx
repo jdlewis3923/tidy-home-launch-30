@@ -18,6 +18,8 @@ import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { BUNDLE_GIFT_COPY, SERVICE_NAMES, SIZE_PRICES, hasFreeAddonEntitlement } from "@/lib/pricing-canon";
+import bundleDesktop from "@/assets/bundle-home-car-desktop.png.asset.json";
+import bundleMobile from "@/assets/bundle-home-car-mobile.png.asset.json";
 
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
 
@@ -120,7 +122,12 @@ const BundleInner = () => {
       />
 
       {/* HERO */}
-      <section className="relative min-h-[70vh] flex items-center pt-24 pb-16 overflow-hidden bg-gradient-to-b from-navy to-primary-deep">
+      <section className="relative min-h-[70vh] flex items-center pt-24 pb-16 overflow-hidden bg-navy">
+        <picture className="absolute inset-0">
+          <source media="(max-width: 767px)" srcSet={bundleMobile.url} />
+          <img src={bundleDesktop.url} alt="Home and lawn with a car in the driveway" className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
+        </picture>
+        <div className="absolute inset-0 service-hero-scrim" />
         <SparkleField />
         <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Bundle your services")}</span>

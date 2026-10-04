@@ -14,6 +14,8 @@ import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { pushEvent } from "@/lib/tracking";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
+import referDesktop from "@/assets/refer-homes-desktop.png.asset.json";
+import referMobile from "@/assets/refer-homes-mobile.png.asset.json";
 
 /**
  * /refer — public marketing surface for the existing
@@ -120,7 +122,12 @@ const ReferInner = () => {
       <Navbar onOpenPopup={handleNavCta} />
 
       {/* HERO */}
-      <section className="relative pt-32 pb-16 px-4 bg-gradient-to-b from-navy to-primary-deep overflow-hidden">
+      <section className="relative pt-32 pb-16 px-4 bg-navy overflow-hidden">
+        <picture className="absolute inset-0">
+          <source media="(max-width: 767px)" srcSet={referMobile.url} />
+          <img src={referDesktop.url} alt="Palm-lined neighborhood with two homes" className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
+        </picture>
+        <div className="absolute inset-0 service-hero-scrim" />
         <SparkleField />
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Refer & Earn")}</span>
