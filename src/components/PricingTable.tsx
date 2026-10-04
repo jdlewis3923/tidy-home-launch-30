@@ -45,7 +45,7 @@ const PricingTable = () => {
           </h2>
           <p className="text-text-mid mt-4 max-w-xl mx-auto">
             {t(
-              "Size sets the price per visit for cleaning and lawn care. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Shine Complete is one flat monthly price.",
+              "Size sets the price per visit for cleaning and lawn care. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Car Care is one flat monthly price.",
             )}
           </p>
 
@@ -75,7 +75,7 @@ const PricingTable = () => {
                   <th className="text-left px-6 py-4 font-semibold">{t("Size")}</th>
                   <th className="px-6 py-4 font-semibold">{t("House Cleaning")}</th>
                   <th className="px-6 py-4 font-semibold">{t("Lawn Care")}</th>
-                  <th className="px-6 py-4 font-semibold">{t("Car Care · Shine Complete")}<span className="block text-[11px] font-normal opacity-80">{t("per month")}</span></th>
+                  <th className="px-6 py-4 font-semibold">{t("Car Care")}<span className="block text-[11px] font-normal opacity-80">{t("per month")}</span></th>
 
                 </tr>
               </thead>

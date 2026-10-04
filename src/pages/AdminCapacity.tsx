@@ -165,7 +165,7 @@ interface AssignmentRow {
 const SERVICE_OPTIONS: Array<{ value: AssignmentRow["service"]; label: string }> = [
   { value: "cleaning", label: "House Cleaning" },
   { value: "lawn", label: "Lawn Care" },
-  { value: "detailing", label: "Shine Complete" },
+  { value: "detailing", label: "Car Care" },
 ];
 
 /**

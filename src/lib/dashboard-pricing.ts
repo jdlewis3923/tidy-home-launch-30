@@ -236,7 +236,7 @@ export { lookupKeyFor, perVisitPrice, monthlyPrice, ENTRY_MONTHLY, SHINE_MONTHLY
 
 /**
  * The service's headline figure: its lowest MONTHLY BILL.
- * Cleaning $139, lawn $45, Shine Complete $149 at size 1.
+ * Cleaning $139, lawn $45, Car Care $149 at size 1.
  */
 export function getSizePrice(service: ServiceType, size: Size): number {
   return SIZE_PRICES[service][size];
@@ -283,7 +283,7 @@ export function getServicePrice(state: ConfigState, service: ServiceType): numbe
 
 /**
  * RETIRED. The standalone Car Wash Add-On is no longer sold: the only wash in
- * the system is the $0 maintenance wash inside Shine Complete, and every
+ * the system is the $0 maintenance wash inside Car Care, and every
  * `wash_*` Stripe price is archived. Always 0.
  */
 export function getCarWashPrice(_state: ConfigState): number {
@@ -295,7 +295,7 @@ export function carWashEligible(_state: ConfigState): boolean {
   return false;
 }
 
-/** Car care is Shine Complete only. */
+/** Car care is Car Care only. */
 export function carVariantAvailable(state: ConfigState): boolean {
   return state.services.includes('detailing');
 }

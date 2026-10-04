@@ -53,6 +53,28 @@ Deno.serve(async (req) => {
         results.push({ id, name: template.name ?? null, ok: true, hits });
         continue;
       }
+      if (new URL(req.url).searchParams.get('scan') === 'text') {
+        // Read-only: surface the first occurrence of a phrase in each template.
+        const q = (new URL(req.url).searchParams.get('q') ?? '').toLowerCase();
+        const text = current.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
+        const idx = q ? text.toLowerCase().indexOf(q) : -1;
+        results.push({ id, name: template.name ?? null, ok: true, found: idx >= 0, excerpt: idx >= 0 ? text.slice(Math.max(0, idx - 60), idx + 140) : null });
+        continue;
+      }
+      if (new URL(req.url).searchParams.get('scan') === 'replace') {
+        // Write mode: plain-text replace of an exact phrase in each template's HTML.
+        const q = new URL(req.url).searchParams.get('q') ?? '';
+        const r = new URL(req.url).searchParams.get('r') ?? '';
+        if (q && r && current.includes(q)) {
+          const write = await vendorFetch(`${GATEWAY}/${id}`, {
+            method: 'PUT', headers: h, body: JSON.stringify({ htmlContent: current.split(q).join(r) }),
+          });
+          results.push({ id, name: template.name ?? null, ok: write.ok, stage: 'replace', status: write.status, replaced: write.ok });
+          continue;
+        }
+        results.push({ id, name: template.name ?? null, ok: true, replaced: false });
+        continue;
+      }
       const branded = brandHostedTemplate(current, template.subject ?? template.name ?? 'A Tidy update');
       if (apply && branded.changed) {
         const write = await vendorFetch(`${GATEWAY}/${id}`, {

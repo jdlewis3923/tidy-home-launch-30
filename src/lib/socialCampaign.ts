@@ -240,8 +240,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 4,
     title: "Car care from $149",
     zip: "33156",
-    en: `Shine Complete from $149 a month.\n\nHand wash, wheels, glass, interior wipe-down — in your driveway.`,
-    es: `Shine Complete desde $149 al mes.\n\nLavado a mano, ruedas, vidrios e interior — en tu entrada.`,
+    en: `Car Care from $149 a month.\n\nHand wash, wheels, glass, interior wipe-down — in your driveway.`,
+    es: `Car Care desde $149 al mes.\n\nLavado a mano, ruedas, vidrios e interior — en tu entrada.`,
   },
   {
     post_number: 5,
@@ -380,8 +380,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 24,
     title: "Interior detail",
     zip: "33186",
-    en: `Sand in the footwells, salt on the glass. Shine Complete keeps up with Miami.`,
-    es: `Arena en los tapetes, sal en los vidrios. Shine Complete le sigue el paso a Miami.`,
+    en: `Sand in the footwells, salt on the glass. Car Care keeps up with Miami.`,
+    es: `Arena en los tapetes, sal en los vidrios. Car Care le sigue el paso a Miami.`,
   },
   {
     post_number: 25,
@@ -444,8 +444,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 33,
     title: "Car care in your driveway",
     zip: "33186",
-    en: `Shine Complete: car care in your own driveway, from $149 a month.\n\nHand wash, wheels, glass and an interior wipe-down. You never move the car.\n\n${N["33186"]} founding spots are open.`,
-    es: `Shine Complete: cuidado del carro en tu propia entrada, desde $149 al mes.\n\nLavado a mano, ruedas, vidrios y limpieza interior. No tienes que mover el carro.\n\nHay lugares fundadores abiertos en ${N["33186"]}.`,
+    en: `Car care in your own driveway, from $149 a month.\n\nHand wash, wheels, glass and an interior wipe-down. You never move the car.\n\n${N["33186"]} founding spots are open.`,
+    es: `Cuidado del Auto en tu propia entrada, desde $149 al mes.\n\nLavado a mano, ruedas, vidrios y limpieza interior. No tienes que mover el carro.\n\nHay lugares fundadores abiertos en ${N["33186"]}.`,
   },
   {
     post_number: 34,

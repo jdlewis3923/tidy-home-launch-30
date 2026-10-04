@@ -36,11 +36,11 @@ export const HOURS_PER_CUSTOMER_PER_MONTH: Record<CapacityService, number> = {
   shine: 2.89,
 };
 
-/** Display names. `shine` is Shine Complete (the detailing subscription). */
+/** Display names. `shine` is Car Care (the detailing subscription). */
 export const CAPACITY_SERVICE_NAMES: Record<CapacityService, string> = {
   cleaning: 'House Cleaning',
   lawn: 'Lawn Care',
-  shine: 'Shine Complete',
+  shine: 'Car Care',
 };
 
 /** The `service_type` enum value in the database for each capacity service. */

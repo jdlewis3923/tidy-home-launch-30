@@ -6,7 +6,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 //
 // Model: three sizes (1/2/3) per service, resolved from stripe_catalog BY
 // LOOKUP KEY. Cleaning and lawn are per visit and carry cadence as the item
-// quantity (monthly 1, biweekly 2, weekly 4). Shine Complete and the Car Wash
+// quantity (monthly 1, biweekly 2, weekly 4). Car Care and the Car Wash
 // Add-On are per month, always quantity 1. No percentage discounts, no promo
 // codes — bundling earns free car washes and the founding offer is a set of
 // fulfilment promises recorded in metadata. The single exception is the referred

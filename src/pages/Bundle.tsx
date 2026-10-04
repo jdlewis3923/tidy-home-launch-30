@@ -23,7 +23,7 @@ import heroImg from "@/assets/hero-miami-home.jpg";
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
 
 // Headline figures are size 1 for each service. Cleaning and lawn care are
-// priced per visit; Shine Complete is a flat monthly price.
+// priced per visit; Car Care is a flat monthly price.
 const SERVICES: { slug: ServiceSlug; label: string; basePrice: number }[] = [
   { slug: "cleaning", label: SERVICE_NAMES.cleaning, basePrice: SIZE_PRICES.cleaning[1] },
   { slug: "lawn", label: SERVICE_NAMES.lawn, basePrice: SIZE_PRICES.lawn[1] },
