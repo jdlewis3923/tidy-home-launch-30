@@ -445,6 +445,10 @@ const translations: Record<string, string> = {
   "Serving Kendall & Pinecrest with recurring house cleaning, lawn care, and Car Care subscriptions.":
     "Sirviendo Kendall y Pinecrest con suscripciones recurrentes de limpieza del hogar, cuidado del jardín y Cuidado del Auto.",
   "A quick form · No contracts": "Un formulario rápido · Sin contratos",
+  "No card, no account": "Sin tarjeta ni cuenta",
+  "Reserve your spot": "Reserva tu lugar",
+  "First visits begin Monday, Nov 16": "Las primeras visitas comienzan el lunes 16 de nov",
+  "First visits begin Monday, November 16": "Las primeras visitas comienzan el lunes 16 de noviembre",
   "A quick form to sign up. Same Pro. Locked price.":
     "Un formulario rápido para inscribirte. El mismo profesional. Precio fijo.",
   "Book in a couple of minutes": "Reserva en un par de minutos",
@@ -460,7 +464,7 @@ const translations: Record<string, string> = {
   "Bundle your services · free monthly add-on": "Combina tus servicios · servicio adicional gratis al mes",
 
   // House Cleaning LP
-  "Monthly House Cleaning in Pinecrest + Kendall": "Limpieza Mensual del Hogar en Pinecrest + Kendall",
+  "House Cleaning in Pinecrest & Kendall": "Limpieza del Hogar en Pinecrest y Kendall",
   "Same Pro. Locked rate. No contracts. Handle your home on autopilot.":
     "El mismo profesional. Tarifa fija. Sin contratos. Tu casa en piloto automático.",
   "From $139 a month": "Desde $139 al mes",
@@ -514,7 +518,7 @@ const translations: Record<string, string> = {
     "Agrega un 2º servicio y eliges un servicio adicional premium gratis cada mes — y nunca más coordinas dos proveedores.",
 
   // Lawn Care LP
-  "Monthly Lawn Care in Pinecrest + Kendall": "Cuidado Mensual del Jardín en Pinecrest + Kendall",
+  "Lawn Care in Pinecrest & Kendall": "Cuidado del Jardín en Pinecrest y Kendall",
   "Mow, edge, blow. Same Pro. Locked price. Never surprise-billed.":
     "Cortar, bordear, soplar. El mismo profesional. Precio fijo. Sin facturas sorpresa.",
   "From $45 a month": "Desde $45 al mes",
@@ -551,7 +555,8 @@ const translations: Record<string, string> = {
     "¿Ya tienes jardín? Agrega limpieza desde $139 al mes.",
 
   // Car Care LP
-  "Car Care in Pinecrest + Kendall": "Car Care en Pinecrest + Kendall",
+  "Mobile Car Detailing in Pinecrest & Kendall": "Detallado Móvil de Autos en Pinecrest y Kendall",
+  "Shine Complete — 3 maintenance washes a month plus 2 full details a year.": "Shine Complete — 3 lavados de mantenimiento al mes y 2 detallados completos al año.",
   "We come to your driveway. Ceramic-safe. Monthly interior + exterior.":
     "Vamos a tu garaje. Seguro para cerámica. Interior + exterior mensual.",
   "A good mobile detail runs **$120–$180 per appointment**. Car Care is **$149/mo** for 3 maintenance washes a month plus 2 full details a year — in your driveway.":

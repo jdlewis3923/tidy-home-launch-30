@@ -15,6 +15,7 @@ import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import { PHONE_DISPLAY, PHONE_TEL, SERVICE_AREA_TRUST } from "@/lib/landing";
+import { LAUNCH_DATE_SHORT } from "@/lib/launch";
 import { pushEvent, trackSelectPlan, useViewPricingObserver } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
@@ -137,7 +138,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
   const ctaForPlan = (planSlug: string | undefined, where: string) => {
     const base = getCtaProps({
       trackingId: `lp_${config.serviceSlug}_${where}`,
-      ctaText: "Book in about 2 minutes",
+      ctaText: config.ctaPrimaryLabel ?? "Reserve your spot",
       service: config.signupServiceParam,
       plan: planSlug,
       trackingMeta: {
@@ -171,7 +172,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
   const handleNavCta = () => {
     pushEvent("cta_click", {
       cta_id: `lp_${config.serviceSlug}_nav`,
-      cta_text: "Book in about 2 minutes",
+      cta_text: config.ctaPrimaryLabel ?? "Reserve your spot",
       service: config.signupServiceParam,
     });
     track("book_cta_click", {
@@ -206,6 +207,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         label={t(config.stickyLabel)}
         surface={`lp_${config.serviceSlug}`}
         service={config.signupServiceParam}
+        ctaLabel={config.ctaPrimaryLabel}
       />
 
       {/* HERO */}
@@ -238,12 +240,12 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           />
         </picture>
 
-        <div className="absolute inset-0 bg-navy/65" />
+         <div className="absolute inset-0 service-hero-scrim" />
         <SparkleField />
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t(config.eyebrow)}</span>
-          <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
+          <h1 className="service-hero-headline mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
             {t(config.h1)}
           </h1>
           <p className="mt-5 text-lg md:text-xl font-light text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
@@ -279,8 +281,8 @@ const ServiceLandingPageInner = ({ config }: Props) => {
               >
                 {t(config.ctaPrimaryLabel ?? "Book in about 2 minutes")} <span className="arrow">→</span>
               </Link>
-              <span className="mt-2 text-xs text-primary-foreground/70">
-                {t("A quick form · No contracts")}
+               <span className="mt-2 text-xs text-primary-foreground/90">
+                 {t("No card, no account")} · {t(`First visits begin ${LAUNCH_DATE_SHORT}`)}
               </span>
             </div>
             <a
@@ -510,7 +512,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       <LpFinalCta
         headline={t(`Ready to lock in your ${config.eyebrow.toLowerCase()}?`)}
         subhead={t("A quick form to sign up. The same pro for each service, every visit. Locked price.")}
-        ctaLabel={t("Start your plan")}
+         ctaLabel={t(config.ctaPrimaryLabel ?? "Reserve your spot")}
         trackingId={`lp_${config.serviceSlug}_final`}
         service={config.signupServiceParam}
       />

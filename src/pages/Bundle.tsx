@@ -18,7 +18,6 @@ import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { BUNDLE_GIFT_COPY, SERVICE_NAMES, SIZE_PRICES, hasFreeAddonEntitlement } from "@/lib/pricing-canon";
-import heroImg from "@/assets/hero-miami-home.jpg";
 
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
 
@@ -110,7 +109,6 @@ const BundleInner = () => {
           "One flat price set by the size of your home, lawn or vehicle. Hold two or more services and you pick one free premium add-on every month — Pinecrest, Kendall and Kendall West (33156, 33183, 33186).",
         )}
         canonical="https://jointidy.co/bundle"
-        ogImage={heroImg}
         priceRange="$45–$916"
       />
       <Navbar onOpenPopup={handleNavCta} />
@@ -122,15 +120,7 @@ const BundleInner = () => {
       />
 
       {/* HERO */}
-      <section className="relative min-h-[70vh] flex items-center pt-24 pb-16 overflow-hidden">
-        <img
-          src={heroImg}
-          alt="Modern Miami home — bundle & save"
-          className="absolute inset-0 w-full h-full object-cover"
-          width={1920}
-          height={1080}
-        />
-        <div className="absolute inset-0 bg-navy/70" />
+      <section className="relative min-h-[70vh] flex items-center pt-24 pb-16 overflow-hidden bg-gradient-to-b from-navy to-primary-deep">
         <SparkleField />
         <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Bundle your services")}</span>
