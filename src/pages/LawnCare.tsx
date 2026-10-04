@@ -21,7 +21,7 @@ const config: ServiceLandingConfig = {
   systemBridge:
     "Tidy isn't just lawn — it's a system for your entire home.",
   ctaPrimaryLabel: "Reserve your spot",
-  ctaPlanLabel: "Start your plan",
+  ctaPlanLabel: "Reserve your spot",
   priceAnchor: "From $45 a month",
   stickyLabel: "Lawn Care · from $45 a month",
   savingsCallout:

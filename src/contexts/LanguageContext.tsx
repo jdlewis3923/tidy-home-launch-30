@@ -447,6 +447,8 @@ const translations: Record<string, string> = {
   "A quick form · No contracts": "Un formulario rápido · Sin contratos",
   "No card, no account": "Sin tarjeta ni cuenta",
   "Reserve your spot": "Reserva tu lugar",
+  "First visits begin Monday, Nov 16": "Las primeras visitas comienzan el lunes 16 de nov",
+  "First visits begin Monday, November 16": "Las primeras visitas comienzan el lunes 16 de noviembre",
   "A quick form to sign up. Same Pro. Locked price.":
     "Un formulario rápido para inscribirte. El mismo profesional. Precio fijo.",
   "Book in a couple of minutes": "Reserva en un par de minutos",

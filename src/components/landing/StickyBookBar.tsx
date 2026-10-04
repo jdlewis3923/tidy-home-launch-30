@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   label: string;            // "House Cleaning · from $139/mo"
+  ctaLabel?: string;
   /** Tracking surface, e.g. "lp_house-cleaning" */
   surface: string;
   /** Optional CTA overrides forwarded into /signup */
@@ -26,7 +27,7 @@ interface Props {
  * Routes through `usePrimaryCta` so the bar's main button works correctly
  * in both the post-launch (dashboard) and pre-launch (lead popup) modes.
  */
-const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Props) => {
+const StickyBookBar = ({ label, ctaLabel, surface, service, plan, bundle, services }: Props) => {
   const [visible, setVisible] = useState(false);
   const { getCtaProps } = usePrimaryCta();
   const { t } = useLanguage();
@@ -53,7 +54,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
 
   const desktopRaw = getCtaProps({
     trackingId: `${surface}_sticky_top`,
-    ctaText: "Book in about 2 minutes",
+    ctaText: ctaLabel ?? "Book in about 2 minutes",
     service,
     plan,
     bundle,
@@ -63,7 +64,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
 
   const mobileRaw = getCtaProps({
     trackingId: `${surface}_sticky_mobile`,
-    ctaText: "Book in about 2 minutes",
+    ctaText: ctaLabel ?? "Book in about 2 minutes",
     service,
     plan,
     bundle,
@@ -88,7 +89,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
               onClick={desktopCta.onClick}
               className="cta-arrow cta-press shrink-0 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-1.5 rounded-md text-sm transition-colors animate-pulse-gold"
             >
-              {t("Book in a couple of minutes")} <span className="arrow">→</span>
+              {t(ctaLabel ?? "Book in a couple of minutes")} <span className="arrow">→</span>
             </Link>
           </div>
         </div>
@@ -112,7 +113,7 @@ const StickyBookBar = ({ label, surface, service, plan, bundle, services }: Prop
               onClick={mobileCta.onClick}
               className="cta-arrow cta-press flex-1 text-center bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-4 py-3 rounded-lg text-sm animate-pulse-gold"
             >
-              {t("Book in a couple of minutes")} <span className="arrow">→</span>
+                {t(ctaLabel ?? "Book in a couple of minutes")} <span className="arrow">→</span>
             </Link>
             <a
               href={`tel:${PHONE_TEL}`}

@@ -14,7 +14,7 @@ const config: ServiceLandingConfig = {
   intentConfirm: "The same pro for each service, every visit. Locked monthly price. Cancel anytime.",
   systemBridge: "Tidy isn't just detailing — it's a system for your entire home.",
   ctaPrimaryLabel: "Reserve your spot",
-  ctaPlanLabel: "Start your plan",
+  ctaPlanLabel: "Reserve your spot",
   priceAnchor: "From $149/mo",
   stickyLabel: "Car Care · from $149/mo",
   savingsCallout:

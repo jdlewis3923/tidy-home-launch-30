@@ -15,7 +15,7 @@ import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import { PHONE_DISPLAY, PHONE_TEL, SERVICE_AREA_TRUST } from "@/lib/landing";
-import { LAUNCH_DATE_LONG } from "@/lib/launch";
+import { LAUNCH_DATE_SHORT } from "@/lib/launch";
 import { pushEvent, trackSelectPlan, useViewPricingObserver } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
@@ -138,7 +138,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
   const ctaForPlan = (planSlug: string | undefined, where: string) => {
     const base = getCtaProps({
       trackingId: `lp_${config.serviceSlug}_${where}`,
-      ctaText: "Book in about 2 minutes",
+      ctaText: config.ctaPrimaryLabel ?? "Reserve your spot",
       service: config.signupServiceParam,
       plan: planSlug,
       trackingMeta: {
@@ -172,7 +172,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
   const handleNavCta = () => {
     pushEvent("cta_click", {
       cta_id: `lp_${config.serviceSlug}_nav`,
-      cta_text: "Book in about 2 minutes",
+      cta_text: config.ctaPrimaryLabel ?? "Reserve your spot",
       service: config.signupServiceParam,
     });
     track("book_cta_click", {
@@ -207,6 +207,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         label={t(config.stickyLabel)}
         surface={`lp_${config.serviceSlug}`}
         service={config.signupServiceParam}
+        ctaLabel={config.ctaPrimaryLabel}
       />
 
       {/* HERO */}
@@ -281,7 +282,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                 {t(config.ctaPrimaryLabel ?? "Book in about 2 minutes")} <span className="arrow">→</span>
               </Link>
                <span className="mt-2 text-xs text-primary-foreground/90">
-                 {t("No card, no account")} · {t(`First visits begin ${LAUNCH_DATE_LONG}`)}
+                 {t("No card, no account")} · {t(`First visits begin ${LAUNCH_DATE_SHORT}`)}
               </span>
             </div>
             <a
@@ -511,7 +512,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       <LpFinalCta
         headline={t(`Ready to lock in your ${config.eyebrow.toLowerCase()}?`)}
         subhead={t("A quick form to sign up. The same pro for each service, every visit. Locked price.")}
-        ctaLabel={t("Start your plan")}
+         ctaLabel={t(config.ctaPrimaryLabel ?? "Reserve your spot")}
         trackingId={`lp_${config.serviceSlug}_final`}
         service={config.signupServiceParam}
       />

@@ -21,7 +21,7 @@ const config: ServiceLandingConfig = {
   systemBridge:
     "Tidy isn't just cleaning — it's a system for your entire home.",
   ctaPrimaryLabel: "Reserve your spot",
-  ctaPlanLabel: "Start your plan",
+  ctaPlanLabel: "Reserve your spot",
   priceAnchor: "From $139 a month",
   stickyLabel: "House Cleaning · from $139 a month",
   savingsCallout:
