@@ -50,7 +50,6 @@ const MINUTES: Record<string, number> = {
   inside_fridge_clean: 25,
   interior_windows: 30,
   deep_baseboard_scrub: 30,
-  laundry_wdf: 40,
   inside_kitchen_cabinets: 35,
   weed_removal: 30,
   leaf_debris_cleanup: 30,
