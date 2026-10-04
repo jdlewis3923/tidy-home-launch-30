@@ -3,6 +3,8 @@ import { ChevronDown } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
+import { FREQUENCY_FAQ } from "@/lib/frequency-faq";
+import { Button } from "@/components/ui/button";
 
 const preLaunchFAQ = [
   {
@@ -125,6 +127,15 @@ const FAQ = () => {
         </FadeIn>
 
         <div className="space-y-8 text-left">
+          <FadeIn>
+            <div className="bg-card border rounded-lg overflow-hidden">
+              <Button variant="ghost" onClick={() => setOpenItem(openItem === FREQUENCY_FAQ.q ? null : FREQUENCY_FAQ.q)} aria-expanded={openItem === FREQUENCY_FAQ.q} className="w-full h-auto min-h-14 justify-between px-5 py-4 text-left whitespace-normal">
+                <span>{t(FREQUENCY_FAQ.q)}</span>
+                <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform ${openItem === FREQUENCY_FAQ.q ? "rotate-180" : ""}`} />
+              </Button>
+              {openItem === FREQUENCY_FAQ.q && <p className="px-5 pb-4 text-sm text-text-mid">{t(FREQUENCY_FAQ.a)}</p>}
+            </div>
+          </FadeIn>
           {faqSections.map((section, si) => (
             <FadeIn key={section.title} delay={si * 100} direction="up">
               <div>

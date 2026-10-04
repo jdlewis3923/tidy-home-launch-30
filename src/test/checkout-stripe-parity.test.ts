@@ -188,6 +188,23 @@ describe('checkout ↔ Stripe parity', () => {
     expect(Math.round(stripeSubscriptionCents(monthly))).toBe(189 * 100);
   });
 
+  it('every homepage cadence amount matches its quote and checkout lookup key', () => {
+    for (const service of ['cleaning', 'lawn'] as const) {
+      for (const size of [1, 2, 3] as const) {
+        for (const cadence of ['monthly', 'biweekly', 'weekly'] as const) {
+          const state = buildState([service], { size, cadence });
+          const line = translate(state).services[0];
+          expect(line).toBeDefined();
+          expect(lookupKeyFor(line.service, line.size, line.frequency)).toBe(
+            lookupKeyFor(service, size, cadence),
+          );
+          expect(calculatePricing(state).ongoing).toBe(BILLED_MONTHLY[service][size][cadence]);
+          expect(stripeSubscriptionCents(state)).toBe(BILLED_MONTHLY[service][size][cadence] * 100);
+        }
+      }
+    }
+  });
+
   it('Shine Complete stays flat however often the cadence field says', () => {
     const monthly = buildState(['detailing'], { size: 2, cadence: 'monthly' });
     const weekly = buildState(['detailing'], { size: 2, cadence: 'weekly' });

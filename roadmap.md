@@ -1,5 +1,10 @@
 # Roadmap
 
+## Homepage cadence pricing (requested 2026-10-04)
+- [x] Show catalog monthly totals for all three cleaning and lawn cadences with visible visit counts; keep Shine Complete fixed.
+- [x] Place the bilingual cadence answer first in FAQ and in the chatbot's winning knowledge entry.
+- [x] Verify all three table states, quote/checkout parity and screenshots.
+
 ## Pro onboarding (one email, three links)
 - [x] 30-day tokens for insurance + intake links, admin regeneration, intake expiry guard
 - [x] /coi token upload endpoint writing to /admin/insurance + /admin/coi
