@@ -1,5 +1,6 @@
 import { ConfigState, calculatePricing, serviceLabels, serviceIcons, frequencyLabels, addOnData, sizeLabels, sizeFor, serviceUnits, frequencyVisitCopy, formatPerVisit, formatMonthly, hasCustomQuote } from '@/lib/dashboard-pricing';
 import GuaranteeLine from '@/components/GuaranteeLine';
+import QuoteReview from '@/components/reviews/QuoteReview';
 
 interface Props {
   state: ConfigState;
@@ -112,6 +113,7 @@ export default function StepReview({ state, onEdit }: Props) {
               </p>
             </div>
             <GuaranteeLine className="mt-4" />
+            <QuoteReview services={state.services} />
           </>
         ) : (
           <>

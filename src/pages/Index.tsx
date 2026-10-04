@@ -14,6 +14,7 @@ const TrustBar = lazy(() => import("@/components/TrustBar"));
 const Services = lazy(() => import("@/components/Services"));
 const GuaranteeSection = lazy(() => import("@/components/GuaranteeSection"));
 const HowItWorks = lazy(() => import("@/components/HowItWorks"));
+const NeighborReviews = lazy(() => import("@/components/reviews/NeighborReviews"));
 const BeforeAfter = lazy(() => import("@/components/BeforeAfter"));
 const WhoItsFor = lazy(() => import("@/components/WhoItsFor"));
 const Testimonials = lazy(() => import("@/components/Testimonials"));
@@ -90,6 +91,7 @@ const Index = () => {
         <Services />
         <GuaranteeSection />
         <HowItWorks onOpenPopup={handleCTA} />
+        <NeighborReviews />
         <BeforeAfter />
         <WhoItsFor />
         <Testimonials onOpenPopup={handleCTA} />
