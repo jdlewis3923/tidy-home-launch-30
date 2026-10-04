@@ -160,9 +160,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           </h1>
 
           <p className="text-base md:text-xl font-medium tracking-tight text-primary-foreground drop-shadow-md max-w-2xl mx-auto mb-4 md:mb-8 leading-snug antialiased">
-            {t("Scheduling, timing, and follow-through — handled.")}
-            <br />
-            {t("Set it once. We take care of the rest.")}
+            {t("Pick your services. Set how often. Never think about it again.")}
           </p>
         </div>
 
