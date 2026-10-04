@@ -5,6 +5,7 @@ import { useHasRoleState } from "@/hooks/useHasRole";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ReviewBonusRecorder from "@/components/admin/ReviewBonusRecorder";
+import SiteReviewsManager from "@/components/admin/SiteReviewsManager";
 
 type ReviewRow = {
   id: string; reviewer_name: string | null; stars: number; comment: string | null; posted_at: string;
@@ -114,6 +115,8 @@ export default function AdminReviews() {
             <Link to="/admin/reviews/import" className="rounded-lg border border-border px-3 py-2 text-xs font-semibold">Import</Link>
                       </div>
         </div>
+
+        <SiteReviewsManager />
 
         <ReviewBonusRecorder pros={pros} onApproved={fetchAll} />
 
