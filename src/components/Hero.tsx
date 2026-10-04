@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { RESERVATIONS_MODE, LAUNCH_DATE_LONG, FOUNDING_CAP } from "@/lib/launch";
 import FoundingCounter from "@/components/FoundingCounter";
-import heroVideo from "@/assets/homepage-mobile-hero-20261004.mp4.asset.json";
-import heroPoster from "@/assets/homepage-mobile-hero-poster-20261004.jpg.asset.json";
+import heroVideo from "@/assets/homepage-mobile-hero-20261004b.mp4.asset.json";
+import heroPoster from "@/assets/homepage-mobile-hero-poster-20261004b.jpg.asset.json";
 import heroWideVideo from "@/assets/homepage-desktop-hero.mp4.asset.json";
 import heroWidePoster from "@/assets/homepage-desktop-hero-poster.jpg.asset.json";
 import { useLanguage } from "@/contexts/LanguageContext";
