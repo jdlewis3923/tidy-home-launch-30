@@ -4,6 +4,7 @@ import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { FREQUENCY_FAQ } from "@/lib/frequency-faq";
+import { Button } from "@/components/ui/button";
 
 const preLaunchFAQ = [
   {
