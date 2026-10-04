@@ -148,7 +148,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
           {t("On Autopilot.")}
         </h1>
 
-        <p className="text-base md:text-xl font-normal italic tracking-wide text-primary-foreground/90 max-w-2xl mx-auto mb-4 md:mb-8 leading-relaxed">
+        <p className="text-base md:text-xl font-medium tracking-tight text-primary-foreground drop-shadow-md max-w-2xl mx-auto mb-4 md:mb-8 leading-snug antialiased">
           {t("Scheduling, timing, and follow-through — handled.")}
           <br />
           {t("Set it once. We take care of the rest.")}
