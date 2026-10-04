@@ -1858,6 +1858,57 @@ export type Database = {
         }
         Relationships: []
       }
+      google_listing_cache: {
+        Row: {
+          fetched_at: string
+          id: string
+          last_error: string | null
+          last_error_at: string | null
+          maps_uri: string | null
+          rating: number | null
+          reviews: Json
+          total_count: number | null
+        }
+        Insert: {
+          fetched_at?: string
+          id?: string
+          last_error?: string | null
+          last_error_at?: string | null
+          maps_uri?: string | null
+          rating?: number | null
+          reviews?: Json
+          total_count?: number | null
+        }
+        Update: {
+          fetched_at?: string
+          id?: string
+          last_error?: string | null
+          last_error_at?: string | null
+          maps_uri?: string | null
+          rating?: number | null
+          reviews?: Json
+          total_count?: number | null
+        }
+        Relationships: []
+      }
+      google_reviewer_neighborhoods: {
+        Row: {
+          author_name: string
+          neighborhood: string
+          updated_at: string
+        }
+        Insert: {
+          author_name: string
+          neighborhood: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          neighborhood?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       google_reviews: {
         Row: {
           bonus_paid_at: string | null
