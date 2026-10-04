@@ -1,8 +1,11 @@
 import { Check, X as XIcon, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import cleaningImg from "@/assets/cleaning-interior.jpg";
-import lawnImg from "@/assets/lawn-care.jpg";
-import carImg from "@/assets/car-detailing.jpg";
+import cleaningImgAsset from "@/assets/services-cleaning-20261004.webp.asset.json";
+import lawnImgAsset from "@/assets/services-lawn-20261004.webp.asset.json";
+import carImgAsset from "@/assets/services-car-20261004.webp.asset.json";
+const cleaningImg = cleaningImgAsset.url;
+const lawnImg = lawnImgAsset.url;
+const carImg = carImgAsset.url;
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
