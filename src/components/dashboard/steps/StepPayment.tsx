@@ -270,7 +270,7 @@ export default function StepPayment({ state, onChange }: Props) {
 
           {pricing.freeAddons > 0 && (
             <div className="flex justify-between items-baseline gap-3 text-ink">
-              <span className="text-xs lowercase">1 free premium add-on a month — your pick</span>
+              <span className="text-xs lowercase">{pricing.freeAddons} free premium add-on{pricing.freeAddons > 1 ? "s" : ""} a month — your pick</span>
               <span className="text-xs tabular-nums">included</span>
             </div>
           )}

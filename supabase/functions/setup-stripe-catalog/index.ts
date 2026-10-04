@@ -59,6 +59,8 @@ type CatalogRow = {
   price_cents: number;
   description: string;
   sort_order: number;
+  /** Retired add-ons keep their records but stay switched off. */
+  active?: boolean;
 };
 
 const SERVICE_SORT: Record<CanonService, number> = { cleaning: 10, lawn: 20, detailing: 30 };
@@ -135,26 +137,25 @@ const ADDON_ROWS: CatalogRow[] = [
 
   // ---- 15 add-on one-time prices ----
   // House Cleaning (6)
-  { service_type: null, frequency: null, lookup_key: null, size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'oven', stripe_price_id: 'price_1T1CMdD7AxvAjJGvb2RXCJUg', price_cents: 4500, description: 'Inside Oven Clean', sort_order: 200 },
-  { service_type: null, frequency: null, lookup_key: null, size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'fridge', stripe_price_id: 'price_1TNCl4D7AxvAjJGvCEEWmMKA', price_cents: 3500, description: 'Inside Fridge Clean', sort_order: 201 },
-  { service_type: null, frequency: null, lookup_key: null, size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'interiorWindows', stripe_price_id: 'price_1TNCjmD7AxvAjJGvtwYE31nw', price_cents: 5500, description: 'Interior Windows', sort_order: 202 },
-  { service_type: null, frequency: null, lookup_key: null, size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'baseboards', stripe_price_id: 'price_1TNCjnD7AxvAjJGvAKQN2y7a', price_cents: 3500, description: 'Deep Baseboard Scrub', sort_order: 203 },
-  { service_type: null, frequency: null, lookup_key: null, size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'laundry', stripe_price_id: 'price_1TNCjpD7AxvAjJGvoZQSrVrh', price_cents: 3000, description: 'Laundry — Wash, Dry & Fold (1 load)', sort_order: 204 },
-  { service_type: null, frequency: null, lookup_key: null, size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'cabinets', stripe_price_id: 'price_1TNCl5D7AxvAjJGvPbjrVube', price_cents: 5000, description: 'Inside Kitchen Cabinets', sort_order: 205 },
+  { service_type: null, frequency: null, lookup_key: 'addon_inside_oven', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'oven', stripe_price_id: 'price_1T1CMdD7AxvAjJGvb2RXCJUg', price_cents: 4500, description: 'Inside Oven Clean', active: true, sort_order: 200 },
+  { service_type: null, frequency: null, lookup_key: 'addon_inside_fridge', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'fridge', stripe_price_id: 'price_1TNCl4D7AxvAjJGvCEEWmMKA', price_cents: 3500, description: 'Inside Fridge Clean', active: true, sort_order: 201 },
+  { service_type: null, frequency: null, lookup_key: 'addon_interior_windows', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'interiorWindows', stripe_price_id: 'price_1TNCjmD7AxvAjJGvtwYE31nw', price_cents: 5500, description: 'Interior Windows', active: true, sort_order: 202 },
+  { service_type: null, frequency: null, lookup_key: 'addon_deep_baseboard', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'baseboards', stripe_price_id: 'price_1TNCjnD7AxvAjJGvAKQN2y7a', price_cents: 3500, description: 'Deep Baseboard Scrub', active: false, sort_order: 203 },
+  { service_type: null, frequency: null, lookup_key: 'addon_kitchen_cabinets', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'cabinets', stripe_price_id: 'price_1TNCl5D7AxvAjJGvPbjrVube', price_cents: 5000, description: 'Inside Kitchen Cabinets', active: false, sort_order: 205 },
   // Lawn Care (5)
-  { service_type: null, frequency: null, lookup_key: null, size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'weed', stripe_price_id: 'price_1TNCl7D7AxvAjJGv3YxUwsUg', price_cents: 4500, description: 'Weed Removal — Garden Beds', sort_order: 301 },
-  { service_type: null, frequency: null, lookup_key: null, size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'leaf', stripe_price_id: 'price_1TNCl9D7AxvAjJGvf7PJ200g', price_cents: 5500, description: 'Leaf & Debris Cleanup', sort_order: 302 },
+  { service_type: null, frequency: null, lookup_key: 'addon_weed_removal', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'weed', stripe_price_id: 'price_1TNCl7D7AxvAjJGv3YxUwsUg', price_cents: 4500, description: 'Weed Removal — Garden Beds', active: true, sort_order: 301 },
+  { service_type: null, frequency: null, lookup_key: 'addon_leaf_debris', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'leaf', stripe_price_id: 'price_1TNCl9D7AxvAjJGvf7PJ200g', price_cents: 5500, description: 'Leaf & Debris Cleanup', active: true, sort_order: 302 },
   // The Bed Edge Reset / Exterior Windows survivors are the hand-made products
   // (prod_VAqGjYoJDQwpPl / prod_VAqJF5yfKZGlOY); the sync-created twins are archived.
-  { service_type: null, frequency: null, lookup_key: 'addon_bed_edge_reset', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'bedEdgeReset', stripe_price_id: 'price_1UAUZWD7AxvAjJGvFI0Z7BDl', price_cents: 6500, description: 'Bed Edge Reset', sort_order: 300 },
-  { service_type: null, frequency: null, lookup_key: 'addon_exterior_windows_screens', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'exteriorWindows', stripe_price_id: 'price_1UAUdCD7AxvAjJGvJqdbCKw9', price_cents: 8500, description: 'Exterior Windows & Screens', sort_order: 303 },
-  { service_type: null, frequency: null, lookup_key: null, size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'pressureWash', stripe_price_id: 'price_1TNCjrD7AxvAjJGv3cHMAlq6', price_cents: 15000, description: 'Driveway Pressure Wash', sort_order: 304 },
+  { service_type: null, frequency: null, lookup_key: 'addon_bed_edge_reset', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'bedEdgeReset', stripe_price_id: 'price_1UAUZWD7AxvAjJGvFI0Z7BDl', price_cents: 6500, description: 'Bed Edge Reset', active: true, sort_order: 300 },
+  { service_type: null, frequency: null, lookup_key: 'addon_exterior_windows_screens', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'exteriorWindows', stripe_price_id: 'price_1UAUdCD7AxvAjJGvJqdbCKw9', price_cents: 8500, description: 'Exterior Windows & Screens', active: false, sort_order: 303 },
+  { service_type: null, frequency: null, lookup_key: 'addon_driveway_pressure_wash', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'pressureWash', stripe_price_id: 'price_1TNCjrD7AxvAjJGv3cHMAlq6', price_cents: 15000, description: 'Driveway Pressure Wash', active: false, sort_order: 304 },
   // Shine Complete (4). Ozone Odor Treatment, Engine Bay Clean and Ceramic Spray
   // Coat are retired — their Stripe prices are archived.
-  { service_type: null, frequency: null, lookup_key: null, size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'petHair', stripe_price_id: 'price_1TNCl6D7AxvAjJGvxirYq3hZ', price_cents: 4500, description: 'Pet Hair Removal', sort_order: 401 },
-  { service_type: null, frequency: null, lookup_key: 'addon_clay_bar_ceramic_coat', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'clayBarCeramic', stripe_price_id: 'price_1UAYd6D7AxvAjJGver1hsniC', price_cents: 9500, description: 'Clay Bar & Ceramic Coat', sort_order: 250 },
-  { service_type: null, frequency: null, lookup_key: 'addon_headlight_restoration', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'headlightRestoration', stripe_price_id: 'price_1UAYd7D7AxvAjJGv2NZMyK5x', price_cents: 7900, description: 'Headlight Restoration', sort_order: 260 },
-  { service_type: null, frequency: null, lookup_key: 'addon_interior_protect_condition', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'interiorProtect', stripe_price_id: 'price_1UAYd9D7AxvAjJGvo0qTp9nJ', price_cents: 5500, description: 'Interior Protect & Condition', sort_order: 270 },
+  { service_type: null, frequency: null, lookup_key: 'addon_pet_hair', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'petHair', stripe_price_id: 'price_1TNCl6D7AxvAjJGvxirYq3hZ', price_cents: 4500, description: 'Pet Hair Removal', active: true, sort_order: 401 },
+  { service_type: null, frequency: null, lookup_key: 'addon_clay_bar_ceramic_coat', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'clayBarCeramic', stripe_price_id: 'price_1UAYd6D7AxvAjJGver1hsniC', price_cents: 9500, description: 'Clay Bar & Ceramic Coat', active: true, sort_order: 250 },
+  { service_type: null, frequency: null, lookup_key: 'addon_headlight_restoration', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'headlightRestoration', stripe_price_id: 'price_1UAYd7D7AxvAjJGv2NZMyK5x', price_cents: 7900, description: 'Headlight Restoration', active: false, sort_order: 260 },
+  { service_type: null, frequency: null, lookup_key: 'addon_interior_protect', size: null, unit: 'one_time', quantity_rule: 'always_1', per_visit: false, is_addon: true, addon_name: 'interiorProtect', stripe_price_id: 'price_1UAYd9D7AxvAjJGvo0qTp9nJ', price_cents: 5500, description: 'Interior Protect & Condition', active: true, sort_order: 270 },
 ];
 
 /** Resolves the 15 recurring prices from Stripe by lookup_key. */
@@ -238,7 +239,7 @@ Deno.serve(async (req) => {
         const { error: upsertError } = await supabase
           .from('stripe_catalog')
           .upsert(
-            catalog.map((row) => ({ ...row, active: true })),
+            catalog.map((row) => ({ ...row, active: row.active ?? true })),
             { onConflict: 'stripe_price_id' },
           );
         if (upsertError) {
