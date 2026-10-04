@@ -22,7 +22,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
   }, []);
 
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[90vh] flex items-start md:items-center justify-center overflow-hidden">
       {/* Mobile (portrait source matches portrait viewport): animated loop. */}
       {motionOk ? (
         <video
@@ -134,27 +134,27 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         </div>
       </div>
 
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <div className="inline-flex items-center bg-primary/20 border border-primary/30 rounded-full px-4 py-1.5 mb-6">
+      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-14 md:pt-0">
+        <div className="inline-flex items-center bg-primary/20 border border-primary/30 rounded-full px-4 py-1.5 mb-4 md:mb-6">
           <span className="w-2 h-2 rounded-full bg-success mr-2 animate-pulse-dot" />
           <span className="text-xs font-medium text-primary-foreground">
             {t("Now accepting homes in Kendall & Pinecrest · Limited spots")}
           </span>
         </div>
 
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-primary-foreground leading-tight mb-6">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-primary-foreground leading-tight mb-4 md:mb-6">
           {t("Your Home.")}
           <br />
           {t("On Autopilot.")}
         </h1>
 
-        <p className="text-lg md:text-xl font-light text-primary-foreground/80 max-w-2xl mx-auto mb-8 leading-relaxed">
+        <p className="text-lg md:text-xl font-light text-primary-foreground/80 max-w-2xl mx-auto mb-5 md:mb-8 leading-relaxed">
           {t("Scheduling, timing, and follow-through — handled.")}
           <br />
           {t("Set it once. We take care of the rest.")}
         </p>
 
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
+        <div className="flex flex-wrap justify-center gap-3 mb-6 md:mb-8">
           {["🏠 House Cleaning", "🌿 Lawn Care", "🚗 Shine Complete"].map((pill) => (
             <span
               key={pill}
@@ -175,18 +175,18 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
             });
             onOpenPopup();
           }}
-          className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)] animate-pulse-gold"
+          className="bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-3 md:py-4 rounded-xl transition-all hover:scale-105 shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)] animate-pulse-gold"
         >
           {t(CUSTOMER_DASHBOARD_ENABLED ? "See your price — 60 seconds →" : "Request Early Access →")}
         </button>
 
-        <p className="mt-4 text-xs text-primary-foreground/60" data-testid="hero-trust-line">
+        <p className="mt-3 md:mt-4 text-xs text-primary-foreground/60" data-testid="hero-trust-line">
           {RESERVATIONS_MODE
             ? <>{t(`First visits begin ${LAUNCH_DATE_LONG}`)} · {FOUNDING_CAP} {t("founding homes")} · {t("No contracts")} ·{" "}</>
             : <>{t(CUSTOMER_DASHBOARD_ENABLED ? "No contracts · Cancel anytime ·" : "Founding memberships · No commitment ·")}{" "}</>}
           <strong className="font-bold text-primary-foreground">{t("48-hour guarantee")}</strong>
         </p>
-        {RESERVATIONS_MODE && <div className="mt-3"><FoundingCounter tone="dark" /></div>}
+        {RESERVATIONS_MODE && <div className="mt-2 md:mt-3"><FoundingCounter tone="dark" /></div>}
       </div>
     </section>
   );
