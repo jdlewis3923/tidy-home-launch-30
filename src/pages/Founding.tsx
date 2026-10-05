@@ -20,9 +20,9 @@ import foundingHero from "@/assets/founding-family-provided.png";
 import cleaningImage from "@/assets/founding-plan-cleaning.png.asset.json";
 import lawnImage from "@/assets/founding-plan-lawn.png.asset.json";
 import carImage from "@/assets/founding-plan-car-care.png.asset.json";
-import scanImage from "@/assets/founding-how-scan.png.asset.json";
-import calendarImage from "@/assets/founding-how-calendar.png.asset.json";
-import proImage from "@/assets/founding-how-pro.png.asset.json";
+import scanImage from "@/assets/founding-how-scan.jpg";
+import calendarImage from "@/assets/founding-how-calendar.jpg";
+import proImage from "@/assets/founding-pro-step.jpg";
 
 type Svc = "cleaning" | "lawn" | "detailing";
 type Step = "zip" | "services" | "sizes" | "price" | "reserve" | "done";
@@ -448,11 +448,11 @@ export default function Founding() {
             <h2>{t("How it works")}</h2>
             <ol className="founding-how-grid">
               {[
-                { h: "Scan", d: "See your price in 60 seconds. No account, no call.", image: scanImage.url },
-                { h: "Pick your day", d: "Any weekday or Saturday, mornings or afternoons.", image: calendarImage.url },
-                { h: "Meet your Pro", d: "The same background-checked pro for each service, every visit.", image: proImage.url },
+                { h: "Scan", d: "See your price in 60 seconds. No account, no call.", image: scanImage },
+                { h: "Pick your day", d: "Any weekday or Saturday, mornings or afternoons.", image: calendarImage },
+                { h: "Meet your Pro", d: "The same background-checked pro for each service, every visit.", image: proImage },
               ].map(({ h, d, image }, i) => (
-                <li key={h}><div className="founding-step-image"><img src={image} alt="" width={1008} height={1008} loading="lazy" /><span>{i + 1}</span></div><strong>{t(h)}</strong><p>{t(d)}</p></li>
+                <li key={h}><div className="founding-step-image"><img src={image} alt="" width={1200} height={900} loading="lazy" /><span>{i + 1}</span></div><strong>{t(h)}</strong><p>{t(d)}</p></li>
               ))}
           </ol>
           </div>
