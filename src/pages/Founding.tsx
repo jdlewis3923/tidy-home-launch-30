@@ -108,7 +108,15 @@ export default function Founding() {
   const listing = useGoogleListing();
   const launch = language === "es" ? LAUNCH_DATE_LONG_ES : LAUNCH_DATE_LONG;
   const scrollTo = useRef<HTMLDivElement>(null);
-  const go = (step: Step) => { set({ step }); scrollTo.current?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  const scrollQuoteIntoView = () => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => scrollTo.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    });
+  };
+  const go = (step: Step, patch: Partial<State> = {}) => {
+    set({ ...patch, step });
+    scrollQuoteIntoView();
+  };
   useEffect(() => {
     const node = scrollTo.current;
     if (!node) return;
@@ -241,7 +249,7 @@ export default function Founding() {
             <div className="founding-language"><LanguageToggle /></div>
           </div>
           <div className="founding-hero-copy">
-            <h1>{t("More life.")}<br /><span>{t("Less chores.")}</span></h1>
+            <h1><span className="founding-hero-title-line">{t("More life.")}</span><span className="founding-hero-title-line founding-hero-title-accent">{t("Less chores.")}</span></h1>
             <p>{t("Three services. One subscription.")}<br />{t("More life for you.")}</p>
             {listing && <a className="founding-rating-line" href={listing.maps_uri} target="_blank" rel="noreferrer"><span>★★★★★</span> {formatRating(listing.rating)} · {listing.total_count} {t("Google reviews")}</a>}
             <div data-testid="founding-left" className="founding-cap-pill">
@@ -491,7 +499,7 @@ export default function Founding() {
               ].map(({ svc, label, price, image, Icon, tone }, index) => (
                 <li key={label} className="founding-plan-card" style={{ animationDelay: `${index * 120}ms` }}>
                   <picture><img src={image} alt="" width={1365} height={768} loading="lazy" /></picture>
-                  <div><Icon className={`founding-plan-icon is-${tone}`} aria-hidden="true" /><span><strong>{t(label)}</strong><small>{t("from")} ${price} {t("a month")}</small></span><button type="button" aria-label={`${t("Add")} ${t(label)}`} onClick={() => { set({ services: s.services.includes(svc) ? s.services : [...s.services, svc] }); go("sizes"); }}>+</button></div>
+                  <div><Icon className={`founding-plan-icon is-${tone}`} aria-hidden="true" /><span><strong>{t(label)}</strong><small>{t("from")} ${price} {t("a month")}</small></span><button type="button" aria-label={`${t("Add")} ${t(label)}`} onClick={() => go("sizes", { services: s.services.includes(svc) ? s.services : [...s.services, svc] })}>+</button></div>
                 </li>
               ))}
             </ul>
@@ -534,9 +542,9 @@ export default function Founding() {
         </Reveal>
       </main>
       {!quoteVisible && s.step !== "done" && (
-        <button type="button" className="founding-sticky-quote md:hidden" onClick={() => scrollTo.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+        <button type="button" className="founding-sticky-quote" onClick={scrollQuoteIntoView}>
           <span>{t("See your price — 60 seconds")}</span>
-          {isZip(s.zip) && left !== null && <small>{left} {t("of")} {FOUNDING_CAP} · {s.zip}</small>}
+          {isZip(s.zip) && left !== null && <small>{left} {t("of")} {FOUNDING_CAP} {t("founding homes left in")} {s.zip}</small>}
         </button>
       )}
     </div>
