@@ -29,3 +29,8 @@ export const RESERVATION_ALERTS = [
   { at: 10, key: 'first_pro', title: (svc: string) => `Advance your first ${svc} pro` },
   { at: 30, key: 'pro_2', title: (svc: string) => `Advance ${svc} pro #2` },
 ] as const;
+
+/** The founding service-area ZIPs — the ONE list every page and function reads. */
+export const FOUNDING_ZIPS = ['33156', '33183', '33186'] as const;
+/** Founding-member benefits, worded exactly as printed on the door hanger (service-specific Pro wording). */
+export const FOUNDING_BENEFITS = ['Your price never rises', "First visit perfect or it's free", 'Free premium add-on on visit one', 'The same pro for each service, every visit'] as const;

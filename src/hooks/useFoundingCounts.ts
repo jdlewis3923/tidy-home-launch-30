@@ -2,7 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { FOUNDING_CAP } from '@/lib/launch';
 
-export const FOUNDING_ZIPS = ['33156', '33183', '33186'] as const;
+import { FOUNDING_ZIPS } from '@/lib/launch';
+export { FOUNDING_ZIPS };
 export type FoundingCounts = { byZip: Record<string, number>; total: number };
 
 /** Real founding homes per ZIP (one per household) from the reservations table. Never seeded. */
