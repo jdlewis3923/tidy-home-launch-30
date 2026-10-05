@@ -1594,7 +1594,8 @@ body.admin-hud h1 {
 .founding-section-lead { margin-top: 11px; color: hsl(var(--text-mid)); font-size: 1rem; }
 .founding-plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 32px; }
 .founding-plan-card { overflow: hidden; border: 1px solid hsl(var(--border)); border-radius: 8px; background: hsl(var(--card)); text-align: left; box-shadow: 0 8px 20px hsl(var(--navy) / .06); }
-.founding-plan-card > img { width: 100%; height: 174px; object-fit: cover; }
+.founding-plan-card > picture { display: block; height: 174px; }
+.founding-plan-card > picture img { width: 100%; height: 100%; object-fit: cover; }
 .founding-plan-card > div { display: grid; grid-template-columns: 30px 1fr 32px; align-items: center; gap: 10px; min-height: 78px; padding: 12px 14px; }
 .founding-plan-icon { width: 24px; height: 24px; }
 .founding-plan-icon.is-gold { color: hsl(var(--gold)); }.founding-plan-icon.is-green { color: hsl(var(--success)); }.founding-plan-icon.is-blue { color: hsl(var(--primary)); }
@@ -1658,7 +1659,7 @@ body.admin-hud h1 {
   .founding-plans-section h2, .founding-how-section h2 { font-size: 1.8rem; }
   .founding-section-lead { font-size: .8rem; }
   .founding-plan-grid { gap: 8px; margin-top: 24px; }
-  .founding-plan-card > img { height: 87px; }
+  .founding-plan-card > picture { height: 87px; }
   .founding-plan-card > div { grid-template-columns: 22px 1fr 25px; gap: 5px; min-height: 64px; padding: 8px; }
   .founding-plan-icon { width: 18px; height: 18px; }
   .founding-plan-card strong { font-size: .65rem; line-height: 1.15; }
