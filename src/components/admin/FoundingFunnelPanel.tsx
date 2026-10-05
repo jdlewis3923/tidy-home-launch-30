@@ -1,7 +1,7 @@
 /** Command → first panel: door-hanger reservations, scans, conversion, drop-off, expansion waitlist. */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { FOUNDING_ZIPS, RESERVABLE_SERVICES, RESERVATION_SERVICE_LABEL } from "@/lib/launch";
+import { FOUNDING_CAP, FOUNDING_ZIPS, RESERVABLE_SERVICES, RESERVATION_SERVICE_LABEL } from "@/lib/launch";
 
 type Ev = { session_id: string; event: string; step: string | null; src: string | null; zip: string | null };
 const STEPS = ["page_view", "sizes", "price", "reserve", "reserved"] as const;
@@ -13,7 +13,7 @@ export default function FoundingFunnelPanel() {
     refetchInterval: 60_000,
     queryFn: async () => {
       const [res, ev, wl] = await Promise.all([
-        supabase.from("reservations").select("zip, services, src, founding, custom_quote").neq("status", "canceled").eq("is_test_row", false),
+        supabase.from("reservations").select("zip, services, src, founding, custom_quote, created_at").neq("status", "canceled").eq("is_test_row", false).order("created_at", { ascending: true }),
         supabase.from("founding_events").select("session_id, event, step, src, zip").order("created_at", { ascending: false }).limit(20000),
         supabase.from("waitlist").select("email, zip, source, requested_at").like("source", "founding%").order("requested_at", { ascending: false }).limit(200),
       ]);
@@ -24,6 +24,11 @@ export default function FoundingFunnelPanel() {
   const { res, ev, wl } = q.data;
 
   const count = (z: string, s: string) => res.filter((r) => r.zip === z && (r.services as string[]).includes(s)).length;
+  const zipStatus = (z: string) => {
+    const founding = res.filter((r) => r.zip === z && r.founding);
+    const firstStandard = res.find((r) => r.zip === z && !r.founding);
+    return { count: founding.length, full: founding.length >= FOUNDING_CAP, closedAt: firstStandard?.created_at ?? null };
+  };
   // Scan sessions per ZIP × src, with conversion.
   const sessions = new Map<string, { src: string; zip: string; converted: boolean }>();
   for (const e of [...ev].reverse()) {
@@ -46,6 +51,9 @@ export default function FoundingFunnelPanel() {
   return (
     <section className="admin-page-surface rounded-lg border p-4 space-y-5" aria-label="Founding reservations">
       <h2 className="text-base font-bold">Founding reservations</h2>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {FOUNDING_ZIPS.map((z) => { const st = zipStatus(z); return <div key={z} className={`rounded-md border p-3 ${st.full ? "border-destructive/40 bg-destructive/10" : "border-border"}`}><div className="flex items-center justify-between"><strong className="tabular-nums">{z}</strong><span className={`text-xs font-bold ${st.full ? "text-destructive" : "text-primary"}`}>{st.full ? "CLOSED" : "OPEN"}</span></div><p className="mt-1 text-xs text-muted-foreground">{st.count} of {FOUNDING_CAP} founding homes</p>{st.full && st.closedAt && <p className="mt-1 text-xs text-muted-foreground">Closed {new Date(st.closedAt).toLocaleString()}</p>}</div>; })}
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead><tr className="text-left text-xs text-muted-foreground"><th className="py-1">ZIP</th>{RESERVABLE_SERVICES.map((s) => <th key={s}>{RESERVATION_SERVICE_LABEL[s]}</th>)}</tr></thead>
