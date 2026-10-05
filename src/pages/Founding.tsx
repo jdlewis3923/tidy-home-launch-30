@@ -204,7 +204,7 @@ export default function Founding() {
             <h1>{t("More life.")}<br /><span>{t("Less chores.")}</span></h1>
             <p>{t("Three services. One subscription.")}<br />{t("More life for you.")}</p>
             <div data-testid="founding-left" className="founding-cap-pill">
-              {left === null
+              {!isZip(s.zip) || left === null
                 ? <>{FOUNDING_CAP} {t("founding homes per ZIP")} · {FOUNDING_ZIPS.join(" · ")}</>
                 : left > 0
                   ? <><strong>{left} {t("of")} {FOUNDING_CAP}</strong> {t("founding homes left in")} {s.zip}</>
@@ -219,28 +219,33 @@ export default function Founding() {
           <section aria-label={t("Your price")} className="founding-quote-card">
             {s.step !== "done" && <p className="mb-3 text-center text-xs font-medium text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
 
-            {/* ZIP first when unknown */}
-            {!isZip(s.zip) && s.step !== "done" && (
-              <fieldset className="mb-4">
+            {/* ZIP is always the dedicated first step. QR codes carry source attribution only. */}
+            {s.step === "zip" && (
+              <fieldset>
                 <legend className="text-sm font-bold">{t("Your ZIP code")}</legend>
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  {FOUNDING_ZIPS.map((z) => <button key={z} type="button" className={`${chip} ${off}`} onClick={() => set({ zip: z })}>{z}</button>)}
+                <div className="mt-2 grid gap-2">
+                  {([['33156', 'Pinecrest'], ['33183', 'Kendall'], ['33186', 'Kendall West']] as const).map(([z, area]) => <button key={z} type="button" className={`${chip} ${s.zip === z ? on : off} founding-zip-choice`} onClick={() => set({ zip: z })}><strong>{z}</strong><span>{t(area)}</span></button>)}
                 </div>
-                <label className="mt-3 block text-xs font-semibold text-ink-faint" htmlFor="fz-other">{t("Somewhere else? Enter your ZIP")}</label>
-                <input id="fz-other" inputMode="numeric" autoComplete="postal-code" maxLength={5} className={input} value={otherZip} onChange={(e) => setOtherZip(e.target.value.replace(/\D/g, ""))} />
-                {outside && (waitDone
-                  ? <p className="mt-3 rounded-lg bg-accent p-3 text-sm font-semibold">{t("Thanks — we'll email you when we reach")} {otherZip}.</p>
-                  : <form onSubmit={joinWaitlist} className="mt-3 rounded-lg bg-accent p-3">
+                <details className="founding-other-zip mt-3">
+                  <summary>{t("My ZIP isn't listed")}</summary>
+                  <label className="mt-3 block text-xs font-semibold text-ink-faint" htmlFor="fz-other">{t("Your ZIP code")}</label>
+                  <input id="fz-other" inputMode="numeric" autoComplete="postal-code" maxLength={5} className={input} value={otherZip} onChange={(e) => setOtherZip(e.target.value.replace(/\D/g, ""))} />
+                  {outside && (waitDone
+                    ? <p className="mt-3 rounded-lg bg-accent p-3 text-sm font-semibold">{t("Thanks — we'll email you when we reach")} {otherZip}.</p>
+                    : <form onSubmit={joinWaitlist} className="mt-3 rounded-lg bg-accent p-3">
                       <p className="text-sm font-semibold">{t("We're not in your ZIP yet — we'll tell you when we are.")}</p>
                       <label htmlFor="fz-wait" className="mt-2 block text-xs font-semibold">{t("Email")}</label>
                       <input id="fz-wait" type="email" autoComplete="email" required className={input} value={waitEmail} onChange={(e) => setWaitEmail(e.target.value)} />
                       <button className={`${primaryBtn} mt-3`}>{t("Tell me when you're here")}</button>
                     </form>)}
+                </details>
+                <button className={`${primaryBtn} mt-4`} disabled={!isZip(s.zip)} onClick={() => go("services")}>{t("Next")} →</button>
               </fieldset>
             )}
 
             {s.step === "services" && (
               <div>
+                <button type="button" className="mb-3 text-xs font-semibold text-primary underline" onClick={() => go("zip")}>{s.zip} · {t("Change ZIP")}</button>
                 <p className="text-sm font-bold">{t("Pick your services")}</p>
                 <div className="mt-2 grid gap-2">
                   {SVCS.map((svc) => {
@@ -255,7 +260,7 @@ export default function Founding() {
                     );
                   })}
                 </div>
-                <button className={`${primaryBtn} mt-4`} disabled={!s.services.length || !isZip(s.zip)} onClick={() => go("sizes")}>{t("Next")} →</button>
+                <button className={`${primaryBtn} mt-4`} disabled={!s.services.length} onClick={() => go("sizes")}>{t("Next")} →</button>
               </div>
             )}
 
@@ -402,14 +407,18 @@ export default function Founding() {
         </div>
 
         {/* BELOW THE FOLD */}
-        <section className="founding-benefits-section">
-          <h2>{t("Founding member benefits")}</h2>
-          <ul className="founding-benefits-grid">
-            {FOUNDING_BENEFITS.map((b, index) => {
-              const Icon = [LockKeyhole, Star, Gift, UserRoundCheck][index];
-              return <li key={b}><span><Icon aria-hidden="true" /></span><strong>{t(b)}</strong></li>;
-            })}
-          </ul>
+        <section className={`founding-benefits-section ${foundingFull ? "is-full" : ""}`}>
+          {foundingFull ? (
+            <div className="founding-standard-card"><ShieldCheck aria-hidden="true" /><p><strong>{t("Founding homes are fully reserved in")} {s.zip}</strong><span>{t("You're reserving at standard terms — same guarantee, same pros, cancel anytime.")}</span></p></div>
+          ) : (
+            <><h2>{t("Founding member benefits")}</h2>
+            <ul className="founding-benefits-grid">
+              {FOUNDING_BENEFITS.map((b, index) => {
+                const Icon = [LockKeyhole, Star, Gift, UserRoundCheck][index];
+                return <li key={b}><span><Icon aria-hidden="true" /></span><strong>{t(b)}</strong></li>;
+              })}
+            </ul></>
+          )}
         </section>
 
         <section className="founding-plans-section">
