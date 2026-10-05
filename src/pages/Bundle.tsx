@@ -9,7 +9,6 @@ import StickyBookBar from "@/components/landing/StickyBookBar";
 
 import NeighborhoodTrust from "@/components/landing/NeighborhoodTrust";
 import SectionDecor from "@/components/landing/SectionDecor";
-import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { pushEvent } from "@/lib/tracking";
@@ -175,8 +174,6 @@ const BundleInner = () => {
           <div><Leaf /><strong>{t("Eco-Safe Products")}</strong></div>
         </div>
       </section>
-
-      <LandingTicker />
 
       {/* TIERS */}
       <section id="bundle-builder" className="relative bg-background py-20 px-4 overflow-hidden scroll-mt-24">

@@ -240,9 +240,9 @@
   .offer-page .offer-title-dash::after { content: ""; position: absolute; z-index: -1; bottom: .045em; left: 12%; width: 76%; height: .12em; background: hsl(var(--gold)); border-radius: 50%; transform: rotate(-2deg); }
   .offer-refer-title { @apply mt-3 font-extrabold; font-size: clamp(2.8rem, 5vw, 5.2rem); line-height: .98; }
   .offer-refer-intro, .offer-bundle-intro { @apply mx-auto mt-5 max-w-xl font-medium leading-snug; font-size: clamp(.95rem, 1.5vw, 1.22rem); }
-  .offer-refer-content { gap: clamp(1.6rem, 5vh, 4rem); }
+  .offer-refer-content { gap: 1.8rem; }
   .offer-reward-pair { @apply flex w-full items-center justify-center; gap: clamp(2.4rem, 5vw, 5rem); }
-  .offer-reward-card { @apply relative flex aspect-[.78] w-[36%] max-w-[12rem] flex-col items-center justify-center rounded-lg bg-primary-foreground/95 px-2 py-3 shadow-xl; }
+  .offer-reward-card { @apply relative flex aspect-[.78] w-[36%] max-w-[11rem] flex-col items-center justify-center rounded-lg bg-primary-foreground/95 px-2 py-3 shadow-xl; }
   .offer-reward-neighbor { transform: rotate(-4deg); }
   .offer-reward-you { transform: rotate(4deg); }
   .offer-reward-card > span:not(.offer-card-icon) { @apply font-bold uppercase text-[10px]; letter-spacing: .1em; }
@@ -285,7 +285,7 @@
   .bundle-gift-tile { @apply relative flex w-[34%] max-w-[14rem] flex-col items-center justify-center rounded-lg bg-gold px-2 py-3 text-center text-gold-foreground shadow-lg; }
   .bundle-gift-tile > span:not(.offer-card-icon) { @apply mt-3 text-[10px] font-semibold; }
   .bundle-gift-tile strong { @apply text-2xl leading-[.9] md:text-3xl; }
-  .bundle-gift-tile strong em { @apply text-base not-italic md:text-xl; }
+  .bundle-gift-tile strong em { @apply text-sm not-italic md:text-xl; }
   .bundle-gift-tile small { @apply text-xs font-semibold; }
   .bundle-gift-tile ul { @apply mt-3 space-y-1 text-left text-[10px] font-semibold; }
   .bundle-gift-tile li { @apply flex items-center gap-1; }
@@ -304,7 +304,7 @@
     .offer-refer-trust { padding: .8rem 0; }
     .offer-refer-review { margin-bottom: .5rem; }
     .offer-bundle-content { padding-left: 1.5rem; padding-right: 1.5rem; }
-    .offer-bundle-title { font-size: clamp(2rem, 8vw, 2.8rem); }
+    .offer-bundle-title { font-size: clamp(1.75rem, 7.3vw, 2.8rem); }
     .offer-bundle-tiles { gap: .3rem; }
     .bundle-service-tile { width: 29%; }
     .bundle-gift-tile { width: 34%; }

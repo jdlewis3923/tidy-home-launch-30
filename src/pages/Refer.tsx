@@ -6,7 +6,6 @@ import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
 import Reveal from "@/components/landing/Reveal";
 import SectionDecor from "@/components/landing/SectionDecor";
-import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
@@ -165,8 +164,6 @@ const ReferInner = () => {
           </a>}
         </div>
       </section>
-
-      <LandingTicker />
 
       {/* HOW IT WORKS */}
       <section className="relative bg-background py-16 px-4 overflow-hidden">
