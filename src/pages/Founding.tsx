@@ -20,12 +20,12 @@ import foundingHero from "@/assets/founding-family-hero.jpg";
 import cleaningImage from "@/assets/cleaning-interior.webp";
 import lawnImage from "@/assets/lawn-care.webp";
 import carImage from "@/assets/car-detailing.webp";
-import scanImage from "@/assets/founding-scan-step.jpg";
+import scanImage from "@/assets/founding-scan-step-official.jpg";
 import calendarImage from "@/assets/founding-calendar-step.jpg";
-import proImage from "@/assets/founding-pro-step.jpg";
+import proImage from "@/assets/founding-pro-step-official.jpg";
 
 type Svc = "cleaning" | "lawn" | "detailing";
-type Step = "services" | "sizes" | "price" | "reserve" | "done";
+type Step = "zip" | "services" | "sizes" | "price" | "reserve" | "done";
 type Lawn = 1 | 2 | 3;
 type State = {
   zip: string; src: string; step: Step; services: Svc[];
@@ -43,7 +43,7 @@ const CAD_LABEL: Record<CanonCadence, string> = { monthly: "Once a month", biwee
 const isZip = (z: string) => (FOUNDING_ZIPS as readonly string[]).includes(z);
 
 const blank = (zip: string, src: string): State => ({
-  zip, src, step: "services", services: [], beds: "", baths: "", lawn: null, car: null,
+  zip, src, step: zip ? "services" : "zip", services: [], beds: "", baths: "", lawn: null, car: null,
   cadence: { cleaning: "biweekly", lawn: "biweekly" }, gifts: [], first: "", last: "", email: "", phone: "", street: "", sms: false, day: "", time: "morning",
 });
 
@@ -76,14 +76,13 @@ function usePrices() {
 export default function Founding() {
   const { t, language } = useLanguage();
   const [params] = useSearchParams();
-  const urlZip = params.get("zip") ?? "";
   const urlSrc = params.get("src") ?? "";
   const [s, setS] = useState<State>(() => {
     try {
       const saved = JSON.parse(sessionStorage.getItem(KEY) || "null") as State | null;
-      if (saved) return { ...saved, zip: isZip(urlZip) ? urlZip : saved.zip, src: urlSrc || saved.src, step: saved.step === "done" ? "services" : saved.step };
+      if (saved) return { ...saved, src: urlSrc || saved.src, step: saved.step === "done" ? (isZip(saved.zip) ? "services" : "zip") : (!isZip(saved.zip) ? "zip" : saved.step) };
     } catch { /* fresh */ }
-    return blank(isZip(urlZip) ? urlZip : "", urlSrc);
+    return blank("", urlSrc);
   });
   const set = (p: Partial<State>) => setS((o) => ({ ...o, ...p }));
   useEffect(() => { try { sessionStorage.setItem(KEY, JSON.stringify(s)); } catch { /* ok */ } }, [s]);
@@ -96,6 +95,7 @@ export default function Founding() {
   const counts = useFoundingCounts();
   const homes = s.zip && counts.data ? counts.data.byZip[s.zip] ?? 0 : null;
   const left = homes === null ? null : Math.max(0, FOUNDING_CAP - homes);
+  const foundingFull = isZip(s.zip) && left === 0;
   const prices = usePrices();
   const listing = useGoogleListing();
   const launch = language === "es" ? LAUNCH_DATE_LONG_ES : LAUNCH_DATE_LONG;
