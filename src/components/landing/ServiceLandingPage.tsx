@@ -266,7 +266,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             </div>
 
             <p className="mt-7 text-xl md:text-2xl font-semibold text-primary-foreground">
-              {t("From")} <strong className="text-3xl md:text-4xl text-gold">{config.priceAnchor.replace(/^From\s*/i, "").replace(/\s+a month$/i, "")}</strong>{" "}
+              {t("From")} <strong className="text-3xl md:text-4xl text-gold">{config.priceAnchor.replace(/^From\s*/i, "").replace(/(?:\s+a month|\/mo)$/i, "")}</strong>{" "}
               <span>{config.priceAnchor.toLowerCase().includes("month") ? t("a month") : t("/mo")}</span>
             </p>
             <div className="mt-3 max-w-md">
