@@ -15,6 +15,14 @@ import { PHONE_DISPLAY, PHONE_TEL } from "@/lib/landing";
 import { supabase } from "@/integrations/supabase/client";
 import LanguageToggle from "@/components/LanguageToggle";
 import TidyLogo from "@/components/TidyLogo";
+import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
+import foundingHero from "@/assets/founding-family-hero.jpg";
+import cleaningImage from "@/assets/cleaning-interior.webp";
+import lawnImage from "@/assets/lawn-care.webp";
+import carImage from "@/assets/car-detailing.webp";
+import scanImage from "@/assets/founding-scan-step.jpg";
+import calendarImage from "@/assets/founding-calendar-step.jpg";
+import proImage from "@/assets/founding-pro-step.jpg";
 
 type Svc = "cleaning" | "lawn" | "detailing";
 type Step = "services" | "sizes" | "price" | "reserve" | "done";
@@ -169,7 +177,7 @@ export default function Founding() {
   const reviews = listing ? rankReviews(listing.reviews).slice(0, 3) : [];
 
   return (
-    <div className="min-h-screen bg-background text-ink">
+    <div className="founding-landing min-h-screen bg-background text-ink">
       <Helmet>
         <html lang={language} />
         <title>{t("Founding Homes · Cleaning, Lawn & Car Care in Pinecrest & Kendall | Tidy")}</title>
@@ -184,28 +192,31 @@ export default function Founding() {
         <meta name="twitter:image" content="https://jointidy.co/og-founding.jpg" />
       </Helmet>
 
-      {/* ABOVE THE FOLD — navy + gold, like the hanger */}
-      <header className="bg-navy text-primary-foreground">
-        <div className="mx-auto flex max-w-xl items-center justify-between px-4 pt-3">
-          <TidyLogo size="sm" priority />
-          <div className="rounded-lg bg-background"><LanguageToggle /></div>
-        </div>
-        <div className="mx-auto max-w-xl px-4 pb-6 pt-3">
-          <h1 className="text-[2.1rem] font-extrabold leading-tight">{t("More life.")} <span className="text-gold">{t("Less chores.")}</span></h1>
-          <p className="mt-1 text-base text-primary-foreground/85">{t("Three services. One subscription. More life for you.")}</p>
-          <p data-testid="founding-left" className="mt-3 rounded-lg bg-primary-foreground/10 px-3 py-2 text-sm font-semibold">
-            {left === null
-              ? <>{FOUNDING_CAP} {t("founding homes per ZIP")} · {FOUNDING_ZIPS.join(" · ")}</>
-              : left > 0
-                ? <><span className="text-gold">{left} {t("of")} {FOUNDING_CAP}</span> {t("founding homes left in")} {s.zip}</>
-                : <>{t("Founding homes are fully reserved in")} {s.zip} — {t("you're reserving at standard terms.")}</>}
-          </p>
+      <header className="founding-landing-hero text-primary-foreground">
+        <img src={foundingHero} alt="Family relaxing together at home" width={1600} height={1200} loading="eager" fetchPriority="high" className="founding-hero-photo" />
+        <div className="founding-hero-shade" />
+        <div className="founding-hero-shell">
+          <div className="founding-topbar">
+            <TidyLogo size="md" priority />
+            <div className="founding-language"><LanguageToggle /></div>
+          </div>
+          <div className="founding-hero-copy">
+            <h1>{t("More life.")}<br /><span>{t("Less chores.")}</span></h1>
+            <p>{t("Three services. One subscription.")}<br />{t("More life for you.")}</p>
+            <div data-testid="founding-left" className="founding-cap-pill">
+              {left === null
+                ? <>{FOUNDING_CAP} {t("founding homes per ZIP")} · {FOUNDING_ZIPS.join(" · ")}</>
+                : left > 0
+                  ? <><strong>{left} {t("of")} {FOUNDING_CAP}</strong> {t("founding homes left in")} {s.zip}</>
+                  : <>{t("Founding homes are fully reserved in")} {s.zip}</>}
+            </div>
+          </div>
         </div>
       </header>
 
-      <main>
-        <div ref={scrollTo} className="mx-auto -mt-3 max-w-xl px-3">
-          <section aria-label={t("Your price")} className="rounded-2xl border border-border bg-card p-4 shadow-xl">
+      <main className="founding-landing-main">
+        <div ref={scrollTo} className="founding-quote-wrap">
+          <section aria-label={t("Your price")} className="founding-quote-card">
             {s.step !== "done" && <p className="mb-3 text-center text-xs font-medium text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
 
             {/* ZIP first when unknown */}
@@ -234,10 +245,11 @@ export default function Founding() {
                 <div className="mt-2 grid gap-2">
                   {SVCS.map((svc) => {
                     const picked = s.services.includes(svc);
+                    const Icon = svc === "cleaning" ? Sparkles : svc === "lawn" ? Leaf : CarFront;
                     return (
                       <button key={svc} type="button" aria-pressed={picked} className={`${chip} ${picked ? on : off} flex items-center justify-between text-left`}
                         onClick={() => set({ services: picked ? s.services.filter((x) => x !== svc) : [...s.services, svc] })}>
-                        <span>{t(SVC_LABEL[svc])}</span>
+                        <span className="flex items-center gap-2"><Icon className={`h-5 w-5 founding-service-icon founding-service-icon-${svc}`} aria-hidden="true" />{t(SVC_LABEL[svc])}</span>
                         <span className="text-xs font-medium text-ink-faint">{t("from")} {money(SIZE_PRICES[svc][1])}{per}</span>
                       </button>
                     );
@@ -390,48 +402,69 @@ export default function Founding() {
         </div>
 
         {/* BELOW THE FOLD */}
-        <section className="mx-auto max-w-xl px-4 py-8">
-          <h2 className="text-center text-xs font-bold uppercase tracking-widest text-primary">{t("Founding member benefits")}</h2>
-          <ul className="mt-3 grid grid-cols-2 gap-2">
-            {FOUNDING_BENEFITS.map((b) => <li key={b} className="rounded-xl border border-border bg-card p-3 text-sm font-semibold"><span className="text-gold">✓</span> {t(b)}</li>)}
+        <section className="founding-benefits-section">
+          <h2>{t("Founding member benefits")}</h2>
+          <ul className="founding-benefits-grid">
+            {FOUNDING_BENEFITS.map((b, index) => {
+              const Icon = [LockKeyhole, Star, Gift, UserRoundCheck][index];
+              return <li key={b}><span><Icon aria-hidden="true" /></span><strong>{t(b)}</strong></li>;
+            })}
           </ul>
         </section>
 
-        <section className="bg-accent/50 py-8">
-          <div className="mx-auto max-w-xl px-4">
-            <h2 className="text-2xl font-extrabold">{t("Plans from $45 a month.")}</h2>
-            <ul className="mt-3 space-y-2 text-sm">
-              <li className="flex justify-between rounded-xl bg-card p-3"><span>{t("House Cleaning")}</span><b>{t("from")} $139 {t("a month")}</b></li>
-              <li className="flex justify-between rounded-xl bg-card p-3"><span>{t("Lawn Care")}</span><b>{t("from")} $45 {t("a month")}</b></li>
-              <li className="flex justify-between rounded-xl bg-card p-3"><span>{t("Car Care")}</span><b>{t("from")} $149 {t("a month")}</b></li>
+        <section className="founding-plans-section">
+          <div className="founding-section-shell">
+            <p className="founding-eyebrow">{t("Simple, transparent pricing")}</p>
+            <h2>{t("Plans from $45 a month.")}</h2>
+            <p className="founding-section-lead">{t("Bundle the services you want. One simple bill. No hidden fees.")}</p>
+            <ul className="founding-plan-grid">
+              {[
+                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: cleaningImage, Icon: Sparkles, tone: "gold" },
+                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnImage, Icon: Leaf, tone: "green" },
+                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carImage, Icon: CarFront, tone: "blue" },
+              ].map(({ svc, label, price, image, Icon, tone }) => (
+                <li key={label} className="founding-plan-card">
+                  <img src={image} alt="" width={640} height={360} loading="lazy" />
+                  <div><Icon className={`founding-plan-icon is-${tone}`} aria-hidden="true" /><span><strong>{t(label)}</strong><small>{t("from")} ${price} {t("a month")}</small></span><button type="button" aria-label={`${t("Add")} ${t(label)}`} onClick={() => { set({ services: s.services.includes(svc) ? s.services : [...s.services, svc] }); go("sizes"); }}>+</button></div>
+                </li>
+              ))}
             </ul>
           </div>
         </section>
 
-        <section className="mx-auto max-w-xl px-4 py-8">
-          <h2 className="text-xl font-extrabold">{t("How it works")}</h2>
-          <ol className="mt-3 space-y-3">
-            {[["Scan", "See your price in 60 seconds. No account, no call."], ["Pick your day", "Any weekday or Saturday, mornings or afternoons."], ["Meet your Pro", "The same background-checked pro for each service, every visit."]].map(([h, d], i) => (
-              <li key={h} className="flex gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold font-extrabold text-navy">{i + 1}</span><div><p className="font-bold">{t(h)}</p><p className="text-sm text-ink-faint">{t(d)}</p></div></li>
-            ))}
+        <section className="founding-how-section">
+          <div className="founding-section-shell">
+            <p className="founding-eyebrow">{t("Get started in minutes")}</p>
+            <h2>{t("How it works")}</h2>
+            <ol className="founding-how-grid">
+              {[
+                { h: "Scan", d: "See your price in 60 seconds. No account, no call.", image: scanImage },
+                { h: "Pick your day", d: "Any weekday or Saturday, mornings or afternoons.", image: calendarImage },
+                { h: "Meet your Pro", d: "The same background-checked pro for each service, every visit.", image: proImage },
+              ].map(({ h, d, image }, i) => (
+                <li key={h}><div className="founding-step-image"><img src={image} alt="" width={1008} height={1008} loading="lazy" /><span>{i + 1}</span></div><strong>{t(h)}</strong><p>{t(d)}</p></li>
+              ))}
           </ol>
+          </div>
         </section>
 
-        <section className="bg-navy py-6 text-primary-foreground">
-          <ul className="mx-auto flex max-w-xl flex-wrap justify-center gap-x-4 gap-y-2 px-4 text-xs font-semibold">
-            {["Licensed & Insured", "Background-Checked Pros", "Photo-Verified Every Visit", "Cancel Anytime", "48-hour fix guarantee"].map((x) => <li key={x}><span className="text-gold">✓</span> {t(x)}</li>)}
+        <section className="founding-trust-section">
+          <ul>
+            {[
+              { label: "Licensed & Insured", Icon: ShieldCheck }, { label: "Background-Checked Pros", Icon: UserRoundCheck },
+              { label: "Photo-Verified Every Visit", Icon: Camera }, { label: "48-hour fix guarantee", Icon: Clock3 }, { label: "Cancel Anytime", Icon: CalendarDays },
+            ].map(({ label, Icon }) => <li key={label}><Icon aria-hidden="true" /><strong>{t(label)}</strong></li>)}
           </ul>
         </section>
 
-        <section className="mx-auto max-w-xl px-4 py-8">
-          <Link to={`/refer${language === "es" ? "?lang=es" : ""}`} className="block rounded-2xl border-2 border-gold bg-gold/10 p-4 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/60">
-            <p className="text-lg font-extrabold">{t("Give $50, Get $50")}</p>
-            <p className="text-sm text-ink-faint">{t("Share Tidy with a neighbor — you both get $50 off.")} →</p>
+        <section className="founding-footer-section">
+          <Link to={`/refer${language === "es" ? "?lang=es" : ""}`} className="founding-refer-card">
+            <Gift aria-hidden="true" /><span><strong>{t("Give $50, Get $50")}</strong><small>{t("Share Tidy with a neighbor — you both get $50 off.")}</small></span><ArrowRight aria-hidden="true" />
           </Link>
-          <p className="mt-6 text-center text-sm">{t("Questions?")} <a href={`tel:${PHONE_TEL}`} onClick={() => logEvent("tap_to_call", s, language)} className="inline-flex min-h-[44px] items-center font-bold text-primary underline">{PHONE_DISPLAY}</a></p>
-          <p className="text-center text-sm font-semibold">{t("Cancel anytime. No contracts.")}</p>
-          <p className="mt-4 text-center text-xs text-ink-faint">{t("Serving Pinecrest, Kendall and Kendall West")} · {FOUNDING_ZIPS.join(" · ")}</p>
-          <p className="mt-2 text-center text-xs"><Link to="/terms" className="underline">{t("Terms")}</Link> · <Link to="/privacy" className="underline">{t("Privacy Policy")}</Link></p>
+          <p className="founding-question">{t("Questions?")} <a href={`tel:${PHONE_TEL}`} onClick={() => logEvent("tap_to_call", s, language)}>{PHONE_DISPLAY}</a></p>
+          <p className="founding-cancel">{t("Cancel anytime. No contracts.")}</p>
+          <p className="founding-serving">{t("Serving Pinecrest, Kendall and Kendall West")} · {FOUNDING_ZIPS.join(" · ")}</p>
+          <p className="founding-legal"><Link to="/terms">{t("Terms")}</Link> · <Link to="/privacy">{t("Privacy Policy")}</Link></p>
         </section>
       </main>
     </div>
