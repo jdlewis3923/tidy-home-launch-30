@@ -6,6 +6,7 @@
  * (sparklines), alert_event / alert_rule (feed). No hardcoded readings: when a
  * metric is null the UI renders an em dash + "no data yet".
  */
+import FoundingFunnelPanel from "@/components/admin/FoundingFunnelPanel";
 import ViewSequenceLink from "@/components/admin/ViewSequenceLink";
 import ReservationsForecast from "@/components/admin/ReservationsForecast";
 import SmsQueueLine from "@/components/admin/SmsQueueLine";
@@ -317,6 +318,7 @@ export default function AdminCommand() {
         </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+          <FoundingFunnelPanel />
           <MessagingReadinessBanner />
           <SmsQueueLine />
           <ReservationsForecast compact />

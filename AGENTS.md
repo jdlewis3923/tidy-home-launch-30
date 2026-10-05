@@ -5,3 +5,4 @@
 - Inbox redos go through `redo-request` with `message_id`; the clock starts at the member's message time — why: the guarantee promises "reply here within 48 hours".
 - The homepage frequency FAQ is shared from `src/lib/frequency-faq.ts` across pricing and FAQ sections — why: both placements must give the same bilingual answer.
 - Homepage hero media is split at the 768px rendered viewport: portrait media below it and widescreen media at or above it, including phone browsers in desktop-site mode — why: browser display mode must determine the correct composition.
+- Public page reachability is master switch OR per-page row in page_visibility (via get_page_visibility); /founding fails open unless explicitly off — why: printed hangers must never dead-end.

@@ -39,11 +39,11 @@ const ADDONS: AddonSpec[] = [
   { lookup_key: 'addon_pet_hair', addon_name: 'petHair', addon_key: 'pet_hair_removal', cents: 4500, active: true, pay_cents: 1800 },
   { lookup_key: 'addon_interior_protect', addon_name: 'interiorProtect', addon_key: 'interior_protect_condition', cents: 5500, active: true, pay_cents: 2200 },
   { lookup_key: 'addon_clay_bar_ceramic_coat', addon_name: 'clayBarCeramic', addon_key: 'clay_bar_ceramic_coat', cents: 9500, active: true, pay_cents: 3800 },
-  { lookup_key: 'addon_deep_baseboard', addon_name: 'baseboards', addon_key: 'deep_baseboard_scrub', cents: 3500, active: false, pay_cents: null },
-  { lookup_key: 'addon_kitchen_cabinets', addon_name: 'cabinets', addon_key: 'inside_kitchen_cabinets', cents: 5000, active: false, pay_cents: null },
-  { lookup_key: 'addon_exterior_windows_screens', addon_name: 'exteriorWindows', addon_key: 'exterior_windows_screens', cents: 8500, active: false, pay_cents: null },
-  { lookup_key: 'addon_headlight_restoration', addon_name: 'headlightRestoration', addon_key: 'headlight_restoration', cents: 7900, active: false, pay_cents: null },
-  { lookup_key: 'addon_driveway_pressure_wash', addon_name: 'pressureWash', addon_key: 'driveway_pressure_wash', cents: 15000, active: false, pay_cents: null },
+  { lookup_key: 'addon_deep_baseboard', addon_name: 'baseboards', addon_key: 'deep_baseboard_scrub', cents: 3500, active: true, pay_cents: 1400 },
+  { lookup_key: 'addon_kitchen_cabinets', addon_name: 'cabinets', addon_key: 'inside_kitchen_cabinets', cents: 5000, active: true, pay_cents: 2000 },
+  { lookup_key: 'addon_exterior_windows_screens', addon_name: 'exteriorWindows', addon_key: 'exterior_windows_screens', cents: 8500, active: true, pay_cents: 3400 },
+  { lookup_key: 'addon_headlight_restoration', addon_name: 'headlightRestoration', addon_key: 'headlight_restoration', cents: 7900, active: true, pay_cents: 3160 },
+  { lookup_key: 'addon_driveway_pressure_wash', addon_name: 'pressureWash', addon_key: 'driveway_pressure_wash', cents: 15000, active: true, pay_cents: 6000 },
 ];
 
 /** Old interior-protect key, superseded by addon_interior_protect. */
