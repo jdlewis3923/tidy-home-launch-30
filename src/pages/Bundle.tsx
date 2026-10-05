@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Check, MapPin, Gift, ShieldCheck, Users, LockKeyhole, Leaf, Plus, ArrowRight } from "lucide-react";
+import { Check, MapPin, Gift, ShieldCheck, Users, LockKeyhole, Leaf, Plus } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
@@ -8,7 +8,6 @@ import Reveal from "@/components/landing/Reveal";
 import StickyBookBar from "@/components/landing/StickyBookBar";
 
 import NeighborhoodTrust from "@/components/landing/NeighborhoodTrust";
-import SparkleField from "@/components/landing/SparkleField";
 import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";

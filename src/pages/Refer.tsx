@@ -5,7 +5,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
 import Reveal from "@/components/landing/Reveal";
-import SparkleField from "@/components/landing/SparkleField";
 import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
