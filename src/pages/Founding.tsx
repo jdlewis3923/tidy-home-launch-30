@@ -223,7 +223,7 @@ export default function Founding() {
         <div ref={scrollTo} className="founding-quote-wrap">
           <section aria-label={t("Your price")} className="founding-quote-card">
             {s.step !== "done" && <p className="mb-3 text-center text-xs font-medium text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
-            {isZip(s.zip) && left !== null && s.step !== "done" && (
+            {isZip(s.zip) && left !== null && (
               <div data-testid="founding-live-count" className="founding-live-count" aria-live="polite">
                 <span aria-hidden="true" />
                 {left > 0
