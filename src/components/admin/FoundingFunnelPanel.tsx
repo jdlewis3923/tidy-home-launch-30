@@ -20,7 +20,7 @@ export default function FoundingFunnelPanel() {
       return { res: res.data ?? [], ev: (ev.data ?? []) as Ev[], wl: wl.data ?? [] };
     },
   });
-  if (!q.data) return <section className="admin-card p-4 text-sm text-muted-foreground">Loading reservations…</section>;
+  if (!q.data) return <section className="admin-page-surface rounded-lg border p-4 text-sm text-muted-foreground">Loading reservations…</section>;
   const { res, ev, wl } = q.data;
 
   const count = (z: string, s: string) => res.filter((r) => r.zip === z && (r.services as string[]).includes(s)).length;
@@ -44,7 +44,7 @@ export default function FoundingFunnelPanel() {
   const calls = ev.filter((e) => e.event === "tap_to_call").length;
 
   return (
-    <section className="admin-card p-4 space-y-5" aria-label="Founding reservations">
+    <section className="admin-page-surface rounded-lg border p-4 space-y-5" aria-label="Founding reservations">
       <h2 className="text-base font-bold">Founding reservations</h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
