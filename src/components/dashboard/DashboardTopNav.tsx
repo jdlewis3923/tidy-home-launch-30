@@ -13,7 +13,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Bell, ChevronDown, Inbox, Calendar, FlaskConical, Gauge, Menu, X, Power } from 'lucide-react';
-import tidyLogo from '@/assets/tidy-logo-trimmed.png';
+import tidyLogoAsset from '@/assets/tidy-official-logo.png.asset.json';
 import { supabase } from '@/integrations/supabase/client';
 import { useHasRoleState } from '@/hooks/useHasRole';
 
@@ -62,7 +62,7 @@ export default function DashboardTopNav({ initials = '' }: { initials?: string }
 
         <Link to="/dashboard" className="flex items-center">
           <img
-            src={tidyLogo}
+            src={tidyLogoAsset.url}
             alt="Tidy"
             className="h-11 w-auto sm:h-14 drop-shadow-[0_4px_14px_rgba(15,23,42,0.12)]"
           />

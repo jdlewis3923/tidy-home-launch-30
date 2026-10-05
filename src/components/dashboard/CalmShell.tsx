@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import tidyLogo from '@/assets/tidy-logo.png';
+import tidyLogoAsset from '@/assets/tidy-official-logo.png.asset.json';
 
 interface Props {
   step: number;
@@ -40,7 +40,7 @@ export default function CalmShell({ step, totalSteps, microcopy, children }: Pro
         <div className="mx-auto max-w-2xl px-5 pt-8 pb-2 flex flex-col items-center text-center">
           <a href="/" aria-label="Tidy">
             <img
-              src={tidyLogo}
+              src={tidyLogoAsset.url}
               alt="Tidy"
               className="h-72 md:h-96 w-auto drop-shadow-[0_14px_36px_rgba(15,23,42,0.18)]"
             />
