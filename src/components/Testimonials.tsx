@@ -3,7 +3,9 @@ import testimonialsBgMobile from "@/assets/testimonials-bg-mobile.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { pushEvent } from "@/lib/tracking";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
-import FadeIn from "./FadeIn";
+import { Camera, KeyRound, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import FoundingCounter from "./FoundingCounter";
 
 interface TestimonialsProps {
   onOpenPopup: () => void;
@@ -11,17 +13,17 @@ interface TestimonialsProps {
 
 const foundingCards = [
   {
-    icon: "🔑",
+    Icon: KeyRound,
     title: "Founding Member Pricing",
-    desc: "Lock in your rate as one of our first members. Your price stays put as we grow.",
+    desc: "Lock in your rate as one of our first members. Your founding price is locked for 12 months.",
   },
   {
-    icon: "📸",
+    Icon: Camera,
     title: "Built on Accountability",
-    desc: "Every visit gets photo verification after the service, and a named point of contact on every job.",
+    desc: "The same pro for each service, every visit — with photo verification submitted after the service.",
   },
   {
-    icon: "🛡️",
+    Icon: ShieldCheck,
     title: "The 48-hour guarantee",
     desc: "If anything about your visit isn't right, tell us within 48 hours and we'll send your pro back to fix it at no charge. No forms, no argument.",
   },
@@ -31,11 +33,9 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
   const { t } = useLanguage();
 
   const ctaText = CUSTOMER_DASHBOARD_ENABLED ? "See your price — 60 seconds →" : "Request Early Access →";
-  const btnClass =
-    "mt-12 bg-gold hover:bg-gold/90 text-gold-foreground font-bold px-8 py-3.5 rounded-xl transition-all hover:scale-105 shadow-[0_0_20px_rgba(245,197,24,0.3)] animate-pulse-gold";
 
   return (
-    <section className="relative py-20 px-4 overflow-hidden">
+    <section className="founding-showcase relative overflow-hidden">
       <img
         src={testimonialsBgMobile}
         alt="Luxury Miami home"
@@ -52,52 +52,51 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
         height={1080}
         className="absolute inset-0 w-full h-full object-cover hidden md:block"
       />
-      <div className="absolute inset-0 bg-navy/75" />
+      <div className="founding-showcase-scrim absolute inset-0" />
 
-      <div className="relative z-10 max-w-6xl mx-auto text-center">
-        <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("FOUNDING MEMBERS")}</span>
-        <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mt-3">
+      <div className="founding-showcase-inner relative z-10 mx-auto text-center">
+        <span className="founding-showcase-eyebrow">{t("FOUNDING MEMBERS")}</span>
+        <h2 className="founding-showcase-title">
           {t("Be among the first homes on autopilot.")}
         </h2>
-        <p className="text-primary-foreground/80 mt-4 max-w-2xl mx-auto">
+        <p className="founding-showcase-intro">
           {t(
-            "Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and lock in founding-member pricing.",
+            "Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and your founding rate is locked for 12 months — it does not rise when the founding group closes.",
           )}
         </p>
 
-        <div className="grid md:grid-cols-3 gap-6 mt-12 text-left">
-          {foundingCards.map((card, i) => (
-            <FadeIn key={card.title} delay={i * 100}>
-              <div className="bg-card rounded-xl p-8 h-full">
-                <div className="text-4xl mb-4" aria-hidden="true">
-                  {card.icon}
+        <div className="founding-showcase-panel text-left">
+          {foundingCards.map(({ Icon, title, desc }) => (
+              <div className="founding-showcase-benefit" key={title}>
+                <span className="founding-showcase-icon"><Icon aria-hidden="true" /></span>
+                <div>
+                  <h3>{t(title)}</h3>
+                  <p>{t(desc)}</p>
                 </div>
-                <h3 className="text-lg font-bold text-foreground mb-2">{t(card.title)}</h3>
-                <p className="text-sm text-foreground/70">{t(card.desc)}</p>
               </div>
-            </FadeIn>
           ))}
         </div>
 
-        <p className="mt-10 text-sm text-primary-foreground/80">
+        <p className="founding-showcase-proof">
           {t("Background-Checked · Photo-Verified Visits · 48-hour guarantee")}
         </p>
 
-        <p className="mt-3 text-sm text-primary-foreground/80">
+        <p className="founding-showcase-proof founding-showcase-proof-secondary">
           {t(
             "One free premium add-on on your first visit · 48-hour guarantee · Only 25 founding homes per ZIP",
           )}
         </p>
 
-        <button
+        <Button
           onClick={() => {
             pushEvent("cta_click", { cta_id: "testimonials", cta_text: ctaText });
             onOpenPopup();
           }}
-          className={btnClass}
+          className="founding-showcase-cta animate-pulse-gold"
         >
           {t(ctaText)}
-        </button>
+        </Button>
+        <div className="mt-4"><FoundingCounter tone="dark" /></div>
       </div>
     </section>
   );

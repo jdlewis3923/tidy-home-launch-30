@@ -195,6 +195,10 @@ const translations: Record<string, string> = {
   "Time-Conscious Homeowners": "Propietarios que Valoran su Tiempo",
   "You value your weekend. Stop spending it coordinating, rebooking, and following up. Tidy handles all of it.":
     "Valoras tu fin de semana. Deja de gastarlo coordinando, reagendando y dando seguimiento. Tidy se encarga de todo.",
+  "Homeowners Who Travel": "Propietarios que Viajan",
+  "Away for the week or the season? Your home still gets serviced on schedule, and you see the photos after every visit.":
+    "¿Fuera por una semana o por la temporada? Tu hogar sigue recibiendo servicio a tiempo y ves las fotos después de cada visita.",
+  "Family relaxing together in their home": "Familia descansando junta en su hogar",
 
   // Testimonials
   Reviews: "Reseñas",
@@ -221,6 +225,9 @@ const translations: Record<string, string> = {
   "Miami-Local": "Local en Miami",
   "Built for Florida homes. Serving Kendall, Kendall West & Pinecrest neighborhoods.":
     "Hecho para hogares de Florida. Sirviendo las comunidades de Kendall, Kendall West y Pinecrest.",
+  "Local to Your ZIP": "Local en Tu Código Postal",
+  "Built for South Florida homes. Serving Pinecrest, Kendall, and Kendall West — 33156, 33183, 33186.":
+    "Hecho para hogares del sur de Florida. Sirviendo Pinecrest, Kendall y Kendall West — 33156, 33183, 33186.",
 
   // Pricing
   "Everything runs automatically — no coordination needed. Modify, skip, or adjust anytime.":
@@ -909,15 +916,21 @@ const translations: Record<string, string> = {
   "Founding Member Pricing": "Precio de Miembro Fundador",
   "Lock in your rate as one of our first members. Your price stays put as we grow.":
     "Asegura tu tarifa como uno de nuestros primeros miembros. Tu precio se mantiene mientras crecemos.",
+  "Lock in your rate as one of our first members. Your founding price is locked for 12 months.":
+    "Asegura tu tarifa como uno de nuestros primeros miembros. Tu precio fundador queda fijo por 12 meses.",
   "Built on Accountability": "Construido sobre la Responsabilidad",
   "Every visit gets photo verification after the service, and a named point of contact on every job.":
     "Cada visita recibe verificación con fotos después del servicio y un contacto asignado en cada trabajo.",
+  "The same pro for each service, every visit — with photo verification submitted after the service.":
+    "El mismo profesional para cada servicio, en cada visita — con verificación fotográfica enviada después del servicio.",
   "Not happy? We make it right within 24 hours — re-service or credit, no questions asked.":
     "¿No quedaste satisfecho? Lo resolvemos dentro de 24 horas — repetimos el servicio o te damos un crédito, sin preguntas.",
   "FOUNDING MEMBERS": "MIEMBROS FUNDADORES",
   "Be among the first homes on autopilot.": "Sé de los primeros hogares en piloto automático.",
   "Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and lock in founding-member pricing.":
     "Tidy está aceptando un grupo limitado de miembros fundadores en Pinecrest, Kendall y Kendall West. Únete temprano y asegura el precio de miembro fundador.",
+  "Tidy is now accepting a limited group of founding members across Pinecrest, Kendall, and Kendall West. Join early and your founding rate is locked for 12 months — it does not rise when the founding group closes.":
+    "Tidy está aceptando un grupo limitado de miembros fundadores en Pinecrest, Kendall y Kendall West. Únete temprano y tu tarifa fundadora queda fija por 12 meses — no aumenta cuando cierre el grupo fundador.",
   "Background-Checked · Photo-Verified Visits · First visit perfect or it's free":
     "Antecedentes Verificados · Visitas Verificadas con Fotos · Garantía de 48 horas",
   "One free premium add-on on your first visit · First visit perfect or it's free · Only 25 founding homes per ZIP":
