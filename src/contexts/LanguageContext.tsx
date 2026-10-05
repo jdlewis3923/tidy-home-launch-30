@@ -603,6 +603,13 @@ const translations: Record<string, string> = {
   // Bundle page
   "Bundle your services — a free premium add-on every month": "Combina tus servicios — un servicio adicional premium gratis cada mes",
   "Bundle your services": "Combina tus servicios",
+  "Your choice of a": "Tú eliges un",
+  "FREE": "GRATIS",
+  "premium add-on": "servicio adicional premium",
+  "every month": "cada mes",
+  "Car Wash & Detail": "Lavado y detallado de auto",
+  "Window Cleaning": "Limpieza de ventanas",
+  "Pressure Washing": "Lavado a presión",
   "Hold two or more services and you pick one free premium add-on every month. Pinecrest & Kendall only (33156 · 33183 · 33186).":
     "Si tienes dos o más servicios, eliges un servicio adicional premium gratis cada mes. Solo Pinecrest y Kendall (33156 · 33183 · 33186).",
   "Every service on one bill — and you still pick one free premium add-on every month.":
@@ -938,6 +945,19 @@ const translations: Record<string, string> = {
   "Refer a neighbor in Pinecrest or Kendall (33156 · 33183 · 33186). They get $50 off their first month, you get $50 off yours. No limit, no fine print.":
     "Refiere a un vecino en Pinecrest o Kendall (33156 · 33183 · 33186). Ellos reciben $50 de descuento en su primer mes y tú $50 en el tuyo. Sin límite, sin letra pequeña.",
   "Refer & Earn": "Refiere y Gana",
+  "Give $50, Get $50": "Da $50, recibe $50",
+  "Give $50,": "Da $50,",
+  "Get $50": "Recibe $50",
+  "Refer a neighbor in Pinecrest or Kendall.": "Refiere a un vecino en Pinecrest o Kendall.",
+  "They get $50 off their first month.": "Recibe $50 de descuento en su primer mes.",
+  "You get $50 off yours.": "Tú recibes $50 de descuento en el tuyo.",
+  "Your neighbor": "Tu vecino",
+  "off their first month": "de descuento en su primer mes",
+  "off your next month": "de descuento en tu próximo mes",
+  "Get your referral link": "Obtén tu enlace de referido",
+  "No cap. No expiration. No fine print.": "Sin límite. Sin vencimiento. Sin letra pequeña.",
+  "Works in Pinecrest & Kendall": "Válido en Pinecrest y Kendall",
+  "Neighbors love it.": "A los vecinos les encanta.",
   "Give $50, Get $50 — refer a neighbor in Pinecrest + Kendall":
     "Da $50, Recibe $50 — refiere a un vecino en Pinecrest + Kendall",
   "Send a neighbor your link. They get $50 off their first month. You get $50 off yours. No cap, no expiration, no fine print.":

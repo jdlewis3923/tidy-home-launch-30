@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Copy, Check, Gift, UserPlus, Sparkles, MapPin, ShieldCheck, LockKeyhole, ArrowRight } from "lucide-react";
+import { Copy, Check, Gift, UserPlus, Sparkles, ShieldCheck, LockKeyhole, ArrowRight, House, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
 import Reveal from "@/components/landing/Reveal";
 import SectionDecor from "@/components/landing/SectionDecor";
-import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
@@ -15,6 +14,9 @@ import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
 import referDesktop from "@/assets/refer-homes-desktop.png.asset.json";
 import referMobile from "@/assets/refer-homes-mobile.png.asset.json";
+import { Button } from "@/components/ui/button";
+import { useGoogleListing, formatRating } from "@/lib/googleReviews";
+import { Stars, GoogleMark } from "@/components/reviews/ReviewBits";
 
 /**
  * /refer — public marketing surface for the existing
@@ -36,6 +38,7 @@ const ReferInner = () => {
   const [retryTick, setRetryTick] = useState(0);
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
   const { t } = useLanguage();
+  const listing = useGoogleListing();
 
   // Lazy-load Supabase only if dashboard auth is on, to avoid touching
   // the bundle when this page is browsed pre-launch.
@@ -109,7 +112,7 @@ const ReferInner = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="offer-page min-h-screen bg-background flex flex-col">
       <SeoHead
         title={t("Refer a Neighbor — Give $50, Get $50 | Tidy Home Concierge")}
         description={t(
@@ -121,44 +124,46 @@ const ReferInner = () => {
       <Navbar onOpenPopup={handleNavCta} />
 
       {/* HERO */}
-      <section className="editorial-offer-hero relative min-h-[calc(100svh-1rem)] pt-28 pb-40 px-4 overflow-hidden">
+      <section className="editorial-offer-hero offer-refer relative min-h-svh overflow-hidden">
         <picture className="absolute inset-0">
           <source media="(max-width: 767px)" srcSet={referMobile.url} />
-          <img src={referDesktop.url} alt="Palm-lined neighborhood with two homes" className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
+          <img src={referDesktop.url} alt="Palm-lined neighborhood with two homes" className="h-full w-full object-cover object-center" loading="eager" fetchPriority="high" />
         </picture>
         <div className="absolute inset-0 refer-editorial-scrim" />
-        <div className="relative z-10 max-w-3xl mx-auto text-center text-navy">
-          <span className="text-xs uppercase tracking-[0.28em] text-primary font-bold">{t("Refer & Earn")}</span>
-          <h1 className="mt-3 text-5xl md:text-7xl font-extrabold leading-[0.9] text-balance">
-            {t("Give $50,")}<br />{t("Get $50")}
-          </h1>
-          <p className="mt-5 text-base md:text-lg max-w-xl mx-auto leading-snug font-medium">
-            {t("Refer a neighbor in Pinecrest or Kendall. They get $50 off their first month. You get $50 off yours.")}
-          </p>
-
-          <div className="mt-7 flex items-center justify-center gap-3 md:gap-8">
-            <div className="offer-reward-card -rotate-2">
-              <span>{t("Your neighbor")}</span><strong>$50</strong><small>{t("off their first month")}</small>
+        <div className="offer-refer-content relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-4 text-center text-navy">
+          <div className="offer-refer-heading">
+            <span className="offer-eyebrow">{t("Refer & Earn")}</span>
+            <h1 className="offer-refer-title">{t("Give $50,")}<br /><span className="offer-title-dash">{t("Get $50")}</span></h1>
+            <p className="offer-refer-intro">{t("Refer a neighbor in Pinecrest or Kendall.")}<br />{t("They get $50 off their first month.")}<br />{t("You get $50 off yours.")}</p>
+          </div>
+          <div className="offer-reward-pair" aria-label={t("Give $50, Get $50") }>
+            <div className="offer-reward-card offer-reward-neighbor">
+              <span className="offer-card-icon offer-card-icon-blue"><House aria-hidden="true" /></span>
+              <span>{t("Your neighbor")}</span><strong>$50</strong><i className="offer-small-dash" aria-hidden="true" /><small>{t("off their first month")}</small>
             </div>
-            <ArrowRight className="w-8 h-8 text-primary shrink-0" aria-hidden="true" />
-            <div className="offer-reward-card rotate-2">
-              <span>{t("You")}</span><strong>$50</strong><small>{t("off your next month")}</small>
+            <ArrowRight className="offer-reward-arrow" aria-hidden="true" />
+            <div className="offer-reward-card offer-reward-you">
+              <span className="offer-card-icon offer-card-icon-gold"><Gift aria-hidden="true" /></span>
+              <span>{t("You")}</span><strong>$50</strong><i className="offer-small-dash" aria-hidden="true" /><small>{t("off your next month")}</small>
             </div>
           </div>
-
-          <a href="#referral-link" className="cta-arrow cta-press mt-7 inline-flex w-full max-w-md items-center justify-center bg-gold text-gold-foreground font-bold px-7 py-4 rounded-xl">
-            {t("Get your referral link")} <span className="arrow ml-1">→</span>
-          </a>
-          <p className="mt-2 text-xs font-medium">{t("No cap. No expiration. No fine print.")}</p>
+          <div className="offer-refer-action">
+            <Button asChild className="offer-refer-button cta-arrow cta-press"><a href="#referral-link">{t("Get your referral link")} <span className="arrow">→</span></a></Button>
+            <p>{t("No cap. No expiration. No fine print.")}</p>
+          </div>
         </div>
-        <div className="absolute z-20 bottom-5 left-4 right-4 max-w-4xl md:mx-auto service-benefit-bar">
-          <div><span className="service-benefit-icon"><MapPin /></span><strong>{t("Works in Pinecrest & Kendall")}</strong></div>
-          <div><span className="service-benefit-icon"><ShieldCheck /></span><strong>{t("The same pro for each service, every visit")}</strong></div>
-          <div><span className="service-benefit-icon"><LockKeyhole /></span><strong>{t("Cancel anytime")}</strong></div>
+        <div className="offer-refer-footer relative z-10">
+          <div className="offer-refer-trust">
+            <div><Users aria-hidden="true" /><span>{t("Works in Pinecrest & Kendall")}</span></div>
+            <div><ShieldCheck aria-hidden="true" /><span>{t("The same pro for each service, every visit")}</span></div>
+            <div><LockKeyhole aria-hidden="true" /><span>{t("Cancel anytime")}</span></div>
+          </div>
+          {listing && <a className="offer-refer-review" href={listing.maps_uri} target="_blank" rel="noopener noreferrer">
+            <span className="offer-review-avatars" aria-hidden="true">{listing.reviews.slice(0, 3).map((r, i) => <span key={r.id ?? i}>{r.author?.charAt(0) || "?"}</span>)}</span>
+            <span className="offer-review-copy"><strong>{t("Neighbors love it.")}</strong><span><Stars value={listing.rating} size={13} /> {formatRating(listing.rating)} · {listing.total_count} {t("reviews on Google")} <GoogleMark size={13} /></span></span>
+          </a>}
         </div>
       </section>
-
-      <LandingTicker />
 
       {/* HOW IT WORKS */}
       <section className="relative bg-background py-16 px-4 overflow-hidden">

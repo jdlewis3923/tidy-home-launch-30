@@ -228,31 +228,93 @@
   .service-benefit-icon svg { @apply h-5 w-5 md:h-6 md:w-6; }
   .editorial-offer-hero { @apply bg-section-alt; }
   .refer-editorial-scrim {
-    background: linear-gradient(180deg, hsl(var(--primary-foreground) / .9) 0%, hsl(var(--primary-foreground) / .64) 55%, hsl(var(--primary-foreground) / .22) 78%, hsl(var(--primary-foreground) / .7) 100%);
+    background: linear-gradient(180deg, hsl(var(--primary-foreground) / .85) 0%, hsl(var(--primary-foreground) / .68) 34%, hsl(var(--primary-foreground) / .12) 72%, hsl(var(--primary-foreground) / .78) 100%);
   }
   .bundle-editorial-scrim {
-    background: linear-gradient(180deg, hsl(var(--primary-foreground) / .94) 0%, hsl(var(--primary-foreground) / .84) 44%, hsl(var(--primary-foreground) / .46) 68%, hsl(var(--navy) / .12) 100%);
+    background: linear-gradient(180deg, hsl(var(--primary-foreground) / .9) 0%, hsl(var(--primary-foreground) / .76) 38%, hsl(var(--primary-foreground) / .22) 70%, hsl(var(--navy) / .08) 100%);
   }
-  .offer-reward-card {
-    @apply flex aspect-[.86] w-32 flex-col items-center justify-center rounded-lg bg-primary-foreground/95 p-4 shadow-xl md:w-44;
+  .offer-page { --offer-nav-height: 6rem; }
+  .offer-page .editorial-offer-hero { display: flex; flex-direction: column; justify-content: space-between; min-height: 0; height: 52rem; padding-top: calc(var(--offer-nav-height) + 1.2rem); }
+  .offer-page .offer-eyebrow { @apply block text-primary font-bold uppercase text-xs; letter-spacing: .2em; }
+  .offer-page .offer-title-dash { position: relative; display: inline-block; }
+  .offer-page .offer-title-dash::after { content: ""; position: absolute; z-index: -1; bottom: .045em; left: 12%; width: 76%; height: .12em; background: hsl(var(--gold)); border-radius: 50%; transform: rotate(-2deg); }
+  .offer-refer-title { @apply mt-3 font-extrabold; font-size: clamp(2.8rem, 5vw, 5.2rem); line-height: .98; }
+  .offer-refer-intro, .offer-bundle-intro { @apply mx-auto mt-5 max-w-xl font-medium leading-snug; font-size: clamp(.95rem, 1.5vw, 1.22rem); }
+  .offer-refer-content { gap: 1.8rem; }
+  .offer-reward-pair { @apply flex w-full items-center justify-center; gap: clamp(2.4rem, 5vw, 5rem); }
+  .offer-reward-card { @apply relative flex aspect-[.78] w-[36%] max-w-[11rem] flex-col items-center justify-center rounded-lg bg-primary-foreground/95 px-2 py-3 shadow-xl; }
+  .offer-reward-neighbor { transform: rotate(-4deg); }
+  .offer-reward-you { transform: rotate(4deg); }
+  .offer-reward-card > span:not(.offer-card-icon) { @apply font-bold uppercase text-[10px]; letter-spacing: .1em; }
+  .offer-reward-card strong { @apply text-5xl md:text-6xl; line-height: 1.1; }
+  .offer-reward-card small { @apply max-w-28 text-xs md:text-sm font-medium leading-tight; }
+  .offer-small-dash { display: block; width: 3rem; height: .2rem; margin: .1rem 0 .5rem; border-radius: 100%; background: hsl(var(--gold)); transform: rotate(-4deg); }
+  .offer-card-icon { @apply absolute flex items-center justify-center rounded-full border-2 border-primary-foreground text-navy shadow-md; width: 3.2rem; height: 3.2rem; top: -1.6rem; }
+  .offer-card-icon svg { width: 1.45rem; height: 1.45rem; }
+  .offer-reward-neighbor .offer-card-icon { left: 12%; }
+  .offer-reward-you .offer-card-icon { right: 12%; }
+  .offer-card-icon-blue { @apply bg-secondary; }
+  .offer-card-icon-gold { @apply bg-gold; }
+  .offer-card-icon-green { @apply bg-success; }
+  .offer-reward-arrow { @apply absolute z-10 h-8 w-8 text-primary; margin-top: 2rem; }
+  .offer-refer-action { @apply flex w-full flex-col items-center; }
+  .offer-refer-button { @apply w-full max-w-sm rounded-full bg-gold text-gold-foreground hover:bg-gold/90; height: 3.3rem; font-size: 1rem; }
+  .offer-refer-action p { @apply mt-2 text-xs font-medium; }
+  .offer-refer-footer { @apply mx-auto w-full max-w-5xl px-4; }
+  .offer-refer-trust { @apply grid grid-cols-3 bg-primary-foreground/95 text-navy; padding: 1.1rem 0; }
+  .offer-refer-trust > div { @apply flex flex-col items-center justify-center gap-1 border-r border-navy/15 px-2 text-center last:border-0; }
+  .offer-refer-trust svg { @apply h-5 w-5; }
+  .offer-refer-trust span { @apply max-w-36 text-[11px] font-medium leading-tight; }
+  .offer-refer-review { @apply mx-auto mb-3 mt-2 flex max-w-xl items-center justify-center gap-4 rounded-lg bg-secondary/95 px-4 py-3 text-navy; }
+  .offer-review-avatars { @apply flex shrink-0; }
+  .offer-review-avatars > span { @apply flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary-foreground bg-primary text-xs font-bold text-primary-foreground; margin-left: -.4rem; }
+  .offer-review-avatars > span:first-child { margin-left: 0; }
+  .offer-review-copy { @apply flex flex-col items-start gap-1 text-xs; }
+  .offer-review-copy > span { @apply flex flex-wrap items-center gap-1; }
+  .offer-bundle-content { @apply text-left; }
+  .offer-bundle-title { @apply mt-4 font-extrabold; font-size: clamp(2.3rem, 4.3vw, 4.8rem); line-height: 1.02; }
+  .offer-bundle-intro { @apply ml-0; }
+  .offer-bundle-tiles { @apply mt-10 flex items-stretch justify-start gap-2; }
+  .bundle-service-tile { @apply relative flex w-[24%] max-w-[11rem] flex-col items-center rounded-lg bg-primary-foreground/95 pb-3 shadow-lg; }
+  .bundle-service-tile .offer-card-icon { left: 50%; transform: translateX(-50%); }
+  .bundle-service-tile img { @apply h-24 w-full rounded-t-lg object-cover md:h-36; }
+  .bundle-service-tile strong { @apply px-1 pt-2 text-center text-xs leading-tight md:text-sm; }
+  .bundle-check { @apply mx-auto mt-auto h-6 w-6 rounded-full bg-gold p-1 text-gold-foreground; }
+  .bundle-plus { @apply z-10 -mx-5 flex h-8 w-8 self-center items-center justify-center rounded-full bg-primary-foreground shadow-md; }
+  .bundle-flow-arrow { @apply h-7 w-7 self-center text-primary; }
+  .bundle-gift-tile { @apply relative flex w-[34%] max-w-[14rem] flex-col items-center justify-center rounded-lg bg-gold px-2 py-3 text-center text-gold-foreground shadow-lg; }
+  .bundle-gift-tile > span:not(.offer-card-icon) { @apply mt-3 text-[10px] font-semibold; }
+  .bundle-gift-tile strong { @apply text-2xl leading-[.9] md:text-3xl; }
+  .bundle-gift-tile strong em { @apply text-sm not-italic md:text-xl; }
+  .bundle-gift-tile small { @apply text-xs font-semibold; }
+  .bundle-gift-tile ul { @apply mt-3 space-y-1 text-left text-[10px] font-semibold; }
+  .bundle-gift-tile li { @apply flex items-center gap-1; }
+  .bundle-gift-tile li svg { @apply h-4 w-4 shrink-0 rounded-full bg-primary-foreground p-0.5; }
+  .offer-zip-pill { @apply mt-5 inline-flex items-center gap-2 rounded-full bg-primary-foreground/95 px-5 py-2 text-xs font-bold shadow-sm; }
+  .bundle-trust-bar { @apply mx-auto grid w-full max-w-5xl grid-cols-4 rounded-t-xl bg-navy/95 px-2 py-5 text-primary-foreground backdrop-blur-md md:px-8 md:py-6; }
+  .bundle-trust-bar > div { @apply flex min-w-0 flex-col items-center gap-1 border-r border-primary-foreground/15 px-1 text-center last:border-r-0; }
+  .bundle-trust-bar svg { @apply h-5 w-5 shrink-0 text-primary-foreground; }
+  .bundle-trust-bar strong { @apply text-[9px] leading-tight md:text-xs; }
+  @media (max-width: 767px) {
+    .offer-page .editorial-offer-hero { height: auto; min-height: 48rem; padding-top: calc(var(--offer-nav-height) + .5rem); }
+    .offer-refer-content { gap: 2rem; }
+    .offer-reward-pair { gap: 3rem; }
+    .offer-reward-card { width: 37%; max-width: 9rem; }
+    .offer-reward-card strong { font-size: 2.7rem; }
+    .offer-refer-trust { padding: .8rem 0; }
+    .offer-refer-review { margin-bottom: .5rem; }
+    .offer-bundle-content { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .offer-bundle-title { font-size: clamp(1.75rem, 7.3vw, 2.8rem); }
+    .offer-bundle-tiles { gap: .3rem; }
+    .bundle-service-tile { width: 29%; }
+    .bundle-gift-tile { width: 34%; }
+    .bundle-plus { margin-left: -.9rem; margin-right: -.9rem; }
+    .bundle-flow-arrow { width: 1.2rem; }
+    .bundle-service-tile img { height: 5.8rem; }
+    .bundle-gift-tile strong { font-size: 1.35rem; }
+    .bundle-gift-tile strong em { font-size: .9rem; }
+    .bundle-gift-tile ul { font-size: 9px; }
   }
-  .offer-reward-card span { @apply text-[10px] font-bold uppercase tracking-widest; }
-  .offer-reward-card strong { @apply my-1 text-4xl md:text-6xl; }
-  .offer-reward-card small { @apply text-xs font-semibold leading-tight md:text-sm; }
-  .editorial-underline { text-decoration: underline; text-decoration-color: hsl(var(--gold)); text-decoration-thickness: .12em; text-underline-offset: .12em; }
-  .bundle-service-tile {
-    @apply flex w-24 flex-col overflow-hidden rounded-lg bg-primary-foreground/95 pb-3 shadow-lg md:w-36;
-  }
-  .bundle-service-tile img { @apply h-24 w-full object-cover md:h-32; }
-  .bundle-service-tile strong { @apply px-2 pt-2 text-xs leading-tight md:text-sm; }
-  .bundle-check { @apply mx-auto mt-2 h-6 w-6 rounded-full bg-gold p-1 text-gold-foreground; }
-  .bundle-gift-tile { @apply flex w-28 flex-col items-center justify-center rounded-lg bg-gold p-2 text-gold-foreground shadow-lg md:w-44 md:p-4; }
-  .bundle-gift-tile span, .bundle-gift-tile small { @apply text-[9px] font-semibold md:text-xs; }
-  .bundle-gift-tile strong { @apply my-1 text-lg leading-[.9] md:text-2xl; }
-  .bundle-trust-bar { @apply grid grid-cols-4 bg-navy/95 px-2 py-4 text-primary-foreground backdrop-blur-md md:px-8 md:py-6; }
-  .bundle-trust-bar > div { @apply flex min-w-0 flex-col items-center gap-1 border-r border-primary-foreground/15 px-1 text-center last:border-r-0 md:flex-row md:justify-center md:gap-3; }
-  .bundle-trust-bar svg { @apply h-4 w-4 shrink-0 text-primary-foreground md:h-5 md:w-5; }
-  .bundle-trust-bar strong { @apply text-[8px] leading-tight md:text-xs; }
   @media (max-width: 767px) {
     .service-editorial-scrim {
       background: linear-gradient(90deg, hsl(var(--navy) / .9) 0%, hsl(var(--navy) / .66) 58%, hsl(var(--navy) / .12) 100%), linear-gradient(0deg, hsl(var(--navy) / .32), transparent 50%);
