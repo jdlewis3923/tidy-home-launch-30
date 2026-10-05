@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Check, MapPin, ShieldCheck, BadgeCheck, Camera, Clock3, LockKeyhole, Star } from "lucide-react";
+import { Check, MapPin, Sparkles, ShieldCheck, BadgeCheck, Camera, Clock3, LockKeyhole, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead, { SeoService } from "@/components/landing/SeoHead";
