@@ -10,7 +10,7 @@ export const PHONE_TEL = "+17868291141";
 export { FOUNDING_ZIPS as SERVICE_ZIPS } from "@/lib/launch";
 import { FOUNDING_ZIPS as SERVICE_ZIPS_ } from "@/lib/launch";
 export const SERVICE_AREA_TEXT = "Pinecrest + Kendall — Miami-Dade";
-export const SERVICE_AREA_TRUST = `Serving ${SERVICE_ZIPS.join(" · ")}`;
+export const SERVICE_AREA_TRUST = `Serving ${SERVICE_ZIPS_.join(" · ")}`;
 
 // UTM params we forward end-to-end.
 export const FORWARDED_PARAMS = [
