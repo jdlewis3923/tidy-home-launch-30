@@ -177,7 +177,7 @@ export default function Founding() {
   const reviews = listing ? rankReviews(listing.reviews).slice(0, 3) : [];
 
   return (
-    <div className="min-h-screen bg-background text-ink">
+    <div className="founding-landing min-h-screen bg-background text-ink">
       <Helmet>
         <html lang={language} />
         <title>{t("Founding Homes · Cleaning, Lawn & Car Care in Pinecrest & Kendall | Tidy")}</title>
@@ -419,13 +419,13 @@ export default function Founding() {
             <p className="founding-section-lead">{t("Bundle the services you want. One simple bill. No hidden fees.")}</p>
             <ul className="founding-plan-grid">
               {[
-                { label: "House Cleaning", price: 139, image: cleaningImage.url, Icon: Sparkles, tone: "gold" },
-                { label: "Lawn Care", price: 45, image: lawnImage.url, Icon: Leaf, tone: "green" },
-                { label: "Car Care", price: 149, image: carImage.url, Icon: CarFront, tone: "blue" },
-              ].map(({ label, price, image, Icon, tone }) => (
+                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: cleaningImage.url, Icon: Sparkles, tone: "gold" },
+                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnImage.url, Icon: Leaf, tone: "green" },
+                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carImage.url, Icon: CarFront, tone: "blue" },
+              ].map(({ svc, label, price, image, Icon, tone }) => (
                 <li key={label} className="founding-plan-card">
                   <img src={image} alt="" width={640} height={360} loading="lazy" />
-                  <div><Icon className={`founding-plan-icon is-${tone}`} aria-hidden="true" /><span><strong>{t(label)}</strong><small>{t("from")} ${price} {t("a month")}</small></span><button type="button" aria-label={`${t("Add")} ${t(label)}`} onClick={() => { const svc = label === "House Cleaning" ? "cleaning" : label === "Lawn Care" ? "lawn" : "detailing"; set({ services: s.services.includes(svc) ? s.services : [...s.services, svc] }); go("sizes"); }}>+</button></div>
+                  <div><Icon className={`founding-plan-icon is-${tone}`} aria-hidden="true" /><span><strong>{t(label)}</strong><small>{t("from")} ${price} {t("a month")}</small></span><button type="button" aria-label={`${t("Add")} ${t(label)}`} onClick={() => { set({ services: s.services.includes(svc) ? s.services : [...s.services, svc] }); go("sizes"); }}>+</button></div>
                 </li>
               ))}
             </ul>

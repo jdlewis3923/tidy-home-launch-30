@@ -1543,3 +1543,119 @@ body.admin-hud h1 {
 @media (prefers-reduced-motion: reduce) {
   .founding-showcase-cta { animation: none; }
 }
+
+/* /founding — mobile door-hanger landing surface. */
+.founding-landing {
+  --founding-shadow: 0 18px 42px hsl(var(--navy) / .16);
+  --founding-soft: 210 50% 98%;
+  background: hsl(var(--background));
+  font-family: "Poppins", system-ui, sans-serif;
+}
+.founding-landing-hero { position: relative; min-height: 648px; overflow: hidden; background: hsl(var(--navy)); }
+.founding-hero-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 56% center; }
+.founding-hero-shade { position: absolute; inset: 0; background: linear-gradient(90deg, hsl(var(--navy) / .94) 0%, hsl(var(--navy) / .72) 34%, hsl(var(--navy) / .12) 70%), linear-gradient(180deg, hsl(var(--navy) / .12), hsl(var(--navy) / .08) 68%, hsl(var(--navy) / .3)); }
+.founding-hero-shell { position: relative; z-index: 1; width: min(100% - 40px, 1160px); margin: 0 auto; }
+.founding-topbar { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; }
+.founding-language { overflow: hidden; border-radius: 10px; background: hsl(var(--navy) / .7); color: hsl(var(--primary-foreground)); box-shadow: 0 4px 18px hsl(var(--navy) / .25); }
+.founding-hero-copy { width: min(520px, 48%); padding-top: 54px; }
+.founding-hero-copy h1 { font-size: clamp(3.15rem, 5.2vw, 5.1rem); font-weight: 900; line-height: .98; letter-spacing: 0; text-shadow: 0 4px 18px hsl(var(--navy) / .28); }
+.founding-hero-copy h1 span { color: hsl(var(--gold)); }
+.founding-hero-copy > p { margin-top: 20px; font-size: 1.24rem; line-height: 1.45; color: hsl(var(--primary-foreground) / .92); }
+.founding-cap-pill { display: inline-flex; margin-top: 20px; border-radius: 10px; padding: 12px 16px; background: hsl(var(--primary-foreground) / .14); font-size: .86rem; font-weight: 600; backdrop-filter: blur(8px); }
+.founding-cap-pill strong { color: hsl(var(--gold)); }
+.founding-landing-main { position: relative; }
+.founding-quote-wrap { position: relative; z-index: 3; width: min(100% - 40px, 430px); margin: -350px auto 0; transform: translateX(-365px); }
+.founding-quote-card { border: 1px solid hsl(var(--border)); border-radius: 18px; background: hsl(var(--card)); padding: 22px; box-shadow: var(--founding-shadow); }
+.founding-quote-card button { letter-spacing: 0; }
+.founding-quote-card > div > button:last-child, .founding-quote-card form > button:not([type="button"]) { box-shadow: 0 10px 26px hsl(var(--gold) / .32); }
+.founding-service-icon-cleaning { color: hsl(var(--gold)); }
+.founding-service-icon-lawn { color: hsl(var(--success)); }
+.founding-service-icon-detailing { color: hsl(var(--primary)); }
+.founding-benefits-section { width: min(100% - 40px, 1160px); margin: 0 auto; padding: 76px 0 68px; text-align: center; }
+.founding-benefits-section h2, .founding-eyebrow { color: hsl(var(--primary)); font-size: .78rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.founding-benefits-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 25px; }
+.founding-benefits-grid li { display: flex; min-height: 132px; flex-direction: column; align-items: center; justify-content: center; gap: 14px; border-radius: 8px; background: hsl(var(--founding-soft)); padding: 20px 12px; box-shadow: 0 8px 24px hsl(var(--navy) / .04); }
+.founding-benefits-grid li > span { display: flex; width: 48px; height: 48px; align-items: center; justify-content: center; border-radius: 999px; background: hsl(var(--card)); box-shadow: 0 7px 20px hsl(var(--primary) / .1); color: hsl(var(--primary)); }
+.founding-benefits-grid li:nth-child(2) > span { color: hsl(var(--gold)); }
+.founding-benefits-grid li > span svg { width: 25px; height: 25px; stroke-width: 2.5; }
+.founding-benefits-grid strong { max-width: 170px; color: hsl(var(--navy)); font-size: .86rem; line-height: 1.35; }
+.founding-plans-section { background: hsl(var(--founding-soft)); padding: 62px 20px 72px; text-align: center; }
+.founding-section-shell { width: min(100%, 1160px); margin: 0 auto; }
+.founding-plans-section h2, .founding-how-section h2 { margin-top: 8px; color: hsl(var(--navy)); font-size: clamp(2rem, 3.2vw, 3rem); font-weight: 900; line-height: 1.05; }
+.founding-section-lead { margin-top: 11px; color: hsl(var(--text-mid)); font-size: 1rem; }
+.founding-plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 32px; }
+.founding-plan-card { overflow: hidden; border: 1px solid hsl(var(--border)); border-radius: 8px; background: hsl(var(--card)); text-align: left; box-shadow: 0 8px 20px hsl(var(--navy) / .06); }
+.founding-plan-card > img { width: 100%; height: 174px; object-fit: cover; }
+.founding-plan-card > div { display: grid; grid-template-columns: 30px 1fr 32px; align-items: center; gap: 10px; min-height: 78px; padding: 12px 14px; }
+.founding-plan-icon { width: 24px; height: 24px; }
+.founding-plan-icon.is-gold { color: hsl(var(--gold)); }.founding-plan-icon.is-green { color: hsl(var(--success)); }.founding-plan-icon.is-blue { color: hsl(var(--primary)); }
+.founding-plan-card span { display: flex; min-width: 0; flex-direction: column; }
+.founding-plan-card strong { color: hsl(var(--navy)); font-size: .9rem; }
+.founding-plan-card small { margin-top: 2px; color: hsl(var(--text-mid)); font-size: .72rem; }
+.founding-plan-card button { display: flex; width: 30px; height: 30px; align-items: center; justify-content: center; border: 1px solid hsl(var(--primary) / .42); border-radius: 999px; color: hsl(var(--primary)); font-size: 1.15rem; }
+.founding-how-section { padding: 62px 20px 70px; text-align: center; }
+.founding-how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 30px; text-align: left; }
+.founding-step-image { position: relative; aspect-ratio: 1.26 / 1; overflow: visible; margin-bottom: 21px; }
+.founding-step-image img { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; }
+.founding-step-image span { position: absolute; bottom: -17px; left: 12px; display: flex; width: 39px; height: 39px; align-items: center; justify-content: center; border-radius: 999px; background: hsl(var(--gold)); color: hsl(var(--navy)); font-weight: 900; }
+.founding-how-grid strong { color: hsl(var(--navy)); font-size: 1rem; }
+.founding-how-grid p { margin-top: 3px; color: hsl(var(--text-mid)); font-size: .8rem; line-height: 1.4; }
+.founding-trust-section { background: hsl(var(--navy)); color: hsl(var(--primary-foreground)); }
+.founding-trust-section ul { display: grid; grid-template-columns: repeat(5, 1fr); width: min(100% - 40px, 1160px); margin: 0 auto; }
+.founding-trust-section li { display: flex; min-height: 122px; flex-direction: column; align-items: center; justify-content: center; gap: 9px; padding: 18px 10px; text-align: center; }
+.founding-trust-section svg { width: 30px; height: 30px; color: hsl(var(--gold)); stroke-width: 2; }
+.founding-trust-section strong { max-width: 125px; font-size: .74rem; line-height: 1.25; }
+.founding-footer-section { width: min(100% - 40px, 1160px); margin: 0 auto; padding: 32px 0 42px; }
+.founding-refer-card { display: grid; grid-template-columns: 56px 1fr 28px; align-items: center; gap: 18px; min-height: 92px; border: 2px solid hsl(var(--gold)); border-radius: 16px; background: hsl(var(--gold) / .08); padding: 16px 26px; }
+.founding-refer-card > svg:first-child { width: 44px; height: 44px; color: hsl(var(--destructive)); fill: hsl(var(--gold)); }
+.founding-refer-card > svg:last-child { color: hsl(var(--navy)); }
+.founding-refer-card span { display: flex; flex-direction: column; }
+.founding-refer-card strong { color: hsl(var(--navy)); font-size: 1.32rem; font-weight: 900; }
+.founding-refer-card small { margin-top: 3px; color: hsl(var(--text-mid)); font-size: .85rem; }
+.founding-question, .founding-cancel, .founding-serving, .founding-legal { text-align: center; }
+.founding-question { margin-top: 28px; font-size: .84rem; }.founding-question a { color: hsl(var(--primary)); font-weight: 800; }
+.founding-cancel { margin-top: 10px; font-size: .78rem; font-weight: 600; }
+.founding-serving { margin-top: 18px; color: hsl(var(--text-mid)); font-size: .72rem; }.founding-legal { margin-top: 12px; font-size: .72rem; }.founding-legal a { text-decoration: underline; }
+
+@media (max-width: 767px) {
+  .founding-landing-hero { min-height: 648px; }
+  .founding-hero-photo { object-position: 59% center; }
+  .founding-hero-shade { background: linear-gradient(90deg, hsl(var(--navy) / .95) 0%, hsl(var(--navy) / .69) 39%, hsl(var(--navy) / .08) 78%), linear-gradient(180deg, hsl(var(--navy) / .08), hsl(var(--navy) / .04) 55%, hsl(var(--navy) / .32)); }
+  .founding-hero-shell { width: calc(100% - 36px); }
+  .founding-topbar picture img { height: 42px; }
+  .founding-hero-copy { width: 78%; padding-top: 28px; }
+  .founding-hero-copy h1 { font-size: 2.72rem; }
+  .founding-hero-copy > p { margin-top: 14px; font-size: .96rem; }
+  .founding-cap-pill { margin-top: 13px; padding: 9px 11px; font-size: .68rem; white-space: nowrap; }
+  .founding-quote-wrap { width: calc(100% - 40px); margin-top: -366px; transform: none; }
+  .founding-quote-card { padding: 17px; border-radius: 17px; }
+  .founding-benefits-section { width: calc(100% - 28px); padding: 53px 0 45px; }
+  .founding-benefits-grid { grid-template-columns: repeat(4, 1fr); gap: 7px; margin-top: 19px; }
+  .founding-benefits-grid li { min-height: 126px; gap: 10px; padding: 12px 5px; }
+  .founding-benefits-grid li > span { width: 40px; height: 40px; }
+  .founding-benefits-grid li > span svg { width: 22px; height: 22px; }
+  .founding-benefits-grid strong { font-size: .66rem; line-height: 1.28; }
+  .founding-plans-section, .founding-how-section { padding: 48px 14px 54px; }
+  .founding-plans-section h2, .founding-how-section h2 { font-size: 1.8rem; }
+  .founding-section-lead { font-size: .8rem; }
+  .founding-plan-grid { gap: 8px; margin-top: 24px; }
+  .founding-plan-card > img { height: 87px; }
+  .founding-plan-card > div { grid-template-columns: 22px 1fr 25px; gap: 5px; min-height: 64px; padding: 8px; }
+  .founding-plan-icon { width: 18px; height: 18px; }
+  .founding-plan-card strong { font-size: .65rem; line-height: 1.15; }
+  .founding-plan-card small { font-size: .54rem; white-space: nowrap; }
+  .founding-plan-card button { width: 24px; height: 24px; font-size: .9rem; }
+  .founding-how-grid { gap: 10px; margin-top: 24px; }
+  .founding-step-image { aspect-ratio: .96 / 1; margin-bottom: 18px; }
+  .founding-step-image span { bottom: -14px; left: 5px; width: 32px; height: 32px; font-size: .8rem; }
+  .founding-how-grid strong { font-size: .74rem; }
+  .founding-how-grid p { font-size: .61rem; line-height: 1.38; }
+  .founding-trust-section ul { grid-template-columns: repeat(5, 1fr); width: 100%; }
+  .founding-trust-section li { min-height: 108px; gap: 7px; padding: 13px 3px; }
+  .founding-trust-section svg { width: 25px; height: 25px; }
+  .founding-trust-section strong { font-size: .57rem; }
+  .founding-footer-section { width: calc(100% - 36px); padding-top: 27px; }
+  .founding-refer-card { grid-template-columns: 42px 1fr 21px; gap: 11px; min-height: 78px; padding: 12px 14px; }
+  .founding-refer-card > svg:first-child { width: 36px; height: 36px; }
+  .founding-refer-card strong { font-size: 1.05rem; }.founding-refer-card small { font-size: .66rem; }
+}
