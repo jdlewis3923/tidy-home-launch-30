@@ -17,9 +17,9 @@ import LanguageToggle from "@/components/LanguageToggle";
 import TidyLogo from "@/components/TidyLogo";
 import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
 import foundingHero from "@/assets/founding-family-hero.jpg";
-import cleaningImage from "@/assets/services-cleaning-20261004.webp.asset.json";
-import lawnImage from "@/assets/services-lawn-20261004.webp.asset.json";
-import carImage from "@/assets/services-car-20261004.webp.asset.json";
+import cleaningImage from "@/assets/cleaning-interior.webp";
+import lawnImage from "@/assets/lawn-care.webp";
+import carImage from "@/assets/car-detailing.webp";
 import scanImage from "@/assets/founding-scan-step.jpg";
 import calendarImage from "@/assets/founding-calendar-step.jpg";
 import proImage from "@/assets/founding-pro-step.jpg";
@@ -419,9 +419,9 @@ export default function Founding() {
             <p className="founding-section-lead">{t("Bundle the services you want. One simple bill. No hidden fees.")}</p>
             <ul className="founding-plan-grid">
               {[
-                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: cleaningImage.url, Icon: Sparkles, tone: "gold" },
-                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnImage.url, Icon: Leaf, tone: "green" },
-                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carImage.url, Icon: CarFront, tone: "blue" },
+                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: cleaningImage, Icon: Sparkles, tone: "gold" },
+                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnImage, Icon: Leaf, tone: "green" },
+                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carImage, Icon: CarFront, tone: "blue" },
               ].map(({ svc, label, price, image, Icon, tone }) => (
                 <li key={label} className="founding-plan-card">
                   <img src={image} alt="" width={640} height={360} loading="lazy" />

@@ -1624,12 +1624,18 @@ body.admin-hud h1 {
   .founding-hero-shell { width: calc(100% - 36px); }
   .founding-topbar picture img { height: 42px; }
   .founding-hero-copy { width: 78%; padding-top: 28px; }
-  .founding-hero-copy h1 { font-size: 2.72rem; }
+  .founding-hero-copy h1 { font-size: 2.42rem; }
   .founding-hero-copy > p { margin-top: 14px; font-size: .96rem; }
   .founding-cap-pill { margin-top: 13px; padding: 9px 11px; font-size: .68rem; white-space: nowrap; }
-  .founding-quote-wrap { width: calc(100% - 40px); margin-top: -366px; transform: none; }
-  .founding-quote-card { padding: 17px; border-radius: 17px; }
-  .founding-benefits-section { width: calc(100% - 28px); padding: 53px 0 45px; }
+  .founding-quote-wrap { width: min(calc(100% - 40px), 332px); margin: -366px 0 0 20px; transform: none; }
+  .founding-quote-card { padding: 13px 14px 14px; border-radius: 17px; }
+  .founding-quote-card button, .founding-quote-card input, .founding-quote-card select { min-height: 38px; }
+  .founding-quote-card > div > button:last-child, .founding-quote-card form > button:not([type="button"]) { min-height: 44px; }
+  .founding-quote-card fieldset { margin-bottom: 11px; }
+  .founding-quote-card .mt-4 { margin-top: .7rem; }
+  .founding-quote-card .mt-3 { margin-top: .55rem; }
+  .founding-quote-card .mt-2 { margin-top: .4rem; }
+  .founding-benefits-section { width: calc(100% - 28px); padding: 45px 0; }
   .founding-benefits-grid { grid-template-columns: repeat(4, 1fr); gap: 7px; margin-top: 19px; }
   .founding-benefits-grid li { min-height: 126px; gap: 10px; padding: 12px 5px; }
   .founding-benefits-grid li > span { width: 40px; height: 40px; }
