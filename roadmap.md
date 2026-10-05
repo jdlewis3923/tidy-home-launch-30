@@ -76,3 +76,11 @@
 - [ ] Verify initial multi-service checkout and add-service billing produce one subscription, one monthly charge and one invoice; repair any split path
 - [ ] Replace every cross-service “one Pro” claim in site, account, email sources and chatbot knowledge with service-specific consistency wording
 - [ ] Add regression coverage and verify the member photo record and billing invariants
+
+## /founding door-hanger page (requested 2026-10-05)
+- [x] /founding page: price-first quote, live counter, reservation, confirmation, EN/ES, SEO/OG
+- [x] Per-page on/off switches with dead-link and /founding-off guards
+- [x] Scan/step/tap-to-call logging; Command reservations panel first
+- [x] Write-first reservations, honeypot, duplicate update, founding flag past 25 (no waitlist)
+- [x] Prices read from Stripe by lookup_key with cached fallback
+- [ ] Switch on the five extra add-on prices in Stripe (needs your go-ahead: changes live Stripe)
