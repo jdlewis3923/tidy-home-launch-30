@@ -568,10 +568,6 @@ const translations: Record<string, string> = {
   "Book in a couple of minutes": "Reserva en un par de minutos",
   "We serve Pinecrest and Kendall only. We are not currently serving other areas.":
     "Servimos solo Pinecrest y Kendall. Por ahora no servimos otras áreas.",
-  Pinecrest: "Pinecrest",
-  Kendall: "Kendall",
-  "Kendall West": "Kendall West",
-
   // Sticky bar labels
   "House Cleaning · from $139 a month": "Limpieza del Hogar · desde $139 al mes",
   "Lawn Care · from $45 a month": "Cuidado del Jardín · desde $45 al mes",
