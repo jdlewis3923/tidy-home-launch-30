@@ -187,8 +187,8 @@ export default function Founding() {
       {/* ABOVE THE FOLD — navy + gold, like the hanger */}
       <header className="bg-navy text-primary-foreground">
         <div className="mx-auto flex max-w-xl items-center justify-between px-4 pt-3">
-          <TidyLogo />
-          <LanguageToggle />
+          <TidyLogo size="sm" priority />
+          <div className="rounded-lg bg-background"><LanguageToggle /></div>
         </div>
         <div className="mx-auto max-w-xl px-4 pb-6 pt-3">
           <h1 className="text-[2.1rem] font-extrabold leading-tight">{t("More life.")} <span className="text-gold">{t("Less chores.")}</span></h1>

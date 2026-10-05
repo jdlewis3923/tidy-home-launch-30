@@ -15,6 +15,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Home } from "lucide-react";
 
 const HIDE_ON_PREFIXES = [
+  "/founding",
   "/dashboard/plan",
   "/dashboard/confirmation",
   "/checkout",
