@@ -15,6 +15,7 @@ import { PHONE_DISPLAY, PHONE_TEL } from "@/lib/landing";
 import { supabase } from "@/integrations/supabase/client";
 import LanguageToggle from "@/components/LanguageToggle";
 import TidyLogo from "@/components/TidyLogo";
+import Reveal from "@/components/motion/Reveal";
 import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
 import foundingHero from "@/assets/founding-family-provided.png";
 import cleaningDesktop from "@/assets/service-cleaning-desktop.png.asset.json";
@@ -222,6 +223,14 @@ export default function Founding() {
         <div ref={scrollTo} className="founding-quote-wrap">
           <section aria-label={t("Your price")} className="founding-quote-card">
             {s.step !== "done" && <p className="mb-3 text-center text-xs font-medium text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
+            {isZip(s.zip) && left !== null && s.step !== "done" && (
+              <div data-testid="founding-live-count" className="founding-live-count" aria-live="polite">
+                <span aria-hidden="true" />
+                {left > 0
+                  ? <><strong>{left} {t("of")} {FOUNDING_CAP}</strong> {t("founding homes left in")} {s.zip}</>
+                  : <>{t("Founding homes are fully reserved in")} {s.zip}</>}
+              </div>
+            )}
 
             {/* ZIP is always the dedicated first step. QR codes carry source attribution only. */}
             {s.step === "zip" && (
@@ -411,7 +420,7 @@ export default function Founding() {
         </div>
 
         {/* BELOW THE FOLD */}
-        <section className={`founding-benefits-section ${foundingFull ? "is-full" : ""}`}>
+        <Reveal as="section" className={`founding-benefits-section ${foundingFull ? "is-full" : ""}`}>
           {foundingFull ? (
             <div className="founding-standard-card"><ShieldCheck aria-hidden="true" /><p><strong>{t("Founding homes are fully reserved in")} {s.zip}</strong><span>{t("You're reserving at standard terms — same guarantee, same pros, cancel anytime.")}</span></p></div>
           ) : (
@@ -423,9 +432,9 @@ export default function Founding() {
               })}
             </ul></>
           )}
-        </section>
+        </Reveal>
 
-        <section className="founding-plans-section">
+        <Reveal as="section" className="founding-plans-section">
           <div className="founding-section-shell">
             <p className="founding-eyebrow">{t("Simple, transparent pricing")}</p>
             <h2>{t("Plans from $45 a month.")}</h2>
@@ -443,9 +452,9 @@ export default function Founding() {
               ))}
             </ul>
           </div>
-        </section>
+        </Reveal>
 
-        <section className="founding-how-section">
+        <Reveal as="section" className="founding-how-section">
           <div className="founding-section-shell">
             <p className="founding-eyebrow">{t("Get started in minutes")}</p>
             <h2>{t("How it works")}</h2>
@@ -459,18 +468,18 @@ export default function Founding() {
               ))}
           </ol>
           </div>
-        </section>
+        </Reveal>
 
-        <section className="founding-trust-section">
+        <Reveal as="section" className="founding-trust-section">
           <ul>
             {[
               { label: "Licensed & Insured", Icon: ShieldCheck }, { label: "Background-Checked Pros", Icon: UserRoundCheck },
               { label: "Photo-Verified Every Visit", Icon: Camera }, { label: "48-hour fix guarantee", Icon: Clock3 }, { label: "Cancel Anytime", Icon: CalendarDays },
             ].map(({ label, Icon }) => <li key={label}><Icon aria-hidden="true" /><strong>{t(label)}</strong></li>)}
           </ul>
-        </section>
+        </Reveal>
 
-        <section className="founding-footer-section">
+        <Reveal as="section" className="founding-footer-section">
           <Link to={`/refer${language === "es" ? "?lang=es" : ""}`} className="founding-refer-card">
             <Gift aria-hidden="true" /><span><strong>{t("Give $50, Get $50")}</strong><small>{t("Share Tidy with a neighbor — you both get $50 off.")}</small></span><ArrowRight aria-hidden="true" />
           </Link>
@@ -478,7 +487,7 @@ export default function Founding() {
           <p className="founding-cancel">{t("Cancel anytime. No contracts.")}</p>
           <p className="founding-serving">{t("Serving Pinecrest, Kendall and Kendall West")} · {FOUNDING_ZIPS.join(" · ")}</p>
           <p className="founding-legal"><Link to="/terms">{t("Terms")}</Link> · <Link to="/privacy">{t("Privacy Policy")}</Link></p>
-        </section>
+        </Reveal>
       </main>
     </div>
   );
