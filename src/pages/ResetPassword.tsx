@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import tidyLogo from '@/assets/tidy-logo.png';
+import tidyLogo from '@/assets/tidy-official-logo.png';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');

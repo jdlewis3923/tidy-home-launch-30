@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import tidyLogo from '@/assets/tidy-logo.png';
+import tidyLogo from '@/assets/tidy-official-logo.png';
 
 /**
  * Calm Apple-style login. Cream paper, oversized logo, single column.

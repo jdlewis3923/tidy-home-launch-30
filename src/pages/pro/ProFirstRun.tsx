@@ -9,7 +9,7 @@ import { CalendarDays, DollarSign, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProSession } from "@/hooks/useProSession";
 import { ProButton, ProCard } from "@/components/pro/portal/kit";
-import tidyLogo from "@/assets/tidy-logo.png";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 
 const CALLOUTS = [
   { icon: CalendarDays, title: "Today's work", body: "Every visit, time window and address in one list." },

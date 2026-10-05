@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import tidyLogo from "@/assets/tidy-logo.png";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 import SparkleField from "@/components/landing/SparkleField";
 import SeoHead from "@/components/landing/SeoHead";
 import { useLanguage } from "@/contexts/LanguageContext";

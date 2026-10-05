@@ -8,7 +8,7 @@ export type ReservationRow = {
   id: string; created_at: string; status: string; first_name: string; last_name: string; email: string; phone: string;
   services: string[]; waitlist_services: string[]; lines: { service: string; size: number | string | null; cadence: string | null; monthly: number; visits_per_month: number }[];
   monthly_cents: number; street: string; zip: string; preferred_day: string; preferred_time: string; heard_from: string; heard_other: string | null;
-  invited_at: string | null; assigned_day: string | null; assigned_window: string | null; assigned_pro_first_name: string | null; converted_at: string | null; is_test_row: boolean; sms_consent: boolean;
+  invited_at: string | null; assigned_day: string | null; assigned_window: string | null; assigned_pro_first_name: string | null; converted_at: string | null; is_test_row: boolean; sms_consent: boolean; founding: boolean;
 };
 
 export function useReservations() {
@@ -27,9 +27,10 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 export function forecast(rows: ReservationRow[]) {
   const live = rows.filter((r) => r.status !== "canceled");
   const bySvc = Object.fromEntries(RESERVABLE_SERVICES.map((s) => [s, { reserved: 0, waitlist: 0, monthly: 0, perWeek: 0 }])) as Record<ReservableService, { reserved: number; waitlist: number; monthly: number; perWeek: number }>;
-  const byZip: Record<string, number> = {}; const byDay: Record<string, number> = {};
+  const byZip: Record<string, number> = {}; const byZipFounding: Record<string, number> = {}; const byZipClosedAt: Record<string, string | null> = {}; const byDay: Record<string, number> = {};
   for (const r of live) {
     byZip[r.zip] = (byZip[r.zip] ?? 0) + 1;
+    if (r.founding) byZipFounding[r.zip] = (byZipFounding[r.zip] ?? 0) + 1;
     byDay[r.preferred_day] = (byDay[r.preferred_day] ?? 0) + 1;
     for (const s of r.services as ReservableService[]) {
       if (!bySvc[s]) continue;
@@ -40,7 +41,11 @@ export function forecast(rows: ReservationRow[]) {
     }
   }
   const monthly = RESERVABLE_SERVICES.reduce((n, s) => n + bySvc[s].monthly, 0);
-  return { total: live.length, bySvc, byZip, byDay, monthly };
+  for (const z of ZIPS) {
+    const foundingRows = live.filter((r) => r.zip === z && r.founding).sort((a, b) => a.created_at.localeCompare(b.created_at));
+    byZipClosedAt[z] = foundingRows[FOUNDING_CAP - 1]?.created_at ?? null;
+  }
+  return { total: live.length, bySvc, byZip, byZipFounding, byZipClosedAt, byDay, monthly };
 }
 
 export default function ReservationsForecast({ compact = false }: { compact?: boolean }) {
@@ -71,7 +76,7 @@ export default function ReservationsForecast({ compact = false }: { compact?: bo
         ))}</tbody>
       </table>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 text-xs">
-        <div><p className="font-semibold text-foreground">By ZIP</p><div className="mt-1 flex flex-wrap gap-2">{ZIPS.map((z) => <span key={z} className="rounded border border-border px-2 py-1 tabular-nums">{z} · {f.byZip[z] ?? 0}</span>)}</div></div>
+        <div><p className="font-semibold text-foreground">Founding status by ZIP</p><div className="mt-1 flex flex-wrap gap-2">{ZIPS.map((z) => { const n = f.byZipFounding[z] ?? 0; const full = n >= FOUNDING_CAP; return <span key={z} className={`rounded border px-2 py-1 tabular-nums ${full ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-border"}`}>{z} · {n}/{FOUNDING_CAP} · {full ? `Closed${f.byZipClosedAt[z] ? ` ${new Date(f.byZipClosedAt[z] as string).toLocaleString()}` : ""}` : "Open"}</span>; })}</div></div>
         <div><p className="font-semibold text-foreground">By preferred day</p><div className="mt-1 flex flex-wrap gap-2">{DAYS.map((d) => <span key={d} className="rounded border border-border px-2 py-1 tabular-nums">{d.slice(0, 3)} · {f.byDay[d] ?? 0}</span>)}</div></div>
       </div>
     </section>

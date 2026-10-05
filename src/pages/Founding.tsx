@@ -16,16 +16,16 @@ import { supabase } from "@/integrations/supabase/client";
 import LanguageToggle from "@/components/LanguageToggle";
 import TidyLogo from "@/components/TidyLogo";
 import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
-import foundingHero from "@/assets/founding-family-hero.jpg";
+import foundingHero from "@/assets/founding-family-provided.png";
 import cleaningImage from "@/assets/cleaning-interior.webp";
 import lawnImage from "@/assets/lawn-care.webp";
 import carImage from "@/assets/car-detailing.webp";
-import scanImage from "@/assets/founding-scan-step.jpg";
-import calendarImage from "@/assets/founding-calendar-step.jpg";
-import proImage from "@/assets/founding-pro-step.jpg";
+import scanImage from "@/assets/cleaning-interior.webp";
+import calendarImage from "@/assets/lawn-care.webp";
+import proImage from "@/assets/car-detailing.webp";
 
 type Svc = "cleaning" | "lawn" | "detailing";
-type Step = "services" | "sizes" | "price" | "reserve" | "done";
+type Step = "zip" | "services" | "sizes" | "price" | "reserve" | "done";
 type Lawn = 1 | 2 | 3;
 type State = {
   zip: string; src: string; step: Step; services: Svc[];
@@ -43,7 +43,7 @@ const CAD_LABEL: Record<CanonCadence, string> = { monthly: "Once a month", biwee
 const isZip = (z: string) => (FOUNDING_ZIPS as readonly string[]).includes(z);
 
 const blank = (zip: string, src: string): State => ({
-  zip, src, step: "services", services: [], beds: "", baths: "", lawn: null, car: null,
+  zip, src, step: zip ? "services" : "zip", services: [], beds: "", baths: "", lawn: null, car: null,
   cadence: { cleaning: "biweekly", lawn: "biweekly" }, gifts: [], first: "", last: "", email: "", phone: "", street: "", sms: false, day: "", time: "morning",
 });
 
@@ -76,14 +76,13 @@ function usePrices() {
 export default function Founding() {
   const { t, language } = useLanguage();
   const [params] = useSearchParams();
-  const urlZip = params.get("zip") ?? "";
   const urlSrc = params.get("src") ?? "";
   const [s, setS] = useState<State>(() => {
     try {
       const saved = JSON.parse(sessionStorage.getItem(KEY) || "null") as State | null;
-      if (saved) return { ...saved, zip: isZip(urlZip) ? urlZip : saved.zip, src: urlSrc || saved.src, step: saved.step === "done" ? "services" : saved.step };
+      if (saved) return { ...saved, src: urlSrc || saved.src, step: saved.step === "done" ? (isZip(saved.zip) ? "services" : "zip") : (!isZip(saved.zip) ? "zip" : saved.step) };
     } catch { /* fresh */ }
-    return blank(isZip(urlZip) ? urlZip : "", urlSrc);
+    return blank("", urlSrc);
   });
   const set = (p: Partial<State>) => setS((o) => ({ ...o, ...p }));
   useEffect(() => { try { sessionStorage.setItem(KEY, JSON.stringify(s)); } catch { /* ok */ } }, [s]);
@@ -96,6 +95,7 @@ export default function Founding() {
   const counts = useFoundingCounts();
   const homes = s.zip && counts.data ? counts.data.byZip[s.zip] ?? 0 : null;
   const left = homes === null ? null : Math.max(0, FOUNDING_CAP - homes);
+  const foundingFull = isZip(s.zip) && left === 0;
   const prices = usePrices();
   const listing = useGoogleListing();
   const launch = language === "es" ? LAUNCH_DATE_LONG_ES : LAUNCH_DATE_LONG;
@@ -150,6 +150,7 @@ export default function Founding() {
     setBusy(false);
     if (error || !data?.ok) { setErr(t("We couldn't save that. Check your details and try again, or call us.")); return; }
     setResult({ updated: !!data.updated, founding: data.founding !== false });
+    void counts.refetch();
     go("done");
     try { sessionStorage.removeItem(KEY); } catch { /* ok */ }
   }
@@ -193,7 +194,7 @@ export default function Founding() {
       </Helmet>
 
       <header className="founding-landing-hero text-primary-foreground">
-        <img src={foundingHero} alt="Family relaxing together at home" width={1600} height={1200} loading="eager" fetchPriority="high" className="founding-hero-photo" />
+        <img src={foundingHero} alt="Family relaxing together at home" width={1536} height={1024} loading="eager" fetchPriority="high" className="founding-hero-photo" />
         <div className="founding-hero-shade" />
         <div className="founding-hero-shell">
           <div className="founding-topbar">
@@ -204,7 +205,7 @@ export default function Founding() {
             <h1>{t("More life.")}<br /><span>{t("Less chores.")}</span></h1>
             <p>{t("Three services. One subscription.")}<br />{t("More life for you.")}</p>
             <div data-testid="founding-left" className="founding-cap-pill">
-              {left === null
+              {!isZip(s.zip) || left === null
                 ? <>{FOUNDING_CAP} {t("founding homes per ZIP")} · {FOUNDING_ZIPS.join(" · ")}</>
                 : left > 0
                   ? <><strong>{left} {t("of")} {FOUNDING_CAP}</strong> {t("founding homes left in")} {s.zip}</>
@@ -219,28 +220,33 @@ export default function Founding() {
           <section aria-label={t("Your price")} className="founding-quote-card">
             {s.step !== "done" && <p className="mb-3 text-center text-xs font-medium text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
 
-            {/* ZIP first when unknown */}
-            {!isZip(s.zip) && s.step !== "done" && (
-              <fieldset className="mb-4">
+            {/* ZIP is always the dedicated first step. QR codes carry source attribution only. */}
+            {s.step === "zip" && (
+              <fieldset>
                 <legend className="text-sm font-bold">{t("Your ZIP code")}</legend>
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  {FOUNDING_ZIPS.map((z) => <button key={z} type="button" className={`${chip} ${off}`} onClick={() => set({ zip: z })}>{z}</button>)}
+                <div className="mt-2 grid gap-2">
+                  {([['33156', 'Pinecrest'], ['33183', 'Kendall'], ['33186', 'Kendall West']] as const).map(([z, area]) => <button key={z} type="button" className={`${chip} ${s.zip === z ? on : off} founding-zip-choice`} onClick={() => set({ zip: z })}><strong>{z}</strong><span>{t(area)}</span></button>)}
                 </div>
-                <label className="mt-3 block text-xs font-semibold text-ink-faint" htmlFor="fz-other">{t("Somewhere else? Enter your ZIP")}</label>
-                <input id="fz-other" inputMode="numeric" autoComplete="postal-code" maxLength={5} className={input} value={otherZip} onChange={(e) => setOtherZip(e.target.value.replace(/\D/g, ""))} />
-                {outside && (waitDone
-                  ? <p className="mt-3 rounded-lg bg-accent p-3 text-sm font-semibold">{t("Thanks — we'll email you when we reach")} {otherZip}.</p>
-                  : <form onSubmit={joinWaitlist} className="mt-3 rounded-lg bg-accent p-3">
+                <details className="founding-other-zip mt-3">
+                  <summary>{t("My ZIP isn't listed")}</summary>
+                  <label className="mt-3 block text-xs font-semibold text-ink-faint" htmlFor="fz-other">{t("Your ZIP code")}</label>
+                  <input id="fz-other" inputMode="numeric" autoComplete="postal-code" maxLength={5} className={input} value={otherZip} onChange={(e) => setOtherZip(e.target.value.replace(/\D/g, ""))} />
+                  {outside && (waitDone
+                    ? <p className="mt-3 rounded-lg bg-accent p-3 text-sm font-semibold">{t("Thanks — we'll email you when we reach")} {otherZip}.</p>
+                    : <form onSubmit={joinWaitlist} className="mt-3 rounded-lg bg-accent p-3">
                       <p className="text-sm font-semibold">{t("We're not in your ZIP yet — we'll tell you when we are.")}</p>
                       <label htmlFor="fz-wait" className="mt-2 block text-xs font-semibold">{t("Email")}</label>
                       <input id="fz-wait" type="email" autoComplete="email" required className={input} value={waitEmail} onChange={(e) => setWaitEmail(e.target.value)} />
                       <button className={`${primaryBtn} mt-3`}>{t("Tell me when you're here")}</button>
                     </form>)}
+                </details>
+                <button className={`${primaryBtn} mt-4`} disabled={!isZip(s.zip)} onClick={() => go("services")}>{t("Next")} →</button>
               </fieldset>
             )}
 
             {s.step === "services" && (
               <div>
+                <button type="button" className="mb-3 text-xs font-semibold text-primary underline" onClick={() => go("zip")}>{s.zip} · {t("Change ZIP")}</button>
                 <p className="text-sm font-bold">{t("Pick your services")}</p>
                 <div className="mt-2 grid gap-2">
                   {SVCS.map((svc) => {
@@ -255,7 +261,7 @@ export default function Founding() {
                     );
                   })}
                 </div>
-                <button className={`${primaryBtn} mt-4`} disabled={!s.services.length || !isZip(s.zip)} onClick={() => go("sizes")}>{t("Next")} →</button>
+                <button className={`${primaryBtn} mt-4`} disabled={!s.services.length} onClick={() => go("sizes")}>{t("Next")} →</button>
               </div>
             )}
 
@@ -402,14 +408,18 @@ export default function Founding() {
         </div>
 
         {/* BELOW THE FOLD */}
-        <section className="founding-benefits-section">
-          <h2>{t("Founding member benefits")}</h2>
-          <ul className="founding-benefits-grid">
-            {FOUNDING_BENEFITS.map((b, index) => {
-              const Icon = [LockKeyhole, Star, Gift, UserRoundCheck][index];
-              return <li key={b}><span><Icon aria-hidden="true" /></span><strong>{t(b)}</strong></li>;
-            })}
-          </ul>
+        <section className={`founding-benefits-section ${foundingFull ? "is-full" : ""}`}>
+          {foundingFull ? (
+            <div className="founding-standard-card"><ShieldCheck aria-hidden="true" /><p><strong>{t("Founding homes are fully reserved in")} {s.zip}</strong><span>{t("You're reserving at standard terms — same guarantee, same pros, cancel anytime.")}</span></p></div>
+          ) : (
+            <><h2>{t("Founding member benefits")}</h2>
+            <ul className="founding-benefits-grid">
+              {FOUNDING_BENEFITS.map((b, index) => {
+                const Icon = [LockKeyhole, Star, Gift, UserRoundCheck][index];
+                return <li key={b}><span><Icon aria-hidden="true" /></span><strong>{t(b)}</strong></li>;
+              })}
+            </ul></>
+          )}
         </section>
 
         <section className="founding-plans-section">

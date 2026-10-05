@@ -1,5 +1,4 @@
-import tidyLogo from "@/assets/tidy-logo-trimmed.png";
-import tidyLogoWebp from "@/assets/tidy-logo-trimmed.webp";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 
 /**
  * The original export was 600×362 but the mark itself only filled a 212×177
@@ -19,7 +18,6 @@ const TidyLogo = ({ size = "md", withBackground = false, priority = false }: { s
 
   return (
     <picture>
-      <source srcSet={tidyLogoWebp} type="image/webp" />
       <img
         src={tidyLogo}
         alt="Tidy Home Concierge"

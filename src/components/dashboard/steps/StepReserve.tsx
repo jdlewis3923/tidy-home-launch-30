@@ -5,7 +5,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ConfigState, calculatePricing, sizeFor, VALID_ZIPS, clearState } from '@/lib/dashboard-pricing';
 import { LAUNCH_DATE_LONG, RESERVATION_SERVICE_LABEL, RESERVABLE_SERVICES, type ReservableService } from '@/lib/launch';
-import { useFoundingCounts, isZipFull } from '@/hooks/useFoundingCounts';
 import FoundingCounter from '@/components/FoundingCounter';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -23,7 +22,6 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { data: counts } = useFoundingCounts();
   const [heard, setHeard] = useState('');
   const [heardOther, setHeardOther] = useState('');
   const [busy, setBusy] = useState(false);
@@ -31,7 +29,6 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
   const set = (k: keyof ConfigState, v: unknown) => onChange({ ...state, [k]: v });
 
   const services = state.services.filter((s): s is ReservableService => (RESERVABLE_SERVICES as readonly string[]).includes(s));
-  const allFull = services.length > 0 && isZipFull(counts, state.zip);
   const zipOk = VALID_ZIPS.includes(state.zip);
   const ready = !!(state.firstName.trim() && /\S+@\S+\.\S+/.test(state.email) && state.phone.replace(/\D/g, '').length >= 10
     && state.address.trim().length >= 3 && zipOk && state.preferredDay && state.preferredTime && heard && services.length);
@@ -67,9 +64,6 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
         <p>{t(`No card today, nothing to pay now. We'll confirm your day and time before service begins on ${LAUNCH_DATE_LONG}.`)}</p>
         <p className="font-semibold text-ink">{t('Founding members pick their day first — the earlier you reserve, the better your choice of day and time.')}</p>
         <div className="pt-1"><FoundingCounter zip={state.zip} /></div>
-        {allFull && (
-          <p className="text-xs text-ink">{t(`The 25 founding homes in ${state.zip} are taken — you'll join the waitlist for every service.`)}</p>
-        )}
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
@@ -119,7 +113,7 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
       <button type="button" onClick={submit} disabled={!ready || busy} data-testid="reserve-submit"
         style={{ backgroundColor: 'hsl(var(--ink))', color: '#ffffff' }}
         className="w-full rounded-xl px-7 py-4 text-sm font-semibold shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] disabled:opacity-40">
-        {busy ? t('Reserving…') : allFull ? t('Join the waitlist') : t('Reserve your spot')}
+        {busy ? t('Reserving…') : t('Reserve your spot')}
       </button>
     </div>
   );

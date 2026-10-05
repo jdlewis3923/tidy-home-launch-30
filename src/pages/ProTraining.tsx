@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { QUESTIONS, PASS_THRESHOLD } from "@/lib/trainingQuestions";
-import tidyLogo from "@/assets/tidy-logo.png";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 
 export default function ProTraining() {
   const [authed, setAuthed] = useState<boolean | null>(null);

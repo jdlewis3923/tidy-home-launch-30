@@ -17,7 +17,7 @@ import { CheckCircle2, Circle, Clock, AlertTriangle, ArrowRight, CreditCard, Gra
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import tidyLogo from "@/assets/tidy-logo.png";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 import InstallAndNotifyStep from "@/components/pro/portal/InstallAndNotifyStep";
 
 type ApplicantRow = {

@@ -18,6 +18,12 @@ const translations: Record<string, string> = {
   "Your price": "Tu precio",
   "See your price in 60 seconds. No card. No account.": "Mira tu precio en 60 segundos. Sin tarjeta. Sin cuenta.",
   "Your ZIP code": "Tu código postal",
+  "Pinecrest": "Pinecrest",
+  "Kendall": "Kendall",
+  "Kendall West": "Kendall West",
+  "My ZIP isn't listed": "Mi código postal no está en la lista",
+  "Change ZIP": "Cambiar código postal",
+  "You're reserving at standard terms — same guarantee, same pros, cancel anytime.": "Estás reservando con términos estándar — la misma garantía, los mismos profesionales y cancelación en cualquier momento.",
   "Somewhere else? Enter your ZIP": "¿Vives en otra zona? Escribe tu código postal",
   "Thanks — we'll email you when we reach": "Gracias — te escribiremos cuando lleguemos a",
   "We're not in your ZIP yet — we'll tell you when we are.": "Todavía no llegamos a tu código postal — te avisaremos cuando lleguemos.",
@@ -562,10 +568,6 @@ const translations: Record<string, string> = {
   "Book in a couple of minutes": "Reserva en un par de minutos",
   "We serve Pinecrest and Kendall only. We are not currently serving other areas.":
     "Servimos solo Pinecrest y Kendall. Por ahora no servimos otras áreas.",
-  Pinecrest: "Pinecrest",
-  Kendall: "Kendall",
-  "Kendall West": "Kendall West",
-
   // Sticky bar labels
   "House Cleaning · from $139 a month": "Limpieza del Hogar · desde $139 al mes",
   "Lawn Care · from $45 a month": "Cuidado del Jardín · desde $45 al mes",

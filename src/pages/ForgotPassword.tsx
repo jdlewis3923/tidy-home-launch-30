@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import tidyLogo from '@/assets/tidy-logo.png';
+import tidyLogo from '@/assets/tidy-official-logo.png';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');

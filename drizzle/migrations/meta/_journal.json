@@ -813,6 +813,13 @@
       "when": 1791227027529,
       "tag": "0115_founding_page_and_page_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 116,
+      "version": "7",
+      "when": 1791229040520,
+      "tag": "0116_atomic_founding_cap_per_zip",
+      "breakpoints": true
     }
   ]
 }

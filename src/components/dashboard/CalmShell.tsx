@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import tidyLogo from '@/assets/tidy-logo.png';
+import tidyLogo from '@/assets/tidy-official-logo.png';
 
 interface Props {
   step: number;

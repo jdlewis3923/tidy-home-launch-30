@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import tidyLogo from '@/assets/tidy-logo.png';
+import tidyLogo from '@/assets/tidy-official-logo.png';
 import {
   useDashboardData,
   formatLongDate,

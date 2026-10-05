@@ -21,7 +21,7 @@ import ProNotificationBell from "@/components/pro/ProNotificationBell";
 import PushOptIn from "@/components/pro/portal/PushOptIn";
 import { Skeleton } from "@/components/ui/skeleton";
 import AnimatedNumber from "@/components/motion/AnimatedNumber";
-import tidyLogo from "@/assets/tidy-logo.png";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 
 type DashboardData = {
   firstName: string;
