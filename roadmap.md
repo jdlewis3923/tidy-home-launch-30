@@ -78,6 +78,7 @@
 - [ ] Add regression coverage and verify the member photo record and billing invariants
 
 ## /founding door-hanger page (requested 2026-10-05)
+- [ ] Apply the 10-item founding conversion pass and replace the hero with the supplied mobile/desktop curtain-and-birds video pair
 - [x] /founding page: price-first quote, live counter, reservation, confirmation, EN/ES, SEO/OG
 - [x] Per-page on/off switches with dead-link and /founding-off guards
 - [x] Scan/step/tap-to-call logging; Command reservations panel first
