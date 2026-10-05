@@ -118,7 +118,7 @@ export default function Founding() {
   useEffect(() => {
     if (scrollRequest === 0) return;
     scrollQuoteIntoView();
-  }, [scrollRequest, s.step, s.services]);
+  }, [scrollRequest]); // eslint-disable-line react-hooks/exhaustive-deps
   const [isPhone, setIsPhone] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches);
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 767px)");
@@ -276,7 +276,7 @@ export default function Founding() {
 
       <main className="founding-landing-main">
         <div className="founding-quote-wrap">
-          <section ref={quoteCard} aria-label={t("Your price")} className="founding-quote-card">
+          <section ref={quoteCardRef} data-testid="founding-quote-card" aria-label={t("Your price")} className="founding-quote-card">
             {s.step !== "done" && <p className="mb-3 text-center text-xs font-medium text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
             {isZip(s.zip) && left !== null && (
               <div data-testid="founding-live-count" className="founding-live-count" aria-live="polite">
@@ -291,7 +291,7 @@ export default function Founding() {
             {s.step === "zip" && (
               <fieldset>
                 <legend className="text-sm font-bold">{t("Your ZIP code")}</legend>
-                <div className="mt-2 grid gap-2">
+                <div className="founding-zip-grid mt-2 grid gap-2">
                   {([['33156', 'Pinecrest'], ['33183', 'Kendall'], ['33186', 'Kendall West']] as const).map(([z, area]) => <button key={z} type="button" aria-label={`${z} ${t(area)}`} className={`${chip} ${s.zip === z ? on : off} founding-zip-choice`} onClick={() => set({ zip: z })}><strong>{z}</strong><span>{t(area)}</span></button>)}
                 </div>
                 <details className="founding-other-zip mt-3">
@@ -552,8 +552,8 @@ export default function Founding() {
           <p className="founding-legal"><Link to="/terms">{t("Terms")}</Link> · <Link to="/privacy">{t("Privacy Policy")}</Link></p>
         </Reveal>
       </main>
-      {!quoteVisible && s.step !== "done" && (
-        <button type="button" className="founding-sticky-quote" onClick={scrollQuoteIntoView}>
+      {isPhone && !quoteVisible && s.step !== "done" && (
+        <button type="button" data-testid="founding-sticky-cta" className="founding-sticky-quote" onClick={scrollQuoteIntoView}>
           <span>{t("See your price — 60 seconds")}</span>
           {isZip(s.zip) && left !== null && <small>{left} {t("of")} {FOUNDING_CAP} {t("founding homes left in")} {s.zip}</small>}
         </button>
