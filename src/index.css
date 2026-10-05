@@ -1668,14 +1668,17 @@ body.admin-hud h1 {
   .founding-hero-copy h1 { font-size: 2.42rem; }
   .founding-hero-copy > p { margin-top: 14px; font-size: .96rem; }
   .founding-cap-pill { max-width: 100%; margin-top: 13px; padding: 9px 11px; font-size: .68rem; line-height: 1.35; white-space: normal; }
-  .founding-quote-wrap { width: min(calc(100% - 40px), 332px); margin: -366px 0 0 20px; transform: none; }
-  .founding-quote-card { padding: 13px 14px 14px; border-radius: 17px; }
-  .founding-quote-card button, .founding-quote-card input, .founding-quote-card select { min-height: 38px; }
-  .founding-quote-card > div > button:last-child, .founding-quote-card form > button:not([type="button"]) { min-height: 44px; }
-  .founding-quote-card fieldset { margin-bottom: 11px; }
-  .founding-quote-card .mt-4 { margin-top: .7rem; }
-  .founding-quote-card .mt-3 { margin-top: .55rem; }
-  .founding-quote-card .mt-2 { margin-top: .4rem; }
+  .founding-quote-wrap { width: min(calc(100% - 40px), 332px); margin: -132px 0 0 20px; transform: none; }
+  .founding-quote-card { padding: 12px 13px 13px; border-radius: 16px; }
+  .founding-quote-card button, .founding-quote-card input, .founding-quote-card select { min-height: 36px; }
+  .founding-quote-card > div > button:last-child, .founding-quote-card form > button:not([type="button"]) { min-height: 42px; }
+  .founding-quote-card fieldset { margin-bottom: 8px; }
+  .founding-quote-card .grid { gap: 7px; }
+  .founding-quote-card .mt-4 { margin-top: .6rem; }
+  .founding-quote-card .mt-3 { margin-top: .5rem; }
+  .founding-quote-card .mt-2 { margin-top: .35rem; }
+  .founding-live-count { min-height: 32px; margin: 0 0 9px; padding: 6px 9px; }
+  .founding-other-zip summary { min-height: 34px; }
   .founding-benefits-section { width: calc(100% - 28px); padding: 30px 0 45px; }
   .founding-benefits-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 19px; text-align: left; }
   .founding-benefits-grid li { display: grid; grid-template-columns: 48px minmax(0, 1fr); min-height: 76px; justify-content: start; gap: 14px; padding: 13px 16px; }
