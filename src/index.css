@@ -1582,8 +1582,9 @@ body.admin-hud h1 {
 .founding-reserve-launch { border-radius: 8px; background: hsl(var(--primary) / .07); padding: 10px 11px; color: hsl(var(--navy)); font-size: .72rem; font-weight: 650; line-height: 1.45; }
 .founding-bundle-offer { display: grid; width: 100%; grid-template-columns: minmax(0, 1fr) 28px; align-items: center; gap: 8px; margin-top: 8px; border: 1px solid hsl(var(--gold) / .7); border-radius: 10px; background: hsl(var(--gold) / .08); padding: 10px 11px; color: hsl(var(--navy)); font-size: .72rem; line-height: 1.4; text-align: left; }
 .founding-bundle-offer > span:last-child { display: flex; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 999px; background: hsl(var(--gold)); color: hsl(var(--navy)); font-size: 1rem; font-weight: 800; }
-.founding-sticky-quote { position: fixed; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); left: 12px; z-index: 50; display: flex; min-height: 58px; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid hsl(var(--gold) / .75); border-radius: 12px; background: hsl(var(--navy)); padding: 10px 14px; color: hsl(var(--primary-foreground)); box-shadow: 0 14px 36px hsl(var(--navy) / .34); text-align: left; animation: founding-sticky-enter 280ms cubic-bezier(.22,1,.36,1) both; }
-.founding-sticky-quote span { font-size: .76rem; font-weight: 800; }.founding-sticky-quote small { max-width: 48%; color: hsl(var(--gold)); font-size: .64rem; font-weight: 700; line-height: 1.25; text-align: right; }
+.founding-sticky-quote { position: fixed; right: 0; bottom: 0; left: 0; z-index: 60; display: flex; width: 100%; min-height: 60px; align-items: center; justify-content: space-between; gap: 12px; border-top: 2px solid hsl(var(--gold)); background: hsl(var(--navy)); padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); color: hsl(var(--primary-foreground)); box-shadow: 0 -10px 30px hsl(var(--navy) / .3); text-align: left; animation: founding-sticky-enter 280ms cubic-bezier(.22,1,.36,1) both; }
+.founding-sticky-quote span { font-size: .86rem; font-weight: 800; }
+.founding-sticky-quote small { max-width: 46%; color: hsl(var(--gold)); font-size: .7rem; font-weight: 700; line-height: 1.25; text-align: right; }
 .founding-zip-choice { display: grid; grid-template-columns: 74px 1fr; align-items: center; text-align: left; }
 .founding-zip-choice strong { color: hsl(var(--primary)); font-size: .95rem; }
 .founding-zip-choice span { color: hsl(var(--text-mid)); font-size: .78rem; }
@@ -1656,6 +1657,8 @@ body.admin-hud h1 {
 
 @media (min-width: 768px) {
   .founding-sticky-quote { display: none; }
+  .founding-cap-pill { display: none; }
+  .founding-landing-hero { min-height: 820px; }
 }
 
 @media (max-width: 767px) {
@@ -1668,8 +1671,13 @@ body.admin-hud h1 {
   .founding-hero-copy h1 { font-size: 2.42rem; }
   .founding-hero-copy > p { margin-top: 14px; font-size: .96rem; }
   .founding-cap-pill { max-width: 100%; margin-top: 13px; padding: 9px 11px; font-size: .68rem; line-height: 1.35; white-space: normal; }
-  .founding-quote-wrap { width: min(calc(100% - 40px), 332px); margin: -132px 0 0 20px; transform: none; }
-  .founding-quote-card { padding: 12px 13px 13px; border-radius: 16px; }
+  .founding-quote-wrap { width: calc(100% - 28px); margin: -118px auto 0; transform: none; }
+  .founding-quote-card { padding: 12px 12px 12px; border-radius: 14px; }
+  .founding-quote-card > p:first-child { margin-bottom: 8px; font-size: .7rem; }
+  .founding-zip-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px !important; }
+  .founding-zip-grid .founding-zip-choice { display: flex; min-height: 54px; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 6px 4px; text-align: center; }
+  .founding-zip-grid .founding-zip-choice strong { font-size: 1rem; line-height: 1.1; }
+  .founding-zip-grid .founding-zip-choice span { font-size: .66rem; line-height: 1.15; }
   .founding-quote-card button, .founding-quote-card input, .founding-quote-card select { min-height: 36px; }
   .founding-quote-card > div > button:last-child, .founding-quote-card form > button:not([type="button"]) { min-height: 42px; }
   .founding-quote-card fieldset { margin-bottom: 8px; }

@@ -107,22 +107,30 @@ export default function Founding() {
   const prices = usePrices();
   const listing = useGoogleListing();
   const launch = language === "es" ? LAUNCH_DATE_LONG_ES : LAUNCH_DATE_LONG;
-  const quoteCard = useRef<HTMLElement>(null);
-  const pendingQuoteScroll = useRef(false);
-  const scrollQuoteIntoView = () => quoteCard.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const quoteCardRef = useRef<HTMLElement>(null);
+  // Every step change requests a scroll; the effect below runs after React has rendered the new step.
+  const [scrollRequest, setScrollRequest] = useState(0);
+  const scrollQuoteIntoView = () => quoteCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   const go = (step: Step, patch: Partial<State> = {}) => {
-    pendingQuoteScroll.current = true;
     set({ ...patch, step });
+    setScrollRequest((n) => n + 1);
   };
   useEffect(() => {
-    if (!pendingQuoteScroll.current) return;
-    pendingQuoteScroll.current = false;
+    if (scrollRequest === 0) return;
     scrollQuoteIntoView();
-  }, [s.step, s.services]);
+  }, [scrollRequest]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [isPhone, setIsPhone] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches);
   useEffect(() => {
-    const node = quoteCard.current;
+    const mql = window.matchMedia("(max-width: 767px)");
+    const onChange = () => setIsPhone(mql.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  useEffect(() => {
+    const node = quoteCardRef.current;
     if (!node) return;
-    const observer = new IntersectionObserver(([entry]) => setQuoteVisible(entry.isIntersecting), { threshold: 0.08 });
+    // threshold 0: visible while any part of the card is on screen, hidden only once fully out.
+    const observer = new IntersectionObserver(([entry]) => setQuoteVisible(entry.isIntersecting), { threshold: 0 });
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
@@ -212,7 +220,8 @@ export default function Founding() {
     if (service === "cleaning") { additions.beds = s.beds || "2"; additions.baths = s.baths || "1"; }
     if (service === "lawn") additions.lawn = s.lawn ?? 1;
     if (service === "detailing") additions.car = s.car ?? 1;
-    set(additions);
+    // Starting size is preselected so the "from" price stays truthful; the visitor confirms it on the sizes step.
+    go("sizes", additions);
   };
 
   return (
@@ -267,7 +276,7 @@ export default function Founding() {
 
       <main className="founding-landing-main">
         <div className="founding-quote-wrap">
-          <section ref={quoteCard} aria-label={t("Your price")} className="founding-quote-card">
+          <section ref={quoteCardRef} data-testid="founding-quote-card" aria-label={t("Your price")} className="founding-quote-card">
             {s.step !== "done" && <p className="mb-3 text-center text-xs font-medium text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
             {isZip(s.zip) && left !== null && (
               <div data-testid="founding-live-count" className="founding-live-count" aria-live="polite">
@@ -282,7 +291,7 @@ export default function Founding() {
             {s.step === "zip" && (
               <fieldset>
                 <legend className="text-sm font-bold">{t("Your ZIP code")}</legend>
-                <div className="mt-2 grid gap-2">
+                <div className="founding-zip-grid mt-2 grid gap-2">
                   {([['33156', 'Pinecrest'], ['33183', 'Kendall'], ['33186', 'Kendall West']] as const).map(([z, area]) => <button key={z} type="button" aria-label={`${z} ${t(area)}`} className={`${chip} ${s.zip === z ? on : off} founding-zip-choice`} onClick={() => set({ zip: z })}><strong>{z}</strong><span>{t(area)}</span></button>)}
                 </div>
                 <details className="founding-other-zip mt-3">
@@ -543,8 +552,8 @@ export default function Founding() {
           <p className="founding-legal"><Link to="/terms">{t("Terms")}</Link> · <Link to="/privacy">{t("Privacy Policy")}</Link></p>
         </Reveal>
       </main>
-      {!quoteVisible && s.step !== "done" && (
-        <button type="button" className="founding-sticky-quote" onClick={scrollQuoteIntoView}>
+      {isPhone && !quoteVisible && s.step !== "done" && (
+        <button type="button" data-testid="founding-sticky-cta" className="founding-sticky-quote" onClick={scrollQuoteIntoView}>
           <span>{t("See your price — 60 seconds")}</span>
           {isZip(s.zip) && left !== null && <small>{left} {t("of")} {FOUNDING_CAP} {t("founding homes left in")} {s.zip}</small>}
         </button>
