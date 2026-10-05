@@ -107,18 +107,20 @@ export default function Founding() {
   const prices = usePrices();
   const listing = useGoogleListing();
   const launch = language === "es" ? LAUNCH_DATE_LONG_ES : LAUNCH_DATE_LONG;
-  const scrollTo = useRef<HTMLDivElement>(null);
-  const scrollQuoteIntoView = () => {
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => scrollTo.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
-    });
-  };
+  const quoteCard = useRef<HTMLElement>(null);
+  const pendingQuoteScroll = useRef(false);
+  const scrollQuoteIntoView = () => quoteCard.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   const go = (step: Step, patch: Partial<State> = {}) => {
+    pendingQuoteScroll.current = true;
     set({ ...patch, step });
-    scrollQuoteIntoView();
   };
   useEffect(() => {
-    const node = scrollTo.current;
+    if (!pendingQuoteScroll.current) return;
+    pendingQuoteScroll.current = false;
+    scrollQuoteIntoView();
+  }, [s.step, s.services]);
+  useEffect(() => {
+    const node = quoteCard.current;
     if (!node) return;
     const observer = new IntersectionObserver(([entry]) => setQuoteVisible(entry.isIntersecting), { threshold: 0.08 });
     observer.observe(node);
@@ -264,8 +266,8 @@ export default function Founding() {
       </header>
 
       <main className="founding-landing-main">
-        <div ref={scrollTo} className="founding-quote-wrap">
-          <section aria-label={t("Your price")} className="founding-quote-card">
+        <div className="founding-quote-wrap">
+          <section ref={quoteCard} aria-label={t("Your price")} className="founding-quote-card">
             {s.step !== "done" && <p className="mb-3 text-center text-xs font-medium text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
             {isZip(s.zip) && left !== null && (
               <div data-testid="founding-live-count" className="founding-live-count" aria-live="polite">
@@ -281,7 +283,7 @@ export default function Founding() {
               <fieldset>
                 <legend className="text-sm font-bold">{t("Your ZIP code")}</legend>
                 <div className="mt-2 grid gap-2">
-                  {([['33156', 'Pinecrest'], ['33183', 'Kendall'], ['33186', 'Kendall West']] as const).map(([z, area]) => <button key={z} type="button" className={`${chip} ${s.zip === z ? on : off} founding-zip-choice`} onClick={() => set({ zip: z })}><strong>{z}</strong><span>{t(area)}</span></button>)}
+                  {([['33156', 'Pinecrest'], ['33183', 'Kendall'], ['33186', 'Kendall West']] as const).map(([z, area]) => <button key={z} type="button" aria-label={`${z} ${t(area)}`} className={`${chip} ${s.zip === z ? on : off} founding-zip-choice`} onClick={() => set({ zip: z })}><strong>{z}</strong><span>{t(area)}</span></button>)}
                 </div>
                 <details className="founding-other-zip mt-3">
                   <summary>{t("My ZIP isn't listed")}</summary>
