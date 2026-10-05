@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Service landing pages (requested 2026-10-04)
+- [x] Rebuild the three service heroes and the Refer/Bundle hero experiences to match the approved visual references without changing pricing or flows.
 - [x] Category headlines with “&”, Shine Complete as car subtitle, and reservation buttons/date line across cleaning, lawn, and car pages.
 - [x] Shared lighter service-photo scrim with measured readable headlines; solid navy bundle hero.
 - [x] Set the canonical first-visit date to November 16 in both mirrors; check phone/desktop and parity tests.

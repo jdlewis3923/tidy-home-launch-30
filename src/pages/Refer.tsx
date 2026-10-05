@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Copy, Check, Gift, UserPlus, Sparkles, MapPin } from "lucide-react";
+import { Copy, Check, Gift, UserPlus, Sparkles, MapPin, ShieldCheck, LockKeyhole, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
 import Reveal from "@/components/landing/Reveal";
-import SparkleField from "@/components/landing/SparkleField";
 import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
@@ -122,27 +121,40 @@ const ReferInner = () => {
       <Navbar onOpenPopup={handleNavCta} />
 
       {/* HERO */}
-      <section className="relative pt-32 pb-16 px-4 bg-navy overflow-hidden">
+      <section className="editorial-offer-hero relative min-h-[calc(100svh-1rem)] pt-28 pb-40 px-4 overflow-hidden">
         <picture className="absolute inset-0">
           <source media="(max-width: 767px)" srcSet={referMobile.url} />
           <img src={referDesktop.url} alt="Palm-lined neighborhood with two homes" className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
         </picture>
-        <div className="absolute inset-0 service-hero-scrim-blue" />
-        <SparkleField />
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Refer & Earn")}</span>
-          <h1 className="mt-3 text-3xl md:text-5xl font-extrabold text-primary-foreground leading-tight">
-            {t("Give $50, Get $50 — refer a neighbor in Pinecrest + Kendall")}
+        <div className="absolute inset-0 refer-editorial-scrim" />
+        <div className="relative z-10 max-w-3xl mx-auto text-center text-navy">
+          <span className="text-xs uppercase tracking-[0.28em] text-primary font-bold">{t("Refer & Earn")}</span>
+          <h1 className="mt-3 text-5xl md:text-7xl font-extrabold leading-[0.9] text-balance">
+            {t("Give $50,")}<br />{t("Get $50")}
           </h1>
-          <p className="mt-5 text-lg text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            {t(
-              "Send a neighbor your link. They get $50 off their first month. You get $50 off yours. No cap, no expiration, no fine print.",
-            )}
+          <p className="mt-5 text-base md:text-lg max-w-xl mx-auto leading-snug font-medium">
+            {t("Refer a neighbor in Pinecrest or Kendall. They get $50 off their first month. You get $50 off yours.")}
           </p>
-          <div className="mt-6 inline-flex items-center gap-1.5 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground text-sm font-medium">
-            <MapPin className="w-3.5 h-3.5" />
-            {t(SERVICE_AREA_TRUST)}
+
+          <div className="mt-7 flex items-center justify-center gap-3 md:gap-8">
+            <div className="offer-reward-card -rotate-2">
+              <span>{t("Your neighbor")}</span><strong>$50</strong><small>{t("off their first month")}</small>
+            </div>
+            <ArrowRight className="w-8 h-8 text-primary shrink-0" aria-hidden="true" />
+            <div className="offer-reward-card rotate-2">
+              <span>{t("You")}</span><strong>$50</strong><small>{t("off your next month")}</small>
+            </div>
           </div>
+
+          <a href="#referral-link" className="cta-arrow cta-press mt-7 inline-flex w-full max-w-md items-center justify-center bg-gold text-gold-foreground font-bold px-7 py-4 rounded-xl">
+            {t("Get your referral link")} <span className="arrow ml-1">→</span>
+          </a>
+          <p className="mt-2 text-xs font-medium">{t("No cap. No expiration. No fine print.")}</p>
+        </div>
+        <div className="absolute z-20 bottom-5 left-4 right-4 max-w-4xl md:mx-auto service-benefit-bar">
+          <div><span className="service-benefit-icon"><MapPin /></span><strong>{t("Works in Pinecrest & Kendall")}</strong></div>
+          <div><span className="service-benefit-icon"><ShieldCheck /></span><strong>{t("The same pro for each service, every visit")}</strong></div>
+          <div><span className="service-benefit-icon"><LockKeyhole /></span><strong>{t("Cancel anytime")}</strong></div>
         </div>
       </section>
 
@@ -192,7 +204,7 @@ const ReferInner = () => {
       </section>
 
       {/* REFERRAL CODE BLOCK */}
-      <section className="relative bg-section-alt py-16 px-4 overflow-hidden">
+      <section id="referral-link" className="relative bg-section-alt py-16 px-4 overflow-hidden scroll-mt-24">
         <SectionDecor tone="gold" />
         <div className="relative max-w-2xl mx-auto">
           <Reveal>

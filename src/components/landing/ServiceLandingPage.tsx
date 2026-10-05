@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Check, Phone, MapPin, Sparkles, ShieldCheck, BadgeCheck, Camera } from "lucide-react";
+import { Check, MapPin, Sparkles, ShieldCheck, BadgeCheck, Camera, Clock3, LockKeyhole, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead, { SeoService } from "@/components/landing/SeoHead";
@@ -10,11 +10,10 @@ import StickyBookBar from "@/components/landing/StickyBookBar";
 import HowItWorksStrip from "@/components/landing/HowItWorksStrip";
 import SavingsCallout from "@/components/landing/SavingsCallout";
 import NeighborhoodTrust from "@/components/landing/NeighborhoodTrust";
-import SparkleField from "@/components/landing/SparkleField";
 import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
-import { PHONE_DISPLAY, PHONE_TEL, SERVICE_AREA_TRUST } from "@/lib/landing";
+import { SERVICE_AREA_TRUST } from "@/lib/landing";
 import { LAUNCH_DATE_SHORT } from "@/lib/launch";
 import { pushEvent, trackSelectPlan, useViewPricingObserver } from "@/lib/tracking";
 import { track } from "@/lib/track";
@@ -211,7 +210,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       />
 
       {/* HERO */}
-      <section className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden">
+      <section className="service-showcase-hero relative min-h-[calc(100svh-1rem)] flex pt-24 overflow-hidden">
         {/*
           One <picture>: WebP first with a jpg fallback, the portrait mobile crop
           below the 768px phone breakpoint, intrinsic width/height to stop layout
@@ -239,67 +238,56 @@ const ServiceLandingPageInner = ({ config }: Props) => {
           />
         </picture>
 
-         <div className="absolute inset-0 service-hero-scrim" />
-        <SparkleField />
+        <div className="absolute inset-0 service-editorial-scrim" />
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-          <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t(config.eyebrow)}</span>
-          <h1 className="service-hero-headline mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
-            {t(config.h1)}
-          </h1>
-          <p className="mt-5 text-lg md:text-xl font-light text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            {t(config.subhead)}
-          </p>
-          {config.intentConfirm && (
-            <p className="mt-3 text-base md:text-lg text-primary-foreground/80 max-w-2xl mx-auto">
-              {t(config.intentConfirm)}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-12 md:pt-16 pb-36 md:pb-40 flex items-start">
+          <div className="max-w-xl text-left">
+            <span className="text-xs md:text-sm uppercase tracking-[0.28em] text-gold font-bold">{t(config.eyebrow)}</span>
+            <h1 className="service-hero-headline mt-4 text-[2.6rem] sm:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-[0.98] text-balance">
+              {t(config.h1)}
+            </h1>
+            <p className="mt-4 text-lg md:text-xl font-medium text-primary-foreground/85 max-w-lg leading-snug">
+              {t(config.subhead)}
             </p>
-          )}
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm">
-            <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium">
-              {t(config.priceAnchor)}
-            </span>
-            <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5" />
-              {t(SERVICE_AREA_TRUST)}
-            </span>
-            <span className="bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground font-medium inline-flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              {t("Background-Checked Pros")}
-            </span>
+            <div className="mt-6 grid grid-cols-3 gap-2 md:gap-4 text-primary-foreground">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="service-trust-icon"><MapPin className="w-5 h-5 text-gold" /></span>
+                <span className="text-[11px] md:text-sm font-semibold leading-tight">{t("Serving")}<br />33156 · 33183 · 33186</span>
+              </div>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="service-trust-icon"><ShieldCheck className="w-5 h-5" /></span>
+                <span className="text-[11px] md:text-sm font-semibold leading-tight">{t("Background-checked pros")}</span>
+              </div>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="service-trust-icon"><Star className="w-5 h-5 fill-gold text-gold" /></span>
+                <span className="text-[11px] md:text-sm font-semibold leading-tight">{t("The same pro for each service, every visit")}</span>
+              </div>
+            </div>
 
-          </div>
-
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <div className="flex flex-col items-center">
+            <p className="mt-7 text-xl md:text-2xl font-semibold text-primary-foreground">
+              {t("From")} <strong className="text-3xl md:text-4xl text-gold">{config.priceAnchor.replace(/^From\s*/i, "").replace(/(?:\s+a month|\/mo)$/i, "")}</strong>{" "}
+              <span>{config.priceAnchor.toLowerCase().includes("month") ? t("a month") : t("/mo")}</span>
+            </p>
+            <div className="mt-3 max-w-md">
               <Link
                 to={heroCta.to}
                 onClick={heroCta.onClick}
-                className="cta-arrow cta-press animate-pulse-gold bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-8 py-4 rounded-xl transition-colors shadow-[0_0_24px_rgba(245,197,24,0.4)] hover:shadow-[0_0_36px_rgba(245,197,24,0.6)]"
+                className="cta-arrow cta-press flex w-full items-center justify-center animate-pulse-gold bg-gold hover:bg-gold/90 text-gold-foreground font-bold text-lg px-7 py-4 rounded-xl transition-colors"
               >
-                {t(config.ctaPrimaryLabel ?? "Book in about 2 minutes")} <span className="arrow">→</span>
+                {t(config.ctaPrimaryLabel ?? "Reserve your spot")} <span className="arrow ml-1">→</span>
               </Link>
-               <span className="mt-2 text-xs text-primary-foreground/90">
-                 {t("No card, no account")} · {t(`First visits begin ${LAUNCH_DATE_SHORT}`)}
-              </span>
+              <p className="mt-2 text-[11px] md:text-xs text-primary-foreground/85 whitespace-nowrap">
+                {t("No card, no account")} · {t(`First visits begin ${LAUNCH_DATE_SHORT}`)}
+              </p>
             </div>
-            <a
-              href={`tel:${PHONE_TEL}`}
-              onClick={() => {
-                pushEvent("cta_click", { cta_id: `lp_${config.serviceSlug}_call_hero`, cta_text: "Call" });
-                track("phone_click", { service: config.serviceSlug });
-              }}
-              className="inline-flex items-center gap-2 text-primary-foreground/90 hover:text-primary-foreground text-sm font-medium px-4 py-3"
-            >
-              <Phone className="w-4 h-4" />
-              {PHONE_DISPLAY}
-            </a>
           </div>
+        </div>
 
-          <p className="mt-4 text-xs text-primary-foreground/60">
-            {t("Locked price · No contracts · Cancel anytime · Pause or reschedule anytime")}
-          </p>
+        <div className="absolute z-20 bottom-5 md:bottom-7 left-4 right-4 max-w-6xl md:mx-auto service-benefit-bar">
+          <div><span className="service-benefit-icon"><Camera /></span><strong>{t("Photo-verified visits")}</strong></div>
+          <div><span className="service-benefit-icon"><Clock3 /></span><strong>{t("48-hour guarantee")}</strong></div>
+          <div><span className="service-benefit-icon"><LockKeyhole /></span><strong>{t("Locked monthly price")}</strong></div>
         </div>
       </section>
 
