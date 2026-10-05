@@ -7,7 +7,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useFoundingCounts } from "@/hooks/useFoundingCounts";
-import { useGoogleListing, shortName, rankReviews, formatRating } from "@/lib/googleReviews";
+import { useGoogleListing, shortName, pickReview, formatRating } from "@/lib/googleReviews";
 import { FOUNDING_ZIPS, FOUNDING_CAP, FOUNDING_BENEFITS, LAUNCH_DATE_LONG, LAUNCH_DATE_LONG_ES } from "@/lib/launch";
 import { lookupKeyFor, sizeFromBedrooms, VISITS_PER_MONTH, BILLED_MONTHLY, SIZE_PRICES, type CanonCadence, type CanonSize, type SizeSelection } from "@/lib/pricing-canon";
 import { GIFT_ELIGIBLE_ADDONS } from "@/lib/addon-catalog";
@@ -18,7 +18,10 @@ import TidyLogo from "@/components/TidyLogo";
 import Reveal from "@/components/motion/Reveal";
 import SparkleField from "@/components/landing/SparkleField";
 import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
-import foundingHero from "@/assets/founding-family-provided.png";
+import foundingMobileVideo from "@/assets/homepage-mobile-hero-20261004b.mp4.asset.json";
+import foundingMobilePoster from "@/assets/homepage-mobile-hero-poster-20261004b.jpg.asset.json";
+import foundingDesktopVideo from "@/assets/homepage-desktop-hero-20261004b.mp4.asset.json";
+import foundingDesktopPoster from "@/assets/homepage-desktop-hero-poster-20261004b.jpg.asset.json";
 import cleaningPlan from "@/assets/founding-plan-cleaning.png";
 import lawnPlan from "@/assets/founding-plan-lawn.png";
 import carPlan from "@/assets/founding-plan-car.png";
@@ -87,7 +90,10 @@ export default function Founding() {
     return blank("", urlSrc);
   });
   const set = (p: Partial<State>) => setS((o) => ({ ...o, ...p }));
+  const [motionOk, setMotionOk] = useState(false);
+  const [quoteVisible, setQuoteVisible] = useState(true);
   useEffect(() => { try { sessionStorage.setItem(KEY, JSON.stringify(s)); } catch { /* ok */ } }, [s]);
+  useEffect(() => { setMotionOk(!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches); }, []);
 
   const logged = useRef(false);
   useEffect(() => { if (!logged.current) { logged.current = true; logEvent("page_view", s, language); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -103,6 +109,13 @@ export default function Founding() {
   const launch = language === "es" ? LAUNCH_DATE_LONG_ES : LAUNCH_DATE_LONG;
   const scrollTo = useRef<HTMLDivElement>(null);
   const go = (step: Step) => { set({ step }); scrollTo.current?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  useEffect(() => {
+    const node = scrollTo.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(([entry]) => setQuoteVisible(entry.isIntersecting), { threshold: 0.08 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   // ── quote math (each line its own Stripe price, quantity 1, no discounts) ──
   const cleanSize: SizeSelection | null = s.beds && s.baths ? (s.beds === "5" ? "quote" : sizeFromBedrooms(Number(s.beds), Number(s.baths))) : null;
@@ -177,7 +190,20 @@ export default function Founding() {
   const off = "border-border bg-card text-ink hover:border-primary/50";
   const input = "mt-1 w-full min-h-[44px] rounded-xl border-2 border-border bg-card px-3 text-base text-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold/60 focus-visible:border-primary";
   const primaryBtn = "w-full min-h-[52px] rounded-xl bg-gold px-5 text-base font-extrabold text-navy shadow-lg disabled:opacity-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/60";
-  const reviews = listing ? rankReviews(listing.reviews).slice(0, 3) : [];
+  const featuredReview = useMemo(() => {
+    if (!listing) return null;
+    const complete = listing.reviews.filter((review) => !/(?:…|\.\.\.)\s*$/.test(review.text.trim()));
+    return pickReview(complete, s.services);
+  }, [listing, s.services]);
+  const reviewName = featuredReview ? (featuredReview.author?.trim().includes(" ") ? shortName(featuredReview.author) : t("Google reviewer")) : "";
+  const addServiceAtPrice = (service: Svc) => {
+    if (s.services.includes(service)) return;
+    const additions: Partial<State> = { services: [...s.services, service] };
+    if (service === "cleaning") { additions.beds = s.beds || "2"; additions.baths = s.baths || "1"; }
+    if (service === "lawn") additions.lawn = s.lawn ?? 1;
+    if (service === "detailing") additions.car = s.car ?? 1;
+    set(additions);
+  };
 
   return (
     <div className="founding-landing min-h-screen bg-background text-ink">
@@ -196,7 +222,17 @@ export default function Founding() {
       </Helmet>
 
       <header className="founding-landing-hero text-primary-foreground">
-        <img src={foundingHero} alt="Family relaxing together at home" width={1536} height={1024} loading="eager" fetchPriority="high" className="founding-hero-photo" />
+        {motionOk ? (
+          <>
+            <video src={foundingMobileVideo.url} poster={foundingMobilePoster.url} autoPlay loop muted playsInline preload="auto" aria-hidden="true" className="founding-hero-photo md:hidden" />
+            <video src={foundingDesktopVideo.url} poster={foundingDesktopPoster.url} autoPlay loop muted playsInline preload="metadata" aria-hidden="true" className="founding-hero-photo hidden md:block" />
+          </>
+        ) : (
+          <picture>
+            <source media="(max-width: 767px)" srcSet={foundingMobilePoster.url} />
+            <img src={foundingDesktopPoster.url} alt="Open Miami home interior looking toward the water" width={1920} height={1080} loading="eager" fetchPriority="high" className="founding-hero-photo" />
+          </picture>
+        )}
         <div className="founding-hero-shade" />
         <SparkleField />
         <div className="founding-hero-shell">
@@ -207,11 +243,12 @@ export default function Founding() {
           <div className="founding-hero-copy">
             <h1>{t("More life.")}<br /><span>{t("Less chores.")}</span></h1>
             <p>{t("Three services. One subscription.")}<br />{t("More life for you.")}</p>
+            {listing && <a className="founding-rating-line" href={listing.maps_uri} target="_blank" rel="noreferrer"><span>★★★★★</span> {formatRating(listing.rating)} · {listing.total_count} {t("Google reviews")}</a>}
             <div data-testid="founding-left" className="founding-cap-pill">
               {!isZip(s.zip) || left === null
                 ? <>{FOUNDING_CAP} {t("founding homes per ZIP")} · {FOUNDING_ZIPS.join(" · ")}</>
                 : left > 0
-                  ? <><strong>{left} {t("of")} {FOUNDING_CAP}</strong> {t("founding homes left in")} {s.zip}</>
+                  ? <><strong>{left} {t("of")} {FOUNDING_CAP}</strong> {t("founding homes left in")} {s.zip}{left === FOUNDING_CAP ? <> · {t("Founding pricing is open now.")}</> : null}</>
                   : <>{t("Founding homes are fully reserved in")} {s.zip}</>}
             </div>
           </div>
@@ -226,7 +263,7 @@ export default function Founding() {
               <div data-testid="founding-live-count" className="founding-live-count" aria-live="polite">
                 <span aria-hidden="true" />
                 {left > 0
-                  ? <><strong>{left} {t("of")} {FOUNDING_CAP}</strong> {t("founding homes left in")} {s.zip}</>
+                  ? <><strong>{left} {t("of")} {FOUNDING_CAP}</strong> {t("founding homes left in")} {s.zip}{left === FOUNDING_CAP ? <> · {t("Founding pricing is open now.")}</> : null}</>
                   : <>{t("Founding homes are fully reserved in")} {s.zip}</>}
               </div>
             )}
@@ -320,12 +357,13 @@ export default function Founding() {
             {s.step === "price" && (
               <div>
                 {priced.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <Stat label={t("Monthly total")} value={`${money(total)}${per}`} big />
+                  <div className="founding-price-stats text-center">
+                    <Stat label={t("Monthly total")} value={`${money(total)}${per}`} big className="founding-price-total" />
                     <Stat label={t("Visits a month")} value={String(visits)} />
                     <Stat label={t("Per visit")} value={visits ? money(total / visits) : "—"} />
                   </div>
                 )}
+                <p className="founding-launch-note">{t(`Founding visits begin ${LAUNCH_DATE_LONG}.`)}</p>
                 <p className="mt-2 text-center text-sm font-semibold text-primary">{t("Not right? We come back within 48 hours, free.")}</p>
                 <ul className="mt-3 divide-y divide-border text-sm">
                   {lines.map((l) => l && (
@@ -336,6 +374,12 @@ export default function Founding() {
                   ))}
                 </ul>
                 {anyQuote && <p className="mt-2 rounded-lg bg-accent p-2 text-xs">{t("5+ bedrooms gets a custom quote. Reserve now and we'll send your price before anything is set.")}</p>}
+
+                {SVCS.filter((service) => !s.services.includes(service)).map((service) => (
+                  <button key={service} type="button" className="founding-bundle-offer" onClick={() => addServiceAtPrice(service)}>
+                    <span><strong>{t("Add")} {t(SVC_LABEL[service])} {t("from")} {money(SIZE_PRICES[service][1])}{per}</strong> — {t(s.services.length >= 2 ? "and get two free premium add-ons every month." : "and your first premium add-on is free every month.")}</span><span aria-hidden="true">+</span>
+                  </button>
+                ))}
 
                 {giftCount > 0 && (
                   <fieldset className="mt-4 rounded-xl border-2 border-gold/60 p-3">
@@ -354,7 +398,7 @@ export default function Founding() {
                 {listing && (
                   <div className="mt-4 rounded-xl bg-navy p-3 text-primary-foreground">
                     <p className="text-sm font-bold"><span className="text-gold">★★★★★</span> {formatRating(listing.rating)} · {listing.total_count} {t("Google reviews")}</p>
-                    {reviews.map((r, i) => <p key={r.id ?? i} className="mt-2 text-sm">“{r.text.length > 140 ? r.text.slice(0, 137) + "…" : r.text}” <span className="text-primary-foreground/70">— {shortName(r.author)}</span></p>)}
+                    {featuredReview && <p className="mt-2 text-sm">“{featuredReview.text}” <span className="text-primary-foreground/70">— {reviewName}</span></p>}
                     <a href={listing.maps_uri} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-gold underline">{t("Read them on Google")} →</a>
                   </div>
                 )}
@@ -393,6 +437,7 @@ export default function Founding() {
                   <span>{t("Text me about my reservation. Msg & data rates may apply. Reply STOP to opt out.")}</span>
                 </label>
                 {err && <p role="alert" className="text-sm font-semibold text-destructive">{err}</p>}
+                <p className="founding-reserve-launch">{t(`Founding visits begin ${LAUNCH_DATE_LONG}. No charge today — we'll confirm your day and your Pro the week before, and set up payment then.`)}</p>
                 <button className={primaryBtn} disabled={!formOk || busy}>{busy ? t("Saving…") : t("Reserve my spot — no charge")}</button>
                 <p className="text-center text-xs text-ink-faint">{t("By reserving you agree to our")} <Link to="/terms" className="underline">{t("Terms")}</Link> {t("and")} <Link to="/privacy" className="underline">{t("Privacy Policy")}</Link>.</p>
                 <button type="button" className={`${chip} ${off} w-full`} onClick={() => go("price")}>← {t("Back to my price")}</button>
@@ -488,6 +533,12 @@ export default function Founding() {
           <p className="founding-legal"><Link to="/terms">{t("Terms")}</Link> · <Link to="/privacy">{t("Privacy Policy")}</Link></p>
         </Reveal>
       </main>
+      {!quoteVisible && s.step !== "done" && (
+        <button type="button" className="founding-sticky-quote md:hidden" onClick={() => scrollTo.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+          <span>{t("See your price — 60 seconds")}</span>
+          {isZip(s.zip) && left !== null && <small>{left} {t("of")} {FOUNDING_CAP} · {s.zip}</small>}
+        </button>
+      )}
     </div>
   );
 }
@@ -502,8 +553,8 @@ function Cadence({ value, onChange, t, chip, on, off }: { value: CanonCadence; o
     </div>
   );
 }
-function Stat({ label, value, big }: { label: string; value: string; big?: boolean }) {
-  return <div className="rounded-xl bg-accent p-2"><p className={`${big ? "text-xl" : "text-lg"} font-extrabold`}>{value}</p><p className="text-[11px] text-ink-faint">{label}</p></div>;
+function Stat({ label, value, big, className = "" }: { label: string; value: string; big?: boolean; className?: string }) {
+  return <div className={`founding-price-stat rounded-xl bg-accent p-2 ${className}`}><p className={`${big ? "text-xl" : "text-lg"} whitespace-nowrap font-extrabold`}>{value}</p><p className="text-[11px] text-ink-faint">{label}</p></div>;
 }
 function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: React.ReactNode }) {
   return <div><label htmlFor={id} className="text-xs font-semibold">{label}</label>{children}{error && <p className="mt-1 text-xs text-destructive">{error}</p>}</div>;

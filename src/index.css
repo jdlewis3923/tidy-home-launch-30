@@ -1561,6 +1561,8 @@ body.admin-hud h1 {
 .founding-hero-copy h1 { font-size: clamp(3.15rem, 5.2vw, 5.1rem); font-weight: 900; line-height: .98; letter-spacing: 0; text-shadow: 0 4px 18px hsl(var(--navy) / .28); }
 .founding-hero-copy h1 span { color: hsl(var(--gold)); }
 .founding-hero-copy > p { margin-top: 20px; font-size: 1.24rem; line-height: 1.45; color: hsl(var(--primary-foreground) / .92); }
+.founding-rating-line { display: inline-flex; margin-top: 12px; align-items: center; gap: 5px; color: hsl(var(--primary-foreground)); font-size: .78rem; font-weight: 700; text-decoration: none; text-shadow: 0 2px 8px hsl(var(--navy) / .45); }
+.founding-rating-line span { color: hsl(var(--gold)); letter-spacing: .08em; }
 .founding-cap-pill { display: inline-flex; margin-top: 20px; border-radius: 10px; padding: 12px 16px; background: hsl(var(--primary-foreground) / .14); font-size: .86rem; font-weight: 600; backdrop-filter: blur(8px); }
 .founding-cap-pill strong { color: hsl(var(--gold)); }
 .founding-landing-main { position: relative; }
@@ -1571,6 +1573,16 @@ body.admin-hud h1 {
 .founding-live-count { display: flex; min-height: 38px; align-items: center; justify-content: center; gap: 7px; margin: 0 0 12px; border-radius: 8px; background: hsl(var(--primary) / .07); padding: 8px 10px; color: hsl(var(--navy)); font-size: .72rem; font-weight: 650; text-align: center; }
 .founding-live-count > span { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 999px; background: hsl(var(--success)); box-shadow: 0 0 0 4px hsl(var(--success) / .12); animation: founding-live 2.8s ease-in-out infinite; }
 .founding-live-count strong { color: hsl(var(--primary)); }
+.founding-price-stats { display: grid; grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, 1fr)); gap: 8px; }
+.founding-price-stat { min-width: 0; overflow: hidden; }
+.founding-price-stat p:first-child { font-size: clamp(.92rem, 4vw, 1.125rem); }
+.founding-price-total p:first-child { font-size: clamp(1rem, 4.6vw, 1.25rem); }
+.founding-launch-note { margin-top: 10px; color: hsl(var(--navy)); font-size: .75rem; font-weight: 700; text-align: center; }
+.founding-reserve-launch { border-radius: 8px; background: hsl(var(--primary) / .07); padding: 10px 11px; color: hsl(var(--navy)); font-size: .72rem; font-weight: 650; line-height: 1.45; }
+.founding-bundle-offer { display: grid; width: 100%; grid-template-columns: minmax(0, 1fr) 28px; align-items: center; gap: 8px; margin-top: 8px; border: 1px solid hsl(var(--gold) / .7); border-radius: 10px; background: hsl(var(--gold) / .08); padding: 10px 11px; color: hsl(var(--navy)); font-size: .72rem; line-height: 1.4; text-align: left; }
+.founding-bundle-offer > span:last-child { display: flex; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 999px; background: hsl(var(--gold)); color: hsl(var(--navy)); font-size: 1rem; font-weight: 800; }
+.founding-sticky-quote { position: fixed; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); left: 12px; z-index: 50; display: flex; min-height: 58px; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid hsl(var(--gold) / .75); border-radius: 12px; background: hsl(var(--navy)); padding: 10px 14px; color: hsl(var(--primary-foreground)); box-shadow: 0 14px 36px hsl(var(--navy) / .34); text-align: left; animation: founding-sticky-enter 280ms cubic-bezier(.22,1,.36,1) both; }
+.founding-sticky-quote span { font-size: .76rem; font-weight: 800; }.founding-sticky-quote small { color: hsl(var(--gold)); font-size: .64rem; font-weight: 700; }
 .founding-zip-choice { display: grid; grid-template-columns: 74px 1fr; align-items: center; text-align: left; }
 .founding-zip-choice strong { color: hsl(var(--primary)); font-size: .95rem; }
 .founding-zip-choice span { color: hsl(var(--text-mid)); font-size: .78rem; }
@@ -1639,10 +1651,11 @@ body.admin-hud h1 {
 @keyframes founding-card-enter { from { opacity: 0; transform: translateY(24px) scale(.985); } to { opacity: 1; transform: none; } }
 @keyframes founding-live { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
 @keyframes founding-item-enter { from { opacity: 0; transform: translateY(22px) scale(.975); } to { opacity: 1; transform: none; } }
+@keyframes founding-sticky-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 767px) {
   .founding-landing-hero { min-height: 648px; }
-  .founding-hero-photo { object-position: 59% center; }
+  .founding-hero-photo { object-position: center center; }
   .founding-hero-shade { background: linear-gradient(90deg, hsl(var(--navy) / .95) 0%, hsl(var(--navy) / .69) 39%, hsl(var(--navy) / .08) 78%), linear-gradient(180deg, hsl(var(--navy) / .08), hsl(var(--navy) / .04) 55%, hsl(var(--navy) / .32)); }
   .founding-hero-shell { width: calc(100% - 36px); }
   .founding-topbar picture img { height: 42px; }
@@ -1658,7 +1671,7 @@ body.admin-hud h1 {
   .founding-quote-card .mt-4 { margin-top: .7rem; }
   .founding-quote-card .mt-3 { margin-top: .55rem; }
   .founding-quote-card .mt-2 { margin-top: .4rem; }
-  .founding-benefits-section { width: calc(100% - 28px); padding: 45px 0; }
+  .founding-benefits-section { width: calc(100% - 28px); padding: 30px 0 45px; }
   .founding-benefits-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 19px; text-align: left; }
   .founding-benefits-grid li { display: grid; grid-template-columns: 48px minmax(0, 1fr); min-height: 76px; justify-content: start; gap: 14px; padding: 13px 16px; }
   .founding-benefits-grid li > span { width: 40px; height: 40px; }
@@ -1695,7 +1708,7 @@ body.admin-hud h1 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .founding-hero-copy, .founding-quote-card, .founding-live-count > span, .reveal-in .founding-benefits-grid li, .reveal-in .founding-plan-card, .reveal-in .founding-how-grid li { animation: none; }
+  .founding-hero-copy, .founding-quote-card, .founding-live-count > span, .founding-sticky-quote, .reveal-in .founding-benefits-grid li, .reveal-in .founding-plan-card, .reveal-in .founding-how-grid li { animation: none; }
   .founding-plan-card { transition: none; }
   .founding-plan-card:hover { transform: none; }
 }
