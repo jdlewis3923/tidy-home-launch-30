@@ -214,17 +214,16 @@ const ServiceLandingPageInner = ({ config }: Props) => {
       <section className="relative min-h-[80vh] flex items-center pt-24 pb-16 overflow-hidden">
         {/*
           One <picture>: WebP first with a jpg fallback, the portrait mobile crop
-          only under 640px (above that the 1600px landscape asset is sharper than
-          upscaling a 900px portrait), intrinsic width/height to stop layout
+          below the 768px phone breakpoint, intrinsic width/height to stop layout
           shift, and fetchpriority=high because this is the LCP element.
         */}
         <picture>
           {config.heroImageMobile && (
             <>
               {config.heroImageMobileWebp && (
-                <source media="(max-width: 639px)" srcSet={config.heroImageMobileWebp} type="image/webp" />
+                <source media="(max-width: 767px)" srcSet={config.heroImageMobileWebp} type="image/webp" />
               )}
-              <source media="(max-width: 639px)" srcSet={config.heroImageMobile} />
+              <source media="(max-width: 767px)" srcSet={config.heroImageMobile} />
             </>
           )}
           {config.heroImageWebp && <source srcSet={config.heroImageWebp} type="image/webp" />}

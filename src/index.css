@@ -201,7 +201,7 @@
 
 @layer utilities {
   .service-hero-scrim {
-    background: linear-gradient(to bottom, hsl(var(--service-hero-overlay) / .55) 0%, hsl(var(--service-hero-overlay) / .25) 60%, hsl(var(--service-hero-overlay) / .25) 100%);
+    background: linear-gradient(to bottom, hsl(var(--service-hero-overlay) / .76) 0%, hsl(var(--service-hero-overlay) / .72) 60%, hsl(var(--service-hero-overlay) / .76) 100%);
   }
   .service-hero-headline {
     /* Shade only the headline area, not the whole photograph. */
