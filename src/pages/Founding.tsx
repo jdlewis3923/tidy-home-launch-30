@@ -17,12 +17,12 @@ import LanguageToggle from "@/components/LanguageToggle";
 import TidyLogo from "@/components/TidyLogo";
 import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
 import foundingHero from "@/assets/founding-family-provided.png";
-import cleaningImage from "@/assets/cleaning-interior.webp";
-import lawnImage from "@/assets/lawn-care.webp";
-import carImage from "@/assets/car-detailing.webp";
-import scanImage from "@/assets/cleaning-interior.webp";
-import calendarImage from "@/assets/lawn-care.webp";
-import proImage from "@/assets/founding-pro-step.jpg";
+import cleaningImage from "@/assets/founding-plan-cleaning.png.asset.json";
+import lawnImage from "@/assets/founding-plan-lawn.png.asset.json";
+import carImage from "@/assets/founding-plan-car-care.png.asset.json";
+import scanImage from "@/assets/founding-how-scan.png.asset.json";
+import calendarImage from "@/assets/founding-how-calendar.png.asset.json";
+import proImage from "@/assets/founding-how-pro.png.asset.json";
 
 type Svc = "cleaning" | "lawn" | "detailing";
 type Step = "zip" | "services" | "sizes" | "price" | "reserve" | "done";
@@ -429,9 +429,9 @@ export default function Founding() {
             <p className="founding-section-lead">{t("Bundle the services you want. One simple bill. No hidden fees.")}</p>
             <ul className="founding-plan-grid">
               {[
-                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: cleaningImage, Icon: Sparkles, tone: "gold" },
-                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnImage, Icon: Leaf, tone: "green" },
-                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carImage, Icon: CarFront, tone: "blue" },
+                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: cleaningImage.url, Icon: Sparkles, tone: "gold" },
+                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnImage.url, Icon: Leaf, tone: "green" },
+                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carImage.url, Icon: CarFront, tone: "blue" },
               ].map(({ svc, label, price, image, Icon, tone }) => (
                 <li key={label} className="founding-plan-card">
                   <img src={image} alt="" width={640} height={360} loading="lazy" />
@@ -448,9 +448,9 @@ export default function Founding() {
             <h2>{t("How it works")}</h2>
             <ol className="founding-how-grid">
               {[
-                { h: "Scan", d: "See your price in 60 seconds. No account, no call.", image: scanImage },
-                { h: "Pick your day", d: "Any weekday or Saturday, mornings or afternoons.", image: calendarImage },
-                { h: "Meet your Pro", d: "The same background-checked pro for each service, every visit.", image: proImage },
+                { h: "Scan", d: "See your price in 60 seconds. No account, no call.", image: scanImage.url },
+                { h: "Pick your day", d: "Any weekday or Saturday, mornings or afternoons.", image: calendarImage.url },
+                { h: "Meet your Pro", d: "The same background-checked pro for each service, every visit.", image: proImage.url },
               ].map(({ h, d, image }, i) => (
                 <li key={h}><div className="founding-step-image"><img src={image} alt="" width={1008} height={1008} loading="lazy" /><span>{i + 1}</span></div><strong>{t(h)}</strong><p>{t(d)}</p></li>
               ))}
