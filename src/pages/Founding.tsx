@@ -22,7 +22,7 @@ import lawnImage from "@/assets/lawn-care.webp";
 import carImage from "@/assets/car-detailing.webp";
 import scanImage from "@/assets/cleaning-interior.webp";
 import calendarImage from "@/assets/lawn-care.webp";
-import proImage from "@/assets/car-detailing.webp";
+import proImage from "@/assets/founding-pro-step.jpg";
 
 type Svc = "cleaning" | "lawn" | "detailing";
 type Step = "zip" | "services" | "sizes" | "price" | "reserve" | "done";
