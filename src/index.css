@@ -234,7 +234,7 @@
     background: linear-gradient(180deg, hsl(var(--primary-foreground) / .9) 0%, hsl(var(--primary-foreground) / .76) 38%, hsl(var(--primary-foreground) / .22) 70%, hsl(var(--navy) / .08) 100%);
   }
   .offer-page { --offer-nav-height: 6rem; }
-  .offer-page .editorial-offer-hero { display: flex; flex-direction: column; justify-content: space-between; padding-top: calc(var(--offer-nav-height) + 1.2rem); }
+  .offer-page .editorial-offer-hero { display: flex; flex-direction: column; justify-content: space-between; min-height: 0; height: 52rem; padding-top: calc(var(--offer-nav-height) + 1.2rem); }
   .offer-page .offer-eyebrow { @apply block text-primary font-bold uppercase text-xs; letter-spacing: .2em; }
   .offer-page .offer-title-dash { position: relative; display: inline-block; }
   .offer-page .offer-title-dash::after { content: ""; position: absolute; z-index: -1; bottom: .045em; left: 12%; width: 76%; height: .12em; background: hsl(var(--gold)); border-radius: 50%; transform: rotate(-2deg); }
@@ -256,7 +256,7 @@
   .offer-card-icon-blue { @apply bg-secondary; }
   .offer-card-icon-gold { @apply bg-gold; }
   .offer-card-icon-green { @apply bg-success; }
-  .offer-reward-arrow { @apply absolute z-10 h-8 w-8 text-primary; }
+  .offer-reward-arrow { @apply absolute z-10 h-8 w-8 text-primary; margin-top: 2rem; }
   .offer-refer-action { @apply flex w-full flex-col items-center; }
   .offer-refer-button { @apply w-full max-w-sm rounded-full bg-gold text-gold-foreground hover:bg-gold/90; height: 3.3rem; font-size: 1rem; }
   .offer-refer-action p { @apply mt-2 text-xs font-medium; }
@@ -277,12 +277,12 @@
   .offer-bundle-tiles { @apply mt-10 flex items-stretch justify-start gap-2; }
   .bundle-service-tile { @apply relative flex w-[24%] max-w-[11rem] flex-col items-center rounded-lg bg-primary-foreground/95 pb-3 shadow-lg; }
   .bundle-service-tile .offer-card-icon { left: 50%; transform: translateX(-50%); }
-  .bundle-service-tile img { @apply h-28 w-full rounded-t-lg object-cover md:h-36; }
+  .bundle-service-tile img { @apply h-24 w-full rounded-t-lg object-cover md:h-36; }
   .bundle-service-tile strong { @apply px-1 pt-2 text-center text-xs leading-tight md:text-sm; }
   .bundle-check { @apply mx-auto mt-auto h-6 w-6 rounded-full bg-gold p-1 text-gold-foreground; }
   .bundle-plus { @apply z-10 -mx-5 flex h-8 w-8 self-center items-center justify-center rounded-full bg-primary-foreground shadow-md; }
   .bundle-flow-arrow { @apply h-7 w-7 self-center text-primary; }
-  .bundle-gift-tile { @apply relative flex w-[31%] max-w-[14rem] flex-col items-center justify-center rounded-lg bg-gold px-2 py-3 text-center text-gold-foreground shadow-lg; }
+  .bundle-gift-tile { @apply relative flex w-[34%] max-w-[14rem] flex-col items-center justify-center rounded-lg bg-gold px-2 py-3 text-center text-gold-foreground shadow-lg; }
   .bundle-gift-tile > span:not(.offer-card-icon) { @apply mt-3 text-[10px] font-semibold; }
   .bundle-gift-tile strong { @apply text-2xl leading-[.9] md:text-3xl; }
   .bundle-gift-tile strong em { @apply text-base not-italic md:text-xl; }
@@ -296,7 +296,7 @@
   .bundle-trust-bar svg { @apply h-5 w-5 shrink-0 text-primary-foreground; }
   .bundle-trust-bar strong { @apply text-[9px] leading-tight md:text-xs; }
   @media (max-width: 767px) {
-    .offer-page .editorial-offer-hero { min-height: max(100svh, 46rem); padding-top: calc(var(--offer-nav-height) + .5rem); }
+    .offer-page .editorial-offer-hero { height: auto; min-height: 48rem; padding-top: calc(var(--offer-nav-height) + .5rem); }
     .offer-refer-content { gap: 2rem; }
     .offer-reward-pair { gap: 3rem; }
     .offer-reward-card { width: 37%; max-width: 9rem; }
@@ -310,9 +310,10 @@
     .bundle-gift-tile { width: 34%; }
     .bundle-plus { margin-left: -.9rem; margin-right: -.9rem; }
     .bundle-flow-arrow { width: 1.2rem; }
-    .bundle-service-tile img { height: 6.6rem; }
+    .bundle-service-tile img { height: 5.8rem; }
     .bundle-gift-tile strong { font-size: 1.35rem; }
     .bundle-gift-tile strong em { font-size: .9rem; }
+    .bundle-gift-tile ul { font-size: 9px; }
   }
   @media (max-width: 767px) {
     .service-editorial-scrim {
