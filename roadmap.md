@@ -83,5 +83,5 @@
 - [x] Scan/step/tap-to-call logging; Command reservations panel first
 - [x] Write-first reservations, honeypot, duplicate update, founding flag past 25 (no waitlist)
 - [x] Prices read from Stripe by lookup_key with cached fallback
-- [ ] Correct supplied How It Works screens, persist the selected-ZIP live counter, remove mobile clipping, and add restrained page motion
+- [x] Correct supplied How It Works screens, persist the selected-ZIP live counter, remove mobile clipping, and add restrained page motion
 - [ ] Switch on the five extra add-on prices in Stripe (needs your go-ahead: changes live Stripe)
