@@ -45,8 +45,9 @@ export function usePageVisibility() {
  * 15,000 printed hangers point at it; every other page fails closed.
  */
 export function pageAllowed(pathname: string, masterLive: boolean, vis: Record<string, boolean> | undefined, visError: boolean): boolean {
-  if (masterLive) return true;
   const key = pageKeyFor(pathname);
+  if (key === "/founding" && vis && vis[key] === false) return false;
+  if (masterLive) return true;
   if (!key) return false;
   if (key === "/founding") return visError || !vis ? true : vis[key] !== false;
   return !!vis?.[key];

@@ -158,8 +158,9 @@ const RouteTracker = ({ children }: { children: React.ReactNode }) => {
 // Admin can still log in and flip it back on; everything else shows ComingSoon.
 import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFoundingOfferShown, doorhangerGateAllows } from "@/lib/doorhanger";
 import { getLandingSource } from "@/lib/landing-source";
+import { usePageVisibility, pageAllowed } from "@/lib/pageVisibility";
 
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/apply", "/pro", "/add/", "/addon/", "/q/", "/neighbor", "/rate", "/verify/", "/intake", "/coi", "/contract/", "/photo/", "/badge/"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/pro", "/add/", "/addon/", "/q/", "/neighbor", "/rate", "/verify/", "/intake", "/coi", "/contract/", "/photo/", "/badge/"];
 
 // The printed door hangers point at /dashboard/plan?src=doorhanger_en — a
 // neighbour with no account should see the founding offer first. Bounce them to
@@ -179,6 +180,7 @@ const DoorhangerRescue = () => {
 const SiteGate = ({ children }: { children: React.ReactNode }) => {
   const { isLive, isLoading } = useSiteLive();
   const location = useLocation();
+  const vis = usePageVisibility();
   // ?preview=TOKEN → validated server side, then held in a session cookie.
   const [previewChecked, setPreviewChecked] = useState(() => !location.search.includes("preview="));
   const [hasPreview, setHasPreview] = useState(hasPreviewAccess);
@@ -196,9 +198,11 @@ const SiteGate = ({ children }: { children: React.ReactNode }) => {
     ALWAYS_OPEN_PREFIXES.some((p) => location.pathname.startsWith(p)) ||
     // Narrow carve-out: the conversion hops open for door-hanger arrivals only.
     doorhangerGateAllows(location.pathname, location.search, getLandingSource());
-  if (isLoading || !previewChecked) return <RouteFallback />;
+  if (isLoading || vis.isLoading || !previewChecked) return <RouteFallback />;
+  const pageOn = pageAllowed(location.pathname, isLive, vis.data, vis.isError);
+  if (location.pathname.startsWith("/founding")) return pageOn || hasPreview ? <>{children}</> : <AdminSiteGate>{children}</AdminSiteGate>;
   // The live site does not need an auth request before every page can render.
-  if (isLive || hasPreview || isWhitelisted) return <>{children}</>;
+  if (pageOn || hasPreview || isWhitelisted) return <>{children}</>;
   return <AdminSiteGate>{children}</AdminSiteGate>;
 };
 
