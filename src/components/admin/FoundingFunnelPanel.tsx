@@ -25,9 +25,8 @@ export default function FoundingFunnelPanel() {
 
   const count = (z: string, s: string) => res.filter((r) => r.zip === z && (r.services as string[]).includes(s)).length;
   const zipStatus = (z: string) => {
-    const founding = res.filter((r) => r.zip === z && r.founding);
-    const firstStandard = res.find((r) => r.zip === z && !r.founding);
-    return { count: founding.length, full: founding.length >= FOUNDING_CAP, closedAt: firstStandard?.created_at ?? null };
+    const founding = res.filter((r) => r.zip === z && r.founding).sort((a, b) => a.created_at.localeCompare(b.created_at));
+    return { count: founding.length, full: founding.length >= FOUNDING_CAP, closedAt: founding[FOUNDING_CAP - 1]?.created_at ?? null };
   };
   // Scan sessions per ZIP × src, with conversion.
   const sessions = new Map<string, { src: string; zip: string; converted: boolean }>();

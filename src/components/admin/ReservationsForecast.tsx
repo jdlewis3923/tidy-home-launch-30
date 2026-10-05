@@ -31,7 +31,6 @@ export function forecast(rows: ReservationRow[]) {
   for (const r of live) {
     byZip[r.zip] = (byZip[r.zip] ?? 0) + 1;
     if (r.founding) byZipFounding[r.zip] = (byZipFounding[r.zip] ?? 0) + 1;
-    else if (byZipFounding[r.zip] >= FOUNDING_CAP && !byZipClosedAt[r.zip]) byZipClosedAt[r.zip] = r.created_at;
     byDay[r.preferred_day] = (byDay[r.preferred_day] ?? 0) + 1;
     for (const s of r.services as ReservableService[]) {
       if (!bySvc[s]) continue;
@@ -43,8 +42,8 @@ export function forecast(rows: ReservationRow[]) {
   }
   const monthly = RESERVABLE_SERVICES.reduce((n, s) => n + bySvc[s].monthly, 0);
   for (const z of ZIPS) {
-    const firstStandard = live.find((r) => r.zip === z && !r.founding);
-    byZipClosedAt[z] = firstStandard?.created_at ?? null;
+    const foundingRows = live.filter((r) => r.zip === z && r.founding).sort((a, b) => a.created_at.localeCompare(b.created_at));
+    byZipClosedAt[z] = foundingRows[FOUNDING_CAP - 1]?.created_at ?? null;
   }
   return { total: live.length, bySvc, byZip, byZipFounding, byZipClosedAt, byDay, monthly };
 }

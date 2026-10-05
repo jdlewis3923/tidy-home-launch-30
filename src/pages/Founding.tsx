@@ -150,6 +150,7 @@ export default function Founding() {
     setBusy(false);
     if (error || !data?.ok) { setErr(t("We couldn't save that. Check your details and try again, or call us.")); return; }
     setResult({ updated: !!data.updated, founding: data.founding !== false });
+    void counts.refetch();
     go("done");
     try { sessionStorage.removeItem(KEY); } catch { /* ok */ }
   }

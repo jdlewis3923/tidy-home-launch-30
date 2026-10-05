@@ -11,6 +11,7 @@ export function useFoundingCounts() {
   return useQuery({
     queryKey: ['founding-spot-counts'],
     staleTime: 30_000,
+    refetchInterval: 15_000,
     queryFn: async (): Promise<FoundingCounts> => {
       const { data, error } = await supabase.rpc('founding_home_counts');
       if (error) throw error;
