@@ -38,6 +38,7 @@
 
     --navy: 222 47% 11%;
     --service-hero-overlay: 206.667 100% 17.647%;
+    --service-hero-neutral-overlay: 0 0% 0%;
     --review-navy: 206 100% 18%;
     --review-yellow: 49 100% 50%;
     --navy-deep: 224 71% 4%;
@@ -201,21 +202,13 @@
 
 @layer utilities {
   .service-hero-scrim {
+    background: linear-gradient(to bottom, hsl(var(--service-hero-neutral-overlay) / .48) 0%, hsl(var(--service-hero-neutral-overlay) / .42) 60%, hsl(var(--service-hero-neutral-overlay) / .48) 100%);
+  }
+  .service-hero-scrim-blue {
     background: linear-gradient(to bottom, hsl(var(--service-hero-overlay) / .76) 0%, hsl(var(--service-hero-overlay) / .72) 60%, hsl(var(--service-hero-overlay) / .76) 100%);
   }
   .service-hero-headline {
-    /* Shade only the headline area, not the whole photograph. */
-    position: relative;
-    isolation: isolate;
     text-shadow: 0 1px 3px hsl(var(--navy));
-  }
-  .service-hero-headline::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    inset: -3rem -8rem;
-    pointer-events: none;
-    background: radial-gradient(ellipse 55% 55% at center, hsl(var(--navy) / .84) 0%, hsl(var(--navy) / .8) 55%, transparent 100%);
   }
   .text-balance {
     text-wrap: balance;

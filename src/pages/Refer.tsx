@@ -127,7 +127,7 @@ const ReferInner = () => {
           <source media="(max-width: 767px)" srcSet={referMobile.url} />
           <img src={referDesktop.url} alt="Palm-lined neighborhood with two homes" className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
         </picture>
-        <div className="absolute inset-0 service-hero-scrim" />
+        <div className="absolute inset-0 service-hero-scrim-blue" />
         <SparkleField />
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Refer & Earn")}</span>
