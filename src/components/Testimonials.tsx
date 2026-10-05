@@ -92,7 +92,7 @@ const Testimonials = ({ onOpenPopup }: TestimonialsProps) => {
             pushEvent("cta_click", { cta_id: "testimonials", cta_text: ctaText });
             onOpenPopup();
           }}
-          className="founding-showcase-cta animate-pulse-gold"
+          className="founding-showcase-cta"
         >
           {t(ctaText)}
         </Button>
