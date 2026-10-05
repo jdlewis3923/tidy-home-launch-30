@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Check, MapPin } from "lucide-react";
+import { Check, MapPin, Gift, ShieldCheck, Users, LockKeyhole, Leaf, Plus, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
@@ -20,6 +20,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { BUNDLE_GIFT_COPY, SERVICE_NAMES, SIZE_PRICES, hasFreeAddonEntitlement } from "@/lib/pricing-canon";
 import bundleDesktop from "@/assets/bundle-home-car-desktop.png.asset.json";
 import bundleMobile from "@/assets/bundle-home-car-mobile.png.asset.json";
+import cleaningImage from "@/assets/services-cleaning-20261004.webp.asset.json";
+import lawnImage from "@/assets/services-lawn-20261004.webp.asset.json";
 
 type ServiceSlug = "cleaning" | "lawn" | "detailing";
 
@@ -122,32 +124,54 @@ const BundleInner = () => {
       />
 
       {/* HERO */}
-      <section className="relative min-h-[70vh] flex items-center pt-24 pb-16 overflow-hidden bg-navy">
+      <section className="editorial-offer-hero relative min-h-[calc(100svh-1rem)] pt-28 pb-40 px-4 overflow-hidden">
         <picture className="absolute inset-0">
           <source media="(max-width: 767px)" srcSet={bundleMobile.url} />
           <img src={bundleDesktop.url} alt="Home and lawn with a car in the driveway" className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
         </picture>
-        <div className="absolute inset-0 service-hero-scrim" />
-        <SparkleField />
-        <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
-          <span className="text-xs uppercase tracking-widest text-gold font-semibold">{t("Bundle your services")}</span>
-          <h1 className="mt-3 text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-foreground leading-tight">
-            {t("Bundle your services — a free premium add-on every month")}
+        <div className="absolute inset-0 bundle-editorial-scrim" />
+        <div className="relative z-10 max-w-4xl mx-auto text-center text-navy">
+          <span className="text-xs uppercase tracking-[0.28em] text-primary font-bold">{t("Bundle your services")}</span>
+          <h1 className="mt-3 text-4xl md:text-6xl font-extrabold leading-[0.94] text-balance">
+            {t("Bundle & get a")}<br /><span className="editorial-underline">{t("free premium add-on")}</span>
           </h1>
-          <p className="mt-5 text-lg md:text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
-            {t("Hold two or more services and you pick one free premium add-on every month. Pinecrest & Kendall only (33156 · 33183 · 33186).")}
+          <p className="mt-5 text-base md:text-lg max-w-xl mx-auto leading-snug font-medium">
+            {t("Hold two or more services and you’ll get one free premium add-on every month.")}
           </p>
-          <div className="mt-6 inline-flex items-center gap-1.5 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 rounded-full px-4 py-1.5 text-primary-foreground text-sm font-medium">
-            <MapPin className="w-3.5 h-3.5" />
-            {t(SERVICE_AREA_TRUST)}
+
+          <div className="mt-7 flex items-stretch justify-center gap-2 md:gap-4">
+            <div className="bundle-service-tile">
+              <img src={cleaningImage.url} alt="" />
+              <strong>{t("House Cleaning")}</strong><Check className="bundle-check" />
+            </div>
+            <div className="bundle-service-tile">
+              <img src={lawnImage.url} alt="" />
+              <strong>{t("Lawn Care")}</strong><Check className="bundle-check" />
+            </div>
+            <div className="flex items-center"><Plus className="w-6 h-6" /></div>
+            <div className="bundle-gift-tile">
+              <Gift className="w-8 h-8" /><span>{t("Your choice of a")}</span>
+              <strong>{t("FREE premium add-on")}</strong>
+              <small>{t("every month")}</small>
+            </div>
           </div>
+
+          <a href="#bundle-builder" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary-foreground/90 px-5 py-2 text-xs md:text-sm font-bold shadow-sm">
+            <MapPin className="w-4 h-4" /> {t(SERVICE_AREA_TRUST)}
+          </a>
+        </div>
+        <div className="absolute z-20 bottom-0 left-0 right-0 bundle-trust-bar">
+          <div><ShieldCheck /><strong>{t("Background-Checked Pros")}</strong></div>
+          <div><Users /><strong>{t("The same pro for each service, every visit")}</strong></div>
+          <div><LockKeyhole /><strong>{t("Locked monthly price")}</strong></div>
+          <div><Leaf /><strong>{t("Eco-Safe Products")}</strong></div>
         </div>
       </section>
 
       <LandingTicker />
 
       {/* TIERS */}
-      <section className="relative bg-background py-20 px-4 overflow-hidden">
+      <section id="bundle-builder" className="relative bg-background py-20 px-4 overflow-hidden scroll-mt-24">
         <SectionDecor tone="primary" />
         <div className="relative max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-6 items-stretch">
