@@ -806,6 +806,13 @@
       "when": 1791137893160,
       "tag": "0114_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 115,
+      "version": "7",
+      "when": 1791227027529,
+      "tag": "0115_founding_page_and_page_visibility",
+      "breakpoints": true
     }
   ]
 }

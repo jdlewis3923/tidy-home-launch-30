@@ -1858,6 +1858,42 @@ export type Database = {
         }
         Relationships: []
       }
+      founding_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          lang: string | null
+          reservation_id: string | null
+          session_id: string
+          src: string | null
+          step: string | null
+          zip: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          lang?: string | null
+          reservation_id?: string | null
+          session_id: string
+          src?: string | null
+          step?: string | null
+          zip?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          lang?: string | null
+          reservation_id?: string | null
+          session_id?: string
+          src?: string | null
+          step?: string | null
+          zip?: string | null
+        }
+        Relationships: []
+      }
       google_listing_cache: {
         Row: {
           fetched_at: string
@@ -3291,6 +3327,30 @@ export type Database = {
         }
         Relationships: []
       }
+      page_visibility: {
+        Row: {
+          is_on: boolean
+          path: string
+          updated_at: string
+          updated_by: string | null
+          updated_by_email: string | null
+        }
+        Insert: {
+          is_on?: boolean
+          path: string
+          updated_at?: string
+          updated_by?: string | null
+          updated_by_email?: string | null
+        }
+        Update: {
+          is_on?: boolean
+          path?: string
+          updated_at?: string
+          updated_by?: string | null
+          updated_by_email?: string | null
+        }
+        Relationships: []
+      }
       payout_weeks: {
         Row: {
           bonus_cents: number
@@ -4428,8 +4488,11 @@ export type Database = {
           city: string
           converted_at: string | null
           created_at: string
+          custom_quote: boolean
           email: string
           first_name: string
+          founding: boolean
+          gift_addons: string[]
           heard_from: string
           heard_other: string | null
           id: string
@@ -4445,10 +4508,13 @@ export type Database = {
           preferred_time: string
           quote: Json
           services: string[]
+          session_id: string | null
           sms_consent: boolean
+          src: string | null
           status: string
           street: string
           subscription_id: string | null
+          update_count: number
           updated_at: string
           user_id: string | null
           waitlist_services: string[]
@@ -4461,8 +4527,11 @@ export type Database = {
           city?: string
           converted_at?: string | null
           created_at?: string
+          custom_quote?: boolean
           email: string
           first_name: string
+          founding?: boolean
+          gift_addons?: string[]
           heard_from: string
           heard_other?: string | null
           id?: string
@@ -4478,10 +4547,13 @@ export type Database = {
           preferred_time: string
           quote?: Json
           services: string[]
+          session_id?: string | null
           sms_consent?: boolean
+          src?: string | null
           status?: string
           street: string
           subscription_id?: string | null
+          update_count?: number
           updated_at?: string
           user_id?: string | null
           waitlist_services?: string[]
@@ -4494,8 +4566,11 @@ export type Database = {
           city?: string
           converted_at?: string | null
           created_at?: string
+          custom_quote?: boolean
           email?: string
           first_name?: string
+          founding?: boolean
+          gift_addons?: string[]
           heard_from?: string
           heard_other?: string | null
           id?: string
@@ -4511,10 +4586,13 @@ export type Database = {
           preferred_time?: string
           quote?: Json
           services?: string[]
+          session_id?: string | null
           sms_consent?: boolean
+          src?: string | null
           status?: string
           street?: string
           subscription_id?: string | null
+          update_count?: number
           updated_at?: string
           user_id?: string | null
           waitlist_services?: string[]
@@ -6253,6 +6331,7 @@ export type Database = {
           pro_id: string
         }[]
       }
+      get_page_visibility: { Args: never; Returns: Json }
       get_pro_addon_request_stats: {
         Args: never
         Returns: {
