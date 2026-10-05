@@ -17,11 +17,14 @@ import LanguageToggle from "@/components/LanguageToggle";
 import TidyLogo from "@/components/TidyLogo";
 import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
 import foundingHero from "@/assets/founding-family-provided.png";
-import cleaningImage from "@/assets/cleaning-interior.webp";
-import lawnImage from "@/assets/lawn-care.webp";
-import carImage from "@/assets/car-detailing.webp";
-import scanImage from "@/assets/cleaning-interior.webp";
-import calendarImage from "@/assets/lawn-care.webp";
+import cleaningDesktop from "@/assets/service-cleaning-desktop.png.asset.json";
+import cleaningMobile from "@/assets/service-cleaning-mobile.png.asset.json";
+import lawnDesktop from "@/assets/service-lawn-desktop.png.asset.json";
+import lawnMobile from "@/assets/service-lawn-mobile.png.asset.json";
+import carDesktop from "@/assets/service-car-care-desktop.png.asset.json";
+import carMobile from "@/assets/service-car-care-mobile.png.asset.json";
+import scanImage from "@/assets/founding-how-scan.jpg";
+import calendarImage from "@/assets/founding-how-calendar.jpg";
 import proImage from "@/assets/founding-pro-step.jpg";
 
 type Svc = "cleaning" | "lawn" | "detailing";
@@ -429,12 +432,12 @@ export default function Founding() {
             <p className="founding-section-lead">{t("Bundle the services you want. One simple bill. No hidden fees.")}</p>
             <ul className="founding-plan-grid">
               {[
-                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: cleaningImage, Icon: Sparkles, tone: "gold" },
-                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnImage, Icon: Leaf, tone: "green" },
-                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carImage, Icon: CarFront, tone: "blue" },
-              ].map(({ svc, label, price, image, Icon, tone }) => (
+                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, desktop: cleaningDesktop.url, mobile: cleaningMobile.url, Icon: Sparkles, tone: "gold" },
+                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, desktop: lawnDesktop.url, mobile: lawnMobile.url, Icon: Leaf, tone: "green" },
+                { svc: "detailing" as Svc, label: "Car Care", price: 149, desktop: carDesktop.url, mobile: carMobile.url, Icon: CarFront, tone: "blue" },
+              ].map(({ svc, label, price, desktop, mobile, Icon, tone }) => (
                 <li key={label} className="founding-plan-card">
-                  <img src={image} alt="" width={640} height={360} loading="lazy" />
+                  <picture><source media="(max-width: 767px)" srcSet={mobile} /><img src={desktop} alt="" width={640} height={360} loading="lazy" /></picture>
                   <div><Icon className={`founding-plan-icon is-${tone}`} aria-hidden="true" /><span><strong>{t(label)}</strong><small>{t("from")} ${price} {t("a month")}</small></span><button type="button" aria-label={`${t("Add")} ${t(label)}`} onClick={() => { set({ services: s.services.includes(svc) ? s.services : [...s.services, svc] }); go("sizes"); }}>+</button></div>
                 </li>
               ))}
@@ -452,7 +455,7 @@ export default function Founding() {
                 { h: "Pick your day", d: "Any weekday or Saturday, mornings or afternoons.", image: calendarImage },
                 { h: "Meet your Pro", d: "The same background-checked pro for each service, every visit.", image: proImage },
               ].map(({ h, d, image }, i) => (
-                <li key={h}><div className="founding-step-image"><img src={image} alt="" width={1008} height={1008} loading="lazy" /><span>{i + 1}</span></div><strong>{t(h)}</strong><p>{t(d)}</p></li>
+                <li key={h}><div className="founding-step-image"><img src={image} alt="" width={1200} height={900} loading="lazy" /><span>{i + 1}</span></div><strong>{t(h)}</strong><p>{t(d)}</p></li>
               ))}
           </ol>
           </div>
