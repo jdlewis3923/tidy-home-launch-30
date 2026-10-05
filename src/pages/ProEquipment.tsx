@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getRequiredItems, isOptionalItem, type EquipmentItem } from "@/lib/equipmentChecklist";
-import tidyLogo from "@/assets/tidy-logo.png";
+import tidyLogoAsset from "@/assets/tidy-official-logo.png.asset.json";
 
 type PhotoRow = {
   id: string;
@@ -128,7 +128,7 @@ export default function ProEquipment() {
           <Link to="/pro/onboarding" className="flex items-center gap-2 text-sm text-slate-500 hover:text-navy">
             <ArrowLeft className="h-4 w-4" /> Back
           </Link>
-          <img src={tidyLogo} alt="Tidy" className="h-8 w-auto" />
+          <img src={tidyLogoAsset.url} alt="Tidy" className="h-8 w-auto" />
           <span className="text-xs font-semibold text-primary">Equipment</span>
         </div>
       </header>

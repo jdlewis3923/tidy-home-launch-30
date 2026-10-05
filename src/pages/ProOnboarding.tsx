@@ -17,7 +17,7 @@ import { CheckCircle2, Circle, Clock, AlertTriangle, ArrowRight, CreditCard, Gra
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import tidyLogo from "@/assets/tidy-logo.png";
+import tidyLogoAsset from "@/assets/tidy-official-logo.png.asset.json";
 import InstallAndNotifyStep from "@/components/pro/portal/InstallAndNotifyStep";
 
 type ApplicantRow = {
@@ -137,7 +137,7 @@ export default function ProOnboarding() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-3xl flex items-center justify-between px-4 py-3 sm:px-6">
           <Link to="/pro" className="flex items-center gap-3">
-            <img src={tidyLogo} alt="Tidy" className="h-10 w-auto" />
+            <img src={tidyLogoAsset.url} alt="Tidy" className="h-10 w-auto" />
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">Pro App</p>
               <p className="text-sm font-semibold text-navy -mt-0.5">Onboarding</p>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import tidyLogo from '@/assets/tidy-logo.png';
+import tidyLogoAsset from '@/assets/tidy-official-logo.png.asset.json';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -40,7 +40,7 @@ export default function ForgotPassword() {
     return (
       <Shell>
         <div className="text-center">
-          <img src={tidyLogo} alt="Tidy" className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]" />
+          <img src={tidyLogoAsset.url} alt="Tidy" className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]" />
           <h1 className="mt-6 text-3xl font-bold text-ink lowercase tracking-tight" style={{ letterSpacing: '-0.025em' }}>
             check your email.
           </h1>
@@ -56,7 +56,7 @@ export default function ForgotPassword() {
   return (
     <Shell>
       <div className="text-center">
-        <img src={tidyLogo} alt="Tidy" className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]" />
+        <img src={tidyLogoAsset.url} alt="Tidy" className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]" />
         <h1 className="mt-6 text-3xl font-bold text-ink lowercase tracking-tight" style={{ letterSpacing: '-0.025em' }}>
           reset your password.
         </h1>

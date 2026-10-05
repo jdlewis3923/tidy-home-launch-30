@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { QUESTIONS, PASS_THRESHOLD } from "@/lib/trainingQuestions";
-import tidyLogo from "@/assets/tidy-logo.png";
+import tidyLogoAsset from "@/assets/tidy-official-logo.png.asset.json";
 
 export default function ProTraining() {
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -62,7 +62,7 @@ export default function ProTraining() {
           <Link to="/pro/onboarding" className="flex items-center gap-2 text-sm text-slate-500 hover:text-navy">
             <ArrowLeft className="h-4 w-4" /> Back
           </Link>
-          <img src={tidyLogo} alt="Tidy" className="h-8 w-auto" />
+          <img src={tidyLogoAsset.url} alt="Tidy" className="h-8 w-auto" />
           <span className="text-xs font-semibold text-primary">Training</span>
         </div>
       </header>

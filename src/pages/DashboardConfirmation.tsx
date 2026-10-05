@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import tidyLogo from '@/assets/tidy-logo.png';
+import tidyLogoAsset from '@/assets/tidy-official-logo.png.asset.json';
 import {
   useDashboardData,
   formatLongDate,
@@ -43,7 +43,7 @@ export default function DashboardConfirmation() {
 
       <div className="relative mx-auto max-w-xl px-5 py-16 md:py-24 flex flex-col items-center text-center">
         <img
-          src={tidyLogo}
+          src={tidyLogoAsset.url}
           alt="Tidy"
           className="h-32 md:h-40 w-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)] animate-calm-rise"
         />
