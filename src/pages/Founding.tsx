@@ -20,9 +20,9 @@ import foundingHero from "@/assets/founding-family-provided.png";
 import cleaningImage from "@/assets/cleaning-interior.webp";
 import lawnImage from "@/assets/lawn-care.webp";
 import carImage from "@/assets/car-detailing.webp";
-import scanImage from "@/assets/founding-scan-step-official.jpg";
-import calendarImage from "@/assets/founding-calendar-step.jpg";
-import proImage from "@/assets/founding-pro-step-official.jpg";
+import scanImage from "@/assets/cleaning-interior.webp";
+import calendarImage from "@/assets/lawn-care.webp";
+import proImage from "@/assets/car-detailing.webp";
 
 type Svc = "cleaning" | "lawn" | "detailing";
 type Step = "zip" | "services" | "sizes" | "price" | "reserve" | "done";
