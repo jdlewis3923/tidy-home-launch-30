@@ -1,59 +1,62 @@
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { VETTED_CLAIM } from "@/lib/pricing-canon";
+import { CalendarDays, CreditCard, MapPin, RefreshCw, ShieldCheck, SquareCheckBig } from "lucide-react";
 
 const reasons = [
   {
-    icon: "🔁",
+    Icon: RefreshCw,
     title: "Full Autopilot",
     desc: "Everything runs automatically. No scheduling. No coordination. No thinking about it again after signup.",
   },
   {
-    icon: "✅",
+    Icon: SquareCheckBig,
     title: "The 48-hour guarantee",
     desc: "If anything about your visit isn't right, tell us within 48 hours and we'll send your pro back to fix it at no charge. No forms, no argument.",
   },
   {
-    icon: "🛡️",
+    Icon: ShieldCheck,
     title: VETTED_CLAIM,
     desc: "Every professional is screened through Checkr before their first visit. Photo verification submitted after every visit.",
   },
   {
-    icon: "📅",
+    Icon: CalendarDays,
     title: "Always on Schedule",
     desc: "Weekly, biweekly, or monthly service. No delays, no chasing vendors, no rescheduling headaches.",
   },
   {
-    icon: "💳",
+    Icon: CreditCard,
     title: "One Simple Bill",
     desc: "All services under one monthly subscription. Transparent pricing, no surprise charges, secure payments via Stripe.",
   },
   {
-    icon: "📍",
-    title: "Miami-Local",
-    desc: "Built for Florida homes. Serving Kendall, Kendall West & Pinecrest neighborhoods.",
+    Icon: MapPin,
+    title: "Local to Your ZIP",
+    desc: "Built for South Florida homes. Serving Pinecrest, Kendall, and Kendall West — 33156, 33183, 33186.",
   },
 ];
 
 const WhyTidy = () => {
   const { t } = useLanguage();
   return (
-    <section className="bg-section-alt py-20 px-4 overflow-hidden">
-      <div className="max-w-6xl mx-auto text-center">
+    <section className="why-tidy-showcase overflow-hidden">
+      <div className="why-tidy-showcase-inner mx-auto text-center">
         <FadeIn>
-          <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Why Tidy")}</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3 mb-12">
+          <span className="why-tidy-eyebrow">{t("Why Tidy")}</span>
+          <h2 className="why-tidy-title">
             {t("Why homeowners choose Tidy")}
           </h2>
         </FadeIn>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reasons.map((r, i) => (
-            <FadeIn key={r.title} delay={i * 100}>
-              <div className="bg-card border rounded-xl p-6 text-left hover-lift h-full transition-all duration-300">
-                <span className="text-2xl">{r.icon}</span>
-                <h3 className="text-base font-bold text-foreground mt-3 mb-2">{t(r.title)}</h3>
-                <p className="text-sm text-muted-foreground">{t(r.desc)}</p>
+        <div className="why-tidy-grid">
+          {reasons.map(({ Icon, title, desc }, i) => (
+            <FadeIn key={title} delay={i * 100}>
+              <div className="why-tidy-item text-left">
+                <span className="why-tidy-icon"><Icon aria-hidden="true" /></span>
+                <div>
+                  <h3>{t(title)}</h3>
+                  <p>{t(desc)}</p>
+                </div>
               </div>
             </FadeIn>
           ))}
