@@ -1477,6 +1477,11 @@ body.admin-hud h1 {
 .founding-showcase-proof-secondary { margin-top: 5px; }
 .founding-showcase-cta { height: 64px; min-width: 420px; margin-top: 22px; border-radius: 12px; background: hsl(var(--gold)); color: hsl(var(--gold-foreground)); font-size: 1.05rem; box-shadow: 0 0 34px hsl(var(--gold) / .58); }
 .founding-showcase-cta:hover { background: hsl(var(--gold) / .92); transform: translateY(-2px); }
+.founding-showcase-cta { animation: founding-glow 7s ease-in-out infinite; }
+@keyframes founding-glow {
+  0%, 100% { box-shadow: 0 0 24px hsl(var(--gold) / .34); }
+  50% { box-shadow: 0 0 42px hsl(var(--gold) / .62); }
+}
 
 .why-tidy-showcase { padding: 70px 24px 78px; background: hsl(var(--background)); }
 .why-tidy-showcase-inner { max-width: 1500px; }
@@ -1533,4 +1538,8 @@ body.admin-hud h1 {
   .who-showcase-persona { grid-template-columns: 76px 1fr; gap: 16px; }
   .who-showcase-icon { width: 68px; height: 68px; }
   .who-showcase-icon svg { width: 32px; height: 32px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .founding-showcase-cta { animation: none; }
 }
