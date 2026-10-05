@@ -1658,6 +1658,7 @@ body.admin-hud h1 {
 @media (min-width: 768px) {
   .founding-sticky-quote { display: none; }
   .founding-cap-pill { display: none; }
+  .founding-landing-hero { min-height: 820px; }
 }
 
 @media (max-width: 767px) {
