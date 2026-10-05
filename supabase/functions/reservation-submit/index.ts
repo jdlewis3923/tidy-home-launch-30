@@ -10,7 +10,7 @@ import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell, TIDY_OWNER_EMAIL } from '../_shared/email-brand.ts';
 import { queueSms, isWindowOpen, nextOpenWindow } from '../_shared/sms-window.ts';
 import { toE164 } from '../_shared/member-followups.ts';
-import { FOUNDING_CAP, RESERVATION_ALERTS, RESERVABLE_SERVICES, LAUNCH_DATE_LONG_ES } from '../_shared/launch.ts';
+import { RESERVATION_ALERTS, RESERVABLE_SERVICES, LAUNCH_DATE_LONG_ES } from '../_shared/launch.ts';
 import { esc, logEmail, reservationConfirmEmail, foundingConfirmEmail, reservationConfirmSms, svcLabel } from '../_shared/reservation-emails.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
@@ -121,21 +121,13 @@ Deno.serve(async (req) => {
     .neq('status', 'canceled').or(`email.eq.${email},and(zip.eq.${b.zip},street.ilike.${b.street.replace(/[,()%*]/g, ' ').trim()})`).order('created_at').limit(1);
   const existing = dupes?.[0];
 
-  // Founding benefits close at the cap; the ZIP never closes and nobody is waitlisted on founding count.
-  let founding = existing?.founding ?? true;
-  if (!existing) {
-    const { data: st } = await admin.rpc('founding_home_status', { _street: b.street, _zip: b.zip });
-    const status = Array.isArray(st) ? st[0] : st;
-    founding = !!status?.already || (status?.homes ?? 0) < FOUNDING_CAP;
-  }
-
   const record = {
     first_name: b.first_name, last_name: b.last_name, email, phone: b.phone, sms_consent: b.sms_consent,
     services, waitlist_services: [] as string[], quote: b.quote, lines, monthly_cents: monthlyCents,
     street: b.street, city: b.city, zip: b.zip, preferred_day: b.preferred_day, preferred_time: b.preferred_time,
     heard_from: b.heard_from, heard_other: b.heard_from === 'other' ? (b.heard_other || null) : null,
     lang: b.lang, is_test_row: !!b.is_test, src: b.src ?? null, session_id: b.session_id ?? null,
-    gift_addons: b.gift_addons, custom_quote: customQuote, founding,
+    gift_addons: b.gift_addons, custom_quote: customQuote,
   };
   const q = existing
     ? admin.from('reservations').update({ ...record, update_count: (existing.update_count ?? 0) + 1, updated_at: new Date().toISOString() }).eq('id', existing.id)
@@ -153,5 +145,5 @@ Deno.serve(async (req) => {
   const rt = (globalThis as any).EdgeRuntime;
   if (rt?.waitUntil) rt.waitUntil(job);
 
-  return jsonResponse({ ok: true, id: row.id, updated: !!existing, founding, waitlist: [] });
+  return jsonResponse({ ok: true, id: row.id, updated: !!existing, founding: row.founding, waitlist: [] });
 });
