@@ -19,9 +19,9 @@ import Reveal from "@/components/motion/Reveal";
 import SparkleField from "@/components/landing/SparkleField";
 import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
 import foundingHero from "@/assets/founding-family-provided.png";
-import cleaningPlan from "@/assets/founding-plan-cleaning.png.asset.json";
-import lawnPlan from "@/assets/founding-plan-lawn.png.asset.json";
-import carPlan from "@/assets/founding-plan-car.png.asset.json";
+import cleaningPlan from "@/assets/founding-plan-cleaning.png";
+import lawnPlan from "@/assets/founding-plan-lawn.png";
+import carPlan from "@/assets/founding-plan-car.png";
 import scanImage from "@/assets/founding-how-scan.jpg";
 import calendarImage from "@/assets/founding-how-calendar.jpg";
 import proImage from "@/assets/founding-pro-step.jpg";
@@ -440,9 +440,9 @@ export default function Founding() {
             <p className="founding-section-lead">{t("Bundle the services you want. One simple bill. No hidden fees.")}</p>
             <ul className="founding-plan-grid">
               {[
-                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: cleaningPlan.url, Icon: Sparkles, tone: "gold" },
-                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnPlan.url, Icon: Leaf, tone: "green" },
-                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carPlan.url, Icon: CarFront, tone: "blue" },
+                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: cleaningPlan, Icon: Sparkles, tone: "gold" },
+                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnPlan, Icon: Leaf, tone: "green" },
+                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carPlan, Icon: CarFront, tone: "blue" },
               ].map(({ svc, label, price, image, Icon, tone }, index) => (
                 <li key={label} className="founding-plan-card" style={{ animationDelay: `${index * 120}ms` }}>
                   <picture><img src={image} alt="" width={1365} height={768} loading="lazy" /></picture>
