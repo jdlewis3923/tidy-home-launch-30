@@ -957,7 +957,6 @@ const translations: Record<string, string> = {
   "Get your referral link": "Obtén tu enlace de referido",
   "No cap. No expiration. No fine print.": "Sin límite. Sin vencimiento. Sin letra pequeña.",
   "Works in Pinecrest & Kendall": "Válido en Pinecrest y Kendall",
-  "Cancel anytime": "Cancela cuando quieras",
   "Neighbors love it.": "A los vecinos les encanta.",
   "Give $50, Get $50 — refer a neighbor in Pinecrest + Kendall":
     "Da $50, Recibe $50 — refiere a un vecino en Pinecrest + Kendall",
