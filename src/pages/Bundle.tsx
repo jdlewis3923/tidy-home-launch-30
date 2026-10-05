@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Check, MapPin, Gift, ShieldCheck, Users, LockKeyhole, Leaf, Plus } from "lucide-react";
+import { Check, MapPin, Gift, ShieldCheck, Users, LockKeyhole, Leaf, Plus, House, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SeoHead from "@/components/landing/SeoHead";
@@ -105,7 +105,7 @@ const BundleInner = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="offer-page min-h-screen bg-background flex flex-col">
       <SeoHead
         title={t("Bundle Your Services in Pinecrest + Kendall | Tidy Home Concierge")}
         description={t(
@@ -123,43 +123,52 @@ const BundleInner = () => {
       />
 
       {/* HERO */}
-      <section className="editorial-offer-hero relative min-h-[calc(100svh-1rem)] pt-28 pb-40 px-4 overflow-hidden">
+      <section className="editorial-offer-hero offer-bundle relative min-h-svh overflow-hidden">
         <picture className="absolute inset-0">
           <source media="(max-width: 767px)" srcSet={bundleMobile.url} />
-          <img src={bundleDesktop.url} alt="Home and lawn with a car in the driveway" className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
+          <img src={bundleDesktop.url} alt="Home and lawn with a car in the driveway" className="h-full w-full object-cover object-center" loading="eager" fetchPriority="high" />
         </picture>
         <div className="absolute inset-0 bundle-editorial-scrim" />
-        <div className="relative z-10 max-w-4xl mx-auto text-center text-navy">
-          <span className="text-xs uppercase tracking-[0.28em] text-primary font-bold">{t("Bundle your services")}</span>
-          <h1 className="mt-3 text-4xl md:text-6xl font-extrabold leading-[0.94] text-balance">
-            {t("Bundle & get a")}<br /><span className="editorial-underline">{t("free premium add-on")}</span>
+        <div className="offer-bundle-content relative z-10 mx-auto w-full max-w-5xl px-4 text-center text-navy">
+          <span className="offer-eyebrow">{t("Bundle your services")}</span>
+          <h1 className="offer-bundle-title">
+            {t("Bundle & get a")}<br /><span className="offer-title-dash">{t("free premium add-on")}</span>
           </h1>
-          <p className="mt-5 text-base md:text-lg max-w-xl mx-auto leading-snug font-medium">
+          <p className="offer-bundle-intro">
             {t("Hold two or more services and you’ll get one free premium add-on every month.")}
           </p>
 
-          <div className="mt-7 flex items-stretch justify-center gap-2 md:gap-4">
+          <div className="offer-bundle-tiles">
             <div className="bundle-service-tile">
+              <span className="offer-card-icon offer-card-icon-blue"><House aria-hidden="true" /></span>
               <img src={cleaningImage.url} alt="" />
               <strong>{t("House Cleaning")}</strong><Check className="bundle-check" />
             </div>
             <div className="bundle-service-tile">
+              <span className="offer-card-icon offer-card-icon-green"><Leaf aria-hidden="true" /></span>
               <img src={lawnImage.url} alt="" />
               <strong>{t("Lawn Care")}</strong><Check className="bundle-check" />
             </div>
-            <div className="flex items-center"><Plus className="w-6 h-6" /></div>
+            <span className="bundle-plus"><Plus aria-hidden="true" /></span>
+            <ArrowRight className="bundle-flow-arrow" aria-hidden="true" />
             <div className="bundle-gift-tile">
-              <Gift className="w-8 h-8" /><span>{t("Your choice of a")}</span>
-              <strong>{t("FREE premium add-on")}</strong>
+              <span className="offer-card-icon offer-card-icon-gold"><Gift aria-hidden="true" /></span>
+              <span>{t("Your choice of a")}</span>
+              <strong>{t("FREE")}<br /><em>{t("premium add-on")}</em></strong>
               <small>{t("every month")}</small>
+              <ul>
+                <li><Check aria-hidden="true" />{t("Car Wash & Detail")}</li>
+                <li><Check aria-hidden="true" />{t("Window Cleaning")}</li>
+                <li><Check aria-hidden="true" />{t("Pressure Washing")}</li>
+              </ul>
             </div>
           </div>
 
-          <a href="#bundle-builder" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary-foreground/90 px-5 py-2 text-xs md:text-sm font-bold shadow-sm">
+          <a href="#bundle-builder" className="offer-zip-pill">
             <MapPin className="w-4 h-4" /> {t(SERVICE_AREA_TRUST)}
           </a>
         </div>
-        <div className="absolute z-20 bottom-0 left-0 right-0 bundle-trust-bar">
+        <div className="relative z-20 bundle-trust-bar">
           <div><ShieldCheck /><strong>{t("Background-Checked Pros")}</strong></div>
           <div><Users /><strong>{t("The same pro for each service, every visit")}</strong></div>
           <div><LockKeyhole /><strong>{t("Locked monthly price")}</strong></div>
