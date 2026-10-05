@@ -9,7 +9,7 @@ import { CalendarDays, DollarSign, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProSession } from "@/hooks/useProSession";
 import { ProButton, ProCard } from "@/components/pro/portal/kit";
-import tidyLogoAsset from "@/assets/tidy-official-logo.png.asset.json";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 
 const CALLOUTS = [
   { icon: CalendarDays, title: "Today's work", body: "Every visit, time window and address in one list." },
@@ -38,7 +38,7 @@ export default function ProFirstRun() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="bg-gradient-to-b from-[hsl(var(--pro-navy))] to-[hsl(var(--pro-sky))] px-6 pb-10 pt-[max(2rem,env(safe-area-inset-top))] text-white">
-        <img src={tidyLogoAsset.url} alt="" className="h-14 w-14 rounded-full object-contain" />
+        <img src={tidyLogo} alt="" className="h-14 w-14 rounded-full object-contain" />
         <h1 className="mt-4 text-[28px] font-extrabold leading-tight">
           Welcome to Tidy{me?.first_name ? `, ${me.first_name}` : ""}.
         </h1>

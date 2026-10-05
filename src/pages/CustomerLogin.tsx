@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import tidyLogoAsset from '@/assets/tidy-official-logo.png.asset.json';
+import tidyLogo from '@/assets/tidy-official-logo.png';
 
 /**
  * Calm Apple-style login. Cream paper, oversized logo, single column.
@@ -119,7 +119,7 @@ export default function CustomerLogin() {
         <div className="text-center">
           <a href="/" aria-label="Tidy">
             <img
-              src={tidyLogoAsset.url}
+              src={tidyLogo}
               alt="Tidy"
               className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]"
             />

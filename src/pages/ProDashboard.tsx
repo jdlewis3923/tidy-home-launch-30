@@ -21,7 +21,7 @@ import ProNotificationBell from "@/components/pro/ProNotificationBell";
 import PushOptIn from "@/components/pro/portal/PushOptIn";
 import { Skeleton } from "@/components/ui/skeleton";
 import AnimatedNumber from "@/components/motion/AnimatedNumber";
-import tidyLogoAsset from "@/assets/tidy-official-logo.png.asset.json";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 
 type DashboardData = {
   firstName: string;
@@ -258,7 +258,7 @@ export default function ProDashboard() {
       <header className="relative z-10 border-b border-slate-200/70 bg-white/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-8">
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={tidyLogoAsset.url} alt="Tidy" className="h-12 w-auto drop-shadow-[0_4px_14px_rgba(37,99,235,0.18)] transition-transform group-hover:scale-105" />
+            <img src={tidyLogo} alt="Tidy" className="h-12 w-auto drop-shadow-[0_4px_14px_rgba(37,99,235,0.18)] transition-transform group-hover:scale-105" />
             <div className="hidden sm:block">
               <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">Pro App</p>
               <p className="text-sm font-semibold text-navy -mt-0.5">Contractor Console</p>

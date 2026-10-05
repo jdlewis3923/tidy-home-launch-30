@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import tidyLogoAsset from '@/assets/tidy-official-logo.png.asset.json';
+import tidyLogo from '@/assets/tidy-official-logo.png';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -45,7 +45,7 @@ export default function ResetPassword() {
     return (
       <Shell>
         <div className="text-center">
-          <img src={tidyLogoAsset.url} alt="Tidy" className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]" />
+          <img src={tidyLogo} alt="Tidy" className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]" />
           <h1 className="mt-6 text-3xl font-bold text-ink lowercase tracking-tight">password updated.</h1>
           <p className="mt-2 text-sm text-ink-faint lowercase">redirecting to your dashboard…</p>
         </div>
@@ -56,7 +56,7 @@ export default function ResetPassword() {
   return (
     <Shell>
       <div className="text-center">
-        <img src={tidyLogoAsset.url} alt="Tidy" className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]" />
+        <img src={tidyLogo} alt="Tidy" className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]" />
         <h1 className="mt-6 text-3xl font-bold text-ink lowercase tracking-tight" style={{ letterSpacing: '-0.025em' }}>
           set a new password.
         </h1>

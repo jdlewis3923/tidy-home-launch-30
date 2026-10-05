@@ -1,4 +1,4 @@
-import tidyLogo from "@/assets/tidy-official-logo.png.asset.json";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 
 /**
  * The original export was 600×362 but the mark itself only filled a 212×177
@@ -19,7 +19,7 @@ const TidyLogo = ({ size = "md", withBackground = false, priority = false }: { s
   return (
     <picture>
       <img
-        src={tidyLogo.url}
+        src={tidyLogo}
         alt="Tidy Home Concierge"
         width={212}
         height={177}
