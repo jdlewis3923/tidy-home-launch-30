@@ -107,22 +107,30 @@ export default function Founding() {
   const prices = usePrices();
   const listing = useGoogleListing();
   const launch = language === "es" ? LAUNCH_DATE_LONG_ES : LAUNCH_DATE_LONG;
-  const quoteCard = useRef<HTMLElement>(null);
-  const pendingQuoteScroll = useRef(false);
-  const scrollQuoteIntoView = () => quoteCard.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const quoteCardRef = useRef<HTMLElement>(null);
+  // Every step change requests a scroll; the effect below runs after React has rendered the new step.
+  const [scrollRequest, setScrollRequest] = useState(0);
+  const scrollQuoteIntoView = () => quoteCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   const go = (step: Step, patch: Partial<State> = {}) => {
-    pendingQuoteScroll.current = true;
     set({ ...patch, step });
+    setScrollRequest((n) => n + 1);
   };
   useEffect(() => {
-    if (!pendingQuoteScroll.current) return;
-    pendingQuoteScroll.current = false;
+    if (scrollRequest === 0) return;
     scrollQuoteIntoView();
-  }, [s.step, s.services]);
+  }, [scrollRequest, s.step, s.services]);
+  const [isPhone, setIsPhone] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches);
   useEffect(() => {
-    const node = quoteCard.current;
+    const mql = window.matchMedia("(max-width: 767px)");
+    const onChange = () => setIsPhone(mql.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  useEffect(() => {
+    const node = quoteCardRef.current;
     if (!node) return;
-    const observer = new IntersectionObserver(([entry]) => setQuoteVisible(entry.isIntersecting), { threshold: 0.08 });
+    // threshold 0: visible while any part of the card is on screen, hidden only once fully out.
+    const observer = new IntersectionObserver(([entry]) => setQuoteVisible(entry.isIntersecting), { threshold: 0 });
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
@@ -212,7 +220,8 @@ export default function Founding() {
     if (service === "cleaning") { additions.beds = s.beds || "2"; additions.baths = s.baths || "1"; }
     if (service === "lawn") additions.lawn = s.lawn ?? 1;
     if (service === "detailing") additions.car = s.car ?? 1;
-    set(additions);
+    // Starting size is preselected so the "from" price stays truthful; the visitor confirms it on the sizes step.
+    go("sizes", additions);
   };
 
   return (
