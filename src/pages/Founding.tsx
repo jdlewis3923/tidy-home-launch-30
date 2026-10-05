@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import LanguageToggle from "@/components/LanguageToggle";
 import TidyLogo from "@/components/TidyLogo";
 import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
-import foundingHeroAsset from "@/assets/who-its-for-family.png.asset.json";
+import foundingHero from "@/assets/founding-family-provided.png";
 import cleaningImage from "@/assets/cleaning-interior.webp";
 import lawnImage from "@/assets/lawn-care.webp";
 import carImage from "@/assets/car-detailing.webp";
@@ -194,7 +194,7 @@ export default function Founding() {
       </Helmet>
 
       <header className="founding-landing-hero text-primary-foreground">
-        <img src={foundingHeroAsset.url} alt="Family relaxing together at home" width={1536} height={1024} loading="eager" fetchPriority="high" className="founding-hero-photo" />
+        <img src={foundingHero} alt="Family relaxing together at home" width={1536} height={1024} loading="eager" fetchPriority="high" className="founding-hero-photo" />
         <div className="founding-hero-shade" />
         <div className="founding-hero-shell">
           <div className="founding-topbar">
