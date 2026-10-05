@@ -40,6 +40,7 @@ const LawnCare = lazy(() => import("./pages/LawnCare.tsx"));
 const CarDetailing = lazy(() => import("./pages/CarDetailing.tsx"));
 const Bundle = lazy(() => import("./pages/Bundle.tsx"));
 const Refer = lazy(() => import("./pages/Refer.tsx"));
+const Founding = lazy(() => import("./pages/Founding.tsx"));
 const Neighbor = lazy(() => import("./pages/Neighbor.tsx"));
 
 
@@ -280,6 +281,8 @@ const App = () => (
                   <Route path="/signup" element={<SignupRedirect />} />
                   <Route path="/referral" element={<ReferralRedirect />} />
                   <Route path="/refer" element={<Refer />} />
+                  <Route path="/founding" element={<Founding />} />
+                  <Route path="/car-care" element={<QueryPreservingRedirect to="/car-detailing" />} />
                   <Route path="/neighbor" element={<Neighbor />} />
                   <Route path="/thank-you" element={<ThankYou />} />
                   <Route path="/terms" element={<Terms />} />

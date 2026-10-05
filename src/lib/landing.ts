@@ -7,7 +7,8 @@ export const PHONE_DISPLAY = "(786) 829-1141";
 export const PHONE_TEL = "+17868291141";
 
 // Service area — exact list, no other ZIPs.
-export const SERVICE_ZIPS = ["33156", "33183", "33186"] as const;
+export { FOUNDING_ZIPS as SERVICE_ZIPS } from "@/lib/launch";
+import { FOUNDING_ZIPS as SERVICE_ZIPS_ } from "@/lib/launch";
 export const SERVICE_AREA_TEXT = "Pinecrest + Kendall — Miami-Dade";
 export const SERVICE_AREA_TRUST = `Serving ${SERVICE_ZIPS.join(" · ")}`;
 

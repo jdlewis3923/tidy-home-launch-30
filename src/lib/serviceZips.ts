@@ -1,6 +1,7 @@
 // Tidy Miami service-area ZIPs.
 // Apply form / submit-application / AdminApplicants all reference this.
-export const SERVICE_ZIPS = ["33156", "33183", "33186"] as const;
+export { FOUNDING_ZIPS as SERVICE_ZIPS } from "@/lib/launch";
+import { FOUNDING_ZIPS as SERVICE_ZIPS_ } from "@/lib/launch";
 
 export function isInServiceArea(zip?: string | null): boolean {
   if (!zip) return true; // missing zip → don't flag (form still allows blank)
