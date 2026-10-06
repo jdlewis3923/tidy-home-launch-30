@@ -1557,6 +1557,11 @@ body.admin-hud h1 {
 .founding-hero-shell { position: relative; z-index: 1; width: min(100% - 40px, 1160px); margin: 0 auto; }
 .founding-topbar { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; }
 .founding-language { overflow: hidden; border-radius: 10px; background: hsl(var(--navy) / .7); color: hsl(var(--primary-foreground)); box-shadow: 0 4px 18px hsl(var(--navy) / .25); }
+.founding-language button,
+.founding-language button:hover,
+.founding-language button:focus-visible,
+.founding-language button:active { color: hsl(var(--primary-foreground)); border-color: hsl(var(--primary-foreground) / .3); }
+.founding-language button:hover { background: hsl(var(--primary-foreground) / .1); }
 .founding-hero-copy { width: min(620px, 58%); padding-top: 54px; animation: founding-hero-enter 760ms cubic-bezier(.22,1,.36,1) both; }
 .founding-hero-copy h1 { font-size: clamp(3.15rem, 5.2vw, 5.1rem); font-weight: 900; line-height: .98; letter-spacing: 0; text-shadow: 0 4px 18px hsl(var(--navy) / .28); }
 .founding-hero-title-line { display: block; white-space: nowrap; }

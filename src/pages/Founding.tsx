@@ -249,7 +249,7 @@ export default function Founding() {
         ) : (
           <picture>
             <source media="(max-width: 767px)" srcSet={foundingMobilePoster.url} />
-            <img src={foundingDesktopPoster.url} alt="Open Miami home interior looking toward the water" width={1920} height={1080} loading="eager" fetchPriority="high" className="founding-hero-photo" />
+            <img src={foundingDesktopPoster.url} alt={t("Open Miami home interior looking toward the water")} width={1920} height={1080} loading="eager" fetchPriority="high" className="founding-hero-photo" />
           </picture>
         )}
         <div className="founding-hero-shade" />
@@ -382,7 +382,7 @@ export default function Founding() {
                     <Stat label={t("Per visit")} value={visits ? money(total / visits) : "—"} />
                   </div>
                 )}
-                <p className="founding-launch-note">{t(`Founding visits begin ${LAUNCH_DATE_LONG}.`)}</p>
+                <p className="founding-launch-note">{t("Founding visits begin")} {launch}.</p>
                 <p className="mt-2 text-center text-sm font-semibold text-primary">{t("Not right? We come back within 48 hours, free.")}</p>
                 <ul className="mt-3 divide-y divide-border text-sm">
                   {lines.map((l) => l && (
@@ -456,7 +456,7 @@ export default function Founding() {
                   <span>{t("Text me about my reservation. Msg & data rates may apply. Reply STOP to opt out.")}</span>
                 </label>
                 {err && <p role="alert" className="text-sm font-semibold text-destructive">{err}</p>}
-                <p className="founding-reserve-launch">{t(`Founding visits begin ${LAUNCH_DATE_LONG}. No charge today — we'll confirm your day and your Pro the week before, and set up payment then.`)}</p>
+                <p className="founding-reserve-launch">{t("Founding visits begin")} {launch}. {t("No charge today — we'll confirm your day and your Pro the week before, and set up payment then.")}</p>
                 <button className={primaryBtn} disabled={!formOk || busy}>{busy ? t("Saving…") : t("Reserve my spot — no charge")}</button>
                 <p className="text-center text-xs text-ink-faint">{t("By reserving you agree to our")} <Link to="/terms" className="underline">{t("Terms")}</Link> {t("and")} <Link to="/privacy" className="underline">{t("Privacy Policy")}</Link>.</p>
                 <button type="button" className={`${chip} ${off} w-full`} onClick={() => go("price")}>← {t("Back to my price")}</button>
