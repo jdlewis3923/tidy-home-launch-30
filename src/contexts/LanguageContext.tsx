@@ -15,6 +15,8 @@ const translations: Record<string, string> = {
   "Simple, transparent pricing": "Precios claros y transparentes",
   "Bundle the services you want. One simple bill. No hidden fees.": "Combina los servicios que quieras. Una sola factura. Sin cargos ocultos.",
   "Get started in minutes": "Comienza en minutos",
+  "Add": "Agregar",
+  "Open Miami home interior looking toward the water": "Interior de una casa de Miami abierto hacia el agua",
   "Founding visits begin": "Las visitas de fundadores comienzan el",
   "No charge today — we'll confirm your day and your Pro the week before, and set up payment then.": "Sin cargo hoy — confirmaremos tu día y tu profesional la semana anterior, y configuraremos el pago en ese momento.",
   "Three services. One subscription. More life for you.": "Tres servicios. Una suscripción. Más vida para ti.",
