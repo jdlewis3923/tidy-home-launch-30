@@ -6,3 +6,9 @@
 - The homepage frequency FAQ is shared from `src/lib/frequency-faq.ts` across pricing and FAQ sections — why: both placements must give the same bilingual answer.
 - Homepage hero media is split at the 768px rendered viewport: portrait media below it and widescreen media at or above it, including phone browsers in desktop-site mode — why: browser display mode must determine the correct composition.
 - Public page reachability is master switch OR per-page row in page_visibility (via get_page_visibility); /founding fails open unless explicitly off — why: printed hangers must never dead-end.
+- Founding status lives in `founding_grants` (numbers per ZIP, never reused; cap counts homes ever granted) and is decided only by the reservations insert trigger — why: the founding promise must survive cancellations and edits automatically.
+- Prices resolve by `stripe_catalog.canon_key` + the member's `member_rate_card_version()`; founding subscriptions cannot change `rate_card_version` without a logged `price_migration_overrides` row — why: price rises publish a new rate card and never touch locked members.
+- Free add-ons live only in the `addon_entitlements` ledger (choose via `choose_free_addon`, events in `entitlement_events`); the gift's Pro pay is added to the visit's contractor pay — why: one source of truth, expiry enforced, Pros paid on gifts.
+- The Car Wash Add-On is stored as `subscriptions.car_wash_key` and becomes separate `visit_kind = 'car_wash'` jobs for car care Pros via `member_ops_tick()` — why: the cleaner never washes the car.
+- Member notifications are written to `member_notifications` first and emailed afterwards by `member-ops-tick` — why: a failed send can never undo a gift, job or founding grant.
+- Contractor pay columns are excluded from member-readable column grants; admin totals come from security-definer RPCs — why: pay is never customer-visible.
