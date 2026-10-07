@@ -17,7 +17,6 @@ const translations: Record<string, string> = {
   "in": "en",
   "your price is locked.": "tu precio está fijo.",
   "If you change size or how often, you still get founding-era prices.": "Si cambias el tamaño o la frecuencia, sigues con precios de fundador.",
-  "Size": "Tamaño",
   "Every two weeks": "Cada dos semanas",
   "Your car wash": "Tu lavado de auto",
   "Your car wash is handled by our car care Pro — a different team member from your cleaner. We'll confirm the day with you.": "Tu lavado de auto lo hace nuestro Pro de cuidado del auto — una persona distinta de quien limpia tu casa. Te confirmaremos el día.",

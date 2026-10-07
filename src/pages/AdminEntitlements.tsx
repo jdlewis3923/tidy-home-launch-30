@@ -1,10 +1,10 @@
 /** Admin — Free add-on entitlements (/admin/entitlements) and car wash jobs on their own lines. */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 
 type Ent = { id: string; member_id: string; type: string; period: string | null; status: string; chosen_addon: string | null;
-  contractor_pay_cents: number | null; redeemed_at: string | null; granted_at: string };
+  redeemed_at: string | null; granted_at: string };
 type Wash = { id: string; visit_date: string; zip: string | null; time_window: string | null; assigned_pro_id: string | null;
   different_day: boolean; customer_first_name: string | null; status: string };
 
@@ -15,9 +15,10 @@ export default function AdminEntitlements() {
   const [ents, setEnts] = useState<Ent[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
   const [washes, setWashes] = useState<Wash[]>([]);
+  const [cost, setCost] = useState<{ month: string; gifts: number; cost_cents: number }[]>([]);
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("addon_entitlements").select("id, member_id, type, period, status, chosen_addon, contractor_pay_cents, redeemed_at, granted_at").order("granted_at", { ascending: false }).limit(1000);
+      const { data } = await supabase.from("addon_entitlements").select("id, member_id, type, period, status, chosen_addon, redeemed_at, granted_at").order("granted_at", { ascending: false }).limit(1000);
       const list = (data as Ent[]) ?? [];
       setEnts(list);
       const ids = [...new Set(list.map((e) => e.member_id))];
@@ -28,17 +29,14 @@ export default function AdminEntitlements() {
       const { data: w } = await supabase.from("visits").select("id, visit_date, zip, time_window, assigned_pro_id, different_day, customer_first_name, status")
         .eq("visit_kind", "car_wash").gte("visit_date", new Date().toISOString().slice(0, 10)).order("visit_date").order("zip").limit(300);
       setWashes((w as Wash[]) ?? []);
+      const { data: c } = await supabase.rpc("admin_gift_cost_by_month");
+      setCost(c ?? []);
     })();
   }, []);
 
   const per = period();
   const unused = ents.filter((e) => e.status === "available" || e.status === "chosen");
   const expiring = unused.filter((e) => e.type === "bundle_monthly" && e.period === per && e.status === "available");
-  const costByMonth = useMemo(() => {
-    const m: Record<string, number> = {};
-    for (const e of ents) if (e.status === "redeemed" && e.redeemed_at) { const k = e.redeemed_at.slice(0, 7); m[k] = (m[k] ?? 0) + (e.contractor_pay_cents ?? 0); }
-    return Object.entries(m).sort((a, b) => b[0].localeCompare(a[0]));
-  }, [ents]);
   const soon = (d: string) => (new Date(`${d}T12:00:00`).getTime() - Date.now()) < 48 * 3600_000;
 
   return (
@@ -51,14 +49,14 @@ export default function AdminEntitlements() {
         <div className="grid gap-4 sm:grid-cols-3">
           <Stat label="Unused right now" value={String(unused.filter((e) => e.status === "available").length)} />
           <Stat label={`Expiring end of ${per}`} value={String(expiring.length)} />
-          <Stat label={`Gift cost ${per} (Pro pay)`} value={money(costByMonth.find(([k]) => k === per)?.[1] ?? 0)} />
+          <Stat label={`Gift cost ${per} (Pro pay)`} value={money(cost.find((c) => c.month === per)?.cost_cents ?? 0)} />
         </div>
 
         <Table title="Unused entitlements" head={["Member", "Type", "Period", "Status", "Chosen"]}
           rows={unused.map((e) => [names[e.member_id] ?? e.member_id.slice(0, 8), e.type === "founding_first_visit" ? "Founding · first visit" : "Bundle · monthly", e.period ?? "—", e.status, e.chosen_addon ?? "—"])} />
 
-        <Table title="Monthly cost of gifted add-ons (sum of Pro pay on redeemed gifts)" head={["Month", "Cost"]}
-          rows={costByMonth.map(([k, v]) => [k, money(v)])} />
+        <Table title="Monthly cost of gifted add-ons (sum of Pro pay on redeemed gifts)" head={["Month", "Gifts redeemed", "Cost"]}
+          rows={cost.map((c) => [c.month, String(c.gifts), money(c.cost_cents)])} />
 
         <Table title="Car wash jobs (own line, by day and ZIP)" head={["Day", "ZIP", "Window", "Member", "Car care Pro", "Flags"]}
           rows={washes.map((w) => [w.visit_date, w.zip ?? "—", w.time_window ?? "—", w.customer_first_name ?? "—",
