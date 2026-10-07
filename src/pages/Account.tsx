@@ -21,6 +21,9 @@ import {
 } from "lucide-react";
 import { CUSTOMER_ACCOUNT_ENABLED } from "@/lib/dashboard-config";
 import DashboardTopNav from "@/components/dashboard/DashboardTopNav";
+import FoundingBadge from "@/components/dashboard/FoundingBadge";
+import FreeAddonPicker from "@/components/dashboard/FreeAddonPicker";
+import CarWashDetails from "@/components/dashboard/CarWashDetails";
 import CalmModal from "@/components/dashboard/CalmModal";
 import { useDashboardData } from "@/lib/dashboard-data";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +80,12 @@ export default function Account() {
           <p className="mt-3 text-base text-ink-soft">
             Everything we need to take care of your home, in one place.
           </p>
+        </div>
+
+        <div className="mt-8 space-y-4">
+          <FoundingBadge />
+          <FreeAddonPicker />
+          <CarWashDetails />
         </div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-2">

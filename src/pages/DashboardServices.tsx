@@ -1,3 +1,4 @@
+import FreeAddonPicker from '@/components/dashboard/FreeAddonPicker';
 /**
  * Tidy — /dashboard/services
  *
@@ -419,72 +420,7 @@ export default function DashboardServices() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {/* ---------------- Free monthly add-on ---------------- */}
-            {freeAllowance > 0 && (
-              <Card>
-                <div className="flex flex-wrap items-baseline justify-between gap-3">
-                  <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
-                    <Gift className="h-4 w-4 text-[hsl(var(--primary))]" />
-                    {t('Your free add-on this month')}
-                  </h2>
-                  <span className="rounded-full bg-[hsl(var(--primary))]/10 px-3 py-1 text-xs font-semibold text-[hsl(var(--primary))]">
-                    {freeRemaining > 0
-                      ? `${freeRemaining} ${t('available')}`
-                      : t('redeemed this month')}
-                  </span>
-                </div>
-
-                {freeRemaining > 0 ? (
-                  <>
-                    <p className="mt-2 text-sm text-ink-soft">
-                      {t('Two or more services means one premium add-on a month is on us — your pick.')}
-                    </p>
-                    {loadingAddons ? (
-                      <div className="mt-5 flex items-center gap-2 text-ink-soft">
-                        <Loader2 className="h-4 w-4 animate-spin" /> {t('Loading…')}
-                      </div>
-                    ) : (
-                      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {giftPool.map((addon) => (
-                          <div
-                            key={`free-${addon.addon_key}`}
-                            className="rounded-2xl border border-[hsl(var(--hairline))] bg-white p-4 transition hover:border-[hsl(var(--primary))]/40"
-                          >
-                            <div className="flex items-center gap-2 text-[hsl(var(--primary))]">
-                              <IconFor name={addon.lucide_icon} />
-                              <span className="text-sm font-semibold text-ink">{addon.display_name}</span>
-                            </div>
-                            <div className="mt-1 text-sm text-ink-soft">
-                              <span className="line-through">${(addon.price_cents / 100).toFixed(0)}</span>{' '}
-                              <span className="font-semibold text-[hsl(var(--primary))]">{t('free')}</span>
-                            </div>
-                            <button
-                              type="button"
-                              disabled={working === addon.addon_key}
-                              onClick={() => attach(addon, true)}
-                              className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-ink px-3 py-2 text-xs font-semibold text-white transition hover:bg-ink-soft disabled:opacity-60"
-                            >
-                              {working === addon.addon_key ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <Gift className="h-3.5 w-3.5" />
-                              )}
-                              {t('Use my free add-on')}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="mt-4 rounded-xl bg-cream/50 p-4 text-sm text-ink-soft">
-                    {freeUsedThisMonth[0]?.addon_name
-                      ? `${freeUsedThisMonth[0].addon_name} — ${t('on us this month. Your next free add-on unlocks next month.')}`
-                      : t('Your next free add-on unlocks next month.')}
-                  </div>
-                )}
-              </Card>
-            )}
+            <FreeAddonPicker />
 
             {/* ---------------- Paid add-ons ---------------- */}
             <Card>

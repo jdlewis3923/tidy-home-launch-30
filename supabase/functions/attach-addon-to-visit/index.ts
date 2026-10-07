@@ -90,6 +90,11 @@ Deno.serve(async (req) => {
   const period = currentPeriod();
   let isFree = false;
   if (redeem_free) {
+    // Free add-ons now live in the entitlement ledger (choose_free_addon), which
+    // pays the Pro and enforces monthly expiry. This legacy path is closed.
+    return jsonResponse({ ok: false, error: 'use_free_addon_picker' }, 409);
+  }
+  if (false) {
     const allowance = Number(sub?.free_addons_per_month ?? 0);
     if (allowance < 1) {
       return jsonResponse({ ok: false, error: 'no_free_addon_allowance' }, 409);

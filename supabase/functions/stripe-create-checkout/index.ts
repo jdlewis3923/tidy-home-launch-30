@@ -238,10 +238,15 @@ Deno.serve(async (req) => {
           : null;
 
         const surchargeKeys = ["surcharge_cleaning_xl", "surcharge_lawn_xl"];
+        // Prices come from THIS MEMBER'S rate card (founding homes keep theirs
+        // forever, including size and cadence changes) — never the current one.
+        const { data: rcv } = await supabase.rpc("member_rate_card_version", { _user: user.id });
+        const rateCardVersion = typeof rcv === "number" ? rcv : 1;
         const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
-          .select("lookup_key, service_type, stripe_price_id, stripe_price_id_test, price_cents")
-          .in("lookup_key", [
+          .select("lookup_key:canon_key, stripe_lookup_key:lookup_key, service_type, stripe_price_id, stripe_price_id_test, price_cents")
+          .eq("rate_card_version", rateCardVersion)
+          .in("canon_key", [
             ...serviceKeys,
             ...(carWashKey ? [carWashKey] : []),
             ...surchargeKeys,
@@ -483,6 +488,7 @@ Deno.serve(async (req) => {
           addons_json: JSON.stringify(input.addons),
 
           car_wash_json: input.car_wash ? JSON.stringify(input.car_wash) : "",
+          rate_card_version: String(rateCardVersion),
           free_addons_per_month: String(freeAddons),
           zip: input.zip,
           preferred_day: input.preferred_day ?? "",

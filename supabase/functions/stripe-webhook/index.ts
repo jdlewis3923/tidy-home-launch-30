@@ -59,6 +59,16 @@ async function fireZap(eventName: string, payload: unknown) {
 // from provisioning — job creation had never once succeeded.
 
 
+/** wash_{size}_x{washes} from the checkout metadata, or null. */
+function carWashKeyFromMeta(raw?: string): string | null {
+  if (!raw) return null;
+  try {
+    const cw = JSON.parse(raw);
+    const key = `wash_${cw.size}_x${cw.washes}`;
+    return /^wash_[123]_x[12]$/.test(key) ? key : null;
+  } catch { return null; }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok');
   if (req.method !== 'POST') return new Response('method not allowed', { status: 405 });
@@ -340,6 +350,8 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       has_water_spigot: meta.access_water_spigot === 'yes' ? true : meta.access_water_spigot === 'no' ? false : null,
       has_electrical_outlet: meta.access_electrical_outlet === 'yes' ? true : meta.access_electrical_outlet === 'no' ? false : null,
       washing_allowed: meta.access_washing_allowed === 'yes' ? true : meta.access_washing_allowed === 'no' ? false : null,
+      // The Car Wash Add-On becomes its own car_wash job for a car care Pro, never a line on the base visit.
+      car_wash_key: carWashKeyFromMeta(meta.car_wash_json),
     })
     .select('id')
     .single();
