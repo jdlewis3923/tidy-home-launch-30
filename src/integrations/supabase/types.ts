@@ -48,6 +48,8 @@ export type Database = {
           addon_price_cents: number
           attached_at: string
           completed_at: string | null
+          contractor_pay_cents: number | null
+          entitlement_id: string | null
           free_period: string | null
           id: string
           is_free: boolean
@@ -60,6 +62,7 @@ export type Database = {
           stripe_addon_price_id: string
           stripe_invoice_item_id: string | null
           user_id: string
+          visit_id: string | null
         }
         Insert: {
           addon_key: string
@@ -67,6 +70,8 @@ export type Database = {
           addon_price_cents: number
           attached_at?: string
           completed_at?: string | null
+          contractor_pay_cents?: number | null
+          entitlement_id?: string | null
           free_period?: string | null
           id?: string
           is_free?: boolean
@@ -79,6 +84,7 @@ export type Database = {
           stripe_addon_price_id: string
           stripe_invoice_item_id?: string | null
           user_id: string
+          visit_id?: string | null
         }
         Update: {
           addon_key?: string
@@ -86,6 +92,8 @@ export type Database = {
           addon_price_cents?: number
           attached_at?: string
           completed_at?: string | null
+          contractor_pay_cents?: number | null
+          entitlement_id?: string | null
           free_period?: string | null
           id?: string
           is_free?: boolean
@@ -98,12 +106,14 @@ export type Database = {
           stripe_addon_price_id?: string
           stripe_invoice_item_id?: string | null
           user_id?: string
+          visit_id?: string | null
         }
         Relationships: []
       }
       addon_catalog: {
         Row: {
           addon_key: string
+          contractor_pay_cents: number | null
           created_at: string
           display_name: string
           gift_eligible: boolean
@@ -113,6 +123,7 @@ export type Database = {
           lookup_key: string | null
           lucide_icon: string | null
           price_cents: number
+          rate_card_version: number
           services: string[]
           sort_order: number
           stripe_price_id: string | null
@@ -121,6 +132,7 @@ export type Database = {
         }
         Insert: {
           addon_key: string
+          contractor_pay_cents?: number | null
           created_at?: string
           display_name: string
           gift_eligible?: boolean
@@ -130,6 +142,7 @@ export type Database = {
           lookup_key?: string | null
           lucide_icon?: string | null
           price_cents: number
+          rate_card_version?: number
           services?: string[]
           sort_order?: number
           stripe_price_id?: string | null
@@ -138,6 +151,7 @@ export type Database = {
         }
         Update: {
           addon_key?: string
+          contractor_pay_cents?: number | null
           created_at?: string
           display_name?: string
           gift_eligible?: boolean
@@ -147,11 +161,72 @@ export type Database = {
           lookup_key?: string | null
           lucide_icon?: string | null
           price_cents?: number
+          rate_card_version?: number
           services?: string[]
           sort_order?: number
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      addon_entitlements: {
+        Row: {
+          addon_attach_id: string | null
+          attached_visit_id: string | null
+          chosen_addon: string | null
+          chosen_at: string | null
+          contractor_pay_cents: number | null
+          expired_at: string | null
+          grant_reason: string | null
+          granted_at: string
+          id: string
+          member_id: string
+          period: string | null
+          redeemed_at: string | null
+          reminded_at: string | null
+          slot: number
+          status: string
+          subscription_id: string | null
+          type: string
+        }
+        Insert: {
+          addon_attach_id?: string | null
+          attached_visit_id?: string | null
+          chosen_addon?: string | null
+          chosen_at?: string | null
+          contractor_pay_cents?: number | null
+          expired_at?: string | null
+          grant_reason?: string | null
+          granted_at?: string
+          id?: string
+          member_id: string
+          period?: string | null
+          redeemed_at?: string | null
+          reminded_at?: string | null
+          slot?: number
+          status?: string
+          subscription_id?: string | null
+          type: string
+        }
+        Update: {
+          addon_attach_id?: string | null
+          attached_visit_id?: string | null
+          chosen_addon?: string | null
+          chosen_at?: string | null
+          contractor_pay_cents?: number | null
+          expired_at?: string | null
+          grant_reason?: string | null
+          granted_at?: string
+          id?: string
+          member_id?: string
+          period?: string | null
+          redeemed_at?: string | null
+          reminded_at?: string | null
+          slot?: number
+          status?: string
+          subscription_id?: string | null
+          type?: string
         }
         Relationships: []
       }
@@ -1245,6 +1320,48 @@ export type Database = {
         }
         Relationships: []
       }
+      car_wash_profiles: {
+        Row: {
+          access_note: string | null
+          gate_code: string | null
+          interior_access: string | null
+          interior_included: boolean
+          parking_spot: string | null
+          subscription_id: string
+          updated_at: string
+          user_id: string
+          vehicle_color: string | null
+          vehicle_make: string | null
+          vehicle_model: string | null
+        }
+        Insert: {
+          access_note?: string | null
+          gate_code?: string | null
+          interior_access?: string | null
+          interior_included?: boolean
+          parking_spot?: string | null
+          subscription_id: string
+          updated_at?: string
+          user_id: string
+          vehicle_color?: string | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+        }
+        Update: {
+          access_note?: string | null
+          gate_code?: string | null
+          interior_access?: string | null
+          interior_included?: boolean
+          parking_spot?: string | null
+          subscription_id?: string
+          updated_at?: string
+          user_id?: string
+          vehicle_color?: string | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+        }
+        Relationships: []
+      }
       chatbot_knowledge: {
         Row: {
           content: string
@@ -1819,6 +1936,36 @@ export type Database = {
         }
         Relationships: []
       }
+      entitlement_events: {
+        Row: {
+          created_at: string
+          detail: Json | null
+          entitlement_id: string | null
+          event: string
+          id: string
+          member_id: string | null
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json | null
+          entitlement_id?: string | null
+          event: string
+          id?: string
+          member_id?: string | null
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          detail?: Json | null
+          entitlement_id?: string | null
+          event?: string
+          id?: string
+          member_id?: string | null
+          reason?: string
+        }
+        Relationships: []
+      }
       escalations: {
         Row: {
           contractor_id: string | null
@@ -1858,6 +2005,39 @@ export type Database = {
         }
         Relationships: []
       }
+      founding_audit: {
+        Row: {
+          actor: string | null
+          created_at: string
+          detail: Json | null
+          event: string
+          grant_id: string | null
+          id: string
+          reason: string | null
+          subscription_id: string | null
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          detail?: Json | null
+          event: string
+          grant_id?: string | null
+          id?: string
+          reason?: string | null
+          subscription_id?: string | null
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          detail?: Json | null
+          event?: string
+          grant_id?: string | null
+          id?: string
+          reason?: string | null
+          subscription_id?: string | null
+        }
+        Relationships: []
+      }
       founding_events: {
         Row: {
           created_at: string
@@ -1891,6 +2071,51 @@ export type Database = {
           src?: string | null
           step?: string | null
           zip?: string | null
+        }
+        Relationships: []
+      }
+      founding_grants: {
+        Row: {
+          address_key: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          email: string | null
+          founding_number: number
+          founding_zip: string
+          granted_at: string
+          id: string
+          rate_card_version: number
+          reservation_id: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          address_key: string
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          email?: string | null
+          founding_number: number
+          founding_zip: string
+          granted_at?: string
+          id?: string
+          rate_card_version: number
+          reservation_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          address_key?: string
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          email?: string | null
+          founding_number?: number
+          founding_zip?: string
+          granted_at?: string
+          id?: string
+          rate_card_version?: number
+          reservation_id?: string | null
+          status?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -3092,6 +3317,54 @@ export type Database = {
         }
         Relationships: []
       }
+      member_notifications: {
+        Row: {
+          body: string
+          created_at: string
+          dedupe_key: string | null
+          email_attempts: number
+          email_error: string | null
+          email_status: string
+          id: string
+          kind: string
+          read_at: string | null
+          related_entitlement_id: string | null
+          related_visit_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          dedupe_key?: string | null
+          email_attempts?: number
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          kind: string
+          read_at?: string | null
+          related_entitlement_id?: string | null
+          related_visit_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          dedupe_key?: string | null
+          email_attempts?: number
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          related_entitlement_id?: string | null
+          related_visit_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           calendar_enabled: boolean
@@ -3455,6 +3728,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      price_migration_overrides: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          reason: string
+          subscription_id: string
+          target_version: number
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason: string
+          subscription_id: string
+          target_version: number
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason?: string
+          subscription_id?: string
+          target_version?: number
+        }
+        Relationships: []
       }
       pro_bonuses: {
         Row: {
@@ -4330,6 +4633,30 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_cards: {
+        Row: {
+          is_current: boolean
+          label: string
+          notes: string | null
+          published_at: string
+          version: number
+        }
+        Insert: {
+          is_current?: boolean
+          label: string
+          notes?: string | null
+          published_at?: string
+          version: number
+        }
+        Update: {
+          is_current?: boolean
+          label?: string
+          notes?: string | null
+          published_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       rate_limit_hits: {
         Row: {
           bucket: string
@@ -4492,6 +4819,9 @@ export type Database = {
           email: string
           first_name: string
           founding: boolean
+          founding_date: string | null
+          founding_number: number | null
+          founding_zip: string | null
           gift_addons: string[]
           heard_from: string
           heard_other: string | null
@@ -4507,6 +4837,7 @@ export type Database = {
           preferred_day: string
           preferred_time: string
           quote: Json
+          rate_card_version: number | null
           services: string[]
           session_id: string | null
           sms_consent: boolean
@@ -4531,6 +4862,9 @@ export type Database = {
           email: string
           first_name: string
           founding?: boolean
+          founding_date?: string | null
+          founding_number?: number | null
+          founding_zip?: string | null
           gift_addons?: string[]
           heard_from: string
           heard_other?: string | null
@@ -4546,6 +4880,7 @@ export type Database = {
           preferred_day: string
           preferred_time: string
           quote?: Json
+          rate_card_version?: number | null
           services: string[]
           session_id?: string | null
           sms_consent?: boolean
@@ -4570,6 +4905,9 @@ export type Database = {
           email?: string
           first_name?: string
           founding?: boolean
+          founding_date?: string | null
+          founding_number?: number | null
+          founding_zip?: string | null
           gift_addons?: string[]
           heard_from?: string
           heard_other?: string | null
@@ -4585,6 +4923,7 @@ export type Database = {
           preferred_day?: string
           preferred_time?: string
           quote?: Json
+          rate_card_version?: number | null
           services?: string[]
           session_id?: string | null
           sms_consent?: boolean
@@ -5093,6 +5432,7 @@ export type Database = {
           addon_name: string | null
           band: string | null
           bundle_discount_pct: number
+          canon_key: string | null
           created_at: string
           description: string | null
           frequency:
@@ -5104,6 +5444,7 @@ export type Database = {
           per_visit: boolean
           price_cents: number
           quantity_rule: string | null
+          rate_card_version: number
           service_type: Database["public"]["Enums"]["service_type"] | null
           size: number | null
           sort_order: number
@@ -5117,6 +5458,7 @@ export type Database = {
           addon_name?: string | null
           band?: string | null
           bundle_discount_pct?: number
+          canon_key?: string | null
           created_at?: string
           description?: string | null
           frequency?:
@@ -5128,6 +5470,7 @@ export type Database = {
           per_visit?: boolean
           price_cents: number
           quantity_rule?: string | null
+          rate_card_version?: number
           service_type?: Database["public"]["Enums"]["service_type"] | null
           size?: number | null
           sort_order?: number
@@ -5141,6 +5484,7 @@ export type Database = {
           addon_name?: string | null
           band?: string | null
           bundle_discount_pct?: number
+          canon_key?: string | null
           created_at?: string
           description?: string | null
           frequency?:
@@ -5152,6 +5496,7 @@ export type Database = {
           per_visit?: boolean
           price_cents?: number
           quantity_rule?: string | null
+          rate_card_version?: number
           service_type?: Database["public"]["Enums"]["service_type"] | null
           size?: number | null
           sort_order?: number
@@ -5301,11 +5646,13 @@ export type Database = {
           cancel_at_period_end: boolean
           canceled_at: string | null
           car_service_code: string | null
+          car_wash_key: string | null
           card_brand: string | null
           card_last4: string | null
           created_at: string
           founding_free_addon_first_visit: boolean
           founding_free_addon_fulfilled_at: string | null
+          founding_grant_id: string | null
           founding_rate_locked: boolean
           founding_review_promised: boolean
           founding_zip: string | null
@@ -5324,6 +5671,7 @@ export type Database = {
           paused_until: string | null
           plan_lines: Json
           preferred_pro_id: string | null
+          rate_card_version: number | null
           services: Database["public"]["Enums"]["service_type"][]
           size: number | null
           size_tier: number | null
@@ -5348,11 +5696,13 @@ export type Database = {
           cancel_at_period_end?: boolean
           canceled_at?: string | null
           car_service_code?: string | null
+          car_wash_key?: string | null
           card_brand?: string | null
           card_last4?: string | null
           created_at?: string
           founding_free_addon_first_visit?: boolean
           founding_free_addon_fulfilled_at?: string | null
+          founding_grant_id?: string | null
           founding_rate_locked?: boolean
           founding_review_promised?: boolean
           founding_zip?: string | null
@@ -5371,6 +5721,7 @@ export type Database = {
           paused_until?: string | null
           plan_lines?: Json
           preferred_pro_id?: string | null
+          rate_card_version?: number | null
           services?: Database["public"]["Enums"]["service_type"][]
           size?: number | null
           size_tier?: number | null
@@ -5395,11 +5746,13 @@ export type Database = {
           cancel_at_period_end?: boolean
           canceled_at?: string | null
           car_service_code?: string | null
+          car_wash_key?: string | null
           card_brand?: string | null
           card_last4?: string | null
           created_at?: string
           founding_free_addon_first_visit?: boolean
           founding_free_addon_fulfilled_at?: string | null
+          founding_grant_id?: string | null
           founding_rate_locked?: boolean
           founding_review_promised?: boolean
           founding_zip?: string | null
@@ -5418,6 +5771,7 @@ export type Database = {
           paused_until?: string | null
           plan_lines?: Json
           preferred_pro_id?: string | null
+          rate_card_version?: number | null
           services?: Database["public"]["Enums"]["service_type"][]
           size?: number | null
           size_tier?: number | null
@@ -5962,12 +6316,14 @@ export type Database = {
         Row: {
           access_notes: string | null
           assigned_pro_id: string | null
+          base_visit_id: string | null
           cadence: string | null
           completed_at: string | null
           contractor_pay_cents: number | null
           created_at: string
           crew_name: string | null
           customer_first_name: string | null
+          different_day: boolean
           gate_code: string | null
           id: string
           is_redo: boolean
@@ -6003,12 +6359,14 @@ export type Database = {
         Insert: {
           access_notes?: string | null
           assigned_pro_id?: string | null
+          base_visit_id?: string | null
           cadence?: string | null
           completed_at?: string | null
           contractor_pay_cents?: number | null
           created_at?: string
           crew_name?: string | null
           customer_first_name?: string | null
+          different_day?: boolean
           gate_code?: string | null
           id?: string
           is_redo?: boolean
@@ -6044,12 +6402,14 @@ export type Database = {
         Update: {
           access_notes?: string | null
           assigned_pro_id?: string | null
+          base_visit_id?: string | null
           cadence?: string | null
           completed_at?: string | null
           contractor_pay_cents?: number | null
           created_at?: string
           crew_name?: string | null
           customer_first_name?: string | null
+          different_day?: boolean
           gate_code?: string | null
           id?: string
           is_redo?: boolean
@@ -6131,9 +6491,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      active_founding_grant_for: {
+        Args: { _user: string }
+        Returns: {
+          address_key: string
+          cancel_reason: string | null
+          cancelled_at: string | null
+          email: string | null
+          founding_number: number
+          founding_zip: string
+          granted_at: string
+          id: string
+          rate_card_version: number
+          reservation_id: string | null
+          status: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "founding_grants"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_assign_customer_pro: {
         Args: { _applicant_id: string; _subscription_id: string }
         Returns: undefined
+      }
+      admin_bulk_rate_card_migration: {
+        Args: { _reason: string; _target: number }
+        Returns: {
+          moved: number
+          skipped_founding: number
+        }[]
       }
       admin_cron_health: {
         Args: never
@@ -6148,6 +6538,27 @@ export type Database = {
           minutes_since: number
           schedule: string
           stale: boolean
+        }[]
+      }
+      admin_founding_override: {
+        Args: { _reason: string; _subscription: string; _target: number }
+        Returns: string
+      }
+      admin_founding_registry: {
+        Args: never
+        Returns: {
+          address: string
+          current_zip: string
+          email: string
+          founding_number: number
+          founding_zip: string
+          grant_id: string
+          granted_at: string
+          monthly_cents: number
+          name: string
+          rate_card_version: number
+          services: string[]
+          status: string
         }[]
       }
       admin_get_jobber_refresh_token: { Args: never; Returns: string }
@@ -6225,9 +6636,20 @@ export type Database = {
         Returns: undefined
       }
       capture_cron_health: { Args: never; Returns: number }
+      car_wash_line: {
+        Args: { _sub: string }
+        Returns: {
+          size: number
+          washes: number
+        }[]
+      }
       change_badge_status: {
         Args: { _applicant_id: string; _new_status: string; _note?: string }
         Returns: undefined
+      }
+      choose_free_addon: {
+        Args: { _addon_key: string; _entitlement: string; _visit: string }
+        Returns: Json
       }
       claim_pro_notification: {
         Args: { _contractor_id: string; _kind: string; _scope: string }
@@ -6266,6 +6688,7 @@ export type Database = {
           problem: string
         }[]
       }
+      current_rate_card_version: { Args: never; Returns: number }
       current_user_admin: { Args: never; Returns: boolean }
       customers_needing_attention: {
         Args: never
@@ -6406,7 +6829,22 @@ export type Database = {
         }
         Returns: Json
       }
+      member_ops_tick: { Args: never; Returns: Json }
+      member_rate_card_version: { Args: { _user: string }; Returns: number }
+      my_founding: { Args: never; Returns: Json }
       nextval: { Args: { seq_name: string }; Returns: number }
+      notify_member: {
+        Args: {
+          _body: string
+          _dedupe: string
+          _ent?: string
+          _kind: string
+          _title: string
+          _user: string
+          _visit?: string
+        }
+        Returns: undefined
+      }
       pro_all_five: { Args: { _applicant_id: string }; Returns: boolean }
       pro_capacity_stats_internal: {
         Args: never
@@ -6476,6 +6914,7 @@ export type Database = {
         Args: { _base_cents: number; _pro_uid: string }
         Returns: number
       }
+      pro_visit_extras: { Args: { _visit: string }; Returns: Json }
       public_five_star_proof: { Args: never; Returns: Json }
       rate_limit_take: {
         Args: {
@@ -6493,7 +6932,16 @@ export type Database = {
         Returns: Json
       }
       review_kpis: { Args: never; Returns: Json }
+      schedule_car_wash_jobs: {
+        Args: { _cap_per_pro_day?: number }
+        Returns: number
+      }
       sms_recipient_name: { Args: { _phone: string }; Returns: string }
+      subscription_service_count: { Args: { _sub: string }; Returns: number }
+      sync_member_entitlements: {
+        Args: { _reason: string; _sub: string }
+        Returns: undefined
+      }
       verify_pro_badge: {
         Args: { _token: string }
         Returns: {

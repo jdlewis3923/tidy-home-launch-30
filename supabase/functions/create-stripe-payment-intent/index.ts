@@ -210,10 +210,14 @@ Deno.serve(async (req) => {
           : null;
         const surchargeKeys = ["surcharge_cleaning_xl", "surcharge_lawn_xl"];
 
+        // Member's own rate card (founding homes keep theirs forever).
+        const { data: rcv } = await supabase.rpc("member_rate_card_version", { _user: user.id });
+        const rateCardVersion = typeof rcv === "number" ? rcv : 1;
         const { data: priceRows, error: priceErr } = await supabase
           .from("stripe_catalog")
-          .select("lookup_key, stripe_price_id, stripe_price_id_test")
-          .in("lookup_key", [...serviceKeys, ...(carWashKey ? [carWashKey] : []), ...surchargeKeys])
+          .select("lookup_key:canon_key, stripe_price_id, stripe_price_id_test")
+          .eq("rate_card_version", rateCardVersion)
+          .in("canon_key", [...serviceKeys, ...(carWashKey ? [carWashKey] : []), ...surchargeKeys])
           .eq("active", true);
         if (priceErr) throw new Error(`catalog read failed: ${priceErr.message}`);
 

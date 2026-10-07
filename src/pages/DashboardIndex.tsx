@@ -36,6 +36,7 @@ import HomeAppHead from '@/components/dashboard/HomeAppHead';
 import HomeInstallPrompt from '@/components/dashboard/HomeInstallPrompt';
 
 import AddToNextVisitPanel from '@/components/dashboard/AddToNextVisitPanel';
+import FreeAddonPicker from '@/components/dashboard/FreeAddonPicker';
 import AddonsYearStat from '@/components/dashboard/AddonsYearStat';
 import type { AddonService } from '@/lib/addon-catalog';
 import ScheduleCalendar from '@/components/dashboard/ScheduleCalendar';
@@ -284,6 +285,7 @@ export default function DashboardIndex() {
         </section>
       ) : (
         <>
+          {data.subscription && <div className="mx-auto max-w-[1100px] px-6 pt-6"><FreeAddonPicker /></div>}
           {/* Add-on attach panel (within 14 days of visit) */}
           {data.subscription && (
             <AddToNextVisitPanel

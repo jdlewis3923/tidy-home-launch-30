@@ -7,6 +7,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import ProVisitExtras from "@/components/pro/ProVisitExtras";
 import { AlertTriangle, Check, ListChecks, Send } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import {
@@ -203,6 +204,7 @@ export default function ProVisit() {
             </p>
           )}
         </ProCard>
+        <ProVisitExtras visitId={visit.id} />
 
         <Link
           to={`/pro/visit/${visit.id}/checklist`}

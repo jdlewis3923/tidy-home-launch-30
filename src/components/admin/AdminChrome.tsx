@@ -20,6 +20,8 @@ const GROUPS: NavGroup[] = [
     { to: "/admin/command", label: "Command", icon: Activity },
     { to: "/admin/kpis", label: "KPIs", icon: BarChart3 },
     { to: "/admin/reservations", label: "Reservations", icon: ClipboardList },
+    { to: "/admin/founding", label: "Founding homes", icon: ClipboardList },
+    { to: "/admin/entitlements", label: "Free add-ons", icon: ClipboardList },
     { to: "/admin/alerts", label: "Alerts", icon: Bell, badge: "alerts" },
     { to: "/admin/schedule", label: "Schedule", icon: CalendarDays },
   ]},

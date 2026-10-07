@@ -67,6 +67,8 @@ const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
 const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
 const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
 const AdminReservations = lazy(() => import("./pages/AdminReservations.tsx"));
+const AdminFounding = lazy(() => import("./pages/AdminFounding.tsx"));
+const AdminEntitlements = lazy(() => import("./pages/AdminEntitlements.tsx"));
 const Reserved = lazy(() => import("./pages/Reserved.tsx"));
 const ReserveConfirm = lazy(() => import("./pages/ReserveConfirm.tsx"));
 const AdminCommand = lazy(() => import("./pages/AdminCommand.tsx"));
@@ -351,6 +353,8 @@ const App = () => (
                   {/* Permanent KPI Command Center — admins only. */}
                   <Route path="/admin/kpis" element={<AdminKpis />} />
                   <Route path="/admin/reservations" element={<AdminReservations />} />
+                  <Route path="/admin/founding" element={<AdminFounding />} />
+                  <Route path="/admin/entitlements" element={<AdminEntitlements />} />
                   {/* Command center — default admin landing view. */}
                   <Route path="/admin" element={<Navigate to="/admin/command" replace />} />
                   <Route path="/admin/command" element={<AdminCommand />} />
