@@ -46,20 +46,43 @@ const EVENTS: EventDef[] = [
     active: true,
     defaultPayload: { amount_cents: 15900, attempt_count: 1 },
   },
+  // Visit events have no Zap; they send a Brevo template directly, so the stub
+  // must carry every merge field the template requires.
   {
     name: "visit_scheduled",
-    active: false,
-    defaultPayload: { service: "cleaning", visit_date: "2025-05-12" },
+    active: true,
+    defaultPayload: {
+      email: "test+visit@jointidy.co",
+      first_name: "Test",
+      service_type: "Home Cleaning",
+      service_date: "Monday, November 16",
+      time_window: "9:00–11:00 AM",
+      service_address: "Test address, 33156",
+    },
   },
   {
     name: "visit_on_the_way",
-    active: false,
-    defaultPayload: { service: "cleaning", eta_minutes: 25 },
+    active: true,
+    defaultPayload: {
+      email: "test+visit@jointidy.co",
+      first_name: "Test",
+      service_type: "Home Cleaning",
+      service_date: "Monday, November 16",
+      time_window: "9:00–11:00 AM",
+      service_address: "Test address, 33156",
+    },
   },
   {
     name: "visit_complete",
-    active: false,
-    defaultPayload: { service: "cleaning", visit_date: "2025-05-12" },
+    active: true,
+    defaultPayload: {
+      email: "test+visit@jointidy.co",
+      first_name: "Test",
+      service_type: "Home Cleaning",
+      service_address: "Test address, 33156",
+      completion_time: "10:45 AM",
+      pro_name: "Test Pro",
+    },
   },
   {
     name: "password_reset",
@@ -67,6 +90,22 @@ const EVENTS: EventDef[] = [
     defaultPayload: { email: "test+reset@jointidy.co" },
   },
 ];
+
+/**
+ * supabase-js turns any non-2xx into a generic "Edge Function returned a
+ * non-2xx status code". The function's own JSON body says what actually broke
+ * (unauthorized, vendor rejection, validation) — read it so the test shows it.
+ */
+async function invokeWithBody(fn: string, body: unknown): Promise<Record<string, unknown>> {
+  const { data, error } = await supabase.functions.invoke(fn, { body });
+  if (!error) return (data ?? {}) as Record<string, unknown>;
+  const ctx = (error as { context?: unknown }).context;
+  if (ctx instanceof Response) {
+    const parsed = await ctx.clone().json().catch(() => null);
+    return { ok: false, http_status: ctx.status, ...(parsed && typeof parsed === "object" ? parsed : { error: error.message }) };
+  }
+  return { ok: false, error: error.message };
+}
 
 interface Result {
   ok: boolean;
@@ -96,20 +135,13 @@ export default function AdminTestZapier() {
       return;
     }
 
-    const { data, error } = await supabase.functions.invoke("send-zapier-event", {
-      body: {
-        event_name: def.name,
-        lang,
-        user_id: sess.session.user.id,
-        payload: def.defaultPayload,
-      },
+    const data = await invokeWithBody("send-zapier-event", {
+      event_name: def.name,
+      lang,
+      user_id: sess.session.user.id,
+      payload: def.defaultPayload,
     });
-
-    if (error) {
-      setResults((r) => ({ ...r, [def.name]: { ok: false, error: error.message } }));
-    } else {
-      setResults((r) => ({ ...r, [def.name]: data as Result }));
-    }
+    setResults((r) => ({ ...r, [def.name]: data as unknown as Result }));
     setRunning(null);
   };
 
@@ -268,11 +300,7 @@ function TwilioSelfTest() {
       setRunning(false);
       return;
     }
-    const { data, error } = await supabase.functions.invoke("send-twilio-sms", {
-      body: { to_phone_e164: to, body, idempotency_key: key },
-    });
-    if (error) setResult({ ok: false, error: error.message });
-    else setResult(data as Record<string, unknown>);
+    setResult(await invokeWithBody("send-twilio-sms", { to_phone_e164: to, body, idempotency_key: key }));
     setRunning(false);
   };
 

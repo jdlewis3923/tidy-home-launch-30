@@ -9,6 +9,7 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendPwaPushToJustin } from '../_shared/notifyJustin.ts';
+import { writeAlert } from '../_shared/alerts.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { enforceRateLimit } from '../_shared/rate-limit.ts';
 import { scoreApplicant } from '../_shared/hiring/score.ts';
@@ -180,6 +181,12 @@ Deno.serve(async (req) => {
     // Phase 4: queueMicrotask work is killed when the isolate shuts down after
     // the response. EdgeRuntime.waitUntil keeps it alive, and every failure is
     // recorded rather than vanishing.
+    // A failed follow-up is written to integration_logs (Health page) and an
+    // admin alert; the applicant row above is already saved and never undone.
+    const recordFollowUpFailure = async (msg: string) => {
+      await admin.from('integration_logs').insert({ source: 'internal', event: 'submit_application.applied_trigger_failed', status: 'error', error_message: msg.slice(0, 1000), detail: { applicant_id: applicantId } }).then(() => {}, () => {});
+      await writeAlert(admin, { level: 'warning', category: 'hiring', title: `Application follow-up failed · ${fullName}`, body: `${fullName} is saved, but the applied-stage emails/texts did not run: ${msg.slice(0, 300)}`, action_label: 'Open applicants', action_url: '/admin/applicants', dedupe_key: `apply_followup:${applicantId}`, context: { applicant_id: applicantId } });
+    };
     const followUp = (async () => {
       try {
         const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/applicant-applied-trigger`, {
@@ -188,10 +195,13 @@ Deno.serve(async (req) => {
           body: JSON.stringify({ applicant_id: applicantId }),
         });
         if (!r.ok) {
-          console.error('[apply] trigger http', r.status, (await r.text().catch(() => '')).slice(0, 300));
+          const text = (await r.text().catch(() => '')).slice(0, 300);
+          console.error('[apply] trigger http', r.status, text);
+          await recordFollowUpFailure(`applicant-applied-trigger ${r.status}: ${text}`);
         }
       } catch (e) {
         console.error('[apply] trigger failed', (e as Error).message);
+        await recordFollowUpFailure((e as Error).message);
       }
       try {
         await sendPwaPushToJustin('New application', `${fullName} applied for ${data.service}`, '/admin/applicants');

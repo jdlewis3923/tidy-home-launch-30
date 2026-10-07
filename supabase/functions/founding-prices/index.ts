@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error('[founding-prices] stripe lookup failed, serving cache', msg);
-    await admin.from('integration_logs').insert({ source: 'founding-prices', event: 'stripe_lookup_failed', status: 'error', error_message: msg }).then(() => {}, () => {});
+    await admin.from('integration_logs').insert({ source: 'stripe', event: 'founding_prices.stripe_lookup_failed', status: 'error', error_message: msg }).then(() => {}, () => {});
     const { data } = await admin.from('stripe_catalog').select('lookup_key, price_cents').in('lookup_key', ALL_RECURRING_LOOKUP_KEYS).gt('price_cents', 0);
     const prices: Record<string, number> = {};
     for (const r of data ?? []) if (r.lookup_key) prices[r.lookup_key] = r.price_cents;
