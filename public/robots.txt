@@ -1,7 +1,9 @@
-# Pre-launch: site is gated. Crawling disabled for every user-agent.
-# To go live, change the Disallow line below to: Allow: /
 User-agent: *
-Disallow: /
-Disallow: /verify/
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /intake/
 
 Sitemap: https://jointidy.co/sitemap.xml
