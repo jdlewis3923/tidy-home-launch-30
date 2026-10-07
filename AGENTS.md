@@ -12,3 +12,4 @@
 - The Car Wash Add-On is stored as `subscriptions.car_wash_key` and becomes separate `visit_kind = 'car_wash'` jobs for car care Pros via `member_ops_tick()` — why: the cleaner never washes the car.
 - Member notifications are written to `member_notifications` first and emailed afterwards by `member-ops-tick` — why: a failed send can never undo a gift, job or founding grant.
 - Contractor pay columns are excluded from member-readable column grants; admin totals come from security-definer RPCs — why: pay is never customer-visible.
+- integration_logs.source and admin_alerts.level are database-checked allowlists; log under an allowed source (e.g. 'internal') and put the function name in event — why: a rejected log or alert write fails silently and the Health page goes blind.
