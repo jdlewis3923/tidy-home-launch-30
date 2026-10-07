@@ -49,6 +49,10 @@ interface SourceSummary {
   success_rate_pct: number | null;
   avg_latency_ms: number | null;
   last_call_at: string | null;
+  /** Most recent error in the last 30 days, even when the 24h window is quiet. */
+  last_error_message: string | null;
+  last_error_event: string | null;
+  last_error_at: string | null;
 }
 
 function emptySummary(): SourceSummary {
@@ -61,6 +65,9 @@ function emptySummary(): SourceSummary {
     success_rate_pct: null,
     avg_latency_ms: null,
     last_call_at: null,
+    last_error_message: null,
+    last_error_event: null,
+    last_error_at: null,
   };
 }
 
@@ -138,6 +145,25 @@ Deno.serve(async (req) => {
 
           // Rows are sorted desc — first one we see per source is the latest.
           if (s.last_call_at === null) s.last_call_at = row.created_at as string;
+        }
+
+        // Last error per lane, looked up over 30 days so a lane that failed
+        // yesterday and went quiet still shows what broke and when.
+        const errSince = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const { data: errRows, error: errQueryErr } = await supabase
+          .from('integration_logs')
+          .select('source, event, error_message, created_at')
+          .eq('status', 'error')
+          .gte('created_at', errSince)
+          .order('created_at', { ascending: false })
+          .limit(2000);
+        if (errQueryErr) console.error('[admin-health] last-error query failed', errQueryErr.message);
+        for (const row of errRows ?? []) {
+          const src = row.source as Source;
+          if (!(src in sources) || sources[src].last_error_at) continue;
+          sources[src].last_error_at = row.created_at as string;
+          sources[src].last_error_event = (row.event as string) ?? null;
+          sources[src].last_error_message = ((row.error_message as string | null) ?? '').slice(0, 300) || null;
         }
 
         for (const src of TRACKED_SOURCES) {
