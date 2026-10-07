@@ -10,7 +10,7 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4
 import { tidyEmailShell } from './email-brand.ts';
 
 export type AlertLevel = 'action' | 'warning' | 'critical';
-export type AlertCategory = 'hiring' | 'site' | 'calendar' | 'capacity' | 'insurance';
+export type AlertCategory = 'hiring' | 'site' | 'calendar' | 'capacity' | 'insurance' | 'reservations';
 
 export interface AlertInput {
   level: AlertLevel;

@@ -51,7 +51,7 @@ async function notify(row: any, isUpdate: boolean, page: string) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error(`[reservation-submit] ${name} failed`, msg);
       await admin.from('integration_logs').insert({ source: 'internal', event: `reservation_submit.notify.${name.replace(/ /g, '_')}_failed`, status: 'error', error_message: msg, detail: { reservation_id: row.id } }).then(() => {}, () => {});
-      await writeAlert(admin, { level: 'warn', category: 'reservations', title: `Reservation ${name} failed`, body: `${row.first_name} (${row.zip}) is saved, but the ${name} did not send: ${msg}`, action_label: 'Open reservations', action_url: '/admin/reservations', dedupe_key: `res_notify_${name}:${row.id}`, context: { reservation_id: row.id } });
+      await writeAlert(admin, { level: 'warning', category: 'reservations', title: `Reservation ${name} failed`, body: `${row.first_name} (${row.zip}) is saved, but the ${name} did not send: ${msg}`, action_label: 'Open reservations', action_url: '/admin/reservations', dedupe_key: `res_notify_${name}:${row.id}`, context: { reservation_id: row.id } });
     }
   };
   await step('member email', async () => {
