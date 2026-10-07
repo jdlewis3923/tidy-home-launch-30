@@ -46,20 +46,43 @@ const EVENTS: EventDef[] = [
     active: true,
     defaultPayload: { amount_cents: 15900, attempt_count: 1 },
   },
+  // Visit events have no Zap; they send a Brevo template directly, so the stub
+  // must carry every merge field the template requires.
   {
     name: "visit_scheduled",
-    active: false,
-    defaultPayload: { service: "cleaning", visit_date: "2025-05-12" },
+    active: true,
+    defaultPayload: {
+      email: "test+visit@jointidy.co",
+      first_name: "Test",
+      service_type: "Home Cleaning",
+      service_date: "Monday, November 16",
+      time_window: "9:00–11:00 AM",
+      service_address: "Test address, 33156",
+    },
   },
   {
     name: "visit_on_the_way",
-    active: false,
-    defaultPayload: { service: "cleaning", eta_minutes: 25 },
+    active: true,
+    defaultPayload: {
+      email: "test+visit@jointidy.co",
+      first_name: "Test",
+      service_type: "Home Cleaning",
+      service_date: "Monday, November 16",
+      time_window: "9:00–11:00 AM",
+      service_address: "Test address, 33156",
+    },
   },
   {
     name: "visit_complete",
-    active: false,
-    defaultPayload: { service: "cleaning", visit_date: "2025-05-12" },
+    active: true,
+    defaultPayload: {
+      email: "test+visit@jointidy.co",
+      first_name: "Test",
+      service_type: "Home Cleaning",
+      service_address: "Test address, 33156",
+      completion_time: "10:45 AM",
+      pro_name: "Test Pro",
+    },
   },
   {
     name: "password_reset",
