@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
       if (status === 'sent') sent++; else if (status === 'failed') failed++;
     }
     if (failed > 0) {
-      await admin.from('integration_logs').insert({ source: 'member-ops-tick', event: 'notification_email_failed', status: 'error', error_message: `${failed} member emails failed` }).then(() => {}, () => {});
+      await admin.from('integration_logs').insert({ source: 'internal', event: 'member_ops_tick.notification_email_failed', status: 'error', error_message: `${failed} member emails failed` }).then(() => {}, () => {});
     }
     return jsonResponse({ ok: true, tick, sent, failed });
   } catch (e) {

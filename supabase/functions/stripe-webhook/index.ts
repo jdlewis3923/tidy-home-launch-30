@@ -764,8 +764,8 @@ async function maybeCreditReferrer(stripe: Stripe, supabase: any, opts: {
       .eq('status', 'pending');
 
     await supabase.from('integration_logs').insert({
-      source: 'referral',
-      event: `credit:${referral.id}`,
+      source: 'stripe',
+      event: `referral_credit:${referral.id}`,
       status: 'success',
       payload_hash: `${referrerCus}:${txn.id}:-${amountCents}`,
     });
@@ -774,8 +774,8 @@ async function maybeCreditReferrer(stripe: Stripe, supabase: any, opts: {
     const message = err instanceof Error ? err.message : 'unknown';
     console.error('[stripe-webhook] referral credit failed', message);
     await supabase.from('integration_logs').insert({
-      source: 'referral',
-      event: `credit:${referredUserId}`,
+      source: 'stripe',
+      event: `referral_credit:${referredUserId}`,
       status: 'error',
       error_message: message.slice(0, 1000),
     });

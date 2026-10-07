@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
   }
 
   await admin.from('integration_logs').insert({
-    source: 'google_places',
+    source: 'google', // was 'google_places' — rejected by the source check, so these rows were silently dropped
     event: 'poll_reviews',
     status: 'success',
     payload_hash: `inserted=${inserted} matched=${matched} fetched=${reviews.length}`,
