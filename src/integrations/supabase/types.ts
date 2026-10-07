@@ -6567,6 +6567,14 @@ export type Database = {
       admin_get_service_role_key: { Args: never; Returns: string }
       admin_get_vapid_private: { Args: never; Returns: string }
       admin_get_vapid_public: { Args: never; Returns: string }
+      admin_gift_cost_by_month: {
+        Args: never
+        Returns: {
+          cost_cents: number
+          gifts: number
+          month: string
+        }[]
+      }
       admin_onboarding_tokens: {
         Args: { _applicant_id: string; _regenerate?: boolean }
         Returns: Json
