@@ -64,6 +64,9 @@ interface SourceSummary {
   success_rate_pct: number | null;
   avg_latency_ms: number | null;
   last_call_at: string | null;
+  last_error_message?: string | null;
+  last_error_event?: string | null;
+  last_error_at?: string | null;
 }
 
 interface HealthResponse {
@@ -390,6 +393,7 @@ export default function AdminHealth() {
                     <th className="px-4 py-3 text-right">Success rate</th>
                     <th className="px-4 py-3 text-right">Avg latency</th>
                     <th className="px-4 py-3 text-right">Last call</th>
+                    <th className="px-4 py-3 text-left">Last error (30 days)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -411,6 +415,19 @@ export default function AdminHealth() {
                         </td>
                         <td className="px-4 py-3 text-right text-xs">
                           {formatRelative(r.last_call_at)}
+                        </td>
+                        <td className="max-w-xs px-4 py-3 text-left text-xs">
+                          {r.last_error_at ? (
+                            <>
+                              <span className="font-semibold">
+                                {new Date(r.last_error_at).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "short", timeStyle: "short" })} ET
+                              </span>
+                              {r.last_error_event ? <span className="text-slate-500"> · {r.last_error_event}</span> : null}
+                              <span className="mt-0.5 block break-words">{r.last_error_message ?? "no message recorded"}</span>
+                            </>
+                          ) : (
+                            "—"
+                          )}
                         </td>
                       </tr>
                     );
