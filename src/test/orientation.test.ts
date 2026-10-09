@@ -33,6 +33,9 @@ describe("orientation preview preserves content and stage gates", () => {
     expect(new Set(visuals.map(v => v.layout)).size).toBeGreaterThanOrEqual(18);
     expect(visuals[0].layout).toBe("opener");
     expect(visuals[0].image).toContain("reference-welcome");
+    for (const layout of ["opener", "pillars", "relationship", "gates", "coverage", "kit", "comparison", "timeline", "philosophy", "purpose", "finale"]) {
+      expect(visuals.some(v => v.layout === layout)).toBe(true);
+    }
     const images = visuals.flatMap((v,i) => slides[i].block.pair ? [orientationImage(`${slides[i].block.pair}-R`),orientationImage(`${slides[i].block.pair}-W`)] : v.image ? [v.image] : []);
     expect(new Set(images).size).toBe(images.length);
     const referenceImages = visuals.flatMap((v,i) => slides[i].block.pair ? [orientationImage(`${slides[i].block.pair}-R`),orientationImage(`${slides[i].block.pair}-W`)] : v.references);
@@ -45,7 +48,8 @@ describe("orientation preview preserves content and stage gates", () => {
     const pairs = orientationSlides(ORIENTATION_SECTIONS).filter(s => s.block.pair);
     expect(Object.keys(ORIENTATION_STANDARDS)).toHaveLength(15);
     for (const { block } of pairs) {
-      const directions = ORIENTATION_STANDARDS[block.pair!];
+      if (!block.pair) throw new Error("Comparison requires a pair");
+      const directions = ORIENTATION_STANDARDS[block.pair];
       for (const text of Object.values(directions)) expect(text.length).toBeGreaterThan(40);
       expect(orientationImage(`${block.pair}-R`)).toContain("/hd/");
       expect(orientationImage(`${block.pair}-W`)).toContain("/hd/");

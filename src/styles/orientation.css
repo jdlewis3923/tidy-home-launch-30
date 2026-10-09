@@ -271,3 +271,64 @@
 .orientation-slide.slide-pair .orientation-pair { margin-top:16px; }
 @media(max-width:899px) { .orientation-app:not(.orientation-export) .orientation-result-direction { font-size:16px; }.orientation-app:not(.orientation-export) .orientation-result-direction p[lang=es] { font-size:14px; } }
 @media(prefers-reduced-motion:reduce) { .orientation-app *, .orientation-app *:before, .orientation-app *:after { animation:none!important; transition:none!important; } }
+
+/* Reference posters: three role tiles, circular visit markers and service kit columns. */
+.layout-relationship .orientation-slide-body,.layout-kit .orientation-slide-body { display:flex; flex-direction:column; align-items:stretch; justify-content:center; gap:24px; }
+.orientation-relationship-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:28px; }
+.orientation-relationship-grid > div { border:2px solid hsl(var(--orientation-blue) / .2); border-top:12px solid hsl(var(--orientation-blue)); padding:28px; border-radius:8px; }
+.orientation-relationship-grid > div:nth-child(2) { border-top-color:hsl(var(--orientation-yellow)); }
+.orientation-relationship-grid > div:nth-child(3) { background:hsl(var(--orientation-blue)); color:hsl(var(--orientation-light)); }
+.orientation-relationship-grid svg { width:68px; height:68px; margin-bottom:20px; }
+.orientation-relationship-grid h3 { font-size:34px; margin-bottom:18px; }
+.orientation-relationship-grid p { font-size:25px; line-height:1.5; }
+.orientation-relationship-grid p[lang=es] { font-size:22px; margin-top:24px; }
+.layout-relationship .orientation-reference-strip { height:130px; max-width:380px; align-self:flex-end; }
+.orientation-pillar h3 { font-size:42px; margin-bottom:18px; }
+.orientation-pillar h4 { font-size:27px; margin-top:24px; font-weight:900; }
+.orientation-pillar p { font-size:26px; }.orientation-pillar p[lang=es] { font-size:22px; margin-top:10px; }
+.orientation-pillar-grid { align-items:stretch; }
+.layout-pillars .orientation-reference-strip { height:125px; }
+.orientation-kit-labels { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); text-align:center; gap:24px; }
+.orientation-kit-labels strong { font-size:30px; font-weight:900; }.orientation-kit-labels span { display:block; font-size:21px; margin-top:8px; }
+.orientation-service-kits { width:100%; height:390px; object-fit:contain; }
+.orientation-kit-bottom { display:grid; grid-template-columns:minmax(0,1fr) 370px; gap:30px; align-items:center; }
+.orientation-kit-bottom .orientation-wide-copy { gap:28px; }.orientation-kit-bottom .orientation-wide-copy p { font-size:23px; line-height:1.5; }
+.orientation-kit-detail { display:flex; gap:18px; height:140px; }.orientation-kit-detail > img { width:190px; height:140px; object-fit:contain; }
+.orientation-kit-detail .orientation-reference-strip { width:160px; height:140px; }
+.layout-kit .orientation-kit-note { margin:0; font-size:18px; }
+.orientation-visit-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:48px; margin:28px 0; text-align:center; }
+.orientation-visit-circle { position:relative; display:grid; place-items:center; width:184px; height:184px; margin:0 auto 24px; border:12px solid hsl(var(--slide-accent)); border-radius:50%; background:hsl(var(--orientation-paper)); color:hsl(var(--orientation-blue)); }
+.orientation-visit-circle svg { width:80px; height:80px; }.orientation-visit-circle b { position:absolute; right:-12px; bottom:-12px; display:grid; place-items:center; width:60px; height:60px; background:hsl(var(--orientation-blue)); color:hsl(var(--orientation-light)); border-radius:50%; font-size:30px; }
+.orientation-visit-steps h3 { font-size:35px; }.orientation-visit-steps p { font-size:25px; margin-top:12px; }
+.orientation-visit-steps > div { position:relative; }.orientation-visit-steps > div:not(:last-child):after { content:"→"; position:absolute; right:-45px; top:64px; font-size:52px; color:hsl(var(--slide-accent)); }
+.orientation-philosophy-photo .orientation-reference-strip { height:650px; }.orientation-philosophy-photo img { object-fit:cover; }
+.layout-purpose .orientation-slide-body { display:block; }
+.orientation-purpose-photos { position:absolute; inset:0; }.orientation-purpose-photos .orientation-reference-strip { height:100%; gap:0; }.orientation-purpose-photos img { width:50%; object-fit:cover; border-radius:0; }
+.orientation-purpose-photos:after { content:""; position:absolute; inset:0; background:linear-gradient(0deg,hsl(var(--orientation-charcoal) / .98),hsl(var(--orientation-charcoal) / .1) 85%); }
+.orientation-purpose-copy { position:relative; color:hsl(var(--orientation-light)); padding-top:390px; }.orientation-purpose-copy .orientation-wide-copy { margin-top:30px; }.orientation-purpose-copy .orientation-wide-copy p[lang=es],.orientation-purpose-copy h2 { color:hsl(var(--orientation-light-muted)); }
+.orientation-purpose-copy .orientation-composition-title h1 { color:hsl(var(--orientation-light))!important; }
+.layout-finale { overflow:hidden; }.layout-finale:before { width:750px; height:1080px; opacity:1; background:hsl(var(--orientation-blue)); clip-path:polygon(55% 0,100% 0,100% 100%,0 100%); }
+.orientation-finale-copy { position:relative; z-index:1; }.orientation-finale-copy > img { width:130px; margin-bottom:20px; }
+.orientation-finale-photos .orientation-reference-strip { height:650px; }.orientation-finale-photos img { height:650px; }
+.orientation-pair figure { border:2px solid hsl(var(--orientation-blue) / .2); border-radius:8px; overflow:hidden; background:hsl(var(--orientation-paper)); padding:18px; }
+.orientation-pair figure:nth-child(2) { border-color:hsl(var(--orientation-error) / .3); }
+.orientation-pair figcaption { display:flex; align-items:center; gap:12px; font-size:23px!important; }
+.orientation-pair figcaption svg { width:28px; height:28px; flex-shrink:0; }
+.orientation-result-direction { list-style:disc; padding-left:26px; font-size:22px; line-height:1.5; }
+.orientation-result-direction li::marker { color:hsl(var(--orientation-blue)); }.orientation-pair figure:nth-child(2) li::marker { color:hsl(var(--orientation-error)); }
+.orientation-relationship-grid > div,.orientation-visit-steps > div { animation:orientation-element-enter .9s cubic-bezier(.16,1,.3,1) both; }
+.orientation-relationship-grid > div:nth-child(2),.orientation-visit-steps > div:nth-child(2) { animation-delay:.25s; }.orientation-relationship-grid > div:nth-child(3),.orientation-visit-steps > div:nth-child(3) { animation-delay:.4s; }.orientation-visit-steps > div:nth-child(4) { animation-delay:.55s; }
+@media(max-width:899px) {
+ .orientation-app:not(.orientation-export) .orientation-relationship-grid { grid-template-columns:1fr; }
+ .orientation-app:not(.orientation-export) .orientation-relationship-grid p { font-size:18px; }.orientation-app:not(.orientation-export) .orientation-relationship-grid p[lang=es] { font-size:16px; }
+ .orientation-app:not(.orientation-export) .orientation-pillar h3 { font-size:30px; }.orientation-app:not(.orientation-export) .orientation-pillar h4 { font-size:22px; }
+ .orientation-app:not(.orientation-export) .orientation-visit-steps { grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+ .orientation-app:not(.orientation-export) .orientation-visit-circle { width:106px; height:106px; border-width:7px; }.orientation-app:not(.orientation-export) .orientation-visit-circle svg { width:45px; height:45px; }.orientation-app:not(.orientation-export) .orientation-visit-circle b { width:38px; height:38px; font-size:20px; }
+ .orientation-app:not(.orientation-export) .orientation-visit-steps h3 { font-size:22px; }.orientation-app:not(.orientation-export) .orientation-visit-steps p { font-size:16px; }.orientation-app:not(.orientation-export) .orientation-visit-steps > div:after { display:none; }
+ .orientation-app:not(.orientation-export) .orientation-kit-labels { gap:8px; }.orientation-app:not(.orientation-export) .orientation-kit-labels strong { font-size:16px; }.orientation-app:not(.orientation-export) .orientation-kit-labels span { font-size:12px; }
+ .orientation-app:not(.orientation-export) .orientation-service-kits { height:auto; }.orientation-app:not(.orientation-export) .orientation-kit-bottom { grid-template-columns:1fr; }.orientation-app:not(.orientation-export) .orientation-kit-bottom p { font-size:16px; }
+ .orientation-app:not(.orientation-export) .orientation-philosophy-photo .orientation-reference-strip { height:320px; }
+ .orientation-app:not(.orientation-export) .orientation-purpose-copy { padding-top:250px; }.orientation-app:not(.orientation-export) .orientation-purpose-copy .orientation-wide-copy { display:block; }.orientation-app:not(.orientation-export) .orientation-purpose-copy p { margin-top:24px; }
+ .orientation-app:not(.orientation-export) .orientation-pair figcaption { font-size:14px!important; padding:10px; }.orientation-app:not(.orientation-export) .orientation-result-direction { font-size:16px; }
+}
+@media(prefers-reduced-motion:reduce) { .orientation-app *, .orientation-app *:before,.orientation-app *:after { animation:none!important; transition:none!important; } }
