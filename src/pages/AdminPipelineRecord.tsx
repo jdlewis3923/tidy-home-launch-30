@@ -42,7 +42,7 @@ const FIELDS: Record<string, Field[]> = {
     { key: "quote_limit_aggregate", label: "Aggregate limit ($)", type: "number" },
     { key: "quote_names_tidy_as_ai", label: "Names Tidy as additional insured", type: "bool" },
   ],
-  background: [{ key: "checkr_result", label: "Checkr result", type: "select", options: ["clear", "consider", "suspended", "pending"] }],
+  background: [{ key: "checkr_result", label: "Checkr result", type: "select", options: ["clear", "consider", "suspended"] }],
   insured: [
     { key: "coi_effective_date", label: "COI effective", type: "date" },
     { key: "coi_expiry_date", label: "COI expiry", type: "date" },
@@ -283,8 +283,8 @@ export default function AdminPipelineRecord() {
       <Dialog open={modal === "withdraw"} onOpenChange={(v) => !v && setModal(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader><DialogTitle>{name} withdrew</DialogTitle><DialogDescription>Moves to the archive. You can restore later.</DialogDescription></DialogHeader>
-          <Textarea aria-label="Note" placeholder="Note (optional)" value={wdNote} onChange={(e) => setWdNote(e.target.value)} rows={2} />
-          <DialogFooter><Button onClick={async () => { if (await run("pipeline_withdraw", { _note: wdNote.trim() || null }, "Archived.")) navigate("/admin/pipeline"); }}>Confirm</Button></DialogFooter>
+          <Textarea aria-label="Note" placeholder="Note (required)" value={wdNote} onChange={(e) => setWdNote(e.target.value)} rows={2} />
+          <DialogFooter><Button disabled={!wdNote.trim()} onClick={async () => { if (await run("pipeline_withdraw", { _note: wdNote.trim() }, "Archived.")) navigate("/admin/pipeline"); }}>Confirm</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -294,7 +294,7 @@ export default function AdminPipelineRecord() {
           <div className="space-y-3">
             <select aria-label="Move to stage" value={ovStage} onChange={(e) => setOvStage(e.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
               <option value="">Move to…</option>
-              {PIPELINE_STAGES.filter((s) => s.key !== p.stage).map((s, i) => <option key={s.key} value={s.key}>{stageIndex(s.key) + 1}. {s.label}</option>)}
+              {PIPELINE_STAGES.filter((s) => s.key !== p.stage).map((s) => <option key={s.key} value={s.key}>{stageIndex(s.key) + 1}. {s.label}</option>)}
             </select>
             <Textarea aria-label="Reason" placeholder="Reason (required)" value={ovReason} onChange={(e) => setOvReason(e.target.value)} rows={2} />
           </div>
