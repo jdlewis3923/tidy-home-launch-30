@@ -12,6 +12,15 @@ export function OrientationSlide({ slide, page, total, exporting = false }: { sl
   const parent = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0);
   const [entered, setEntered] = useState(exporting);
+  const [ready, setReady] = useState(exporting);
+  useEffect(() => {
+    if (exporting || !parent.current) return;
+    let cancelled = false;
+    // Reveal after the photographs load, not while the viewer is still waiting for them.
+    Promise.all(Array.from(parent.current.querySelectorAll("img")).map(img => img.decode().catch(() => undefined)))
+      .then(() => { if (!cancelled) setReady(true); });
+    return () => { cancelled = true; };
+  }, [exporting, slide.block]);
   useEffect(() => {
     if (exporting || !parent.current) return;
     // Reading sections mount many slides at once: start their motion on visibility, not page load.
@@ -28,9 +37,10 @@ export function OrientationSlide({ slide, page, total, exporting = false }: { sl
   }, []);
   const { block, section } = slide;
   const visual = orientationVisual(block, section.id, slide.index);
-  return <div ref={parent} data-slide-motion={exporting ? "static" : entered ? "entered" : "waiting"} className={`orientation-slide-container tone-${visual.tone} ${entered ? "is-entered" : "is-waiting"}`}><div className={`orientation-slide layout-${visual.layout} ${block.pair ? "slide-pair" : ""}`} style={{ transform: exporting ? "none" : `scale(${scale})` }}>
+  return <div ref={parent} data-slide-motion={exporting ? "static" : entered && ready ? "entered" : "waiting"} className={`orientation-slide-container tone-${visual.tone} ${entered && ready ? "is-entered" : "is-waiting"}`}><div className={`orientation-slide layout-${visual.layout} ${block.pair ? "slide-pair" : ""}`} style={{ transform: exporting ? "none" : `scale(${scale})` }}>
     <header className="orientation-slide-header"><TidyLogo /><span>{section.title} / {section.es}</span><span>{page} / {total}</span></header>
     <div className="orientation-slide-body"><OrientationComposition block={block} sectionId={section.id} index={slide.index} interactive={!exporting} /></div>
     <footer>Images are illustrations of the standard. / Las imágenes ilustran el estándar.</footer>
+    {!exporting && <div className="orientation-motion-line" aria-hidden="true"><span /></div>}
   </div></div>;
 }
