@@ -89,6 +89,8 @@
 - [ ] Switch on the five extra add-on prices in Stripe (needs your go-ahead: changes live Stripe)
 
 ## Pro orientation (Oct 9)
+- [ ] Replace repeated imagery with unique photo assignments and purposeful graphic slides; simplify image-free opener and design badge.
+- [ ] Build visibly distinct tile, timeline, quote, scenario and comparison compositions with staged motion; verify viewer and regenerate PDF.
 - [x] Rotate bright semantic slide palettes and layouts; keep the current font and signed-in gates.
 - [x] Add orientation-only motion, swipe/click navigation and comparison controls with reduced-motion support.
 - [x] Add diverse casting and a complete branded kit visual; regenerate and visually review every PDF page.
