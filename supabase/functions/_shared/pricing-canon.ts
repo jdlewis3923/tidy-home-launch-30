@@ -192,6 +192,7 @@ export const CLEANING_SURCHARGE = {
   label: '2,501–4,000 sq ft',
 } as const;
 
+/** RETIRED — kept for history only; never charged. The lawn bands replace it. */
 export const LAWN_SURCHARGE = {
   perVisitDollars: 30,
   minSqFt: 4001,
@@ -207,10 +208,9 @@ export function cleaningSurchargePerVisit(sqft: number | null | undefined): numb
 }
 
 /** Lawn surcharge per visit for a yard's mowable turf area. */
-export function lawnSurchargePerVisit(sqft: number | null | undefined): number {
-  if (!sqft) return 0;
-  if (sqft > LAWN_SURCHARGE.maxSqFt) return 0;
-  return sqft >= LAWN_SURCHARGE.minSqFt ? LAWN_SURCHARGE.perVisitDollars : 0;
+export function lawnSurchargePerVisit(_sqft?: number | null): number {
+  // RETIRED: the lawn size bands replaced the old extra-large lawn surcharge.
+  return 0;
 }
 
 /** True when the property is above every purchasable band — quote by hand. */
@@ -345,17 +345,18 @@ export const SERVICE_AREA_SHORT = 'Pinecrest, Kendall & Kendall West';
 // Figures are explicit dollars so no rounding rule can drift.
 // ---------------------------------------------------------------------------
 
-/** Pay per completed visit, by service, size and the plan's cadence. */
+/** Pay per completed visit, by service and size. Cadence never moves Pro pay —
+ *  the cadence discount comes out of Tidy's margin, never the Pro's. */
 export const CONTRACTOR_VISIT_PAY: Record<'cleaning' | 'lawn', Record<CanonSize, Record<CanonCadence, number>>> = {
   cleaning: {
-    1: { monthly: 56, biweekly: 51, weekly: 46 },
-    2: { monthly: 76, biweekly: 70, weekly: 62 },
-    3: { monthly: 112, biweekly: 103, weekly: 92 },
+    1: { monthly: 56, biweekly: 56, weekly: 56 },
+    2: { monthly: 76, biweekly: 76, weekly: 76 },
+    3: { monthly: 112, biweekly: 112, weekly: 112 },
   },
   lawn: {
-    1: { monthly: 18, biweekly: 16, weekly: 15 },
-    2: { monthly: 26, biweekly: 24, weekly: 21 },
-    3: { monthly: 40, biweekly: 36, weekly: 32 },
+    1: { monthly: 18, biweekly: 18, weekly: 18 },
+    2: { monthly: 26, biweekly: 26, weekly: 26 },
+    3: { monthly: 40, biweekly: 40, weekly: 40 },
   },
 };
 
@@ -367,7 +368,7 @@ export const CONTRACTOR_SHINE_PAY: Record<CanonSize, { maintenanceWash: number; 
 };
 
 /** The pro's share of a surcharge, per visit. */
-export const CONTRACTOR_SURCHARGE_PAY = { cleaning: 24, lawn: 12 } as const;
+export const CONTRACTOR_SURCHARGE_PAY = { cleaning: 24, lawn: 0 } as const;
 
 /** Tier 2 pros earn +10% on every figure, rounded to the dollar. */
 export const TIER_2_UPLIFT = 1.1;
