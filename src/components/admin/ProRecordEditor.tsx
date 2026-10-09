@@ -39,7 +39,7 @@ const GROUPS: { title: string; fields: Field[] }[] = [
   ] },
   { title: "Pipeline", fields: [
     { key: "score", label: "Score", kind: "number" }, { key: "hiring_tier", label: "Tier", kind: "select", options: ["A", "B", "C"] },
-    { key: "current_stage", label: "Stage", kind: "select", options: STAGES }, { key: "queue_state", label: "Queue state", kind: "select", options: QUEUE },
+    { key: "queue_state", label: "Queue state", kind: "select", options: QUEUE },
     { key: "pro_number", label: "Pro number", kind: "text" }, { key: "start_date", label: "Start date", kind: "date" },
     { key: "flags", label: "Flags (comma separated)", kind: "list" }, { key: "notes", label: "Notes", kind: "longtext" },
   ] },

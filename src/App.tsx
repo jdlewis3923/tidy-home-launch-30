@@ -68,6 +68,9 @@ const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
 const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
 const AdminReservations = lazy(() => import("./pages/AdminReservations.tsx"));
 const AdminFounding = lazy(() => import("./pages/AdminFounding.tsx"));
+const AdminPipeline = lazy(() => import("./pages/AdminPipeline.tsx"));
+const AdminPipelineRecord = lazy(() => import("./pages/AdminPipelineRecord.tsx"));
+const AdminPipelineArchive = lazy(() => import("./pages/AdminPipelineArchive.tsx"));
 const AdminEntitlements = lazy(() => import("./pages/AdminEntitlements.tsx"));
 const Reserved = lazy(() => import("./pages/Reserved.tsx"));
 const ReserveConfirm = lazy(() => import("./pages/ReserveConfirm.tsx"));
@@ -354,6 +357,9 @@ const App = () => (
                   <Route path="/admin/kpis" element={<AdminKpis />} />
                   <Route path="/admin/reservations" element={<AdminReservations />} />
                   <Route path="/admin/founding" element={<AdminFounding />} />
+                  <Route path="/admin/pipeline" element={<AdminPipeline />} />
+                  <Route path="/admin/pipeline/archive" element={<AdminPipelineArchive />} />
+                  <Route path="/admin/pipeline/:id" element={<AdminPipelineRecord />} />
                   <Route path="/admin/entitlements" element={<AdminEntitlements />} />
                   {/* Command center — default admin landing view. */}
                   <Route path="/admin" element={<Navigate to="/admin/command" replace />} />

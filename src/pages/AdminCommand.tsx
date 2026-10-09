@@ -24,6 +24,7 @@ import { MessagingReadinessBanner } from "@/components/admin/MessagingReadiness"
 import { Button } from "@/components/ui/button";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { toast } from "@/hooks/use-toast";
+import MoneyAtRiskTile from "@/components/admin/pipeline/MoneyAtRiskTile";
 
 // ── types ────────────────────────────────────────────────────────────────────
 type Metrics = Record<string, any>;
@@ -472,6 +473,8 @@ export default function AdminCommand() {
                 })}
               </div>
             </div>
+
+            <MoneyAtRiskTile />
 
             {/* Hiring pipeline funnel */}
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6">
