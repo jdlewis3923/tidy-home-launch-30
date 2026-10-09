@@ -25,11 +25,15 @@ describe("orientation preview preserves content and stage gates", () => {
     }
     expect(slides.filter(s => s.block.pair)).toHaveLength(15);
   });
-  it("shares all four palettes and five layouts without depending on unlocked slide position", () => {
+  it("uses distinct compositions, an image-free opener and no repeated slide photos", () => {
     const slides = orientationSlides(ORIENTATION_SECTIONS);
     const visuals = slides.map(s => orientationVisual(s.block, s.section.id, s.index));
     expect(new Set(visuals.map(v => v.tone)).size).toBe(4);
-    expect(new Set(visuals.map(v => v.layout)).size).toBe(5);
+    expect(new Set(visuals.map(v => v.layout)).size).toBeGreaterThanOrEqual(20);
+    expect(visuals[0].layout).toBe("opener");
+    expect(visuals[0].image).toBeUndefined();
+    const images = visuals.flatMap((v,i) => slides[i].block.pair ? [orientationImage(`${slides[i].block.pair}-R`),orientationImage(`${slides[i].block.pair}-W`)] : v.image ? [v.image] : []);
+    expect(new Set(images).size).toBe(images.length);
     expect(orientationImage("PRO-5")).toContain("complete-kit");
     expect(orientationImage("PRO-1")).toContain("diverse-arrival");
   });
