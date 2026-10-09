@@ -540,6 +540,12 @@ export function sizeFromTurfSqFt(sqft: number): SizeSelection {
   return 'quote';
 }
 
+/** Verified band as stored on the reservation: '1' | '2' | '3' | 'custom'. */
+export function lawnBandFromSqFt(sqft: number): '1' | '2' | '3' | 'custom' {
+  const s = sizeFromTurfSqFt(sqft);
+  return s === 'quote' ? 'custom' : (String(s) as '1' | '2' | '3');
+}
+
 /** What the customer drives → size. */
 export type VehicleClass = 'sedan' | 'coupe' | 'suv' | 'crossover' | 'truck' | 'suv3row' | 'van';
 
