@@ -32,7 +32,13 @@ Deno.serve(async (req) => {
       }
     }
   }
-  const list = await stripe.prices.list({ lookup_keys: Object.keys(wanted), limit: 100 });
+  // Stripe accepts at most 10 lookup_keys per list call.
+  const keys = Object.keys(wanted);
+  const list = { data: [] as Stripe.Price[] };
+  for (let i = 0; i < keys.length; i += 9) {
+    const page = await stripe.prices.list({ lookup_keys: keys.slice(i, i + 9), limit: 100 });
+    list.data.push(...page.data);
+  }
   const out = [];
   for (const p of list.data) {
     const w = wanted[p.lookup_key ?? ""];
