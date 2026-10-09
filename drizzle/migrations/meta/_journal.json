@@ -841,6 +841,13 @@
       "when": 1791385489682,
       "tag": "0119_hide_contractor_pay_from_members",
       "breakpoints": true
+    },
+    {
+      "idx": 120,
+      "version": "7",
+      "when": 1791552766270,
+      "tag": "0120_contractor_pipeline_seven_stages",
+      "breakpoints": true
     }
   ]
 }

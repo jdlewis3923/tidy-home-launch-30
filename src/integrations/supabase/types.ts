@@ -1586,6 +1586,44 @@ export type Database = {
           },
         ]
       }
+      contractor_artifacts: {
+        Row: {
+          applicant_id: string
+          file_name: string | null
+          id: string
+          kind: string
+          storage_path: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          applicant_id: string
+          file_name?: string | null
+          id?: string
+          kind: string
+          storage_path: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          applicant_id?: string
+          file_name?: string | null
+          id?: string
+          kind?: string
+          storage_path?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contractor_artifacts_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contractor_insurance: {
         Row: {
           additional_insured_status: string
@@ -1677,6 +1715,246 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "contractor_insurance_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contractor_pipeline: {
+        Row: {
+          activated_at: string | null
+          adverse_action_notice_sent_at: string | null
+          applicant_id: string
+          apply_submitted_at: string | null
+          archived: boolean
+          archived_at: string | null
+          call_notes: string | null
+          checkr_result: string | null
+          coi_effective_date: string | null
+          coi_expiry_date: string | null
+          coi_limit_aggregate: number | null
+          coi_limit_occurrence: number | null
+          coi_names_tidy_as_ai: boolean | null
+          created_at: string
+          decline_note: string | null
+          decline_reason: string | null
+          drive_time_minutes: number | null
+          hold_callback_date: string | null
+          hold_reason: string | null
+          ica_countersigned_at: string | null
+          insurance_reimbursement_start_month: string | null
+          kit_issued_at: string | null
+          owns_equipment: boolean | null
+          pre_adverse_notice_sent_at: string | null
+          quote_carrier: string | null
+          quote_limit_aggregate: number | null
+          quote_limit_occurrence: number | null
+          quote_names_tidy_as_ai: boolean | null
+          reimbursement_m1_paid_at: string | null
+          reimbursement_m2_paid_at: string | null
+          reimbursement_m3_paid_at: string | null
+          report_and_rights_summary_provided: boolean | null
+          route_confirmed: boolean
+          screening_call_completed_at: string | null
+          screening_decision: string | null
+          service: string | null
+          service_days: string[]
+          source: string | null
+          spend_confirmed_at: string | null
+          stage: string
+          stage_entered_at: string
+          state: string
+          updated_at: string
+          welcome_t1_sent_at: string | null
+          withdrawn_note: string | null
+        }
+        Insert: {
+          activated_at?: string | null
+          adverse_action_notice_sent_at?: string | null
+          applicant_id: string
+          apply_submitted_at?: string | null
+          archived?: boolean
+          archived_at?: string | null
+          call_notes?: string | null
+          checkr_result?: string | null
+          coi_effective_date?: string | null
+          coi_expiry_date?: string | null
+          coi_limit_aggregate?: number | null
+          coi_limit_occurrence?: number | null
+          coi_names_tidy_as_ai?: boolean | null
+          created_at?: string
+          decline_note?: string | null
+          decline_reason?: string | null
+          drive_time_minutes?: number | null
+          hold_callback_date?: string | null
+          hold_reason?: string | null
+          ica_countersigned_at?: string | null
+          insurance_reimbursement_start_month?: string | null
+          kit_issued_at?: string | null
+          owns_equipment?: boolean | null
+          pre_adverse_notice_sent_at?: string | null
+          quote_carrier?: string | null
+          quote_limit_aggregate?: number | null
+          quote_limit_occurrence?: number | null
+          quote_names_tidy_as_ai?: boolean | null
+          reimbursement_m1_paid_at?: string | null
+          reimbursement_m2_paid_at?: string | null
+          reimbursement_m3_paid_at?: string | null
+          report_and_rights_summary_provided?: boolean | null
+          route_confirmed?: boolean
+          screening_call_completed_at?: string | null
+          screening_decision?: string | null
+          service?: string | null
+          service_days?: string[]
+          source?: string | null
+          spend_confirmed_at?: string | null
+          stage?: string
+          stage_entered_at?: string
+          state?: string
+          updated_at?: string
+          welcome_t1_sent_at?: string | null
+          withdrawn_note?: string | null
+        }
+        Update: {
+          activated_at?: string | null
+          adverse_action_notice_sent_at?: string | null
+          applicant_id?: string
+          apply_submitted_at?: string | null
+          archived?: boolean
+          archived_at?: string | null
+          call_notes?: string | null
+          checkr_result?: string | null
+          coi_effective_date?: string | null
+          coi_expiry_date?: string | null
+          coi_limit_aggregate?: number | null
+          coi_limit_occurrence?: number | null
+          coi_names_tidy_as_ai?: boolean | null
+          created_at?: string
+          decline_note?: string | null
+          decline_reason?: string | null
+          drive_time_minutes?: number | null
+          hold_callback_date?: string | null
+          hold_reason?: string | null
+          ica_countersigned_at?: string | null
+          insurance_reimbursement_start_month?: string | null
+          kit_issued_at?: string | null
+          owns_equipment?: boolean | null
+          pre_adverse_notice_sent_at?: string | null
+          quote_carrier?: string | null
+          quote_limit_aggregate?: number | null
+          quote_limit_occurrence?: number | null
+          quote_names_tidy_as_ai?: boolean | null
+          reimbursement_m1_paid_at?: string | null
+          reimbursement_m2_paid_at?: string | null
+          reimbursement_m3_paid_at?: string | null
+          report_and_rights_summary_provided?: boolean | null
+          route_confirmed?: boolean
+          screening_call_completed_at?: string | null
+          screening_decision?: string | null
+          service?: string | null
+          service_days?: string[]
+          source?: string | null
+          spend_confirmed_at?: string | null
+          stage?: string
+          stage_entered_at?: string
+          state?: string
+          updated_at?: string
+          welcome_t1_sent_at?: string | null
+          withdrawn_note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contractor_pipeline_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: true
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contractor_spend: {
+        Row: {
+          amount_cents: number
+          applicant_id: string
+          category: string
+          created_by: string | null
+          id: string
+          note: string | null
+          spent_at: string
+        }
+        Insert: {
+          amount_cents: number
+          applicant_id: string
+          category: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          spent_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          applicant_id?: string
+          category?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          spent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contractor_spend_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contractor_stage_events: {
+        Row: {
+          actor: string | null
+          applicant_id: string
+          created_at: string
+          from_stage: string | null
+          from_state: string | null
+          id: string
+          kind: string
+          metadata: Json
+          reason: string | null
+          to_stage: string | null
+          to_state: string | null
+        }
+        Insert: {
+          actor?: string | null
+          applicant_id: string
+          created_at?: string
+          from_stage?: string | null
+          from_state?: string | null
+          id?: string
+          kind: string
+          metadata?: Json
+          reason?: string | null
+          to_stage?: string | null
+          to_state?: string | null
+        }
+        Update: {
+          actor?: string | null
+          applicant_id?: string
+          created_at?: string
+          from_stage?: string | null
+          from_state?: string | null
+          id?: string
+          kind?: string
+          metadata?: Json
+          reason?: string | null
+          to_stage?: string | null
+          to_state?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contractor_stage_events_applicant_id_fkey"
             columns: ["applicant_id"]
             isOneToOne: false
             referencedRelation: "applicants"
@@ -6851,6 +7129,142 @@ export type Database = {
           _user: string
           _visit?: string
         }
+        Returns: undefined
+      }
+      pipeline_add_artifact: {
+        Args: { _id: string; _kind: string; _name: string; _path: string }
+        Returns: string
+      }
+      pipeline_advance: {
+        Args: {
+          _amount_cents?: number
+          _confirm_spend?: boolean
+          _expected_to?: string
+          _id: string
+          _note?: string
+        }
+        Returns: Json
+      }
+      pipeline_archive_apply: {
+        Args: {
+          _id: string
+          _meta: Json
+          _note: string
+          _reason: string
+          _state: string
+        }
+        Returns: undefined
+      }
+      pipeline_archive_list: {
+        Args: { _q?: string }
+        Returns: {
+          applicant_id: string
+          archived_at: string
+          email: string
+          name: string
+          phone: string
+          reason: string
+          service: string
+          spend_cents: number
+          stage: string
+          state: string
+        }[]
+      }
+      pipeline_assert_admin: { Args: never; Returns: undefined }
+      pipeline_board: {
+        Args: never
+        Returns: {
+          activated: boolean
+          applicant_id: string
+          callback_overdue: boolean
+          city: string
+          days_in_stage: number
+          hold_callback_date: string
+          hold_reason: string
+          name: string
+          overridden: boolean
+          previously_declined: string
+          service: string
+          stage: string
+          state: string
+        }[]
+      }
+      pipeline_bulk_decline: {
+        Args: { _ids: string[]; _note?: string; _reason: string }
+        Returns: number
+      }
+      pipeline_business_days_between: {
+        Args: { _from: string; _to: string }
+        Returns: number
+      }
+      pipeline_callbacks_due: { Args: never; Returns: number }
+      pipeline_coi_tick: { Args: never; Returns: Json }
+      pipeline_decline: {
+        Args: {
+          _adverse?: string
+          _id: string
+          _note?: string
+          _pre_adverse?: string
+          _reason: string
+          _rights_provided?: boolean
+        }
+        Returns: undefined
+      }
+      pipeline_hold: {
+        Args: { _callback: string; _id: string; _reason: string }
+        Returns: undefined
+      }
+      pipeline_log: {
+        Args: {
+          _from_stage: string
+          _from_state: string
+          _id: string
+          _kind: string
+          _meta?: Json
+          _reason: string
+          _to_stage: string
+          _to_state: string
+        }
+        Returns: undefined
+      }
+      pipeline_mark_welcome_sent: { Args: { _id: string }; Returns: undefined }
+      pipeline_missing: { Args: { _id: string }; Returns: string[] }
+      pipeline_money_at_risk: {
+        Args: never
+        Returns: {
+          service: string
+          spend_cents: number
+        }[]
+      }
+      pipeline_override: {
+        Args: { _id: string; _reason: string; _to_stage: string }
+        Returns: undefined
+      }
+      pipeline_pro_assignable: {
+        Args: { _applicant_id: string }
+        Returns: boolean
+      }
+      pipeline_reinstate: { Args: { _id: string }; Returns: undefined }
+      pipeline_restore: { Args: { _id: string }; Returns: undefined }
+      pipeline_resume: { Args: { _id: string }; Returns: undefined }
+      pipeline_service_key: { Args: { _s: string }; Returns: string }
+      pipeline_service_label: { Args: { _s: string }; Returns: string }
+      pipeline_spend_lock_holder: {
+        Args: { _except: string; _service: string }
+        Returns: {
+          applicant_id: string
+          name: string
+          stage: string
+        }[]
+      }
+      pipeline_stage_index: { Args: { _s: string }; Returns: number }
+      pipeline_stage_label: { Args: { _s: string }; Returns: string }
+      pipeline_update: {
+        Args: { _id: string; _patch: Json }
+        Returns: undefined
+      }
+      pipeline_withdraw: {
+        Args: { _id: string; _note: string }
         Returns: undefined
       }
       pro_all_five: { Args: { _applicant_id: string }; Returns: boolean }
