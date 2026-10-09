@@ -14,3 +14,4 @@
 - Contractor pay columns are excluded from member-readable column grants; admin totals come from security-definer RPCs — why: pay is never customer-visible.
 - integration_logs.source and admin_alerts.level are database-checked allowlists; log under an allowed source (e.g. 'internal') and put the function name in event — why: a rejected log or alert write fails silently and the Health page goes blind.
 - Pro orientation progress is server-gated by contractor pipeline stage and stored per applicant/section in `pro_orientation_progress` — why: locked material and completion cannot be bypassed client-side.
+- Orientation reading, browser slides and client-generated PDFs share `ORIENTATION_COPY`; Pro previews export only stage-unlocked sections, while role-checked admin previews do not write progress — why: one content source and no public document URL or preview-driven acknowledgements.

@@ -149,6 +149,7 @@ export default function ProProfile() {
 
           <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)]">
             <SettingRow to="/pro/notifications" label="Notifications" />
+            <SettingRow to="/pro/orientation" label="Pro orientation / Orientación" />
             <SettingRow to="/pro/status" label="Badge and tier" />
             <SettingRow
               label="Contact support"
