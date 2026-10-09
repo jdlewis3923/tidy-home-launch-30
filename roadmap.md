@@ -89,6 +89,8 @@
 - [ ] Switch on the five extra add-on prices in Stripe (needs your go-ahead: changes live Stripe)
 
 ## Pro orientation (Oct 9)
+- [ ] Add signed-in browser deck preview, PDF open/download, and prominent admin/Pro links.
+- [ ] Restyle orientation with heavier Tidy typography and image-led layouts; verify access, gating and progress.
 - [x] /pro/orientation hub + 4 sections, stage-gated, bilingual, "I've read this" progress
 - [x] 36 orientation images in public/orientation/
 - [x] Admin: orientation progress on pipeline record; deck download on /admin/orientations + record
