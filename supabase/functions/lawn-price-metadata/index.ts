@@ -19,12 +19,17 @@ Deno.serve(async (req) => {
   const apply = body?.apply === true;
   const stripe = new Stripe(key, { apiVersion: "2024-12-18.acacia", httpClient: Stripe.createFetchHttpClient() });
 
-  const wanted: Record<string, { contractor_pay: string; budget_hours: string; size: CanonSize; cadence: CanonCadence }> = {};
-  for (const size of [1, 2, 3] as CanonSize[]) {
-    for (const cadence of ["monthly", "biweekly", "weekly"] as CanonCadence[]) {
-      wanted[SERVICE_LOOKUP_KEYS.lawn[size][cadence]] = {
-        contractor_pay: String(CONTRACTOR_VISIT_PAY.lawn[size][cadence]), budget_hours: BUDGET_HOURS[size], size, cadence,
-      };
+  // Pro pay never moves with cadence: lawn 18/26/40, cleaning 56/76/112 on every cadence.
+  const wanted: Record<string, { contractor_pay: string; budget_hours?: string; size: CanonSize; cadence: CanonCadence }> = {};
+  for (const service of ["lawn", "cleaning"] as const) {
+    for (const size of [1, 2, 3] as CanonSize[]) {
+      for (const cadence of ["monthly", "biweekly", "weekly"] as CanonCadence[]) {
+        wanted[SERVICE_LOOKUP_KEYS[service][size][cadence]] = {
+          contractor_pay: String(CONTRACTOR_VISIT_PAY[service][size].monthly),
+          ...(service === "lawn" ? { budget_hours: BUDGET_HOURS[size] } : {}),
+          size, cadence,
+        };
+      }
     }
   }
   const list = await stripe.prices.list({ lookup_keys: Object.keys(wanted), limit: 100 });
@@ -34,8 +39,9 @@ Deno.serve(async (req) => {
     if (!w) continue;
     const before = { contractor_pay: p.metadata?.contractor_pay ?? null, budget_hours: p.metadata?.budget_hours ?? null };
     let after = before;
-    if (apply && (before.contractor_pay !== w.contractor_pay || before.budget_hours !== w.budget_hours)) {
-      const u = await stripe.prices.update(p.id, { metadata: { contractor_pay: w.contractor_pay, budget_hours: w.budget_hours } });
+    const needs = before.contractor_pay !== w.contractor_pay || (w.budget_hours != null && before.budget_hours !== w.budget_hours);
+    if (apply && needs) {
+      const u = await stripe.prices.update(p.id, { metadata: { contractor_pay: w.contractor_pay, ...(w.budget_hours ? { budget_hours: w.budget_hours } : {}) } });
       after = { contractor_pay: u.metadata?.contractor_pay ?? null, budget_hours: u.metadata?.budget_hours ?? null };
     }
     out.push({ lookup_key: p.lookup_key, active: p.active, unit_amount: p.unit_amount, expected: w, before, after });
