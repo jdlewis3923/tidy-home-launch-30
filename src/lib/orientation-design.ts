@@ -10,17 +10,17 @@ export const ORIENTATION_TONES = ["blue", "yellow", "white", "charcoal"] as cons
 const referenceKeys = ["ARRIVAL-R","ARRIVAL-W","K1-R","K1-W","K2-R","K2-W","B1-R","B1-W","B2-R","B2-W","F1-R","F1-W","F2-R","F2-W","L1-R","L1-W","L2-R","L2-W","L3-R","L3-W","L4-R","L4-W","C1-R","C1-W","C2-R","C2-W","C3-R","C3-W","C4-R","C4-W"];
 export const orientationImage = (name: string) => referenceKeys.includes(name) ? REFERENCE_IMAGES[12 + referenceKeys.indexOf(name)] : name === "PRO-5" ? kit : name === "PRO-1" ? welcome : name === "PRO-6" ? portrait : name === "PRO-2" ? REFERENCE_IMAGES[10] : name === "PRO-3" ? REFERENCE_IMAGES[11] : name === "PRO-4" ? REFERENCE_IMAGES[9] : `/orientation/${name}.jpg`;
 const photoAssignments: Record<string, number[]> = {
-  "Welcome to TIDY":[0], "Our standard":[1,2], "Independent contractor relationship":[3],
+  "Welcome to TIDY":[], "Our standard":[1,2], "Independent contractor relationship":[3],
   "Five readiness gates":[4], "Insurance":[5], "Insurance wording":[6], "Screening and privacy":[7], "Your kit":[8],
-  "Cleaning scope":[9], "Lawn scope":[10], "Car care scope":[11], "Your first assignment":[42,43],
+  "Cleaning scope":[9], "Lawn scope":[10], "Car care scope":[11], "Communication":[0,42], "Your first assignment":[43],
 };
 const compositions: Record<string, string> = {
-  "Welcome to TIDY": "opener", "Our standard": "pillars", "Independent contractor relationship": "editorial",
-  "Five readiness gates": "gates", "Insurance": "coverage", "Insurance wording": "quote", "Screening and privacy": "privacy",
+  "Welcome to TIDY": "opener", "Our standard": "pillars", "Independent contractor relationship": "relationship",
+  "Five readiness gates": "gates", "Insurance": "coverage", "Insurance wording": "quote", "Screening and privacy": "philosophy",
   "Your kit": "kit", "Your badge": "badge", "Your territory": "territory", "Pay per completed visit": "pay",
   "Additional earnings": "stat", "The visit": "timeline", "Cleaning scope": "scope", "Cleaning add-ons": "boundary",
   "Lawn scope": "scope-reverse", "Car care scope": "scope-banner", "Your photo record": "photo-story",
-  "Escalation": "steps", "The 48-hour standard": "stat", "Boundaries": "boundary", "Communication": "message",
+  "Escalation": "steps", "The 48-hour standard": "stat", "Boundaries": "boundary", "Communication": "purpose",
   "Scenario: no access": "scenario", "Scenario: extra request": "scenario-graphic", "Scenario: damage or safety concern": "alert",
   "Your first assignment": "finale",
 };

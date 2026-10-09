@@ -1,7 +1,7 @@
 import type { OrientationBlock } from "@/lib/orientation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Columns2, Check, RotateCcw } from "lucide-react";
+import { Columns2, Check, RotateCcw, X } from "lucide-react";
 import { orientationImage } from "@/lib/orientation-design";
 import { ORIENTATION_STANDARDS } from "@/lib/orientation-standards";
 
@@ -12,8 +12,8 @@ export function OrientationImages({ block, eager = false, interactive = false }:
   if (block.pair) {
     const standard = ORIENTATION_STANDARDS[block.pair];
     return <div className="orientation-comparison">{interactive && <div className="orientation-comparison-controls" role="group" aria-label="Compare results / Comparar resultados">{([['both', Columns2, 'Both / Ambos'], ['right', Check, 'RIGHT / ACCEPT'], ['wrong', RotateCcw, 'WRONG / REWORK']] as const).map(([value, Icon, label]) => <Button key={value} size="sm" variant="outline" aria-pressed={mode === value} onClick={() => setMode(value)}><Icon />{label}</Button>)}</div>}<div key={mode} className={`orientation-pair ${mode !== "both" ? "single-result" : ""}`}>
-      <figure hidden={mode === "wrong"}>{image(`${block.pair}-R`, "Accepted result")}<figcaption className="orientation-accept">RIGHT / ACCEPT · CORRECTO</figcaption><div className="orientation-result-direction"><p>{standard.right}</p><p lang="es">{standard.rightEs}</p></div></figure>
-      <figure hidden={mode === "right"}>{image(`${block.pair}-W`, "Result to rework")}<figcaption className="orientation-rework">WRONG / REWORK · CORREGIR</figcaption><div className="orientation-result-direction"><p>{standard.wrong}</p><p lang="es">{standard.wrongEs}</p></div></figure>
+      <figure hidden={mode === "wrong"}>{image(`${block.pair}-R`, "Accepted result")}<figcaption className="orientation-accept"><Check aria-hidden="true" /> RIGHT / ACCEPT · CORRECTO</figcaption><ul className="orientation-result-direction"><li>{standard.right}<p lang="es">{standard.rightEs}</p></li></ul></figure>
+      <figure hidden={mode === "right"}>{image(`${block.pair}-W`, "Result to rework")}<figcaption className="orientation-rework"><X aria-hidden="true" /> WRONG / REWORK · CORREGIR</figcaption><ul className="orientation-result-direction"><li>{standard.wrong}<p lang="es">{standard.wrongEs}</p></li></ul></figure>
     </div></div>;
   }
   return block.image ? image(block.image, block.title) : null;
