@@ -89,6 +89,9 @@
 - [ ] Switch on the five extra add-on prices in Stripe (needs your go-ahead: changes live Stripe)
 
 ## Pro orientation (Oct 9)
+- [ ] Rotate bright semantic slide palettes and layouts; keep the current font and signed-in gates.
+- [ ] Add orientation-only motion, swipe/click navigation and comparison controls with reduced-motion support.
+- [ ] Add diverse casting and a complete branded kit visual; regenerate and visually review every PDF page.
 - [x] Add signed-in browser deck preview, PDF open/download, and prominent admin/Pro links.
 - [x] Restyle orientation with heavier Tidy typography and image-led layouts; verify access, gating and progress.
 - [x] /pro/orientation hub + 4 sections, stage-gated, bilingual, "I've read this" progress
