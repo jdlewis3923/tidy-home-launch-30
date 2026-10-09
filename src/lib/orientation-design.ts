@@ -1,6 +1,9 @@
 import kit from "@/assets/orientation/complete-kit-v3.jpg";
 import arrival from "@/assets/orientation/diverse-arrival.jpg";
 import portrait from "@/assets/orientation/badge-portrait.jpg";
+import photoRecord from "@/assets/orientation/photo-record.jpg";
+import noAccess from "@/assets/orientation/no-access.jpg";
+import assignment from "@/assets/orientation/first-assignment.jpg";
 import { ORIENTATION_COPY, ORIENTATION_SECTIONS, type OrientationBlock } from "@/lib/orientation";
 
 export const ORIENTATION_TONES = ["blue", "yellow", "white", "charcoal"] as const;
@@ -22,7 +25,7 @@ export function orientationVisual(block: OrientationBlock, sectionId: string, in
   const stat = block.title === "Five readiness gates" ? "05" : block.title === "Additional earnings" ? "40%" : block.title === "The 48-hour standard" ? "48h" : undefined;
   const layout = block.pair ? ["comparison", "comparison-rail", "comparison-focus"][number % 3] : compositions[block.title] ?? "editorial";
   // No fallback photograph: conceptual slides use graphics, never recycled pictures.
-  const image = block.title === "Our standard" ? arrival : block.image && block.title !== "Welcome to TIDY" ? orientationImage(block.image) : undefined;
+  const image = block.title === "Our standard" ? arrival : block.title === "Your photo record" ? photoRecord : block.title === "Scenario: no access" ? noAccess : block.title === "Your first assignment" ? assignment : block.image && block.title !== "Welcome to TIDY" ? orientationImage(block.image) : undefined;
   return { tone: ORIENTATION_TONES[number % 4], layout, stat, image, number };
 }
 export const orientationSegments = (text: string) => text.match(/[^.!?]+[.!?]+[”"]?|[^.!?]+$/g)?.map(s => s.trim()).filter(Boolean) ?? [text];
