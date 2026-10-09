@@ -176,3 +176,8 @@ verify_jwt = false
 
 [functions.google-reviews-public]
 verify_jwt = false
+
+# Lawn size verification: admin verify is gated by has_role inside the RPC;
+# load/respond are public and authorized by the single-use confirmation token.
+[functions.lawn-verification]
+verify_jwt = false
