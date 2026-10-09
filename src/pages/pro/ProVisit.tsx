@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ProVisitExtras from "@/components/pro/ProVisitExtras";
-import LawnJobSize from "@/components/pro/LawnJobSize";
+import LawnJobSize from "@/components/pro/ProLawnJobSize";
 import { AlertTriangle, Check, ListChecks, Send } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import {
