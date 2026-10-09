@@ -89,8 +89,8 @@
 - [ ] Switch on the five extra add-on prices in Stripe (needs your go-ahead: changes live Stripe)
 
 ## Pro orientation (Oct 9)
-- [ ] Align the entire deck to supplied reference cadence, include all contact-sheet images once and photographic welcome, preserve designed badge.
-- [ ] Build visibly distinct tile, timeline, quote, scenario and comparison compositions with staged motion; verify viewer and regenerate PDF.
+- [x] Align the entire deck to supplied reference cadence, include all 44 contact-sheet images once and photographic welcome, preserve designed badge.
+- [x] Build visibly distinct tile, timeline, quote, scenario and comparison compositions with staged motion; verify signed-in viewer, PDF download and all 41 rendered pages.
 - [x] Rotate bright semantic slide palettes and layouts; keep the current font and signed-in gates.
 - [x] Add orientation-only motion, swipe/click navigation and comparison controls with reduced-motion support.
 - [x] Add diverse casting and a complete branded kit visual; regenerate and visually review every PDF page.
