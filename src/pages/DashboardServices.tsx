@@ -389,7 +389,7 @@ export default function DashboardServices() {
         lang: language === 'es' ? 'es' : 'en',
         bedrooms: newService === 'cleaning' ? Number(newBedrooms.replace('+', '')) || null : null,
         bathrooms: newService === 'cleaning' ? Number(newBathrooms.replace('+', '')) || null : null,
-        lawn_choice: newService === 'lawn' ? newLawnChoice : null,
+        lawn_choice: null,
         vehicle_class: newService === 'detailing' ? newVehicleClass : null,
       });
       setStartingCheckout(false);
