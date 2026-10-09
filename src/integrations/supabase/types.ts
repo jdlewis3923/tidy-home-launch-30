@@ -3478,6 +3478,53 @@ export type Database = {
         }
         Relationships: []
       }
+      lawn_size_notices: {
+        Row: {
+          body: string
+          created_at: string
+          email: string
+          email_error: string | null
+          email_status: string
+          id: string
+          kind: string
+          reservation_id: string
+          sent_at: string | null
+          subject: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          email: string
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          kind: string
+          reservation_id: string
+          sent_at?: string | null
+          subject: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          email?: string
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          kind?: string
+          reservation_id?: string
+          sent_at?: string | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawn_size_notices_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           created_at: string
@@ -5141,6 +5188,17 @@ export type Database = {
           is_test_row: boolean
           lang: string
           last_name: string
+          lawn_confirm_token: string | null
+          lawn_confirmed_at: string | null
+          lawn_measured_sqft: number | null
+          lawn_new_monthly_cents: number | null
+          lawn_old_monthly_cents: number | null
+          lawn_selected_size: string | null
+          lawn_size_confirmation: string | null
+          lawn_size_variance: number | null
+          lawn_verified_at: string | null
+          lawn_verified_by: string | null
+          lawn_verified_size: string | null
           lines: Json
           monthly_cents: number
           phone: string
@@ -5184,6 +5242,17 @@ export type Database = {
           is_test_row?: boolean
           lang?: string
           last_name?: string
+          lawn_confirm_token?: string | null
+          lawn_confirmed_at?: string | null
+          lawn_measured_sqft?: number | null
+          lawn_new_monthly_cents?: number | null
+          lawn_old_monthly_cents?: number | null
+          lawn_selected_size?: string | null
+          lawn_size_confirmation?: string | null
+          lawn_size_variance?: number | null
+          lawn_verified_at?: string | null
+          lawn_verified_by?: string | null
+          lawn_verified_size?: string | null
           lines?: Json
           monthly_cents?: number
           phone: string
@@ -5227,6 +5296,17 @@ export type Database = {
           is_test_row?: boolean
           lang?: string
           last_name?: string
+          lawn_confirm_token?: string | null
+          lawn_confirmed_at?: string | null
+          lawn_measured_sqft?: number | null
+          lawn_new_monthly_cents?: number | null
+          lawn_old_monthly_cents?: number | null
+          lawn_selected_size?: string | null
+          lawn_size_confirmation?: string | null
+          lawn_size_variance?: number | null
+          lawn_verified_at?: string | null
+          lawn_verified_by?: string | null
+          lawn_verified_size?: string | null
           lines?: Json
           monthly_cents?: number
           phone?: string
@@ -6885,6 +6965,10 @@ export type Database = {
           month: string
         }[]
       }
+      admin_lawn_verify: {
+        Args: { _measured: number; _reservation: string }
+        Returns: Json
+      }
       admin_onboarding_tokens: {
         Args: { _applicant_id: string; _regenerate?: boolean }
         Returns: Json
@@ -7138,6 +7222,21 @@ export type Database = {
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_service_caller: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
+      lawn_apply_size: { Args: { _reservation: string }; Returns: undefined }
+      lawn_checkout_gate: { Args: { _email: string }; Returns: Json }
+      lawn_conversion_block: {
+        Args: { r: Database["public"]["Tables"]["reservations"]["Row"] }
+        Returns: string
+      }
+      lawn_line_cents: {
+        Args: { _cadence: string; _rate_card: number; _size: string }
+        Returns: number
+      }
+      lawn_size_from_sqft: { Args: { _sqft: number }; Returns: string }
+      lawn_size_respond: {
+        Args: { _accept: boolean; _token: string }
+        Returns: Json
+      }
       mark_visit_paid_in_full: {
         Args: {
           _actor?: string
