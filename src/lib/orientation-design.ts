@@ -1,14 +1,14 @@
-import kit from "@/assets/orientation/complete-kit-v3.jpg";
-import portrait from "@/assets/orientation/badge-portrait.jpg";
-import photoRecord from "@/assets/orientation/photo-record.jpg";
-import noAccess from "@/assets/orientation/no-access.jpg";
-import welcome from "@/assets/orientation/reference-welcome.jpg";
+import kit from "@/assets/orientation/hd/complete-kit-v3.jpg";
+import portrait from "@/assets/orientation/hd/badge-portrait.jpg";
+import photoRecord from "@/assets/orientation/hd/photo-record.jpg";
+import noAccess from "@/assets/orientation/hd/no-access.jpg";
+import welcome from "@/assets/orientation/hd/reference-welcome.jpg";
 import { REFERENCE_IMAGES } from "@/lib/orientation-reference";
 import { ORIENTATION_COPY, ORIENTATION_SECTIONS, type OrientationBlock } from "@/lib/orientation";
 
 export const ORIENTATION_TONES = ["blue", "yellow", "white", "charcoal"] as const;
 const referenceKeys = ["ARRIVAL-R","ARRIVAL-W","K1-R","K1-W","K2-R","K2-W","B1-R","B1-W","B2-R","B2-W","F1-R","F1-W","F2-R","F2-W","L1-R","L1-W","L2-R","L2-W","L3-R","L3-W","L4-R","L4-W","C1-R","C1-W","C2-R","C2-W","C3-R","C3-W","C4-R","C4-W"];
-export const orientationImage = (name: string) => referenceKeys.includes(name) ? REFERENCE_IMAGES[12 + referenceKeys.indexOf(name)] : name === "PRO-5" ? kit : name === "PRO-1" ? welcome : name === "PRO-6" ? portrait : `/orientation/${name}.jpg`;
+export const orientationImage = (name: string) => referenceKeys.includes(name) ? REFERENCE_IMAGES[12 + referenceKeys.indexOf(name)] : name === "PRO-5" ? kit : name === "PRO-1" ? welcome : name === "PRO-6" ? portrait : name === "PRO-2" ? REFERENCE_IMAGES[10] : name === "PRO-3" ? REFERENCE_IMAGES[11] : name === "PRO-4" ? REFERENCE_IMAGES[9] : `/orientation/${name}.jpg`;
 const photoAssignments: Record<string, number[]> = {
   "Welcome to TIDY":[0], "Our standard":[1,2], "Independent contractor relationship":[3],
   "Five readiness gates":[4], "Insurance":[5], "Insurance wording":[6], "Screening and privacy":[7], "Your kit":[8],
