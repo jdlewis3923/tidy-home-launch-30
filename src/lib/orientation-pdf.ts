@@ -6,7 +6,7 @@ import mediumFont from "@/assets/orientation/poppins-medium.ttf.asset.json";
 import { OrientationSlide, type OrientationSlideData } from "@/components/pro/orientation/OrientationSlide";
 
 export async function orientationPdf(slides: OrientationSlideData[]): Promise<Blob> {
-  const [{ jsPDF }, { toJpeg }] = await Promise.all([import("jspdf"), import("html-to-image")]);
+  const [{ jsPDF }, { default: html2canvas }] = await Promise.all([import("jspdf"), import("html2canvas")]);
   const fontCss = (await Promise.all([[blackFont.url,900],[mediumFont.url,500]].map(async ([url, weight]) => {
     const response = await fetch(String(url));
     if (!response.ok || response.headers.get("content-type")?.includes("text/html")) throw new Error("A deck font could not be loaded.");
@@ -25,7 +25,10 @@ export async function orientationPdf(slides: OrientationSlideData[]): Promise<Bl
       await document.fonts.ready;
       const element = host.querySelector<HTMLElement>(".orientation-slide");
       if (!element) throw new Error("Slide unavailable.");
-      const jpeg = await toJpeg(element, {width:1920, height:1080, pixelRatio:1, quality:.94, fontEmbedCSS:fontCss, style:{transform:"none",position:"relative",left:"0",top:"0",margin:"0"}});
+      const canvas = await html2canvas(element, {width:1920,height:1080,scale:1,useCORS:true,logging:false,windowWidth:1920,windowHeight:1080,onclone:doc=>{
+        const style=doc.createElement("style");style.textContent=fontCss+".orientation-export *, .orientation-export *:before, .orientation-export *:after {animation:none!important;transition:none!important;} .orientation-export {left:0!important;}";doc.head.append(style);
+      }});
+      const jpeg = canvas.toDataURL("image/jpeg",.94);
       if(i) pdf.addPage([1920,1080],"landscape");
       pdf.addImage(jpeg,"JPEG",0,0,1920,1080);
     }

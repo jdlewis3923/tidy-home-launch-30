@@ -13,7 +13,7 @@ const referenceKeys = ["ARRIVAL-R","ARRIVAL-W","K1-R","K1-W","K2-R","K2-W","B1-R
 export const orientationImage = (name: string) => referenceKeys.includes(name) ? REFERENCE_IMAGES[12 + referenceKeys.indexOf(name)] : name === "PRO-5" ? kit : name === "PRO-1" ? welcome : name === "PRO-6" ? portrait : `/orientation/${name}.jpg`;
 const photoAssignments: Record<string, number[]> = {
   "Welcome to TIDY":[0], "Our standard":[1,2], "Independent contractor relationship":[3,4],
-  "Five readiness gates":[5], "Insurance":[6], "Insurance wording":[7], "Your kit":[8],
+  "Five readiness gates":[4], "Insurance":[5], "Insurance wording":[6], "Screening and privacy":[7], "Your kit":[8],
   "Cleaning scope":[9], "Lawn scope":[10], "Car care scope":[11], "Your first assignment":[42,43],
 };
 const compositions: Record<string, string> = {

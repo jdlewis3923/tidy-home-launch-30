@@ -24,6 +24,7 @@ export function OrientationComposition({ block, sectionId, index, interactive = 
   if (v.layout === "coverage") return <><div className="orientation-insurance-copy"><Title /><div className="orientation-coverage-numbers"><div><ShieldCheck /><strong>$1M</strong></div><div><ShieldCheck /><strong>$2M</strong></div></div><div className="orientation-wide-copy"><p>{block.body}</p><p lang="es">{block.es}</p></div></div><div className="orientation-document-photo"><ReferencePhotos /></div></>;
   if (v.layout === "quote") return <><Copy /><div className="orientation-document-photo"><ReferencePhotos /></div></>;
   if (v.layout === "editorial" && v.references.length) return <><Title /><div className="orientation-editorial-tiles"><div><Handshake /><p>{en[0]}</p><p lang="es">{es[0]}</p></div><div><ShieldCheck /><p>{en[1]}</p><p lang="es">{es[1]}</p></div></div><ReferencePhotos /></>;
+  if (v.layout === "privacy") return <><Copy /><div className="orientation-document-photo"><ReferencePhotos /></div></>;
   if (v.layout === "finale") return <><Copy /><div className="orientation-finale-photos"><ReferencePhotos /></div></>;
   if (["privacy", "boundary", "message", "scenario-graphic", "alert", "editorial"].includes(v.layout)) {
     const Icon = v.layout === "privacy" ? LockKeyhole : v.layout === "message" ? MessageCircle : v.layout === "alert" ? AlertTriangle : v.layout === "editorial" ? Handshake : ArrowUpRight;
