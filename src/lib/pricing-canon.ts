@@ -638,7 +638,7 @@ export const SHINE_SUMMARY = '3 maintenance washes every month plus 2 full detai
 export const SIZING_FAQ: { q: string; a: string }[] = [
   {
     q: 'How do I know which size I am?',
-    a: 'Bedrooms for cleaning, what you drive for car care. For lawn, size is square feet of grass only — Small up to 3,000, Standard 3,000–7,000, Large 7,000–12,000. We don't count your house, driveway or pool. Pick your best guess; we check it from above and tell you before your first visit. You never have to measure anything.',
+    a: "Bedrooms for cleaning, what you drive for car care. For lawn, size is square feet of grass only — Small up to 3,000, Standard 3,000–7,000, Large 7,000–12,000. We don't count your house, driveway or pool. Pick your best guess; we check it from above and tell you before your first visit. You never have to measure anything.",
   },
   {
     q: 'What if I pick the wrong size?',
