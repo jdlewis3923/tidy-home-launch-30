@@ -1,5 +1,10 @@
 # Roadmap
 
+## Phone screenshots and orientation reference (Oct 9)
+- [x] Repair founding QR page phone readability, service cards and quote spacing in EN/ES.
+- [x] Add reference-style role tiles, circular steps, service kits and photo-led endings; retain the existing bilingual content and gates rather than substitute reference slogans.
+- [x] Verify phone/desktop rendering and regenerate the signed-in downloadable PDF; all 41 PDF pages inspected.
+
 ## Service landing pages (requested 2026-10-04)
 - [x] Rebuild the three service heroes and the Refer/Bundle hero experiences to match the approved visual references without changing pricing or flows.
 - [x] Category headlines with “&”, Shine Complete as car subtitle, and reservation buttons/date line across cleaning, lawn, and car pages.

@@ -181,7 +181,7 @@ export default function Founding() {
       heard_from: s.src.startsWith("hanger") || s.src.startsWith("doorhanger") ? "door_hanger" : "other",
       heard_other: s.src || undefined, lang: language, src: s.src || undefined, session_id: sessionId(),
       gift_addons: s.gifts.slice(0, giftCount), website: honeypot.current?.value || "",
-      lines: lines.filter(Boolean).map((l) => ({ service: l!.service, size: l!.size, cadence: l!.service === "detailing" ? null : l!.cadence, monthly: l!.monthly, visits_per_month: l!.visits })),
+      lines: lines.flatMap((l) => l ? [{ service: l.service, size: l.size, cadence: l.service === "detailing" ? null : l.cadence, monthly: l.monthly, visits_per_month: l.visits }] : []),
       quote: { total, visits, src: "founding", beds: s.beds, baths: s.baths },
     };
     const { data, error } = await supabase.functions.invoke("reservation-submit", { body });
@@ -518,7 +518,7 @@ export default function Founding() {
               ].map(({ svc, label, price, image, Icon, tone }, index) => (
                 <li key={label} className="founding-plan-card" style={{ animationDelay: `${index * 120}ms` }}>
                   <picture><img src={image} alt="" width={1365} height={768} loading="lazy" /></picture>
-                  <div><Icon className={`founding-plan-icon is-${tone}`} aria-hidden="true" /><span><strong>{t(label)}</strong><small>{t("from")} ${price} {t("a month")}</small></span><button type="button" aria-label={`${t("Add")} ${t(label)}`} onClick={() => go("sizes", { services: s.services.includes(svc) ? s.services : [...s.services, svc] })}>+</button></div>
+                  <div><Icon className={`founding-plan-icon is-${tone}`} aria-hidden="true" /><span><strong>{t(label)}</strong><small>{t("from")} ${price} {t("a month")}</small></span><button type="button" aria-label={`${t("Add")} ${t(label)}`} onClick={() => isZip(s.zip) ? go("sizes", { services: s.services.includes(svc) ? s.services : [...s.services, svc] }) : go("zip", { services: s.services.includes(svc) ? s.services : [...s.services, svc] })}>+</button></div>
                 </li>
               ))}
             </ul>
