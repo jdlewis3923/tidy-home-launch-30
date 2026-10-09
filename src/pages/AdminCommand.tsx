@@ -835,15 +835,18 @@ function AlertRow({
 
 function LawnVerificationCount() {
   const [n, setN] = useState<number | null>(null);
+  const [m, setM] = useState(0);
   useEffect(() => {
     void supabase.from("reservations").select("id", { count: "exact", head: true })
       .contains("services", ["lawn"]).is("lawn_verified_at", null).in("status", ["reserved", "invited"])
       .then(({ count }) => setN(count ?? 0));
+    void supabase.from("lawn_plan_changes").select("id", { count: "exact", head: true })
+      .in("status", ["pending_verification", "failed"]).then(({ count }) => setM(count ?? 0));
   }, []);
   if (n === null) return null;
   return (
     <a href="/admin/lawn-verification" data-testid="lawn-unverified-tile" className="mx-auto mb-4 block max-w-6xl rounded-lg border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground">
-      Lawn reservations awaiting size verification: <span className="tabular-nums">{n}</span> →
+      Lawn reservations awaiting size verification: <span className="tabular-nums">{n}</span> · paid-plan lawn changes: <span className="tabular-nums">{m}</span> →
     </a>
   );
 }

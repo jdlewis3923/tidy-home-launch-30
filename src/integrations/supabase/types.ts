@@ -3478,6 +3478,139 @@ export type Database = {
         }
         Relationships: []
       }
+      lawn_plan_changes: {
+        Row: {
+          applied_at: string | null
+          apply_error: string | null
+          cadence: string
+          confirm_token: string | null
+          confirmed_at: string | null
+          created_at: string
+          id: string
+          kind: string
+          lookup_key: string | null
+          measured_sqft: number | null
+          new_monthly_cents: number | null
+          note: string | null
+          old_monthly_cents: number | null
+          rate_card_version: number | null
+          selected_size: string
+          source: string
+          status: string
+          subscription_id: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+          verified_size: string | null
+          visit_id: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          apply_error?: string | null
+          cadence: string
+          confirm_token?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          lookup_key?: string | null
+          measured_sqft?: number | null
+          new_monthly_cents?: number | null
+          note?: string | null
+          old_monthly_cents?: number | null
+          rate_card_version?: number | null
+          selected_size: string
+          source?: string
+          status?: string
+          subscription_id: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+          verified_size?: string | null
+          visit_id?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          apply_error?: string | null
+          cadence?: string
+          confirm_token?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          lookup_key?: string | null
+          measured_sqft?: number | null
+          new_monthly_cents?: number | null
+          note?: string | null
+          old_monthly_cents?: number | null
+          rate_card_version?: number | null
+          selected_size?: string
+          source?: string
+          status?: string
+          subscription_id?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          verified_size?: string | null
+          visit_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawn_plan_changes_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lawn_plan_notices: {
+        Row: {
+          body: string
+          change_id: string
+          created_at: string
+          email: string
+          email_error: string | null
+          email_status: string
+          id: string
+          kind: string
+          sent_at: string | null
+          subject: string
+        }
+        Insert: {
+          body: string
+          change_id: string
+          created_at?: string
+          email: string
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          kind: string
+          sent_at?: string | null
+          subject: string
+        }
+        Update: {
+          body?: string
+          change_id?: string
+          created_at?: string
+          email?: string
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          kind?: string
+          sent_at?: string | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawn_plan_notices_change_id_fkey"
+            columns: ["change_id"]
+            isOneToOne: false
+            referencedRelation: "lawn_plan_changes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lawn_size_notices: {
         Row: {
           body: string
@@ -6968,6 +7101,10 @@ export type Database = {
           month: string
         }[]
       }
+      admin_lawn_plan_verify: {
+        Args: { _change: string; _measured: number }
+        Returns: Json
+      }
       admin_lawn_verify: {
         Args: { _measured: number; _reservation: string }
         Returns: Json
@@ -7234,6 +7371,10 @@ export type Database = {
       lawn_line_cents: {
         Args: { _cadence: string; _rate_card: number; _size: string }
         Returns: number
+      }
+      lawn_plan_respond: {
+        Args: { _accept: boolean; _token: string }
+        Returns: Json
       }
       lawn_size_from_sqft: { Args: { _sqft: number }; Returns: string }
       lawn_size_respond: {

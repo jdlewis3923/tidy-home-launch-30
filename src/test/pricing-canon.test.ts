@@ -25,6 +25,7 @@ import {
   ENTRY_PRICE_MONTHLY,
   HEADLINE_PRICE_COPY,
   LAWN_SURCHARGE,
+  lawnSurchargePerVisit,
   PER_VISIT_PRICES,
   REFERRAL_BONUS_CENTS,
   SERVICE_LOOKUP_KEYS,
@@ -144,7 +145,7 @@ describe('cadence is a volume curve, never a quantity', () => {
 
   it('surcharges scale with the cadence', () => {
     expect(CLEANING_SURCHARGE.perVisitDollars).toBe(60);
-    expect(LAWN_SURCHARGE.perVisitDollars).toBe(30);
+    expect(lawnSurchargePerVisit(5000)).toBe(0); // retired — bands replace it
     expect(monthlyPrice('cleaning', 2, 'weekly', 60)).toBe(620 + 240);
     expect(monthlyPrice('lawn', 2, 'biweekly', 30)).toBe(120 + 60);
   });
@@ -153,14 +154,14 @@ describe('cadence is a volume curve, never a quantity', () => {
 describe('contractor pay is 40% of the visit price and never shown to a customer', () => {
   it('locks the cleaning and lawn pay tables', () => {
     expect(CONTRACTOR_VISIT_PAY.cleaning).toEqual({
-      1: { monthly: 56, biweekly: 51, weekly: 46 },
-      2: { monthly: 76, biweekly: 70, weekly: 62 },
-      3: { monthly: 112, biweekly: 103, weekly: 92 },
+      1: { monthly: 56, biweekly: 56, weekly: 56 },
+      2: { monthly: 76, biweekly: 76, weekly: 76 },
+      3: { monthly: 112, biweekly: 112, weekly: 112 },
     });
     expect(CONTRACTOR_VISIT_PAY.lawn).toEqual({
-      1: { monthly: 18, biweekly: 16, weekly: 15 },
-      2: { monthly: 26, biweekly: 24, weekly: 21 },
-      3: { monthly: 40, biweekly: 36, weekly: 32 },
+      1: { monthly: 18, biweekly: 18, weekly: 18 },
+      2: { monthly: 26, biweekly: 26, weekly: 26 },
+      3: { monthly: 40, biweekly: 40, weekly: 40 },
     });
   });
 
@@ -171,11 +172,11 @@ describe('contractor pay is 40% of the visit price and never shown to a customer
   });
 
   it('surcharge share and Tier 2 uplift', () => {
-    expect(CONTRACTOR_SURCHARGE_PAY).toEqual({ cleaning: 24, lawn: 12 });
+    expect(CONTRACTOR_SURCHARGE_PAY).toEqual({ cleaning: 24, lawn: 0 });
     expect(TIER_2_UPLIFT).toBe(1.1);
-    expect(contractorVisitPay({ service: 'cleaning', size: 2, cadence: 'biweekly' })).toBe(70);
-    expect(contractorVisitPay({ service: 'cleaning', size: 2, cadence: 'biweekly', tier: 2 })).toBe(77);
-    expect(contractorVisitPay({ service: 'cleaning', size: 2, cadence: 'weekly', surcharge: true })).toBe(62 + 24);
+    expect(contractorVisitPay({ service: 'cleaning', size: 2, cadence: 'biweekly' })).toBe(76);
+    expect(contractorVisitPay({ service: 'cleaning', size: 2, cadence: 'biweekly', tier: 2 })).toBe(84);
+    expect(contractorVisitPay({ service: 'cleaning', size: 2, cadence: 'weekly', surcharge: true })).toBe(76 + 24);
   });
 
   it('a weekly plan quarterly deep clean pays the MONTHLY rate', () => {

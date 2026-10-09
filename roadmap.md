@@ -105,3 +105,9 @@
 - [x] 36 orientation images in public/orientation/
 - [x] Admin: orientation progress on pipeline record; deck download on /admin/orientations + record
 - [x] 12-point verification
+
+## Lawn follow-ups (Oct 9)
+- [x] Remove old $30 lawn surcharge everywhere
+- [x] Flat Pro pay across cadences (lawn 18/26/40, cleaning 56/76/112) in code, DB and Stripe metadata
+- [x] Adding lawn from an account waits for aerial verification (no visits until verified)
+- [x] Stripe price swap for paid members after a size correction (confirm on increase)

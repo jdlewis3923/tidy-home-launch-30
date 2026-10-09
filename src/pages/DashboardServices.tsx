@@ -356,6 +356,24 @@ export default function DashboardServices() {
       return;
     }
     setStartingCheckout(true);
+    // Lawn is measured from above before it joins the plan: nothing is billed
+    // and no lawn visit is scheduled until Tidy verifies the size.
+    if (newService === 'lawn') {
+      const { data: res, error } = await supabase.functions.invoke('lawn-plan-change', {
+        body: { action: 'request', size: String(newSize), cadence: newFrequency },
+      });
+      setStartingCheckout(false);
+      if (error || !res?.ok) {
+        toast({ title: t('Could not add lawn'), description: t('Try again in a moment.'), variant: 'destructive' });
+        return;
+      }
+      toast({
+        title: t('Lawn requested'),
+        description: t("We'll check your lawn size from above and tell you before anything is billed or scheduled."),
+      });
+      data.refetch();
+      return;
+    }
     const lines: CheckoutServiceLine[] = [
       {
         service: newService,
@@ -371,7 +389,7 @@ export default function DashboardServices() {
         lang: language === 'es' ? 'es' : 'en',
         bedrooms: newService === 'cleaning' ? Number(newBedrooms.replace('+', '')) || null : null,
         bathrooms: newService === 'cleaning' ? Number(newBathrooms.replace('+', '')) || null : null,
-        lawn_choice: newService === 'lawn' ? newLawnChoice : null,
+        lawn_choice: null,
         vehicle_class: newService === 'detailing' ? newVehicleClass : null,
       });
       setStartingCheckout(false);
