@@ -1544,6 +1544,7 @@ const translations: Record<string, string> = {
   "Large yard": "Jardín grande",
   "up to 3,000 sq ft of turf": "hasta 3,000 pies² de césped",
   "3,001–6,000 sq ft of turf": "3,001–6,000 pies² de césped",
+  "One price per visit, set by square feet of grass only — Small up to 3,000 sq ft ($45), Standard 3,000–7,000 ($65), Large 7,000–12,000 ($99) at the monthly plan. We don't count your house, driveway or pool; larger than 12,000 sq ft is a custom quote. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess — we check it from above and tell you before your first visit.": "Un precio por visita, según los pies² de césped solamente — Pequeño hasta 3,000 pies² ($45), Estándar 3,000–7,000 ($65), Grande 7,000–12,000 ($99) en el plan mensual. No contamos tu casa, entrada ni piscina; más de 12,000 pies² es una cotización a medida. Venir más seguido baja el precio por visita — quincenal es 8% menos por visita que mensual, semanal 18% menos. Siempre se factura mensualmente. Elige tu mejor estimado — lo revisamos desde arriba y te avisamos antes de tu primera visita.",
   "up to 3,000 sq ft of lawn": "hasta 3,000 pies² de césped",
   "3,000 – 7,000 sq ft of lawn": "3,000 – 7,000 pies² de césped",
   "7,000 – 12,000 sq ft of lawn": "7,000 – 12,000 pies² de césped",
