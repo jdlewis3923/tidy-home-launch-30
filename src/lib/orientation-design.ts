@@ -12,7 +12,7 @@ export const ORIENTATION_TONES = ["blue", "yellow", "white", "charcoal"] as cons
 const referenceKeys = ["ARRIVAL-R","ARRIVAL-W","K1-R","K1-W","K2-R","K2-W","B1-R","B1-W","B2-R","B2-W","F1-R","F1-W","F2-R","F2-W","L1-R","L1-W","L2-R","L2-W","L3-R","L3-W","L4-R","L4-W","C1-R","C1-W","C2-R","C2-W","C3-R","C3-W","C4-R","C4-W"];
 export const orientationImage = (name: string) => referenceKeys.includes(name) ? REFERENCE_IMAGES[12 + referenceKeys.indexOf(name)] : name === "PRO-5" ? kit : name === "PRO-1" ? welcome : name === "PRO-6" ? portrait : `/orientation/${name}.jpg`;
 const photoAssignments: Record<string, number[]> = {
-  "Welcome to TIDY":[0], "Our standard":[1,2], "Independent contractor relationship":[3,4],
+  "Welcome to TIDY":[0], "Our standard":[1,2], "Independent contractor relationship":[3],
   "Five readiness gates":[4], "Insurance":[5], "Insurance wording":[6], "Screening and privacy":[7], "Your kit":[8],
   "Cleaning scope":[9], "Lawn scope":[10], "Car care scope":[11], "Your first assignment":[42,43],
 };
