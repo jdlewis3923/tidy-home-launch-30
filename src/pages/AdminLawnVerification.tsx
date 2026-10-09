@@ -20,6 +20,104 @@ type Row = {
 
 const sizeName = (s: string | null) => (s === "custom" ? "Custom quote" : s ? LAWN_SIZE_NAMES[Number(s) as CanonSize] : "—");
 
+type Change = {
+  id: string; created_at: string; subscription_id: string; user_id: string; kind: string; source: string; cadence: string;
+  selected_size: string; measured_sqft: number | null; verified_size: string | null; status: string; apply_error: string | null;
+  old_monthly_cents: number | null; new_monthly_cents: number | null;
+};
+type LawnSub = { id: string; user_id: string; plan_lines: unknown; lawn_measured_sqft: number | null };
+const money = (c: number | null) => (c == null ? "—" : `$${Math.round(c / 100)}`);
+
+/** Paid members: lawn added from an account, and size corrections after a Pro reports an oversized yard. */
+function PaidMemberLawn() {
+  const [changes, setChanges] = useState<Change[]>([]);
+  const [subs, setSubs] = useState<LawnSub[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+  const load = useCallback(async () => {
+    const [{ data: c }, { data: s }] = await Promise.all([
+      supabase.from("lawn_plan_changes").select("*").order("created_at", { ascending: true }).limit(100),
+      supabase.from("subscriptions").select("id, user_id, plan_lines, lawn_measured_sqft").contains("services", ["lawn"]).in("status", ["active", "paused"]),
+    ]);
+    const list = (c ?? []) as Change[]; const ss = (s ?? []) as LawnSub[];
+    setChanges(list); setSubs(ss);
+    const ids = [...new Set([...list.map((x) => x.user_id), ...ss.map((x) => x.user_id)])];
+    if (ids.length) {
+      const { data: p } = await supabase.from("profiles").select("id, first_name, last_name, address_line1, zip").in("id", ids);
+      setNames(Object.fromEntries((p ?? []).map((r) => [r.id, `${r.first_name ?? ""} ${r.last_name ?? ""} · ${r.address_line1 ?? ""} ${r.zip ?? ""}`.trim()])));
+    }
+  }, []);
+  useEffect(() => { void load(); }, [load]);
+
+  async function run(key: string, body: Record<string, unknown>) {
+    setBusy(key);
+    const { data, error } = await supabase.functions.invoke("lawn-plan-change", { body });
+    setBusy(null);
+    if (error || !data?.ok) { toast.error(`Not saved: ${data?.error ?? error?.message ?? "error"}`); return; }
+    const k = data.result.kind as string;
+    toast.success(k === "size_up" ? "Size up — waiting on the customer to confirm" : k === "size_down" ? "Moved down and applied" : k === "quote" ? "Over 12,000 sq ft — quote by hand" : data.applied ? "Applied" : "No change needed");
+    setDraft({}); void load();
+  }
+  const open = changes.filter((c) => ["pending_verification", "failed"].includes(c.status));
+  const lawnSize = (pl: unknown) => {
+    const l = (Array.isArray(pl) ? pl : []).find((x: { service?: string }) => x.service === "lawn") as { size_tier?: number; cadence?: string } | undefined;
+    return l ? `${sizeName(String(l.size_tier))} · ${l.cadence}` : "—";
+  };
+  return (
+    <div className="space-y-4 rounded-lg border border-border bg-card p-4">
+      <div>
+        <h2 className="text-lg font-black">Paid members</h2>
+        <p className="text-sm text-muted-foreground">Lawn added from an account waits here — no bill and no lawn visit until measured. Size-ups wait for the customer; size-downs apply straight away. The new price is swapped on their bill by lookup key.</p>
+        <p className="mt-1 text-sm font-semibold" data-testid="lawn-plan-open-count">{open.length} waiting to be measured</p>
+      </div>
+      <table className="w-full text-sm" data-testid="lawn-plan-queue">
+        <thead className="text-xs text-muted-foreground"><tr>{["Requested", "Member", "Kind", "Selected", "Status", "Measured turf sq ft", ""].map((h) => <th key={h} className="px-2 py-1 text-left font-medium">{h}</th>)}</tr></thead>
+        <tbody>
+          {open.map((c) => {
+            const n = Number(draft[c.id]); const d = n > 0 ? lawnBandFromSqFt(n) : null; const differs = d !== null && d !== c.selected_size;
+            return (
+              <tr key={c.id} className={`border-t border-border ${differs ? "bg-gold/15" : ""}`}>
+                <td className="px-2 py-2 text-xs">{new Date(c.created_at).toLocaleDateString()}</td>
+                <td className="px-2 py-2">{names[c.user_id] ?? c.user_id.slice(0, 8)}</td>
+                <td className="px-2 py-2 text-xs">{c.kind === "add_lawn" ? "Added lawn" : "Correction"} · {c.cadence}</td>
+                <td className="px-2 py-2">{sizeName(c.selected_size)}</td>
+                <td className="px-2 py-2 text-xs">{c.status}{c.apply_error ? ` — ${c.apply_error}` : ""}</td>
+                <td className="px-2 py-2"><Input aria-label="Measured turf sq ft" type="number" min={1} className="w-28" value={draft[c.id] ?? ""} onChange={(e) => setDraft((x) => ({ ...x, [c.id]: e.target.value }))} />{d && <div className="text-xs font-semibold">{sizeName(d)}{differs ? " · differs" : ""}</div>}</td>
+                <td className="px-2 py-2"><Button size="sm" disabled={busy === c.id || !(n > 0)} onClick={() => run(c.id, { action: "verify", change_id: c.id, measured_sqft: Math.round(n) })}>Save</Button></td>
+              </tr>
+            );
+          })}
+          {open.length === 0 && <tr><td colSpan={7} className="px-2 py-4 text-center text-muted-foreground">Nothing waiting.</td></tr>}
+        </tbody>
+      </table>
+
+      <div>
+        <h3 className="text-sm font-bold">Correct a lawn on a paid plan</h3>
+        <p className="text-xs text-muted-foreground">Use when a Pro reports a bigger yard. Re-measure the turf from above and enter it here.</p>
+        <ul className="mt-2 space-y-2">
+          {subs.map((s) => (
+            <li key={s.id} className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="min-w-[16rem]">{names[s.user_id] ?? s.user_id.slice(0, 8)} · {lawnSize(s.plan_lines)}{s.lawn_measured_sqft ? ` · ~${s.lawn_measured_sqft.toLocaleString()} sq ft` : ""}</span>
+              <Input aria-label="Re-measured turf sq ft" type="number" min={1} className="w-28" value={draft[`s:${s.id}`] ?? ""} onChange={(e) => setDraft((x) => ({ ...x, [`s:${s.id}`]: e.target.value }))} />
+              <Button size="sm" variant="outline" disabled={busy === s.id || !(Number(draft[`s:${s.id}`]) > 0)} onClick={() => run(s.id, { action: "correct", subscription_id: s.id, measured_sqft: Math.round(Number(draft[`s:${s.id}`])), source: "pro_report" })}>Apply measurement</Button>
+            </li>
+          ))}
+          {subs.length === 0 && <li className="text-xs text-muted-foreground">No paid lawn plans yet.</li>}
+        </ul>
+      </div>
+
+      {changes.some((c) => !["pending_verification", "failed"].includes(c.status)) && (
+        <ul className="space-y-1 text-xs">
+          {changes.filter((c) => !["pending_verification", "failed"].includes(c.status)).slice(-20).reverse().map((c) => (
+            <li key={c.id}>{names[c.user_id] ?? ""} · {c.kind === "add_lawn" ? "added lawn" : "correction"} · ~{c.measured_sqft?.toLocaleString()} sq ft · {sizeName(c.selected_size)} → <strong>{sizeName(c.verified_size)}</strong> · {money(c.old_monthly_cents)} → {money(c.new_monthly_cents)} · {c.status === "awaiting_customer" ? "waiting on customer" : c.status}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function AdminLawnVerification() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [recent, setRecent] = useState<Row[]>([]);
@@ -99,6 +197,8 @@ export default function AdminLawnVerification() {
             </tbody>
           </table>
         </div>
+
+        <PaidMemberLawn />
 
         {recent.length > 0 && (
           <div className="rounded-lg border border-border bg-card p-4">
