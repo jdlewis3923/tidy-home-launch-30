@@ -19,7 +19,7 @@ import {
   sizeLabels,
   vehicleClassLabels,
 } from '@/lib/dashboard-pricing';
-import { LAWN_GUESS_NOTE, QUOTE_COPY, QUOTE_PHONE, type VehicleClass } from '@/lib/pricing-canon';
+import { LAWN_GUESS_NOTE, LAWN_OVER_OPTION, QUOTE_COPY, QUOTE_PHONE, type VehicleClass } from '@/lib/pricing-canon';
 import { carVariantAvailable, carWashEligible, setCarVariant } from '@/lib/dashboard-pricing';
 import { trackCarVariantSelect } from '@/lib/tracking';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -104,7 +104,7 @@ function OptionCard({ selected, title, helper, onClick }: {
   );
 }
 
-const lawnOptions: LawnChoice[] = ['small', 'standard', 'large', 'over'];
+const lawnOptions: LawnChoice[] = ['small', 'standard', 'large'];
 
 const vehicleOptions: VehicleClass[] = ['sedan', 'coupe', 'crossover', 'suv', 'suv3row', 'truck', 'van'];
 
@@ -223,29 +223,21 @@ export default function StepProperty({ state, onChange }: Props) {
               <OptionCard
                 key={choice}
                 selected={state.lawnChoice === choice}
-                title={lawnChoiceLabels[choice]}
-                helper={lawnChoiceHelpers[choice]}
+                title={t(lawnChoiceLabels[choice])}
+                helper={t(lawnChoiceHelpers[choice])}
                 onClick={() => onChange({ ...state, lawnChoice: choice })}
               />
             ))}
           </div>
 
-          <p className="text-[11px] text-ink-faint">{LAWN_GUESS_NOTE}</p>
+          <p className="text-[12px] leading-relaxed text-ink-soft">{t(LAWN_GUESS_NOTE)}</p>
 
-          <SqFtField
-            required
-            label={t('mowable turf square footage')}
-            placeholder="e.g. 3500"
-            value={state.turfSqFt}
-            onChange={v => onChange({ ...state, turfSqFt: v })}
-            helper={t('grass only, not the house or driveway. 4,001–7,500 sq ft adds $30 a visit. above 7,500 we quote by hand.')}
-            missingNote={t('we need this to price your visit correctly.')}
-          />
-
-          {(state.turfSqFt ?? 0) > 7500 && (
-            <QuoteNotice>{t('turf over 7,500 sq ft is quoted by hand')}</QuoteNotice>
-          )}
-
+          <a
+            href="/founding?service=lawn&size=custom"
+            className="block rounded-xl border border-dashed border-hairline px-4 py-3 text-sm font-semibold text-ink-soft hover:border-ink"
+          >
+            {t(LAWN_OVER_OPTION)} →
+          </a>
 
           <SizeReadout service="lawn" size={sizeFor(state, 'lawn')} state={state} />
         </div>
