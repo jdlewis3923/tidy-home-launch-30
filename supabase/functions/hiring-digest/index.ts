@@ -95,10 +95,13 @@ Deno.serve(async (req) => {
       `<h3 style="margin:18px 0 6px">Tomorrow</h3><ul>${callItems || '<li>No calls booked.</li>'}${liveItems}</ul>`;
   }
 
-  const subject = `Tidy ${edition === 'evening' ? 'evening' : 'morning'} digest — ${open.length} open`;
+  const { data: cbDue } = await admin.rpc('pipeline_callbacks_due');
+  const callbacksDue = Number(cbDue ?? 0);
+  const subject = `Tidy ${edition === 'evening' ? 'evening' : 'morning'} digest — ${open.length} open${callbacksDue ? ` · ${callbacksDue} callbacks due` : ''}`;
   const html =
     `<div style="font-family:system-ui,sans-serif;font-size:14px;color:#0f172a">` +
     `<h2 style="margin:0">${esc(subject)}</h2>` +
+    `<p style="margin:10px 0">Pipeline callbacks due today or overdue: <b>${callbacksDue}</b> — <a href="https://jointidy.co/admin/pipeline?view=callbacks">open callbacks</a></p>` +
     (sections || '<p>Nothing open right now.</p>') +
     tomorrowBlock +
     `<p style="margin-top:20px"><a href="https://jointidy.co/admin/alerts">Open the alerts page</a></p></div>`;
