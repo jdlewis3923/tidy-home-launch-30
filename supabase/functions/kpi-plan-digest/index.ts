@@ -126,7 +126,9 @@ Deno.serve(async (req) => {
     // Lawn reservations waiting on aerial size verification (blocks conversion).
     const { count: lawnUnverified } = await supabase.from('reservations').select('id', { count: 'exact', head: true })
       .contains('services', ['lawn']).is('lawn_verified_at', null).in('status', ['reserved', 'invited']).eq('is_test_row', false);
-    const lawnLine = `<p style="margin:0 0 14px">Lawn reservations awaiting size verification: <strong>${lawnUnverified ?? 0}</strong> — <a href="${APP_URL}/admin/lawn-verification">verify</a></p>`;
+    const { count: lawnPlanOpen } = await supabase.from('lawn_plan_changes').select('id', { count: 'exact', head: true })
+      .in('status', ['pending_verification', 'failed']);
+    const lawnLine = `<p style="margin:0 0 14px">Lawn reservations awaiting size verification: <strong>${lawnUnverified ?? 0}</strong> · paid-plan lawn changes to measure: <strong>${lawnPlanOpen ?? 0}</strong> — <a href="${APP_URL}/admin/lawn-verification">verify</a></p>`;
     let heading: string;
     let bodyHtml: string;
 
