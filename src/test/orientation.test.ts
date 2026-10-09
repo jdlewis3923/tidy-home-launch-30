@@ -50,5 +50,6 @@ describe("orientation preview preserves content and stage gates", () => {
       expect(orientationImage(`${block.pair}-R`)).toContain("/hd/");
       expect(orientationImage(`${block.pair}-W`)).toContain("/hd/");
     }
+    for (let i = 1; i <= 6; i++) expect(orientationImage(`PRO-${i}`)).toContain("/hd/");
   });
 });
