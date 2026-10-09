@@ -111,7 +111,7 @@ const PricingTable = () => {
 
           <p className="mt-6 text-xs text-text-light">
             {t(
-              "5+ bedroom homes and yards over 10,000 sq ft are quoted by hand. Cancel anytime.",
+              "5+ bedroom homes and lawns over 12,000 sq ft of grass are quoted by hand. Cancel anytime.",
             )}
           </p>
           <p className="mt-2 text-xs text-text-light/80">

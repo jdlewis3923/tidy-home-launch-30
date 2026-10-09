@@ -286,6 +286,7 @@ export default function AdminCommand() {
 
   return (
     <main className="admin-page">
+      <LawnVerificationCount />
       <Helmet>
         <title>Command · Tidy Admin</title>
         <meta name="description" content="Tidy command center: profit versus plan, capacity runway, ZIP funnel, alerts and trust metrics." />
@@ -829,5 +830,20 @@ function AlertRow({
         </div>
       )}
     </div>
+  );
+}
+
+function LawnVerificationCount() {
+  const [n, setN] = useState<number | null>(null);
+  useEffect(() => {
+    void supabase.from("reservations").select("id", { count: "exact", head: true })
+      .contains("services", ["lawn"]).is("lawn_verified_at", null).in("status", ["reserved", "invited"])
+      .then(({ count }) => setN(count ?? 0));
+  }, []);
+  if (n === null) return null;
+  return (
+    <a href="/admin/lawn-verification" data-testid="lawn-unverified-tile" className="mx-auto mb-4 block max-w-6xl rounded-lg border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground">
+      Lawn reservations awaiting size verification: <span className="tabular-nums">{n}</span> →
+    </a>
   );
 }

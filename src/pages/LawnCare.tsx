@@ -4,7 +4,7 @@ import heroMobileAsset from "@/assets/service-lawn-mobile.png.asset.json";
 
 // Card prices are the SIZE-1 lot MONTHLY BILL. Size 2 and size 3 cost more,
 // which is why every card says "From" and carries this qualifier.
-const SIZE_NOTE = "size 1 lot — sizes 2 and 3 cost more, see sizes below";
+const SIZE_NOTE = "Small lawn, up to 3,000 sq ft of grass — Standard (3,000–7,000) and Large (7,000–12,000) cost more";
 
 
 const config: ServiceLandingConfig = {
@@ -84,7 +84,7 @@ const config: ServiceLandingConfig = {
   ],
   addOnsNote: "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset.",
   surchargeNote:
-    "Extra-large lot (4,001–7,500 sq ft of mowable turf): +$30 per visit. Above that size we quote individually.",
+    "Larger than 12,000 sq ft of grass? We quote it by hand — no price online.",
 
   trustCards: [
     {
@@ -104,7 +104,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "One price per visit, set by the size of your lawn: $45, $65 or $99 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess and we confirm the size from satellite imagery before your first visit.",
+      a: "One price per visit, set by square feet of grass only — Small up to 3,000 sq ft ($45), Standard 3,000–7,000 ($65), Large 7,000–12,000 ($99) at the monthly plan. We don't count your house, driveway or pool; larger than 12,000 sq ft is a custom quote. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess — we check it from above and tell you before your first visit.",
     },
     {
       q: "Can I cancel anytime?",
@@ -148,9 +148,9 @@ const config: ServiceLandingConfig = {
       description:
         "Recurring lawn care in Pinecrest and Kendall. One flat price per visit set by the size of your lot.",
       offers: [
-        { name: "Size 1 lot (up to 3,000 sq ft turf)", price: 45, unit: "visit" },
-        { name: "Size 2 lot (3,001–6,000 sq ft turf)", price: 65, unit: "visit" },
-        { name: "Size 3 lot (6,001–10,000 sq ft turf)", price: 99, unit: "visit" },
+        { name: "Small lawn (up to 3,000 sq ft of grass)", price: 45, unit: "visit" },
+        { name: "Standard lawn (3,000–7,000 sq ft of grass)", price: 65, unit: "visit" },
+        { name: "Large lawn (7,000–12,000 sq ft of grass)", price: 99, unit: "visit" },
       ],
     },
   },
