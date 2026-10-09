@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate, useLocation, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Download, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Download, ExternalLink, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOrientationAccess } from "@/hooks/useOrientationAccess";
 import { OrientationSlide, orientationSlides } from "@/components/pro/orientation/OrientationSlide";
@@ -19,6 +19,7 @@ export default function ProOrientationPreview() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [showPdf, setShowPdf] = useState(false);
   const [touch, setTouch] = useState<number | null>(null);
+  const [replay, setReplay] = useState(0);
   const move = (next: number) => setParams({ slide: String(Math.max(0, Math.min(slides.length - 1, next)) + 1) }, { replace: true });
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if (e.target instanceof HTMLSelectElement) return; if (e.key === "ArrowRight") move(current + 1); if (e.key === "ArrowLeft") move(current - 1); };
@@ -49,8 +50,8 @@ export default function ProOrientationPreview() {
     </header>
     <h1 className="orientation-preview-title">TIDY Pro orientation <span lang="es">Orientación para Pros</span></h1>
     {access.error ? <p role="alert">Orientation unavailable. Try again. / Orientación no disponible. Intenta otra vez.</p> : !slides.length ? <p>Available after your agreement is signed. / Disponible después de firmar tu acuerdo.</p> : <>
-      <div className="orientation-preview-stage" onTouchStart={e => setTouch(e.touches[0].clientX)} onTouchEnd={e => { if (touch !== null && Math.abs(e.changedTouches[0].clientX - touch) > 50) move(current + (e.changedTouches[0].clientX < touch ? 1 : -1)); setTouch(null); }}><div key={`${slides[current].section.id}-${slides[current].index}`} className="orientation-slide-reveal"><OrientationSlide slide={slides[current]} page={current + 1} total={slides.length} /></div></div>
-      <nav className="orientation-deck-nav" aria-label="Deck navigation"><Button variant="outline" size="icon" title="Previous / Anterior" aria-label="Previous slide" disabled={current === 0} onClick={() => move(current - 1)}><ChevronLeft /></Button><select aria-label="Choose slide" className="orientation-slide-select" value={current} onChange={e => move(Number(e.target.value))}>{slides.map((s, i) => <option key={`${s.section.id}-${s.index}`} value={i}>{i + 1}. {s.block.title}</option>)}</select><Button variant="outline" size="icon" title="Next / Siguiente" aria-label="Next slide" disabled={current === slides.length - 1} onClick={() => move(current + 1)}><ChevronRight /></Button></nav>
+      <div className="orientation-preview-stage" onTouchStart={e => setTouch(e.touches[0].clientX)} onTouchEnd={e => { if (touch !== null && Math.abs(e.changedTouches[0].clientX - touch) > 50) move(current + (e.changedTouches[0].clientX < touch ? 1 : -1)); setTouch(null); }}><div key={`${slides[current].section.id}-${slides[current].index}-${replay}`} className="orientation-slide-reveal"><OrientationSlide slide={slides[current]} page={current + 1} total={slides.length} /></div></div>
+      <nav className="orientation-deck-nav" aria-label="Deck navigation"><Button variant="outline" size="icon" title="Previous / Anterior" aria-label="Previous slide" disabled={current === 0} onClick={() => move(current - 1)}><ChevronLeft /></Button><select aria-label="Choose slide" className="orientation-slide-select" value={current} onChange={e => move(Number(e.target.value))}>{slides.map((s, i) => <option key={`${s.section.id}-${s.index}`} value={i}>{i + 1}. {s.block.title}</option>)}</select><Button variant="outline" size="icon" title="Next / Siguiente" aria-label="Next slide" disabled={current === slides.length - 1} onClick={() => move(current + 1)}><ChevronRight /></Button><Button variant="outline" size="icon" title="Replay / Repetir" aria-label="Replay animations" onClick={() => setReplay(n => n + 1)}><RotateCcw /></Button></nav>
       {!admin && <p className="text-center text-sm text-muted-foreground">{access.sections.length} of 4 sections available / {access.sections.length} de 4 secciones disponibles</p>}
     </>}
     {message && <p role="alert">{message}</p>}
