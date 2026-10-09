@@ -98,7 +98,7 @@ export default function AdminPipelineRecord() {
   const load = useCallback(async () => {
     const [pr, ar, ms, art, sp, ev] = await Promise.all([
       db.from("contractor_pipeline").select("*").eq("applicant_id", id).maybeSingle(),
-      db.from("applicants").select("first_name,last_name,phone,email,city").eq("id", id).maybeSingle(),
+      db.from("applicants").select("first_name,last_name,phone,email").eq("id", id).maybeSingle(),
       db.rpc("pipeline_missing", { _id: id }),
       db.from("contractor_artifacts").select("*").eq("applicant_id", id).order("uploaded_at", { ascending: false }),
       db.from("contractor_spend").select("*").eq("applicant_id", id).order("spent_at"),
@@ -160,7 +160,7 @@ export default function AdminPipelineRecord() {
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-2xl font-black tracking-tight text-foreground">{name}</h1>
-            <p className="text-sm text-muted-foreground">{serviceLabel(p.service)} · {a?.city ?? "—"} · stage {stageIndex(p.stage) + 1} {stageLabel(p.stage)}
+            <p className="text-sm text-muted-foreground">{serviceLabel(p.service)} · stage {stageIndex(p.stage) + 1} {stageLabel(p.stage)}
               {p.archived ? ` · archived (${p.state})` : p.state !== "open" ? ` · ${p.state}` : ""}</p>
           </div>
           <p className="text-sm font-semibold tabular-nums">Spent {money(total)}</p>
