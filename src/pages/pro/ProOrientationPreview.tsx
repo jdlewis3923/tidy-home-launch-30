@@ -42,7 +42,7 @@ export default function ProOrientationPreview() {
   if (!access.userId) return <Navigate to="/pro/login" replace />;
   if (admin && !access.isAdmin) return <Navigate to="/pro/orientation" replace />;
   return <main className="orientation-app orientation-preview">
-    <Helmet><title>{current + 1}/{slides.length} — {slides[current]?.block.title ?? "Pro orientation"} | TIDY</title><meta name="robots" content="noindex,nofollow" /></Helmet>
+    <Helmet><title>{`${current + 1}/${slides.length} — ${slides[current]?.block.title ?? "Pro orientation"} | TIDY`}</title><meta name="robots" content="noindex,nofollow" /></Helmet>
     <header className="orientation-preview-toolbar">
       <Button variant="ghost" asChild><Link to={admin ? "/admin/orientations" : "/pro/orientation"}><ArrowLeft /> Orientation / Orientación</Link></Button>
       <div className="flex flex-wrap gap-2"><Button className="orientation-gold-button" disabled={busy || !slides.length} onClick={() => makePdf(false)}>{busy ? <Loader2 className="animate-spin" /> : <ExternalLink />} Open PDF / Abrir PDF</Button><Button variant="outline" disabled={busy || !slides.length} onClick={() => makePdf(true)}><Download /> PDF</Button></div>
