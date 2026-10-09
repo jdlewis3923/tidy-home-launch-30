@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ORIENTATION_COPY, ORIENTATION_SECTIONS, stageNumber } from "@/lib/orientation";
 import { orientationSlides } from "@/components/pro/orientation/OrientationSlide";
+import { orientationVisual, orientationImage } from "@/lib/orientation-design";
 
 describe("orientation preview preserves content and stage gates", () => {
   it("keeps exactly four sections and the specified gates", () => {
@@ -23,5 +24,13 @@ describe("orientation preview preserves content and stage gates", () => {
       expect(slide.block.title && slide.block.body && slide.block.esTitle && slide.block.es).toBeTruthy();
     }
     expect(slides.filter(s => s.block.pair)).toHaveLength(15);
+  });
+  it("shares all four palettes and five layouts without depending on unlocked slide position", () => {
+    const slides = orientationSlides(ORIENTATION_SECTIONS);
+    const visuals = slides.map(s => orientationVisual(s.block, s.section.id, s.index));
+    expect(new Set(visuals.map(v => v.tone)).size).toBe(4);
+    expect(new Set(visuals.map(v => v.layout)).size).toBe(5);
+    expect(orientationImage("PRO-5")).toContain("complete-kit");
+    expect(orientationImage("PRO-1")).toContain("diverse-arrival");
   });
 });
