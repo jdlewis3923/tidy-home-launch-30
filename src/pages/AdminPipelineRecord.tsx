@@ -252,7 +252,7 @@ export default function AdminPipelineRecord() {
         <section className="rounded-lg border border-border bg-card p-4">
           <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-base font-bold">Pro orientation</h2><Button asChild size="sm" variant="outline"><a href="/TIDY_Pro_Onboarding_Rebuilt.pptx" download>Download deck</a></Button></div>
           <p className="mt-2 text-sm">{orientationProgress.filter((x) => x.completed_at).length} of 4 sections read</p>
-          <ul className="mt-2 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">{["before-you-work","what-it-pays","on-the-job","when-it-matters"].map((key) => { const row = orientationProgress.find((x) => x.section_id === key); return <li key={key}>{row?.completed_at ? "✓" : row?.started_at ? "Started" : "—"} {key.replaceAll("-", " ")}{row?.completed_at ? ` · ${new Date(row.completed_at).toLocaleString()}` : ""}</li>; })}</ul>
+          <ul className="mt-2 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">{["before-you-work","what-it-pays","on-the-job","when-it-matters"].map((key) => { const row = orientationProgress.find((x) => x.section_id === key); return <li key={key}>{row?.completed_at ? "✓" : row?.started_at ? "Started" : "—"} {key.split("-").join(" ")}{row?.completed_at ? ` · ${new Date(row.completed_at).toLocaleString()}` : ""}</li>; })}</ul>
         </section>
 
         <section className="rounded-lg border border-border bg-card p-4">
