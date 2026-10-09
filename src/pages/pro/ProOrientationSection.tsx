@@ -6,8 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useOrientationAccess } from "@/hooks/useOrientationAccess";
 import { ORIENTATION_COPY, ORIENTATION_SECTIONS, stageNumber } from "@/lib/orientation";
-import { OrientationContent, OrientationFooter } from "@/components/pro/orientation/OrientationContent";
+import { OrientationFooter } from "@/components/pro/orientation/OrientationContent";
 import "@/styles/orientation.css";
+import { OrientationSlide } from "@/components/pro/orientation/OrientationSlide";
 
 export default function ProOrientationSection() {
   const { sectionId = "" } = useParams(); const nav = useNavigate();
@@ -27,5 +28,5 @@ export default function ProOrientationSection() {
     setBusy(false);
     if (result.error) setError(true); else nav("/pro/orientation");
   };
-  return <main className="orientation-app"><Helmet><title>{`${section.title} | TIDY`}</title><meta name="robots" content="noindex,nofollow" /></Helmet><article className="orientation-reading"><nav className="flex flex-wrap justify-between gap-3"><Button asChild variant="ghost"><Link to="/pro/orientation"><ArrowLeft /> All sections / Todas las secciones</Link></Button><Button asChild variant="outline"><Link to="/pro/orientation/preview"><Play /> Preview / Vista previa</Link></Button></nav><header><p className="text-sm font-extrabold text-primary">SECTION {ORIENTATION_SECTIONS.indexOf(section) + 1} / SECCIÓN {ORIENTATION_SECTIONS.indexOf(section) + 1}</p><h1>{section.title}</h1><p className="text-lg text-muted-foreground" lang="es">{section.es}</p></header>{ORIENTATION_COPY[section.id].map((block, i) => <OrientationContent key={i} block={block} />)}<div className="border-t border-border pt-8"><Button className="orientation-gold-button min-h-14 w-full text-base" onClick={complete} disabled={busy}>{busy ? <Loader2 className="animate-spin" /> : <Check />} I've read this / He leído esto</Button>{error && <p role="alert" className="mt-3 text-destructive">Could not save. Please try again. / No se pudo guardar. Intenta otra vez.</p>}</div><OrientationFooter /></article></main>;
+  return <main className="orientation-app"><Helmet><title>{`${section.title} | TIDY`}</title><meta name="robots" content="noindex,nofollow" /></Helmet><article className="orientation-reading"><nav className="flex flex-wrap justify-between gap-3"><Button asChild variant="ghost"><Link to="/pro/orientation"><ArrowLeft /> All sections / Todas las secciones</Link></Button><Button asChild variant="outline"><Link to="/pro/orientation/preview"><Play /> Preview / Vista previa</Link></Button></nav><header><p className="text-sm font-extrabold text-primary">SECTION {ORIENTATION_SECTIONS.indexOf(section) + 1} / SECCIÓN {ORIENTATION_SECTIONS.indexOf(section) + 1}</p><h1>{section.title}</h1><p className="text-lg text-muted-foreground" lang="es">{section.es}</p></header>{ORIENTATION_COPY[section.id].map((block, i) => <section className="orientation-reading-slide" key={i}><OrientationSlide slide={{block, section, index:i}} page={i + 1} total={ORIENTATION_COPY[section.id].length} /></section>)}<div className="border-t border-border pt-8"><Button className="orientation-gold-button min-h-14 w-full text-base" onClick={complete} disabled={busy}>{busy ? <Loader2 className="animate-spin" /> : <Check />} I've read this / He leído esto</Button>{error && <p role="alert" className="mt-3 text-destructive">Could not save. Please try again. / No se pudo guardar. Intenta otra vez.</p>}</div><OrientationFooter /></article></main>;
 }
