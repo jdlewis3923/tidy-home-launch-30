@@ -89,9 +89,9 @@
 - [ ] Switch on the five extra add-on prices in Stripe (needs your go-ahead: changes live Stripe)
 
 ## Pro orientation (Oct 9)
-- [ ] Replace low-resolution crops with detailed 4K reference restorations; verify all displayed images.
-- [ ] Ensure every slide visibly animates when entered or scrolled into view, with replay and reduced-motion support.
-- [ ] Add bilingual accepted-result and rework directions to all 15 comparisons; regenerate and inspect the PDF.
+- [x] Replace low-resolution crops with reconstructed 3840px masters; verify 49 unique deck photographs and high-resolution hub imagery.
+- [x] Ensure every slide visibly animates when entered or scrolled into view, with replay and reduced-motion support; browser verified 41/41.
+- [x] Add bilingual accepted-result and rework directions to all 15 comparisons; regenerate and inspect the 41-page v4 PDF.
 - [x] Align the entire deck to supplied reference cadence, include all 44 contact-sheet images once and photographic welcome, preserve designed badge.
 - [x] Build visibly distinct tile, timeline, quote, scenario and comparison compositions with staged motion; verify signed-in viewer, PDF download and all 41 rendered pages.
 - [x] Rotate bright semantic slide palettes and layouts; keep the current font and signed-in gates.
