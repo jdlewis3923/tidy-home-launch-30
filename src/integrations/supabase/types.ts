@@ -6055,6 +6055,7 @@ export type Database = {
           jobber_client_id: string | null
           jobber_job_ids: Json
           latest_invoice_attempt_count: number | null
+          lawn_measured_sqft: number | null
           monthly_total_cents: number
           next_billing_date: string | null
           pause_collection: string | null
@@ -6105,6 +6106,7 @@ export type Database = {
           jobber_client_id?: string | null
           jobber_job_ids?: Json
           latest_invoice_attempt_count?: number | null
+          lawn_measured_sqft?: number | null
           monthly_total_cents?: number
           next_billing_date?: string | null
           pause_collection?: string | null
@@ -6155,6 +6157,7 @@ export type Database = {
           jobber_client_id?: string | null
           jobber_job_ids?: Json
           latest_invoice_attempt_count?: number | null
+          lawn_measured_sqft?: number | null
           monthly_total_cents?: number
           next_billing_date?: string | null
           pause_collection?: string | null
