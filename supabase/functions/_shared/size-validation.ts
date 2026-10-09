@@ -127,10 +127,6 @@ export function surchargePerVisitFor(service: CanonService, sqFt?: number | null
       ? CLEANING_SURCHARGE.perVisitDollars
       : 0;
   }
-  if (service === "lawn") {
-    return sqFt >= LAWN_SURCHARGE.minSqFt && sqFt <= LAWN_SURCHARGE.maxSqFt
-      ? LAWN_SURCHARGE.perVisitDollars
-      : 0;
-  }
+  // Lawn: the old extra-large surcharge is retired — the size bands replace it.
   return 0;
 }

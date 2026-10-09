@@ -275,10 +275,7 @@ Deno.serve(async (req) => {
             if (sqFt > CLEANING_SURCHARGE.maxSqFt) return -1;
             return sqFt >= CLEANING_SURCHARGE.minSqFt ? CLEANING_SURCHARGE.perVisitDollars : 0;
           }
-          if (service === "lawn") {
-            if (sqFt > LAWN_SURCHARGE.maxSqFt) return -1;
-            return sqFt >= LAWN_SURCHARGE.minSqFt ? LAWN_SURCHARGE.perVisitDollars : 0;
-          }
+          // Lawn: retired surcharge — the size bands (and aerial verification) replace it.
           return 0;
         };
 
