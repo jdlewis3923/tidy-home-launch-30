@@ -1557,6 +1557,19 @@ body.admin-hud h1 {
 
 /* /founding — mobile door-hanger landing surface. */
 .founding-landing {
+  /* The QR page is a light public brochure, independent of signed-in admin theme. */
+  color-scheme: light;
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --border: 214 32% 91%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+  --text-mid: 215 25% 35%;
+  --ink: 222 47% 11%;
+  --ink-soft: 222 30% 28%;
+  --ink-faint: 222 15% 50%;
   --founding-shadow: 0 18px 42px hsl(var(--navy) / .16);
   --founding-soft: 210 50% 98%;
   background: hsl(var(--background));
@@ -1580,7 +1593,7 @@ body.admin-hud h1 {
 .founding-hero-copy > p { margin-top: 20px; font-size: 1.24rem; line-height: 1.45; color: hsl(var(--primary-foreground) / .92); }
 .founding-rating-line { display: inline-flex; margin-top: 12px; align-items: center; gap: 5px; color: hsl(var(--primary-foreground)); font-size: .78rem; font-weight: 700; text-decoration: none; text-shadow: 0 2px 8px hsl(var(--navy) / .45); }
 .founding-rating-line span { color: hsl(var(--gold)); letter-spacing: .08em; }
-.founding-cap-pill { display: inline-flex; margin-top: 20px; border-radius: 10px; padding: 12px 16px; background: hsl(var(--primary-foreground) / .14); font-size: .86rem; font-weight: 600; backdrop-filter: blur(8px); }
+.founding-cap-pill { display: block; width: fit-content; margin-top: 20px; border-radius: 10px; padding: 12px 16px; background: hsl(var(--primary-foreground) / .14); font-size: .86rem; font-weight: 600; backdrop-filter: blur(8px); }
 .founding-cap-pill strong { color: hsl(var(--gold)); }
 .founding-landing-main { position: relative; }
 .founding-quote-wrap { position: relative; z-index: 3; width: min(100% - 40px, 430px); margin: -350px auto 0; transform: translateX(-365px); }
@@ -1683,19 +1696,19 @@ body.admin-hud h1 {
   .founding-hero-shade { background: linear-gradient(90deg, hsl(var(--navy) / .95) 0%, hsl(var(--navy) / .69) 39%, hsl(var(--navy) / .08) 78%), linear-gradient(180deg, hsl(var(--navy) / .08), hsl(var(--navy) / .04) 55%, hsl(var(--navy) / .32)); }
   .founding-hero-shell { width: calc(100% - 36px); }
   .founding-topbar picture img { height: 42px; }
-  .founding-hero-copy { width: 78%; padding-top: 28px; }
+  .founding-hero-copy { width: 100%; padding: 28px 0 28px; }
   .founding-hero-copy h1 { font-size: 2.42rem; }
   .founding-hero-copy > p { margin-top: 14px; font-size: .96rem; }
   .founding-cap-pill { max-width: 100%; margin-top: 13px; padding: 9px 11px; font-size: .68rem; line-height: 1.35; white-space: normal; }
   .founding-quote-wrap { width: calc(100% - 28px); margin: -228px auto 0; transform: none; }
-  .founding-quote-card { padding: 12px 12px 12px; border-radius: 14px; }
+  .founding-quote-card { padding: 18px 14px; border-radius: 14px; scroll-margin-top: 16px; }
   .founding-quote-card > p:first-child { margin-bottom: 8px; font-size: .7rem; }
   .founding-zip-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px !important; }
   .founding-zip-grid .founding-zip-choice { display: flex; min-height: 54px; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 6px 4px; text-align: center; }
   .founding-zip-grid .founding-zip-choice strong { font-size: 1rem; line-height: 1.1; }
   .founding-zip-grid .founding-zip-choice span { font-size: .66rem; line-height: 1.15; }
-  .founding-quote-card button, .founding-quote-card input, .founding-quote-card select { min-height: 36px; }
-  .founding-quote-card > div > button:last-child, .founding-quote-card form > button:not([type="button"]) { min-height: 42px; }
+  .founding-quote-card button, .founding-quote-card input, .founding-quote-card select { min-height: 44px; }
+  .founding-quote-card > div > button:last-child, .founding-quote-card form > button:not([type="button"]) { min-height: 52px; }
   .founding-quote-card fieldset { margin-bottom: 8px; }
   .founding-quote-card .grid { gap: 7px; }
   .founding-quote-card .mt-4 { margin-top: .6rem; }
@@ -1716,24 +1729,26 @@ body.admin-hud h1 {
   .founding-plans-section, .founding-how-section { padding: 48px 14px 54px; }
   .founding-plans-section h2, .founding-how-section h2 { font-size: 1.8rem; }
   .founding-section-lead { font-size: .8rem; }
-  .founding-plan-grid { gap: 8px; margin-top: 24px; }
-  .founding-plan-card > picture { height: 87px; }
-  .founding-plan-card > div { grid-template-columns: 22px 1fr 25px; gap: 5px; min-height: 64px; padding: 8px; }
-  .founding-plan-icon { width: 18px; height: 18px; }
-  .founding-plan-card strong { font-size: .65rem; line-height: 1.15; }
-  .founding-plan-card small { font-size: .54rem; white-space: nowrap; }
-  .founding-plan-card button { width: 24px; height: 24px; font-size: .9rem; }
+  .founding-plan-grid { grid-template-columns: 1fr; gap: 14px; margin-top: 24px; }
+  .founding-plan-card { display: grid; grid-template-columns: 104px minmax(0, 1fr); }
+  .founding-plan-card > picture { height: 112px; }
+  .founding-plan-card > div { grid-template-columns: minmax(0, 1fr) 44px; gap: 8px; min-height: 112px; padding: 14px 10px 14px 16px; }
+  .founding-plan-icon { display: none; }
+  .founding-plan-card strong { font-size: 1rem; line-height: 1.35; overflow-wrap: normal; }
+  .founding-plan-card small { font-size: .78rem; line-height: 1.5; white-space: normal; }
+  .founding-plan-card button { width: 44px; height: 44px; font-size: 1.2rem; }
   .founding-how-grid { grid-template-columns: 1fr; gap: 28px; margin-top: 24px; }
   .founding-how-grid li { min-width: 0; }
   .founding-step-image { aspect-ratio: 1.34 / 1; margin-bottom: 20px; }
   .founding-step-image span { bottom: -15px; left: 12px; width: 34px; height: 34px; font-size: .82rem; }
   .founding-how-grid strong { display: block; font-size: .92rem; }
   .founding-how-grid p { max-width: 34rem; font-size: .78rem; line-height: 1.5; }
-  .founding-trust-section ul { grid-template-columns: repeat(5, 1fr); width: 100%; }
-  .founding-trust-section li { min-height: 108px; gap: 7px; padding: 13px 3px; }
+  .founding-trust-section ul { grid-template-columns: repeat(2, minmax(0, 1fr)); width: calc(100% - 28px); }
+  .founding-trust-section li { min-height: 108px; gap: 10px; padding: 16px 10px; }
   .founding-trust-section svg { width: 25px; height: 25px; }
-  .founding-trust-section strong { font-size: .57rem; }
-  .founding-footer-section { width: calc(100% - 36px); padding-top: 27px; }
+  .founding-trust-section strong { max-width: 150px; font-size: .78rem; line-height: 1.45; }
+  .founding-trust-section li:last-child { grid-column: 1 / -1; }
+  .founding-footer-section { width: calc(100% - 36px); padding-top: 27px; padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
   .founding-refer-card { grid-template-columns: 42px 1fr 21px; gap: 11px; min-height: 78px; padding: 12px 14px; }
   .founding-refer-card > svg:first-child { width: 36px; height: 36px; }
   .founding-refer-card strong { font-size: 1.05rem; }.founding-refer-card small { font-size: .66rem; }
