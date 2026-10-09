@@ -11,6 +11,14 @@ export function orientationSlides(sections: readonly typeof ORIENTATION_SECTIONS
 export function OrientationSlide({ slide, page, total, exporting = false }: { slide: OrientationSlideData; page: number; total: number; exporting?: boolean }) {
   const parent = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0);
+  const [entered, setEntered] = useState(exporting);
+  useEffect(() => {
+    if (exporting || !parent.current) return;
+    // Reading sections mount many slides at once: start their motion on visibility, not page load.
+    const observer = new IntersectionObserver(([entry]) => setEntered(entry.isIntersecting), { threshold: .12 });
+    observer.observe(parent.current);
+    return () => observer.disconnect();
+  }, [exporting]);
   useEffect(() => {
     const element = parent.current;
     if (!element) return;
@@ -20,7 +28,7 @@ export function OrientationSlide({ slide, page, total, exporting = false }: { sl
   }, []);
   const { block, section } = slide;
   const visual = orientationVisual(block, section.id, slide.index);
-  return <div ref={parent} className={`orientation-slide-container tone-${visual.tone}`}><div className={`orientation-slide layout-${visual.layout} ${block.pair ? "slide-pair" : ""}`} style={{ transform: exporting ? "none" : `scale(${scale})` }}>
+  return <div ref={parent} data-slide-motion={exporting ? "static" : entered ? "entered" : "waiting"} className={`orientation-slide-container tone-${visual.tone} ${entered ? "is-entered" : "is-waiting"}`}><div className={`orientation-slide layout-${visual.layout} ${block.pair ? "slide-pair" : ""}`} style={{ transform: exporting ? "none" : `scale(${scale})` }}>
     <header className="orientation-slide-header"><TidyLogo /><span>{section.title} / {section.es}</span><span>{page} / {total}</span></header>
     <div className="orientation-slide-body"><OrientationComposition block={block} sectionId={section.id} index={slide.index} interactive={!exporting} /></div>
     <footer>Images are illustrations of the standard. / Las imágenes ilustran el estándar.</footer>
