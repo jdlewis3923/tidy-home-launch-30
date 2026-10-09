@@ -105,7 +105,7 @@ export default function AdminPipelineRecord() {
       db.from("contractor_stage_events").select("*").eq("applicant_id", id).order("created_at", { ascending: false }).limit(50),
     ]);
     if (pr.error) setErr(rpcMessage(pr.error));
-    setP(pr.data); setA(ar.data); setMissing(ms.data ?? []); setArtifacts(art.data ?? []); setSpend(sp.data ?? []); setEvents(ev.data ?? []);
+    setP(pr.data); setA(ar.data); setMissing(ms.error ? [`Could not check requirements: ${rpcMessage(ms.error)}`] : (ms.data ?? [])); setArtifacts(art.data ?? []); setSpend(sp.data ?? []); setEvents(ev.data ?? []);
     setDraft({});
   }, [id]);
   useEffect(() => { void load(); }, [load]);
