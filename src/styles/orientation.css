@@ -274,6 +274,8 @@
 
 /* Reference posters: three role tiles, circular visit markers and service kit columns. */
 .layout-relationship .orientation-slide-body,.layout-kit .orientation-slide-body { display:flex; flex-direction:column; align-items:stretch; justify-content:center; gap:24px; }
+.layout-kit .orientation-slide-body { gap:18px; padding-top:20px; justify-content:flex-start; }
+.layout-kit .orientation-composition-title h1 { font-size:60px; }.layout-kit .orientation-composition-title h2 { margin-top:12px; }
 .orientation-relationship-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:28px; }
 .orientation-relationship-grid > div { border:2px solid hsl(var(--orientation-blue) / .2); border-top:12px solid hsl(var(--orientation-blue)); padding:28px; border-radius:8px; }
 .orientation-relationship-grid > div:nth-child(2) { border-top-color:hsl(var(--orientation-yellow)); }
@@ -290,7 +292,7 @@
 .layout-pillars .orientation-reference-strip { height:125px; }
 .orientation-kit-labels { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); text-align:center; gap:24px; }
 .orientation-kit-labels strong { font-size:30px; font-weight:900; }.orientation-kit-labels span { display:block; font-size:21px; margin-top:8px; }
-.orientation-service-kits { width:100%; height:390px; object-fit:contain; }
+.orientation-service-kits { width:100%; height:330px; object-fit:contain; }
 .orientation-kit-bottom { display:grid; grid-template-columns:minmax(0,1fr) 370px; gap:30px; align-items:center; }
 .orientation-kit-bottom .orientation-wide-copy { gap:28px; }.orientation-kit-bottom .orientation-wide-copy p { font-size:23px; line-height:1.5; }
 .orientation-kit-detail { display:flex; gap:18px; height:140px; }.orientation-kit-detail > img { width:190px; height:140px; object-fit:contain; }
@@ -307,9 +309,9 @@
 .orientation-purpose-photos:after { content:""; position:absolute; inset:0; background:linear-gradient(0deg,hsl(var(--orientation-charcoal) / .98),hsl(var(--orientation-charcoal) / .1) 85%); }
 .orientation-purpose-copy { position:relative; color:hsl(var(--orientation-light)); padding-top:390px; }.orientation-purpose-copy .orientation-wide-copy { margin-top:30px; }.orientation-purpose-copy .orientation-wide-copy p[lang=es],.orientation-purpose-copy h2 { color:hsl(var(--orientation-light-muted)); }
 .orientation-purpose-copy .orientation-composition-title h1 { color:hsl(var(--orientation-light))!important; }
-.layout-finale { overflow:hidden; }.layout-finale:before { width:750px; height:1080px; opacity:1; background:hsl(var(--orientation-blue)); clip-path:polygon(55% 0,100% 0,100% 100%,0 100%); }
+.layout-finale { overflow:hidden; }.layout-finale:before { width:550px; height:1200px; right:-230px; top:-60px; opacity:1; background:hsl(var(--orientation-blue)); clip-path:none; transform:skewX(-22deg); }
 .orientation-finale-copy { position:relative; z-index:1; }.orientation-finale-copy > img { width:130px; margin-bottom:20px; }
-.orientation-finale-photos .orientation-reference-strip { height:650px; }.orientation-finale-photos img { height:650px; }
+.orientation-finale-photos { position:relative; z-index:1; }.orientation-finale-photos .orientation-reference-strip { height:650px; }.orientation-finale-photos img { height:650px; }
 .orientation-pair figure { border:2px solid hsl(var(--orientation-blue) / .2); border-radius:8px; overflow:hidden; background:hsl(var(--orientation-paper)); padding:18px; }
 .orientation-pair figure:nth-child(2) { border-color:hsl(var(--orientation-error) / .3); }
 .orientation-pair figcaption { display:flex; align-items:center; gap:12px; font-size:23px!important; }
