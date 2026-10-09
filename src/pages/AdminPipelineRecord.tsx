@@ -87,6 +87,7 @@ export default function AdminPipelineRecord() {
   const [artifacts, setArtifacts] = useState<Row[]>([]);
   const [spend, setSpend] = useState<Row[]>([]);
   const [events, setEvents] = useState<Row[]>([]);
+  const [orientationProgress, setOrientationProgress] = useState<Row[]>([]);
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [err, setErr] = useState<string | null>(null);
   const [modal, setModal] = useState<null | "spend" | "hold" | "override" | "withdraw" | "decline">(null);
@@ -96,16 +97,17 @@ export default function AdminPipelineRecord() {
   const [wdNote, setWdNote] = useState("");
 
   const load = useCallback(async () => {
-    const [pr, ar, ms, art, sp, ev] = await Promise.all([
+    const [pr, ar, ms, art, sp, ev, op] = await Promise.all([
       db.from("contractor_pipeline").select("*").eq("applicant_id", id).maybeSingle(),
       db.from("applicants").select("first_name,last_name,phone,email").eq("id", id).maybeSingle(),
       db.rpc("pipeline_missing", { _id: id }),
       db.from("contractor_artifacts").select("*").eq("applicant_id", id).order("uploaded_at", { ascending: false }),
       db.from("contractor_spend").select("*").eq("applicant_id", id).order("spent_at"),
       db.from("contractor_stage_events").select("*").eq("applicant_id", id).order("created_at", { ascending: false }).limit(50),
+      db.from("pro_orientation_progress").select("section_id,started_at,completed_at").eq("applicant_id", id),
     ]);
     if (pr.error) setErr(rpcMessage(pr.error));
-    setP(pr.data); setA(ar.data); setMissing(ms.error ? [`Could not check requirements: ${rpcMessage(ms.error)}`] : (ms.data ?? [])); setArtifacts(art.data ?? []); setSpend(sp.data ?? []); setEvents(ev.data ?? []);
+    setP(pr.data); setA(ar.data); setMissing(ms.error ? [`Could not check requirements: ${rpcMessage(ms.error)}`] : (ms.data ?? [])); setArtifacts(art.data ?? []); setSpend(sp.data ?? []); setEvents(ev.data ?? []); setOrientationProgress(op.data ?? []);
     setDraft({});
   }, [id]);
   useEffect(() => { void load(); }, [load]);
@@ -245,6 +247,12 @@ export default function AdminPipelineRecord() {
             {spend.length === 0 && <p className="text-sm text-muted-foreground">Nothing spent.</p>}
             <ul className="space-y-1 text-sm">{spend.map((x) => <li key={x.id} className="flex justify-between"><span>{x.category === "kit" ? "Kit" : "Background check"}</span><span className="tabular-nums">{money(x.amount_cents)}</span></li>)}</ul>
           </div>
+        </section>
+
+        <section className="rounded-lg border border-border bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-base font-bold">Pro orientation</h2><Button asChild size="sm" variant="outline"><a href="/TIDY_Pro_Onboarding_Rebuilt.pptx" download>Download deck</a></Button></div>
+          <p className="mt-2 text-sm">{orientationProgress.filter((x) => x.completed_at).length} of 4 sections read</p>
+          <ul className="mt-2 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">{["before-you-work","what-it-pays","on-the-job","when-it-matters"].map((key) => { const row = orientationProgress.find((x) => x.section_id === key); return <li key={key}>{row?.completed_at ? "✓" : row?.started_at ? "Started" : "—"} {key.split("-").join(" ")}{row?.completed_at ? ` · ${new Date(row.completed_at).toLocaleString()}` : ""}</li>; })}</ul>
         </section>
 
         <section className="rounded-lg border border-border bg-card p-4">

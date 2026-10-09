@@ -855,6 +855,13 @@
       "when": 1791553431491,
       "tag": "0121_fix_pipeline_missing_array_append",
       "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1791554626208,
+      "tag": "0122_add_pro_orientation_progress",
+      "breakpoints": true
     }
   ]
 }
