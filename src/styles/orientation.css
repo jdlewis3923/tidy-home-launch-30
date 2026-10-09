@@ -234,6 +234,37 @@
 .orientation-motion-line span { display:block; width:32%; height:100%; background:hsl(var(--slide-accent)); }
 .is-entered .orientation-motion-line span { animation:orientation-visible-sweep 5s ease-in-out infinite; }
 @keyframes orientation-visible-sweep { 0%,100% { transform:translateX(-100%); } 50% { transform:translateX(313%); } }
+/* Bilingual text gets separate reading space, including the fixed-size PDF canvas. */
+.orientation-slide p { overflow-wrap:break-word; }
+.orientation-slide h2 { line-height:1.25; }
+.orientation-slide-copy > div[lang=es] { margin-top:32px; }
+.orientation-slide-copy > div[lang=es] > p { line-height:1.5; margin-top:18px; }
+.orientation-composition-title h2 { margin-top:20px; line-height:1.3; }
+.orientation-pillar p { line-height:1.45; }
+.orientation-pillar p[lang=es] { font-size:24px; line-height:1.5; margin-top:26px; }
+.orientation-gate p { line-height:1.45; }
+.orientation-gate p[lang=es] { font-size:22px; line-height:1.5; margin-top:20px; }
+.orientation-content-tile p { font-size:25px; line-height:1.45; }
+.orientation-content-tile p[lang=es] { font-size:22px; line-height:1.5; margin-top:24px; }
+.orientation-editorial-tiles p[lang=es] { line-height:1.5; margin-top:26px; }
+.orientation-wide-copy p[lang=es],.orientation-insurance-copy .orientation-wide-copy p[lang=es] { line-height:1.5; }
+.orientation-result-direction { line-height:1.45; }
+.orientation-result-direction p[lang=es] { font-size:22px; line-height:1.5; margin-top:16px; }
+.orientation-slide.slide-pair .orientation-slide-copy { column-gap:64px; row-gap:12px; }
+.orientation-slide.slide-pair .orientation-slide-copy > div[lang=es] { margin-top:8px; }
+.orientation-slide.slide-pair .orientation-slide-copy > div[lang=es] > p { font-size:25px; line-height:1.45; margin-top:14px; }
+.orientation-slide.slide-pair .orientation-photo { height:290px; }
+.orientation-cover-copy div[lang=es] p { line-height:1.5; margin-top:18px; }
+@media(max-width:899px) {
+  .orientation-app:not(.orientation-export) .orientation-slide-copy > div[lang=es],
+  .orientation-app:not(.orientation-export) .orientation-slide.slide-pair .orientation-slide-copy > div[lang=es] { margin-top:28px; }
+  .orientation-app:not(.orientation-export) .orientation-slide-copy > div[lang=es] > p,
+  .orientation-app:not(.orientation-export) .orientation-slide.slide-pair .orientation-slide-copy > div[lang=es] > p { font-size:16px; line-height:1.65; margin-top:12px; }
+  .orientation-app:not(.orientation-export) .orientation-slide p[lang=es] { line-height:1.65; }
+  .orientation-app:not(.orientation-export) .orientation-result-direction p[lang=es] { font-size:15px; margin-top:14px; }
+  .orientation-app:not(.orientation-export) .orientation-gate p[lang=es] { font-size:16px; }
+  .orientation-app:not(.orientation-export) .orientation-pillar p[lang=es] { font-size:16px; }
+}
 .orientation-result-direction { margin-top:14px; font-size:23px; line-height:1.35; color:hsl(var(--slide-ink)); }
 .orientation-result-direction p[lang=es] { font-size:20px; margin-top:10px; color:hsl(var(--slide-muted)); }
 .orientation-slide.slide-pair .orientation-photo { height:310px; object-fit:contain; background:hsl(var(--orientation-charcoal) / .04); }

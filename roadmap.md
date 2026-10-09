@@ -89,6 +89,7 @@
 - [ ] Switch on the five extra add-on prices in Stripe (needs your go-ahead: changes live Stripe)
 
 ## Pro orientation (Oct 9)
+- [ ] Final spacing pass: separate Spanish subtitles and paragraphs, inspect all slides and regenerate the PDF.
 - [x] Replace slide four’s circles with larger raster artwork; delay entrances until photos load and add one visible ongoing slide accent.
 - [x] Replace low-resolution crops with reconstructed 3840px masters; verify 49 unique deck photographs and high-resolution hub imagery.
 - [x] Ensure every slide visibly animates when entered or scrolled into view, with replay and reduced-motion support; browser verified 41/41.
