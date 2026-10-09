@@ -228,6 +228,12 @@
 .orientation-slide-container.is-entered .orientation-slide-header { animation:orientation-header-arrive .8s ease both; }
 @keyframes orientation-slide-arrive { from { opacity:.05; translate:0 70px; } to { opacity:1; translate:0 0; } }
 @keyframes orientation-header-arrive { from { opacity:0; translate:-32px 0; } to { opacity:1; translate:0 0; } }
+.orientation-gate-art { width:154px; height:154px; padding:30px; border-radius:50%; background:hsl(var(--orientation-paper)); margin:0 auto 24px; display:grid; place-items:center; }
+.orientation-gate-art img { width:94px; height:94px; object-fit:contain; }
+.orientation-motion-line { position:absolute; bottom:0; left:0; width:100%; height:8px; overflow:hidden; background:hsl(var(--slide-ink) / .08); }
+.orientation-motion-line span { display:block; width:32%; height:100%; background:hsl(var(--slide-accent)); }
+.is-entered .orientation-motion-line span { animation:orientation-visible-sweep 5s ease-in-out infinite; }
+@keyframes orientation-visible-sweep { 0%,100% { transform:translateX(-100%); } 50% { transform:translateX(313%); } }
 .orientation-result-direction { margin-top:14px; font-size:23px; line-height:1.35; color:hsl(var(--slide-ink)); }
 .orientation-result-direction p[lang=es] { font-size:20px; margin-top:10px; color:hsl(var(--slide-muted)); }
 .orientation-slide.slide-pair .orientation-photo { height:310px; object-fit:contain; background:hsl(var(--orientation-charcoal) / .04); }

@@ -3,6 +3,11 @@ import TidyLogo from "@/components/TidyLogo";
 import { OrientationImages } from "./OrientationContent";
 import { orientationSegments, orientationVisual } from "@/lib/orientation-design";
 import type { OrientationBlock } from "@/lib/orientation";
+import agreementArt from "@/assets/orientation/gates/agreement.png";
+import insuranceArt from "@/assets/orientation/gates/insurance.png";
+import screeningArt from "@/assets/orientation/gates/screening.png";
+import identificationArt from "@/assets/orientation/gates/identification.png";
+import assignmentArt from "@/assets/orientation/gates/assignment.png";
 
 export function OrientationComposition({ block, sectionId, index, interactive = true }: { block: OrientationBlock; sectionId: string; index: number; interactive?: boolean }) {
   const v = orientationVisual(block, sectionId, index);
@@ -17,7 +22,7 @@ export function OrientationComposition({ block, sectionId, index, interactive = 
   if (v.layout === "badge") return <><Copy /><div className="orientation-badge-stage"><div className="orientation-id-badge"><div className="orientation-id-top"><TidyLogo /><strong>TIDY PRO</strong></div><Photo /><strong className="orientation-id-name">ALEX RIVERA</strong><span className="orientation-id-role">Independent Pro / Pro independiente</span><div className="orientation-id-bottom">SAMPLE / EJEMPLO</div></div></div></>;
   if (v.layout === "kit") return <><Copy /><div className="orientation-kit-stage"><Photo /><ReferencePhotos /><p className="orientation-kit-note">Illustrated kit options vary by service. Car magnet optional.<br /><span lang="es">Las opciones del kit varían según el servicio. Imán para auto opcional.</span></p></div></>;
   if (v.layout === "pillars") return <><Title /><div className="orientation-pillar-grid">{[ShieldCheck,Heart,ClipboardCheck].map((Icon,i) => <div className="orientation-pillar" key={i}><Icon /><p>{en[i]}</p><p lang="es">{es[i]}</p></div>)}</div><ReferencePhotos /></>;
-  if (v.layout === "gates") return <><Title /><div className="orientation-gate-grid">{[FileCheck,ShieldCheck,LockKeyhole,IdCard,CalendarDays].map((Icon,i) => <div className="orientation-gate" key={i}><span>{String(i+1).padStart(2,"0")}</span><Icon /><p>{en[i]}</p><p lang="es">{es[i]}</p></div>)}</div><ReferencePhotos /></>;
+  if (v.layout === "gates") return <><Title /><div className="orientation-gate-grid">{[agreementArt,insuranceArt,screeningArt,identificationArt,assignmentArt].map((src,i) => <div className="orientation-gate" key={src}><span>{String(i+1).padStart(2,"0")}</span><div className="orientation-gate-art"><img src={src} alt="" width={256} height={256} /></div><p>{en[i]}</p><p lang="es">{es[i]}</p></div>)}</div><ReferencePhotos /></>;
   if (["pay", "timeline", "steps"].includes(v.layout)) return <><Title /><Tiles /></>;
   if (v.layout === "territory") return <><Title /><div className="orientation-zip-grid">{[["33156","Pinecrest"],["33183","Kendall"],["33186","Kendall West"]].map(([zip, label]) => <div key={zip}><MapPin /><strong>{zip}</strong><span>{label}</span></div>)}</div><div className="orientation-wide-copy"><p>{block.body}</p><p lang="es">{block.es}</p></div></>;
   if (v.layout === "stat") return <><div className="orientation-stat-callout"><strong>{v.stat}</strong><Clock3 /></div><Copy /></>;
