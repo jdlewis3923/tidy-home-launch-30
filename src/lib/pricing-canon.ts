@@ -182,9 +182,9 @@ export const SIZE_HELPERS: Record<CanonService, Record<CanonSize, string>> = {
     3: 'max 3 baths',
   },
   lawn: {
-    1: 'up to 3,000 sq ft of turf',
-    2: '3,001–6,000 sq ft of turf',
-    3: '6,001–10,000 sq ft of turf',
+    1: 'up to 3,000 sq ft of lawn',
+    2: '3,000 – 7,000 sq ft of lawn',
+    3: '7,000 – 12,000 sq ft of lawn',
   },
   detailing: {
     1: 'coupe, sedan',
@@ -529,11 +529,28 @@ export function sizeFromBedrooms(bedrooms: number, bathrooms: number): SizeSelec
 
 export const BATH_LIMITS: Record<CanonSize, number> = { 1: 2, 2: 2.5, 3: 3 };
 
-/** Lawn size from mowable turf area. Over 10,000 sq ft is a quote. */
+/**
+ * Lawn size bands — SQUARE FEET OF TURF (grass only; never house, driveway,
+ * walkways, patio, pool or decking). Upper bounds are inclusive.
+ */
+export const LAWN_BANDS = [
+  { size: 1, name: 'Small', maxSqFt: 3000 },
+  { size: 2, name: 'Standard', maxSqFt: 7000 },
+  { size: 3, name: 'Large', maxSqFt: 12000 },
+] as const;
+/** Above this turf area a lawn is never self-bookable — custom quote only. */
+export const LAWN_QUOTE_ABOVE_SQFT = 12000;
+export const LAWN_SIZE_NAMES: Record<CanonSize, string> = { 1: 'Small', 2: 'Standard', 3: 'Large' };
+/** Shown directly under every lawn size picker, verbatim. */
+export const LAWN_GRASS_ONLY_NOTE =
+  "That's grass only — we don't count your house, driveway or pool. Not sure? Pick your best guess. We check it from above and tell you before your first visit.";
+export const LAWN_OVER_OPTION = 'Larger than 12,000 sq ft — request a quote';
+
+/** Lawn size from turf area. Over 12,000 sq ft is a quote. */
 export function sizeFromTurfSqFt(sqft: number): SizeSelection {
   if (sqft <= 3000) return 1;
-  if (sqft <= 6000) return 2;
-  if (sqft <= 10000) return 3;
+  if (sqft <= 7000) return 2;
+  if (sqft <= 12000) return 3;
   return 'quote';
 }
 
@@ -616,7 +633,7 @@ export const SHINE_SUMMARY = '3 maintenance washes every month plus 2 full detai
 export const SIZING_FAQ: { q: string; a: string }[] = [
   {
     q: 'How do I know which size I am?',
-    a: 'Bedrooms for cleaning, what you drive for car care. For lawn, pick small, standard or large — we confirm it from satellite imagery before your first visit. You never have to measure anything.',
+    a: 'Bedrooms for cleaning, what you drive for car care. For lawn, size is square feet of grass only — Small up to 3,000, Standard 3,000–7,000, Large 7,000–12,000. We don't count your house, driveway or pool. Pick your best guess; we check it from above and tell you before your first visit. You never have to measure anything.',
   },
   {
     q: 'What if I pick the wrong size?',
@@ -627,7 +644,7 @@ export const SIZING_FAQ: { q: string; a: string }[] = [
     a: 'Your home moves up one size. Bathrooms drive the length of a visit more than anything else.',
   },
   {
-    q: 'What if I have 5+ bedrooms, or more than 10,000 sq ft of lawn?',
+    q: 'What if I have 5+ bedrooms, or more than 12,000 sq ft of lawn?',
     a: "Call us and we'll quote it. It isn't a worse deal, it just isn't a checkbox.",
   },
   {
