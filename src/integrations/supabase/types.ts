@@ -7462,6 +7462,14 @@ export type Database = {
           zip: string
         }[]
       }
+      pro_lawn_job_info: {
+        Args: { _visit: string }
+        Returns: {
+          measured_sqft: number
+          size_tier: number
+          visit_pay_cents: number
+        }[]
+      }
       pro_orientation_state: { Args: never; Returns: Json }
       pro_orientation_touch: {
         Args: { _complete?: boolean; _section_id: string }
