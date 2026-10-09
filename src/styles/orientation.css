@@ -96,6 +96,7 @@
 .tone-charcoal { --slide-paper:var(--orientation-charcoal); --slide-ink:var(--orientation-light); --slide-muted:var(--orientation-light-muted); --slide-accent:var(--orientation-yellow); }
 .orientation-slide-container { background:hsl(var(--slide-paper)); border-color:hsl(var(--slide-ink) / .12); }
 .orientation-slide { background:hsl(var(--slide-paper)); color:hsl(var(--slide-ink)); }
+.orientation-slide h1,.orientation-slide h2 { color:inherit; }
 .orientation-slide-copy > div,.orientation-slide footer { color:hsl(var(--slide-muted)); }
 .orientation-slide-header { border-bottom:2px solid hsl(var(--slide-ink) / .18); padding-bottom:14px; position:relative; z-index:2; }
 .orientation-slide-copy,.orientation-slide-media { position:relative; z-index:2; }
