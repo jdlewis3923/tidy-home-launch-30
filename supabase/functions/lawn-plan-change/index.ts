@@ -81,11 +81,11 @@ async function tell(change: any, v: any) {
   const m = await member(change.user_id);
   const n = notice(v.kind, m.es, v);
   if (!n || !m.email) return 'skipped';
-  const { data: row } = await admin.from('lawn_size_notices').insert({ reservation_id: null, kind: v.kind, email: m.email, subject: n.subject, body: n.text }).select('id').single();
+  const { data: row } = await admin.from('lawn_plan_notices').insert({ change_id: change.id, kind: v.kind, email: m.email, subject: n.subject, body: n.text }).select('id').single();
   try {
     const sent = await sendBrevoEmail({ to: { email: m.email, name: m.first_name }, marketing: false, subject: n.subject, label: 'lawn-size-notice',
       htmlContent: tidyEmailShell({ heading: n.subject, eyebrow: 'Lawn Care', bodyHtml: `<p>${m.first_name},</p><p>${n.text}</p>`, ctaUrl: n.cta, ctaLabel: n.cta ? (m.es ? 'Revisar y confirmar' : 'Review and confirm') : undefined }) });
-    await admin.from('lawn_size_notices').update({ email_status: sent.sent ? 'sent' : 'failed', email_error: sent.sent ? null : (sent.reason ?? 'send failed'), sent_at: sent.sent ? new Date().toISOString() : null }).eq('id', row?.id);
+    await admin.from('lawn_plan_notices').update({ email_status: sent.sent ? 'sent' : 'failed', email_error: sent.sent ? null : (sent.reason ?? 'send failed'), sent_at: sent.sent ? new Date().toISOString() : null }).eq('id', row?.id);
     if (!sent.sent) throw new Error(sent.reason ?? 'send failed');
     return 'sent';
   } catch (e) {
@@ -198,7 +198,7 @@ Deno.serve(async (req) => {
   if (b.action === 'verify' || b.action === 'correct') {
     const auth = await requireServiceOrAdmin(req);
     if (!auth.ok) return jsonResponse({ ok: false, error: auth.error }, auth.status);
-    const asService = auth.kind === 'service';
+    const asService = auth.kind === 'service_role';
     let changeId = b.action === 'verify' ? b.change_id : '';
     if (b.action === 'correct') {
       const { data: sub } = await admin.from('subscriptions').select('id, user_id, services, plan_lines, sizes_json').eq('id', b.subscription_id).single();
