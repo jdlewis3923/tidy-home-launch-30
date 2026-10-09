@@ -30,6 +30,7 @@ import {
   quantityFor,
   sizeFromBedrooms,
   sizeFromTurfSqFt,
+  LAWN_QUOTE_ABOVE_SQFT,
 
   type CanonCadence,
   type CanonService,
@@ -134,17 +135,17 @@ export const vehicleClassLabels = VEHICLE_CLASS_LABELS;
 export const allSizes = SIZES;
 
 export const lawnChoiceLabels: Record<LawnChoice, string> = {
-  small: 'Small yard',
-  standard: 'Standard yard',
-  large: 'Large yard',
-  over: 'Bigger than that',
+  small: 'Small',
+  standard: 'Standard',
+  large: 'Large',
+  over: 'Larger than 12,000 sq ft — request a quote',
 };
 
 export const lawnChoiceHelpers: Record<LawnChoice, string> = {
-  small: 'up to 3,000 sq ft of turf',
-  standard: '3,001–6,000 sq ft of turf',
-  large: '6,001–10,000 sq ft of turf',
-  over: 'more than 10,000 sq ft — we quote it',
+  small: 'up to 3,000 sq ft of lawn',
+  standard: '3,000 – 7,000 sq ft of lawn',
+  large: '7,000 – 12,000 sq ft of lawn',
+  over: 'custom quote — no price online',
 };
 
 export function bathroomsToNumber(value: string | null): number {
@@ -208,12 +209,12 @@ export function sizeFor(state: ConfigState, service: ServiceType): SizeSelection
 
 /**
  * True when the plan can't be booked online: any service above size 3, a home
- * over 4,000 sq ft, or turf over 7,500 sq ft. Those go to the quote form.
+ * over 4,000 sq ft, or turf over 12,000 sq ft. Those go to the quote form.
  */
 export function needsQuote(state: ConfigState): boolean {
   if (state.services.some((svc) => sizeFor(state, svc) === 'quote')) return true;
   if (state.services.includes('cleaning') && (state.homeSqFt ?? 0) > CLEANING_SURCHARGE.maxSqFt) return true;
-  if (state.services.includes('lawn') && (state.turfSqFt ?? 0) > LAWN_SURCHARGE.maxSqFt) return true;
+  if (state.services.includes('lawn') && (state.turfSqFt ?? 0) > LAWN_QUOTE_ABOVE_SQFT) return true;
   return false;
 }
 

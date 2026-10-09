@@ -12,6 +12,7 @@
 import {
   CLEANING_SURCHARGE,
   LAWN_SURCHARGE,
+  LAWN_QUOTE_ABOVE_SQFT,
   VEHICLE_CLASS_SIZE,
   sizeFromBedrooms,
   sizeFromTurfSqFt,
@@ -86,10 +87,11 @@ export function checkServiceLine(args: {
   inputs: SizeInputs;
 }): SizeCheckResult {
   const { service, claimedSize, sqFt, inputs } = args;
-  // Square footage is REQUIRED for the two per-visit services: it is the only
-  // input that triggers the surcharge (cleaning +$60, lawn +$30 a visit) and
-  // the pro's surcharge share. A blank field used to buy the smaller price.
-  if ((service === "cleaning" || service === "lawn") && !sqFt) {
+  // Interior square footage is REQUIRED for cleaning: it triggers the +$60
+  // surcharge and the pro's share. Lawn is NEVER measured by the customer —
+  // the size is their best guess, verified by Tidy from aerial imagery before
+  // conversion (reservations.lawn_verified_at; see lawn-verification).
+  if (service === "cleaning" && !sqFt) {
     return { ok: false, error: "sq_ft_required", detail: service };
   }
   const recomputed = recomputeSize(service, inputs);
@@ -111,7 +113,7 @@ export function checkServiceLine(args: {
   if (service === "cleaning" && sqFt && sqFt > CLEANING_SURCHARGE.maxSqFt) {
     return { ok: false, error: "property_requires_quote", detail: "cleaning_sq_ft" };
   }
-  if (service === "lawn" && sqFt && sqFt > LAWN_SURCHARGE.maxSqFt) {
+  if (service === "lawn" && sqFt && sqFt > LAWN_QUOTE_ABOVE_SQFT) {
     return { ok: false, error: "property_requires_quote", detail: "lawn_turf_sq_ft" };
   }
   return { ok: true };
