@@ -32,6 +32,8 @@ import {
   SERVICE_UNIT,
   CLEANING_SURCHARGE,
   LAWN_SURCHARGE,
+  LAWN_GRASS_ONLY_NOTE,
+  LAWN_OVER_OPTION,
   type CanonService,
   type CanonSize,
 } from '@/lib/pricing-canon';
@@ -40,6 +42,7 @@ import {
   sizeForLawnReconciled,
   sizeForCarCare,
   lawnChoiceLabels,
+  lawnChoiceHelpers,
   vehicleClassLabels,
   type Frequency,
   type ServiceType,
@@ -164,7 +167,7 @@ export default function DashboardServices() {
     (newService === 'lawn' && newSqFt > LAWN_SURCHARGE.maxSqFt);
 
   const newReady = !!newService && !!newSize && !newNeedsQuote &&
-    (newService === 'detailing' || newSqFt > 0);
+    (newService !== 'cleaning' || newSqFt > 0);
 
   const resetNewService = (s: CanonService) => {
     setNewService(s);
@@ -664,10 +667,11 @@ export default function DashboardServices() {
                         <div className="space-y-3">
                           <h3 className="text-sm font-semibold text-ink-soft">{t('Your yard')}</h3>
                           <div className="grid gap-2 sm:grid-cols-2">
-                            {(['small', 'standard', 'large', 'over'] as LawnChoice[]).map((choice) => (
+                            {(['small', 'standard', 'large'] as LawnChoice[]).map((choice) => (
                               <button
                                 key={choice}
                                 type="button"
+                                aria-pressed={newLawnChoice === choice}
                                 onClick={() => setNewLawnChoice(choice)}
                                 className={`min-h-[44px] rounded-xl border-2 p-3 text-left text-sm font-semibold transition ${
                                   newLawnChoice === choice
@@ -675,26 +679,20 @@ export default function DashboardServices() {
                                     : 'border-[hsl(var(--hairline))] bg-white text-ink hover:border-ink/40'
                                 }`}
                               >
-                                {lawnChoiceLabels[choice]}
+                                {t(lawnChoiceLabels[choice])}
+                                <span className={`mt-0.5 block text-[11px] font-normal ${newLawnChoice === choice ? 'text-white/75' : 'text-ink-faint'}`}>
+                                  {t(lawnChoiceHelpers[choice])}
+                                </span>
                               </button>
                             ))}
                           </div>
-                          <label className="block text-xs font-medium text-ink-soft">
-                            {t('Mowable turf square footage')} *
-                            <input
-                              type="number"
-                              inputMode="numeric"
-                              min={0}
-                              step={50}
-                              value={newTurfSqFt}
-                              onChange={(e) => setNewTurfSqFt(e.target.value)}
-                              placeholder="e.g. 3500"
-                              className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
-                            />
-                          </label>
-                          <p className="text-[11px] text-ink-faint">
-                            {t('Grass only. 4,001–7,500 sq ft adds $30 a visit. Above 7,500 we quote by hand.')}
-                          </p>
+                          <p className="text-[12px] leading-relaxed text-ink-soft">{t(LAWN_GRASS_ONLY_NOTE)}</p>
+                          <a
+                            href="/founding?service=lawn&size=custom"
+                            className="block rounded-xl border border-dashed border-[hsl(var(--hairline))] px-3 py-3 text-sm font-semibold text-ink-soft hover:border-ink"
+                          >
+                            {t(LAWN_OVER_OPTION)} →
+                          </a>
                         </div>
                       )}
 

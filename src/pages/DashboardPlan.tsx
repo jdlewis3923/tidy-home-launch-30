@@ -211,7 +211,6 @@ export default function DashboardPlan() {
       // Square footage is required for cleaning and lawn: it is what triggers
       // the surcharge, and the server now rejects a line without it.
       if (state.services.includes('cleaning') && !(state.homeSqFt && state.homeSqFt > 0)) return false;
-      if (state.services.includes('lawn') && !(state.turfSqFt && state.turfSqFt > 0)) return false;
       return state.services.every(svc => !!sizeFor(state, svc));
     }
 

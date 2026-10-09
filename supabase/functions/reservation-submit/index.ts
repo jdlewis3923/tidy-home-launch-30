@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
   const email = b.email.toLowerCase();
 
   // Duplicate detection: same email OR same street+ZIP updates the existing reservation.
-  const { data: dupes } = await admin.from('reservations').select('id, founding, update_count, street, zip, email')
+  const { data: dupes } = await admin.from('reservations').select('id, founding, update_count, street, zip, email, lawn_selected_size')
     .neq('status', 'canceled').or(`email.eq.${email},and(zip.eq.${b.zip},street.ilike.${b.street.replace(/[,()%*]/g, ' ').trim()})`).order('created_at').limit(1);
   const existing = dupes?.[0];
 
@@ -129,6 +129,17 @@ Deno.serve(async (req) => {
     lang: b.lang, is_test_row: !!b.is_test, src: b.src ?? null, session_id: b.session_id ?? null,
     gift_addons: b.gift_addons, custom_quote: customQuote,
   };
+  // Lawn size is the customer's best guess; Tidy verifies it from aerial imagery
+  // before conversion. Larger than 12,000 sq ft arrives as size 'quote' → custom.
+  const lawnLine = lines.find((l) => l.service === 'lawn');
+  const lawnSelected = lawnLine ? (['1', '2', '3'].includes(String(lawnLine.size)) ? String(lawnLine.size) : 'custom') : null;
+  // deno-lint-ignore no-explicit-any
+  const lawnFields: Record<string, any> = { lawn_selected_size: lawnSelected };
+  // A changed lawn answer or a new address needs a fresh measurement.
+  if (!existing || existing.lawn_selected_size !== lawnSelected || existing.street !== b.street || existing.zip !== b.zip) {
+    Object.assign(lawnFields, { lawn_measured_sqft: null, lawn_verified_size: null, lawn_verified_at: null, lawn_verified_by: null, lawn_size_variance: null, lawn_size_confirmation: null, lawn_confirm_token: null, lawn_old_monthly_cents: null, lawn_new_monthly_cents: null, lawn_confirmed_at: null });
+  }
+  Object.assign(record, lawnFields);
   const q = existing
     ? admin.from('reservations').update({ ...record, update_count: (existing.update_count ?? 0) + 1, updated_at: new Date().toISOString() }).eq('id', existing.id)
     : admin.from('reservations').insert(record);

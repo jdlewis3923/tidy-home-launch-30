@@ -123,6 +123,10 @@ Deno.serve(async (req) => {
       (events ?? []).filter((e) => domains.includes(String(domainOf(String(e.rule_code)))));
 
     const status = statusLine(p);
+    // Lawn reservations waiting on aerial size verification (blocks conversion).
+    const { count: lawnUnverified } = await supabase.from('reservations').select('id', { count: 'exact', head: true })
+      .contains('services', ['lawn']).is('lawn_verified_at', null).in('status', ['reserved', 'invited']).eq('is_test_row', false);
+    const lawnLine = `<p style="margin:0 0 14px">Lawn reservations awaiting size verification: <strong>${lawnUnverified ?? 0}</strong> — <a href="${APP_URL}/admin/lawn-verification">verify</a></p>`;
     let heading: string;
     let bodyHtml: string;
 
@@ -135,6 +139,7 @@ Deno.serve(async (req) => {
       const svc = (cap.services ?? {}) as Record<string, Row>;
       bodyHtml = `
         <p style="margin:0 0 14px;font-weight:700;color:#0f172a">${status}</p>
+        ${lawnLine}
         <h2 style="font-size:16px;margin:18px 0 4px">Today</h2>
         <p style="margin:0">Unassigned jobs in the next 72h: <strong>${val(cap.unassigned_jobs_72h)}</strong></p>
         ${((cap.unassigned_jobs ?? []) as Row[]).length
@@ -165,6 +170,7 @@ Deno.serve(async (req) => {
       const zips = Object.entries((fun.zips ?? {}) as Record<string, Row>);
       bodyHtml = `
         <p style="margin:0 0 14px;font-weight:700;color:#0f172a">${status}</p>
+        ${lawnLine}
         <h2 style="font-size:16px;margin:18px 0 4px">Yesterday</h2>
         <p style="margin:0">Adds: <strong>${val(p.adds_yesterday)}</strong> · Churn: <strong>${val(p.churn_yesterday)}</strong>
           · Active subs: <strong>${val(p.active_subs)}</strong> · MRR: <strong>${money(p.mrr)}</strong></p>

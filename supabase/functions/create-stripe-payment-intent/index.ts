@@ -37,6 +37,7 @@ import {
   type WashCount,
 } from "../_shared/pricing-canon.ts";
 import { checkServiceLine, surchargePerVisitFor } from "../_shared/size-validation.ts";
+import { lawnCheckoutGate } from "../_shared/lawn-gate.ts";
 import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
 import { stripeMode, stripeModeConflict, stripeSecretKey } from "../_shared/stripe-mode.ts";
 
@@ -186,6 +187,13 @@ Deno.serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  // ---------- Lawn: verified from aerial imagery before conversion ----------
+  {
+    const lawnLine = input.services.find((s) => s.service === "lawn");
+    const gate = await lawnCheckoutGate(supabase, user.email, lawnLine ? Number(lawnLine.size) : null);
+    if (!gate.ok) return jsonResponse({ ok: false, error: gate.error, detail: gate.detail }, 409);
+  }
 
   try {
     const result = await withLogging({

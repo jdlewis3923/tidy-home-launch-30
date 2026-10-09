@@ -67,6 +67,8 @@ const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
 const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
 const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
 const AdminReservations = lazy(() => import("./pages/AdminReservations.tsx"));
+const AdminLawnVerification = lazy(() => import("./pages/AdminLawnVerification.tsx"));
+const LawnSizeConfirm = lazy(() => import("./pages/LawnSizeConfirm.tsx"));
 const AdminFounding = lazy(() => import("./pages/AdminFounding.tsx"));
 const AdminPipeline = lazy(() => import("./pages/AdminPipeline.tsx"));
 const AdminPipelineRecord = lazy(() => import("./pages/AdminPipelineRecord.tsx"));
@@ -359,6 +361,7 @@ const App = () => (
                   {/* Permanent KPI Command Center — admins only. */}
                   <Route path="/admin/kpis" element={<AdminKpis />} />
                   <Route path="/admin/reservations" element={<AdminReservations />} />
+                  <Route path="/admin/lawn-verification" element={<AdminLawnVerification />} />
                   <Route path="/admin/founding" element={<AdminFounding />} />
                   <Route path="/admin/pipeline" element={<AdminPipeline />} />
                   <Route path="/admin/pipeline/archive" element={<AdminPipelineArchive />} />
@@ -426,6 +429,7 @@ const App = () => (
                   <Route path="/redo" element={<Redo />} />
                   <Route path="/reserved" element={<Reserved />} />
                   <Route path="/reserve/confirm/:token" element={<ReserveConfirm />} />
+                  <Route path="/lawn-size/:token" element={<LawnSizeConfirm />} />
                   <Route path="/go/:id" element={<GoAsk />} />
 
                   {/* Public Pro badge verification — no login, ever. */}
