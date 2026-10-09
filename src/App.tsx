@@ -104,6 +104,7 @@ const ProOnboarding = lazy(() => import("./pages/ProOnboarding.tsx"));
 const ProTraining = lazy(() => import("./pages/ProTraining.tsx"));
 const ProOrientation = lazy(() => import("./pages/pro/ProOrientation.tsx"));
 const ProOrientationSection = lazy(() => import("./pages/pro/ProOrientationSection.tsx"));
+const ProOrientationPreview = lazy(() => import("./pages/pro/ProOrientationPreview.tsx"));
 const ProEquipment = lazy(() => import("./pages/ProEquipment.tsx"));
 const AdminCoiReview = lazy(() => import("./pages/AdminCoiReview.tsx"));
 const AdminInsurance = lazy(() => import("./pages/AdminInsurance.tsx"));
@@ -379,6 +380,7 @@ const App = () => (
                   <Route path="/admin/documents" element={<AdminDocuments />} />
                   <Route path="/admin/applicants" element={<AdminApplicants />} />
                   <Route path="/admin/orientations" element={<AdminOrientations />} />
+                  <Route path="/admin/orientations/preview" element={<ProOrientationPreview />} />
                   <Route path="/admin/social-launch" element={<AdminSocialLaunch />} />
                   <Route path="/admin/nextdoor-verify" element={<AdminNextdoorVerify />} />
                   <Route path="/admin/documenso-templates" element={<AdminDocumensoTemplates />} />
@@ -399,6 +401,7 @@ const App = () => (
                   <Route path="/pro/onboarding" element={<ProOnboarding />} />
                   <Route path="/pro/training" element={<ProTraining />} />
                   <Route path="/pro/orientation" element={<ProOrientation />} />
+                  <Route path="/pro/orientation/preview" element={<ProOrientationPreview />} />
                   <Route path="/pro/orientation/:sectionId" element={<ProOrientationSection />} />
                   <Route path="/pro/equipment" element={<ProEquipment />} />
                   {/* On-site job view: before-photo gate + walkaround add-on request. */}

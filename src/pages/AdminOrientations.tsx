@@ -180,7 +180,8 @@ export default function AdminOrientations() {
             <p className="text-sm text-slate-500 mt-1">Schedule sessions, register applicants, mark attendance.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline"><a href="/TIDY_Pro_Onboarding_Rebuilt.pptx" download><Download className="mr-1 h-4 w-4" /> Download deck</a></Button>
+            <Button asChild><Link to="/admin/orientations/preview">Preview orientation / Vista previa</Link></Button>
+            <Button asChild variant="outline"><Link to="/admin/orientations/preview"><Download className="mr-1 h-4 w-4" /> Open / download PDF</Link></Button>
             <Button onClick={() => setShowNew(true)} className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold">
               <Plus className="h-4 w-4 mr-1" /> Schedule new orientation
             </Button>
