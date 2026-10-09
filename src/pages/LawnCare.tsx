@@ -84,7 +84,7 @@ const config: ServiceLandingConfig = {
   ],
   addOnsNote: "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset.",
   surchargeNote:
-    "Extra-large lot (4,001–7,500 sq ft of mowable turf): +$30 per visit. Above that size we quote individually.",
+    "Larger than 12,000 sq ft of grass? We quote it by hand — no price online.",
 
   trustCards: [
     {
