@@ -102,6 +102,8 @@ const ProReviewBonuses = lazy(() => import("./pages/ProReviewBonuses.tsx"));
 const ProUploadCoi = lazy(() => import("./pages/ProUploadCoi.tsx"));
 const ProOnboarding = lazy(() => import("./pages/ProOnboarding.tsx"));
 const ProTraining = lazy(() => import("./pages/ProTraining.tsx"));
+const ProOrientation = lazy(() => import("./pages/pro/ProOrientation.tsx"));
+const ProOrientationSection = lazy(() => import("./pages/pro/ProOrientationSection.tsx"));
 const ProEquipment = lazy(() => import("./pages/ProEquipment.tsx"));
 const AdminCoiReview = lazy(() => import("./pages/AdminCoiReview.tsx"));
 const AdminInsurance = lazy(() => import("./pages/AdminInsurance.tsx"));
@@ -396,6 +398,8 @@ const App = () => (
                   <Route path="/pro/upload-coi" element={<ProUploadCoi />} />
                   <Route path="/pro/onboarding" element={<ProOnboarding />} />
                   <Route path="/pro/training" element={<ProTraining />} />
+                  <Route path="/pro/orientation" element={<ProOrientation />} />
+                  <Route path="/pro/orientation/:sectionId" element={<ProOrientationSection />} />
                   <Route path="/pro/equipment" element={<ProEquipment />} />
                   {/* On-site job view: before-photo gate + walkaround add-on request. */}
                   <Route path="/pro/job/:jobId" element={<ProJobView />} />

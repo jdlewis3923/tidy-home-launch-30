@@ -4444,6 +4444,38 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_orientation_progress: {
+        Row: {
+          applicant_id: string
+          completed_at: string | null
+          id: string
+          section_id: string
+          started_at: string
+        }
+        Insert: {
+          applicant_id: string
+          completed_at?: string | null
+          id?: string
+          section_id: string
+          started_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          completed_at?: string | null
+          id?: string
+          section_id?: string
+          started_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_orientation_progress_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pro_praise: {
         Row: {
           applicant_id: string | null
@@ -7327,6 +7359,11 @@ export type Database = {
           visit_pay_cents: number
           zip: string
         }[]
+      }
+      pro_orientation_state: { Args: never; Returns: Json }
+      pro_orientation_touch: {
+        Args: { _complete?: boolean; _section_id: string }
+        Returns: undefined
       }
       pro_partner_progress: { Args: never; Returns: Json }
       pro_partner_status: { Args: { _applicant: string }; Returns: Json }

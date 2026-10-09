@@ -87,3 +87,9 @@
 - [x] Prices read from Stripe by lookup_key with cached fallback
 - [x] Correct supplied How It Works screens, persist the selected-ZIP live counter, remove mobile clipping, and add restrained page motion
 - [ ] Switch on the five extra add-on prices in Stripe (needs your go-ahead: changes live Stripe)
+
+## Pro orientation (Oct 9)
+- [ ] /pro/orientation hub + 4 sections, stage-gated, bilingual, "I've read this" progress
+- [ ] 36 orientation images in public/orientation/
+- [ ] Admin: orientation progress on pipeline record; deck download on /admin/orientations + record
+- [ ] 12-point verification
