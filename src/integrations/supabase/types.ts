@@ -3564,6 +3564,53 @@ export type Database = {
           },
         ]
       }
+      lawn_plan_notices: {
+        Row: {
+          body: string
+          change_id: string
+          created_at: string
+          email: string
+          email_error: string | null
+          email_status: string
+          id: string
+          kind: string
+          sent_at: string | null
+          subject: string
+        }
+        Insert: {
+          body: string
+          change_id: string
+          created_at?: string
+          email: string
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          kind: string
+          sent_at?: string | null
+          subject: string
+        }
+        Update: {
+          body?: string
+          change_id?: string
+          created_at?: string
+          email?: string
+          email_error?: string | null
+          email_status?: string
+          id?: string
+          kind?: string
+          sent_at?: string | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawn_plan_notices_change_id_fkey"
+            columns: ["change_id"]
+            isOneToOne: false
+            referencedRelation: "lawn_plan_changes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lawn_size_notices: {
         Row: {
           body: string
