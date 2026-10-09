@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ProVisitExtras from "@/components/pro/ProVisitExtras";
+import LawnJobSize from "@/components/pro/LawnJobSize";
 import { AlertTriangle, Check, ListChecks, Send } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import {
@@ -173,6 +174,7 @@ export default function ProVisit() {
             )}
           </div>
         </div>
+        {visit.service_type === "lawn" && <LawnJobSize visitId={visit.id} fallbackPayCents={visit.visit_pay_cents} />}
         <p className="mt-1 text-[13px] text-[hsl(var(--pro-ink-soft))]">Flat pay for this completed visit</p>
       </div>
 
