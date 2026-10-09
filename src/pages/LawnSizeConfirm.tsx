@@ -1,6 +1,6 @@
 /** /lawn-size/:token — the customer confirms or declines a lawn size-up before anything is charged. */
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,22 +16,26 @@ const money = (c: number | null) => (c == null ? "" : `$${Math.round(c / 100).to
 export default function LawnSizeConfirm() {
   const { token = "" } = useParams();
   const { t } = useLanguage();
+  // ?plan=1 — a size change on an existing paid plan (not a reservation).
+  const [params] = useSearchParams();
+  const plan = params.get("plan") === "1";
+  const fn = plan ? "lawn-plan-change" : "lawn-verification";
   const [offer, setOffer] = useState<Offer | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "missing" | "confirmed" | "declined">("loading");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    void supabase.functions.invoke("lawn-verification", { body: { action: "load", token } }).then(({ data }) => {
+    void supabase.functions.invoke(fn, { body: { action: "load", token } }).then(({ data }) => {
       if (!data?.ok) { setState("missing"); return; }
       const o = data.offer as Offer;
       setOffer(o);
       setState(o.lawn_size_confirmation === "confirmed" ? "confirmed" : o.lawn_size_confirmation === "declined" ? "declined" : "ready");
     });
-  }, [token]);
+  }, [token, fn]);
 
   async function respond(accept: boolean) {
     setBusy(true);
-    const { data } = await supabase.functions.invoke("lawn-verification", { body: { action: "respond", token, accept } });
+    const { data } = await supabase.functions.invoke(fn, { body: { action: "respond", token, accept } });
     setBusy(false);
     if (data?.ok) setState(accept ? "confirmed" : "declined");
   }
@@ -51,19 +55,19 @@ export default function LawnSizeConfirm() {
               {t("We measured your lawn from above at about {sqft} sq ft, which puts it in our {size} size.")
                 .replace("{sqft}", offer.lawn_measured_sqft.toLocaleString()).replace("{size}", size)}{" "}
               {(offer.lawn_old_monthly_cents != null
-                ? t("Your plan is {new} a month instead of {old}.")
-                : t("Your plan is {new} a month.")).replace("{new}", money(offer.lawn_new_monthly_cents)).replace("{old}", money(offer.lawn_old_monthly_cents))}{" "}
+                ? t(plan ? "Your lawn plan is {new} a month instead of {old}." : "Your plan is {new} a month instead of {old}.")
+                : t(plan ? "Your lawn plan is {new} a month." : "Your plan is {new} a month.")).replace("{new}", money(offer.lawn_new_monthly_cents)).replace("{old}", money(offer.lawn_old_monthly_cents))}{" "}
               {t("Nothing is charged until you confirm.")}
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <button disabled={busy} onClick={() => respond(true)} className="min-h-[48px] rounded-xl bg-gold px-4 font-extrabold text-navy disabled:opacity-50">{t("Confirm new size")}</button>
-              <button disabled={busy} onClick={() => respond(false)} className="min-h-[48px] rounded-xl border-2 border-border px-4 font-semibold text-foreground disabled:opacity-50">{t("Cancel my reservation")}</button>
+              <button disabled={busy} onClick={() => respond(false)} className="min-h-[48px] rounded-xl border-2 border-border px-4 font-semibold text-foreground disabled:opacity-50">{t(plan ? "Don't change my plan" : "Cancel my reservation")}</button>
             </div>
-            <p className="mt-4 text-xs text-muted-foreground">{t("Declining cancels the lawn reservation — we never shrink the visit to fit a smaller price.")}</p>
+            <p className="mt-4 text-xs text-muted-foreground">{t(!plan ? "Declining cancels the lawn reservation — we never shrink the visit to fit a smaller price." : (offer as Offer & { kind?: string }).kind === "correction" ? "Declining ends lawn service on your plan — we never shrink the visit to fit a smaller price." : "Declining means lawn isn't added — we never shrink the visit to fit a smaller price.")}</p>
           </>
         )}
-        {state === "confirmed" && <p className="mt-6 text-lg font-semibold text-foreground">{t("Confirmed. Your lawn plan is set at the measured size — we'll be in touch before your first visit.")}</p>}
-        {state === "declined" && <p className="mt-6 text-lg font-semibold text-foreground">{t("Your reservation is cancelled. Nothing was charged.")}</p>}
+        {state === "confirmed" && <p className="mt-6 text-lg font-semibold text-foreground">{t(plan ? "Confirmed. Your lawn plan is updated at the measured size, starting on your next bill." : "Confirmed. Your lawn plan is set at the measured size — we'll be in touch before your first visit.")}</p>}
+        {state === "declined" && <p className="mt-6 text-lg font-semibold text-foreground">{t(plan ? "No change made. Nothing was charged." : "Your reservation is cancelled. Nothing was charged.")}</p>}
       </div>
     </main>
   );
