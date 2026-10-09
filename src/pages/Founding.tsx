@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useFoundingCounts } from "@/hooks/useFoundingCounts";
 import { useGoogleListing, shortName, pickReview, formatRating } from "@/lib/googleReviews";
 import { FOUNDING_ZIPS, FOUNDING_CAP, FOUNDING_BENEFITS, LAUNCH_DATE_LONG, LAUNCH_DATE_LONG_ES } from "@/lib/launch";
-import { lookupKeyFor, sizeFromBedrooms, VISITS_PER_MONTH, BILLED_MONTHLY, SIZE_PRICES, type CanonCadence, type CanonSize, type SizeSelection } from "@/lib/pricing-canon";
+import { LAWN_GRASS_ONLY_NOTE, LAWN_OVER_OPTION, lookupKeyFor, sizeFromBedrooms, VISITS_PER_MONTH, BILLED_MONTHLY, SIZE_PRICES, type CanonCadence, type CanonSize, type SizeSelection } from "@/lib/pricing-canon";
 import { GIFT_ELIGIBLE_ADDONS } from "@/lib/addon-catalog";
 import { PHONE_DISPLAY, PHONE_TEL } from "@/lib/landing";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +31,7 @@ import proImage from "@/assets/founding-pro-step.jpg";
 
 type Svc = "cleaning" | "lawn" | "detailing";
 type Step = "zip" | "services" | "sizes" | "price" | "reserve" | "done";
-type Lawn = 1 | 2 | 3;
+type Lawn = 1 | 2 | 3 | "quote";
 type State = {
   zip: string; src: string; step: Step; services: Svc[];
   beds: string; baths: string; lawn: Lawn | null; car: CanonSize | null;
@@ -85,6 +85,11 @@ export default function Founding() {
   const [s, setS] = useState<State>(() => {
     try {
       const saved = JSON.parse(sessionStorage.getItem(KEY) || "null") as State | null;
+      const custom = params.get("service") === "lawn" && params.get("size") === "custom";
+      if (custom) {
+        const base = saved ?? blank("", urlSrc);
+        return { ...base, src: urlSrc || base.src, services: base.services.includes("lawn") ? base.services : [...base.services, "lawn"], lawn: "quote", step: isZip(base.zip) ? "sizes" : "zip" };
+      }
       if (saved) return { ...saved, src: urlSrc || saved.src, step: saved.step === "done" ? (isZip(saved.zip) ? "services" : "zip") : (!isZip(saved.zip) ? "zip" : saved.step) };
     } catch { /* fresh */ }
     return blank("", urlSrc);
@@ -351,10 +356,13 @@ export default function Founding() {
                   <fieldset>
                     <legend className="text-sm font-bold">{t("Lawn Care")} — {t("yard size")}</legend>
                     <div className="mt-2 grid grid-cols-3 gap-2">
-                      {([[1, "Small"], [2, "Standard"], [3, "Large"]] as const).map(([v, l]) => <button key={v} type="button" aria-pressed={s.lawn === v} className={`${chip} ${s.lawn === v ? on : off}`} onClick={() => set({ lawn: v })}>{t(l)}</button>)}
+                      {([[1, "Small", "up to 3,000 sq ft of lawn"], [2, "Standard", "3,000 – 7,000 sq ft of lawn"], [3, "Large", "7,000 – 12,000 sq ft of lawn"]] as const).map(([v, l, h]) => <button key={v} type="button" aria-pressed={s.lawn === v} className={`${chip} ${s.lawn === v ? on : off} flex flex-col items-start text-left leading-tight`} onClick={() => set({ lawn: v })}><span>{t(l)}</span><span className="mt-0.5 text-[11px] font-medium opacity-80">{t(h)}</span></button>)}
                     </div>
-                    <p className="mt-2 text-xs text-ink-faint">{t("We confirm from aerial imagery before your first visit — nothing to measure.")}</p>
+                    <p className="mt-2 text-xs leading-relaxed text-ink-soft">{t(LAWN_GRASS_ONLY_NOTE)}</p>
+                    <button type="button" aria-pressed={s.lawn === "quote"} className={`mt-2 w-full rounded-xl border-2 border-dashed px-3 py-2 text-left text-sm font-semibold ${s.lawn === "quote" ? "border-gold bg-gold/10 text-ink" : "border-border text-ink-soft hover:border-primary/50"}`} onClick={() => set({ lawn: "quote" })}>{t(LAWN_OVER_OPTION)} →</button>
+                    {s.lawn !== "quote" && (<>
                     <Cadence value={s.cadence.lawn} onChange={(c) => set({ cadence: { ...s.cadence, lawn: c } })} t={t} chip={chip} on={on} off={off} />
+                    </>)}
                   </fieldset>
                 )}
                 {s.services.includes("detailing") && (
