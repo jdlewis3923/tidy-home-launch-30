@@ -89,7 +89,7 @@
 - [ ] Switch on the five extra add-on prices in Stripe (needs your go-ahead: changes live Stripe)
 
 ## Pro orientation (Oct 9)
-- [ ] /pro/orientation hub + 4 sections, stage-gated, bilingual, "I've read this" progress
-- [ ] 36 orientation images in public/orientation/
-- [ ] Admin: orientation progress on pipeline record; deck download on /admin/orientations + record
-- [ ] 12-point verification
+- [x] /pro/orientation hub + 4 sections, stage-gated, bilingual, "I've read this" progress
+- [x] 36 orientation images in public/orientation/
+- [x] Admin: orientation progress on pipeline record; deck download on /admin/orientations + record
+- [x] 12-point verification
