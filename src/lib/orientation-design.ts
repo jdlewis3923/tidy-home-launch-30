@@ -1,8 +1,8 @@
-import kit from "@/assets/orientation/complete-kit-v3.jpg";
-import portrait from "@/assets/orientation/badge-portrait.jpg";
-import photoRecord from "@/assets/orientation/photo-record.jpg";
-import noAccess from "@/assets/orientation/no-access.jpg";
-import welcome from "@/assets/orientation/reference-welcome.jpg";
+import kit from "@/assets/orientation/hd/complete-kit-v3.jpg";
+import portrait from "@/assets/orientation/hd/badge-portrait.jpg";
+import photoRecord from "@/assets/orientation/hd/photo-record.jpg";
+import noAccess from "@/assets/orientation/hd/no-access.jpg";
+import welcome from "@/assets/orientation/hd/reference-welcome.jpg";
 import { REFERENCE_IMAGES } from "@/lib/orientation-reference";
 import { ORIENTATION_COPY, ORIENTATION_SECTIONS, type OrientationBlock } from "@/lib/orientation";
 
