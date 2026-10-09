@@ -1,16 +1,31 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Play, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useProSession } from "@/hooks/useProSession";
-import { ORIENTATION_COPY, ORIENTATION_SECTIONS, stageNumber, type OrientationSectionId } from "@/lib/orientation";
+import { useOrientationAccess } from "@/hooks/useOrientationAccess";
+import { ORIENTATION_COPY, ORIENTATION_SECTIONS, stageNumber } from "@/lib/orientation";
+import { OrientationContent, OrientationFooter } from "@/components/pro/orientation/OrientationContent";
+import "@/styles/orientation.css";
 
-const Pic=({src,alt}:{src:string;alt:string})=><img src={src} loading="lazy" width={1344} height={768} alt={alt} className="aspect-video w-full rounded-md object-cover"/>;
-export default function ProOrientationSection(){
- const {sectionId=""}=useParams(); const nav=useNavigate(); const {userId,loading}=useProSession(); const [state,setState]=useState<any>(null); const section=ORIENTATION_SECTIONS.find(s=>s.id===sectionId); const blocks=section?ORIENTATION_COPY[section.id]:[];
- useEffect(()=>{if(userId&&section){(supabase as any).rpc("pro_orientation_state").then(({data}:any)=>setState(data));(supabase as any).rpc("pro_orientation_touch",{_section_id:section.id,_complete:false});}},[userId,sectionId]);
- if(loading)return <main className="min-h-screen bg-background p-6">Loading…</main>; if(!userId)return <Navigate to="/pro/login" replace/>; if(!section)return <Navigate to="/pro/orientation" replace/>; if(state&&stageNumber(state.stage)<section.min)return <Navigate to="/pro/orientation" replace/>;
- const complete=async()=>{const {error}=await (supabase as any).rpc("pro_orientation_touch",{_section_id:section.id,_complete:true});if(!error)nav("/pro/orientation");};
- return <main className="min-h-screen bg-background text-foreground"><Helmet><title>{section.title} | TIDY</title><meta name="robots" content="noindex,nofollow"/></Helmet><article className="mx-auto max-w-3xl px-4 py-6"><Link to="/pro/orientation" className="text-sm font-semibold text-primary">← All sections / Todas las secciones</Link><header className="my-6"><p className="text-sm font-bold text-primary">SECTION {ORIENTATION_SECTIONS.indexOf(section)+1} / SECCIÓN {ORIENTATION_SECTIONS.indexOf(section)+1}</p><h1 className="mt-1 text-3xl font-black">{section.title}</h1><p className="text-lg text-muted-foreground">{section.es}</p></header><div className="space-y-10">{blocks.map((b,i)=><section key={`${b.title}-${i}`}><h2 className="text-2xl font-black">{b.title}</h2><p className="mt-2 text-base leading-7">{b.body}</p><div className="mt-3 border-l-2 border-border pl-3"><h3 className="font-bold text-muted-foreground">{b.esTitle}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{b.es}</p></div>{b.image&&<div className="mt-4"><Pic src={`/orientation/${b.image}.jpg`} alt={b.title}/></div>}{b.pair&&<div className="mt-4 grid grid-cols-1 gap-4 min-[900px]:grid-cols-2"><figure><Pic src={`/orientation/${b.pair}-R.jpg`} alt="Accepted result"/><figcaption className="mt-2 font-black text-primary">RIGHT / ACCEPT</figcaption></figure><figure><Pic src={`/orientation/${b.pair}-W.jpg`} alt="Result to rework"/><figcaption className="mt-2 font-black text-destructive">WRONG / REWORK</figcaption></figure></div>}</section>)}</div><div className="mt-10 border-t border-border pt-6"><Button className="h-12 w-full text-base" onClick={complete}>I've read this / He leído esto</Button></div><footer className="py-8 text-center text-xs text-muted-foreground">Images are illustrations of the standard.</footer></article></main>;
+export default function ProOrientationSection() {
+  const { sectionId = "" } = useParams(); const nav = useNavigate();
+  const access = useOrientationAccess();
+  const section = ORIENTATION_SECTIONS.find(s => s.id === sectionId);
+  const unlocked = Boolean(section && access.state && stageNumber(access.state.stage) >= section.min);
+  const [busy, setBusy] = useState(false); const [error, setError] = useState(false);
+  useEffect(() => {
+    if (access.userId && section && unlocked) void supabase.rpc("pro_orientation_touch" as never, { _section_id: section.id, _complete: false } as never);
+  }, [access.userId, section?.id, unlocked]);
+  if (access.loading) return <main className="orientation-app p-6">Loading… / Cargando…</main>;
+  if (!access.userId) return <Navigate to="/pro/login" replace />;
+  if (!section || !unlocked) return <Navigate to="/pro/orientation" replace />;
+  const complete = async () => {
+    setBusy(true); setError(false);
+    const result = await supabase.rpc("pro_orientation_touch" as never, { _section_id: section.id, _complete: true } as never);
+    setBusy(false);
+    if (result.error) setError(true); else nav("/pro/orientation");
+  };
+  return <main className="orientation-app"><Helmet><title>{section.title} | TIDY</title><meta name="robots" content="noindex,nofollow" /></Helmet><article className="orientation-reading"><nav className="flex flex-wrap justify-between gap-3"><Button asChild variant="ghost"><Link to="/pro/orientation"><ArrowLeft /> All sections / Todas las secciones</Link></Button><Button asChild variant="outline"><Link to="/pro/orientation/preview"><Play /> Preview / Vista previa</Link></Button></nav><header><p className="text-sm font-extrabold text-primary">SECTION {ORIENTATION_SECTIONS.indexOf(section) + 1} / SECCIÓN {ORIENTATION_SECTIONS.indexOf(section) + 1}</p><h1>{section.title}</h1><p className="text-lg text-muted-foreground" lang="es">{section.es}</p></header>{ORIENTATION_COPY[section.id].map((block, i) => <OrientationContent key={i} block={block} />)}<div className="border-t border-border pt-8"><Button className="orientation-gold-button min-h-14 w-full text-base" onClick={complete} disabled={busy}>{busy ? <Loader2 className="animate-spin" /> : <Check />} I've read this / He leído esto</Button>{error && <p role="alert" className="mt-3 text-destructive">Could not save. Please try again. / No se pudo guardar. Intenta otra vez.</p>}</div><OrientationFooter /></article></main>;
 }
