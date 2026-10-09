@@ -564,8 +564,7 @@ export const VEHICLE_CLASS_LABELS: Record<VehicleClass, string> = {
 };
 
 /** Shown beside the lawn selector, verbatim. */
-export const LAWN_GUESS_NOTE =
-  'Not sure? Pick your best guess — we confirm the exact size from satellite imagery before your first visit, and we’ll tell you before we start if it’s different.';
+export const LAWN_GUESS_NOTE = LAWN_GRASS_ONLY_NOTE;
 
 // ---------------------------------------------------------------------------
 // What every visit includes. Published on the pricing page and in the FAQ.
@@ -623,7 +622,7 @@ export const SIZING_FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'What if I pick the wrong size?',
-    a: 'We move you to the right price before your second visit. We never bill you retroactively for the first.',
+    a: "Lawn: we check it from above before your first visit. If it's bigger, we tell you the new price and nothing is charged until you confirm. If it's smaller, we move you down. Cleaning and car care: we move you to the right price before your second visit and never bill retroactively for the first.",
   },
   {
     q: 'What if I have more bathrooms than my size allows?',
