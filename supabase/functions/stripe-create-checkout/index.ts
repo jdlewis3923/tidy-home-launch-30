@@ -171,6 +171,12 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: "add_service_requires_one_recurring_service" }, 400);
   }
 
+  // Lawn added to an existing plan must be measured from above first — it goes
+  // through lawn-plan-change (pending verification), never straight onto Stripe.
+  if (input.add_to_existing && input.services[0]?.service === "lawn") {
+    return jsonResponse({ ok: false, error: "lawn_requires_verification" }, 409);
+  }
+
   if (!SERVICE_ZIPS.has(input.zip)) {
     return jsonResponse({ ok: false, error: "zip_outside_service_area" }, 400);
   }
