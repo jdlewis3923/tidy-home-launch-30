@@ -904,6 +904,13 @@
       "when": 1791588096324,
       "tag": "0128_lawn_plan_notices",
       "breakpoints": true
+    },
+    {
+      "idx": 129,
+      "version": "7",
+      "when": 1791588194534,
+      "tag": "0129_lawn_plan_verify_retry",
+      "breakpoints": true
     }
   ]
 }
