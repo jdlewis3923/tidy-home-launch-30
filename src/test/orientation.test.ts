@@ -25,16 +25,19 @@ describe("orientation preview preserves content and stage gates", () => {
     }
     expect(slides.filter(s => s.block.pair)).toHaveLength(15);
   });
-  it("uses distinct compositions, an image-free opener and no repeated slide photos", () => {
+  it("uses reference compositions, a photographic opener and all 44 reference photos once", () => {
     const slides = orientationSlides(ORIENTATION_SECTIONS);
     const visuals = slides.map(s => orientationVisual(s.block, s.section.id, s.index));
     expect(new Set(visuals.map(v => v.tone)).size).toBe(4);
-    expect(new Set(visuals.map(v => v.layout)).size).toBeGreaterThanOrEqual(20);
+    expect(new Set(visuals.map(v => v.layout)).size).toBeGreaterThanOrEqual(18);
     expect(visuals[0].layout).toBe("opener");
-    expect(visuals[0].image).toBeUndefined();
+    expect(visuals[0].image).toContain("reference-welcome");
     const images = visuals.flatMap((v,i) => slides[i].block.pair ? [orientationImage(`${slides[i].block.pair}-R`),orientationImage(`${slides[i].block.pair}-W`)] : v.image ? [v.image] : []);
     expect(new Set(images).size).toBe(images.length);
+    const referenceImages = visuals.flatMap((v,i) => slides[i].block.pair ? [orientationImage(`${slides[i].block.pair}-R`),orientationImage(`${slides[i].block.pair}-W`)] : v.references);
+    expect(referenceImages).toHaveLength(44);
+    expect(new Set(referenceImages).size).toBe(44);
     expect(orientationImage("PRO-5")).toContain("complete-kit");
-    expect(orientationImage("PRO-1")).toContain("diverse-arrival");
+    expect(orientationImage("PRO-1")).toContain("reference-welcome");
   });
 });
