@@ -1,5 +1,6 @@
 import blackFont from "@/assets/orientation/poppins-black.ttf.asset.json";
 import mediumFont from "@/assets/orientation/poppins-medium.ttf.asset.json";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 import { ORIENTATION_SECTIONS } from "@/lib/orientation";
 import type { OrientationSlideData } from "@/components/pro/orientation/OrientationSlide";
 
@@ -15,6 +16,10 @@ export async function orientationPdf(slides: OrientationSlideData[]): Promise<Bl
   const { jsPDF } = await import("jspdf");
   const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: [1920, 1080], compress: true });
   const [black, medium] = await Promise.all([base64(blackFont.url), base64(mediumFont.url)]);
+  const logo = new Image(); logo.src = tidyLogo; await logo.decode();
+  const logoCanvas = document.createElement("canvas"); logoCanvas.width = logo.naturalWidth; logoCanvas.height = logo.naturalHeight;
+  logoCanvas.getContext("2d")!.drawImage(logo, 0, 0);
+  const logoData = logoCanvas.toDataURL("image/png");
   pdf.addFileToVFS("Poppins-Black.ttf", black); pdf.addFont("Poppins-Black.ttf", "Poppins", "bold");
   pdf.addFileToVFS("Poppins-Medium.ttf", medium); pdf.addFont("Poppins-Medium.ttf", "Poppins", "normal");
   const css = getComputedStyle(document.documentElement);
@@ -35,7 +40,7 @@ export async function orientationPdf(slides: OrientationSlideData[]): Promise<Bl
     if (i) pdf.addPage([1920, 1080], "landscape");
     const { block, section } = slides[i];
     pdf.setFillColor(...paper); pdf.rect(0, 0, 1920, 1080, "F");
-    text("TIDY", 90, 84, 200, 40, true, blue);
+    pdf.addImage(logoData, "PNG", 90, 30, 96, 80);
     text(`${section.title} / ${section.es}`, 310, 76, 1300, 22);
     text(`${i + 1} / ${slides.length}`, 1730, 76, 150, 22);
     const pair = Boolean(block.pair), width = pair ? 1720 : 820;

@@ -73,3 +73,20 @@
 .orientation-pdf-panel iframe { width:100%; height:80vh; margin-top:20px; border:1px solid hsl(var(--border)); }
 @media(max-width:899px) { .orientation-pair { grid-template-columns:1fr; } .orientation-slide .orientation-pair { grid-template-columns:1fr 1fr; } .orientation-reading-block { display:block; } .orientation-reading-block > img { margin-top:24px; } }
 @media(max-width:600px) { .orientation-topbar { padding:16px; } .orientation-topbar .orientation-top-label { display:none; } .orientation-hero { min-height:420px; } .orientation-hero h1 { font-size:40px; } .orientation-hero-copy { padding:32px 20px; } .orientation-section-grid { grid-template-columns:1fr; } .orientation-hub-body { padding:28px 20px; } .orientation-progress h2 { font-size:22px; } .orientation-reading { padding:20px; } .orientation-reading header h1 { font-size:36px; } .orientation-reading-block h2 { font-size:28px; } .orientation-preview { padding:16px; } .orientation-preview-title { font-size:24px; } .orientation-preview-toolbar .flex { width:100%; } }
+@media(max-width:899px) {
+  .orientation-slide-container { aspect-ratio:auto; overflow:visible; }
+  .orientation-slide { position:relative; width:100%; height:auto; left:auto; top:auto; margin:0; padding:24px 20px; transform:none!important; }
+  .orientation-slide-header { height:auto; font-size:12px; gap:12px; align-items:flex-start; }
+  .orientation-slide-header img { height:44px; }
+  .orientation-slide-header span:last-child { white-space:nowrap; }
+  .orientation-slide .orientation-slide-body,.orientation-slide.slide-pair .orientation-slide-body { display:block; height:auto; padding-top:28px; }
+  .orientation-slide .orientation-slide-copy h1,.orientation-slide.slide-pair .orientation-slide-copy h1 { font-size:30px; }
+  .orientation-slide .orientation-slide-copy > p,.orientation-slide.slide-pair .orientation-slide-copy > p { font-size:18px; line-height:1.6; margin-top:18px; }
+  .orientation-slide .orientation-slide-copy h2 { font-size:20px; }
+  .orientation-slide .orientation-slide-copy > div > p,.orientation-slide.slide-pair .orientation-slide-copy > div > p { font-size:15px; line-height:1.6; }
+  .orientation-slide-media { margin-top:24px; }
+  .orientation-slide .orientation-pair { grid-template-columns:1fr; }
+  .orientation-slide.slide-pair .orientation-photo { height:auto; aspect-ratio:16/9; }
+  .orientation-slide.slide-pair figcaption { font-size:16px; }
+  .orientation-slide footer { position:static; font-size:11px; margin-top:28px; }
+}
