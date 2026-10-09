@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ORIENTATION_COPY, ORIENTATION_SECTIONS, stageNumber } from "@/lib/orientation";
 import { orientationSlides } from "@/components/pro/orientation/OrientationSlide";
 import { orientationVisual, orientationImage } from "@/lib/orientation-design";
+import { ORIENTATION_STANDARDS } from "@/lib/orientation-standards";
 
 describe("orientation preview preserves content and stage gates", () => {
   it("keeps exactly four sections and the specified gates", () => {
@@ -39,5 +40,15 @@ describe("orientation preview preserves content and stage gates", () => {
     expect(new Set(referenceImages).size).toBe(44);
     expect(orientationImage("PRO-5")).toContain("complete-kit");
     expect(orientationImage("PRO-1")).toContain("reference-welcome");
+  });
+  it("includes bilingual acceptance and rework instructions for all 15 comparisons", () => {
+    const pairs = orientationSlides(ORIENTATION_SECTIONS).filter(s => s.block.pair);
+    expect(Object.keys(ORIENTATION_STANDARDS)).toHaveLength(15);
+    for (const { block } of pairs) {
+      const directions = ORIENTATION_STANDARDS[block.pair!];
+      for (const text of Object.values(directions)) expect(text.length).toBeGreaterThan(40);
+      expect(orientationImage(`${block.pair}-R`)).toContain("/hd/");
+      expect(orientationImage(`${block.pair}-W`)).toContain("/hd/");
+    }
   });
 });
