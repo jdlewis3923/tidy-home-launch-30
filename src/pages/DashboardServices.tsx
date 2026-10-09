@@ -32,6 +32,8 @@ import {
   SERVICE_UNIT,
   CLEANING_SURCHARGE,
   LAWN_SURCHARGE,
+  LAWN_GRASS_ONLY_NOTE,
+  LAWN_OVER_OPTION,
   type CanonService,
   type CanonSize,
 } from '@/lib/pricing-canon';
