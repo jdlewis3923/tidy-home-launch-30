@@ -6332,6 +6332,7 @@ export type Database = {
           customer_phone_e164: string | null
           id: string
           last_message_at: string
+          pro_user_id: string | null
           status: Database["public"]["Enums"]["support_status"]
           updated_at: string
           visitor_id: string | null
@@ -6345,6 +6346,7 @@ export type Database = {
           customer_phone_e164?: string | null
           id?: string
           last_message_at?: string
+          pro_user_id?: string | null
           status?: Database["public"]["Enums"]["support_status"]
           updated_at?: string
           visitor_id?: string | null
@@ -6358,6 +6360,7 @@ export type Database = {
           customer_phone_e164?: string | null
           id?: string
           last_message_at?: string
+          pro_user_id?: string | null
           status?: Database["public"]["Enums"]["support_status"]
           updated_at?: string
           visitor_id?: string | null
@@ -6375,6 +6378,7 @@ export type Database = {
           sender_type: Database["public"]["Enums"]["support_sender_type"]
           sender_user_id: string | null
           twilio_sid: string | null
+          visit_id: string | null
         }
         Insert: {
           ai_confidence?: number | null
@@ -6386,6 +6390,7 @@ export type Database = {
           sender_type: Database["public"]["Enums"]["support_sender_type"]
           sender_user_id?: string | null
           twilio_sid?: string | null
+          visit_id?: string | null
         }
         Update: {
           ai_confidence?: number | null
@@ -6397,6 +6402,7 @@ export type Database = {
           sender_type?: Database["public"]["Enums"]["support_sender_type"]
           sender_user_id?: string | null
           twilio_sid?: string | null
+          visit_id?: string | null
         }
         Relationships: [
           {
@@ -7620,6 +7626,10 @@ export type Database = {
       pro_partner_status: { Args: { _applicant: string }; Returns: Json }
       pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
       pro_review_bonus_total: { Args: { _pro?: string }; Returns: number }
+      pro_send_message: {
+        Args: { _body: string; _visit_id?: string }
+        Returns: string
+      }
       pro_tier_uplift_cents: {
         Args: { _base_cents: number; _pro_uid: string }
         Returns: number
@@ -7697,9 +7707,9 @@ export type Database = {
         | "paused"
       subscription_frequency: "weekly" | "biweekly" | "monthly"
       subscription_status: "active" | "paused" | "canceled"
-      support_channel: "sms" | "web"
+      support_channel: "sms" | "web" | "pro"
       support_direction: "inbound" | "outbound" | "auto_reply"
-      support_sender_type: "customer" | "ai" | "admin"
+      support_sender_type: "customer" | "ai" | "admin" | "pro"
       support_status: "open" | "resolved" | "escalated"
       visit_status:
         | "scheduled"
@@ -7869,9 +7879,9 @@ export const Constants = {
       ],
       subscription_frequency: ["weekly", "biweekly", "monthly"],
       subscription_status: ["active", "paused", "canceled"],
-      support_channel: ["sms", "web"],
+      support_channel: ["sms", "web", "pro"],
       support_direction: ["inbound", "outbound", "auto_reply"],
-      support_sender_type: ["customer", "ai", "admin"],
+      support_sender_type: ["customer", "ai", "admin", "pro"],
       support_status: ["open", "resolved", "escalated"],
       visit_status: [
         "scheduled",

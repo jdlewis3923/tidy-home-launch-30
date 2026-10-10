@@ -918,6 +918,20 @@
       "when": 1791592376004,
       "tag": "0130_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 131,
+      "version": "7",
+      "when": 1791646420760,
+      "tag": "0131_pro_channel_enum",
+      "breakpoints": true
+    },
+    {
+      "idx": 132,
+      "version": "7",
+      "when": 1791646446658,
+      "tag": "0132_pro_messages_and_photo_feed",
+      "breakpoints": true
     }
   ]
 }
