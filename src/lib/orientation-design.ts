@@ -33,7 +33,7 @@ export function orientationVisual(block: OrientationBlock, sectionId: string, in
   // No fallback photograph: conceptual slides use graphics, never recycled pictures.
   const references = (photoAssignments[block.title] ?? []).map(i => REFERENCE_IMAGES[i]);
   const image = block.title === "Welcome to TIDY" ? welcome : block.title === "Your photo record" ? photoRecord : block.title === "Scenario: no access" ? noAccess : block.title === "Your badge" ? portrait : block.title === "Your kit" ? kit : references[0] ?? (block.image ? orientationImage(block.image) : undefined);
-  const tone = block.pair || ["Independent contractor relationship","Your kit","Insurance wording"].includes(block.title) ? "white" : ["Welcome to TIDY","Our standard","Five readiness gates","Your first assignment"].includes(block.title) ? "charcoal" : ORIENTATION_TONES[number % 4];
+  const tone = block.pair || ["Independent contractor relationship","Your kit","Insurance wording","Screening and privacy"].includes(block.title) ? "white" : ["Welcome to TIDY","Our standard","Five readiness gates"].includes(block.title) ? "charcoal" : ["Insurance","Communication","Your first assignment"].includes(block.title) ? "blue" : ORIENTATION_TONES[number % 4];
   return { tone, layout, stat, image, references, number };
 }
 export const orientationSegments = (text: string) => text.match(/[^.!?]+[.!?]+[”"]?|[^.!?]+$/g)?.map(s => s.trim()).filter(Boolean) ?? [text];
