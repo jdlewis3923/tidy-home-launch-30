@@ -126,4 +126,4 @@
 - [x] Stripe price swap for paid members after a size correction (confirm on increase)
 
 ## Scheduling system v3 (Oct 10)
-- [ ] Service days (admin grid + seed), Pro claims (5 states, catch-up day, 14-day drop rule), customer day picker, capacity, call-offs/holidays/weather moves, day loss, pivot ladder, waitlist, notifications, 20-point verification
+- [x] Service days (admin grid + seed), Pro claims (5 states, catch-up day, 14-day drop rule), customer day picker, capacity, call-offs/holidays/weather moves, day loss, pivot ladder, waitlist, notifications, 20-point verification
