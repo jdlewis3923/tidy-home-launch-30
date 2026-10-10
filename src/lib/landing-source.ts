@@ -61,7 +61,8 @@ export async function persistLandingTouch(source: LandingSource): Promise<void> 
   try {
     const params = new URLSearchParams(window.location.search);
     const { supabase } = await import("@/integrations/supabase/client");
-    const { error } = await supabase.from("landing_touches").insert({
+    const { error } = await supabase.functions.invoke("log-touch", { body: {
+      kind: "landing_touch",
       landing_source: source,
       placement: params.get("placement")?.slice(0, 16) ?? getQrPlacement(),
       zip: (params.get("zip") ?? getQrZip())?.slice(0, 10) ?? null,
@@ -74,7 +75,7 @@ export async function persistLandingTouch(source: LandingSource): Promise<void> 
       utm_content: params.get("utm_content")?.slice(0, 200) ?? null,
       user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
       referrer: typeof document !== "undefined" ? document.referrer.slice(0, 500) || null : null,
-    });
+    } });
     if (error) console.warn("[landing] touch log failed", error.message);
   } catch {
     /* never let attribution logging break the page */
