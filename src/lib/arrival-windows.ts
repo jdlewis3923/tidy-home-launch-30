@@ -25,3 +25,10 @@ export const ARRIVAL_WINDOW_PENDING_LABEL = 'Arrival window confirmed before you
 export function arrivalWindowLabel(timeWindow: string | null | undefined): string {
   return timeWindow?.trim() ? timeWindow : ARRIVAL_WINDOW_PENDING_LABEL;
 }
+
+/** Scheduling v3 windows — written by the booking engine (sched_window_times). */
+export const SCHEDULE_WINDOWS = {
+  lawn: { day: 'Done by 6:00 PM' },
+  cleaning: { morning: '8:00 AM – 10:00 AM', midday: '12:00 PM – 2:00 PM' },
+  detailing: { morning: '8:00 AM – 12:00 PM', afternoon: '12:00 PM – 4:00 PM' },
+} as const;
