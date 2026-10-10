@@ -181,3 +181,6 @@ verify_jwt = false
 # load/respond are public and authorized by the single-use confirmation token.
 [functions.lawn-verification]
 verify_jwt = false
+
+[functions.log-touch]
+verify_jwt = false
