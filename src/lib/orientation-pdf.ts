@@ -25,8 +25,46 @@ export async function orientationPdf(slides: OrientationSlideData[]): Promise<Bl
       await document.fonts.ready;
       const element = host.querySelector<HTMLElement>(".orientation-slide");
       if (!element) throw new Error("Slide unavailable.");
+      // html2canvas does not implement object-fit: rasterize the visible crop first,
+      // rather than allowing photographs to stretch to the capture rectangle.
+      for (const img of Array.from(element.querySelectorAll("img"))) {
+        const css = getComputedStyle(img);
+        if (!["cover", "contain"].includes(css.objectFit)) continue;
+        const width = img.clientWidth, height = img.clientHeight;
+        if (!width || !height || !img.naturalWidth || !img.naturalHeight) continue;
+        const raster = document.createElement("canvas");
+        raster.width = width; raster.height = height;
+        const ctx = raster.getContext("2d");
+        if (!ctx) continue;
+        const ratio = css.objectFit === "cover" ? Math.max(width / img.naturalWidth, height / img.naturalHeight) : Math.min(width / img.naturalWidth, height / img.naturalHeight);
+        const dw = img.naturalWidth * ratio, dh = img.naturalHeight * ratio;
+        const position = css.objectPosition.split(" ").map(x => parseFloat(x) / 100);
+        ctx.drawImage(img, (width - dw) * (position[0] || .5), (height - dh) * (position[1] || .5), dw, dh);
+        img.src = raster.toDataURL("image/png");
+        await img.decode();
+      }
+      // Capture the clipped reference background as artwork: canvas capture otherwise
+      // ignores clip-path and paints an opaque rectangle over the slide.
+      const pattern = getComputedStyle(element, "::before");
+      let patternCss = "";
+      if (pattern.clipPath.startsWith("polygon(") && pattern.display !== "none") {
+        const w = parseFloat(pattern.width), h = parseFloat(pattern.height);
+        const raster = document.createElement("canvas"); raster.width = w; raster.height = h;
+        const ctx = raster.getContext("2d");
+        if (ctx) {
+          const points = pattern.clipPath.slice(8, -1).split(",").map(point => point.trim().split(/\s+/).map(parseFloat));
+          ctx.beginPath(); points.forEach(([x,y], n) => n ? ctx.lineTo(x / 100 * w,y / 100 * h) : ctx.moveTo(x / 100 * w,y / 100 * h)); ctx.closePath(); ctx.clip();
+          if (pattern.backgroundImage.includes("linear-gradient")) {
+            const gradient = ctx.createLinearGradient(0,h,w,0);
+            const blue = getComputedStyle(element).getPropertyValue("--orientation-blue").trim();
+            gradient.addColorStop(0,`hsl(${blue} / .18)`); gradient.addColorStop(.28,`hsl(${blue} / .48)`); gradient.addColorStop(.54,`hsl(${blue})`); ctx.fillStyle = gradient;
+          } else ctx.fillStyle = pattern.backgroundColor;
+          ctx.fillRect(0,0,w,h);
+          patternCss = `.orientation-export .orientation-slide:before{clip-path:none!important;background:transparent url(${raster.toDataURL("image/png")}) center/100% 100% no-repeat!important;}`;
+        }
+      }
       const canvas = await html2canvas(element, {width:1920,height:1080,scale:1,useCORS:true,logging:false,windowWidth:1920,windowHeight:1080,onclone:doc=>{
-        const style=doc.createElement("style");style.textContent=fontCss+".orientation-export *, .orientation-export *:before, .orientation-export *:after {animation:none!important;transition:none!important;} .orientation-export {left:0!important;}";doc.head.append(style);
+        const style=doc.createElement("style");style.textContent=fontCss+patternCss+".orientation-export *, .orientation-export *:before, .orientation-export *:after {animation:none!important;transition:none!important;} .orientation-export {left:0!important;}";doc.head.append(style);
       }});
       const jpeg = canvas.toDataURL("image/jpeg",.94);
       if(i) pdf.addPage([1920,1080],"landscape");
