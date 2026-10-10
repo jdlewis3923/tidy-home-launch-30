@@ -7697,9 +7697,9 @@ export type Database = {
         | "paused"
       subscription_frequency: "weekly" | "biweekly" | "monthly"
       subscription_status: "active" | "paused" | "canceled"
-      support_channel: "sms" | "web"
+      support_channel: "sms" | "web" | "pro"
       support_direction: "inbound" | "outbound" | "auto_reply"
-      support_sender_type: "customer" | "ai" | "admin"
+      support_sender_type: "customer" | "ai" | "admin" | "pro"
       support_status: "open" | "resolved" | "escalated"
       visit_status:
         | "scheduled"
@@ -7869,9 +7869,9 @@ export const Constants = {
       ],
       subscription_frequency: ["weekly", "biweekly", "monthly"],
       subscription_status: ["active", "paused", "canceled"],
-      support_channel: ["sms", "web"],
+      support_channel: ["sms", "web", "pro"],
       support_direction: ["inbound", "outbound", "auto_reply"],
-      support_sender_type: ["customer", "ai", "admin"],
+      support_sender_type: ["customer", "ai", "admin", "pro"],
       support_status: ["open", "resolved", "escalated"],
       visit_status: [
         "scheduled",
