@@ -3,14 +3,12 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import { useHasRole } from "@/hooks/useHasRole";
 
 type Row = { id: string; visit_id: string; kind: string; storage_path: string; uploaded_at: string; url?: string | null };
 type VisitInfo = { id: string; service: string | null; service_type: string | null; visit_date: string | null; status: string | null };
 
 export default function AdminPhotos() {
   const navigate = useNavigate();
-  const role = useHasRole("admin") as unknown as { loading?: boolean; hasRole?: boolean } | boolean;
   const [rows, setRows] = useState<Row[] | null>(null);
   const [visits, setVisits] = useState<Record<string, VisitInfo>>({});
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -23,7 +21,6 @@ export default function AdminPhotos() {
       setAuthed(!!data);
     })();
   }, [navigate]);
-  void role;
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("visit_photos").select("id, visit_id, kind, storage_path, uploaded_at")

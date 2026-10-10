@@ -9,6 +9,8 @@ import { FileUp, LogOut } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import { ProButton, ProCard, ScheduleSkeleton, SettingRow, StatusPill } from "@/components/pro/portal/kit";
 import PushOptIn from "@/components/pro/portal/PushOptIn";
+import ShotList from "@/components/pro/ShotList";
+import { SHOT_LIST } from "@/lib/visitShotList";
 import { useProSession } from "@/hooks/useProSession";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -145,9 +147,15 @@ export default function ProProfile() {
             </div>
           </ProCard>
 
+          <div className="space-y-3">
+            <p className="text-[13px] font-extrabold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">Photo guide / Guía de fotos</p>
+            {Object.values(SHOT_LIST).map((s) => <ShotList key={s.label} label={s.label} shots={s.shots} />)}
+          </div>
+
           <PushOptIn />
 
           <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)]">
+            <SettingRow to="/pro/messages" label="Message Tidy / Mensaje a Tidy" />
             <SettingRow to="/pro/notifications" label="Notifications" />
             <SettingRow to="/pro/orientation" label="Pro orientation / Orientación" />
             <SettingRow to="/pro/status" label="Badge and tier" />

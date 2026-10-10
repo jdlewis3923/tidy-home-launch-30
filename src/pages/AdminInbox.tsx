@@ -13,10 +13,10 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-type Channel = "sms" | "web";
+type Channel = "sms" | "web" | "pro";
 type Status = "open" | "resolved" | "escalated";
 type Direction = "inbound" | "outbound" | "auto_reply";
-type SenderType = "customer" | "ai" | "admin";
+type SenderType = "customer" | "ai" | "admin" | "pro";
 
 type Conversation = {
   id: string;
@@ -45,12 +45,13 @@ type Message = {
 type Filter = "all" | "open" | "escalated" | "resolved";
 
 function senderIcon(t: SenderType) {
-  if (t === "customer") return <User className="h-3.5 w-3.5" />;
+  if (t === "customer" || t === "pro") return <User className="h-3.5 w-3.5" />;
   if (t === "ai") return <Bot className="h-3.5 w-3.5" />;
   return <Shield className="h-3.5 w-3.5" />;
 }
 
 function channelIcon(c: Channel) {
+  if (c === "pro") return <Shield className="h-3.5 w-3.5" />;
   return c === "sms" ? (
     <Smartphone className="h-3.5 w-3.5" />
   ) : (

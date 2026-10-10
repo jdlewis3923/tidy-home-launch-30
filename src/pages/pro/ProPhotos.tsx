@@ -9,6 +9,8 @@ import { useParams } from "react-router-dom";
 import ProShell from "@/components/pro/portal/ProShell";
 import { ErrorState, PhotoThumb, ScheduleSkeleton, UploadTile } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
+import ShotList from "@/components/pro/ShotList";
+import { SHOT_LIST, shotListFor } from "@/lib/visitShotList";
 import {
   fetchVisitPhotos, removeVisitPhoto, signedPhotoUrl, uploadVisitPhoto, type VisitPhoto,
 } from "@/lib/pro-portal";
@@ -22,6 +24,8 @@ export default function ProPhotos() {
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const thisVisit = visits.find((v) => v.id === id);
+  const shots = shotListFor(thisVisit?.service_type);
   const completed = visits.some((visit) => visit.id === id && visit.status === "complete");
 
   const load = useCallback(async () => {
@@ -83,6 +87,7 @@ export default function ProPhotos() {
       {error && <ErrorState title="Couldn't load photos" onRetry={() => void load()} />}
       {photos && !error && (
         <div className="space-y-6 p-4">
+          {shots ? <ShotList label={shots.label} shots={shots.shots} /> : Object.values(SHOT_LIST).map((s) => <ShotList key={s.label} label={s.label} shots={s.shots} />)}
           {(["before", "after"] as const).map((kind) => (
             <section key={kind}>
               <h2 className="pb-2 text-[13px] font-extrabold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
@@ -111,6 +116,7 @@ export default function ProPhotos() {
             One before photo and one after photo are required to complete a visit. Photos are private
             to Tidy and the customer's own visit record.
           </p>
+          <a href={`/pro/messages?visit=${id}`} className="block text-[14px] font-bold text-[hsl(var(--pro-blue))]">Message Tidy about this visit / Mensaje a Tidy →</a>
            {completed && (
              <p className="text-[13px] font-semibold text-[hsl(var(--pro-green))]">
                Visit complete — its photo record is locked.
