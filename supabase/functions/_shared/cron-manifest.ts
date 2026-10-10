@@ -29,6 +29,7 @@ export const EXPECTED_CRON_JOBS: ExpectedCronJob[] = [
   // --- pure SQL, no HTTP hop ---
   { name: 'cron-health-snapshot', schedule: '7 * * * *', kind: 'sql', purpose: 'Refreshes the scheduled-job health snapshot the watchdog reads.' },
   { name: 'generate-recurring-visits-daily', schedule: '30 9 * * *', kind: 'sql', purpose: 'Extends every active plan 45 days of visits.' },
+  { name: 'schedule-tick-hourly', schedule: '40 * * * *', kind: 'sql', purpose: 'Scheduling: activates/suspends Pro claims, applies 14-day drops, waitlist offers and holds, night-before reminders, daily pivot ladder.' },
   { name: 'social-posts-publisher', schedule: '* * * * *', kind: 'sql', purpose: 'Releases due social posts and fans them out to meta-publish-post.' },
 
   // --- money / contractor ---

@@ -17,6 +17,8 @@ import {
 import { useProSession } from "@/hooks/useProSession";
 import { dayLabel, fetchNotifications, mondayOf, timeWindow } from "@/lib/pro-portal";
 import { money } from "@/lib/pro-pay";
+import WeeklyRoute from "@/components/pro/schedule/WeeklyRoute";
+import MyDates from "@/components/pro/schedule/MyDates";
 
 const COI_LABEL: Record<string, string> = {
   none: "Insurance",
@@ -31,6 +33,7 @@ const PUSH_CARD_KEY = "tidy_pro_push_card_dismissed";
 export default function ProSchedule() {
   const { me, coi, visits, loading, error, reload, userId } = useProSession();
   const [week, setWeek] = useState<"this" | "next">("this");
+  const [tab, setTab] = useState<"route" | "dates">("route");
   const [unread, setUnread] = useState(0);
   const [showPushCard, setShowPushCard] = useState(
     () => typeof window !== "undefined" && !localStorage.getItem(PUSH_CARD_KEY),
@@ -96,6 +99,9 @@ export default function ProSchedule() {
   return (
     <ProShell title={greeting} showBell unread={unread}>
       <ProPartnerStrip />
+      <p className="px-[18px] pt-4 text-[14px] font-semibold text-[hsl(var(--pro-ink))]">
+        You choose your days and your area. Once customers are booked on a day, changes need 14 days' notice.
+      </p>
       {coi && (coi.status === "expired" || coi.status === "none") && (
         <WarningBanner
           pulse
@@ -140,6 +146,18 @@ export default function ProSchedule() {
             </HeroPanel>
           </section>
 
+          <div className="mx-[18px] mt-5 flex rounded-xl border border-[hsl(var(--pro-navy)/0.07)] bg-white p-1 pro-card" role="tablist">
+            {([["route", "My weekly route"], ["dates", "My dates"]] as const).map(([k, label]) => (
+              <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
+                className={`min-h-[44px] flex-1 rounded-[10px] text-[14px] font-bold ${tab === k ? "bg-[hsl(var(--pro-navy))] text-white" : "text-[hsl(var(--pro-ink-soft))]"}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {tab === "route" && <WeeklyRoute />}
+          {tab === "dates" && <MyDates />}
+          {tab === "dates" && (<>
           <div className="mx-[18px] mt-5 flex rounded-xl border border-[hsl(var(--pro-navy)/0.07)] bg-white p-1 pro-card">
             {(["this", "next"] as const).map((w) => (
               <button
@@ -194,6 +212,7 @@ export default function ProSchedule() {
               ))}
             </div>
           )}
+          </>)}
         </>
       )}
 

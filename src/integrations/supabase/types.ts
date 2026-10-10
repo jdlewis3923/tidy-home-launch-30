@@ -1320,6 +1320,33 @@ export type Database = {
         }
         Relationships: []
       }
+      capacity_overrides: {
+        Row: {
+          admin_id: string
+          created_at: string
+          details: Json
+          id: string
+          reason: string
+          visit_id: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          reason: string
+          visit_id: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          reason?: string
+          visit_id?: string
+        }
+        Relationships: []
+      }
       car_wash_profiles: {
         Row: {
           access_note: string | null
@@ -2145,6 +2172,74 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_bookings: {
+        Row: {
+          budget_hours: number
+          cadence: string
+          claim_id: string
+          created_at: string
+          details: Json
+          end_reason: string | null
+          ended_at: string | null
+          first_visit_date: string
+          id: string
+          service: Database["public"]["Enums"]["service_type"]
+          status: string
+          subscription_id: string
+          updated_at: string
+          user_id: string
+          weekday: number
+          window_key: string
+          zip: string
+        }
+        Insert: {
+          budget_hours: number
+          cadence: string
+          claim_id: string
+          created_at?: string
+          details?: Json
+          end_reason?: string | null
+          ended_at?: string | null
+          first_visit_date: string
+          id?: string
+          service: Database["public"]["Enums"]["service_type"]
+          status?: string
+          subscription_id: string
+          updated_at?: string
+          user_id: string
+          weekday: number
+          window_key: string
+          zip: string
+        }
+        Update: {
+          budget_hours?: number
+          cadence?: string
+          claim_id?: string
+          created_at?: string
+          details?: Json
+          end_reason?: string | null
+          ended_at?: string | null
+          first_visit_date?: string
+          id?: string
+          service?: Database["public"]["Enums"]["service_type"]
+          status?: string
+          subscription_id?: string
+          updated_at?: string
+          user_id?: string
+          weekday?: number
+          window_key?: string
+          zip?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_bookings_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "pro_day_claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documenso_templates: {
         Row: {
           doc_type: string
@@ -2553,6 +2648,36 @@ export type Database = {
           quantity?: number
           verified_spotcheck?: boolean
           zip?: string | null
+        }
+        Relationships: []
+      }
+      hire_specs: {
+        Row: {
+          created_at: string
+          id: string
+          service: Database["public"]["Enums"]["service_type"]
+          spec: string
+          status: string
+          weekday: number
+          zip: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          service: Database["public"]["Enums"]["service_type"]
+          spec: string
+          status?: string
+          weekday: number
+          zip: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          service?: Database["public"]["Enums"]["service_type"]
+          spec?: string
+          status?: string
+          weekday?: number
+          zip?: string
         }
         Relationships: []
       }
@@ -4308,6 +4433,108 @@ export type Database = {
           },
         ]
       }
+      pro_catchup_days: {
+        Row: {
+          pro_user_id: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          pro_user_id: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          pro_user_id?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: []
+      }
+      pro_date_exceptions: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          off_date: string
+          pro_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          off_date: string
+          pro_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          off_date?: string
+          pro_user_id?: string
+        }
+        Relationships: []
+      }
+      pro_day_claims: {
+        Row: {
+          activated_at: string | null
+          created_at: string
+          drop_effective: string | null
+          drop_reason: string | null
+          end_time: string
+          ended_at: string | null
+          hours_effective: string | null
+          id: string
+          pending_end: string | null
+          pending_start: string | null
+          pro_user_id: string
+          service: Database["public"]["Enums"]["service_type"]
+          start_time: string
+          status: string
+          weekday: number
+          zip: string
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string
+          drop_effective?: string | null
+          drop_reason?: string | null
+          end_time: string
+          ended_at?: string | null
+          hours_effective?: string | null
+          id?: string
+          pending_end?: string | null
+          pending_start?: string | null
+          pro_user_id: string
+          service: Database["public"]["Enums"]["service_type"]
+          start_time: string
+          status?: string
+          weekday: number
+          zip: string
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string
+          drop_effective?: string | null
+          drop_reason?: string | null
+          end_time?: string
+          ended_at?: string | null
+          hours_effective?: string | null
+          id?: string
+          pending_end?: string | null
+          pending_start?: string | null
+          pro_user_id?: string
+          service?: Database["public"]["Enums"]["service_type"]
+          start_time?: string
+          status?: string
+          weekday?: number
+          zip?: string
+        }
+        Relationships: []
+      }
       pro_demand_crossings: {
         Row: {
           applicant_id: string
@@ -5297,6 +5524,54 @@ export type Database = {
         }
         Relationships: []
       }
+      reschedule_items: {
+        Row: {
+          booking_id: string | null
+          claim_id: string | null
+          created_at: string
+          dedupe_key: string | null
+          details: Json
+          id: string
+          kind: string
+          reason: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          visit_id: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          claim_id?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          details?: Json
+          id?: string
+          kind: string
+          reason: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          visit_id?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          claim_id?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          details?: Json
+          id?: string
+          kind?: string
+          reason?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          visit_id?: string | null
+        }
+        Relationships: []
+      }
       reservations: {
         Row: {
           assigned_day: string | null
@@ -5575,6 +5850,138 @@ export type Database = {
           },
         ]
       }
+      sched_blackouts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          label: string | null
+          off_date: string
+          service: Database["public"]["Enums"]["service_type"] | null
+          zip: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          label?: string | null
+          off_date: string
+          service?: Database["public"]["Enums"]["service_type"] | null
+          zip?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          label?: string | null
+          off_date?: string
+          service?: Database["public"]["Enums"]["service_type"] | null
+          zip?: string | null
+        }
+        Relationships: []
+      }
+      sched_budget_hours: {
+        Row: {
+          hours: number
+          service: Database["public"]["Enums"]["service_type"]
+          size_tier: number
+          visit_kind: string
+        }
+        Insert: {
+          hours: number
+          service: Database["public"]["Enums"]["service_type"]
+          size_tier?: number
+          visit_kind: string
+        }
+        Update: {
+          hours?: number
+          service?: Database["public"]["Enums"]["service_type"]
+          size_tier?: number
+          visit_kind?: string
+        }
+        Relationships: []
+      }
+      sched_config: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      sched_notice_log: {
+        Row: {
+          created_at: string
+          key: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+        }
+        Relationships: []
+      }
+      sched_waitlist: {
+        Row: {
+          created_at: string
+          hold_until: string | null
+          id: string
+          kind: string
+          offer_weekday: number | null
+          offered_at: string | null
+          service: Database["public"]["Enums"]["service_type"]
+          status: string
+          subscription_id: string | null
+          user_id: string
+          weekday: number | null
+          zip: string
+        }
+        Insert: {
+          created_at?: string
+          hold_until?: string | null
+          id?: string
+          kind: string
+          offer_weekday?: number | null
+          offered_at?: string | null
+          service: Database["public"]["Enums"]["service_type"]
+          status?: string
+          subscription_id?: string | null
+          user_id: string
+          weekday?: number | null
+          zip: string
+        }
+        Update: {
+          created_at?: string
+          hold_until?: string | null
+          id?: string
+          kind?: string
+          offer_weekday?: number | null
+          offered_at?: string | null
+          service?: Database["public"]["Enums"]["service_type"]
+          status?: string
+          subscription_id?: string | null
+          user_id?: string
+          weekday?: number | null
+          zip?: string
+        }
+        Relationships: []
+      }
       sequence_email_queue: {
         Row: {
           applicant_id: string
@@ -5615,6 +6022,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_days: {
+        Row: {
+          active: boolean
+          close_effective: string | null
+          closed_at: string | null
+          created_at: string
+          id: string
+          opened_at: string
+          service: Database["public"]["Enums"]["service_type"]
+          weekday: number
+          zip: string
+        }
+        Insert: {
+          active?: boolean
+          close_effective?: string | null
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          opened_at?: string
+          service: Database["public"]["Enums"]["service_type"]
+          weekday: number
+          zip: string
+        }
+        Update: {
+          active?: boolean
+          close_effective?: string | null
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          opened_at?: string
+          service?: Database["public"]["Enums"]["service_type"]
+          weekday?: number
+          zip?: string
+        }
+        Relationships: []
       }
       service_gates: {
         Row: {
@@ -6680,6 +7123,33 @@ export type Database = {
           },
         ]
       }
+      visit_moves: {
+        Row: {
+          created_at: string
+          from_date: string | null
+          id: string
+          reason: string
+          to_date: string | null
+          visit_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_date?: string | null
+          id?: string
+          reason: string
+          to_date?: string | null
+          visit_id: string
+        }
+        Update: {
+          created_at?: string
+          from_date?: string | null
+          id?: string
+          reason?: string
+          to_date?: string | null
+          visit_id?: string
+        }
+        Relationships: []
+      }
       visit_photos: {
         Row: {
           id: string
@@ -6847,9 +7317,13 @@ export type Database = {
       visits: {
         Row: {
           access_notes: string | null
+          anchor_date: string | null
           assigned_pro_id: string | null
           base_visit_id: string | null
+          booking_id: string | null
+          budget_hours: number | null
           cadence: string | null
+          claim_id: string | null
           completed_at: string | null
           contractor_pay_cents: number | null
           created_at: string
@@ -6863,6 +7337,7 @@ export type Database = {
           jobber_job_id: string | null
           jobber_visit_id: string | null
           lifecycle_reason: string | null
+          moved_from_date: string | null
           notes: string | null
           on_my_way_at: string | null
           paid_in_full_reason: string | null
@@ -6886,13 +7361,18 @@ export type Database = {
           visit_date: string
           visit_kind: string | null
           visit_pay_cents: number | null
+          window_key: string | null
           zip: string | null
         }
         Insert: {
           access_notes?: string | null
+          anchor_date?: string | null
           assigned_pro_id?: string | null
           base_visit_id?: string | null
+          booking_id?: string | null
+          budget_hours?: number | null
           cadence?: string | null
+          claim_id?: string | null
           completed_at?: string | null
           contractor_pay_cents?: number | null
           created_at?: string
@@ -6906,6 +7386,7 @@ export type Database = {
           jobber_job_id?: string | null
           jobber_visit_id?: string | null
           lifecycle_reason?: string | null
+          moved_from_date?: string | null
           notes?: string | null
           on_my_way_at?: string | null
           paid_in_full_reason?: string | null
@@ -6929,13 +7410,18 @@ export type Database = {
           visit_date: string
           visit_kind?: string | null
           visit_pay_cents?: number | null
+          window_key?: string | null
           zip?: string | null
         }
         Update: {
           access_notes?: string | null
+          anchor_date?: string | null
           assigned_pro_id?: string | null
           base_visit_id?: string | null
+          booking_id?: string | null
+          budget_hours?: number | null
           cadence?: string | null
+          claim_id?: string | null
           completed_at?: string | null
           contractor_pay_cents?: number | null
           created_at?: string
@@ -6949,6 +7435,7 @@ export type Database = {
           jobber_job_id?: string | null
           jobber_visit_id?: string | null
           lifecycle_reason?: string | null
+          moved_from_date?: string | null
           notes?: string | null
           on_my_way_at?: string | null
           paid_in_full_reason?: string | null
@@ -6972,6 +7459,7 @@ export type Database = {
           visit_date?: string
           visit_kind?: string | null
           visit_pay_cents?: number | null
+          window_key?: string | null
           zip?: string | null
         }
         Relationships: [
@@ -7046,6 +7534,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_add_blackout: {
+        Args: {
+          _date: string
+          _kind?: string
+          _label: string
+          _service?: Database["public"]["Enums"]["service_type"]
+          _zip?: string
+        }
+        Returns: Json
+      }
       admin_assign_customer_pro: {
         Args: { _applicant_id: string; _subscription_id: string }
         Returns: undefined
@@ -7115,6 +7613,15 @@ export type Database = {
         Args: { _measured: number; _reservation: string }
         Returns: Json
       }
+      admin_move_visit: {
+        Args: {
+          _date: string
+          _reason: string
+          _visit: string
+          _window: string
+        }
+        Returns: Json
+      }
       admin_onboarding_tokens: {
         Args: { _applicant_id: string; _regenerate?: boolean }
         Returns: Json
@@ -7134,6 +7641,13 @@ export type Database = {
           reachable: boolean
         }[]
       }
+      admin_remove_blackout: { Args: { _id: string }; Returns: undefined }
+      admin_reschedule_list: { Args: never; Returns: Json }
+      admin_resolve_reschedule: {
+        Args: { _id: string; _note: string }
+        Returns: undefined
+      }
+      admin_sched_state: { Args: never; Returns: Json }
       admin_set_jobber_refresh_token: {
         Args: { _token: string }
         Returns: undefined
@@ -7145,6 +7659,15 @@ export type Database = {
       admin_set_scheduler_paused: {
         Args: { _paused: boolean }
         Returns: boolean
+      }
+      admin_set_service_day: {
+        Args: {
+          _active: boolean
+          _service: Database["public"]["Enums"]["service_type"]
+          _weekday: number
+          _zip: string
+        }
+        Returns: Json
       }
       admin_set_service_role_key: { Args: { _key: string }; Returns: undefined }
       admin_set_site_live: { Args: { _live: boolean }; Returns: boolean }
@@ -7167,6 +7690,14 @@ export type Database = {
           subscription_id: string
           zip: string
         }[]
+      }
+      admin_weather_day: {
+        Args: {
+          _date: string
+          _service: Database["public"]["Enums"]["service_type"]
+          _zip: string
+        }
+        Returns: Json
       }
       approve_review_bonus: {
         Args: {
@@ -7238,6 +7769,30 @@ export type Database = {
       }
       current_rate_card_version: { Args: never; Returns: number }
       current_user_admin: { Args: never; Returns: boolean }
+      customer_book_day: {
+        Args: {
+          _details?: Json
+          _service: Database["public"]["Enums"]["service_type"]
+          _weekday: number
+          _window: string
+        }
+        Returns: Json
+      }
+      customer_day_options: {
+        Args: { _service: Database["public"]["Enums"]["service_type"] }
+        Returns: Json
+      }
+      customer_join_waitlist: {
+        Args: {
+          _service: Database["public"]["Enums"]["service_type"]
+          _weekday?: number
+        }
+        Returns: Json
+      }
+      customer_move_visit: {
+        Args: { _date: string; _visit: string }
+        Returns: Json
+      }
       customers_needing_attention: {
         Args: never
         Returns: {
@@ -7558,6 +8113,16 @@ export type Database = {
           preferred_by_count: number
         }[]
       }
+      pro_claim_day: {
+        Args: {
+          _end: string
+          _service: Database["public"]["Enums"]["service_type"]
+          _start: string
+          _weekday: number
+          _zip: string
+        }
+        Returns: Json
+      }
       pro_coi_state: {
         Args: { _pro: string }
         Returns: {
@@ -7569,6 +8134,9 @@ export type Database = {
           status: string
         }[]
       }
+      pro_dates: { Args: { _weeks?: number }; Returns: Json }
+      pro_drop_day: { Args: { _claim: string }; Returns: Json }
+      pro_drop_preview: { Args: { _claim: string }; Returns: Json }
       pro_get_me: {
         Args: never
         Returns: {
@@ -7617,6 +8185,7 @@ export type Database = {
           visit_pay_cents: number
         }[]
       }
+      pro_mark_off: { Args: { _date: string; _note?: string }; Returns: Json }
       pro_orientation_state: { Args: never; Returns: Json }
       pro_orientation_touch: {
         Args: { _complete?: boolean; _section_id: string }
@@ -7626,13 +8195,19 @@ export type Database = {
       pro_partner_status: { Args: { _applicant: string }; Returns: Json }
       pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
       pro_review_bonus_total: { Args: { _pro?: string }; Returns: number }
+      pro_schedule_state: { Args: never; Returns: Json }
       pro_send_message: {
         Args: { _body: string; _visit_id?: string }
         Returns: string
       }
+      pro_set_catchup: { Args: { _weekday: number }; Returns: Json }
       pro_tier_uplift_cents: {
         Args: { _base_cents: number; _pro_uid: string }
         Returns: number
+      }
+      pro_update_claim_hours: {
+        Args: { _claim: string; _end: string; _start: string }
+        Returns: Json
       }
       pro_visit_extras: { Args: { _visit: string }; Returns: Json }
       public_five_star_proof: { Args: never; Returns: Json }
@@ -7652,6 +8227,212 @@ export type Database = {
         Returns: Json
       }
       review_kpis: { Args: never; Returns: Json }
+      sched_alert: {
+        Args: {
+          _body: string
+          _dedupe: string
+          _level: string
+          _title: string
+          _type: string
+          _url: string
+        }
+        Returns: undefined
+      }
+      sched_blocked: {
+        Args: {
+          _d: string
+          _s: Database["public"]["Enums"]["service_type"]
+          _zip: string
+        }
+        Returns: boolean
+      }
+      sched_booked: {
+        Args: { _d: string; _excl: string; _pro: string }
+        Returns: number
+      }
+      sched_budget: {
+        Args: {
+          _kind: string
+          _s: Database["public"]["Enums"]["service_type"]
+          _size: number
+        }
+        Returns: number
+      }
+      sched_claim_hours: {
+        Args: {
+          _c: Database["public"]["Tables"]["pro_day_claims"]["Row"]
+          _d: string
+        }
+        Returns: number
+      }
+      sched_claim_live_on: {
+        Args: {
+          _c: Database["public"]["Tables"]["pro_day_claims"]["Row"]
+          _d: string
+        }
+        Returns: boolean
+      }
+      sched_customer_notice: {
+        Args: {
+          _body: string
+          _dedupe: string
+          _expires: string
+          _kind: string
+          _sms: string
+          _title: string
+          _user: string
+          _visit: string
+        }
+        Returns: undefined
+      }
+      sched_dates: {
+        Args: {
+          _cadence: string
+          _first: string
+          _max: number
+          _s: Database["public"]["Enums"]["service_type"]
+          _until: string
+        }
+        Returns: string[]
+      }
+      sched_day_loss: {
+        Args: { _claim: string; _effective: string; _reason: string }
+        Returns: number
+      }
+      sched_day_name: { Args: { _w: number }; Returns: string }
+      sched_dow: { Args: { _d: string }; Returns: number }
+      sched_find_slot: {
+        Args: {
+          _budget: number
+          _d: string
+          _excl: string
+          _pro: string
+          _s: Database["public"]["Enums"]["service_type"]
+          _sub?: string
+          _w: string
+          _zip: string
+        }
+        Returns: Record<string, unknown>
+      }
+      sched_first_date: {
+        Args: {
+          _budget: number
+          _cadence: string
+          _claim: string
+          _excl_booking: string
+          _w: string
+        }
+        Returns: string
+      }
+      sched_fmt: { Args: { _d: string }; Returns: string }
+      sched_generate_booking: {
+        Args: { _b: string; _until: string }
+        Returns: number
+      }
+      sched_ladder: { Args: never; Returns: undefined }
+      sched_launch_date: { Args: never; Returns: string }
+      sched_load: {
+        Args: { _d: string; _excl_booking: string; _pro: string }
+        Returns: number
+      }
+      sched_me_pro: { Args: never; Returns: string }
+      sched_month_anchor: {
+        Args: { _first: string; _k: number }
+        Returns: string
+      }
+      sched_move_visit: {
+        Args: { _reason: string; _to: string; _visit: string; _w: string }
+        Returns: undefined
+      }
+      sched_once: { Args: { _key: string }; Returns: boolean }
+      sched_options: {
+        Args: { _s: Database["public"]["Enums"]["service_type"]; _user: string }
+        Returns: Json
+      }
+      sched_place_visit: {
+        Args: {
+          _anchor: string
+          _b: string
+          _force_move: boolean
+          _kind: string
+          _pay: number
+        }
+        Returns: boolean
+      }
+      sched_pro_active: { Args: { _uid: string }; Returns: boolean }
+      sched_pro_cap: { Args: { _d: string; _pro: string }; Returns: number }
+      sched_pro_first_name: { Args: { _uid: string }; Returns: string }
+      sched_pro_notice: {
+        Args: {
+          _body: string
+          _dedupe: string
+          _kind: string
+          _pro: string
+          _title: string
+          _url: string
+        }
+        Returns: undefined
+      }
+      sched_pro_services: {
+        Args: { _uid: string }
+        Returns: Database["public"]["Enums"]["service_type"][]
+      }
+      sched_pro_went_inactive: { Args: { _claim: string }; Returns: undefined }
+      sched_relocate_visit: {
+        Args: { _reason: string; _visit: string }
+        Returns: string
+      }
+      sched_require_admin: { Args: never; Returns: undefined }
+      sched_routes: { Args: never; Returns: Json }
+      sched_slot_fits: {
+        Args: {
+          _budget: number
+          _cadence: string
+          _claim: string
+          _excl_booking: string
+          _first: string
+          _w: string
+        }
+        Returns: boolean
+      }
+      sched_std_kind: {
+        Args: { _s: Database["public"]["Enums"]["service_type"] }
+        Returns: string
+      }
+      sched_svc_label: {
+        Args: { _s: Database["public"]["Enums"]["service_type"] }
+        Returns: string
+      }
+      sched_sync_pro: { Args: { _uid: string }; Returns: undefined }
+      sched_tick: { Args: never; Returns: Json }
+      sched_today: { Args: never; Returns: string }
+      sched_waitlist_offer: {
+        Args: { _s: Database["public"]["Enums"]["service_type"]; _zip: string }
+        Returns: undefined
+      }
+      sched_weekday_hours: {
+        Args: { _d: string; _pro: string }
+        Returns: number
+      }
+      sched_window_taken: {
+        Args: {
+          _d: string
+          _excl_booking: string
+          _pro: string
+          _s: Database["public"]["Enums"]["service_type"]
+          _w: string
+        }
+        Returns: boolean
+      }
+      sched_window_times: {
+        Args: { _key: string; _s: Database["public"]["Enums"]["service_type"] }
+        Returns: Record<string, unknown>
+      }
+      sched_windows: {
+        Args: { _s: Database["public"]["Enums"]["service_type"] }
+        Returns: string[]
+      }
+      sched_zips: { Args: never; Returns: string[] }
       schedule_car_wash_jobs: {
         Args: { _cap_per_pro_day?: number }
         Returns: number

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { HireSpecsBanner } from "@/components/admin/RescheduleBanner";
 import DeclineDialog, { type DeclineInput } from "@/components/admin/pipeline/DeclineDialog";
 import { PIPELINE_SERVICES, PIPELINE_STAGES, rpcMessage, serviceLabel, stageIndex } from "@/lib/pipeline";
 
@@ -101,6 +102,7 @@ export default function AdminPipeline() {
     <main className="min-h-screen bg-background px-4 py-8 sm:px-8">
       <Helmet><title>Pipeline | Tidy Admin</title></Helmet>
       <div className="mx-auto max-w-[1600px] space-y-5">
+        <HireSpecsBanner />
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-2xl font-black tracking-tight text-foreground">Contractor pipeline</h1>

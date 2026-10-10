@@ -3,6 +3,7 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 type Language = "en" | "es";
 
 const translations: Record<string, string> = {
+  "Same Pro, rescheduled within 48 hours.": "Mismo Pro, reprogramado dentro de 48 horas.",
   "Your free add-ons": "Tus extras gratis",
   "You have 1 free add-on this month. Pick one.": "Tienes 1 extra gratis este mes. Elige uno.",
   "You have 2 free add-ons this month. Pick them.": "Tienes 2 extras gratis este mes. Elígelos.",
