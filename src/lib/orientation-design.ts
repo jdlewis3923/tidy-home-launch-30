@@ -1,4 +1,4 @@
-import kit from "@/assets/orientation/hd/complete-kit-v3.jpg";
+import kit from "@/assets/orientation/hd/complete-kit-v4.jpg";
 import portrait from "@/assets/orientation/hd/badge-portrait.jpg";
 import photoRecord from "@/assets/orientation/hd/photo-record.jpg";
 import noAccess from "@/assets/orientation/hd/no-access.jpg";
