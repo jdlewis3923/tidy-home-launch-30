@@ -1,5 +1,9 @@
 # Roadmap
 
+## Orientation language review (Oct 10)
+- [ ] Review all English and Latin American Spanish slide copy, comparison directions and controls without changing business rules.
+- [ ] Verify the signed-in preview and regenerated PDF for readable, correctly rendered bilingual text.
+
 ## Exact orientation reference corrections (Oct 10)
 - [x] Add reference angular backgrounds, insurance card/document composition and two photo-led designs while retaining approved bilingual content; visual reproduction is not pixel-identical to the supplied montage.
 - [x] Correct short or flattened photographs in viewer and PDF; verify 41 signed-in slides, download and inspect all 41 PDF pages.
