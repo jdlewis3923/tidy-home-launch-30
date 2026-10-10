@@ -360,6 +360,9 @@
 .orientation-slide.slide-pair .orientation-photo { height:400px; aspect-ratio:auto; object-fit:cover; }.orientation-slide.slide-pair .orientation-pair { margin-top:16px; gap:28px; }.orientation-pair figure { padding:0 0 18px; }.orientation-pair figcaption { margin:0; border-radius:0; }.orientation-result-direction { margin:16px 24px 0; font-size:21px; }.orientation-result-direction p[lang=es] { font-size:19px; line-height:1.4; }
 .orientation-slide .orientation-reference-strip img { flex:1 1 0; width:0; min-width:0; aspect-ratio:auto; object-fit:cover; }
 .orientation-slide .orientation-finale-photos .orientation-reference-strip { flex-direction:row; }
+.layout-scope-reverse .orientation-slide-copy > p { font-size:28px; line-height:1.32; margin-top:20px; }
+.layout-scope-reverse .orientation-slide-copy > div { margin-top:22px; }
+.layout-scope-reverse .orientation-slide-copy > div > p { font-size:24px; line-height:1.4; margin-top:14px; }
 .layout-coverage .orientation-slide-header { color:hsl(var(--orientation-ink)); border-color:hsl(var(--orientation-ink) / .18); }
 .layout-coverage .orientation-slide-header > span { background:hsl(var(--orientation-paper)); padding:8px 12px; }
 .layout-coverage footer { color:hsl(var(--orientation-ink)); background:hsl(var(--orientation-paper)); padding:5px 8px; }

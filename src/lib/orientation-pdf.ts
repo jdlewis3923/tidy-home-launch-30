@@ -12,8 +12,12 @@ export async function orientationPdf(slides: OrientationSlideData[]): Promise<Bl
     if (!response.ok || response.headers.get("content-type")?.includes("text/html")) throw new Error("A deck font could not be loaded.");
     const bytes = new Uint8Array(await response.arrayBuffer());
     let raw = ""; bytes.forEach(b => { raw += String.fromCharCode(b); });
-    return `@font-face{font-family:Poppins; font-weight:${weight};src:url(data:font/ttf;base64,${btoa(raw)}) format('truetype');}`;
+    return `@font-face{font-family:TidyOrientationPdf; font-weight:${weight};src:url(data:font/ttf;base64,${btoa(raw)}) format('truetype');}`;
   }))).join("\n");
+  const fontStyle = document.createElement("style");
+  const exportFontCss = fontCss + ".orientation-export, .orientation-export * {font-family:TidyOrientationPdf,sans-serif!important;}";
+  fontStyle.textContent = exportFontCss; document.head.append(fontStyle);
+  await Promise.all([document.fonts.load('500 32px TidyOrientationPdf'), document.fonts.load('900 68px TidyOrientationPdf')]);
   const host = document.createElement("div"); host.className = "orientation-app orientation-export";
   host.setAttribute("aria-hidden", "true"); document.body.append(host);
   const root = createRoot(host);
@@ -63,8 +67,9 @@ export async function orientationPdf(slides: OrientationSlideData[]): Promise<Bl
           patternCss = `.orientation-export .orientation-slide:before{clip-path:none!important;background:transparent url(${raster.toDataURL("image/png")}) center/100% 100% no-repeat!important;}`;
         }
       }
-      const canvas = await html2canvas(element, {width:1920,height:1080,scale:1,useCORS:true,logging:false,windowWidth:1920,windowHeight:1080,onclone:doc=>{
-        const style=doc.createElement("style");style.textContent=fontCss+patternCss+".orientation-export *, .orientation-export *:before, .orientation-export *:after {animation:none!important;transition:none!important;} .orientation-export {left:0!important;}";doc.head.append(style);
+      const canvas = await html2canvas(element, {width:1920,height:1080,scale:1,useCORS:true,logging:false,windowWidth:1920,windowHeight:1080,onclone:async doc=>{
+        const style=doc.createElement("style");style.textContent=exportFontCss+patternCss+".orientation-export *, .orientation-export *:before, .orientation-export *:after {animation:none!important;transition:none!important;} .orientation-export {left:0!important;}";doc.head.append(style);
+        await Promise.all([doc.fonts.load('500 32px TidyOrientationPdf'),doc.fonts.load('900 68px TidyOrientationPdf')]);
       }});
       const jpeg = canvas.toDataURL("image/jpeg",.94);
       if(i) pdf.addPage([1920,1080],"landscape");
@@ -72,5 +77,5 @@ export async function orientationPdf(slides: OrientationSlideData[]): Promise<Bl
     }
     pdf.setProperties({title:"TIDY Pro orientation",author:"Tidy Home Concierge LLC"});
     return pdf.output("blob");
-  } finally { root.unmount(); host.remove(); }
+  } finally { root.unmount(); host.remove(); fontStyle.remove(); }
 }
