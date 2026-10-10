@@ -1,5 +1,9 @@
 # Roadmap
 
+## Exact orientation reference corrections (Oct 10)
+- [x] Add reference angular backgrounds, insurance card/document composition and two photo-led designs while retaining approved bilingual content; visual reproduction is not pixel-identical to the supplied montage.
+- [x] Correct short or flattened photographs in viewer and PDF; verify 41 signed-in slides, download and inspect all 41 PDF pages.
+
 ## Phone screenshots and orientation reference (Oct 9)
 - [x] Repair founding QR page phone readability, service cards and quote spacing in EN/ES.
 - [x] Add reference-style role tiles, circular steps, service kits and photo-led endings; retain the existing bilingual content and gates rather than substitute reference slogans.
