@@ -28,9 +28,9 @@ const QrRedirect = () => {
       route: parsed?.route ?? undefined,
     });
     // Fire-and-forget: a logging failure must never block the redirect.
-    void supabase
-      .from("qr_scans")
-      .insert({
+    void supabase.functions
+      .invoke("log-touch", { body: {
+        kind: "qr_scan",
         raw_code: raw,
         parsed: Boolean(parsed),
         lang: parsed?.lang ?? null,
@@ -39,7 +39,7 @@ const QrRedirect = () => {
         route: parsed?.route ?? null,
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
         referrer: typeof document !== "undefined" ? document.referrer.slice(0, 500) || null : null,
-      })
+      } })
       .then(({ error }) => {
         if (error) console.warn("[qr] scan log failed", error.message);
       });
