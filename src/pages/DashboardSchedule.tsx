@@ -19,6 +19,9 @@ import {
   serviceLabel,
 } from '@/lib/dashboard-data';
 import { useLanguage } from '@/contexts/LanguageContext';
+import DayPicker from '@/components/dashboard/DayPicker';
+import MoveVisit from '@/components/dashboard/MoveVisit';
+import { SCHED_SERVICES } from '@/lib/scheduling';
 
 const SERVICE_DOT: Record<string, string> = {
   lawn: 'bg-emerald-500',
@@ -83,6 +86,10 @@ export default function DashboardSchedule() {
           </p>
         </header>
 
+        <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {SCHED_SERVICES.map((s) => <DayPicker key={s} service={s} />)}
+        </section>
+
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <ScheduleCalendar visits={data.visits} selectedDate={selectedDate} onSelect={setSelectedDate} />
@@ -117,6 +124,10 @@ export default function DashboardSchedule() {
                         <p className="text-[11px] text-ink-faint">
                           {relativeDateLabel(v.visit_date)} · {t(STATUS_LABEL[v.status] ?? v.status)}
                         </p>
+                        {v.moved_from_date && (
+                          <p className="text-[11px] font-semibold text-[hsl(var(--primary))]">{t('Same Pro, rescheduled within 48 hours.')}</p>
+                        )}
+                        {v.booking_id && v.status === 'scheduled' && <MoveVisit visitId={v.id} visitDate={v.visit_date} />}
                       </div>
                     </li>
                   ))}

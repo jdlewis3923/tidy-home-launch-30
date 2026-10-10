@@ -64,6 +64,8 @@ const AdminTestZapier = lazy(() => import("./pages/AdminTestZapier.tsx"));
 const AdminHealth = lazy(() => import("./pages/AdminHealth.tsx"));
 const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.tsx"));
 const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
+const AdminCalendar = lazy(() => import("./pages/AdminCalendar.tsx"));
+const AdminReschedules = lazy(() => import("./pages/AdminReschedules.tsx"));
 const AdminPhotos = lazy(() => import("./pages/AdminPhotos.tsx"));
 const ProMessages = lazy(() => import("./pages/pro/ProMessages.tsx"));
 const AdminSchedule = lazy(() => import("./pages/AdminSchedule.tsx"));
@@ -359,6 +361,8 @@ const App = () => (
                   {/* Unified support inbox (SMS + web), admins only. */}
                   <Route path="/admin/inbox" element={<AdminInbox />} />
                   <Route path="/admin/photos" element={<AdminPhotos />} />
+                  <Route path="/admin/calendar" element={<AdminCalendar />} />
+                  <Route path="/admin/reschedules" element={<AdminReschedules />} />
                   {/* Social media auto-poster (IG + FB), admins only. */}
                   <Route path="/admin/schedule" element={<AdminSchedule />} />
                   {/* Permanent KPI Command Center — admins only. */}
