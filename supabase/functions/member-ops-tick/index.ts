@@ -43,6 +43,10 @@ Deno.serve(async (req) => {
       try {
         const { data: u } = await admin.auth.admin.getUserById(n.user_id);
         const email = u?.user?.email;
+        const { data: prof } = await admin.from('profiles').select('language').eq('user_id', n.user_id).maybeSingle();
+        const es = String(prof?.language ?? 'en').trim() === 'es';
+        const SCHED = ['day_confirmed', 'pro_changed', 'visit_moved', 'waitlist_offer', 'day_change_needed', 'moved_to_waitlist', 'visit_reminder', 'choose_day'];
+        const toSchedule = SCHED.includes(n.kind);
         if (!email) { status = 'skipped'; err = 'no email'; }
         else {
           const res = await sendBrevoEmail({
@@ -54,8 +58,8 @@ Deno.serve(async (req) => {
               eyebrow: 'Tidy Home Concierge',
               artTopic: n.kind.startsWith('car_wash') ? 'car care' : 'visit',
               bodyHtml: `<p style="font:16px/1.55 Arial,sans-serif;color:#334155">${esc(n.body)}</p>`,
-              ctaUrl: 'https://jointidy.co/account',
-              ctaLabel: 'Open your account',
+              ctaUrl: toSchedule ? 'https://jointidy.co/dashboard/schedule' : 'https://jointidy.co/account',
+              ctaLabel: toSchedule ? (es ? 'Abrir mi horario' : 'Open your schedule') : (es ? 'Abrir mi cuenta' : 'Open your account'),
             }),
             tags: ['member-notification', n.kind],
             label: `member-${n.kind}`,
