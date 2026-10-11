@@ -1,5 +1,6 @@
 import '../_shared/http.ts';
 import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { CONTRACTOR_SHINE_PAY, type CanonSize } from '../_shared/pricing-canon.ts';
@@ -11,6 +12,19 @@ Deno.serve(async (req) => {
   const auth = await requireServiceOrAdmin(req);
   if (!auth.ok) return jsonResponse({ ok: false, error: auth.error }, auth.status);
   const body = await req.json().catch(() => ({}));
+  if (body.action === 'verify_scheduler') {
+    const url = Deno.env.get('SUPABASE_URL');
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !serviceKey) return jsonResponse({ ok: false, error: 'database_not_configured' }, 503);
+    const db = createClient(url, serviceKey, { auth: { persistSession: false } });
+    const results = [];
+    for (const size of [1, 2, 3] as const) for (const cadence of ['monthly', 'biweekly', 'weekly']) for (const kind of ['maintenance_wash', 'full_detail']) {
+      const { data, error } = await db.rpc('contractor_visit_pay_cents', { _service: 'detailing', _size: size, _cadence: cadence, _tier: null, _surcharge: false, _visit_kind: kind });
+      const expected = (kind === 'full_detail' ? CONTRACTOR_SHINE_PAY[size].fullDetail : CONTRACTOR_SHINE_PAY[size].maintenanceWash) * 100;
+      results.push({ size, cadence, kind, pay_cents: data, expected, ok: !error && data === expected, error: error?.message });
+    }
+    return jsonResponse({ ok: results.every((r) => r.ok), results });
+  }
   const mode = body.mode === 'test' ? 'test' : 'live';
   const key = Deno.env.get(mode === 'test' ? 'STRIPE_TEST_SECRET_KEY' : 'STRIPE_SECRET_KEY');
   if (!key) return jsonResponse({ ok: false, mode, error: 'missing_stripe_key' }, 503);

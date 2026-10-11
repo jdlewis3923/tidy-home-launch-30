@@ -5,6 +5,7 @@ import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { EMAIL } from '../_shared/emailTemplates.ts';
 import { brandHostedTemplate } from '../_shared/email-brand.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { CONTRACTOR_SHINE_PAY, TIER_2_UPLIFT } from '../_shared/pricing-canon.ts';
 
 const GATEWAY = 'https://connector-gateway.lovable.dev/brevo/smtp/templates';
 
@@ -46,6 +47,31 @@ Deno.serve(async (req) => {
       }
       const template = await read.json() as LiveTemplate;
       const current = template.htmlContent ?? '';
+      if (new URL(req.url).searchParams.get('scan') === 'car-pay') {
+        // Only Car Care pay rows; leave cleaning/lawn tables and unrelated figures alone.
+        const tier2 = id === EMAIL.CONTRACTOR_T2_OFFER || id === EMAIL.CONTRACTOR_T2_CONFIRMED;
+        const rows: Array<Record<string, unknown>> = [];
+        const corrected = current.replace(/<tr\b[^>]*>[\s\S]*?<\/tr>/gi, (row) => {
+          const text = row.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ');
+          const detail = /Full detail/i.test(text);
+          if (!detail && !/Maintenance wash/i.test(text)) return row;
+          const amounts = [...row.matchAll(/\$(\d+(?:\.\d+)?)/g)];
+          if (amounts.length !== 3) return row;
+          const wanted = ([1, 2, 3] as const).map((size) => Math.round((detail ? CONTRACTOR_SHINE_PAY[size].fullDetail : CONTRACTOR_SHINE_PAY[size].maintenanceWash) * (tier2 ? TIER_2_UPLIFT : 1)));
+          let i = 0;
+          const next = row.replace(/\$(\d+(?:\.\d+)?)/g, () => `$${wanted[i++]}`);
+          rows.push({ kind: detail ? 'full_detail' : 'maintenance_wash', before: amounts.map((m) => Number(m[1])), after: wanted, changed: row !== next });
+          return next;
+        });
+        const changed = corrected !== current;
+        let ok = true;
+        if (apply && changed) {
+          const write = await vendorFetch(`${GATEWAY}/${id}`, { method: 'PUT', headers: h, body: JSON.stringify({ htmlContent: corrected }) });
+          ok = write.ok;
+        }
+        results.push({ id, name: template.name ?? null, ok, changed, applied: apply && changed && ok, rows });
+        continue;
+      }
       if (new URL(req.url).searchParams.get('scan') === 'pay') {
         // Read-only: surface any car-care pay figure that is not canon (16/20/26 · 78/88/115).
         const text = current.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
