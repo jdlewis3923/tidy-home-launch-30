@@ -77,7 +77,7 @@ const PERKS = [
 const EXP_TO_YEARS: Record<ExpBucket, number> = { "1-2": 2, "3-5": 5, "5+": 6 };
 
 export default function Apply() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [form, setForm] = useState<Form>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -167,6 +167,7 @@ export default function Apply() {
     setSubmitting(true);
     try {
       const payload = {
+        preferred_language: language === "es" ? "es" : "en",
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         email: form.email.trim(),

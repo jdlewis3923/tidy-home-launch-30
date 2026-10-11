@@ -9,7 +9,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { badgePhotoEmail, PHOTO_RETAKE_REASONS, type RetakeReason } from '../_shared/pro-emails.ts';
-import { sendProEmail } from '../_shared/pro-send.ts';
+import { sendProEmail, proLang } from '../_shared/pro-send.ts';
 import { TIDY_SITE } from '../_shared/email-brand.ts';
 
 const URL_ = Deno.env.get('SUPABASE_URL')!;
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
   if (!reason) return jsonResponse({ error: 'reason_required' }, 400);
   const { data: a } = await admin.from('applicants').select('id, first_name, email').eq('id', kit.applicant_id).maybeSingle();
   if (!a?.email) return jsonResponse({ error: 'no_email' }, 400);
-  const built = badgePhotoEmail(a.first_name ?? 'there', `${TIDY_SITE}/photo/${kit.badge_photo_token}`, 'both', reason);
+  const built = badgePhotoEmail(a.first_name ?? 'there', `${TIDY_SITE}/photo/${kit.badge_photo_token}`, await proLang(admin, a.id), reason);
   const res = await sendProEmail(admin, { applicantId: a.id, key: 'photo_retake', to: a.email, name: a.first_name ?? undefined, built, triggeredBy: auth.kind === 'admin' ? `admin:${auth.userId}` : 'service' });
   if (!res.sent) return jsonResponse({ ok: false, error: 'email_failed', reason: res.reason }, 502);
   await admin.from('pro_kit').update({ badge_photo_status: 'retake_requested', badge_photo_retake_reason: reason, badge_photo_reviewed_at: now }).eq('id', kitId);

@@ -3,6 +3,7 @@
  * Insurance certificate upload (the one thing that unblocks visit actions),
  * account details and sign out.
  */
+import LanguagePreference from "@/components/LanguagePreference";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { FileUp, LogOut } from "lucide-react";
@@ -166,6 +167,8 @@ export default function ProProfile() {
               }}
             />
           </div>
+
+          <LanguagePreference />
 
           <button
             type="button"

@@ -18,7 +18,7 @@ export default function CustomerLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   // Default view: signup if entry point signals it (?mode=signup from START MY PLAN),
   // otherwise sign-in (top-nav Login link).
   const initialIsSignUp = searchParams.get('mode') === 'signup';
@@ -54,7 +54,7 @@ export default function CustomerLogin() {
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}${safeRedirect ?? '/dashboard'}` },
+          options: { emailRedirectTo: `${window.location.origin}${safeRedirect ?? '/dashboard'}`, data: { language: language === 'es' ? 'es' : 'en' } },
         });
         if (signUpError) {
           setError(signUpError.message);

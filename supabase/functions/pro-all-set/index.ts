@@ -12,7 +12,7 @@ import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { loadFive } from '../_shared/pro-five.ts';
 import { allSetEmail } from '../_shared/pro-emails.ts';
 import { gateMissing } from '../_shared/onboarding-sequence.ts';
-import { sendProEmail } from '../_shared/pro-send.ts';
+import { sendProEmail, proLang } from '../_shared/pro-send.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     pro_number: rec.applicant.pro_number,
     service: rec.applicant.service,
     expected_delivery: rec.kit?.expected_delivery_date ?? null,
-  });
+  }, await proLang(admin, id));
   const res = await sendProEmail(admin, {
     applicantId: id, key: 'all_set', to: rec.applicant.email, name: rec.applicant.first_name ?? undefined,
     built, triggeredBy: 'pro-all-set', mode: 'auto',

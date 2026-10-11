@@ -28,6 +28,7 @@ import CalmModal from "@/components/dashboard/CalmModal";
 import { useDashboardData } from "@/lib/dashboard-data";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LanguagePreference from "@/components/LanguagePreference";
 
 export default function Account() {
   const navigate = useNavigate();
@@ -149,6 +150,8 @@ export default function Account() {
               </Link>
             </div>
           </div>
+
+          <LanguagePreference />
 
           <button
             type="button"
