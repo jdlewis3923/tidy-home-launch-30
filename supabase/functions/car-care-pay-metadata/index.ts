@@ -34,7 +34,17 @@ Deno.serve(async (req) => {
       const size = Number(tier);
       const pay = size === 1 || size === 2 || size === 3 ? CONTRACTOR_SHINE_PAY[size as CanonSize] : null;
       if (!pay) {
-        unresolved.push({ price_id: price.id, lookup_key: lookup, name, reason: 'vehicle_size_not_identified', pay_metadata: Object.fromEntries(Object.entries(md).filter(([k]) => /pay/.test(k))) });
+        const oldPay = Object.fromEntries(Object.entries(md).filter(([k]) => /^(contractor_pay|wash_pay|detail_pay)/.test(k)));
+        if (!price.active && Object.keys(oldPay).length) {
+          const remove = Object.fromEntries(Object.keys(oldPay).map((k) => [k, '']));
+          if (apply) {
+            const after = await stripe.prices.update(price.id, { metadata: remove });
+            if (after.unit_amount !== price.unit_amount || after.active !== price.active || Object.keys(oldPay).some((k) => after.metadata[k] != null)) throw new Error(`retired_verification_failed:${price.id}`);
+          }
+          changed.push({ price_id: price.id, lookup_key: lookup, active: false, before: oldPay, after: remove, reason: 'remove_retired_unmapped_pay', applied: apply });
+        } else if (price.active && Object.keys(oldPay).length) {
+          unresolved.push({ price_id: price.id, lookup_key: lookup, name, reason: 'vehicle_size_not_identified', pay_metadata: oldPay });
+        }
         continue;
       }
       const kind = combined.visit_kind ?? combined.visit_type ?? '';
@@ -47,7 +57,10 @@ Deno.serve(async (req) => {
       // Existing per-job fields must agree; x2 contractor_pay remains monthly total.
       const perJob = detail && !plan ? pay.fullDetail : pay.maintenanceWash;
       for (const field of Object.keys(md)) {
-        if (/^contractor_pay/.test(field)) wanted[field] = String(field === 'contractor_pay' && !plan ? Number(wanted.contractor_pay) : perJob * (field.endsWith('_cents') ? 100 : 1));
+        if (/^contractor_pay/.test(field)) {
+          if (field === 'contractor_pay_month' && plan) wanted[field] = ''; // retired average is not a per-job rate
+          else wanted[field] = String((!plan && (field === 'contractor_pay' || field === 'contractor_pay_month') ? Number(wanted.contractor_pay) : perJob) * (field.endsWith('_cents') ? 100 : 1));
+        }
         if (/^(wash_pay|detail_pay)(?:_cents)?$/.test(field)) wanted[field] = String((field.startsWith('detail') ? pay.fullDetail : pay.maintenanceWash) * (field.endsWith('_cents') ? 100 : 1));
       }
       const before = Object.fromEntries(Object.keys(wanted).map((k) => [k, md[k] ?? null]));
