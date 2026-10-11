@@ -1,5 +1,8 @@
 # Roadmap
 
+## QR page phone recoloring
+- [ ] Protect the founding page against browser automatic darkening; verify white quote surfaces in light, dark, and forced-dark browser settings without publishing.
+
 ## Orientation language review (Oct 10)
 - [ ] Review all English and Latin American Spanish slide copy, comparison directions and controls without changing business rules.
 - [ ] Verify the signed-in preview and regenerated PDF for readable, correctly rendered bilingual text.
