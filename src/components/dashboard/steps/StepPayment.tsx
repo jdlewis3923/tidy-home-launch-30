@@ -29,6 +29,8 @@ import EmbeddedPaymentForm from '@/components/dashboard/EmbeddedPaymentForm';
 import GuaranteeLine from '@/components/GuaranteeLine';
 import { getLandingSource, getQrPlacement, getQrRoute, getQrZip } from "@/lib/landing-source";
 import { getUtmAttribution } from '@/lib/utm';
+import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
+import { groupsFor, recordScopeAcceptance, type ScopeGroup } from '@/lib/serviceScope';
 
 // The exact Terms wording shown next to the pay button. It is both rendered and
 // stored with the recorded consent, so change them together.
@@ -57,8 +59,8 @@ export default function StepPayment({ state, onChange }: Props) {
   // a "we may not be able to service this" banner and captures a lead so we
   // can call ahead, rather than losing the sale outright.
   const showAccessGate = hasCarService(state);
-  const accessAnswers: Array<{ key: 'hasWaterSpigot' | 'hasElectricalOutlet' | 'washingAllowed'; which: 'water_spigot' | 'electrical_outlet' | 'washing_allowed' }> = [
-    { key: 'hasWaterSpigot', which: 'water_spigot' },
+  // No spigot is never a failure: the Pro brings their own water (scope rule).
+  const accessAnswers: Array<{ key: 'hasElectricalOutlet' | 'washingAllowed'; which: 'electrical_outlet' | 'washing_allowed' }> = [
     { key: 'hasElectricalOutlet', which: 'electrical_outlet' },
     { key: 'washingAllowed', which: 'washing_allowed' },
   ];
@@ -92,6 +94,11 @@ export default function StepPayment({ state, onChange }: Props) {
   }, []);
 
   const totalToday = pricing.firstMonth;
+  const { car_wash: carWashLine } = translate(state);
+  const scopeGroups = groupsFor(pricing.servicePrices.map((sp) => sp.service as string), !!carWashLine);
+  const [scopeChecked, setScopeChecked] = useState<Partial<Record<ScopeGroup, boolean>>>({});
+  const needsSpigot = scopeGroups.some((g) => g === 'car_care' || g === 'car_wash_addon');
+  const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!needsSpigot || typeof state.hasWaterSpigot === 'boolean');
 
   const embedded = isEmbeddedCheckoutAvailable();
   const stripePromise = useMemo(() => (embedded ? getStripe() : null), [embedded]);
@@ -100,6 +107,7 @@ export default function StepPayment({ state, onChange }: Props) {
 
   // The server contract lives in src/lib/checkout.ts — one translator for both
   // the hosted and embedded paths, so sizes and cadence can't drift apart.
+  let scopeRefRef: string | undefined;
   const buildIntentBody = () => {
     const { services, addons, car_wash } = translate(state);
     const attr = getUtmAttribution();
@@ -125,14 +133,21 @@ export default function StepPayment({ state, onChange }: Props) {
       qr_placement: getQrPlacement() ?? undefined,
       qr_zip: getQrZip() ?? undefined,
       qr_route: getQrRoute() ?? undefined,
+      scope_acceptance_ref: scopeRefRef,
     };
   };
 
   const handlePay = async () => {
-    if (customQuote || submitting) return;
+    if (customQuote || submitting || !scopeOk) return;
     setSubmitting(true);
     setError(null);
     try {
+      const acc = await recordScopeAcceptance({
+        groups: scopeGroups, email: state.email || undefined, language: language === 'es' ? 'es' : 'en', surface: 'checkout',
+        checkboxText: Object.fromEntries(scopeGroups.map((g) => [g, checkboxText(g, language)])),
+      });
+      if (acc.ok === false) { setError('We could not save your agreement just now. Please tap the button again.'); setSubmitting(false); return; }
+      scopeRefRef = acc.ref;
       const result = await provisionAccount(state);
       if (result.ok === false) {
         setError(result.message);
@@ -191,7 +206,7 @@ export default function StepPayment({ state, onChange }: Props) {
           console.error(
             '[stripe] publishable key mode does not match the server STRIPE_MODE — falling back to hosted Checkout.',
           );
-          await startCheckout({ config: state, lang: language });
+          await startCheckout({ config: state, lang: language, scopeRef: scopeRefRef });
           setSubmitting(false);
           return;
         }
@@ -200,7 +215,7 @@ export default function StepPayment({ state, onChange }: Props) {
         // Keep submitting=true until the user finishes paying (UI shows form, no double-submit possible).
       } else {
         // Hosted-checkout path — always reachable, regardless of any flag state.
-        await startCheckout({ config: state, lang: language });
+        await startCheckout({ config: state, lang: language, scopeRef: scopeRefRef });
         // startCheckout redirects; clear the flag as a safety net so the button
         // can never stay stuck if the redirect does not happen.
         setSubmitting(false);
@@ -373,17 +388,7 @@ export default function StepPayment({ state, onChange }: Props) {
         >
           <p className="text-sm font-semibold text-ink lowercase">{t('Before we come out')}</p>
 
-          <label className="flex items-start gap-2.5 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={state.hasWaterSpigot === true}
-              onChange={(e) => onChange({ ...state, hasWaterSpigot: e.target.checked })}
-              className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
-            />
-            <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
-              {t("There's an outdoor water spigot I can reach from my driveway or parking spot")}
-            </span>
-          </label>
+          <SpigotQuestion value={typeof state.hasWaterSpigot === 'boolean' ? state.hasWaterSpigot : null} onChange={(v) => onChange({ ...state, hasWaterSpigot: v })} />
 
           <label className="flex items-start gap-2.5 cursor-pointer group">
             <input
@@ -475,6 +480,14 @@ export default function StepPayment({ state, onChange }: Props) {
         </div>
       </div>
 
+      {scopeGroups.map((g) => (
+        <div key={g} className="rounded-xl border border-hairline bg-white p-4">
+          <ScopeSummary compact group={g} monthlyLawn={g === 'lawn' && state.frequencies.lawn === 'monthly'} weekly={g === 'cleaning' ? state.frequencies.cleaning === 'weekly' : undefined} />
+        </div>
+      ))}
+      {needsSpigot && !showAccessGate && <SpigotQuestion value={typeof state.hasWaterSpigot === 'boolean' ? state.hasWaterSpigot : null} onChange={(v) => onChange({ ...state, hasWaterSpigot: v })} />}
+      <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} />
+
       {error && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive animate-calm-in">
           {error}
@@ -497,7 +510,7 @@ export default function StepPayment({ state, onChange }: Props) {
         <button
           type="button"
           onClick={handlePay}
-          disabled={submitting || customQuote || preparing}
+          disabled={submitting || customQuote || preparing || !scopeOk}
           className={`group relative w-full overflow-hidden rounded-xl bg-ink px-6 py-5 text-base font-semibold text-white shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all duration-300 hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${reveal(0)}`}
           style={{ transitionDelay: '340ms', letterSpacing: '-0.005em' }}
         >

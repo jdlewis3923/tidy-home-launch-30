@@ -116,7 +116,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's actually included in a visit?",
-      a: "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. A bed edge reset is available as an add-on.",
+      a: "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and mulching clippings back into the lawn. A bed edge reset is available as an add-on.",
     },
     {
       q: "Who does the work?",

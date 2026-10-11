@@ -3,6 +3,8 @@
  * Mobile-first, bilingual through the shared t() layer, every load logged.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ScopeSummary, ScopeAcceptChecks, allScopeChecked, checkboxText } from "@/components/scope/ServiceScope";
+import { groupsFor, recordScopeAcceptance, type ScopeGroup } from "@/lib/serviceScope";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -171,10 +173,20 @@ export default function Founding() {
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.email);
   const formOk = s.first.trim() && s.last.trim() && emailOk && phoneOk && s.street.trim().length >= 5 && s.day && isZip(s.zip);
 
+  const scopeGroups = useMemo(() => groupsFor(s.services), [s.services]);
+  const [scopeChecked, setScopeChecked] = useState<Partial<Record<ScopeGroup, boolean>>>({});
+  const [spigot, setSpigot] = useState<boolean | null>(null);
+  const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!s.services.includes("detailing") || spigot !== null);
+
   async function reserve(e: React.FormEvent) {
     e.preventDefault();
-    if (!formOk || busy) return;
+    if (!formOk || !scopeOk || busy) return;
     setBusy(true); setErr("");
+    const acc = await recordScopeAcceptance({
+      groups: scopeGroups, email: s.email, language: language === "es" ? "es" : "en", surface: "founding",
+      checkboxText: Object.fromEntries(scopeGroups.map((g) => [g, checkboxText(g, language)])),
+    });
+    if (!acc.ok) { setBusy(false); setErr(t("We couldn't save that. Check your details and try again, or call us.")); return; }
     const body = {
       page: "founding", first_name: s.first, last_name: s.last, email: s.email, phone: s.phone, sms_consent: s.sms,
       services: s.services, street: s.street, city: "Miami", zip: s.zip, preferred_day: s.day, preferred_time: s.time,
@@ -183,6 +195,7 @@ export default function Founding() {
       gift_addons: s.gifts.slice(0, giftCount), website: honeypot.current?.value || "",
       lines: lines.flatMap((l) => l ? [{ service: l.service, size: l.size, cadence: l.service === "detailing" ? null : l.cadence, monthly: l.monthly, visits_per_month: l.visits }] : []),
       quote: { total, visits, src: "founding", beds: s.beds, baths: s.baths },
+      scope_acceptance_ref: acc.ref, spigot_at_parking: s.services.includes("detailing") ? spigot ?? undefined : undefined,
     };
     const { data, error } = await supabase.functions.invoke("reservation-submit", { body });
     setBusy(false);
@@ -334,6 +347,12 @@ export default function Founding() {
                     );
                   })}
                 </div>
+                {s.services.map((svc) => (
+                  <div key={svc} className="mt-3 rounded-xl border border-border bg-card p-3">
+                    <p className="text-sm font-bold">{t(SVC_LABEL[svc])}</p>
+                    <ScopeSummary compact group={groupsFor([svc])[0]} monthlyLawn={svc === "lawn" && s.cadence.lawn === "monthly"} weekly={svc === "cleaning" ? s.cadence.cleaning === "weekly" : undefined} />
+                  </div>
+                ))}
                 <button className={`${primaryBtn} mt-4`} disabled={!s.services.length} onClick={() => go("sizes")}>{t("Next")} →</button>
               </div>
             )}
@@ -363,6 +382,7 @@ export default function Founding() {
                     <button type="button" aria-pressed={s.lawn === "quote"} className={`mt-2 w-full rounded-xl border-2 border-dashed px-3 py-2 text-left text-sm font-semibold ${s.lawn === "quote" ? "border-gold bg-gold/10 text-ink" : "border-border text-ink-soft hover:border-primary/50"}`} onClick={() => set({ lawn: "quote" })}>{t(LAWN_OVER_OPTION)} →</button>
                     {s.lawn !== "quote" && (<>
                     <Cadence value={s.cadence.lawn} onChange={(c) => set({ cadence: { ...s.cadence, lawn: c } })} t={t} chip={chip} on={on} off={off} />
+                    <ScopeSummary compact group="lawn" monthlyLawn={s.cadence.lawn === "monthly"} />
                     </>)}
                   </fieldset>
                 )}
@@ -373,6 +393,7 @@ export default function Founding() {
                       {([[1, "Sedan"], [2, "SUV"], [3, "Truck, 3-row or van"]] as const).map(([v, l]) => <button key={v} type="button" aria-pressed={s.car === v} className={`${chip} ${s.car === v ? on : off}`} onClick={() => set({ car: v })}>{t(l)}</button>)}
                     </div>
                     <p className="mt-2 text-xs text-ink-faint">{t("Shine Complete: 3 maintenance washes a month plus 2 full details a year. One flat monthly price.")}</p>
+                    <ScopeSummary compact group="car_care" />
                   </fieldset>
                 )}
                 <div className="flex gap-2">
@@ -464,9 +485,19 @@ export default function Founding() {
                   <input type="checkbox" className="mt-1 h-5 w-5" checked={s.sms} onChange={(e) => set({ sms: e.target.checked })} />
                   <span>{t("Text me about my reservation. Msg & data rates may apply. Reply STOP to opt out.")}</span>
                 </label>
+                {s.services.includes("detailing") && (
+                  <fieldset>
+                    <legend className="text-sm font-bold">{language === "es" ? "¿Hay una llave de agua exterior donde se estaciona el auto?" : "Outdoor spigot at the parking spot?"}</legend>
+                    <div className="mt-1 grid grid-cols-2 gap-2" role="radiogroup">
+                      {([true, false] as const).map((v) => <button key={String(v)} type="button" role="radio" aria-checked={spigot === v} className={`${chip} ${spigot === v ? on : off}`} onClick={() => setSpigot(v)}>{v ? (language === "es" ? "Sí" : "Yes") : "No"}</button>)}
+                    </div>
+                    {spigot === false && <p className="mt-1 text-xs text-ink-soft">{language === "es" ? "No hay problema: su Pro trae su propia agua. Nunca hay cargo extra." : "No problem — your Pro brings their own water. Never a fee."}</p>}
+                  </fieldset>
+                )}
+                <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} />
                 {err && <p role="alert" className="text-sm font-semibold text-destructive">{err}</p>}
                 <p className="founding-reserve-launch">{t("Founding visits begin")} {launch}. {t("No charge today — we'll confirm your day and your Pro the week before, and set up payment then.")}</p>
-                <button className={primaryBtn} disabled={!formOk || busy}>{busy ? t("Saving…") : t("Reserve my spot — no charge")}</button>
+                <button className={primaryBtn} disabled={!formOk || !scopeOk || busy}>{busy ? t("Saving…") : t("Reserve my spot — no charge")}</button>
                 <p className="text-center text-xs text-ink-faint">{t("By reserving you agree to our")} <Link to="/terms" className="underline">{t("Terms")}</Link> {t("and")} <Link to="/privacy" className="underline">{t("Privacy Policy")}</Link>.</p>
                 <button type="button" className={`${chip} ${off} w-full`} onClick={() => go("price")}>← {t("Back to my price")}</button>
               </form>

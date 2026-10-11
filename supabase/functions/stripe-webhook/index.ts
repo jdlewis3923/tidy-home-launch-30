@@ -27,6 +27,9 @@ import { resolveStripeCurrentPeriodEnd } from '../_shared/resolve-stripe-current
 import { loadPlanLines } from '../_shared/plan-lines.ts';
 import { stripeSecretKey } from '../_shared/stripe-mode.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { groupsFor, scopeEmailHtml } from '../_shared/scope.ts';
+import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import { tidyEmailShell } from '../_shared/email-brand.ts';
 
 const STRIPE_SECRET_KEY = stripeSecretKey();
 // Live and test endpoints have different signing secrets. Try test first, then live,
@@ -415,6 +418,36 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   });
   if (genErr) console.error('[stripe-webhook] visit generation failed', genErr.message);
   else console.log('[stripe-webhook] visits generated', JSON.stringify(generated));
+
+  // "Your plan includes" — the same scope rows the customer accepted, in their language.
+  // Best effort: a failed send is logged and never blocks the subscription.
+  try {
+    const { data: who } = await supabase.auth.admin.getUserById(userId);
+    const { data: prof } = await supabase.from('profiles').select('first_name, language').eq('user_id', userId).maybeSingle();
+    const to = who?.user?.email;
+    if (to && !/@(example\.com|test\.jointidy\.co)$/i.test(to)) {
+      const es = String(prof?.language ?? '').trim() === 'es';
+      const monthlyLawn = services.some((s: { service: string; frequency?: string }) => s.service === 'lawn' && s.frequency === 'monthly');
+      const scope = await scopeEmailHtml(supabase, groupsFor(services.map((s: { service: string }) => s.service), !!meta.car_wash_json), es ? 'es' : 'en', { monthlyLawn });
+      // Write first (dedupe on the subscription) so a replayed webhook never re-sends.
+      const { error: dupErr } = scope ? await supabase.from('member_notifications').insert({
+        user_id: userId, kind: 'plan_scope', title: es ? 'Lo que incluye su plan' : 'What your plan includes',
+        body: es ? 'Lo que incluye y no incluye su plan está en su cuenta.' : "What your plan includes and doesn't is on your Account page.",
+        email_status: 'skipped', dedupe_key: `plan_scope:${subRow.id}`,
+      }) : { error: { message: 'no scope' } };
+      if (scope && !dupErr) {
+        const sent = await sendBrevoEmail({
+          to: { email: to, name: prof?.first_name ?? undefined }, marketing: false,
+          subject: es ? 'Lo que incluye su plan Tidy' : 'What your Tidy plan includes',
+          htmlContent: tidyEmailShell({ heading: es ? 'Su plan incluye' : 'Your plan includes', eyebrow: es ? 'Confirmación' : 'Confirmation',
+            bodyHtml: `<p>${es ? 'Este es exactamente lo que incluye y no incluye cada visita. También está en su cuenta.' : "Here's exactly what each visit includes and doesn't. It's on your Account page too."}</p>${scope}`,
+            ctaUrl: 'https://jointidy.co/account', ctaLabel: es ? 'Abrir mi cuenta' : 'Open my account' }),
+          label: 'plan-scope-confirm', tags: ['plan-scope'],
+        });
+        await supabase.from('member_notifications').update({ email_status: sent.sent ? 'sent' : 'failed', email_error: sent.sent ? null : String(sent.reason ?? 'send failed') }).eq('dedupe_key', `plan_scope:${subRow.id}`);
+      }
+    }
+  } catch (e) { console.error('[stripe-webhook] scope email failed', (e as Error).message); }
 
   await fireZap('subscription_confirmed', {
     user_id: userId,

@@ -11,6 +11,7 @@ import { tidyEmailShell, TIDY_OWNER_EMAIL } from '../_shared/email-brand.ts';
 import { queueSms, isWindowOpen, nextOpenWindow } from '../_shared/sms-window.ts';
 import { toE164 } from '../_shared/member-followups.ts';
 import { RESERVATION_ALERTS, RESERVABLE_SERVICES, LAUNCH_DATE_LONG_ES } from '../_shared/launch.ts';
+import { groupsFor, verifyScopeAcceptance, scopeEmailHtml } from '../_shared/scope.ts';
 import { esc, logEmail, reservationConfirmEmail, foundingConfirmEmail, reservationConfirmSms, svcLabel } from '../_shared/reservation-emails.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
@@ -37,6 +38,8 @@ const Body = z.object({
   gift_addons: z.array(z.string().max(60)).max(2).default([]),
   website: z.string().max(200).optional(), // honeypot
   page: z.enum(['founding', 'builder']).default('builder'),
+  scope_acceptance_ref: z.string().trim().max(80).optional(),
+  spigot_at_parking: z.boolean().optional(),
 });
 
 async function serviceCount(svc: string) {
@@ -55,9 +58,11 @@ async function notify(row: any, isUpdate: boolean, page: string) {
     }
   };
   await step('member email', async () => {
+    const monthlyLawn = (row.lines ?? []).some((l: { service: string; cadence: string | null }) => l.service === 'lawn' && l.cadence === 'monthly');
+    const scopeHtml = await scopeEmailHtml(admin, groupsFor(row.services ?? []), row.lang === 'es' ? 'es' : 'en', { monthlyLawn }).catch(() => '');
     const em = page === 'founding'
-      ? foundingConfirmEmail(row, LAUNCH_DATE_LONG_ES)
-      : reservationConfirmEmail(row);
+      ? foundingConfirmEmail(row, LAUNCH_DATE_LONG_ES, scopeHtml)
+      : reservationConfirmEmail(row, scopeHtml);
     const sent = await sendBrevoEmail({ to: { email: row.email, name: row.first_name }, marketing: false, subject: em.subject, htmlContent: em.html, label: 'reservation-confirm', tags: ['reservation'] });
     await logEmail(admin, page === 'founding' ? 'founding-reservation-confirm' : 'reservation-confirm', row.email, em.subject, sent, 'reservation-submit');
     if (!sent.sent) throw new Error(sent.reason ?? 'send failed');
@@ -116,6 +121,11 @@ Deno.serve(async (req) => {
   const monthlyCents = Math.round(lines.filter((l) => l.size !== 'quote').reduce((n, l) => n + l.monthly, 0) * 100);
   const email = b.email.toLowerCase();
 
+  // No reservation without a stored "what's included" acceptance per service.
+  const scope = await verifyScopeAcceptance(admin, { ref: b.scope_acceptance_ref, email, groups: groupsFor(services) });
+  if (!scope.ok) return jsonResponse({ ok: false, error: 'scope_acceptance_required', missing: scope.missing }, 409);
+  if (services.includes('detailing') && typeof b.spigot_at_parking !== 'boolean') return jsonResponse({ ok: false, error: 'spigot_answer_required' }, 400);
+
   // Duplicate detection: same email OR same street+ZIP updates the existing reservation.
   const { data: dupes } = await admin.from('reservations').select('id, founding, update_count, street, zip, email, lawn_selected_size')
     .neq('status', 'canceled').or(`email.eq.${email},and(zip.eq.${b.zip},street.ilike.${b.street.replace(/[,()%*]/g, ' ').trim()})`).order('created_at').limit(1);
@@ -128,6 +138,7 @@ Deno.serve(async (req) => {
     heard_from: b.heard_from, heard_other: b.heard_from === 'other' ? (b.heard_other || null) : null,
     lang: b.lang, is_test_row: !!b.is_test, src: b.src ?? null, session_id: b.session_id ?? null,
     gift_addons: b.gift_addons, custom_quote: customQuote,
+    scope_acceptance_ref: b.scope_acceptance_ref ?? null, spigot_at_parking: services.includes('detailing') ? b.spigot_at_parking ?? null : null,
   };
   // Lawn size is the customer's best guess; Tidy verifies it from aerial imagery
   // before conversion. Larger than 12,000 sq ft arrives as size 'quote' → custom.

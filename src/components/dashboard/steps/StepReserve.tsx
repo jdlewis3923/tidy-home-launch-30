@@ -7,6 +7,8 @@ import { ConfigState, calculatePricing, sizeFor, VALID_ZIPS, clearState } from '
 import { LAUNCH_DATE_LONG, RESERVATION_SERVICE_LABEL, RESERVABLE_SERVICES, type ReservableService } from '@/lib/launch';
 import FoundingCounter from '@/components/FoundingCounter';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
+import { groupsFor, recordScopeAcceptance, type ScopeGroup } from '@/lib/serviceScope';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Any day'];
 const HEARD = [
@@ -32,10 +34,19 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
   const zipOk = VALID_ZIPS.includes(state.zip);
   const ready = !!(state.firstName.trim() && /\S+@\S+\.\S+/.test(state.email) && state.phone.replace(/\D/g, '').length >= 10
     && state.address.trim().length >= 3 && zipOk && state.preferredDay && state.preferredTime && heard && services.length);
+  const scopeGroups = groupsFor(services);
+  const [scopeChecked, setScopeChecked] = useState<Partial<Record<ScopeGroup, boolean>>>({});
+  const hasCar = services.includes('detailing' as ReservableService);
+  const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!hasCar || typeof state.hasWaterSpigot === 'boolean');
 
   const submit = async () => {
-    if (!ready || busy) return;
+    if (!ready || !scopeOk || busy) return;
     setBusy(true); setErr(null);
+    const acc = await recordScopeAcceptance({
+      groups: scopeGroups, email: state.email.trim(), language: language === 'es' ? 'es' : 'en', surface: 'quote',
+      checkboxText: Object.fromEntries(scopeGroups.map((g) => [g, checkboxText(g, language)])),
+    });
+    if (!acc.ok) { setBusy(false); setErr(t("That didn't go through. Please try again, or call (786) 829-1141.")); return; }
     const pricing = calculatePricing(state);
     const lines = pricing.servicePrices.map((sp) => ({
       service: sp.service, size: (sizeFor(state, sp.service) ?? null) as number | string | null,
@@ -48,6 +59,7 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
         sms_consent: state.smsConsent, services, lines, quote,
         street: state.address.trim(), city: state.city.trim(), zip: state.zip, preferred_day: state.preferredDay,
         preferred_time: state.preferredTime, heard_from: heard, heard_other: heardOther || undefined, lang: language === 'es' ? 'es' : 'en',
+        scope_acceptance_ref: acc.ref, spigot_at_parking: hasCar ? state.hasWaterSpigot : undefined,
       },
     });
     setBusy(false);
@@ -108,9 +120,16 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
         <span>{t('Text me my reservation confirmation and schedule updates from Tidy Home Concierge. Msg & data rates may apply. Reply STOP to opt out.')}</span>
       </label>
 
+      {scopeGroups.map((g) => (
+        <div key={g} className="rounded-2xl border border-hairline bg-white p-4">
+          <ScopeSummary compact group={g} monthlyLawn={g === 'lawn' && state.frequencies.lawn === 'monthly'} weekly={g === 'cleaning' ? state.frequencies.cleaning === 'weekly' : undefined} />
+        </div>
+      ))}
+      {hasCar && <SpigotQuestion value={typeof state.hasWaterSpigot === 'boolean' ? state.hasWaterSpigot : null} onChange={(v) => set('hasWaterSpigot', v)} />}
+      <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} />
       {err && <p className="text-sm text-destructive">{err}</p>}
       <RatingLine />
-      <button type="button" onClick={submit} disabled={!ready || busy} data-testid="reserve-submit"
+      <button type="button" onClick={submit} disabled={!ready || !scopeOk || busy} data-testid="reserve-submit"
         style={{ backgroundColor: 'hsl(var(--ink))', color: '#ffffff' }}
         className="w-full rounded-xl px-7 py-4 text-sm font-semibold shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] disabled:opacity-40">
         {busy ? t('Reserving…') : t('Reserve your spot')}
