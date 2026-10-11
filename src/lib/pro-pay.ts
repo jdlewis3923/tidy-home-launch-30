@@ -1,7 +1,7 @@
 /**
  * Tidy Pro pay — the pro-facing view of the pay canon.
  *
- * Pay is a flat amount per completed visit, set by the plan's SIZE and CADENCE.
+ * Pay is a flat amount per completed visit, set by SIZE and visit kind, never cadence.
  * The figures live in `src/lib/pricing-canon.ts` (mirrored in the database
  * function public.contractor_visit_pay_cents) so the portal and the ledger
  * cannot drift. A percentage is never shown to a pro, and the customer's price
