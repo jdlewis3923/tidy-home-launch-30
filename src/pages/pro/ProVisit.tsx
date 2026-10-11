@@ -33,6 +33,40 @@ export default function ProVisit() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [checkedIn, setCheckedIn] = useState(false);
+  const [sizeOpen, setSizeOpen] = useState(false);
+  const [beds, setBeds] = useState("");
+  const [baths, setBaths] = useState("");
+  const [vclass, setVclass] = useState("sedan");
+  const [plate, setPlate] = useState("");
+
+  const GPS_MSG = "Turn on location for this site in your phone settings, then try again. Check-in and check-out need your location.";
+
+  const checkIn = async () => {
+    if (!visit) return;
+    setBusy("omw");
+    setActionError(null);
+    const res = await visitAction(visit.id, "check_in");
+    setBusy(null);
+    if (!res.ok) { setActionError(res.error === "gps_unavailable" ? GPS_MSG : "Couldn't check you in."); return; }
+    setCheckedIn(true);
+  };
+
+  const saveSize = async () => {
+    if (!visit) return;
+    const isCar = visit.service_type === "detailing";
+    const body = isCar
+      ? { vehicle_class: vclass, plate: plate.trim() }
+      : { bedrooms: parseInt(beds, 10), bathrooms: parseFloat(baths) };
+    if (isCar ? !plate.trim() : !(beds && baths)) { setActionError(isCar ? "Add the vehicle type and plate." : "Add bedrooms and bathrooms."); return; }
+    setBusy("complete");
+    const res = await visitAction(visit.id, "size_check", body);
+    setBusy(null);
+    if (!res.ok) { setActionError("Couldn't save the size. Try again."); return; }
+    setSizeOpen(false);
+    setActionError(null);
+    void complete();
+  };
 
   useEffect(() => {
     if (visit?.on_my_way_at) setOmwSent(true);
@@ -94,8 +128,15 @@ export default function ProVisit() {
     setBusy(null);
     setConfirm(false);
     if (!res.ok) {
+      if (res.error === "size_check_required") { setSizeOpen(true); setActionError("First visit: record the real size before you finish."); return; }
       setActionError(
-        res.error === "photos_required"
+        res.error === "gps_unavailable"
+          ? GPS_MSG
+          : res.error === "gps_check_in_required"
+          ? "Tap \"I've arrived\" when you get there, then finish the visit."
+          : res.error === "before_photos_required" || res.error === "after_photos_required"
+          ? (visit.service_type === "detailing" ? "Car visits need 6 before photos and after photos from the same angles." : "Add the before and after photos from the checklist first.")
+          : res.error === "photos_required"
           ? "Add at least one before photo and one after photo first."
           : res.error === "coi_blocked"
             ? "Your insurance certificate must be valid before you complete a visit."
@@ -238,6 +279,36 @@ export default function ProVisit() {
               </>
             )}
           </ProButton>
+
+          <ProButton
+            full
+            variant="secondary"
+            disabled={busy !== null || checkedIn || blocked || !!visit.completed_at}
+            onClick={() => void checkIn()}
+          >
+            {checkedIn ? <><Check className="h-4 w-4" aria-hidden /> Checked in</> : "I've arrived — check in"}
+          </ProButton>
+
+          {sizeOpen && (
+            <ProCard>
+              <p className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">First visit — real size</p>
+              {visit.service_type === "detailing" ? (
+                <div className="mt-2 space-y-2">
+                  <select value={vclass} onChange={(e) => setVclass(e.target.value)} className="min-h-[44px] w-full rounded-xl border px-3 text-[15px]">
+                    {[["sedan","Sedan"],["coupe","Coupe"],["suv","SUV"],["crossover","Crossover"],["truck","Truck"],["suv3row","3-row SUV"],["van","Van"]].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                  <input value={plate} onChange={(e) => setPlate(e.target.value.toUpperCase())} maxLength={15} placeholder="Plate" className="min-h-[44px] w-full rounded-xl border px-3 text-[15px]" />
+                </div>
+              ) : (
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <input inputMode="numeric" value={beds} onChange={(e) => setBeds(e.target.value.replace(/[^0-9]/g, ""))} placeholder="Bedrooms" className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
+                  <input inputMode="decimal" value={baths} onChange={(e) => setBaths(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="Bathrooms" className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
+                </div>
+              )}
+              <p className="mt-2 text-[13px] text-[hsl(var(--pro-ink-soft))]">If it doesn't match the plan, do the visit as booked. Tidy talks to the customer — never you.</p>
+              <ProButton full className="mt-3" disabled={busy !== null} onClick={() => void saveSize()}>Save size and finish</ProButton>
+            </ProCard>
+          )}
 
           <Link
             to={`/pro/visit/${visit.id}/photos`}
