@@ -1,5 +1,9 @@
 # Roadmap
 
+## Confirmed Car Care pay (Oct 11)
+- [ ] Align scheduler and future Car Care jobs with wash 16/20/26 and full detail 78/88/115, flat across cadences.
+- [ ] Audit and correct all Stripe contractor-pay metadata and customer-facing app, email and Indeed car-pay copy; list changes, verify, do not publish.
+
 ## QR page phone recoloring
 - [x] Protect the founding page against browser automatic darkening; verified white quote surfaces and ZIP/service selection in light/dark modes with forced-dark Chromium enabled; no horizontal overflow. Not published; the specific phone browser remains unverified.
 
