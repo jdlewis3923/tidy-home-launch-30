@@ -1558,7 +1558,7 @@ body.admin-hud h1 {
 /* /founding — mobile door-hanger landing surface. */
 .founding-landing {
   /* The QR page is a light public brochure, independent of signed-in admin theme. */
-  color-scheme: only light;
+  color-scheme: light;
   --background: 0 0% 100%;
   --foreground: 222 47% 11%;
   --card: 0 0% 100%;
@@ -1760,5 +1760,17 @@ body.admin-hud h1 {
   .founding-plan-card:hover { transform: none; }
 }
 
-/* Stop phone browsers (e.g. Samsung Internet) auto-darkening public pages. */
-:root { color-scheme: only light; }
+/* Stop phone browsers (Samsung Internet, Chrome auto-dark) from greying pages.
+   Those browsers only skip their forced darkening when the page says it handles
+   dark itself, so the root declares "light dark" while everything we draw stays
+   on our own explicit (light) colors and light form controls. */
+:root { color-scheme: light dark; }
+body { color-scheme: light; }
+.founding-landing { color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  .founding-landing {
+    color-scheme: light;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}

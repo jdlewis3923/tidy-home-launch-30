@@ -233,7 +233,7 @@ export default function Founding() {
     <div className="founding-landing min-h-screen bg-background text-ink">
       <Helmet>
         <html lang={language} />
-        <meta name="color-scheme" content="only light" />
+        <meta name="color-scheme" content="light dark" />
         <title>{t("Founding Homes · Cleaning, Lawn & Car Care in Pinecrest & Kendall | Tidy")}</title>
         <meta name="description" content={t("See your Tidy price in 60 seconds — house cleaning, lawn care and car care for Pinecrest, Kendall and Kendall West (33156, 33183, 33186). No card. No account.")} />
         <link rel="canonical" href="https://jointidy.co/founding" />
