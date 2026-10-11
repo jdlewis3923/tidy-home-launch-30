@@ -778,6 +778,7 @@ export type Database = {
           photo_compliance_rate: number | null
           photos_expected_count: number
           photos_uploaded_count: number
+          preferred_language: string
           pro_number: string | null
           pro_number_reserved: string | null
           pro_partner_interest: string | null
@@ -923,6 +924,7 @@ export type Database = {
           photo_compliance_rate?: number | null
           photos_expected_count?: number
           photos_uploaded_count?: number
+          preferred_language?: string
           pro_number?: string | null
           pro_number_reserved?: string | null
           pro_partner_interest?: string | null
@@ -1068,6 +1070,7 @@ export type Database = {
           photo_compliance_rate?: number | null
           photos_expected_count?: number
           photos_uploaded_count?: number
+          preferred_language?: string
           pro_number?: string | null
           pro_number_reserved?: string | null
           pro_partner_interest?: string | null
@@ -5888,18 +5891,24 @@ export type Database = {
           hours: number
           service: Database["public"]["Enums"]["service_type"]
           size_tier: number
+          source_lookup_key: string | null
+          synced_at: string | null
           visit_kind: string
         }
         Insert: {
           hours: number
           service: Database["public"]["Enums"]["service_type"]
           size_tier?: number
+          source_lookup_key?: string | null
+          synced_at?: string | null
           visit_kind: string
         }
         Update: {
           hours?: number
           service?: Database["public"]["Enums"]["service_type"]
           size_tier?: number
+          source_lookup_key?: string | null
+          synced_at?: string | null
           visit_kind?: string
         }
         Relationships: []
@@ -7954,6 +7963,7 @@ export type Database = {
       member_ops_tick: { Args: never; Returns: Json }
       member_rate_card_version: { Args: { _user: string }; Returns: number }
       my_founding: { Args: never; Returns: Json }
+      my_language: { Args: never; Returns: string }
       nextval: { Args: { seq_name: string }; Returns: number }
       notify_member: {
         Args: {
@@ -8301,6 +8311,8 @@ export type Database = {
       }
       sched_day_name: { Args: { _w: number }; Returns: string }
       sched_dow: { Args: { _d: string }; Returns: number }
+      sched_es: { Args: { _t: string }; Returns: string }
+      sched_es_tok: { Args: { _t: string }; Returns: string }
       sched_find_slot: {
         Args: {
           _budget: number
@@ -8378,6 +8390,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["service_type"][]
       }
       sched_pro_went_inactive: { Args: { _claim: string }; Returns: undefined }
+      sched_prompt_unbooked: { Args: { _sub?: string }; Returns: number }
       sched_relocate_visit: {
         Args: { _reason: string; _visit: string }
         Returns: string
@@ -8437,12 +8450,14 @@ export type Database = {
         Args: { _cap_per_pro_day?: number }
         Returns: number
       }
+      set_my_language: { Args: { _lang: string }; Returns: string }
       sms_recipient_name: { Args: { _phone: string }; Returns: string }
       subscription_service_count: { Args: { _sub: string }; Returns: number }
       sync_member_entitlements: {
         Args: { _reason: string; _sub: string }
         Returns: undefined
       }
+      user_lang: { Args: { _uid: string }; Returns: string }
       verify_pro_badge: {
         Args: { _token: string }
         Returns: {
