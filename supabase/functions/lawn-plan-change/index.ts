@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
     if (open) return jsonResponse({ ok: true, pending_verification: true, change_id: open.id, already: true });
     const { data: row, error } = await admin.from('lawn_plan_changes').insert({ subscription_id: sub.id, user_id: u.user.id, kind: 'add_lawn', source: 'member_add', cadence: b.cadence, selected_size: b.size }).select('id').single();
     if (error) return jsonResponse({ ok: false, error: 'could_not_save' }, 500);
-    await writeAlert(admin, { level: 'info', category: 'reservations', title: 'Lawn added from an account — measure it', body: 'A member added lawn to their plan. Measure the turf from above; nothing is billed and no lawn visit is scheduled until you do.', action_label: 'Open lawn verification', action_url: '/admin/lawn-verification', dedupe_key: `lawn_plan_add:${row.id}`, context: { change_id: row.id } });
+    await writeAlert(admin, { level: 'action', category: 'reservations', title: 'Lawn added from an account — measure it', body: 'A member added lawn to their plan. Measure the turf from above; nothing is billed and no lawn visit is scheduled until you do.', action_label: 'Open lawn verification', action_url: '/admin/lawn-verification', dedupe_key: `lawn_plan_add:${row.id}`, context: { change_id: row.id } });
     return jsonResponse({ ok: true, pending_verification: true, change_id: row.id });
   }
 
