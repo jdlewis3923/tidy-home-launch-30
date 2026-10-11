@@ -18,4 +18,4 @@
 - Paid-plan lawn adds/corrections go only through `lawn-plan-change` (DB trigger refuses unverified lawn), swapping Stripe by lookup_key — why: nothing billed before verification; size-ups wait for the customer.
 - Contractor pay varies by service and size only, never cadence — why: cadence discounts come from Tidy's margin.
 - Founding uses scoped light tokens and stacked phone service cards — why: QR visitors never inherit illegible admin colors or clipped prices.
-- Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits); visits are generated only from a booking and every rule is enforced in `sched_*`/`pro_*`/`customer_*`/`admin_*` SQL functions plus visits triggers — why: one source of truth, rules can't be bypassed client-side.
+- Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
