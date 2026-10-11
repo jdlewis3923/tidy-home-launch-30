@@ -29,6 +29,7 @@ import { useDashboardData } from "@/lib/dashboard-data";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguagePreference from "@/components/LanguagePreference";
+import { PlanScope, SizeReviewPrompt } from "@/components/scope/PlanScope";
 
 export default function Account() {
   const navigate = useNavigate();
@@ -151,6 +152,15 @@ export default function Account() {
             </div>
           </div>
 
+          <SizeReviewPrompt />
+          {data.subscription && (
+            <PlanScope
+              services={(data.subscription.services ?? []) as string[]}
+              carWash={!!(data.subscription as { car_wash_key?: string | null }).car_wash_key}
+              monthlyLawn={(data.subscription.plan_lines as Array<{ service?: string; cadence?: string }> | null)?.some((l) => l?.service === 'lawn' && l?.cadence === 'monthly') ?? false}
+              weekly={(data.subscription.plan_lines as Array<{ service?: string; cadence?: string }> | null)?.some((l) => l?.service === 'cleaning' && l?.cadence === 'weekly') ?? false}
+            />
+          )}
           <LanguagePreference />
 
           <button
