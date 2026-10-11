@@ -1759,3 +1759,6 @@ body.admin-hud h1 {
   .founding-plan-card { transition: none; }
   .founding-plan-card:hover { transform: none; }
 }
+
+/* Stop phone browsers (e.g. Samsung Internet) auto-darkening public pages. */
+:root { color-scheme: only light; }
