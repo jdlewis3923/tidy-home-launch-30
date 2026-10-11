@@ -282,7 +282,7 @@ export default function ProVisit() {
 
           <ProButton
             full
-            variant="secondary"
+            variant="outlined"
             disabled={busy !== null || checkedIn || blocked || !!visit.completed_at}
             onClick={() => void checkIn()}
           >
