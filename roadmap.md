@@ -1,7 +1,7 @@
 # Roadmap
 
 ## QR page phone recoloring
-- [ ] Protect the founding page against browser automatic darkening; verify white quote surfaces in light, dark, and forced-dark browser settings without publishing.
+- [x] Protect the founding page against browser automatic darkening; verified white quote surfaces and ZIP/service selection in light/dark modes with forced-dark Chromium enabled; no horizontal overflow. Not published; the specific phone browser remains unverified.
 
 ## Orientation language review (Oct 10)
 - [ ] Review all English and Latin American Spanish slide copy, comparison directions and controls without changing business rules.
