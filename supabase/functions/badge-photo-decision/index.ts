@@ -9,7 +9,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { badgePhotoEmail, PHOTO_RETAKE_REASONS, type RetakeReason } from '../_shared/pro-emails.ts';
-import { sendProEmail } from '../_shared/pro-send.ts';
+import { sendProEmail, proLang } from '../_shared/pro-send.ts';
 import { TIDY_SITE } from '../_shared/email-brand.ts';
 
 const URL_ = Deno.env.get('SUPABASE_URL')!;

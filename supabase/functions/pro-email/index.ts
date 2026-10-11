@@ -21,7 +21,7 @@ import {
   allSetEmail, backgroundCheckEmail, badgePhotoEmail, contractEmail, declineEmail,
   insuranceRequestEmail, missingEmail, interviewEmail, firstRouteEmail, PHOTO_RETAKE_REASONS, type Built, type Lang, type RetakeReason,
 } from '../_shared/pro-emails.ts';
-import { sendProEmail } from '../_shared/pro-send.ts';
+import { sendProEmail, proLang } from '../_shared/pro-send.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

@@ -16,7 +16,7 @@ import { PDFDocument, StandardFonts, rgb } from 'https://esm.sh/pdf-lib@1.17.1';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { contractSignedEmail } from '../_shared/pro-emails.ts';
-import { sendProEmail } from '../_shared/pro-send.ts';
+import { sendProEmail, proLang } from '../_shared/pro-send.ts';
 import { TIDY_OWNER_EMAIL } from '../_shared/email-brand.ts';
 
 const URL_ = Deno.env.get('SUPABASE_URL')!;

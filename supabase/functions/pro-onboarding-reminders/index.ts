@@ -16,7 +16,7 @@ import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { loadFive, FIVE_KEYS } from '../_shared/pro-five.ts';
 import { missingEmail } from '../_shared/pro-emails.ts';
-import { sendProEmail } from '../_shared/pro-send.ts';
+import { sendProEmail, proLang } from '../_shared/pro-send.ts';
 import { writeAlert } from '../_shared/alerts.ts';
 import { SITE } from '../_shared/pro-onboarding.ts';
 
