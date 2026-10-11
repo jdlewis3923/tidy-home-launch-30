@@ -111,6 +111,7 @@ Deno.serve(async (req) => {
         .insert({
           first_name: data.first_name,
           last_name:  data.last_name,
+          preferred_language: (raw as { preferred_language?: string })?.preferred_language === 'es' ? 'es' : 'en',
           email:      data.email.toLowerCase(),
           phone:      data.phone ?? null,
           zip:        data.zip ?? null,
