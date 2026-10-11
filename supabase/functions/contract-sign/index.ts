@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
 
   const { data: link } = await admin.storage.from(BUCKET).createSignedUrl(path, 60 * 60 * 24 * 30);
   const first = a.first_name ?? 'there';
-  const built = contractSignedEmail(first, typed, whenEt, doc.version, link?.signedUrl ?? null);
+  const built = contractSignedEmail(first, typed, whenEt, doc.version, link?.signedUrl ?? null, await proLang(admin, a.id));
   const attachment = [{ name: 'Tidy-Contractor-Agreement-signed.pdf', content: toB64(bytes) }];
   if (a.email) await sendProEmail(admin, { applicantId: a.id, key: 'contract_signed', to: a.email, name: first, built, triggeredBy: 'contract-sign', attachment });
   await sendProEmail(admin, {

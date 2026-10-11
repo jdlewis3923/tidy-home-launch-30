@@ -128,3 +128,14 @@ export async function sendProEmail(admin: SupabaseClient, args: {
   }
   return { sent: res.sent, reason: res.reason, outOfSequence };
 }
+
+/** The Pro/applicant's stored language ('en' | 'es'); automatic mail is sent in it. */
+export async function proLang(admin: SupabaseClient, applicantId: string | null | undefined): Promise<'en' | 'es'> {
+  if (!applicantId) return 'en';
+  const { data } = await admin.from('applicants').select('preferred_language, contractor_id').eq('id', applicantId).maybeSingle();
+  if (data?.contractor_id) {
+    const { data: p } = await admin.from('profiles').select('language').eq('user_id', data.contractor_id).maybeSingle();
+    if (p?.language) return String(p.language).trim() === 'es' ? 'es' : 'en';
+  }
+  return data?.preferred_language === 'es' ? 'es' : 'en';
+}

@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     pro_number: rec.applicant.pro_number,
     service: rec.applicant.service,
     expected_delivery: rec.kit?.expected_delivery_date ?? null,
-  });
+  }, await proLang(admin, id));
   const res = await sendProEmail(admin, {
     applicantId: id, key: 'all_set', to: rec.applicant.email, name: rec.applicant.first_name ?? undefined,
     built, triggeredBy: 'pro-all-set', mode: 'auto',

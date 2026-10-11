@@ -37,7 +37,7 @@ const Body = z.object({
   applicant_id: z.string().uuid(),
   email: z.enum(PRO_EMAIL_KEYS),
   mode: z.enum(['preview', 'send', 'test']).default('preview'),
-  lang: z.enum(['both', 'en', 'es']).default('both'),
+  lang: z.enum(['both', 'en', 'es']).optional(),
   reason: z.string().max(40).optional(),
   /** manual = admin Send menu override (default); transition/auto = fired by the sequence. */
   sequence: z.enum(['manual', 'transition', 'auto']).default('manual'),
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
   catch { return jsonResponse({ error: 'applicant_not_found' }, 404); }
   const a = rec.applicant;
   const first = a.first_name ?? 'there';
-  const L = lang as Lang;
+  const L = (lang ?? await proLang(admin, applicant_id)) as Lang;
   let note: string | null = null;
   let built: Built;
 

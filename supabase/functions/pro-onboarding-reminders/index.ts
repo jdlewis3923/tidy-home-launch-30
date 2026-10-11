@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
     if (daysSince < dueDay) { results.push({ applicant_id: row.id, action: 'not_due', days_since: daysSince }); continue; }
     if (!row.email) { results.push({ applicant_id: row.id, action: 'no_email' }); continue; }
 
-    const built = missingEmail(row.first_name ?? 'there', rec.missing.map((k) => ({ key: k, url: rec.urls[k] })));
+    const built = missingEmail(row.first_name ?? 'there', rec.missing.map((k) => ({ key: k, url: rec.urls[k] })), await proLang(admin, row.id));
     const res = await sendProEmail(admin, { applicantId: row.id, key: 'missing', to: row.email, name: row.first_name ?? undefined, built, triggeredBy: 'pro-onboarding-reminders', mode: 'auto' });
     const nowIso = new Date().toISOString();
     if (res.sent) {
