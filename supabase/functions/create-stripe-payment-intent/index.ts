@@ -38,6 +38,7 @@ import {
 } from "../_shared/pricing-canon.ts";
 import { checkServiceLine, surchargePerVisitFor } from "../_shared/size-validation.ts";
 import { lawnCheckoutGate } from "../_shared/lawn-gate.ts";
+import { groupsFor, verifyScopeAcceptance } from "../_shared/scope.ts";
 import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
 import { stripeMode, stripeModeConflict, stripeSecretKey } from "../_shared/stripe-mode.ts";
 
@@ -55,6 +56,8 @@ const VehicleClassEnum = z.enum(["sedan", "coupe", "suv", "crossover", "truck", 
 const LawnChoiceEnum = z.enum(["small", "standard", "large", "over"]);
 
 const InputSchema = z.object({
+  /** Ref from scope-accept: the customer's stored "I've read what's included" rows. */
+  scope_acceptance_ref: z.string().trim().max(80).optional(),
   services: z
     .array(
       z.object({
@@ -193,6 +196,15 @@ Deno.serve(async (req) => {
     const lawnLine = input.services.find((s) => s.service === "lawn");
     const gate = await lawnCheckoutGate(supabase, user.email, lawnLine ? Number(lawnLine.size) : null);
     if (!gate.ok) return jsonResponse({ ok: false, error: gate.error, detail: gate.detail }, 409);
+  }
+
+  // ---------- Scope: a stored "what's included" acceptance for every service ----------
+  {
+    const scope = await verifyScopeAcceptance(supabase, {
+      ref: input.scope_acceptance_ref, email: user.email, userId: user.id,
+      groups: groupsFor(input.services.map((s) => s.service), !!input.car_wash),
+    });
+    if (!scope.ok) return jsonResponse({ ok: false, error: "scope_acceptance_required", missing: scope.missing }, 409);
   }
 
   try {

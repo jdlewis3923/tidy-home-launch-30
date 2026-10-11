@@ -1,3 +1,5 @@
+import { ScopeSummary } from "@/components/scope/ServiceScope";
+import { groupsFor } from "@/lib/serviceScope";
 import { Link } from "react-router-dom";
 import { Check, MapPin, Sparkles, ShieldCheck, BadgeCheck, Camera, Clock3, LockKeyhole, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -302,6 +304,15 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
       {/* INFINITE TICKER (mirrors homepage energy) */}
       <LandingTicker />
+
+      {/* WHAT'S INCLUDED — read from service_scope */}
+      {(["cleaning", "lawn", "detailing"] as string[]).includes(config.signupServiceParam) && (
+        <section className="bg-background pt-16 px-4" data-testid="service-scope">
+          <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card p-5 md:p-6">
+            <ScopeSummary compact group={groupsFor([config.signupServiceParam])[0]} />
+          </div>
+        </section>
+      )}
 
       {/* PLANS */}
       <section className="relative bg-background py-20 px-4 overflow-hidden">

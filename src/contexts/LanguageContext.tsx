@@ -660,8 +660,8 @@ const translations: Record<string, string> = {
   "What's actually included in a visit?": "¿Qué incluye realmente una visita?",
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
-"Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. A bed edge reset is available as an add-on.":
-    "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y recoger o triturar la grama cortada. El reajuste del borde de jardineras está disponible como servicio adicional.",
+"Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and mulching clippings back into the lawn. A bed edge reset is available as an add-on.":
+    "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y triturar la grama cortada para dejarla en el jardín. El reajuste del borde de jardineras está disponible como servicio adicional.",
   "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, interior windows, bedroom tidy, linen change, and trash out — using eco-safe products.":
     "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
   "Who does the cleaning?": "¿Quién hace la limpieza?",

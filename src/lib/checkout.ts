@@ -31,6 +31,8 @@ interface CheckoutPayload {
   config: ConfigState;
   /** Visitor's active locale; defaults to 'en'. */
   lang?: 'en' | 'es';
+  /** Ref from recordScopeAcceptance — the server refuses checkout without it. */
+  scopeRef?: string;
 }
 
 export interface CheckoutServiceLine {
@@ -72,7 +74,7 @@ export function translate(config: ConfigState) {
 
 export async function startCheckout(payload: CheckoutPayload): Promise<void> {
   const attribution = getUtmAttribution();
-  const { config, lang } = payload;
+  const { config, lang, scopeRef } = payload;
 
   const { services, addons, car_wash } = translate(config);
 
@@ -107,6 +109,7 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     qr_placement: getQrPlacement() ?? undefined,
     qr_zip: getQrZip() ?? undefined,
     qr_route: getQrRoute() ?? undefined,
+    scope_acceptance_ref: scopeRef,
   };
 
   const { data, error } = await supabase.functions.invoke(
@@ -144,6 +147,7 @@ export async function startAddServiceCheckout(args: {
   bathrooms?: number | null;
   lawn_choice?: 'small' | 'standard' | 'large' | 'over' | null;
   vehicle_class?: string | null;
+  scopeRef?: string;
 }): Promise<{ effective: 'next_combined_invoice' }> {
   const attribution = getUtmAttribution();
   const body = {
@@ -166,6 +170,7 @@ export async function startAddServiceCheckout(args: {
     qr_zip: getQrZip() ?? undefined,
     qr_route: getQrRoute() ?? undefined,
     add_to_existing: true,
+    scope_acceptance_ref: args.scopeRef,
   };
 
 

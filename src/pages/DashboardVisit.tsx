@@ -4,6 +4,7 @@ import { ArrowLeft, Camera, CheckCircle2 } from "lucide-react";
 import DashboardTopNav from "@/components/dashboard/DashboardTopNav";
 import RouteFallback from "@/components/RouteFallback";
 import RedoButton from "@/components/dashboard/RedoButton";
+import DamageClaim from "@/components/dashboard/DamageClaim";
 import { supabase } from "@/integrations/supabase/client";
 import { formatLongDate, serviceLabel, useDashboardData } from "@/lib/dashboard-data";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,7 +14,8 @@ type Photo = { id: string; kind: "before" | "after"; uploaded_at: string; url: s
 export default function DashboardVisit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const useLanguageEs = language === "es";
   const dashboard = useDashboardData();
   const [photos, setPhotos] = useState<Photo[] | null>(null);
   const [photoError, setPhotoError] = useState(false);
@@ -72,7 +74,7 @@ export default function DashboardVisit() {
             <p className="mt-1 text-sm text-ink-soft">{formatLongDate(visit.visit_date)}</p>
           </div>
           <span className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-            <CheckCircle2 className="h-4 w-4" /> {t(visit.status === "complete" ? "Completed" : "Scheduled")}
+            <CheckCircle2 className="h-4 w-4" /> {visit.status === "blocked" ? (useLanguageEs ? "Completada — sin acceso" : "Completed — no access") : t(visit.status === "complete" ? "Completed" : "Scheduled")}
           </span>
         </header>
 
@@ -110,7 +112,10 @@ export default function DashboardVisit() {
         )}
 
         {visit.status === "complete" && visit.completed_at && (
-          <RedoButton visitId={visit.id} completedAt={visit.completed_at} />
+          <>
+            <RedoButton visitId={visit.id} completedAt={visit.completed_at} />
+            <DamageClaim visitId={visit.id} completedAt={visit.completed_at} />
+          </>
         )}
       </main>
     </div>

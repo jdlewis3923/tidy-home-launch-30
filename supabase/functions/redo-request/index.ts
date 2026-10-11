@@ -12,6 +12,7 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { bearerToken } from '../_shared/admin-auth.ts';
 import { writeAlert } from '../_shared/alerts.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
+import { memberScopeRows, visitScopes } from '../_shared/scope.ts';
 import { tidyEmailShell, TIDY_OWNER_EMAIL, TIDY_SITE } from '../_shared/email-brand.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
@@ -24,12 +25,15 @@ const Body = z.object({
   source: z.enum(['dashboard', 'email']).optional(),
   message_id: z.string().uuid().optional(),
   is_test: z.boolean().optional(),
+  /** Which INCLUDED items were missed — picked from that visit's scope. */
+  missed_items: z.array(z.string().trim().min(1).max(600)).max(30).optional(),
+  photo_path: z.string().trim().max(300).optional(),
 });
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 
 async function resolveVisit(token?: string, visitId?: string, uid?: string | null) {
-  const q = admin.from('visits').select('id, user_id, assigned_pro_id, service_type, scheduled_start, visit_date, completed_at, status, customer_first_name, is_redo, rate_token');
+  const q = admin.from('visits').select('id, user_id, assigned_pro_id, service_type, visit_kind, scheduled_start, visit_date, completed_at, status, customer_first_name, is_redo, rate_token');
   if (token) {
     const { data } = await q.eq('rate_token', token).maybeSingle();
     return data && data.rate_token === token ? data : null;
@@ -51,12 +55,15 @@ Deno.serve(async (req) => {
 
     if (req.method === 'GET') {
       const t = url.searchParams.get('t') ?? undefined;
-      if (!t) return jsonResponse({ ok: true, function: 'redo-request' });
-      const v = await resolveVisit(t);
+      const qv = url.searchParams.get('visit_id') ?? undefined;
+      if (!t && !(qv && uid)) return jsonResponse({ ok: true, function: 'redo-request' });
+      const v = await resolveVisit(t, qv, uid);
       if (!v) return jsonResponse({ ok: false, error: 'not_found' }, 404);
       const { data: existing } = await admin.from('redo_requests').select('id, status, requested_at').eq('visit_id', v.id).neq('status', 'canceled').maybeSingle();
       const open = !!v.completed_at && Date.now() - new Date(v.completed_at).getTime() <= WINDOW_MS;
-      return jsonResponse({ ok: true, first_name: v.customer_first_name, service: v.service_type, completed_at: v.completed_at, window_open: open, existing });
+      const items = (await memberScopeRows(admin, v.user_id, visitScopes(v.service_type, v.visit_kind))).filter((r) => r.section === 'included');
+      return jsonResponse({ ok: true, first_name: v.customer_first_name, service: v.service_type, completed_at: v.completed_at, window_open: open, existing,
+        included_items: items.map((r) => ({ en: r.text_en, es: r.text_es, group_en: r.group_en, group_es: r.group_es })) });
     }
     if (req.method !== 'POST') return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
 
@@ -77,7 +84,7 @@ Deno.serve(async (req) => {
       const m = Array.isArray(rows) ? rows[0] : rows;
       if (!m) return jsonResponse({ ok: false, error: 'message_not_found' }, 404);
       if (!m.visit_id) return jsonResponse({ ok: false, error: 'no_visit_found' }, 404);
-      const { data } = await admin.from('visits').select('id, user_id, assigned_pro_id, service_type, scheduled_start, visit_date, completed_at, status, customer_first_name, is_redo, rate_token').eq('id', m.visit_id).maybeSingle();
+      const { data } = await admin.from('visits').select('id, user_id, assigned_pro_id, service_type, visit_kind, scheduled_start, visit_date, completed_at, status, customer_first_name, is_redo, rate_token').eq('id', m.visit_id).maybeSingle();
       v = data;
       note = (m.body ?? '').slice(0, 500);
       requestedAt = new Date(m.sent_at);
@@ -89,6 +96,20 @@ Deno.serve(async (req) => {
     if (v.is_redo) return jsonResponse({ ok: false, error: 'redo_of_redo' }, 400);
     if (!v.completed_at) return jsonResponse({ ok: false, error: 'not_completed' }, 400);
     if (!fromInbox && Date.now() - new Date(v.completed_at).getTime() > WINDOW_MS) return jsonResponse({ ok: false, error: 'window_closed' }, 400);
+
+    // Redo covers the booked scope only: the member picks INCLUDED items from this visit's scope.
+    let missed: string[] | null = null;
+    if (!fromInbox) {
+      const picked = parsed.data.missed_items ?? [];
+      if (!picked.length) return jsonResponse({ ok: false, error: 'missed_items_required' }, 400);
+      const included = (await memberScopeRows(admin, v.user_id, visitScopes(v.service_type, v.visit_kind))).filter((r) => r.section === 'included');
+      const allowed = new Map<string, string>();
+      for (const r of included) { allowed.set(r.text_en, r.text_en); allowed.set(r.text_es, r.text_en); }
+      const bad = picked.filter((p) => !allowed.has(p));
+      if (bad.length) return jsonResponse({ ok: false, error: 'item_not_in_scope', items: bad }, 400);
+      missed = [...new Set(picked.map((p) => allowed.get(p)!))];
+    }
+    const photoPath = parsed.data.photo_path && v.user_id && parsed.data.photo_path.startsWith(`${v.user_id}/`) ? parsed.data.photo_path : null;
 
     const { data: existing } = await admin.from('redo_requests').select('id, due_at').eq('visit_id', v.id).neq('status', 'canceled').maybeSingle();
     if (existing) return jsonResponse({ ok: true, already: true, redo_id: existing.id, due_at: existing.due_at });
@@ -103,6 +124,7 @@ Deno.serve(async (req) => {
       visit_id: v.id, user_id: v.user_id, pro_id: v.assigned_pro_id, applicant_id: applicant?.id ?? null,
       note: note || null, source: fromInbox ? 'inbox' : (source ?? (token ? 'email' : 'dashboard')), support_message_id: message_id ?? null,
       requested_at: now.toISOString(), due_at: due.toISOString(), is_test_row: !!is_test,
+      missed_items: missed, photo_path: photoPath,
     }).select('id').single();
     if (error) {
       if ((error as { code?: string }).code === '23505') return jsonResponse({ ok: true, already: true });
@@ -135,12 +157,28 @@ Deno.serve(async (req) => {
       }
     }
 
+    // More than two redo claims in 60 days from one member → admin review.
+    if (v.user_id) {
+      const since = new Date(now.getTime() - 60 * 86_400_000).toISOString();
+      const { count } = await admin.from('redo_requests').select('id', { count: 'exact', head: true })
+        .eq('user_id', v.user_id).neq('status', 'canceled').gte('requested_at', since);
+      if ((count ?? 0) > 2) {
+        await writeAlert(admin, {
+          level: 'warning', category: 'operations',
+          title: `${v.customer_first_name ?? 'A member'} has ${count} redo claims in 60 days`,
+          body: 'More than two redo claims in 60 days. Review the claims and photos before scheduling more redos.',
+          action_label: 'Open redos', action_url: '/admin/command#redos',
+          dedupe_key: `member_redo_pattern:${v.user_id}`, context: { count, user_id: v.user_id },
+        });
+      }
+    }
+
     await sendBrevoEmail({
       to: TIDY_OWNER_EMAIL, marketing: false,
       subject: `Redo requested — schedule by ${due.toLocaleString('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: 'numeric', minute: '2-digit' })}`,
       htmlContent: tidyEmailShell({
         heading: 'A member asked for a redo', eyebrow: '48-hour guarantee',
-        bodyHtml: `<p><b>Member:</b> ${esc(v.customer_first_name ?? 'Member')}<br><b>Pro:</b> ${esc(proName)}<br><b>Visit:</b> ${esc(v.service_type ?? '')} · ${esc(v.visit_date ?? '')}</p><p><b>Note:</b> ${note ? esc(note) : '(none)'}</p><p>Schedule the free return visit within 48 hours.</p>`,
+        bodyHtml: `<p><b>Member:</b> ${esc(v.customer_first_name ?? 'Member')}<br><b>Pro:</b> ${esc(proName)}<br><b>Visit:</b> ${esc(v.service_type ?? '')} · ${esc(v.visit_date ?? '')}</p><p><b>Missed (from the visit's included list):</b> ${missed?.length ? esc(missed.join(' · ')) : '(not picked)'}</p><p><b>Note:</b> ${note ? esc(note) : '(none)'}</p><p>Schedule the free return visit within 48 hours.</p>`,
         ctaUrl: `${TIDY_SITE}/admin/command#redos`, ctaLabel: 'Open Workday', artTopic: 'visit',
       }),
       tags: ['redo'], label: 'redo-request',

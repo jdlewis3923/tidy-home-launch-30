@@ -1357,12 +1357,14 @@ export type Database = {
           interior_access: string | null
           interior_included: boolean
           parking_spot: string | null
+          spigot_at_parking: boolean | null
           subscription_id: string
           updated_at: string
           user_id: string
           vehicle_color: string | null
           vehicle_make: string | null
           vehicle_model: string | null
+          vehicle_plate: string | null
         }
         Insert: {
           access_note?: string | null
@@ -1370,12 +1372,14 @@ export type Database = {
           interior_access?: string | null
           interior_included?: boolean
           parking_spot?: string | null
+          spigot_at_parking?: boolean | null
           subscription_id: string
           updated_at?: string
           user_id: string
           vehicle_color?: string | null
           vehicle_make?: string | null
           vehicle_model?: string | null
+          vehicle_plate?: string | null
         }
         Update: {
           access_note?: string | null
@@ -1383,12 +1387,14 @@ export type Database = {
           interior_access?: string | null
           interior_included?: boolean
           parking_spot?: string | null
+          spigot_at_parking?: boolean | null
           subscription_id?: string
           updated_at?: string
           user_id?: string
           vehicle_color?: string | null
           vehicle_make?: string | null
           vehicle_model?: string | null
+          vehicle_plate?: string | null
         }
         Relationships: []
       }
@@ -2239,6 +2245,50 @@ export type Database = {
             columns: ["claim_id"]
             isOneToOne: false
             referencedRelation: "pro_day_claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      damage_claims: {
+        Row: {
+          admin_notes: string | null
+          closed_at: string | null
+          description: string
+          id: string
+          photo_paths: string[]
+          reported_at: string
+          status: string
+          user_id: string
+          visit_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          closed_at?: string | null
+          description: string
+          id?: string
+          photo_paths: string[]
+          reported_at?: string
+          status?: string
+          user_id: string
+          visit_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          closed_at?: string | null
+          description?: string
+          id?: string
+          photo_paths?: string[]
+          reported_at?: string
+          status?: string
+          user_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "damage_claims_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
             referencedColumns: ["id"]
           },
         ]
@@ -5406,7 +5456,9 @@ export type Database = {
           due_at: string
           id: string
           is_test_row: boolean
+          missed_items: string[] | null
           note: string | null
+          photo_path: string | null
           pro_id: string | null
           redo_visit_id: string | null
           requested_at: string
@@ -5426,7 +5478,9 @@ export type Database = {
           due_at?: string
           id?: string
           is_test_row?: boolean
+          missed_items?: string[] | null
           note?: string | null
+          photo_path?: string | null
           pro_id?: string | null
           redo_visit_id?: string | null
           requested_at?: string
@@ -5446,7 +5500,9 @@ export type Database = {
           due_at?: string
           id?: string
           is_test_row?: boolean
+          missed_items?: string[] | null
           note?: string | null
+          photo_path?: string | null
           pro_id?: string | null
           redo_visit_id?: string | null
           requested_at?: string
@@ -5617,9 +5673,11 @@ export type Database = {
           preferred_time: string
           quote: Json
           rate_card_version: number | null
+          scope_acceptance_ref: string | null
           services: string[]
           session_id: string | null
           sms_consent: boolean
+          spigot_at_parking: boolean | null
           src: string | null
           status: string
           street: string
@@ -5671,9 +5729,11 @@ export type Database = {
           preferred_time: string
           quote?: Json
           rate_card_version?: number | null
+          scope_acceptance_ref?: string | null
           services: string[]
           session_id?: string | null
           sms_consent?: boolean
+          spigot_at_parking?: boolean | null
           src?: string | null
           status?: string
           street: string
@@ -5725,9 +5785,11 @@ export type Database = {
           preferred_time?: string
           quote?: Json
           rate_card_version?: number | null
+          scope_acceptance_ref?: string | null
           services?: string[]
           session_id?: string | null
           sms_consent?: boolean
+          spigot_at_parking?: boolean | null
           src?: string | null
           status?: string
           street?: string
@@ -5991,6 +6053,84 @@ export type Database = {
         }
         Relationships: []
       }
+      scope_acceptances: {
+        Row: {
+          acceptance_ref: string
+          accepted_at: string
+          checkbox_text: string
+          customer_id: string | null
+          email: string | null
+          id: string
+          ip: string | null
+          language: string
+          scope_version: number
+          service: string
+          surface: string
+          user_agent: string | null
+          water_consent: boolean | null
+        }
+        Insert: {
+          acceptance_ref: string
+          accepted_at?: string
+          checkbox_text: string
+          customer_id?: string | null
+          email?: string | null
+          id?: string
+          ip?: string | null
+          language?: string
+          scope_version: number
+          service: string
+          surface: string
+          user_agent?: string | null
+          water_consent?: boolean | null
+        }
+        Update: {
+          acceptance_ref?: string
+          accepted_at?: string
+          checkbox_text?: string
+          customer_id?: string | null
+          email?: string | null
+          id?: string
+          ip?: string | null
+          language?: string
+          scope_version?: number
+          service?: string
+          surface?: string
+          user_agent?: string | null
+          water_consent?: boolean | null
+        }
+        Relationships: []
+      }
+      scope_versions: {
+        Row: {
+          change_note: string | null
+          existing_members_from: string | null
+          notice_sent_at: string | null
+          published_at: string
+          published_by: string | null
+          scope_version: number
+          service: string
+        }
+        Insert: {
+          change_note?: string | null
+          existing_members_from?: string | null
+          notice_sent_at?: string | null
+          published_at?: string
+          published_by?: string | null
+          scope_version: number
+          service: string
+        }
+        Update: {
+          change_note?: string | null
+          existing_members_from?: string | null
+          notice_sent_at?: string | null
+          published_at?: string
+          published_by?: string | null
+          scope_version?: number
+          service?: string
+        }
+        Relationships: []
+      }
       sequence_email_queue: {
         Row: {
           applicant_id: string
@@ -6110,6 +6250,54 @@ export type Database = {
         }
         Relationships: []
       }
+      service_scope: {
+        Row: {
+          active: boolean
+          addon_key: string | null
+          created_at: string
+          group_en: string | null
+          group_es: string | null
+          id: string
+          notice_key: string | null
+          scope_version: number
+          section: string
+          service: string
+          sort_order: number
+          text_en: string
+          text_es: string
+        }
+        Insert: {
+          active?: boolean
+          addon_key?: string | null
+          created_at?: string
+          group_en?: string | null
+          group_es?: string | null
+          id?: string
+          notice_key?: string | null
+          scope_version?: number
+          section: string
+          service: string
+          sort_order?: number
+          text_en: string
+          text_es: string
+        }
+        Update: {
+          active?: boolean
+          addon_key?: string | null
+          created_at?: string
+          group_en?: string | null
+          group_es?: string | null
+          id?: string
+          notice_key?: string | null
+          scope_version?: number
+          section?: string
+          service?: string
+          sort_order?: number
+          text_en?: string
+          text_es?: string
+        }
+        Relationships: []
+      }
       site_google_reviews: {
         Row: {
           author_name: string
@@ -6154,6 +6342,86 @@ export type Database = {
           verified_at?: string
         }
         Relationships: []
+      }
+      size_reviews: {
+        Row: {
+          admin_note: string | null
+          booked_size: number | null
+          created_at: string
+          customer_responded_at: string | null
+          id: string
+          matches: boolean
+          new_monthly_cents: number | null
+          observed_bathrooms: number | null
+          observed_bedrooms: number | null
+          observed_plate: string | null
+          observed_size: number | null
+          observed_vehicle_class: string | null
+          old_monthly_cents: number | null
+          rate_card_version: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          service: string
+          status: string
+          subscription_id: string | null
+          user_id: string | null
+          visit_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          booked_size?: number | null
+          created_at?: string
+          customer_responded_at?: string | null
+          id?: string
+          matches: boolean
+          new_monthly_cents?: number | null
+          observed_bathrooms?: number | null
+          observed_bedrooms?: number | null
+          observed_plate?: string | null
+          observed_size?: number | null
+          observed_vehicle_class?: string | null
+          old_monthly_cents?: number | null
+          rate_card_version?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          service: string
+          status?: string
+          subscription_id?: string | null
+          user_id?: string | null
+          visit_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          booked_size?: number | null
+          created_at?: string
+          customer_responded_at?: string | null
+          id?: string
+          matches?: boolean
+          new_monthly_cents?: number | null
+          observed_bathrooms?: number | null
+          observed_bedrooms?: number | null
+          observed_plate?: string | null
+          observed_size?: number | null
+          observed_vehicle_class?: string | null
+          old_monthly_cents?: number | null
+          rate_card_version?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          service?: string
+          status?: string
+          subscription_id?: string | null
+          user_id?: string | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "size_reviews_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: true
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sms_delivery_events: {
         Row: {
@@ -7332,12 +7600,19 @@ export type Database = {
           booking_id: string | null
           budget_hours: number | null
           cadence: string | null
+          check_in_at: string | null
+          check_in_lat: number | null
+          check_in_lng: number | null
+          check_out_at: string | null
+          check_out_lat: number | null
+          check_out_lng: number | null
           claim_id: string | null
           completed_at: string | null
           contractor_pay_cents: number | null
           created_at: string
           crew_name: string | null
           customer_first_name: string | null
+          customer_told_at: string | null
           different_day: boolean
           gate_code: string | null
           id: string
@@ -7347,8 +7622,10 @@ export type Database = {
           jobber_visit_id: string | null
           lifecycle_reason: string | null
           moved_from_date: string | null
+          not_reached_note: string | null
           notes: string | null
           on_my_way_at: string | null
+          outcome_reason: string | null
           paid_in_full_reason: string | null
           parking_notes: string | null
           pet_notes: string | null
@@ -7369,6 +7646,7 @@ export type Database = {
           user_id: string
           visit_date: string
           visit_kind: string | null
+          visit_outcome: string | null
           visit_pay_cents: number | null
           window_key: string | null
           zip: string | null
@@ -7381,12 +7659,19 @@ export type Database = {
           booking_id?: string | null
           budget_hours?: number | null
           cadence?: string | null
+          check_in_at?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_out_at?: string | null
+          check_out_lat?: number | null
+          check_out_lng?: number | null
           claim_id?: string | null
           completed_at?: string | null
           contractor_pay_cents?: number | null
           created_at?: string
           crew_name?: string | null
           customer_first_name?: string | null
+          customer_told_at?: string | null
           different_day?: boolean
           gate_code?: string | null
           id?: string
@@ -7396,8 +7681,10 @@ export type Database = {
           jobber_visit_id?: string | null
           lifecycle_reason?: string | null
           moved_from_date?: string | null
+          not_reached_note?: string | null
           notes?: string | null
           on_my_way_at?: string | null
+          outcome_reason?: string | null
           paid_in_full_reason?: string | null
           parking_notes?: string | null
           pet_notes?: string | null
@@ -7418,6 +7705,7 @@ export type Database = {
           user_id: string
           visit_date: string
           visit_kind?: string | null
+          visit_outcome?: string | null
           visit_pay_cents?: number | null
           window_key?: string | null
           zip?: string | null
@@ -7430,12 +7718,19 @@ export type Database = {
           booking_id?: string | null
           budget_hours?: number | null
           cadence?: string | null
+          check_in_at?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_out_at?: string | null
+          check_out_lat?: number | null
+          check_out_lng?: number | null
           claim_id?: string | null
           completed_at?: string | null
           contractor_pay_cents?: number | null
           created_at?: string
           crew_name?: string | null
           customer_first_name?: string | null
+          customer_told_at?: string | null
           different_day?: boolean
           gate_code?: string | null
           id?: string
@@ -7445,8 +7740,10 @@ export type Database = {
           jobber_visit_id?: string | null
           lifecycle_reason?: string | null
           moved_from_date?: string | null
+          not_reached_note?: string | null
           notes?: string | null
           on_my_way_at?: string | null
+          outcome_reason?: string | null
           paid_in_full_reason?: string | null
           parking_notes?: string | null
           pet_notes?: string | null
@@ -7467,6 +7764,7 @@ export type Database = {
           user_id?: string
           visit_date?: string
           visit_kind?: string | null
+          visit_outcome?: string | null
           visit_pay_cents?: number | null
           window_key?: string | null
           zip?: string | null
@@ -7650,6 +7948,10 @@ export type Database = {
           reachable: boolean
         }[]
       }
+      admin_publish_scope: {
+        Args: { _note?: string; _rows: Json; _service: string }
+        Returns: number
+      }
       admin_remove_blackout: { Args: { _id: string }; Returns: undefined }
       admin_reschedule_list: { Args: never; Returns: Json }
       admin_resolve_reschedule: {
@@ -7687,6 +7989,10 @@ export type Database = {
       admin_set_visit_pro: {
         Args: { _applicant_id: string; _visit_id: string }
         Returns: undefined
+      }
+      admin_size_review_notify: {
+        Args: { _new_size: number; _note?: string; _review: string }
+        Returns: Json
       }
       admin_unassigned_visits: {
         Args: never
@@ -7777,6 +8083,7 @@ export type Database = {
         }[]
       }
       current_rate_card_version: { Args: never; Returns: number }
+      current_scope_version: { Args: { _service: string }; Returns: number }
       current_user_admin: { Args: never; Returns: boolean }
       customer_book_day: {
         Args: {
@@ -7962,6 +8269,14 @@ export type Database = {
       }
       member_ops_tick: { Args: never; Returns: Json }
       member_rate_card_version: { Args: { _user: string }; Returns: number }
+      member_scope_version: {
+        Args: { _service: string; _user: string }
+        Returns: number
+      }
+      member_size_review_respond: {
+        Args: { _confirm: boolean; _review: string }
+        Returns: Json
+      }
       my_founding: { Args: never; Returns: Json }
       my_language: { Args: never; Returns: string }
       nextval: { Args: { seq_name: string }; Returns: number }

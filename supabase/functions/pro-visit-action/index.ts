@@ -8,7 +8,10 @@
 //   - complete stamps completed_at, rolls the week's payout_weeks row and
 //     increments the Pro's completed visit count
 //
-// Deliberately absent: any clock-in, elapsed time or location capture.
+// GPS: check_in (arrival) and complete (check-out) stamp the Pro's location;
+// a DB trigger refuses to close a visit without both plus before/after photos.
+// First cleaning/car visit: the Pro records the real size (size_check);
+// a mismatch lands in /admin/size-review — the Pro still does the booked size.
 
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
@@ -17,6 +20,8 @@ import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 import { PRO_REPORTABLE_PAID_IN_FULL_REASONS } from '../_shared/pricing-canon.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { afterVisitComplete, maybePromoteProPartner } from '../_shared/member-followups.ts';
+import { recomputeSize } from '../_shared/size-validation.ts';
+import { writeAlert } from '../_shared/alerts.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
 
@@ -24,9 +29,19 @@ const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
 // Canon pays it in full. Only the two pro-reportable reasons are accepted here,
 // a note is mandatory, and on_my_way must already have been sent — every case
 // is written to admin_alerts for review.
+const Gps = { lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) };
 const BodySchema = z.discriminatedUnion('action', [
   z.object({ visit_id: z.string().uuid(), action: z.literal('on_my_way') }),
-  z.object({ visit_id: z.string().uuid(), action: z.literal('complete') }),
+  z.object({ visit_id: z.string().uuid(), action: z.literal('check_in'), ...Gps }),
+  z.object({ visit_id: z.string().uuid(), action: z.literal('complete'), ...Gps, not_reached_note: z.string().trim().max(1000).optional() }),
+  z.object({
+    visit_id: z.string().uuid(),
+    action: z.literal('size_check'),
+    bedrooms: z.number().int().min(0).max(20).optional(),
+    bathrooms: z.number().min(0).max(20).optional(),
+    vehicle_class: z.enum(['sedan', 'coupe', 'suv', 'crossover', 'truck', 'suv3row', 'van']).optional(),
+    plate: z.string().trim().max(15).optional(),
+  }),
   z.object({
     visit_id: z.string().uuid(),
     action: z.literal('blocked'),
@@ -64,7 +79,7 @@ Deno.serve(async (req) => {
 
     const { data: visit } = await admin
       .from('visits')
-      .select('id, assigned_pro_id, status, user_id, service_type, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, street, customer_first_name, rate_token, is_redo, redo_request_id')
+      .select('id, assigned_pro_id, status, user_id, subscription_id, service_type, visit_kind, size_tier, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, check_in_at, street, customer_first_name, rate_token, is_redo, redo_request_id')
       .eq('id', visit_id)
       .maybeSingle();
     if (!visit || visit.assigned_pro_id !== uid) {
@@ -121,16 +136,83 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: true, action, sms });
     }
 
+    if (action === 'check_in') {
+      const { lat, lng } = parsed.data;
+      const { error } = await admin.from('visits').update({
+        check_in_at: visit.check_in_at ?? new Date().toISOString(), check_in_lat: lat, check_in_lng: lng,
+        status: 'in_progress',
+      }).eq('id', visit_id);
+      if (error) return jsonResponse({ ok: false, error: error.message });
+      return jsonResponse({ ok: true, action });
+    }
+
+    if (action === 'size_check') {
+      const d = parsed.data;
+      const svc = visit.service_type === 'cleaning' ? 'cleaning' : visit.service_type === 'detailing' ? 'detailing' : null;
+      if (!svc) return jsonResponse({ ok: false, error: 'size_check_not_needed' });
+      const observed = svc === 'cleaning'
+        ? recomputeSize('cleaning', { bedrooms: d.bedrooms ?? null, bathrooms: d.bathrooms ?? null })
+        : recomputeSize('detailing' as never, { vehicle_class: d.vehicle_class ?? null });
+      if (observed == null || observed === 'quote' && svc === 'detailing') return jsonResponse({ ok: false, error: 'size_inputs_required' });
+      if (svc === 'detailing' && !d.plate) return jsonResponse({ ok: false, error: 'plate_required' });
+      const booked = visit.size_tier ?? null;
+      const observedNum = observed === 'quote' ? 99 : Number(observed);
+      const matches = booked != null && observedNum <= booked;
+      const { error } = await admin.from('size_reviews').upsert({
+        visit_id, user_id: visit.user_id, subscription_id: visit.subscription_id, service: svc,
+        booked_size: booked, observed_bedrooms: d.bedrooms ?? null, observed_bathrooms: d.bathrooms ?? null,
+        observed_vehicle_class: d.vehicle_class ?? null, observed_plate: d.plate ?? null,
+        observed_size: observed === 'quote' ? null : observedNum, matches, status: matches ? 'recorded' : 'open',
+      }, { onConflict: 'visit_id' });
+      if (error) return jsonResponse({ ok: false, error: error.message });
+      if (!matches) {
+        await writeAlert(admin, {
+          level: 'action', category: 'operations',
+          title: `Size mismatch at a first visit · ${visit.customer_first_name ?? 'Member'}`,
+          body: `Booked size ${booked ?? '?'}, Pro recorded ${observed === 'quote' ? 'custom-quote size' : `size ${observedNum}`}. The Pro does the booked size today. Nothing is repriced until the member confirms.`,
+          action_label: 'Open size review', action_url: '/admin/size-review', dedupe_key: `size_review:${visit_id}`, context: { visit_id },
+        });
+      }
+      return jsonResponse({ ok: true, action, matches });
+    }
+
     if (action === 'blocked') {
       if (!visit.on_my_way_at) return jsonResponse({ ok: false, error: 'on_my_way_required' });
       const { reason, note } = parsed.data;
+      // Evidence first: the DB trigger requires photos + GPS check-in and, for
+      // no access, a 15-minute wait from check-in before this can be recorded.
+      const outcome = reason === 'unsafe_conditions' ? 'unsafe' : 'no_access';
+      const { error: outErr } = await admin.from('visits').update({ visit_outcome: outcome, outcome_reason: note }).eq('id', visit_id);
+      if (outErr) return jsonResponse({ ok: false, error: outErr.message.replace(/^.*?(\w+_required|wait_15_minutes).*$/, '$1') });
       const { data: result, error: rpcErr } = await admin.rpc('mark_visit_paid_in_full', {
         _visit_id: visit_id,
         _reason: reason,
         _note: note,
         _actor: `pro:${uid}`,
       });
-      if (rpcErr) return jsonResponse({ ok: false, error: rpcErr.message });
+      if (rpcErr) {
+        await admin.from('visits').update({ visit_outcome: null, outcome_reason: null }).eq('id', visit_id);
+        return jsonResponse({ ok: false, error: rpcErr.message });
+      }
+      // Tell the member why, in their language (write-first; member-ops-tick emails it).
+      const { data: prof } = await admin.from('profiles').select('language').eq('user_id', visit.user_id).maybeSingle();
+      const es = String(prof?.language ?? '').trim() === 'es';
+      const why = outcome === 'unsafe'
+        ? (es ? 'Su Pro tuvo que detenerse porque encontró una condición insegura. Tomó fotos y se retiró.' : 'Your Pro had to stop because of an unsafe condition. They took photos and left.')
+        : (es ? 'Su Pro no pudo entrar. Le escribimos, esperamos 15 minutos y tomamos fotos con hora y ubicación.' : "Your Pro couldn't get in. We messaged you, waited 15 minutes and took timestamped photos.");
+      await admin.from('member_notifications').insert({
+        user_id: visit.user_id, kind: 'visit_no_access', related_visit_id: visit_id,
+        title: es ? 'Visita completada — sin acceso' : 'Visit completed — no access',
+        body: `${why} ${es ? 'La visita cuenta como realizada y no se acredita ni se reprograma. Vea «Así funcionan las visitas» en su cuenta.' : 'The visit counts as delivered and is not credited or rescheduled. See "How visits work" on your Account page.'} ${es ? 'Nota del Pro' : "Pro's note"}: ${note}`,
+        dedupe_key: `no_access:${visit_id}`,
+      }).then(() => {}, () => {});
+      await admin.from('visits').update({ customer_told_at: new Date().toISOString() }).eq('id', visit_id);
+      if (outcome === 'unsafe') {
+        await writeAlert(admin, {
+          level: 'critical', category: 'operations', title: `Pro stopped a visit — unsafe · ${visit.customer_first_name ?? 'Member'}`,
+          body: note, action_label: 'Open visit photos', action_url: '/admin/photos', dedupe_key: `unsafe:${visit_id}`, context: { visit_id },
+        });
+      }
       const out = result as { visit_pay_cents?: number } | null;
       return jsonResponse({ ok: true, action, paid_in_full_reason: reason, visit_pay_cents: out?.visit_pay_cents ?? 0 });
     }
@@ -155,6 +237,16 @@ Deno.serve(async (req) => {
       });
     }
 
+    // First cleaning/car visit: the real size must be recorded before closing.
+    if (!visit.is_redo && (visit.service_type === 'cleaning' || visit.service_type === 'detailing')) {
+      const { count: priorDone } = await admin.from('visits').select('id', { count: 'exact', head: true })
+        .eq('user_id', visit.user_id).eq('service_type', visit.service_type).eq('status', 'complete').neq('id', visit_id);
+      if (!priorDone) {
+        const { data: sc } = await admin.from('size_reviews').select('id').eq('visit_id', visit_id).maybeSingle();
+        if (!sc) return jsonResponse({ ok: false, error: 'size_check_required' });
+      }
+    }
+
     // Pay = frozen Tier 1 base (contractor_pay_cents) + the uplift for the tier
     // this pro holds RIGHT NOW. The base never moves; the tier is the pro's.
     let pay = visit.visit_pay_cents ?? 0;
@@ -167,10 +259,20 @@ Deno.serve(async (req) => {
     }
 
     const now = new Date();
-    await admin
+    const { lat, lng, not_reached_note } = parsed.data as { lat: number; lng: number; not_reached_note?: string };
+    const { error: closeErr } = await admin
       .from('visits')
-      .update({ completed_at: now.toISOString(), status: 'complete', visit_pay_cents: pay })
+      .update({
+        completed_at: now.toISOString(), status: 'complete', visit_pay_cents: pay,
+        check_out_at: now.toISOString(), check_out_lat: lat, check_out_lng: lng,
+        not_reached_note: not_reached_note || null,
+      })
       .eq('id', visit_id);
+    // The DB refuses to close without before/after photos and GPS check-in/out.
+    if (closeErr) {
+      const code = /(before_photos_required|after_photos_required|gps_check_in_required|gps_check_out_required)/.exec(closeErr.message)?.[1];
+      return jsonResponse({ ok: false, error: code ?? closeErr.message });
+    }
 
     // Roll this Pro's payout week (Monday-Sunday, paid the following Friday).
     const { error: creditErr } = await admin.rpc('credit_payout_week', {

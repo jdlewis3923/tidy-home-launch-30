@@ -23,6 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useDashboardData, formatLongDate, serviceLabel } from '@/lib/dashboard-data';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { startAddServiceCheckout, type CheckoutServiceLine } from '@/lib/checkout';
+import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
+import { groupsFor, recordScopeAcceptance, type ScopeGroup } from '@/lib/serviceScope';
 import { trackPreferredProSet, pushEvent } from '@/lib/tracking';
 import {
   SERVICE_NAMES,
@@ -136,6 +138,8 @@ export default function DashboardServices() {
   // square footage is what triggers the surcharge.
   const [newService, setNewService] = useState<CanonService | null>(null);
   const [newFrequency, setNewFrequency] = useState<Frequency>('monthly');
+  const [addScopeChecked, setAddScopeChecked] = useState<Partial<Record<ScopeGroup, boolean>>>({});
+  const [addSpigot, setAddSpigot] = useState<boolean | null>(null);
   const [newBedrooms, setNewBedrooms] = useState<string>('');
   const [newBathrooms, setNewBathrooms] = useState<string>('');
   const [newHomeSqFt, setNewHomeSqFt] = useState<string>('');
@@ -344,8 +348,10 @@ export default function DashboardServices() {
     toast({ title: t('Preference saved') });
   };
 
+  const addScopeGroups: ScopeGroup[] = newService ? groupsFor([newService]) : [];
+  const addScopeOk = allScopeChecked(addScopeGroups, addScopeChecked) && (newService !== 'detailing' || addSpigot !== null);
   const addService = async () => {
-    if (!newService || !newSize || !newReady) return;
+    if (!newService || !newSize || !newReady || !addScopeOk) return;
     const zip = data.profile?.zip ?? sub?.founding_zip ?? '';
     if (!/^\d{5}$/.test(zip)) {
       toast({
@@ -356,11 +362,20 @@ export default function DashboardServices() {
       return;
     }
     setStartingCheckout(true);
+    const acc = await recordScopeAcceptance({
+      groups: addScopeGroups, language: language === 'es' ? 'es' : 'en', surface: 'upgrade',
+      checkboxText: Object.fromEntries(addScopeGroups.map((g) => [g, checkboxText(g, language)])),
+    });
+    if (acc.ok === false) {
+      setStartingCheckout(false);
+      toast({ title: t('Could not start checkout'), description: t('Try again in a moment.'), variant: 'destructive' });
+      return;
+    }
     // Lawn is measured from above before it joins the plan: nothing is billed
     // and no lawn visit is scheduled until Tidy verifies the size.
     if (newService === 'lawn') {
       const { data: res, error } = await supabase.functions.invoke('lawn-plan-change', {
-        body: { action: 'request', size: String(newSize), cadence: newFrequency },
+        body: { action: 'request', size: String(newSize), cadence: newFrequency, scope_acceptance_ref: acc.ref },
       });
       setStartingCheckout(false);
       if (error || !res?.ok) {
@@ -391,6 +406,7 @@ export default function DashboardServices() {
         bathrooms: newService === 'cleaning' ? Number(newBathrooms.replace('+', '')) || null : null,
         lawn_choice: null,
         vehicle_class: newService === 'detailing' ? newVehicleClass : null,
+        scopeRef: acc.ref,
       });
       setStartingCheckout(false);
       toast({
@@ -776,9 +792,16 @@ export default function DashboardServices() {
                         </div>
                       )}
 
+                      {addScopeGroups.map((g) => (
+                        <div key={g} className="rounded-xl border border-hairline bg-white p-4">
+                          <ScopeSummary compact group={g} monthlyLawn={g === 'lawn' && newFrequency === 'monthly'} weekly={g === 'cleaning' ? newFrequency === 'weekly' : undefined} />
+                        </div>
+                      ))}
+                      {newService === 'detailing' && <SpigotQuestion value={addSpigot} onChange={setAddSpigot} />}
+                      <ScopeAcceptChecks groups={addScopeGroups} checked={addScopeChecked} onChange={setAddScopeChecked} />
                       <button
                         type="button"
-                        disabled={startingCheckout || !newReady}
+                        disabled={startingCheckout || !newReady || !addScopeOk}
                         onClick={addService}
                         className="inline-flex items-center gap-2 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] transition hover:bg-ink-soft disabled:opacity-60"
                       >

@@ -11,7 +11,7 @@ export const NEXT_STEPS = [
   [LAUNCH_DATE_LONG, 'your first visit.'],
 ] as const;
 
-export function reservationConfirmEmail(r: { first_name: string; services: string[]; waitlist_services: string[]; preferred_day: string; preferred_time: string }) {
+export function reservationConfirmEmail(r: { first_name: string; services: string[]; waitlist_services: string[]; preferred_day: string; preferred_time: string }, scopeHtml = '') {
   const reserved = r.services.filter((s) => !r.waitlist_services.includes(s));
   const steps = NEXT_STEPS.map(([w, t]) => `<tr><td style="padding:10px 0;border-top:1px solid #e9eff7;vertical-align:top;width:150px"><b style="color:#0f172a">${esc(w)}</b></td><td style="padding:10px 0;border-top:1px solid #e9eff7">${esc(t)}</td></tr>`).join('');
   const wl = r.waitlist_services.length
@@ -21,7 +21,7 @@ export function reservationConfirmEmail(r: { first_name: string; services: strin
     heading: reserved.length ? "You're reserved." : "You're on the waitlist.",
     eyebrow: 'Founding member · visit reservation',
     previewText: `First visits begin ${LAUNCH_DATE_LONG}.`,
-    bodyHtml: `<p>Hi ${esc(r.first_name)},</p>${reserved.length ? `<p><b>Reserved:</b> ${esc(reserved.map(svcLabel).join(', '))} · preferred ${esc(r.preferred_day)} ${r.preferred_time === 'morning' ? 'mornings' : 'afternoons'}.</p>` : ''}${wl}<p style="margin:18px 0 4px"><b style="color:#0f172a">Here's what happens next:</b></p><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font:14px/1.5 Arial,sans-serif;color:#475569">${steps}</table><p style="margin-top:18px">No card today, nothing to pay now.</p><p>Questions any time: <a href="mailto:hello@jointidy.co">hello@jointidy.co</a> or (786) 829-1141.</p>`,
+    bodyHtml: `<p>Hi ${esc(r.first_name)},</p>${reserved.length ? `<p><b>Reserved:</b> ${esc(reserved.map(svcLabel).join(', '))} · preferred ${esc(r.preferred_day)} ${r.preferred_time === 'morning' ? 'mornings' : 'afternoons'}.</p>` : ''}${wl}<p style="margin:18px 0 4px"><b style="color:#0f172a">Here's what happens next:</b></p><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font:14px/1.5 Arial,sans-serif;color:#475569">${steps}</table><p style="margin-top:18px">No card today, nothing to pay now.</p><p>Questions any time: <a href="mailto:hello@jointidy.co">hello@jointidy.co</a> or (786) 829-1141.</p>${scopeHtml}`,
     ctaUrl: TIDY_SITE, ctaLabel: 'Visit Tidy',
   });
   return { subject, html };
@@ -61,7 +61,7 @@ export function foundingConfirmEmail(r: {
   first_name: string; lang: string; founding: boolean; monthly_cents: number; custom_quote: boolean;
   preferred_day: string; preferred_time: string; zip: string; gift_addons: string[];
   lines: Array<{ service: string; size: unknown; cadence: string | null; monthly: number }>;
-}, launchEs: string) {
+}, launchEs: string, scopeHtml = '') {
   const es = r.lang === 'es';
   const rows = r.lines.map((l) => {
     const name = es ? (SVC_ES[l.service] ?? l.service) : svcLabel(l.service);
@@ -82,7 +82,7 @@ export function foundingConfirmEmail(r: {
 <p>${es ? 'Día preferido' : 'Preferred day'}: ${esc(day)} · ZIP ${esc(r.zip)}</p>
 ${r.gift_addons.length ? `<p>${es ? 'Complemento gratis elegido' : 'Free add-on chosen'}: ${esc(r.gift_addons.join(', '))}</p>` : ''}
 <p>${esc(terms)}</p>
-<p style="color:#64748b">${es ? 'Preguntas' : 'Questions'}: (786) 829-1141 · hello@jointidy.co</p>`;
+<p style="color:#64748b">${es ? 'Preguntas' : 'Questions'}: (786) 829-1141 · hello@jointidy.co</p>${scopeHtml}`;
   return {
     subject: es ? `${r.first_name}, tu lugar está reservado` : `${r.first_name}, you're reserved`,
     html: tidyEmailShell({ heading: es ? 'Estás reservado. Sin cargo hoy.' : "You're reserved. No charge today.", eyebrow: es ? 'Reserva de miembro fundador' : 'Founding reservation', previewText: es ? `Las primeras visitas comienzan el ${date}.` : `First visits begin ${date}.`, bodyHtml: body, ctaUrl: TIDY_SITE, ctaLabel: es ? 'Visitar Tidy' : 'Visit Tidy' }),

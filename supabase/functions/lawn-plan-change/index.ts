@@ -1,3 +1,4 @@
+import { verifyScopeAcceptance } from '../_shared/scope.ts';
 // Lawn size changes on PAID plans (members who already have a Stripe subscription).
 //   request (member) — add lawn to an existing plan: saved as pending verification; nothing billed, no visits.
 //   correct (admin)  — a Pro reported an oversized yard (or admin re-measured): open + verify in one step.
@@ -28,7 +29,7 @@ const NAMES: Record<string, { en: string; es: string }> = {
 const money = (c: number | null | undefined) => (c == null ? '' : `$${Math.round(c / 100).toLocaleString('en-US')}`);
 
 const Body = z.discriminatedUnion('action', [
-  z.object({ action: z.literal('request'), size: z.enum(['1', '2', '3', 'custom']), cadence: z.enum(['monthly', 'biweekly', 'weekly']) }),
+  z.object({ action: z.literal('request'), size: z.enum(['1', '2', '3', 'custom']), cadence: z.enum(['monthly', 'biweekly', 'weekly']), scope_acceptance_ref: z.string().trim().max(80).optional() }),
   z.object({ action: z.literal('correct'), subscription_id: z.string().uuid(), measured_sqft: z.number().int().min(1).max(200000),
     source: z.enum(['pro_report', 'admin']).default('pro_report'), visit_id: z.string().uuid().optional(), note: z.string().max(500).optional() }),
   z.object({ action: z.literal('verify'), change_id: z.string().uuid(), measured_sqft: z.number().int().min(1).max(200000) }),
@@ -184,6 +185,8 @@ Deno.serve(async (req) => {
     const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
     const { data: u } = await admin.auth.getUser(token);
     if (!u?.user) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+    const scope = await verifyScopeAcceptance(admin, { ref: b.scope_acceptance_ref, email: u.user.email, userId: u.user.id, groups: ['lawn'] });
+    if (!scope.ok) return jsonResponse({ ok: false, error: 'scope_acceptance_required', missing: scope.missing }, 409);
     const { data: sub } = await admin.from('subscriptions').select('id, services, stripe_subscription_id').eq('user_id', u.user.id).in('status', ['active', 'paused']).order('created_at', { ascending: false }).limit(1).maybeSingle();
     if (!sub?.stripe_subscription_id) return jsonResponse({ ok: false, error: 'existing_subscription_not_found' }, 400);
     if ((sub.services ?? []).includes('lawn')) return jsonResponse({ ok: false, error: 'service_already_on_subscription' }, 400);
