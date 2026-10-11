@@ -240,14 +240,31 @@ export async function signedPhotoUrl(path: string): Promise<string | null> {
 /** Server-enforced visit actions. Returns the function's own {ok,error} shape. */
 export async function visitAction(
   visitId: string,
-  action: "on_my_way" | "complete" | "blocked",
-  blocked?: { reason: "customer_no_access" | "unsafe_conditions"; note: string },
+  action: "on_my_way" | "check_in" | "complete" | "blocked" | "size_check",
+  extra?: Record<string, unknown>,
 ) {
+  let gps: { lat: number; lng: number } | null = null;
+  if (action === "check_in" || action === "complete") {
+    gps = await getGps();
+    if (!gps) return { ok: false as const, error: "gps_unavailable" };
+  }
   const { data, error } = await supabase.functions.invoke("pro-visit-action", {
-    body: { visit_id: visitId, action, ...(action === "blocked" ? blocked : {}) },
+    body: { visit_id: visitId, action, ...(extra ?? {}), ...(gps ?? {}) },
   });
   if (error) return { ok: false as const, error: error.message };
   return data as { ok: boolean; error?: string; coi_status?: string; visit_pay_cents?: number };
+}
+
+/** Device location for check-in / check-out. Null if the Pro denies it or it times out. */
+export function getGps(): Promise<{ lat: number; lng: number } | null> {
+  return new Promise((resolve) => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+    );
+  });
 }
 
 /* ---------- small shared date helpers ---------- */
