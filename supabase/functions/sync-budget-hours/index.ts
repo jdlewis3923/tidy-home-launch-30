@@ -91,7 +91,8 @@ Deno.serve(async (req) => {
   }
   const missing = keys.filter((k) => !prices.some((p) => p.lookup_key === k));
   if (apply && upserts.length) {
-    const { error } = await admin.from('sched_budget_hours').upsert(upserts, { onConflict: 'service,visit_kind,size_tier' });
+    const unique = [...new Map(upserts.map((u) => [`${u.service}|${u.visit_kind}|${u.size_tier}`, u])).values()];
+    const { error } = await admin.from('sched_budget_hours').upsert(unique, { onConflict: 'service,visit_kind,size_tier' });
     if (error) return jsonResponse({ ok: false, error: error.message, changed }, 500);
     // Deep clean is computed (1.5x standard); old size-0 car wash row is superseded by sized rows.
     await admin.from('sched_budget_hours').delete().eq('visit_kind', 'quarterly_deep_clean');
