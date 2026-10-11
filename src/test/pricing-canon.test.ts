@@ -171,6 +171,19 @@ describe('contractor pay is 40% of the visit price and never shown to a customer
     expect(CONTRACTOR_SHINE_PAY[3]).toEqual({ maintenanceWash: 26, fullDetail: 115 });
   });
 
+  it('keeps Car Care pay flat across every cadence and mirrors the scheduler correction', () => {
+    const sql = read('drizzle/migrations/0142_correct_car_care_contractor_pay.sql');
+    for (const size of SIZES) {
+      for (const cadence of ['monthly', 'biweekly', 'weekly'] as const) {
+        for (const shineVisit of ['maintenance_wash', 'full_detail'] as const) {
+          const expected = shineVisit === 'full_detail' ? CONTRACTOR_SHINE_PAY[size].fullDetail : CONTRACTOR_SHINE_PAY[size].maintenanceWash;
+          expect(contractorVisitPay({ service: 'detailing', size, cadence, shineVisit })).toBe(expected);
+        }
+      }
+      expect(sql).toContain(`WHEN ${size} THEN CASE WHEN _visit_kind = 'full_detail' THEN ${CONTRACTOR_SHINE_PAY[size].fullDetail * 100} ELSE ${CONTRACTOR_SHINE_PAY[size].maintenanceWash * 100} END`);
+    }
+  });
+
   it('surcharge share and Tier 2 uplift', () => {
     expect(CONTRACTOR_SURCHARGE_PAY).toEqual({ cleaning: 24, lawn: 0 });
     expect(TIER_2_UPLIFT).toBe(1.1);

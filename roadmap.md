@@ -1,5 +1,9 @@
 # Roadmap
 
+## Confirmed Car Care pay (Oct 11)
+- [x] Aligned scheduler and future Car Care jobs with wash 16/20/26 and full detail 78/88/115; verified all 18 size/cadence/kind combinations. Only canceled Car Care jobs existed; historical pay retained.
+- [x] Audited 125 live and 51 test Stripe prices: fixed four wash monthly totals per mode, removed ten unmappable archived pay fields live; repeat audits found no changes. Corrected Car Care rows in hosted templates 61/62 preserving Partner uplift; app/orientation/Indeed stored copy already correct. 56 tests passed; not published. External already-posted Indeed ads were not accessible.
+
 ## QR page phone recoloring
 - [x] Protect the founding page against browser automatic darkening; verified white quote surfaces and ZIP/service selection in light/dark modes with forced-dark Chromium enabled; no horizontal overflow. Not published; the specific phone browser remains unverified.
 
