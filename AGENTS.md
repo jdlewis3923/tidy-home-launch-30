@@ -17,5 +17,5 @@
 - Lawn size is turf-only sq ft, banded in `LAWN_BANDS`/`sizeFromTurfSqFt` (mirrored in `public.lawn_size_from_sqft`); customers only guess, admins measure at `/admin/lawn-verification` via `admin_lawn_verify`, and DB triggers refuse conversion while `lawn_conversion_block()` is non-null — why: no silent repricing and no Pro absorbing an oversized yard.
 - Paid-plan lawn adds/corrections go only through `lawn-plan-change` (DB trigger refuses unverified lawn), swapping Stripe by lookup_key — why: nothing billed before verification; size-ups wait for the customer.
 - Contractor pay varies by service and size only, never cadence — why: cadence discounts come from Tidy's margin.
-- Founding uses scoped light tokens and stacked phone service cards — why: QR visitors never inherit illegible admin colors or clipped prices.
+- Founding uses scoped light tokens, a page-level only-light color scheme, and stacked phone service cards — why: QR visitors must not inherit admin colors or browser automatic darkening and clipped prices.
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
