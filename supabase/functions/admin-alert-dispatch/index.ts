@@ -124,6 +124,14 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   if (edition === 'today') {
     sections.push({ title: 'Must do today', items: mustDo.map(item) });
     sections.push({ title: 'Unresolved urgent', red: true, items: urgentOpen.map(item) });
+    // Nextdoor can't be auto-posted: today's post, with its copy, image and a Mark posted button.
+    const { data: nd } = await admin.from('social_launch_posts').select('id, caption, image_url, scheduled_for, status')
+      .eq('channel', 'nextdoor').is('archived_at', null).is('posted_at', null)
+      .gte('scheduled_for', etMidnightUtc(today)).lt('scheduled_for', etMidnightUtc(addDays(today, 1)));
+    sections.push({ title: 'Post to Nextdoor today (6 PM)', items: (nd ?? []).map((p) => ({
+      text: p.caption?.trim() ? `${p.caption.trim()}${p.image_url ? `\n\nImage: ${p.image_url}` : ''}` : 'Needs a post — no copy written for this slot yet',
+      url: `${SITE}/admin/social?post=${p.id}`, label: 'Copy + Mark posted',
+    })) });
     sections.push({ title: 'Yesterday in numbers', items: anyNumbers ? [{ text: numbers.join(' · ') }] : [] });
     // Coming up: calendar tasks + launch dates in the next 7 days.
     const next7 = addDays(today, 7);
@@ -159,10 +167,10 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   }
 
   const shown = sections.filter((s) => s.items.length);
-  const nothing = edition === 'today' && !mustDo.length;
+  const nothing = edition === 'today' && !mustDo.length && !urgentOpen.length;
   const html = (nothing ? `<p style="margin:0 0 16px;font:700 16px Arial;color:#0f172a">Nothing needs you today.</p>` : '') + shown.map((s) => `
     <h2 style="margin:18px 0 8px;font:800 15px Arial;color:${s.red ? '#b91c1c' : '#0f172a'}">${esc(s.title)}</h2>
-    <ul style="margin:0;padding-left:18px">${s.items.map((i) => `<li style="margin:0 0 6px;color:${s.red ? '#b91c1c' : '#334155'}">${esc(i.text)}${i.url ? ` — <a href="${i.url}" style="color:#2563eb;font-weight:700">${esc(i.label)}</a>` : ''}</li>`).join('')}</ul>`).join('');
+    <ul style="margin:0;padding-left:18px">${s.items.map((i) => `<li style="margin:0 0 6px;white-space:pre-line;color:${s.red ? '#b91c1c' : '#334155'}">${esc(i.text)}${i.url ? ` — <a href="${i.url}" style="color:#2563eb;font-weight:700">${esc(i.label)}</a>` : ''}</li>`).join('')}</ul>`).join('');
   const heading = edition === 'today' ? 'Today' : 'Tonight';
   const mail = shown.length || nothing
     ? await sendBrevoEmail({
