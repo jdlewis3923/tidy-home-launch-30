@@ -37,6 +37,14 @@ const Terms = () => {
                 "Standard services include routine maintenance only. Not included: extreme buildup or neglect, hazardous materials, mold remediation, biohazard cleanup, heavy stain restoration, paint correction, construction debris cleanup.",
               )}
             </p>
+            <div className="mt-4 space-y-8" id="whats-included">
+              {(["cleaning", "lawn", "car_care"] as const).map((g) => (
+                <div key={g}>
+                  <h3 className="mb-2 text-base font-bold text-foreground">{GROUP_NAME[g][language === "es" ? 1 : 0]}</h3>
+                  <ScopeFull group={g} />
+                </div>
+              ))}
+            </div>
           </section>
           <section>
             <h2 className="text-lg font-bold text-foreground">{t("3. Access Requirements")}</h2>
