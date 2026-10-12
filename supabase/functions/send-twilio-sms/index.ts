@@ -33,6 +33,7 @@ import { withLogging, logInvocation } from '../_shared/withLogging.ts';
 import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 import { closedReason, isQuietHours, isSundayET, nextOpenWindow, queueSms } from '../_shared/sms-window.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { holdForDigest } from '../_shared/brevo-send.ts';
 
 const REQUIRED_ENV = [
   'SUPABASE_URL',
