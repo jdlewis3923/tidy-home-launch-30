@@ -7943,6 +7943,10 @@ export type Database = {
           stale: boolean
         }[]
       }
+      admin_evidence_pack: {
+        Args: { _email: string; _from: string; _to: string }
+        Returns: Json
+      }
       admin_founding_override: {
         Args: { _reason: string; _subscription: string; _target: number }
         Returns: string
