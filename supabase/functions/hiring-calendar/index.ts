@@ -15,6 +15,8 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { writeAlert } from '../_shared/alerts.ts';
+import { loadLaunchConfig } from '../_shared/launch-config.ts';
+import { fmtLaunchDate } from '../_shared/launch.ts';
 
 interface TaskRow {
   id: string;
@@ -85,10 +87,44 @@ Deno.serve(async (req) => {
 
   const today = easternToday();
 
-  const { data: launchSetting } = await admin
-    .from('app_settings').select('value').eq('key', 'launch_date').maybeSingle();
-  const rawLaunch = (launchSetting?.value ?? null) as string | null;
-  const launch = rawLaunch ? new Date(`${String(rawLaunch).replace(/"/g, '').slice(0, 10)}T00:00:00Z`) : null;
+  // Offset tasks (print runs, drops) count from the first door hanger drop in launch_config.
+  const cfg = await loadLaunchConfig(admin);
+  const rawLaunch = cfg.global?.hanger_drops?.[0]?.start ?? null;
+  const launch = rawLaunch ? new Date(`${rawLaunch.slice(0, 10)}T00:00:00Z`) : null;
+  const todayIso = isoDate(today);
+
+  // Hire deadlines from launch_config. Urgent on the morning they fall due.
+  let hireAlerts = 0;
+  const home = cfg.cleaning?.pro_callback_date;
+  if (home && todayIso === home) {
+    for (const svc of ['lawn', 'cleaning'] as const) {
+      const first = fmtLaunchDate(cfg[svc]?.first_visit_date);
+      const ok = await writeAlert(admin, {
+        level: 'critical', category: 'calendar',
+        title: `Advance your #1 ${svc} Pro today`,
+        body: `WHAT: ${svc === 'lawn' ? 'Lawn' : 'Cleaning'} needs its first Pro advanced today.\nWHY TODAY: Pros must be active by ${fmtLaunchDate(cfg[svc]?.pro_ready_by)} for first visits ${first}.\nIF IGNORED: the ${first} ${svc} launch slips.\nDO: open the pipeline.`,
+        action_label: 'Open the pipeline', action_url: `/admin/pipeline?service=${svc}`,
+        due_date: home, dedupe_key: `hire_deadline_${svc}_${home}`,
+      });
+      if (ok) hireAlerts += 1;
+    }
+  }
+  const carDue = cfg.car?.pro_callback_date;
+  if (carDue && todayIso === carDue) {
+    const { count } = await admin.from('reservations').select('id', { count: 'exact', head: true })
+      .contains('services', ['detailing']).not('status', 'eq', 'canceled');
+    const enough = (count ?? 0) >= 10;
+    const ok = await writeAlert(admin, {
+      level: 'critical', category: 'calendar',
+      title: enough ? 'Advance your #1 car care Pro today' : `Car care below 10 reservations (${count ?? 0}) — decide today`,
+      body: enough
+        ? `WHAT: Car care has ${count} reservations; advance your first car care Pro today.\nWHY TODAY: Pros must be active by ${fmtLaunchDate(cfg.car?.pro_ready_by)} for first visits ${fmtLaunchDate(cfg.car?.first_visit_date)}.\nIF IGNORED: the car care launch slips.\nDO: open the pipeline.`
+        : `WHAT: Car care has ${count ?? 0} reservations, under the 10 needed to hire.\nWHY TODAY: today is the car care hire date.\nIF IGNORED: the ${fmtLaunchDate(cfg.car?.first_visit_date)} car care launch is undecided.\nDO: decide whether to launch car care.`,
+      action_label: 'Open the pipeline', action_url: '/admin/pipeline?service=detailing',
+      due_date: carDue, dedupe_key: `hire_deadline_car_${carDue}`,
+    });
+    if (ok) hireAlerts += 1;
+  }
 
   const { data: tasks } = await admin
     .from('calendar_tasks')
@@ -169,7 +205,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, launch_date: rawLaunch, tasks: (tasks ?? []).length, dated, dueAlerts, headsUp, policyAlerts }),
+    JSON.stringify({ ok: true, launch_date: rawLaunch, hireAlerts, tasks: (tasks ?? []).length, dated, dueAlerts, headsUp, policyAlerts }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
   );
 });
