@@ -8599,6 +8599,7 @@ export type Database = {
           zip: string
         }[]
       }
+      pro_job_card: { Args: { _visit: string }; Returns: Json }
       pro_lawn_job_info: {
         Args: { _visit: string }
         Returns: {

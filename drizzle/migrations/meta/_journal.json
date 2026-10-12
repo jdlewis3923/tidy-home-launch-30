@@ -1065,6 +1065,13 @@
       "when": 1791845626970,
       "tag": "0151_my_pro_services",
       "breakpoints": true
+    },
+    {
+      "idx": 152,
+      "version": "7",
+      "when": 1791846333866,
+      "tag": "0152_pro_job_card",
+      "breakpoints": true
     }
   ]
 }
