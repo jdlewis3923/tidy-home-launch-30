@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { Button } from "@/components/ui/button";
 import type { TablesUpdate } from "@/integrations/supabase/types";
+import AlertTiers from "@/components/admin/AlertTiers";
 
 interface AlertRow {
   id: string;
@@ -179,6 +180,8 @@ export default function AdminAlerts() {
                 {doneToday.map((r) => <li key={r.id}>{r.title}</li>)}
               </ul>}
         </section>
+
+        <AlertTiers />
       </div>
     </main>
   );
