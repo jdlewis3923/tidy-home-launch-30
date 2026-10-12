@@ -6173,6 +6173,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sched_first_right: {
+        Row: {
+          expires_at: string
+          id: string
+          offered_at: string
+          pro_user_id: string
+          responded_at: string | null
+          service: Database["public"]["Enums"]["service_type"]
+          status: string
+          weekday: number
+          zip: string
+        }
+        Insert: {
+          expires_at?: string
+          id?: string
+          offered_at?: string
+          pro_user_id: string
+          responded_at?: string | null
+          service: Database["public"]["Enums"]["service_type"]
+          status?: string
+          weekday: number
+          zip: string
+        }
+        Update: {
+          expires_at?: string
+          id?: string
+          offered_at?: string
+          pro_user_id?: string
+          responded_at?: string | null
+          service?: Database["public"]["Enums"]["service_type"]
+          status?: string
+          weekday?: number
+          zip?: string
+        }
+        Relationships: []
+      }
       sched_notice_log: {
         Row: {
           created_at: string
@@ -6191,7 +6227,10 @@ export type Database = {
       sched_waitlist: {
         Row: {
           created_at: string
+          founding_hold_until: string | null
+          hold_lapsed_at: string | null
           hold_until: string | null
+          hold_warned_at: string | null
           id: string
           kind: string
           offer_weekday: number | null
@@ -6201,11 +6240,15 @@ export type Database = {
           subscription_id: string | null
           user_id: string
           weekday: number | null
+          window_key: string | null
           zip: string
         }
         Insert: {
           created_at?: string
+          founding_hold_until?: string | null
+          hold_lapsed_at?: string | null
           hold_until?: string | null
+          hold_warned_at?: string | null
           id?: string
           kind: string
           offer_weekday?: number | null
@@ -6215,11 +6258,15 @@ export type Database = {
           subscription_id?: string | null
           user_id: string
           weekday?: number | null
+          window_key?: string | null
           zip: string
         }
         Update: {
           created_at?: string
+          founding_hold_until?: string | null
+          hold_lapsed_at?: string | null
           hold_until?: string | null
+          hold_warned_at?: string | null
           id?: string
           kind?: string
           offer_weekday?: number | null
@@ -6229,6 +6276,7 @@ export type Database = {
           subscription_id?: string | null
           user_id?: string
           weekday?: number | null
+          window_key?: string | null
           zip?: string
         }
         Relationships: []
@@ -8072,6 +8120,7 @@ export type Database = {
           stale: boolean
         }[]
       }
+      admin_demand_report: { Args: never; Returns: Json }
       admin_evidence_pack: {
         Args: { _email: string; _from: string; _to: string }
         Returns: Json
@@ -8328,6 +8377,7 @@ export type Database = {
       current_rate_card_version: { Args: never; Returns: number }
       current_scope_version: { Args: { _service: string }; Returns: number }
       current_user_admin: { Args: never; Returns: boolean }
+      customer_assign_lawn_day: { Args: never; Returns: Json }
       customer_book_day: {
         Args: {
           _details?: Json
@@ -8350,6 +8400,14 @@ export type Database = {
       }
       customer_move_visit: {
         Args: { _date: string; _visit: string }
+        Returns: Json
+      }
+      customer_waitlist_join: {
+        Args: {
+          _service: Database["public"]["Enums"]["service_type"]
+          _weekday?: number
+          _window?: string
+        }
         Returns: Json
       }
       customers_needing_attention: {
@@ -8729,7 +8787,9 @@ export type Database = {
           status: string
         }[]
       }
+      pro_custom_hours_state: { Args: never; Returns: Json }
       pro_dates: { Args: { _weeks?: number }; Returns: Json }
+      pro_decline_first_right: { Args: { _id: string }; Returns: Json }
       pro_drop_day: { Args: { _claim: string }; Returns: Json }
       pro_drop_preview: { Args: { _claim: string }; Returns: Json }
       pro_get_me: {
@@ -8797,6 +8857,10 @@ export type Database = {
         Returns: string
       }
       pro_set_catchup: { Args: { _weekday: number }; Returns: Json }
+      pro_set_catchup_busy: {
+        Args: { _busy: boolean; _date: string }
+        Returns: Json
+      }
       pro_tier_uplift_cents: {
         Args: { _base_cents: number; _pro_uid: string }
         Returns: number
@@ -8823,6 +8887,10 @@ export type Database = {
         Returns: Json
       }
       review_kpis: { Args: never; Returns: Json }
+      sched_active_pro_count: {
+        Args: { _s: Database["public"]["Enums"]["service_type"] }
+        Returns: number
+      }
       sched_alert: {
         Args: {
           _body: string
@@ -8868,6 +8936,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      sched_cleaning_seq_ok: {
+        Args: {
+          _budget: number
+          _d: string
+          _excl_booking: string
+          _pro: string
+          _w: string
+        }
+        Returns: boolean
+      }
+      sched_custom_hours_allowed: {
+        Args: { _s: Database["public"]["Enums"]["service_type"] }
+        Returns: boolean
+      }
       sched_customer_notice: {
         Args: {
           _body: string
@@ -8878,6 +8960,16 @@ export type Database = {
           _title: string
           _user: string
           _visit: string
+        }
+        Returns: undefined
+      }
+      sched_customer_sms: {
+        Args: {
+          _dedupe: string
+          _expires: string
+          _kind: string
+          _sms: string
+          _user: string
         }
         Returns: undefined
       }
@@ -8896,6 +8988,22 @@ export type Database = {
         Returns: number
       }
       sched_day_name: { Args: { _w: number }; Returns: string }
+      sched_demand_rows: {
+        Args: never
+        Returns: {
+          afternoons: number
+          claimed: boolean
+          day: string
+          fit_pct: number
+          flagged: boolean
+          mornings: number
+          preferences: number
+          service: string
+          share: number
+          weekday: number
+          zip: string
+        }[]
+      }
       sched_dow: { Args: { _d: string }; Returns: number }
       sched_es: { Args: { _t: string }; Returns: string }
       sched_es_tok: { Args: { _t: string }; Returns: string }
@@ -8922,7 +9030,19 @@ export type Database = {
         }
         Returns: string
       }
+      sched_first_right_open: {
+        Args: {
+          _s: Database["public"]["Enums"]["service_type"]
+          _wd: number
+          _zip: string
+        }
+        Returns: string
+      }
       sched_fmt: { Args: { _d: string }; Returns: string }
+      sched_full_day: {
+        Args: { _s: Database["public"]["Enums"]["service_type"] }
+        Returns: Record<string, unknown>
+      }
       sched_generate_booking: {
         Args: { _b: string; _until: string }
         Returns: number
@@ -8934,6 +9054,15 @@ export type Database = {
             Args: { _s: Database["public"]["Enums"]["service_type"] }
             Returns: string
           }
+      sched_lawn_day_pick: {
+        Args: {
+          _sim?: Json
+          _street: string
+          _weekdays: number[]
+          _zip: string
+        }
+        Returns: number
+      }
       sched_load: {
         Args: { _d: string; _excl_booking: string; _pro: string }
         Returns: number
@@ -9003,6 +9132,7 @@ export type Database = {
         Args: { _s: Database["public"]["Enums"]["service_type"] }
         Returns: string
       }
+      sched_street_key: { Args: { _addr: string }; Returns: string }
       sched_svc_label: {
         Args: { _s: Database["public"]["Enums"]["service_type"] }
         Returns: string
@@ -9010,6 +9140,7 @@ export type Database = {
       sched_sync_pro: { Args: { _uid: string }; Returns: undefined }
       sched_tick: { Args: never; Returns: Json }
       sched_today: { Args: never; Returns: string }
+      sched_waitlist_holds: { Args: never; Returns: undefined }
       sched_waitlist_offer: {
         Args: { _s: Database["public"]["Enums"]["service_type"]; _zip: string }
         Returns: undefined
