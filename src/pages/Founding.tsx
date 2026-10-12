@@ -498,7 +498,7 @@ export default function Founding() {
                 )}
                 <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} />
                 {err && <p role="alert" className="text-sm font-semibold text-destructive">{err}</p>}
-                <p className="founding-reserve-launch">{startsLine(launchCfg, lang, foundingServicesForDate)}. {t("No charge today — we'll confirm your day and your Pro the week before, and set up payment then.")}</p>
+                <p className="founding-reserve-launch">{startsLine(launchCfg, lang, s.services)}. {t("No charge today — we'll confirm your day and your Pro the week before, and set up payment then.")}</p>
                 <button className={primaryBtn} disabled={!formOk || !scopeOk || busy}>{busy ? t("Saving…") : t("Reserve my spot — no charge")}</button>
                 <p className="text-center text-xs text-ink-faint">{t("By reserving you agree to our")} <Link to="/terms" className="underline">{t("Terms")}</Link> {t("and")} <Link to="/privacy" className="underline">{t("Privacy Policy")}</Link>.</p>
                 <button type="button" className={`${chip} ${off} w-full`} onClick={() => go("price")}>← {t("Back to my price")}</button>
@@ -509,7 +509,7 @@ export default function Founding() {
               <div className="text-center" role="status">
                 <h2 className="text-2xl font-extrabold">{t("You're reserved. No charge today.")}</h2>
                 {result?.updated && <p className="mt-1 text-sm font-semibold text-primary">{t("We found your earlier reservation and updated it.")}</p>}
-                <p className="mt-2 font-semibold">{startsLine(launchCfg, lang, foundingServicesForDate)}.</p>
+                <p className="mt-2 font-semibold">{startsLine(launchCfg, lang, s.services)}.</p>
                 <p className="mt-2 text-sm">{t("We'll contact you about a week before your first visit to confirm your day, your window and your Pro, and to set up payment then.")}</p>
                 {!result?.founding && <p className="mt-2 text-sm">{t("Founding homes are fully reserved in")} {s.zip} — {t("you're reserving at standard terms.")}</p>}
                 <ul className="mt-3 divide-y divide-border text-left text-sm">
