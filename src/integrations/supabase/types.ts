@@ -9043,6 +9043,7 @@ export type Database = {
       }
       set_my_language: { Args: { _lang: string }; Returns: string }
       sms_recipient_name: { Args: { _phone: string }; Returns: string }
+      social_caption_hash: { Args: { _c: string }; Returns: string }
       subscription_service_count: { Args: { _sub: string }; Returns: number }
       sync_member_entitlements: {
         Args: { _reason: string; _sub: string }
