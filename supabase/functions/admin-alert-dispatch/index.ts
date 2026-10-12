@@ -167,7 +167,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   }
 
   const shown = sections.filter((s) => s.items.length);
-  const nothing = edition === 'today' && !mustDo.length && !urgentOpen.length;
+  const nothing = edition === 'today' && !mustDo.length;
   const html = (nothing ? `<p style="margin:0 0 16px;font:700 16px Arial;color:#0f172a">Nothing needs you today.</p>` : '') + shown.map((s) => `
     <h2 style="margin:18px 0 8px;font:800 15px Arial;color:${s.red ? '#b91c1c' : '#0f172a'}">${esc(s.title)}</h2>
     <ul style="margin:0;padding-left:18px">${s.items.map((i) => `<li style="margin:0 0 6px;white-space:pre-line;color:${s.red ? '#b91c1c' : '#334155'}">${esc(i.text)}${i.url ? ` — <a href="${i.url}" style="color:#2563eb;font-weight:700">${esc(i.label)}</a>` : ''}</li>`).join('')}</ul>`).join('');
