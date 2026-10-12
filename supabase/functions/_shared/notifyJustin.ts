@@ -69,6 +69,8 @@ export async function sendBrevoEmail(opts: {
   triggeredBy?: string;    // edge fn / cron name for email_send_log
   /** true for lifecycle/marketing mail — enforces the Brevo unsubscribe list. */
   marketing?: boolean;
+  /** Owner-bound mail: only the alert dispatcher or a test may send it directly. */
+  adminChannel?: 'urgent' | 'digest' | 'test';
 }) {
   const templateName = opts.templateName ?? opts.tags?.[0] ?? 'unknown';
   if (!BREVO_API_KEY) {
@@ -91,9 +93,11 @@ export async function sendBrevoEmail(opts: {
     tags: opts.tags,
     attachment: opts.attachments,
     marketing: opts.marketing ?? false,
-    label: 'notifyJustin',
+    label: opts.triggeredBy ?? 'notifyJustin',
     transport: 'gateway',
+    adminChannel: opts.adminChannel,
   });
+  if (result.heldForDigest) return null;
 
   if (!result.sent) {
     if (result.reason === 'blacklisted') {
@@ -165,6 +169,7 @@ export async function sendTwilioSmsToJustin(message: string, idemKey: string): P
         body: message,
         idempotency_key: idemKey,
         triggered_by: 'notifyJustin',
+        admin_channel: idemKey.startsWith('admin-alert:') ? 'urgent' : undefined,
       }),
     });
     if (!res.ok && res.status !== 202) {

@@ -121,6 +121,7 @@ Deno.serve(async (req) => {
         attachments: attachments.length ? attachments : undefined,
         templateName: tpl.template_name,
         triggeredBy: 'test-suite',
+        adminChannel: 'test',
       });
       const logId = await getLatestLogId(tpl.template_name);
       if (logId) log_ids.push(logId);
