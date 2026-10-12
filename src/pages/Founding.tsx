@@ -414,7 +414,7 @@ export default function Founding() {
                     <Stat label={t("Per visit")} value={visits ? money(total / visits) : "—"} />
                   </div>
                 )}
-                <p className="founding-launch-note">{startsLine(launchCfg, lang)}.</p>
+                <p className="founding-launch-note">{startsLine(launchCfg, lang, s.services)}.</p>
                 <p className="mt-2 text-center text-sm font-semibold text-primary">{t("Not right? We come back within 48 hours, free.")}</p>
                 <ul className="mt-3 divide-y divide-border text-sm">
                   {lines.map((l) => l && (
