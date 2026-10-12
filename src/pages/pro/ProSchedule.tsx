@@ -5,6 +5,7 @@
  * one does not (enforced server-side in pro-visit-action).
  */
 import { useEffect, useMemo, useState } from "react";
+import ProLaunchLine from "@/components/pro/ProLaunchLine";
 import { Navigate } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
@@ -119,6 +120,7 @@ export default function ProSchedule() {
         />
       )}
 
+      <ProLaunchLine className="px-[18px] pt-3" />
       {loading && <ScheduleSkeleton />}
 
       {!loading && error && <ErrorState title="Couldn't load your schedule" onRetry={reload} />}

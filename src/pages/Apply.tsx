@@ -4,6 +4,8 @@
  * Tidy-branded, mobile-first contractor intake.
  */
 import { useState } from "react";
+import { useLaunchConfig } from "@/hooks/useLaunchConfig";
+import { fmtLaunchDate } from "@/lib/launch";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -328,6 +330,13 @@ export default function Apply() {
               "Tidy is Miami's subscription home-service brand. We're hiring background-checked cleaners, lawn pros, and detailers in Kendall and Pinecrest.",
             )}
           </p>
+          {launchCfg && (
+            <p className="mt-3 text-sm font-semibold text-white/80" data-testid="apply-launch-dates">
+              {language === "es"
+                ? `Primeras visitas: limpieza y jardín el ${fmtLaunchDate(launchCfg.cleaning?.first_visit_date, "es")}; cuidado del auto el ${fmtLaunchDate(launchCfg.car?.first_visit_date, "es")}.`
+                : `First visits: cleaning and lawn ${fmtLaunchDate(launchCfg.cleaning?.first_visit_date)}; car care ${fmtLaunchDate(launchCfg.car?.first_visit_date)}.`}
+            </p>
+          )}
 
           <div className="mt-10 grid sm:grid-cols-2 gap-4">
             {PERKS.map(({ icon: Icon, title, body }) => (

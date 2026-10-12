@@ -8372,6 +8372,10 @@ export type Database = {
       }
       my_founding: { Args: never; Returns: Json }
       my_language: { Args: never; Returns: string }
+      my_pro_services: {
+        Args: never
+        Returns: Database["public"]["Enums"]["service_type"][]
+      }
       nextval: { Args: { seq_name: string }; Returns: number }
       notify_member: {
         Args: {
