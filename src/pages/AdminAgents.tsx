@@ -116,8 +116,7 @@ export default function AdminAgents() {
 
       const [{ data: dRows }, { data: sRows }] = await Promise.all([
         supabase.from("kpi_definitions").select("code, category").eq("enabled", true),
-        supabase.from("kpi_snapshots").select("kpi_code, computed_at, status")
-          .order("computed_at", { ascending: false }).limit(500),
+        supabase.rpc("kpi_latest_snapshots", { _codes: null }),
       ]);
       const latest: Record<string, SnapRow> = {};
       for (const s of (sRows ?? []) as SnapRow[]) {
