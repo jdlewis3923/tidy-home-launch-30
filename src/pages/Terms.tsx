@@ -2,9 +2,11 @@ import TidyLogo from "@/components/TidyLogo";
 import { Link } from "react-router-dom";
 import SeoHead from "@/components/landing/SeoHead";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ScopeFull } from "@/components/scope/ServiceScope";
+import { GROUP_NAME } from "@/lib/serviceScope";
 
 const Terms = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
