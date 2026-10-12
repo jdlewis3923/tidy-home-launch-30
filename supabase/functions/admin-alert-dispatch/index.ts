@@ -131,12 +131,12 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     const cfg = await loadLaunchConfig(admin).catch(() => null);
     const coming: { text: string }[] = (tasks ?? []).map((t) => ({ text: `${t.next_due_date} · ${t.title}` }));
     if (cfg) {
-      for (const [scope, row] of Object.entries(cfg.byScope ?? {}) as [string, Record<string, unknown>][]) {
+      for (const [scope, row] of Object.entries(cfg).filter(([k]) => k !== 'global') as [string, Record<string, unknown>][]) {
         for (const [k, label] of [['conversion_date', 'conversion day'], ['first_visit_date', 'first visits'], ['pro_callback_date', 'Pro hire date'], ['pro_ready_by', 'Pro must be active']] as const) {
           const v = row?.[k] as string | null; if (v && v >= today && v <= next7) coming.push({ text: `${v} · ${scope} ${label}` });
         }
       }
-      for (const d of (cfg.hangerDrops ?? []) as { start: string; end: string }[]) if (d.start >= today && d.start <= next7) coming.push({ text: `${d.start} · door hanger drop starts` });
+      for (const d of ((cfg.global as { hanger_drops?: unknown } | undefined)?.hanger_drops ?? []) as { start: string; end: string }[]) if (d.start >= today && d.start <= next7) coming.push({ text: `${d.start} · door hanger drop starts` });
     }
     coming.sort((a, b) => a.text.localeCompare(b.text));
     sections.push({ title: 'Next 7 days', items: coming });
