@@ -30,6 +30,7 @@ import { vendorFetch } from '../_shared/http.ts';
 import { groupsFor, scopeEmailHtml } from '../_shared/scope.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
+import { writeAlert } from '../_shared/alerts.ts';
 
 const STRIPE_SECRET_KEY = stripeSecretKey();
 // Live and test endpoints have different signing secrets. Try test first, then live,
@@ -220,6 +221,35 @@ Deno.serve(async (req) => {
       case 'customer.updated':
         // No-op for now; reserved for future profile sync.
         break;
+      case 'charge.dispute.created': {
+        const d = event.data.object as Stripe.Dispute;
+        const due = d.evidence_details?.due_by ? new Date(d.evidence_details.due_by * 1000) : null;
+        const hoursLeft = due ? (due.getTime() - Date.now()) / 3_600_000 : null;
+        await writeAlert(supabase, {
+          level: 'critical', category: 'money', tier: 'urgent', night_ok: hoursLeft != null && hoursLeft < 24,
+          title: `Chargeback opened · $${(d.amount / 100).toFixed(2)}`,
+          what: `Chargeback opened · $${(d.amount / 100).toFixed(2)} · ${d.reason}`,
+          why_today: due ? `Evidence due ${due.toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'short' })} ET` : 'Evidence deadline set by the bank',
+          if_ignored: 'The money is lost automatically and the dispute counts against the account',
+          action_label: 'Build evidence pack', action_url: '/admin/evidence-pack',
+          due_date: due ? due.toISOString().slice(0, 10) : null,
+          dedupe_key: `dispute:${d.id}`, context: { dispute_id: d.id, charge: d.charge },
+        });
+        break;
+      }
+      case 'payout.failed': {
+        const p = event.data.object as Stripe.Payout;
+        await writeAlert(supabase, {
+          level: 'critical', category: 'money', tier: 'urgent', night_ok: true,
+          title: `Stripe payout failed · $${(p.amount / 100).toFixed(2)}`,
+          what: `Stripe payout to the bank failed · $${(p.amount / 100).toFixed(2)}`,
+          why_today: p.failure_message ?? 'The bank refused the transfer',
+          if_ignored: 'Money stays stuck in Stripe and Pro payouts can fail',
+          action_label: 'Open payouts', action_url: '/admin/costs',
+          dedupe_key: `payout_failed:${p.id}`, context: { payout_id: p.id, code: p.failure_code },
+        });
+        break;
+      }
       default:
         break;
     }

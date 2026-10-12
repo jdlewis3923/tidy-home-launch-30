@@ -121,6 +121,7 @@ Deno.serve(async (req) => {
         attachments: attachments.length ? attachments : undefined,
         templateName: tpl.template_name,
         triggeredBy: 'test-suite',
+        adminChannel: 'test',
       });
       const logId = await getLatestLogId(tpl.template_name);
       if (logId) log_ids.push(logId);
@@ -146,7 +147,7 @@ Deno.serve(async (req) => {
           body: sms.body,
           idempotency_key: `test-suite-${sms.template_name}-${Date.now()}`,
           template_name: sms.template_name,
-          triggered_by: 'test-suite',
+          triggered_by: 'test-suite', admin_channel: 'test',
         }),
       });
       const json = await r.json().catch(() => ({}));

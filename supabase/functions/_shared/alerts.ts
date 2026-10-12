@@ -7,10 +7,10 @@ import '../_shared/http.ts';
 // caller. So this function only ever writes a row, deduped on dedupe_key.
 
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
-import { tidyEmailShell } from './email-brand.ts';
 
 export type AlertLevel = 'action' | 'warning' | 'critical';
-export type AlertCategory = 'hiring' | 'site' | 'calendar' | 'capacity' | 'insurance' | 'reservations' | 'operations';
+export type AlertCategory = 'hiring' | 'site' | 'calendar' | 'capacity' | 'insurance' | 'reservations' | 'operations' | 'money' | 'safety';
+export type AlertTier = 'urgent' | 'digest' | 'dashboard';
 
 export interface AlertInput {
   level: AlertLevel;
@@ -23,6 +23,14 @@ export interface AlertInput {
   /** Stable key — the same alert never stacks. */
   dedupe_key: string;
   context?: Record<string, unknown> | null;
+  /** Omit to use the tier set at /admin/alerts for this kind of alert. */
+  tier?: AlertTier;
+  /** Urgent only: may it text you between 9 PM and 9 AM? */
+  night_ok?: boolean;
+  /** Urgent alerts read as four lines: WHAT / WHY TODAY / IF IGNORED / DO. */
+  what?: string;
+  why_today?: string;
+  if_ignored?: string;
 }
 
 /**
@@ -47,6 +55,11 @@ export async function writeAlert(
         dedupe_key: alert.dedupe_key,
         context: alert.context ?? null,
         resolved_at: null,
+        ...(alert.tier ? { tier: alert.tier } : {}),
+        ...(alert.night_ok ? { night_ok: true } : {}),
+        what: alert.what ?? null,
+        why_today: alert.why_today ?? null,
+        if_ignored: alert.if_ignored ?? null,
       },
       { onConflict: 'dedupe_key' },
     );
@@ -54,37 +67,9 @@ export async function writeAlert(
       console.error('writeAlert failed', alert.dedupe_key, error.message);
       return false;
     }
-    // Critical alerts also go out immediately. The row already exists, so a
-    // failed send is logged and swallowed — it can never unwrite the alert.
-    if (alert.level === 'critical') {
-      try {
-        const { sendBrevoEmail } = await import('./brevo-send.ts');
-        const res = await sendBrevoEmail({
-          to: 'hello@jointidy.co',
-          marketing: false,
-          sender: { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' },
-          subject: `Tidy critical: ${alert.title}`,
-
-          htmlContent: tidyEmailShell({
-            heading: alert.title,
-            eyebrow: 'Tidy critical alert',
-            bodyHtml: `<p>${alert.body ?? ''}</p>`,
-            ctaUrl: alert.action_url ? `https://jointidy.co${alert.action_url}` : undefined,
-            ctaLabel: alert.action_label ?? 'Open alert',
-          }),
-          tags: ['admin-critical'],
-          label: 'critical-alert',
-        });
-        if (!res.sent) {
-          await admin.from('integration_logs').insert({
-            source: 'brevo', event: 'critical_alert_email', status: 'error',
-            error_message: res.reason ?? 'unknown', detail: { dedupe_key: alert.dedupe_key },
-          });
-        }
-      } catch (err) {
-        console.error('critical alert email failed', alert.dedupe_key, String(err));
-      }
-    }
+    // Delivery is decided by tier in the database: urgent alerts are sent the
+    // moment the row lands (admin-alert-dispatch); everything else waits for
+    // the 9 AM / 9 PM digest or stays on the dashboard.
     return true;
   } catch (err) {
     console.error('writeAlert threw', alert.dedupe_key, String(err));

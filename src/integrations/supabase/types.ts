@@ -356,6 +356,66 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_alert_tier_log: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_night_ok: boolean | null
+          new_tier: string | null
+          old_night_ok: boolean | null
+          old_tier: string | null
+          rule_key: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_night_ok?: boolean | null
+          new_tier?: string | null
+          old_night_ok?: boolean | null
+          old_tier?: string | null
+          rule_key: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_night_ok?: boolean | null
+          new_tier?: string | null
+          old_night_ok?: boolean | null
+          old_tier?: string | null
+          rule_key?: string
+        }
+        Relationships: []
+      }
+      admin_alert_tiers: {
+        Row: {
+          label: string
+          night_ok: boolean
+          rule_key: string
+          tier: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          label: string
+          night_ok?: boolean
+          rule_key: string
+          tier: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          label?: string
+          night_ok?: boolean
+          rule_key?: string
+          tier?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       admin_alerts: {
         Row: {
           action_label: string | null
@@ -368,10 +428,19 @@ export type Database = {
           dedupe_key: string | null
           due_date: string | null
           id: string
+          if_ignored: string | null
           level: string
+          night_ok: boolean
+          notified_at: string | null
+          notify_result: string | null
+          reminded_at: string | null
           resolved_at: string | null
+          route_to: string
           snoozed_until: string | null
+          tier: string | null
           title: string
+          what: string | null
+          why_today: string | null
         }
         Insert: {
           action_label?: string | null
@@ -384,10 +453,19 @@ export type Database = {
           dedupe_key?: string | null
           due_date?: string | null
           id?: string
+          if_ignored?: string | null
           level?: string
+          night_ok?: boolean
+          notified_at?: string | null
+          notify_result?: string | null
+          reminded_at?: string | null
           resolved_at?: string | null
+          route_to?: string
           snoozed_until?: string | null
+          tier?: string | null
           title: string
+          what?: string | null
+          why_today?: string | null
         }
         Update: {
           action_label?: string | null
@@ -400,10 +478,46 @@ export type Database = {
           dedupe_key?: string | null
           due_date?: string | null
           id?: string
+          if_ignored?: string | null
           level?: string
+          night_ok?: boolean
+          notified_at?: string | null
+          notify_result?: string | null
+          reminded_at?: string | null
           resolved_at?: string | null
+          route_to?: string
           snoozed_until?: string | null
+          tier?: string | null
           title?: string
+          what?: string | null
+          why_today?: string | null
+        }
+        Relationships: []
+      }
+      admin_digest_runs: {
+        Row: {
+          body: Json | null
+          edition: string
+          email_result: string | null
+          run_date: string
+          sent_at: string
+          sms_result: string | null
+        }
+        Insert: {
+          body?: Json | null
+          edition: string
+          email_result?: string | null
+          run_date: string
+          sent_at?: string
+          sms_result?: string | null
+        }
+        Update: {
+          body?: Json | null
+          edition?: string
+          email_result?: string | null
+          run_date?: string
+          sent_at?: string
+          sms_result?: string | null
         }
         Relationships: []
       }
@@ -8029,6 +8143,10 @@ export type Database = {
         Returns: undefined
       }
       admin_sched_state: { Args: never; Returns: Json }
+      admin_set_alert_tier: {
+        Args: { _night_ok?: boolean; _rule: string; _tier: string }
+        Returns: undefined
+      }
       admin_set_jobber_refresh_token: {
         Args: { _token: string }
         Returns: undefined

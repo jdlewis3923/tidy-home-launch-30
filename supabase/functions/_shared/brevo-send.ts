@@ -41,10 +41,16 @@ export interface SendBrevoEmailOptions {
   label?: string;
   /** ISO time — Brevo holds the message until then. */
   scheduledAt?: string;
+  /**
+   * Mail to the owner inbox is only sent by the alert dispatcher ('urgent' |
+   * 'digest') or a test. Anything else is held as a digest item instead.
+   */
+  adminChannel?: 'urgent' | 'digest' | 'test';
 }
 
 export interface SendBrevoEmailResult {
   sent: boolean;
+  heldForDigest?: boolean;
   reason?: 'blacklisted' | 'no_api_key' | 'no_recipient' | 'branding_error' | 'http_error' | 'network_error';
   status?: number;
   messageId?: string | null;
@@ -56,6 +62,29 @@ const BREVO_CONTACT_URL = 'https://connector-gateway.lovable.dev/brevo/contacts'
 const BREVO_TEMPLATE_URL = 'https://connector-gateway.lovable.dev/brevo/smtp/templates';
 const DEFAULT_SENDER = { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' };
 const MAX_ATTEMPTS = 3;
+
+
+const OWNER_EMAILS = new Set(['hello@jointidy.co']);
+
+/** Writes a digest-tier admin alert (deduped per subject per day). Never throws. */
+export async function holdForDigest(kind: 'admin_email' | 'admin_text', subject: string, source: string): Promise<void> {
+  const url = env('SUPABASE_URL'); const key = env('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !key) return;
+  const day = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  try {
+    await vendorFetch(`${url}/rest/v1/admin_alerts?on_conflict=dedupe_key`, {
+      method: 'POST',
+      headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({
+        alert_type: kind, level: 'action', category: 'operations', tier: 'digest',
+        title: subject.slice(0, 200), body: `Held for your digest (from ${source}).`,
+        dedupe_key: `${kind}:${day}:${subject.slice(0, 120)}`,
+      }),
+    });
+  } catch (e) {
+    console.warn('[holdForDigest] failed', (e as Error).message);
+  }
+}
 
 function env(name: string): string | undefined {
   // Deno at runtime; undefined under vitest/node.
@@ -120,6 +149,15 @@ export async function sendBrevoEmail(
 
   let recipients = normalizeRecipients(opts.to);
   if (recipients.length === 0) return { sent: false, reason: 'no_recipient' };
+
+  // Owner inbox: two digests a day plus urgent alerts only (Part E). Routine
+  // mail to the owner becomes a digest line instead of an email.
+  if (!opts.adminChannel && recipients.some((r) => OWNER_EMAILS.has(r.email.trim().toLowerCase()))) {
+    const others = recipients.filter((r) => !OWNER_EMAILS.has(r.email.trim().toLowerCase()));
+    await holdForDigest('admin_email', opts.subject ?? `Template ${opts.templateId ?? ''}`.trim(), label);
+    if (!others.length) return { sent: true, heldForDigest: true, messageId: null };
+    recipients = others;
+  }
   if (!apiKey) {
     console.warn(`[${label}] BREVO_API_KEY missing — not sending`);
     return { sent: false, reason: 'no_api_key' };
