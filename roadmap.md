@@ -136,4 +136,5 @@
 - [x] Service days (admin grid + seed), Pro claims (5 states, catch-up day, 14-day drop rule), customer day picker, capacity, call-offs/holidays/weather moves, day loss, pivot ladder, waitlist, notifications, 20-point verification
 
 - [x] Master prompt Part C — launch dates in launch_config, car care 30 Nov, server gates.
-- [ ] Master prompt Parts B-checks, D (rest), E, F, G — next, in order.
+- [x] Part D screens: service scope admin, size review, evidence pack, Pro job card, terms
+- [ ] Master prompt Parts E, F, G — next, in order.
