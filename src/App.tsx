@@ -89,6 +89,9 @@ const AdminNotificationSettings = lazy(() => import("./pages/AdminNotificationSe
 const AdminCosts = lazy(() => import("./pages/AdminCosts.tsx"));
 const AdminSiteStatus = lazy(() => import("./pages/AdminSiteStatus.tsx"));
 const AdminLaunchDates = lazy(() => import("./pages/AdminLaunchDates.tsx"));
+const AdminServiceScope = lazy(() => import("./pages/AdminServiceScope.tsx"));
+const AdminSizeReview = lazy(() => import("./pages/AdminSizeReview.tsx"));
+const AdminEvidencePack = lazy(() => import("./pages/AdminEvidencePack.tsx"));
 const AdminDocuments = lazy(() => import("./pages/AdminDocuments.tsx"));
 const AdminApplicants = lazy(() => import("./pages/AdminApplicants.tsx"));
 const AdminEmailHealth = lazy(() => import("./pages/AdminEmailHealth.tsx"));
@@ -389,6 +392,9 @@ const App = () => (
                   <Route path="/admin/costs" element={<AdminCosts />} />
                   <Route path="/admin/site-status" element={<AdminSiteStatus />} />
                   <Route path="/admin/launch-dates" element={<AdminLaunchDates />} />
+                  <Route path="/admin/service-scope" element={<AdminServiceScope />} />
+                  <Route path="/admin/size-review" element={<AdminSizeReview />} />
+                  <Route path="/admin/evidence-pack" element={<AdminEvidencePack />} />
                   <Route path="/admin/documents" element={<AdminDocuments />} />
                   <Route path="/admin/applicants" element={<AdminApplicants />} />
                   <Route path="/admin/orientations" element={<AdminOrientations />} />
