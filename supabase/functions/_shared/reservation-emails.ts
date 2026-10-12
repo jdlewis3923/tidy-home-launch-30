@@ -1,40 +1,54 @@
-// Reservation confirmation + convert-invite copy. Dates come from launch.ts only.
-import { LAUNCH_DATE_LONG, LAUNCH_MONTH, RESERVATION_SERVICE_LABEL, type ReservableService } from './launch.ts';
+// Reservation confirmation + convert-invite copy. Dates come from launch_config (passed in as cfg).
+import { RESERVATION_SERVICE_LABEL, fmtLaunchDate, launchScope, startsLine, type LaunchConfig, type ReservableService } from './launch.ts';
 import { tidyEmailShell, TIDY_SITE } from './email-brand.ts';
 
 export const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 export const svcLabel = (s: string) => RESERVATION_SERVICE_LABEL[s as ReservableService] ?? s;
 
-export const NEXT_STEPS = [
-  ['Now', 'we hold your spot and your preferred day.'],
-  [`Early ${LAUNCH_MONTH}`, 'we confirm your pro, your day and your time window, and you add a card. Nothing charges until your first visit.'],
-  [LAUNCH_DATE_LONG, 'your first visit.'],
-] as const;
+/** The earliest first-visit date among these services (car care is later than cleaning/lawn). */
+function firstDate(cfg: LaunchConfig, services: string[]): string | null {
+  const ds = (services.length ? services : ['cleaning']).map((s) => cfg[launchScope(s)]?.first_visit_date).filter(Boolean) as string[];
+  return ds.sort()[0] ?? null;
+}
+function conversionMonth(cfg: LaunchConfig, services: string[]): string {
+  const ds = (services.length ? services : ['cleaning']).map((s) => cfg[launchScope(s)]?.conversion_date).filter(Boolean) as string[];
+  return fmtLaunchDate(ds.sort()[0], 'en', 'month');
+}
+export function nextSteps(cfg: LaunchConfig, services: string[]) {
+  return [
+    ['Now', 'we hold your spot and your preferred day.'],
+    [`Early ${conversionMonth(cfg, services)}`, 'we confirm your pro, your day and your time window, and you add a card. Nothing charges until your first visit.'],
+    [startsLine(cfg, 'en', services), 'your first visit.'],
+  ] as const;
+}
 
-export function reservationConfirmEmail(r: { first_name: string; services: string[]; waitlist_services: string[]; preferred_day: string; preferred_time: string }, scopeHtml = '') {
+export function reservationConfirmEmail(r: { first_name: string; services: string[]; waitlist_services: string[]; preferred_day: string; preferred_time: string }, cfg: LaunchConfig, scopeHtml = '') {
   const reserved = r.services.filter((s) => !r.waitlist_services.includes(s));
-  const steps = NEXT_STEPS.map(([w, t]) => `<tr><td style="padding:10px 0;border-top:1px solid #e9eff7;vertical-align:top;width:150px"><b style="color:#0f172a">${esc(w)}</b></td><td style="padding:10px 0;border-top:1px solid #e9eff7">${esc(t)}</td></tr>`).join('');
+  const steps = nextSteps(cfg, r.services).map(([w, t]) => `<tr><td style="padding:10px 0;border-top:1px solid #e9eff7;vertical-align:top;width:150px"><b style="color:#0f172a">${esc(w)}</b></td><td style="padding:10px 0;border-top:1px solid #e9eff7">${esc(t)}</td></tr>`).join('');
   const wl = r.waitlist_services.length
     ? `<p>The founding group for ${esc(r.waitlist_services.map(svcLabel).join(' and '))} is full, so you're first on the waitlist for it.</p>` : '';
   const subject = reserved.length ? `${r.first_name}, you're reserved` : `${r.first_name}, you're on the waitlist`;
   const html = tidyEmailShell({
     heading: reserved.length ? "You're reserved." : "You're on the waitlist.",
     eyebrow: 'Founding member · visit reservation',
-    previewText: `First visits begin ${LAUNCH_DATE_LONG}.`,
+    previewText: `${startsLine(cfg, 'en', r.services)}.`,
     bodyHtml: `<p>Hi ${esc(r.first_name)},</p>${reserved.length ? `<p><b>Reserved:</b> ${esc(reserved.map(svcLabel).join(', '))} · preferred ${esc(r.preferred_day)} ${r.preferred_time === 'morning' ? 'mornings' : 'afternoons'}.</p>` : ''}${wl}<p style="margin:18px 0 4px"><b style="color:#0f172a">Here's what happens next:</b></p><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font:14px/1.5 Arial,sans-serif;color:#475569">${steps}</table><p style="margin-top:18px">No card today, nothing to pay now.</p><p>Questions any time: <a href="mailto:hello@jointidy.co">hello@jointidy.co</a> or (786) 829-1141.</p>${scopeHtml}`,
     ctaUrl: TIDY_SITE, ctaLabel: 'Visit Tidy',
   });
   return { subject, html };
 }
 
-export function reservationConfirmSms(first: string) {
-  return `Tidy: ${first}, you're reserved. We'll confirm your pro, day and time in early ${LAUNCH_MONTH} — nothing to pay now. First visits begin ${LAUNCH_DATE_LONG}. Questions: (786) 829-1141`;
+export function reservationConfirmSms(first: string, cfg: LaunchConfig, services: string[], lang: 'en' | 'es' = 'en') {
+  return lang === 'es'
+    ? `Tidy: ${first}, tu lugar está reservado. Confirmaremos tu profesional, día y horario a principios de ${fmtLaunchDate(firstDate(cfg, services), 'es', 'month')} — nada que pagar ahora. ${startsLine(cfg, 'es', services)}. Preguntas: (786) 829-1141`
+    : `Tidy: ${first}, you're reserved. We'll confirm your pro, day and time in early ${conversionMonth(cfg, services)} — nothing to pay now. ${startsLine(cfg, 'en', services)}. Questions: (786) 829-1141`;
 }
 
-export function convertEmail(r: { first_name: string; assigned_day: string; assigned_window: string; assigned_pro_first_name: string }, link: string) {
-  const line = `${r.first_name} — your Tidy service starts ${LAUNCH_DATE_LONG}. Here's your day and time: ${r.assigned_day}, ${r.assigned_window}, with ${r.assigned_pro_first_name}. Confirm and add your card — nothing charges until after your first visit.`;
+export function convertEmail(r: { first_name: string; assigned_day: string; assigned_window: string; assigned_pro_first_name: string; services?: string[] }, link: string, cfg: LaunchConfig) {
+  const start = fmtLaunchDate(firstDate(cfg, r.services ?? []));
+  const line = `${r.first_name} — your Tidy service starts ${start}. Here's your day and time: ${r.assigned_day}, ${r.assigned_window}, with ${r.assigned_pro_first_name}. Confirm and add your card — nothing charges until after your first visit.`;
   const html = tidyEmailShell({
-    heading: `Your Tidy service starts ${LAUNCH_DATE_LONG}`,
+    heading: `Your Tidy service starts ${start}`,
     eyebrow: 'Confirm your visit schedule',
     bodyHtml: `<p>${esc(line)}</p><p>Your quote is already set — just check it and add a card.</p><p>Questions any time: <a href="mailto:hello@jointidy.co">hello@jointidy.co</a> or (786) 829-1141.</p>`,
     ctaUrl: link, ctaLabel: 'Confirm & add card',
@@ -61,7 +75,7 @@ export function foundingConfirmEmail(r: {
   first_name: string; lang: string; founding: boolean; monthly_cents: number; custom_quote: boolean;
   preferred_day: string; preferred_time: string; zip: string; gift_addons: string[];
   lines: Array<{ service: string; size: unknown; cadence: string | null; monthly: number }>;
-}, launchEs: string, scopeHtml = '') {
+}, cfg: LaunchConfig, scopeHtml = '') {
   const es = r.lang === 'es';
   const rows = r.lines.map((l) => {
     const name = es ? (SVC_ES[l.service] ?? l.service) : svcLabel(l.service);
@@ -71,12 +85,12 @@ export function foundingConfirmEmail(r: {
   }).join('');
   const total = r.custom_quote ? '' : `<tr><td style="padding:10px 0;border-top:2px solid #0f172a"><b>${es ? 'Total mensual' : 'Monthly total'}</b></td><td align="right" style="padding:10px 0;border-top:2px solid #0f172a"><b>$${(r.monthly_cents / 100).toFixed(0)}/${es ? 'mes' : 'mo'}</b></td></tr>`;
   const day = es ? `${DAY_ES[r.preferred_day] ?? r.preferred_day}, ${r.preferred_time === 'morning' ? 'por la mañana' : 'por la tarde'}` : `${r.preferred_day} ${r.preferred_time === 'morning' ? 'mornings' : 'afternoons'}`;
-  const date = es ? launchEs : LAUNCH_DATE_LONG;
+  const line = startsLine(cfg, es ? 'es' : 'en', r.lines.map((l) => l.service));
   const terms = r.founding
     ? (es ? 'Reservaste con beneficios de miembro fundador.' : 'You reserved with founding-member benefits.')
     : (es ? `Los hogares fundadores en ${r.zip} ya están completos — reservaste en términos estándar.` : `Founding homes are fully reserved in ${r.zip} — you reserved at standard terms.`);
   const body = `<p>${es ? 'Hola' : 'Hi'} ${esc(r.first_name)},</p>
-<p><b>${es ? 'Sin cargo hoy.' : 'No charge today.'}</b> ${es ? `Las primeras visitas comienzan el ${esc(date)}.` : `First visits begin ${esc(date)}.`}</p>
+<p><b>${es ? 'Sin cargo hoy.' : 'No charge today.'}</b> ${esc(line)}.</p>
 <p>${es ? 'Te contactaremos aproximadamente una semana antes de tu primera visita para confirmar tu día, tu horario y tu profesional, y para configurar el pago en ese momento.' : "We'll contact you about a week before your first visit to confirm your day, your window and your Pro, and to set up payment then."}</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font:14px/1.5 Arial,sans-serif;color:#334155">${rows}${total}</table>
 <p>${es ? 'Día preferido' : 'Preferred day'}: ${esc(day)} · ZIP ${esc(r.zip)}</p>
@@ -85,6 +99,6 @@ ${r.gift_addons.length ? `<p>${es ? 'Complemento gratis elegido' : 'Free add-on 
 <p style="color:#64748b">${es ? 'Preguntas' : 'Questions'}: (786) 829-1141 · hello@jointidy.co</p>${scopeHtml}`;
   return {
     subject: es ? `${r.first_name}, tu lugar está reservado` : `${r.first_name}, you're reserved`,
-    html: tidyEmailShell({ heading: es ? 'Estás reservado. Sin cargo hoy.' : "You're reserved. No charge today.", eyebrow: es ? 'Reserva de miembro fundador' : 'Founding reservation', previewText: es ? `Las primeras visitas comienzan el ${date}.` : `First visits begin ${date}.`, bodyHtml: body, ctaUrl: TIDY_SITE, ctaLabel: es ? 'Visitar Tidy' : 'Visit Tidy' }),
+    html: tidyEmailShell({ heading: es ? 'Estás reservado. Sin cargo hoy.' : "You're reserved. No charge today.", eyebrow: es ? 'Reserva de miembro fundador' : 'Founding reservation', previewText: `${line}.`, bodyHtml: body, ctaUrl: TIDY_SITE, ctaLabel: es ? 'Visitar Tidy' : 'Visit Tidy' }),
   };
 }
