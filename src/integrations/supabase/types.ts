@@ -8239,6 +8239,17 @@ export type Database = {
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_service_caller: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
+      kpi_latest_snapshots: {
+        Args: { _codes?: string[] }
+        Returns: {
+          computed_at: string
+          kpi_code: string
+          status: Database["public"]["Enums"]["kpi_status"]
+          value: number
+          value_text: string
+        }[]
+      }
+      kpi_snapshots_prune: { Args: never; Returns: number }
       lawn_apply_size: { Args: { _reservation: string }; Returns: undefined }
       lawn_checkout_gate: { Args: { _email: string }; Returns: Json }
       lawn_conversion_block: {
