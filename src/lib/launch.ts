@@ -27,7 +27,7 @@ export function launchScope(service: string): LaunchScope {
   return ['detailing', 'car', 'car_care', 'car_wash', 'car_detail', 'shine'].includes(service) ? 'car' : service === 'lawn' ? 'lawn' : 'cleaning';
 }
 
-/** "Monday, November 16" / "lunes, 16 de noviembre"; short = "Monday, Nov 16". */
+/** Long ("Monday, <Month> <day>"), short ("Monday, <Mon> <day>") or month-name formatting, EN or ES. */
 export function fmtLaunchDate(iso: string | null | undefined, lang: 'en' | 'es' = 'en', style: 'long' | 'short' | 'month' = 'long'): string {
   if (!iso) return '';
   const d = new Date(`${iso.slice(0, 10)}T12:00:00Z`);

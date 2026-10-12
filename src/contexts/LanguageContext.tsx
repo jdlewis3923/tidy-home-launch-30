@@ -88,8 +88,6 @@ const translations: Record<string, string> = {
   "Monthly total": "Total mensual",
   "Visits a month": "Visitas al mes",
   "Per visit": "Por visita",
-  "Founding visits begin Monday, November 16.": "Las visitas de fundadores comienzan el lunes 16 de noviembre.",
-  "Founding visits begin Monday, November 16. No charge today — we'll confirm your day and your Pro the week before, and set up payment then.": "Las visitas de fundadores comienzan el lunes 16 de noviembre. Sin cargo hoy — confirmaremos tu día y tu profesional la semana anterior, y configuraremos el pago en ese momento.",
   "Google reviewer": "Cliente de Google",
   "and your first premium add-on is free every month.": "y tu primer servicio adicional premium es gratis cada mes.",
   "and get two free premium add-ons every month.": "y recibe dos servicios adicionales premium gratis cada mes.",
@@ -606,8 +604,6 @@ const translations: Record<string, string> = {
   "A quick form · No contracts": "Un formulario rápido · Sin contratos",
   "No card, no account": "Sin tarjeta ni cuenta",
   "Reserve your spot": "Reserva tu lugar",
-  "First visits begin Monday, Nov 16": "Las primeras visitas comienzan el lunes 16 de nov",
-  "First visits begin Monday, November 16": "Las primeras visitas comienzan el lunes 16 de noviembre",
   "A quick form to sign up. Same Pro. Locked price.":
     "Un formulario rápido para inscribirte. El mismo profesional. Precio fijo.",
   "Book in a couple of minutes": "Reserva en un par de minutos",
