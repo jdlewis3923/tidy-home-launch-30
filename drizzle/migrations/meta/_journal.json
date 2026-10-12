@@ -1037,6 +1037,34 @@
       "when": 1791843537184,
       "tag": "0147_kpi_latest_snapshot_rows",
       "breakpoints": true
+    },
+    {
+      "idx": 148,
+      "version": "7",
+      "when": 1791845281283,
+      "tag": "0148_launch_config",
+      "breakpoints": true
+    },
+    {
+      "idx": 149,
+      "version": "7",
+      "when": 1791845322183,
+      "tag": "0149_launch_dates_per_service_in_scheduler",
+      "breakpoints": true
+    },
+    {
+      "idx": 150,
+      "version": "7",
+      "when": 1791845344757,
+      "tag": "0150_launch_visit_guard_fix",
+      "breakpoints": true
+    },
+    {
+      "idx": 151,
+      "version": "7",
+      "when": 1791845626970,
+      "tag": "0151_my_pro_services",
+      "breakpoints": true
     }
   ]
 }

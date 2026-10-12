@@ -55,6 +55,7 @@ const GROUPS: NavGroup[] = [
     { to: "/admin/health", label: "Health", icon: Heart },
     { to: "/admin/email-health", label: "Email & SMS", icon: Mail },
     { to: "/admin/site-status", label: "Site", icon: Power },
+    { to: "/admin/launch-dates", label: "Launch dates", icon: CalendarDays },
     { to: "/admin/chatbot-knowledge", label: "Chatbot", icon: BookOpen },
     { to: "/admin/agents", label: "Agents", icon: Bot },
     { to: "/admin/settings/notifications", label: "Notify", icon: Bell },

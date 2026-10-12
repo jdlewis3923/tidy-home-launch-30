@@ -10,7 +10,8 @@ import { Helmet } from "react-helmet-async";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useFoundingCounts } from "@/hooks/useFoundingCounts";
 import { useGoogleListing, shortName, pickReview, formatRating } from "@/lib/googleReviews";
-import { FOUNDING_ZIPS, FOUNDING_CAP, FOUNDING_BENEFITS, LAUNCH_DATE_LONG, LAUNCH_DATE_LONG_ES } from "@/lib/launch";
+import { FOUNDING_ZIPS, FOUNDING_CAP, FOUNDING_BENEFITS, startsLine } from "@/lib/launch";
+import { useLaunchConfig } from "@/hooks/useLaunchConfig";
 import { LAWN_GRASS_ONLY_NOTE, LAWN_OVER_OPTION, lookupKeyFor, sizeFromBedrooms, VISITS_PER_MONTH, BILLED_MONTHLY, SIZE_PRICES, type CanonCadence, type CanonSize, type SizeSelection } from "@/lib/pricing-canon";
 import { GIFT_ELIGIBLE_ADDONS } from "@/lib/addon-catalog";
 import { PHONE_DISPLAY, PHONE_TEL } from "@/lib/landing";
@@ -113,7 +114,8 @@ export default function Founding() {
   const foundingFull = isZip(s.zip) && left === 0;
   const prices = usePrices();
   const listing = useGoogleListing();
-  const launch = language === "es" ? LAUNCH_DATE_LONG_ES : LAUNCH_DATE_LONG;
+  const launchCfg = useLaunchConfig();
+  const lang = language === "es" ? "es" : "en";
   const quoteCardRef = useRef<HTMLElement>(null);
   // Every step change requests a scroll; the effect below runs after React has rendered the new step.
   const [scrollRequest, setScrollRequest] = useState(0);
@@ -412,7 +414,7 @@ export default function Founding() {
                     <Stat label={t("Per visit")} value={visits ? money(total / visits) : "—"} />
                   </div>
                 )}
-                <p className="founding-launch-note">{t("Founding visits begin")} {launch}.</p>
+                <p className="founding-launch-note">{startsLine(launchCfg, lang, s.services)}.</p>
                 <p className="mt-2 text-center text-sm font-semibold text-primary">{t("Not right? We come back within 48 hours, free.")}</p>
                 <ul className="mt-3 divide-y divide-border text-sm">
                   {lines.map((l) => l && (
@@ -496,7 +498,7 @@ export default function Founding() {
                 )}
                 <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} />
                 {err && <p role="alert" className="text-sm font-semibold text-destructive">{err}</p>}
-                <p className="founding-reserve-launch">{t("Founding visits begin")} {launch}. {t("No charge today — we'll confirm your day and your Pro the week before, and set up payment then.")}</p>
+                <p className="founding-reserve-launch">{startsLine(launchCfg, lang, s.services)}. {t("No charge today — we'll confirm your day and your Pro the week before, and set up payment then.")}</p>
                 <button className={primaryBtn} disabled={!formOk || !scopeOk || busy}>{busy ? t("Saving…") : t("Reserve my spot — no charge")}</button>
                 <p className="text-center text-xs text-ink-faint">{t("By reserving you agree to our")} <Link to="/terms" className="underline">{t("Terms")}</Link> {t("and")} <Link to="/privacy" className="underline">{t("Privacy Policy")}</Link>.</p>
                 <button type="button" className={`${chip} ${off} w-full`} onClick={() => go("price")}>← {t("Back to my price")}</button>
@@ -507,7 +509,7 @@ export default function Founding() {
               <div className="text-center" role="status">
                 <h2 className="text-2xl font-extrabold">{t("You're reserved. No charge today.")}</h2>
                 {result?.updated && <p className="mt-1 text-sm font-semibold text-primary">{t("We found your earlier reservation and updated it.")}</p>}
-                <p className="mt-2 font-semibold">{t("First visits begin")} {launch}.</p>
+                <p className="mt-2 font-semibold">{startsLine(launchCfg, lang, s.services)}.</p>
                 <p className="mt-2 text-sm">{t("We'll contact you about a week before your first visit to confirm your day, your window and your Pro, and to set up payment then.")}</p>
                 {!result?.founding && <p className="mt-2 text-sm">{t("Founding homes are fully reserved in")} {s.zip} — {t("you're reserving at standard terms.")}</p>}
                 <ul className="mt-3 divide-y divide-border text-left text-sm">

@@ -223,6 +223,16 @@ Deno.serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  // Launch gate (launch_config): car care — Shine Complete or the Car Wash Add-On —
+  // cannot convert to paid before its conversion date.
+  if (input.car_wash || input.services.some((s) => s.service === "detailing")) {
+    const { data: open } = await supabase.rpc("launch_conversion_open", { _scope: "car" });
+    if (open === false) {
+      const { data: row } = await supabase.from("launch_config").select("conversion_date").eq("scope", "car").maybeSingle();
+      return jsonResponse({ ok: false, error: "car_care_conversion_not_open", opens: row?.conversion_date ?? null }, 409);
+    }
+  }
+
 
   // ---------- Lawn: verified from aerial imagery before conversion ----------
   {

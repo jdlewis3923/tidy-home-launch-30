@@ -16,7 +16,8 @@ import SectionDecor from "@/components/landing/SectionDecor";
 import LandingTicker from "@/components/landing/LandingTicker";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import { SERVICE_AREA_TRUST } from "@/lib/landing";
-import { LAUNCH_DATE_SHORT } from "@/lib/launch";
+import { startsLine } from "@/lib/launch";
+import { useLaunchConfig } from "@/hooks/useLaunchConfig";
 import { pushEvent, trackSelectPlan, useViewPricingObserver } from "@/lib/tracking";
 import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
@@ -130,7 +131,8 @@ const ServiceLandingPage = ({ config }: Props) => (
 
 const ServiceLandingPageInner = ({ config }: Props) => {
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const launchCfg = useLaunchConfig();
   // Fires view_pricing once per pageview when the plan cards scroll into view.
   const pricingRef = useViewPricingObserver({ service: config.signupServiceParam });
 
@@ -280,7 +282,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
                 {t(config.ctaPrimaryLabel ?? "Reserve your spot")} <span className="arrow ml-1">→</span>
               </Link>
               <p className="mt-2 text-[11px] md:text-xs text-primary-foreground/85 whitespace-nowrap">
-                {t("No card, no account")} · {t(`First visits begin ${LAUNCH_DATE_SHORT}`)}
+                {t("No card, no account")} · {startsLine(launchCfg, language === "es" ? "es" : "en", [config.serviceSlug === "car-detailing" ? "car" : config.serviceSlug === "lawn-care" ? "lawn" : "cleaning"], "short")}
               </p>
             </div>
           </div>

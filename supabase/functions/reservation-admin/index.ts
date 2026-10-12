@@ -9,6 +9,8 @@ import { TIDY_SITE } from '../_shared/email-brand.ts';
 import { queueSms, isWindowOpen, nextOpenWindow } from '../_shared/sms-window.ts';
 import { toE164 } from '../_shared/member-followups.ts';
 import { convertEmail, logEmail } from '../_shared/reservation-emails.ts';
+import { loadLaunchConfig, easternTodayIso } from '../_shared/launch-config.ts';
+import { launchScope } from '../_shared/launch.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 const Body = z.object({
@@ -29,9 +31,18 @@ Deno.serve(async (req) => {
   if (!r) return jsonResponse({ ok: false, error: 'not_found' }, 404);
   if (r.status === 'converted' || r.status === 'canceled') return jsonResponse({ ok: false, error: `already_${r.status}` }, 409);
 
+  // Conversion dates live in launch_config. Car care cannot be converted before its date.
+  const cfg = await loadLaunchConfig(admin);
+  const today = easternTodayIso();
+  const scopes = [...new Set(((r.services ?? []) as string[]).map(launchScope))];
+  const early = scopes.filter((s) => cfg[s]?.conversion_date && today < (cfg[s]!.conversion_date as string));
+  if (b.action !== 'preview' && early.includes('car')) {
+    return jsonResponse({ ok: false, error: 'car_care_conversion_not_open', opens: cfg.car?.conversion_date }, 409);
+  }
+
   const t = r.invite_token ?? token();
   const link = `${TIDY_SITE}/reserve/confirm/${t}`;
-  const msg = convertEmail({ first_name: r.first_name, assigned_day: b.day, assigned_window: b.window, assigned_pro_first_name: b.pro_first_name }, link);
+  const msg = convertEmail({ first_name: r.first_name, assigned_day: b.day, assigned_window: b.window, assigned_pro_first_name: b.pro_first_name, services: r.services ?? [] }, link, cfg);
   if (b.action === 'preview') return jsonResponse({ ok: true, to: r.email, phone: r.phone, subject: msg.subject, html: msg.html, sms: msg.sms });
 
   await admin.from('reservations').update({ invite_token: t, invited_at: new Date().toISOString(), status: 'invited', assigned_day: b.day, assigned_window: b.window, assigned_pro_first_name: b.pro_first_name }).eq('id', r.id);

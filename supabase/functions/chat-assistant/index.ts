@@ -1,5 +1,7 @@
 // Tidy chatbot — Lovable AI Gateway, streaming, knowledge-base grounded.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { loadLaunchConfig } from "../_shared/launch-config.ts";
+import { fmtLaunchDate } from "../_shared/launch.ts";
 import { vendorFetch } from '../_shared/http.ts';
 
 const corsHeaders = {
@@ -42,6 +44,19 @@ Deno.serve(async (req) => {
 
     const knowledge = kbRow?.content?.trim() || FALLBACK_KNOWLEDGE;
 
+    // Launch dates come live from launch_config, so the chatbot can never quote a stale date.
+    let launchFacts = "";
+    try {
+      const cfg = await loadLaunchConfig(supabase);
+      launchFacts = `\n\nLAUNCH DATES (authoritative — always use these):
+- House cleaning: first visits begin ${fmtLaunchDate(cfg.cleaning?.first_visit_date)}.
+- Lawn care: first visits begin ${fmtLaunchDate(cfg.lawn?.first_visit_date)}.
+- Car Care (Shine Complete and the Car Wash Add-On): first visits begin ${fmtLaunchDate(cfg.car?.first_visit_date)}.
+- Reservations made now are free; we confirm the day, window and Pro and set up payment shortly before the first visit.
+- No visits on Thanksgiving Day.
+When asked when Tidy starts, give the date for the service they ask about; if they don't say, give both dates.`;
+    } catch { /* knowledge alone; the model is told not to guess */ }
+
     const systemPrompt = `You are Tidy's friendly concierge assistant. You help homeowners in Miami learn about Tidy Home Concierge's subscription cleaning, lawn care, and Car Care services.
 
 RULES:
@@ -53,7 +68,7 @@ RULES:
 - Currency is USD. Service area is Miami (Kendall, Pinecrest area).
 
 BUSINESS KNOWLEDGE:
-${knowledge}`;
+${knowledge}${launchFacts}`;
 
     const aiResp = await vendorFetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

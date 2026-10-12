@@ -3656,6 +3656,72 @@ export type Database = {
         }
         Relationships: []
       }
+      launch_config: {
+        Row: {
+          conversion_date: string | null
+          first_visit_date: string | null
+          hanger_drops: Json
+          late_first_visit_week: string | null
+          pro_callback_date: string | null
+          pro_ready_by: string | null
+          scope: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          conversion_date?: string | null
+          first_visit_date?: string | null
+          hanger_drops?: Json
+          late_first_visit_week?: string | null
+          pro_callback_date?: string | null
+          pro_ready_by?: string | null
+          scope: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          conversion_date?: string | null
+          first_visit_date?: string | null
+          hanger_drops?: Json
+          late_first_visit_week?: string | null
+          pro_callback_date?: string | null
+          pro_ready_by?: string | null
+          scope?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      launch_config_log: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          field: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          scope: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          field: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          scope: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          field?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          scope?: string
+        }
+        Relationships: []
+      }
       lawn_plan_changes: {
         Row: {
           applied_at: string | null
@@ -7963,6 +8029,10 @@ export type Database = {
         Args: { _token: string }
         Returns: undefined
       }
+      admin_set_launch_config: {
+        Args: { _field: string; _scope: string; _value: string }
+        Returns: undefined
+      }
       admin_set_meta_secret: {
         Args: { _name: string; _value: string }
         Returns: undefined
@@ -8261,6 +8331,7 @@ export type Database = {
         }[]
       }
       kpi_snapshots_prune: { Args: never; Returns: number }
+      launch_conversion_open: { Args: { _scope: string }; Returns: boolean }
       lawn_apply_size: { Args: { _reservation: string }; Returns: undefined }
       lawn_checkout_gate: { Args: { _email: string }; Returns: Json }
       lawn_conversion_block: {
@@ -8301,6 +8372,10 @@ export type Database = {
       }
       my_founding: { Args: never; Returns: Json }
       my_language: { Args: never; Returns: string }
+      my_pro_services: {
+        Args: never
+        Returns: Database["public"]["Enums"]["service_type"][]
+      }
       nextval: { Args: { seq_name: string }; Returns: number }
       notify_member: {
         Args: {
@@ -8679,7 +8754,12 @@ export type Database = {
         Returns: number
       }
       sched_ladder: { Args: never; Returns: undefined }
-      sched_launch_date: { Args: never; Returns: string }
+      sched_launch_date:
+        | { Args: never; Returns: string }
+        | {
+            Args: { _s: Database["public"]["Enums"]["service_type"] }
+            Returns: string
+          }
       sched_load: {
         Args: { _d: string; _excl_booking: string; _pro: string }
         Returns: number

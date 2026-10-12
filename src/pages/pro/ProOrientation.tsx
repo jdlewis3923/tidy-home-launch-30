@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import ProLaunchLine from "@/components/pro/ProLaunchLine";
 import { Link, Navigate } from "react-router-dom";
 import { Lock, Check, ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export default function ProOrientation() {
   return <main className="orientation-app">
     <Helmet><title>Pro orientation | TIDY</title><meta name="robots" content="noindex,nofollow" /></Helmet>
     <nav className="orientation-topbar"><Link to="/pro/profile" aria-label="TIDY Pro profile"><TidyLogo priority /></Link><span className="orientation-top-label font-bold">PRO ORIENTATION / ORIENTACIÓN</span><Button asChild className="orientation-gold-button"><Link to="/pro/orientation/preview"><Play /> Preview / Vista previa</Link></Button></nav>
-    <header className="orientation-hero"><img src={orientationImage("PRO-1")} width={1536} height={1024} alt="Illustration of a Pro greeting a homeowner at the door" /><div className="orientation-hero-copy"><h1>Pro orientation</h1><p className="hero-spanish" lang="es">Orientación para Pros</p><p>Reliable. Respectful. Thorough.</p><p className="hero-spanish" lang="es">Confiable. Respetuoso. Minucioso.</p></div></header>
+    <header className="orientation-hero"><img src={orientationImage("PRO-1")} width={1536} height={1024} alt="Illustration of a Pro greeting a homeowner at the door" /><div className="orientation-hero-copy"><h1>Pro orientation</h1><p className="hero-spanish" lang="es">Orientación para Pros</p><p>Reliable. Respectful. Thorough.</p><p className="hero-spanish" lang="es">Confiable. Respetuoso. Minucioso.</p></div></header><ProLaunchLine className="mx-auto max-w-5xl px-6 pt-6" />
     <div className="orientation-hub-body">
       <div className="orientation-progress"><div className="orientation-ring" aria-label={`${done.size} of 4 sections read`}><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" /><circle className="ring-filled" cx="50" cy="50" r="42" strokeDasharray={`${done.size / 4 * 264} 264`} /></svg><strong>{done.size}/4</strong></div><div><h2>{done.size} of 4 sections read</h2><p className="mt-2 text-sm text-muted-foreground" lang="es">{done.size} de 4 secciones leídas</p></div></div>
       {error && <p role="alert" className="mb-6 text-destructive">Your orientation could not load. Please refresh. / No se pudo cargar tu orientación. Actualiza la página.</p>}
