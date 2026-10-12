@@ -52,6 +52,8 @@ const BodySchema = z.object({
   triggered_by: z.string().min(1).max(120).optional(),
   /** Set by sms-outbox-release when draining a parked message. */
   skip_window: z.boolean().optional(),
+  /** Texts to the owner's alert phone only go out from the alert dispatcher or a test. */
+  admin_channel: z.enum(['urgent', 'digest', 'test']).optional(),
   /**
    * ISO instant after which a parked copy of this message must be canceled
    * instead of delivered — the event it refers to has passed by then.
@@ -252,7 +254,7 @@ Deno.serve(async (req) => {
 
     const {
       to_phone_e164, body, content_sid, content_variables,
-      idempotency_key, template_name, triggered_by, skip_window, expires_at,
+      idempotency_key, template_name, triggered_by, skip_window, expires_at, admin_channel,
     } = parsed.data;
     const tplName = template_name ?? content_sid ?? 'sms-adhoc';
 
@@ -270,6 +272,14 @@ Deno.serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
+
+    // ---- Owner phone: two digests a day plus urgent alerts only (Part E) ----
+    const ownerPhone = Deno.env.get('JUSTIN_ALERT_PHONE') ?? '+17868291141';
+    if (!admin_channel && to_phone_e164 === ownerPhone) {
+      await holdForDigest('admin_text', (body ?? tplName).slice(0, 200), triggered_by ?? 'send-twilio-sms');
+      await finish('success', 'held_for_digest');
+      return jsonResponse({ ok: true, sent: false, held_for_digest: true });
+    }
 
     // ---- Send window: queue instead of destroy ----
     const blocked = skip_window ? null : closedReason();
