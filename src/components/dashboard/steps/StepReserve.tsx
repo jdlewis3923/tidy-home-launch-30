@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ConfigState, calculatePricing, sizeFor, VALID_ZIPS, clearState } from '@/lib/dashboard-pricing';
-import { LAUNCH_DATE_LONG, RESERVATION_SERVICE_LABEL, RESERVABLE_SERVICES, type ReservableService } from '@/lib/launch';
+import { startsLine, RESERVATION_SERVICE_LABEL, RESERVABLE_SERVICES, type ReservableService } from '@/lib/launch';
 import FoundingCounter from '@/components/FoundingCounter';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
@@ -73,7 +73,7 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-hairline bg-white p-5 text-sm text-ink-soft space-y-2" data-testid="reserve-framing">
-        <p>{t(`No card today, nothing to pay now. We'll confirm your day and time before service begins on ${LAUNCH_DATE_LONG}.`)}</p>
+        <p>{t("No card today, nothing to pay now. We'll confirm your day and time before service begins.")} {startsLine(launchCfg, language === 'es' ? 'es' : 'en', services)}.</p>
         <p className="font-semibold text-ink">{t('Founding members pick their day first — the earlier you reserve, the better your choice of day and time.')}</p>
         <div className="pt-1"><FoundingCounter zip={state.zip} /></div>
       </div>

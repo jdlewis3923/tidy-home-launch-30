@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { RESERVATIONS_MODE, LAUNCH_DATE_LONG, FOUNDING_CAP } from "@/lib/launch";
+import { RESERVATIONS_MODE, FOUNDING_CAP, startsLine } from "@/lib/launch";
+import { useLaunchConfig } from "@/hooks/useLaunchConfig";
 import FoundingCounter from "@/components/FoundingCounter";
 import heroVideo from "@/assets/homepage-mobile-hero-20261004b.mp4.asset.json";
 import heroPoster from "@/assets/homepage-mobile-hero-poster-20261004b.jpg.asset.json";
@@ -196,7 +197,7 @@ const Hero = ({ onOpenPopup }: HeroProps) => {
         <div className="w-full">
           <p className="mt-0 md:mt-4 text-xs text-primary-foreground/60" data-testid="hero-trust-line">
             {RESERVATIONS_MODE
-              ? <>{t(`First visits begin ${LAUNCH_DATE_LONG}`)} · {FOUNDING_CAP} {t("founding homes")} · {t("No contracts")} ·{" "}</>
+              ? <>{startsLine(launchCfg, language === "es" ? "es" : "en")} · {FOUNDING_CAP} {t("founding homes")} · {t("No contracts")} ·{" "}</>
               : <>{t(CUSTOMER_DASHBOARD_ENABLED ? "No contracts · Cancel anytime ·" : "Founding memberships · No commitment ·")}{" "}</>}
             <strong className="font-bold text-primary-foreground">{t("48-hour guarantee")}</strong>
           </p>

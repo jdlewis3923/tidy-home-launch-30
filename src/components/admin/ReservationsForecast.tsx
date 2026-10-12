@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { FOUNDING_CAP, LAUNCH_DATE_LONG, RESERVABLE_SERVICES, RESERVATION_SERVICE_LABEL, type ReservableService } from "@/lib/launch";
+import { FOUNDING_CAP, startsLine, RESERVABLE_SERVICES, RESERVATION_SERVICE_LABEL, type ReservableService } from "@/lib/launch";
 
 export type ReservationRow = {
   id: string; created_at: string; status: string; first_name: string; last_name: string; email: string; phone: string;
@@ -56,7 +56,7 @@ export default function ReservationsForecast({ compact = false }: { compact?: bo
     <section className="admin-page-surface rounded-lg border bg-card p-5" data-testid="reservations-forecast">
       <div className="flex flex-wrap items-baseline gap-3">
         <h2 className="text-lg font-bold text-foreground">Reservations</h2>
-        <span className="text-xs text-muted-foreground">first visits {LAUNCH_DATE_LONG} · if every reservation converts</span>
+        <span className="text-xs text-muted-foreground">{startsLine(launchCfg).toLowerCase()} · if every reservation converts</span>
         {compact && <Link to="/admin/reservations" className="ml-auto text-xs font-semibold text-primary underline">Open reservations</Link>}
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-4">

@@ -2,20 +2,23 @@ import { Link } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import CalmShell from '@/components/dashboard/CalmShell';
 import FoundingCounter from '@/components/FoundingCounter';
-import { LAUNCH_DATE_LONG, LAUNCH_MONTH, RESERVATION_SERVICE_LABEL, type ReservableService } from '@/lib/launch';
+import { RESERVATION_SERVICE_LABEL, fmtLaunchDate, launchScope, startsLine, type ReservableService } from '@/lib/launch';
+import { useLaunchConfig } from '@/hooks/useLaunchConfig';
 import { RESERVE_RESULT_KEY } from '@/components/dashboard/steps/StepReserve';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Reserved() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const cfg = useLaunchConfig();
+  const lang = language === 'es' ? 'es' : 'en';
   let r: { first?: string; services?: ReservableService[]; waitlist?: ReservableService[] } = {};
   try { r = JSON.parse(sessionStorage.getItem(RESERVE_RESULT_KEY) ?? '{}'); } catch { /* ignore */ }
   const waitlist = r.waitlist ?? [];
   const reserved = (r.services ?? []).filter((s) => !waitlist.includes(s));
   const steps = [
     [t('Now'), t('we hold your spot and your preferred day.')],
-    [t(`Early ${LAUNCH_MONTH}`), t('we confirm your pro, your day and your time window, and you add a card. Nothing charges until your first visit.')],
-    [t(LAUNCH_DATE_LONG), t('your first visit.')],
+    [`${lang === 'es' ? 'Principios de' : 'Early'} ${fmtLaunchDate(reserved.map((s) => cfg?.[launchScope(s)]?.conversion_date).filter(Boolean).sort()[0] as string | undefined, lang, 'month')}`, t('we confirm your pro, your day and your time window, and you add a card. Nothing charges until your first visit.')],
+    [startsLine(cfg, lang, reserved), t('your first visit.')],
   ];
   return (
     <CalmShell step={0} totalSteps={0} microcopy="">
