@@ -1037,6 +1037,13 @@
       "when": 1791843537184,
       "tag": "0147_kpi_latest_snapshot_rows",
       "breakpoints": true
+    },
+    {
+      "idx": 148,
+      "version": "7",
+      "when": 1791845281283,
+      "tag": "0148_launch_config",
+      "breakpoints": true
     }
   ]
 }
