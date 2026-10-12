@@ -138,4 +138,5 @@
 - [x] Master prompt Part C — launch dates in launch_config, car care 30 Nov, server gates.
 - [x] Part D screens: service scope admin, size review, evidence pack, Pro job card, terms
 - [x] Part E — alert tiers, urgent on insert, 9 AM / 9 PM digests, /admin/alerts tiers
-- [ ] Master prompt Parts F, G — next.
+- [x] Part F — one post one row, duplicate + double-publish guards, archive, rebuild to 31 Dec, /admin/social
+- [ ] Part G — launch scheduling (next).
