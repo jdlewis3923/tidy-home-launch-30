@@ -10,7 +10,8 @@ import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell, TIDY_OWNER_EMAIL } from '../_shared/email-brand.ts';
 import { queueSms, isWindowOpen, nextOpenWindow } from '../_shared/sms-window.ts';
 import { toE164 } from '../_shared/member-followups.ts';
-import { RESERVATION_ALERTS, RESERVABLE_SERVICES, LAUNCH_DATE_LONG_ES } from '../_shared/launch.ts';
+import { RESERVATION_ALERTS, RESERVABLE_SERVICES } from '../_shared/launch.ts';
+import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { groupsFor, verifyScopeAcceptance, scopeEmailHtml } from '../_shared/scope.ts';
 import { esc, logEmail, reservationConfirmEmail, foundingConfirmEmail, reservationConfirmSms, svcLabel } from '../_shared/reservation-emails.ts';
 
@@ -60,9 +61,10 @@ async function notify(row: any, isUpdate: boolean, page: string) {
   await step('member email', async () => {
     const monthlyLawn = (row.lines ?? []).some((l: { service: string; cadence: string | null }) => l.service === 'lawn' && l.cadence === 'monthly');
     const scopeHtml = await scopeEmailHtml(admin, groupsFor(row.services ?? []), row.lang === 'es' ? 'es' : 'en', { monthlyLawn }).catch(() => '');
+    const cfg = await loadLaunchConfig(admin);
     const em = page === 'founding'
-      ? foundingConfirmEmail(row, LAUNCH_DATE_LONG_ES, scopeHtml)
-      : reservationConfirmEmail(row, scopeHtml);
+      ? foundingConfirmEmail(row, cfg, scopeHtml)
+      : reservationConfirmEmail(row, cfg, scopeHtml);
     const sent = await sendBrevoEmail({ to: { email: row.email, name: row.first_name }, marketing: false, subject: em.subject, htmlContent: em.html, label: 'reservation-confirm', tags: ['reservation'] });
     await logEmail(admin, page === 'founding' ? 'founding-reservation-confirm' : 'reservation-confirm', row.email, em.subject, sent, 'reservation-submit');
     if (!sent.sent) throw new Error(sent.reason ?? 'send failed');
@@ -71,7 +73,7 @@ async function notify(row: any, isUpdate: boolean, page: string) {
     const phone = toE164(row.phone);
     if (!phone || !row.sms_consent) return;
     const now = new Date();
-    const r = await queueSms(admin, { to_phone_e164: phone, body: reservationConfirmSms(row.first_name), idempotency_key: `reservation_confirm:${row.id}:${row.update_count}`, template_name: 'reservation_confirm', triggered_by: 'reservation-submit' }, 'reservation_confirm', isWindowOpen(now) ? now : nextOpenWindow(now));
+    const r = await queueSms(admin, { to_phone_e164: phone, body: reservationConfirmSms(row.first_name, await loadLaunchConfig(admin), row.services ?? [], row.lang === 'es' ? 'es' : 'en'), idempotency_key: `reservation_confirm:${row.id}:${row.update_count}`, template_name: 'reservation_confirm', triggered_by: 'reservation-submit' }, 'reservation_confirm', isWindowOpen(now) ? now : nextOpenWindow(now));
     if (!r.queued) throw new Error(String(r.error ?? 'queue failed'));
   });
   const lines = (row.lines ?? []) as Array<{ service: string; size: unknown; cadence: string | null; monthly: number }>;
