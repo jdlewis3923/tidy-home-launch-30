@@ -176,7 +176,7 @@ async function processPost(sb: ReturnType<typeof createClient>, post: Post): Pro
       .eq("id", post.id);
     // A failed auto-post goes to the digest, not an urgent alert. Status
     // 'failed' is never re-pulled, so it cannot repeat on its own.
-    await writeAlert(sb, {
+    await writeAlert(sb as never, {
       level: "action", category: "operations", tier: "digest",
       title: `Social post failed to publish · ${new Date(post.scheduled_for).toLocaleDateString("en-US", { timeZone: "America/New_York" })}`,
       body: msg, action_label: "Open social calendar", action_url: "/admin/social",
@@ -217,7 +217,7 @@ Deno.serve(async (req) => {
 
   const results: Array<{ id: string; ok: boolean; error?: string }> = [];
   for (const p of (posts ?? []) as Post[]) {
-    const r = await processPost(sb, p);
+    const r = await processPost(sb as never, p);
     results.push({ id: p.id, ...r });
   }
   return json({ processed: results.length, results });
