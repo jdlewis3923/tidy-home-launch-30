@@ -8239,6 +8239,17 @@ export type Database = {
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_service_caller: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
+      kpi_latest_snapshot_rows: {
+        Args: never
+        Returns: {
+          computed_at: string
+          context: Json
+          kpi_code: string
+          status: Database["public"]["Enums"]["kpi_status"]
+          value: number
+          value_text: string
+        }[]
+      }
       kpi_latest_snapshots: {
         Args: { _codes?: string[] }
         Returns: {

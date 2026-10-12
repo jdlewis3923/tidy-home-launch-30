@@ -1030,6 +1030,13 @@
       "when": 1791843506066,
       "tag": "0146_kpi_latest_snapshots_and_retention",
       "breakpoints": true
+    },
+    {
+      "idx": 147,
+      "version": "7",
+      "when": 1791843537184,
+      "tag": "0147_kpi_latest_snapshot_rows",
+      "breakpoints": true
     }
   ]
 }
