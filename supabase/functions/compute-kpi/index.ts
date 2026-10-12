@@ -383,12 +383,8 @@ Deno.serve(async (req) => {
 
     // Latest prior snapshot per code (for transition detection)
     const codes = computed.map((c) => c.code);
-    const { data: prior } = await supabase
-      .from('kpi_snapshots')
-      .select('kpi_code, status, computed_at')
-      .in('kpi_code', codes)
-      .order('computed_at', { ascending: false })
-      .limit(500);
+    // One indexed lookup per KPI (the old ordered scan over all history took ~1s a run).
+    const { data: prior } = await supabase.rpc('kpi_latest_snapshots', { _codes: codes });
     const priorStatus = new Map<string, KpiStatus>();
     for (const p of prior ?? []) {
       if (!priorStatus.has(p.kpi_code)) priorStatus.set(p.kpi_code, p.status as KpiStatus);
@@ -433,6 +429,8 @@ Deno.serve(async (req) => {
       const { error: snapErr } = await supabase.from('kpi_snapshots').insert(snapRows);
       if (snapErr) throw new Error(`snapshot insert failed: ${snapErr.message}`);
     }
+    // Keep 90 days of KPI history; deletes in small batches so it never spikes the disk.
+    await supabase.rpc('kpi_snapshots_prune').then(() => {}, () => {});
 
     // Fire alerts via smart filter (suppression + predictive lead-time)
     let firedCount = 0;

@@ -291,11 +291,7 @@ export default function AdminKpis() {
           .eq("enabled", true)
           .order("display_order", { ascending: true }),
         // Get latest snapshot per kpi_code via a window-style query (RLS = admin)
-        supabase
-          .from("kpi_snapshots")
-          .select("*")
-          .order("computed_at", { ascending: false })
-          .limit(500),
+        supabase.rpc("kpi_latest_snapshot_rows"),
         supabase
           .from("kpi_alerts")
           .select("id, kpi_code, severity, message, created_at")
