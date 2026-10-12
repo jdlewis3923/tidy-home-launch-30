@@ -131,7 +131,8 @@ const ServiceLandingPage = ({ config }: Props) => (
 
 const ServiceLandingPageInner = ({ config }: Props) => {
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const launchCfg = useLaunchConfig();
   // Fires view_pricing once per pageview when the plan cards scroll into view.
   const pricingRef = useViewPricingObserver({ service: config.signupServiceParam });
 

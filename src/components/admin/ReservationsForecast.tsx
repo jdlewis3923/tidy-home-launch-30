@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useLaunchConfig } from "@/hooks/useLaunchConfig";
 import { FOUNDING_CAP, startsLine, RESERVABLE_SERVICES, RESERVATION_SERVICE_LABEL, type ReservableService } from "@/lib/launch";
 
 export type ReservationRow = {
@@ -49,6 +50,7 @@ export function forecast(rows: ReservationRow[]) {
 }
 
 export default function ReservationsForecast({ compact = false }: { compact?: boolean }) {
+  const launchCfg = useLaunchConfig();
   const { rows } = useReservations();
   if (!rows) return null;
   const f = forecast(rows);

@@ -15,7 +15,8 @@ interface HeroProps {
 }
 
 const Hero = ({ onOpenPopup }: HeroProps) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const launchCfg = useLaunchConfig();
   // Reduced-motion visitors keep the still photo; everyone else gets the loop.
   const [motionOk, setMotionOk] = useState(false);
   useEffect(() => {

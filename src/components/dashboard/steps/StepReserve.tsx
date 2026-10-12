@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ConfigState, calculatePricing, sizeFor, VALID_ZIPS, clearState } from '@/lib/dashboard-pricing';
+import { useLaunchConfig } from '@/hooks/useLaunchConfig';
 import { startsLine, RESERVATION_SERVICE_LABEL, RESERVABLE_SERVICES, type ReservableService } from '@/lib/launch';
 import FoundingCounter from '@/components/FoundingCounter';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -22,6 +23,7 @@ export const RESERVE_RESULT_KEY = 'tidy_reservation_result';
 
 export default function StepReserve({ state, onChange }: { state: ConfigState; onChange: (s: ConfigState) => void }) {
   const { t, language } = useLanguage();
+  const launchCfg = useLaunchConfig();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [heard, setHeard] = useState('');
