@@ -94,7 +94,8 @@ describe('helpers that shipped with no callers', () => {
     expect(callers.length).toBeGreaterThan(0);
     // and every caller passes its own job name as the first argument
     const named = new Set(EXPECTED_CRON_JOBS.map((j) => j.name));
-    const unknown = [...new Set(callers)].filter((c) => !named.has(c));
+    // "job:event" names are event-driven calls into a scheduled job's function (e.g. urgent alerts on insert).
+    const unknown = [...new Set(callers)].filter((c) => !named.has(c.split(':')[0]));
     expect(unknown).toEqual([]);
   });
 
