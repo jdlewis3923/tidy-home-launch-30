@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ProVisitExtras from "@/components/pro/ProVisitExtras";
+import ProJobCard from "@/components/pro/ProJobCard";
 import LawnJobSize from "@/components/pro/ProLawnJobSize";
 import { AlertTriangle, Check, ListChecks, Send } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
@@ -220,6 +221,8 @@ export default function ProVisit() {
       </div>
 
       <MapPreview street={visit.street} zip={visit.zip} />
+
+      <div className="px-4 pt-4"><ProJobCard visitId={visit.id} serviceType={visit.service_type} /></div>
 
       <div className="p-4">
         <ProCard>
