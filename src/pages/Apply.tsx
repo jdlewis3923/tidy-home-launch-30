@@ -80,6 +80,7 @@ const EXP_TO_YEARS: Record<ExpBucket, number> = { "1-2": 2, "3-5": 5, "5+": 6 };
 
 export default function Apply() {
   const { t, language } = useLanguage();
+  const launchCfg = useLaunchConfig();
   const [form, setForm] = useState<Form>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
