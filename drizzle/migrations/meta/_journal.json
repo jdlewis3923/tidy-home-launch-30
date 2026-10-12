@@ -1086,6 +1086,13 @@
       "when": 1791847363922,
       "tag": "0154_admin_alert_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 155,
+      "version": "7",
+      "when": 1791848777810,
+      "tag": "0155_social_one_post_one_row",
+      "breakpoints": true
     }
   ]
 }

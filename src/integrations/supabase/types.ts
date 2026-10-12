@@ -6746,10 +6746,14 @@ export type Database = {
       }
       social_launch_posts: {
         Row: {
+          archive_reason: string | null
+          archived_at: string | null
           armed_at: string | null
           caption: string
           channel: string
+          content_hash: string | null
           created_at: string
+          external_post_id: string | null
           id: string
           image_filename: string | null
           image_url: string | null
@@ -6760,14 +6764,19 @@ export type Database = {
           scheduled_for: string
           scheduled_in_native_tool_at: string | null
           status: string
+          theme: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
+          archive_reason?: string | null
+          archived_at?: string | null
           armed_at?: string | null
           caption: string
           channel: string
+          content_hash?: string | null
           created_at?: string
+          external_post_id?: string | null
           id?: string
           image_filename?: string | null
           image_url?: string | null
@@ -6778,14 +6787,19 @@ export type Database = {
           scheduled_for: string
           scheduled_in_native_tool_at?: string | null
           status?: string
+          theme?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
+          archive_reason?: string | null
+          archived_at?: string | null
           armed_at?: string | null
           caption?: string
           channel?: string
+          content_hash?: string | null
           created_at?: string
+          external_post_id?: string | null
           id?: string
           image_filename?: string | null
           image_url?: string | null
@@ -6796,6 +6810,7 @@ export type Database = {
           scheduled_for?: string
           scheduled_in_native_tool_at?: string | null
           status?: string
+          theme?: string | null
           title?: string | null
           updated_at?: string
         }
@@ -8104,6 +8119,10 @@ export type Database = {
         Args: { _measured: number; _reservation: string }
         Returns: Json
       }
+      admin_mark_social_posted: {
+        Args: { _external?: string; _id: string }
+        Returns: undefined
+      }
       admin_move_visit: {
         Args: {
           _date: string
@@ -8236,6 +8255,38 @@ export type Database = {
       choose_free_addon: {
         Args: { _addon_key: string; _entitlement: string; _visit: string }
         Returns: Json
+      }
+      claim_due_social_posts: {
+        Args: { _limit?: number; _only?: string }
+        Returns: {
+          archive_reason: string | null
+          archived_at: string | null
+          armed_at: string | null
+          caption: string
+          channel: string
+          content_hash: string | null
+          created_at: string
+          external_post_id: string | null
+          id: string
+          image_filename: string | null
+          image_url: string | null
+          notes: string | null
+          post_number: number
+          posted_at: string | null
+          publish_error: string | null
+          scheduled_for: string
+          scheduled_in_native_tool_at: string | null
+          status: string
+          theme: string | null
+          title: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "social_launch_posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       claim_pro_notification: {
         Args: { _contractor_id: string; _kind: string; _scope: string }
