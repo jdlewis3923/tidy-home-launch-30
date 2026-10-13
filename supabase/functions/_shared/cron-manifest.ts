@@ -72,6 +72,7 @@ export const EXPECTED_CRON_JOBS: ExpectedCronJob[] = [
   { name: 'cron-heartbeat', schedule: '7 * * * *', kind: 'http', fn: 'cron-heartbeat', purpose: 'The watchdog itself.' },
   { name: 'sheets-master-sync-1h', schedule: '15 * * * *', kind: 'http', fn: 'sheets-master-sync', purpose: 'Mirrors operational data to the master sheet.' },
   { name: 'social-launch-publisher', schedule: '*/5 * * * *', kind: 'http', fn: 'social-launch-publisher', purpose: 'Publishes queued launch posts.' },
+  { name: 'social-plan-nightly', schedule: '15 7 * * *', kind: 'http', fn: 'social-plan', purpose: 'Re-plans the social calendar from launch dates (also runs when launch dates change).' },
 ];
 
 /** Jobs deliberately NOT scheduled — listed so "missing" never means "forgotten". */

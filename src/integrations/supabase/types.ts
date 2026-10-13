@@ -7038,6 +7038,8 @@ export type Database = {
       }
       social_launch_posts: {
         Row: {
+          anchor_type: string | null
+          anchor_value: string | null
           archive_reason: string | null
           archived_at: string | null
           armed_at: string | null
@@ -7045,22 +7047,33 @@ export type Database = {
           channel: string
           content_hash: string | null
           created_at: string
+          drop_if_bumped: boolean
           external_post_id: string | null
           id: string
           image_filename: string | null
+          image_flag: string | null
+          image_subject: string | null
           image_url: string | null
+          is_spare: boolean
+          not_before: string
           notes: string | null
           post_number: number
           posted_at: string | null
+          priority: number | null
           publish_error: string | null
-          scheduled_for: string
+          rendered_caption: string | null
+          scheduled_for: string | null
           scheduled_in_native_tool_at: string | null
           status: string
+          template_copy: string | null
           theme: string | null
           title: string | null
           updated_at: string
+          waiting_reason: string | null
         }
         Insert: {
+          anchor_type?: string | null
+          anchor_value?: string | null
           archive_reason?: string | null
           archived_at?: string | null
           armed_at?: string | null
@@ -7068,22 +7081,33 @@ export type Database = {
           channel: string
           content_hash?: string | null
           created_at?: string
+          drop_if_bumped?: boolean
           external_post_id?: string | null
           id?: string
           image_filename?: string | null
+          image_flag?: string | null
+          image_subject?: string | null
           image_url?: string | null
+          is_spare?: boolean
+          not_before?: string
           notes?: string | null
           post_number: number
           posted_at?: string | null
+          priority?: number | null
           publish_error?: string | null
-          scheduled_for: string
+          rendered_caption?: string | null
+          scheduled_for?: string | null
           scheduled_in_native_tool_at?: string | null
           status?: string
+          template_copy?: string | null
           theme?: string | null
           title?: string | null
           updated_at?: string
+          waiting_reason?: string | null
         }
         Update: {
+          anchor_type?: string | null
+          anchor_value?: string | null
           archive_reason?: string | null
           archived_at?: string | null
           armed_at?: string | null
@@ -7091,20 +7115,29 @@ export type Database = {
           channel?: string
           content_hash?: string | null
           created_at?: string
+          drop_if_bumped?: boolean
           external_post_id?: string | null
           id?: string
           image_filename?: string | null
+          image_flag?: string | null
+          image_subject?: string | null
           image_url?: string | null
+          is_spare?: boolean
+          not_before?: string
           notes?: string | null
           post_number?: number
           posted_at?: string | null
+          priority?: number | null
           publish_error?: string | null
-          scheduled_for?: string
+          rendered_caption?: string | null
+          scheduled_for?: string | null
           scheduled_in_native_tool_at?: string | null
           status?: string
+          template_copy?: string | null
           theme?: string | null
           title?: string | null
           updated_at?: string
+          waiting_reason?: string | null
         }
         Relationships: []
       }
@@ -8560,6 +8593,8 @@ export type Database = {
       claim_due_social_posts: {
         Args: { _limit?: number; _only?: string }
         Returns: {
+          anchor_type: string | null
+          anchor_value: string | null
           archive_reason: string | null
           archived_at: string | null
           armed_at: string | null
@@ -8567,20 +8602,29 @@ export type Database = {
           channel: string
           content_hash: string | null
           created_at: string
+          drop_if_bumped: boolean
           external_post_id: string | null
           id: string
           image_filename: string | null
+          image_flag: string | null
+          image_subject: string | null
           image_url: string | null
+          is_spare: boolean
+          not_before: string
           notes: string | null
           post_number: number
           posted_at: string | null
+          priority: number | null
           publish_error: string | null
-          scheduled_for: string
+          rendered_caption: string | null
+          scheduled_for: string | null
           scheduled_in_native_tool_at: string | null
           status: string
+          template_copy: string | null
           theme: string | null
           title: string | null
           updated_at: string
+          waiting_reason: string | null
         }[]
         SetofOptions: {
           from: "*"
