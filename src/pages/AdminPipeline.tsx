@@ -18,7 +18,7 @@ import { PIPELINE_SERVICES, PIPELINE_STAGES, rpcMessage, serviceLabel, stageInde
 export type BoardCard = {
   applicant_id: string; name: string; city: string | null; service: string | null; stage: string; state: string;
   days_in_stage: number; hold_callback_date: string | null; hold_reason: string | null; callback_overdue: boolean;
-  activated: boolean; previously_declined: string | null; overridden: boolean;
+  activated: boolean; previously_declined: string | null; overridden: boolean; is_test?: boolean;
 };
 
 const fmtDate = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -175,7 +175,7 @@ export default function AdminPipeline() {
                   <section key={st.key} className="flex min-h-40 flex-col rounded-lg border border-border bg-muted/40" aria-label={`Stage ${i + 1} ${st.label}`}>
                     <header className="flex items-baseline justify-between border-b border-border px-3 py-2">
                       <h2 className="text-xs font-bold uppercase tracking-wide text-foreground">{i + 1} · {st.label}</h2>
-                      <span className="text-sm font-bold tabular-nums">{col.length}</span>
+                      <span className="text-sm font-bold tabular-nums">{col.filter((c) => !c.is_test).length}</span>
                     </header>
                     {st.cost > 0 && <p className="px-3 pt-1 text-[11px] text-muted-foreground">Spend gate</p>}
                     <div className="flex flex-col gap-2 p-2">
@@ -195,6 +195,7 @@ export default function AdminPipeline() {
                                 {c.state === "lapsed" && <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-semibold text-destructive">Insurance lapsed</span>}
                                 {c.stage === "active" && !c.activated && c.state === "open" && <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Not yet active</span>}
                                 {c.overridden && <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold text-accent-foreground">Overridden</span>}
+                                {c.is_test && <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">Test · not counted</span>}
                               </div>
                               {c.previously_declined && (
                                 <p className="mt-1.5 rounded bg-accent px-1.5 py-0.5 text-[11px] font-semibold text-accent-foreground">{c.previously_declined}</p>
