@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLaunchConfig } from "@/hooks/useLaunchConfig";
 import { ProButton } from "@/components/pro/portal/kit";
 import { DAY_NAME, DAY_SHORT, HOUR_OPTIONS, SERVICE_NAME, WEEKDAYS, hhmm, hourLabel, schedError } from "@/lib/scheduling";
 
@@ -23,6 +24,9 @@ const hatch = { backgroundColor: "hsl(var(--pro-navy))", backgroundImage: "repea
 
 export default function WeeklyRoute() {
   const [st, setSt] = useState<State | null>(null);
+  const launchCfg = useLaunchConfig();
+  const conv = (launchCfg?.cleaning as { conversion_date?: string | null } | undefined)?.conversion_date;
+  const convLabel = conv ? new Date(`${conv}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" }) : null;
   const [sel, setSel] = useState<Cell | null>(null);
   const [start, setStart] = useState(8);
   const [end, setEnd] = useState(14);
@@ -115,7 +119,7 @@ export default function WeeklyRoute() {
         )}
       </div>
 
-      <p className="rounded-xl bg-white p-3 text-[13px] font-semibold text-[hsl(var(--pro-ink))]">Launch days are Monday to Thursday; your exact days are confirmed the week of 9 November.</p>
+      <p className="rounded-xl bg-white p-3 text-[13px] font-semibold text-[hsl(var(--pro-ink))]">Launch days are Monday to Thursday; your exact days are confirmed the week of {convLabel ?? "conversion"}.</p>
       <p className="rounded-xl bg-white p-3 text-[13px] font-semibold text-[hsl(var(--pro-ink))]">You're exclusive on every day you claim in your area, and you get first right on any new day we open there.</p>
 
       {offers.map((o) => (
