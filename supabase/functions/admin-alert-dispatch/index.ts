@@ -132,6 +132,14 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
       text: p.caption?.trim() ? `${p.caption.trim()}${p.image_url ? `\n\nImage: ${p.image_url}` : ''}` : 'Needs a post — no copy written for this slot yet',
       url: `${SITE}/admin/social?post=${p.id}`, label: 'Copy + Mark posted',
     })) });
+    // Car care opens on demand: running count until the threshold, then the advance line.
+    const { data: car } = await admin.rpc('car_launch_status');
+    const cs = car as { count: number; threshold: number; reached_at: string | null; first_visit_date: string | null } | null;
+    if (cs && !cs.first_visit_date) {
+      sections.push({ title: 'Car care', red: !!cs.reached_at, items: [cs.reached_at
+        ? { text: `Car care reached ${cs.threshold} reservations. Advance your car Pro today.`, url: `${SITE}/admin/pipeline?service=detailing`, label: 'Open the pipeline' }
+        : { text: `Car care: ${cs.count} of ${cs.threshold} reservations.` }] });
+    }
     sections.push({ title: 'Yesterday in numbers', items: anyNumbers ? [{ text: numbers.join(' · ') }] : [] });
     // Coming up: calendar tasks + launch dates in the next 7 days.
     const next7 = addDays(today, 7);

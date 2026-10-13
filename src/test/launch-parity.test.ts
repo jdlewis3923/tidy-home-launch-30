@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { FOUNDING_CAP, startsLine, fmtLaunchDate, type LaunchConfig } from "@/lib/launch";
+import { FOUNDING_CAP, CAR_OPENS_LINE, firstVisitOn, startsLine, fmtLaunchDate, type LaunchConfig } from "@/lib/launch";
 
 describe("launch canon", () => {
   it("keeps the edge-function copy byte-identical", () => {
@@ -17,6 +17,16 @@ describe("launch canon", () => {
     expect(startsLine(cfg, "en", ["detailing"])).toBe("Car care begins Monday, November 30");
     expect(startsLine(cfg, "en", ["lawn"])).toBe("First visits begin Monday, November 16");
     expect(startsLine(cfg, "en")).toContain("car care begins Monday, November 30");
+  });
+  it("shows the opens-on-demand line while car care has no date", () => {
+    const noCar: LaunchConfig = { ...cfg, car: { first_visit_date: null } as LaunchConfig["car"] };
+    expect(startsLine(noCar, "en", ["detailing"])).toBe(CAR_OPENS_LINE.en);
+    expect(startsLine(noCar, "es", ["detailing"])).toBe(CAR_OPENS_LINE.es);
+    expect(startsLine(noCar, "en", ["cleaning", "detailing"])).toContain("Car care opens as soon as");
+  });
+  it("moves a Thanksgiving Thursday first visit to the next Thursday", () => {
+    expect(firstVisitOn("2026-11-23", "Thursday", ["2026-11-26"])).toBe("2026-12-03");
+    expect(firstVisitOn("2026-11-23", "Wednesday", ["2026-11-26"])).toBe("2026-11-25");
   });
   it("keeps launch dates out of the code", () => {
     const { execSync } = require("node:child_process");
