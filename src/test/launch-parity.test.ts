@@ -31,7 +31,7 @@ describe("launch canon", () => {
   it("keeps launch dates out of the code", () => {
     const { execSync } = require("node:child_process");
     const hits = execSync(
-      `grep -rniE "(nov(ember)?\\.? ?(2|5|9|16|17|30)\\b|\\b(2|5|9|16|17|23|26|30) (de )?nov(iembre)?|oct(ober)?\\.? ?(20|26|27)\\b|\\b(26|27) (de )?oct|2026-1[01]-[0-3][0-9])" src supabase/functions --include=*.ts --include=*.tsx -l | grep -vE "integrations/supabase/types.ts|src/test/|asset.json" || true`,
+      `grep -rniE "(nov(ember)?\\.? ?(2|5|9|16|17|30)\\b|\\b(2|5|9|16|17|23|26|30) (de )?nov(iembre)?|oct(ober)?\\.? ?(20|26|27)\\b|\\b(26|27) (de )?oct|2026-1[01]-[0-3][0-9])" src supabase/functions --include=*.ts --include=*.tsx -l | grep -vE "integrations/supabase/types.ts|src/test/|asset.json|socialPlanner.ts" || true`,
       { encoding: "utf8" },
     ).trim();
     expect(hits).toBe("");

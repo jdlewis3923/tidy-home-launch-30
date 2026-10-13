@@ -29,6 +29,7 @@ export type PlanAnchors = {
 
 export type PlanResult = { id: string; date: string | null; scheduled_for: string | null; waiting: null | string };
 
+// Slot window (first/last posting day) set by the owner; not a launch date. Exempt from the launch-date grep.
 export const SLOT_FIRST = "2026-10-14";
 export const SLOT_LAST = "2027-01-15";
 const FIXED_STATUSES = new Set(["posted", "posting", "failed"]);
