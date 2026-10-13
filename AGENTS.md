@@ -20,3 +20,4 @@
 - Subdirectories have their own `AGENTS.md`; read it before changing files there.
 - Contractor hiring is eight stages with equipment proof at stage 3; candidate messages leave only through `pipeline-notify`, fired by the database at the stage that owns them, and older senders pass `_shared/pipeline-gate.ts` — why: nothing is signed or spent before someone has seen the equipment.
 - Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: test accounts and declined history stay as they are.
+- Social posts are templates with launch anchors; only `social-plan` (shared `socialPlanner.ts`, mirrored + tested) sets their dates, tokens fill at posting, posted rows never move — why: no post carries a hard-coded launch date.
