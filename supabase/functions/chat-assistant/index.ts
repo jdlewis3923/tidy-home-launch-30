@@ -1,7 +1,7 @@
 // Tidy chatbot — Lovable AI Gateway, streaming, knowledge-base grounded.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadLaunchConfig } from "../_shared/launch-config.ts";
-import { fmtLaunchDate } from "../_shared/launch.ts";
+import { CAR_OPENS_LINE, fmtLaunchDate } from "../_shared/launch.ts";
 import { vendorFetch } from '../_shared/http.ts';
 
 const corsHeaders = {
