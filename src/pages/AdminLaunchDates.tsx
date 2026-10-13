@@ -87,6 +87,8 @@ export default function AdminLaunchDates() {
         </section>
       ))}
 
+      <CarLaunchPanel />
+
       <section className="rounded-xl border border-border bg-card p-5">
         <h2 className="text-lg font-bold text-foreground">Door hanger drops</h2>
         <ul className="mt-2 space-y-1 text-sm text-foreground">
