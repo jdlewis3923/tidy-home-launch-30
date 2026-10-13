@@ -148,7 +148,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     }
     coming.sort((a, b) => a.text.localeCompare(b.text));
     sections.push({ title: 'Next 7 days', items: coming });
-    // Demand report on the Friday before conversion and on conversion day (6 Nov / 9 Nov for cleaning + lawn).
+    // Demand report three days before cleaning/lawn conversion and on conversion day.
     const conv = (cfg as Record<string, { conversion_date?: string | null }> | null)?.cleaning?.conversion_date ?? null;
     if (conv && (today === conv || today === addDays(conv, -3))) {
       const { data: dem } = await admin.rpc('sched_demand_rows');
