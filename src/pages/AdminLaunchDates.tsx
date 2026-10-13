@@ -120,3 +120,54 @@ export default function AdminLaunchDates() {
     </main>
   );
 }
+
+type CarStatus = { count: number; threshold: number; reached_at: string | null; proposed_first_visit: string | null; proposed_conversion: string | null; first_visit_date: string | null; conversion_date: string | null };
+
+/** Car care opens on demand: the count, the editable threshold, and the proposed dates waiting for approval. */
+function CarLaunchPanel() {
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const st = useQuery({
+    queryKey: ["car_launch_status"],
+    queryFn: async () => (await supabase.rpc("car_launch_status")).data as unknown as CarStatus | null,
+  });
+  const s = st.data;
+  const refresh = () => { for (const k of ["car_launch_status", "launch_config_admin", "launch_config", "launch_config_log"]) void qc.invalidateQueries({ queryKey: [k] }); };
+  const setThreshold = async (n: number) => {
+    const { error } = await supabase.rpc("admin_set_car_threshold", { _n: n });
+    if (error) toast({ title: "Not saved", description: error.message, variant: "destructive" }); else { toast({ title: "Saved" }); refresh(); }
+  };
+  const approve = async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_approve_car_launch");
+    setBusy(false);
+    if (error) { toast({ title: "Not approved", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Car care dates set", description: "The site now shows the car care start date." });
+    refresh();
+  };
+  if (!s) return null;
+  return (
+    <section className="rounded-xl border border-border bg-card p-5" data-testid="car-launch-panel">
+      <h2 className="text-lg font-bold text-foreground">Car care opens on demand</h2>
+      <p className="mt-1 text-sm text-foreground">Car care: {s.count} of {s.threshold} reservations{s.reached_at ? " — threshold reached" : ""}.</p>
+      <label className="mt-3 block text-sm">
+        <span className="font-medium text-foreground">Reservations needed to open</span>
+        <input type="number" min={1} max={500} defaultValue={s.threshold} key={s.threshold}
+          onBlur={(e) => { const n = Number(e.target.value); if (n && n !== s.threshold) void setThreshold(n); }}
+          className="mt-1 block min-h-[44px] w-32 rounded-lg border border-border bg-background px-3 text-foreground" />
+      </label>
+      {s.first_visit_date ? (
+        <p className="mt-3 text-sm text-foreground">Set: converts {fmtLaunchDate(s.conversion_date)}, first visits {fmtLaunchDate(s.first_visit_date)}.</p>
+      ) : s.proposed_first_visit ? (
+        <div className="mt-3 rounded-lg border border-primary/40 bg-primary/5 p-3">
+          <p className="text-sm font-semibold text-foreground">Proposed: converts {fmtLaunchDate(s.proposed_conversion)}, first visits {fmtLaunchDate(s.proposed_first_visit)}.</p>
+          <p className="text-xs text-muted-foreground">Nothing changes until you approve.</p>
+          <button type="button" disabled={busy} onClick={() => void approve()}
+            className="mt-2 min-h-[44px] rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60">Approve</button>
+        </div>
+      ) : (
+        <p className="mt-3 text-sm text-muted-foreground">No date yet. When a car Pro reaches Active, the proposed dates appear here.</p>
+      )}
+    </section>
+  );
+}
