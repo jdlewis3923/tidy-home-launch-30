@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLaunchConfig } from "@/hooks/useLaunchConfig";
-import { fmtLaunchDate, launchScope } from "@/lib/launch";
+import { CAR_PRO_ROUTE_LINE, fmtLaunchDate, launchScope } from "@/lib/launch";
 
-/** First-visit date for the signed-in Pro's own service(s), from launch_config. */
+/** First-visit date for the signed-in Pro's own service(s), from launch_config. Car Pros see the demand line until a date is set. */
 export default function ProLaunchLine({ className = "" }: { className?: string }) {
   const cfg = useLaunchConfig();
   const { data: services } = useQuery({
@@ -19,6 +19,14 @@ export default function ProLaunchLine({ className = "" }: { className?: string }
     <div className={className} data-testid="pro-launch-line">
       {services.map((s) => {
         const row = cfg[launchScope(s)];
+        if (launchScope(s) === "car" && !row?.first_visit_date) {
+          return (
+            <p key={s} className="text-[13px] font-semibold text-[hsl(var(--pro-ink-soft))]">
+              {label[s]?.[0] ?? s}: {CAR_PRO_ROUTE_LINE.en}
+              <span className="block font-normal" lang="es">{label[s]?.[1] ?? s}: {CAR_PRO_ROUTE_LINE.es}</span>
+            </p>
+          );
+        }
         if (!row?.first_visit_date) return null;
         return (
           <p key={s} className="text-[13px] font-semibold text-[hsl(var(--pro-ink-soft))]">
