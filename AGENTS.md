@@ -19,5 +19,5 @@
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
 - Subdirectories have their own `AGENTS.md`; read it before changing files there.
 - Contractor hiring is eight stages with equipment proof at stage 3; candidate messages leave only through `pipeline-notify`, fired by the database at the stage that owns them, and older senders pass `_shared/pipeline-gate.ts` — why: nothing is signed or spent before someone has seen the equipment.
-- Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: test accounts and declined history stay as they are.
+- Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: test and declined records stay as they are.
 - Social post dates are set only by `social-plan` (`socialPlanner.ts`, mirrored); tokens fill at posting — why: no hard-coded launch dates.
