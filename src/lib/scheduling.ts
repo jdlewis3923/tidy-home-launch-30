@@ -20,6 +20,12 @@ export const hhmm = (h: number) => `${String(h).padStart(2, "0")}:00`;
 /** Readable copy for server refusals. */
 export const SCHED_ERRORS: Record<string, string> = {
   catchup_required: "Pick your catch-up day first.",
+  full_day_required: "For now, a claimed day covers the full day. Shorter hours open once two Pros cover this service.",
+  first_right_held: "Another Pro has first right on this day for 72 hours.",
+  lawn_day_assigned: "Tidy assigns your lawn day by street so neighbors share a day.",
+  window_sequence_conflict: "That window no longer fits your Pro's day. Pick another window.",
+  not_catchup_day: "That date isn't your catch-up day.",
+  visits_already_moved_here: "A visit is already moved to that day. Message Tidy.",
   catchup_conflict: "That's your catch-up day. Pick a different catch-up day first.",
   catchup_is_a_work_day: "You already work that day. Pick a day you don't work.",
   taken: "Another Pro just claimed this day.",
