@@ -18,8 +18,10 @@ export default function ReserveConfirm() {
       const r = data?.reservation;
       if (error || !r) { setErr(t('This link is no longer active. Call (786) 829-1141 and we will sort it out.')); return; }
       if (r.status === 'converted') { navigate('/dashboard', { replace: true }); return; }
-      const services = (r.services as string[]).filter((s) => !(r.waitlist_services as string[]).includes(s));
-      const q = r.quote ?? {};
+      // A car part that's waiting for its own date is left out; it joins the same bill when car care opens.
+      const services = (r.services as string[]).filter((s) => !(r.waitlist_services as string[]).includes(s) && !(r.car_waiting && s === 'detailing'));
+      const q = { ...(r.quote ?? {}) };
+      if (r.car_waiting) delete q.carWashes;
       const state = {
         ...q, services, frequencies: Object.fromEntries(Object.entries(q.frequencies ?? {}).filter(([k]) => services.includes(k))),
         firstName: r.first_name, lastName: r.last_name, email: r.email, phone: r.phone, address: r.street, city: r.city || 'Miami', zip: r.zip,
