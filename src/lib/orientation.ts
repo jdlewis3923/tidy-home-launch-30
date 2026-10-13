@@ -1,11 +1,11 @@
 export const ORIENTATION_SECTIONS = [
-  { id: "before-you-work", title: "Before you work", es: "Antes de trabajar", min: 3, unlock: "Agreement signed", unlockEs: "Acuerdo firmado" },
-  { id: "what-it-pays", title: "What it pays", es: "Pagos e ingresos", min: 5, unlock: "Background check started", unlockEs: "Verificación de antecedentes iniciada" },
-  { id: "on-the-job", title: "On the job", es: "Durante el servicio", min: 5, unlock: "Background check started", unlockEs: "Verificación de antecedentes iniciada" },
-  { id: "when-it-matters", title: "When it matters", es: "Situaciones importantes", min: 6, unlock: "Insurance confirmed", unlockEs: "Seguro confirmado" },
+  { id: "before-you-work", title: "Before you work", es: "Antes de trabajar", min: 4, unlock: "Agreement signed", unlockEs: "Acuerdo firmado" },
+  { id: "what-it-pays", title: "What it pays", es: "Pagos e ingresos", min: 6, unlock: "Background check started", unlockEs: "Verificación de antecedentes iniciada" },
+  { id: "on-the-job", title: "On the job", es: "Durante el servicio", min: 6, unlock: "Background check started", unlockEs: "Verificación de antecedentes iniciada" },
+  { id: "when-it-matters", title: "When it matters", es: "Situaciones importantes", min: 7, unlock: "Insurance confirmed", unlockEs: "Seguro confirmado" },
 ] as const;
 export type OrientationSectionId = typeof ORIENTATION_SECTIONS[number]["id"];
-export const stageNumber = (stage: string) => ["applied","screened","agreement","ins_quote","background","insured","active"].indexOf(stage) + 1;
+export const stageNumber = (stage: string) => ["applied","screened","proof","agreement","ins_quote","background","insured","active"].indexOf(stage) + 1;
 
 export type OrientationBlock = { title: string; esTitle: string; body: string; es: string; image?: string; pair?: string };
 export const ORIENTATION_COPY: Record<OrientationSectionId, OrientationBlock[]> = {

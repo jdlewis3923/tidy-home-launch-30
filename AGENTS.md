@@ -18,3 +18,4 @@
 - Root declares `color-scheme: light dark`; body/Founding render light with explicit colors and scoped tokens — why: phone browsers ignore "only light" and grey out QR visitors' pages.
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
 - Subdirectories have their own `AGENTS.md`; read it before changing files there.
+- Contractor hiring is eight stages with equipment proof at stage 3; candidate messages leave only through `pipeline-notify`, fired by the database at the stage that owns them, and older senders pass `_shared/pipeline-gate.ts` — why: nothing is signed or spent before someone has seen the equipment.

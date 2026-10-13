@@ -22,6 +22,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { pipelineAllows, type GateKind } from '../_shared/pipeline-gate.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { ADMIN_EMAIL, sendBrevoEmail, brandedEmailHtml, type BrevoAttachment } from '../_shared/notifyJustin.ts';
 import { vendorFetch } from '../_shared/http.ts';
@@ -204,6 +205,16 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
   }
   const { applicant_id, action, notes, scheduled_at } = parsed.data;
+
+  // Hiring order (8-stage pipeline): no ICA, W-9, Checkr or kit message before its stage.
+  const GATED: Record<string, GateKind> = { send_offer: 'ica', send_contract: 'ica', send_to_bg_check: 'checkr', clear: 'checkr', mark_oriented: 'kit', activate: 'kit', send_payment_setup: 'kit' };
+  if (GATED[action]) {
+    const { data: inPipeline } = await admin.from('contractor_pipeline').select('applicant_id').eq('applicant_id', applicant_id).maybeSingle();
+    const g = action === 'send_to_bg_check' || action === 'clear'
+      ? (inPipeline ? { ok: false as const, reason: 'Checkr is sent by hand on Checkr\'s site; the cleared message comes from the pipeline.' } : { ok: true as const })
+      : await pipelineAllows(admin, applicant_id, GATED[action]);
+    if (!g.ok) return jsonResponse({ ok: false, error: 'hiring_order', reason: g.reason }, 409);
+  }
 
   if (action === 'consider' && !notes) {
     return jsonResponse({ error: 'notes_required_for_consider' }, 400);

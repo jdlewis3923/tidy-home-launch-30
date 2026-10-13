@@ -148,6 +148,13 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     }
     coming.sort((a, b) => a.text.localeCompare(b.text));
     sections.push({ title: 'Next 7 days', items: coming });
+    // Day 5 with equipment proof incomplete: one-tap Hold / Decline (reason preset "No equipment", editable). Never auto-declined.
+    const { data: overdue } = await admin.rpc('pipeline_proof_overdue');
+    const fmtD = (iso: string) => new Date(iso).toLocaleDateString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric' });
+    sections.push({ title: 'Proof overdue', items: ((overdue ?? []) as { applicant_id: string; name: string; service: string; sent_at: string }[]).flatMap((o) => [
+      { text: `Proof overdue: ${o.name} (${o.service}), sent ${fmtD(o.sent_at)}`, url: `${SITE}/admin/pipeline/${o.applicant_id}?action=hold`, label: 'Hold' },
+      { text: `Decline ${o.name} — No equipment`, url: `${SITE}/admin/pipeline/${o.applicant_id}?action=decline&reason=No%20equipment`, label: 'Decline' },
+    ]) });
     // Demand report three days before cleaning/lawn conversion and on conversion day.
     const conv = (cfg as Record<string, { conversion_date?: string | null }> | null)?.cleaning?.conversion_date ?? null;
     if (conv && (today === conv || today === addDays(conv, -3))) {
@@ -173,6 +180,11 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     const { data: dueT } = await admin.from('calendar_tasks').select('title').is('done_at', null).eq('next_due_date', tmr);
     for (const t of dueT ?? []) tmrItems.push({ text: `Due: ${t.title}` });
     sections.push({ title: 'Tomorrow', items: tmrItems });
+    // First-visit probation (in place of a skills test): each completed probation visit, photos one tap away.
+    const { data: prob } = await admin.rpc('pipeline_probation_checks', { _since: etMidnightUtc(today) });
+    sections.push({ title: 'Probation checks', items: ((prob ?? []) as { name: string; visit_id: string; n: number }[]).map((v) => ({
+      text: `Probation check: ${v.name}, visit ${v.n} of 3`, url: `${SITE}/admin/photos?visit=${v.visit_id}`, label: 'Photos',
+    })) });
     // More than 3 urgent today → say so, so the noisy ones can be re-tiered.
     const { data: urgentToday } = await admin.from('admin_alerts').select('title, alert_type').eq('tier', 'urgent').gte('created_at', etMidnightUtc(today));
     if ((urgentToday ?? []).length > 3) sections.push({ title: `${urgentToday!.length} urgent alerts today — re-tier the noisy ones?`, red: true, items: urgentToday!.map((u) => ({ text: `${u.title} (${u.alert_type})`, url: `${SITE}/admin/alerts#tiers`, label: 'Change tier' })) });
