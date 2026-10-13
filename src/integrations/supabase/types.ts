@@ -6209,6 +6209,33 @@ export type Database = {
         }
         Relationships: []
       }
+      sched_launch_calendar: {
+        Row: {
+          approved_at: string
+          approved_by: string | null
+          id: string
+          service: Database["public"]["Enums"]["service_type"]
+          weekday: number
+          zip: string
+        }
+        Insert: {
+          approved_at?: string
+          approved_by?: string | null
+          id?: string
+          service: Database["public"]["Enums"]["service_type"]
+          weekday: number
+          zip: string
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string | null
+          id?: string
+          service?: Database["public"]["Enums"]["service_type"]
+          weekday?: number
+          zip?: string
+        }
+        Relationships: []
+      }
       sched_notice_log: {
         Row: {
           created_at: string
@@ -8094,6 +8121,7 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_approve_launch_calendar: { Args: { _rows: Json }; Returns: Json }
       admin_assign_customer_pro: {
         Args: { _applicant_id: string; _subscription_id: string }
         Returns: undefined
@@ -8160,6 +8188,7 @@ export type Database = {
           month: string
         }[]
       }
+      admin_launch_proposal: { Args: never; Returns: Json }
       admin_lawn_plan_verify: {
         Args: { _change: string; _measured: number }
         Returns: Json
@@ -8946,6 +8975,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      sched_cluster: { Args: { _zip: string }; Returns: string }
+      sched_cluster_zips: { Args: { _c: string }; Returns: string[] }
       sched_custom_hours_allowed: {
         Args: { _s: Database["public"]["Enums"]["service_type"] }
         Returns: boolean
@@ -8983,11 +9014,17 @@ export type Database = {
         }
         Returns: string[]
       }
+      sched_day_capacity: { Args: { _s: string }; Returns: number }
       sched_day_loss: {
         Args: { _claim: string; _effective: string; _reason: string }
         Returns: number
       }
       sched_day_name: { Args: { _w: number }; Returns: string }
+      sched_days_needed: {
+        Args: { _hours: number; _s: string; _visits: number }
+        Returns: number
+      }
+      sched_demand_items: { Args: never; Returns: Json }
       sched_demand_rows: {
         Args: never
         Returns: {
@@ -9047,6 +9084,7 @@ export type Database = {
         Args: { _b: string; _until: string }
         Returns: number
       }
+      sched_item_load: { Args: { _i: Json }; Returns: Record<string, unknown> }
       sched_ladder: { Args: never; Returns: undefined }
       sched_launch_date:
         | { Args: never; Returns: string }
@@ -9054,6 +9092,11 @@ export type Database = {
             Args: { _s: Database["public"]["Enums"]["service_type"] }
             Returns: string
           }
+      sched_launch_locked: {
+        Args: { _s: Database["public"]["Enums"]["service_type"] }
+        Returns: boolean
+      }
+      sched_launch_proposal: { Args: { _items?: Json }; Returns: Json }
       sched_lawn_day_pick: {
         Args: {
           _sim?: Json
@@ -9141,6 +9184,10 @@ export type Database = {
       sched_sync_pro: { Args: { _uid: string }; Returns: undefined }
       sched_tick: { Args: never; Returns: Json }
       sched_today: { Args: never; Returns: string }
+      sched_visits_per_week: {
+        Args: { _cadence: string; _s: string }
+        Returns: number
+      }
       sched_waitlist_holds: { Args: never; Returns: undefined }
       sched_waitlist_offer: {
         Args: { _s: Database["public"]["Enums"]["service_type"]; _zip: string }
