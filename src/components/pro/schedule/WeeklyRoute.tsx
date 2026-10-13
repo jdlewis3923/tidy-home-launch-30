@@ -29,11 +29,22 @@ export default function WeeklyRoute() {
   const [preview, setPreview] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [hoursState, setHoursState] = useState<Record<string, { allowed: boolean; start: string; end: string }>>({});
+  const [busyDates, setBusyDates] = useState<string[]>([]);
+  const [offers, setOffers] = useState<{ id: string; service: string; zip: string; weekday: number; expires_at: string }[]>([]);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc("pro_schedule_state");
     if (error) { setMsg({ ok: false, text: schedError(error) }); return; }
     setSt(data as unknown as State);
+    const [{ data: hs }, { data: ex }, { data: fr }] = await Promise.all([
+      supabase.rpc("pro_custom_hours_state"),
+      supabase.from("pro_date_exceptions").select("off_date, kind").eq("kind", "busy"),
+      supabase.from("sched_first_right").select("id, service, zip, weekday, expires_at").eq("status", "offered").gt("expires_at", new Date().toISOString()),
+    ]);
+    setHoursState((hs ?? {}) as never);
+    setBusyDates((ex ?? []).map((r: { off_date: string }) => r.off_date));
+    setOffers((fr ?? []) as never);
   }, []);
   useEffect(() => { void load(); }, [load]);
 
@@ -57,13 +68,25 @@ export default function WeeklyRoute() {
 
   if (!st) return <p className="p-4 text-[14px] text-[hsl(var(--pro-ink-soft))]">Loading your route…</p>;
   if (!st.services.length) return <p className="p-4 text-[14px] text-[hsl(var(--pro-ink-soft))]">No service on your profile yet. Tidy adds it when you're onboarded.</p>;
-  const hoursOk = end - start >= 4;
+  // Until a service has two active Pros (and custom hours are switched on), a claim covers the full day.
+  const fullDay = sel ? !hoursState[sel.service]?.allowed : true;
+  const fdStart = sel ? Number((hoursState[sel.service]?.start ?? "08:00").slice(0, 2)) : 8;
+  const fdEnd = sel ? Number((hoursState[sel.service]?.end ?? (sel.service === "detailing" ? "16:00" : "18:00")).slice(0, 2)) : 18;
+  const cStart = fullDay ? fdStart : start;
+  const cEnd = fullDay ? fdEnd : end;
+  const hoursOk = cEnd - cStart >= 4;
+  // Next four catch-up dates (Pros may book their own work; Tidy gives 24 h notice).
+  const catchupDates: string[] = [];
+  if (st.catchup) {
+    const d = new Date(); d.setHours(12, 0, 0, 0);
+    while (catchupDates.length < 4) { d.setDate(d.getDate() + 1); if (((d.getDay() + 6) % 7) + 1 === st.catchup) catchupDates.push(d.toLocaleDateString("en-CA")); }
+  }
 
   return (
     <div className="space-y-4 px-[18px] pt-4">
       <div className="rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white p-4">
         <p className="text-[15px] font-extrabold text-[hsl(var(--pro-ink))]">Catch-up day</p>
-        <p className="mt-1 text-[13px] text-[hsl(var(--pro-ink-soft))]">Your catch-up day is only used if a visit has to move. Most weeks you won't be needed.</p>
+        <p className="mt-1 text-[13px] text-[hsl(var(--pro-ink-soft))]">{st.catchup === 5 ? "Friday is held for rain-outs. Your own work is fine on Fridays; we give 24 hours' notice if we need it." : "Your catch-up day is held for rain-outs. Your own work is fine on it; we give 24 hours' notice if we need it."}</p>
         <div className="mt-3 grid grid-cols-6 gap-1.5">
           {WEEKDAYS.map((d) => (
             <button key={d} type="button" disabled={busy}
@@ -74,7 +97,34 @@ export default function WeeklyRoute() {
           ))}
         </div>
         {!st.catchup && <p className="mt-2 text-[13px] font-bold text-[hsl(var(--pro-red))]">Pick a catch-up day before you claim any days.</p>}
+        {catchupDates.length > 0 && (
+          <div className="mt-3 space-y-1.5">
+            <p className="text-[13px] font-bold text-[hsl(var(--pro-ink))]">Booked with your own work?</p>
+            {catchupDates.map((d) => {
+              const on = busyDates.includes(d);
+              return (
+                <button key={d} type="button" disabled={busy}
+                  onClick={() => void run(() => supabase.rpc("pro_set_catchup_busy", { _date: d, _busy: !on }), () => on ? "Marked free." : "Marked busy — rain-outs that day go to Tidy instead.")}
+                  className={`flex min-h-[44px] w-full items-center justify-between rounded-lg px-3 text-[13px] font-semibold ${on ? "bg-[hsl(var(--pro-navy))] text-white" : "border border-[hsl(var(--pro-navy)/0.12)] text-[hsl(var(--pro-ink))]"}`}>
+                  <span>{new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</span>
+                  <span>{on ? "Busy" : "Free"}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      <p className="rounded-xl bg-white p-3 text-[13px] font-semibold text-[hsl(var(--pro-ink))]">You're exclusive on every day you claim in your area, and you get first right on any new day we open there.</p>
+
+      {offers.map((o) => (
+        <div key={o.id} className="rounded-[18px] border-2 border-[hsl(var(--pro-blue))] bg-white p-4">
+          <p className="text-[15px] font-extrabold text-[hsl(var(--pro-ink))]">First right: {SERVICE_NAME[o.service]} · {o.zip} · {DAY_NAME[o.weekday]}</p>
+          <p className="mt-1 text-[13px] text-[hsl(var(--pro-ink-soft))]">It's yours first until {new Date(o.expires_at).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })}. Tap the day below to claim it.</p>
+          <button type="button" disabled={busy} className="mt-2 text-[13px] font-bold text-[hsl(var(--pro-red))]"
+            onClick={() => void run(() => supabase.rpc("pro_decline_first_right", { _id: o.id }), () => "Passed. We'll offer it to another Pro.")}>Pass on this day</button>
+        </div>
+      ))}
 
       {!st.active && (
         <p className="rounded-xl bg-[hsl(var(--pro-amber-soft,45_100%_92%))] p-3 text-[13px] font-semibold text-[hsl(var(--pro-ink))]">
@@ -116,6 +166,9 @@ export default function WeeklyRoute() {
       {sel && (
         <div className="space-y-3 rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white p-4">
           <p className="text-[16px] font-extrabold text-[hsl(var(--pro-ink))]">{SERVICE_NAME[sel.service]} · {sel.zip} · {DAY_NAME[sel.weekday]}</p>
+          {fullDay ? (
+            <p className="text-[14px] text-[hsl(var(--pro-ink))]">{hourLabel(fdStart)} to {hourLabel(fdEnd)} — full day. Shorter hours open once two Pros cover this service.</p>
+          ) : (
           <div className="flex items-center gap-2 text-[14px]">
             <select className="min-h-[44px] rounded-lg border px-2" value={start} onChange={(e) => setStart(Number(e.target.value))}>
               {HOUR_OPTIONS.slice(0, -4).map((h) => <option key={h} value={h}>{hourLabel(h)}</option>)}
@@ -125,10 +178,11 @@ export default function WeeklyRoute() {
               {HOUR_OPTIONS.slice(4).map((h) => <option key={h} value={h}>{hourLabel(h)}</option>)}
             </select>
           </div>
+          )}
           {!hoursOk && <p className="text-[13px] text-[hsl(var(--pro-red))]">At least 4 hours.</p>}
           {!sel.claim ? (
             <ProButton full disabled={busy || !hoursOk || !st.catchup}
-              onClick={() => void run(() => supabase.rpc("pro_claim_day", { _service: sel.service as never, _zip: sel.zip, _weekday: sel.weekday, _start: hhmm(start), _end: hhmm(end) }),
+              onClick={() => void run(() => supabase.rpc("pro_claim_day", { _service: sel.service as never, _zip: sel.zip, _weekday: sel.weekday, _start: hhmm(cStart), _end: hhmm(cEnd) }),
                 (d) => d.status === "pending" ? "Claimed — pending until you're active." : "Claimed. Customers can book it now.")}>
               Claim this day
             </ProButton>
@@ -137,7 +191,7 @@ export default function WeeklyRoute() {
               {sel.claim.locked_until && <p className="text-[13px] text-[hsl(var(--pro-ink-soft))]">Customers are booked in the next 14 days. Changes take effect from {sel.claim.locked_until}.</p>}
               {sel.claim.drop_effective && <p className="text-[13px] font-semibold text-[hsl(var(--pro-red))]">Dropping — effective {sel.claim.drop_effective}.</p>}
               <ProButton full variant="secondary" disabled={busy || !hoursOk || !!sel.claim.drop_effective}
-                onClick={() => void run(() => supabase.rpc("pro_update_claim_hours", { _claim: sel.claim!.id, _start: hhmm(start), _end: hhmm(end) }),
+                onClick={() => void run(() => supabase.rpc("pro_update_claim_hours", { _claim: sel.claim!.id, _start: hhmm(cStart), _end: hhmm(cEnd) }),
                   (d) => d.immediate ? "Hours updated." : d.message)}>
                 Save hours
               </ProButton>
