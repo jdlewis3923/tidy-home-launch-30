@@ -63,7 +63,7 @@ export function convertEmail(r: { first_name: string; assigned_day: string; assi
   const naive = startIso ? firstVisitOn(startIso, r.assigned_day) : null;
   const actual = startIso ? firstVisitOn(startIso, r.assigned_day, blackouts) : null;
   const holiday = naive && actual && naive !== actual
-    ? ` Your first visit is ${new Date(`${actual}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })} (no visits on Thanksgiving).`
+    ? ` Your first visit is ${(() => { const d = new Date(`${actual}T12:00:00Z`); const o = { timeZone: 'UTC' } as const; return `${d.toLocaleDateString('en-US', { ...o, weekday: 'long' })} ${d.getUTCDate()} ${d.toLocaleDateString('en-US', { ...o, month: 'long' })}`; })()} (no visits on Thanksgiving).`
     : '';
   const car = carWaiting ? ` Car care starts later: ${CAR_OPENS_LINE.en}. We'll add it to this same bill when it starts.` : '';
   const line = `${r.first_name} — your Tidy service starts ${start}. Here's your day and time: ${r.assigned_day}, ${r.assigned_window}, with ${r.assigned_pro_first_name}.${holiday} Confirm and add your card — nothing charges until after your first visit.${car}`;
