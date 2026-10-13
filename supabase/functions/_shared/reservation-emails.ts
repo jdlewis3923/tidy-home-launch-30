@@ -1,23 +1,24 @@
 // Reservation confirmation + convert-invite copy. Dates come from launch_config (passed in as cfg).
-import { RESERVATION_SERVICE_LABEL, fmtLaunchDate, launchScope, startsLine, type LaunchConfig, type ReservableService } from './launch.ts';
+import { RESERVATION_SERVICE_LABEL, CAR_OPENS_LINE, fmtLaunchDate, firstVisitOn, launchScope, startsLine, type LaunchConfig, type ReservableService } from './launch.ts';
 import { tidyEmailShell, TIDY_SITE } from './email-brand.ts';
 
 export const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 export const svcLabel = (s: string) => RESERVATION_SERVICE_LABEL[s as ReservableService] ?? s;
 
-/** The earliest first-visit date among these services (car care is later than cleaning/lawn). */
+/** The earliest first-visit date among these services; null when only car care is reserved and it has no date. */
 function firstDate(cfg: LaunchConfig, services: string[]): string | null {
   const ds = (services.length ? services : ['cleaning']).map((s) => cfg[launchScope(s)]?.first_visit_date).filter(Boolean) as string[];
   return ds.sort()[0] ?? null;
 }
-function conversionMonth(cfg: LaunchConfig, services: string[]): string {
+function conversionMonth(cfg: LaunchConfig, services: string[], lang: 'en' | 'es' = 'en'): string {
   const ds = (services.length ? services : ['cleaning']).map((s) => cfg[launchScope(s)]?.conversion_date).filter(Boolean) as string[];
-  return fmtLaunchDate(ds.sort()[0], 'en', 'month');
+  return fmtLaunchDate(ds.sort()[0], lang, 'month');
 }
 export function nextSteps(cfg: LaunchConfig, services: string[]) {
+  const month = conversionMonth(cfg, services);
   return [
     ['Now', 'we hold your spot and your preferred day.'],
-    [`Early ${conversionMonth(cfg, services)}`, 'we confirm your pro, your day and your time window, and you add a card. Nothing charges until your first visit.'],
+    [month ? `Early ${month}` : 'When car care opens', 'we confirm your pro, your day and your time window, and you add a card. Nothing charges until your first visit.'],
     [startsLine(cfg, 'en', services), 'your first visit.'],
   ] as const;
 }
@@ -39,21 +40,40 @@ export function reservationConfirmEmail(r: { first_name: string; services: strin
 }
 
 export function reservationConfirmSms(first: string, cfg: LaunchConfig, services: string[], lang: 'en' | 'es' = 'en') {
+  const month = conversionMonth(cfg, services, lang);
+  if (!month) {
+    return lang === 'es'
+      ? `Tidy: ${first}, tu lugar está reservado — nada que pagar ahora. ${CAR_OPENS_LINE.es}. Preguntas: (786) 829-1141`
+      : `Tidy: ${first}, you're reserved — nothing to pay now. ${CAR_OPENS_LINE.en}. Questions: (786) 829-1141`;
+  }
   return lang === 'es'
-    ? `Tidy: ${first}, tu lugar está reservado. Confirmaremos tu profesional, día y horario a principios de ${fmtLaunchDate(firstDate(cfg, services), 'es', 'month')} — nada que pagar ahora. ${startsLine(cfg, 'es', services)}. Preguntas: (786) 829-1141`
-    : `Tidy: ${first}, you're reserved. We'll confirm your pro, day and time in early ${conversionMonth(cfg, services)} — nothing to pay now. ${startsLine(cfg, 'en', services)}. Questions: (786) 829-1141`;
+    ? `Tidy: ${first}, tu lugar está reservado. Confirmaremos tu profesional, día y horario a principios de ${month} — nada que pagar ahora. ${startsLine(cfg, 'es', services)}. Preguntas: (786) 829-1141`
+    : `Tidy: ${first}, you're reserved. We'll confirm your pro, day and time in early ${month} — nothing to pay now. ${startsLine(cfg, 'en', services)}. Questions: (786) 829-1141`;
 }
 
-export function convertEmail(r: { first_name: string; assigned_day: string; assigned_window: string; assigned_pro_first_name: string; services?: string[] }, link: string, cfg: LaunchConfig) {
-  const start = fmtLaunchDate(firstDate(cfg, r.services ?? []));
-  const line = `${r.first_name} — your Tidy service starts ${start}. Here's your day and time: ${r.assigned_day}, ${r.assigned_window}, with ${r.assigned_pro_first_name}. Confirm and add your card — nothing charges until after your first visit.`;
+/**
+ * The convert invite. `blackouts` are no-visit dates (Thanksgiving): a member whose day
+ * falls on one is told their real first visit, a week later, on the same weekday.
+ * `carWaiting`: the car part waits for its own date and joins the same bill later.
+ */
+export function convertEmail(r: { first_name: string; assigned_day: string; assigned_window: string; assigned_pro_first_name: string; services?: string[] }, link: string, cfg: LaunchConfig, blackouts: string[] = [], carWaiting = false) {
+  const services = (r.services ?? []).filter((s) => !carWaiting || launchScope(s) !== 'car');
+  const startIso = firstDate(cfg, services);
+  const start = fmtLaunchDate(startIso);
+  const naive = startIso ? firstVisitOn(startIso, r.assigned_day) : null;
+  const actual = startIso ? firstVisitOn(startIso, r.assigned_day, blackouts) : null;
+  const holiday = naive && actual && naive !== actual
+    ? ` Your first visit is ${new Date(`${actual}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })} (no visits on Thanksgiving).`
+    : '';
+  const car = carWaiting ? ` Car care starts later: ${CAR_OPENS_LINE.en}. We'll add it to this same bill when it starts.` : '';
+  const line = `${r.first_name} — your Tidy service starts ${start}. Here's your day and time: ${r.assigned_day}, ${r.assigned_window}, with ${r.assigned_pro_first_name}.${holiday} Confirm and add your card — nothing charges until after your first visit.${car}`;
   const html = tidyEmailShell({
     heading: `Your Tidy service starts ${start}`,
     eyebrow: 'Confirm your visit schedule',
     bodyHtml: `<p>${esc(line)}</p><p>Your quote is already set — just check it and add a card.</p><p>Questions any time: <a href="mailto:hello@jointidy.co">hello@jointidy.co</a> or (786) 829-1141.</p>`,
     ctaUrl: link, ctaLabel: 'Confirm & add card',
   });
-  return { subject: `${r.first_name}, confirm your Tidy day and time`, html, sms: `Tidy: ${line} ${link}` };
+  return { subject: `${r.first_name}, confirm your Tidy day and time`, html, sms: `Tidy: ${line} ${link}`, first_visit: actual };
 }
 
 /** Every reservation send is written to the email history. */
