@@ -140,3 +140,12 @@
 - [x] Part E — alert tiers, urgent on insert, 9 AM / 9 PM digests, /admin/alerts tiers
 - [x] Part F — one post one row, duplicate + double-publish guards, archive, rebuild to 31 Dec, /admin/social
 - [ ] Part G — launch scheduling (next).
+
+## Launch date change (Oct 13)
+- [x] Cleaning/lawn 23 Nov, conversion 16 Nov, ready-by 20 Nov, late week 30 Nov; car dates empty
+- [x] Car care opens on demand: threshold alert, digest line, proposal + Approve, server gates, customer/Pro copy
+- [x] Thanksgiving Thursday first visit line; waitlist hold counted from conversion
+- [ ] Car line added to an existing bill when car opens is an admin step (alert lists it), not automatic
+
+## Social calendar (Oct 13)
+- [ ] Load 39 posts (34 FB+IG, 5 Nextdoor), images/cards, IG "Link in bio", checks S-1..S-7 — not started; re-plan around 23 Nov + no car date needed
