@@ -1901,6 +1901,7 @@ export type Database = {
           ica_countersigned_at: string | null
           insurance_instructions_sent_at: string | null
           insurance_reimbursement_start_month: string | null
+          is_test: boolean
           kit_issued_at: string | null
           one_pager_sent_at: string | null
           owns_equipment: boolean | null
@@ -1973,6 +1974,7 @@ export type Database = {
           ica_countersigned_at?: string | null
           insurance_instructions_sent_at?: string | null
           insurance_reimbursement_start_month?: string | null
+          is_test?: boolean
           kit_issued_at?: string | null
           one_pager_sent_at?: string | null
           owns_equipment?: boolean | null
@@ -2045,6 +2047,7 @@ export type Database = {
           ica_countersigned_at?: string | null
           insurance_instructions_sent_at?: string | null
           insurance_reimbursement_start_month?: string | null
+          is_test?: boolean
           kit_issued_at?: string | null
           one_pager_sent_at?: string | null
           owns_equipment?: boolean | null
@@ -8892,6 +8895,7 @@ export type Database = {
           days_in_stage: number
           hold_callback_date: string
           hold_reason: string
+          is_test: boolean
           name: string
           overridden: boolean
           previously_declined: string
@@ -8926,6 +8930,7 @@ export type Database = {
         Args: { _callback: string; _id: string; _reason: string }
         Returns: undefined
       }
+      pipeline_is_test_pro: { Args: { _uid: string }; Returns: boolean }
       pipeline_log: {
         Args: {
           _from_stage: string
