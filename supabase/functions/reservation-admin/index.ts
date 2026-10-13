@@ -31,21 +31,29 @@ Deno.serve(async (req) => {
   if (!r) return jsonResponse({ ok: false, error: 'not_found' }, 404);
   if (r.status === 'converted' || r.status === 'canceled') return jsonResponse({ ok: false, error: `already_${r.status}` }, 409);
 
-  // Conversion dates live in launch_config. Car care cannot be converted before its date.
+  // Conversion dates live in launch_config. A service with no date (car care) is never open.
+  // Cleaning/lawn convert on their date; a car part waits for the car date (the database enforces the same).
   const cfg = await loadLaunchConfig(admin);
   const today = easternTodayIso();
   const scopes = [...new Set(((r.services ?? []) as string[]).map(launchScope))];
-  const early = scopes.filter((s) => cfg[s]?.conversion_date && today < (cfg[s]!.conversion_date as string));
-  if (b.action !== 'preview' && early.includes('car')) {
-    return jsonResponse({ ok: false, error: 'car_care_conversion_not_open', opens: cfg.car?.conversion_date }, 409);
+  const isOpen = (s: string) => !!cfg[s as 'car']?.conversion_date && today >= (cfg[s as 'car']!.conversion_date as string);
+  const hasCar = scopes.includes('car') || !!(r.quote as { carWashes?: unknown } | null)?.carWashes;
+  const home = scopes.filter((s) => s !== 'car');
+  if (b.action !== 'preview') {
+    if (home.some((s) => !isOpen(s))) return jsonResponse({ ok: false, error: 'conversion_not_open', opens: cfg[home[0] as 'cleaning']?.conversion_date }, 409);
+    if (hasCar && !isOpen('car') && !home.length) return jsonResponse({ ok: false, error: 'car_care_conversion_not_open', opens: cfg.car?.conversion_date ?? null }, 409);
   }
+  const carWaiting = hasCar && !isOpen('car') && home.length > 0;
+  const { data: bl } = await admin.from('sched_blackouts').select('off_date').is('zip', null);
+  const blackouts = ((bl ?? []) as { off_date: string }[]).map((x) => String(x.off_date).slice(0, 10));
 
   const t = r.invite_token ?? token();
   const link = `${TIDY_SITE}/reserve/confirm/${t}`;
-  const msg = convertEmail({ first_name: r.first_name, assigned_day: b.day, assigned_window: b.window, assigned_pro_first_name: b.pro_first_name, services: r.services ?? [] }, link, cfg);
-  if (b.action === 'preview') return jsonResponse({ ok: true, to: r.email, phone: r.phone, subject: msg.subject, html: msg.html, sms: msg.sms });
+  const msg = convertEmail({ first_name: r.first_name, assigned_day: b.day, assigned_window: b.window, assigned_pro_first_name: b.pro_first_name, services: r.services ?? [] }, link, cfg, blackouts, carWaiting);
+  if (b.action === 'preview') return jsonResponse({ ok: true, to: r.email, phone: r.phone, subject: msg.subject, html: msg.html, sms: msg.sms, first_visit: msg.first_visit, car_waiting: carWaiting });
 
-  await admin.from('reservations').update({ invite_token: t, invited_at: new Date().toISOString(), status: 'invited', assigned_day: b.day, assigned_window: b.window, assigned_pro_first_name: b.pro_first_name }).eq('id', r.id);
+  const { error: upErr } = await admin.from('reservations').update({ invite_token: t, invited_at: new Date().toISOString(), status: 'invited', assigned_day: b.day, assigned_window: b.window, assigned_pro_first_name: b.pro_first_name }).eq('id', r.id);
+  if (upErr) return jsonResponse({ ok: false, error: upErr.message }, 409);
   const sent = await sendBrevoEmail({ to: { email: r.email, name: r.first_name }, marketing: false, subject: msg.subject, htmlContent: msg.html, label: 'reservation-convert', tags: ['reservation'] });
   await logEmail(admin, 'reservation-convert', r.email, msg.subject, sent, 'reservation-admin');
   let sms: string = 'no_consent';

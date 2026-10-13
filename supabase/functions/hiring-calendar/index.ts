@@ -109,22 +109,7 @@ Deno.serve(async (req) => {
       if (ok) hireAlerts += 1;
     }
   }
-  const carDue = cfg.car?.pro_callback_date;
-  if (carDue && todayIso === carDue) {
-    const { count } = await admin.from('reservations').select('id', { count: 'exact', head: true })
-      .contains('services', ['detailing']).not('status', 'eq', 'canceled');
-    const enough = (count ?? 0) >= 10;
-    const ok = await writeAlert(admin, {
-      level: 'critical', category: 'calendar',
-      title: enough ? 'Advance your #1 car care Pro today' : `Car care below 10 reservations (${count ?? 0}) — decide today`,
-      body: enough
-        ? `WHAT: Car care has ${count} reservations; advance your first car care Pro today.\nWHY TODAY: Pros must be active by ${fmtLaunchDate(cfg.car?.pro_ready_by)} for first visits ${fmtLaunchDate(cfg.car?.first_visit_date)}.\nIF IGNORED: the car care launch slips.\nDO: open the pipeline.`
-        : `WHAT: Car care has ${count ?? 0} reservations, under the 10 needed to hire.\nWHY TODAY: today is the car care hire date.\nIF IGNORED: the ${fmtLaunchDate(cfg.car?.first_visit_date)} car care launch is undecided.\nDO: decide whether to launch car care.`,
-      action_label: 'Open the pipeline', action_url: '/admin/pipeline?service=detailing',
-      due_date: carDue, dedupe_key: `hire_deadline_car_${carDue}`,
-    });
-    if (ok) hireAlerts += 1;
-  }
+  // Car care has no fixed hire date: car_launch_check() raises the urgent alert when demand reaches the threshold.
 
   const { data: tasks } = await admin
     .from('calendar_tasks')

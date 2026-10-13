@@ -1,7 +1,7 @@
 // Tidy chatbot — Lovable AI Gateway, streaming, knowledge-base grounded.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadLaunchConfig } from "../_shared/launch-config.ts";
-import { fmtLaunchDate } from "../_shared/launch.ts";
+import { CAR_OPENS_LINE, fmtLaunchDate } from "../_shared/launch.ts";
 import { vendorFetch } from '../_shared/http.ts';
 
 const corsHeaders = {
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
       launchFacts = `\n\nLAUNCH DATES (authoritative — always use these):
 - House cleaning: first visits begin ${fmtLaunchDate(cfg.cleaning?.first_visit_date)}.
 - Lawn care: first visits begin ${fmtLaunchDate(cfg.lawn?.first_visit_date)}.
-- Car Care (Shine Complete and the Car Wash Add-On): first visits begin ${fmtLaunchDate(cfg.car?.first_visit_date)}.
+- Car Care (Shine Complete and the Car Wash Add-On): ${cfg.car?.first_visit_date ? `first visits begin ${fmtLaunchDate(cfg.car.first_visit_date)}.` : `no start date yet. Say exactly: "${CAR_OPENS_LINE.en}." In Spanish: "${CAR_OPENS_LINE.es}." Never give a car care date.`}
 - Reservations made now are free; we confirm the day, window and Pro and set up payment shortly before the first visit.
 - No visits on Thanksgiving Day.
 When asked when Tidy starts, give the date for the service they ask about; if they don't say, give both dates.`;
