@@ -39,10 +39,24 @@ export function firstVisitFor(cfg: LaunchConfig | undefined, service: string): s
   return cfg?.[launchScope(service)]?.first_visit_date ?? null;
 }
 
+/** Customer copy while car care has no date (it opens when demand fills a route). No final period: callers add it. */
+export const CAR_OPENS_LINE = {
+  en: "Car care opens as soon as enough neighbors in your area reserve it. Reserve now, no card needed, and you'll be first in line",
+  es: 'El cuidado de autos abre en cuanto suficientes vecinos de tu zona lo reserven. Reserva ahora, sin tarjeta, y serás de los primeros',
+} as const;
+/** Car Pro copy while car care has no date. */
+export const CAR_PRO_ROUTE_LINE = {
+  en: 'Your first route starts once 10 members reserve in your area. We confirm the date at least a week ahead.',
+  es: 'Tu primera ruta comienza cuando 10 miembros reserven en tu zona. Confirmamos la fecha con al menos una semana de anticipación.',
+} as const;
+export function carHasDate(cfg: LaunchConfig | undefined): boolean {
+  return !!cfg?.car?.first_visit_date;
+}
+
 /**
  * One sentence with the right start date(s) for the services in play. With no
- * services (or a mix) it names both dates, so a car care customer never sees
- * the cleaning/lawn date alone.
+ * services (or a mix) it names both, so a car care customer never sees the
+ * cleaning/lawn date alone. With no car date, car care gets the "opens as soon as" line.
  */
 export function startsLine(cfg: LaunchConfig | undefined, lang: 'en' | 'es' = 'en', services?: string[], style: 'long' | 'short' = 'long'): string {
   if (!cfg) return '';
@@ -52,12 +66,31 @@ export function startsLine(cfg: LaunchConfig | undefined, lang: 'en' | 'es' = 'e
   const hasHome = scopes.has('cleaning') || scopes.has('lawn');
   const hasCar = scopes.has('car');
   if (hasHome && hasCar) {
+    if (!car) {
+      return lang === 'es'
+        ? `Limpieza y jardín comienzan el ${home}. ${CAR_OPENS_LINE.es}`
+        : `Cleaning and lawn begin ${home}. ${CAR_OPENS_LINE.en}`;
+    }
     return lang === 'es'
       ? `Limpieza y jardín comienzan el ${home}; cuidado del auto comienza el ${car}`
       : `Cleaning and lawn begin ${home}; car care begins ${car}`;
   }
-  if (hasCar) return lang === 'es' ? `Cuidado del auto comienza el ${car}` : `Car care begins ${car}`;
+  if (hasCar) {
+    if (!car) return CAR_OPENS_LINE[lang];
+    return lang === 'es' ? `Cuidado del auto comienza el ${car}` : `Car care begins ${car}`;
+  }
   return lang === 'es' ? `Las primeras visitas comienzan el ${home}` : `First visits begin ${home}`;
+}
+
+/** The date a member's first visit falls on: their weekday on/after the first-visit date, skipping blackout days a week. */
+export function firstVisitOn(startIso: string, weekday: string, blackouts: string[] = []): string | null {
+  const names = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const wd = names.indexOf(weekday.trim().toLowerCase().split(/[\s,]/)[0]);
+  if (wd < 0) return null;
+  const d = new Date(`${startIso.slice(0, 10)}T12:00:00Z`);
+  while (d.getUTCDay() !== wd) d.setUTCDate(d.getUTCDate() + 1);
+  while (blackouts.includes(d.toISOString().slice(0, 10))) d.setUTCDate(d.getUTCDate() + 7);
+  return d.toISOString().slice(0, 10);
 }
 
 export const RESERVABLE_SERVICES = ['cleaning', 'lawn', 'detailing'] as const;
