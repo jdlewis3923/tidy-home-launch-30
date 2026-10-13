@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,15 +21,17 @@ export type DeclineInput = {
  * server re-checks them and refuses to archive without them.
  */
 export default function DeclineDialog({
-  open, onOpenChange, names, fcraEligible, onConfirm,
+  open, onOpenChange, names, fcraEligible, onConfirm, defaultReason,
 }: {
+  defaultReason?: string;
   open: boolean;
   onOpenChange: (v: boolean) => void;
   names: string[];
   fcraEligible: boolean;
   onConfirm: (input: DeclineInput) => Promise<void> | void;
 }) {
-  const [reason, setReason] = useState<string>("");
+  const [reason, setReason] = useState<string>(defaultReason ?? "");
+  useEffect(() => { if (open && defaultReason) setReason(defaultReason); }, [open, defaultReason]);
   const [note, setNote] = useState("");
   const [preAdverse, setPreAdverse] = useState("");
   const [rights, setRights] = useState(false);

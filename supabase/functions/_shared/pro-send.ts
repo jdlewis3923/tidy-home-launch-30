@@ -14,6 +14,10 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4
 import { sendBrevoEmail, type BrevoAttachment } from './brevo-send.ts';
 import type { Built } from './pro-emails.ts';
 import { SEQUENCE_EMAILS, AUTO_CAP_MS, inQuietHours, nextSendWindow } from './onboarding-sequence.ts';
+import { pipelineAllows, type GateKind } from './pipeline-gate.ts';
+
+/** Legacy sequence emails that carry the ICA, W-9, Checkr, insurance or kit — held to the 8-stage hiring order. */
+const HIRING_ORDER: Record<string, GateKind> = { onboarding: 'onboarding', missing: 'onboarding', contract: 'ica', badge_photo: 'kit', photo_retake: 'kit', all_set: 'kit', first_route: 'kit' };
 
 /** transition = fired by a stage change; auto = system; manual = admin Send menu override. */
 export type SendMode = 'transition' | 'auto' | 'manual';
@@ -90,6 +94,13 @@ export async function sendProEmail(admin: SupabaseClient, args: {
 }): Promise<{ sent: boolean; reason?: string; blocked?: boolean; deferred?: boolean; outOfSequence?: string | null }> {
   const mode = args.mode ?? 'transition';
   let outOfSequence: string | null = null;
+  if (args.applicantId && HIRING_ORDER[args.key]) {
+    const h = await pipelineAllows(admin, args.applicantId, HIRING_ORDER[args.key]);
+    if (!h.ok) {
+      await admin.from('onboarding_events').insert({ applicant_id: args.applicantId, event: `email_blocked:${args.key}`, metadata: { reason: h.reason, mode, hiring_order: true } });
+      return { sent: false, blocked: true, reason: h.reason };
+    }
+  }
   if (args.applicantId) {
     const g = await sequenceGuard(admin, args.applicantId, args.key, mode);
     if (!g.ok && 'blocked' in g) return { sent: false, blocked: true, reason: g.blocked };

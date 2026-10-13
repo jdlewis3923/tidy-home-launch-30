@@ -1,7 +1,7 @@
 import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 /**
  * pipeline-welcome-t1 — fired by the database the moment ica_countersigned_at
- * is written (stage 3). Sends the existing WELCOME-T1 template once and stamps
+ * is written (stage 4). Sends the existing WELCOME-T1 template once and stamps
  * welcome_t1_sent_at. Service-role only; no other contractor message is sent.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
@@ -38,5 +38,10 @@ Deno.serve(async (req) => {
   await admin.from("email_send_log").insert({ template_name: "WELCOME-T1", channel: "brevo", recipient: a.email, triggered_by: "pipeline-welcome-t1", status: "sent", payload: { applicant_id } });
   const { error } = await admin.rpc("pipeline_mark_welcome_sent", { _id: applicant_id });
   if (error) return jsonResponse({ ok: false, error: error.message }, 500);
-  return jsonResponse({ ok: true });
+  // On signature: WELCOME-T1 (above, unchanged) plus the insurance quote instructions.
+  const ins = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/pipeline-notify`, {
+    method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
+    body: JSON.stringify({ applicant_id, event: "insurance_instructions" }),
+  }).then((r) => r.status, () => 0);
+  return jsonResponse({ ok: true, insurance_instructions: ins });
 });

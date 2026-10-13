@@ -1,11 +1,12 @@
 /**
- * Contractor pipeline — the seven fixed stages. The database owns the rules
+ * Contractor pipeline — the eight fixed stages (equipment proof before any document or dollar). The database owns the rules
  * (pipeline_* functions); this file only names and labels them for screens.
  * No screen may write a stage: every move goes through supabase.rpc("pipeline_*").
  */
 export const PIPELINE_STAGES = [
   { key: "applied", label: "Applied", cost: 0 },
   { key: "screened", label: "Screened", cost: 0 },
+  { key: "proof", label: "Equipment proof", cost: 0 },
   { key: "agreement", label: "Agreement", cost: 0 },
   { key: "ins_quote", label: "Insurance quote", cost: 0 },
   { key: "background", label: "Background check", cost: 6449 },
@@ -54,3 +55,11 @@ export const rpcMessage = (e: { message?: string } | null | undefined) =>
   (e?.message ?? "Something went wrong").replace(/^pipeline:\s*/, "");
 
 export const BUSINESS_DAYS_FOR_ADVERSE = 5;
+
+export const PROOF_MESSAGE = "Equipment proof not approved. Tidy does not pay for a background check on equipment nobody has seen.";
+export const PROOF_REJECT_REASONS = ["Card not in photo", "Not the required item", "Not running / couldn't tell it works", "Blurry", "Other"] as const;
+export const EXPERIENCE_LEVELS = [
+  { key: "none", label: "None (recorded, not a gate)" },
+  { key: "informal", label: "Informal" },
+  { key: "professional", label: "Professional" },
+] as const;

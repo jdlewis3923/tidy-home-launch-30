@@ -1,6 +1,6 @@
 /** Admin visit photo feed — /admin/photos. Live as Pros upload. Photos stay private (signed URLs). */
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,6 +9,7 @@ type VisitInfo = { id: string; service: string | null; service_type: string | nu
 
 export default function AdminPhotos() {
   const navigate = useNavigate();
+  const visitFilter = useSearchParams()[0].get("visit");
   const [rows, setRows] = useState<Row[] | null>(null);
   const [visits, setVisits] = useState<Record<string, VisitInfo>>({});
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -23,8 +24,9 @@ export default function AdminPhotos() {
   }, [navigate]);
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from("visit_photos").select("id, visit_id, kind, storage_path, uploaded_at")
-      .order("uploaded_at", { ascending: false }).limit(120);
+    let q = supabase.from("visit_photos").select("id, visit_id, kind, storage_path, uploaded_at");
+    if (visitFilter) q = q.eq("visit_id", visitFilter);
+    const { data } = await q.order("uploaded_at", { ascending: false }).limit(120);
     const list = (data ?? []) as Row[];
     const paths = list.map((r) => r.storage_path);
     const signed = paths.length ? (await supabase.storage.from("visit-photos").createSignedUrls(paths, 3600)).data ?? [] : [];
@@ -35,7 +37,7 @@ export default function AdminPhotos() {
       const { data: v } = await supabase.from("visits").select("id, service, service_type, visit_date, status").in("id", ids);
       setVisits(Object.fromEntries(((v ?? []) as VisitInfo[]).map((x) => [x.id, x])));
     }
-  }, []);
+  }, [visitFilter]);
 
   useEffect(() => {
     if (!authed) return;

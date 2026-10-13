@@ -206,9 +206,15 @@ Deno.serve(async (req) => {
   if (outcome === 'clear') {
     // Clear → "your check is clear" email, then the next-step onboarding
     // email (insurance + sizes/kit links) if it has not gone out yet.
-    await callFn('advance-applicant', { applicant_id: applicantId, action: 'clear', notes: `Checkr report clear (${eventType})` });
-    const { data: a } = await admin.from('applicants').select('onboarding_email_sent_at').eq('id', applicantId).maybeSingle();
-    if (!a?.onboarding_email_sent_at) await callFn('pro-onboarding-email', { applicant_id: applicantId });
+    // 8-stage pipeline: record the result on the pipeline record. Saving checkr_result = clear
+    // at stage 6 sends the one "You're cleared" message (database trigger). Nothing else is sent here.
+    const { data: pl } = await admin.from('contractor_pipeline').select('stage').eq('applicant_id', applicantId).maybeSingle();
+    if (pl?.stage === 'background') {
+      const { error: pe } = await admin.rpc('pipeline_update', { _id: applicantId, _patch: { checkr_result: 'clear' } });
+      if (pe) console.error('[checkr-webhook] pipeline clear failed', pe.message);
+    } else if (!pl) {
+      await callFn('advance-applicant', { applicant_id: applicantId, action: 'clear', notes: `Checkr report clear (${eventType})` });
+    }
   } else if (outcome === 'reject') {
     await callFn('advance-applicant', { applicant_id: applicantId, action: 'fail', notes: `Checkr adverse action final (${eventType})` });
   } else if (outcome === 'review') {

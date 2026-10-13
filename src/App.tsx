@@ -132,6 +132,7 @@ const CoiTokenUpload = lazy(() => import("./pages/CoiTokenUpload.tsx"));
 
 /* Tidy Pro Portal — the installable app Pros work from day to day. */
 const ProLanding = lazy(() => import("./pages/pro/ProLanding.tsx"));
+const ProProof = lazy(() => import("./pages/pro/ProProof"));
 const ProLogin = lazy(() => import("./pages/pro/ProLogin.tsx"));
 const ProFirstRun = lazy(() => import("./pages/pro/ProFirstRun.tsx"));
 const ProSchedule = lazy(() => import("./pages/pro/ProSchedule.tsx"));
@@ -180,7 +181,7 @@ import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFou
 import { getLandingSource } from "@/lib/landing-source";
 import { usePageVisibility, pageAllowed } from "@/lib/pageVisibility";
 
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/pro", "/add/", "/addon/", "/q/", "/neighbor", "/rate", "/verify/", "/intake", "/coi", "/contract/", "/photo/", "/badge/"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/pro", "/pro/proof", "/add/", "/addon/", "/q/", "/neighbor", "/rate", "/verify/", "/intake", "/coi", "/contract/", "/photo/", "/badge/"];
 
 // The printed door hangers point at /dashboard/plan?src=doorhanger_en — a
 // neighbour with no account should see the founding offer first. Bounce them to
@@ -461,6 +462,7 @@ const App = () => (
                   <Route path="/coi/:token" element={<CoiTokenUpload />} />
 
                   {/* Tidy Pro Portal — its own app shell, no site chrome. */}
+                  <Route path="/pro/proof/:token" element={<ProProof />} />
                   <Route path="/pro/welcome" element={<ProLanding />} />
                   <Route path="/pro/login" element={<ProLogin />} />
                   <Route path="/pro/first-run" element={<ProFirstRun />} />

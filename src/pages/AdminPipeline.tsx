@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { HireSpecsBanner } from "@/components/admin/RescheduleBanner";
 import DeclineDialog, { type DeclineInput } from "@/components/admin/pipeline/DeclineDialog";
+import HiringDocsPanel from "@/components/admin/pipeline/HiringDocsPanel";
 import { PIPELINE_SERVICES, PIPELINE_STAGES, rpcMessage, serviceLabel, stageIndex } from "@/lib/pipeline";
 
 export type BoardCard = {
@@ -68,7 +69,7 @@ export default function AdminPipeline() {
   useEffect(() => { void load(); }, [load]);
 
   const visible = useMemo(() => cards.filter((c) =>
-    (service === "all" || c.service === service) && (!fromSpend || stageIndex(c.stage) >= 4)), [cards, service, fromSpend]);
+    (service === "all" || c.service === service) && (!fromSpend || stageIndex(c.stage) >= stageIndex("background"))), [cards, service, fromSpend]);
   const open = visible.filter((c) => c.state !== "hold");
   const held = visible.filter((c) => c.state === "hold")
     .sort((a, b) => (a.hold_callback_date ?? "").localeCompare(b.hold_callback_date ?? ""));
@@ -103,6 +104,7 @@ export default function AdminPipeline() {
       <Helmet><title>Pipeline | Tidy Admin</title></Helmet>
       <div className="mx-auto max-w-[1600px] space-y-5">
         <HireSpecsBanner />
+        <HiringDocsPanel />
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-2xl font-black tracking-tight text-foreground">Contractor pipeline</h1>
@@ -129,7 +131,7 @@ export default function AdminPipeline() {
         </div>
 
         {fromSpend && (
-          <p className="text-sm text-muted-foreground">Showing stage 5 and later. <button className="font-semibold text-primary underline" onClick={() => setParam("from", null)}>Show all stages</button></p>
+          <p className="text-sm text-muted-foreground">Showing stage 6 and later. <button className="font-semibold text-primary underline" onClick={() => setParam("from", null)}>Show all stages</button></p>
         )}
         {err && <p className="text-sm text-destructive">{err}</p>}
         {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
@@ -166,7 +168,7 @@ export default function AdminPipeline() {
                 </span>
               </div>
             )}
-            <div className="grid gap-3 overflow-x-auto pb-2" style={{ gridTemplateColumns: "repeat(7, minmax(180px, 1fr))" }}>
+            <div className="grid gap-3 overflow-x-auto pb-2" style={{ gridTemplateColumns: "repeat(8, minmax(170px, 1fr))" }}>
               {PIPELINE_STAGES.map((st, i) => {
                 const col = open.filter((c) => c.stage === st.key);
                 return (

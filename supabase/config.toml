@@ -184,3 +184,9 @@ verify_jwt = false
 
 [functions.log-touch]
 verify_jwt = false
+
+[functions.pipeline-notify]
+verify_jwt = false
+
+[functions.pro-proof]
+verify_jwt = false

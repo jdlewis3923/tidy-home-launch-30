@@ -52,6 +52,13 @@ Deno.serve(async (req) => {
   }
   const { applicant_id, resend } = parsed.data;
 
+  // 8-stage pipeline: Tidy never sends a Checkr invite. Justin orders Checkr Essential by hand
+  // on Checkr's site after the background-stage spend (Checkr collects its own consent).
+  const { data: inPipeline } = await admin.from('contractor_pipeline').select('applicant_id').eq('applicant_id', applicant_id).maybeSingle();
+  if (inPipeline) {
+    return jsonResponse({ ok: false, error: 'hiring_order', reason: "Send the Checkr Essential invite by hand on Checkr's site once the candidate is at Background check." }, 409);
+  }
+
   const { data: applicant, error: fetchErr } = await admin
     .from('applicants')
     .select('id, first_name, last_name, email, phone, zip, checkr_candidate_id, checkr_invitation_id')

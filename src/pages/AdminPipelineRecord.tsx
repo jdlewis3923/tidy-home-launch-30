@@ -4,7 +4,8 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import ProofPanel from "@/components/admin/pipeline/ProofPanel";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,8 @@ const FIELDS: Record<string, Field[]> = {
   screened: [
     { key: "screening_call_completed_at", label: "Screening call completed", type: "datetime" },
     { key: "call_notes", label: "Call notes (20+ characters)", type: "textarea" },
-    { key: "owns_equipment", label: "Owns equipment", type: "bool" },
+    { key: "preferred_language", label: "Preferred language (every message goes in it)", type: "select", options: ["en", "es"] },
+    { key: "experience_level", label: "Experience (recorded, not a gate)", type: "select", options: ["none", "informal", "professional"] },
     { key: "drive_time_minutes", label: "Drive time (minutes, 30 max)", type: "number" },
     { key: "screening_decision", label: "Decision (use Hold / Decline buttons for those)", type: "select", options: ["advance"] },
   ],
@@ -81,6 +83,10 @@ const fromInput = (f: Field, s: string): any => {
 export default function AdminPipelineRecord() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
+  const [search, setSearch] = useSearchParams();
+  const [equip, setEquip] = useState<Row[]>([]);
+  const [claimed, setClaimed] = useState<string[] | null>(null);
+  const [presetReason, setPresetReason] = useState<string | undefined>(undefined);
   const [p, setP] = useState<Row | null>(null);
   const [a, setA] = useState<Row | null>(null);
   const [missing, setMissing] = useState<string[]>([]);
@@ -108,8 +114,13 @@ export default function AdminPipelineRecord() {
     ]);
     if (pr.error) setErr(rpcMessage(pr.error));
     setP(pr.data); setA(ar.data); setMissing(ms.error ? [`Could not check requirements: ${rpcMessage(ms.error)}`] : (ms.data ?? [])); setArtifacts(art.data ?? []); setSpend(sp.data ?? []); setEvents(ev.data ?? []); setOrientationProgress(op.data ?? []);
-    setDraft({});
+    setDraft({}); setClaimed(null);
+    if (pr.data?.service) { const { data: eq } = await db.from("pipeline_equipment_items").select("*").eq("service", pr.data.service).eq("active", true).order("sort"); setEquip(eq ?? []); }
   }, [id]);
+  useEffect(() => {
+    const act = search.get("action");
+    if (act === "hold" || act === "decline") { setModal(act); if (act === "decline") setPresetReason(search.get("reason") ?? "No equipment"); setSearch({}, { replace: true }); }
+  }, [search, setSearch]);
   useEffect(() => { void load(); }, [load]);
 
   const run = async (fn: string, args: Record<string, unknown>, ok: string) => {
@@ -128,6 +139,7 @@ export default function AdminPipelineRecord() {
   const saveFields = async () => {
     const patch: Record<string, unknown> = {};
     for (const f of FIELDS[p.stage] ?? []) if (f.key in draft) patch[f.key] = fromInput(f, draft[f.key]);
+    if (claimed) patch.equipment_claimed = claimed;
     if (!Object.keys(patch).length) return;
     const { error } = await db.rpc("pipeline_update", { _id: id, _patch: patch });
     if (error) toast.error(rpcMessage(error)); else { toast.success("Saved."); await load(); }
@@ -168,7 +180,7 @@ export default function AdminPipelineRecord() {
           <p className="text-sm font-semibold tabular-nums">Spent {money(total)}</p>
         </header>
 
-        <ol className="grid grid-cols-7 gap-1" aria-label="Stages">
+        <ol className="grid grid-cols-8 gap-1" aria-label="Stages">
           {PIPELINE_STAGES.map((s, i) => (
             <li key={s.key} className={`rounded px-1 py-1.5 text-center text-[10px] font-semibold ${i < stageIndex(p.stage) ? "bg-primary/20 text-foreground" : i === stageIndex(p.stage) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
               {i + 1}. {s.label}
@@ -176,6 +188,21 @@ export default function AdminPipelineRecord() {
           ))}
         </ol>
 
+        {p.proof_moved_back && <p className="rounded-md border border-accent bg-accent/20 p-3 text-sm font-semibold text-foreground">Moved back for equipment proof.</p>}
+        {p.stage === "proof" && !p.proof_link_sent_at && !p.archived && (
+          <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted p-3 text-sm">
+            <span>No proof link has gone out yet.</span>
+            <Button size="sm" onClick={() => run("pipeline_send_proof_link", {}, "Proof link sent.")}>Send proof link</Button>
+          </div>
+        )}
+        {p.stage === "background" && <p className="rounded-md border border-border bg-muted p-3 text-sm">Reminder: send the Checkr Essential invite by hand on Checkr's site. Checkr collects its own consent. Tidy sends nothing automatic at this stage.</p>}
+        {p.probation_paused_at && (
+          <div className="flex flex-wrap items-center gap-2 rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+            <span>New assignments paused after 2 probation redos.</span>
+            <Button size="sm" onClick={() => run("pipeline_probation_clear", {}, "Assignments resumed.")}>Clear pause</Button>
+          </div>
+        )}
+        {p.activated_at && p.probation_visits_remaining > 0 && <p className="rounded-md border border-border bg-muted p-3 text-sm">Probation: {p.probation_visits_remaining} of 3 visits left (before/after photos required to complete).</p>}
         {p.state === "hold" && <p className="rounded-md border border-border bg-muted p-3 text-sm">On hold: {p.hold_reason} · call back {p.hold_callback_date}</p>}
         {p.state === "lapsed" && <p className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">Insurance lapsed — no jobs can be assigned. Upload a new COI and update the dates, then reinstate.</p>}
         {p.archived && p.decline_reason && <p className="rounded-md border border-border bg-muted p-3 text-sm">Declined: {p.decline_reason}{p.decline_note ? ` — ${p.decline_note}` : ""}</p>}
@@ -202,6 +229,21 @@ export default function AdminPipelineRecord() {
             })}
             <datalist id="carriers"><option value="Hiscox" /><option value="NEXT" /></datalist>
           </div>
+          {p.stage === "screened" && (
+            <fieldset className="mt-3 space-y-1 text-sm">
+              <legend className="font-semibold">Equipment they say they own (every item must be ticked to advance)</legend>
+              {equip.map((it) => {
+                const cur = claimed ?? (p.equipment_claimed ?? []);
+                return (
+                  <label key={it.id} className="flex items-center gap-2">
+                    <input type="checkbox" checked={cur.includes(it.id)} onChange={(e) => setClaimed(e.target.checked ? [...cur, it.id] : cur.filter((x: string) => x !== it.id))} />
+                    {it.label_en}{it.needs_video ? " (video)" : ""}
+                  </label>
+                );
+              })}
+              <p className="text-xs text-muted-foreground">One missing item: Hold with a callback date, or Decline "No equipment".</p>
+            </fieldset>
+          )}
           {(ARTIFACTS_FOR[p.stage] ?? []).map((k) => (
             <div key={k} className="mt-3 flex flex-wrap items-center gap-2 text-sm">
               <span className="font-semibold">{ARTIFACT_LABEL[k]}:</span>
@@ -210,7 +252,7 @@ export default function AdminPipelineRecord() {
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(k, f); e.target.value = ""; }} />
             </div>
           ))}
-          <div className="mt-4 flex justify-end"><Button variant="outline" onClick={saveFields} disabled={!Object.keys(draft).length}>Save</Button></div>
+          <div className="mt-4 flex justify-end"><Button variant="outline" onClick={saveFields} disabled={!Object.keys(draft).length && !claimed}>Save</Button></div>
         </section>
 
         <section className="rounded-lg border border-border bg-card p-4">
@@ -233,6 +275,8 @@ export default function AdminPipelineRecord() {
             {p.archived && <Button onClick={() => run("pipeline_restore", {}, "Restored to the board.")}>Restore</Button>}
           </div>
         </section>
+
+        {(p.stage === "proof" || p.proof_submitted_at) && <ProofPanel id={id} p={p} onChange={() => void load()} />}
 
         <section className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-lg border border-border bg-card p-4">
@@ -311,7 +355,7 @@ export default function AdminPipelineRecord() {
       </Dialog>
 
       <DeclineDialog open={modal === "decline"} onOpenChange={(v) => setModal(v ? "decline" : null)} names={[name]}
-        fcraEligible={stageIndex(p.stage) >= 4 && artifacts.some((x) => x.kind === "checkr_report")} onConfirm={decline} />
+        defaultReason={presetReason} fcraEligible={stageIndex(p.stage) >= stageIndex("background") && artifacts.some((x) => x.kind === "checkr_report")} onConfirm={decline} />
     </main>
   );
 }

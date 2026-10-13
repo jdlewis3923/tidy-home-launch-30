@@ -7,11 +7,11 @@ import { ORIENTATION_STANDARDS } from "@/lib/orientation-standards";
 describe("orientation preview preserves content and stage gates", () => {
   it("keeps exactly four sections and the specified gates", () => {
     expect(ORIENTATION_SECTIONS).toHaveLength(4);
-    expect(ORIENTATION_SECTIONS.map(s => s.min)).toEqual([3, 5, 5, 6]);
+    expect(ORIENTATION_SECTIONS.map(s => s.min)).toEqual([4, 6, 6, 7]);
     expect(stageNumber("unknown")).toBe(0);
   });
   it("only includes slides belonging to unlocked sections", () => {
-    for (const [stage, count] of [["applied", 0], ["agreement", 1], ["background", 3], ["insured", 4]] as const) {
+    for (const [stage, count] of [["applied", 0], ["proof", 0], ["agreement", 1], ["background", 3], ["insured", 4]] as const) {
       const sections = ORIENTATION_SECTIONS.filter(s => stageNumber(stage) >= s.min);
       expect(sections).toHaveLength(count);
       expect(orientationSlides(sections).every(s => s.section.min <= stageNumber(stage))).toBe(true);

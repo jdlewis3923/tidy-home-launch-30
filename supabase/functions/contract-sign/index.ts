@@ -18,17 +18,26 @@ import { vendorFetch } from '../_shared/http.ts';
 import { contractSignedEmail } from '../_shared/pro-emails.ts';
 import { sendProEmail, proLang } from '../_shared/pro-send.ts';
 import { TIDY_OWNER_EMAIL } from '../_shared/email-brand.ts';
+import { pipelineAllows } from '../_shared/pipeline-gate.ts';
 
 const URL_ = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const admin = createClient(URL_, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
 const BUCKET = 'company-docs';
 
-async function currentIca() {
+async function currentIca(lang: 'en' | 'es' = 'en') {
+  // Spanish ICA is a lawyer-supplied upload (doc_key ica:es); never machine-translated.
+  if (lang === 'es') {
+    const { data: es } = await admin.from('company_documents').select('id, filename, storage_path, uploaded_at')
+      .eq('doc_key', 'ica:es').eq('current_version', true).is('archived_at', null)
+      .order('uploaded_at', { ascending: false }).limit(1).maybeSingle();
+    if (es) return { ...es, version: `${es.filename} · ${String(es.uploaded_at).slice(0, 10)} · ${String(es.id).slice(0, 8)}` };
+  }
   const { data } = await admin.from('company_documents')
     .select('id, filename, storage_path, uploaded_at')
     .eq('category', 'Contracts').ilike('filename', '%IndependentContractorAgreement%')
     .not('filename', 'ilike', 'ICA-signed%').not('tags', 'cs', '{signed}')
+    .or('doc_key.is.null,doc_key.neq.ica:es')
     .eq('current_version', true).is('archived_at', null)
     .order('uploaded_at', { ascending: false }).limit(1).maybeSingle();
   if (!data) return null;
@@ -55,7 +64,11 @@ Deno.serve(async (req) => {
     .eq('contract_token', token).maybeSingle();
   if (!a) return jsonResponse({ error: 'not_found' }, 404);
 
-  const doc = await currentIca();
+  // 8-stage pipeline: the agreement opens only after equipment proof is approved (stage 4+).
+  const gate = await pipelineAllows(admin, a.id, 'ica');
+  if (!gate.ok) return jsonResponse({ error: 'not_yet', reason: gate.reason }, 403);
+
+  const doc = await currentIca(await proLang(admin, a.id));
   if (!doc) return jsonResponse({ error: 'no_agreement_on_file' }, 500);
 
   if (body.action === 'document') {
