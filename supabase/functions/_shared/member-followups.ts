@@ -64,6 +64,18 @@ function canText(profile: any): string | null {
   return toE164(profile.phone);
 }
 
+function doneText(visit: Visit, profile: any, rateUrl: string): string {
+  const es = String(profile?.language ?? '').trim() === 'es';
+  const svc = String((visit as { service_type?: string }).service_type ?? '');
+  const photo = `${TIDY_SITE}/dashboard/visit/${visit.id}`;
+  if (es) {
+    const name = svc === 'lawn' ? 'servicio de césped' : svc === 'detailing' ? 'cuidado del auto' : svc === 'cleaning' ? 'limpieza' : 'visita';
+    return `Tidy: su ${name} está lista. Vea la foto del después: ${photo}\n¿Cómo le fue? Califíquela: ${rateUrl}\n${GUARANTEE_REPLY_LINE}`;
+  }
+  const name = svc === 'lawn' ? 'lawn care' : svc === 'detailing' ? 'car care' : svc === 'cleaning' ? 'cleaning' : 'visit';
+  return `Tidy: your ${name} is done. See the after photo: ${photo}\nHow was it? Rate it in one tap: ${rateUrl}\n${GUARANTEE_REPLY_LINE}`;
+}
+
 /** Called once, right after a visit is marked complete. Never throws. */
 export async function afterVisitComplete(admin: any, visit: Visit, now = new Date()): Promise<Record<string, unknown>> {
   const out: Record<string, unknown> = {};
@@ -79,7 +91,8 @@ export async function afterVisitComplete(admin: any, visit: Visit, now = new Dat
     if (phone) {
       const r = await queueSms(admin, {
         to_phone_e164: phone,
-        body: `Hi ${first}, how was your Tidy visit today? Rate it in one tap: ${rateUrl}\n${GUARANTEE_REPLY_LINE}`,
+        // "Your [service] is done." with a link to the visit record's after photo, in the member's language.
+        body: doneText(visit, profile, rateUrl),
         idempotency_key: `post_visit:${visit.id}`,
         template_name: 'post_visit_review',
         triggered_by: 'pro-visit-action',

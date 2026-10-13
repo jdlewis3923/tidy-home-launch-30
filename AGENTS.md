@@ -1,8 +1,6 @@
 - Onboarding sequence: stages/gates/email inventory live in `_shared/onboarding-sequence.ts` (mirrored to `src/lib/onboardingSequence.ts`, parity-tested); stage moves only via `sequence-advance`, and every Pro email passes `sendProEmail`'s guard — why: one definition, one door, auditable order.
 - Launch dates live only in the `launch_config` table (edited at /admin/launch-dates, changes logged); `src/lib/launch.ts` (mirrored to `_shared/launch.ts`, parity-tested) only formats them and holds the founding cap — why: one place to move a date, and a test fails if a date is typed into code.
 - Reservations never touch Stripe; the paid subscription marks a reservation converted by email match (DB trigger) — why: Stripe products stay frozen.
-- Failed or expired texts always raise an admin alert via `_shared/sms-failure.ts` (direct sends in send-twilio-sms, queued ones in sms-outbox-release) — why: no text ever fails silently.
-- Inbox redos go through `redo-request` with `message_id`; the clock starts at the member's message time — why: the guarantee promises "reply here within 48 hours".
 - The homepage frequency FAQ is shared from `src/lib/frequency-faq.ts` across pricing and FAQ sections — why: both placements must give the same bilingual answer.
 - Homepage hero media is split at the 768px rendered viewport: portrait media below it and widescreen media at or above it, including phone browsers in desktop-site mode — why: browser display mode must determine the correct composition.
 - Public page reachability is master switch OR per-page row in page_visibility (via get_page_visibility); /founding fails open unless explicitly off — why: printed hangers must never dead-end.
@@ -17,6 +15,6 @@
 - Lawn size is turf-only sq ft, banded in `LAWN_BANDS`/`sizeFromTurfSqFt` (mirrored in `public.lawn_size_from_sqft`); customers only guess, admins measure at `/admin/lawn-verification` via `admin_lawn_verify`, and DB triggers refuse conversion while `lawn_conversion_block()` is non-null — why: no silent repricing and no Pro absorbing an oversized yard.
 - Paid-plan lawn adds/corrections go only through `lawn-plan-change` (DB trigger refuses unverified lawn), swapping Stripe by lookup_key — why: nothing billed before verification; size-ups wait for the customer.
 - Contractor pay varies by service and size only, never cadence — why: cadence discounts come from Tidy's margin.
-- Car Care Stripe pay audits run through `car-care-pay-metadata`, using the shared pay canon across live/test and active/archived prices without changing amounts or activation; unidentifiable retired pay metadata is removed rather than mapped to invented vehicle sizes — why: pay stays per job and legacy bands cannot silently reintroduce wrong rates.
 - Root declares `color-scheme: light dark`; body/Founding render light with explicit colors and scoped tokens — why: phone browsers ignore "only light" and grey out QR visitors' pages.
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
+- Subdirectories have their own `AGENTS.md`; read it before changing files there.

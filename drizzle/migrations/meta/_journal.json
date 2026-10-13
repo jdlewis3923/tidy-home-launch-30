@@ -1086,6 +1086,48 @@
       "when": 1791847363922,
       "tag": "0154_admin_alert_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 155,
+      "version": "7",
+      "when": 1791848777810,
+      "tag": "0155_social_one_post_one_row",
+      "breakpoints": true
+    },
+    {
+      "idx": 156,
+      "version": "7",
+      "when": 1791848834607,
+      "tag": "0156_social_guard_hash_fix",
+      "breakpoints": true
+    },
+    {
+      "idx": 157,
+      "version": "7",
+      "when": 1791849563965,
+      "tag": "0157_part_g_launch_scheduling",
+      "breakpoints": true
+    },
+    {
+      "idx": 158,
+      "version": "7",
+      "when": 1791849611064,
+      "tag": "0158_street_key_suffixes",
+      "breakpoints": true
+    },
+    {
+      "idx": 159,
+      "version": "7",
+      "when": 1791849657753,
+      "tag": "0159_cleaning_sequence_pure_check",
+      "breakpoints": true
+    },
+    {
+      "idx": 160,
+      "version": "7",
+      "when": 1791849722938,
+      "tag": "0160_full_day_claim_hours_guard",
+      "breakpoints": true
     }
   ]
 }

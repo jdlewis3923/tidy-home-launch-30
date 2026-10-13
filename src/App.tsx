@@ -92,6 +92,8 @@ const AdminLaunchDates = lazy(() => import("./pages/AdminLaunchDates.tsx"));
 const AdminServiceScope = lazy(() => import("./pages/AdminServiceScope.tsx"));
 const AdminSizeReview = lazy(() => import("./pages/AdminSizeReview.tsx"));
 const AdminEvidencePack = lazy(() => import("./pages/AdminEvidencePack.tsx"));
+const AdminSocial = lazy(() => import("./pages/AdminSocial.tsx"));
+const AdminDemand = lazy(() => import("./pages/AdminDemand.tsx"));
 const AdminDocuments = lazy(() => import("./pages/AdminDocuments.tsx"));
 const AdminApplicants = lazy(() => import("./pages/AdminApplicants.tsx"));
 const AdminEmailHealth = lazy(() => import("./pages/AdminEmailHealth.tsx"));
@@ -101,7 +103,6 @@ const AdminReviews = lazy(() => import("./pages/AdminReviews.tsx"));
 const AdminReviewsImport = lazy(() => import("./pages/AdminReviewsImport.tsx"));
 const AdminCapacity = lazy(() => import("./pages/AdminCapacity.tsx"));
 const AdminOrientations = lazy(() => import("./pages/AdminOrientations.tsx"));
-const AdminSocialLaunch = lazy(() => import("./pages/AdminSocialLaunch.tsx"));
 const AdminNextdoorVerify = lazy(() => import("./pages/AdminNextdoorVerify.tsx"));
 const AdminDocumensoTemplates = lazy(() => import("./pages/AdminDocumensoTemplates.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
@@ -399,7 +400,9 @@ const App = () => (
                   <Route path="/admin/applicants" element={<AdminApplicants />} />
                   <Route path="/admin/orientations" element={<AdminOrientations />} />
                   <Route path="/admin/orientations/preview" element={<ProOrientationPreview />} />
-                  <Route path="/admin/social-launch" element={<AdminSocialLaunch />} />
+                  <Route path="/admin/social" element={<AdminSocial />} />
+                  <Route path="/admin/demand" element={<AdminDemand />} />
+                  <Route path="/admin/social-launch" element={<Navigate to="/admin/social" replace />} />
                   <Route path="/admin/nextdoor-verify" element={<AdminNextdoorVerify />} />
                   <Route path="/admin/documenso-templates" element={<AdminDocumensoTemplates />} />
                   <Route path="/admin/email-health" element={<AdminEmailHealth />} />

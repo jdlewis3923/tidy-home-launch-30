@@ -124,6 +124,14 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   if (edition === 'today') {
     sections.push({ title: 'Must do today', items: mustDo.map(item) });
     sections.push({ title: 'Unresolved urgent', red: true, items: urgentOpen.map(item) });
+    // Nextdoor can't be auto-posted: today's post, with its copy, image and a Mark posted button.
+    const { data: nd } = await admin.from('social_launch_posts').select('id, caption, image_url, scheduled_for, status')
+      .eq('channel', 'nextdoor').is('archived_at', null).is('posted_at', null)
+      .gte('scheduled_for', etMidnightUtc(today)).lt('scheduled_for', etMidnightUtc(addDays(today, 1)));
+    sections.push({ title: 'Post to Nextdoor today (6 PM)', items: (nd ?? []).map((p) => ({
+      text: p.caption?.trim() ? `${p.caption.trim()}${p.image_url ? `\n\nImage: ${p.image_url}` : ''}` : 'Needs a post — no copy written for this slot yet',
+      url: `${SITE}/admin/social?post=${p.id}`, label: 'Copy + Mark posted',
+    })) });
     sections.push({ title: 'Yesterday in numbers', items: anyNumbers ? [{ text: numbers.join(' · ') }] : [] });
     // Coming up: calendar tasks + launch dates in the next 7 days.
     const next7 = addDays(today, 7);
@@ -131,15 +139,27 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     const cfg = await loadLaunchConfig(admin).catch(() => null);
     const coming: { text: string }[] = (tasks ?? []).map((t) => ({ text: `${t.next_due_date} · ${t.title}` }));
     if (cfg) {
-      for (const [scope, row] of Object.entries(cfg.byScope ?? {}) as [string, Record<string, unknown>][]) {
+      for (const [scope, row] of Object.entries(cfg).filter(([k]) => k !== 'global') as unknown as [string, Record<string, unknown>][]) {
         for (const [k, label] of [['conversion_date', 'conversion day'], ['first_visit_date', 'first visits'], ['pro_callback_date', 'Pro hire date'], ['pro_ready_by', 'Pro must be active']] as const) {
           const v = row?.[k] as string | null; if (v && v >= today && v <= next7) coming.push({ text: `${v} · ${scope} ${label}` });
         }
       }
-      for (const d of (cfg.hangerDrops ?? []) as { start: string; end: string }[]) if (d.start >= today && d.start <= next7) coming.push({ text: `${d.start} · door hanger drop starts` });
+      for (const d of ((cfg.global as { hanger_drops?: unknown } | undefined)?.hanger_drops ?? []) as { start: string; end: string }[]) if (d.start >= today && d.start <= next7) coming.push({ text: `${d.start} · door hanger drop starts` });
     }
     coming.sort((a, b) => a.text.localeCompare(b.text));
     sections.push({ title: 'Next 7 days', items: coming });
+    // Demand report three days before cleaning/lawn conversion and on conversion day.
+    const conv = (cfg as Record<string, { conversion_date?: string | null }> | null)?.cleaning?.conversion_date ?? null;
+    if (conv && (today === conv || today === addDays(conv, -3))) {
+      const { data: dem } = await admin.rpc('sched_demand_rows');
+      const rows = (dem ?? []) as { service: string; zip: string; day: string; share: number; flagged: boolean; fit_pct: number }[];
+      const fit = new Map<string, number>(); for (const r of rows) fit.set(`${r.service} ${r.zip}`, r.fit_pct);
+      sections.push({ title: 'Demand vs. claimed days (calendar locks soon)', red: rows.some((r) => r.flagged), items: [
+        ...[...fit].map(([k, p]) => ({ text: `${k}: ${p}% of reservations fit a claimed day` })),
+        ...rows.filter((r) => r.flagged).map((r) => ({ text: `UNCOVERED: ${r.service} ${r.zip} ${r.day} — ${r.share}% of preferences, no Pro claim`, url: `${SITE}/admin/demand`, label: 'Open demand' })),
+        ...(rows.length ? [] : [{ text: 'No reservation preferences yet.', url: `${SITE}/admin/demand`, label: 'Open demand' }]),
+      ] });
+    }
     if (!mustDo.length) sections[0] = { title: 'Must do today', items: [] };
   } else {
     const openToday = [...urgentOpen, ...recent];
@@ -162,7 +182,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const nothing = edition === 'today' && !mustDo.length;
   const html = (nothing ? `<p style="margin:0 0 16px;font:700 16px Arial;color:#0f172a">Nothing needs you today.</p>` : '') + shown.map((s) => `
     <h2 style="margin:18px 0 8px;font:800 15px Arial;color:${s.red ? '#b91c1c' : '#0f172a'}">${esc(s.title)}</h2>
-    <ul style="margin:0;padding-left:18px">${s.items.map((i) => `<li style="margin:0 0 6px;color:${s.red ? '#b91c1c' : '#334155'}">${esc(i.text)}${i.url ? ` — <a href="${i.url}" style="color:#2563eb;font-weight:700">${esc(i.label)}</a>` : ''}</li>`).join('')}</ul>`).join('');
+    <ul style="margin:0;padding-left:18px">${s.items.map((i) => `<li style="margin:0 0 6px;white-space:pre-line;color:${s.red ? '#b91c1c' : '#334155'}">${esc(i.text)}${i.url ? ` — <a href="${i.url}" style="color:#2563eb;font-weight:700">${esc(i.label)}</a>` : ''}</li>`).join('')}</ul>`).join('');
   const heading = edition === 'today' ? 'Today' : 'Tonight';
   const mail = shown.length || nothing
     ? await sendBrevoEmail({

@@ -31,6 +31,7 @@ export default function ProVisit() {
   const [blockNote, setBlockNote] = useState("");
   const [blockedDone, setBlockedDone] = useState(false);
   const [omwSent, setOmwSent] = useState(false);
+  const [eta, setEta] = useState(20);
   const [actionError, setActionError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -80,7 +81,7 @@ export default function ProVisit() {
     if (!visit) return;
     setBusy("omw");
     setActionError(null);
-    const res = await visitAction(visit.id, "on_my_way");
+    const res = await visitAction(visit.id, "on_my_way", { eta_minutes: eta });
     setBusy(null);
     if (!res.ok) {
       setActionError(
@@ -267,6 +268,19 @@ export default function ProVisit() {
         )}
 
         <div className="mt-5 space-y-3">
+          {!omwSent && !visit.completed_at && (
+            <div>
+              <p className="text-[13px] font-bold text-[hsl(var(--pro-ink))]">About how many minutes away?</p>
+              <div className="mt-2 grid grid-cols-4 gap-1.5" role="radiogroup" aria-label="Minutes away">
+                {[10, 20, 30, 45].map((m) => (
+                  <button key={m} type="button" role="radio" aria-checked={eta === m} onClick={() => setEta(m)}
+                    className={`min-h-[44px] rounded-lg text-[14px] font-bold ${eta === m ? "bg-[hsl(var(--pro-navy))] text-white" : "border border-[hsl(var(--pro-navy)/0.12)] text-[hsl(var(--pro-ink))]"}`}>
+                    {m} min
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <ProButton
             full
             disabled={busy !== null || omwSent || blocked || !!visit.completed_at}

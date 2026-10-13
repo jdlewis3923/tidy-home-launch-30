@@ -18,6 +18,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { requireServiceOrAdmin } from "../_shared/admin-auth.ts";
 import { isCronAuthorized } from "../_shared/cron-auth.ts";
 import { vendorFetch } from '../_shared/http.ts';
+import { writeAlert } from '../_shared/alerts.ts';
 
 
 const corsHeaders = {
@@ -161,6 +162,7 @@ async function processPost(sb: ReturnType<typeof createClient>, post: Post): Pro
           status: "posted",
           posted_at: new Date().toISOString(),
           publish_error: null,
+          external_post_id: [ids.ig && `ig:${ids.ig}`, ids.fb && `fb:${ids.fb}`].filter(Boolean).join(" ") || null,
           notes: `ig:${ids.ig ?? "-"} fb:${ids.fb ?? "-"}`,
         })
         .eq("id", post.id);
@@ -172,13 +174,13 @@ async function processPost(sb: ReturnType<typeof createClient>, post: Post): Pro
       .from("social_launch_posts")
       .update({ status: "failed", publish_error: msg })
       .eq("id", post.id);
-    await sb.from("email_send_log").insert({
-      channel: "internal",
-      template_name: "social_launch_publish_failed",
-      recipient: "hello@jointidy.co",
-      status: "failed",
-      error_message: msg,
-      payload: { post_id: post.id, channel: post.channel, post_number: post.post_number },
+    // A failed auto-post goes to the digest, not an urgent alert. Status
+    // 'failed' is never re-pulled, so it cannot repeat on its own.
+    await writeAlert(sb as never, {
+      level: "action", category: "operations", tier: "digest",
+      title: `Social post failed to publish · ${new Date(post.scheduled_for).toLocaleDateString("en-US", { timeZone: "America/New_York" })}`,
+      body: msg, action_label: "Open social calendar", action_url: "/admin/social",
+      dedupe_key: `social_failed:${post.id}`, context: { post_id: post.id },
     });
     return { ok: false, error: msg };
   }
@@ -207,27 +209,15 @@ Deno.serve(async (req) => {
     }
   } catch {/* ignore */}
 
-  let q = sb
-    .from("social_launch_posts")
-    .select("id,channel,post_number,scheduled_for,caption,image_url,status,notes")
-    .is("posted_at", null)
-    // The armed filter is NOT optional: a post_id must never let an unposted
-    // draft, or something scheduled for next month, publish immediately.
-    .eq("status", "armed");
-
-  if (onlyId) {
-    q = q.eq("id", onlyId);
-  } else {
-    q = q.lte("scheduled_for", new Date().toISOString()).limit(20);
-  }
-
-
-  const { data: posts, error } = await q;
+  // One step: the database claims due posts and marks them 'posting' in the
+  // same statement, so an overlapping run or a retry can never publish twice.
+  // Nextdoor is never auto-posted; it is listed in the 9 AM digest instead.
+  const { data: posts, error } = await sb.rpc("claim_due_social_posts", { _limit: 10, _only: onlyId });
   if (error) return json({ error: error.message }, 500);
 
   const results: Array<{ id: string; ok: boolean; error?: string }> = [];
   for (const p of (posts ?? []) as Post[]) {
-    const r = await processPost(sb, p);
+    const r = await processPost(sb as never, p);
     results.push({ id: p.id, ...r });
   }
   return json({ processed: results.length, results });
