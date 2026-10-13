@@ -1875,13 +1875,16 @@ export type Database = {
       contractor_pipeline: {
         Row: {
           activated_at: string | null
+          activation_notice_sent_at: string | null
           adverse_action_notice_sent_at: string | null
+          agreement_docs_sent_at: string | null
           applicant_id: string
           apply_submitted_at: string | null
           archived: boolean
           archived_at: string | null
           call_notes: string | null
           checkr_result: string | null
+          cleared_notice_sent_at: string | null
           coi_effective_date: string | null
           coi_expiry_date: string | null
           coi_limit_aggregate: number | null
@@ -1891,17 +1894,39 @@ export type Database = {
           decline_note: string | null
           decline_reason: string | null
           drive_time_minutes: number | null
+          equipment_claimed: string[]
+          experience_level: string | null
           hold_callback_date: string | null
           hold_reason: string | null
           ica_countersigned_at: string | null
+          insurance_instructions_sent_at: string | null
           insurance_reimbursement_start_month: string | null
           kit_issued_at: string | null
+          one_pager_sent_at: string | null
           owns_equipment: boolean | null
           pre_adverse_notice_sent_at: string | null
+          preferred_language: string | null
+          probation_cleared_at: string | null
+          probation_paused_at: string | null
+          probation_redo_count: number
+          probation_visits_remaining: number | null
+          proof_approved_at: string | null
+          proof_approved_by: string | null
+          proof_link_sent_at: string | null
+          proof_moved_back: boolean
+          proof_reminder_sent_at: string | null
+          proof_submitted_at: string | null
+          proof_token: string | null
+          proof_token_expires_at: string | null
           quote_carrier: string | null
           quote_limit_aggregate: number | null
           quote_limit_occurrence: number | null
           quote_names_tidy_as_ai: boolean | null
+          ref_name: string | null
+          ref_notes: string | null
+          ref_phone: string | null
+          ref_relationship: string | null
+          ref_status: string
           reimbursement_m1_paid_at: string | null
           reimbursement_m2_paid_at: string | null
           reimbursement_m3_paid_at: string | null
@@ -1922,13 +1947,16 @@ export type Database = {
         }
         Insert: {
           activated_at?: string | null
+          activation_notice_sent_at?: string | null
           adverse_action_notice_sent_at?: string | null
+          agreement_docs_sent_at?: string | null
           applicant_id: string
           apply_submitted_at?: string | null
           archived?: boolean
           archived_at?: string | null
           call_notes?: string | null
           checkr_result?: string | null
+          cleared_notice_sent_at?: string | null
           coi_effective_date?: string | null
           coi_expiry_date?: string | null
           coi_limit_aggregate?: number | null
@@ -1938,17 +1966,39 @@ export type Database = {
           decline_note?: string | null
           decline_reason?: string | null
           drive_time_minutes?: number | null
+          equipment_claimed?: string[]
+          experience_level?: string | null
           hold_callback_date?: string | null
           hold_reason?: string | null
           ica_countersigned_at?: string | null
+          insurance_instructions_sent_at?: string | null
           insurance_reimbursement_start_month?: string | null
           kit_issued_at?: string | null
+          one_pager_sent_at?: string | null
           owns_equipment?: boolean | null
           pre_adverse_notice_sent_at?: string | null
+          preferred_language?: string | null
+          probation_cleared_at?: string | null
+          probation_paused_at?: string | null
+          probation_redo_count?: number
+          probation_visits_remaining?: number | null
+          proof_approved_at?: string | null
+          proof_approved_by?: string | null
+          proof_link_sent_at?: string | null
+          proof_moved_back?: boolean
+          proof_reminder_sent_at?: string | null
+          proof_submitted_at?: string | null
+          proof_token?: string | null
+          proof_token_expires_at?: string | null
           quote_carrier?: string | null
           quote_limit_aggregate?: number | null
           quote_limit_occurrence?: number | null
           quote_names_tidy_as_ai?: boolean | null
+          ref_name?: string | null
+          ref_notes?: string | null
+          ref_phone?: string | null
+          ref_relationship?: string | null
+          ref_status?: string
           reimbursement_m1_paid_at?: string | null
           reimbursement_m2_paid_at?: string | null
           reimbursement_m3_paid_at?: string | null
@@ -1969,13 +2019,16 @@ export type Database = {
         }
         Update: {
           activated_at?: string | null
+          activation_notice_sent_at?: string | null
           adverse_action_notice_sent_at?: string | null
+          agreement_docs_sent_at?: string | null
           applicant_id?: string
           apply_submitted_at?: string | null
           archived?: boolean
           archived_at?: string | null
           call_notes?: string | null
           checkr_result?: string | null
+          cleared_notice_sent_at?: string | null
           coi_effective_date?: string | null
           coi_expiry_date?: string | null
           coi_limit_aggregate?: number | null
@@ -1985,17 +2038,39 @@ export type Database = {
           decline_note?: string | null
           decline_reason?: string | null
           drive_time_minutes?: number | null
+          equipment_claimed?: string[]
+          experience_level?: string | null
           hold_callback_date?: string | null
           hold_reason?: string | null
           ica_countersigned_at?: string | null
+          insurance_instructions_sent_at?: string | null
           insurance_reimbursement_start_month?: string | null
           kit_issued_at?: string | null
+          one_pager_sent_at?: string | null
           owns_equipment?: boolean | null
           pre_adverse_notice_sent_at?: string | null
+          preferred_language?: string | null
+          probation_cleared_at?: string | null
+          probation_paused_at?: string | null
+          probation_redo_count?: number
+          probation_visits_remaining?: number | null
+          proof_approved_at?: string | null
+          proof_approved_by?: string | null
+          proof_link_sent_at?: string | null
+          proof_moved_back?: boolean
+          proof_reminder_sent_at?: string | null
+          proof_submitted_at?: string | null
+          proof_token?: string | null
+          proof_token_expires_at?: string | null
           quote_carrier?: string | null
           quote_limit_aggregate?: number | null
           quote_limit_occurrence?: number | null
           quote_names_tidy_as_ai?: boolean | null
+          ref_name?: string | null
+          ref_notes?: string | null
+          ref_phone?: string | null
+          ref_relationship?: string | null
+          ref_status?: string
           reimbursement_m1_paid_at?: string | null
           reimbursement_m2_paid_at?: string | null
           reimbursement_m3_paid_at?: string | null
@@ -4478,6 +4553,124 @@ export type Database = {
           week_start?: string
         }
         Relationships: []
+      }
+      pipeline_equipment_items: {
+        Row: {
+          active: boolean
+          id: string
+          is_vehicle: boolean
+          label_en: string
+          label_es: string
+          needs_video: boolean
+          service: string
+          sort: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          id?: string
+          is_vehicle?: boolean
+          label_en: string
+          label_es: string
+          needs_video?: boolean
+          service: string
+          sort?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          id?: string
+          is_vehicle?: boolean
+          label_en?: string
+          label_es?: string
+          needs_video?: boolean
+          service?: string
+          sort?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pipeline_probation_visits: {
+        Row: {
+          applicant_id: string
+          completed_at: string
+          n: number
+          redo_at: string | null
+          visit_id: string
+        }
+        Insert: {
+          applicant_id: string
+          completed_at?: string
+          n: number
+          redo_at?: string | null
+          visit_id: string
+        }
+        Update: {
+          applicant_id?: string
+          completed_at?: string
+          n?: number
+          redo_at?: string | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_probation_visits_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "contractor_pipeline"
+            referencedColumns: ["applicant_id"]
+          },
+        ]
+      }
+      pipeline_proof_items: {
+        Row: {
+          applicant_id: string
+          mime: string | null
+          reject_note: string | null
+          reject_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          size_bytes: number | null
+          slot: string
+          status: string
+          storage_path: string
+          uploaded_at: string
+        }
+        Insert: {
+          applicant_id: string
+          mime?: string | null
+          reject_note?: string | null
+          reject_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number | null
+          slot: string
+          status?: string
+          storage_path: string
+          uploaded_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          mime?: string | null
+          reject_note?: string | null
+          reject_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number | null
+          slot?: string
+          status?: string
+          storage_path?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_proof_items_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "contractor_pipeline"
+            referencedColumns: ["applicant_id"]
+          },
+        ]
       }
       plan_line_sets: {
         Row: {
@@ -8728,6 +8921,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      pipeline_doc_warnings: { Args: never; Returns: string[] }
       pipeline_hold: {
         Args: { _callback: string; _id: string; _reason: string }
         Returns: undefined
@@ -8743,6 +8937,10 @@ export type Database = {
           _to_stage: string
           _to_state: string
         }
+        Returns: undefined
+      }
+      pipeline_mark_sent: {
+        Args: { _id: string; _what: string }
         Returns: undefined
       }
       pipeline_mark_welcome_sent: { Args: { _id: string }; Returns: undefined }
@@ -8762,9 +8960,59 @@ export type Database = {
         Args: { _applicant_id: string }
         Returns: boolean
       }
+      pipeline_probation_checks: {
+        Args: { _since: string }
+        Returns: {
+          applicant_id: string
+          completed_at: string
+          n: number
+          name: string
+          visit_id: string
+        }[]
+      }
+      pipeline_probation_clear: { Args: { _id: string }; Returns: undefined }
+      pipeline_proof_message: { Args: never; Returns: string }
+      pipeline_proof_missing: { Args: { _id: string }; Returns: string[] }
+      pipeline_proof_overdue: {
+        Args: never
+        Returns: {
+          applicant_id: string
+          name: string
+          sent_at: string
+          service: string
+        }[]
+      }
+      pipeline_proof_recompute: { Args: { _id: string }; Returns: boolean }
+      pipeline_proof_review: {
+        Args: {
+          _approve: boolean
+          _id: string
+          _note?: string
+          _reason?: string
+          _slot: string
+        }
+        Returns: Json
+      }
+      pipeline_proof_slots: {
+        Args: { _service: string }
+        Returns: {
+          item_id: string
+          kind: string
+          label_en: string
+          label_es: string
+          slot: string
+          sort: number
+        }[]
+      }
+      pipeline_proof_tick: { Args: never; Returns: number }
+      pipeline_reference_review: {
+        Args: { _id: string; _notes?: string; _status: string }
+        Returns: Json
+      }
       pipeline_reinstate: { Args: { _id: string }; Returns: undefined }
       pipeline_restore: { Args: { _id: string }; Returns: undefined }
       pipeline_resume: { Args: { _id: string }; Returns: undefined }
+      pipeline_send_proof_link: { Args: { _id: string }; Returns: undefined }
       pipeline_service_key: { Args: { _s: string }; Returns: string }
       pipeline_service_label: { Args: { _s: string }; Returns: string }
       pipeline_spend_lock_holder: {
