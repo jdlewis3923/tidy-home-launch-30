@@ -148,6 +148,18 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     }
     coming.sort((a, b) => a.text.localeCompare(b.text));
     sections.push({ title: 'Next 7 days', items: coming });
+    // Demand report on the Friday before conversion and on conversion day (6 Nov / 9 Nov for cleaning + lawn).
+    const conv = (cfg as Record<string, { conversion_date?: string | null }> | null)?.cleaning?.conversion_date ?? null;
+    if (conv && (today === conv || today === addDays(conv, -3))) {
+      const { data: dem } = await admin.rpc('sched_demand_rows');
+      const rows = (dem ?? []) as { service: string; zip: string; day: string; share: number; flagged: boolean; fit_pct: number }[];
+      const fit = new Map<string, number>(); for (const r of rows) fit.set(`${r.service} ${r.zip}`, r.fit_pct);
+      sections.push({ title: 'Demand vs. claimed days (calendar locks soon)', red: rows.some((r) => r.flagged), items: [
+        ...[...fit].map(([k, p]) => ({ text: `${k}: ${p}% of reservations fit a claimed day` })),
+        ...rows.filter((r) => r.flagged).map((r) => ({ text: `UNCOVERED: ${r.service} ${r.zip} ${r.day} — ${r.share}% of preferences, no Pro claim`, url: `${SITE}/admin/demand`, label: 'Open demand' })),
+        ...(rows.length ? [] : [{ text: 'No reservation preferences yet.', url: `${SITE}/admin/demand`, label: 'Open demand' }]),
+      ] });
+    }
     if (!mustDo.length) sections[0] = { title: 'Must do today', items: [] };
   } else {
     const openToday = [...urgentOpen, ...recent];
