@@ -1142,6 +1142,13 @@
       "when": 1791892555544,
       "tag": "0162_launch_lock_per_service",
       "breakpoints": true
+    },
+    {
+      "idx": 163,
+      "version": "7",
+      "when": 1791893272102,
+      "tag": "0163_pipeline_equipment_proof_stage",
+      "breakpoints": true
     }
   ]
 }
