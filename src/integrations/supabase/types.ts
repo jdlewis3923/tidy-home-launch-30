@@ -9117,6 +9117,7 @@ export type Database = {
       }
       sched_require_admin: { Args: never; Returns: undefined }
       sched_routes: { Args: never; Returns: Json }
+      sched_seq_check: { Args: { _items: Json }; Returns: boolean }
       sched_slot_fits: {
         Args: {
           _budget: number
