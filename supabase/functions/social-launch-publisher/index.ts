@@ -19,6 +19,8 @@ import { requireServiceOrAdmin } from "../_shared/admin-auth.ts";
 import { isCronAuthorized } from "../_shared/cron-auth.ts";
 import { vendorFetch } from '../_shared/http.ts';
 import { writeAlert } from '../_shared/alerts.ts';
+import { renderTemplate, instagramVersion } from '../_shared/socialPlanner.ts';
+import { loadLaunchConfig, easternTodayIso } from '../_shared/launch-config.ts';
 
 
 const corsHeaders = {
@@ -58,7 +60,19 @@ async function vaultGet(sb: ReturnType<typeof createClient>, name: string): Prom
   return (data as string | null) ?? null;
 }
 
+async function renderCaption(post: Post, sb: ReturnType<typeof createClient>): Promise<string> {
+  // Tokens are filled at the moment of posting, from launch_config — never stored filled.
+  const tpl = (post as Post & { template_copy?: string | null }).template_copy ?? post.caption;
+  if (!/\{(LAUNCH|CONVERT|CAR_LINE)\}/.test(tpl)) return tpl;
+  const cfg = await loadLaunchConfig(sb);
+  const drops = (cfg.global?.hanger_drops ?? []).map((d) => d.start).sort();
+  const out = renderTemplate(tpl, { launch: cfg.cleaning?.first_visit_date ?? null, conversion: cfg.cleaning?.conversion_date ?? null, carLaunch: cfg.car?.first_visit_date ?? null, hangerDrop1: drops[0] ?? null }, easternTodayIso());
+  if (/\{(LAUNCH|CONVERT)\}/.test(out)) throw new Error("launch date missing in launch_config; post held");
+  return out;
+}
+
 async function publishToMeta(post: Post, sb: ReturnType<typeof createClient>): Promise<{ ig?: string; fb?: string }> {
+  post = { ...post, caption: await renderCaption(post, sb) };
   // Reuse the existing CAPI vault entry — single source of truth for Meta page token.
   const pageToken = await vaultGet(sb, "meta_fb_page_access_token");
   const igUserId = await vaultGet(sb, "meta_ig_user_id");
@@ -75,7 +89,7 @@ async function publishToMeta(post: Post, sb: ReturnType<typeof createClient>): P
     const cu = new URL(`${GRAPH}/${igUserId}/media`);
     cu.searchParams.set("access_token", pageToken);
     cu.searchParams.set("image_url", post.image_url);
-    cu.searchParams.set("caption", post.caption);
+    cu.searchParams.set("caption", instagramVersion(post.caption));
     const cr = await vendorFetch(cu.toString(), { method: "POST" });
     const cj = await cr.json();
     if (!cr.ok) throw new Error(`IG container failed: ${JSON.stringify(cj).slice(0, 300)}`);

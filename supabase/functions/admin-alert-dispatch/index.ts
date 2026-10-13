@@ -21,6 +21,7 @@ import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { loadLaunchConfig } from '../_shared/launch-config.ts';
+import { renderTemplate } from '../_shared/socialPlanner.ts';
 
 const SITE = 'https://jointidy.co';
 const OWNER_EMAIL = 'hello@jointidy.co';
@@ -125,13 +126,17 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     sections.push({ title: 'Must do today', items: mustDo.map(item) });
     sections.push({ title: 'Unresolved urgent', red: true, items: urgentOpen.map(item) });
     // Nextdoor can't be auto-posted: today's post, with its copy, image and a Mark posted button.
-    const { data: nd } = await admin.from('social_launch_posts').select('id, caption, image_url, scheduled_for, status')
+    const { data: nd } = await admin.from('social_launch_posts').select('id, caption, template_copy, image_url, scheduled_for, status')
       .eq('channel', 'nextdoor').is('archived_at', null).is('posted_at', null)
       .gte('scheduled_for', etMidnightUtc(today)).lt('scheduled_for', etMidnightUtc(addDays(today, 1)));
-    sections.push({ title: 'Post to Nextdoor today (6 PM)', items: (nd ?? []).map((p) => ({
-      text: p.caption?.trim() ? `${p.caption.trim()}${p.image_url ? `\n\nImage: ${p.image_url}` : ''}` : 'Needs a post — no copy written for this slot yet',
+    const lc = await loadLaunchConfig(admin as never);
+    const anchors = { launch: lc.cleaning?.first_visit_date ?? null, conversion: lc.cleaning?.conversion_date ?? null, carLaunch: lc.car?.first_visit_date ?? null, hangerDrop1: (lc.global?.hanger_drops ?? []).map((d) => d.start).sort()[0] ?? null };
+    sections.push({ title: 'Post to Nextdoor today (6 PM)', items: (nd ?? []).map((p) => {
+      const copy = renderTemplate((p.template_copy ?? p.caption ?? '').trim(), anchors, today);
+      return {
+      text: copy ? `${copy}${p.image_url ? `\n\nImage: ${p.image_url}` : ''}` : 'Needs a post — no copy written for this slot yet',
       url: `${SITE}/admin/social?post=${p.id}`, label: 'Copy + Mark posted',
-    })) });
+    }; }) });
     // Car care opens on demand: running count until the threshold, then the advance line.
     const { data: car } = await admin.rpc('car_launch_status');
     const cs = car as { count: number; threshold: number; reached_at: string | null; first_visit_date: string | null } | null;

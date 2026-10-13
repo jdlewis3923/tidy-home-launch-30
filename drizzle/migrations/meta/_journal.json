@@ -1170,6 +1170,20 @@
       "when": 1791897162323,
       "tag": "0166_fix_launch_config_save",
       "breakpoints": true
+    },
+    {
+      "idx": 167,
+      "version": "7",
+      "when": 1791899467221,
+      "tag": "0167_social_calendar_launch_anchored",
+      "breakpoints": true
+    },
+    {
+      "idx": 168,
+      "version": "7",
+      "when": 1791899656315,
+      "tag": "0168_social_postnum_unique_live_only",
+      "breakpoints": true
     }
   ]
 }
