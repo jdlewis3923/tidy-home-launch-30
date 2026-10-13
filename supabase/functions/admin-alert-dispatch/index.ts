@@ -21,6 +21,7 @@ import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { loadLaunchConfig } from '../_shared/launch-config.ts';
+import { renderTemplate } from '../_shared/socialPlanner.ts';
 
 const SITE = 'https://jointidy.co';
 const OWNER_EMAIL = 'hello@jointidy.co';
@@ -135,7 +136,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
       return {
       text: copy ? `${copy}${p.image_url ? `\n\nImage: ${p.image_url}` : ''}` : 'Needs a post — no copy written for this slot yet',
       url: `${SITE}/admin/social?post=${p.id}`, label: 'Copy + Mark posted',
-    })) });
+    }; }) });
     // Car care opens on demand: running count until the threshold, then the advance line.
     const { data: car } = await admin.rpc('car_launch_status');
     const cs = car as { count: number; threshold: number; reached_at: string | null; first_visit_date: string | null } | null;
