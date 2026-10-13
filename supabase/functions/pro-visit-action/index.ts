@@ -31,7 +31,7 @@ const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
 // is written to admin_alerts for review.
 const Gps = { lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) };
 const BodySchema = z.discriminatedUnion('action', [
-  z.object({ visit_id: z.string().uuid(), action: z.literal('on_my_way') }),
+  z.object({ visit_id: z.string().uuid(), action: z.literal('on_my_way'), eta_minutes: z.number().int().min(5).max(120).optional() }),
   z.object({ visit_id: z.string().uuid(), action: z.literal('check_in'), ...Gps }),
   z.object({ visit_id: z.string().uuid(), action: z.literal('complete'), ...Gps, not_reached_note: z.string().trim().max(1000).optional() }),
   z.object({
@@ -105,9 +105,21 @@ Deno.serve(async (req) => {
       let sms: string = 'skipped_no_phone';
       const { data: profile } = await admin
         .from('profiles')
-        .select('phone, first_name')
+        .select('phone, first_name, language')
         .eq('user_id', visit.user_id)
         .maybeSingle();
+      // "[Pro first name] is on the way, about [ETA] minutes." — in the member's language.
+      const eta = (parsed.data as { eta_minutes?: number }).eta_minutes;
+      const { data: proName } = await admin.rpc('sched_pro_first_name', { _uid: uid });
+      const who = String(proName ?? '').trim() || 'Your Tidy Pro';
+      const es = String(profile?.language ?? '').trim() === 'es';
+      const omwText = es
+        ? `${who === 'Your Tidy Pro' ? 'Su Pro de Tidy' : who} va en camino${eta ? `, llega en unos ${eta} minutos` : ''}.`
+        : `${who} is on the way${eta ? `, about ${eta} minutes` : ''}.`;
+      await admin.from('member_notifications').insert({
+        user_id: visit.user_id, kind: 'pro_on_the_way', related_visit_id: visit_id,
+        title: es ? 'Su Pro va en camino' : 'Your Pro is on the way', body: omwText, dedupe_key: `omw:${visit_id}`,
+      }).then(() => {}, () => {});
       if (profile?.phone) {
         const to = profile.phone.startsWith('+') ? profile.phone : `+1${profile.phone.replace(/\D/g, '')}`;
         const res = await vendorFetch(`${env.values.SUPABASE_URL}/functions/v1/send-twilio-sms`, {
@@ -118,7 +130,7 @@ Deno.serve(async (req) => {
           },
           body: JSON.stringify({
             to_phone_e164: to,
-            body: 'Your Tidy Pro is on the way.',
+            body: `Tidy: ${omwText}`,
             idempotency_key: `omw:${visit_id}`,
             template_name: 'pro_on_my_way',
             triggered_by: 'pro-visit-action',
