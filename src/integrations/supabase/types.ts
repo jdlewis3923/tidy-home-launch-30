@@ -3850,6 +3850,12 @@ export type Database = {
       }
       launch_config: {
         Row: {
+          car_launch_threshold: number | null
+          car_proposed_at: string | null
+          car_proposed_conversion: string | null
+          car_proposed_first_visit: string | null
+          car_proposed_for: string | null
+          car_threshold_reached_at: string | null
           conversion_date: string | null
           first_visit_date: string | null
           hanger_drops: Json
@@ -3861,6 +3867,12 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          car_launch_threshold?: number | null
+          car_proposed_at?: string | null
+          car_proposed_conversion?: string | null
+          car_proposed_first_visit?: string | null
+          car_proposed_for?: string | null
+          car_threshold_reached_at?: string | null
           conversion_date?: string | null
           first_visit_date?: string | null
           hanger_drops?: Json
@@ -3872,6 +3884,12 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          car_launch_threshold?: number | null
+          car_proposed_at?: string | null
+          car_proposed_conversion?: string | null
+          car_proposed_first_visit?: string | null
+          car_proposed_for?: string | null
+          car_threshold_reached_at?: string | null
           conversion_date?: string | null
           first_visit_date?: string | null
           hanger_drops?: Json
@@ -6012,6 +6030,7 @@ export type Database = {
           assigned_day: string | null
           assigned_pro_first_name: string | null
           assigned_window: string | null
+          car_waiting: boolean
           city: string
           converted_at: string | null
           created_at: string
@@ -6068,6 +6087,7 @@ export type Database = {
           assigned_day?: string | null
           assigned_pro_first_name?: string | null
           assigned_window?: string | null
+          car_waiting?: boolean
           city?: string
           converted_at?: string | null
           created_at?: string
@@ -6124,6 +6144,7 @@ export type Database = {
           assigned_day?: string | null
           assigned_pro_first_name?: string | null
           assigned_window?: string | null
+          car_waiting?: boolean
           city?: string
           converted_at?: string | null
           created_at?: string
@@ -8317,6 +8338,7 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_approve_car_launch: { Args: never; Returns: Json }
       admin_approve_launch_calendar: { Args: { _rows: Json }; Returns: Json }
       admin_assign_customer_pro: {
         Args: { _applicant_id: string; _subscription_id: string }
@@ -8440,6 +8462,7 @@ export type Database = {
         Args: { _night_ok?: boolean; _rule: string; _tier: string }
         Returns: undefined
       }
+      admin_set_car_threshold: { Args: { _n: number }; Returns: undefined }
       admin_set_jobber_refresh_token: {
         Args: { _token: string }
         Returns: undefined
@@ -8515,6 +8538,10 @@ export type Database = {
         Returns: undefined
       }
       capture_cron_health: { Args: never; Returns: number }
+      car_launch_check: { Args: never; Returns: undefined }
+      car_launch_propose_date: { Args: { _from: string }; Returns: string }
+      car_launch_status: { Args: never; Returns: Json }
+      car_reservation_count: { Args: never; Returns: number }
       car_wash_line: {
         Args: { _sub: string }
         Returns: {
