@@ -13,7 +13,7 @@ type Opt = { weekday: number; day: string; pro_first_name: string; full: boolean
 type Options = {
   error?: string; zip: string; cadence: string; options: Opt[];
   booking: null | { weekday: number; window: string; first_visit_date: string; pro_first_name: string; losing_day: string | null };
-  waitlist: { kind: string; weekday: number | null; status: string; offer_weekday: number | null; hold_until: string | null }[];
+  waitlist: { kind: string; weekday: number | null; status: string; offer_weekday: number | null; hold_until: string | null; founding_hold_until?: string | null }[];
 };
 
 const T = {
@@ -27,6 +27,8 @@ const T = {
     booked: (d: string, w: string, f: string, n: string) => `${d}${w ? `, ${w}` : ""}. First visit ${f}. Your Pro is ${n}.`,
     losing: (d: string) => `Your day changes from ${d}. Choose another day below.`, offer: (d: string) => `${d} opened for you — held 48 hours.`,
     notice: "Changing your day needs 48 hours' notice.", cancel: "Cancel",
+    lawnAssigned: (d: string) => `Your lawn day is ${d} — done by 6 PM, no need to be home.`, requestOther: "Request a different day",
+    assigning: "Finding your street's lawn day…", hold: (d: string) => `Your founding number and rate are held until ${d}.`,
   },
   es: {
     title: (s: string) => `Tu día de ${s}`, choose: "Elige tu día", change: "Cambiar día", lawnCard: (d: string) => `Listo el ${d} antes de las 6 pm. No necesitas estar en casa.`,
@@ -38,6 +40,8 @@ const T = {
     booked: (d: string, w: string, f: string, n: string) => `${d}${w ? `, ${w}` : ""}. Primera visita ${f}. Tu Pro es ${n}.`,
     losing: (d: string) => `Tu día cambia a partir del ${d}. Elige otro día abajo.`, offer: (d: string) => `Se abrió el ${d} para ti — reservado 48 horas.`,
     notice: "Cambiar tu día requiere 48 horas de aviso.", cancel: "Cancelar",
+    lawnAssigned: (d: string) => `Tu día de césped es el ${d.toLowerCase()} — listo antes de las 6 PM, no necesitas estar en casa.`, requestOther: "Pedir otro día",
+    assigning: "Buscando el día de césped de tu calle…", hold: (d: string) => `Tu número fundador y tu tarifa están reservados hasta el ${d}.`,
   },
 };
 const CADENCE_ES: Record<string, string> = { weekly: "semanal", biweekly: "cada dos semanas", monthly: "mensual" };
@@ -62,11 +66,19 @@ export default function DayPicker({ service }: { service: SchedService }) {
     setO(data as unknown as Options);
   }, [service]);
   useEffect(() => { void load(); }, [load]);
+  // Lawn: Tidy assigns the day by street (once). The member can request another day after.
+  const [assigning, setAssigning] = useState(false);
+  useEffect(() => {
+    if (service !== "lawn" || !o || o.error || o.booking || assigning) return;
+    if (o.waitlist.length || !o.options.some((x) => !x.full)) return;
+    setAssigning(true);
+    void supabase.rpc("customer_assign_lawn_day").then(({ error }) => { if (error) setErr(schedError(error)); void load(); });
+  }, [service, o, assigning, load]);
 
   if (!o || o.error) return null;
   const pickDay = (opt: Opt) => { setDay(opt); setWin(service === "lawn" ? opt.windows[0] : null); setErr(null); };
   const join = async (weekday: number | null) => {
-    const { error } = await supabase.rpc("customer_join_waitlist", { _service: service, _weekday: weekday ?? undefined });
+    const { error } = await supabase.rpc("customer_waitlist_join", { _service: service, _weekday: weekday ?? undefined, _window: win?.key && service !== "lawn" ? win.key : undefined });
     if (error) setErr(schedError(error)); else void load();
   };
   const book = async () => {
@@ -84,12 +96,16 @@ export default function DayPicker({ service }: { service: SchedService }) {
     </label>
   );
   const offered = o.waitlist.find((w) => w.status === "offered");
-  const showPicker = !o.booking || editing || !!o.booking.losing_day;
+  const showPicker = (service === "lawn" ? !!o.booking && editing : !o.booking || editing) || !!o.booking?.losing_day || (service === "lawn" && !o.booking && (o.waitlist.length > 0 || !o.options.some((x) => !x.full)));
+  const holdUntil = o.waitlist.find((w) => w.status === "waiting" && w.founding_hold_until)?.founding_hold_until;
   const entryOk = service !== "cleaning" || !!details.entry_method;
 
   return (
     <div className="rounded-3xl border border-[hsl(var(--hairline))] bg-white p-6">
       <h2 className="text-lg font-bold text-ink">{L.title(svc.toLowerCase())}</h2>
+      {!o.booking && service === "lawn" && !showPicker && <p className="mt-1 text-sm text-ink-soft">{L.assigning}</p>}
+      {o.booking && service === "lawn" && <p className="mt-1 text-sm font-semibold text-ink">{L.lawnAssigned(dayName(o.booking.weekday))}</p>}
+      {holdUntil && <p className="mt-2 rounded-xl bg-cream/60 p-3 text-sm text-ink">{L.hold(prettyDay(holdUntil.slice(0, 10), lang))}</p>}
       {o.booking && (
         <p className="mt-1 text-sm text-ink-soft">
           {L.booked(dayName(o.booking.weekday), o.booking.window === "day" ? "" : o.booking.window, prettyDay(o.booking.first_visit_date, lang), o.booking.pro_first_name)}
@@ -98,7 +114,7 @@ export default function DayPicker({ service }: { service: SchedService }) {
       {o.booking?.losing_day && <p className="mt-2 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-900">{L.losing(prettyDay(o.booking.losing_day, lang))}</p>}
       {offered?.offer_weekday && <p className="mt-2 rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">{L.offer(dayName(offered.offer_weekday))}</p>}
       {o.booking && !editing && !o.booking.losing_day && (
-        <button type="button" className="mt-3 text-sm font-semibold text-[hsl(var(--primary))]" onClick={() => setEditing(true)}>{L.change}</button>
+        <button type="button" className="mt-3 text-sm font-semibold text-[hsl(var(--primary))]" onClick={() => setEditing(true)}>{service === "lawn" ? L.requestOther : L.change}</button>
       )}
 
       {showPicker && (
