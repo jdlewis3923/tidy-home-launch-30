@@ -93,6 +93,7 @@ const AdminServiceScope = lazy(() => import("./pages/AdminServiceScope.tsx"));
 const AdminSizeReview = lazy(() => import("./pages/AdminSizeReview.tsx"));
 const AdminEvidencePack = lazy(() => import("./pages/AdminEvidencePack.tsx"));
 const AdminSocial = lazy(() => import("./pages/AdminSocial.tsx"));
+const AdminDemand = lazy(() => import("./pages/AdminDemand.tsx"));
 const AdminDocuments = lazy(() => import("./pages/AdminDocuments.tsx"));
 const AdminApplicants = lazy(() => import("./pages/AdminApplicants.tsx"));
 const AdminEmailHealth = lazy(() => import("./pages/AdminEmailHealth.tsx"));
@@ -400,6 +401,7 @@ const App = () => (
                   <Route path="/admin/orientations" element={<AdminOrientations />} />
                   <Route path="/admin/orientations/preview" element={<ProOrientationPreview />} />
                   <Route path="/admin/social" element={<AdminSocial />} />
+                  <Route path="/admin/demand" element={<AdminDemand />} />
                   <Route path="/admin/social-launch" element={<Navigate to="/admin/social" replace />} />
                   <Route path="/admin/nextdoor-verify" element={<AdminNextdoorVerify />} />
                   <Route path="/admin/documenso-templates" element={<AdminDocumensoTemplates />} />

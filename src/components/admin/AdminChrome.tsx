@@ -60,6 +60,7 @@ const GROUPS: NavGroup[] = [
     { to: "/admin/size-review", label: "Size review", icon: Power },
     { to: "/admin/evidence-pack", label: "Evidence pack", icon: Mail },
     { to: "/admin/social", label: "Social calendar", icon: CalendarDays },
+    { to: "/admin/demand", label: "Demand", icon: CalendarDays },
     { to: "/admin/chatbot-knowledge", label: "Chatbot", icon: BookOpen },
     { to: "/admin/agents", label: "Agents", icon: Bot },
     { to: "/admin/settings/notifications", label: "Notify", icon: Bell },
