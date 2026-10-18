@@ -16,6 +16,11 @@ type Tpl = {
   body_en: string; body_es: string | null; es_reviewed: boolean; active: boolean;
 };
 type ContactRow = { id: string; first_name: string | null; email: string | null; phone: string | null; lifecycle_stage: string };
+type ZapRow = {
+  zap_id: string; name: string; zap_state: string; app_stage: string | null;
+  replacement_note: string | null; status: string; cutover_date: string | null; notes: string | null;
+};
+const ZAP_STATUSES = ["shadow", "ready", "zap_off", "app_live", "retired", "blocked"] as const;
 
 function fmtDelay(mins: number): string {
   if (mins === 0) return "immediately";
@@ -35,16 +40,24 @@ export default function AdminMessages() {
   const [liveStages, setLiveStages] = useState("");
   const [editing, setEditing] = useState<Tpl | null>(null);
   const [testKey, setTestKey] = useState("");
+  const [zaps, setZaps] = useState<ZapRow[]>([]);
+  const [shadowCounts, setShadowCounts] = useState<Record<string, number>>({});
 
   const load = async () => {
-    const [{ data: s }, { data: t }, { data: c }, { data: q }, { data: sh }, { data: ls }] = await Promise.all([
+    const [{ data: s }, { data: t }, { data: c }, { data: q }, { data: sh }, { data: ls }, { data: z }, { data: dr }] = await Promise.all([
       supabase.from("lifecycle_sequences").select("*").order("stage").order("step_order"),
       supabase.from("lifecycle_templates").select("*").order("key"),
       supabase.from("contacts").select("lifecycle_stage"),
       supabase.from("message_queue").select("status").gte("created_at", new Date(Date.now() - 30 * 864e5).toISOString()),
       supabase.from("app_settings").select("value").eq("key", "lifecycle_shadow").maybeSingle(),
       supabase.from("app_settings").select("value").eq("key", "lifecycle_live_stages").maybeSingle(),
+      supabase.from("zap_cutover").select("*").order("zap_id"),
+      supabase.from("message_queue").select("stage").eq("status", "dry_run").gte("sent_at", new Date(Date.now() - 7 * 864e5).toISOString()),
     ]);
+    setZaps((z ?? []) as ZapRow[]);
+    const dc: Record<string, number> = {};
+    for (const r of dr ?? []) dc[r.stage] = (dc[r.stage] ?? 0) + 1;
+    setShadowCounts(dc);
     setSeqs((s ?? []) as Seq[]);
     setTpls((t ?? []) as Tpl[]);
     const cc: Record<string, number> = {};
@@ -96,6 +109,15 @@ export default function AdminMessages() {
     toast.success("Settings saved");
   };
 
+  const setZapStatus = async (zapId: string, status: string) => {
+    const cutover_date = status === "app_live" ? new Date().toISOString().slice(0, 10) : null;
+    const { error } = await supabase.from("zap_cutover").update({ status, cutover_date, updated_at: new Date().toISOString() }).eq("zap_id", zapId);
+    if (error) toast.error(error.message);
+    else { toast.success(`Zap ${zapId} → ${status}`); load(); }
+  };
+
+  const zapsForStage = (stage: string) => zaps.filter((z) => z.app_stage === stage);
+
   const sendTest = async () => {
     if (!testKey) return;
     const { error } = await supabase.functions.invoke("lifecycle-event", {
@@ -136,9 +158,12 @@ export default function AdminMessages() {
 
         {stages.map(([stage, steps]) => (
           <section key={stage} className="rounded-xl border p-4 space-y-3">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-lg font-bold">{stage}</h2>
               <Badge variant="secondary">{counts[stage] ?? 0} contacts</Badge>
+              {zapsForStage(stage).map((z) => (
+                <Badge key={z.zap_id} variant="outline">Zap replaced: {z.zap_id}</Badge>
+              ))}
             </div>
             {steps.map((s) => {
               const t = tplFor(s.template_key, s.channel);
@@ -169,6 +194,42 @@ export default function AdminMessages() {
             })}
           </section>
         ))}
+
+        <section className="rounded-xl border p-4 space-y-3">
+          <h2 className="text-lg font-bold">Zapier cutover checklist</h2>
+          <p className="text-sm text-muted-foreground">
+            One row per Zap. While a Zap is ON its app replacement stays in shadow (logs, sends nothing).
+            Turn the Zap off, set the row to <b>app_live</b>, and add the stage to Live stages above — same minute.
+            Shadow report: dry-run sends the app logged in the last 7 days, per stage.
+          </p>
+          {Object.keys(shadowCounts).length > 0 && (
+            <div className="flex flex-wrap gap-2 text-xs">
+              {Object.entries(shadowCounts).map(([st, n]) => (
+                <Badge key={st} variant="secondary">{st}: {n} shadow sends / 7 d</Badge>
+              ))}
+            </div>
+          )}
+          <div className="space-y-2">
+            {zaps.map((z) => (
+              <div key={z.zap_id} className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/40 p-3 text-sm">
+                <code className="font-bold">{z.zap_id}</code>
+                <span className="flex-1 min-w-40">{z.name}</span>
+                <Badge variant={z.zap_state === "ON" ? "default" : "secondary"}>Zap {z.zap_state}</Badge>
+                {z.app_stage && <Badge variant="outline">{z.app_stage}</Badge>}
+                <select
+                  value={z.status}
+                  onChange={(e) => setZapStatus(z.zap_id, e.target.value)}
+                  className="rounded-md border bg-background px-2 py-1 text-xs"
+                >
+                  {ZAP_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+                {z.cutover_date && <span className="text-xs text-muted-foreground">live since {z.cutover_date}</span>}
+                {z.replacement_note && <div className="w-full text-xs text-muted-foreground">{z.replacement_note}</div>}
+                {z.notes && <div className="w-full text-xs text-amber-700">{z.notes}</div>}
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section className="rounded-xl border p-4 space-y-2">
           <h2 className="text-lg font-bold">Test mode</h2>

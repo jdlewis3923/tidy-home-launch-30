@@ -8934,6 +8934,45 @@ export type Database = {
         }
         Relationships: []
       }
+      zap_cutover: {
+        Row: {
+          app_stage: string | null
+          created_at: string
+          cutover_date: string | null
+          name: string
+          notes: string | null
+          replacement_note: string | null
+          status: string
+          updated_at: string
+          zap_id: string
+          zap_state: string
+        }
+        Insert: {
+          app_stage?: string | null
+          created_at?: string
+          cutover_date?: string | null
+          name: string
+          notes?: string | null
+          replacement_note?: string | null
+          status?: string
+          updated_at?: string
+          zap_id: string
+          zap_state?: string
+        }
+        Update: {
+          app_stage?: string | null
+          created_at?: string
+          cutover_date?: string | null
+          name?: string
+          notes?: string | null
+          replacement_note?: string | null
+          status?: string
+          updated_at?: string
+          zap_id?: string
+          zap_state?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
