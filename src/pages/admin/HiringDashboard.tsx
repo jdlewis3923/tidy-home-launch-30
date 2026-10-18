@@ -111,9 +111,53 @@ export default function HiringDashboard() {
   const activeByService = rows.filter((r) => ["background", "insured", "active"].includes(r.stage))
     .reduce<Record<string, number>>((m, r) => ({ ...m, [r.service]: (m[r.service] ?? 0) + 1 }), {});
 
+  const toggleDryRun = async () => {
+    const next = !dryRun;
+    const { error } = await supabase.from("app_settings").update({ value: next ? "on" : "off" }).eq("key", "sms_dry_run");
+    if (!error) setDryRun(next);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <h1 className="text-2xl font-bold text-foreground mb-6">Hiring</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Hiring</h1>
+        <div className="flex items-center gap-3">
+          <Link to="/admin/hiring/outbox" className="text-sm text-primary underline">Outbox</Link>
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input type="checkbox" checked={!!dryRun} onChange={toggleDryRun} className="h-4 w-4" />
+            SMS dry-run
+          </label>
+        </div>
+      </div>
+
+      {dryRun ? (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 text-amber-800 px-4 py-3 mb-6 text-sm font-medium">
+          SMS dry-run is ON — no texts are sent. Everything lands in the Outbox, and you can simulate replies on each candidate.
+        </div>
+      ) : null}
+
+      <div className="rounded-xl border border-border bg-card p-5 mb-6">
+        <h2 className="font-semibold text-foreground mb-3">Today</h2>
+        {today.length === 0 ? <p className="text-sm text-muted-foreground">No calls today.</p> : (
+          <div className="grid gap-2">
+            {today.map((t) => (
+              <div key={t.slot_id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border px-4 py-3">
+                <span className="text-sm font-semibold text-foreground w-20">
+                  {new Date(t.starts_at).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" })}
+                </span>
+                <span className={`h-2.5 w-2.5 rounded-full ${t.confirmed ? "bg-green-500" : "bg-red-500"}`} title={t.confirmed ? "Confirmed" : "Unconfirmed"} />
+                <span className="text-sm text-foreground font-medium">{t.name}</span>
+                <span className="text-xs text-muted-foreground capitalize">{t.service.replace("_", " ")} · {t.kind === "phone" ? "Phone" : "In person"}</span>
+                <span className="text-xs text-muted-foreground">Intent {t.intent ?? "—"}{t.flags > 0 ? ` · ${t.flags} flag${t.flags === 1 ? "" : "s"}` : ""}</span>
+                <span className="flex-1" />
+                {t.phone ? <a href={`tel:${t.phone}`} className="text-sm text-primary underline">Call</a> : null}
+                <Link to={`/admin/hiring/fit/${t.applicant_id}`} className="text-sm text-primary underline">Fit Report</Link>
+                <Link to={t.kind === "phone" ? `/admin/hiring/phone/${t.applicant_id}` : `/admin/hiring/interview/${t.applicant_id}`} className="text-sm text-primary underline">Scorecard</Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="rounded-xl border border-border bg-card p-5 mb-6">
         <h2 className="font-semibold text-foreground mb-2">Seats (one Pro per service until 30 reservations)</h2>
