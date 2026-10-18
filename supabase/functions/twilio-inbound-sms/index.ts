@@ -262,7 +262,7 @@ Deno.serve(async (req) => {
       if (kw === "STOP" || kw === "START" || kw === "HELP") {
         if (kw === 'HELP') {
           // HELP must not clear an existing STOP.
-          return twiml('Tidy Home Concierge: (786) 829-1141 or hello@jointidy.co. Reply START to opt in, STOP to opt out.');
+          return new Response('<?xml version="1.0" encoding="UTF-8"?><Response><Message>Tidy Home Concierge: (786) 829-1141 or hello@jointidy.co. Reply START to opt in, STOP to opt out.</Message></Response>', { headers: { ...corsHeaders, 'Content-Type': 'application/xml' } });
         }
         const stopped = kw === "STOP";
         await supabase.from("contacts").update({ sms_stopped: stopped }).eq("phone", from).then(() => {}, () => {});
