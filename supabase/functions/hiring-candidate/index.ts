@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
     };
     for (const [k, want] of Object.entries(KO)) {
       if (val(k) !== undefined && val(k) !== want) {
-        await admin.rpc('pipeline_archive', { _id: p.applicant_id, _reason: 'knockout_apply' }).catch(() => null);
+        await admin.rpc('pipeline_archive', { _id: p.applicant_id, _reason: 'knockout_apply' }).then(() => {}, () => {});
         // Fallback if the RPC name differs: direct guarded update.
         await admin.from('contractor_pipeline').update({ archived: true, archived_at: new Date().toISOString(), state: 'declined', archive_reason: 'knockout_apply', decline_reason: 'Knockout answer' }).eq('applicant_id', p.applicant_id);
         return jsonResponse({ ok: true, knockout: true });
