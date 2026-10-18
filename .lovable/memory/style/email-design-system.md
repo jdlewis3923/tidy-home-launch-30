@@ -26,3 +26,5 @@ Rules:
 - Every surface is locked white against phone dark mode (gradient backgrounds + dark-mode overrides). Never grey/dark on mobile.
 - Emails show a relevant photo plus blue line-icon fact tiles (date, plan, price, area, size) for the details that email mentions. No emojis.
 - Subject is never repeated as a second heading; the main link becomes the gold button.
+- Every email surface must be white and every primary button website gold (#f5c518), including phone dark mode. Never promise a client-independent guarantee without testing the actual phone email app.
+- Header artwork must match the message's intent, not merely a service word: team introductions show diverse AI people in Tidy uniforms; support alerts show support; billing shows billing. Repeat artwork only for congruent intents.

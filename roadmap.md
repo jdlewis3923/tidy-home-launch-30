@@ -1,5 +1,11 @@
 # Roadmap
 
+## Email phone appearance and intent artwork (Oct 18)
+- [x] White raster-backed surfaces and website-gold buttons; no grey surfaces. Phone-sized dark browser and stripped-style preview verified.
+- [x] Reviewed all 13 existing banners; corrected team/support/equipment/billing/review/lawn/account intent routing and upgraded all 36 registered hosted templates without changing copy or merge fields.
+- [x] Sender/artwork tests passed; 53 affected senders deployed; live hosted audit repeated with zero changes/failures.
+- [ ] Actual Outlook Android dark-mode confirmation — needs a fresh email screenshot from Justin; browser checks cannot guarantee all email apps.
+
 ## Hiring system v5 (Oct 17) — CORE BUILT, do not publish
 Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spend lock, override audit, probation, hiring documents panel.
 - [x] Stages 0–10 server-enforced (0169); legacy mapped (screened→phone_screened, ins_quote→background/agreement); archived/is_test untouched
