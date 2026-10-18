@@ -222,7 +222,7 @@ export default function Apply() {
   if (!token) {
     return (
       <div className="min-h-screen bg-background">
-        <SeoHead title={t("Apply to be a Tidy Pro", "Aplica para ser un Pro de Tidy")} description={t("Join Tidy's pro team in Miami.", "Únete al equipo de Pros de Tidy en Miami.")} />
+        <SeoHead title={t("Apply to be a Tidy Pro", "Aplica para ser un Pro de Tidy")} description={t("Join Tidy's pro team in Miami.", "Únete al equipo de Pros de Tidy en Miami.")} canonical="/apply" />
         <header className="border-b border-border"><div className="container mx-auto px-4 py-4 flex items-center justify-between"><Link to="/"><TidyLogo /></Link>
           <button onClick={() => setLang(lang === "en" ? "es" : "en")} className="text-sm font-semibold text-foreground">{lang === "en" ? "Español" : "English"}</button></div></header>
         <main className="container mx-auto px-4 py-12 max-w-xl">
