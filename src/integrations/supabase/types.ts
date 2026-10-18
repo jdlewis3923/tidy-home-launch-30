@@ -1229,6 +1229,42 @@ export type Database = {
         }
         Relationships: []
       }
+      application_answers: {
+        Row: {
+          answered_at: string
+          candidate_id: string
+          question_id: string
+          value: Json
+        }
+        Insert: {
+          answered_at?: string
+          candidate_id: string
+          question_id: string
+          value: Json
+        }
+        Update: {
+          answered_at?: string
+          candidate_id?: string
+          question_id?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_answers_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "question_bank"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       badge_status_log: {
         Row: {
           applicant_id: string
@@ -1389,6 +1425,45 @@ export type Database = {
           sort_key?: number
           task_key?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      candidate_faq: {
+        Row: {
+          a_en: string
+          a_es: string
+          candidate_visible: boolean
+          created_at: string
+          id: string
+          needs_justin: boolean
+          q_en: string
+          q_es: string
+          sort: number
+          updated_at: string
+        }
+        Insert: {
+          a_en?: string
+          a_es?: string
+          candidate_visible?: boolean
+          created_at?: string
+          id?: string
+          needs_justin?: boolean
+          q_en: string
+          q_es: string
+          sort?: number
+          updated_at?: string
+        }
+        Update: {
+          a_en?: string
+          a_es?: string
+          candidate_visible?: boolean
+          created_at?: string
+          id?: string
+          needs_justin?: boolean
+          q_en?: string
+          q_es?: string
+          sort?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1879,12 +1954,17 @@ export type Database = {
           adverse_action_notice_sent_at: string | null
           agreement_docs_sent_at: string | null
           applicant_id: string
+          apply_resume_token: string | null
+          apply_started_at: string | null
           apply_submitted_at: string | null
+          apply_total_seconds: number | null
           archived: boolean
           archived_at: string | null
           call_notes: string | null
+          checkin_missed_count: number
           checkr_result: string | null
           cleared_notice_sent_at: string | null
+          close_out_sent_at: string | null
           coi_effective_date: string | null
           coi_expiry_date: string | null
           coi_limit_aggregate: number | null
@@ -1899,12 +1979,21 @@ export type Database = {
           hold_callback_date: string | null
           hold_reason: string | null
           ica_countersigned_at: string | null
+          inperson_confirmed_at: string | null
+          inperson_reschedules: number
+          inperson_slot_id: string | null
           insurance_instructions_sent_at: string | null
           insurance_reimbursement_start_month: string | null
+          invite_deadline_at: string | null
+          invited_at: string | null
           is_test: boolean
           kit_issued_at: string | null
+          last_checkin_sent_at: string | null
+          legacy_application: boolean
           one_pager_sent_at: string | null
           owns_equipment: boolean | null
+          phone_reschedules: number
+          phone_slot_id: string | null
           pre_adverse_notice_sent_at: string | null
           preferred_language: string | null
           probation_cleared_at: string | null
@@ -1932,11 +2021,13 @@ export type Database = {
           reimbursement_m2_paid_at: string | null
           reimbursement_m3_paid_at: string | null
           report_and_rights_summary_provided: boolean | null
+          revived_once: boolean
           route_confirmed: boolean
           screening_call_completed_at: string | null
           screening_decision: string | null
           service: string | null
           service_days: string[]
+          sign_deadline_at: string | null
           source: string | null
           spend_confirmed_at: string | null
           stage: string
@@ -1952,12 +2043,17 @@ export type Database = {
           adverse_action_notice_sent_at?: string | null
           agreement_docs_sent_at?: string | null
           applicant_id: string
+          apply_resume_token?: string | null
+          apply_started_at?: string | null
           apply_submitted_at?: string | null
+          apply_total_seconds?: number | null
           archived?: boolean
           archived_at?: string | null
           call_notes?: string | null
+          checkin_missed_count?: number
           checkr_result?: string | null
           cleared_notice_sent_at?: string | null
+          close_out_sent_at?: string | null
           coi_effective_date?: string | null
           coi_expiry_date?: string | null
           coi_limit_aggregate?: number | null
@@ -1972,12 +2068,21 @@ export type Database = {
           hold_callback_date?: string | null
           hold_reason?: string | null
           ica_countersigned_at?: string | null
+          inperson_confirmed_at?: string | null
+          inperson_reschedules?: number
+          inperson_slot_id?: string | null
           insurance_instructions_sent_at?: string | null
           insurance_reimbursement_start_month?: string | null
+          invite_deadline_at?: string | null
+          invited_at?: string | null
           is_test?: boolean
           kit_issued_at?: string | null
+          last_checkin_sent_at?: string | null
+          legacy_application?: boolean
           one_pager_sent_at?: string | null
           owns_equipment?: boolean | null
+          phone_reschedules?: number
+          phone_slot_id?: string | null
           pre_adverse_notice_sent_at?: string | null
           preferred_language?: string | null
           probation_cleared_at?: string | null
@@ -2005,11 +2110,13 @@ export type Database = {
           reimbursement_m2_paid_at?: string | null
           reimbursement_m3_paid_at?: string | null
           report_and_rights_summary_provided?: boolean | null
+          revived_once?: boolean
           route_confirmed?: boolean
           screening_call_completed_at?: string | null
           screening_decision?: string | null
           service?: string | null
           service_days?: string[]
+          sign_deadline_at?: string | null
           source?: string | null
           spend_confirmed_at?: string | null
           stage?: string
@@ -2025,12 +2132,17 @@ export type Database = {
           adverse_action_notice_sent_at?: string | null
           agreement_docs_sent_at?: string | null
           applicant_id?: string
+          apply_resume_token?: string | null
+          apply_started_at?: string | null
           apply_submitted_at?: string | null
+          apply_total_seconds?: number | null
           archived?: boolean
           archived_at?: string | null
           call_notes?: string | null
+          checkin_missed_count?: number
           checkr_result?: string | null
           cleared_notice_sent_at?: string | null
+          close_out_sent_at?: string | null
           coi_effective_date?: string | null
           coi_expiry_date?: string | null
           coi_limit_aggregate?: number | null
@@ -2045,12 +2157,21 @@ export type Database = {
           hold_callback_date?: string | null
           hold_reason?: string | null
           ica_countersigned_at?: string | null
+          inperson_confirmed_at?: string | null
+          inperson_reschedules?: number
+          inperson_slot_id?: string | null
           insurance_instructions_sent_at?: string | null
           insurance_reimbursement_start_month?: string | null
+          invite_deadline_at?: string | null
+          invited_at?: string | null
           is_test?: boolean
           kit_issued_at?: string | null
+          last_checkin_sent_at?: string | null
+          legacy_application?: boolean
           one_pager_sent_at?: string | null
           owns_equipment?: boolean | null
+          phone_reschedules?: number
+          phone_slot_id?: string | null
           pre_adverse_notice_sent_at?: string | null
           preferred_language?: string | null
           probation_cleared_at?: string | null
@@ -2078,11 +2199,13 @@ export type Database = {
           reimbursement_m2_paid_at?: string | null
           reimbursement_m3_paid_at?: string | null
           report_and_rights_summary_provided?: boolean | null
+          revived_once?: boolean
           route_confirmed?: boolean
           screening_call_completed_at?: string | null
           screening_decision?: string | null
           service?: string | null
           service_days?: string[]
+          sign_deadline_at?: string | null
           source?: string | null
           spend_confirmed_at?: string | null
           stage?: string
@@ -2926,6 +3049,47 @@ export type Database = {
         }
         Relationships: []
       }
+      hiring_deadlines: {
+        Row: {
+          applicant_id: string
+          created_at: string
+          due_at: string
+          id: string
+          kind: string
+          nudge_at: string | null
+          nudged_at: string | null
+          resolved_at: string | null
+        }
+        Insert: {
+          applicant_id: string
+          created_at?: string
+          due_at: string
+          id?: string
+          kind: string
+          nudge_at?: string | null
+          nudged_at?: string | null
+          resolved_at?: string | null
+        }
+        Update: {
+          applicant_id?: string
+          created_at?: string
+          due_at?: string
+          id?: string
+          kind?: string
+          nudge_at?: string | null
+          nudged_at?: string | null
+          resolved_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hiring_deadlines_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hiring_openings: {
         Row: {
           created_at: string
@@ -2973,6 +3137,91 @@ export type Database = {
           {
             foreignKeyName: "hiring_openings_filled_by_applicant_id_fkey"
             columns: ["filled_by_applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hiring_scorecards: {
+        Row: {
+          applicant_id: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          data: Json
+          id: string
+          kind: string
+          passed: boolean | null
+        }
+        Insert: {
+          applicant_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          kind: string
+          passed?: boolean | null
+        }
+        Update: {
+          applicant_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          kind?: string
+          passed?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hiring_scorecards_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hiring_slots: {
+        Row: {
+          applicant_id: string | null
+          booked_at: string | null
+          created_at: string
+          duration_min: number
+          id: string
+          kind: string
+          staff: string | null
+          starts_at: string
+          status: string
+        }
+        Insert: {
+          applicant_id?: string | null
+          booked_at?: string | null
+          created_at?: string
+          duration_min?: number
+          id?: string
+          kind: string
+          staff?: string | null
+          starts_at: string
+          status?: string
+        }
+        Update: {
+          applicant_id?: string | null
+          booked_at?: string | null
+          created_at?: string
+          duration_min?: number
+          id?: string
+          kind?: string
+          staff?: string | null
+          starts_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hiring_slots_applicant_id_fkey"
+            columns: ["applicant_id"]
             isOneToOne: false
             referencedRelation: "applicants"
             referencedColumns: ["id"]
@@ -3167,6 +3416,41 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      intent_adjustments: {
+        Row: {
+          applicant_id: string
+          created_at: string
+          created_by: string | null
+          delta: number
+          id: string
+          reason: string
+        }
+        Insert: {
+          applicant_id: string
+          created_at?: string
+          created_by?: string | null
+          delta: number
+          id?: string
+          reason: string
+        }
+        Update: {
+          applicant_id?: string
+          created_at?: string
+          created_by?: string | null
+          delta?: number
+          id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intent_adjustments_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoices: {
         Row: {
@@ -3857,6 +4141,7 @@ export type Database = {
           car_proposed_for: string | null
           car_threshold_reached_at: string | null
           conversion_date: string | null
+          est_full_day_pay: number | null
           first_visit_date: string | null
           hanger_drops: Json
           late_first_visit_week: string | null
@@ -3874,6 +4159,7 @@ export type Database = {
           car_proposed_for?: string | null
           car_threshold_reached_at?: string | null
           conversion_date?: string | null
+          est_full_day_pay?: number | null
           first_visit_date?: string | null
           hanger_drops?: Json
           late_first_visit_week?: string | null
@@ -3891,6 +4177,7 @@ export type Database = {
           car_proposed_for?: string | null
           car_threshold_reached_at?: string | null
           conversion_date?: string | null
+          est_full_day_pay?: number | null
           first_visit_date?: string | null
           hanger_drops?: Json
           late_first_visit_week?: string | null
@@ -5794,6 +6081,72 @@ export type Database = {
           route?: string | null
           user_agent?: string | null
           zip?: string | null
+        }
+        Relationships: []
+      }
+      question_bank: {
+        Row: {
+          active: boolean
+          anchors_key: string | null
+          core: boolean
+          correct_answer: string | null
+          created_at: string
+          demo_able: boolean
+          id: string
+          key: string
+          knockout: boolean
+          label_en: string
+          label_es: string
+          options: Json | null
+          required: boolean
+          section: number
+          service: string
+          sort: number
+          type: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          active?: boolean
+          anchors_key?: string | null
+          core?: boolean
+          correct_answer?: string | null
+          created_at?: string
+          demo_able?: boolean
+          id?: string
+          key: string
+          knockout?: boolean
+          label_en: string
+          label_es: string
+          options?: Json | null
+          required?: boolean
+          section: number
+          service?: string
+          sort?: number
+          type: string
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          active?: boolean
+          anchors_key?: string | null
+          core?: boolean
+          correct_answer?: string | null
+          created_at?: string
+          demo_able?: boolean
+          id?: string
+          key?: string
+          knockout?: boolean
+          label_en?: string
+          label_es?: string
+          options?: Json | null
+          required?: boolean
+          section?: number
+          service?: string
+          sort?: number
+          type?: string
+          updated_at?: string
+          weight?: number
         }
         Relationships: []
       }
@@ -8800,6 +9153,24 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      hiring_answer: { Args: { _id: string; _key: string }; Returns: Json }
+      hiring_answer_num: {
+        Args: { _id: string; _key: string }
+        Returns: number
+      }
+      hiring_answer_text: {
+        Args: { _id: string; _key: string }
+        Returns: string
+      }
+      hiring_fit_report: { Args: { _id: string }; Returns: Json }
+      hiring_resolve_deadline: {
+        Args: { _id: string; _kind: string }
+        Returns: undefined
+      }
+      hiring_set_deadline: {
+        Args: { _due: string; _id: string; _kind: string; _nudge?: string }
+        Returns: undefined
       }
       inbox_message_visit: {
         Args: { _message_id: string }
