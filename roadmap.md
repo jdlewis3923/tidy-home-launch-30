@@ -1,5 +1,10 @@
 # Roadmap
 
+## Email phone appearance and intent artwork (Oct 18)
+- [ ] Strengthen white surfaces and website-gold buttons against phone email recoloring; remove grey surfaces.
+- [ ] Audit intent routing and add matching team/support imagery; upgrade older branded emails.
+- [ ] Verify shared sender and artwork tests, deploy affected email senders; actual Outlook phone confirmation requires Justin's screenshot.
+
 ## Hiring system v5 (Oct 17) — CORE BUILT, do not publish
 Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spend lock, override audit, probation, hiring documents panel.
 - [x] Stages 0–10 server-enforced (0169); legacy mapped (screened→phone_screened, ins_quote→background/agreement); archived/is_test untouched
