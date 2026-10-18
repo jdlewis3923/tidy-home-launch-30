@@ -65,39 +65,16 @@ export async function handleHiringInbound(admin: any, fromRaw: string, body: str
   const t = (en: string, es: string) => (lang === 'es' ? es : en);
 
   // ---- YES: revive an archived-for-silence candidate ONCE within 7 days ----
-  if (kw === 'YES') {
-    const silenceReasons = ['no_apply', 'no_proof', 'no_booking', 'no_show_phone', 'no_confirm', 'no_show_interview', 'no_sign', 'no_bg_consent', 'no_coi'];
-    const archivedRecently = p.archived && p.archived_at && (Date.now() - new Date(p.archived_at).getTime()) < 7 * 24 * 3600e3;
-    if (p.archived && archivedRecently && silenceReasons.includes(p.archive_reason) && !p.revived_once && p.archived_from_stage) {
-      await admin.rpc('pipeline_restore', { _id: applicant.id }).catch(() => {});
-      // Direct restore: pipeline_restore may not exist; use guarded update path.
-      const { error } = await admin
-        .from('contractor_pipeline')
-        .update({
-          archived: false, archived_at: null, state: 'open',
-          stage: p.archived_from_stage, archive_reason: null, decline_reason: null,
-          revived_once: true,
-        })
-        .eq('applicant_id', applicant.id)
-        .eq('archived', true);
-      if (error) {
-        console.error('[hiring-inbound] revive blocked', error.message);
-      } else {
-        await admin.rpc('hiring_set_deadline', {
-          _id: applicant.id,
-          _kind: p.archived_from_stage === 'applied' ? 'proof' : p.archived_from_stage,
-          _due: new Date(Date.now() + 48 * 3600e3).toISOString(),
-          _nudge: new Date(Date.now() + 24 * 3600e3).toISOString(),
-        }).catch(() => {});
-        await logTimeline(admin, applicant.id, 'Revived by YES reply', { from_stage: p.archived_from_stage });
-        await sendSms(from, t(
-          `Welcome back, ${first}! You're back in the running. Check your texts for the next step — you have 48 hours. — Tidy`,
-          `¡Bienvenido de nuevo, ${first}! Sigues en el proceso. Revisa tus mensajes para el siguiente paso — tienes 48 horas. — Tidy`,
-        ), `revive-${applicant.id}-${Date.now()}`, 'hiring-revive');
-      }
+  if (kw === 'YES' && p.archived) {
+    const { data: revive } = await admin.rpc('hiring_revive', { _id: applicant.id });
+    if (revive?.ok) {
+      await sendSms(from, t(
+        `Welcome back, ${first}! You're back in the running. Check your texts for the next step — you have 48 hours. — Tidy`,
+        `¡Bienvenido de nuevo, ${first}! Sigues en el proceso. Revisa tus mensajes para el siguiente paso — tienes 48 horas. — Tidy`,
+      ), `revive-${applicant.id}-${Date.now()}`, 'hiring-revive');
       return true;
     }
-    // YES with nothing to revive → fall through to unread-reply logging.
+    // Not revivable (too late, already revived, or not a silence archive) → unread reply.
   }
 
   // ---- C / CONFIRM: confirm the next booked slot ----
