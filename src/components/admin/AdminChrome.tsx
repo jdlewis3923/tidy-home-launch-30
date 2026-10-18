@@ -30,6 +30,7 @@ const GROUPS: NavGroup[] = [
     { to: "/admin/hiring", label: "Hiring dashboard", icon: BarChart3 },
     { to: "/admin/hiring/slots", label: "Hiring slots", icon: CalendarDays },
     { to: "/admin/hiring/outbox", label: "SMS outbox", icon: MessageSquare },
+    { to: "/admin/messages", label: "Messages", icon: Mail },
     { to: "/admin/hiring/content", label: "Hiring content", icon: FileText },
     { to: "/admin/pipeline", label: "Pipeline", icon: Users },
     { to: "/admin/pipeline/archive", label: "Pipeline archive", icon: FileText },
