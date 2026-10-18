@@ -2,7 +2,7 @@
  * Hiring-order gate for every older sender (advance-applicant, sequence-advance,
  * onboarding-email-send, pro-onboarding-reminders, checkr-invite, contract-sign).
  *
- * The eight-stage pipeline owns WHEN a candidate gets a document:
+ * The eleven-stage v5 pipeline owns WHEN a candidate gets a document:
  *   ica / w9  -> only once equipment proof is approved and they are at agreement or later
  *   checkr    -> never automatic; Justin invites by hand on Checkr's site (stage background)
  *   kit       -> only once they are at active
@@ -11,7 +11,7 @@
 // deno-lint-ignore no-explicit-any
 type Admin = any;
 
-export const STAGES = ['applied', 'screened', 'proof', 'agreement', 'ins_quote', 'background', 'insured', 'active'] as const;
+export const STAGES = ['invited', 'applied', 'proof', 'screen_booked', 'phone_screened', 'referenced', 'interviewed', 'agreement', 'background', 'insured', 'active'] as const;
 export const stageIdx = (s: string | null | undefined) => STAGES.indexOf((s ?? '') as typeof STAGES[number]) + 1;
 
 export type GateKind = 'ica' | 'checkr' | 'kit' | 'insurance' | 'onboarding';

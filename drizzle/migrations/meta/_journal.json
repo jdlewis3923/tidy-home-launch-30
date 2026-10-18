@@ -1191,6 +1191,34 @@
       "when": 1792282377654,
       "tag": "0169_hiring_v5_stages_questions_slots",
       "breakpoints": true
+    },
+    {
+      "idx": 170,
+      "version": "7",
+      "when": 1792288218942,
+      "tag": "0170_hiring_v5_seeds_and_scheduler",
+      "breakpoints": true
+    },
+    {
+      "idx": 171,
+      "version": "7",
+      "when": 1792288471309,
+      "tag": "0171_hiring_v5_tick_schedule",
+      "breakpoints": true
+    },
+    {
+      "idx": 172,
+      "version": "7",
+      "when": 1792288658500,
+      "tag": "0172_hiring_v5_fix_slot_seeder",
+      "breakpoints": true
+    },
+    {
+      "idx": 173,
+      "version": "7",
+      "when": 1792288795590,
+      "tag": "0173_hiring_v5_fit_report_jobs_fix",
+      "breakpoints": true
     }
   ]
 }

@@ -27,6 +27,8 @@ const GROUPS: NavGroup[] = [
     { to: "/admin/schedule", label: "Schedule", icon: CalendarDays },
   ]},
   { label: "Hiring", icon: BriefcaseBusiness, items: [
+    { to: "/admin/hiring", label: "Hiring dashboard", icon: BarChart3 },
+    { to: "/admin/hiring/slots", label: "Hiring slots", icon: CalendarDays },
     { to: "/admin/pipeline", label: "Pipeline", icon: Users },
     { to: "/admin/pipeline/archive", label: "Pipeline archive", icon: FileText },
     { to: "/admin/applicants", label: "Applicants (legacy)", icon: Users },

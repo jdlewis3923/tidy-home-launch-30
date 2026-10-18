@@ -133,6 +133,11 @@ const CoiTokenUpload = lazy(() => import("./pages/CoiTokenUpload.tsx"));
 /* Tidy Pro Portal — the installable app Pros work from day to day. */
 const ProLanding = lazy(() => import("./pages/pro/ProLanding.tsx"));
 const ProProof = lazy(() => import("./pages/pro/ProProof"));
+const ProBook = lazy(() => import("./pages/pro/ProBook"));
+const HiringDashboard = lazy(() => import("./pages/admin/HiringDashboard"));
+const HiringFitReport = lazy(() => import("./pages/admin/HiringFitReport"));
+const HiringScorecard = lazy(() => import("./pages/admin/HiringScorecard"));
+const HiringSlots = lazy(() => import("./pages/admin/HiringSlots"));
 const ProLogin = lazy(() => import("./pages/pro/ProLogin.tsx"));
 const ProFirstRun = lazy(() => import("./pages/pro/ProFirstRun.tsx"));
 const ProSchedule = lazy(() => import("./pages/pro/ProSchedule.tsx"));
@@ -379,6 +384,12 @@ const App = () => (
                   <Route path="/admin/pipeline" element={<AdminPipeline />} />
                   <Route path="/admin/pipeline/archive" element={<AdminPipelineArchive />} />
                   <Route path="/admin/pipeline/:id" element={<AdminPipelineRecord />} />
+                  <Route path="/admin/hiring" element={<HiringDashboard />} />
+                  <Route path="/admin/hiring/fit/:id" element={<HiringFitReport />} />
+                  <Route path="/admin/hiring/phone/:id" element={<HiringScorecard kind="phone" />} />
+                  <Route path="/admin/hiring/ref/:id" element={<HiringScorecard kind="reference" />} />
+                  <Route path="/admin/hiring/interview/:id" element={<HiringScorecard kind="interview" />} />
+                  <Route path="/admin/hiring/slots" element={<HiringSlots />} />
                   <Route path="/admin/entitlements" element={<AdminEntitlements />} />
                   {/* Command center — default admin landing view. */}
                   <Route path="/admin" element={<Navigate to="/admin/command" replace />} />
@@ -463,6 +474,7 @@ const App = () => (
 
                   {/* Tidy Pro Portal — its own app shell, no site chrome. */}
                   <Route path="/pro/proof/:token" element={<ProProof />} />
+                  <Route path="/pro/book/:token" element={<ProBook />} />
                   <Route path="/pro/welcome" element={<ProLanding />} />
                   <Route path="/pro/login" element={<ProLogin />} />
                   <Route path="/pro/first-run" element={<ProFirstRun />} />

@@ -1958,6 +1958,7 @@ export type Database = {
           apply_started_at: string | null
           apply_submitted_at: string | null
           apply_total_seconds: number | null
+          archive_reason: string | null
           archived: boolean
           archived_at: string | null
           call_notes: string | null
@@ -2047,6 +2048,7 @@ export type Database = {
           apply_started_at?: string | null
           apply_submitted_at?: string | null
           apply_total_seconds?: number | null
+          archive_reason?: string | null
           archived?: boolean
           archived_at?: string | null
           call_notes?: string | null
@@ -2136,6 +2138,7 @@ export type Database = {
           apply_started_at?: string | null
           apply_submitted_at?: string | null
           apply_total_seconds?: number | null
+          archive_reason?: string | null
           archived?: boolean
           archived_at?: string | null
           call_notes?: string | null
@@ -9168,10 +9171,12 @@ export type Database = {
         Args: { _id: string; _kind: string }
         Returns: undefined
       }
+      hiring_seed_slots: { Args: never; Returns: number }
       hiring_set_deadline: {
         Args: { _due: string; _id: string; _kind: string; _nudge?: string }
         Returns: undefined
       }
+      hiring_tick: { Args: never; Returns: number }
       inbox_message_visit: {
         Args: { _message_id: string }
         Returns: {
