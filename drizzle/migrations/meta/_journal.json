@@ -1268,6 +1268,13 @@
       "when": 1792367214678,
       "tag": "0180_lifecycle_event_dispatch",
       "breakpoints": true
+    },
+    {
+      "idx": 181,
+      "version": "7",
+      "when": 1792367348865,
+      "tag": "0181_lifecycle_source_triggers",
+      "breakpoints": true
     }
   ]
 }

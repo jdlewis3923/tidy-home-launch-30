@@ -9660,11 +9660,35 @@ export type Database = {
         Args: { _accept: boolean; _token: string }
         Returns: Json
       }
+      lifecycle_capture_contact: {
+        Args: {
+          _email: string
+          _first: string
+          _lang: string
+          _last: string
+          _phone: string
+          _sms: boolean
+          _test?: boolean
+          _zip: string
+        }
+        Returns: string
+      }
       lifecycle_contact_for_user: {
         Args: { _user_id: string }
         Returns: string
       }
       lifecycle_dispatch: {
+        Args: {
+          _at?: string
+          _contact_id: string
+          _event: string
+          _key: string
+          _simulation_id?: string
+          _tokens?: Json
+        }
+        Returns: Json
+      }
+      lifecycle_dispatch_internal: {
         Args: {
           _at?: string
           _contact_id: string
