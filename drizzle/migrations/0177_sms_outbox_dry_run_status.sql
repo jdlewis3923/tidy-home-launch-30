@@ -1,0 +1,2 @@
+ALTER TABLE public.sms_outbox DROP CONSTRAINT sms_outbox_status_chk;
+ALTER TABLE public.sms_outbox ADD CONSTRAINT sms_outbox_status_chk CHECK (status IN ('queued','sent','failed','canceled','dry_run'));
