@@ -12,6 +12,12 @@ type Row = {
   first_name: string; last_name: string; intent: number | null;
 };
 type GhostRow = { archive_reason: string; n: number };
+type TodayRow = {
+  slot_id: string; kind: string; starts_at: string; confirmed: boolean;
+  applicant_id: string; name: string; service: string; phone: string;
+  intent: number | null; flags: number;
+};
+type UnmatchedRow = { id: string; from_phone: string; body: string; created_at: string };
 
 const STAGE_LABEL: Record<string, string> = {
   invited: "Invited", applied: "Applied", proof: "Proof", screen_booked: "Screen booked",
@@ -25,9 +31,51 @@ export default function HiringDashboard() {
   const [ghost, setGhost] = useState<GhostRow[]>([]);
   const [funnel, setFunnel] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [dryRun, setDryRun] = useState<boolean | null>(null);
+  const [today, setToday] = useState<TodayRow[]>([]);
+  const [unmatched, setUnmatched] = useState<UnmatchedRow[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
+    // SMS dry-run toggle
+    const { data: dr } = await supabase.from("app_settings").select("value").eq("key", "sms_dry_run").maybeSingle();
+    setDryRun(dr?.value === "on");
+
+    // Today list: today's booked slots (ET), time order
+    const etNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+    const dayStart = new Date(etNow); dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(etNow); dayEnd.setHours(23, 59, 59, 999);
+    const { data: slots } = await supabase.from("hiring_slots")
+      .select("id, kind, starts_at, confirmed_at, applicant_id")
+      .eq("status", "booked")
+      .gte("starts_at", dayStart.toISOString())
+      .lte("starts_at", dayEnd.toISOString())
+      .order("starts_at");
+    const todayList: TodayRow[] = [];
+    for (const s of slots ?? []) {
+      const slot = s as { id: string; kind: string; starts_at: string; confirmed_at: string | null; applicant_id: string | null };
+      if (!slot.applicant_id) continue;
+      const { data: p } = await supabase.from("contractor_pipeline")
+        .select("service, is_test, archived, applicants(first_name, last_name, phone)")
+        .eq("applicant_id", slot.applicant_id).maybeSingle();
+      const rec = p as unknown as { service: string; is_test: boolean; archived: boolean; applicants: { first_name: string; last_name: string; phone: string } | null } | null;
+      if (!rec || rec.archived) continue;
+      const { data: fr } = await supabase.rpc("hiring_fit_report", { _id: slot.applicant_id });
+      const fit = fr as { intent?: number; flags?: unknown[] } | null;
+      todayList.push({
+        slot_id: slot.id, kind: slot.kind, starts_at: slot.starts_at, confirmed: !!slot.confirmed_at,
+        applicant_id: slot.applicant_id,
+        name: `${rec.applicants?.first_name ?? ""} ${rec.applicants?.last_name ?? ""}`.trim() || "—",
+        service: rec.service, phone: rec.applicants?.phone ?? "",
+        intent: typeof fit?.intent === "number" ? fit.intent : null,
+        flags: Array.isArray(fit?.flags) ? fit.flags.length : 0,
+      });
+    }
+    setToday(todayList);
+
+    // Unmatched texts (unknown numbers)
+    const { data: um } = await supabase.from("unmatched_texts").select("id, from_phone, body, created_at").order("created_at", { ascending: false }).limit(20);
+    setUnmatched((um as UnmatchedRow[]) ?? []);
     const { data: p } = await supabase.from("contractor_pipeline")
       .select("applicant_id, stage, service, is_test, archived, applicants(first_name, last_name)")
       .eq("archived", false);
