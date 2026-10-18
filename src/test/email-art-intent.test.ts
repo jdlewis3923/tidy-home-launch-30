@@ -8,7 +8,7 @@ describe('email intent artwork', () => {
     ['Conoce a tu equipo', 'team-20261018'],
     ['Your cleaning payment failed', 'billing'],
     ['Your lawn size is verified', 'lawn'],
-    ['Your equipment proof photos', 'kit'],
+    ['Your equipment proof photos', 'equipment-20261018'],
     ['Your badge photo needs a retake', 'photo'],
     ['Your visit is confirmed', 'visit'],
     ['Your visit review', 'community'],

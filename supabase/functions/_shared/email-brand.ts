@@ -36,7 +36,7 @@ const photo = (name: string, label: string, alt: string): TidyEmailArt => ({ ima
 const ART: Array<{ match: RegExp; art: TidyEmailArt }> = [
   { match: /(needs help|still open|support|urgent|alert|redo|damage|safety|no access|necesita ayuda|ayuda|problema)/i, art: photo('support-20261018', 'Tidy support', 'An illustrative Tidy support coordinator helping by phone') },
   { match: /(meet (?:the|your) team|meet (?:the|your) pro|your pro|team|equipo|conoce|pro.changed)/i, art: photo('team-20261018', 'Meet Tidy', 'An illustrative diverse team in blue Tidy uniforms') },
-  { match: /(equipment|proof|loaded vehicle|work photos|herramientas|equipamiento)/i, art: photo('kit', 'Equipment readiness', 'Service equipment and a Tidy kit ready for review') },
+  { match: /(equipment|proof|loaded vehicle|work photos|herramientas|equipamiento)/i, art: photo('equipment-20261018', 'Equipment readiness', 'Illustrative cleaning, lawn and Car Care equipment in separate groups') },
   { match: /(lawn size|turf|sqft|sq ft|césped|cesped)/i, art: photo('lawn', 'Lawn', 'A manicured lawn in front of a Miami home') },
   { match: /(payment|invoice|receipt|billing|payout|deposit|card exp|credit.card|pago|factura|tarjeta)/i, art: photo('billing', 'Billing', 'A card and receipt on a white desk') },
   { match: /(digest|report|summary|kpi|metrics|snapshot|resumen)/i, art: photo('report', 'Your snapshot', 'A laptop with a soft chart by a window') },
@@ -55,7 +55,7 @@ const ART: Array<{ match: RegExp; art: TidyEmailArt }> = [
   { match: /(review|rating|feedback|star|referral|refer a|friend|credit|neighbor)/i, art: photo('community', 'Your neighbors', 'Neighbors chatting over a white fence') },
   { match: /(applicant|apply|hiring|interview|offer|candidate)/i, art: photo('team-20261018', 'Hiring', 'An illustrative diverse team in blue Tidy uniforms') },
   { match: /(digest|report|summary|kpi|weekly|metrics|alert|urgent|failed|attention|issue|action required)/i, art: photo('report', 'Your snapshot', 'A laptop with a soft chart by a window') },
-  { match: /(password|sign in|log in|verify|confirm your email|account)/i, art: photo('home', 'Your account', 'A bright Miami home at golden hour') },
+  { match: /(password|sign in|log in|verify|confirm your email|account|contraseña|cuenta)/i, art: photo('verify', 'Your account', 'A verification checklist being reviewed') },
 ];
 
 const DEFAULT_ART: TidyEmailArt = photo('home', 'Tidy Home Concierge', 'A bright Miami home at golden hour');

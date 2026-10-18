@@ -2,7 +2,7 @@
 - Launch dates live only in `launch_config` (edited at /admin/launch-dates, logged); `src/lib/launch.ts` (mirrored to `_shared/launch.ts`, parity-tested) only formats them. An empty car date means closed (SQL-enforced); car dates are set only by `admin_approve_car_launch` after demand + an Active car Pro — why: one place to move a date; car opens only when a route fills.
 - Reservations never touch Stripe; the paid subscription marks a reservation converted by email match (DB trigger) — why: Stripe products stay frozen.
 - The homepage frequency FAQ is shared from `src/lib/frequency-faq.ts` across pricing and FAQ sections — why: both placements must give the same bilingual answer.
-- Homepage hero media is split at the 768px rendered viewport: portrait media below it and widescreen media at or above it, including phone browsers in desktop-site mode — why: browser display mode must determine the correct composition.
+- Hero media: portrait below 768px, widescreen above, including desktop-site mode — why: viewport determines composition.
 - Public page reachability is master switch OR per-page row in page_visibility (via get_page_visibility); /founding fails open unless explicitly off — why: printed hangers must never dead-end.
 - Founding status lives in `founding_grants` (numbers per ZIP, never reused; cap counts homes ever granted) and is decided only by the reservations insert trigger — why: the founding promise must survive cancellations and edits automatically.
 - Prices resolve by `stripe_catalog.canon_key` + the member's `member_rate_card_version()`; founding subscriptions cannot change `rate_card_version` without a logged `price_migration_overrides` row — why: price rises publish a new rate card and never touch locked members.
@@ -14,10 +14,11 @@
 - Pro orientation progress is server-gated by contractor pipeline stage and stored per applicant/section in `pro_orientation_progress` — why: locked material and completion cannot be bypassed client-side.
 - Lawn size is turf-only sq ft, banded in `LAWN_BANDS`/`sizeFromTurfSqFt` (mirrored in `public.lawn_size_from_sqft`); customers only guess, admins measure at `/admin/lawn-verification` via `admin_lawn_verify`, and DB triggers refuse conversion while `lawn_conversion_block()` is non-null — why: no silent repricing and no Pro absorbing an oversized yard.
 - Paid-plan lawn adds/corrections go only through `lawn-plan-change` (DB trigger refuses unverified lawn), swapping Stripe by lookup_key — why: nothing billed before verification; size-ups wait for the customer.
-- Contractor pay varies by service and size only, never cadence — why: cadence discounts come from Tidy's margin.
+- Pro pay varies by service/size, never cadence — why: discounts come from Tidy's margin.
 - Root declares `color-scheme: light dark`; body/Founding render light with explicit colors and scoped tokens — why: phone browsers ignore "only light" and grey out QR visitors' pages.
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
 - Subdirectories have their own `AGENTS.md`; read it before changing files there.
+- Email-brand owns intent artwork and versioned raster-backed surfaces — why: phone email clients strip gradients and invert flat colors.
 - Contractor hiring is eight stages with equipment proof at stage 3; candidate messages leave only through `pipeline-notify`, fired by the database at the stage that owns them, and older senders pass `_shared/pipeline-gate.ts` — why: nothing is signed or spent before someone has seen the equipment.
 - Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: test and declined records stay as they are.
 - Social post dates are set only by `social-plan` (`socialPlanner.ts`); tokens fill at posting — why: no hard-coded launch dates.
