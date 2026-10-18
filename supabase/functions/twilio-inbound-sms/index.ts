@@ -14,6 +14,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { createHmac } from "node:crypto";
 import { runSupportAssistant, notifyAdminEmail, type SupportMsg } from "../_shared/support-assistant.ts";
 import { vendorFetch } from '../_shared/http.ts';
+import { handleHiringInbound } from '../_shared/hiring-inbound.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -251,6 +252,15 @@ Deno.serve(async (req) => {
       body,
       twilio_sid: messageSid,
     });
+
+    // Hiring pipeline candidates get keyword handling (C/CONFIRM, R, 1, 2, YES)
+    // instead of the support assistant. Unknown numbers are logged as unmatched
+    // and still flow to the assistant below.
+    const hiringHandled = await handleHiringInbound(supabase, from, body, messageSid).catch((e) => {
+      console.error("[twilio-inbound-sms] hiring handler failed", e);
+      return false;
+    });
+    if (hiringHandled) return twiml();
 
     // Answer Twilio now; finish the assistant work in the background.
     runInBackground(handleConversation(supabase, { convId: convId!, from, body, messageSid }));

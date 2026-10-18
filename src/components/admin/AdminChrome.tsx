@@ -4,7 +4,7 @@ import {
   Activity, Inbox, BarChart3, Heart, FileText, Users, Megaphone, DollarSign,
   Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays, Award, ShieldCheck,
   ClipboardList, Gauge, Star, SlidersHorizontal, GraduationCap, PackageCheck,
-  Shield, Menu, X, ChevronDown, BriefcaseBusiness, Landmark, Settings,
+  Shield, Menu, X, ChevronDown, BriefcaseBusiness, Landmark, Settings, MessageSquare,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import CapacityBanner from "@/components/admin/CapacityBanner";
@@ -29,6 +29,8 @@ const GROUPS: NavGroup[] = [
   { label: "Hiring", icon: BriefcaseBusiness, items: [
     { to: "/admin/hiring", label: "Hiring dashboard", icon: BarChart3 },
     { to: "/admin/hiring/slots", label: "Hiring slots", icon: CalendarDays },
+    { to: "/admin/hiring/outbox", label: "SMS outbox", icon: MessageSquare },
+    { to: "/admin/hiring/content", label: "Hiring content", icon: FileText },
     { to: "/admin/pipeline", label: "Pipeline", icon: Users },
     { to: "/admin/pipeline/archive", label: "Pipeline archive", icon: FileText },
     { to: "/admin/applicants", label: "Applicants (legacy)", icon: Users },

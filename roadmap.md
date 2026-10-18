@@ -165,3 +165,12 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 
 ## Social calendar (Oct 13)
 - [ ] Load 39 posts (34 FB+IG, 5 Nextdoor), images/cards, IG "Link in bio", checks S-1..S-7 — not started; re-plan around 23 Nov + no car date needed
+
+## Hiring v5 — 4 gaps (DONE, unpublished)
+- [x] Inbound SMS keyword handler (C/CONFIRM, R, 1, 2, YES, STOP/START, unread→digest, unknown→unmatched list)
+- [x] SMS dry-run toggle + Outbox page + Simulate reply box
+- [x] Today list on hiring dashboard
+- [x] Meeting location editor + booking block when empty
+- [x] Scheduler timing: 15-min 8AM–9PM ET, hourly overnight
+- [x] 13 v5 checks run in dry-run — all pass
+- [ ] Re-run SMS-dependent checks live once Twilio is reactivated

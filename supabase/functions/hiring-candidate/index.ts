@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
     };
     for (const [k, want] of Object.entries(KO)) {
       if (val(k) !== undefined && val(k) !== want) {
-        await admin.rpc('pipeline_archive', { _id: p.applicant_id, _reason: 'knockout_apply' }).catch(() => null);
+        await admin.rpc('pipeline_archive', { _id: p.applicant_id, _reason: 'knockout_apply' }).then(() => {}, () => {});
         // Fallback if the RPC name differs: direct guarded update.
         await admin.from('contractor_pipeline').update({ archived: true, archived_at: new Date().toISOString(), state: 'declined', archive_reason: 'knockout_apply', decline_reason: 'Knockout answer' }).eq('applicant_id', p.applicant_id);
         return jsonResponse({ ok: true, knockout: true });
@@ -160,6 +160,12 @@ Deno.serve(async (req) => {
   // ---- slots: open slots of a kind
   if (action === 'slots') {
     const kind = body?.kind === 'in_person' ? 'in_person' : 'phone';
+    // In-person booking is blocked until Justin sets the private meeting location.
+    if (kind === 'in_person') {
+      const { data: loc } = await admin.from('app_settings').select('value').eq('key', 'hiring_inperson_location').maybeSingle();
+      const locVal = typeof loc?.value === 'string' ? loc.value : '';
+      if (!locVal.trim()) return jsonResponse({ ok: true, slots: [], location_missing: true });
+    }
     const { data } = await admin.from('hiring_slots').select('id, starts_at, duration_min')
       .eq('kind', kind).eq('status', 'open').gt('starts_at', new Date().toISOString())
       .order('starts_at').limit(40);
@@ -174,6 +180,11 @@ Deno.serve(async (req) => {
     const reschedCol = kind === 'phone' ? 'phone_reschedules' : 'inperson_reschedules';
     if (kind === 'phone' && p.stage !== 'proof') return jsonResponse({ error: 'wrong_stage' }, 409);
     if (kind === 'in_person' && !['phone_screened', 'referenced'].includes(String(p.stage))) return jsonResponse({ error: 'wrong_stage' }, 409);
+    if (kind === 'in_person') {
+      const { data: loc } = await admin.from('app_settings').select('value').eq('key', 'hiring_inperson_location').maybeSingle();
+      const locVal = typeof loc?.value === 'string' ? loc.value : '';
+      if (!locVal.trim()) return jsonResponse({ error: 'location_missing' }, 409);
+    }
     if (p[col]) {
       if (Number(p[reschedCol] ?? 0) >= 1) return jsonResponse({ error: 'no_reschedules' }, 409);
       await admin.from('hiring_slots').update({ status: 'open', applicant_id: null, booked_at: null }).eq('id', p[col]);

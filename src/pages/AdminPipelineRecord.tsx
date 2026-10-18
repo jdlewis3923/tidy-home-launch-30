@@ -202,6 +202,9 @@ export default function AdminPipelineRecord() {
         {p.state === "lapsed" && <p className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">Insurance lapsed — no jobs can be assigned. Upload a new COI and update the dates, then reinstate.</p>}
         {p.archived && p.decline_reason && <p className="rounded-md border border-border bg-muted p-3 text-sm">Declined: {p.decline_reason}{p.decline_note ? ` — ${p.decline_note}` : ""}</p>}
 
+        <SimulateReply applicantId={id!} />
+
+
         <section className="rounded-lg border border-border bg-card p-4">
           <h2 className="mb-3 text-base font-bold">What this stage needs</h2>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -352,5 +355,42 @@ export default function AdminPipelineRecord() {
       <DeclineDialog open={modal === "decline"} onOpenChange={(v) => setModal(v ? "decline" : null)} names={[name]}
         defaultReason={presetReason} fcraEligible={stageIndex(p.stage) >= stageIndex("background") && artifacts.some((x) => x.kind === "checkr_report")} onConfirm={decline} />
     </main>
+  );
+}
+
+/** Dry-run only: simulate an inbound candidate text through the real keyword handler. */
+function SimulateReply({ applicantId }: { applicantId: string }) {
+  const [enabled, setEnabled] = useState(false);
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    (supabase as any).from("app_settings").select("value").eq("key", "sms_dry_run").maybeSingle()
+      .then(({ data }: any) => setEnabled(data?.value === "on"));
+  }, []);
+
+  if (!enabled) return null;
+
+  const send = async () => {
+    if (!text.trim()) return;
+    setSending(true);
+    const { data, error } = await supabase.functions.invoke("hiring-sms-simulate", {
+      body: { applicant_id: applicantId, body: text.trim() },
+    });
+    setSending(false);
+    if (error) toast.error(error.message);
+    else if ((data as any)?.handled === false) toast.error("No candidate matched this phone — logged as unmatched.");
+    else { toast.success("Simulated reply processed."); setText(""); }
+  };
+
+  return (
+    <section className="rounded-lg border border-amber-300 bg-amber-50 p-4">
+      <h2 className="mb-2 text-sm font-bold text-amber-900">Simulate reply (dry-run)</h2>
+      <div className="flex gap-2">
+        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. YES, C, R, 1, 2, or any message" className="bg-white" />
+        <Button size="sm" onClick={send} disabled={sending || !text.trim()}>{sending ? "…" : "Send"}</Button>
+      </div>
+      <p className="mt-1 text-xs text-amber-800">Runs the exact inbound handler. Keywords: C/CONFIRM, R, 1, 2, YES, STOP/START.</p>
+    </section>
   );
 }

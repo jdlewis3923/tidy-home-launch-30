@@ -1,0 +1,2 @@
+ALTER TABLE public.contractor_stage_events DROP CONSTRAINT contractor_stage_events_kind_check;
+ALTER TABLE public.contractor_stage_events ADD CONSTRAINT contractor_stage_events_kind_check CHECK (kind IN ('advance','activate','hold','resume','decline','withdraw','restore','override','lapse','reinstate','migrate','refused','proof_review','proof_link','reference','probation','message','note'));
