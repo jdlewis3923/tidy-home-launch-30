@@ -9677,6 +9677,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: string
       }
+      lifecycle_daily_events: { Args: { _at?: string }; Returns: Json }
       lifecycle_dispatch: {
         Args: {
           _at?: string
@@ -9746,6 +9747,15 @@ export type Database = {
       lifecycle_set_stage: {
         Args: { _contact_id: string; _stage: string; _tokens?: Json }
         Returns: undefined
+      }
+      lifecycle_simulate: {
+        Args: {
+          _contact_id: string
+          _event?: string
+          _journey?: boolean
+          _tokens?: Json
+        }
+        Returns: Json
       }
       mark_visit_paid_in_full: {
         Args: {

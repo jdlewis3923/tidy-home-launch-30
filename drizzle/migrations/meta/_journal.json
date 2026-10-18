@@ -1275,6 +1275,13 @@
       "when": 1792367348865,
       "tag": "0181_lifecycle_source_triggers",
       "breakpoints": true
+    },
+    {
+      "idx": 182,
+      "version": "7",
+      "when": 1792367399855,
+      "tag": "0182_lifecycle_schedule_and_simulator",
+      "breakpoints": true
     }
   ]
 }
