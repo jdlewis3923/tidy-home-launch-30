@@ -66,7 +66,8 @@ Deno.serve(async (req) => {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
   // Test mode: send every active email template to the owner inbox with sample tokens.
-  if (new URL(req.url).searchParams.get('test') === 'all_emails') {
+  const reqBody = await req.clone().json().catch(() => ({}));
+  if (reqBody?.test === 'all_emails') {
     const sample: Record<string, string> = {
       first: 'Justin', plan: 'Cleaning + Lawn', pay_link: 'https://jointidy.co', link: 'https://jointidy.co',
       deadline: 'Fri 20 Nov', founding_number: '7', zip_name: 'Pinecrest', zip: '33156', wait_position: '3',
