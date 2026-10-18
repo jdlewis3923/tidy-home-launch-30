@@ -109,6 +109,15 @@ export default function AdminMessages() {
     toast.success("Settings saved");
   };
 
+  const setZapStatus = async (zapId: string, status: string) => {
+    const cutover_date = status === "app_live" ? new Date().toISOString().slice(0, 10) : null;
+    const { error } = await supabase.from("zap_cutover").update({ status, cutover_date, updated_at: new Date().toISOString() }).eq("zap_id", zapId);
+    if (error) toast.error(error.message);
+    else { toast.success(`Zap ${zapId} → ${status}`); load(); }
+  };
+
+  const zapsForStage = (stage: string) => zaps.filter((z) => z.app_stage === stage);
+
   const sendTest = async () => {
     if (!testKey) return;
     const { error } = await supabase.functions.invoke("lifecycle-event", {
