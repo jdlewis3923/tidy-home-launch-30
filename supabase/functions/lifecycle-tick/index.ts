@@ -17,6 +17,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { renderLifecycleEmail } from '../_shared/lifecycle-email.ts';
+import { lifecycleCanSend, lifecycleTemplatePair } from '../_shared/lifecycle-policy.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -141,7 +142,12 @@ Deno.serve(async (req) => {
         eventLive = rule?.live === true;
       }
     }
-    const allowedLive = !contact.is_test && !row.force_shadow && (row.event_id ? eventLive : (!shadow || liveStages.has(row.stage)));
+    const allowedLive = lifecycleCanSend({ shadow, test: contact.is_test, forceShadow: row.force_shadow, eventBacked: !!row.event_id, eventLive, stageLive: liveStages.has(row.stage) });
+    if (!allowedLive && row.channel !== 'task') {
+      await admin.from('message_queue').update({ status: 'dry_run', sent_at: new Date().toISOString() }).eq('id', row.id);
+      results.dry_run++;
+      continue;
+    }
     // Admin task rows become Today-list alerts, never sends.
     if (row.channel === 'task') {
       if (allowedLive) {
@@ -170,10 +176,11 @@ Deno.serve(async (req) => {
         // Marketing text without consent → email version only, if one exists.
         const { data: emailTpl } = await admin
           .from('lifecycle_templates').select('*')
-          .eq('key', row.template_key).eq('channel', 'email').eq('active', true).maybeSingle();
+          .eq('key', lifecycleTemplatePair(row.template_key)).eq('channel', 'email').eq('active', true).maybeSingle();
         if (emailTpl && contact.email && (row.marketing ? contact.email_marketing && !contact.email_suppressed : true)) {
-          await admin.from('message_queue').update({ channel: 'email' }).eq('id', row.id);
+          await admin.from('message_queue').update({ channel: 'email', template_key: emailTpl.key }).eq('id', row.id);
           row.channel = 'email';
+          row.template_key = emailTpl.key;
         } else {
           await admin.from('message_queue').update({ status: 'cancelled', error: 'no consent' }).eq('id', row.id);
           results.skipped_consent++;
@@ -268,11 +275,11 @@ Deno.serve(async (req) => {
       let fellBack = false;
       if (row.channel === 'sms') {
         const { data: emailTpl } = await admin
-          .from('lifecycle_templates').select('key').eq('key', row.template_key).eq('channel', 'email').eq('active', true).maybeSingle();
+          .from('lifecycle_templates').select('key').eq('key', lifecycleTemplatePair(row.template_key)).eq('channel', 'email').eq('active', true).maybeSingle();
         if (emailTpl && contact.email) {
           await admin.from('message_queue').insert({
             contact_id: contact.id, stage: row.stage, step_order: row.step_order,
-            template_key: row.template_key, channel: 'email', marketing: row.marketing,
+            template_key: emailTpl.key, channel: 'email', marketing: row.marketing,
             tokens: row.tokens, send_at: new Date().toISOString(),
           });
           fellBack = true;
