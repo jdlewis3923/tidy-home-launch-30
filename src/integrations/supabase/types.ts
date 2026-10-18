@@ -9204,6 +9204,7 @@ export type Database = {
         Args: { _id: string; _kind: string }
         Returns: undefined
       }
+      hiring_revive: { Args: { _id: string }; Returns: Json }
       hiring_seed_slots: { Args: never; Returns: number }
       hiring_set_deadline: {
         Args: { _due: string; _id: string; _kind: string; _nudge?: string }
