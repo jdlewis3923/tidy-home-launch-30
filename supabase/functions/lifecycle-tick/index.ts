@@ -82,10 +82,10 @@ Deno.serve(async (req) => {
         marketing: false,
         subject: `[TEST] ${fillTokens(t.subject_en ?? 'Tidy', sample)}`,
         htmlContent: fillTokens(t.body_en, sample),
-        label: `lifecycle-test:${t.key}`,
+        label: `lifecycle-test:${t.key}`, adminChannel: 'test',
       }).catch((e) => ({ sent: false, reason: (e as Error).message } as any));
       out.push({ key: t.key, sent: !!r.sent, reason: r.sent ? undefined : String(r.reason ?? '') });
-      await new Promise((res) => setTimeout(res, 1500));
+      await new Promise((res) => setTimeout(res, 300));
     }
     return new Response(JSON.stringify({ ok: true, total: out.length, sent: out.filter((o) => o.sent).length, out }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
