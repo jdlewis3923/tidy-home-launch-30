@@ -178,6 +178,11 @@ Deno.serve(async (req) => {
           .from('lifecycle_templates').select('*')
           .eq('key', lifecycleTemplatePair(row.template_key)).eq('channel', 'email').eq('active', true).maybeSingle();
         if (emailTpl && contact.email && (row.marketing ? contact.email_marketing && !contact.email_suppressed : true)) {
+          const { data: existingEmail } = await admin.from('message_queue').select('id').eq('contact_id', row.contact_id).eq('template_key', emailTpl.key).eq('channel', 'email').eq('event_id', row.event_id).neq('status', 'cancelled').limit(1);
+          if (existingEmail?.length) {
+            await admin.from('message_queue').update({ status: 'cancelled', error: 'email counterpart already queued' }).eq('id', row.id);
+            continue;
+          }
           await admin.from('message_queue').update({ channel: 'email', template_key: emailTpl.key }).eq('id', row.id);
           row.channel = 'email';
           row.template_key = emailTpl.key;
@@ -277,10 +282,12 @@ Deno.serve(async (req) => {
         const { data: emailTpl } = await admin
           .from('lifecycle_templates').select('key').eq('key', lifecycleTemplatePair(row.template_key)).eq('channel', 'email').eq('active', true).maybeSingle();
         if (emailTpl && contact.email) {
+          const { data: nextSend } = await admin.rpc('lifecycle_next_send_time', { _at: new Date().toISOString() });
           await admin.from('message_queue').insert({
             contact_id: contact.id, stage: row.stage, step_order: row.step_order,
             template_key: emailTpl.key, channel: 'email', marketing: row.marketing,
-            tokens: row.tokens, send_at: new Date().toISOString(),
+            tokens: row.tokens, send_at: nextSend, queue_scope: row.queue_scope, force_shadow: row.force_shadow,
+            event_id: row.event_id, simulation_id: row.simulation_id,
           });
           fellBack = true;
         }

@@ -1,9 +1,12 @@
 # Roadmap
 
 ## Lifecycle event triggers + simulator (Oct 18) — shadow only, unpublished
-- [ ] Wire real lead, Stripe, visit, customer-change and scheduled events through an idempotent queue.
-- [ ] Add admin-only test-contact simulator and compressed full journey with rendered queue timeline.
-- [ ] Verify every event, quiet hours, duplicate protection and orphan-free journey; report inaccessible live-provider checks.
+- [x] Lead/reservation/invoice/visit/rating/move/add-on/referral table events and checkout expiry hooks; daily planner reuses the existing tick; all 50 rules remain shadow.
+- [x] Admin-only simulator, isolated is_test clones, 24-step journey and message timeline; browser verified 61 messages, 0 simulated orphans, replay protection PASS.
+- [x] All 50 registered events queued in database audit; 15 targeted tests passed; preview build OK.
+- [ ] Live SMS delivery and inbound signature checks — blocked by inactive Twilio account; no messages sent during tests.
+- [ ] Full end-to-end producer verification (real Stripe events, completed Pro visits, automatic referral credit) — provider/test-job flows not exercised; simulator checks dispatch, not external producers.
+- [ ] Reconcile legacy senders and rare change-reason mappings before cutting over; existing Zaps/senders remain unchanged in shadow.
 
 ## Email phone appearance and intent artwork (Oct 18)
 - [x] White raster-backed surfaces and website-gold buttons; no grey surfaces. Phone-sized dark browser and stripped-style preview verified.

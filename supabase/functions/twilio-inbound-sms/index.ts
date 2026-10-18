@@ -188,6 +188,9 @@ Deno.serve(async (req) => {
     const fnUrl = Deno.env.get("TWILIO_INBOUND_URL")
       || `${Deno.env.get("SUPABASE_URL")}/functions/v1/twilio-inbound-sms`;
 
+    if (!authToken || !signature) {
+      return new Response('signature required', { status: 403, headers: corsHeaders });
+    }
     if (!SKIP_SIG && authToken) {
       const ok = validateTwilioSignature(authToken, signature, fnUrl, params);
       if (!ok) {
@@ -257,6 +260,10 @@ Deno.serve(async (req) => {
     {
       const kw = body.trim().toUpperCase().replace(/[^A-Z]/g, "");
       if (kw === "STOP" || kw === "START" || kw === "HELP") {
+        if (kw === 'HELP') {
+          // HELP must not clear an existing STOP.
+          return twiml('Tidy Home Concierge: (786) 829-1141 or hello@jointidy.co. Reply START to opt in, STOP to opt out.');
+        }
         const stopped = kw === "STOP";
         await supabase.from("contacts").update({ sms_stopped: stopped }).eq("phone", from).then(() => {}, () => {});
         if (stopped) {
