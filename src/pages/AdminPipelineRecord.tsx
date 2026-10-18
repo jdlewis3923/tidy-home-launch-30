@@ -202,6 +202,9 @@ export default function AdminPipelineRecord() {
         {p.state === "lapsed" && <p className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">Insurance lapsed — no jobs can be assigned. Upload a new COI and update the dates, then reinstate.</p>}
         {p.archived && p.decline_reason && <p className="rounded-md border border-border bg-muted p-3 text-sm">Declined: {p.decline_reason}{p.decline_note ? ` — ${p.decline_note}` : ""}</p>}
 
+        <SimulateReply applicantId={id!} />
+
+
         <section className="rounded-lg border border-border bg-card p-4">
           <h2 className="mb-3 text-base font-bold">What this stage needs</h2>
           <div className="grid gap-3 sm:grid-cols-2">
