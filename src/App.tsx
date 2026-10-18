@@ -139,6 +139,7 @@ const HiringFitReport = lazy(() => import("./pages/admin/HiringFitReport"));
 const HiringScorecard = lazy(() => import("./pages/admin/HiringScorecard"));
 const HiringSlots = lazy(() => import("./pages/admin/HiringSlots"));
 const HiringOutbox = lazy(() => import("./pages/admin/HiringOutbox"));
+const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const HiringContent = lazy(() => import("./pages/admin/HiringContent"));
 const ProLogin = lazy(() => import("./pages/pro/ProLogin.tsx"));
 const ProFirstRun = lazy(() => import("./pages/pro/ProFirstRun.tsx"));
@@ -393,6 +394,7 @@ const App = () => (
                   <Route path="/admin/hiring/interview/:id" element={<HiringScorecard kind="interview" />} />
                   <Route path="/admin/hiring/slots" element={<HiringSlots />} />
                   <Route path="/admin/hiring/outbox" element={<HiringOutbox />} />
+                  <Route path="/admin/messages" element={<AdminMessages />} />
                   <Route path="/admin/hiring/content" element={<HiringContent />} />
                   <Route path="/admin/entitlements" element={<AdminEntitlements />} />
                   {/* Command center — default admin landing view. */}
