@@ -158,9 +158,12 @@ export default function AdminMessages() {
 
         {stages.map(([stage, steps]) => (
           <section key={stage} className="rounded-xl border p-4 space-y-3">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-lg font-bold">{stage}</h2>
               <Badge variant="secondary">{counts[stage] ?? 0} contacts</Badge>
+              {zapsForStage(stage).map((z) => (
+                <Badge key={z.zap_id} variant="outline">Zap replaced: {z.zap_id}</Badge>
+              ))}
             </div>
             {steps.map((s) => {
               const t = tplFor(s.template_key, s.channel);
