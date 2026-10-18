@@ -1205,6 +1205,13 @@
       "when": 1792288471309,
       "tag": "0171_hiring_v5_tick_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 172,
+      "version": "7",
+      "when": 1792288658500,
+      "tag": "0172_hiring_v5_fix_slot_seeder",
+      "breakpoints": true
     }
   ]
 }
