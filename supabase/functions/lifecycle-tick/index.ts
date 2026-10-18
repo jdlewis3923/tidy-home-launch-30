@@ -16,6 +16,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
+import { renderLifecycleEmail } from '../_shared/lifecycle-email.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -81,7 +82,7 @@ Deno.serve(async (req) => {
         to: { email: 'hello@jointidy.co', name: 'Justin (test)' },
         marketing: false,
         subject: `[TEST] ${fillTokens(t.subject_en ?? 'Tidy', sample)}`,
-        htmlContent: fillTokens(t.body_en, sample),
+        htmlContent: renderLifecycleEmail({ rawBody: t.body_en, rawSubject: t.subject_en ?? 'Tidy', tokens: sample, templateKey: t.key }).html,
         label: `lifecycle-test:${t.key}`, adminChannel: 'test',
       }).catch((e) => ({ sent: false, reason: (e as Error).message } as any));
       out.push({ key: t.key, sent: !!r.sent, reason: r.sent ? undefined : String(r.reason ?? '') });
@@ -213,7 +214,12 @@ Deno.serve(async (req) => {
       else sendError = r.error ?? 'sms failed';
     } else {
       try {
-        const html = `${bodyText}${row.marketing ? CAN_SPAM_FOOTER.replace('{unsubscribe_link}', `${SUPABASE_URL}/functions/v1/lifecycle-unsubscribe?c=${contact.id}`) : ''}`;
+        const { html } = renderLifecycleEmail({
+          rawBody: useEs ? tpl.body_es : tpl.body_en,
+          rawSubject: useEs ? (tpl.subject_es ?? tpl.subject_en ?? '') : (tpl.subject_en ?? ''),
+          tokens: { first: contact.first_name ?? '', ...(row.tokens ?? {}) }, templateKey: row.template_key, lang: useEs ? 'es' : 'en',
+          footerHtml: row.marketing ? CAN_SPAM_FOOTER.replace('{unsubscribe_link}', `${SUPABASE_URL}/functions/v1/lifecycle-unsubscribe?c=${contact.id}`) : '',
+        });
         const r = await sendBrevoEmail({
           to: { email: contact.email, name: [contact.first_name, contact.last_name].filter(Boolean).join(' ') || undefined },
           marketing: row.marketing,
