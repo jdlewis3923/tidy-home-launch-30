@@ -40,16 +40,24 @@ export default function AdminMessages() {
   const [liveStages, setLiveStages] = useState("");
   const [editing, setEditing] = useState<Tpl | null>(null);
   const [testKey, setTestKey] = useState("");
+  const [zaps, setZaps] = useState<ZapRow[]>([]);
+  const [shadowCounts, setShadowCounts] = useState<Record<string, number>>({});
 
   const load = async () => {
-    const [{ data: s }, { data: t }, { data: c }, { data: q }, { data: sh }, { data: ls }] = await Promise.all([
+    const [{ data: s }, { data: t }, { data: c }, { data: q }, { data: sh }, { data: ls }, { data: z }, { data: dr }] = await Promise.all([
       supabase.from("lifecycle_sequences").select("*").order("stage").order("step_order"),
       supabase.from("lifecycle_templates").select("*").order("key"),
       supabase.from("contacts").select("lifecycle_stage"),
       supabase.from("message_queue").select("status").gte("created_at", new Date(Date.now() - 30 * 864e5).toISOString()),
       supabase.from("app_settings").select("value").eq("key", "lifecycle_shadow").maybeSingle(),
       supabase.from("app_settings").select("value").eq("key", "lifecycle_live_stages").maybeSingle(),
+      supabase.from("zap_cutover").select("*").order("zap_id"),
+      supabase.from("message_queue").select("stage").eq("status", "dry_run").gte("sent_at", new Date(Date.now() - 7 * 864e5).toISOString()),
     ]);
+    setZaps((z ?? []) as ZapRow[]);
+    const dc: Record<string, number> = {};
+    for (const r of dr ?? []) dc[r.stage] = (dc[r.stage] ?? 0) + 1;
+    setShadowCounts(dc);
     setSeqs((s ?? []) as Seq[]);
     setTpls((t ?? []) as Tpl[]);
     const cc: Record<string, number> = {};
