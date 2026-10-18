@@ -4,7 +4,7 @@ import {
   Activity, Inbox, BarChart3, Heart, FileText, Users, Megaphone, DollarSign,
   Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays, Award, ShieldCheck,
   ClipboardList, Gauge, Star, SlidersHorizontal, GraduationCap, PackageCheck,
-  Shield, Menu, X, ChevronDown, BriefcaseBusiness, Landmark, Settings,
+  Shield, Menu, X, ChevronDown, BriefcaseBusiness, Landmark, Settings, MessageSquare,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import CapacityBanner from "@/components/admin/CapacityBanner";
