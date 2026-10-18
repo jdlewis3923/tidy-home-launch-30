@@ -274,6 +274,21 @@ Deno.serve(async (req) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
+    // ---- SMS dry-run (hiring v5): nothing goes to Twilio; every text is
+    // parked in sms_outbox with status 'dry_run' so the Outbox page shows
+    // exactly what would have been sent. ----
+    const { data: dryRunRow } = await admin.from('app_settings').select('value').eq('key', 'sms_dry_run').maybeSingle();
+    if (dryRunRow?.value === 'on' || dryRunRow?.value === '"on"') {
+      await admin.from('sms_outbox').insert({
+        to_phone_e164, body: body ?? null, content_sid: content_sid ?? null,
+        content_variables: content_variables ?? null, idempotency_key,
+        template_name: tplName, triggered_by: triggered_by ?? null,
+        status: 'dry_run', queued_reason: 'dry_run',
+      });
+      await finish('success', 'dry_run');
+      return jsonResponse({ ok: true, sent: false, dry_run: true }, 200);
+    }
+
     // ---- Owner phone: two digests a day plus urgent alerts only (Part E) ----
     const ownerPhone = Deno.env.get('JUSTIN_ALERT_PHONE') ?? '+17868291141';
     if (!admin_channel && to_phone_e164 === ownerPhone) {

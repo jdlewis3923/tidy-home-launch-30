@@ -14,6 +14,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { createHmac } from "node:crypto";
 import { runSupportAssistant, notifyAdminEmail, type SupportMsg } from "../_shared/support-assistant.ts";
 import { vendorFetch } from '../_shared/http.ts';
+import { handleHiringInbound } from '../_shared/hiring-inbound.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
