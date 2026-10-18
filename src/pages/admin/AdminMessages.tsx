@@ -16,6 +16,11 @@ type Tpl = {
   body_en: string; body_es: string | null; es_reviewed: boolean; active: boolean;
 };
 type ContactRow = { id: string; first_name: string | null; email: string | null; phone: string | null; lifecycle_stage: string };
+type ZapRow = {
+  zap_id: string; name: string; zap_state: string; app_stage: string | null;
+  replacement_note: string | null; status: string; cutover_date: string | null; notes: string | null;
+};
+const ZAP_STATUSES = ["shadow", "ready", "zap_off", "app_live", "retired", "blocked"] as const;
 
 function fmtDelay(mins: number): string {
   if (mins === 0) return "immediately";
