@@ -17,6 +17,10 @@ describe('email intent artwork', () => {
     ['Your contractor agreement', 'contract'],
     ['Your weekly KPI digest', 'report'],
     ['Your Car Care plan', 'car'],
+    ['Your Tidy price', 'billing'],
+    ['One schedule. One bill.', 'billing'],
+    ['A founding spot opened', 'community'],
+    ['res started email', 'home'],
   ])('%s has congruent artwork', (topic, filename) => {
     expect(pickEmailArt(topic).image).toContain(`email%2F${filename}.jpg`);
   });
