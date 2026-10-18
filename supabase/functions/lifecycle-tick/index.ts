@@ -64,6 +64,32 @@ Deno.serve(async (req) => {
   }
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+
+  // Test mode: send every active email template to the owner inbox with sample tokens.
+  if (new URL(req.url).searchParams.get('test') === 'all_emails') {
+    const sample: Record<string, string> = {
+      first: 'Justin', plan: 'Cleaning + Lawn', pay_link: 'https://jointidy.co', link: 'https://jointidy.co',
+      deadline: 'Fri 20 Nov', founding_number: '7', zip_name: 'Pinecrest', zip: '33156', wait_position: '3',
+      spots_left: '5', review_link: 'https://jointidy.co', price_month: '$129', convert_date: 'Mon 16 Nov',
+      launch: 'Mon 23 Nov', service: 'cleaning', size: 'Standard', sqft: '4,200',
+    };
+    const { data: tpls } = await admin.from('lifecycle_templates').select('*').eq('channel', 'email').eq('active', true).order('key');
+    const out: Array<{ key: string; sent: boolean; reason?: string }> = [];
+    for (const t of tpls ?? []) {
+      const r = await sendBrevoEmail({
+        to: { email: 'hello@jointidy.co', name: 'Justin (test)' },
+        marketing: false,
+        subject: `[TEST] ${fillTokens(t.subject_en ?? 'Tidy', sample)}`,
+        htmlContent: fillTokens(t.body_en, sample),
+        label: `lifecycle-test:${t.key}`,
+      }).catch((e) => ({ sent: false, reason: (e as Error).message } as any));
+      out.push({ key: t.key, sent: !!r.sent, reason: r.sent ? undefined : String(r.reason ?? '') });
+      await new Promise((res) => setTimeout(res, 1500));
+    }
+    return new Response(JSON.stringify({ ok: true, total: out.length, sent: out.filter((o) => o.sent).length, out }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
   const shadow = (await getSetting(admin, 'lifecycle_shadow')) !== 'off';
   const liveStages = new Set(
     (await getSetting(admin, 'lifecycle_live_stages')).split(',').map((s) => s.trim()).filter(Boolean),
