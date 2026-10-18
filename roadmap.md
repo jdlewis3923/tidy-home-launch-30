@@ -1,5 +1,10 @@
 # Roadmap
 
+## Lifecycle event triggers + simulator (Oct 18) — shadow only, unpublished
+- [ ] Wire real lead, Stripe, visit, customer-change and scheduled events through an idempotent queue.
+- [ ] Add admin-only test-contact simulator and compressed full journey with rendered queue timeline.
+- [ ] Verify every event, quiet hours, duplicate protection and orphan-free journey; report inaccessible live-provider checks.
+
 ## Email phone appearance and intent artwork (Oct 18)
 - [x] White raster-backed surfaces and website-gold buttons; no grey surfaces. Phone-sized dark browser and stripped-style preview verified.
 - [x] Reviewed all 13 existing banners; corrected team/support/equipment/billing/review/lawn/account intent routing and upgraded all 36 registered hosted templates without changing copy or merge fields.
