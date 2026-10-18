@@ -177,6 +177,7 @@ export function tidyEmailShell(opts: TidyEmailShellOptions): string {
 }
 
 export function ensureTidyEmailBranding(html: string, subject?: string): string {
+  if (isTidyEmailCompliant(html) && html.includes(TIDY_EMAIL_VERSION)) return html;
   if (isTidyEmailCompliant(html)) return brandHostedTemplate(html, subject ?? 'Tidy').html;
   return tidyEmailShell({
     heading: subject,
@@ -223,8 +224,10 @@ export function lightenEmailHtml(html: string): string {
 export function brandHostedTemplate(html: string, heading: string): { html: string; changed: boolean; mode: 'updated' | 'wrapped' | 'unchanged' } {
   const art = pickEmailArt(heading);
   if (isTidyEmailCompliant(html)) {
-    const revised = html.includes(TIDY_EMAIL_VERSION) ? html : html.replace(/<tr data-tidy-hero-photo="true">[\s\S]*?<\/tr>/i, emailHeroArt(art));
-    const protectedHtml = protectEmailAppearance(revised);
+    const revised = html.replace(/<tr data-tidy-hero-photo="true">[\s\S]*?<\/tr>/i, emailHeroArt(art));
+    if (revised === html && html.includes(TIDY_EMAIL_VERSION)) return { html, changed: false, mode: 'unchanged' };
+    const unversioned = revised.replace(/\sdata-tidy-email-version="[^"]*"/g, '');
+    const protectedHtml = protectEmailAppearance(unversioned);
     return { html: protectedHtml, changed: protectedHtml !== html, mode: protectedHtml === html ? 'unchanged' : 'updated' };
   }
 
