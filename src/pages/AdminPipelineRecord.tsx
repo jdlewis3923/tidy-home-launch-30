@@ -357,3 +357,40 @@ export default function AdminPipelineRecord() {
     </main>
   );
 }
+
+/** Dry-run only: simulate an inbound candidate text through the real keyword handler. */
+function SimulateReply({ applicantId }: { applicantId: string }) {
+  const [enabled, setEnabled] = useState(false);
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    (supabase as any).from("app_settings").select("value").eq("key", "sms_dry_run").maybeSingle()
+      .then(({ data }: any) => setEnabled(data?.value === "on"));
+  }, []);
+
+  if (!enabled) return null;
+
+  const send = async () => {
+    if (!text.trim()) return;
+    setSending(true);
+    const { data, error } = await supabase.functions.invoke("hiring-sms-simulate", {
+      body: { applicant_id: applicantId, body: text.trim() },
+    });
+    setSending(false);
+    if (error) toast.error(error.message);
+    else if ((data as any)?.handled === false) toast.error("No candidate matched this phone — logged as unmatched.");
+    else { toast.success("Simulated reply processed."); setText(""); }
+  };
+
+  return (
+    <section className="rounded-lg border border-amber-300 bg-amber-50 p-4">
+      <h2 className="mb-2 text-sm font-bold text-amber-900">Simulate reply (dry-run)</h2>
+      <div className="flex gap-2">
+        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. YES, C, R, 1, 2, or any message" className="bg-white" />
+        <Button size="sm" onClick={send} disabled={sending || !text.trim()}>{sending ? "…" : "Send"}</Button>
+      </div>
+      <p className="mt-1 text-xs text-amber-800">Runs the exact inbound handler. Keywords: C/CONFIRM, R, 1, 2, YES, STOP/START.</p>
+    </section>
+  );
+}
