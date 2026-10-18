@@ -17,14 +17,25 @@ export default function HiringSlots() {
   const [kind, setKind] = useState<"phone" | "in_person">("phone");
   const [when, setWhen] = useState("");
   const [staff, setStaff] = useState("");
+  const [location, setLocation] = useState("");
+  const [locationLoaded, setLocationLoaded] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase.from("hiring_slots").select("*").gte("starts_at", new Date().toISOString()).order("starts_at").limit(200);
     setSlots((data as Slot[]) ?? []);
+    const { data: loc } = await supabase.from("app_settings").select("value").eq("key", "hiring_inperson_location").maybeSingle();
+    setLocation(typeof loc?.value === "string" ? loc.value : "");
+    setLocationLoaded(true);
     setLoading(false);
   }, []);
   useEffect(() => { load(); }, [load]);
+
+  const saveLocation = async () => {
+    const { error } = await supabase.from("app_settings").update({ value: location }).eq("key", "hiring_inperson_location");
+    if (error) toast({ title: error.message, variant: "destructive" });
+    else toast({ title: "Meeting location saved" });
+  };
 
   const add = async () => {
     if (!when) return;
