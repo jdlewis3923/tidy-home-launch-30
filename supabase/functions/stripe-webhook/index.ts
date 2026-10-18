@@ -197,6 +197,17 @@ Deno.serve(async (req) => {
       case 'checkout.session.completed':
         await handleCheckoutCompleted(stripe, supabase, event);
         break;
+      case 'checkout.session.expired':
+      case 'checkout.session.async_payment_failed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const uid = session.metadata?.user_id;
+        if (uid) await supabase.rpc('lifecycle_emit_user', { _user_id: uid, _event: 'CHECKOUT_ABANDONED', _key: `stripe:${event.id}` });
+        else if (session.customer_details?.email || session.customer_email) {
+          const { data: cid } = await supabase.rpc('lifecycle_capture_contact', { _email: session.customer_details?.email ?? session.customer_email, _phone: session.customer_details?.phone ?? null, _first: null, _last: null, _zip: null, _lang: 'en', _sms: false });
+          if (cid) await supabase.rpc('lifecycle_dispatch', { _contact_id: cid, _event: 'CHECKOUT_ABANDONED', _key: `stripe:${event.id}` });
+        }
+        break;
+      }
       case 'customer.subscription.created':
         await handleSubscriptionCreated(stripe, supabase, event);
         break;
@@ -219,7 +230,15 @@ Deno.serve(async (req) => {
         await handlePaymentMethodAttached(stripe, supabase, event);
         break;
       case 'customer.updated':
-        // No-op for now; reserved for future profile sync.
+        // Refresh only card expiry metadata, never the card number.
+        {
+          const customer = event.data.object as Stripe.Customer;
+          const pmId = typeof customer.invoice_settings?.default_payment_method === 'string' ? customer.invoice_settings.default_payment_method : customer.invoice_settings?.default_payment_method?.id;
+          if (pmId) {
+            const pm = await stripe.paymentMethods.retrieve(pmId);
+            if (pm.card) await supabase.from('subscriptions').update({ card_exp_month: pm.card.exp_month, card_exp_year: pm.card.exp_year }).eq('stripe_customer_id', customer.id);
+          }
+        }
         break;
       case 'charge.dispute.created': {
         const d = event.data.object as Stripe.Dispute;
@@ -685,20 +704,20 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Ev
       };
       const cid = typeof inv.charge === 'string' ? inv.charge : inv.charge?.id ?? null;
       const piId = typeof inv.payment_intent === 'string' ? inv.payment_intent : inv.payment_intent?.id ?? null;
-      let card: { brand?: string | null; last4?: string | null } | null | undefined = null;
+      let card: { brand?: string | null; last4?: string | null; exp_month?: number; exp_year?: number } | null | undefined = null;
       if (cid) {
         const charge = await stripe.charges.retrieve(cid);
         card = charge.payment_method_details?.card;
       } else if (piId) {
         const pi = await stripe.paymentIntents.retrieve(piId, { expand: ['latest_charge'] });
         const latest = pi.latest_charge as unknown as
-          { payment_method_details?: { card?: { brand?: string; last4?: string } } } | null;
+          { payment_method_details?: { card?: { brand?: string; last4?: string; exp_month?: number; exp_year?: number } } } | null;
         card = latest?.payment_method_details?.card ?? null;
       }
       if (card?.brand || card?.last4) {
         await supabase
           .from('subscriptions')
-          .update({ card_brand: card.brand ?? null, card_last4: card.last4 ?? null })
+          .update({ card_brand: card.brand ?? null, card_last4: card.last4 ?? null, card_exp_month: card.exp_month ?? null, card_exp_year: card.exp_year ?? null })
           .eq('id', localSubId);
       }
     }
@@ -708,13 +727,7 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, event: Stripe.Ev
 
 
   // HALF 2 — customer referral payout: credit the REFERRER $50 once, on the
-  // referred customer's FIRST paid invoice.
-  await maybeCreditReferrer(stripe, supabase, {
-    invoice,
-    referredUserId: userId,
-    referredStripeCustomerId:
-      typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id ?? null,
-  });
+  // Referral credit is earned after the friend's first completed visit, not payment.
 }
 
 // =====================================================================
@@ -1065,7 +1078,7 @@ async function handlePaymentMethodAttached(stripe: Stripe, supabase: any, event:
     if (pm.card?.brand || pm.card?.last4) {
       await supabase
         .from('subscriptions')
-        .update({ card_brand: pm.card.brand ?? null, card_last4: pm.card.last4 ?? null })
+        .update({ card_brand: pm.card.brand ?? null, card_last4: pm.card.last4 ?? null, card_exp_month: pm.card.exp_month ?? null, card_exp_year: pm.card.exp_year ?? null })
         .eq('id', row.id);
     }
     // Reactivation: if Stripe paused us due to dunning, unpause now that

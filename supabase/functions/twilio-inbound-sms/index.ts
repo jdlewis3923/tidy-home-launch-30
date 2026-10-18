@@ -291,6 +291,11 @@ Deno.serve(async (req) => {
       return false;
     });
     if (hiringHandled) return twiml();
+    const { data: lifecycleReply, error: lifecycleError } = await supabase.rpc('lifecycle_inbound_reply', {
+      _phone: from, _body: body, _sid: messageSid ?? crypto.randomUUID(),
+    });
+    if (lifecycleError) console.error('[twilio-inbound-sms] lifecycle reply failed', lifecycleError.message);
+    if (lifecycleReply?.handled) return twiml();
 
     // Answer Twilio now; finish the assistant work in the background.
     runInBackground(handleConversation(supabase, { convId: convId!, from, body, messageSid }));

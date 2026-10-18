@@ -1,11 +1,14 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'npm:zod@3';
+import { enforceRateLimit } from '../_shared/rate-limit.ts';
 const schema = z.object({ event: z.enum(['RES_STARTED', 'CUSTOM_QUOTE', 'PRICE_SEEN']), email: z.string().trim().toLowerCase().email().max(254), phone: z.string().trim().min(10).max(32).optional(), first_name: z.string().trim().max(80).optional(), zip: z.string().regex(/^\d{5}$/).optional(), lang: z.enum(['en', 'es']).default('en'), sms_service: z.boolean().default(false) });
 Deno.serve(async req => {
  const headers = { ...corsHeaders, 'Content-Type': 'application/json' };
  if (req.method === 'OPTIONS') return new Response('ok', { headers });
  if (req.method !== 'POST') return new Response(JSON.stringify({ error: 'method_not_allowed' }), { status: 405, headers });
+ const limited = await enforceRateLimit(req, { bucket: 'lifecycle-capture', limit: 20, windowSeconds: 300 });
+ if (limited) return limited;
  const parsed = schema.safeParse(await req.json().catch(() => null));
  if (!parsed.success) return new Response(JSON.stringify({ error: parsed.error.flatten() }), { status: 400, headers });
  const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
