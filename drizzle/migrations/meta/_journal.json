@@ -1282,6 +1282,13 @@
       "when": 1792367399855,
       "tag": "0182_lifecycle_schedule_and_simulator",
       "breakpoints": true
+    },
+    {
+      "idx": 183,
+      "version": "7",
+      "when": 1792367632994,
+      "tag": "0183_lifecycle_inbound_and_isolated_simulations",
+      "breakpoints": true
     }
   ]
 }

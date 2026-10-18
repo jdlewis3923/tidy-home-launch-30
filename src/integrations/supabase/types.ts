@@ -9710,6 +9710,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      lifecycle_inbound_reply: {
+        Args: { _body: string; _phone: string; _sid: string }
+        Returns: Json
+      }
       lifecycle_next_send_time: { Args: { _at: string }; Returns: string }
       lifecycle_orphans: {
         Args: never
