@@ -207,6 +207,6 @@ export default function AdminMessages() {
           </div>
         </div>
       )}
-    </AdminChrome>
+    </div>
   );
 }
