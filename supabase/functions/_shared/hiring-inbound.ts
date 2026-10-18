@@ -94,7 +94,7 @@ export async function handleHiringInbound(admin: any, fromRaw: string, body: str
         await admin.from('contractor_pipeline').update({ phone_confirmed_at: new Date().toISOString() }).eq('applicant_id', applicant.id);
       } else {
         await admin.from('contractor_pipeline').update({ inperson_confirmed_at: new Date().toISOString() }).eq('applicant_id', applicant.id);
-        await admin.rpc('hiring_resolve_deadline', { _id: applicant.id, _kind: 'confirm_inperson' }).catch(() => {});
+        await admin.rpc('hiring_resolve_deadline', { _id: applicant.id, _kind: 'confirm_inperson' }).then(() => {}, () => {});
       }
       await logTimeline(admin, applicant.id, `Confirmed ${slot.kind} slot by text`, { slot_id: slot.id });
       await sendSms(from, t(
@@ -146,7 +146,7 @@ export async function handleHiringInbound(admin: any, fromRaw: string, body: str
 
   // ---- 1: weekly check-in "on track" ----
   if (kw === '1') {
-    await admin.rpc('hiring_resolve_deadline', { _id: applicant.id, _kind: 'checkin' }).catch(() => {});
+    await admin.rpc('hiring_resolve_deadline', { _id: applicant.id, _kind: 'checkin' }).then(() => {}, () => {});
     await admin.from('contractor_pipeline').update({ checkin_missed_count: 0 }).eq('applicant_id', applicant.id);
     await logTimeline(admin, applicant.id, 'Weekly check-in: on track', {});
     await sendSms(from, t(`Thanks, ${first}! Glad you're on track. — Tidy`, `¡Gracias, ${first}! Nos alegra que todo vaya bien. — Tidy`), `checkin-ok-${applicant.id}-${Date.now()}`, 'hiring-checkin-ok');
@@ -155,7 +155,7 @@ export async function handleHiringInbound(admin: any, fromRaw: string, body: str
 
   // ---- 2: needs help → URGENT alert ----
   if (kw === '2') {
-    await admin.rpc('hiring_resolve_deadline', { _id: applicant.id, _kind: 'checkin' }).catch(() => {});
+    await admin.rpc('hiring_resolve_deadline', { _id: applicant.id, _kind: 'checkin' }).then(() => {}, () => {});
     await admin.from('admin_alerts').insert({
       alert_type: 'hiring_needs_help', level: 'critical', category: 'hiring',
       title: `${first} needs help`,
