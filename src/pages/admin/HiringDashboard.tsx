@@ -206,12 +206,27 @@ export default function HiringDashboard() {
         )}
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-5">
+      <div className="rounded-xl border border-border bg-card p-5 mb-6">
         <h2 className="font-semibold text-foreground mb-3 flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-amber-600" />Ghost report (auto-archived)</h2>
         {ghost.length === 0 ? <p className="text-sm text-muted-foreground">Nobody auto-archived yet.</p> : (
           <div className="flex flex-wrap gap-2">
             {ghost.map((g) => (
               <span key={g.archive_reason} className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800">{g.archive_reason}: {g.n}</span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-5">
+        <h2 className="font-semibold text-foreground mb-3">Unmatched texts (unknown numbers)</h2>
+        {unmatched.length === 0 ? <p className="text-sm text-muted-foreground">None.</p> : (
+          <div className="grid gap-2">
+            {unmatched.map((u) => (
+              <div key={u.id} className="rounded-lg border border-border px-4 py-2 text-sm">
+                <span className="font-medium text-foreground">{u.from_phone}</span>
+                <span className="text-muted-foreground"> · {new Date(u.created_at).toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
+                <p className="text-foreground mt-1">{u.body}</p>
+              </div>
             ))}
           </div>
         )}
