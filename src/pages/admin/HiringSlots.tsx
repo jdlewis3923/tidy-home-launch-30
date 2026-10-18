@@ -55,6 +55,25 @@ export default function HiringSlots() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <h1 className="text-2xl font-bold text-foreground mb-6">Hiring slots</h1>
+
+      {locationLoaded && !location.trim() ? (
+        <div className="rounded-xl border border-red-300 bg-red-50 text-red-800 px-4 py-3 mb-4 text-sm font-medium">
+          Set the meeting location before booking in-person interviews.
+        </div>
+      ) : null}
+      <div className="rounded-xl border border-border bg-card p-4 mb-6">
+        <label className="text-xs font-medium text-muted-foreground">Meeting location (private — only sent in the in-person confirmation text)</label>
+        <textarea
+          className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[72px]"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Place name, address, parking note"
+        />
+        <div className="mt-2 flex justify-end">
+          <Button size="sm" onClick={saveLocation}>Save location</Button>
+        </div>
+      </div>
+
       <div className="rounded-xl border border-border bg-card p-4 mb-6 flex flex-wrap items-end gap-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground">Kind</label>
