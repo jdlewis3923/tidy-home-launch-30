@@ -1767,6 +1767,72 @@ export type Database = {
         }
         Relationships: []
       }
+      contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          email_marketing: boolean
+          email_suppressed: boolean
+          first_name: string | null
+          id: string
+          is_test: boolean
+          lang: string
+          last_marketing_sent_at: string | null
+          last_name: string | null
+          lifecycle_stage: string
+          phone: string | null
+          sms_marketing: boolean
+          sms_service: boolean
+          sms_stopped: boolean
+          source: string | null
+          src_tag: string | null
+          updated_at: string
+          zip: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          email_marketing?: boolean
+          email_suppressed?: boolean
+          first_name?: string | null
+          id?: string
+          is_test?: boolean
+          lang?: string
+          last_marketing_sent_at?: string | null
+          last_name?: string | null
+          lifecycle_stage?: string
+          phone?: string | null
+          sms_marketing?: boolean
+          sms_service?: boolean
+          sms_stopped?: boolean
+          source?: string | null
+          src_tag?: string | null
+          updated_at?: string
+          zip?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          email_marketing?: boolean
+          email_suppressed?: boolean
+          first_name?: string | null
+          id?: string
+          is_test?: boolean
+          lang?: string
+          last_marketing_sent_at?: string | null
+          last_name?: string | null
+          lifecycle_stage?: string
+          phone?: string | null
+          sms_marketing?: boolean
+          sms_service?: boolean
+          sms_stopped?: boolean
+          source?: string | null
+          src_tag?: string | null
+          updated_at?: string
+          zip?: string | null
+        }
+        Relationships: []
+      }
       contract_signatures: {
         Row: {
           applicant_id: string
@@ -4489,6 +4555,90 @@ export type Database = {
         }
         Relationships: []
       }
+      lifecycle_sequences: {
+        Row: {
+          active: boolean
+          channel: string
+          condition: Json | null
+          created_at: string
+          delay_minutes: number
+          id: string
+          marketing: boolean
+          stage: string
+          step_order: number
+          template_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          channel: string
+          condition?: Json | null
+          created_at?: string
+          delay_minutes?: number
+          id?: string
+          marketing?: boolean
+          stage: string
+          step_order: number
+          template_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          channel?: string
+          condition?: Json | null
+          created_at?: string
+          delay_minutes?: number
+          id?: string
+          marketing?: boolean
+          stage?: string
+          step_order?: number
+          template_key?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lifecycle_templates: {
+        Row: {
+          active: boolean
+          body_en: string
+          body_es: string | null
+          channel: string
+          created_at: string
+          es_reviewed: boolean
+          id: string
+          key: string
+          subject_en: string | null
+          subject_es: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          body_en: string
+          body_es?: string | null
+          channel: string
+          created_at?: string
+          es_reviewed?: boolean
+          id?: string
+          key: string
+          subject_en?: string | null
+          subject_es?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          body_en?: string
+          body_es?: string | null
+          channel?: string
+          created_at?: string
+          es_reviewed?: boolean
+          id?: string
+          key?: string
+          subject_en?: string | null
+          subject_es?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       member_asks: {
         Row: {
           acted_at: string | null
@@ -4575,6 +4725,68 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      message_queue: {
+        Row: {
+          attempts: number
+          channel: string
+          contact_id: string
+          created_at: string
+          error: string | null
+          id: string
+          marketing: boolean
+          provider_id: string | null
+          send_at: string
+          sent_at: string | null
+          stage: string
+          status: string
+          step_order: number | null
+          template_key: string | null
+          tokens: Json
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          contact_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          marketing?: boolean
+          provider_id?: string | null
+          send_at: string
+          sent_at?: string | null
+          stage: string
+          status?: string
+          step_order?: number | null
+          template_key?: string | null
+          tokens?: Json
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          contact_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          marketing?: boolean
+          provider_id?: string | null
+          send_at?: string
+          sent_at?: string | null
+          stage?: string
+          status?: string
+          step_order?: number | null
+          template_key?: string | null
+          tokens?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_preferences: {
         Row: {
@@ -9287,6 +9499,41 @@ export type Database = {
       lawn_size_respond: {
         Args: { _accept: boolean; _token: string }
         Returns: Json
+      }
+      lifecycle_next_send_time: { Args: { _at: string }; Returns: string }
+      lifecycle_orphans: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string | null
+          email_marketing: boolean
+          email_suppressed: boolean
+          first_name: string | null
+          id: string
+          is_test: boolean
+          lang: string
+          last_marketing_sent_at: string | null
+          last_name: string | null
+          lifecycle_stage: string
+          phone: string | null
+          sms_marketing: boolean
+          sms_service: boolean
+          sms_stopped: boolean
+          source: string | null
+          src_tag: string | null
+          updated_at: string
+          zip: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "contacts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      lifecycle_set_stage: {
+        Args: { _contact_id: string; _stage: string; _tokens?: Json }
+        Returns: undefined
       }
       mark_visit_paid_in_full: {
         Args: {

@@ -1247,6 +1247,13 @@
       "when": 1792289848065,
       "tag": "0177_sms_outbox_dry_run_status",
       "breakpoints": true
+    },
+    {
+      "idx": 178,
+      "version": "7",
+      "when": 1792334752860,
+      "tag": "0178_lifecycle_engine",
+      "breakpoints": true
     }
   ]
 }
