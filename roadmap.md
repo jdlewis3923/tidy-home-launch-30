@@ -174,3 +174,16 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Scheduler timing: 15-min 8AM–9PM ET, hourly overnight
 - [x] 13 v5 checks run in dry-run — all pass
 - [ ] Re-run SMS-dependent checks live once Twilio is reactivated
+
+## Lifecycle messaging (replaces Zapier) — in progress, shadow mode ON
+- [x] Engine: contacts, lifecycle_sequences, lifecycle_templates, message_queue; quiet hours; stage-change stop rule; orphans RPC
+- [x] lifecycle-tick sender (15-min cron): consent gates, 1 marketing/day cap, 3x retry, SMS→email fallback, shadow/live stages
+- [x] lifecycle-event stage-transition endpoint; STOP/START/HELP on inbound texts
+- [x] /admin/messages page: stages, copy EN/ES review, toggles, counts, orphans, test mode
+- [x] Seeded: PRICE_SEEN, RES_STARTED, POPUP, RESERVED, CONVERTING, CHECKOUT_ABANDONED, OUT_OF_AREA, FOUNDING_FULL, CUSTOM_QUOTE
+- [ ] Capture wiring: text-me-my-price, reservation field-save, popup stage, src tags, retargeting audience
+- [ ] Section 3 stages: WELCOME, EVERY VISIT, CHANGES BY TIDY, PAYMENT FAILED, REVIEW, REFERRAL, CROSS-SELL, BUNDLE GIFT, MONTHLY EMAIL, CARD EXPIRING, PAUSE, CANCEL REQUEST
+- [ ] Section 4: CANCELLED, COLD
+- [ ] lifecycle-unsubscribe endpoint; orphan check in 9 AM digest
+- [ ] Zapier cutover map + shadow comparison report (needs Zap names from Justin)
+- [ ] Run the 10 DONE-WHEN checks with is_test contacts
