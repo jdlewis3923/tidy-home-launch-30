@@ -21,3 +21,8 @@ Rules:
 - Every email opens with a full-width photographic banner (light, bright Miami scenes) chosen by topic via pickEmailArt(). Photos live in the public social-images bucket under brand/email/.
 - Emoji or icon-circle hero art is retired — user found it cheap. Never use emojis as the focal point or in the service strip.
 - Service strip is text only: CLEANING · LAWN · CAR CARE with gold dots.
+
+## White-only + info tiles (Oct 18)
+- Every surface is locked white against phone dark mode (gradient backgrounds + dark-mode overrides). Never grey/dark on mobile.
+- Emails show a relevant photo plus blue line-icon fact tiles (date, plan, price, area, size) for the details that email mentions. No emojis.
+- Subject is never repeated as a second heading; the main link becomes the gold button.
