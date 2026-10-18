@@ -128,6 +128,7 @@ export function emailButton(url: string, label: string): string {
 /** Image fills also work when a phone client strips CSS gradients.
  * No sender can control the surrounding email application's dark chrome. */
 export function protectEmailAppearance(html: string): string {
+  if (html.includes(TIDY_EMAIL_VERSION)) return html;
   let next = html.replace(/data-tidy-email-version="[^"]*"/g, '').replace(/<html\b/i, `<html ${TIDY_EMAIL_VERSION}`);
   next = next.replace(/<(body|table|td|div|a)\b[^>]*>/gi, (tag, name: string) => {
     const style = tag.match(/\bstyle="([^"]*)"/i)?.[1] ?? '';
@@ -135,12 +136,12 @@ export function protectEmailAppearance(html: string): string {
     if (name.toLowerCase() === 'a' && !gold) return tag;
     const color = gold ? '#f5c518' : '#ffffff';
     const image = gold ? TIDY_EMAIL_GOLD : TIDY_EMAIL_WHITE;
-    const cleaned = style.replace(/background(?:-color|-image)?\s*:[^;]*(?:;|$)/gi, '');
+    const cleaned = style.replace(/background(?:-color|-image)?\s*:[^;]*(?:;|$)/gi, '').replace(/;+$/g, '');
     let result = tag.replace(/\s(?:style|bgcolor|background)="[^"]*"/gi, '');
     if (gold && !/class="[^"]*tgold/.test(result)) {
       result = /class="/.test(result) ? result.replace(/class="/, 'class="tgold ') : result.replace(/>$/, ' class="tgold">');
     }
-    return result.replace(/>$/, ` bgcolor="${color}" background="${image}" style="${cleaned};background-color:${color};background-image:url('${image}');">`);
+    return result.replace(/>$/, ` bgcolor="${color}" background="${image}" style="${cleaned}${cleaned ? ';' : ''}background-color:${color};background-image:url('${image}');">`);
   });
   if (!next.includes('-webkit-text-fill-color')) {
     next = next.includes('</head>') ? next.replace('</head>', `${DARK_LOCK}</head>`) : `${DARK_LOCK}${next}`;

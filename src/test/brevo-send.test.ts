@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 // Deno-style specifier resolves fine under vitest since the helper is plain TS.
 import { sendBrevoEmail } from '../../supabase/functions/_shared/brevo-send';
-import { brandHostedTemplate } from '../../supabase/functions/_shared/email-brand';
+import { brandHostedTemplate, tidyEmailShell } from '../../supabase/functions/_shared/email-brand';
 
 const SEND_URL = 'https://connector-gateway.lovable.dev/brevo/smtp/email';
 const CONTACT_PREFIX = 'https://connector-gateway.lovable.dev/brevo/contacts/';
 const TEMPLATE_PREFIX = 'https://connector-gateway.lovable.dev/brevo/smtp/templates/';
 const OFFICIAL_LOGO = 'https://vcdhpsfuilrrrqfhfsjt.supabase.co/storage/v1/object/public/social-images/brand%2Ftidy-logo-email.png';
-const COMPLIANT_TEMPLATE = `<!doctype html><html data-tidy-email="branded"><body><img src="${OFFICIAL_LOGO}"><table><tr data-tidy-service-strip="true"><td>Services</td></tr><tr data-tidy-hero-photo="true"><td><img src="x"></td></tr></table></body></html>`;
+const COMPLIANT_TEMPLATE = tidyEmailShell({ heading: 'Test', bodyHtml: '<p>Ready</p>' });
 
 function mockFetch(handler: (url: string, init?: RequestInit) => { status: number; body?: unknown } | Error) {
   const calls: string[] = [];
@@ -155,7 +155,7 @@ describe('sendBrevoEmail Tidy branding enforcement', () => {
     });
     const html = String(payload.htmlContent ?? '');
     expect(html).not.toMatch(/background\s*:\s*#0f172a/i);
-    expect(html).not.toMatch(/color\s*:\s*#ffffff/i);
+    expect(html).toContain('style="color:#0f172a">Dark block</p>');
     expect(html).toContain('data-tidy-hero-photo="true"');
     expect(html).toContain('email%2Fvisit.jpg');
   });
