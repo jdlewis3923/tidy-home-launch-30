@@ -29,21 +29,16 @@ const FIELDS: Record<string, Field[]> = {
     { key: "phone", label: "Phone", type: "text" }, { key: "email", label: "Email", type: "text" },
     { key: "apply_submitted_at", label: "Application submitted", type: "datetime" },
   ],
-  screened: [
-    { key: "screening_call_completed_at", label: "Screening call completed", type: "datetime" },
-    { key: "call_notes", label: "Call notes (20+ characters)", type: "textarea" },
+  proof: [
     { key: "preferred_language", label: "Preferred language (every message goes in it)", type: "select", options: ["en", "es"] },
     { key: "experience_level", label: "Experience (recorded, not a gate)", type: "select", options: ["none", "informal", "professional"] },
     { key: "drive_time_minutes", label: "Drive time (minutes, 30 max)", type: "number" },
-    { key: "screening_decision", label: "Decision (use Hold / Decline buttons for those)", type: "select", options: ["advance"] },
+  ],
+  screen_booked: [
+    { key: "screening_call_completed_at", label: "Phone screen completed", type: "datetime" },
+    { key: "call_notes", label: "Call notes (20+ characters)", type: "textarea" },
   ],
   agreement: [{ key: "ica_countersigned_at", label: "ICA countersigned (sends WELCOME-T1)", type: "datetime" }],
-  ins_quote: [
-    { key: "quote_carrier", label: "Quote carrier", type: "text", list: "carriers" },
-    { key: "quote_limit_occurrence", label: "Per-occurrence limit ($)", type: "number" },
-    { key: "quote_limit_aggregate", label: "Aggregate limit ($)", type: "number" },
-    { key: "quote_names_tidy_as_ai", label: "Names Tidy as additional insured", type: "bool" },
-  ],
   background: [{ key: "checkr_result", label: "Checkr result", type: "select", options: ["clear", "consider", "suspended"] }],
   insured: [
     { key: "coi_effective_date", label: "COI effective", type: "date" },
@@ -62,7 +57,7 @@ const FIELDS: Record<string, Field[]> = {
     { key: "reimbursement_m3_paid_at", label: "Reimbursement month 3 paid", type: "datetime" },
   ],
 };
-const ARTIFACTS_FOR: Record<string, string[]> = { agreement: ["ica_signed", "w9"], ins_quote: ["insurance_quote"], background: ["checkr_report"], insured: ["coi"] };
+const ARTIFACTS_FOR: Record<string, string[]> = { agreement: ["ica_signed", "w9"], background: ["checkr_report"], insured: ["coi"] };
 
 const toInput = (f: Field, v: any) => {
   if (v == null) return "";
@@ -229,7 +224,7 @@ export default function AdminPipelineRecord() {
             })}
             <datalist id="carriers"><option value="Hiscox" /><option value="NEXT" /></datalist>
           </div>
-          {p.stage === "screened" && (
+          {p.stage === "proof" && (
             <fieldset className="mt-3 space-y-1 text-sm">
               <legend className="font-semibold">Equipment they say they own (every item must be ticked to advance)</legend>
               {equip.map((it) => {

@@ -1,14 +1,17 @@
 /**
- * Contractor pipeline — the eight fixed stages (equipment proof before any document or dollar). The database owns the rules
- * (pipeline_* functions); this file only names and labels them for screens.
+ * Contractor pipeline — the eleven fixed v5 stages (application → proof → screens → sign at the table).
+ * The database owns the rules (pipeline_* functions); this file only names and labels them for screens.
  * No screen may write a stage: every move goes through supabase.rpc("pipeline_*").
  */
 export const PIPELINE_STAGES = [
+  { key: "invited", label: "Invited", cost: 0 },
   { key: "applied", label: "Applied", cost: 0 },
-  { key: "screened", label: "Screened", cost: 0 },
   { key: "proof", label: "Equipment proof", cost: 0 },
+  { key: "screen_booked", label: "Phone screen booked", cost: 0 },
+  { key: "phone_screened", label: "Phone screened", cost: 0 },
+  { key: "referenced", label: "Referenced", cost: 0 },
+  { key: "interviewed", label: "Interviewed", cost: 0 },
   { key: "agreement", label: "Agreement", cost: 0 },
-  { key: "ins_quote", label: "Insurance quote", cost: 0 },
   { key: "background", label: "Background check", cost: 6449 },
   { key: "insured", label: "Insured", cost: 0 },
   { key: "active", label: "Active", cost: 6000 },

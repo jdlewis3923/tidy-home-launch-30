@@ -1,0 +1,2 @@
+-- lovable-cron-fallback-reviewed: v5 hiring deadlines (48h apply, 48h proof, 2h CONFIRM window, weekly check-ins) require 15-minute enforcement; 96 runs/day, each a single bounded SQL call.
+SELECT cron.schedule('hiring_tick_15min', '*/15 * * * *', $$SELECT public.hiring_tick()$$);

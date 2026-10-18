@@ -81,13 +81,13 @@ Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   const auth = await requireServiceOrAdmin(req);
   if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
-  const { applicant_id, event, slot } = await req.json().catch(() => ({}));
+  const { applicant_id, event, slot, step } = await req.json().catch(() => ({}));
   if (typeof applicant_id !== 'string' || typeof event !== 'string') return jsonResponse({ error: 'applicant_id and event required' }, 400);
 
   const { data: p } = await admin.from('contractor_pipeline').select('*').eq('applicant_id', applicant_id).maybeSingle();
   const { data: a } = await admin.from('applicants').select('id, first_name, email, phone, contract_token').eq('id', applicant_id).maybeSingle();
   if (!p || !a) return jsonResponse({ error: 'not_found' }, 404);
-  if (p.archived) return jsonResponse({ ok: true, skipped: 'archived' });
+  if (p.archived && event !== 'close_out') return jsonResponse({ ok: true, skipped: 'archived' });
   const lang: Lang = p.preferred_language === 'es' ? 'es' : 'en';
   const first = (a.first_name ?? '').trim() || (lang === 'es' ? 'hola' : 'there');
   const role = ROLE[p.service ?? 'cleaning'] ?? ROLE.cleaning;
@@ -97,9 +97,15 @@ Deno.serve(async (req) => {
   const stageOk: Record<string, boolean> = {
     proof_invite: p.stage === 'proof', proof_link: p.stage === 'proof', proof_reminder: p.stage === 'proof', proof_rejected: p.stage === 'proof',
     agreement_docs: p.stage === 'agreement' && !!p.proof_approved_at,
-    insurance_instructions: !!p.proof_approved_at && ['agreement', 'ins_quote'].includes(p.stage),
+    insurance_instructions: !!p.proof_approved_at && ['agreement', 'background'].includes(p.stage),
     cleared: p.stage === 'background' && p.checkr_result === 'clear' && !!p.proof_approved_at,
     activation: p.stage === 'active' && !!p.proof_approved_at,
+    // v5 events
+    nudge: !p.archived && ['invited', 'applied', 'proof'].includes(p.stage),
+    book_phone: p.stage === 'proof',
+    slot_reminder: !p.archived && ['proof', 'screen_booked', 'phone_screened', 'referenced'].includes(p.stage),
+    weekly_checkin: !p.archived && ['agreement', 'background', 'insured'].includes(p.stage),
+    close_out: p.archived === true,
   };
   if (!(event in stageOk)) return jsonResponse({ error: 'unknown_event' }, 400);
   if (!stageOk[event]) {
@@ -174,6 +180,62 @@ Deno.serve(async (req) => {
       ? `Ya estás aprobado. Compra la póliza que cotizaste y sube el certificado: ${link}.`
       : `You're cleared. Buy the policy you quoted and upload the certificate: ${link}.`;
     subject = lang === 'es' ? 'Ya estás aprobado: sube tu certificado de seguro' : "You're cleared: upload your insurance certificate";
+    html = `<p>${esc(sms)}</p>`;
+  } else if (event === 'nudge') {
+    const stepName = String(step ?? '');
+    const resumeUrl = p.apply_resume_token ? `${SITE}/apply?resume=${p.apply_resume_token}` : `${SITE}/apply`;
+    const bookUrl = p.apply_resume_token ? `${SITE}/pro/book/${p.apply_resume_token}` : null;
+    if (stepName === 'apply') {
+      sms = lang === 'es'
+        ? `Hola ${first}, soy Justin de Tidy. Tu solicitud está empezada; termínala aquí cuando puedas (unos 10 minutos): ${resumeUrl}`
+        : `Hi ${first}, it's Justin from Tidy. Your application is started; finish it here when you can (about 10 minutes): ${resumeUrl}`;
+      subject = lang === 'es' ? 'Termina tu solicitud' : 'Finish your application';
+    } else if (stepName === 'proof') {
+      sms = lang === 'es'
+        ? `Hola ${first}, soy Justin de Tidy. Recordatorio: muéstranos tu equipo aquí cuando puedas (unos 10 minutos): ${proofUrl ?? resumeUrl}`
+        : `Hi ${first}, it's Justin from Tidy. Reminder: show us your equipment here when you can (about 10 minutes): ${proofUrl ?? resumeUrl}`;
+      subject = lang === 'es' ? 'Recordatorio: muéstranos tu equipo' : 'Reminder: show us your equipment';
+    } else {
+      sms = lang === 'es'
+        ? `Hola ${first}, soy Justin de Tidy. Elige la hora de tu llamada de 15 minutos aquí: ${bookUrl ?? resumeUrl}`
+        : `Hi ${first}, it's Justin from Tidy. Pick a time for your 15-minute call here: ${bookUrl ?? resumeUrl}`;
+      subject = lang === 'es' ? 'Elige la hora de tu llamada' : 'Pick a time for your call';
+    }
+    html = `<p>${esc(sms)}</p>`;
+  } else if (event === 'book_phone') {
+    const bookUrl = p.apply_resume_token ? `${SITE}/pro/book/${p.apply_resume_token}` : `${SITE}/apply`;
+    sms = lang === 'es'
+      ? `Hola ${first}, soy Justin de Tidy. Recibimos tu equipo. Elige la hora de tu llamada de 15 minutos (tardes entre semana o sábado por la mañana): ${bookUrl}`
+      : `Hi ${first}, it's Justin from Tidy. We got your equipment. Pick a time for your 15-minute call (weekday evenings or Saturday morning): ${bookUrl}`;
+    subject = lang === 'es' ? 'Elige la hora de tu llamada de 15 minutos' : 'Pick a time for your 15-minute call';
+    html = `<p>${esc(sms)}</p>`;
+  } else if (event === 'slot_reminder') {
+    const { data: s } = await admin.from('hiring_slots').select('kind, starts_at').eq('id', slot ?? '').maybeSingle();
+    const when = s?.starts_at ? new Date(s.starts_at).toLocaleString(lang === 'es' ? 'es-US' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' }) : '';
+    if (s?.kind === 'in_person') {
+      sms = lang === 'es'
+        ? `Hola ${first}, soy Justin de Tidy. Te veo ${when}. La dirección te llega por separado. Responde CONFIRM para confirmar.`
+        : `Hi ${first}, it's Justin from Tidy. I'll see you ${when}. The address comes separately. Reply CONFIRM to confirm.`;
+      subject = lang === 'es' ? 'Tu entrevista en persona' : 'Your in-person interview';
+    } else {
+      sms = lang === 'es'
+        ? `Hola ${first}, soy Justin de Tidy. Te llamo ${when}. Son 15 minutos. Si necesitas cambiar la hora, responde a este mensaje.`
+        : `Hi ${first}, it's Justin from Tidy. I'll call you ${when}. It's 15 minutes. If you need to move it, reply to this message.`;
+      subject = lang === 'es' ? 'Tu llamada con Tidy' : 'Your call with Tidy';
+    }
+    html = `<p>${esc(sms)}</p>`;
+  } else if (event === 'weekly_checkin') {
+    const replyUrl = p.apply_resume_token ? `${SITE}/pro/book/${p.apply_resume_token}` : `${SITE}/apply`;
+    sms = lang === 'es'
+      ? `Hola ${first}, soy Justin de Tidy. ¿Sigues listo para empezar? Responde SÍ o toca aquí: ${replyUrl}`
+      : `Hi ${first}, it's Justin from Tidy. Still on for your start? Reply YES or tap here: ${replyUrl}`;
+    subject = lang === 'es' ? '¿Sigues listo para empezar?' : 'Still on for your start?';
+    html = `<p>${esc(sms)}</p>`;
+  } else if (event === 'close_out') {
+    sms = lang === 'es'
+      ? `Hola ${first}, soy Justin de Tidy. Como no tuvimos noticias tuyas, cerramos tu solicitud por ahora. Si quieres retomarla, responde YES y la reabrimos.`
+      : `Hi ${first}, it's Justin from Tidy. Since we didn't hear back, we've closed your application for now. If you want to pick it back up, reply YES and we'll reopen it.`;
+    subject = lang === 'es' ? 'Cerramos tu solicitud (puedes reabrirla)' : 'We closed your application (you can reopen it)';
     html = `<p>${esc(sms)}</p>`;
   } else if (event === 'activation') {
     const five = await loadFive(admin, applicant_id, { mintTokens: true }).catch(() => null);

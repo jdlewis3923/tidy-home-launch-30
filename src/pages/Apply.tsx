@@ -1,644 +1,290 @@
 /**
- * Public Application Form — /apply
+ * Public Application — /apply (hiring v5)
  *
- * Tidy-branded, mobile-first contractor intake.
+ * 12-section slider application, EN/ES, autosave + resume token.
+ * Questions come from the question_bank table (admin-editable).
+ * Sliders stay unset until touched. Knockouts archive on submit.
  */
-import { useState } from "react";
-import { useLaunchConfig } from "@/hooks/useLaunchConfig";
-import { CAR_PRO_ROUTE_LINE, fmtLaunchDate } from "@/lib/launch";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { toast } from "@/hooks/use-toast";
-import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  Loader2,
-  CheckCircle2,
-  ArrowLeft,
-  Sparkles,
-  DollarSign,
-  CalendarClock,
-  ShieldCheck,
-  MapPin,
-} from "lucide-react";
+import { Loader2, CheckCircle2, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import TidyLogo from "@/components/TidyLogo";
 import SeoHead from "@/components/landing/SeoHead";
 
-type ServiceChoice = "cleaning" | "lawn" | "detail" | "multiple";
-type ExpBucket = "1-2" | "3-5" | "5+";
-type YesNo = "yes" | "no";
-
-type Form = {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  zip: string;
-  service: ServiceChoice | "";
-  experience: ExpBucket | "";
-  has_vehicle: YesNo | "";
-  has_supplies: YesNo | "";
-  work_authorized: YesNo | "";
-  bilingual: YesNo | "";
-  insurance_willing: YesNo | "";
-  fl_license: YesNo | "";
-  license_expiry: string;
-  description: string;
+type Q = {
+  id: string; key: string; section: number; type: string; label: string;
+  anchors: string | null; core: boolean; weight: number; required: boolean;
+  options: { value: string; en: string; es: string }[] | null; knockout: boolean; sort: number;
 };
+type Faq = { q: string; a: string; needs_justin: boolean };
+type Answers = Record<string, unknown>;
 
-const EMPTY: Form = {
-  first_name: "",
-  last_name: "",
-  email: "",
-  phone: "",
-  zip: "",
-  service: "",
-  experience: "",
-  has_vehicle: "",
-  has_supplies: "",
-  work_authorized: "",
-  bilingual: "",
-  insurance_willing: "",
-  fl_license: "",
-  license_expiry: "",
-  description: "",
+const SECTIONS_EN = ["About you", "Quick check", "Availability", "Work history", "Your skills", "How you work", "Showing up", "What would you do?", "Your equipment", "What you want", "A reference", "Review & send"];
+const SECTIONS_ES = ["Sobre ti", "Chequeo rápido", "Disponibilidad", "Historial de trabajo", "Tus habilidades", "Cómo trabajas", "Puntualidad", "¿Qué harías?", "Tu equipo", "Lo que quieres", "Una referencia", "Revisar y enviar"];
+
+const SKILL_ANCHORS = {
+  en: ["Never done it", "Done it a few times", "Comfortable", "Very good", "Could teach it"],
+  es: ["Nunca lo he hecho", "Lo he hecho algunas veces", "Me siento cómodo", "Muy bueno", "Podría enseñarlo"],
 };
-
-const PERKS = [
-  { icon: DollarSign, title: "Weekly direct deposit", body: "Paid every Friday — no chasing invoices." },
-  { icon: CalendarClock, title: "Predictable routes", body: "Recurring subscribers in 33156 / 33183 / 33186." },
-  { icon: ShieldCheck, title: "We handle the admin", body: "Booking, billing, and customer support — all on us." },
-  { icon: Sparkles, title: "Grow with the brand", body: "" },
-];
-
-const EXP_TO_YEARS: Record<ExpBucket, number> = { "1-2": 2, "3-5": 5, "5+": 6 };
+const STYLE_ANCHORS = {
+  en: ["Not me", "Rarely", "Sometimes", "Usually", "Always me"],
+  es: ["No soy yo", "Casi nunca", "A veces", "Casi siempre", "Siempre yo"],
+};
 
 export default function Apply() {
-  const { t, language } = useLanguage();
-  const launchCfg = useLaunchConfig();
-  const [form, setForm] = useState<Form>(EMPTY);
-  const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
-  const [declined, setDeclined] = useState<string | null>(null);
+  const [params] = useSearchParams();
+  const [token, setToken] = useState<string | null>(params.get("resume"));
+  const [service, setService] = useState<string>("");
+  const [lang, setLang] = useState<"en" | "es">("en");
+  const [questions, setQuestions] = useState<Q[]>([]);
+  const [answers, setAnswers] = useState<Answers>({});
+  const [faq, setFaq] = useState<Faq[]>([]);
+  const [section, setSection] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [knockout, setKnockout] = useState(false);
+  const [missing, setMissing] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const saveQueue = useRef<Record<string, unknown>>({});
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const t = useCallback((en: string, es: string) => (lang === "es" ? es : en), [lang]);
 
-  function YesNoBlock({
-    label,
-    value,
-    onChange,
-    name,
-  }: {
-    label: string;
-    value: string;
-    onChange: (v: YesNo) => void;
-    name: string;
-  }) {
-    return (
-      <RadioBlock
-        label={label}
-        value={value}
-        onChange={(v) => onChange(v as YesNo)}
-        options={[
-          { v: "yes", l: t("Yes") },
-          { v: "no", l: t("No") },
-        ]}
-        name={name}
-        inline
-      />
-    );
-  }
+  const call = useCallback(async (payload: Record<string, unknown>) => {
+    const { data, error: err } = await supabase.functions.invoke("hiring-candidate", { body: payload });
+    if (err) throw err;
+    return data;
+  }, []);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.service) {
-      toast({ title: t("Please pick a role"), variant: "destructive" });
-      return;
-    }
-    if (!form.experience) {
-      toast({ title: t("Please pick experience range"), variant: "destructive" });
-      return;
-    }
-    if (!form.has_vehicle) {
-      toast({ title: t("Reliable transportation?"), variant: "destructive" });
-      return;
-    }
-    if (!form.has_supplies) {
-      toast({ title: t("Professional equipment?"), variant: "destructive" });
-      return;
-    }
-    if (!form.work_authorized) {
-      toast({ title: t("US work authorization?"), variant: "destructive" });
-      return;
-    }
-    if (!form.bilingual) {
-      toast({ title: t("Bilingual English + Spanish?"), variant: "destructive" });
-      return;
-    }
-    if (!form.insurance_willing) {
-      toast({ title: t("Willing to carry GL insurance?"), variant: "destructive" });
-      return;
-    }
-    if (!form.fl_license) {
-      toast({ title: t("Valid Florida driver's license?"), variant: "destructive" });
-      return;
-    }
-    if (form.fl_license === "yes" && !form.license_expiry) {
-      toast({ title: t("Driver's license expiry date?"), variant: "destructive" });
-      return;
-    }
+  // Load an in-progress application.
+  useEffect(() => {
+    if (!token) return;
+    setLoading(true);
+    call({ action: "load", token })
+      .then((d) => {
+        if (d?.error) { setError(d.error); return; }
+        setLang(d.lang === "es" ? "es" : "en");
+        setService(d.service);
+        setQuestions(d.questions ?? []);
+        setAnswers(d.answers ?? {});
+        setFaq(d.faq ?? []);
+        if (d.submitted) setSubmitted(true);
+      })
+      .catch(() => setError("load_failed"))
+      .finally(() => setLoading(false));
+  }, [token, call]);
 
-    // Hard disqualifiers — do not create a candidate record.
-    if (form.bilingual === "no") {
-      setDeclined(t("This role requires fluent English and Spanish to communicate with our Miami customers."));
-      return;
-    }
-    if (form.insurance_willing === "no") {
-      setDeclined(t("Every Tidy Pro must carry a $1M/$2M general liability policy naming Tidy as Additional Insured before the first visit."));
-      return;
-    }
-    if (form.fl_license === "no") {
-      setDeclined(t("A valid Florida driver's license is required to drive between appointments."));
-      return;
-    }
-
-    setSubmitting(true);
+  const start = async (svc: string) => {
+    setStarting(true);
     try {
-      const payload = {
-        preferred_language: language === "es" ? "es" : "en",
-        first_name: form.first_name.trim(),
-        last_name: form.last_name.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim() || undefined,
-        zip: form.zip.trim() || undefined,
-        service: form.service,
-        experience_bucket: form.experience,
-        experience_years: EXP_TO_YEARS[form.experience as ExpBucket],
-        has_vehicle: form.has_vehicle === "yes",
-        has_supplies: form.has_supplies === "yes",
-        work_authorized: form.work_authorized === "yes",
-        bilingual: form.bilingual === "yes",
-        insurance_willing: form.insurance_willing === "yes",
-        fl_license: form.fl_license === "yes",
-        license_expiry: form.license_expiry || undefined,
-        description: form.description.trim() || undefined,
-      };
-      const { data, error } = await supabase.functions.invoke("submit-application", { body: payload });
-      if (error) throw error;
-      if (data?.declined) {
-        const reasons: Record<string, string> = {
-          bilingual_required: t("This role requires fluent English and Spanish to communicate with our Miami customers."),
-          insurance_required: t("Every Tidy Pro must carry a $1M/$2M general liability policy naming Tidy as Additional Insured before the first visit."),
-          fl_license_required: t("A valid Florida driver's license is required to drive between appointments."),
-        };
-        setDeclined(reasons[data.reason] ?? t("Not a fit at this time"));
-        return;
-      }
-      setDone(true);
-    } catch (err: any) {
-      console.error(err);
-      toast({
-        title: t("Could not submit"),
-        description: err?.message ?? t("Please try again"),
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitting(false);
-    }
+      const d = await call({ action: "start", service: svc, lang });
+      if (d?.token) {
+        setToken(d.token);
+        window.history.replaceState(null, "", `/apply?resume=${d.token}`);
+      } else setError(d?.error ?? "start_failed");
+    } catch { setError("start_failed"); }
+    setStarting(false);
   };
 
-  if (declined) {
-    return (
-      <main className="min-h-screen bg-navy-deep relative overflow-hidden flex items-center justify-center p-6">
-        <Helmet>
-          <title>{t("Not a fit at this time | Tidy")}</title>
-        </Helmet>
-        <div
-          className="absolute inset-0 opacity-60 pointer-events-none"
-          style={{ background: "radial-gradient(60% 50% at 50% 0%, hsl(var(--primary)/0.25), transparent 70%)" }}
-        />
-        <div
-          className="absolute inset-0 opacity-40 pointer-events-none"
-          style={{ background: "radial-gradient(40% 40% at 80% 80%, hsl(var(--gold)/0.2), transparent 70%)" }}
-        />
-        <div className="relative max-w-lg w-full rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-10 text-center shadow-2xl animate-calm-rise">
-          <div className="mx-auto h-16 w-16 rounded-full bg-white/10 ring-1 ring-white/30 flex items-center justify-center">
-            <ShieldCheck className="h-9 w-9 text-white/80" />
-          </div>
-          <h1 className="mt-6 font-display text-3xl font-black text-white tracking-tight">
-            {t("Not a fit at this time")}
-          </h1>
-          <p className="mt-3 text-white/70 leading-relaxed">{declined}</p>
-          <p className="mt-4 text-white/50 text-sm">
-            {t("If your situation changes, feel free to apply again.")}
-          </p>
-          <Link
-            to="/"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white/10 text-white font-bold px-6 py-3 hover:bg-white/20 transition ring-1 ring-white/20"
-          >
-            <ArrowLeft className="h-4 w-4" /> {t("Back to Tidy")}
-          </Link>
-        </div>
-      </main>
-    );
-  }
+  // Autosave: debounce 800ms per question.
+  const answer = useCallback((q: Q, value: unknown) => {
+    setAnswers((prev) => ({ ...prev, [q.id]: value }));
+    saveQueue.current[q.id] = value;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      const batch = { ...saveQueue.current };
+      saveQueue.current = {};
+      for (const [qid, v] of Object.entries(batch)) {
+        call({ action: "answer", token, question_id: qid, value: v }).catch(() => undefined);
+      }
+    }, 800);
+  }, [call, token]);
 
-  if (done) {
-    return (
-      <main className="min-h-screen bg-navy-deep relative overflow-hidden flex items-center justify-center p-6">
-        <Helmet>
-          <title>{t("Application received | Tidy")}</title>
-        </Helmet>
-        <div
-          className="absolute inset-0 opacity-60 pointer-events-none"
-          style={{ background: "radial-gradient(60% 50% at 50% 0%, hsl(var(--primary)/0.25), transparent 70%)" }}
-        />
-        <div
-          className="absolute inset-0 opacity-40 pointer-events-none"
-          style={{ background: "radial-gradient(40% 40% at 80% 80%, hsl(var(--gold)/0.2), transparent 70%)" }}
-        />
-        <div className="relative max-w-lg w-full rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/10 p-10 text-center shadow-2xl animate-calm-rise">
-          <div className="mx-auto h-16 w-16 rounded-full bg-gold/15 ring-1 ring-gold/40 flex items-center justify-center">
-            <CheckCircle2 className="h-9 w-9 text-gold" />
-          </div>
-          <h1 className="mt-6 font-display text-3xl font-black text-white tracking-tight">
-            {t("Application received")}
-          </h1>
-          <p className="mt-3 text-white/70 leading-relaxed">
-            {t("Thanks for applying. We'll review and be in touch within")}{" "}
-            <span className="text-white font-semibold">{t("2–3 business days")}</span>.
-          </p>
-          <Link
-            to="/"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-gold text-navy-deep font-bold px-6 py-3 hover:brightness-110 transition"
-          >
-            <ArrowLeft className="h-4 w-4" /> {t("Back to Tidy")}
-          </Link>
-        </div>
-      </main>
-    );
-  }
+  const submit = async () => {
+    setLoading(true); setMissing([]);
+    try {
+      const d = await call({ action: "submit", token });
+      if (d?.ok) { setSubmitted(true); setKnockout(!!d.knockout); }
+      else if (d?.error === "missing") { setMissing(d.keys ?? []); setSection(1); }
+      else setError(d?.error ?? "submit_failed");
+    } catch { setError("submit_failed"); }
+    setLoading(false);
+  };
 
-  return (
-    <main className="min-h-screen bg-navy-deep relative overflow-hidden">
-      <SeoHead
-        title={t("Careers at Tidy — Apply to join Miami's home-service crew")}
-        description={t("Join Tidy's contractor network in Kendall and Pinecrest. Cleaning, lawn care, and Car Care pros — weekly pay, predictable routes.")}
-        canonical="https://jointidy.co/apply"
-      />
+  const bySection = useMemo(() => {
+    const m = new Map<number, Q[]>();
+    for (const q of questions) {
+      const arr = m.get(q.section) ?? [];
+      arr.push(q);
+      m.set(q.section, arr);
+    }
+    return m;
+  }, [questions]);
 
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
-          style={{ background: "radial-gradient(circle, hsl(var(--primary)/0.55), transparent 60%)" }}
-        />
-        <div
-          className="absolute -bottom-40 -right-32 h-[480px] w-[480px] rounded-full opacity-30 blur-3xl"
-          style={{ background: "radial-gradient(circle, hsl(var(--gold)/0.55), transparent 60%)" }}
-        />
+  const sectionNames = lang === "es" ? SECTIONS_ES : SECTIONS_EN;
+  const current = bySection.get(section) ?? [];
+  const totalSections = Math.max(1, ...Array.from(bySection.keys()), 12);
+
+  const renderQuestion = (q: Q) => {
+    const v = answers[q.id];
+    const isMissing = missing.includes(q.key);
+    const wrap = (children: React.ReactNode) => (
+      <div key={q.id} className={`rounded-xl border p-4 ${isMissing ? "border-destructive" : "border-border"} bg-card`}>
+        <p className="font-medium text-foreground mb-3">{q.label}{q.required && q.type !== "slider" ? <span className="text-destructive"> *</span> : null}</p>
+        {children}
       </div>
+    );
 
-      <header className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
-        <Link
-          to="/"
-          className="flex items-center gap-2 text-white/80 hover:text-white transition text-sm font-semibold"
-        >
-          <ArrowLeft className="h-4 w-4" /> {t("Back to site")}
-        </Link>
-        <Link to="/" aria-label="Tidy home">
-          <TidyLogo size="sm" />
-        </Link>
-      </header>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-20 pt-6 grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-start">
-        <section className="text-white animate-calm-rise">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs font-semibold tracking-wide uppercase text-white/80 ring-1 ring-white/15">
-            <Sparkles className="h-3.5 w-3.5 text-gold" /> {t("Now hiring · Miami")}
-          </span>
-          <h1 className="mt-5 font-display text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[0.98] text-balance">
-            {t("Join our team —")}
-            <span className="block bg-gradient-to-r from-gold via-gold to-amber-200 bg-clip-text text-transparent">
-              {t("we bring the customers.")}
-            </span>
-          </h1>
-          <p className="mt-5 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed">
-            {t(
-              "Tidy is Miami's subscription home-service brand. We're hiring background-checked cleaners, lawn pros, and detailers in Kendall and Pinecrest.",
-            )}
-          </p>
-          {launchCfg && (
-            <p className="mt-3 text-sm font-semibold text-white/80" data-testid="apply-launch-dates">
-              {launchCfg.car?.first_visit_date
-                ? (language === "es"
-                  ? `Primeras visitas: limpieza y jardín el ${fmtLaunchDate(launchCfg.cleaning?.first_visit_date, "es")}; cuidado del auto el ${fmtLaunchDate(launchCfg.car?.first_visit_date, "es")}.`
-                  : `First visits: cleaning and lawn ${fmtLaunchDate(launchCfg.cleaning?.first_visit_date)}; car care ${fmtLaunchDate(launchCfg.car?.first_visit_date)}.`)
-                : (language === "es"
-                  ? `Primeras visitas: limpieza y jardín el ${fmtLaunchDate(launchCfg.cleaning?.first_visit_date, "es")}. Pros de cuidado del auto: ${CAR_PRO_ROUTE_LINE.es}`
-                  : `First visits: cleaning and lawn ${fmtLaunchDate(launchCfg.cleaning?.first_visit_date)}. Car care Pros: ${CAR_PRO_ROUTE_LINE.en}`)}
-            </p>
-          )}
-
-          <div className="mt-10 grid sm:grid-cols-2 gap-4">
-            {PERKS.map(({ icon: Icon, title, body }) => (
-              <div
-                key={title}
-                className="rounded-xl bg-white/[0.04] backdrop-blur border border-white/10 p-5 hover:bg-white/[0.07] hover:border-white/20 transition"
-              >
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 ring-1 ring-primary/30 flex items-center justify-center">
-                  <Icon className="h-5 w-5 text-primary-foreground" />
-                </div>
-                <h3 className="mt-3 font-display text-base font-bold text-white">{t(title)}</h3>
-                {body ? (
-                  <p className="mt-1 text-sm text-white/60 leading-relaxed">{t(body)}</p>
-                ) : null}
-              </div>
+    if (q.type === "slider") {
+      const anchors = q.anchors === "style" ? STYLE_ANCHORS[lang] : SKILL_ANCHORS[lang];
+      const num = typeof v === "number" ? v : null;
+      return wrap(
+        <div>
+          <div className="flex justify-between gap-1">
+            {[2, 4, 6, 8, 10].map((n, i) => (
+              <button key={n} type="button" onClick={() => answer(q, n)}
+                className={`flex-1 rounded-lg border py-3 text-sm font-semibold transition-colors ${num === n ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground"}`}>
+                {n / 2}
+              </button>
             ))}
-</div>
-
-          <div className="mt-10 rounded-xl bg-white/[0.04] backdrop-blur border border-white/10 p-5">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-gold" />
-              <h2 className="font-display text-base font-bold text-white">{t("Insurance requirement")}</h2>
-            </div>
-            <p className="mt-3 text-sm text-white/70 leading-relaxed">
-              {t(
-                "Every Tidy Pro carries their own commercial general liability policy at $1,000,000 per occurrence / $2,000,000 aggregate, naming Tidy Home Concierge LLC as Additional Insured. It must be active and verified before your first visit.",
-              )}
-            </p>
-            <p className="mt-2 text-sm text-white/70 leading-relaxed">
-              {t(
-                "No LLC is required and most solo operators pay about $25 to $60 a month; Hiscox and NEXT Insurance are the two carriers our Pros use.",
-              )}
-            </p>
-            <div className="mt-3 rounded-xl bg-gold/10 ring-1 ring-gold/30 p-4">
-              <p className="text-sm text-white/85 leading-relaxed">
-                <span className="font-bold text-gold">{t("We reimburse up to $50 a month")}</span>{" "}
-                {t(
-                  "toward your premium for the first 3 months — paid with your Friday deposit once your certificate is verified.",
-                )}
-              </p>
-            </div>
           </div>
-
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/55">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-gold" /> 33156 · 33183 · 33186
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-gold" /> {t("Background check on every hire")}
-            </span>
+          <div className="flex justify-between gap-1 mt-1">
+            {anchors.map((a, i) => (
+              <span key={i} className={`flex-1 text-center text-[10px] leading-tight ${num === (i + 1) * 2 ? "text-primary font-semibold" : "text-muted-foreground"}`}>{a}</span>
+            ))}
           </div>
-        </section>
+        </div>
+      );
+    }
+    if (q.type === "yesno") {
+      return wrap(
+        <div className="flex gap-2">
+          {[true, false].map((b) => (
+            <button key={String(b)} type="button" onClick={() => answer(q, b)}
+              className={`flex-1 rounded-lg border py-3 font-semibold ${v === b ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground"}`}>
+              {b ? t("Yes", "Sí") : t("No", "No")}
+            </button>
+          ))}
+        </div>
+      );
+    }
+    if (q.type === "choice" && q.options) {
+      return wrap(
+        <div className="grid gap-2">
+          {q.options.map((o) => (
+            <button key={o.value} type="button" onClick={() => answer(q, o.value)}
+              className={`rounded-lg border px-4 py-3 text-left ${v === o.value ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-foreground"}`}>
+              {lang === "es" ? o.es : o.en}
+            </button>
+          ))}
+        </div>
+      );
+    }
+    if (q.type === "number") {
+      return wrap(<Input type="number" inputMode="numeric" value={typeof v === "number" ? String(v) : ""} onChange={(e) => answer(q, e.target.value === "" ? null : Number(e.target.value))} />);
+    }
+    if (q.type === "date") {
+      return wrap(<Input type="date" value={typeof v === "string" ? v : ""} onChange={(e) => answer(q, e.target.value)} />);
+    }
+    if (q.type === "grid") {
+      // Free-form grid (work history, availability blocks) — JSON text area for now.
+      return wrap(<Textarea rows={4} value={typeof v === "string" ? v : ""} placeholder={t("One per line", "Uno por línea")} onChange={(e) => answer(q, e.target.value)} />);
+    }
+    if (q.type === "checklist") {
+      return wrap(<Textarea rows={4} value={typeof v === "string" ? v : ""} placeholder={t("Item — brand — age, one per line", "Artículo — marca — antigüedad, uno por línea")} onChange={(e) => answer(q, e.target.value)} />);
+    }
+    return wrap(q.key.includes("why") || q.type === "text" && q.key.startsWith("intent.")
+      ? <Textarea rows={3} value={typeof v === "string" ? v : ""} onChange={(e) => answer(q, e.target.value)} />
+      : <Input value={typeof v === "string" ? v : ""} onChange={(e) => answer(q, e.target.value)} />);
+  };
 
-        <section className="relative">
-          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-transparent to-gold/20 opacity-60 blur-lg pointer-events-none" />
-          <div className="relative rounded-2xl bg-white shadow-2xl border border-white/40 overflow-hidden animate-calm-rise">
-            <div className="px-6 sm:px-8 pt-7 pb-5 border-b border-hairline bg-cream">
-              <h2 className="mt-1 font-display text-2xl font-black text-ink tracking-tight">
-                {t("Apply to join Tidy")}
-              </h2>
-              <p className="mt-1 text-sm text-ink-faint">{t("Takes about 2 minutes.")}</p>
-            </div>
-
-            <form onSubmit={submit} className="px-6 sm:px-8 py-7 space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="first_name" className="text-ink">
-                    {t("First name")} *
-                  </Label>
-                  <Input
-                    id="first_name"
-                    required
-                    value={form.first_name}
-                    onChange={(e) => set("first_name", e.target.value)}
-                    className="mt-1.5"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="last_name" className="text-ink">
-                    {t("Last name")} *
-                  </Label>
-                  <Input
-                    id="last_name"
-                    required
-                    value={form.last_name}
-                    onChange={(e) => set("last_name", e.target.value)}
-                    className="mt-1.5"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="email" className="text-ink">
-                  {t("Email")} *
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  required
-                  value={form.email}
-                  onChange={(e) => set("email", e.target.value)}
-                  className="mt-1.5"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="phone" className="text-ink">
-                    {t("Phone")} *
-                  </Label>
-                  <Input
-                    id="phone"
-                    required
-                    value={form.phone}
-                    onChange={(e) => set("phone", e.target.value)}
-                    placeholder="(786) 555-1234"
-                    className="mt-1.5"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="zip" className="text-ink">
-                    {t("ZIP code")} *
-                  </Label>
-                  <Input
-                    id="zip"
-                    required
-                    maxLength={10}
-                    value={form.zip}
-                    onChange={(e) => set("zip", e.target.value)}
-                    placeholder="33183"
-                    className="mt-1.5"
-                  />
-                </div>
-              </div>
-
-              <RadioBlock
-                label={t("Which service are you applying for?") + " *"}
-                value={form.service}
-                onChange={(v) => set("service", v as ServiceChoice)}
-                options={[
-                  { v: "cleaning", l: t("House Cleaning") },
-                  { v: "lawn", l: t("Lawn Care") },
-                  { v: "detail", l: t("Car Care") },
-                  { v: "multiple", l: t("Multiple") },
-                ]}
-                name="service"
-              />
-
-              <RadioBlock
-                label={t("Years of relevant experience") + " *"}
-                value={form.experience}
-                onChange={(v) => set("experience", v as ExpBucket)}
-                options={[
-                  { v: "1-2", l: t("1–2 years") },
-                  { v: "3-5", l: t("3–5 years") },
-                  { v: "5+", l: t("5+ years") },
-                ]}
-                name="experience"
-                inline
-              />
-
-              <YesNoBlock
-                label={t("Do you have your own reliable transportation?") + " *"}
-                value={form.has_vehicle}
-                onChange={(v) => set("has_vehicle", v)}
-                name="vehicle"
-              />
-              <YesNoBlock
-                label={t("Do you have your own professional equipment in working condition?") + " *"}
-                value={form.has_supplies}
-                onChange={(v) => set("has_supplies", v)}
-                name="supplies"
-              />
-              <YesNoBlock
-                label={t("Are you authorized to work in the United States?") + " *"}
-                value={form.work_authorized}
-                onChange={(v) => set("work_authorized", v)}
-                name="workauth"
-              />
-
-                <YesNoBlock
-                  label={t("Do you speak both English and Spanish?") + " *"}
-                  value={form.bilingual}
-                  onChange={(v) => set("bilingual", v)}
-                  name="bilingual"
-                />
-
-                <YesNoBlock
-                  label={t("Are you willing to carry your own commercial general liability policy ($1,000,000 per occurrence / $2,000,000 aggregate) naming Tidy Home Concierge LLC as Additional Insured before your first paid visit?") + " *"}
-                  value={form.insurance_willing}
-                  onChange={(v) => set("insurance_willing", v)}
-                  name="insurance"
-                />
-                <p className="text-xs text-ink-faint -mt-3">
-                  {t("Roughly $25–60 a month. No LLC required. Tidy reimburses up to $50 a month toward the premium for your first three months.")}
-                </p>
-
-              <YesNoBlock
-                label={t("Do you have a valid Florida driver's license?") + " *"}
-                value={form.fl_license}
-                onChange={(v) => set("fl_license", v)}
-                name="fl_license"
-              />
-              {form.fl_license === "yes" && (
-                <div>
-                  <Label htmlFor="license_expiry" className="text-ink">
-                    {t("License expiry date")} *
-                  </Label>
-                  <Input
-                    id="license_expiry"
-                    type="date"
-                    required
-                    value={form.license_expiry}
-                    onChange={(e) => set("license_expiry", e.target.value)}
-                    className="mt-1.5"
-                  />
-                </div>
-              )}
-
-              <div>
-                <Label htmlFor="description" className="text-ink">
-                  {t("Brief description of your relevant experience")}
-                </Label>
-                <Textarea
-                  id="description"
-                  rows={4}
-                  maxLength={500}
-                  value={form.description}
-                  onChange={(e) => set("description", e.target.value)}
-                  className="mt-1.5"
-                  placeholder={t("Tell us about your background in this service…")}
-                />
-                <p className="mt-1 text-xs text-ink-faint text-right">{form.description.length}/500</p>
-              </div>
-
-              <div className="rounded-xl border border-hairline bg-cream/60 p-4 text-xs text-ink leading-relaxed">
-                {t(
-                  "By submitting, you confirm Tidy may contact you about this role. You will undergo a background check at Tidy's expense if we move forward.",
-                )}
-              </div>
-
-              <Button
-                type="submit"
-                size="lg"
-                disabled={submitting}
-                className="w-full bg-gradient-to-b from-navy-deep to-[#0b1226] text-white hover:brightness-110 font-bold text-base h-12 shadow-lg disabled:opacity-50"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("Submitting…")}
-                  </>
-                ) : (
-                  t("Submit application")
-                )}
-              </Button>
-            </form>
-          </div>
-        </section>
+  // ---- screens
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-md text-center">
+          <CheckCircle2 className="h-14 w-14 text-primary mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-foreground mb-2">{knockout ? t("Thanks for your time", "Gracias por tu tiempo") : t("Application received", "Solicitud recibida")}</h1>
+          <p className="text-muted-foreground">{knockout
+            ? t("This role needs a few things you don't have right now. If that changes, apply again — we'd love to hear from you.", "Este puesto requiere algunas cosas que no tienes ahora. Si eso cambia, aplica de nuevo — nos encantaría saber de ti.")
+            : t("Next step: show us your equipment. We'll text you a link — it takes about 10 minutes on your phone.", "Siguiente paso: muéstranos tu equipo. Te enviaremos un enlace por texto — toma unos 10 minutos desde tu teléfono.")}</p>
+        </div>
       </div>
-    </main>
-  );
-}
+    );
+  }
 
-function RadioBlock({
-  label,
-  value,
-  onChange,
-  options,
-  name,
-  inline,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { v: string; l: string }[];
-  name: string;
-  inline?: boolean;
-}) {
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SeoHead title={t("Apply to be a Tidy Pro", "Aplica para ser un Pro de Tidy")} description={t("Join Tidy's pro team in Miami.", "Únete al equipo de Pros de Tidy en Miami.")} />
+        <header className="border-b border-border"><div className="container mx-auto px-4 py-4 flex items-center justify-between"><Link to="/"><TidyLogo /></Link>
+          <button onClick={() => setLang(lang === "en" ? "es" : "en")} className="text-sm font-semibold text-foreground">{lang === "en" ? "Español" : "English"}</button></div></header>
+        <main className="container mx-auto px-4 py-12 max-w-xl">
+          <div className="flex items-center gap-2 text-primary mb-3"><Sparkles className="h-5 w-5" /><span className="text-sm font-semibold uppercase tracking-wide">{t("Now hiring", "Estamos contratando")}</span></div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t("Work for yourself, with a route we build for you", "Trabaja por tu cuenta, con una ruta que construimos para ti")}</h1>
+          <p className="text-muted-foreground mb-8">{t("Pick your service to start. About 10 minutes, and you can finish later — we save as you go.", "Elige tu servicio para empezar. Unos 10 minutos, y puedes terminar después — guardamos a medida que avanzas.")}</p>
+          <div className="grid gap-3">
+            {([["cleaning", t("Home cleaning", "Limpieza de casas")], ["lawn", t("Lawn care", "Cuidado de césped")], ["car_care", t("Car care", "Cuidado de autos")]] as const).map(([svc, label]) => (
+              <Button key={svc} size="lg" variant="outline" disabled={starting} onClick={() => start(svc)} className="justify-between h-14 text-base">
+                {label}{starting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+              </Button>
+            ))}
+          </div>
+          {error ? <p className="text-destructive text-sm mt-4">{error}</p> : null}
+        </main>
+      </div>
+    );
+  }
+
+  if (loading && questions.length === 0) {
+    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
+
   return (
-    <div>
-      <Label className="text-ink">{label}</Label>
-      <RadioGroup
-        value={value}
-        onValueChange={onChange}
-        className={inline ? "mt-2 flex flex-wrap gap-3" : "mt-2 grid sm:grid-cols-2 gap-2"}
-      >
-        {options.map((o) => (
-          <label
-            key={o.v}
-            htmlFor={`${name}-${o.v}`}
-            className={`flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-sm cursor-pointer transition ${value === o.v ? "border-primary bg-primary/5 text-ink" : "border-hairline text-ink hover:bg-cream/60"}`}
-          >
-            <RadioGroupItem id={`${name}-${o.v}`} value={o.v} />
-            <span>{o.l}</span>
-          </label>
-        ))}
-      </RadioGroup>
+    <div className="min-h-screen bg-background">
+      <Helmet><title>{t("Apply — Tidy", "Aplica — Tidy")}</title></Helmet>
+      <header className="border-b border-border sticky top-0 bg-background z-10">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <TidyLogo />
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground">{t("Saved as you go", "Se guarda a medida que avanzas")}</span>
+            <button onClick={() => setLang(lang === "en" ? "es" : "en")} className="text-sm font-semibold text-foreground">{lang === "en" ? "Español" : "English"}</button>
+          </div>
+        </div>
+        <div className="h-1 bg-muted"><div className="h-1 bg-primary transition-all" style={{ width: `${(section / totalSections) * 100}%` }} /></div>
+      </header>
+      <main className="container mx-auto px-4 py-8 max-w-xl">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-1">{t("Section", "Sección")} {section} {t("of", "de")} {totalSections}</p>
+        <h2 className="text-2xl font-bold text-foreground mb-6">{sectionNames[section - 1] ?? ""}</h2>
+        <div className="grid gap-4">{current.map(renderQuestion)}</div>
+        {missing.length > 0 ? <p className="text-destructive text-sm mt-4">{t("Some required answers are missing — they're marked in red.", "Faltan algunas respuestas obligatorias — están marcadas en rojo.")}</p> : null}
+        {error ? <p className="text-destructive text-sm mt-4">{error}</p> : null}
+        <div className="flex gap-3 mt-8">
+          <Button variant="outline" disabled={section <= 1} onClick={() => setSection((s) => s - 1)}><ArrowLeft className="h-4 w-4 mr-1" />{t("Back", "Atrás")}</Button>
+          {section < totalSections
+            ? <Button className="flex-1" onClick={() => setSection((s) => s + 1)}>{t("Next", "Siguiente")}<ArrowRight className="h-4 w-4 ml-1" /></Button>
+            : <Button className="flex-1" disabled={loading} onClick={submit}>{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("Send my application", "Enviar mi solicitud")}</Button>}
+        </div>
+        {faq.length > 0 && section === totalSections ? (
+          <div className="mt-10 border-t border-border pt-6">
+            <h3 className="font-semibold text-foreground mb-3">{t("Questions candidates ask", "Preguntas frecuentes")}</h3>
+            <div className="grid gap-3">
+              {faq.map((f, i) => (
+                <details key={i} className="rounded-lg border border-border bg-card p-3">
+                  <summary className="font-medium text-foreground cursor-pointer">{f.q}</summary>
+                  <p className="text-sm text-muted-foreground mt-2">{f.needs_justin ? t("We'll confirm this with you directly.", "Te lo confirmamos directamente.") : f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </main>
     </div>
   );
 }
