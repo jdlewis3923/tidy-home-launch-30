@@ -1,20 +1,20 @@
 # Roadmap
 
-## Hiring system v5 (Oct 17) — IN PROGRESS, do not publish
+## Hiring system v5 (Oct 17) — CORE BUILT, do not publish
 Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spend lock, override audit, probation, hiring documents panel.
-- [ ] Stages 0–10 (invited→applied→proof→screen_booked→phone_screened→referenced→interviewed→agreement→background→insured→active), forward-only server-enforced; map legacy records (applied flagged "legacy application", screened→phone_screened); don't touch archived/is_test
-- [ ] /apply rebuild: 12 sections, EN/ES, autosave + resume text, unset sliders, knockouts archive "knockout_apply", question_bank table (admin-editable), application_answers
-- [ ] Fit Report /admin/hiring/fit/:id — Skill/Reliability/Intent gauges, flags F1–F10, split talking points, live-updating
-- [ ] Phone Scorecard /admin/hiring/phone/:id (K1–K10, P1–P4, PASS rule, book in-person + CONFIRM text)
-- [ ] Reference /admin/hiring/ref/:id (R1–R5, FAIL rules, second-reference text)
-- [ ] In-Person Scorecard /admin/hiring/interview/:id (I1–I10, intent questions, Intent ≥ 60, table checklist)
-- [ ] Deadlines/nudges/auto-archive scheduler (15 min), one reschedule, YES revives once, SMS-fail email fallback chip
-- [ ] Slots /admin/hiring/slots + candidate self-book /pro/book/:token; in-person location private
-- [ ] candidate_faq table (prefilled, pay-timing row red until Justin fills)
-- [ ] Pre-launch weekly check-ins (stages 7–9), URGENT on misses, bench #2 offer
-- [ ] Dashboard /admin/hiring: seat rule, Intent-sorted table, Today list, funnel, ghost report, banner
-- [ ] Messages §12 (INVITE/RESUME/NUDGE/BOOK PHONE/SLOT REMINDER/IN-PERSON CONFIRM/WEEKLY CHECK-IN/CLOSE-OUT) EN+ES
-- [ ] 13 DONE-WHEN checks with is_test candidates on Justin's number
+- [x] Stages 0–10 server-enforced (0169); legacy mapped (screened→phone_screened, ins_quote→background/agreement); archived/is_test untouched
+- [x] /apply rebuild: 12 sections, EN/ES, autosave + resume token, unset sliders, knockouts archive "knockout_apply", question_bank + application_answers
+- [x] Fit Report /admin/hiring/fit/:id — gauges, F1–F10, split talking points, live (0173 fix)
+- [x] Scorecards /admin/hiring/phone|ref|interview/:id with PASS rules (interview needs Intent ≥ 60)
+- [x] Slots /admin/hiring/slots + candidate self-book /pro/book/:token; one reschedule per kind
+- [x] candidate_faq seeded (pay-timing row flagged needs_justin)
+- [x] 15-min hiring_tick scheduler (0171): nudges, auto-archive with reason, slot reminders, weekly check-ins + URGENT
+- [x] Messages: nudge/book_phone/slot_reminder/weekly_checkin/close_out EN+ES in pipeline-notify
+- [x] Dashboard /admin/hiring: seats, funnel, Intent-sorted table, ghost report
+- [ ] YES-revival of archived candidates (inbound SMS handling) — not built
+- [ ] Today list + banner on dashboard — partial
+- [ ] Full 13 DONE-WHEN verification with is_test candidates — not run
+- [ ] In-person location setting UI (app_settings.hiring_inperson_location) — DB ready, no UI
 
 ## Confirmed Car Care pay (Oct 11)
 - [x] Aligned scheduler and future Car Care jobs with wash 16/20/26 and full detail 78/88/115; verified all 18 size/cadence/kind combinations. Only canceled Car Care jobs existed; historical pay retained.
