@@ -60,7 +60,7 @@ async function sendSmsRow(admin: ReturnType<typeof createClient>, to: string, bo
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (!isCronAuthorized(req)) {
+  if (!(await isCronAuthorized(req))) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: corsHeaders });
   }
 
@@ -97,6 +97,12 @@ Deno.serve(async (req) => {
     (await getSetting(admin, 'lifecycle_live_stages')).split(',').map((s) => s.trim()).filter(Boolean),
   );
 
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
+  if ((await getSetting(admin, 'lifecycle_last_planned_day')) !== day) {
+    const { error: planningError } = await admin.rpc('lifecycle_daily_events');
+    if (!planningError) await setSetting(admin, 'lifecycle_last_planned_day', day);
+    else console.error('[lifecycle-tick] daily planning failed', planningError.message);
+  }
   // Claim due rows.
   const { data: due, error } = await admin
     .from('message_queue')
@@ -127,9 +133,18 @@ Deno.serve(async (req) => {
       continue;
     }
 
+    let eventLive = false;
+    if (row.event_id) {
+      const { data: event } = await admin.from('lifecycle_events').select('event').eq('id', row.event_id).maybeSingle();
+      if (event) {
+        const { data: rule } = await admin.from('lifecycle_event_rules').select('live').eq('event', event.event).maybeSingle();
+        eventLive = rule?.live === true;
+      }
+    }
+    const allowedLive = !contact.is_test && !row.force_shadow && (row.event_id ? eventLive : (!shadow || liveStages.has(row.stage)));
     // Admin task rows become Today-list alerts, never sends.
     if (row.channel === 'task') {
-      if (!shadow || liveStages.has(row.stage)) {
+      if (allowedLive) {
         await admin.from('admin_alerts').insert({
           alert_type: 'lifecycle_task', level: 'critical', category: 'operations', tier: 'urgent',
           title: fillTokens(row.template_key ?? 'Lifecycle task', row.tokens),
@@ -196,7 +211,7 @@ Deno.serve(async (req) => {
     const bodyText = fillTokens(useEs ? tpl.body_es : tpl.body_en, row.tokens);
     const subject = fillTokens(useEs ? (tpl.subject_es ?? tpl.subject_en ?? '') : (tpl.subject_en ?? ''), row.tokens);
 
-    const isLive = !shadow || liveStages.has(row.stage);
+    const isLive = allowedLive;
     if (!isLive) {
       await admin.from('message_queue').update({ status: 'dry_run', sent_at: new Date().toISOString() }).eq('id', row.id);
       results.dry_run++;
@@ -246,7 +261,7 @@ Deno.serve(async (req) => {
 
     // Retry with backoff, then fail. SMS failure falls back to the email version.
     if (row.attempts < 3) {
-      const retryAt = new Date(Date.now() + RETRY_BACKOFF_MS[row.attempts]).toISOString();
+      const { data: retryAt } = await admin.rpc('lifecycle_next_send_time', { _at: new Date(Date.now() + RETRY_BACKOFF_MS[row.attempts]).toISOString() });
       await admin.from('message_queue').update({ status: 'queued', attempts: row.attempts + 1, send_at: retryAt, error: sendError }).eq('id', row.id);
       results.retried++;
     } else {

@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 type Seq = {
   id: string; stage: string; step_order: number; delay_minutes: number;
@@ -132,6 +133,7 @@ export default function AdminMessages() {
 
   return (
     <div className="space-y-8 p-4">
+        <Button asChild variant="outline"><Link to="/admin/messages/simulator">Message simulator</Link></Button>
         <section className="rounded-xl border p-4 space-y-3">
           <h2 className="text-lg font-bold">Engine</h2>
           <label className="flex items-center gap-2 text-sm">

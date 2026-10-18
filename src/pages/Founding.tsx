@@ -173,6 +173,11 @@ export default function Founding() {
   const honeypot = useRef<HTMLInputElement>(null);
   const phoneOk = /^\+?1?\D*\d{3}\D*\d{3}\D*\d{4}\D*$/.test(s.phone);
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.email);
+  useEffect(() => {
+    if (!emailOk || s.step !== 'reserve') return;
+    const timer = setTimeout(() => { void supabase.functions.invoke('lifecycle-capture', { body: { event: 'RES_STARTED', email: s.email, phone: phoneOk ? s.phone : undefined, first_name: s.first, zip: s.zip, lang, sms_service: s.sms } }); }, 1200);
+    return () => clearTimeout(timer);
+  }, [emailOk, phoneOk, s.step, s.email, s.phone, s.first, s.zip, s.sms, lang]);
   const formOk = s.first.trim() && s.last.trim() && emailOk && phoneOk && s.street.trim().length >= 5 && s.day && isZip(s.zip);
 
   const scopeGroups = useMemo(() => groupsFor(s.services), [s.services]);
