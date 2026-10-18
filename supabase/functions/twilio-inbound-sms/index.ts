@@ -253,6 +253,36 @@ Deno.serve(async (req) => {
       twilio_sid: messageSid,
     });
 
+    // Lifecycle consent keywords first — STOP/START/HELP are never overridden.
+    {
+      const kw = body.trim().toUpperCase().replace(/[^A-Z]/g, "");
+      if (kw === "STOP" || kw === "START" || kw === "HELP") {
+        const stopped = kw === "STOP";
+        await supabase.from("contacts").update({ sms_stopped: stopped }).eq("phone", from).then(() => {}, () => {});
+        if (stopped) {
+          await supabase.from("message_queue").update({ status: "cancelled", error: "STOP" })
+            .eq("channel", "sms").eq("status", "queued")
+            .in("contact_id", (await supabase.from("contacts").select("id").eq("phone", from)).data?.map((c: { id: string }) => c.id) ?? [])
+            .then(() => {}, () => {});
+        }
+        const reply = kw === "STOP"
+          ? "You've been unsubscribed from Tidy texts. Reply START to opt back in."
+          : kw === "START"
+            ? "You're opted back in to Tidy texts."
+            : "Tidy Home Concierge: reply STOP to opt out, START to opt in. Help: (786) 829-1141 or hello@jointidy.co.";
+        await vendorFetch(`${SUPABASE_URL}/functions/v1/send-twilio-sms`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to_phone_e164: from, body: reply,
+            idempotency_key: `consent-${kw}-${messageSid}`,
+            template_name: `consent-${kw.toLowerCase()}`, triggered_by: "twilio-inbound-sms",
+          }),
+        }).catch(() => {});
+        return twiml();
+      }
+    }
+
     // Hiring pipeline candidates get keyword handling (C/CONFIRM, R, 1, 2, YES)
     // instead of the support assistant. Unknown numbers are logged as unmatched
     // and still flow to the assistant below.
