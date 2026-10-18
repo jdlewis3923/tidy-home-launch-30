@@ -57,10 +57,45 @@ export function pickEmailArt(topic?: string): TidyEmailArt {
 }
 
 export function emailHeroArt(art: TidyEmailArt): string {
-  return `<tr ${TIDY_ART_MARKER}><td style="padding:0;background:#f4f8fc;font-size:0;line-height:0"><img src="${art.image}" alt="${art.alt}" width="600" height="250" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>`;
+  return `<tr ${TIDY_ART_MARKER}><td class="ts" style="padding:0;${SOFT};font-size:0;line-height:0"><img src="${art.image}" alt="${art.alt}" width="600" height="250" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>`;
+}
+
+const ICON_BASE = 'https://vcdhpsfuilrrrqfhfsjt.supabase.co/storage/v1/object/public/social-images/brand%2Femail%2Ficons%2F';
+export type TidyEmailIcon = 'calendar-days' | 'car' | 'clock' | 'credit-card' | 'gift' | 'hash' | 'house' | 'leaf' | 'map-pin' | 'ruler' | 'sparkles' | 'spray-can' | 'star' | 'tag';
+export interface TidyEmailFact { icon: TidyEmailIcon; label: string; value: string }
+
+/** Solid white that dark-mode clients (Outlook app, Gmail) don't invert: a gradient background image. */
+const W = 'background-color:#ffffff;background-image:linear-gradient(#ffffff,#ffffff)';
+const PAGE = 'background-color:#ffffff;background-image:linear-gradient(#ffffff,#ffffff)';
+const SOFT = 'background-color:#f4f8fc;background-image:linear-gradient(#f4f8fc,#f4f8fc)';
+
+/** Dark-mode lock for clients that honour <style> (Apple Mail, Outlook.com/iOS via data-ogsc/ogsb). */
+const DARK_LOCK = `<style>:root{color-scheme:light only;supported-color-schemes:light only}
+body,.tw{background:#ffffff!important}
+[data-ogsb] .tw,[data-ogsb] body{background-color:#ffffff!important}
+[data-ogsb] .ts{background-color:#f4f8fc!important}
+[data-ogsc] .tn,[data-ogsc] .tn *{color:#0f172a!important}
+[data-ogsc] .tb,[data-ogsc] .tb *{color:#475569!important}
+[data-ogsc] .tg{color:#b48a00!important}
+@media (prefers-color-scheme:dark){body,.tw{background:#ffffff!important}.ts{background:#f4f8fc!important}.tn,.tn *{color:#0f172a!important}.tb,.tb *{color:#475569!important}}
+</style>`;
+
+/** Two-column icon tiles: the useful, at-a-glance facts of this email. */
+export function emailFactsCard(facts: TidyEmailFact[]): string {
+  const items = facts.filter((f) => f.value && !/\{\w+\}/.test(f.value)).slice(0, 4);
+  if (!items.length) return '';
+  const cell = (f: TidyEmailFact) => `<td class="ts" width="50%" valign="top" style="${SOFT};border:1px solid #e3ecf7;border-radius:12px;padding:14px"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td valign="middle" style="${W};border-radius:10px;width:40px;height:40px;text-align:center"><img src="${ICON_BASE}${f.icon}.png" width="22" height="22" alt="" style="display:block;margin:9px auto;border:0"></td><td valign="middle" style="padding-left:12px"><p class="tb" style="margin:0;font:700 10px Arial,sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:#64748b">${f.label}</p><p class="tn" style="margin:2px 0 0;font:800 15px/1.3 Arial,sans-serif;color:#0f172a">${f.value}</p></td></tr></table></td>`;
+  const rows: string[] = [];
+  for (let i = 0; i < items.length; i += 2) {
+    const b = items[i + 1];
+    rows.push(`<tr>${cell(items[i])}<td width="10" style="font-size:0">&nbsp;</td>${b ? cell(b) : '<td width="50%">&nbsp;</td>'}</tr><tr><td colspan="3" style="height:10px;font-size:0;line-height:0">&nbsp;</td></tr>`);
+  }
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 18px">${rows.join('')}</table>`;
 }
 
 export interface TidyEmailShellOptions {
+  /** Icon tiles shown above the body copy. */
+  facts?: TidyEmailFact[];
   heading?: string;
   eyebrow?: string;
   previewText?: string;
@@ -79,27 +114,27 @@ export function emailButton(url: string, label: string): string {
 
 export function emailServiceStrip(): string {
   const dot = '<span style="color:#FCCC00;padding:0 10px">&#9679;</span>';
-  return `<tr data-tidy-service-strip="true"><td align="center" style="background:#ffffff;border-bottom:1px solid #eef2f7;padding:12px 20px;font:700 10px Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#475569">Cleaning${dot}Lawn${dot}Car Care</td></tr>`;
+  return `<tr data-tidy-service-strip="true"><td class="tw tb" align="center" bgcolor="#ffffff" style="${W};border-bottom:1px solid #eef2f7;padding:12px 20px;font:700 10px Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#475569">Cleaning${dot}Lawn${dot}Car Care</td></tr>`;
 }
 
 export function tidyEmailShell(opts: TidyEmailShellOptions): string {
   const preview = opts.previewText ?? opts.heading ?? 'A message from Tidy Home Concierge';
   const art = opts.art ?? pickEmailArt(opts.artTopic ?? `${opts.heading ?? ''} ${opts.eyebrow ?? ''} ${opts.previewText ?? ''}`);
   const heading = opts.heading
-    ? `<h1 style="margin:0 0 16px;font:800 25px/1.2 Arial,sans-serif;color:#0f172a">${opts.heading}</h1>`
+    ? `<h1 class="tn" style="margin:0 0 16px;font:800 26px/1.2 Arial,sans-serif;color:#0f172a">${opts.heading}</h1>`
     : '';
   const cta = opts.ctaUrl ? emailButton(opts.ctaUrl, opts.ctaLabel ?? 'Open Tidy') : '';
   const context = opts.recipientContext
     ? `<br><span style="color:#8494a8">${opts.recipientContext}</span>`
     : '';
 
-  return `<!doctype html><html lang="en" ${TIDY_EMAIL_MARKER}><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>${opts.heading ?? 'Tidy Home Concierge'}</title></head><body style="margin:0;padding:0;background:#f6f9fc;-webkit-text-size-adjust:100%;font-family:Arial,sans-serif;color:#0f172a"><div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#f6f9fc">${preview}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f9fc"><tr><td align="center" style="padding:28px 12px 36px"><table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #e9eff7;border-radius:14px;overflow:hidden">
-    <tr><td style="background:#ffffff;padding:16px 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><a href="${TIDY_SITE}"><img src="${TIDY_LOGO}" alt="Tidy Home Concierge" width="106" height="88" style="display:block;width:106px;height:88px;object-fit:contain;border:0"></a></td><td valign="middle" align="right" style="font:700 13px/1.35 Arial,sans-serif;color:#0f172a">More life.<br><span style="color:#b48a00">Less chores.</span></td></tr></table></td></tr>
+  return `<!doctype html><html lang="en" ${TIDY_EMAIL_MARKER}><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>${opts.heading ?? 'Tidy Home Concierge'}</title>${DARK_LOCK}</head><body class="tw" style="margin:0;padding:0;${PAGE};-webkit-text-size-adjust:100%;font-family:Arial,sans-serif;color:#0f172a"><div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#ffffff">${preview}</div><table class="tw" role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="${PAGE}"><tr><td class="tw" align="center" style="padding:16px 8px 28px;${PAGE}"><table class="tw" role="presentation" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:600px;${W};border:1px solid #e9eff7;border-radius:14px;overflow:hidden">
+    <tr><td class="tw" bgcolor="#ffffff" style="${W};padding:16px 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><a href="${TIDY_SITE}"><img src="${TIDY_LOGO}" alt="Tidy Home Concierge" width="106" height="88" style="display:block;width:106px;height:88px;object-fit:contain;border:0"></a></td><td class="tn" valign="middle" align="right" style="font:700 13px/1.35 Arial,sans-serif;color:#0f172a">More life.<br><span class="tg" style="color:#b48a00">Less chores.</span></td></tr></table></td></tr>
     <tr><td style="height:4px;background:#FCCC00;font-size:0;line-height:0">&nbsp;</td></tr>
     ${emailHeroArt(art)}
     ${emailServiceStrip()}
-    <tr><td style="padding:28px 28px 30px">${opts.eyebrow ? `<p style="margin:0 0 8px;font:700 11px Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;color:#2563eb">${opts.eyebrow}</p>` : ''}${heading}<div style="font:15px/1.65 Arial,sans-serif;color:#475569">${opts.bodyHtml}</div>${cta}</td></tr>
-    <tr><td style="background:#f7fafd;border-top:1px solid #e6edf5;padding:20px 28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><img src="${TIDY_LOGO}" alt="Tidy" width="58" height="48" style="display:block;width:58px;height:48px;object-fit:contain;border:0"></td><td align="right" style="font:11px/1.65 Arial,sans-serif;color:#5b6b80">Tidy Home Concierge LLC<br>2121 Biscayne Blvd #1562, Miami, FL 33137<br><a href="${TIDY_SITE}" style="color:#5b6b80">jointidy.co</a> · (786) 829-1141${context}</td></tr></table></td></tr>
+    <tr><td class="tw" bgcolor="#ffffff" style="${W};padding:26px 24px 30px">${opts.eyebrow ? `<p style="margin:0 0 8px;font:700 11px Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;color:#2563eb">${opts.eyebrow}</p>` : ''}${heading}${opts.facts ? emailFactsCard(opts.facts) : ''}<div class="tb" style="font:15px/1.65 Arial,sans-serif;color:#475569">${opts.bodyHtml}</div>${cta}</td></tr>
+    <tr><td class="ts" bgcolor="#f4f8fc" style="${SOFT};border-top:1px solid #e6edf5;padding:20px 28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><img src="${TIDY_LOGO}" alt="Tidy" width="58" height="48" style="display:block;width:58px;height:48px;object-fit:contain;border:0"></td><td class="tb" align="right" style="font:11px/1.65 Arial,sans-serif;color:#5b6b80">Tidy Home Concierge LLC<br>2121 Biscayne Blvd #1562, Miami, FL 33137<br><a href="${TIDY_SITE}" style="color:#5b6b80">jointidy.co</a> · (786) 829-1141${context}</td></tr></table></td></tr>
   </table></td></tr></table></body></html>`;
 }
 
