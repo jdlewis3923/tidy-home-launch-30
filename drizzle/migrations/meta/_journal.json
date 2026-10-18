@@ -1212,6 +1212,13 @@
       "when": 1792288658500,
       "tag": "0172_hiring_v5_fix_slot_seeder",
       "breakpoints": true
+    },
+    {
+      "idx": 173,
+      "version": "7",
+      "when": 1792288795590,
+      "tag": "0173_hiring_v5_fit_report_jobs_fix",
+      "breakpoints": true
     }
   ]
 }
