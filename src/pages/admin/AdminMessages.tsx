@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminChrome } from "@/components/admin/AdminChrome";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -110,8 +109,7 @@ export default function AdminMessages() {
   };
 
   return (
-    <AdminChrome title="Messages">
-      <div className="space-y-8 p-4">
+    <div className="space-y-8 p-4">
         <section className="rounded-xl border p-4 space-y-3">
           <h2 className="text-lg font-bold">Engine</h2>
           <label className="flex items-center gap-2 text-sm">
