@@ -1233,6 +1233,13 @@
       "when": 1792289276815,
       "tag": "0175_hiring_v5_revive_rpc",
       "breakpoints": true
+    },
+    {
+      "idx": 176,
+      "version": "7",
+      "when": 1792289738076,
+      "tag": "0176_allow_note_kind_stage_events",
+      "breakpoints": true
     }
   ]
 }
