@@ -1961,6 +1961,7 @@ export type Database = {
           archive_reason: string | null
           archived: boolean
           archived_at: string | null
+          archived_from_stage: string | null
           call_notes: string | null
           checkin_missed_count: number
           checkr_result: string | null
@@ -1993,6 +1994,7 @@ export type Database = {
           legacy_application: boolean
           one_pager_sent_at: string | null
           owns_equipment: boolean | null
+          phone_confirmed_at: string | null
           phone_reschedules: number
           phone_slot_id: string | null
           pre_adverse_notice_sent_at: string | null
@@ -2051,6 +2053,7 @@ export type Database = {
           archive_reason?: string | null
           archived?: boolean
           archived_at?: string | null
+          archived_from_stage?: string | null
           call_notes?: string | null
           checkin_missed_count?: number
           checkr_result?: string | null
@@ -2083,6 +2086,7 @@ export type Database = {
           legacy_application?: boolean
           one_pager_sent_at?: string | null
           owns_equipment?: boolean | null
+          phone_confirmed_at?: string | null
           phone_reschedules?: number
           phone_slot_id?: string | null
           pre_adverse_notice_sent_at?: string | null
@@ -2141,6 +2145,7 @@ export type Database = {
           archive_reason?: string | null
           archived?: boolean
           archived_at?: string | null
+          archived_from_stage?: string | null
           call_notes?: string | null
           checkin_missed_count?: number
           checkr_result?: string | null
@@ -2173,6 +2178,7 @@ export type Database = {
           legacy_application?: boolean
           one_pager_sent_at?: string | null
           owns_equipment?: boolean | null
+          phone_confirmed_at?: string | null
           phone_reschedules?: number
           phone_slot_id?: string | null
           pre_adverse_notice_sent_at?: string | null
@@ -3191,6 +3197,7 @@ export type Database = {
         Row: {
           applicant_id: string | null
           booked_at: string | null
+          confirmed_at: string | null
           created_at: string
           duration_min: number
           id: string
@@ -3202,6 +3209,7 @@ export type Database = {
         Insert: {
           applicant_id?: string | null
           booked_at?: string | null
+          confirmed_at?: string | null
           created_at?: string
           duration_min?: number
           id?: string
@@ -3213,6 +3221,7 @@ export type Database = {
         Update: {
           applicant_id?: string | null
           booked_at?: string | null
+          confirmed_at?: string | null
           created_at?: string
           duration_min?: number
           id?: string
@@ -8174,6 +8183,30 @@ export type Database = {
           scheduled_at?: string
           service_type?: string | null
           status?: string
+        }
+        Relationships: []
+      }
+      unmatched_texts: {
+        Row: {
+          body: string
+          created_at: string
+          from_phone: string
+          id: string
+          twilio_sid: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          from_phone: string
+          id?: string
+          twilio_sid?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          from_phone?: string
+          id?: string
+          twilio_sid?: string | null
         }
         Relationships: []
       }
