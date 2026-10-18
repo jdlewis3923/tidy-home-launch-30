@@ -13,6 +13,10 @@ export const TIDY_LOGO = 'https://vcdhpsfuilrrrqfhfsjt.supabase.co/storage/v1/ob
 export const TIDY_OWNER_EMAIL = 'hello@jointidy.co';
 export const TIDY_EMAIL_MARKER = 'data-tidy-email="branded"';
 export const TIDY_ART_MARKER = 'data-tidy-hero-photo="true"';
+export const TIDY_EMAIL_VERSION = 'data-tidy-email-version="20261018-raster"';
+const SURFACE_BASE = TIDY_LOGO.slice(0, TIDY_LOGO.indexOf('brand%2F')) + 'brand%2Femail%2F';
+export const TIDY_EMAIL_WHITE = SURFACE_BASE + 'white-20261018.png';
+export const TIDY_EMAIL_GOLD = SURFACE_BASE + 'gold-20261018.png';
 /** Retired emoji-circle hero. Hosted templates carrying it are upgraded in place. */
 const LEGACY_ART_ROW = /<tr data-tidy-hero-art="true">[\s\S]*?<\/p>\s*<\/td><\/tr>/gi;
 const LEGACY_STRIP_ROW = /<tr data-tidy-service-strip="true">[\s\S]*?<\/table><\/td><\/tr>/i;
@@ -30,11 +34,18 @@ const photo = (name: string, label: string, alt: string): TidyEmailArt => ({ ima
 
 // Order matters: the first match wins.
 const ART: Array<{ match: RegExp; art: TidyEmailArt }> = [
+  { match: /(needs help|still open|support|urgent|alert|redo|damage|safety|no access|necesita ayuda|ayuda|problema)/i, art: photo('support-20261018', 'Tidy support', 'An illustrative Tidy support coordinator helping by phone') },
+  { match: /(meet (?:the|your) team|meet (?:the|your) pro|your pro|team|equipo|conoce|pro.changed)/i, art: photo('team-20261018', 'Meet Tidy', 'An illustrative diverse team in blue Tidy uniforms') },
+  { match: /(equipment|proof|loaded vehicle|work photos|herramientas|equipamiento)/i, art: photo('kit', 'Equipment readiness', 'Service equipment and a Tidy kit ready for review') },
+  { match: /(lawn size|turf|sqft|sq ft|césped|cesped)/i, art: photo('lawn', 'Lawn', 'A manicured lawn in front of a Miami home') },
+  { match: /(payment|invoice|receipt|billing|payout|deposit|card exp|credit.card|pago|factura|tarjeta)/i, art: photo('billing', 'Billing', 'A card and receipt on a white desk') },
+  { match: /(digest|report|summary|kpi|metrics|snapshot|resumen)/i, art: photo('report', 'Your snapshot', 'A laptop with a soft chart by a window') },
+  { match: /(review|rating|feedback|referral|refer a|neighbor|reseña|recomienda)/i, art: photo('community', 'Your neighbors', 'Neighbors chatting over a white fence') },
   { match: /(contract|agreement|signed|signature|firma)/i, art: photo('contract', 'Contractor agreement', 'A signed agreement on a sunlit desk') },
-  { match: /(badge photo|photo|retake|foto)/i, art: photo('photo', 'Badge photo', 'A portrait being taken against a plain wall') },
+  { match: /(badge photo|badge_photo|photo retake|photo_retake|retake|foto de (?:perfil|identificación))/i, art: photo('photo', 'Badge photo', 'A portrait being taken against a plain wall') },
   { match: /(background check|checkr|screening)/i, art: photo('verify', 'Background check', 'A checklist being reviewed in a bright entryway') },
   { match: /(insurance|coi|certificate|liability)/i, art: photo('verify', 'Insurance', 'A checklist being reviewed in a bright entryway') },
-  { match: /(kit|uniform|polo|badge|magnet|shirt|size)/i, art: photo('kit', 'Your Tidy kit', 'Folded polos, a badge and a vest on a table') },
+  { match: /(kit|uniform|polo|badge|magnet|shirt)/i, art: photo('kit', 'Your Tidy kit', 'Folded polos, a badge and a vest on a table') },
   { match: /(all set|you're set|ready to start|welcome|onboard|getting started|next step|bienvenid)/i, art: photo('welcome', 'Welcome to Tidy', 'A Tidy Pro arriving at a bright Miami home') },
   { match: /(visit|appointment|schedule|booking|arriv|reschedul)/i, art: photo('visit', 'Your visit', 'A phone and calendar on a sunny desk') },
   { match: /(lawn|yard|mow)/i, art: photo('lawn', 'Lawn', 'A manicured lawn in front of a Miami home') },
@@ -42,7 +53,7 @@ const ART: Array<{ match: RegExp; art: TidyEmailArt }> = [
   { match: /(clean)/i, art: photo('cleaning', 'Cleaning', 'A spotless sunlit living room') },
   { match: /(payment|invoice|receipt|billing|payout|deposit|card)/i, art: photo('billing', 'Billing', 'A card and receipt on a white desk') },
   { match: /(review|rating|feedback|star|referral|refer a|friend|credit|neighbor)/i, art: photo('community', 'Your neighbors', 'Neighbors chatting over a white fence') },
-  { match: /(applicant|apply|hiring|interview|offer|candidate)/i, art: photo('welcome', 'Hiring', 'A Tidy Pro arriving at a bright Miami home') },
+  { match: /(applicant|apply|hiring|interview|offer|candidate)/i, art: photo('team-20261018', 'Hiring', 'An illustrative diverse team in blue Tidy uniforms') },
   { match: /(digest|report|summary|kpi|weekly|metrics|alert|urgent|failed|attention|issue|action required)/i, art: photo('report', 'Your snapshot', 'A laptop with a soft chart by a window') },
   { match: /(password|sign in|log in|verify|confirm your email|account)/i, art: photo('home', 'Your account', 'A bright Miami home at golden hour') },
 ];
@@ -67,17 +78,19 @@ export interface TidyEmailFact { icon: TidyEmailIcon; label: string; value: stri
 /** Solid white that dark-mode clients (Outlook app, Gmail) don't invert: a gradient background image. */
 const W = 'background-color:#ffffff;background-image:linear-gradient(#ffffff,#ffffff)';
 const PAGE = 'background-color:#ffffff;background-image:linear-gradient(#ffffff,#ffffff)';
-const SOFT = 'background-color:#f4f8fc;background-image:linear-gradient(#f4f8fc,#f4f8fc)';
+const SOFT = W;
 
 /** Dark-mode lock for clients that honour <style> (Apple Mail, Outlook.com/iOS via data-ogsc/ogsb). */
 const DARK_LOCK = `<style>:root{color-scheme:light only;supported-color-schemes:light only}
 body,.tw{background:#ffffff!important}
 [data-ogsb] .tw,[data-ogsb] body{background-color:#ffffff!important}
-[data-ogsb] .ts{background-color:#f4f8fc!important}
+[data-ogsb] .ts{background-color:#ffffff!important}
 [data-ogsc] .tn,[data-ogsc] .tn *{color:#0f172a!important}
 [data-ogsc] .tb,[data-ogsc] .tb *{color:#475569!important}
 [data-ogsc] .tg{color:#b48a00!important}
-@media (prefers-color-scheme:dark){body,.tw{background:#ffffff!important}.ts{background:#f4f8fc!important}.tn,.tn *{color:#0f172a!important}.tb,.tb *{color:#475569!important}}
+@media (prefers-color-scheme:dark){body,.tw{background:#ffffff!important}.ts{background:#ffffff!important}.tn,.tn *{color:#0f172a!important}.tb,.tb *{color:#475569!important}}
+.tn,.tn *{-webkit-text-fill-color:#0f172a!important}.tb,.tb *{-webkit-text-fill-color:#475569!important}
+.tgold,[data-ogsb] .tgold{background-color:#f5c518!important;background-image:url('${TIDY_EMAIL_GOLD}')!important;color:#0f172a!important;-webkit-text-fill-color:#0f172a!important}
 </style>`;
 
 /** Two-column icon tiles: the useful, at-a-glance facts of this email. */
@@ -109,7 +122,30 @@ export interface TidyEmailShellOptions {
 }
 
 export function emailButton(url: string, label: string): string {
-  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0 0"><tr><td bgcolor="#FCCC00" style="background:#FCCC00;border-radius:9px"><a href="${url}" style="display:inline-block;padding:13px 22px;font-family:Arial,sans-serif;font-size:14px;font-weight:800;color:#0f172a;text-decoration:none">${label} &rarr;</a></td></tr></table>`;
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0 0"><tr><td class="tgold" bgcolor="#f5c518" background="${TIDY_EMAIL_GOLD}" style="background-color:#f5c518;background-image:url('${TIDY_EMAIL_GOLD}');border-radius:9px"><a class="tgold" href="${url}" style="background-color:#f5c518;background-image:url('${TIDY_EMAIL_GOLD}');-webkit-text-fill-color:#0f172a;display:inline-block;padding:13px 22px;font-family:Arial,sans-serif;font-size:14px;font-weight:800;color:#0f172a;text-decoration:none">${label} &rarr;</a></td></tr></table>`;
+}
+
+/** Image fills also work when a phone client strips CSS gradients.
+ * No sender can control the surrounding email application's dark chrome. */
+export function protectEmailAppearance(html: string): string {
+  let next = html.replace(/data-tidy-email-version="[^"]*"/g, '').replace(/<html\b/i, `<html ${TIDY_EMAIL_VERSION}`);
+  next = next.replace(/<(body|table|td|div|a)\b[^>]*>/gi, (tag, name: string) => {
+    const style = tag.match(/\bstyle="([^"]*)"/i)?.[1] ?? '';
+    const gold = /(?:background(?:-color)?\s*:\s*#(?:fccc00|f5c518)|bgcolor="#(?:fccc00|f5c518)|class="[^"]*tgold)/i.test(tag);
+    if (name.toLowerCase() === 'a' && !gold) return tag;
+    const color = gold ? '#f5c518' : '#ffffff';
+    const image = gold ? TIDY_EMAIL_GOLD : TIDY_EMAIL_WHITE;
+    const cleaned = style.replace(/background(?:-color|-image)?\s*:[^;]*(?:;|$)/gi, '');
+    let result = tag.replace(/\s(?:style|bgcolor|background)="[^"]*"/gi, '');
+    if (gold && !/class="[^"]*tgold/.test(result)) {
+      result = /class="/.test(result) ? result.replace(/class="/, 'class="tgold ') : result.replace(/>$/, ' class="tgold">');
+    }
+    return result.replace(/>$/, ` bgcolor="${color}" background="${image}" style="${cleaned};background-color:${color};background-image:url('${image}');">`);
+  });
+  if (!next.includes('-webkit-text-fill-color')) {
+    next = next.includes('</head>') ? next.replace('</head>', `${DARK_LOCK}</head>`) : `${DARK_LOCK}${next}`;
+  }
+  return next;
 }
 
 export function emailServiceStrip(): string {
@@ -128,18 +164,18 @@ export function tidyEmailShell(opts: TidyEmailShellOptions): string {
     ? `<br><span style="color:#8494a8">${opts.recipientContext}</span>`
     : '';
 
-  return `<!doctype html><html lang="en" ${TIDY_EMAIL_MARKER}><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>${opts.heading ?? 'Tidy Home Concierge'}</title>${DARK_LOCK}</head><body class="tw" style="margin:0;padding:0;${PAGE};-webkit-text-size-adjust:100%;font-family:Arial,sans-serif;color:#0f172a"><div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#ffffff">${preview}</div><table class="tw" role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="${PAGE}"><tr><td class="tw" align="center" style="padding:16px 8px 28px;${PAGE}"><table class="tw" role="presentation" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:600px;${W};border:1px solid #e9eff7;border-radius:14px;overflow:hidden">
+  return protectEmailAppearance(`<!doctype html><html lang="en" ${TIDY_EMAIL_MARKER}><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>${opts.heading ?? 'Tidy Home Concierge'}</title>${DARK_LOCK}</head><body class="tw" style="margin:0;padding:0;${PAGE};-webkit-text-size-adjust:100%;font-family:Arial,sans-serif;color:#0f172a"><div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#ffffff">${preview}</div><table class="tw" role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="${PAGE}"><tr><td class="tw" align="center" style="padding:16px 8px 28px;${PAGE}"><table class="tw" role="presentation" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:100%;max-width:600px;${W};border:1px solid #e9eff7;border-radius:14px;overflow:hidden">
     <tr><td class="tw" bgcolor="#ffffff" style="${W};padding:16px 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><a href="${TIDY_SITE}"><img src="${TIDY_LOGO}" alt="Tidy Home Concierge" width="106" height="88" style="display:block;width:106px;height:88px;object-fit:contain;border:0"></a></td><td class="tn" valign="middle" align="right" style="font:700 13px/1.35 Arial,sans-serif;color:#0f172a">More life.<br><span class="tg" style="color:#b48a00">Less chores.</span></td></tr></table></td></tr>
     <tr><td style="height:4px;background:#FCCC00;font-size:0;line-height:0">&nbsp;</td></tr>
     ${emailHeroArt(art)}
     ${emailServiceStrip()}
     <tr><td class="tw" bgcolor="#ffffff" style="${W};padding:26px 24px 30px">${opts.eyebrow ? `<p style="margin:0 0 8px;font:700 11px Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;color:#2563eb">${opts.eyebrow}</p>` : ''}${heading}${opts.facts ? emailFactsCard(opts.facts) : ''}<div class="tb" style="font:15px/1.65 Arial,sans-serif;color:#475569">${opts.bodyHtml}</div>${cta}</td></tr>
     <tr><td class="ts" bgcolor="#f4f8fc" style="${SOFT};border-top:1px solid #e6edf5;padding:20px 28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="middle"><img src="${TIDY_LOGO}" alt="Tidy" width="58" height="48" style="display:block;width:58px;height:48px;object-fit:contain;border:0"></td><td class="tb" align="right" style="font:11px/1.65 Arial,sans-serif;color:#5b6b80">Tidy Home Concierge LLC<br>2121 Biscayne Blvd #1562, Miami, FL 33137<br><a href="${TIDY_SITE}" style="color:#5b6b80">jointidy.co</a> · (786) 829-1141${context}</td></tr></table></td></tr>
-  </table></td></tr></table></body></html>`;
+  </table></td></tr></table></body></html>`);
 }
 
 export function ensureTidyEmailBranding(html: string, subject?: string): string {
-  if (isTidyEmailCompliant(html)) return html;
+  if (isTidyEmailCompliant(html)) return brandHostedTemplate(html, subject ?? 'Tidy').html;
   return tidyEmailShell({
     heading: subject,
     previewText: subject,
@@ -185,7 +221,9 @@ export function lightenEmailHtml(html: string): string {
 export function brandHostedTemplate(html: string, heading: string): { html: string; changed: boolean; mode: 'updated' | 'wrapped' | 'unchanged' } {
   const art = pickEmailArt(heading);
   if (isTidyEmailCompliant(html)) {
-    return { html, changed: false, mode: 'unchanged' };
+    const revised = html.includes(TIDY_EMAIL_VERSION) ? html : html.replace(/<tr data-tidy-hero-photo="true">[\s\S]*?<\/tr>/i, emailHeroArt(art));
+    const protectedHtml = protectEmailAppearance(revised);
+    return { html: protectedHtml, changed: protectedHtml !== html, mode: protectedHtml === html ? 'unchanged' : 'updated' };
   }
 
   let next = lightenEmailHtml(
@@ -223,5 +261,6 @@ export function brandHostedTemplate(html: string, heading: string): { html: stri
     next = next.replace(/(<tr data-tidy-service-strip="true">[\s\S]*?<\/tr>)/i, `${hero}$1`);
   }
 
+  next = protectEmailAppearance(next);
   return { html: next, changed: next !== html, mode: next === html ? 'unchanged' : 'updated' };
 }
