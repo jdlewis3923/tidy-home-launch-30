@@ -193,3 +193,12 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [ ] lifecycle-unsubscribe endpoint; orphan check in 9 AM digest
 - [ ] Zapier cutover map + shadow comparison report (needs Zap names from Justin)
 - [ ] Run the 10 DONE-WHEN checks with is_test contacts
+
+## Zapier → app cutover (Oct 18) — shadow mode, nothing live
+- [x] zap_cutover checklist table: all 44 Zaps seeded with state + app replacement; 357856538 blocked pending Justin's name check
+- [x] New stages/templates: COLD, WELCOME, EVERY_VISIT, REVIEW, REFERRAL, PAYMENT_FAILED/RECOVERED, CARD_EXPIRING, CANCEL_REQUEST, PAUSE, CANCELLED, RETENTION_3M/6M, SKIP_PATTERN, OVERFLOW, MONTHLY_RECEIPT, CONVERTING objections 48h
+- [x] /admin/messages: cutover checklist (status per Zap, live-since date), 7-day shadow report, "Zap replaced" tags on stages
+- [ ] Event wiring: visit/payment/skip/retention triggers must call lifecycle-event (EVERY_VISIT steps are single event sends, not stage-entry blasts)
+- [ ] Spanish drafts need review (es_reviewed=false on all new templates)
+- [ ] SMS rows wait for Twilio reactivation; Brevo Zaps stay ON until one real signup proves app sender
+- [ ] Cut each Zap off one at a time after 7-day shadow comparison
