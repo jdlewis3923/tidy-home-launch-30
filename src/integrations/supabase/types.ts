@@ -9679,6 +9679,7 @@ export type Database = {
         Returns: string
       }
       hiring_fit_report: { Args: { _id: string }; Returns: Json }
+      hiring_reopen: { Args: { _applicant_id: string }; Returns: undefined }
       hiring_resolve_deadline: {
         Args: { _id: string; _kind: string }
         Returns: undefined
@@ -9689,6 +9690,8 @@ export type Database = {
         Args: { _due: string; _id: string; _kind: string; _nudge?: string }
         Returns: undefined
       }
+      hiring_sprint_active: { Args: never; Returns: boolean }
+      hiring_sprint_set: { Args: { _on: boolean }; Returns: Json }
       hiring_tick: { Args: never; Returns: number }
       inbox_message_visit: {
         Args: { _message_id: string }

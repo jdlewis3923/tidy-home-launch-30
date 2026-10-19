@@ -1338,6 +1338,13 @@
       "when": 1792370436082,
       "tag": "0190_social_linkedin_nextdoor_manual_and_image_override",
       "breakpoints": true
+    },
+    {
+      "idx": 191,
+      "version": "7",
+      "when": 1792429502432,
+      "tag": "0191_hiring_sprint_mode_invite_reopen_weekday_slots",
+      "breakpoints": true
     }
   ]
 }
