@@ -1331,6 +1331,13 @@
       "when": 1792369437250,
       "tag": "0189_social_external_history_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 190,
+      "version": "7",
+      "when": 1792370436082,
+      "tag": "0190_social_linkedin_nextdoor_manual_and_image_override",
+      "breakpoints": true
     }
   ]
 }

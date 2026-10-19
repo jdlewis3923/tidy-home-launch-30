@@ -10548,6 +10548,7 @@ export type Database = {
           _dry_run?: boolean
           _id: string
           _image_hash: string
+          _image_url?: string
           _platform: string
         }
         Returns: Json
