@@ -124,39 +124,52 @@ Deno.serve(async req=>{
   }
   const {data:posts,error}=await sb.rpc('claim_due_social_posts',{_limit:1,_only:post_id??null});if(error)throw error;
   const results=[];
-  for(const p of (posts??[]) as Post[]){
-   try{
-    const im=await image(p.image_url);const caption=render(p);if(/\{(?:LAUNCH|CONVERT)\}/.test(caption))throw new Error('Launch date missing');
-    const token=await vault('meta_fb_page_access_token');if(!token)throw new Error('Meta connection unavailable');
-    // Preflight every destination before publishing either one.
-    const fb=platforms(p.channel).includes('facebook')?await vault('meta_fb_page_id'):null;
-    const ig=platforms(p.channel).includes('instagram')?await vault('meta_ig_user_id'):null;
-    if(platforms(p.channel).includes('facebook')&&!fb)throw new Error('Facebook page missing');
-    if(platforms(p.channel).includes('instagram')&&(!ig||im.type!=='image/jpeg'))throw new Error(!ig?'Instagram account missing':'Instagram needs a JPEG image');
-    for(const platform of platforms(p.channel)){
-     const copy=platform==='instagram'?instagramVersion(caption):caption;
-     const {data:r,error:reserveError}=await sb.rpc('social_reserve_publish',{_id:p.id,_platform:platform,_caption:copy,_image_hash:im.hash});if(reserveError)throw reserveError;
-     const reservation=r as {ok:boolean;reason?:string;ledger_id:string;image_url:string;caption:string};
-     if(!reservation.ok)throw new Error(reservation.reason??'Blocked');
-     let id:string|undefined;
-     try{
-      if(platform==='facebook'){
-       const response=await api(`${fb}/photos`,token,{url:reservation.image_url,caption:reservation.caption});id=response.post_id??response.id;
-      }else{
-       const container=await api(`${ig}/media`,token,{image_url:reservation.image_url,caption:reservation.caption});if(!container.id)throw new Error('Instagram container missing');
-       let ready=false;
-       for(let attempt=0;attempt<12;attempt++){
-        const state=await api(`${container.id}?fields=status_code`,token);
-        if(state.status_code==='FINISHED'){ready=true;break;}if(state.status_code==='ERROR')throw new Error('Instagram image processing failed');
-        await new Promise(resolve=>setTimeout(resolve,2000));
+   for(const p of (posts??[]) as Post[]){
+    try{
+     if(p.channel==='nextdoor')continue; // manual-only; never auto-posted
+     const im=await image(p.image_url);const caption=render(p);if(/\{(?:LAUNCH|CONVERT)\}/.test(caption))throw new Error('Launch date missing');
+     const targets=platforms(p.channel);
+     const needsMeta=targets.some(t=>t==='facebook'||t==='instagram');
+     const token=needsMeta?await vault('meta_fb_page_access_token'):null;
+     if(needsMeta&&!token)throw new Error('Meta connection unavailable');
+     const linkedinHook=targets.includes('linkedin')?Deno.env.get('LINKEDIN_ZAP_WEBHOOK_URL'):null;
+     if(targets.includes('linkedin')&&!linkedinHook)throw new Error('LinkedIn webhook not configured');
+     // Preflight every destination before publishing either one.
+     const fb=targets.includes('facebook')?await vault('meta_fb_page_id'):null;
+     const ig=targets.includes('instagram')?await vault('meta_ig_user_id'):null;
+     if(targets.includes('facebook')&&!fb)throw new Error('Facebook page missing');
+     if(targets.includes('instagram')&&!ig)throw new Error('Instagram account missing');
+     // Instagram publishes a JPEG derived from the locked image; Facebook keeps the original.
+     const igImage=targets.includes('instagram')?(im.type==='image/jpeg'?{url:p.image_url!,hash:im.hash}:await instagramJpeg(im.bytes)):null;
+     for(const platform of targets){
+      const copy=platform==='instagram'?instagramVersion(caption):caption;
+      const platformImage=platform==='instagram'?igImage!:{url:p.image_url!,hash:im.hash};
+      const {data:r,error:reserveError}=await sb.rpc('social_reserve_publish',{_id:p.id,_platform:platform,_caption:copy,_image_hash:platformImage.hash,_image_url:platformImage.url});if(reserveError)throw reserveError;
+      const reservation=r as {ok:boolean;reason?:string;ledger_id:string;image_url:string;caption:string};
+      if(!reservation.ok)throw new Error(reservation.reason??'Blocked');
+      let id:string|undefined;
+      try{
+       if(platform==='facebook'){
+        const response=await api(`${fb}/photos`,token!,{url:reservation.image_url,caption:reservation.caption});id=response.post_id??response.id;
+       }else if(platform==='linkedin'){
+        const response=await fetch(linkedinHook!,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caption:reservation.caption,image_url:reservation.image_url,scheduled_for:p.scheduled_for,post_id:p.id})});
+        if(!response.ok)throw new Error(`LinkedIn webhook [${response.status}]`);
+        id=`zap:${crypto.randomUUID()}`;
+       }else{
+        const container=await api(`${ig}/media`,token!,{image_url:reservation.image_url,caption:reservation.caption});if(!container.id)throw new Error('Instagram container missing');
+        let ready=false;
+        for(let attempt=0;attempt<12;attempt++){
+         const state=await api(`${container.id}?fields=status_code`,token!);
+         if(state.status_code==='FINISHED'){ready=true;break;}if(state.status_code==='ERROR')throw new Error('Instagram image processing failed');
+         await new Promise(resolve=>setTimeout(resolve,2000));
+        }
+        if(!ready)throw new Error('Instagram image not ready; held for manual review');
+        const response=await api(`${ig}/media_publish`,token!,{creation_id:container.id});id=response.id;
        }
-       if(!ready)throw new Error('Instagram image not ready; held for manual review');
-       const response=await api(`${ig}/media_publish`,token,{creation_id:container.id});id=response.id;
-      }
-      if(!id)throw new Error('Platform did not return a post ID');
-      const {error:confirmError}=await sb.rpc('social_confirm_publish',{_ledger:reservation.ledger_id,_platform_id:id});if(confirmError)throw confirmError;
-     }catch(e){await sb.from('social_publish_ledger').update(id?{state:'posted',platform_post_id:id,confirmed_at:new Date().toISOString(),error:String(e)}:{state:'posting',error:`Uncertain provider result; never retry automatically: ${String(e)}`}).eq('id',reservation.ledger_id).is('platform_post_id',null);throw e;}
-    }
+       if(!id)throw new Error('Platform did not return a post ID');
+       const {error:confirmError}=await sb.rpc('social_confirm_publish',{_ledger:reservation.ledger_id,_platform_id:id});if(confirmError)throw confirmError;
+      }catch(e){await sb.from('social_publish_ledger').update(id?{state:'posted',platform_post_id:id,confirmed_at:new Date().toISOString(),error:String(e)}:{state:'posting',error:`Uncertain provider result; never retry automatically: ${String(e)}`}).eq('id',reservation.ledger_id).is('platform_post_id',null);throw e;}
+     }
     await sb.from('social_launch_posts').update({status:'posted',publish_error:null}).eq('id',p.id);results.push({id:p.id,ok:true});
    }catch(e){const message=String(e);await sb.from('social_launch_posts').update({status:'blocked',publish_error:message}).eq('id',p.id);
     await writeAlert(sb as never,{level:'action',category:'operations',tier:'digest',title:'Social post blocked',body:message,action_url:'/admin/social',action_label:'Open social calendar',dedupe_key:`social_blocked:${p.id}`,context:{post_id:p.id}});results.push({id:p.id,ok:false,error:message});
