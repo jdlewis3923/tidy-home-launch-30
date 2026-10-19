@@ -139,6 +139,7 @@ const HiringFitReport = lazy(() => import("./pages/admin/HiringFitReport"));
 const HiringScorecard = lazy(() => import("./pages/admin/HiringScorecard"));
 const HiringSlots = lazy(() => import("./pages/admin/HiringSlots"));
 const HiringOutbox = lazy(() => import("./pages/admin/HiringOutbox"));
+const HiringInvite = lazy(() => import("./pages/admin/HiringInvite"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const LifecycleSimulator = lazy(() => import("./pages/admin/LifecycleSimulator"));
 const HiringContent = lazy(() => import("./pages/admin/HiringContent"));

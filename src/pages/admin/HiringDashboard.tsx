@@ -32,6 +32,7 @@ export default function HiringDashboard() {
   const [funnel, setFunnel] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [dryRun, setDryRun] = useState<boolean | null>(null);
+  const [sprint, setSprint] = useState<boolean | null>(null);
   const [today, setToday] = useState<TodayRow[]>([]);
   const [unmatched, setUnmatched] = useState<UnmatchedRow[]>([]);
 
