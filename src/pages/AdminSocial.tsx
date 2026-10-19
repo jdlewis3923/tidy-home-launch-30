@@ -184,6 +184,13 @@ export default function AdminSocial() {
         {!locked && (
           <div className="mt-3 flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={() => void save(p)}>Save copy</Button>
+            {p.channel === 'nextdoor' && (
+              <>
+                <Button size="sm" variant="outline" onClick={() => void copyCaption(p)}>Copy caption</Button>
+                {p.image_url && <a href={p.image_url} download target="_blank" rel="noreferrer" className="inline-flex h-9 items-center rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent">Download image</a>}
+                <Button size="sm" onClick={() => void markPosted(p)} disabled={busy}>Mark posted</Button>
+              </>
+            )}
             <label className="text-xs text-muted-foreground">Replace image<input aria-label={`Replace image ${label(p)} ${platform}`} type="file" accept="image/jpeg,image/png" disabled={busy} onChange={e => void replaceImage(p, e.target.files?.[0])} className="block max-w-60" /></label>
             <label className="text-xs text-muted-foreground">New time (your local time)<input aria-label={`New time ${label(p)} ${platform}`} type="datetime-local" value={moves[p.id] ?? ''} onChange={e => setMoves({ ...moves, [p.id]: e.target.value })} className="block rounded border border-input bg-background p-1.5 text-foreground" /></label>
             <Button size="sm" variant="outline" onClick={() => void movePost(p)} disabled={!moves[p.id]}>Move post</Button>
