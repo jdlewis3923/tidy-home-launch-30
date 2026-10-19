@@ -30,7 +30,7 @@ async function sendSms(to: string, body: string, key: string, template: string) 
 // deno-lint-ignore no-explicit-any
 async function logTimeline(admin: any, applicantId: string, note: string, meta: Record<string, unknown> = {}) {
   await admin.from('contractor_stage_events').insert({
-    applicant_id: applicantId, event: 'note', note, meta,
+    applicant_id: applicantId, kind: 'message', reason: note, metadata: { direction: 'inbound', ...meta },
   }).then(() => {}, (e: unknown) => console.error('[hiring-inbound] timeline log failed', e));
 }
 
