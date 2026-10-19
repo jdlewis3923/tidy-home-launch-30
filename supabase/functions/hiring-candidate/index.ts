@@ -73,7 +73,10 @@ Deno.serve(async (req) => {
       invited_at: new Date().toISOString(), invite_deadline_at: new Date(Date.now() + 48 * 3600e3).toISOString(),
     }).eq('applicant_id', a.id);
     if (pErr) { await admin.from('applicants').delete().eq('id', a.id); return jsonResponse({ error: 'start_failed' }, 500); }
-    await admin.rpc('hiring_set_deadline', { _id: a.id, _kind: 'apply', _due: new Date(Date.now() + 48 * 3600e3).toISOString(), _nudge: new Date(Date.now() + 24 * 3600e3).toISOString() });
+    const { data: sprint } = await admin.rpc('hiring_sprint_active');
+    const hours = sprint ? 24 : 48;
+    await admin.from('contractor_pipeline').update({ invite_deadline_at: new Date(Date.now() + hours * 3600e3).toISOString() }).eq('applicant_id', a.id);
+    await admin.rpc('hiring_set_deadline', { _id: a.id, _kind: 'apply', _due: new Date(Date.now() + hours * 3600e3).toISOString(), _nudge: new Date(Date.now() + (hours / 2) * 3600e3).toISOString() });
     return jsonResponse({ ok: true, token });
   }
 
