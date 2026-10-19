@@ -50,6 +50,22 @@ async function faqFor(lang: string) {
   }));
 }
 
+
+// Equipment proof link: issued the moment the application is submitted so the
+// candidate can upload right away (and resume later from the same link).
+async function ensureProofUrl(p: Record<string, unknown>): Promise<string | null> {
+  if (p.archived || !p.apply_submitted_at && !p.__submitting) return null;
+  if (!['applied', 'proof'].includes(String(p.stage)) && !p.__submitting) return null;
+  if (p.proof_approved_at) return null;
+  let tok = p.proof_token as string | null;
+  const exp = p.proof_token_expires_at ? new Date(String(p.proof_token_expires_at)).getTime() : 0;
+  if (!tok || exp < Date.now()) {
+    tok = tok ?? Array.from(crypto.getRandomValues(new Uint8Array(24))).map((b) => b.toString(16).padStart(2, '0')).join('');
+    await admin.from('contractor_pipeline').update({ proof_token: tok, proof_token_expires_at: new Date(Date.now() + 14 * 86400_000).toISOString(), proof_link_sent_at: new Date().toISOString() }).eq('applicant_id', p.applicant_id);
+  }
+  return `https://jointidy.co/pro/proof/${tok}`;
+}
+
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
@@ -92,6 +108,7 @@ Deno.serve(async (req) => {
     const faq = await faqFor(lang);
     return jsonResponse({
       ok: true, lang, service: p.service, stage: p.stage, submitted: !!p.apply_submitted_at,
+      proof_url: p.apply_submitted_at ? await ensureProofUrl(p) : null,
       questions: qs.map((q) => ({
         id: q.id, key: q.key, section: q.section, type: q.type,
         label: lang === 'es' ? q.label_es : q.label_en,
@@ -119,7 +136,7 @@ Deno.serve(async (req) => {
 
   // ---- submit: required + knockout validation, stamp, mirror identity fields
   if (action === 'submit') {
-    if (p.apply_submitted_at) return jsonResponse({ ok: true, already: true });
+    if (p.apply_submitted_at) return jsonResponse({ ok: true, already: true, proof_url: await ensureProofUrl(p) });
     const qs = await questionsFor(String(p.service));
     const { data: answers } = await admin.from('application_answers').select('question_id, value').eq('candidate_id', p.applicant_id);
     const byId = new Map((answers ?? []).map((r) => [r.question_id, r.value]));
@@ -158,7 +175,8 @@ Deno.serve(async (req) => {
       ref_relationship: String(val('ref.relationship') ?? ''),
     }).eq('applicant_id', p.applicant_id);
     // Trigger pipeline_on_application_submitted advances invited → applied + sets proof deadline.
-    return jsonResponse({ ok: true });
+    const proof_url = await ensureProofUrl({ ...p, __submitting: true });
+    return jsonResponse({ ok: true, proof_url });
   }
 
   // ---- slots: open slots of a kind

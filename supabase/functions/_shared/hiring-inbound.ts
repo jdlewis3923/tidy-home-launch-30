@@ -30,7 +30,7 @@ async function sendSms(to: string, body: string, key: string, template: string) 
 // deno-lint-ignore no-explicit-any
 async function logTimeline(admin: any, applicantId: string, note: string, meta: Record<string, unknown> = {}) {
   await admin.from('contractor_stage_events').insert({
-    applicant_id: applicantId, event: 'note', note, meta,
+    applicant_id: applicantId, kind: 'message', reason: note, metadata: { direction: 'inbound', ...meta },
   }).then(() => {}, (e: unknown) => console.error('[hiring-inbound] timeline log failed', e));
 }
 
@@ -176,7 +176,7 @@ export async function handleHiringInbound(admin: any, fromRaw: string, body: str
   }
 
   // ---- Anything else: timeline + 9 AM digest "Unread reply" ----
-  await logTimeline(admin, applicant.id, `Unread reply: ${body.slice(0, 300)}`, { twilio_sid: messageSid });
+  await logTimeline(admin, applicant.id, `Unread reply: ${body.slice(0, 300)}`, { twilio_sid: messageSid, text: body });
   await admin.from('admin_alerts').insert({
     alert_type: 'hiring_unread_reply', level: 'action', category: 'hiring',
     title: `Unread reply from ${first}`,

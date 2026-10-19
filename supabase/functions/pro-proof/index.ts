@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   if (!rec) return jsonResponse({ error: 'not_found' }, 404);
   const { p, first } = rec;
   if (p.archived || p.state !== 'open') return jsonResponse({ error: 'closed' }, 410);
-  if (p.stage !== 'proof' || p.proof_approved_at) return jsonResponse({ error: 'done' }, 410);
+  if (!['applied', 'proof'].includes(p.stage) || !p.apply_submitted_at || p.proof_approved_at) return jsonResponse({ error: 'done' }, 410);
   if (!p.proof_token_expires_at || new Date(p.proof_token_expires_at).getTime() < Date.now()) return jsonResponse({ error: 'expired' }, 410);
 
   const { data: slotRows } = await admin.rpc('pipeline_proof_slots', { _service: p.service });
