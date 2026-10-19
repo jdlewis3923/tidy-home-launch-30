@@ -66,7 +66,7 @@ export function inTextingWindow(now: Date = new Date()): boolean {
   return hour >= 9 && hour < 19;
 }
 
-/** Calls: weekdays 7:00–8:30 PM, Saturday 9:00–11:00 AM (America/New_York). */
+/** Calls: weekdays 7:00–8:30 PM only (America/New_York). No Saturday calls. */
 export function inCallWindow(when: Date): boolean {
   const fmt = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
