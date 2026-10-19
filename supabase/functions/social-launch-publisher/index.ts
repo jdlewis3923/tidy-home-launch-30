@@ -61,6 +61,13 @@ Deno.serve(async req=>{
    if(action==='status'){
     return json({linkedin_configured:!!Deno.env.get('LINKEDIN_ZAP_WEBHOOK_URL')});
    }
+   if(action==='linkedin_test'){
+    const hook=Deno.env.get('LINKEDIN_ZAP_WEBHOOK_URL');if(!hook)return json({error:'LINKEDIN_ZAP_WEBHOOK_URL not set'},400);
+    const {data:img}=await sb.from('social_posts').select('image_url').not('image_url','is',null).limit(1).maybeSingle();
+    const payload={caption:'Test post from Tidy, please ignore',image_url:img?.image_url??null,post_id:'test'};
+    const r=await fetch(hook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    return json({zapier_status:r.status,zapier_body:(await r.text()).slice(0,300),sent:payload});
+   }
    if(action==='history'){
    const token=await vault('meta_fb_page_access_token');const fb=await vault('meta_fb_page_id');const ig=await vault('meta_ig_user_id');
    if(!token) return json({error:'Meta connection unavailable'},409);
