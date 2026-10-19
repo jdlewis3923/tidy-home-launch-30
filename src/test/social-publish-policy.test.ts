@@ -18,6 +18,7 @@ describe('social publish rules', () => {
   it('marks a missed slot instead of posting late',()=>expect(socialBlockReason(post('a'),[],at+300001)).toBe('missed'));
   it('cannot retry confirmed platform IDs',()=>expect(socialBlockReason({...post('a'),platform_post_id:'confirmed'},[],at)).toBe('already_confirmed'));
   it('blocks same-platform image reuse for 90 days',()=>expect(socialBlockReason({...post('b'),image_hash:'a'},[{...post('a',-89*86400000),posted_at:new Date(at-89*86400000).toISOString()}],at)).toBe('repeat_within_90_days'));
+  it('blocks a repeated caption even with a different image',()=>expect(socialBlockReason({...post('b'),content_hash:'a'},[post('a',-86400000)],at)).toBe('repeat_within_90_days'));
   it('does not block a different platform',()=>expect(socialBlockReason({...post('b'),image_hash:'a'},[{...post('a'),platform:'instagram'}],at)).toBeNull());
   it('allows an image after 90 days',()=>expect(socialBlockReason({...post('b'),image_hash:'a'},[post('a',-91*86400000)],at)).toBeNull());
   it('one post per platform per slot',()=>expect(socialBlockReason(post('b'),[post('a')],at)).toBe('slot_already_used'));
