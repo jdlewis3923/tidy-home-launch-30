@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import ProofPanel from "@/components/admin/pipeline/ProofPanel";
+import CandidateTexts from "@/components/admin/pipeline/CandidateTexts";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -275,6 +276,8 @@ export default function AdminPipelineRecord() {
         </section>
 
         {(p.stage === "proof" || p.proof_submitted_at || (p.stage === "applied" && p.proof_token)) && <ProofPanel id={id} p={p} onChange={() => void load()} />}
+
+        {id && <CandidateTexts id={id} />}
 
         <section className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-lg border border-border bg-card p-4">
