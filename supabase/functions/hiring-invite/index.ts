@@ -95,7 +95,8 @@ Deno.serve(async (req) => {
 
     if (!existing) {
       const { data: ins, error } = await admin.from('applicants').insert({
-        first_name: first, phone, service, source,
+        first_name: first, last_name: '', phone, service, source,
+        email: `pending-${crypto.randomUUID().slice(0, 12)}@apply.tidy.local`,
         preferred_language: lang, current_stage: 'invited', queue_state: 'texted',
         first_texted_at: new Date().toISOString(),
       }).select('id').single();
