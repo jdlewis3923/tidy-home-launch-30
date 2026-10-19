@@ -48,6 +48,7 @@ export default function Apply() {
   const [loading, setLoading] = useState(false);
   const [starting, setStarting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [knockout, setKnockout] = useState(false);
   const [missing, setMissing] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +76,7 @@ export default function Apply() {
         setAnswers(d.answers ?? {});
         setFaq(d.faq ?? []);
         if (d.submitted) setSubmitted(true);
+        if (d.proof_url) setProofUrl(d.proof_url);
       })
       .catch(() => setError("load_failed"))
       .finally(() => setLoading(false));
@@ -110,7 +112,7 @@ export default function Apply() {
     setLoading(true); setMissing([]);
     try {
       const d = await call({ action: "submit", token });
-      if (d?.ok) { setSubmitted(true); setKnockout(!!d.knockout); }
+      if (d?.ok) { setSubmitted(true); setKnockout(!!d.knockout); if (d.proof_url) setProofUrl(d.proof_url); }
       else if (d?.error === "missing") { setMissing(d.keys ?? []); setSection(1); }
       else setError(d?.error ?? "submit_failed");
     } catch { setError("submit_failed"); }
@@ -213,7 +215,10 @@ export default function Apply() {
           <h1 className="text-2xl font-bold text-foreground mb-2">{knockout ? t("Thanks for your time", "Gracias por tu tiempo") : t("Application received", "Solicitud recibida")}</h1>
           <p className="text-muted-foreground">{knockout
             ? t("This role needs a few things you don't have right now. If that changes, apply again — we'd love to hear from you.", "Este puesto requiere algunas cosas que no tienes ahora. Si eso cambia, aplica de nuevo — nos encantaría saber de ti.")
-            : t("Next step: show us your equipment. We'll text you a link — it takes about 10 minutes on your phone.", "Siguiente paso: muéstranos tu equipo. Te enviaremos un enlace por texto — toma unos 10 minutos desde tu teléfono.")}</p>
+            : t("Next step: show us your equipment. About 10 minutes on your phone. You can stop and come back with this same link.", "Siguiente paso: muéstranos tu equipo. Unos 10 minutos desde tu teléfono. Puedes parar y volver con este mismo enlace.")}</p>
+          {!knockout && proofUrl && (
+            <Button asChild size="lg" className="mt-6 w-full h-14 text-base"><a href={`${proofUrl.replace("https://jointidy.co", "")}?lang=${lang}`}>{t("Upload equipment photos", "Subir fotos del equipo")}<ArrowRight className="h-4 w-4 ml-2" /></a></Button>
+          )}
         </div>
       </div>
     );
