@@ -17,7 +17,7 @@ import TidyLogo from "@/components/TidyLogo";
 import SeoHead from "@/components/landing/SeoHead";
 
 type Q = {
-  id: string; key: string; section: number; type: string; label: string;
+  id: string; key: string; section: number; type: string; label: string; label_en?: string; label_es?: string;
   anchors: string | null; core: boolean; weight: number; required: boolean;
   options: { value: string; en: string; es: string }[] | null; knockout: boolean; sort: number;
 };
@@ -136,7 +136,7 @@ export default function Apply() {
     const isMissing = missing.includes(q.key);
     const wrap = (children: React.ReactNode) => (
       <div key={q.id} className={`rounded-xl border p-4 ${isMissing ? "border-destructive" : "border-border"} bg-card`}>
-        <p className="font-medium text-foreground mb-3">{q.label}{q.required && q.type !== "slider" ? <span className="text-destructive"> *</span> : null}</p>
+        <p className="font-medium text-foreground mb-3">{(lang === "es" ? q.label_es : q.label_en) ?? q.label}{q.required && q.type !== "slider" ? <span className="text-destructive"> *</span> : null}</p>
         {children}
       </div>
     );

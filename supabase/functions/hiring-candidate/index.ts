@@ -95,6 +95,7 @@ Deno.serve(async (req) => {
       questions: qs.map((q) => ({
         id: q.id, key: q.key, section: q.section, type: q.type,
         label: lang === 'es' ? q.label_es : q.label_en,
+        label_en: q.label_en, label_es: q.label_es,
         anchors: q.anchors_key, core: q.core, weight: q.weight, required: q.required,
         options: q.options, knockout: q.knockout, sort: q.sort,
       })),
