@@ -57,8 +57,11 @@ Deno.serve(async req=>{
  const cfg=await loadLaunchConfig(sb);
  const render=(p:Post)=>renderTemplate(p.template_copy??p.caption,{launch:cfg.cleaning?.first_visit_date??null,conversion:cfg.cleaning?.conversion_date??null,carLaunch:cfg.car?.first_visit_date??null,hangerDrop1:(cfg.global?.hanger_drops??[]).map(d=>d.start).sort()[0]??null},etDate(p.scheduled_for??new Date().toISOString()));
  const platforms=(c:string)=>c==='meta_combined'?['facebook','instagram']:[c];
- try{
-  if(action==='history'){
+  try{
+   if(action==='status'){
+    return json({linkedin_configured:!!Deno.env.get('LINKEDIN_ZAP_WEBHOOK_URL')});
+   }
+   if(action==='history'){
    const token=await vault('meta_fb_page_access_token');const fb=await vault('meta_fb_page_id');const ig=await vault('meta_ig_user_id');
    if(!token) return json({error:'Meta connection unavailable'},409);
    const result:Record<string,unknown>={};
