@@ -205,8 +205,8 @@ Deno.serve(async (req) => {
   } else if (event === 'book_phone') {
     const bookUrl = p.apply_resume_token ? `${SITE}/pro/book/${p.apply_resume_token}` : `${SITE}/apply`;
     sms = lang === 'es'
-      ? `Hola ${first}, soy Justin de Tidy. Recibimos tu equipo. Elige la hora de tu llamada de 15 minutos (tardes entre semana o sábado por la mañana): ${bookUrl}`
-      : `Hi ${first}, it's Justin from Tidy. We got your equipment. Pick a time for your 15-minute call (weekday evenings or Saturday morning): ${bookUrl}`;
+      ? `Hola ${first}, soy Justin de Tidy. Recibimos tu equipo. Elige la hora de tu llamada de 15 minutos (tardes entre semana): ${bookUrl}`
+      : `Hi ${first}, it's Justin from Tidy. We got your equipment. Pick a time for your 15-minute call (weekday evenings): ${bookUrl}`;
     subject = lang === 'es' ? 'Elige la hora de tu llamada de 15 minutos' : 'Pick a time for your 15-minute call';
     html = `<p>${esc(sms)}</p>`;
   } else if (event === 'slot_reminder') {

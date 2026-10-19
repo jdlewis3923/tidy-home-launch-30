@@ -196,7 +196,13 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Meeting location editor + booking block when empty
 - [x] Scheduler timing: 15-min 8AM–9PM ET, hourly overnight
 - [x] 13 v5 checks run in dry-run — all pass
-- [ ] Re-run SMS-dependent checks live once Twilio is reactivated
+- [x] Twilio reactivated 19 Oct: dry-run OFF, readiness probe all-pass (10DLC VERIFIED), real test text accepted (SM3b8f0ecb…), 13 Indeed invites sent live
+- [x] Invite page /admin/hiring/invite (hiring-invite fn): paste rows → create/resend/reopen-by-phone, tokenized /apply link, EN/ES, sprint-aware deadline
+- [x] Sprint mode: hiring_sprint_set RPC + dashboard toggle; 48h→24h deadlines, 12h nudge, auto-off Thu 29 Oct 11:59 PM ET
+- [x] Andrew booked Thu 22 Oct 12:00 PM ET phone (staff Justin), note "Call agreed by text. Application due before the call."
+- [x] Slots: Sat 24 Oct phone+in-person and future Saturday in-person deleted; seed now phone Mon–Fri only + in-person Wed 28/Thu 29 Oct
+- [x] Candidate texts de-Saturday'd (book_phone, ProBook, inCallWindow); FAQ uses live launch placeholders
+- [ ] Rebecca was NOT already on file — created fresh (no resend needed); confirm her Indeed phone matches
 
 ## Lifecycle messaging (replaces Zapier) — in progress, shadow mode ON
 - [x] Engine: contacts, lifecycle_sequences, lifecycle_templates, message_queue; quiet hours; stage-change stop rule; orphans RPC

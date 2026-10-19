@@ -1,29 +1,17 @@
 ---
 name: transactional-messaging
-description: Email and SMS architecture — fire Zapier webhooks only, never call Brevo/Twilio/Resend directly from edge functions
+description: Messaging state — lifecycle engine replaced Zapier; Twilio active since 19 Oct 2026; hiring SMS dry-run OFF
 type: constraint
 ---
 
-Tidy already operates a complete transactional-messaging stack outside Lovable:
+Current state (19 Oct 2026):
 
-- **Brevo**: 14 pre-built templates + automations for PRE-1 through L12 sequences.
-- **Twilio**: SMS sends are handled inside existing Zaps (e.g., Zap 3 on Stripe payment, Zap 9 on Jobber visit complete).
-- **Zapier**: orchestrates Brevo template send + status updates + Twilio SMS for every customer-facing message.
+- **Twilio is ACTIVE.** Account reactivated 19 Oct; readiness probe all-pass, 10DLC campaign VERIFIED ("Tidy SMS Service", LOW_VOLUME). Sending number (786) 829-1141. A real test text was accepted (queued) the same day.
+- **Hiring SMS dry-run is OFF** (`app_settings.sms_dry_run = "off"`). All hiring texts send for real. The Outbox page and Simulate reply remain for testing.
+- **Lifecycle engine** (contacts/sequences/message_queue + `lifecycle-tick`) replaced Zapier for customer messaging; rows stay `live=false` (shadow) until flipped per the cutover checklist. Only exception: LinkedIn posts go through `LINKEDIN_ZAP_WEBHOOK_URL`.
+- **Hiring sprint mode**: `hiring_sprint_set(on)` compresses all deadlines to 24 h with 12 h nudges; auto-off Thu 29 Oct 2026 11:59 PM ET. Toggle on /admin/hiring.
+- **Invites**: /admin/hiring/invite pastes rows → `hiring-invite` creates/resends/reopens by phone, texts a tokenized /apply link (EN/ES).
+- **Slots**: phone screens Mon–Fri evenings only (no Saturday); in-person only Wed 28 / Thu 29 Oct 2026. `hiring_seed_slots` enforces this.
+- Candidate-facing texts must never mention Saturday, Nov 16, or Nov 30. Cleaning/lawn first visits Mon 23 Nov 2026; car care opens on demand (10 reservations).
 
-**Architecture rule for Phase 4 (email) and Phase 5 (SMS):**
-
-- Edge functions MUST NOT call Brevo, Twilio, or Resend directly.
-- Edge functions MUST fire a Zapier webhook for each key event; the existing Zaps do the actual send.
-- Build ONE shared edge function: `send-zapier-event(event_name, payload)` that routes to the correct webhook URL based on `event_name`.
-- Each event's Zapier webhook URL is stored as its own runtime secret (one secret per event, e.g. `ZAP_SUBSCRIPTION_CONFIRMED_URL`, `ZAP_VISIT_COMPLETE_URL`, `ZAP_PAYMENT_FAILED_URL`, etc.).
-- Call `send-zapier-event` from: `stripe-webhook`, `jobber-webhook`, `account-provisioning`, and any future server-side trigger.
-
-**Why:** Avoid duplicating template/sender logic that already lives in Brevo + Zapier. Lovable's role is event emission and observability (`integration_logs`), not message rendering or delivery.
-
-**Do NOT:**
-- Add the Resend connector.
-- Verify an email-sending domain through Lovable.
-- Build React Email templates.
-- Call the Brevo or Twilio APIs from edge functions.
-
-The 7 (or so) key event names will be finalized at Phase 4 kickoff before any webhook secrets are added.
+Do NOT re-enable dry-run or reintroduce Zapier for customer messaging without Justin's say-so.

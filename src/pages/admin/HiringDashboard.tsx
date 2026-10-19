@@ -32,6 +32,7 @@ export default function HiringDashboard() {
   const [funnel, setFunnel] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [dryRun, setDryRun] = useState<boolean | null>(null);
+  const [sprint, setSprint] = useState<boolean | null>(null);
   const [today, setToday] = useState<TodayRow[]>([]);
   const [unmatched, setUnmatched] = useState<UnmatchedRow[]>([]);
 
@@ -40,6 +41,9 @@ export default function HiringDashboard() {
     // SMS dry-run toggle
     const { data: dr } = await supabase.from("app_settings").select("value").eq("key", "sms_dry_run").maybeSingle();
     setDryRun(dr?.value === "on");
+    const { data: sp } = await supabase.from("app_settings").select("value").eq("key", "hiring_sprint_mode").maybeSingle();
+    const spv = sp?.value as { on?: boolean; until?: string } | undefined;
+    setSprint(!!spv?.on && (!spv.until || new Date(spv.until) > new Date()));
 
     // Today list: today's booked slots (ET), time order
     const etNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
@@ -117,12 +121,23 @@ export default function HiringDashboard() {
     if (!error) setDryRun(next);
   };
 
+  const toggleSprint = async () => {
+    const next = !sprint;
+    const { error } = await supabase.rpc("hiring_sprint_set", { _on: next });
+    if (!error) setSprint(next);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Hiring</h1>
         <div className="flex items-center gap-3">
+          <Link to="/admin/hiring/invite" className="text-sm text-primary underline">Invite</Link>
           <Link to="/admin/hiring/outbox" className="text-sm text-primary underline">Outbox</Link>
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input type="checkbox" checked={!!sprint} onChange={toggleSprint} className="h-4 w-4" />
+            Sprint mode (24 h deadlines)
+          </label>
           <label className="flex items-center gap-2 text-sm text-foreground">
             <input type="checkbox" checked={!!dryRun} onChange={toggleDryRun} className="h-4 w-4" />
             SMS dry-run
@@ -133,6 +148,11 @@ export default function HiringDashboard() {
       {dryRun ? (
         <div className="rounded-xl border border-amber-300 bg-amber-50 text-amber-800 px-4 py-3 mb-6 text-sm font-medium">
           SMS dry-run is ON — no texts are sent. Everything lands in the Outbox, and you can simulate replies on each candidate.
+        </div>
+      ) : null}
+      {sprint ? (
+        <div className="rounded-xl border border-blue-300 bg-blue-50 text-blue-800 px-4 py-3 mb-6 text-sm font-medium">
+          Sprint mode is ON — every deadline is 24 hours with a nudge at 12. It switches off automatically Thu Oct 29 at 11:59 PM.
         </div>
       ) : null}
 

@@ -92,8 +92,8 @@ export default function ProBook() {
             </h1>
             <p className="text-muted-foreground mb-6">
               {kind === "phone"
-                ? t("Weekday evenings or Saturday morning. We'll call you.", "Tardes entre semana o sábado por la mañana. Te llamamos nosotros.")
-                : t("Saturdays, about an hour. We send the address after you confirm.", "Sábados, alrededor de una hora. Te enviamos la dirección después de confirmar.")}
+                ? t("Weekday evenings. We'll call you.", "Tardes entre semana. Te llamamos nosotros.")
+                : t("Wednesday or Thursday, about an hour. We send the address after you confirm.", "Miércoles o jueves, alrededor de una hora. Te enviamos la dirección después de confirmar.")}
             </p>
 
             {["agreement", "background", "insured"].includes(stage) && !checkinDone ? (
