@@ -1317,6 +1317,13 @@
       "when": 1792369091784,
       "tag": "0187_social_isolated_dry_runs",
       "breakpoints": true
+    },
+    {
+      "idx": 188,
+      "version": "7",
+      "when": 1792369306950,
+      "tag": "0188_social_test_post_numbers",
+      "breakpoints": true
     }
   ]
 }
