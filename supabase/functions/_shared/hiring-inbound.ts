@@ -176,7 +176,7 @@ export async function handleHiringInbound(admin: any, fromRaw: string, body: str
   }
 
   // ---- Anything else: timeline + 9 AM digest "Unread reply" ----
-  await logTimeline(admin, applicant.id, `Unread reply: ${body.slice(0, 300)}`, { twilio_sid: messageSid });
+  await logTimeline(admin, applicant.id, `Unread reply: ${body.slice(0, 300)}`, { twilio_sid: messageSid, text: body });
   await admin.from('admin_alerts').insert({
     alert_type: 'hiring_unread_reply', level: 'action', category: 'hiring',
     title: `Unread reply from ${first}`,
