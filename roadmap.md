@@ -6,6 +6,8 @@
 - [x] Exact 14-day preview with image replacement and rescheduling; browser dry-run published three isolated snapshots and blocked duplicate fourth. PNG Instagram cards remain visibly blocked until JPEG replacements.
 - [x] All-service selection enabled; nine service/ZIP quotes and three admin-authorized test reservations verified through UI, test reservations deleted (0 remain).
 - [ ] External social history and disable social Zaps / clear Meta Planner — requires Justin's connected accounts or exports.
+- [ ] LINKEDIN_ZAP_WEBHOOK_URL secret not set — Justin must add it (red banner on /admin/social until then); LinkedIn posts block without it.
+- [ ] Social post #2 (Oct 16, "What a founding home gets") is missed — Justin reschedules explicitly on /admin/social.
 
 ## Lifecycle event triggers + simulator (Oct 18) — shadow only, unpublished
 - [x] Lead/reservation/invoice/visit/rating/move/add-on/referral table events and checkout expiry hooks; daily planner reuses the existing tick; all 50 rules remain shadow.
