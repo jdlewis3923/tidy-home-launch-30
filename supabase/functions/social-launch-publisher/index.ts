@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { Image } from 'https://deno.land/x/imagescript@1.2.15/mod.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { writeAlert } from '../_shared/alerts.ts';
@@ -9,7 +10,7 @@ import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { sha256 } from '../_shared/social-publish-policy.ts';
 const graph = 'https://graph.facebook.com/v19.0';
 const json = (data: unknown, status=200) => new Response(JSON.stringify(data),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
-const Body=z.object({action:z.enum(['publish','audit','dry_run','history']).default('publish'),post_id:z.string().uuid().optional()});
+const Body=z.object({action:z.enum(['publish','audit','dry_run','history','status']).default('publish'),post_id:z.string().uuid().optional()});
 type Post={id:string;channel:string;caption:string;template_copy:string|null;image_url:string|null;image_hash:string|null;scheduled_for:string|null;post_number:number|null;is_test:boolean;external_post_id:string|null;posted_at:string|null};
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
@@ -23,15 +24,31 @@ Deno.serve(async req=>{
  if(!url||!key)return json({error:'Publishing configuration missing'},500);
  const sb=createClient(url,key,{auth:{persistSession:false}});
  const vault=async(name:string)=>{const {data,error}=await sb.rpc('admin_get_meta_secret',{_name:name});if(error)throw new Error(error.message);return data as string|null;};
- const image=async(u:string|null)=>{
-  if(!u)throw new Error('missing_image');
-  // Only our public social bucket; never fetch arbitrary client URLs or redirects.
-  if(!u.startsWith(`${url}/storage/v1/object/public/social-images/`))throw new Error('Image must be uploaded to the social calendar');
-  const r=await fetch(u,{redirect:'error'});if(!r.ok)throw new Error(`Image unavailable [${r.status}]`);
-  const bytes=await r.arrayBuffer();if(bytes.byteLength>15*1024*1024)throw new Error('Image too large');
-  if(!(r.headers.get('content-type')??'').startsWith('image/'))throw new Error('Not an image');
-  return {hash:await sha256(bytes),type:r.headers.get('content-type')};
- };
+  const image=async(u:string|null)=>{
+   if(!u)throw new Error('missing_image');
+   // Only our public social bucket; never fetch arbitrary client URLs or redirects.
+   if(!u.startsWith(`${url}/storage/v1/object/public/social-images/`))throw new Error('Image must be uploaded to the social calendar');
+   const r=await fetch(u,{redirect:'error'});if(!r.ok)throw new Error(`Image unavailable [${r.status}]`);
+   const bytes=await r.arrayBuffer();if(bytes.byteLength>15*1024*1024)throw new Error('Image too large');
+   if(!(r.headers.get('content-type')??'').startsWith('image/'))throw new Error('Not an image');
+   return {hash:await sha256(bytes),type:r.headers.get('content-type'),bytes};
+  };
+  // Instagram needs a JPEG. Convert the locked PNG at publish time: sRGB, quality 90,
+  // 1080x1350 portrait or 1080x1080 square to match the card. The original PNG stays
+  // on the post and is still what Facebook publishes.
+  const instagramJpeg=async(bytes:ArrayBuffer)=>{
+   const img=await Image.decode(new Uint8Array(bytes));
+   const portrait=img.height>img.width;
+   const w=1080,h=portrait?1350:1080;
+   img.resize(w,h);
+   const jpeg=await img.encodeJPEG(90);
+   const hash=await sha256(jpeg.buffer.slice(jpeg.byteOffset,jpeg.byteOffset+jpeg.byteLength) as ArrayBuffer);
+   const path=`derived/ig-${hash}.jpg`;
+   const {error:upError}=await sb.storage.from('social-images').upload(path,jpeg,{contentType:'image/jpeg',upsert:true});
+   if(upError)throw upError;
+   const {data:pub}=sb.storage.from('social-images').getPublicUrl(path);
+   return {url:pub.publicUrl,hash,type:'image/jpeg'};
+  };
  const api=async(path:string,token:string,body?:Record<string,string>)=>{
   const response=await fetch(`${graph}/${path}`,body?{method:'POST',body:new URLSearchParams({...body,access_token:token})}:{headers:{Authorization:`Bearer ${token}`}});
   if(!response.ok)throw new Error(`Meta [${response.status}]: ${await response.text()}`);
@@ -40,8 +57,11 @@ Deno.serve(async req=>{
  const cfg=await loadLaunchConfig(sb);
  const render=(p:Post)=>renderTemplate(p.template_copy??p.caption,{launch:cfg.cleaning?.first_visit_date??null,conversion:cfg.cleaning?.conversion_date??null,carLaunch:cfg.car?.first_visit_date??null,hangerDrop1:(cfg.global?.hanger_drops??[]).map(d=>d.start).sort()[0]??null},etDate(p.scheduled_for??new Date().toISOString()));
  const platforms=(c:string)=>c==='meta_combined'?['facebook','instagram']:[c];
- try{
-  if(action==='history'){
+  try{
+   if(action==='status'){
+    return json({linkedin_configured:!!Deno.env.get('LINKEDIN_ZAP_WEBHOOK_URL')});
+   }
+   if(action==='history'){
    const token=await vault('meta_fb_page_access_token');const fb=await vault('meta_fb_page_id');const ig=await vault('meta_ig_user_id');
    if(!token) return json({error:'Meta connection unavailable'},409);
    const result:Record<string,unknown>={};
@@ -61,11 +81,11 @@ Deno.serve(async req=>{
   if(action==='audit'){
    const {data:rows,error}=await sb.from('social_launch_posts').select('*').is('archived_at',null).eq('is_test',false).order('scheduled_for');if(error)throw error;
    const results=[];
-   for(const p of (rows??[]) as Post[]){
-    try{
-     const im=await image(p.image_url);let flag:string|null=null;
-     if(platforms(p.channel).includes('instagram')&&im.type!=='image/jpeg')flag='Instagram requires a JPEG; replace this PNG before publishing';
-     const {error:hashError}=await sb.from('social_launch_posts').update({image_hash:im.hash,image_flag:flag}).eq('id',p.id);if(hashError)throw hashError;
+    for(const p of (rows??[]) as Post[]){
+     try{
+      const im=await image(p.image_url);let flag:string|null=null;
+      // PNG cards are fine: Instagram gets an auto-converted JPEG at publish time.
+      const {error:hashError}=await sb.from('social_launch_posts').update({image_hash:im.hash,image_flag:flag}).eq('id',p.id);if(hashError)throw hashError;
      if(p.external_post_id){
       for(const platform of platforms(p.channel)){
        const aliases=platform==='facebook'?'(?:fb|facebook)': '(?:ig|instagram)';const match=p.external_post_id.match(new RegExp(`${aliases}:([^ ]+)`));
@@ -104,39 +124,52 @@ Deno.serve(async req=>{
   }
   const {data:posts,error}=await sb.rpc('claim_due_social_posts',{_limit:1,_only:post_id??null});if(error)throw error;
   const results=[];
-  for(const p of (posts??[]) as Post[]){
-   try{
-    const im=await image(p.image_url);const caption=render(p);if(/\{(?:LAUNCH|CONVERT)\}/.test(caption))throw new Error('Launch date missing');
-    const token=await vault('meta_fb_page_access_token');if(!token)throw new Error('Meta connection unavailable');
-    // Preflight every destination before publishing either one.
-    const fb=platforms(p.channel).includes('facebook')?await vault('meta_fb_page_id'):null;
-    const ig=platforms(p.channel).includes('instagram')?await vault('meta_ig_user_id'):null;
-    if(platforms(p.channel).includes('facebook')&&!fb)throw new Error('Facebook page missing');
-    if(platforms(p.channel).includes('instagram')&&(!ig||im.type!=='image/jpeg'))throw new Error(!ig?'Instagram account missing':'Instagram needs a JPEG image');
-    for(const platform of platforms(p.channel)){
-     const copy=platform==='instagram'?instagramVersion(caption):caption;
-     const {data:r,error:reserveError}=await sb.rpc('social_reserve_publish',{_id:p.id,_platform:platform,_caption:copy,_image_hash:im.hash});if(reserveError)throw reserveError;
-     const reservation=r as {ok:boolean;reason?:string;ledger_id:string;image_url:string;caption:string};
-     if(!reservation.ok)throw new Error(reservation.reason??'Blocked');
-     let id:string|undefined;
-     try{
-      if(platform==='facebook'){
-       const response=await api(`${fb}/photos`,token,{url:reservation.image_url,caption:reservation.caption});id=response.post_id??response.id;
-      }else{
-       const container=await api(`${ig}/media`,token,{image_url:reservation.image_url,caption:reservation.caption});if(!container.id)throw new Error('Instagram container missing');
-       let ready=false;
-       for(let attempt=0;attempt<12;attempt++){
-        const state=await api(`${container.id}?fields=status_code`,token);
-        if(state.status_code==='FINISHED'){ready=true;break;}if(state.status_code==='ERROR')throw new Error('Instagram image processing failed');
-        await new Promise(resolve=>setTimeout(resolve,2000));
+   for(const p of (posts??[]) as Post[]){
+    try{
+     if(p.channel==='nextdoor')continue; // manual-only; never auto-posted
+     const im=await image(p.image_url);const caption=render(p);if(/\{(?:LAUNCH|CONVERT)\}/.test(caption))throw new Error('Launch date missing');
+     const targets=platforms(p.channel);
+     const needsMeta=targets.some(t=>t==='facebook'||t==='instagram');
+     const token=needsMeta?await vault('meta_fb_page_access_token'):null;
+     if(needsMeta&&!token)throw new Error('Meta connection unavailable');
+     const linkedinHook=targets.includes('linkedin')?Deno.env.get('LINKEDIN_ZAP_WEBHOOK_URL'):null;
+     if(targets.includes('linkedin')&&!linkedinHook)throw new Error('LinkedIn webhook not configured');
+     // Preflight every destination before publishing either one.
+     const fb=targets.includes('facebook')?await vault('meta_fb_page_id'):null;
+     const ig=targets.includes('instagram')?await vault('meta_ig_user_id'):null;
+     if(targets.includes('facebook')&&!fb)throw new Error('Facebook page missing');
+     if(targets.includes('instagram')&&!ig)throw new Error('Instagram account missing');
+     // Instagram publishes a JPEG derived from the locked image; Facebook keeps the original.
+     const igImage=targets.includes('instagram')?(im.type==='image/jpeg'?{url:p.image_url!,hash:im.hash}:await instagramJpeg(im.bytes)):null;
+     for(const platform of targets){
+      const copy=platform==='instagram'?instagramVersion(caption):caption;
+      const platformImage=platform==='instagram'?igImage!:{url:p.image_url!,hash:im.hash};
+      const {data:r,error:reserveError}=await sb.rpc('social_reserve_publish',{_id:p.id,_platform:platform,_caption:copy,_image_hash:platformImage.hash,_image_url:platformImage.url});if(reserveError)throw reserveError;
+      const reservation=r as {ok:boolean;reason?:string;ledger_id:string;image_url:string;caption:string};
+      if(!reservation.ok)throw new Error(reservation.reason??'Blocked');
+      let id:string|undefined;
+      try{
+       if(platform==='facebook'){
+        const response=await api(`${fb}/photos`,token!,{url:reservation.image_url,caption:reservation.caption});id=response.post_id??response.id;
+       }else if(platform==='linkedin'){
+        const response=await fetch(linkedinHook!,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caption:reservation.caption,image_url:reservation.image_url,scheduled_for:p.scheduled_for,post_id:p.id})});
+        if(!response.ok)throw new Error(`LinkedIn webhook [${response.status}]`);
+        id=`zap:${crypto.randomUUID()}`;
+       }else{
+        const container=await api(`${ig}/media`,token!,{image_url:reservation.image_url,caption:reservation.caption});if(!container.id)throw new Error('Instagram container missing');
+        let ready=false;
+        for(let attempt=0;attempt<12;attempt++){
+         const state=await api(`${container.id}?fields=status_code`,token!);
+         if(state.status_code==='FINISHED'){ready=true;break;}if(state.status_code==='ERROR')throw new Error('Instagram image processing failed');
+         await new Promise(resolve=>setTimeout(resolve,2000));
+        }
+        if(!ready)throw new Error('Instagram image not ready; held for manual review');
+        const response=await api(`${ig}/media_publish`,token!,{creation_id:container.id});id=response.id;
        }
-       if(!ready)throw new Error('Instagram image not ready; held for manual review');
-       const response=await api(`${ig}/media_publish`,token,{creation_id:container.id});id=response.id;
-      }
-      if(!id)throw new Error('Platform did not return a post ID');
-      const {error:confirmError}=await sb.rpc('social_confirm_publish',{_ledger:reservation.ledger_id,_platform_id:id});if(confirmError)throw confirmError;
-     }catch(e){await sb.from('social_publish_ledger').update(id?{state:'posted',platform_post_id:id,confirmed_at:new Date().toISOString(),error:String(e)}:{state:'posting',error:`Uncertain provider result; never retry automatically: ${String(e)}`}).eq('id',reservation.ledger_id).is('platform_post_id',null);throw e;}
-    }
+       if(!id)throw new Error('Platform did not return a post ID');
+       const {error:confirmError}=await sb.rpc('social_confirm_publish',{_ledger:reservation.ledger_id,_platform_id:id});if(confirmError)throw confirmError;
+      }catch(e){await sb.from('social_publish_ledger').update(id?{state:'posted',platform_post_id:id,confirmed_at:new Date().toISOString(),error:String(e)}:{state:'posting',error:`Uncertain provider result; never retry automatically: ${String(e)}`}).eq('id',reservation.ledger_id).is('platform_post_id',null);throw e;}
+     }
     await sb.from('social_launch_posts').update({status:'posted',publish_error:null}).eq('id',p.id);results.push({id:p.id,ok:true});
    }catch(e){const message=String(e);await sb.from('social_launch_posts').update({status:'blocked',publish_error:message}).eq('id',p.id);
     await writeAlert(sb as never,{level:'action',category:'operations',tier:'digest',title:'Social post blocked',body:message,action_url:'/admin/social',action_label:'Open social calendar',dedupe_key:`social_blocked:${p.id}`,context:{post_id:p.id}});results.push({id:p.id,ok:false,error:message});
