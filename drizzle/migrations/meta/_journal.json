@@ -1296,6 +1296,41 @@
       "when": 1792367760961,
       "tag": "0184_lifecycle_identity_and_due_followups",
       "breakpoints": true
+    },
+    {
+      "idx": 185,
+      "version": "7",
+      "when": 1792368592790,
+      "tag": "0185_social_locked_publish_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 186,
+      "version": "7",
+      "when": 1792368674880,
+      "tag": "0186_social_confirm_each_platform",
+      "breakpoints": true
+    },
+    {
+      "idx": 187,
+      "version": "7",
+      "when": 1792369091784,
+      "tag": "0187_social_isolated_dry_runs",
+      "breakpoints": true
+    },
+    {
+      "idx": 188,
+      "version": "7",
+      "when": 1792369306950,
+      "tag": "0188_social_test_post_numbers",
+      "breakpoints": true
+    },
+    {
+      "idx": 189,
+      "version": "7",
+      "when": 1792369437250,
+      "tag": "0189_social_external_history_guard",
+      "breakpoints": true
     }
   ]
 }

@@ -1,13 +1,12 @@
 /**
  * Which services customers can actually sign up for right now.
  *
- * Lawn care and Car Care stay closed until those Pros are hired. Flip a
- * service back on by adding it to AVAILABLE_SERVICES — everything that shows a
- * service picker reads this one list, so nothing else needs editing.
+ * All three services may be selected and reserved. Paid conversion remains
+ * independently gated by verified lawn size and the approved car launch.
  */
 import type { ServiceType } from '@/lib/dashboard-pricing';
 
-export const AVAILABLE_SERVICES: ServiceType[] = ['cleaning'];
+export const AVAILABLE_SERVICES: ServiceType[] = ['cleaning', 'lawn', 'detailing'];
 
 export const isServiceAvailable = (s: ServiceType) => AVAILABLE_SERVICES.includes(s);
 

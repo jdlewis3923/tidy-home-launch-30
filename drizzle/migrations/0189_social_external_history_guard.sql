@@ -1,0 +1,6 @@
+CREATE TABLE public.social_external_history(platform text NOT NULL, platform_post_id text NOT NULL, posted_at timestamptz NOT NULL, caption text NOT NULL, content_hash text NOT NULL, image_hash text, image_file text, PRIMARY KEY(platform,platform_post_id));
+GRANT SELECT ON public.social_external_history TO authenticated;
+GRANT ALL ON public.social_external_history TO service_role;
+ALTER TABLE public.social_external_history ENABLE ROW LEVEL SECURITY;
+CREATE POLICY social_external_history_admin ON public.social_external_history FOR SELECT TO authenticated USING(public.has_role(auth.uid(),'admin'));
+DO $$ DECLARE d text; BEGIN SELECT pg_get_functiondef(oid) INTO d FROM pg_proc WHERE pronamespace='public'::regnamespace AND proname='social_reserve_publish'; d:=replace(d,'ELSIF EXISTS(SELECT 1 FROM social_publish_ledger WHERE platform=_platform AND is_test=p.is_test','ELSIF (NOT p.is_test AND EXISTS(SELECT 1 FROM public.social_external_history WHERE platform=_platform AND posted_at>=t-interval ''90 days'' AND (content_hash=h OR image_hash=_image_hash))) THEN reason:=''repeat_within_90_days''; ELSIF EXISTS(SELECT 1 FROM social_publish_ledger WHERE platform=_platform AND is_test=p.is_test'); EXECUTE d; END $$;

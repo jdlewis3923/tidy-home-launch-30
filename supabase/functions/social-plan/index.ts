@@ -33,7 +33,7 @@ async function anchorsFrom(sb: any): Promise<PlanAnchors> {
 async function loadRows(sb: any): Promise<PlanRow[]> {
   const { data, error } = await sb.from("social_launch_posts")
     .select("id, post_number, channel, anchor_type, anchor_value, priority, not_before, drop_if_bumped, is_spare, status, scheduled_for")
-    .eq("theme", "launch-calendar").is("archived_at", null);
+    .eq("theme", "launch-calendar").is("archived_at", null).eq("manual_schedule", false);
   if (error) throw error;
   return data as PlanRow[];
 }
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
   if (action === "seed") {
     await sb.from("social_launch_posts").update({ archived_at: new Date().toISOString(), archive_reason: "Replaced by launch-tied calendar (13 Oct)" })
       .is("archived_at", null).in("status", ["draft", "pending", "skipped"]).or("theme.is.null,theme.neq.launch-calendar");
-    const { data: have } = await sb.from("social_launch_posts").select("post_number").eq("theme", "launch-calendar").is("archived_at", null);
+    const { data: have } = await sb.from("social_launch_posts").select("post_number").eq("theme", "launch-calendar").is("archived_at", null).eq("manual_schedule", false);
     const existing = new Set((have ?? []).map((r: { post_number: number }) => r.post_number));
     const rejected: { post: string; error: string }[] = [];
     // deno-lint-ignore no-explicit-any

@@ -1,5 +1,12 @@
 # Roadmap
 
+## Social calendar + service booking (Oct 19) — do not publish
+- [x] Deliver before-change publisher/history report and both full row inventories; external Zapier/Planner history unavailable.
+- [x] Single app publishing path, image-byte hashes, per-platform immutable confirmations, strict slots and 90-day repeat blocks; confirmed history imported. Nextdoor/LinkedIn held without direct connections.
+- [x] Exact 14-day preview with image replacement and rescheduling; browser dry-run published three isolated snapshots and blocked duplicate fourth. PNG Instagram cards remain visibly blocked until JPEG replacements.
+- [x] All-service selection enabled; nine service/ZIP quotes and three admin-authorized test reservations verified through UI, test reservations deleted (0 remain).
+- [ ] External social history and disable social Zaps / clear Meta Planner — requires Justin's connected accounts or exports.
+
 ## Lifecycle event triggers + simulator (Oct 18) — shadow only, unpublished
 - [x] Lead/reservation/invoice/visit/rating/move/add-on/referral table events and checkout expiry hooks; daily planner reuses the existing tick; all 50 rules remain shadow.
 - [x] Admin-only simulator, isolated is_test clones, 24-step journey and message timeline; browser verified 61 messages, 0 simulated orphans, replay protection PASS.
