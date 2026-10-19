@@ -81,11 +81,11 @@ Deno.serve(async req=>{
   if(action==='audit'){
    const {data:rows,error}=await sb.from('social_launch_posts').select('*').is('archived_at',null).eq('is_test',false).order('scheduled_for');if(error)throw error;
    const results=[];
-   for(const p of (rows??[]) as Post[]){
-    try{
-     const im=await image(p.image_url);let flag:string|null=null;
-     if(platforms(p.channel).includes('instagram')&&im.type!=='image/jpeg')flag='Instagram requires a JPEG; replace this PNG before publishing';
-     const {error:hashError}=await sb.from('social_launch_posts').update({image_hash:im.hash,image_flag:flag}).eq('id',p.id);if(hashError)throw hashError;
+    for(const p of (rows??[]) as Post[]){
+     try{
+      const im=await image(p.image_url);let flag:string|null=null;
+      // PNG cards are fine: Instagram gets an auto-converted JPEG at publish time.
+      const {error:hashError}=await sb.from('social_launch_posts').update({image_hash:im.hash,image_flag:flag}).eq('id',p.id);if(hashError)throw hashError;
      if(p.external_post_id){
       for(const platform of platforms(p.channel)){
        const aliases=platform==='facebook'?'(?:fb|facebook)': '(?:ig|instagram)';const match=p.external_post_id.match(new RegExp(`${aliases}:([^ ]+)`));
