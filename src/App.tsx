@@ -393,7 +393,8 @@ const App = () => (
                   <Route path="/admin/hiring/phone/:id" element={<HiringScorecard kind="phone" />} />
                   <Route path="/admin/hiring/ref/:id" element={<HiringScorecard kind="reference" />} />
                   <Route path="/admin/hiring/interview/:id" element={<HiringScorecard kind="interview" />} />
-                  <Route path="/admin/hiring/slots" element={<HiringSlots />} />
+<Route path="/admin/hiring/slots" element={<HiringSlots />} />
+                  <Route path="/admin/hiring/invite" element={<HiringInvite />} />
                   <Route path="/admin/hiring/outbox" element={<HiringOutbox />} />
                   <Route path="/admin/messages" element={<AdminMessages />} />
                   <Route path="/admin/messages/simulator" element={<LifecycleSimulator />} />
