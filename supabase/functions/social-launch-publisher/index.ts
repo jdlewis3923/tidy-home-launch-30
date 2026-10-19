@@ -45,7 +45,7 @@ Deno.serve(async req=>{
    const token=await vault('meta_fb_page_access_token');const fb=await vault('meta_fb_page_id');const ig=await vault('meta_ig_user_id');
    if(!token) return json({error:'Meta connection unavailable'},409);
    const result:Record<string,unknown>={};
-   if(fb)try{result.facebook=await api(`${fb}/published_posts?fields=id,message,created_time,attachments{media,url,subattachments}&since=${Math.floor(Date.now()/1000)-30*86400}&limit=100`,token);}catch(e){result.facebook_error=String(e);}
+   if(fb)try{result.facebook=await api(`${fb}/published_posts?fields=id,message,created_time,attachments{media,url,subattachments}&since=${Math.floor(Date.now()/1000)-90*86400}&limit=100`,token);}catch(e){result.facebook_error=String(e);}
    if(ig)try{result.instagram=await api(`${ig}/media?fields=id,caption,media_url,timestamp,permalink&limit=100`,token);}catch(e){result.instagram_error=String(e);}
    for(const platform of ['facebook','instagram']){
     const entries=(result[platform] as {data?:Array<{id:string;message?:string;caption?:string;created_time?:string;timestamp?:string}>})?.data??[];
@@ -77,6 +77,11 @@ Deno.serve(async req=>{
      }
      const {data:prior}=await sb.from('social_publish_ledger').select('platform').eq('image_hash',im.hash).eq('is_test',false).neq('post_id',p.id).gte('created_at',new Date(Date.now()-90*86400000).toISOString());
      if(prior?.some(h=>platforms(p.channel).includes(h.platform)))flag='Image already posted on this platform within 90 days';
+     const {data:external}=await sb.from('social_external_history').select('platform,content_hash,image_hash').in('platform',platforms(p.channel)).gte('posted_at',new Date(Date.now()-90*86400000).toISOString());
+     for(const platform of platforms(p.channel)){
+      const {data:h}=await sb.rpc('social_caption_hash',{_c:platform==='instagram'?instagramVersion(render(p)):render(p)});
+      if(external?.some(e=>e.platform===platform&&(e.content_hash===h||e.image_hash===im.hash)))flag='Caption or image already posted on this platform within 90 days';
+     }
      if(!p.posted_at)await sb.from('social_launch_posts').update({image_flag:flag}).eq('id',p.id);
      results.push({id:p.id,hash:im.hash,flag});
     }catch(e){const message=String(e);await sb.from('social_launch_posts').update({image_flag:message}).eq('id',p.id);results.push({id:p.id,error:message});}
