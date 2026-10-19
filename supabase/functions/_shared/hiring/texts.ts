@@ -80,7 +80,6 @@ export function inCallWindow(when: Date): boolean {
   const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
   const minute = Number(parts.find((p) => p.type === "minute")?.value ?? "0");
   const mins = hour * 60 + minute;
-  if (weekday === "Sun") return false;
-  if (weekday === "Sat") return mins >= 9 * 60 && mins <= 11 * 60;
+  if (weekday === "Sun" || weekday === "Sat") return false;
   return mins >= 19 * 60 && mins <= 20 * 60 + 30;
 }
