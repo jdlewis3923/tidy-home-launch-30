@@ -1,7 +1,7 @@
 - Onboarding sequence: stages/gates/email inventory live in `_shared/onboarding-sequence.ts` (mirrored to `src/lib/onboardingSequence.ts`, parity-tested); stage moves only via `sequence-advance`, and every Pro email passes `sendProEmail`'s guard — why: one definition, one door, auditable order.
 - Launch dates live only in `launch_config` (edited at /admin/launch-dates, logged); `src/lib/launch.ts` (mirrored to `_shared/launch.ts`, parity-tested) only formats them. An empty car date means closed (SQL-enforced); car dates are set only by `admin_approve_car_launch` after demand + an Active car Pro — why: one place to move a date; car opens only when a route fills.
 - Reservations never touch Stripe; the paid subscription marks a reservation converted by email match (DB trigger) — why: Stripe products stay frozen.
-- The homepage frequency FAQ is shared from `src/lib/frequency-faq.ts` across pricing and FAQ sections — why: both placements must give the same bilingual answer.
+- Pricing and homepage FAQ share `src/lib/frequency-faq.ts` — why: identical bilingual answers.
 - Hero media: portrait below 768px, widescreen above, including desktop-site mode — why: viewport determines composition.
 - Public page reachability is master switch OR per-page row in page_visibility (via get_page_visibility); /founding fails open unless explicitly off — why: printed hangers must never dead-end.
 - Founding status lives in `founding_grants` (numbers per ZIP, never reused; cap counts homes ever granted) and is decided only by the reservations insert trigger — why: the founding promise must survive cancellations and edits automatically.
@@ -17,7 +17,7 @@
 - Pro pay varies by service/size, never cadence — why: discounts come from Tidy's margin.
 - Root declares `color-scheme: light dark`; body/Founding render light with explicit colors and scoped tokens — why: phone browsers ignore "only light" and grey out QR visitors' pages.
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
-- Subdirectories have their own `AGENTS.md`; read it before changing files there.
+- Read each subdirectory's `AGENTS.md` before editing there.
 - Email-brand owns intent artwork and versioned raster-backed surfaces — why: phone email clients strip gradients and invert flat colors.
 - Candidate messages use `pipeline-notify` and stage-owned gates; legacy senders use `pipeline-gate` — why: documents and spending follow proof approval.
 - Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: test and declined records stay as they are.
