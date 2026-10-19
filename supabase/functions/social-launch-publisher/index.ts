@@ -81,9 +81,10 @@ Deno.serve(async req=>{
    const timeline=[];const run=crypto.randomUUID();const start=Date.now();
    for(let n=0;n<4;n++){
     const original=source[n===3?0:n] as Post; const im=await image(original.image_url);const at=new Date(start+n*600000).toISOString();const caption=render(original);
-    const {data:p,error:insertError}=await sb.from('social_launch_posts').insert({channel:'facebook',caption,template_copy:caption,image_url:original.image_url,image_hash:im.hash,scheduled_for:at,status:'scheduled',is_test:true,theme:`dry-run:${run}`}).select('id').single();if(insertError)throw insertError;
+    const {data:p,error:insertError}=await sb.from('social_launch_posts').insert({channel:'facebook',post_number:n+1,caption,template_copy:caption,image_url:original.image_url,image_hash:im.hash,scheduled_for:at,status:'scheduled',is_test:true,theme:`dry-run:${run}`}).select('id').single();if(insertError)throw insertError;
     const {data:r,error:reserveError}=await sb.rpc('social_reserve_publish',{_id:p.id,_platform:'facebook',_caption:caption,_image_hash:im.hash,_dry_run:true,_at:at});if(reserveError)throw reserveError;
     timeline.push({post_id:p.id,source_id:original.id,scheduled_for:at,caption,image_url:original.image_url,result:r});
+    if(n<3)await sb.from('social_launch_posts').update({status:'posted'}).eq('id',p.id);
    }
    return json({run,timeline,no_provider_calls:true});
   }
