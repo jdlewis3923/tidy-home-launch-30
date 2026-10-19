@@ -40,6 +40,7 @@ export default function AdminSocial() {
   const [range, setRange] = useState<'fortnight' | 'month'>('fortnight');
   const [moves, setMoves] = useState<Record<string, string>>({});
   const [dryRun, setDryRun] = useState<Array<{ source_id: string; scheduled_for: string; caption: string; image_url: string; result: { ok: boolean; reason?: string } }> | null>(null);
+  const [linkedinReady, setLinkedinReady] = useState<boolean | null>(null);
 
   const anchors: PlanAnchors = useMemo(() => ({
     launch: cfg?.cleaning?.first_visit_date ?? null, conversion: cfg?.cleaning?.conversion_date ?? null, carLaunch: cfg?.car?.first_visit_date ?? null,
@@ -54,6 +55,12 @@ export default function AdminSocial() {
     setPosts((data ?? []) as Post[]);
   }, []);
   useEffect(() => { if (hasRole) void load(); }, [hasRole, load]);
+  useEffect(() => {
+    if (!hasRole) return;
+    supabase.functions.invoke('social-launch-publisher', { body: { action: 'status' } })
+      .then(({ data }) => setLinkedinReady(!!data?.linkedin_configured))
+      .catch(() => setLinkedinReady(null));
+  }, [hasRole]);
   useEffect(() => {
     const p = posts.find((x) => x.id === focus);
     if (p?.scheduled_for) { setMonth(monthKey(p.scheduled_for)); setRange('month'); setTimeout(() => document.getElementById(`post-${p.id}-${p.channel === 'meta_combined' ? 'facebook' : p.channel}`)?.scrollIntoView({ block: "center" }), 50); }
