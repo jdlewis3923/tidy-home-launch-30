@@ -41,6 +41,9 @@ export default function HiringDashboard() {
     // SMS dry-run toggle
     const { data: dr } = await supabase.from("app_settings").select("value").eq("key", "sms_dry_run").maybeSingle();
     setDryRun(dr?.value === "on");
+    const { data: sp } = await supabase.from("app_settings").select("value").eq("key", "hiring_sprint_mode").maybeSingle();
+    const spv = sp?.value as { on?: boolean; until?: string } | undefined;
+    setSprint(!!spv?.on && (!spv.until || new Date(spv.until) > new Date()));
 
     // Today list: today's booked slots (ET), time order
     const etNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
@@ -116,6 +119,12 @@ export default function HiringDashboard() {
     const next = !dryRun;
     const { error } = await supabase.from("app_settings").update({ value: next ? "on" : "off" }).eq("key", "sms_dry_run");
     if (!error) setDryRun(next);
+  };
+
+  const toggleSprint = async () => {
+    const next = !sprint;
+    const { error } = await supabase.rpc("hiring_sprint_set", { _on: next });
+    if (!error) setSprint(next);
   };
 
   return (
