@@ -7744,9 +7744,12 @@ export type Database = {
           id: string
           image_filename: string | null
           image_flag: string | null
+          image_hash: string | null
           image_subject: string | null
           image_url: string | null
           is_spare: boolean
+          is_test: boolean
+          manual_schedule: boolean
           not_before: string
           notes: string | null
           post_number: number
@@ -7778,9 +7781,12 @@ export type Database = {
           id?: string
           image_filename?: string | null
           image_flag?: string | null
+          image_hash?: string | null
           image_subject?: string | null
           image_url?: string | null
           is_spare?: boolean
+          is_test?: boolean
+          manual_schedule?: boolean
           not_before?: string
           notes?: string | null
           post_number: number
@@ -7812,9 +7818,12 @@ export type Database = {
           id?: string
           image_filename?: string | null
           image_flag?: string | null
+          image_hash?: string | null
           image_subject?: string | null
           image_url?: string | null
           is_spare?: boolean
+          is_test?: boolean
+          manual_schedule?: boolean
           not_before?: string
           notes?: string | null
           post_number?: number
@@ -7842,8 +7851,10 @@ export type Database = {
           fb_post_id: string | null
           id: string
           ig_post_id: string | null
+          image_hash: string | null
           image_path: string
           image_paths: string[]
+          image_url: string | null
           posted_at: string | null
           scheduled_at: string
           status: Database["public"]["Enums"]["social_post_status"]
@@ -7857,8 +7868,10 @@ export type Database = {
           fb_post_id?: string | null
           id?: string
           ig_post_id?: string | null
+          image_hash?: string | null
           image_path: string
           image_paths?: string[]
+          image_url?: string | null
           posted_at?: string | null
           scheduled_at: string
           status?: Database["public"]["Enums"]["social_post_status"]
@@ -7872,14 +7885,75 @@ export type Database = {
           fb_post_id?: string | null
           id?: string
           ig_post_id?: string | null
+          image_hash?: string | null
           image_path?: string
           image_paths?: string[]
+          image_url?: string | null
           posted_at?: string | null
           scheduled_at?: string
           status?: Database["public"]["Enums"]["social_post_status"]
           updated_at?: string
         }
         Relationships: []
+      }
+      social_publish_ledger: {
+        Row: {
+          caption: string
+          confirmed_at: string | null
+          content_hash: string
+          created_at: string
+          error: string | null
+          id: string
+          image_hash: string
+          image_url: string
+          is_test: boolean
+          platform: string
+          platform_post_id: string | null
+          post_id: string
+          scheduled_for: string
+          state: string
+        }
+        Insert: {
+          caption: string
+          confirmed_at?: string | null
+          content_hash: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          image_hash: string
+          image_url: string
+          is_test?: boolean
+          platform: string
+          platform_post_id?: string | null
+          post_id: string
+          scheduled_for: string
+          state?: string
+        }
+        Update: {
+          caption?: string
+          confirmed_at?: string | null
+          content_hash?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          image_hash?: string
+          image_url?: string
+          is_test?: boolean
+          platform?: string
+          platform_post_id?: string | null
+          post_id?: string
+          scheduled_for?: string
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_publish_ledger_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_launch_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stripe_catalog: {
         Row: {
@@ -9368,9 +9442,12 @@ export type Database = {
           id: string
           image_filename: string | null
           image_flag: string | null
+          image_hash: string | null
           image_subject: string | null
           image_url: string | null
           is_spare: boolean
+          is_test: boolean
+          manual_schedule: boolean
           not_before: string
           notes: string | null
           post_number: number
@@ -10430,6 +10507,21 @@ export type Database = {
       set_my_language: { Args: { _lang: string }; Returns: string }
       sms_recipient_name: { Args: { _phone: string }; Returns: string }
       social_caption_hash: { Args: { _c: string }; Returns: string }
+      social_confirm_publish: {
+        Args: { _ledger: string; _platform_id: string }
+        Returns: undefined
+      }
+      social_reserve_publish: {
+        Args: {
+          _at?: string
+          _caption: string
+          _dry_run?: boolean
+          _id: string
+          _image_hash: string
+          _platform: string
+        }
+        Returns: Json
+      }
       subscription_service_count: { Args: { _sub: string }; Returns: number }
       sync_member_entitlements: {
         Args: { _reason: string; _sub: string }
