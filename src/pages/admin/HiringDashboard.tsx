@@ -132,7 +132,12 @@ export default function HiringDashboard() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Hiring</h1>
         <div className="flex items-center gap-3">
+          <Link to="/admin/hiring/invite" className="text-sm text-primary underline">Invite</Link>
           <Link to="/admin/hiring/outbox" className="text-sm text-primary underline">Outbox</Link>
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input type="checkbox" checked={!!sprint} onChange={toggleSprint} className="h-4 w-4" />
+            Sprint mode (24 h deadlines)
+          </label>
           <label className="flex items-center gap-2 text-sm text-foreground">
             <input type="checkbox" checked={!!dryRun} onChange={toggleDryRun} className="h-4 w-4" />
             SMS dry-run
@@ -143,6 +148,11 @@ export default function HiringDashboard() {
       {dryRun ? (
         <div className="rounded-xl border border-amber-300 bg-amber-50 text-amber-800 px-4 py-3 mb-6 text-sm font-medium">
           SMS dry-run is ON — no texts are sent. Everything lands in the Outbox, and you can simulate replies on each candidate.
+        </div>
+      ) : null}
+      {sprint ? (
+        <div className="rounded-xl border border-blue-300 bg-blue-50 text-blue-800 px-4 py-3 mb-6 text-sm font-medium">
+          Sprint mode is ON — every deadline is 24 hours with a nudge at 12. It switches off automatically Thu Oct 29 at 11:59 PM.
         </div>
       ) : null}
 
