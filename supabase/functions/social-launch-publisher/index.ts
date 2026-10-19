@@ -24,15 +24,31 @@ Deno.serve(async req=>{
  if(!url||!key)return json({error:'Publishing configuration missing'},500);
  const sb=createClient(url,key,{auth:{persistSession:false}});
  const vault=async(name:string)=>{const {data,error}=await sb.rpc('admin_get_meta_secret',{_name:name});if(error)throw new Error(error.message);return data as string|null;};
- const image=async(u:string|null)=>{
-  if(!u)throw new Error('missing_image');
-  // Only our public social bucket; never fetch arbitrary client URLs or redirects.
-  if(!u.startsWith(`${url}/storage/v1/object/public/social-images/`))throw new Error('Image must be uploaded to the social calendar');
-  const r=await fetch(u,{redirect:'error'});if(!r.ok)throw new Error(`Image unavailable [${r.status}]`);
-  const bytes=await r.arrayBuffer();if(bytes.byteLength>15*1024*1024)throw new Error('Image too large');
-  if(!(r.headers.get('content-type')??'').startsWith('image/'))throw new Error('Not an image');
-  return {hash:await sha256(bytes),type:r.headers.get('content-type')};
- };
+  const image=async(u:string|null)=>{
+   if(!u)throw new Error('missing_image');
+   // Only our public social bucket; never fetch arbitrary client URLs or redirects.
+   if(!u.startsWith(`${url}/storage/v1/object/public/social-images/`))throw new Error('Image must be uploaded to the social calendar');
+   const r=await fetch(u,{redirect:'error'});if(!r.ok)throw new Error(`Image unavailable [${r.status}]`);
+   const bytes=await r.arrayBuffer();if(bytes.byteLength>15*1024*1024)throw new Error('Image too large');
+   if(!(r.headers.get('content-type')??'').startsWith('image/'))throw new Error('Not an image');
+   return {hash:await sha256(bytes),type:r.headers.get('content-type'),bytes};
+  };
+  // Instagram needs a JPEG. Convert the locked PNG at publish time: sRGB, quality 90,
+  // 1080x1350 portrait or 1080x1080 square to match the card. The original PNG stays
+  // on the post and is still what Facebook publishes.
+  const instagramJpeg=async(bytes:ArrayBuffer)=>{
+   const img=await Image.decode(new Uint8Array(bytes));
+   const portrait=img.height>img.width;
+   const w=1080,h=portrait?1350:1080;
+   img.resize(w,h);
+   const jpeg=await img.encodeJPEG(90);
+   const hash=await sha256(jpeg.buffer.slice(jpeg.byteOffset,jpeg.byteOffset+jpeg.byteLength) as ArrayBuffer);
+   const path=`derived/ig-${hash}.jpg`;
+   const {error:upError}=await sb.storage.from('social-images').upload(path,jpeg,{contentType:'image/jpeg',upsert:true});
+   if(upError)throw upError;
+   const {data:pub}=sb.storage.from('social-images').getPublicUrl(path);
+   return {url:pub.publicUrl,hash,type:'image/jpeg'};
+  };
  const api=async(path:string,token:string,body?:Record<string,string>)=>{
   const response=await fetch(`${graph}/${path}`,body?{method:'POST',body:new URLSearchParams({...body,access_token:token})}:{headers:{Authorization:`Bearer ${token}`}});
   if(!response.ok)throw new Error(`Meta [${response.status}]: ${await response.text()}`);
