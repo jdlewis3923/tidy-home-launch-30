@@ -274,7 +274,7 @@ export default function AdminPipelineRecord() {
           </div>
         </section>
 
-        {(p.stage === "proof" || p.proof_submitted_at) && <ProofPanel id={id} p={p} onChange={() => void load()} />}
+        {(p.stage === "proof" || p.proof_submitted_at || (p.stage === "applied" && p.proof_token)) && <ProofPanel id={id} p={p} onChange={() => void load()} />}
 
         <section className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-lg border border-border bg-card p-4">
