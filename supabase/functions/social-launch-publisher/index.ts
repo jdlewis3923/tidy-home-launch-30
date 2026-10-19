@@ -63,8 +63,11 @@ Deno.serve(async req=>{
    }
    if(action==='linkedin_test'){
     const hook=Deno.env.get('LINKEDIN_ZAP_WEBHOOK_URL');if(!hook)return json({error:'LINKEDIN_ZAP_WEBHOOK_URL not set'},400);
-    const {data:img}=await sb.from('social_posts').select('image_url').not('image_url','is',null).limit(1).maybeSingle();
-    const payload={caption:'Test post from Tidy, please ignore',image_url:img?.image_url??null,post_id:'test'};
+    const {data:img,error:imageError}=await sb.from('social_launch_posts').select('image_url').not('image_url','is',null).eq('is_test',false).is('archived_at',null).order('scheduled_for',{nullsFirst:false}).limit(1).maybeSingle();
+    if(imageError)throw imageError;
+    if(!img?.image_url)return json({error:'No social-library image available; test not sent'},409);
+    await image(img.image_url);
+    const payload={caption:'Test post from Tidy, please ignore',image_url:img.image_url,post_id:'test'};
     const r=await fetch(hook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     return json({zapier_status:r.status,zapier_body:(await r.text()).slice(0,300),sent:payload});
    }
