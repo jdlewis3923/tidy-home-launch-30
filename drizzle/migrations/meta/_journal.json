@@ -1345,6 +1345,13 @@
       "when": 1792429502432,
       "tag": "0191_hiring_sprint_mode_invite_reopen_weekday_slots",
       "breakpoints": true
+    },
+    {
+      "idx": 192,
+      "version": "7",
+      "when": 1792431083572,
+      "tag": "0192_hiring_close_inperson_slots",
+      "breakpoints": true
     }
   ]
 }
