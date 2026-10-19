@@ -1,238 +1,132 @@
-/**
- * Tidy — Social Launch Publisher
- *
- * Runs every 5 minutes via pg_cron. Finds armed posts whose
- * scheduled_for is due, publishes them to the right channel.
- *
- *  - meta_combined / instagram / facebook → Meta Graph API
- *      (uses META_PAGE_ACCESS_TOKEN secret + cached META_IG_USER_ID/META_FB_PAGE_ID
- *       from existing CAPI vault entries)
- *  - nextdoor → POST to ZAPIER_NEXTDOOR_WEBHOOK_URL
- *      (if missing: insert admin_alerts row + log to email_send_log so
- *       /admin/email-health surfaces it; do NOT mark as posted)
- *
- * Auth: invoked by cron (no JWT) and admin "Test fire" button.
- * verify_jwt=false; we never accept caption/image_url from the request body.
- */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { requireServiceOrAdmin } from "../_shared/admin-auth.ts";
-import { isCronAuthorized } from "../_shared/cron-auth.ts";
-import { vendorFetch } from '../_shared/http.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { writeAlert } from '../_shared/alerts.ts';
 import { renderTemplate, instagramVersion } from '../_shared/socialPlanner.ts';
-import { loadLaunchConfig, easternTodayIso } from '../_shared/launch-config.ts';
-
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
-const GRAPH = "https://graph.facebook.com/v19.0";
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body, null, 2), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
-
-type Post = {
-  id: string;
-  channel: "nextdoor" | "instagram" | "facebook" | "meta_combined";
-  post_number: number;
-  scheduled_for: string;
-  caption: string;
-  image_url: string | null;
-  status: string;
-  notes: string | null;
-};
-
-async function vaultGet(sb: ReturnType<typeof createClient>, name: string): Promise<string | null> {
-  const { data, error } = await sb.rpc("admin_get_meta_secret", { _name: name });
-  if (error) {
-    console.warn(`[social-launch-publisher] vault read ${name} failed: ${error.message}`);
-    return null;
+import { loadLaunchConfig } from '../_shared/launch-config.ts';
+import { sha256 } from '../_shared/social-publish-policy.ts';
+const graph = 'https://graph.facebook.com/v19.0';
+const json = (data: unknown, status=200) => new Response(JSON.stringify(data),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
+const Body=z.object({action:z.enum(['publish','audit','dry_run','history']).default('publish'),post_id:z.string().uuid().optional()});
+type Post={id:string;channel:string;caption:string;template_copy:string|null;image_url:string|null;image_hash:string|null;scheduled_for:string|null;post_number:number|null;is_test:boolean;external_post_id:string|null;posted_at:string|null};
+Deno.serve(async req=>{
+ if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
+ const cron=await isCronAuthorized(req); const auth=cron?null:await requireServiceOrAdmin(req);
+ if(!cron && auth && !auth.ok)return json({error:auth.error},auth.status);
+ const parsed=Body.safeParse(await req.json().catch(()=>({})));
+ if(!parsed.success)return json({error:'Invalid request'},400);
+ const {action,post_id}=parsed.data;
+ if(cron && action!=='publish')return json({error:'Admin required'},403);
+ const url=Deno.env.get('SUPABASE_URL');const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+ if(!url||!key)return json({error:'Publishing configuration missing'},500);
+ const sb=createClient(url,key,{auth:{persistSession:false}});
+ const vault=async(name:string)=>{const {data,error}=await sb.rpc('admin_get_meta_secret',{_name:name});if(error)throw new Error(error.message);return data as string|null;};
+ const image=async(u:string|null)=>{
+  if(!u)throw new Error('missing_image');
+  // Only our public social bucket; never fetch arbitrary client URLs or redirects.
+  if(!u.startsWith(`${url}/storage/v1/object/public/social-images/`))throw new Error('Image must be uploaded to the social calendar');
+  const r=await fetch(u,{redirect:'error'});if(!r.ok)throw new Error(`Image unavailable [${r.status}]`);
+  const bytes=await r.arrayBuffer();if(bytes.byteLength>15*1024*1024)throw new Error('Image too large');
+  if(!(r.headers.get('content-type')??'').startsWith('image/'))throw new Error('Not an image');
+  return {hash:await sha256(bytes),type:r.headers.get('content-type')};
+ };
+ const api=async(path:string,token:string,body?:Record<string,string>)=>{
+  const response=await fetch(`${graph}/${path}`,body?{method:'POST',body:new URLSearchParams({...body,access_token:token})}:{headers:{Authorization:`Bearer ${token}`}});
+  if(!response.ok)throw new Error(`Meta [${response.status}]: ${await response.text()}`);
+  const result=await response.json();if(result.error)throw new Error(`Meta: ${JSON.stringify(result.error)}`);return result;
+ };
+ const cfg=await loadLaunchConfig(sb);
+ const render=(p:Post)=>renderTemplate(p.template_copy??p.caption,{launch:cfg.cleaning?.first_visit_date??null,conversion:cfg.cleaning?.conversion_date??null,carLaunch:cfg.car?.first_visit_date??null,hangerDrop1:(cfg.global?.hanger_drops??[]).map(d=>d.start).sort()[0]??null},(p.scheduled_for??new Date().toISOString()).slice(0,10));
+ const platforms=(c:string)=>c==='meta_combined'?['facebook','instagram']:[c];
+ try{
+  if(action==='history'){
+   const token=await vault('meta_fb_page_access_token');const fb=await vault('meta_fb_page_id');const ig=await vault('meta_ig_user_id');
+   if(!token) return json({error:'Meta connection unavailable'},409);
+   const result:Record<string,unknown>={};
+   if(fb)try{result.facebook=await api(`${fb}/published_posts?fields=id,message,created_time,attachments{media,url,subattachments}&since=${Math.floor(Date.now()/1000)-30*86400}&limit=100`,token);}catch(e){result.facebook_error=String(e);}
+   if(ig)try{result.instagram=await api(`${ig}/media?fields=id,caption,media_url,timestamp,permalink&limit=100`,token);}catch(e){result.instagram_error=String(e);}
+   return json(result);
   }
-  return (data as string | null) ?? null;
-}
-
-async function renderCaption(post: Post, sb: ReturnType<typeof createClient>): Promise<string> {
-  // Tokens are filled at the moment of posting, from launch_config — never stored filled.
-  const tpl = (post as Post & { template_copy?: string | null }).template_copy ?? post.caption;
-  if (!/\{(LAUNCH|CONVERT|CAR_LINE)\}/.test(tpl)) return tpl;
-  const cfg = await loadLaunchConfig(sb);
-  const drops = (cfg.global?.hanger_drops ?? []).map((d) => d.start).sort();
-  const out = renderTemplate(tpl, { launch: cfg.cleaning?.first_visit_date ?? null, conversion: cfg.cleaning?.conversion_date ?? null, carLaunch: cfg.car?.first_visit_date ?? null, hangerDrop1: drops[0] ?? null }, easternTodayIso());
-  if (/\{(LAUNCH|CONVERT)\}/.test(out)) throw new Error("launch date missing in launch_config; post held");
-  return out;
-}
-
-async function publishToMeta(post: Post, sb: ReturnType<typeof createClient>): Promise<{ ig?: string; fb?: string }> {
-  post = { ...post, caption: await renderCaption(post, sb) };
-  // Reuse the existing CAPI vault entry — single source of truth for Meta page token.
-  const pageToken = await vaultGet(sb, "meta_fb_page_access_token");
-  const igUserId = await vaultGet(sb, "meta_ig_user_id");
-  const fbPageId = await vaultGet(sb, "meta_fb_page_id");
-  if (!pageToken) throw new Error("meta_fb_page_access_token not set in vault (run Meta OAuth)");
-  if (!post.image_url) throw new Error("post has no image_url");
-
-  const result: { ig?: string; fb?: string } = {};
-  const wantIg = post.channel === "instagram" || post.channel === "meta_combined";
-  const wantFb = post.channel === "facebook" || post.channel === "meta_combined";
-
-  if (wantIg && igUserId) {
-    // Create container
-    const cu = new URL(`${GRAPH}/${igUserId}/media`);
-    cu.searchParams.set("access_token", pageToken);
-    cu.searchParams.set("image_url", post.image_url);
-    cu.searchParams.set("caption", instagramVersion(post.caption));
-    const cr = await vendorFetch(cu.toString(), { method: "POST" });
-    const cj = await cr.json();
-    if (!cr.ok) throw new Error(`IG container failed: ${JSON.stringify(cj).slice(0, 300)}`);
-    // Publish container
-    const pu = new URL(`${GRAPH}/${igUserId}/media_publish`);
-    pu.searchParams.set("access_token", pageToken);
-    pu.searchParams.set("creation_id", cj.id);
-    const pr = await vendorFetch(pu.toString(), { method: "POST" });
-    const pj = await pr.json();
-    if (!pr.ok) throw new Error(`IG publish failed: ${JSON.stringify(pj).slice(0, 300)}`);
-    result.ig = pj.id;
+  if(action==='audit'){
+   const {data:rows,error}=await sb.from('social_launch_posts').select('*').is('archived_at',null).eq('is_test',false).order('scheduled_for');if(error)throw error;
+   const results=[];
+   for(const p of (rows??[]) as Post[]){
+    try{
+     const im=await image(p.image_url);let flag:string|null=null;
+     if(platforms(p.channel).includes('instagram')&&im.type!=='image/jpeg')flag='Instagram requires a JPEG; replace this PNG before publishing';
+     const {error:hashError}=await sb.from('social_launch_posts').update({image_hash:im.hash,image_flag:flag}).eq('id',p.id);if(hashError)throw hashError;
+     if(p.external_post_id){
+      for(const platform of platforms(p.channel)){
+       const aliases=platform==='facebook'?'(?:fb|facebook)': '(?:ig|instagram)';const match=p.external_post_id.match(new RegExp(`${aliases}:([^ ]+)`));
+       if(!match)continue;
+       const caption=platform==='instagram'?instagramVersion(render(p)):render(p);
+       const {data:h}=await sb.rpc('social_caption_hash',{_c:caption});
+       const {error:backfillError}=await sb.from('social_publish_ledger').upsert({post_id:p.id,platform,scheduled_for:p.scheduled_for,caption,content_hash:h,image_url:p.image_url,image_hash:im.hash,state:'posted',platform_post_id:match[1],confirmed_at:p.posted_at,created_at:p.posted_at,is_test:false},{onConflict:'post_id,platform',ignoreDuplicates:true});if(backfillError)throw backfillError;
+      }
+     }
+     const {data:prior}=await sb.from('social_publish_ledger').select('platform').eq('image_hash',im.hash).eq('is_test',false).neq('post_id',p.id).gte('created_at',new Date(Date.now()-90*86400000).toISOString());
+     if(prior?.some(h=>platforms(p.channel).includes(h.platform)))flag='Image already posted on this platform within 90 days';
+     if(!p.posted_at)await sb.from('social_launch_posts').update({image_flag:flag}).eq('id',p.id);
+     results.push({id:p.id,hash:im.hash,flag});
+    }catch(e){const message=String(e);await sb.from('social_launch_posts').update({image_flag:message}).eq('id',p.id);results.push({id:p.id,error:message});}
+   }
+   return json({results});
   }
-
-  if (wantFb && fbPageId) {
-    const fu = new URL(`${GRAPH}/${fbPageId}/photos`);
-    fu.searchParams.set("access_token", pageToken);
-    fu.searchParams.set("url", post.image_url);
-    fu.searchParams.set("caption", post.caption);
-    const fr = await vendorFetch(fu.toString(), { method: "POST" });
-    const fj = await fr.json();
-    if (!fr.ok) throw new Error(`FB publish failed: ${JSON.stringify(fj).slice(0, 300)}`);
-    result.fb = fj.post_id ?? fj.id;
+  if(action==='dry_run'){
+   // Clone three real preview cards into isolated test rows. No provider calls.
+   const {data:source,error}=await sb.from('social_launch_posts').select('*').is('archived_at',null).eq('is_test',false).eq('channel','meta_combined').eq('status','scheduled').gte('scheduled_for',new Date().toISOString()).order('scheduled_for').limit(3);if(error)throw error;
+   if(source?.length!==3)return json({error:'Three upcoming cards required'},409);
+   const timeline=[];const run=crypto.randomUUID();const start=Date.now();
+   for(let n=0;n<4;n++){
+    const original=source[n===3?0:n] as Post; const im=await image(original.image_url);const at=new Date(start+n*600000).toISOString();const caption=render(original);
+    const {data:p,error:insertError}=await sb.from('social_launch_posts').insert({channel:'facebook',caption,template_copy:caption,image_url:original.image_url,image_hash:im.hash,scheduled_for:at,status:'scheduled',is_test:true,theme:`dry-run:${run}`}).select('id').single();if(insertError)throw insertError;
+    const {data:r,error:reserveError}=await sb.rpc('social_reserve_publish',{_id:p.id,_platform:'facebook',_caption:caption,_image_hash:im.hash,_dry_run:true,_at:at});if(reserveError)throw reserveError;
+    timeline.push({post_id:p.id,source_id:original.id,scheduled_for:at,caption,image_url:original.image_url,result:r});
+   }
+   return json({run,timeline,no_provider_calls:true});
   }
-  return result;
-}
-
-async function publishToNextdoor(post: Post, sb: ReturnType<typeof createClient>): Promise<{ delivered: boolean; needs_manual: boolean }> {
-  const url = Deno.env.get("ZAPIER_NEXTDOOR_WEBHOOK_URL");
-  if (!url) {
-    // Fallback: alert admin to post manually
-    await sb.from("admin_alerts").insert({
-      alert_type: "nextdoor_manual_post_required",
-      title: `Nextdoor post #${post.post_number} ready to publish manually`,
-      body: post.caption,
-      context: { post_id: post.id, image_url: post.image_url, scheduled_for: post.scheduled_for },
-    });
-    await sb.from("email_send_log").insert({
-      channel: "internal",
-      template_name: "nextdoor_manual_post_required",
-      recipient: "hello@jointidy.co",
-      status: "failed",
-      error_message: "ZAPIER_NEXTDOOR_WEBHOOK_URL not configured",
-      payload: { post_id: post.id, post_number: post.post_number, image_url: post.image_url },
-    });
-    return { delivered: false, needs_manual: true };
-  }
-  const r = await vendorFetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      post_id: post.id,
-      post_number: post.post_number,
-      caption: post.caption,
-      image_url: post.image_url,
-      scheduled_for: post.scheduled_for,
-    }),
-  });
-  if (!r.ok) throw new Error(`Zapier webhook failed (${r.status})`);
-  return { delivered: true, needs_manual: false };
-}
-
-async function processPost(sb: ReturnType<typeof createClient>, post: Post): Promise<{ ok: boolean; error?: string }> {
-  try {
-    if (post.channel === "nextdoor") {
-      // Nextdoor has NO public API for organic business posts. We only deliver a
-      // REMINDER (Zapier webhook / admin alert). The row stays 'armed' until an
-      // admin publishes it in Nextdoor and marks it posted on /admin/social-launch.
-      if (post.notes?.startsWith("reminder sent")) return { ok: true }; // already nudged
-      const r = await publishToNextdoor(post, sb);
-      await sb
-        .from("social_launch_posts")
-        .update({
-          publish_error: null,
-          notes: r.delivered ? "reminder sent — publish manually in Nextdoor" : "manual post required",
-        })
-        .eq("id", post.id);
-      return { ok: true };
-    } else {
-
-      const ids = await publishToMeta(post, sb);
-      await sb
-        .from("social_launch_posts")
-        .update({
-          status: "posted",
-          posted_at: new Date().toISOString(),
-          publish_error: null,
-          external_post_id: [ids.ig && `ig:${ids.ig}`, ids.fb && `fb:${ids.fb}`].filter(Boolean).join(" ") || null,
-          notes: `ig:${ids.ig ?? "-"} fb:${ids.fb ?? "-"}`,
-        })
-        .eq("id", post.id);
-      return { ok: true };
+  const {data:posts,error}=await sb.rpc('claim_due_social_posts',{_limit:1,_only:post_id??null});if(error)throw error;
+  const results=[];
+  for(const p of (posts??[]) as Post[]){
+   try{
+    const im=await image(p.image_url);const caption=render(p);if(/\{(?:LAUNCH|CONVERT)\}/.test(caption))throw new Error('Launch date missing');
+    const token=await vault('meta_fb_page_access_token');if(!token)throw new Error('Meta connection unavailable');
+    // Preflight every destination before publishing either one.
+    const fb=platforms(p.channel).includes('facebook')?await vault('meta_fb_page_id'):null;
+    const ig=platforms(p.channel).includes('instagram')?await vault('meta_ig_user_id'):null;
+    if(platforms(p.channel).includes('facebook')&&!fb)throw new Error('Facebook page missing');
+    if(platforms(p.channel).includes('instagram')&&(!ig||im.type!=='image/jpeg'))throw new Error(!ig?'Instagram account missing':'Instagram needs a JPEG image');
+    for(const platform of platforms(p.channel)){
+     const copy=platform==='instagram'?instagramVersion(caption):caption;
+     const {data:r,error:reserveError}=await sb.rpc('social_reserve_publish',{_id:p.id,_platform:platform,_caption:copy,_image_hash:im.hash});if(reserveError)throw reserveError;
+     const reservation=r as {ok:boolean;reason?:string;ledger_id:string;image_url:string;caption:string};
+     if(!reservation.ok)throw new Error(reservation.reason??'Blocked');
+     let id:string;
+     try{
+      if(platform==='facebook'){
+       const response=await api(`${fb}/photos`,token,{url:reservation.image_url,caption:reservation.caption});id=response.post_id??response.id;
+      }else{
+       const container=await api(`${ig}/media`,token,{image_url:reservation.image_url,caption:reservation.caption});if(!container.id)throw new Error('Instagram container missing');
+       let ready=false;
+       for(let attempt=0;attempt<12;attempt++){
+        const state=await api(`${container.id}?fields=status_code`,token);
+        if(state.status_code==='FINISHED'){ready=true;break;}if(state.status_code==='ERROR')throw new Error('Instagram image processing failed');
+        await new Promise(resolve=>setTimeout(resolve,2000));
+       }
+       if(!ready)throw new Error('Instagram image not ready; held for manual review');
+       const response=await api(`${ig}/media_publish`,token,{creation_id:container.id});id=response.id;
+      }
+      if(!id)throw new Error('Platform did not return a post ID');
+      const {error:confirmError}=await sb.rpc('social_confirm_publish',{_ledger:reservation.ledger_id,_platform_id:id});if(confirmError)throw confirmError;
+     }catch(e){await sb.from('social_publish_ledger').update({state:'failed',error:String(e)}).eq('id',reservation.ledger_id).is('platform_post_id',null);throw e;}
     }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    await sb
-      .from("social_launch_posts")
-      .update({ status: "failed", publish_error: msg })
-      .eq("id", post.id);
-    // A failed auto-post goes to the digest, not an urgent alert. Status
-    // 'failed' is never re-pulled, so it cannot repeat on its own.
-    await writeAlert(sb as never, {
-      level: "action", category: "operations", tier: "digest",
-      title: `Social post failed to publish · ${new Date(post.scheduled_for).toLocaleDateString("en-US", { timeZone: "America/New_York" })}`,
-      body: msg, action_label: "Open social calendar", action_url: "/admin/social",
-      dedupe_key: `social_failed:${post.id}`, context: { post_id: post.id },
-    });
-    return { ok: false, error: msg };
+    await sb.from('social_launch_posts').update({status:'posted',publish_error:null}).eq('id',p.id);results.push({id:p.id,ok:true});
+   }catch(e){const message=String(e);await sb.from('social_launch_posts').update({status:'blocked',publish_error:message}).eq('id',p.id);
+    await writeAlert(sb as never,{level:'action',category:'operations',tier:'digest',title:'Social post blocked',body:message,action_url:'/admin/social',action_label:'Open social calendar',dedupe_key:`social_blocked:${p.id}`,context:{post_id:p.id}});results.push({id:p.id,ok:false,error:message});
+   }
   }
-}
-
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-
-  // Authorization (audit item 6): this publishes to live Facebook/Instagram.
-  // A bare unauthenticated POST used to drain the whole armed queue.
-  if (!(await isCronAuthorized(req))) {
-    const auth = await requireServiceOrAdmin(req);
-    if (!auth.ok) return json({ error: auth.error }, auth.status);
-  }
-
-  const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
-  // Optional: { post_id } for admin "Test fire" button
-  let onlyId: string | null = null;
-  try {
-    if (req.method === "POST") {
-      const body = await req.json().catch(() => ({}));
-      if (body && typeof body.post_id === "string") onlyId = body.post_id;
-    }
-  } catch {/* ignore */}
-
-  // One step: the database claims due posts and marks them 'posting' in the
-  // same statement, so an overlapping run or a retry can never publish twice.
-  // Nextdoor is never auto-posted; it is listed in the 9 AM digest instead.
-  const { data: posts, error } = await sb.rpc("claim_due_social_posts", { _limit: 10, _only: onlyId });
-  if (error) return json({ error: error.message }, 500);
-
-  const results: Array<{ id: string; ok: boolean; error?: string }> = [];
-  for (const p of (posts ?? []) as Post[]) {
-    const r = await processPost(sb as never, p);
-    results.push({ id: p.id, ...r });
-  }
-  return json({ processed: results.length, results });
+  return json({results});
+ }catch(e){return json({error:String(e)},500);}
 });
