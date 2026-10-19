@@ -3,8 +3,8 @@
  * Every post is a template; {LAUNCH}, {CONVERT} and {CAR_LINE} are filled on
  * the day it posts. The planner (social-plan) places posts from the launch
  * dates, nightly and whenever a launch date changes. Posted rows never move.
- * Facebook + Instagram publish automatically once; Nextdoor is posted by hand
- * from the 9 AM digest and marked posted here.
+ * Facebook + Instagram publish through the confirmed platform ledger.
+ * Platforms without direct connections remain held.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
@@ -56,7 +56,7 @@ export default function AdminSocial() {
   useEffect(() => { if (hasRole) void load(); }, [hasRole, load]);
   useEffect(() => {
     const p = posts.find((x) => x.id === focus);
-    if (p?.scheduled_for) { setMonth(monthKey(p.scheduled_for)); setTimeout(() => document.getElementById(`post-${p.id}`)?.scrollIntoView({ block: "center" }), 50); }
+    if (p?.scheduled_for) { setMonth(monthKey(p.scheduled_for)); setRange('month'); setTimeout(() => document.getElementById(`post-${p.id}-${p.channel === 'meta_combined' ? 'facebook' : p.channel}`)?.scrollIntoView({ block: "center" }), 50); }
   }, [focus, posts]);
 
   const placed = posts.filter((p) => p.scheduled_for);
@@ -77,11 +77,6 @@ export default function AdminSocial() {
     if (error) { toast.error(error.message.replace(/^.*?: /, "")); return; }
     toast.success("Saved"); void load();
   };
-  const markPosted = async (p: Post) => {
-    const { error } = await supabase.rpc("admin_mark_social_posted", { _id: p.id });
-    if (error) { toast.error(error.message); return; }
-    toast.success("Marked posted"); void load();
-  };
   const replaceImage = async (p: Post, file?: File) => {
     if (!file) return;
     setBusy(true);
@@ -99,6 +94,8 @@ export default function AdminSocial() {
   };
   const movePost = async (p: Post) => {
     const date = moves[p.id]; if (!date) return;
+    const targets = p.channel === 'meta_combined' ? ['facebook', 'instagram'] : [p.channel];
+    if (posts.some(o => o.id !== p.id && o.scheduled_for && Date.parse(o.scheduled_for) === Date.parse(date) && (o.channel === 'meta_combined' ? ['facebook', 'instagram'] : [o.channel]).some(c => targets.includes(c)))) { toast.error('That platform already has a post in this slot'); return; }
     const { error } = await supabase.from('social_launch_posts').update({ scheduled_for: new Date(date).toISOString(), manual_schedule: true, status: 'scheduled', publish_error: null }).eq('id', p.id);
     if (error) { toast.error(error.message); return; }
     toast.success('Post rescheduled'); void load();

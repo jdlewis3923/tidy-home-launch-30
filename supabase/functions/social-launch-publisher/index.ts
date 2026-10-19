@@ -4,7 +4,7 @@ import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { writeAlert } from '../_shared/alerts.ts';
-import { renderTemplate, instagramVersion } from '../_shared/socialPlanner.ts';
+import { renderTemplate, instagramVersion, etDate } from '../_shared/socialPlanner.ts';
 import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { sha256 } from '../_shared/social-publish-policy.ts';
 const graph = 'https://graph.facebook.com/v19.0';
@@ -38,7 +38,7 @@ Deno.serve(async req=>{
   const result=await response.json();if(result.error)throw new Error(`Meta: ${JSON.stringify(result.error)}`);return result;
  };
  const cfg=await loadLaunchConfig(sb);
- const render=(p:Post)=>renderTemplate(p.template_copy??p.caption,{launch:cfg.cleaning?.first_visit_date??null,conversion:cfg.cleaning?.conversion_date??null,carLaunch:cfg.car?.first_visit_date??null,hangerDrop1:(cfg.global?.hanger_drops??[]).map(d=>d.start).sort()[0]??null},(p.scheduled_for??new Date().toISOString()).slice(0,10));
+ const render=(p:Post)=>renderTemplate(p.template_copy??p.caption,{launch:cfg.cleaning?.first_visit_date??null,conversion:cfg.cleaning?.conversion_date??null,carLaunch:cfg.car?.first_visit_date??null,hangerDrop1:(cfg.global?.hanger_drops??[]).map(d=>d.start).sort()[0]??null},etDate(p.scheduled_for??new Date().toISOString()));
  const platforms=(c:string)=>c==='meta_combined'?['facebook','instagram']:[c];
  try{
   if(action==='history'){
@@ -47,6 +47,15 @@ Deno.serve(async req=>{
    const result:Record<string,unknown>={};
    if(fb)try{result.facebook=await api(`${fb}/published_posts?fields=id,message,created_time,attachments{media,url,subattachments}&since=${Math.floor(Date.now()/1000)-30*86400}&limit=100`,token);}catch(e){result.facebook_error=String(e);}
    if(ig)try{result.instagram=await api(`${ig}/media?fields=id,caption,media_url,timestamp,permalink&limit=100`,token);}catch(e){result.instagram_error=String(e);}
+   for(const platform of ['facebook','instagram']){
+    const entries=(result[platform] as {data?:Array<{id:string;message?:string;caption?:string;created_time?:string;timestamp?:string}>})?.data??[];
+    for(const entry of entries){
+     const caption=entry.message??entry.caption??''; const at=entry.created_time??entry.timestamp;
+     if(!at||!caption||Date.parse(at)<Date.now()-90*86400000)continue;
+     const {data:h,error:hashError}=await sb.rpc('social_caption_hash',{_c:caption});if(hashError)throw hashError;
+     const {error:historyError}=await sb.from('social_external_history').upsert({platform,platform_post_id:entry.id,posted_at:at,caption,content_hash:h},{onConflict:'platform,platform_post_id'});if(historyError)throw historyError;
+    }
+   }
    return json(result);
   }
   if(action==='audit'){
@@ -61,7 +70,7 @@ Deno.serve(async req=>{
       for(const platform of platforms(p.channel)){
        const aliases=platform==='facebook'?'(?:fb|facebook)': '(?:ig|instagram)';const match=p.external_post_id.match(new RegExp(`${aliases}:([^ ]+)`));
        if(!match)continue;
-       const caption=platform==='instagram'?instagramVersion(render(p)):render(p);
+    const caption=platform==='instagram'?instagramVersion(render(p)):render(p);
        const {data:h}=await sb.rpc('social_caption_hash',{_c:caption});
        const {error:backfillError}=await sb.from('social_publish_ledger').upsert({post_id:p.id,platform,scheduled_for:p.scheduled_for,caption,content_hash:h,image_url:p.image_url,image_hash:im.hash,state:'posted',platform_post_id:match[1],confirmed_at:p.posted_at,created_at:p.posted_at,is_test:false},{onConflict:'post_id,platform',ignoreDuplicates:true});if(backfillError)throw backfillError;
       }
@@ -104,7 +113,7 @@ Deno.serve(async req=>{
      const {data:r,error:reserveError}=await sb.rpc('social_reserve_publish',{_id:p.id,_platform:platform,_caption:copy,_image_hash:im.hash});if(reserveError)throw reserveError;
      const reservation=r as {ok:boolean;reason?:string;ledger_id:string;image_url:string;caption:string};
      if(!reservation.ok)throw new Error(reservation.reason??'Blocked');
-     let id:string;
+     let id:string|undefined;
      try{
       if(platform==='facebook'){
        const response=await api(`${fb}/photos`,token,{url:reservation.image_url,caption:reservation.caption});id=response.post_id??response.id;
@@ -121,7 +130,7 @@ Deno.serve(async req=>{
       }
       if(!id)throw new Error('Platform did not return a post ID');
       const {error:confirmError}=await sb.rpc('social_confirm_publish',{_ledger:reservation.ledger_id,_platform_id:id});if(confirmError)throw confirmError;
-     }catch(e){await sb.from('social_publish_ledger').update({state:'failed',error:String(e)}).eq('id',reservation.ledger_id).is('platform_post_id',null);throw e;}
+     }catch(e){await sb.from('social_publish_ledger').update(id?{state:'posted',platform_post_id:id,confirmed_at:new Date().toISOString(),error:String(e)}:{state:'posting',error:`Uncertain provider result; never retry automatically: ${String(e)}`}).eq('id',reservation.ledger_id).is('platform_post_id',null);throw e;}
     }
     await sb.from('social_launch_posts').update({status:'posted',publish_error:null}).eq('id',p.id);results.push({id:p.id,ok:true});
    }catch(e){const message=String(e);await sb.from('social_launch_posts').update({status:'blocked',publish_error:message}).eq('id',p.id);

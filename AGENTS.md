@@ -21,6 +21,6 @@
 - Email-brand owns intent artwork and versioned raster-backed surfaces — why: phone email clients strip gradients and invert flat colors.
 - Candidate messages use `pipeline-notify` and stage-owned gates; legacy senders use `pipeline-gate` — why: documents and spending follow proof approval.
 - Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: test and declined records stay as they are.
-- Social post dates are set only by `social-plan` (`socialPlanner.ts`); tokens fill at posting — why: no hard-coded launch dates.
+- Social-launch-publisher alone posts ledger-locked images/copy; social-plan sets dates unless manually moved — why: no competing sends.
 
 - Lifecycle uses transactional event-ledger dispatch; visit events preserve stages, rules default shadow, simulations require admin + is_test — why: no duplicate/test sends.
