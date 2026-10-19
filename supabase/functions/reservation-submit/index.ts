@@ -13,6 +13,7 @@ import { toE164 } from '../_shared/member-followups.ts';
 import { RESERVATION_ALERTS, RESERVABLE_SERVICES } from '../_shared/launch.ts';
 import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { groupsFor, verifyScopeAcceptance, scopeEmailHtml } from '../_shared/scope.ts';
+import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { esc, logEmail, reservationConfirmEmail, foundingConfirmEmail, reservationConfirmSms, svcLabel } from '../_shared/reservation-emails.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
@@ -44,12 +45,13 @@ const Body = z.object({
 });
 
 async function serviceCount(svc: string) {
-  const { count } = await admin.from('reservations').select('id', { count: 'exact', head: true }).neq('status', 'canceled').contains('services', [svc]);
+  const { count } = await admin.from('reservations').select('id', { count: 'exact', head: true }).neq('status', 'canceled').eq('is_test_row', false).contains('services', [svc]);
   return count ?? 0;
 }
 
 // deno-lint-ignore no-explicit-any
 async function notify(row: any, isUpdate: boolean, page: string) {
+  if (row.is_test_row) return;
   const step = async (name: string, fn: () => Promise<unknown>) => {
     try { await fn(); } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -114,6 +116,10 @@ Deno.serve(async (req) => {
   const parsed = Body.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return jsonResponse({ ok: false, error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
   const b = parsed.data;
+  if (b.is_test) {
+    const auth = await requireServiceOrAdmin(req);
+    if (!auth.ok) return jsonResponse({ ok: false, error: auth.error }, auth.status);
+  }
   // Honeypot: bots get a convincing success and nothing is written or counted.
   if (b.website && b.website.trim()) return jsonResponse({ ok: true, id: null, updated: false, founding: true });
 
@@ -130,7 +136,7 @@ Deno.serve(async (req) => {
 
   // Duplicate detection: same email OR same street+ZIP updates the existing reservation.
   const { data: dupes } = await admin.from('reservations').select('id, founding, update_count, street, zip, email, lawn_selected_size')
-    .neq('status', 'canceled').or(`email.eq.${email},and(zip.eq.${b.zip},street.ilike.${b.street.replace(/[,()%*]/g, ' ').trim()})`).order('created_at').limit(1);
+    .eq('is_test_row', !!b.is_test).neq('status', 'canceled').or(`email.eq.${email},and(zip.eq.${b.zip},street.ilike.${b.street.replace(/[,()%*]/g, ' ').trim()})`).order('created_at').limit(1);
   const existing = dupes?.[0];
 
   const record = {
@@ -159,7 +165,7 @@ Deno.serve(async (req) => {
   const { data: row, error } = await q.select('*').single();
   if (error || !row) { console.error('[reservation-submit] write', error?.message); return jsonResponse({ ok: false, error: 'insert_failed' }, 500); }
 
-  if (b.session_id) {
+  if (b.session_id && !b.is_test) {
     await admin.from('founding_events').insert({ session_id: b.session_id, event: 'reserved', src: b.src ?? null, zip: b.zip, lang: b.lang, reservation_id: row.id }).then(() => {}, () => {});
   }
 
