@@ -128,5 +128,5 @@ Deno.serve(async req=>{
    }
   }
   return json({results});
- }catch(e){return json({error:String(e)},500);}
+ }catch(e){return json({error:e instanceof Error ? e.message : typeof e === 'object' && e && 'message' in e ? String(e.message) : String(e)},500);}
 });
