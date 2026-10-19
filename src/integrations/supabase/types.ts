@@ -1786,7 +1786,10 @@ export type Database = {
           sms_stopped: boolean
           source: string | null
           src_tag: string | null
+          stage_entered_at: string
           updated_at: string
+          user_id: string | null
+          welcome_at: string | null
           zip: string | null
         }
         Insert: {
@@ -1807,7 +1810,10 @@ export type Database = {
           sms_stopped?: boolean
           source?: string | null
           src_tag?: string | null
+          stage_entered_at?: string
           updated_at?: string
+          user_id?: string | null
+          welcome_at?: string | null
           zip?: string | null
         }
         Update: {
@@ -1828,7 +1834,10 @@ export type Database = {
           sms_stopped?: boolean
           source?: string | null
           src_tag?: string | null
+          stage_entered_at?: string
           updated_at?: string
+          user_id?: string | null
+          welcome_at?: string | null
           zip?: string | null
         }
         Relationships: []
@@ -4555,6 +4564,93 @@ export type Database = {
         }
         Relationships: []
       }
+      lifecycle_event_rules: {
+        Row: {
+          event: string
+          label_en: string
+          label_es: string
+          live: boolean
+          marketing: boolean
+          stage: string | null
+          templates: string[]
+          urgent: boolean
+        }
+        Insert: {
+          event: string
+          label_en: string
+          label_es: string
+          live?: boolean
+          marketing?: boolean
+          stage?: string | null
+          templates?: string[]
+          urgent?: boolean
+        }
+        Update: {
+          event?: string
+          label_en?: string
+          label_es?: string
+          live?: boolean
+          marketing?: boolean
+          stage?: string | null
+          templates?: string[]
+          urgent?: boolean
+        }
+        Relationships: []
+      }
+      lifecycle_events: {
+        Row: {
+          contact_id: string
+          created_at: string
+          dedupe_key: string
+          event: string
+          id: string
+          next_stage: string | null
+          occurred_at: string
+          prior_stage: string | null
+          simulation_id: string | null
+          tokens: Json
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          dedupe_key: string
+          event: string
+          id?: string
+          next_stage?: string | null
+          occurred_at?: string
+          prior_stage?: string | null
+          simulation_id?: string | null
+          tokens?: Json
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          dedupe_key?: string
+          event?: string
+          id?: string
+          next_stage?: string | null
+          occurred_at?: string
+          prior_stage?: string | null
+          simulation_id?: string | null
+          tokens?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lifecycle_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lifecycle_events_event_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "lifecycle_event_rules"
+            referencedColumns: ["event"]
+          },
+        ]
+      }
       lifecycle_sequences: {
         Row: {
           active: boolean
@@ -4733,11 +4829,15 @@ export type Database = {
           contact_id: string
           created_at: string
           error: string | null
+          event_id: string | null
+          force_shadow: boolean
           id: string
           marketing: boolean
           provider_id: string | null
+          queue_scope: string
           send_at: string
           sent_at: string | null
+          simulation_id: string | null
           stage: string
           status: string
           step_order: number | null
@@ -4750,11 +4850,15 @@ export type Database = {
           contact_id: string
           created_at?: string
           error?: string | null
+          event_id?: string | null
+          force_shadow?: boolean
           id?: string
           marketing?: boolean
           provider_id?: string | null
+          queue_scope?: string
           send_at: string
           sent_at?: string | null
+          simulation_id?: string | null
           stage: string
           status?: string
           step_order?: number | null
@@ -4767,11 +4871,15 @@ export type Database = {
           contact_id?: string
           created_at?: string
           error?: string | null
+          event_id?: string | null
+          force_shadow?: boolean
           id?: string
           marketing?: boolean
           provider_id?: string | null
+          queue_scope?: string
           send_at?: string
           sent_at?: string | null
+          simulation_id?: string | null
           stage?: string
           status?: string
           step_order?: number | null
@@ -4784,6 +4892,13 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_queue_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "lifecycle_events"
             referencedColumns: ["id"]
           },
         ]
@@ -7988,6 +8103,8 @@ export type Database = {
           car_service_code: string | null
           car_wash_key: string | null
           card_brand: string | null
+          card_exp_month: number | null
+          card_exp_year: number | null
           card_last4: string | null
           created_at: string
           founding_free_addon_first_visit: boolean
@@ -8039,6 +8156,8 @@ export type Database = {
           car_service_code?: string | null
           car_wash_key?: string | null
           card_brand?: string | null
+          card_exp_month?: number | null
+          card_exp_year?: number | null
           card_last4?: string | null
           created_at?: string
           founding_free_addon_first_visit?: boolean
@@ -8090,6 +8209,8 @@ export type Database = {
           car_service_code?: string | null
           car_wash_key?: string | null
           card_brand?: string | null
+          card_exp_month?: number | null
+          card_exp_year?: number | null
           card_last4?: string | null
           created_at?: string
           founding_free_addon_first_visit?: boolean
@@ -9539,6 +9660,60 @@ export type Database = {
         Args: { _accept: boolean; _token: string }
         Returns: Json
       }
+      lifecycle_capture_contact: {
+        Args: {
+          _email: string
+          _first: string
+          _lang: string
+          _last: string
+          _phone: string
+          _sms: boolean
+          _test?: boolean
+          _zip: string
+        }
+        Returns: string
+      }
+      lifecycle_contact_for_user: {
+        Args: { _user_id: string }
+        Returns: string
+      }
+      lifecycle_daily_events: { Args: { _at?: string }; Returns: Json }
+      lifecycle_dispatch: {
+        Args: {
+          _at?: string
+          _contact_id: string
+          _event: string
+          _key: string
+          _simulation_id?: string
+          _tokens?: Json
+        }
+        Returns: Json
+      }
+      lifecycle_dispatch_internal: {
+        Args: {
+          _at?: string
+          _contact_id: string
+          _event: string
+          _key: string
+          _simulation_id?: string
+          _tokens?: Json
+        }
+        Returns: Json
+      }
+      lifecycle_emit_user: {
+        Args: {
+          _at?: string
+          _event: string
+          _key: string
+          _tokens?: Json
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      lifecycle_inbound_reply: {
+        Args: { _body: string; _phone: string; _sid: string }
+        Returns: Json
+      }
       lifecycle_next_send_time: { Args: { _at: string }; Returns: string }
       lifecycle_orphans: {
         Args: never
@@ -9560,7 +9735,10 @@ export type Database = {
           sms_stopped: boolean
           source: string | null
           src_tag: string | null
+          stage_entered_at: string
           updated_at: string
+          user_id: string | null
+          welcome_at: string | null
           zip: string | null
         }[]
         SetofOptions: {
@@ -9573,6 +9751,15 @@ export type Database = {
       lifecycle_set_stage: {
         Args: { _contact_id: string; _stage: string; _tokens?: Json }
         Returns: undefined
+      }
+      lifecycle_simulate: {
+        Args: {
+          _contact_id: string
+          _event?: string
+          _journey?: boolean
+          _tokens?: Json
+        }
+        Returns: Json
       }
       mark_visit_paid_in_full: {
         Args: {

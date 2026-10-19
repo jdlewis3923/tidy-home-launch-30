@@ -1261,6 +1261,41 @@
       "when": 1792365223282,
       "tag": "0179_create_zap_cutover_checklist",
       "breakpoints": true
+    },
+    {
+      "idx": 180,
+      "version": "7",
+      "when": 1792367214678,
+      "tag": "0180_lifecycle_event_dispatch",
+      "breakpoints": true
+    },
+    {
+      "idx": 181,
+      "version": "7",
+      "when": 1792367348865,
+      "tag": "0181_lifecycle_source_triggers",
+      "breakpoints": true
+    },
+    {
+      "idx": 182,
+      "version": "7",
+      "when": 1792367399855,
+      "tag": "0182_lifecycle_schedule_and_simulator",
+      "breakpoints": true
+    },
+    {
+      "idx": 183,
+      "version": "7",
+      "when": 1792367632994,
+      "tag": "0183_lifecycle_inbound_and_isolated_simulations",
+      "breakpoints": true
+    },
+    {
+      "idx": 184,
+      "version": "7",
+      "when": 1792367760961,
+      "tag": "0184_lifecycle_identity_and_due_followups",
+      "breakpoints": true
     }
   ]
 }

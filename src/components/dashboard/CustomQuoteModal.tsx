@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ConfigState, hasCustomQuote, serviceLabels, sizeFor, ServiceType } from '@/lib/dashboard-pricing';
 import { fireCustomQuote } from '@/lib/webhooks';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Props {
   open: boolean;
@@ -30,6 +31,9 @@ export default function CustomQuoteModal({ open, onOpenChange, state, onSubmitte
     e.preventDefault();
     if (!canSubmit) return;
     setSubmitting(true);
+    if (/\S+@\S+\.\S+/.test(state.email)) {
+      await supabase.functions.invoke('lifecycle-capture', { body: { event: 'CUSTOM_QUOTE', email: state.email, phone: phone.trim(), first_name: name.trim(), zip: state.zip, sms_service: state.smsConsent } });
+    }
     await fireCustomQuote({
       customer_name: name.trim(),
       customer_phone: phone.trim(),

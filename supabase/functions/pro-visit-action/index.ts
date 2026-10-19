@@ -22,6 +22,7 @@ import { vendorFetch } from '../_shared/http.ts';
 import { afterVisitComplete, maybePromoteProPartner } from '../_shared/member-followups.ts';
 import { recomputeSize } from '../_shared/size-validation.ts';
 import { writeAlert } from '../_shared/alerts.ts';
+import { creditFirstVisitReferral } from '../_shared/lifecycle-referral.ts';
 
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'] as const;
 
@@ -317,6 +318,7 @@ Deno.serve(async (req) => {
     }
 
     const followups = await afterVisitComplete(admin, { id: visit.id, user_id: visit.user_id, rate_token: visit.rate_token, service_type: visit.service_type }, now);
+    await creditFirstVisitReferral(admin, visit.user_id);
     // Pro Partner: applies automatically, no approval — the raise starts on the next visit.
     const proPartner = applicant ? await maybePromoteProPartner(admin, applicant.id) : null;
 

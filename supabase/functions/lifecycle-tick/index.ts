@@ -17,6 +17,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { renderLifecycleEmail } from '../_shared/lifecycle-email.ts';
+import { lifecycleCanSend, lifecycleTemplatePair } from '../_shared/lifecycle-policy.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -60,7 +61,7 @@ async function sendSmsRow(admin: ReturnType<typeof createClient>, to: string, bo
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (!isCronAuthorized(req)) {
+  if (!(await isCronAuthorized(req))) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: corsHeaders });
   }
 
@@ -97,6 +98,12 @@ Deno.serve(async (req) => {
     (await getSetting(admin, 'lifecycle_live_stages')).split(',').map((s) => s.trim()).filter(Boolean),
   );
 
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
+  if ((await getSetting(admin, 'lifecycle_last_planned_day')) !== day) {
+    const { error: planningError } = await admin.rpc('lifecycle_daily_events');
+    if (!planningError) await setSetting(admin, 'lifecycle_last_planned_day', day);
+    else console.error('[lifecycle-tick] daily planning failed', planningError.message);
+  }
   // Claim due rows.
   const { data: due, error } = await admin
     .from('message_queue')
@@ -127,9 +134,23 @@ Deno.serve(async (req) => {
       continue;
     }
 
+    let eventLive = false;
+    if (row.event_id) {
+      const { data: event } = await admin.from('lifecycle_events').select('event').eq('id', row.event_id).maybeSingle();
+      if (event) {
+        const { data: rule } = await admin.from('lifecycle_event_rules').select('live').eq('event', event.event).maybeSingle();
+        eventLive = rule?.live === true;
+      }
+    }
+    const allowedLive = lifecycleCanSend({ shadow, test: contact.is_test, forceShadow: row.force_shadow, eventBacked: !!row.event_id, eventLive, stageLive: liveStages.has(row.stage) });
+    if (!allowedLive && row.channel !== 'task') {
+      await admin.from('message_queue').update({ status: 'dry_run', sent_at: new Date().toISOString() }).eq('id', row.id);
+      results.dry_run++;
+      continue;
+    }
     // Admin task rows become Today-list alerts, never sends.
     if (row.channel === 'task') {
-      if (!shadow || liveStages.has(row.stage)) {
+      if (allowedLive) {
         await admin.from('admin_alerts').insert({
           alert_type: 'lifecycle_task', level: 'critical', category: 'operations', tier: 'urgent',
           title: fillTokens(row.template_key ?? 'Lifecycle task', row.tokens),
@@ -155,10 +176,16 @@ Deno.serve(async (req) => {
         // Marketing text without consent → email version only, if one exists.
         const { data: emailTpl } = await admin
           .from('lifecycle_templates').select('*')
-          .eq('key', row.template_key).eq('channel', 'email').eq('active', true).maybeSingle();
+          .eq('key', lifecycleTemplatePair(row.template_key)).eq('channel', 'email').eq('active', true).maybeSingle();
         if (emailTpl && contact.email && (row.marketing ? contact.email_marketing && !contact.email_suppressed : true)) {
-          await admin.from('message_queue').update({ channel: 'email' }).eq('id', row.id);
+          const { data: existingEmail } = await admin.from('message_queue').select('id').eq('contact_id', row.contact_id).eq('template_key', emailTpl.key).eq('channel', 'email').eq('event_id', row.event_id).neq('status', 'cancelled').limit(1);
+          if (existingEmail?.length) {
+            await admin.from('message_queue').update({ status: 'cancelled', error: 'email counterpart already queued' }).eq('id', row.id);
+            continue;
+          }
+          await admin.from('message_queue').update({ channel: 'email', template_key: emailTpl.key }).eq('id', row.id);
           row.channel = 'email';
+          row.template_key = emailTpl.key;
         } else {
           await admin.from('message_queue').update({ status: 'cancelled', error: 'no consent' }).eq('id', row.id);
           results.skipped_consent++;
@@ -196,7 +223,7 @@ Deno.serve(async (req) => {
     const bodyText = fillTokens(useEs ? tpl.body_es : tpl.body_en, row.tokens);
     const subject = fillTokens(useEs ? (tpl.subject_es ?? tpl.subject_en ?? '') : (tpl.subject_en ?? ''), row.tokens);
 
-    const isLive = !shadow || liveStages.has(row.stage);
+    const isLive = allowedLive;
     if (!isLive) {
       await admin.from('message_queue').update({ status: 'dry_run', sent_at: new Date().toISOString() }).eq('id', row.id);
       results.dry_run++;
@@ -246,19 +273,21 @@ Deno.serve(async (req) => {
 
     // Retry with backoff, then fail. SMS failure falls back to the email version.
     if (row.attempts < 3) {
-      const retryAt = new Date(Date.now() + RETRY_BACKOFF_MS[row.attempts]).toISOString();
+      const { data: retryAt } = await admin.rpc('lifecycle_next_send_time', { _at: new Date(Date.now() + RETRY_BACKOFF_MS[row.attempts]).toISOString() });
       await admin.from('message_queue').update({ status: 'queued', attempts: row.attempts + 1, send_at: retryAt, error: sendError }).eq('id', row.id);
       results.retried++;
     } else {
       let fellBack = false;
       if (row.channel === 'sms') {
         const { data: emailTpl } = await admin
-          .from('lifecycle_templates').select('key').eq('key', row.template_key).eq('channel', 'email').eq('active', true).maybeSingle();
+          .from('lifecycle_templates').select('key').eq('key', lifecycleTemplatePair(row.template_key)).eq('channel', 'email').eq('active', true).maybeSingle();
         if (emailTpl && contact.email) {
+          const { data: nextSend } = await admin.rpc('lifecycle_next_send_time', { _at: new Date().toISOString() });
           await admin.from('message_queue').insert({
             contact_id: contact.id, stage: row.stage, step_order: row.step_order,
-            template_key: row.template_key, channel: 'email', marketing: row.marketing,
-            tokens: row.tokens, send_at: new Date().toISOString(),
+            template_key: emailTpl.key, channel: 'email', marketing: row.marketing,
+            tokens: row.tokens, send_at: nextSend, queue_scope: row.queue_scope, force_shadow: row.force_shadow,
+            event_id: row.event_id, simulation_id: row.simulation_id,
           });
           fellBack = true;
         }

@@ -1,5 +1,5 @@
 import RatingLine from '@/components/reviews/RatingLine';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +31,11 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const set = (k: keyof ConfigState, v: unknown) => onChange({ ...state, [k]: v });
+  useEffect(() => {
+    if (!/\S+@\S+\.\S+/.test(state.email)) return;
+    const timer = setTimeout(() => { void supabase.functions.invoke('lifecycle-capture', { body: { event: 'RES_STARTED', email: state.email, phone: state.phone.replace(/\D/g, '').length >= 10 ? state.phone : undefined, first_name: state.firstName, zip: /^\d{5}$/.test(state.zip) ? state.zip : undefined, lang: language, sms_service: state.smsConsent } }); }, 1200);
+    return () => clearTimeout(timer);
+  }, [state.email, state.phone, state.firstName, state.zip, state.smsConsent, language]);
 
   const services = state.services.filter((s): s is ReservableService => (RESERVABLE_SERVICES as readonly string[]).includes(s));
   const zipOk = VALID_ZIPS.includes(state.zip);
