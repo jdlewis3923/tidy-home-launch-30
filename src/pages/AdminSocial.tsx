@@ -115,6 +115,19 @@ export default function AdminSocial() {
       setDryRun(data.timeline); toast.success('Dry-run complete — nothing sent');
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   };
+  const markPosted = async (p: Post) => {
+    setBusy(true);
+    try {
+      const { error } = await supabase.rpc('admin_mark_social_posted', { _id: p.id });
+      if (error) throw error;
+      toast.success('Marked posted'); await load();
+    } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
+  };
+  const copyCaption = async (p: Post) => {
+    const day = p.scheduled_for ? etDate(p.scheduled_for) : new Date().toISOString().slice(0, 10);
+    await navigator.clipboard.writeText(renderTemplate(edit[p.id] ?? p.template_copy ?? p.caption ?? '', anchors, day));
+    toast.success('Caption copied');
+  };
   const runPreview = async () => {
     setBusy(true);
     try { const r = await invoke({ action: "preview", anchors: { launch: pv.launch || null, conversion: pv.conversion || null, carLaunch: pv.car || null } }); setPreview(r.plan); }
@@ -186,7 +199,12 @@ export default function AdminSocial() {
         <Link to="/admin" className="text-sm text-muted-foreground hover:underline">← Admin</Link>
         <h1 className="mt-2 text-3xl font-bold text-foreground">Social calendar</h1>
         <div className="mt-3 flex flex-wrap gap-2"><Button variant={range === 'fortnight' ? 'default' : 'outline'} onClick={() => setRange('fortnight')}>Next 14 days</Button><Button variant={range === 'month' ? 'default' : 'outline'} onClick={() => setRange('month')}>All months</Button><Button variant="outline" onClick={() => void runDry()} disabled={busy}>Run publishing dry-run</Button></div>
-        <p className="mt-2 text-sm text-destructive">Nextdoor and LinkedIn: no direct publishing connection. Posts are held; Zapier is not used.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Facebook, Instagram and LinkedIn publish automatically from here. Nextdoor is manual: copy the caption, download the image, post it, then mark it posted.</p>
+        {linkedinReady === false && (
+          <p className="mt-2 rounded-lg border border-destructive bg-destructive/10 p-3 text-sm font-semibold text-destructive">
+            LinkedIn isn't connected — add the LINKEDIN_ZAP_WEBHOOK_URL secret (Zapier catch hook → LinkedIn company page), or LinkedIn posts will be blocked.
+          </p>
+        )}
       </header>
       {dryRun && <section className="space-y-3"><h2 className="text-xl font-bold">Dry-run timeline</h2>{dryRun.map((r, i) => <div key={`${r.source_id}-${i}`} className={`flex gap-4 border-b border-border py-3 ${r.result.ok ? 'text-foreground' : 'text-destructive'}`}><img src={r.image_url} alt="" className="h-24 w-24 object-contain" /><div className="min-w-0"><p>{fmt(r.scheduled_for)} · {r.result.ok ? 'Would publish' : r.result.reason}</p><pre className="whitespace-pre-wrap text-xs">{r.caption}</pre></div></div>)}</section>}
 
