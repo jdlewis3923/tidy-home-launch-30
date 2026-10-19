@@ -7728,6 +7728,36 @@ export type Database = {
         }
         Relationships: []
       }
+      social_external_history: {
+        Row: {
+          caption: string
+          content_hash: string
+          image_file: string | null
+          image_hash: string | null
+          platform: string
+          platform_post_id: string
+          posted_at: string
+        }
+        Insert: {
+          caption: string
+          content_hash: string
+          image_file?: string | null
+          image_hash?: string | null
+          platform: string
+          platform_post_id: string
+          posted_at: string
+        }
+        Update: {
+          caption?: string
+          content_hash?: string
+          image_file?: string | null
+          image_hash?: string | null
+          platform?: string
+          platform_post_id?: string
+          posted_at?: string
+        }
+        Relationships: []
+      }
       social_launch_posts: {
         Row: {
           anchor_type: string | null
