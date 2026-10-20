@@ -31,6 +31,10 @@ export const EXPECTED_CRON_JOBS: ExpectedCronJob[] = [
   { name: 'cron-health-snapshot', schedule: '7 * * * *', kind: 'sql', purpose: 'Refreshes the scheduled-job health snapshot the watchdog reads.' },
   { name: 'generate-recurring-visits-daily', schedule: '30 9 * * *', kind: 'sql', purpose: 'Extends every active plan 45 days of visits.' },
   { name: 'schedule-tick-hourly', schedule: '40 * * * *', kind: 'sql', purpose: 'Scheduling: activates/suspends Pro claims, applies 14-day drops, waitlist offers and holds, night-before reminders, daily pivot ladder.' },
+  { name: 'pipeline-coi-tick', schedule: '30 11 * * *', kind: 'sql', purpose: 'Enforces contractor insurance expiry.' },
+  { name: 'pipeline-proof-tick', schedule: '25 * * * *', kind: 'sql', purpose: 'Tracks equipment-proof reminders and expiry.' },
+  { name: 'hiring_tick_15min', schedule: '*/15 * * * *', kind: 'sql', purpose: 'Enforces hiring deadlines and check-ins.' },
+  { name: 'lifecycle-tick-15min', schedule: '*/15 * * * *', kind: 'http', fn: 'lifecycle-tick', purpose: 'Dispatches lifecycle messages with shadow and consent gates.' },
 
   // --- money / contractor ---
   { name: 'referral-bonus-check-daily', schedule: '0 9 * * *', kind: 'http', fn: 'referral-bonus-check', purpose: 'Credits referral bonuses once the referred plan qualifies.' },
