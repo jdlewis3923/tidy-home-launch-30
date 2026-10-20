@@ -49,14 +49,18 @@ Deno.serve(async (req) => {
   // "ok, 0 stale" is how the watchdog could freeze without anyone knowing.
   const { data: captured, error: capErr } = await admin.rpc('capture_cron_health');
   if (capErr) {
-    await admin.from('admin_alerts').insert({
+    await admin.from('admin_alerts').upsert({
       alert_type: 'cron_snapshot_failed',
+      dedupe_key: 'cron_snapshot_failed:open',
+      resolved_at: null,
       title: 'The scheduled-job watchdog could not refresh',
       body: `capture_cron_health failed: ${capErr.message}`,
       context: { at: new Date().toISOString() },
-    });
+    }, { onConflict: 'dedupe_key' });
     return jsonResponse({ ok: false, error: `capture_cron_health failed: ${capErr.message}` }, 500);
   }
+  await admin.from('admin_alerts').update({ resolved_at: new Date().toISOString() })
+    .eq('alert_type', 'cron_snapshot_failed').is('resolved_at', null);
   const { data, error } = await admin
     .from('cron_health_snapshot')
     .select('jobid, jobname, schedule, active, last_run_at, last_status, last_message, expected_interval_minutes, minutes_since, stale, http_status, http_error, captured_at');
@@ -86,6 +90,8 @@ Deno.serve(async (req) => {
         context: { at: new Date().toISOString() },
       });
     }
+  } else {
+    await admin.from('admin_alerts').update({ resolved_at: new Date().toISOString() }).eq('alert_type', 'scheduler_paused').is('resolved_at', null);
   }
 
   const jobs = (data ?? []) as CronRow[];
@@ -100,13 +106,16 @@ Deno.serve(async (req) => {
     _expected: manifestForRpc(),
   });
   if (diffErr) {
-    await admin.from('admin_alerts').insert({
+    await admin.from('admin_alerts').upsert({
       alert_type: 'cron_manifest_check_failed',
+      dedupe_key: 'cron_manifest_check_failed:open',
+      resolved_at: null,
       title: 'Could not compare scheduled jobs against the expected list',
       body: `cron_manifest_diff failed: ${diffErr.message}`,
       context: { at: new Date().toISOString() },
-    });
+    }, { onConflict: 'dedupe_key' });
   } else {
+    await admin.from('admin_alerts').update({ resolved_at: new Date().toISOString() }).eq('alert_type', 'cron_manifest_check_failed').is('resolved_at', null);
     manifestProblems = (diffRows ?? []) as Diff[];
     for (const p of manifestProblems) {
       const { data: existing } = await admin
@@ -165,6 +174,7 @@ Deno.serve(async (req) => {
 
 
   let alerted = 0;
+  await admin.from('admin_alerts').update({ resolved_at: new Date().toISOString() }).eq('alert_type', 'cron_snapshot_empty').is('resolved_at', null);
   for (const j of stale) {
     // One open alert per job — don't spam an hourly duplicate.
     const { data: existing } = await admin
