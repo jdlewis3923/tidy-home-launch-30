@@ -160,7 +160,7 @@ export default function AdminSocial() {
     const tpl = edit[p.id] ?? p.template_copy ?? p.caption ?? "";
     const day = p.scheduled_for ? etDate(p.scheduled_for) : new Date().toISOString().slice(0, 10);
     const rendered = renderTemplate(tpl, anchors, day);
-    const locked = p.status === "posted" || p.status === "posting" || !!p.external_post_id;
+    const locked = p.status === "posted" || p.status === "posting" || !!p.external_post_id || receipts.some(r=>r.post_id===p.id);
     const receipt=receipts.find(r=>r.post_id===p.id);
     const blocked = !!p.image_flag || (!p.image_url && p.media_kind!=='text') || p.status === 'blocked' || p.status === 'missed';
     return (
@@ -175,7 +175,7 @@ export default function AdminSocial() {
         {p.image_flag && <p className="mt-1 text-xs text-destructive">{p.image_flag}</p>}
         {receipt && <div className="mt-2 text-xs text-muted-foreground"><p>{receipt.state==='posted'?'Confirmed on LinkedIn':'Awaiting LinkedIn confirmation'} · Zapier HTTP {receipt.webhook_status??'pending'}</p><pre className="whitespace-pre-wrap">{receipt.webhook_response}</pre>{receipt.post_url && <a href={receipt.post_url} target="_blank" rel="noreferrer" className="text-primary underline">Open LinkedIn post</a>}</div>}
         {p.publish_error && <p className="mt-1 text-xs text-destructive">{p.publish_error}</p>}
-        <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1fr_140px]">
+        <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px]">
           <div>
             <p className="mb-1 text-xs font-semibold text-muted-foreground">Template</p>
             <textarea rows={7} disabled={locked} value={tpl} onChange={(ev) => setEdit({ ...edit, [p.id]: ev.target.value })} className="w-full rounded border border-input bg-background p-2 text-sm" />
@@ -184,8 +184,8 @@ export default function AdminSocial() {
             <p className="mb-1 text-xs font-semibold text-muted-foreground">{CH[platform] ?? platform}</p>
             <pre className="whitespace-pre-wrap rounded bg-muted p-2 text-xs text-foreground">{platform === 'instagram' ? instagramVersion(rendered) : rendered}</pre>
           </div>
-          <div>{p.image_url ? <img src={p.image_url} alt={p.image_subject??"Post image"} loading="lazy" className="w-full rounded object-contain" /> : <div className="flex h-24 items-center justify-center rounded bg-muted text-xs text-muted-foreground">{p.media_kind==='text'?'Text only':'No image'}</div>}
-            <p className="mt-1 text-[11px] text-muted-foreground">{p.image_subject}</p></div>
+          <div>{p.image_url ? <img src={p.image_url} alt={p.image_subject??"Post image"} width={1200} height={p.media_kind==='banner'?627:1200} className="h-auto w-full rounded object-contain" /> : <div className="flex h-24 items-center justify-center rounded bg-muted text-xs text-muted-foreground">{p.media_kind==='text'?'Text only':'No image'}</div>}
+            <details className="mt-1 text-[11px] text-muted-foreground"><summary>Image details</summary>{p.image_subject}</details></div>
         </div>
         {!locked && (
           <div className="mt-3 flex flex-wrap gap-2">
@@ -211,6 +211,7 @@ export default function AdminSocial() {
       <header>
         <Link to="/admin" className="text-sm text-muted-foreground hover:underline">← Admin</Link>
         <h1 className="mt-2 text-3xl font-bold text-foreground">Social calendar</h1>
+        {receipts.some(r=>r.webhook_status!==null && r.webhook_status>=400) && <p className="mt-2 border border-destructive bg-destructive/10 p-3 text-sm text-destructive">LinkedIn calendar held: Zapier rejected a post. Confirm the Zap supports both image and text posts before rescheduling. Accepted posts will not be resent.</p>}
         <div className="mt-3 flex flex-wrap gap-2"><Button variant={range === 'fortnight' ? 'default' : 'outline'} onClick={() => setRange('fortnight')}>Next 14 days</Button><Button variant={range === 'month' ? 'default' : 'outline'} onClick={() => setRange('month')}>All months</Button><Button variant="outline" onClick={() => void runDry()} disabled={busy}>Run publishing dry-run</Button></div>
         <div className="mt-3 flex gap-2"><Button variant={platformFilter==='all'?'default':'outline'} onClick={()=>setPlatformFilter('all')}>All platforms</Button><Button variant={platformFilter==='linkedin'?'default':'outline'} onClick={()=>setPlatformFilter('linkedin')}>LinkedIn</Button></div>
         <p className="mt-2 text-sm text-muted-foreground">Facebook, Instagram and LinkedIn publish automatically from here. Nextdoor is manual: copy the caption, download the image, post it, then mark it posted.</p>
