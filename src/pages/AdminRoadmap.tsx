@@ -17,7 +17,9 @@ const OWNERS = ["Justin", "Lovable", "Chrome", "Pro"] as const;
 const STATUS_CLS: Record<string, string> = {
   planned: "bg-muted", building: "bg-primary/60", ready: "bg-accent", live: "bg-primary", paused: "bg-destructive/60",
 };
-const T0 = "2026-11-01", T1 = "2028-10-31";
+// Fixed 24-month axis (not a launch date).
+const AXIS_START_YEAR = 2026;
+const T0 = `${AXIS_START_YEAR}-11-01`, T1 = `${AXIS_START_YEAR + 2}-10-31`;
 
 export default function AdminRoadmap() {
   const { hasRole, isLoading } = useHasRoleState("admin");
