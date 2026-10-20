@@ -1,5 +1,11 @@
 # Roadmap
 
+## LinkedIn 60-day calendar (Oct 20)
+- [ ] Import 120 exact CSV rows and lock 37 original banners + 23 generated square JPEGs; 60 text-only posts.
+- [ ] Enable LinkedIn-only slots plus separate repurposed Meta extras; chronological/repeat safeguards and recorded webhook responses.
+- [ ] Record confirmed company-page post URLs; publish today's two slots in order with owner authorization.
+- [ ] Verify 14-day LinkedIn preview and first live post URL.
+
 ## Growth roadmap (Oct 20)
 - [x] /admin/roadmap: 6 initiatives, switches (all OFF), gates, checklists, build prompts, 24-month timeline; Launch now / Pause.
 - [x] Hourly roadmap check: 8 AM launch-day switch, kickoff text, URGENT overdue alerts; 9 AM digest kickoff + "Coming up" + milestones. Test kickoff text and digest sent.
