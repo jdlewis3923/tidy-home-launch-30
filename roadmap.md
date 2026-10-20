@@ -4,11 +4,13 @@
 - [x] /admin/roadmap: 6 initiatives, switches (all OFF), gates, checklists, build prompts, 24-month timeline; Launch now / Pause.
 - [x] Hourly roadmap check: 8 AM launch-day switch, kickoff text, URGENT overdue alerts; 9 AM digest kickoff + "Coming up" + milestones. Test kickoff text and digest sent.
 - [x] Visit-count answer recorded (biweekly 26 delivered / 24 billed; weekly 52 / 48).
-- [ ] Prepaid Year build (annual Stripe prices, toggle, prepaid flag, renewal email, refund math test) — waits on Justin: annual price covers billed or delivered visits; approve wording.
+- [x] Prepaid Year pricing + refund math rules (tested: $189 → $2,041.20; cancel at 3 → refund $1,474.20; 45-day notice).
+- [ ] Prepaid Year build: annual Stripe prices (live+test), hidden Monthly/Yearly toggle, prepaid flag, 45-day renewal email, Terms/FAQ EN+ES, Stripe test purchase+cancel — next.
 - [ ] Bundle Push build (hidden) — after Prepaid Year; seasonal drafts need approval.
 - [ ] Pressure Washing build (hidden) — Stripe tiers + booking; drafts need approval.
 
 ## Owner Daily Signal and alert cleanup (Oct 20)
+- [x] Rebuilt owner email as navy Daily Signal matching reference exactly (sharp photos, colored panels); test digest sent.
 - [x] Separate owner Daily Signal layout with reference photos, white surfaces, live numbers and compact gold actions; desktop/phone rendering has no overflow or broken images.
 - [x] Clear 46 verified recovered/test/duplicate alerts; resolved rows stay out of Alerts and deduplicated digests. Genuine failures retained; zero open watchdog/test-document alerts.
 - [x] Deploy owner renderer and sender dependencies; 35 tests passed; authenticated live preview and one refreshed email accepted.
