@@ -1380,6 +1380,13 @@
       "when": 1792539501118,
       "tag": "0196_linkedin_calendar_and_delivery_receipts",
       "breakpoints": true
+    },
+    {
+      "idx": 197,
+      "version": "7",
+      "when": 1792539659523,
+      "tag": "0197_preserve_partial_platform_confirmation_guard",
+      "breakpoints": true
     }
   ]
 }
