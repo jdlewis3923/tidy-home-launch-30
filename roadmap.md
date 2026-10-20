@@ -4,7 +4,8 @@
 - [x] /admin/roadmap: 6 initiatives, switches (all OFF), gates, checklists, build prompts, 24-month timeline; Launch now / Pause.
 - [x] Hourly roadmap check: 8 AM launch-day switch, kickoff text, URGENT overdue alerts; 9 AM digest kickoff + "Coming up" + milestones. Test kickoff text and digest sent.
 - [x] Visit-count answer recorded (biweekly 26 delivered / 24 billed; weekly 52 / 48).
-- [ ] Prepaid Year build (annual Stripe prices, toggle, prepaid flag, 45-day renewal email, refund math test) — decisions + wording approved Oct 20.
+- [x] Prepaid Year pricing + refund math rules (tested: $189 → $2,041.20; cancel at 3 → refund $1,474.20; 45-day notice).
+- [ ] Prepaid Year build: annual Stripe prices (live+test), hidden Monthly/Yearly toggle, prepaid flag, 45-day renewal email, Terms/FAQ EN+ES, Stripe test purchase+cancel — next.
 - [ ] Bundle Push build (hidden) — after Prepaid Year; seasonal drafts need approval.
 - [ ] Pressure Washing build (hidden) — Stripe tiers + booking; drafts need approval.
 
