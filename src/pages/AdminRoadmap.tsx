@@ -10,7 +10,7 @@ import { useHasRoleState } from "@/hooks/useHasRole";
 import { toast } from "@/hooks/use-toast";
 import { dueDate, pctDone, daysBetween, fmt, type Initiative } from "../../supabase/functions/_shared/roadmap-rules";
 
-type Row = Initiative & { slug: string; switch_key: string; gate_note: string | null; summary: string | null; extra_dates: string[];
+type Row = Omit<Initiative, "items"> & { slug: string; switch_key: string; gate_note: string | null; summary: string | null; extra_dates: string[];
   items: (Initiative["items"][number] & { note: string | null; sort: number })[] };
 const STATUSES = ["planned", "building", "ready", "live", "paused"] as const;
 const OWNERS = ["Justin", "Lovable", "Chrome", "Pro"] as const;
