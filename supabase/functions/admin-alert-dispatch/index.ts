@@ -18,7 +18,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
-import { tidyEmailShell } from '../_shared/email-brand.ts';
+import { ownerEmail } from '../_shared/owner-email.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { renderTemplate } from '../_shared/socialPlanner.ts';
@@ -38,7 +38,6 @@ type Alert = {
   context?: Record<string, unknown> | null;
 };
 
-const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
 /** ET wall clock. */
@@ -76,14 +75,14 @@ async function sendUrgent(admin: SupabaseClient, a: Alert, reminder: boolean) {
     const out = await res.json().catch(() => ({}));
     sms = out?.sent ? 'sent' : `failed:${out?.error ?? res.status}`;
   } catch (e) { sms = `failed:${(e as Error).message}`; }
-  const row = (k: string, v: string, color = '#0f172a') => `<tr><td style="padding:6px 12px 6px 0;font:700 12px Arial;color:#64748b;white-space:nowrap;vertical-align:top">${k}</td><td style="padding:6px 0;font:15px/1.5 Arial;color:${color}">${esc(v)}</td></tr>`;
   const mail = await sendBrevoEmail({
     to: OWNER_EMAIL, marketing: false, adminChannel: 'urgent', label: 'admin-alert-dispatch',
     subject: `${reminder ? 'Still open' : 'Urgent'}: ${f.what}`.slice(0, 150),
-    htmlContent: tidyEmailShell({
-      eyebrow: reminder ? 'Still open after 4 hours' : 'Urgent', heading: esc(f.what),
-      bodyHtml: `<table role="presentation" cellpadding="0" cellspacing="0">${row('WHAT', f.what)}${row('WHY TODAY', f.why)}${row('IF IGNORED', f.ifIgnored, '#b91c1c')}</table>`,
-      ctaUrl: f.doUrl, ctaLabel: f.doLabel,
+    htmlContent: ownerEmail({
+      date: et().date, edition: reminder ? 'Still open after 4 hours' : 'Urgent',
+      attention: [{ text: f.what, url: f.doUrl, label: f.doLabel }],
+      unresolved: [{ text: f.what, url: f.doUrl, label: f.doLabel }],
+      sections: [{ title: 'Why today', items: [{ text: f.why }] }, { title: 'If ignored', red: true, items: [{ text: f.ifIgnored }] }],
     }),
     tags: ['admin-urgent'],
   }).catch((e) => ({ sent: false, reason: (e as Error).message }));
@@ -122,7 +121,17 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   };
   const reservations = await count('reservations', 'created_at', (q) => q.eq('is_test_row', false));
   const scans = await count('qr_scans', 'created_at');
-  const visitsDone = await count('visits', 'completed_at');
+  const visitsDone = await count('visits', 'completed_at', (q) => q.eq('is_sample', false));
+  const [{ data: periodVisits, error: visitError }, { data: members, error: memberError }] = await Promise.all([
+    admin.from('visits').select('service, status, assigned_pro_id').eq('is_sample', false).gte('scheduled_start', dayStart).lt('scheduled_start', dayEnd).not('status', 'in', '(canceled,skipped)'),
+    admin.from('subscriptions').select('user_id').eq('status', 'active'),
+  ]);
+  if (visitError || memberError) throw new Error(visitError?.message ?? memberError?.message);
+  const actualVisits = (periodVisits ?? []).filter((v) => !testIds.has(v.assigned_pro_id ?? ''));
+  const operations = [['Cleaning', 'cleaning'], ['Lawn', 'lawn'], ['Car Care', 'detailing']].map(([service, key]) => {
+    const jobs = actualVisits.filter((v) => v.service === key);
+    return { service, total: jobs.length, completed: jobs.filter((v) => v.status === 'complete').length };
+  });
   const { data: inv } = await admin.from('invoices').select('amount_cents').eq('status', 'paid').gte('paid_at', dayStart).lt('paid_at', dayEnd);
   const revenue = (inv ?? []).reduce((s, r) => s + (r.amount_cents ?? 0), 0);
   const numbers = [`${reservations} reservations`, `${scans} QR scans`, `$${(revenue / 100).toFixed(0)} revenue`, `${visitsDone} visits done`];
@@ -209,7 +218,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     const { data: tv } = await admin.from('visits').select('assigned_pro_id').gte('scheduled_start', etMidnightUtc(tmr)).lt('scheduled_start', etMidnightUtc(addDays(tmr, 1))).not('status', 'in', '(canceled,skipped)');
     const pros = new Set((tv ?? []).map((v) => v.assigned_pro_id).filter(Boolean)).size;
     const noPro = (tv ?? []).filter((v) => !v.assigned_pro_id).length;
-    const tmrItems = (tv ?? []).length ? [{ text: `${tv!.length} visits · ${pros} Pros on route${noPro ? ` · ${noPro} without a Pro` : ''}` }] : [];
+    const tmrItems = (tv ?? []).length ? [{ text: `${(tv ?? []).length} visits · ${pros} Pros on route${noPro ? ` · ${noPro} without a Pro` : ''}` }] : [];
     const { data: dueT } = await admin.from('calendar_tasks').select('title').is('done_at', null).eq('next_due_date', tmr);
     for (const t of dueT ?? []) tmrItems.push({ text: `Due: ${t.title}` });
     sections.push({ title: 'Tomorrow', items: tmrItems });
@@ -224,17 +233,16 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   }
 
   const shown = sections.filter((s) => s.items.length);
-  if (preview) return { edition, preview: true, sections: shown, completed_applications: applications.length, open_alerts: all.length };
   const nothing = edition === 'today' && !mustDo.length;
-  const html = (nothing ? `<p style="margin:0 0 16px;font:700 16px Arial;color:#0f172a">Nothing needs you today.</p>` : '') + shown.map((s) => `
-    <h2 style="margin:18px 0 8px;font:800 15px Arial;color:${s.red ? '#b91c1c' : '#0f172a'}">${esc(s.title)}</h2>
-    <ul style="margin:0;padding-left:18px">${s.items.map((i) => `<li style="margin:0 0 6px;white-space:pre-line;color:${s.red ? '#b91c1c' : '#334155'}">${esc(i.text)}${i.url ? ` — <a href="${i.url}" style="color:#2563eb;font-weight:700">${esc(i.label)}</a>` : ''}</li>`).join('')}</ul>`).join('');
   const heading = edition === 'today' ? 'Today' : 'Tonight';
+  const pulse = { revenue, bookings: reservations, households: new Set((members ?? []).map((s) => s.user_id)).size, pros: new Set(actualVisits.map((v) => v.assigned_pro_id).filter(Boolean)).size };
+  const html = ownerEmail({ date: today, edition: heading, pulse, operations, attention: [...urgentOpen, ...mustDo].map(item), unresolved: all.map(item), sections: shown.filter((s) => !['Must do today', 'Unresolved urgent', 'Still open from today', 'Yesterday in numbers', 'Today in numbers'].includes(s.title)) });
+  if (preview) return { edition, preview: true, sections: shown, completed_applications: applications.length, open_alerts: all.length, html };
   const mail = shown.length || nothing
     ? await sendBrevoEmail({
         to: OWNER_EMAIL, marketing: false, adminChannel: 'digest', label: 'admin-digest',
         subject: `Tidy ${heading} · ${today}${urgentOpen.length ? ` · ${urgentOpen.length} unresolved` : ''}`,
-        htmlContent: tidyEmailShell({ eyebrow: `${heading} · ${today}`, heading, bodyHtml: html || '<p>Nothing to report.</p>', ctaUrl: `${SITE}/admin/alerts`, ctaLabel: 'Open alerts' }),
+        htmlContent: html,
         tags: ['admin-digest'],
       }).catch((e) => ({ sent: false, reason: (e as Error).message }))
     : { sent: false, reason: 'empty' };
@@ -250,6 +258,13 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     sms = out?.sent ? 'sent' : `failed:${out?.error ?? res?.status ?? 'network'}`;
   }
   const emailResult = mail.sent ? 'sent' : `failed:${(mail as { reason?: string }).reason}`;
+  await admin.from('email_send_log').insert({
+    template_name: 'admin-digest', channel: 'email', recipient: OWNER_EMAIL,
+    triggered_by: 'admin-alert-dispatch', status: mail.sent ? 'sent' : 'failed',
+    brevo_message_id: (mail as { messageId?: string }).messageId ?? null,
+    error_message: mail.sent ? null : (mail as { reason?: string }).reason ?? 'unknown',
+    payload: { edition, open_alerts: all.length, completed_applications: applications.length },
+  });
   if (!force) await admin.from('admin_digest_runs').update({ email_result: emailResult, sms_result: sms, body: { sections: shown } }).eq('edition', edition).eq('run_date', today);
   return { edition, email: emailResult, sms, sections: shown.map((s) => `${s.title} (${s.items.length})`), nothing };
 }

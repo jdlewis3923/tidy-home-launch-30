@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { visibleDigestAlerts, realCompletedApplications } from '../../supabase/functions/_shared/admin-digest-rules';
 describe('owner digest rules', () => {
+  it('keeps one latest warning for the same incident', () => {
+    const rows = [{ alert_type: 'cron_snapshot_failed', title: 'Watchdog', dedupe_key: 'watchdog', id: 'latest' }, { alert_type: 'cron_snapshot_failed', title: 'Watchdog', dedupe_key: 'watchdog', id: 'old' }];
+    expect(visibleDigestAlerts(rows, new Set()).map((r) => r.id)).toEqual(['latest']);
+  });
+  it('excludes test document events and test pro links', () => {
+    expect(visibleDigestAlerts([
+      { alert_type: 'documenso_envelope_signed', title: 'Signed', context: { document_id: 'test-doc-123' } },
+      { alert_type: 'insurance_lapsed', title: 'Insurance lapsed', action_url: '/admin/pipeline/11111111-1111-4111-8111-111111111111' },
+    ], new Set(['11111111-1111-4111-8111-111111111111']))).toEqual([]);
+  });
   it('excludes cleared alerts', () => {
     expect(visibleDigestAlerts([{ alert_type: 'cron_snapshot_failed', title: 'Watchdog', resolved_at: '2026-10-20T01:00:00Z' }], new Set())).toEqual([]);
   });

@@ -8,7 +8,7 @@ Never show platform badges (e.g., Edit with Lovable). EN/ES bilingual support re
 Copywriting must be concise, low cognitive load. Never use words like "easy" or "convenient".
 Supabase auth, GTM tracking.
 Transactional email/SMS: edge functions fire Zapier webhooks only — never call Brevo/Twilio/Resend directly. Existing Zaps render Brevo templates + send Twilio SMS.
-Every outgoing email uses the shared Tidy design: white surfaces (never grey/black), website-gold buttons, official logo, intent-matched photographic banner, useful details and legal footer; see Email Design System.
+Customer/Pro emails use the shared Tidy design; owner emails use a separate Daily Signal layout matching Justin's Oct 20 reference proportions and controls, with white backgrounds as explicitly requested. Solved and test alerts must never appear as open items.
 Never imply one Pro handles different services. Say “the same pro for each service, every visit” (Spanish: “el mismo profesional para cada servicio, en cada visita”).
 
 ## Memories
