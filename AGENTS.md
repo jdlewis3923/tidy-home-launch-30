@@ -24,3 +24,4 @@
 - Social-launch-publisher alone posts ledger-locked images/copy; social-plan sets dates unless manually moved — why: no competing sends.
 
 - Lifecycle uses transactional event-ledger dispatch; visit events preserve stages, rules default shadow, simulations require admin + is_test — why: no duplicate/test sends.
+- Growth initiatives live in roadmap_initiatives/items; customer code gates new pieces only via feature_enabled(switch_key), flipped by roadmap-tick at 8 AM ET launch day or Launch now — why: everything ships dark and unveils automatically.
