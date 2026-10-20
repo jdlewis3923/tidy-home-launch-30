@@ -85,7 +85,7 @@ export async function isCronAuthorized(req: Request): Promise<boolean> {
 
   // Only record calls that look like scheduled dispatches, so ad-hoc probes do
   // not overwrite a job's real last-seen state.
-  if (req.headers.get('x-cron-job') || presented) await recordCronAck(req, ok);
+  if (req.headers.get('x-cron-job')) await recordCronAck(req, ok);
   return ok;
 }
 
