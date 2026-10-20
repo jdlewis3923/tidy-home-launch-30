@@ -7004,6 +7004,157 @@ export type Database = {
           },
         ]
       }
+      roadmap_events: {
+        Row: {
+          actor: string | null
+          created_at: string
+          detail: string | null
+          id: string
+          initiative_id: string | null
+          kind: string
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          initiative_id?: string | null
+          kind: string
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          initiative_id?: string | null
+          kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_events_initiative_id_fkey"
+            columns: ["initiative_id"]
+            isOneToOne: false
+            referencedRelation: "roadmap_initiatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roadmap_initiatives: {
+        Row: {
+          build_prompt: string | null
+          created_at: string
+          extra_dates: string[]
+          gate_description: string
+          gate_note: string | null
+          gate_passed: boolean
+          id: string
+          is_template: boolean
+          kickoff_sent_at: string | null
+          launch_checked_on: string | null
+          launch_date: string
+          launched_at: string | null
+          name: string
+          slug: string
+          sort: number
+          status: string
+          summary: string | null
+          switch_key: string
+          switch_on: boolean
+          updated_at: string
+        }
+        Insert: {
+          build_prompt?: string | null
+          created_at?: string
+          extra_dates?: string[]
+          gate_description?: string
+          gate_note?: string | null
+          gate_passed?: boolean
+          id?: string
+          is_template?: boolean
+          kickoff_sent_at?: string | null
+          launch_checked_on?: string | null
+          launch_date: string
+          launched_at?: string | null
+          name: string
+          slug: string
+          sort?: number
+          status?: string
+          summary?: string | null
+          switch_key: string
+          switch_on?: boolean
+          updated_at?: string
+        }
+        Update: {
+          build_prompt?: string | null
+          created_at?: string
+          extra_dates?: string[]
+          gate_description?: string
+          gate_note?: string | null
+          gate_passed?: boolean
+          id?: string
+          is_template?: boolean
+          kickoff_sent_at?: string | null
+          launch_checked_on?: string | null
+          launch_date?: string
+          launched_at?: string | null
+          name?: string
+          slug?: string
+          sort?: number
+          status?: string
+          summary?: string | null
+          switch_key?: string
+          switch_on?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      roadmap_items: {
+        Row: {
+          created_at: string
+          done: boolean
+          done_at: string | null
+          id: string
+          initiative_id: string
+          lead_days: number
+          note: string | null
+          owner: string
+          sort: number
+          task: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          id?: string
+          initiative_id: string
+          lead_days?: number
+          note?: string | null
+          owner?: string
+          sort?: number
+          task: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          id?: string
+          initiative_id?: string
+          lead_days?: number
+          note?: string | null
+          owner?: string
+          sort?: number
+          task?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_items_initiative_id_fkey"
+            columns: ["initiative_id"]
+            isOneToOne: false
+            referencedRelation: "roadmap_initiatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sched_blackouts: {
         Row: {
           created_at: string
@@ -9593,6 +9744,7 @@ export type Database = {
       }
       dispatch_due_social_posts: { Args: never; Returns: number }
       ensure_referral_code: { Args: never; Returns: string }
+      feature_enabled: { Args: { _key: string }; Returns: boolean }
       founding_address_key: {
         Args: { _street: string; _zip: string }
         Returns: string
