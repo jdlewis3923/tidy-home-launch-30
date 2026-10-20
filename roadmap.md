@@ -1,5 +1,10 @@
 # Roadmap
 
+## Evening notifications repair (Oct 20)
+- [ ] Restore watchdog refresh, deduplicate failures, and clear recovered alerts without deleting history.
+- [ ] Include real completed applications in digests; exclude test notifications.
+- [ ] Verify live watchdog and digest preview; run regression tests.
+
 ## Social calendar + service booking (Oct 19) — do not publish
 - [x] Deliver before-change publisher/history report and both full row inventories; external Zapier/Planner history unavailable.
 - [x] Single app publishing path, image-byte hashes, per-platform immutable confirmations, strict slots and 90-day repeat blocks; confirmed history imported. Nextdoor/LinkedIn held without direct connections.
