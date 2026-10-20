@@ -15,9 +15,12 @@ export default function CandidateTexts({ id }: { id: string }) {
   const end = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from("contractor_stage_events").select("id, reason, metadata, created_at")
+    const through = new Date().toISOString();
+    const { data, error } = await supabase.from("contractor_stage_events").select("id, reason, metadata, created_at")
       .eq("applicant_id", id).eq("kind", "message").order("created_at", { ascending: true }).limit(200);
+    if (error) return;
     setRows(((data ?? []) as Ev[]).filter((r) => typeof r.metadata?.text === "string" || r.metadata?.direction === "inbound"));
+    if (data?.length) await supabase.rpc("admin_mark_candidate_texts_read", { _id: id, _through: through });
   }, [id]);
 
   useEffect(() => {

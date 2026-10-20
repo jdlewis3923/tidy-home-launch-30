@@ -22,6 +22,7 @@ import { tidyEmailShell } from '../_shared/email-brand.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { renderTemplate } from '../_shared/socialPlanner.ts';
+import { visibleDigestAlerts, realCompletedApplications } from '../_shared/admin-digest-rules.ts';
 
 const SITE = 'https://jointidy.co';
 const OWNER_EMAIL = 'hello@jointidy.co';
@@ -34,6 +35,7 @@ type Alert = {
   action_label: string | null; action_url: string | null; due_date: string | null; created_at: string;
   tier: string | null; night_ok: boolean; what: string | null; why_today: string | null; if_ignored: string | null;
   notified_at: string | null; reminded_at: string | null; resolved_at: string | null; snoozed_until: string | null;
+  context?: Record<string, unknown> | null;
 };
 
 const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
@@ -93,15 +95,21 @@ async function sendUrgent(admin: SupabaseClient, a: Alert, reminder: boolean) {
 const canSendNow = (a: Alert) => isDaytime() || a.night_ok;
 const open = (a: Alert) => !a.resolved_at && !(a.snoozed_until && Date.parse(a.snoozed_until) > Date.now());
 
-async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force = false) {
+async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force = false, preview = false) {
   const { date: today } = et();
-  if (!force) {
+  if (!force && !preview) {
     const { error } = await admin.from('admin_digest_runs').insert({ edition, run_date: today });
     if (error) return { skipped: 'already_sent' };
   }
   const since = new Date(Date.now() - 24 * 3_600_000).toISOString();
-  const { data: alerts } = await admin.from('admin_alerts').select('*').is('resolved_at', null).neq('tier', 'dashboard').order('created_at', { ascending: false }).limit(300);
-  const all = ((alerts ?? []) as Alert[]).filter(open);
+  const [{ data: alerts, error: alertError }, { data: testP, error: testPError }, { data: testA, error: testAError }] = await Promise.all([
+    admin.from('admin_alerts').select('*').is('resolved_at', null).neq('tier', 'dashboard').order('created_at', { ascending: false }).limit(1000),
+    admin.from('contractor_pipeline').select('applicant_id').eq('is_test', true),
+    admin.from('applicants').select('id').eq('is_test_row', true),
+  ]);
+  if (alertError || testPError || testAError) throw new Error(alertError?.message ?? testPError?.message ?? testAError?.message);
+  const testIds = new Set<string>([...(testP ?? []).map((p) => p.applicant_id), ...(testA ?? []).map((a) => a.id)]);
+  const all = visibleDigestAlerts((alerts ?? []) as Alert[], testIds);
   const urgentOpen = all.filter((a) => a.tier === 'urgent');
   const recent = all.filter((a) => a.tier !== 'urgent' && a.created_at >= since);
   const mustDo = all.filter((a) => a.tier !== 'urgent' && ((a.due_date && a.due_date <= today) || a.level === 'action') && a.created_at >= since);
@@ -121,6 +129,19 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const anyNumbers = reservations + scans + revenue + visitsDone > 0;
 
   const sections: { title: string; red?: boolean; items: { text: string; url?: string; label?: string }[] }[] = [];
+  const { data: completed, error: completionError } = await admin.from('contractor_pipeline')
+    .select('applicant_id, service, apply_submitted_at, is_test, archived').gte('apply_submitted_at', dayStart).lt('apply_submitted_at', dayEnd);
+  if (completionError) throw new Error(completionError.message);
+  const applications = realCompletedApplications(completed ?? [], testIds, (r) => r.applicant_id);
+  const { data: names, error: nameError } = applications.length
+    ? await admin.from('applicants').select('id, first_name, last_name').in('id', applications.map((p) => p.applicant_id))
+    : { data: [], error: null };
+  if (nameError) throw new Error(nameError.message);
+  const nameById = new Map((names ?? []).map((a) => [a.id, `${a.first_name ?? ''} ${a.last_name ?? ''}`.trim()]));
+  sections.push({ title: 'Applications completed', items: applications.map((a) => ({
+    text: `${nameById.get(a.applicant_id) || 'Candidate'} · ${a.service === 'car_care' ? 'Car Care' : a.service}`,
+    url: `${SITE}/admin/pipeline/${a.applicant_id}`, label: 'Review application + photos',
+  })) });
   const item = (a: Alert) => ({ text: a.what ?? a.title, url: a.action_url ? `${SITE}${a.action_url}` : undefined, label: a.action_label ?? 'Open' });
   if (edition === 'today') {
     sections.push({ title: 'Must do today', items: mustDo.map(item) });
@@ -180,7 +201,6 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
         ...(rows.length ? [] : [{ text: 'No reservation preferences yet.', url: `${SITE}/admin/demand`, label: 'Open demand' }]),
       ] });
     }
-    if (!mustDo.length) sections[0] = { title: 'Must do today', items: [] };
   } else {
     const openToday = [...urgentOpen, ...recent];
     sections.push({ title: 'Still open from today', red: urgentOpen.length > 0, items: openToday.map(item) });
@@ -199,11 +219,12 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
       text: `Probation check: ${v.name}, visit ${v.n} of 3`, url: `${SITE}/admin/photos?visit=${v.visit_id}`, label: 'Photos',
     })) });
     // More than 3 urgent today → say so, so the noisy ones can be re-tiered.
-    const { data: urgentToday } = await admin.from('admin_alerts').select('title, alert_type').eq('tier', 'urgent').gte('created_at', etMidnightUtc(today));
-    if ((urgentToday ?? []).length > 3) sections.push({ title: `${urgentToday!.length} urgent alerts today — re-tier the noisy ones?`, red: true, items: urgentToday!.map((u) => ({ text: `${u.title} (${u.alert_type})`, url: `${SITE}/admin/alerts#tiers`, label: 'Change tier' })) });
+    const urgentToday = urgentOpen.filter((a) => a.created_at >= etMidnightUtc(today));
+    if (urgentToday.length > 3) sections.push({ title: `${urgentToday.length} urgent alerts today — re-tier the noisy ones?`, red: true, items: urgentToday.map((u) => ({ text: `${u.title} (${u.alert_type})`, url: `${SITE}/admin/alerts#tiers`, label: 'Change tier' })) });
   }
 
   const shown = sections.filter((s) => s.items.length);
+  if (preview) return { edition, preview: true, sections: shown, completed_applications: applications.length, open_alerts: all.length };
   const nothing = edition === 'today' && !mustDo.length;
   const html = (nothing ? `<p style="margin:0 0 16px;font:700 16px Arial;color:#0f172a">Nothing needs you today.</p>` : '') + shown.map((s) => `
     <h2 style="margin:18px 0 8px;font:800 15px Arial;color:${s.red ? '#b91c1c' : '#0f172a'}">${esc(s.title)}</h2>
@@ -260,6 +281,7 @@ Deno.serve(async (req) => {
     return json({ ok: !error, alert_id: data?.id, error: error?.message, note: 'Sent by the database trigger within seconds.' });
   }
   if (mode === 'test_digest') return json({ ok: true, ...(await digest(admin, body.edition ?? 'today', true)) });
+  if (mode === 'preview_digest') return json({ ok: true, ...(await digest(admin, body.edition ?? 'tonight', false, true)) });
 
   // hourly
   const out: Record<string, unknown> = {};
