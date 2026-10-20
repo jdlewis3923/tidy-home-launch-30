@@ -27,6 +27,7 @@ export interface ExpectedCronJob {
 
 export const EXPECTED_CRON_JOBS: ExpectedCronJob[] = [
   { name: 'admin-alert-dispatch', schedule: '0 * * * *', kind: 'http', fn: 'admin-alert-dispatch', purpose: 'Owner alerts: 4-hour urgent reminders and the 9 AM / 9 PM ET digests (urgent sends fire on insert).' },
+  { name: 'roadmap-tick', schedule: '2 * * * *', kind: 'http', fn: 'roadmap-tick', purpose: 'Growth roadmap: 8 AM launch-day switches, kickoff texts and overdue URGENT alerts (8 AM–9 PM ET).' },
   // --- pure SQL, no HTTP hop ---
   { name: 'cron-health-snapshot', schedule: '7 * * * *', kind: 'sql', purpose: 'Refreshes the scheduled-job health snapshot the watchdog reads.' },
   { name: 'generate-recurring-visits-daily', schedule: '30 9 * * *', kind: 'sql', purpose: 'Extends every active plan 45 days of visits.' },

@@ -1,5 +1,13 @@
 # Roadmap
 
+## Growth roadmap (Oct 20)
+- [x] /admin/roadmap: 6 initiatives, switches (all OFF), gates, checklists, build prompts, 24-month timeline; Launch now / Pause.
+- [x] Hourly roadmap check: 8 AM launch-day switch, kickoff text, URGENT overdue alerts; 9 AM digest kickoff + "Coming up" + milestones. Test kickoff text and digest sent.
+- [x] Visit-count answer recorded (biweekly 26 delivered / 24 billed; weekly 52 / 48).
+- [ ] Prepaid Year build (annual Stripe prices, toggle, prepaid flag, renewal email, refund math test) — waits on Justin: annual price covers billed or delivered visits; approve wording.
+- [ ] Bundle Push build (hidden) — after Prepaid Year; seasonal drafts need approval.
+- [ ] Pressure Washing build (hidden) — Stripe tiers + booking; drafts need approval.
+
 ## Owner Daily Signal and alert cleanup (Oct 20)
 - [x] Separate owner Daily Signal layout with reference photos, white surfaces, live numbers and compact gold actions; desktop/phone rendering has no overflow or broken images.
 - [x] Clear 46 verified recovered/test/duplicate alerts; resolved rows stay out of Alerts and deduplicated digests. Genuine failures retained; zero open watchdog/test-document alerts.

@@ -89,6 +89,7 @@ const AdminNotificationSettings = lazy(() => import("./pages/AdminNotificationSe
 const AdminCosts = lazy(() => import("./pages/AdminCosts.tsx"));
 const AdminSiteStatus = lazy(() => import("./pages/AdminSiteStatus.tsx"));
 const AdminLaunchDates = lazy(() => import("./pages/AdminLaunchDates.tsx"));
+const AdminRoadmap = lazy(() => import("./pages/AdminRoadmap.tsx"));
 const AdminServiceScope = lazy(() => import("./pages/AdminServiceScope.tsx"));
 const AdminSizeReview = lazy(() => import("./pages/AdminSizeReview.tsx"));
 const AdminEvidencePack = lazy(() => import("./pages/AdminEvidencePack.tsx"));
@@ -415,6 +416,7 @@ const App = () => (
                   <Route path="/admin/costs" element={<AdminCosts />} />
                   <Route path="/admin/site-status" element={<AdminSiteStatus />} />
                   <Route path="/admin/launch-dates" element={<AdminLaunchDates />} />
+                  <Route path="/admin/roadmap" element={<AdminRoadmap />} />
                   <Route path="/admin/service-scope" element={<AdminServiceScope />} />
                   <Route path="/admin/size-review" element={<AdminSizeReview />} />
                   <Route path="/admin/evidence-pack" element={<AdminEvidencePack />} />
