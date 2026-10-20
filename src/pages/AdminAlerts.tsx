@@ -48,6 +48,7 @@ export default function AdminAlerts() {
     const { data, error } = await supabase
       .from("admin_alerts")
       .select("id, created_at, level, category, title, body, action_label, action_url, due_date, dedupe_key, resolved_at, snoozed_until")
+      .is("resolved_at", null)
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) toast.error(`Could not load alerts: ${error.message}`);
@@ -166,20 +167,12 @@ export default function AdminAlerts() {
             <h2 className="mb-2 text-sm font-bold text-slate-900">Snoozed ({snoozed.length})</h2>
             <ul className="space-y-1 text-xs text-slate-600">
               {snoozed.map((r) => (
-                <li key={r.id}>{r.title} — back {new Date(r.snoozed_until!).toLocaleString()}</li>
+                <li key={r.id}>{r.title} — back {new Date(r.snoozed_until ?? "").toLocaleString()}</li>
               ))}
             </ul>
           </section>
         )}
 
-        <section>
-          <h2 className="mb-2 text-sm font-bold text-slate-900">Done today ({doneToday.length})</h2>
-          {doneToday.length === 0
-            ? <p className="text-xs text-slate-500">Nothing resolved yet today.</p>
-            : <ul className="space-y-1 text-xs text-slate-600">
-                {doneToday.map((r) => <li key={r.id}>{r.title}</li>)}
-              </ul>}
-        </section>
 
         <AlertTiers />
       </div>
