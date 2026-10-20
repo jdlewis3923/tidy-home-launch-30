@@ -18,7 +18,7 @@ import { renderTemplate, instagramVersion, etDate, type PlanAnchors, type PlanRe
 type Post = {
   id: string; post_number: number | null; channel: string; scheduled_for: string | null; caption: string | null; template_copy: string | null;
   image_url: string | null; image_hash: string | null; image_subject: string | null; image_flag: string | null; status: string; posted_at: string | null; external_post_id: string | null;
-  content_hash: string | null; publish_error: string | null; waiting_reason: string | null; priority: number | null; is_spare: boolean;
+  media_kind?: string; source_key?: string | null; content_hash: string | null; publish_error: string | null; waiting_reason: string | null; priority: number | null; is_spare: boolean;
 };
 const CH: Record<string, string> = { meta_combined: "Facebook + Instagram", instagram: "Instagram", facebook: "Facebook", nextdoor: "Nextdoor", linkedin: "LinkedIn" };
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -40,6 +40,8 @@ export default function AdminSocial() {
   const [range, setRange] = useState<'fortnight' | 'month'>('fortnight');
   const [moves, setMoves] = useState<Record<string, string>>({});
   const [dryRun, setDryRun] = useState<Array<{ source_id: string; scheduled_for: string; caption: string; image_url: string; result: { ok: boolean; reason?: string } }> | null>(null);
+  const [platformFilter,setPlatformFilter]=useState('all');
+  const [receipts,setReceipts]=useState<Array<{post_id:string;webhook_status:number|null;webhook_response:string|null;post_url:string|null;state:string}>>([]);
   const [linkedinReady, setLinkedinReady] = useState<boolean | null>(null);
 
   const anchors: PlanAnchors = useMemo(() => ({
@@ -50,9 +52,11 @@ export default function AdminSocial() {
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("social_launch_posts")
-      .select("id, post_number, channel, scheduled_for, caption, template_copy, image_url, image_hash, image_subject, image_flag, status, posted_at, external_post_id, content_hash, publish_error, waiting_reason, priority, is_spare")
+      .select("id, post_number, channel, scheduled_for, caption, template_copy, image_url, image_hash, image_subject, image_flag, status, posted_at, external_post_id, content_hash, publish_error, waiting_reason, priority, is_spare, media_kind, source_key")
       .eq('is_test', false).is("archived_at", null).order("scheduled_for", { nullsFirst: false });
     setPosts((data ?? []) as Post[]);
+    const {data:ledger}=await supabase.from('social_publish_ledger').select('post_id,webhook_status,webhook_response,post_url,state').eq('platform','linkedin').eq('is_test',false).order('created_at',{ascending:false});
+    setReceipts(ledger??[]);
   }, []);
   useEffect(() => { if (hasRole) void load(); }, [hasRole, load]);
   useEffect(() => {
@@ -151,13 +155,14 @@ export default function AdminSocial() {
 
   const byId = new Map(posts.map((p) => [p.id, p]));
   const now = Date.now();
-  const shown = placed.filter((p) => p.scheduled_for && (range === 'fortnight' ? Date.parse(p.scheduled_for) >= now && Date.parse(p.scheduled_for) < now + 14 * 86400000 : monthKey(p.scheduled_for) === month));
+  const shown = placed.filter((p) => p.scheduled_for && (range === 'fortnight' ? etDate(p.scheduled_for) >= etDate(new Date(now).toISOString()) && Date.parse(p.scheduled_for) < now + 14 * 86400000 : monthKey(p.scheduled_for) === month));
   const card = (p: Post, platform = p.channel) => {
     const tpl = edit[p.id] ?? p.template_copy ?? p.caption ?? "";
     const day = p.scheduled_for ? etDate(p.scheduled_for) : new Date().toISOString().slice(0, 10);
     const rendered = renderTemplate(tpl, anchors, day);
     const locked = p.status === "posted" || p.status === "posting" || !!p.external_post_id;
-    const blocked = !!p.image_flag || !p.image_url || p.status === 'blocked' || p.status === 'missed';
+    const receipt=receipts.find(r=>r.post_id===p.id);
+    const blocked = !!p.image_flag || (!p.image_url && p.media_kind!=='text') || p.status === 'blocked' || p.status === 'missed';
     return (
       <section key={`${p.id}-${platform}`} id={`post-${p.id}-${platform}`} className={`rounded-lg border p-4 ${blocked ? 'border-destructive' : focus === p.id ? "border-primary" : "border-border"} bg-card`}>
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
@@ -168,6 +173,7 @@ export default function AdminSocial() {
           </div>
         </div>
         {p.image_flag && <p className="mt-1 text-xs text-destructive">{p.image_flag}</p>}
+        {receipt && <div className="mt-2 text-xs text-muted-foreground"><p>{receipt.state==='posted'?'Confirmed on LinkedIn':'Awaiting LinkedIn confirmation'} · Zapier HTTP {receipt.webhook_status??'pending'}</p><pre className="whitespace-pre-wrap">{receipt.webhook_response}</pre>{receipt.post_url && <a href={receipt.post_url} target="_blank" rel="noreferrer" className="text-primary underline">Open LinkedIn post</a>}</div>}
         {p.publish_error && <p className="mt-1 text-xs text-destructive">{p.publish_error}</p>}
         <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1fr_140px]">
           <div>
@@ -178,7 +184,7 @@ export default function AdminSocial() {
             <p className="mb-1 text-xs font-semibold text-muted-foreground">{CH[platform] ?? platform}</p>
             <pre className="whitespace-pre-wrap rounded bg-muted p-2 text-xs text-foreground">{platform === 'instagram' ? instagramVersion(rendered) : rendered}</pre>
           </div>
-          <div>{p.image_url ? <img src={p.image_url} alt="" className="w-full rounded object-cover" /> : <div className="flex h-24 items-center justify-center rounded bg-muted text-xs text-muted-foreground">No image</div>}
+          <div>{p.image_url ? <img src={p.image_url} alt={p.image_subject??"Post image"} loading="lazy" className="w-full rounded object-contain" /> : <div className="flex h-24 items-center justify-center rounded bg-muted text-xs text-muted-foreground">{p.media_kind==='text'?'Text only':'No image'}</div>}
             <p className="mt-1 text-[11px] text-muted-foreground">{p.image_subject}</p></div>
         </div>
         {!locked && (
@@ -206,6 +212,7 @@ export default function AdminSocial() {
         <Link to="/admin" className="text-sm text-muted-foreground hover:underline">← Admin</Link>
         <h1 className="mt-2 text-3xl font-bold text-foreground">Social calendar</h1>
         <div className="mt-3 flex flex-wrap gap-2"><Button variant={range === 'fortnight' ? 'default' : 'outline'} onClick={() => setRange('fortnight')}>Next 14 days</Button><Button variant={range === 'month' ? 'default' : 'outline'} onClick={() => setRange('month')}>All months</Button><Button variant="outline" onClick={() => void runDry()} disabled={busy}>Run publishing dry-run</Button></div>
+        <div className="mt-3 flex gap-2"><Button variant={platformFilter==='all'?'default':'outline'} onClick={()=>setPlatformFilter('all')}>All platforms</Button><Button variant={platformFilter==='linkedin'?'default':'outline'} onClick={()=>setPlatformFilter('linkedin')}>LinkedIn</Button></div>
         <p className="mt-2 text-sm text-muted-foreground">Facebook, Instagram and LinkedIn publish automatically from here. Nextdoor is manual: copy the caption, download the image, post it, then mark it posted.</p>
         {linkedinReady === false && (
           <p className="mt-2 rounded-lg border border-destructive bg-destructive/10 p-3 text-sm font-semibold text-destructive">
@@ -245,7 +252,7 @@ export default function AdminSocial() {
         ))}
       </div>}
       {shown.length === 0 && <p className="text-sm text-muted-foreground">No posts in this period.</p>}
-      {shown.flatMap(p => (p.channel === 'meta_combined' ? ['facebook', 'instagram'] : [p.channel]).map(platform => card(p, platform)))}
+      {shown.filter(p=>platformFilter==='all'||p.channel===platformFilter).flatMap(p => (p.channel === 'meta_combined' ? ['facebook', 'instagram'] : [p.channel]).map(platform => card(p, platform)))}
       {waiting.length > 0 && (<>
         <h2 className="pt-4 text-xl font-bold text-foreground">Waiting</h2>
         {waiting.map(p => card(p))}
