@@ -193,3 +193,8 @@ verify_jwt = false
 
 [functions.twilio-voice]
 verify_jwt = false
+
+# Zapier confirms asynchronous company-page posts using a per-attempt receipt token.
+# The handler validates that token and the actual LinkedIn ID/URL before any write.
+[functions.linkedin-delivery]
+verify_jwt = false

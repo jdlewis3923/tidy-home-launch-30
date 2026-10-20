@@ -7879,6 +7879,32 @@ export type Database = {
         }
         Relationships: []
       }
+      social_delivery_tokens: {
+        Row: {
+          created_at: string
+          ledger_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          ledger_id: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          ledger_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_delivery_tokens_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: true
+            referencedRelation: "social_publish_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_external_history: {
         Row: {
           caption: string
@@ -7931,8 +7957,10 @@ export type Database = {
           is_spare: boolean
           is_test: boolean
           manual_schedule: boolean
+          media_kind: string
           not_before: string
           notes: string | null
+          original_scheduled_for: string | null
           post_number: number
           posted_at: string | null
           priority: number | null
@@ -7940,6 +7968,7 @@ export type Database = {
           rendered_caption: string | null
           scheduled_for: string | null
           scheduled_in_native_tool_at: string | null
+          source_key: string | null
           status: string
           template_copy: string | null
           theme: string | null
@@ -7968,8 +7997,10 @@ export type Database = {
           is_spare?: boolean
           is_test?: boolean
           manual_schedule?: boolean
+          media_kind?: string
           not_before?: string
           notes?: string | null
+          original_scheduled_for?: string | null
           post_number: number
           posted_at?: string | null
           priority?: number | null
@@ -7977,6 +8008,7 @@ export type Database = {
           rendered_caption?: string | null
           scheduled_for?: string | null
           scheduled_in_native_tool_at?: string | null
+          source_key?: string | null
           status?: string
           template_copy?: string | null
           theme?: string | null
@@ -8005,8 +8037,10 @@ export type Database = {
           is_spare?: boolean
           is_test?: boolean
           manual_schedule?: boolean
+          media_kind?: string
           not_before?: string
           notes?: string | null
+          original_scheduled_for?: string | null
           post_number?: number
           posted_at?: string | null
           priority?: number | null
@@ -8014,6 +8048,7 @@ export type Database = {
           rendered_caption?: string | null
           scheduled_for?: string | null
           scheduled_in_native_tool_at?: string | null
+          source_key?: string | null
           status?: string
           template_copy?: string | null
           theme?: string | null
@@ -8091,8 +8126,12 @@ export type Database = {
           platform: string
           platform_post_id: string | null
           post_id: string
+          post_url: string | null
           scheduled_for: string
           state: string
+          webhook_accepted_at: string | null
+          webhook_response: string | null
+          webhook_status: number | null
         }
         Insert: {
           caption: string
@@ -8107,8 +8146,12 @@ export type Database = {
           platform: string
           platform_post_id?: string | null
           post_id: string
+          post_url?: string | null
           scheduled_for: string
           state?: string
+          webhook_accepted_at?: string | null
+          webhook_response?: string | null
+          webhook_status?: number | null
         }
         Update: {
           caption?: string
@@ -8123,8 +8166,12 @@ export type Database = {
           platform?: string
           platform_post_id?: string | null
           post_id?: string
+          post_url?: string | null
           scheduled_for?: string
           state?: string
+          webhook_accepted_at?: string | null
+          webhook_response?: string | null
+          webhook_status?: number | null
         }
         Relationships: [
           {
@@ -9633,8 +9680,10 @@ export type Database = {
           is_spare: boolean
           is_test: boolean
           manual_schedule: boolean
+          media_kind: string
           not_before: string
           notes: string | null
+          original_scheduled_for: string | null
           post_number: number
           posted_at: string | null
           priority: number | null
@@ -9642,6 +9691,7 @@ export type Database = {
           rendered_caption: string | null
           scheduled_for: string | null
           scheduled_in_native_tool_at: string | null
+          source_key: string | null
           status: string
           template_copy: string | null
           theme: string | null

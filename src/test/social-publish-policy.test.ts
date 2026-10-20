@@ -4,6 +4,10 @@ import { AVAILABLE_SERVICES } from '@/lib/service-availability';
 const at = Date.parse('2026-10-19T15:00:00Z');
 const post = (id: string, offset = 0): SocialSnapshot => ({ id, platform: 'facebook', scheduled_for: new Date(at + offset).toISOString(), caption: id, content_hash: id, image_url: `https://example.com/${id}.jpg`, image_hash: id });
 describe('social publish rules', () => {
+  it('LinkedIn text posts need no image',()=>expect(socialBlockReason({...post('text'),platform:'linkedin',media_kind:'text',image_url:'',image_hash:''},[],at)).toBeNull());
+  it('LinkedIn image posts still require an image',()=>expect(socialBlockReason({...post('image'),platform:'linkedin',media_kind:'image',image_url:''},[],at)).toBe('missing_image'));
+  it('different LinkedIn text captions do not repeat empty image hashes',()=>expect(socialBlockReason({...post('text2'),platform:'linkedin',media_kind:'text',image_url:'',image_hash:''},[{...post('text1',-86400000),platform:'linkedin',media_kind:'text',image_url:'',image_hash:''}],at)).toBeNull());
+  it('repeated LinkedIn text captions block for 90 days',()=>expect(socialBlockReason({...post('text2'),platform:'linkedin',media_kind:'text',content_hash:'text1',image_url:'',image_hash:''},[{...post('text1',-86400000),platform:'linkedin',media_kind:'text',image_url:'',image_hash:''}],at)).toBe('repeat_within_90_days'));
   it('publishes three chronological image/caption units and blocks identical fourth', () => {
     const history: SocialSnapshot[] = [];
     for (let n=0;n<3;n++) {

@@ -7,3 +7,4 @@
 - Email-brand owns customer art/surfaces; owner-email renders owner-only authorized channels unchanged by brevo-send — why: reports differ from customer mail; raster fills resist phone inversion.
 - Candidate messages use `pipeline-notify` and stage-owned gates; legacy senders use `pipeline-gate` — why: documents and spending follow proof approval.
 - Social-launch-publisher alone posts ledger-locked images/copy; social-plan sets dates unless manually moved — why: no competing sends.
+- LinkedIn calendar rows are independent manual-schedule rows; webhook acceptance stays unconfirmed until a per-attempt token receipt supplies the real LinkedIn ID/URL — why: asynchronous Zap acceptance must never masquerade as a published post.
