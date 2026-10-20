@@ -1,0 +1,1 @@
+SELECT cron.schedule('roadmap-tick', '2 * * * *', $job$SELECT public.cron_http_post('roadmap-tick', 'roadmap-tick', '{}'::jsonb);$job$);
