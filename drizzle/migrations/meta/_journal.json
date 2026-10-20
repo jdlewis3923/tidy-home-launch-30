@@ -1373,6 +1373,13 @@
       "when": 1792503386982,
       "tag": "0195_cron_roadmap_tick",
       "breakpoints": true
+    },
+    {
+      "idx": 196,
+      "version": "7",
+      "when": 1792539501118,
+      "tag": "0196_linkedin_calendar_and_delivery_receipts",
+      "breakpoints": true
     }
   ]
 }
