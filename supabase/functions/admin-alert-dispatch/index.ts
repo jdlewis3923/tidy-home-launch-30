@@ -23,6 +23,7 @@ import { vendorFetch } from '../_shared/http.ts';
 import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { renderTemplate } from '../_shared/socialPlanner.ts';
 import { visibleDigestAlerts, realCompletedApplications } from '../_shared/admin-digest-rules.ts';
+import { comingUp as roadmapComingUp, kickoffText, milestoneLine, type Initiative as RInitiative } from '../_shared/roadmap-rules.ts';
 
 const SITE = 'https://jointidy.co';
 const OWNER_EMAIL = 'hello@jointidy.co';
@@ -153,6 +154,15 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   })) });
   const item = (a: Alert) => ({ text: a.what ?? a.title, url: a.action_url ? `${SITE}${a.action_url}` : undefined, label: a.action_label ?? 'Open' });
   if (edition === 'today') {
+    // Growth roadmap goes first: kickoffs from the last day, milestones, then 14-day "Coming up".
+    const { data: rm } = await admin.from('roadmap_initiatives').select('*, items:roadmap_items(id, task, owner, lead_days, done)').order('sort');
+    const inits = (rm ?? []) as (RInitiative & { kickoff_sent_at: string | null })[];
+    const kick = inits.filter((i) => i.kickoff_sent_at && (force || i.kickoff_sent_at >= since) && i.items.length);
+    sections.unshift({ title: 'New initiative starting', items: kick.map((i) => ({ text: kickoffText(i), url: `${SITE}/admin/roadmap`, label: 'Open roadmap' })) });
+    sections.push({ title: 'Coming up', items: [
+      ...inits.map((i) => milestoneLine(i, today)).filter((x): x is string => !!x).map((text) => ({ text })),
+      ...roadmapComingUp(inits, today).map((r) => ({ text: `${r.due} · ${r.i.name}: ${r.x.task} (${r.x.owner})`, url: `${SITE}/admin/roadmap`, label: 'Open' })),
+    ] });
     sections.push({ title: 'Must do today', items: mustDo.map(item) });
     sections.push({ title: 'Unresolved urgent', red: true, items: urgentOpen.map(item) });
     // Nextdoor can't be auto-posted: today's post, with its copy, image and a Mark posted button.
