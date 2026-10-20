@@ -251,7 +251,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const mail = shown.length || nothing
     ? await sendBrevoEmail({
         to: OWNER_EMAIL, marketing: false, adminChannel: 'digest', label: 'admin-digest',
-        subject: `Tidy ${heading} · ${today}${urgentOpen.length ? ` · ${urgentOpen.length} unresolved` : ''}`,
+        subject: `TIDY / The Daily Signal · ${heading}${urgentOpen.length ? ` · ${urgentOpen.length} unresolved` : ''}`,
         htmlContent: html,
         tags: ['admin-digest'],
       }).catch((e) => ({ sent: false, reason: (e as Error).message }))
