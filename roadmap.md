@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Owner Daily Signal and alert cleanup (Oct 20)
-- [ ] Separate owner email layout matching the reference, white surfaces, live numbers and compact actions.
-- [ ] Verify and clear recovered/test/duplicate alerts; prevent their return in digests.
-- [ ] Deploy, test and send one refreshed owner email; actual Outlook appearance needs Justin's fresh screenshot.
+- [x] Separate owner Daily Signal layout with reference photos, white surfaces, live numbers and compact gold actions; desktop/phone rendering has no overflow or broken images.
+- [x] Clear 46 verified recovered/test/duplicate alerts; resolved rows stay out of Alerts and deduplicated digests. Genuine failures retained; zero open watchdog/test-document alerts.
+- [x] Deploy owner renderer and sender dependencies; 35 tests passed; authenticated live preview and one refreshed email accepted.
+- [ ] Actual Outlook dark-mode appearance — Justin must check the freshly sent email; app chrome is outside sender control.
 
 ## Evening notifications repair (Oct 20)
 - [x] Restore watchdog refresh, deduplicate failures, and clear recovered alerts without deleting history.

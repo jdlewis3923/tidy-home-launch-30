@@ -258,6 +258,13 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     sms = out?.sent ? 'sent' : `failed:${out?.error ?? res?.status ?? 'network'}`;
   }
   const emailResult = mail.sent ? 'sent' : `failed:${(mail as { reason?: string }).reason}`;
+  await admin.from('email_send_log').insert({
+    template_name: 'admin-digest', channel: 'email', recipient: OWNER_EMAIL,
+    triggered_by: 'admin-alert-dispatch', status: mail.sent ? 'sent' : 'failed',
+    brevo_message_id: (mail as { messageId?: string }).messageId ?? null,
+    error_message: mail.sent ? null : (mail as { reason?: string }).reason ?? 'unknown',
+    payload: { edition, open_alerts: all.length, completed_applications: applications.length },
+  });
   if (!force) await admin.from('admin_digest_runs').update({ email_result: emailResult, sms_result: sms, body: { sections: shown } }).eq('edition', edition).eq('run_date', today);
   return { edition, email: emailResult, sms, sections: shown.map((s) => `${s.title} (${s.items.length})`), nothing };
 }
