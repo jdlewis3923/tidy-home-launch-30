@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 // Deno-style specifier resolves fine under vitest since the helper is plain TS.
 import { sendBrevoEmail } from '../../supabase/functions/_shared/brevo-send';
 import { brandHostedTemplate, tidyEmailShell } from '../../supabase/functions/_shared/email-brand';
+import { ownerEmail } from '../../supabase/functions/_shared/owner-email';
 
 const SEND_URL = 'https://connector-gateway.lovable.dev/brevo/smtp/email';
 const CONTACT_PREFIX = 'https://connector-gateway.lovable.dev/brevo/contacts/';
@@ -109,6 +110,27 @@ describe('sendBrevoEmail opt-out enforcement', () => {
 });
 
 describe('sendBrevoEmail Tidy branding enforcement', () => {
+  it('preserves authorized owner report without customer normalization', async () => {
+    let payload: Record<string, unknown> = {};
+    const { impl } = mockFetch((_url, init) => {
+      payload = JSON.parse(String(init?.body ?? '{}'));
+      return { status: 201, body: { messageId: 'owner-report' } };
+    });
+    const report = ownerEmail({ date: '2026-10-20', edition: 'Tonight', sections: [], attention: [], unresolved: [] });
+    const result = await sendBrevoEmail({ to: 'hello@jointidy.co', adminChannel: 'digest', htmlContent: report, marketing: false, apiKey: 'test-key', lovableApiKey: 'test-lovable-key', fetchImpl: impl });
+    expect(result.sent).toBe(true);
+    expect(payload.htmlContent).toBe(report);
+  });
+  it('does not preserve owner-only reports for customer recipients', async () => {
+    let payload: Record<string, unknown> = {};
+    const { impl } = mockFetch((_url, init) => {
+      payload = JSON.parse(String(init?.body ?? '{}'));
+      return { status: 201, body: { messageId: 'customer' } };
+    });
+    const report = ownerEmail({ date: '2026-10-20', edition: 'Tonight', sections: [] });
+    await sendBrevoEmail({ to: 'person@example.com', adminChannel: 'digest', htmlContent: report, marketing: false, apiKey: 'test-key', lovableApiKey: 'test-lovable-key', fetchImpl: impl });
+    expect(payload.htmlContent).not.toBe(report);
+  });
   it('wraps every code-generated HTML email in the shared Tidy design', async () => {
     let payload: Record<string, unknown> = {};
     const { impl } = mockFetch((_url, init) => {
