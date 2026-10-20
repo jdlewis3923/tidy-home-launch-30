@@ -4,7 +4,7 @@ description: Light-mode-only Tidy email shell with logo, service banner, and a r
 type: design
 ---
 
-Every outgoing email — customer, Pro, applicant, owner/admin, alert, digest — uses the single shared shell in `supabase/functions/_shared/email-brand.ts`.
+Customer, Pro and applicant emails use the shared shell in `supabase/functions/_shared/email-brand.ts`. Owner/admin alerts and digests use a separate Daily Signal design, not the customer shell.
 
 Rules:
 - Light mode only. No dark/navy panels or hero overlays anywhere. Navy (#0f172a) is text only; backgrounds are white, #f6f9fc, #f4f8fc, or a soft topic tint.
@@ -28,3 +28,10 @@ Rules:
 - Subject is never repeated as a second heading; the main link becomes the gold button.
 - Every email surface must be white and every primary button website gold (#f5c518), including phone dark mode. Never promise a client-independent guarantee without testing the actual phone email app.
 - Header artwork must match the message's intent, not merely a service word: team introductions show diverse AI people in Tidy uniforms; support alerts show support; billing shows billing. Repeat artwork only for congruent intents.
+
+## Owner Daily Signal (Oct 20)
+- Match Justin's uploaded Daily Signal reference: logo/date header, wide Miami-home banner, four Pulse columns, yellow attention panel with compact pill actions, three service-photo operations columns, red unresolved panel, numbered CEO priorities, skyline sign-off.
+- White email background is the explicit requirement, overriding the reference's dark background; keep blue, yellow, green and red accents and reference proportions.
+- All numbers and priorities must be real; never reuse the reference's sample counts, test candidate or test insurance lapse as real data.
+- Resolved and test items are excluded, not merely moved to a long history list in the email.
+- Do not claim Outlook Android is guaranteed white until Justin checks a freshly sent message there; email-app chrome cannot be controlled by the sender.
