@@ -1,10 +1,11 @@
 # Roadmap
 
 ## LinkedIn 60-day calendar (Oct 20)
-- [ ] Import 120 exact CSV rows and lock 37 original banners + 23 generated square JPEGs; 60 text-only posts.
-- [ ] Enable LinkedIn-only slots plus separate repurposed Meta extras; chronological/repeat safeguards and recorded webhook responses.
-- [ ] Record confirmed company-page post URLs; publish today's two slots in order with owner authorization.
-- [ ] Verify 14-day LinkedIn preview and first live post URL.
+- [x] Imported 120 exact CSV rows; 37 unchanged banners, 23 1200×1200 JPEGs, 60 text-only posts; all 60 image downloads verified.
+- [x] Separate 27 Meta extras, replacing three repeated images; 84 unique images, one publisher, delivery-response recording; 23 tests passed.
+- [x] Authenticated 14-day LinkedIn preview: 42 cards with captions and images, plus HTTP receipts and hold banner.
+- [ ] Enable future LinkedIn slots — held with original dates intact after Zap returned HTTP 404 for the afternoon text-only post; Justin must repair/confirm Zap.
+- [ ] First live company-page URL — morning banner accepted HTTP 200, no actual LinkedIn ID/URL returned; Zap must POST the real post ID/link using the supplied callback fields. Neither attempt will be automatically resent.
 
 ## Growth roadmap (Oct 20)
 - [x] /admin/roadmap: 6 initiatives, switches (all OFF), gates, checklists, build prompts, 24-month timeline; Launch now / Pause.
@@ -33,7 +34,7 @@
 - [x] Exact 14-day preview with image replacement and rescheduling; browser dry-run published three isolated snapshots and blocked duplicate fourth. PNG Instagram cards remain visibly blocked until JPEG replacements.
 - [x] All-service selection enabled; nine service/ZIP quotes and three admin-authorized test reservations verified through UI, test reservations deleted (0 remain).
 - [ ] External social history and disable social Zaps / clear Meta Planner — requires Justin's connected accounts or exports.
-- [ ] LINKEDIN_ZAP_WEBHOOK_URL secret not set — Justin must add it (red banner on /admin/social until then); LinkedIn posts block without it.
+- [x] LINKEDIN_ZAP_WEBHOOK_URL set; real Oct 20 attempts and responses recorded. Current Zap repair blocker is tracked above.
 - [ ] Social post #2 (Oct 16, "What a founding home gets") is missed — Justin reschedules explicitly on /admin/social.
 
 ## Lifecycle event triggers + simulator (Oct 18) — shadow only, unpublished
