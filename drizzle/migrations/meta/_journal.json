@@ -1352,6 +1352,13 @@
       "when": 1792431083572,
       "tag": "0192_hiring_close_inperson_slots",
       "breakpoints": true
+    },
+    {
+      "idx": 193,
+      "version": "7",
+      "when": 1792497576935,
+      "tag": "0193_repair_watchdog_and_application_digest_events",
+      "breakpoints": true
     }
   ]
 }

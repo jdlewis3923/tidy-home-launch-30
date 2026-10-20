@@ -9313,6 +9313,10 @@ export type Database = {
         Args: { _measured: number; _reservation: string }
         Returns: Json
       }
+      admin_mark_candidate_texts_read: {
+        Args: { _id: string; _through: string }
+        Returns: number
+      }
       admin_mark_social_posted: {
         Args: { _external?: string; _id: string }
         Returns: undefined
