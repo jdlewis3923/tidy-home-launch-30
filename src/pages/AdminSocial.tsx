@@ -44,6 +44,7 @@ export default function AdminSocial() {
   const [platformFilter,setPlatformFilter]=useState(() => params.get('platform') === 'linkedin' ? 'linkedin' : 'all');
   const [receipts,setReceipts]=useState<Array<{post_id:string;webhook_status:number|null;webhook_response:string|null;post_url:string|null;state:string}>>([]);
   const [linkedinReady, setLinkedinReady] = useState<boolean | null>(null);
+  const [linkedinEnabled, setLinkedinEnabled] = useState(false);
 
   const anchors: PlanAnchors = useMemo(() => ({
     launch: cfg?.cleaning?.first_visit_date ?? null, conversion: cfg?.cleaning?.conversion_date ?? null, carLaunch: cfg?.car?.first_visit_date ?? null,
@@ -63,7 +64,7 @@ export default function AdminSocial() {
   useEffect(() => {
     if (!hasRole) return;
     supabase.functions.invoke('social-launch-publisher', { body: { action: 'status' } })
-      .then(({ data }) => setLinkedinReady(!!data?.linkedin_configured))
+      .then(({ data }) => { setLinkedinReady(!!data?.linkedin_configured); setLinkedinEnabled(!!data?.linkedin_enabled); })
       .catch(() => setLinkedinReady(null));
   }, [hasRole]);
   useEffect(() => {
@@ -214,7 +215,7 @@ export default function AdminSocial() {
       <header>
         <Link to="/admin" className="text-sm text-muted-foreground hover:underline">← Admin</Link>
         <h1 className="mt-2 text-3xl font-bold text-foreground">Social calendar</h1>
-        {receipts.some(r=>r.webhook_status!==null && r.webhook_status>=400) && <p className="mt-2 border border-destructive bg-destructive/10 p-3 text-sm text-destructive">LinkedIn calendar held: Zapier rejected a post. Confirm the Zap supports both image and text posts before rescheduling. Accepted posts will not be resent.</p>}
+        {linkedinReady && <p className={`mt-2 border p-3 text-sm ${linkedinEnabled ? 'border-primary text-foreground' : 'border-destructive text-destructive'}`}>{linkedinEnabled ? 'LinkedIn publishing is on. Confirmed posts will not be resent.' : 'LinkedIn calendar held. Photo and text must both have confirmed post links before activation. Uncertain posts will not be resent.'}</p>}
         <div className="mt-3 flex flex-wrap gap-2"><Button variant={range === 'fortnight' ? 'default' : 'outline'} onClick={() => setRange('fortnight')}>Next 14 days</Button><Button variant={range === 'month' ? 'default' : 'outline'} onClick={() => setRange('month')}>All months</Button><Button variant="outline" onClick={() => void runDry()} disabled={busy}>Run publishing dry-run</Button></div>
         <div className="mt-3 flex gap-2"><Button variant={platformFilter==='all'?'default':'outline'} onClick={()=>setPlatformFilter('all')}>All platforms</Button><Button variant={platformFilter==='linkedin'?'default':'outline'} onClick={()=>setPlatformFilter('linkedin')}>LinkedIn</Button></div>
         <p className="mt-2 text-sm text-muted-foreground">Facebook, Instagram and LinkedIn publish automatically from here. Nextdoor is manual: copy the caption, download the image, post it, then mark it posted.</p>

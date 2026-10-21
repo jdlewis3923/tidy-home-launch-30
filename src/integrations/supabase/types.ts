@@ -4735,6 +4735,30 @@ export type Database = {
         }
         Relationships: []
       }
+      linkedin_publishing_control: {
+        Row: {
+          enabled: boolean
+          id: boolean
+          photo_test_id: string | null
+          text_test_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          id?: boolean
+          photo_test_id?: string | null
+          text_test_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: boolean
+          photo_test_id?: string | null
+          text_test_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       member_asks: {
         Row: {
           acted_at: string | null
@@ -7956,6 +7980,8 @@ export type Database = {
           image_url: string | null
           is_spare: boolean
           is_test: boolean
+          linkedin_url: string | null
+          linkedin_urn: string | null
           manual_schedule: boolean
           media_kind: string
           not_before: string
@@ -7996,6 +8022,8 @@ export type Database = {
           image_url?: string | null
           is_spare?: boolean
           is_test?: boolean
+          linkedin_url?: string | null
+          linkedin_urn?: string | null
           manual_schedule?: boolean
           media_kind?: string
           not_before?: string
@@ -8036,6 +8064,8 @@ export type Database = {
           image_url?: string | null
           is_spare?: boolean
           is_test?: boolean
+          linkedin_url?: string | null
+          linkedin_urn?: string | null
           manual_schedule?: boolean
           media_kind?: string
           not_before?: string
@@ -9679,6 +9709,8 @@ export type Database = {
           image_url: string | null
           is_spare: boolean
           is_test: boolean
+          linkedin_url: string | null
+          linkedin_urn: string | null
           manual_schedule: boolean
           media_kind: string
           not_before: string
@@ -10076,6 +10108,63 @@ export type Database = {
           _tokens?: Json
         }
         Returns: Json
+      }
+      linkedin_confirm_receipt: {
+        Args: { _post: string; _token: string; _url: string; _urn: string }
+        Returns: undefined
+      }
+      linkedin_enable_calendar: { Args: never; Returns: undefined }
+      linkedin_expire_unconfirmed: { Args: never; Returns: number }
+      linkedin_prepare_live_test: {
+        Args: { _kind: string }
+        Returns: {
+          anchor_type: string | null
+          anchor_value: string | null
+          archive_reason: string | null
+          archived_at: string | null
+          armed_at: string | null
+          caption: string
+          channel: string
+          content_hash: string | null
+          created_at: string
+          drop_if_bumped: boolean
+          external_post_id: string | null
+          id: string
+          image_filename: string | null
+          image_flag: string | null
+          image_hash: string | null
+          image_subject: string | null
+          image_url: string | null
+          is_spare: boolean
+          is_test: boolean
+          linkedin_url: string | null
+          linkedin_urn: string | null
+          manual_schedule: boolean
+          media_kind: string
+          not_before: string
+          notes: string | null
+          original_scheduled_for: string | null
+          post_number: number
+          posted_at: string | null
+          priority: number | null
+          publish_error: string | null
+          rendered_caption: string | null
+          scheduled_for: string | null
+          scheduled_in_native_tool_at: string | null
+          source_key: string | null
+          status: string
+          template_copy: string | null
+          theme: string | null
+          title: string | null
+          updated_at: string
+          waiting_reason: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "social_launch_posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       mark_visit_paid_in_full: {
         Args: {
