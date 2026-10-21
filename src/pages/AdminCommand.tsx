@@ -11,6 +11,7 @@ import ViewSequenceLink from "@/components/admin/ViewSequenceLink";
 import ReservationsForecast from "@/components/admin/ReservationsForecast";
 import SmsQueueLine from "@/components/admin/SmsQueueLine";
 import WorkdayBoard from "@/components/admin/WorkdayBoard";
+import { candidateStatusLine, visibleCandidate } from "@/lib/admin-report-rules";
 import RescheduleBanner from "@/components/admin/RescheduleBanner";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
