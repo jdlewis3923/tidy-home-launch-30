@@ -151,13 +151,16 @@ export default function AdminCommand() {
   const [workday, setWorkday] = useState<WorkdayEvent[]>([]);
   const [workdayRange, setWorkdayRange] = useState<WorkdayRange>("today");
   const [waitingOnly, setWaitingOnly] = useState(false);
+  const [candidateLines, setCandidateLines] = useState<Map<string, string>>(new Map());
 
   const load = useCallback(async () => {
     setRefreshing(true);
     const { data: reset } = await supabase.from("app_settings").select("value").eq("key", "reporting_reset_at").maybeSingle();
     const since = typeof reset?.value === "string" ? reset.value : new Date(Date.now() - 30 * 86400_000).toISOString();
-    const { data: candidates } = await supabase.from("contractor_pipeline").select("applicant_id, archived, is_test, applicants(is_test_row)");
-    const hiddenCandidateIds = new Set((candidates ?? []).filter((p) => p.archived || p.is_test || p.applicants?.is_test_row).map((p) => p.applicant_id));
+    const { data: candidates } = await supabase.from("contractor_pipeline").select("applicant_id, archived, is_test, source, apply_submitted_at, applicants(is_test_row, first_name, source)");
+    const shown = new Map<string, string>();
+    for (const p of candidates ?? []) if (visibleCandidate(p)) shown.set(p.applicant_id, candidateStatusLine(p));
+    setCandidateLines(shown);
     const [snapRes, planRes, ruleRes, evRes, scanRes, attentionRes, workdayRes] = await Promise.all([
       supabase.from("kpi_snapshot").select("id, captured_at, window, metrics").order("captured_at", { ascending: false }).limit(200),
       supabase.from("kpi_plan").select("plan_month, month_label, cum_profit_planned, subs_planned, pros_required").order("plan_month"),
@@ -175,7 +178,8 @@ export default function AdminCommand() {
     setRules((ruleRes.data ?? []) as unknown as AlertRule[]);
     setEvents((evRes.data ?? []) as unknown as AlertEvent[]);
     setNeedsAttention((attentionRes.data ?? []) as unknown as NeedsAttentionCustomer[]);
-    setWorkday(((workdayRes.data ?? []) as unknown as WorkdayEvent[]).filter((e) => !e.applicant_id || !hiddenCandidateIds.has(e.applicant_id)));
+    // Candidate rows only for real, named, non-archived candidates.
+    setWorkday(((workdayRes.data ?? []) as unknown as WorkdayEvent[]).filter((e) => !e.applicant_id || shown.has(e.applicant_id)));
 
     // Daily scan counts per ZIP for the trailing 30 days.
     const series: Record<string, number[]> = {};
@@ -349,7 +353,11 @@ export default function AdminCommand() {
             <div className="divide-y divide-slate-200">
               {visibleWorkday.length === 0 ? <div className="p-8 text-center text-sm text-slate-500"><Clock3 className="mx-auto mb-2 h-5 w-5" />No activity in this window.</div> : visibleWorkday.map((event) => <div key={event.id} className={`grid gap-2 p-4 sm:grid-cols-[72px_1fr_auto] sm:items-center ${event.status === "failed" || event.status === "bounced" ? "admin-state-critical" : ""}`}>
                 <time className="font-mono text-xs text-slate-500">{new Date(event.occurred_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</time>
-                <div><p className="text-sm font-semibold text-slate-900">{event.title}</p>{event.detail && <p className="mt-0.5 text-xs text-slate-500">{event.detail}</p>}</div>
+                <div><p className="text-sm font-semibold text-slate-900">{event.title}</p>
+                  {event.applicant_id && candidateLines.get(event.applicant_id)
+                    ? <p className={`mt-1 inline-block rounded px-2 py-0.5 text-xs font-semibold ${candidateLines.get(event.applicant_id)!.includes("NOT") ? "bg-accent/30 text-foreground" : "bg-primary/15 text-primary"}`}>{candidateLines.get(event.applicant_id)}</p>
+                    : event.detail && <p className="mt-0.5 text-xs text-slate-500">{event.detail}</p>}
+                </div>
                 {event.action_url && <Button asChild size="sm" variant="outline"><Link to={event.action_url}>{event.action_label ?? "Open"}<ExternalLink className="ml-1 h-3 w-3" /></Link></Button>}
               </div>)}
             </div>
