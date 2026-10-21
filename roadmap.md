@@ -1,5 +1,10 @@
 # Roadmap
 
+## LinkedIn-only photo edits (Oct 20)
+- [ ] Apply the 32 CSV changes using original photographs and supplied overlays; preserve the other 88 posts and all banners.
+- [ ] Delete and replace the Dec 4 12:30 PM row; save photo credits in admin.
+- [ ] Verify the authenticated 14-day preview, replacement and publishing status without sending posts.
+
 ## LinkedIn 60-day calendar (Oct 20)
 - [x] Imported 120 exact CSV rows; 37 unchanged banners, 23 1200×1200 JPEGs, 60 text-only posts; all 60 image downloads verified.
 - [x] Separate 27 Meta extras, replacing three repeated images; 84 unique images, one publisher, delivery-response recording; 23 tests passed.
