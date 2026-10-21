@@ -1,5 +1,9 @@
 # Roadmap
 
+## LinkedIn Zap contract and live checks (Oct 21 UTC)
+- [ ] Match exact payload; authenticated callback stores URN/link atomically; ten-minute unconfirmed alert and no resend.
+- [ ] Publish one photo and one text, verify real callbacks and URLs; enable future calendar only after both confirm.
+
 ## LinkedIn-only photo edits (Oct 20)
 - [x] Applied 32 original-photo/overlay cards; all JPEGs 1200×1200 with locked hashes; other 88 originals, all banners and other platforms unchanged.
 - [x] Deleted old Dec 4 12:30 PM row and created replacement; 32 photo credits visible in admin.
