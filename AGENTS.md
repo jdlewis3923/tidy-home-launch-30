@@ -17,8 +17,8 @@
 - Pro pay varies by service/size, never cadence — why: discounts come from Tidy's margin.
 - Root declares `color-scheme: light dark`; body/Founding render light with explicit colors and scoped tokens — why: phone browsers ignore "only light" and grey out QR visitors' pages.
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
-- Read subdirectory `AGENTS.md` before edits.
+- Read subdirectory `AGENTS.md` before edits; admin reporting rules live in `supabase/functions/AGENTS.md`.
 - LinkedIn photo attribution is stored in each post's notes under a structured credit marker and parsed by socialPhotoCredits — why: credit follows the locked image without changing the calendar schema.
-- Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: test and declined records stay as they are.
+- Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: preserve test and declined records.
 - Lifecycle uses transactional event-ledger dispatch; visit events preserve stages, rules default shadow, simulations require admin + is_test — why: no duplicate/test sends.
 - Growth initiatives live in roadmap_initiatives/items; customer code gates new pieces only via feature_enabled(switch_key), flipped by roadmap-tick at 8 AM ET launch day or Launch now — why: everything ships dark and unveils automatically.

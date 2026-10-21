@@ -121,20 +121,26 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     const { count: c } = await q; return c ?? 0;
   };
   const reservations = await count('reservations', 'created_at', (q) => q.eq('is_test_row', false));
-  const scans = await count('qr_scans', 'created_at');
-  const visitsDone = await count('visits', 'completed_at', (q) => q.eq('is_sample', false));
+  const { data: reset, error: resetError } = await admin.from('app_settings').select('value').eq('key', 'reporting_reset_at').maybeSingle();
+  if (resetError) throw resetError;
+  const baseline = typeof reset?.value === 'string' ? reset.value : dayStart;
+  const scans = await count('qr_scans', 'created_at', (q) => q.gte('created_at', baseline));
+  const launch = await loadLaunchConfig(admin as never);
+  const conversionOpen = !!launch.cleaning?.conversion_date && today >= launch.cleaning.conversion_date;
+  const operationsOpen = !!launch.cleaning?.first_visit_date && today >= launch.cleaning.first_visit_date;
+  const visitsDone = operationsOpen ? await count('visits', 'completed_at', (q) => q.eq('is_sample', false)) : 0;
   const [{ data: periodVisits, error: visitError }, { data: members, error: memberError }] = await Promise.all([
     admin.from('visits').select('service, status, assigned_pro_id').eq('is_sample', false).gte('scheduled_start', dayStart).lt('scheduled_start', dayEnd).not('status', 'in', '(canceled,skipped)'),
     admin.from('subscriptions').select('user_id').eq('status', 'active'),
   ]);
   if (visitError || memberError) throw new Error(visitError?.message ?? memberError?.message);
-  const actualVisits = (periodVisits ?? []).filter((v) => !testIds.has(v.assigned_pro_id ?? ''));
+  const actualVisits = (operationsOpen ? periodVisits ?? [] : []).filter((v) => !testIds.has(v.assigned_pro_id ?? ''));
   const operations = [['Cleaning', 'cleaning'], ['Lawn', 'lawn'], ['Car Care', 'detailing']].map(([service, key]) => {
     const jobs = actualVisits.filter((v) => v.service === key);
     return { service, total: jobs.length, completed: jobs.filter((v) => v.status === 'complete').length };
   });
   const { data: inv } = await admin.from('invoices').select('amount_cents').eq('status', 'paid').gte('paid_at', dayStart).lt('paid_at', dayEnd);
-  const revenue = (inv ?? []).reduce((s, r) => s + (r.amount_cents ?? 0), 0);
+  const revenue = (conversionOpen ? inv ?? [] : []).reduce((s, r) => s + (r.amount_cents ?? 0), 0);
   const numbers = [`${reservations} reservations`, `${scans} QR scans`, `$${(revenue / 100).toFixed(0)} revenue`, `${visitsDone} visits done`];
   const anyNumbers = reservations + scans + revenue + visitsDone > 0;
 
@@ -149,7 +155,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   if (nameError) throw new Error(nameError.message);
   const nameById = new Map((names ?? []).map((a) => [a.id, `${a.first_name ?? ''} ${a.last_name ?? ''}`.trim()]));
   sections.push({ title: 'Applications completed', items: applications.map((a) => ({
-    text: `${nameById.get(a.applicant_id) || 'Candidate'} · ${a.service === 'car_care' ? 'Car Care' : a.service}`,
+    text: `${nameById.get(a.applicant_id) || 'Candidate'} · Submitted on Tidy · ${new Date(a.apply_submitted_at).toLocaleString('en-US', { timeZone: 'America/New_York' })} ET · ${a.service === 'car_care' ? 'Car Care' : a.service}`,
     url: `${SITE}/admin/pipeline/${a.applicant_id}`, label: 'Review application + photos',
   })) });
   const item = (a: Alert) => ({ text: a.what ?? a.title, url: a.action_url ? `${SITE}${a.action_url}` : undefined, label: a.action_label ?? 'Open' });

@@ -8,3 +8,5 @@
 - Candidate messages use `pipeline-notify` and stage-owned gates; legacy senders use `pipeline-gate` — why: documents and spending follow proof approval.
 - Social-launch-publisher alone posts ledger-locked images/copy; social-plan sets dates unless manually moved — why: no competing sends.
 - LinkedIn sends only caption, optional image_url, callback_url and calendar post_id; a per-attempt token inside callback_url authenticates atomic URN/link receipts, and a minute SQL watchdog marks ten-minute missing receipts unconfirmed — why: Zap acceptance is not publication and uncertain sends never retry.
+
+- Admin analytics use app_settings.reporting_reset_at without deleting business records; launch_config gates operating actuals, modeled profit is labeled estimated, and Workday completion requires contractor_pipeline.apply_submitted_at — why: imports, tests and prelaunch assumptions are not live business activity.
