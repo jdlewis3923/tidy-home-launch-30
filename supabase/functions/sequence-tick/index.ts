@@ -62,18 +62,25 @@ Deno.serve(async (req) => {
   // 4. Stalls: waiting on you 3+ days → one Workday row per person per day.
   const cutoff = new Date(now.getTime() - 3 * 86_400_000).toISOString();
   const youStages = (Object.keys(STAGE_INFO) as SequenceStage[]).filter((s) => STAGE_INFO[s].waitingOn === 'you');
-  const { data: stalled } = await admin.from('applicants').select('id, first_name, sequence_stage, sequence_stage_entered_at')
+  const { data: stalled } = await admin.from('applicants').select('id, first_name, source, is_test_row, sequence_stage, sequence_stage_entered_at, contractor_pipeline(archived, is_test, source, apply_submitted_at)')
     .in('sequence_stage', youStages).lt('sequence_stage_entered_at', cutoff);
   const dayStart = new Date(now); dayStart.setUTCHours(0, 0, 0, 0);
+  const srcLabel = (v?: string | null) => v === 'indeed' ? 'Indeed' : (v === 'apply_form' || v === 'apply_v5') ? 'Tidy website' : 'source unconfirmed';
   for (const s of stalled ?? []) {
+    const raw = (s as { contractor_pipeline?: unknown }).contractor_pipeline;
+    const p = (Array.isArray(raw) ? raw[0] : raw) as { archived?: boolean; is_test?: boolean; source?: string | null; apply_submitted_at?: string | null } | null;
+    // Real, named, live candidates only; an unsubmitted application waits on them, not on Justin.
+    if (!p || p.archived || p.is_test || s.is_test_row || !s.first_name?.trim()) continue;
+    if (s.sequence_stage === 'applied' && !p.apply_submitted_at) continue;
     const { count } = await admin.from('admin_workday_events').select('id', { count: 'exact', head: true })
       .eq('applicant_id', s.id).eq('event_type', 'sequence_stalled').gte('occurred_at', dayStart.toISOString());
     if (count) continue;
     const days = Math.floor((now.getTime() - new Date(s.sequence_stage_entered_at).getTime()) / 86_400_000);
+    const submitted = p.apply_submitted_at ? `finished the Tidy application ${new Date(p.apply_submitted_at).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} ET` : 'has not filled out the Tidy application';
     await admin.from('admin_workday_events').insert({
       event_type: 'sequence_stalled', applicant_id: s.id, actor_type: 'system', status: 'warning', waiting_on_admin: true,
-      title: `${s.first_name ?? 'Pro'} has waited on you ${days} days`,
-      detail: `Stage: ${STAGE_INFO[s.sequence_stage as SequenceStage]?.label ?? s.sequence_stage}`,
+      title: `${s.first_name} has waited on you ${days} days`,
+      detail: `Found on ${srcLabel(p.source ?? s.source)} · ${submitted} · Step: ${STAGE_INFO[s.sequence_stage as SequenceStage]?.label ?? s.sequence_stage}`,
       action_label: 'Open record', action_url: `/admin/applicants?id=${s.id}`, metadata: { days },
     });
     out.stalled++;

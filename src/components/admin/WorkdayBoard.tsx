@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { candidateSource, candidateSubmission, visibleCandidate } from "@/lib/admin-report-rules";
+import { candidateStatusLine, visibleCandidate } from "@/lib/admin-report-rules";
 import RedoTasks from "./RedoTasks";
 import ReservationTasks from "./ReservationTasks";
 import { STAGE_INFO, NEXT_ACTION, type SequenceStage } from "@/lib/onboardingSequence";
@@ -45,8 +45,8 @@ export default function WorkdayBoard() {
             <li key={r.id}>
               <Link to={`/admin/pipeline/${r.id}`} className={`block rounded-md border px-3 py-2 text-sm ${stalled ? "border-accent bg-accent/15" : "border-border bg-background"}`}>
                 <span className="font-semibold text-foreground">{r.first_name} {r.last_name?.[0] ?? ""}.</span>
-                <span className="text-muted-foreground"> · {r.sequence_stage === "applied" ? candidateSubmission(r) : STAGE_INFO[r.sequence_stage]?.label ?? r.sequence_stage}</span>
-                <span className="block text-[11px] text-muted-foreground">Recruited from: {candidateSource(r.source)}{r.apply_submitted_at ? ` · Submitted ${new Date(r.apply_submitted_at).toLocaleString("en-US", { timeZone: "America/New_York" })} ET` : " · Awaiting Tidy application"}</span>
+                {r.sequence_stage !== "applied" && <span className="text-muted-foreground"> · {STAGE_INFO[r.sequence_stage]?.label ?? r.sequence_stage}</span>}
+                <span className={`mt-1 block rounded px-2 py-0.5 text-[11px] font-semibold ${r.apply_submitted_at ? "bg-primary/15 text-primary" : "bg-accent/30 text-foreground"}`}>{candidateStatusLine(r)}</span>
                 {NEXT_ACTION[r.sequence_stage] && title.startsWith("Waiting on me") && <span className="block text-[11px] text-primary">Next: {NEXT_ACTION[r.sequence_stage]?.label}</span>}
                 <span className={`block text-[11px] ${stalled ? "text-accent-foreground font-semibold" : "text-muted-foreground"}`}>{d} day{d === 1 ? "" : "s"} at this stage</span>
               </Link>
