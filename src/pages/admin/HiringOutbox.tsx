@@ -34,7 +34,7 @@ export default function HiringOutbox() {
       {rows.length === 0 ? <p className="text-sm text-muted-foreground">Nothing here yet. Turn on SMS dry-run and run the hiring checks — every text lands here.</p> : (
         <div className="grid gap-2">
           {rows.map((r) => (
-            <div key={r.id} className="rounded-lg border border-border bg-card px-4 py-3">
+            <div key={r.id} className="min-w-0 rounded-lg border border-border bg-card px-4 py-3 [overflow-wrap:anywhere]">
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span>{new Date(r.created_at).toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
                 <span>→ {r.to_phone_e164}</span>
