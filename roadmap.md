@@ -1,5 +1,11 @@
 # Roadmap
 
+## Report truth and Workday sources (Oct 21)
+- [ ] Reset reporting counters from owner-requested baseline without deleting real business records.
+- [ ] Remove obsolete May launch loss/forecast; use November launch settings and distinguish actuals from estimates.
+- [ ] Workday shows source and verified Tidy submission; excludes archived/test/blank records; repair misleading historical events.
+- [ ] Verify refreshed live report, owner digest and regression tests.
+
 ## LinkedIn Zap contract and live checks (Oct 21 UTC)
 - [x] Exact Zap fields, token-authenticated atomic callback, URN resend protection, bounded ten-minute watchdog; 28 tests pass.
 - [x] Sent photo and text once: both Zap HTTP 200; text confirmed at https://www.linkedin.com/feed/update/urn:li:share:7518474104555945984; photo timed out and urgent alert written. Verified signed-in admin and public JPEG.
