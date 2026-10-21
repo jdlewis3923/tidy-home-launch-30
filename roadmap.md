@@ -1,10 +1,10 @@
 # Roadmap
 
 ## Report truth and Workday sources (Oct 21)
-- [ ] Reset reporting counters from owner-requested baseline without deleting real business records.
-- [ ] Remove obsolete May launch loss/forecast; use November launch settings and distinguish actuals from estimates.
-- [ ] Workday shows source and verified Tidy submission; excludes archived/test/blank records; repair misleading historical events.
-- [ ] Verify refreshed live report, owner digest and regression tests.
+- [x] Reset analytics baseline without deleting reservations, applications, payments or historical records; website visits no longer labeled QR scans.
+- [x] Remove May launch loss/forecast; November conversion/first visits drive prelaunch zeros and estimated-profit labeling; refreshed all KPI and capacity reports.
+- [x] Workday shows recruitment source and verified Tidy submission time; excludes archived/test/blank records; corrected historical import events and future capture trigger.
+- [x] Signed-in report and owner preview verified: no old loss, no test-member capacity warning, two real submitted candidates; 23 reporting/capacity tests pass, build OK. Launch-parity test exposes pre-existing date literals in lifecycle simulator/tick, outside this change.
 
 ## LinkedIn Zap contract and live checks (Oct 21 UTC)
 - [x] Exact Zap fields, token-authenticated atomic callback, URN resend protection, bounded ten-minute watchdog; 28 tests pass.
