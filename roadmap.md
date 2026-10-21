@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Latest LinkedIn posting failure (Oct 21)
-- [ ] Diagnose missing photo confirmation and repair what is accessible without duplicate sends.
-- [ ] Verify the photo receipt and enable the calendar only after both live checks confirm.
+- [x] Diagnosed photo attempt: Zap returned HTTP 200 (run 01a15bf1-5b04-799f-e3a4-06f6b6efba3a), but no photo receipt arrived; public 1200×1200 JPEG matches its locked hash, callback is reachable and rejects unauthorized writes, text receipt is confirmed.
+- [ ] Repair photo Zap outcome and enable the calendar only after both live checks confirm — blocked on Zap run's LinkedIn/photo-step error or genuine receipt; no Zap management access is connected, and accepted photo must not be resent blindly.
 
 ## Mobile admin tabs (Oct 21)
 - [x] Fix the covering canvas, wrap mobile tabs and long SMS links; phone inbox switches between list and thread with a back control.
