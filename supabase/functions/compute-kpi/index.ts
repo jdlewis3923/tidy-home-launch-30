@@ -21,6 +21,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { corsHeaders, handleCors, jsonResponse } from '../_shared/cors.ts';
 import { shouldAlert } from '../_shared/kpi-noise-filter.ts';
+import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -376,6 +377,19 @@ Deno.serve(async (req) => {
       if (r.status === 'fulfilled') computed.push(r.value);
     }
     computed.push(...EXTERNAL_PLACEHOLDERS);
+    const cfg = await loadLaunchConfig(supabase);
+    const today = new Date().toISOString().slice(0, 10);
+    const preConversion = !cfg.cleaning?.conversion_date || today < cfg.cleaning.conversion_date;
+    const preVisits = !cfg.cleaning?.first_visit_date || today < cfg.cleaning.first_visit_date;
+    const paidCodes = new Set(['active_subs', 'mrr', 'signup_conversion', 'plan_distribution', 'promo_redemption', 'coupon_spend', 'failed_payments', 'payment_recovery']);
+    const visitCodes = new Set(['visits_today', 'visit_completion', 'customer_no_show', 'same_day_reschedule']);
+    for (const kpi of computed) {
+      if ((preConversion && paidCodes.has(kpi.code)) || (preVisits && visitCodes.has(kpi.code))) {
+        kpi.value = ['active_subs', 'mrr', 'visits_today', 'failed_payments'].includes(kpi.code) ? 0 : null;
+        kpi.value_text = 'Pre-launch';
+        kpi.explicit_status = 'unknown';
+      }
+    }
 
     // Build snapshot rows + detect status changes for alerting
     const snapRows = [];

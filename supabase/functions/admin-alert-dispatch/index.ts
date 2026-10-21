@@ -118,7 +118,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const count = async (t: string, col: string, extra?: (q: any) => any) => {
     let q = admin.from(t).select('*', { count: 'exact', head: true }).gte(col, dayStart).lt(col, dayEnd);
     if (extra) q = extra(q);
-    const { count: c } = await q; return c ?? 0;
+    const { count: c, error } = await q; if (error) throw error; return c ?? 0;
   };
   const reservations = await count('reservations', 'created_at', (q) => q.eq('is_test_row', false));
   const { data: reset, error: resetError } = await admin.from('app_settings').select('value').eq('key', 'reporting_reset_at').maybeSingle();
@@ -131,7 +131,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const visitsDone = operationsOpen ? await count('visits', 'completed_at', (q) => q.eq('is_sample', false)) : 0;
   const [{ data: periodVisits, error: visitError }, { data: members, error: memberError }] = await Promise.all([
     admin.from('visits').select('service, status, assigned_pro_id').eq('is_sample', false).gte('scheduled_start', dayStart).lt('scheduled_start', dayEnd).not('status', 'in', '(canceled,skipped)'),
-    admin.from('subscriptions').select('user_id').eq('status', 'active'),
+    admin.from('subscriptions').select('user_id').eq('status', 'active').not('stripe_subscription_id', 'is', null),
   ]);
   if (visitError || memberError) throw new Error(visitError?.message ?? memberError?.message);
   const actualVisits = (operationsOpen ? periodVisits ?? [] : []).filter((v) => !testIds.has(v.assigned_pro_id ?? ''));
@@ -251,7 +251,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const shown = sections.filter((s) => s.items.length);
   const nothing = edition === 'today' && !mustDo.length;
   const heading = edition === 'today' ? 'Today' : 'Tonight';
-  const pulse = { revenue, bookings: reservations, households: new Set((members ?? []).map((s) => s.user_id)).size, pros: new Set(actualVisits.map((v) => v.assigned_pro_id).filter(Boolean)).size };
+  const pulse = { revenue, bookings: reservations, households: conversionOpen ? new Set((members ?? []).map((s) => s.user_id)).size : 0, pros: new Set(actualVisits.map((v) => v.assigned_pro_id).filter(Boolean)).size };
   const html = ownerEmail({ date: today, edition: heading, pulse, operations, attention: [...urgentOpen, ...mustDo].map(item), unresolved: all.map(item), sections: shown.filter((s) => !['Must do today', 'Unresolved urgent', 'Still open from today', 'Yesterday in numbers', 'Today in numbers'].includes(s.title)) });
   if (preview) return { edition, preview: true, sections: shown, completed_applications: applications.length, open_alerts: all.length, html };
   const mail = shown.length || nothing
