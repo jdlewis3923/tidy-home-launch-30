@@ -1,5 +1,9 @@
 # Roadmap
 
+## Mobile admin tabs (Oct 21)
+- [x] Fix the covering canvas, wrap mobile tabs and long SMS links; phone inbox switches between list and thread with a back control.
+- [x] Signed-in 411px phone: SMS menu tap, Today/Yesterday/Last 7 days, actual message/read/reply box and calendar weekday scrolling verified; light/dark and 1280px desktop visible, build OK. No messages sent, schedules changed or publication.
+
 ## Report truth and Workday sources (Oct 21)
 - [x] Reset analytics baseline without deleting reservations, applications, payments or historical records; website visits no longer labeled QR scans.
 - [x] Remove May launch loss/forecast; November conversion/first visits drive prelaunch zeros and estimated-profit labeling; refreshed all KPI and capacity reports.

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, RotateCcw, Clock, Send, MessageCircle, Smartphone, User, Bot, Shield, Search } from "lucide-react";
+import { ArrowLeft, Loader2, RotateCcw, Clock, Send, MessageCircle, Smartphone, User, Bot, Shield, Search } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -291,14 +291,14 @@ export default function AdminInbox() {
       <Helmet>
         <title>Support Inbox — Tidy Admin</title>
       </Helmet>
-      <div className="flex h-screen flex-col bg-background">
+      <div className="flex h-[calc(100dvh-48px)] min-h-0 flex-col bg-background lg:h-[calc(100dvh-40px)]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b px-4 py-3">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
           <div className="flex items-center gap-3">
             <h1 className="text-base font-semibold">Support Inbox</h1>
             <Badge variant="outline">{conversations.length}</Badge>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {(["all", "open", "escalated", "resolved"] as Filter[]).map((f) => (
               <Button
                 key={f}
@@ -313,9 +313,9 @@ export default function AdminInbox() {
           </div>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex min-h-0 flex-1 overflow-hidden">
           {/* Conversation list */}
-          <aside className="flex w-[340px] flex-col border-r">
+          <aside className={cn("min-h-0 w-full shrink-0 flex-col border-r md:flex md:w-[340px]", active ? "hidden" : "flex")}>
             <div className="border-b p-2">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -379,15 +379,16 @@ export default function AdminInbox() {
           </aside>
 
           {/* Thread */}
-          <section className="flex flex-1 flex-col">
+          <section className={cn("min-h-0 min-w-0 flex-1 flex-col md:flex", active ? "flex" : "hidden")}>
             {!active ? (
               <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
                 Select a conversation
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-between border-b px-4 py-3">
-                  <div>
+                <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
+                  <Button type="button" variant="ghost" size="icon" className="md:hidden" aria-label="Back to conversations" onClick={() => setActiveId(null)}><ArrowLeft className="h-4 w-4" /></Button>
+                  <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
                     <div className="flex items-center gap-2 text-sm font-semibold">
                       {channelIcon(active.channel)}
                       {customerLabel(active)}
@@ -451,7 +452,7 @@ export default function AdminInbox() {
                                 {format(new Date(m.created_at), "h:mm a")}
                               </span>
                             </div>
-                            <div className="whitespace-pre-wrap">{m.body}</div>
+                            <div className="whitespace-pre-wrap [overflow-wrap:anywhere]">{m.body}</div>
                             {m.direction === "inbound" && m.sender_type === "customer" && (
                               <div className="mt-2 border-t border-border/60 pt-2">
                                 {redoDone[m.id] ? (

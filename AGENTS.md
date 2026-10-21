@@ -15,10 +15,11 @@
 - Lawn size is turf-only sq ft, banded in `LAWN_BANDS`/`sizeFromTurfSqFt` (mirrored in `public.lawn_size_from_sqft`); customers only guess, admins measure at `/admin/lawn-verification` via `admin_lawn_verify`, and DB triggers refuse conversion while `lawn_conversion_block()` is non-null — why: no silent repricing and no Pro absorbing an oversized yard.
 - Paid-plan lawn adds/corrections go only through `lawn-plan-change` (DB trigger refuses unverified lawn), swapping Stripe by lookup_key — why: nothing billed before verification; size-ups wait for the customer.
 - Pro pay varies by service/size, never cadence — why: discounts come from Tidy's margin.
-- Root declares `color-scheme: light dark`; body/Founding render light with explicit colors and scoped tokens — why: phone browsers ignore "only light" and grey out QR visitors' pages.
+- Root uses `color-scheme: light dark`; body/Founding use explicit light tokens — why: phones ignore "only light" and darken QR pages.
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
-- Read subdirectory `AGENTS.md` before edits; admin reporting rules live in `supabase/functions/AGENTS.md`.
-- LinkedIn photo attribution is stored in each post's notes under a structured credit marker and parsed by socialPhotoCredits — why: credit follows the locked image without changing the calendar schema.
+- Read subdirectory `AGENTS.md` before edits; admin reporting: `supabase/functions/AGENTS.md`.
+- Admin root isolates a behind-content canvas; mobile tabs wrap — why: no covered or unreachable pages.
+- LinkedIn photo credits use a structured notes marker parsed by socialPhotoCredits — why: credit follows locked images without schema changes.
 - Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: preserve test and declined records.
 - Lifecycle uses transactional event-ledger dispatch; visit events preserve stages, rules default shadow, simulations require admin + is_test — why: no duplicate/test sends.
 - Growth initiatives live in roadmap_initiatives/items; customer code gates new pieces only via feature_enabled(switch_key), flipped by roadmap-tick at 8 AM ET launch day or Launch now — why: everything ships dark and unveils automatically.
