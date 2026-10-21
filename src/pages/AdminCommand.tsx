@@ -162,7 +162,7 @@ export default function AdminCommand() {
       supabase.from("kpi_snapshot").select("id, captured_at, window, metrics").order("captured_at", { ascending: false }).limit(200),
       supabase.from("kpi_plan").select("plan_month, month_label, cum_profit_planned, subs_planned, pros_required").order("plan_month"),
       supabase.from("alert_rule").select("code, domain, priority, title, action_text, enabled"),
-      supabase.from("alert_event").neq("status", "resolved").select("id, rule_code, fired_at, severity, headline, detail, metric_value, threshold_value, suppressed_in_digest, status").order("fired_at", { ascending: false }).limit(200),
+      supabase.from("alert_event").select("id, rule_code, fired_at, severity, headline, detail, metric_value, threshold_value, suppressed_in_digest, status").neq("status", "resolved").order("fired_at", { ascending: false }).limit(200),
       supabase.from("qr_scans").select("zip, scanned_at:created_at").gte("created_at", since),
       supabase.rpc("customers_needing_attention"),
       supabase.from("admin_workday_events").select("id, occurred_at, event_type, applicant_id, title, detail, status, action_label, action_url, waiting_on_admin").gte("occurred_at", new Date(Date.now() - 7 * 86400_000).toISOString()).order("occurred_at", { ascending: false }).limit(500),
