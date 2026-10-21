@@ -15,4 +15,9 @@ describe('truthful admin reports', () => {
   it('Indeed candidate who finished on Tidy says both', () => expect(candidateStatusLine({ source: 'indeed', apply_submitted_at: '2026-10-19T21:07:24Z' })).toBe('Found on Indeed · Finished the Tidy application on jointidy.co Oct 19, 5:07 PM ET'));
   it('Indeed candidate who never finished says not filled out', () => expect(candidateStatusLine({ source: 'indeed' })).toBe('Found on Indeed · Has NOT filled out the Tidy application yet'));
   it('website candidate falls back to applicant source', () => expect(candidateStatusLine({ applicants: { source: 'apply_form' }, apply_submitted_at: '2026-10-12T14:54:05Z' })).toBe('Found on Tidy website · Finished the Tidy application on jointidy.co Oct 12, 10:54 AM ET'));
+});import { inviteLinkStatus } from '../lib/admin-report-rules';
+describe('invite link results', () => {
+  it('submitted wins', () => expect(inviteLinkStatus({ apply_submitted_at: '2026-10-19T21:07:24Z', answers: 66 })).toBe('submitted'));
+  it('answers without submit is started', () => expect(inviteLinkStatus({ answers: 57 })).toBe('started'));
+  it('no answers is not started', () => expect(inviteLinkStatus({ answers: 0 })).toBe('not_started'));
 });
