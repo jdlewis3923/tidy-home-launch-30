@@ -1,5 +1,9 @@
 # Roadmap
 
+## Mobile admin tabs (Oct 21)
+- [ ] Fix the SMS blank-screen overlay and mobile tab reachability, including weekly controls where affected.
+- [ ] Verify signed-in phone and desktop navigation without sending messages or changing schedules.
+
 ## Report truth and Workday sources (Oct 21)
 - [x] Reset analytics baseline without deleting reservations, applications, payments or historical records; website visits no longer labeled QR scans.
 - [x] Remove May launch loss/forecast; November conversion/first visits drive prelaunch zeros and estimated-profit labeling; refreshed all KPI and capacity reports.
