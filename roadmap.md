@@ -1,5 +1,9 @@
 # Roadmap
 
+## Latest LinkedIn posting failure (Oct 21)
+- [ ] Diagnose missing photo confirmation and repair what is accessible without duplicate sends.
+- [ ] Verify the photo receipt and enable the calendar only after both live checks confirm.
+
 ## Mobile admin tabs (Oct 21)
 - [x] Fix the covering canvas, wrap mobile tabs and long SMS links; phone inbox switches between list and thread with a back control.
 - [x] Signed-in 411px phone: SMS menu tap, Today/Yesterday/Last 7 days, actual message/read/reply box and calendar weekday scrolling verified; light/dark and 1280px desktop visible, build OK. No messages sent, schedules changed or publication.
