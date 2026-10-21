@@ -1,7 +1,7 @@
 /**
  * Public Application — /apply (hiring v5)
  *
- * 12-section slider application, EN/ES, autosave + resume token.
+ * Short sectioned application, EN/ES, autosave + resume token.
  * Questions come from the question_bank table (admin-editable).
  * Sliders stay unset until touched. Knockouts archive on submit.
  */
@@ -130,8 +130,11 @@ export default function Apply() {
   }, [questions]);
 
   const sectionNames = lang === "es" ? SECTIONS_ES : SECTIONS_EN;
-  const current = bySection.get(section) ?? [];
-  const totalSections = Math.max(1, ...Array.from(bySection.keys()), 12);
+  // Steps are only the sections that still have questions.
+  const steps = Array.from(bySection.keys()).sort((a, b) => a - b);
+  const sectionNo = steps[section - 1] ?? 1;
+  const current = bySection.get(sectionNo) ?? [];
+  const totalSections = Math.max(1, steps.length);
 
   const renderQuestion = (q: Q) => {
     const v = answers[q.id];
@@ -266,7 +269,7 @@ export default function Apply() {
       </header>
       <main className="container mx-auto px-4 py-8 max-w-xl">
         <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-1">{t("Section", "Sección")} {section} {t("of", "de")} {totalSections}</p>
-        <h2 className="text-2xl font-bold text-foreground mb-6">{sectionNames[section - 1] ?? ""}</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">{sectionNames[sectionNo - 1] ?? ""}</h2>
         <div className="grid gap-4">{current.map(renderQuestion)}</div>
         {missing.length > 0 ? <p className="text-destructive text-sm mt-4">{t("Some required answers are missing — they're marked in red.", "Faltan algunas respuestas obligatorias — están marcadas en rojo.")}</p> : null}
         {error ? <p className="text-destructive text-sm mt-4">{error}</p> : null}
