@@ -75,7 +75,7 @@ interface NeedsAttentionCustomer {
 }
 interface WorkdayEvent {
   id: string; occurred_at: string; event_type: string; title: string; detail: string | null;
-  status: string | null; action_label: string | null; action_url: string | null; waiting_on_admin: boolean;
+  applicant_id?: string | null; status: string | null; action_label: string | null; action_url: string | null; waiting_on_admin: boolean;
 }
 type WorkdayRange = "today" | "yesterday" | "week";
 
@@ -86,7 +86,8 @@ const ZIP_LABELS: Record<string, string> = {
 };
 const SERVICE_ORDER = ["house_clean", "car_wash", "car_detail"] as const;
 const PIPELINE_STAGES: { key: string; label: string }[] = [
-  { key: "applicant", label: "Applicants" },
+  { key: "invited", label: "Awaiting Tidy application" },
+  { key: "submitted", label: "Submitted on Tidy" },
   { key: "screened", label: "Screened" },
   { key: "bg_check", label: "Background" },
   { key: "onboarding", label: "Onboarding" },
@@ -153,15 +154,18 @@ export default function AdminCommand() {
 
   const load = useCallback(async () => {
     setRefreshing(true);
-    const since = new Date(Date.now() - 30 * 86400_000).toISOString();
+    const { data: reset } = await supabase.from("app_settings").select("value").eq("key", "reporting_reset_at").maybeSingle();
+    const since = typeof reset?.value === "string" ? reset.value : new Date(Date.now() - 30 * 86400_000).toISOString();
+    const { data: candidates } = await supabase.from("contractor_pipeline").select("applicant_id, archived, is_test, applicants(is_test_row)");
+    const hiddenCandidateIds = new Set((candidates ?? []).filter((p) => p.archived || p.is_test || p.applicants?.is_test_row).map((p) => p.applicant_id));
     const [snapRes, planRes, ruleRes, evRes, scanRes, attentionRes, workdayRes] = await Promise.all([
       supabase.from("kpi_snapshot").select("id, captured_at, window, metrics").order("captured_at", { ascending: false }).limit(200),
       supabase.from("kpi_plan").select("plan_month, month_label, cum_profit_planned, subs_planned, pros_required").order("plan_month"),
       supabase.from("alert_rule").select("code, domain, priority, title, action_text, enabled"),
-      supabase.from("alert_event").select("id, rule_code, fired_at, severity, headline, detail, metric_value, threshold_value, suppressed_in_digest, status").order("fired_at", { ascending: false }).limit(200),
-      supabase.from("qr_scan").select("zip, scanned_at").gte("scanned_at", since),
+      supabase.from("alert_event").select("id, rule_code, fired_at, severity, headline, detail, metric_value, threshold_value, suppressed_in_digest, status").neq("status", "resolved").order("fired_at", { ascending: false }).limit(200),
+      supabase.from("qr_scans").select("zip, scanned_at:created_at").gte("created_at", since),
       supabase.rpc("customers_needing_attention"),
-      supabase.from("admin_workday_events").select("id, occurred_at, event_type, title, detail, status, action_label, action_url, waiting_on_admin").gte("occurred_at", new Date(Date.now() - 7 * 86400_000).toISOString()).order("occurred_at", { ascending: false }).limit(500),
+      supabase.from("admin_workday_events").select("id, occurred_at, event_type, applicant_id, title, detail, status, action_label, action_url, waiting_on_admin").gte("occurred_at", new Date(Date.now() - 7 * 86400_000).toISOString()).order("occurred_at", { ascending: false }).limit(500),
     ]);
 
     const snaps = (snapRes.data ?? []) as unknown as Snapshot[];
@@ -171,7 +175,7 @@ export default function AdminCommand() {
     setRules((ruleRes.data ?? []) as unknown as AlertRule[]);
     setEvents((evRes.data ?? []) as unknown as AlertEvent[]);
     setNeedsAttention((attentionRes.data ?? []) as unknown as NeedsAttentionCustomer[]);
-    setWorkday((workdayRes.data ?? []) as unknown as WorkdayEvent[]);
+    setWorkday(((workdayRes.data ?? []) as unknown as WorkdayEvent[]).filter((e) => !e.applicant_id || !hiddenCandidateIds.has(e.applicant_id)));
 
     // Daily scan counts per ZIP for the trailing 30 days.
     const series: Record<string, number[]> = {};
@@ -197,10 +201,10 @@ export default function AdminCommand() {
   useEffect(() => {
     if (!hasRole) return;
     const channel = supabase.channel("admin-workday-live").on("postgres_changes", { event: "INSERT", schema: "public", table: "admin_workday_events" }, (payload) => {
-      setWorkday((rows) => [payload.new as WorkdayEvent, ...rows]);
+      void load();
     }).subscribe();
     return () => { void supabase.removeChannel(channel); };
-  }, [hasRole]);
+  }, [hasRole, load]);
 
   const visibleWorkday = useMemo(() => {
     const now = new Date();
@@ -223,13 +227,13 @@ export default function AdminCommand() {
     const actualByMonth = new Map<number, number>();
     for (const s of [...history].reverse()) {
       const p = (s.metrics?.profit ?? {}) as Metrics;
-      if (has(p.plan_month) && has(p.cum_profit_actual)) {
+      if (!p.prelaunch && p.profit_basis && has(p.plan_month) && has(p.cum_profit_actual)) {
         actualByMonth.set(Number(p.plan_month), Number(p.cum_profit_actual));
       }
     }
     return plan.map((row) => {
-      const actual = actualByMonth.has(row.plan_month) ? actualByMonth.get(row.plan_month)! : null;
-      const planned = has(row.cum_profit_planned) ? Number(row.cum_profit_planned) : null;
+      const actual = actualByMonth.has(row.plan_month) ? actualByMonth.get(row.plan_month) ?? null : null;
+      const planned = !profit.prelaunch && has(row.cum_profit_planned) ? Number(row.cum_profit_planned) : null;
       return {
         month: row.month_label,
         planned,
@@ -237,7 +241,7 @@ export default function AdminCommand() {
         gap: actual !== null && planned !== null ? [Math.min(actual, planned), Math.max(actual, planned)] : null,
       };
     });
-  }, [plan, history]);
+  }, [plan, history, profit.prelaunch]);
 
   const ruleByCode = useMemo(
     () => Object.fromEntries(rules.map((r) => [r.code, r])) as Record<string, AlertRule>,
@@ -268,9 +272,9 @@ export default function AdminCommand() {
   // ── status line ───────────────────────────────────────────────────────────
   const delta = has(profit.plan_delta_dollars) ? Number(profit.plan_delta_dollars) : null;
   const daysOff = has(profit.days_behind_plan) ? Number(profit.days_behind_plan) : null;
-  let statusText = "AWAITING FIRST ROLLUP";
+  let statusText = profit.prelaunch ? `PRE-LAUNCH · FIRST VISITS ${dateLabel(profit.launch_date) ?? "NOT SET"}` : "AWAITING FIRST ROLLUP";
   let statusTone = "text-slate-500";
-  if (delta !== null) {
+  if (!profit.prelaunch && delta !== null) {
     if (Math.abs(delta) < 500) {
       statusText = "ON TRACK";
       statusTone = "text-emerald-600";
@@ -335,7 +339,7 @@ export default function AdminCommand() {
             <WorkdayBoard />
             <div className="grid grid-cols-2 md:grid-cols-5 border-b border-slate-200">
               {[
-                ["Applications", todayWorkday.filter((r) => r.event_type === "application_submitted").length],
+                ["Applications", todayWorkday.filter((r) => r.event_type === "application_completed").length],
                 ["Emails sent", todayWorkday.filter((r) => r.event_type === "email" && ["sent", "delivered"].includes(r.status ?? "")).length],
                 ["Emails failed", todayWorkday.filter((r) => r.event_type === "email" && ["failed", "bounced"].includes(r.status ?? "")).length],
                 ["Calls booked", todayWorkday.filter((r) => r.event_type === "call_booked").length],
@@ -363,7 +367,7 @@ export default function AdminCommand() {
 
           {/* 2 — PROFIT LINE */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6">
-            <h2 className="text-base font-semibold text-slate-900">Cumulative profit versus plan</h2>
+            <h2 className="text-base font-semibold text-slate-900">Estimated operating profit versus forecast</h2>
             <div className="h-72 mt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={chartData} margin={{ top: 8, right: 16, bottom: 0, left: 8 }}>
@@ -392,7 +396,7 @@ export default function AdminCommand() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
               <Tile label="Active subs" value={count(profit.active_subs)} />
               <Tile label="MRR" value={money(profit.mrr)} />
-              <Tile label="Cumulative profit" value={money(profit.cum_profit_actual)} />
+              <Tile label="Estimated operating profit" value={money(profit.cum_profit_actual)} />
               <Tile
                 label="Days versus plan"
                 value={
@@ -745,7 +749,7 @@ function AlertFeed({
     const sorted = [...events].sort(
       (a, b) => rank(a) - rank(b) || new Date(b.fired_at).getTime() - new Date(a.fired_at).getTime(),
     );
-    for (const e of sorted) {
+    for (const e of sorted.filter((e) => e.status !== "resolved")) {
       const domain = ruleByCode[e.rule_code]?.domain ?? "other";
       (byDomain[domain] ??= []).push(e);
     }

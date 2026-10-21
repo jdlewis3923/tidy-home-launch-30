@@ -10,9 +10,10 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
  */
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import {
-  DEFAULT_CONSTANTS, KpiConstants, LAUNCH_DATE, LEAD_DAYS_FIELD, MINUTES_PER_SUB_WEEK,
+  DEFAULT_CONSTANTS, KpiConstants, LEAD_DAYS_FIELD, MINUTES_PER_SUB_WEEK,
   MINUTES_PER_VISIT, SERVICE_CODES, SERVICE_DB_KEYS, SERVICE_NAMES, ServiceCode,
   FUNNEL_ZIPS, DAY_MS, daysAgoIso, monthsElapsed, ratio, round, ymd,
 } from '../_shared/kpi-engine.ts';
@@ -47,40 +48,45 @@ async function loadConstants(s: SupabaseClient): Promise<KpiConstants> {
 
 // ───────────────────────── PROFIT ─────────────────────────
 async function profitBlock(s: SupabaseClient, c: KpiConstants) {
+  const cfg = await loadLaunchConfig(s as never);
+  const launchDate = cfg.cleaning?.first_visit_date ?? null;
+  const conversionDate = cfg.cleaning?.conversion_date ?? null;
+  const prelaunch = !launchDate || Date.now() < Date.parse(`${launchDate}T00:00:00Z`);
+  const paidOpen = !!conversionDate && Date.now() >= Date.parse(`${conversionDate}T00:00:00Z`);
   const monthStart = new Date();
   monthStart.setUTCDate(1);
   monthStart.setUTCHours(0, 0, 0, 0);
 
   const [{ data: subs }, { data: paidMtd }, { data: paidAll }, { data: drops }, { data: plan }] =
     await Promise.all([
-      s.from('subscriptions').select('id, monthly_total_cents, services, car_service_code, created_at, status, canceled_at'),
+      s.from('subscriptions').select('id, monthly_total_cents, services, car_service_code, created_at, status, canceled_at, stripe_subscription_id'),
       s.from('invoices').select('amount_cents').eq('status', 'paid').gte('paid_at', monthStart.toISOString()),
-      s.from('invoices').select('amount_cents').eq('status', 'paid').gte('paid_at', `${LAUNCH_DATE}T00:00:00Z`),
+      s.from('invoices').select('amount_cents').eq('status', 'paid').gte('paid_at', `${launchDate ?? "9999-12-31"}T00:00:00Z`),
       s.from('hanger_drop').select('cost, zip, quantity, dropped_on'),
       s.from('kpi_plan').select('*').order('plan_month'),
     ]);
 
-  const active = (subs ?? []).filter((r) => r.status === 'active');
+  const active = paidOpen ? (subs ?? []).filter((r) => r.status === 'active' && r.stripe_subscription_id) : [];
   const mrr = round(active.reduce((a, r) => a + ((r.monthly_total_cents as number) ?? 0), 0) / 100);
   const gpMtd = round(((paidMtd ?? []).reduce((a, r) => a + ((r.amount_cents as number) ?? 0), 0) / 100) * GP_MARGIN);
   const cumGp = round(((paidAll ?? []).reduce((a, r) => a + ((r.amount_cents as number) ?? 0), 0) / 100) * GP_MARGIN);
   const cumSpend = round((drops ?? []).reduce((a, r) => a + Number(r.cost ?? 0), 0));
 
-  const months = monthsElapsed();
-  const cumProfitActual = round(cumGp - cumSpend - months * c.overhead_mo);
+  const months = launchDate ? monthsElapsed(launchDate) : 0;
+  const cumProfitActual = prelaunch ? 0 : round(cumGp - cumSpend - months * c.overhead_mo);
 
   const monthLabel = new Date().toISOString().slice(0, 7);
   const planRows = (plan ?? []) as Row[];
   const current = planRows.find((r) => r.month_label === monthLabel);
   const planMonth = (current?.plan_month as number) ?? null;
-  const cumPlanned = current ? Number(current.cum_profit_planned) : null;
+  const cumPlanned = !prelaunch && current ? Number(current.cum_profit_planned) : null;
 
   const deltaDollars = cumPlanned === null ? null : round(cumProfitActual - cumPlanned);
   const deltaPct = cumPlanned ? round((cumProfitActual - cumPlanned) / Math.abs(cumPlanned) * 100, 1) : null;
 
   // Where does today's actual profit sit on the planned curve?
   let daysBehind: number | null = null;
-  if (planRows.length) {
+  if (!prelaunch && planRows.length) {
     const pts = planRows.map((r) => ({
       v: Number(r.cum_profit_planned),
       // each plan row is achieved by the END of its month
@@ -127,10 +133,11 @@ async function profitBlock(s: SupabaseClient, c: KpiConstants) {
 
   return {
     profit: {
+      prelaunch, launch_date: launchDate, conversion_date: conversionDate, profit_basis: "modeled_margin_and_overhead_not_accounting",
       active_subs: active.length,
       mrr,
-      gp_month_to_date: gpMtd,
-      cum_gp_since_launch: cumGp,
+      gp_month_to_date: prelaunch ? 0 : gpMtd,
+      cum_gp_since_launch: prelaunch ? 0 : cumGp,
       cum_marketing_spend: cumSpend,
       months_elapsed: round(months, 2),
       cum_profit_actual: cumProfitActual,
@@ -145,10 +152,10 @@ async function profitBlock(s: SupabaseClient, c: KpiConstants) {
       adds_yesterday: addsYesterday,
       churn_yesterday: churnYesterday,
     },
-    _subs: subs ?? [],
+    _subs: paidOpen ? (subs ?? []).filter((r) => r.stripe_subscription_id) : [],
     _cumSpend: cumSpend,
     _drops: (drops ?? []) as Row[],
-    _cumGp: cumGp,
+    _cumGp: prelaunch ? 0 : cumGp,
   };
 }
 
@@ -161,15 +168,15 @@ async function capacityBlock(s: SupabaseClient, c: KpiConstants, subs: Row[]) {
   const [{ data: pros }, { data: assignments }, { data: booked }, { data: unassigned }, { data: pipeline }] =
     await Promise.all([
       s.from('applicants')
-        .select('id, first_name, last_name, contractor_id, service, wash_only, available_minutes_week, current_stage, stage_entered_at, compliance_complete, training_passed, equipment_approved, contracts_signed, stripe_connect_complete'),
+        .select('id, first_name, last_name, contractor_id, service, wash_only, available_minutes_week, current_stage, stage_entered_at, compliance_complete, training_passed, equipment_approved, contracts_signed, stripe_connect_complete').eq('is_test_row', false),
       s.from('pro_service_assignments').select('applicant_id, contractor_id, service, time_share, active').eq('active', true),
       // visits is the live schedule (pro_visits retired with Jobber). Column
       // names are aliased so the rest of this block is untouched.
       s.from('visits').select('contractor_id:assigned_pro_id, service_type, scheduled_at:scheduled_start, status')
-        .gte('scheduled_start', new Date(now).toISOString()).lte('scheduled_start', in14),
+        .eq('is_sample', false).not('status', 'in', '(canceled,skipped)').gte('scheduled_start', new Date(now).toISOString()).lte('scheduled_start', in14),
       s.from('visits').select('id, service_type, scheduled_at:scheduled_start, customer_name:customer_first_name, contractor_id:assigned_pro_id, status')
-        .is('assigned_pro_id', null).gte('scheduled_start', new Date(now).toISOString()).lte('scheduled_start', in72),
-      s.from('applicants').select('current_stage, stage_entered_at'),
+        .is('assigned_pro_id', null).eq('is_sample', false).not('status', 'in', '(canceled,skipped)').gte('scheduled_start', new Date(now).toISOString()).lte('scheduled_start', in72),
+      s.from('contractor_pipeline').select('current_stage:stage, stage_entered_at, apply_submitted_at').eq('archived', false).eq('is_test', false),
     ]);
 
   const certified = (pros ?? []).filter(
@@ -241,7 +248,7 @@ async function capacityBlock(s: SupabaseClient, c: KpiConstants, subs: Row[]) {
 
   const stageMap = new Map<string, { count: number; totalDays: number }>();
   for (const p of pipeline ?? []) {
-    const stage = String(p.current_stage ?? 'unknown');
+    const stage = p.current_stage === 'applied' ? (p.apply_submitted_at ? 'submitted' : 'invited') : String(p.current_stage ?? 'unknown');
     const days = p.stage_entered_at ? (now - new Date(p.stage_entered_at as string).getTime()) / DAY_MS : 0;
     const e = stageMap.get(stage) ?? { count: 0, totalDays: 0 };
     e.count += 1;
@@ -268,10 +275,12 @@ async function capacityBlock(s: SupabaseClient, c: KpiConstants, subs: Row[]) {
 
 // ───────────────────────── FUNNEL (trailing windows only) ─────────────────────────
 async function funnelBlock(s: SupabaseClient, c: KpiConstants, drops: Row[]) {
-  const [{ data: scans }] = await Promise.all([
-    s.from('qr_scan').select('zip, scanned_at, converted_quote, converted_paid').gte('scanned_at', daysAgoIso(120)),
-  ]);
-  const { data: lastScans } = await s.from('qr_scan').select('zip, scanned_at').order('scanned_at', { ascending: false }).limit(500);
+  const { data: reset, error: resetError } = await s.from('app_settings').select('value').eq('key', 'reporting_reset_at').maybeSingle();
+  if (resetError) throw resetError;
+  const baseline = typeof reset?.value === 'string' ? reset.value : daysAgoIso(120);
+  const { data: scans, error } = await s.from('qr_scans').select('zip, scanned_at:created_at').gte('created_at', baseline);
+  if (error) throw error;
+  const lastScans = [...(scans ?? [])].sort((a, b) => b.scanned_at.localeCompare(a.scanned_at));
 
   const doors: Record<string, number> = {
     '33156': c.doors_33156, '33183': c.doors_33183, '33186': c.doors_33186,
@@ -286,8 +295,8 @@ async function funnelBlock(s: SupabaseClient, c: KpiConstants, drops: Row[]) {
     const spend = zDrops.reduce((a, r) => a + Number(r.cost ?? 0), 0);
     const scans30 = zScans.filter((r) => new Date(r.scanned_at as string).getTime() >= now - 30 * DAY_MS);
     const scans7 = zScans.filter((r) => new Date(r.scanned_at as string).getTime() >= now - 7 * DAY_MS);
-    const quoteStarts = scans30.filter((r) => r.converted_quote).length;
-    const paid30 = scans30.filter((r) => r.converted_paid).length;
+    const quoteStarts = null;
+    const paid30 = null;
     const last = inZip((lastScans ?? []) as Row[])[0];
     const doorsFor = zip ? (doors[zip] ?? 0) : Object.values(doors).reduce((a, b) => a + b, 0);
     return {
@@ -295,12 +304,12 @@ async function funnelBlock(s: SupabaseClient, c: KpiConstants, drops: Row[]) {
       marketing_spend_cum: round(spend),
       scans_30d: scans30.length,
       scans_7d: scans7.length,
-      scan_rate: hangersCum ? round((scans30.length / hangersCum) * 100, 2) : null,
+      scan_rate: null,
       quote_starts_30d: quoteStarts,
       quotes_completed_30d: quoteStarts,
       paid_30d: paid30,
-      scan_to_paid_pct: scans30.length ? round((paid30 / scans30.length) * 100, 2) : null,
-      cac: paid30 ? round(spend / paid30) : null,
+      scan_to_paid_pct: null,
+      cac: null,
       days_since_last_scan: last ? round((now - new Date(last.scanned_at as string).getTime()) / DAY_MS, 1) : null,
       coverage_passes: doorsFor ? round(hangersCum / doorsFor, 2) : null,
     };
@@ -497,13 +506,13 @@ Deno.serve(async (req) => {
       ...p.profit && { profit: p.profit },
       ...cap,
       ...fun,
-      ...tr,
+      ...(p.profit.prelaunch ? { trust: { named_5star_30d: null, avg_rating_30d: null, completed_jobs_30d: 0, pros: [] } } : tr),
       ...pl,
       composites: {
         runway_to_capacity_weeks: runways.length ? Math.min(...runways) : null,
         marketing_efficiency: spend90 ? round(gp90 / spend90, 2) : null,
         marketing_spend_90d: round(spend90),
-        gp_90d_new_cohort: gp90,
+        gp_90d_new_cohort: p.profit.prelaunch ? 0 : gp90,
         trust_index: (trust.completed_jobs_30d as number)
           ? round((trust.named_5star_30d as number) / (trust.completed_jobs_30d as number), 3)
           : null,

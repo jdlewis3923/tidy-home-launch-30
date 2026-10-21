@@ -118,23 +118,29 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const count = async (t: string, col: string, extra?: (q: any) => any) => {
     let q = admin.from(t).select('*', { count: 'exact', head: true }).gte(col, dayStart).lt(col, dayEnd);
     if (extra) q = extra(q);
-    const { count: c } = await q; return c ?? 0;
+    const { count: c, error } = await q; if (error) throw error; return c ?? 0;
   };
   const reservations = await count('reservations', 'created_at', (q) => q.eq('is_test_row', false));
-  const scans = await count('qr_scans', 'created_at');
-  const visitsDone = await count('visits', 'completed_at', (q) => q.eq('is_sample', false));
+  const { data: reset, error: resetError } = await admin.from('app_settings').select('value').eq('key', 'reporting_reset_at').maybeSingle();
+  if (resetError) throw resetError;
+  const baseline = typeof reset?.value === 'string' ? reset.value : dayStart;
+  const scans = await count('qr_scans', 'created_at', (q) => q.gte('created_at', baseline));
+  const launch = await loadLaunchConfig(admin as never);
+  const conversionOpen = !!launch.cleaning?.conversion_date && today >= launch.cleaning.conversion_date;
+  const operationsOpen = !!launch.cleaning?.first_visit_date && today >= launch.cleaning.first_visit_date;
+  const visitsDone = operationsOpen ? await count('visits', 'completed_at', (q) => q.eq('is_sample', false)) : 0;
   const [{ data: periodVisits, error: visitError }, { data: members, error: memberError }] = await Promise.all([
     admin.from('visits').select('service, status, assigned_pro_id').eq('is_sample', false).gte('scheduled_start', dayStart).lt('scheduled_start', dayEnd).not('status', 'in', '(canceled,skipped)'),
-    admin.from('subscriptions').select('user_id').eq('status', 'active'),
+    admin.from('subscriptions').select('user_id').eq('status', 'active').not('stripe_subscription_id', 'is', null),
   ]);
   if (visitError || memberError) throw new Error(visitError?.message ?? memberError?.message);
-  const actualVisits = (periodVisits ?? []).filter((v) => !testIds.has(v.assigned_pro_id ?? ''));
+  const actualVisits = (operationsOpen ? periodVisits ?? [] : []).filter((v) => !testIds.has(v.assigned_pro_id ?? ''));
   const operations = [['Cleaning', 'cleaning'], ['Lawn', 'lawn'], ['Car Care', 'detailing']].map(([service, key]) => {
     const jobs = actualVisits.filter((v) => v.service === key);
     return { service, total: jobs.length, completed: jobs.filter((v) => v.status === 'complete').length };
   });
   const { data: inv } = await admin.from('invoices').select('amount_cents').eq('status', 'paid').gte('paid_at', dayStart).lt('paid_at', dayEnd);
-  const revenue = (inv ?? []).reduce((s, r) => s + (r.amount_cents ?? 0), 0);
+  const revenue = (conversionOpen ? inv ?? [] : []).reduce((s, r) => s + (r.amount_cents ?? 0), 0);
   const numbers = [`${reservations} reservations`, `${scans} QR scans`, `$${(revenue / 100).toFixed(0)} revenue`, `${visitsDone} visits done`];
   const anyNumbers = reservations + scans + revenue + visitsDone > 0;
 
@@ -149,7 +155,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   if (nameError) throw new Error(nameError.message);
   const nameById = new Map((names ?? []).map((a) => [a.id, `${a.first_name ?? ''} ${a.last_name ?? ''}`.trim()]));
   sections.push({ title: 'Applications completed', items: applications.map((a) => ({
-    text: `${nameById.get(a.applicant_id) || 'Candidate'} · ${a.service === 'car_care' ? 'Car Care' : a.service}`,
+    text: `${nameById.get(a.applicant_id) || 'Candidate'} · Submitted on Tidy · ${new Date(a.apply_submitted_at).toLocaleString('en-US', { timeZone: 'America/New_York' })} ET · ${a.service === 'car_care' ? 'Car Care' : a.service}`,
     url: `${SITE}/admin/pipeline/${a.applicant_id}`, label: 'Review application + photos',
   })) });
   const item = (a: Alert) => ({ text: a.what ?? a.title, url: a.action_url ? `${SITE}${a.action_url}` : undefined, label: a.action_label ?? 'Open' });
@@ -245,7 +251,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const shown = sections.filter((s) => s.items.length);
   const nothing = edition === 'today' && !mustDo.length;
   const heading = edition === 'today' ? 'Today' : 'Tonight';
-  const pulse = { revenue, bookings: reservations, households: new Set((members ?? []).map((s) => s.user_id)).size, pros: new Set(actualVisits.map((v) => v.assigned_pro_id).filter(Boolean)).size };
+  const pulse = { revenue, bookings: reservations, households: conversionOpen ? new Set((members ?? []).map((s) => s.user_id)).size : 0, pros: new Set(actualVisits.map((v) => v.assigned_pro_id).filter(Boolean)).size };
   const html = ownerEmail({ date: today, edition: heading, pulse, operations, attention: [...urgentOpen, ...mustDo].map(item), unresolved: all.map(item), sections: shown.filter((s) => !['Must do today', 'Unresolved urgent', 'Still open from today', 'Yesterday in numbers', 'Today in numbers'].includes(s.title)) });
   if (preview) return { edition, preview: true, sections: shown, completed_applications: applications.length, open_alerts: all.length, html };
   const mail = shown.length || nothing

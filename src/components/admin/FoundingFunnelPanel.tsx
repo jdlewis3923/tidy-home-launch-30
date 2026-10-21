@@ -12,9 +12,12 @@ export default function FoundingFunnelPanel() {
     queryKey: ["founding-funnel"],
     refetchInterval: 60_000,
     queryFn: async () => {
+      const { data: reset, error: resetError } = await supabase.from("app_settings").select("value").eq("key", "reporting_reset_at").maybeSingle();
+      if (resetError) throw resetError;
+      const baseline = typeof reset?.value === "string" ? reset.value : "1970-01-01";
       const [res, ev, wl] = await Promise.all([
         supabase.from("reservations").select("zip, services, src, founding, custom_quote, created_at").neq("status", "canceled").eq("is_test_row", false).order("created_at", { ascending: true }),
-        supabase.from("founding_events").select("session_id, event, step, src, zip").order("created_at", { ascending: false }).limit(20000),
+        supabase.from("founding_events").select("session_id, event, step, src, zip").gte("created_at", baseline).order("created_at", { ascending: false }).limit(20000),
         supabase.from("waitlist").select("email, zip, source, requested_at").like("source", "founding%").order("requested_at", { ascending: false }).limit(200),
       ]);
       return { res: res.data ?? [], ev: (ev.data ?? []) as Ev[], wl: wl.data ?? [] };
@@ -68,14 +71,14 @@ export default function FoundingFunnelPanel() {
       </div>
 
       <div className="overflow-x-auto">
-        <h3 className="text-sm font-semibold">Scans → reservations</h3>
+        <h3 className="text-sm font-semibold">Website visits → reservations</h3>
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-xs text-muted-foreground"><th className="py-1">ZIP</th><th>src</th><th>Scans</th><th>Reserved</th><th>Conv.</th></tr></thead>
+          <thead><tr className="text-left text-xs text-muted-foreground"><th className="py-1">ZIP</th><th>src</th><th>Visits</th><th>Reserved</th><th>Conv.</th></tr></thead>
           <tbody>
             {[...bySrc.entries()].sort((a, b) => b[1].scans - a[1].scans).map(([k, v]) => { const [z, s] = k.split("|"); return (
               <tr key={k} className="border-t border-border"><td className="py-1">{z}</td><td>{s}</td><td>{v.scans}</td><td>{v.res}</td><td>{v.scans ? `${Math.round((v.res / v.scans) * 100)}%` : "—"}</td></tr>
             ); })}
-            {bySrc.size === 0 && <tr><td colSpan={5} className="py-2 text-muted-foreground">No scans yet.</td></tr>}
+            {bySrc.size === 0 && <tr><td colSpan={5} className="py-2 text-muted-foreground">No visits since reset.</td></tr>}
           </tbody>
         </table>
         <p className="mt-1 text-xs text-muted-foreground">Tap-to-call: {calls}</p>

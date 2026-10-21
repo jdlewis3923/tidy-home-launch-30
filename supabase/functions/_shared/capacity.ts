@@ -8,6 +8,7 @@
 // cancellations. Per the owner's spec that count is used directly as
 // growth_per_month, which is deliberately conservative (it alerts earlier).
 
+import { loadLaunchConfig } from './launch-config.ts';
 import {
   CAPACITY_SERVICES,
   CAPACITY_SERVICE_DB_KEY,
@@ -21,12 +22,15 @@ import {
 type Client = any;
 
 export async function computeCapacityFromDb(supabase: Client): Promise<CapacityResult[]> {
+  const cfg = await loadLaunchConfig(supabase);
+  const conversion = cfg.cleaning?.conversion_date;
+  const paidOpen = !!conversion && Date.now() >= Date.parse(`${conversion}T00:00:00Z`);
   const since = new Date(Date.now() - GROWTH_WINDOW_DAYS * 86_400_000).toISOString();
 
   const [{ data: subs, error: subErr }, { data: pros, error: proErr }] = await Promise.all([
     supabase
       .from('subscriptions')
-      .select('id, services, status, created_at, canceled_at')
+      .select('id, services, status, created_at, canceled_at, stripe_subscription_id')
       .limit(10000),
     supabase
       .from('pro_service_assignments')
@@ -47,7 +51,8 @@ export async function computeCapacityFromDb(supabase: Client): Promise<CapacityR
     for (const row of pros ?? []) {
       if (row.service === dbKey) proShare[svc] += Number(row.time_share ?? 0);
     }
-    for (const sub of subs ?? []) {
+    for (const sub of paidOpen ? subs ?? [] : []) {
+      if (!sub.stripe_subscription_id) continue;
       const services: string[] = Array.isArray(sub.services) ? sub.services : [];
       if (!services.includes(dbKey)) continue;
       if (sub.status === 'active') active[svc] += 1;

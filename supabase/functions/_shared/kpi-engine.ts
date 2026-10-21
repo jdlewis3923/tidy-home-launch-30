@@ -6,8 +6,6 @@
  * never drift.
  */
 
-export const LAUNCH_DATE = '2026-05-26';
-
 export type ServiceCode = 'house_clean' | 'car_wash' | 'car_detail';
 
 export const SERVICE_CODES: ServiceCode[] = ['house_clean', 'car_wash', 'car_detail'];
@@ -97,8 +95,8 @@ export function ratio(num: number, den: number): number | null {
 }
 
 /** Fractional months between the launch date and now. */
-export function monthsElapsed(from = LAUNCH_DATE): number {
-  const ms = Date.now() - new Date(from).getTime();
+export function monthsElapsed(from: string, now = Date.now()): number {
+  const ms = now - new Date(from).getTime();
   return Math.max(0, ms / (DAY_MS * 30.4375));
 }
 
