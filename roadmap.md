@@ -1,8 +1,9 @@
 # Roadmap
 
 ## LinkedIn Zap contract and live checks (Oct 21 UTC)
-- [ ] Match exact payload; authenticated callback stores URN/link atomically; ten-minute unconfirmed alert and no resend.
-- [ ] Publish one photo and one text, verify real callbacks and URLs; enable future calendar only after both confirm.
+- [x] Exact Zap fields, token-authenticated atomic callback, URN resend protection, bounded ten-minute watchdog; 28 tests pass.
+- [x] Sent photo and text once: both Zap HTTP 200; text confirmed at https://www.linkedin.com/feed/update/urn:li:share:7518474104555945984; photo timed out and urgent alert written. Verified signed-in admin and public JPEG.
+- [ ] Enable full calendar — blocked by missing photo callback; publishing remains OFF, no retries because the accepted photo may already exist on LinkedIn.
 
 ## LinkedIn-only photo edits (Oct 20)
 - [x] Applied 32 original-photo/overlay cards; all JPEGs 1200×1200 with locked hashes; other 88 originals, all banners and other platforms unchanged.
@@ -13,8 +14,8 @@
 - [x] Imported 120 exact CSV rows; 37 unchanged banners, 23 1200×1200 JPEGs, 60 text-only posts; all 60 image downloads verified.
 - [x] Separate 27 Meta extras, replacing three repeated images; 84 unique images, one publisher, delivery-response recording; 23 tests passed.
 - [x] Authenticated 14-day LinkedIn preview: 42 cards with captions and images, plus HTTP receipts and hold banner.
-- [ ] Enable future LinkedIn slots — held with original dates intact after Zap returned HTTP 404 for the afternoon text-only post; Justin must repair/confirm Zap.
-- [ ] First live company-page URL — morning banner accepted HTTP 200, no actual LinkedIn ID/URL returned; Zap must POST the real post ID/link using the supplied callback fields. Neither attempt will be automatically resent.
+- [ ] Enable future LinkedIn slots — requires photo callback confirmation; text succeeded Oct 21 UTC, photo accepted HTTP 200 but timed out.
+- [x] First confirmed live company-page URL: https://www.linkedin.com/feed/update/urn:li:share:7518474104555945984 (text). Previous attempts remain untouched.
 
 ## Growth roadmap (Oct 20)
 - [x] /admin/roadmap: 6 initiatives, switches (all OFF), gates, checklists, build prompts, 24-month timeline; Launch now / Pause.
