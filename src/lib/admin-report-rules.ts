@@ -17,3 +17,9 @@ export function candidateStatusLine(row: CandidateReportRow) {
   const at = new Date(row.apply_submitted_at).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   return `${from} · Finished the Tidy application on jointidy.co ${at} ET`;
 }
+export type InviteLinkStatus = 'submitted' | 'started' | 'not_started';
+/** What the candidate did with the application link we texted them. */
+export function inviteLinkStatus(row: { apply_submitted_at?: string | null; answers: number }): InviteLinkStatus {
+  if (row.apply_submitted_at) return 'submitted';
+  return row.answers > 0 ? 'started' : 'not_started';
+}

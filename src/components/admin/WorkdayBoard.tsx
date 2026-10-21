@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { candidateStatusLine, visibleCandidate } from "@/lib/admin-report-rules";
 import RedoTasks from "./RedoTasks";
 import ReservationTasks from "./ReservationTasks";
+import InviteLinkResults from "./InviteLinkResults";
 import { STAGE_INFO, NEXT_ACTION, type SequenceStage } from "@/lib/onboardingSequence";
 
 type Row = { id: string; first_name: string | null; last_name: string | null; sequence_stage: SequenceStage; sequence_stage_entered_at: string | null; source: string | null; apply_submitted_at: string | null };
@@ -61,6 +62,7 @@ export default function WorkdayBoard() {
     <>
     <RedoTasks />
     <ReservationTasks />
+    <InviteLinkResults />
     <div className="flex flex-wrap gap-4 px-5 py-4 border-b border-border">
       <Col title="Waiting on me" list={col("you")} />
       <Col title="Waiting on them" list={col("them")} />
