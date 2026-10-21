@@ -1401,6 +1401,13 @@
       "when": 1792546207136,
       "tag": "0199_truthful_candidate_workday_events",
       "breakpoints": true
+    },
+    {
+      "idx": 200,
+      "version": "7",
+      "when": 1792582225800,
+      "tag": "0200_shorten_pro_application_reopen_orestes",
+      "breakpoints": true
     }
   ]
 }
