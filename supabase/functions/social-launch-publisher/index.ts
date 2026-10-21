@@ -9,9 +9,10 @@ import { renderTemplate, instagramVersion, etDate } from '../_shared/socialPlann
 import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { logIntegrationEvent } from '../_shared/integration-log.ts';
 import { sha256 } from '../_shared/social-publish-policy.ts';
+import { linkedinPayload } from '../_shared/linkedin-contract.ts';
 const graph = 'https://graph.facebook.com/v19.0';
 const json = (data: unknown, status=200) => new Response(JSON.stringify(data),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
-const Body=z.object({action:z.enum(['publish','audit','dry_run','history','status','linkedin_test']).default('publish'),post_id:z.string().uuid().optional()});
+const Body=z.object({action:z.enum(['publish','audit','dry_run','history','status','linkedin_test','linkedin_live_photo','linkedin_live_text','linkedin_enable']).default('publish'),post_id:z.string().uuid().optional()});
 type Post={id:string;channel:string;caption:string;template_copy:string|null;image_url:string|null;image_hash:string|null;scheduled_for:string|null;post_number:number|null;media_kind?:string;is_test:boolean;external_post_id:string|null;posted_at:string|null};
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
@@ -60,7 +61,12 @@ Deno.serve(async req=>{
  const platforms=(c:string)=>c==='meta_combined'?['facebook','instagram']:[c];
   try{
    if(action==='status'){
-    return json({linkedin_configured:!!Deno.env.get('LINKEDIN_ZAP_WEBHOOK_URL')});
+    const {data:control}=await sb.from('linkedin_publishing_control').select('enabled').eq('id',true).maybeSingle();
+    return json({linkedin_configured:!!Deno.env.get('LINKEDIN_ZAP_WEBHOOK_URL'),linkedin_enabled:control?.enabled??false});
+   }
+   if(action==='linkedin_enable'){
+    const {error}=await sb.rpc('linkedin_enable_calendar');if(error)throw error;
+    return json({linkedin_enabled:true});
    }
    if(action==='linkedin_test'){
     const hook=Deno.env.get('LINKEDIN_ZAP_WEBHOOK_URL');if(!hook)return json({error:'LINKEDIN_ZAP_WEBHOOK_URL not set'},400);
@@ -134,7 +140,8 @@ Deno.serve(async req=>{
    }
    return json({run,timeline,no_provider_calls:true});
   }
-  const {data:posts,error}=await sb.rpc('claim_due_social_posts',{_limit:1,_only:post_id??null});if(error)throw error;
+  const liveKind=action==='linkedin_live_photo'?'photo':action==='linkedin_live_text'?'text':null;
+  const {data:posts,error}=liveKind?await sb.rpc('linkedin_prepare_live_test',{_kind:liveKind}):await sb.rpc('claim_due_social_posts',{_limit:1,_only:post_id??null});if(error)throw error;
   const results=[];
    for(const p of (posts??[]) as Post[]){
     try{
@@ -154,9 +161,16 @@ Deno.serve(async req=>{
      if(targets.includes('instagram')&&!ig)throw new Error('Instagram account missing');
      // Instagram publishes a JPEG derived from the locked image; Facebook keeps the original.
      const igImage=targets.includes('instagram')?(im.type==='image/jpeg'?{url:p.image_url??'',hash:im.hash}:await instagramJpeg(im.bytes)):null;
+     let linkedinImage={url:p.image_url??'',hash:im.hash};
+     if(p.channel==='linkedin'&&!textOnly&&im.type!=='image/jpeg'){
+      const img=await Image.decode(new Uint8Array(im.bytes));const jpg=await img.encodeJPEG(90);
+      const hash=await sha256(jpg.buffer.slice(jpg.byteOffset,jpg.byteOffset+jpg.byteLength) as ArrayBuffer);
+      const path=`derived/linkedin-${hash}.jpg`;const {error:uploadError}=await sb.storage.from('social-images').upload(path,jpg,{contentType:'image/jpeg',upsert:true});if(uploadError)throw uploadError;
+      linkedinImage={url:sb.storage.from('social-images').getPublicUrl(path).data.publicUrl,hash};
+     }
      for(const platform of targets){
       const copy=platform==='instagram'?instagramVersion(caption):caption;
-      const platformImage=platform==='instagram'?igImage:{url:p.image_url??'',hash:im.hash};
+      const platformImage=platform==='instagram'?igImage:platform==='linkedin'?linkedinImage:{url:p.image_url??'',hash:im.hash};
       if(!platformImage)throw new Error('Platform image missing');
       const {data:r,error:reserveError}=await sb.rpc('social_reserve_publish',{_id:p.id,_platform:platform,_caption:copy,_image_hash:platformImage.hash,_image_url:platformImage.url});if(reserveError)throw reserveError;
       const reservation=r as {ok:boolean;reason?:string;ledger_id:string;image_url:string;caption:string};
@@ -169,7 +183,8 @@ Deno.serve(async req=>{
        }else if(platform==='linkedin'){
         if(!linkedinHook)throw new Error('LinkedIn hook missing');
         const {data:receipt,error:receiptError}=await sb.from('social_delivery_tokens').insert({ledger_id:reservation.ledger_id}).select('token').single();if(receiptError)throw receiptError;
-        const response=await fetch(linkedinHook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caption:reservation.caption,...(textOnly?{}:{image_url:reservation.image_url}),scheduled_for:p.scheduled_for,post_id:p.id,ledger_id:reservation.ledger_id,callback_url:`${url}/functions/v1/linkedin-delivery`,callback_token:receipt.token})});
+        const callbackUrl=`${url}/functions/v1/linkedin-delivery?receipt=${receipt.token}`;
+        const response=await fetch(linkedinHook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(linkedinPayload(reservation.caption,p.id,callbackUrl,textOnly?undefined:reservation.image_url))});
         const responseBody=(await response.text()).slice(0,4000);
         const {error:recordError}=await sb.from('social_publish_ledger').update({webhook_status:response.status,webhook_response:responseBody,webhook_accepted_at:response.ok?new Date().toISOString():null,error:response.ok?null:`Zapier [${response.status}]: ${responseBody}`}).eq('id',reservation.ledger_id);if(recordError)throw recordError;
         await logIntegrationEvent({source:'zapier',event:'linkedin_social_publish',status:response.ok?'success':'error',error_message:response.ok?null:`[${response.status}]: ${responseBody}`});
