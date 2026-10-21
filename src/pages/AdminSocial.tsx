@@ -14,11 +14,12 @@ import { useHasRoleState } from "@/hooks/useHasRole";
 import { useLaunchConfig } from "@/hooks/useLaunchConfig";
 import { Button } from "@/components/ui/button";
 import { renderTemplate, instagramVersion, etDate, type PlanAnchors, type PlanResult } from "@/lib/socialPlanner";
+import { socialPhotoCredit } from "@/lib/socialPhotoCredits";
 
 type Post = {
   id: string; post_number: number | null; channel: string; scheduled_for: string | null; caption: string | null; template_copy: string | null;
   image_url: string | null; image_hash: string | null; image_subject: string | null; image_flag: string | null; status: string; posted_at: string | null; external_post_id: string | null;
-  media_kind?: string; source_key?: string | null; content_hash: string | null; publish_error: string | null; waiting_reason: string | null; priority: number | null; is_spare: boolean;
+  media_kind?: string; source_key?: string | null; notes?: string | null; content_hash: string | null; publish_error: string | null; waiting_reason: string | null; priority: number | null; is_spare: boolean;
 };
 const CH: Record<string, string> = { meta_combined: "Facebook + Instagram", instagram: "Instagram", facebook: "Facebook", nextdoor: "Nextdoor", linkedin: "LinkedIn" };
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -40,7 +41,7 @@ export default function AdminSocial() {
   const [range, setRange] = useState<'fortnight' | 'month'>('fortnight');
   const [moves, setMoves] = useState<Record<string, string>>({});
   const [dryRun, setDryRun] = useState<Array<{ source_id: string; scheduled_for: string; caption: string; image_url: string; result: { ok: boolean; reason?: string } }> | null>(null);
-  const [platformFilter,setPlatformFilter]=useState('all');
+  const [platformFilter,setPlatformFilter]=useState(() => params.get('platform') === 'linkedin' ? 'linkedin' : 'all');
   const [receipts,setReceipts]=useState<Array<{post_id:string;webhook_status:number|null;webhook_response:string|null;post_url:string|null;state:string}>>([]);
   const [linkedinReady, setLinkedinReady] = useState<boolean | null>(null);
 
@@ -52,7 +53,7 @@ export default function AdminSocial() {
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("social_launch_posts")
-      .select("id, post_number, channel, scheduled_for, caption, template_copy, image_url, image_hash, image_subject, image_flag, status, posted_at, external_post_id, content_hash, publish_error, waiting_reason, priority, is_spare, media_kind, source_key")
+      .select("id, post_number, channel, scheduled_for, caption, template_copy, image_url, image_hash, image_subject, image_flag, status, posted_at, external_post_id, content_hash, publish_error, waiting_reason, priority, is_spare, media_kind, source_key, notes")
       .eq('is_test', false).is("archived_at", null).order("scheduled_for", { nullsFirst: false });
     setPosts((data ?? []) as Post[]);
     const {data:ledger}=await supabase.from('social_publish_ledger').select('post_id,webhook_status,webhook_response,post_url,state').eq('platform','linkedin').eq('is_test',false).order('created_at',{ascending:false});
@@ -162,6 +163,7 @@ export default function AdminSocial() {
     const rendered = renderTemplate(tpl, anchors, day);
     const locked = p.status === "posted" || p.status === "posting" || !!p.external_post_id || receipts.some(r=>r.post_id===p.id);
     const receipt=receipts.find(r=>r.post_id===p.id);
+    const credit = p.channel === 'linkedin' ? socialPhotoCredit(p.notes) : null;
     const blocked = !!p.image_flag || (!p.image_url && p.media_kind!=='text') || p.status === 'blocked' || p.status === 'missed';
     return (
       <section key={`${p.id}-${platform}`} id={`post-${p.id}-${platform}`} className={`rounded-lg border p-4 ${blocked ? 'border-destructive' : focus === p.id ? "border-primary" : "border-border"} bg-card`}>
@@ -185,7 +187,8 @@ export default function AdminSocial() {
             <pre className="whitespace-pre-wrap rounded bg-muted p-2 text-xs text-foreground">{platform === 'instagram' ? instagramVersion(rendered) : rendered}</pre>
           </div>
           <div>{p.image_url ? <img src={p.image_url} alt={p.image_subject??"Post image"} width={1200} height={p.media_kind==='banner'?627:1200} className="h-auto w-full rounded object-contain" /> : <div className="flex h-24 items-center justify-center rounded bg-muted text-xs text-muted-foreground">{p.media_kind==='text'?'Text only':'No image'}</div>}
-            <details className="mt-1 text-[11px] text-muted-foreground"><summary>Image details</summary>{p.image_subject}</details></div>
+            <details className="mt-1 text-[11px] text-muted-foreground"><summary>Image details</summary>{p.image_subject}</details>
+            {credit && <p className="mt-2 text-xs text-muted-foreground">Photo: <a href={credit.photo_page} target="_blank" rel="noreferrer" className="text-primary underline">{credit.photographer}</a></p>}</div>
         </div>
         {!locked && (
           <div className="mt-3 flex flex-wrap gap-2">
@@ -221,6 +224,16 @@ export default function AdminSocial() {
           </p>
         )}
       </header>
+      {platformFilter === 'linkedin' && <details className="border-b border-border pb-4">
+        <summary className="cursor-pointer font-semibold text-foreground">Photo credits</summary>
+        <div className="mt-3 overflow-x-auto"><table className="w-full text-left text-sm">
+          <thead><tr><th className="py-2">Date</th><th>Time (ET)</th><th>Photographer</th><th>Source</th></tr></thead>
+          <tbody>{posts.filter(p => p.channel === 'linkedin').map(p => {
+            const credit = socialPhotoCredit(p.notes);
+            return credit ? <tr key={p.id} className="border-t border-border"><td className="py-2">{credit.date}</td><td>{credit.time_et}</td><td>{credit.photographer}</td><td><a href={credit.photo_page} target="_blank" rel="noreferrer" className="text-primary underline">Photo page</a></td></tr> : null;
+          })}</tbody>
+        </table></div>
+      </details>}
       {dryRun && <section className="space-y-3"><h2 className="text-xl font-bold">Dry-run timeline</h2>{dryRun.map((r, i) => <div key={`${r.source_id}-${i}`} className={`flex gap-4 border-b border-border py-3 ${r.result.ok ? 'text-foreground' : 'text-destructive'}`}><img src={r.image_url} alt="" className="h-24 w-24 object-contain" /><div className="min-w-0"><p>{fmt(r.scheduled_for)} · {r.result.ok ? 'Would publish' : r.result.reason}</p><pre className="whitespace-pre-wrap text-xs">{r.caption}</pre></div></div>)}</section>}
 
       <section className="rounded-xl border border-border bg-card p-4" data-testid="social-preview-box">
