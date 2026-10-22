@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ArrowLeft, ChevronLeft, ChevronRight, CalendarDays, MessageSquare, Download, Search, Bell, House, Users, Briefcase, CreditCard, Megaphone, BarChart3, Settings, Globe, MapPin, Phone, Mail, Clock, FileText, Hash, Tag, CheckCircle2, XCircle, AlertCircle, ShieldCheck, Wrench, User, Loader2, RefreshCw, StickyNote } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { answerText, hasAnswer, visibleQuestions, applicationSections, type ApplicationQuestion, type SavedAnswer } from '@/lib/applicant-answers';
+import { answerText, hasAnswer, questionHasAnswer, visibleQuestions, applicationSections, type ApplicationQuestion, type SavedAnswer } from '@/lib/applicant-answers';
 import ApplicationChannels from '@/components/admin/ApplicationChannels';
 import { useApplicationChannels } from '@/hooks/useApplicationChannels';
 import CandidateTexts from '@/components/admin/pipeline/CandidateTexts';
@@ -28,7 +28,7 @@ export default function HiringFitReport(){
  const load=useCallback(async()=>{if(!id)return;setLoading(true);setError('');const [pr,ar,qs,saved,ev,ids,report]=await Promise.all([
  supabase.from('contractor_pipeline').select('apply_submitted_at,apply_started_at,apply_total_seconds,application_version,apply_question_ids,application_owner_notes,source,archived,phone_slot_id,inperson_slot_id').eq('applicant_id',id).maybeSingle(),
  supabase.from('applicants').select('first_name,last_name,phone,email,zip,source,preferred_language,created_at').eq('id',id).maybeSingle(),
- supabase.from('question_bank').select('id,key,section,sort,service,active,label_en,label_es,type,options').order('section').order('sort'),
+ supabase.from('question_bank').select('id,key,section,sort,service,active,label_en,label_es,type,options,application_version').order('section').order('sort'),
  supabase.from('application_answers').select('question_id,value,answered_at').eq('candidate_id',id),
  supabase.from('contractor_stage_events').select('id,kind,reason,created_at').eq('applicant_id',id).order('created_at',{ascending:false}).limit(70),
  supabase.from('contractor_pipeline').select('applicant_id').eq('is_test',false).order('invited_at',{ascending:false}).limit(150),
@@ -43,9 +43,9 @@ export default function HiringFitReport(){
  const name=`${a.first_name} ${a.last_name}`.trim()||t('Unnamed applicant','Solicitante sin nombre');const initials=name.split(' ').filter(Boolean).slice(0,2).map(s=>s[0]).join('').toUpperCase();
  const service=r?.service??questions.find(q=>answers.some(x=>x.question_id===q.id)&&q.service!=='all')?.service??'cleaning';
  const all=visibleQuestions(questions,answers,service);const byId=new Map(answers.map(a=>[a.question_id,a]));
- const current=p.apply_question_ids?.length?questions.filter(q=>p.apply_question_ids?.includes(q.id)):questions.filter(q=>q.active&&['all',service].includes(q.service));
- const currentIds=new Set(current.map(q=>q.id));const historical=all.filter(q=>!currentIds.has(q.id)&&hasAnswer(byId.get(q.id)?.value));const complete=current.filter(q=>hasAnswer(byId.get(q.id)?.value)).length;const percent=current.length?Math.round(complete/current.length*100):0;
- const visible=[...current,...historical].filter(q=>(tab!=='missing'||!hasAnswer(byId.get(q.id)?.value))&&`${q.label_en} ${q.label_es} ${answerText(byId.get(q.id)?.value,q,language)}`.toLowerCase().includes(search.toLowerCase()));
+ const current=p.apply_question_ids?.length?questions.filter(q=>p.apply_question_ids?.includes(q.id)):questions.filter(q=>q.application_version===p.application_version&&['all',service].includes(q.service));
+ const currentIds=new Set(current.map(q=>q.id));const historical=all.filter(q=>!currentIds.has(q.id)&&hasAnswer(byId.get(q.id)?.value));const complete=current.filter(q=>questionHasAnswer(q,byId.get(q.id)?.value)).length;const percent=current.length?Math.round(complete/current.length*100):0;
+ const visible=[...current,...historical].filter(q=>(tab!=='missing'||!questionHasAnswer(q,byId.get(q.id)?.value))&&`${q.label_en} ${q.label_es} ${answerText(byId.get(q.id)?.value,q,language)}`.toLowerCase().includes(search.toLowerCase()));
  const sections=[...new Set(visible.map(q=>q.section))].sort((a,b)=>a-b);const fmt=(date:string|null|undefined)=>date?new Date(date).toLocaleString(language==='es'?'es-US':'en-US',{timeZone:'America/New_York',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})+' ET':t('Not recorded','No registrado');
  const status=p.apply_submitted_at?t('Submitted on Tidy','Enviada en Tidy'):complete?t('Saved (incomplete)','Guardada (incompleta)'):t('Not started','Sin comenzar');const idx=neighbors.indexOf(id??'');const latest=answers.map(x=>x.answered_at).sort().at(-1);const svcLabel=service==='cleaning'?t('Cleaning','Limpieza'):service==='lawn'?t('Lawn Care','Cuidado del jardín'):t('Car Care','Cuidado del Auto');
  const exportAnswers=()=>{const rows=[name,channels.get(id??'')?.indeedLabel??'',channels.get(id??'')?.linkLabel??'',status,...[...current,...historical].map((q,i)=>`${i+1}. ${language==='es'?q.label_es:q.label_en}\n${answerText(byId.get(q.id)?.value,q,language)}\n`)];const url=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/plain;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download=`Tidy-${name.replace(/\s+/g,'-')}-answers.txt`;link.click();URL.revokeObjectURL(url);};

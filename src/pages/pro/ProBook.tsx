@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, CalendarClock, Phone, MapPin } from "lucide-react";
 import TidyLogo from "@/components/TidyLogo";
+import { Input } from "@/components/ui/input";
 
 type Slot = { id: string; starts_at: string; duration_min: number };
 
@@ -27,6 +28,8 @@ export default function ProBook() {
   const [checkinDone, setCheckinDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [phoneMinutes, setPhoneMinutes] = useState(15);
+  const [version, setVersion] = useState(5);
+  const [reference, setReference] = useState({name: '', phone: '', relationship: ''});
 
   const t = useCallback((en: string, es: string) => (lang === "es" ? es : en), [lang]);
   const call = useCallback(async (payload: Record<string, unknown>) => {
@@ -42,6 +45,8 @@ export default function ProBook() {
       if (d?.error) { setError(d.error); return; }
       setLang(d.lang === "es" ? "es" : "en");
       setStage(d.stage);
+      setVersion(d.version ?? 5);
+      if (d.reference) setReference({name: d.reference.name ?? '', phone: d.reference.phone ?? '', relationship: d.reference.relationship ?? ''});
       setPhoneMinutes(d.phone_duration_min === 30 ? 30 : 15);
       const k: "phone" | "in_person" = ["phone_screened", "referenced"].includes(d.stage) ? "in_person" : "phone";
       setKind(k);
@@ -57,7 +62,7 @@ export default function ProBook() {
   const book = async (slotId: string) => {
     setBooking(true); setError(null);
     try {
-      const d = await call({ action: "book", kind, slot_id: slotId });
+      const d = await call({ action: "book", kind, slot_id: slotId, ...(kind === 'in_person' && version === 6 ? { reference } : {}) });
       if (d?.ok) setBooked(d.starts_at);
       else setError(d?.error === "no_reschedules" ? t("You've already moved this once. Reply to our text and we'll help.", "Ya moviste esto una vez. Responde a nuestro mensaje y te ayudamos.") : (d?.error ?? "book_failed"));
     } catch { setError("book_failed"); }
@@ -81,7 +86,7 @@ export default function ProBook() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border"><div className="container mx-auto px-4 py-4 flex items-center justify-between"><TidyLogo />
-        <button onClick={() => setLang(lang === "en" ? "es" : "en")} className="text-sm font-semibold text-foreground">{lang === "en" ? "Español" : "English"}</button></div></header>
+        <Button variant="ghost" onClick={() => setLang(lang === "en" ? "es" : "en")}>{lang === "en" ? "Español" : "English"}</Button></div></header>
       <main className="container mx-auto px-4 py-10 max-w-xl">
         {loading ? <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div> : (
           <>
@@ -94,7 +99,7 @@ export default function ProBook() {
             </h1>
             <p className="text-muted-foreground mb-6">
               {kind === "phone"
-                ? t("Weekday evenings. We'll call you.", "Tardes entre semana. Te llamamos nosotros.")
+                ? t("Choose a weekday time. We'll call you.", "Elige un horario entre semana. Te llamaremos.")
                 : t("Wednesday or Thursday, about an hour. We send the address after you confirm.", "Miércoles o jueves, alrededor de una hora. Te enviamos la dirección después de confirmar.")}
             </p>
 
@@ -105,6 +110,13 @@ export default function ProBook() {
               </div>
             ) : null}
             {checkinDone ? <p className="text-primary font-semibold mb-6 flex items-center gap-2"><CheckCircle2 className="h-5 w-5" />{t("Got it — see you soon.", "Listo — nos vemos pronto.")}</p> : null}
+            {kind === 'in_person' && version === 6 && <section className="space-y-3 mb-6">
+              <h2 className="text-lg font-semibold">{t('A work reference', 'Una referencia laboral')}</h2>
+              <p className="text-sm text-muted-foreground">{t('A supervisor, coworker or client—not a family member or friend.', 'Un supervisor, compañero de trabajo o cliente; no un familiar ni un amigo.')}</p>
+              <label className="block text-sm">{t('Reference name', 'Nombre de la referencia')}<Input value={reference.name} onChange={e=>setReference(r=>({...r,name:e.target.value}))}/></label>
+              <label className="block text-sm">{t('Reference phone', 'Teléfono de la referencia')}<Input type="tel" value={reference.phone} onChange={e=>setReference(r=>({...r,phone:e.target.value}))}/></label>
+              <label className="block text-sm">{t('Working relationship', 'Relación laboral')}<select className="w-full rounded-md border border-input bg-background p-3" value={reference.relationship} onChange={e=>setReference(r=>({...r,relationship:e.target.value}))}><option value="">{t('Select', 'Selecciona')}</option><option value="supervisor">{t('Supervisor', 'Supervisor')}</option><option value="coworker">{t('Coworker', 'Compañero de trabajo')}</option><option value="client">{t('Client', 'Cliente')}</option></select></label>
+            </section>}
 
             {booked ? (
               <div className="rounded-xl border border-primary bg-primary/5 p-5">
@@ -119,7 +131,7 @@ export default function ProBook() {
               <div className="grid gap-2">
                 {slots.length === 0 ? <p className="text-muted-foreground">{t("No open times right now — reply to our text and we'll find one.", "No hay horarios disponibles ahora — responde a nuestro mensaje y encontramos uno.")}</p>
                   : slots.map((s) => (
-                    <Button key={s.id} variant="outline" size="lg" disabled={booking} onClick={() => book(s.id)} className="justify-start h-12">
+                    <Button key={s.id} variant="outline" size="lg" disabled={booking || (kind === 'in_person' && version === 6 && (!reference.name.trim() || reference.phone.replace(/\D/g,'').length < 10 || !reference.relationship))} onClick={() => book(s.id)} className="justify-start h-12">
                       {fmt(s.starts_at)}
                     </Button>
                   ))}
