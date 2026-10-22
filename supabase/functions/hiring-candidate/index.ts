@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
     const faq = await faqFor(lang);
     return jsonResponse({
       ok: true, lang, service: p.service, stage: p.stage, version: p.application_version ?? 5, submitted: !!p.apply_submitted_at,
-      phone_screen_after_submit: immediatePhone && !!p.apply_submitted_at && !p.archived,
+      phone_screen_after_submit: immediatePhone && readyForPhone && !p.archived,
       phone_duration_min: hireReady || p.application_version === 6 ? 30 : undefined,
       proof_url: p.apply_submitted_at ? await ensureProofUrl(p) : null,
       reference: p.application_version === 6 && ['phone_screened', 'referenced'].includes(String(p.stage)) ? { name: p.ref_name, phone: p.ref_phone, relationship: p.ref_relationship } : undefined,
@@ -214,7 +214,7 @@ Deno.serve(async (req) => {
   // ---- slots: open slots of a kind
   if (action === 'slots') {
     const kind = body?.kind === 'in_person' ? 'in_person' : 'phone';
-    if (immediatePhone && (p.archived || !p.apply_submitted_at)) return jsonResponse({ error: 'submit_application_first' }, 409);
+    if (immediatePhone && (p.archived || !readyForPhone)) return jsonResponse({ error: 'submit_application_first' }, 409);
     if (hireReady && kind === 'in_person' && Date.now() < Date.parse('2026-10-26T04:00:00Z')) return jsonResponse({ ok: true, slots: [] });
     // In-person booking is blocked until Justin sets the private meeting location.
     if (kind === 'in_person') {
@@ -236,8 +236,8 @@ Deno.serve(async (req) => {
     const col = kind === 'phone' ? 'phone_slot_id' : 'inperson_slot_id';
     const reschedCol = kind === 'phone' ? 'phone_reschedules' : 'inperson_reschedules';
     if (p.archived) return jsonResponse({ error: 'archived' }, 409);
-    if (immediatePhone && !p.apply_submitted_at) return jsonResponse({ error: 'submit_application_first' }, 409);
-    if (kind === 'phone' && p.stage !== 'proof' && !(immediatePhone && p.apply_submitted_at && ['applied', 'screen_booked'].includes(String(p.stage)))) return jsonResponse({ error: 'wrong_stage' }, 409);
+    if (immediatePhone && !readyForPhone) return jsonResponse({ error: 'submit_application_first' }, 409);
+    if (kind === 'phone' && p.stage !== 'proof' && !(immediatePhone && readyForPhone && ['applied', 'screen_booked'].includes(String(p.stage)))) return jsonResponse({ error: 'wrong_stage' }, 409);
     if (hireReady && kind === 'in_person' && Date.now() < Date.parse('2026-10-26T04:00:00Z')) return jsonResponse({ error: 'no_in_person_this_week' }, 409);
     const { data: chosen } = await admin.from('hiring_slots').select('kind,starts_at,duration_min').eq('id', slotId).maybeSingle();
     if (!chosen || chosen.kind !== kind || (immediatePhone && kind === 'phone' && (chosen.duration_min !== 30 || !weekdaysOnly(chosen.starts_at)))) return jsonResponse({ error: 'invalid_slot' }, 400);
