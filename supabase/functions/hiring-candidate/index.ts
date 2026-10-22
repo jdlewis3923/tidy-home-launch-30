@@ -15,7 +15,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { weekdaysOnly } from '../_shared/hire-ready-rules.ts';
-import { scoreV6, validV6Answer, type V6Question } from '../_shared/application-v6.ts';
+import { scoreV6, validV6Answer, validWorkReference, V6_DISQUALIFY_DELAY_MS, type V6Question } from '../_shared/application-v6.ts';
 
 const backendUrl = Deno.env.get('SUPABASE_URL');
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
     if (identityError) return jsonResponse({ error: 'submit_failed' }, 500);
     const { error: submitError } = await admin.from('contractor_pipeline').update({
       apply_submitted_at: new Date().toISOString(), apply_total_seconds: secs,
-      ...(report ? { application_report: report, application_disqualify_at: report.disqualified ? new Date(Date.now()+24*3600e3).toISOString() : null } : { ref_name: String(val('ref.name') ?? ''), ref_phone: String(val('ref.phone') ?? ''), ref_relationship: String(val('ref.relationship') ?? '') }),
+      ...(report ? { application_report: report, application_disqualify_at: report.disqualified ? new Date(Date.now()+V6_DISQUALIFY_DELAY_MS).toISOString() : null } : { ref_name: String(val('ref.name') ?? ''), ref_phone: String(val('ref.phone') ?? ''), ref_relationship: String(val('ref.relationship') ?? '') }),
     }).eq('applicant_id', p.applicant_id);
     if (submitError) return jsonResponse({ error: 'submit_failed' }, 500);
     if (report?.disqualified) await admin.from('hiring_deadlines').update({ resolved_at: new Date().toISOString() }).eq('applicant_id', p.applicant_id).is('resolved_at', null);
@@ -244,7 +244,7 @@ Deno.serve(async (req) => {
       const name = String(reference?.name ?? p.ref_name ?? '').trim();
       const phone = String(reference?.phone ?? p.ref_phone ?? '').trim();
       const relationship = String(reference?.relationship ?? p.ref_relationship ?? '').trim();
-      if (!name || phone.replace(/\D/g, '').length < 10 || !['supervisor', 'coworker', 'client'].includes(relationship)) return jsonResponse({ error: 'reference_required' }, 400);
+      if (!validWorkReference(name, phone, relationship)) return jsonResponse({ error: 'reference_required' }, 400);
       const { error } = await admin.from('contractor_pipeline').update({ ref_name: name, ref_phone: phone, ref_relationship: relationship }).eq('applicant_id', p.applicant_id);
       if (error) return jsonResponse({ error: 'reference_save_failed' }, 500);
     }

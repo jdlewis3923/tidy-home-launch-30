@@ -78,6 +78,7 @@ body.admin-hud:has(.applicant-reference) > #root .admin-hud-topbar,body.admin-hu
 .applicant-ref-avatar { width:86px; height:86px; border-radius:50%; display:grid; place-items:center; background:hsl(var(--ref-avatar)); font-size:30px; font-weight:700; }
 .applicant-ref-person h1 { font-size:27px; font-weight:800; line-height:1.2; margin-bottom:7px; }
 .applicant-ref-actions { border-left:1px solid hsl(var(--border)); padding-left:20px; }
+.applicant-ref-actions > div { flex-wrap:wrap; }
 .applicant-ref-actions .tactile { font-size:12px; }
 .applicant-ref-stats { display:grid; grid-template-columns:1fr 1.05fr 1fr; gap:14px; margin:14px 0; }
 .applicant-ref-card { background:hsl(var(--background)); border:1px solid hsl(var(--border)); border-radius:8px; padding:18px; }
