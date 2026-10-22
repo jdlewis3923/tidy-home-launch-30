@@ -1415,6 +1415,13 @@
       "when": 1792638675346,
       "tag": "0201_hire_ready_invite_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 202,
+      "version": "7",
+      "when": 1792638695958,
+      "tag": "0202_hook_hire_ready_existing_tick",
+      "breakpoints": true
     }
   ]
 }
