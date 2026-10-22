@@ -1429,6 +1429,13 @@
       "when": 1792670348565,
       "tag": "0203_versioned_application_v6",
       "breakpoints": true
+    },
+    {
+      "idx": 204,
+      "version": "7",
+      "when": 1792672698872,
+      "tag": "0204_fix_hire_ready_tick_alias",
+      "breakpoints": true
     }
   ]
 }
