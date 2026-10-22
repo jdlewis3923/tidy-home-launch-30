@@ -35,7 +35,7 @@ Deno.serve(async req => {
   let emailStatus = 'failed'; let smsStatus = a.phone ? 'failed' : 'no_phone'; let smsSid: string | null = null; const failures: string[] = [];
   try {
     const result = await sendProEmail(admin, { applicantId: job.applicant_id, key: `hire_ready_${job.kind}`, to: a.email, name: a.first_name,
-      built: { subject: copy.subject, html: tidyEmailShell({ heading: copy.subject, previewText: copy.subject, bodyHtml: `<p>${esc(copy.text).replace(/\n/g, '<br>')}</p>`, cta: { label: job.language === 'es' ? 'Completar solicitud' : 'Complete application', url: link } }) }, triggeredBy: 'hire-ready-dispatch' });
+      built: { subject: copy.subject, html: tidyEmailShell({ heading: copy.subject, previewText: copy.subject, bodyHtml: `<p>${esc(copy.text).replace(/\n/g, '<br>')}</p>`, ctaLabel: job.language === 'es' ? 'Completar solicitud' : 'Complete application', ctaUrl: link }) }, triggeredBy: 'hire-ready-dispatch' });
     emailStatus = result.sent ? 'sent' : 'failed'; if (!result.sent) failures.push(`Email: ${result.reason ?? 'not sent'}`);
   } catch (e) { failures.push(`Email: ${String(e).slice(0, 180)}`); }
   if (a.phone) {

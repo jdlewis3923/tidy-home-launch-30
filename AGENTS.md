@@ -23,3 +23,4 @@
 - Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: preserve test and declined records.
 - Lifecycle uses transactional event-ledger dispatch; visit events preserve stages, rules default shadow, simulations require admin + is_test — why: no duplicate/test sends.
 - Growth initiatives live in roadmap_initiatives/items; customer code gates new pieces only via feature_enabled(switch_key), flipped by roadmap-tick at 8 AM ET launch day or Launch now — why: everything ships dark and unveils automatically.
+- Hire-ready invite batches use a per-candidate job ledger processed by the existing hiring tick, with atomic claims and separate finish/archive timestamps; campaign phone screens are available immediately after submission while equipment-proof gates remain intact — why: exact scoped timing, no duplicate contact, and no changes to legacy candidate journeys.
