@@ -127,7 +127,7 @@ export default function DayPicker({ service }: { service: SchedService }) {
                 <button type="button" className="rounded-xl bg-[hsl(var(--primary))] px-4 py-2 text-sm font-bold text-primary-foreground" onClick={() => void join(null)}>{L.joinZip}</button>}
             </div>
           ) : (
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
               {o.options.map((opt) => {
                 const listed = o.waitlist.some((w) => w.weekday === opt.weekday);
                 if (opt.full) return (
@@ -138,8 +138,8 @@ export default function DayPicker({ service }: { service: SchedService }) {
                 );
                 return (
                   <button key={opt.weekday} type="button" onClick={() => pickDay(opt)}
-                    className={`rounded-2xl border p-4 text-left ${day?.weekday === opt.weekday ? "border-[hsl(var(--primary))] ring-2 ring-[hsl(var(--primary)/0.3)]" : "border-[hsl(var(--hairline))]"}`}>
-                    <p className="text-base font-bold text-ink">{dayName(opt.weekday)}</p>
+                    className={`rounded-xl border px-3 py-3 text-center transition-colors ${day?.weekday === opt.weekday ? "day-chip-on border-[hsl(var(--primary))]" : "border-[hsl(var(--hairline))] bg-white"}`}>
+                    <p className="text-base font-semibold">{dayName(opt.weekday)}</p>
                     {service === "lawn" && <p className="mt-1 text-sm text-ink-soft">{L.lawnCard(dayName(opt.weekday))}</p>}
                   </button>
                 );
@@ -153,7 +153,7 @@ export default function DayPicker({ service }: { service: SchedService }) {
               <div className="mt-2 flex flex-wrap gap-2">
                 {day.windows.map((w) => (
                   <button key={w.key} type="button" onClick={() => setWin(w)}
-                    className={`rounded-xl border px-4 py-2 text-sm font-semibold ${win?.key === w.key ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary))] text-primary-foreground" : "border-[hsl(var(--hairline))] text-ink"}`}>
+                    className={`rounded-xl border px-5 py-3 text-sm font-semibold ${win?.key === w.key ? "border-2 border-[hsl(var(--primary))] bg-white text-ink" : "border-[hsl(var(--hairline))] text-ink-soft"}`}>
                     {w.label}
                   </button>
                 ))}

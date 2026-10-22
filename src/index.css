@@ -1822,3 +1822,5 @@ body { color-scheme: light; }
 .svc-title { color: hsl(222 47% 11%); }
 .svc-sub { color: hsl(215 16% 47%); }
 .plan-cta { background: hsl(47 91% 52%); color: hsl(222 47% 11%); box-shadow: 0 12px 30px -12px hsl(47 91% 52% / .7); }
+.day-chip-on { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.day-chip-on p { color: inherit !important; }
