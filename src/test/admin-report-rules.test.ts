@@ -21,3 +21,13 @@ describe('invite link results', () => {
   it('answers without submit is started', () => expect(inviteLinkStatus({ answers: 57 })).toBe('started'));
   it('no answers is not started', () => expect(inviteLinkStatus({ answers: 0 })).toBe('not_started'));
 });
+import { applicationChannels } from '../lib/admin-report-rules';
+describe('applicationChannels', () => {
+  const now = Date.parse('2026-10-22T03:00:00Z');
+  it('Indeed + submitted link = both', () => { const c = applicationChannels({ source: 'indeed', hasLink: true, apply_submitted_at: '2026-10-19T21:07:24Z', answers: 66, now }); expect(c.indeedLabel).toBe('Indeed: YES, applied'); expect(c.link).toBe('submitted'); });
+  it('Indeed + started link', () => expect(applicationChannels({ source: 'indeed', hasLink: true, answers: 57, now }).linkLabel).toBe('Our texted link: started, NOT submitted (57 answers)'));
+  it('Indeed + untouched link', () => expect(applicationChannels({ source: 'indeed', hasLink: true, invited_at: '2026-10-18T00:00:00Z', answers: 0, now }).link).toBe('not_started'));
+  it('Indeed + future invite is scheduled, not sent', () => expect(applicationChannels({ source: 'indeed', hasLink: true, invited_at: '2026-10-22T12:00:00Z', answers: 0, now }).link).toBe('scheduled'));
+  it('Indeed with no link was never texted', () => expect(applicationChannels({ source: 'indeed', answers: 0, now }).link).toBe('not_sent'));
+  it('website applicant: Indeed NO, submitted directly', () => { const c = applicationChannels({ applicantSource: 'apply_form', apply_submitted_at: '2026-10-12T14:54:05Z', answers: 40, now }); expect(c.indeed).toBe(false); expect(c.link).toBe('direct'); });
+});
