@@ -1811,3 +1811,14 @@ body { color-scheme: light; }
 .tidy-login-input { background:hsl(var(--tl-white)); color:hsl(var(--tl-navy)); border-color:hsl(var(--tl-white) / .3); }
 .tidy-login-input:focus { --tw-ring-color: hsl(var(--tl-gold) / .6); }
 .tidy-login-cta { background:hsl(var(--tl-gold)); color:hsl(var(--tl-navy)); box-shadow:0 14px 34px -12px hsl(var(--tl-gold) / .7); }
+
+/* Book a Service cards — reference design */
+.svc-card { background: hsl(0 0% 100%); border: 1.5px solid hsl(214 32% 91%); box-shadow: 0 6px 18px -12px hsl(222 47% 11% / .25); }
+.svc-card-on { border: 2px solid hsl(221 83% 53%); box-shadow: 0 10px 28px -12px hsl(221 83% 53% / .45); }
+.svc-check { border: 2px solid hsl(0 0% 100%); background: hsl(222 47% 11% / .15); color: hsl(0 0% 100%); }
+.svc-check-on { background: hsl(221 83% 53%); }
+.svc-icon { color: hsl(221 83% 53%); }
+.svc-card:nth-child(2) .svc-icon { color: hsl(142 64% 40%); }
+.svc-title { color: hsl(222 47% 11%); }
+.svc-sub { color: hsl(215 16% 47%); }
+.plan-cta { background: hsl(47 91% 52%); color: hsl(222 47% 11%); box-shadow: 0 12px 30px -12px hsl(47 91% 52% / .7); }
