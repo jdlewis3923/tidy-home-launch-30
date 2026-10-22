@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Home, Leaf, Car, ChevronRight, CalendarDays, CreditCard, Star, ShieldCheck } from 'lucide-react';
+import heroImg from '@/assets/login-miami-dusk.jpg';
+import cleaningImg from '@/assets/cleaning-interior.webp';
+import lawnImg from '@/assets/lawn-care.webp';
+import carImg from '@/assets/car-detailing.webp';
 import { useLanguage } from '@/contexts/LanguageContext';
 import tidyLogo from '@/assets/tidy-official-logo.png';
 
@@ -101,40 +105,50 @@ export default function CustomerLogin() {
     }
   };
 
+  const es = language === 'es';
+  const tiles = [
+    { img: cleaningImg, Icon: Home, label: es ? 'Limpieza del Hogar' : 'House Cleaning', to: '/house-cleaning' },
+    { img: lawnImg, Icon: Leaf, label: es ? 'Cuidado del Césped' : 'Lawn Care', to: '/lawn-care' },
+    { img: carImg, Icon: Car, label: es ? 'Cuidado del Auto' : 'Car Care', to: '/car-detailing' },
+  ];
+  const trust = [
+    { Icon: CalendarDays, label: es ? 'Un horario' : 'One Schedule' },
+    { Icon: CreditCard, label: es ? 'Un pago' : 'One Payment' },
+    { Icon: Star, label: es ? 'Pros verificados' : 'Vetted Pros' },
+    { Icon: ShieldCheck, label: es ? 'Pros asegurados' : 'Insured Pros' },
+  ];
   return (
-    <div className="relative min-h-screen overflow-hidden bg-cream text-ink flex items-center justify-center px-5 py-12">
-      {/* Warm cream daylight */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(36_60%_94%)_0%,hsl(36_27%_96%)_55%,hsl(35_22%_92%)_100%)]" />
-        <div
-          className="absolute -top-40 left-1/2 -translate-x-1/2 h-[520px] w-[520px] rounded-full opacity-50"
-          style={{
-            background: 'radial-gradient(circle, hsl(38 80% 88% / 0.85) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-          }}
-        />
-      </div>
-
-      <div className="w-full max-w-md space-y-8 animate-calm-rise">
-        <div className="text-center">
-          <a href="/" aria-label="Tidy">
-            <img
-              src={tidyLogo}
-              alt="Tidy"
-              className="h-32 md:h-36 w-auto mx-auto drop-shadow-[0_8px_24px_rgba(15,23,42,0.12)]"
-            />
-          </a>
-          <h1 className="mt-6 text-3xl font-bold text-ink lowercase tracking-tight" style={{ letterSpacing: '-0.025em' }}>
-            {isSignUp ? 'create your account.' : 'welcome back.'}
-          </h1>
-          <p className="mt-2 text-sm text-ink-faint lowercase">
-            {isSignUp ? "you're seconds from your plan." : 'sign in to manage your plan.'}
-          </p>
+    <div className="tidy-login relative min-h-screen overflow-hidden">
+      <img src={heroImg} alt="" aria-hidden width={1088} height={1600} fetchPriority="high" decoding="async"
+        className="absolute inset-0 h-full w-full object-cover" />
+      <div aria-hidden className="tidy-login-shade absolute inset-0" />
+      <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pb-8 pt-5">
+        <a href="/" aria-label="Tidy"><img src={tidyLogo} alt="Tidy" className="h-20 w-auto drop-shadow-lg" /></a>
+        <h1 className="tidy-login-title mt-6">
+          <span>{es ? 'Más vida.' : 'More life.'}</span>
+          <span className="tidy-login-gold">{es ? 'Menos tareas.' : 'Less chores.'}</span>
+        </h1>
+        <p className="mt-2 text-lg font-medium tidy-login-text">
+          {es ? 'Un sistema. Un horario. Un pago.' : 'One system. One schedule. One payment.'}
+        </p>
+        <div className="mt-5 grid grid-cols-3 gap-2.5">
+          {tiles.map(({ img, Icon, label, to }) => (
+            <Link key={to} to={to} className="tidy-login-tile group relative block aspect-[3/3.6] overflow-hidden rounded-2xl">
+              <img src={img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+              <span aria-hidden className="tidy-login-tile-shade absolute inset-0" />
+              <span className="absolute inset-x-2 bottom-2 flex flex-col gap-1 tidy-login-text">
+                <Icon className="h-6 w-6" />
+                <span className="flex items-end justify-between gap-1 text-[13px] font-semibold leading-tight">
+                  {label}<ChevronRight className="h-5 w-5 shrink-0 rounded-full border tidy-login-ring p-0.5" />
+                </span>
+              </span>
+            </Link>
+          ))}
         </div>
-
+        <div className="tidy-login-card mt-5 rounded-2xl p-4">
         <form onSubmit={handleLogin} className="space-y-4" autoComplete="on">
           <div className="space-y-1.5">
-            <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">email</label>
+            <label className="text-xs font-semibold tidy-login-text">{es ? 'Correo' : 'Email'}</label>
             <input
               type="email"
               name="email"
@@ -142,14 +156,14 @@ export default function CustomerLogin() {
               onChange={e => setEmail(e.target.value)}
               placeholder="you@example.com"
               autoComplete="email"
-              className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+              className="w-full tidy-login-input w-full rounded-xl border px-4 py-3 text-base focus:outline-none focus:ring-2"
               required
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">
-              {isSignUp ? 'create password' : 'password'}
+            <label className="text-xs font-semibold tidy-login-text">
+              {isSignUp ? (es ? 'Crea una contraseña' : 'Create password') : (es ? 'Contraseña' : 'Password')}
             </label>
             <div className="relative">
               <input
@@ -160,7 +174,7 @@ export default function CustomerLogin() {
                 placeholder={isSignUp ? 'min. 8 characters' : 'enter your password'}
                 autoComplete={isSignUp ? 'new-password' : 'current-password'}
                 minLength={8}
-                className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+                className="w-full tidy-login-input w-full rounded-xl border px-4 py-3 text-base focus:outline-none focus:ring-2"
                 required
               />
               <button
@@ -181,7 +195,7 @@ export default function CustomerLogin() {
 
           {isSignUp && (
             <div className="space-y-1.5">
-              <label className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint">
+              <label className="text-xs font-semibold tidy-login-text">
                 confirm password
               </label>
               <div className="relative">
@@ -193,7 +207,7 @@ export default function CustomerLogin() {
                   placeholder="re-enter your password"
                   autoComplete="new-password"
                   minLength={8}
-                  className="w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+                  className="w-full tidy-login-input w-full rounded-xl border px-4 py-3 text-base focus:outline-none focus:ring-2"
                   required
                 />
                 <button
@@ -211,7 +225,7 @@ export default function CustomerLogin() {
           {error && <p className="text-xs text-destructive lowercase">{error}</p>}
 
           {isSignUp && (
-            <p className="text-xs text-ink-faint text-center leading-relaxed">
+            <p className="text-xs tidy-login-text text-center leading-relaxed">
               {t("By creating an account you agree to our")}{" "}
               <Link to="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
                 {t("Terms of Service")}
@@ -227,33 +241,34 @@ export default function CustomerLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="group w-full inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-6 py-4 text-sm font-semibold text-white lowercase shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50"
+            className="tidy-login-cta w-full inline-flex items-center justify-center gap-2 rounded-full px-6 py-4 text-lg font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-50"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {loading ? (isSignUp ? 'creating…' : 'signing in…') : (isSignUp ? 'create account' : 'sign in')}
+            {loading ? (isSignUp ? (es ? 'Creando…' : 'Creating…') : (es ? 'Entrando…' : 'Signing in…')) : (isSignUp ? (es ? 'Crear cuenta' : 'Create Account') : (es ? 'Iniciar sesión' : 'Sign In'))}
+            {!loading && <ChevronRight className="h-5 w-5" />}
           </button>
 
           <div className="text-center space-y-2 pt-2">
             <button
               type="button"
               onClick={() => { setIsSignUp(!isSignUp); setError(''); setConfirmPassword(''); }}
-              className="text-xs text-ink-faint hover:text-ink lowercase underline-offset-4 hover:underline"
+              className="text-xs tidy-login-text underline-offset-4 hover:underline"
             >
-              {isSignUp ? 'already a member? sign in' : "new here? create an account"}
+              {isSignUp ? (es ? '¿Ya eres miembro? Inicia sesión' : 'Already a member? Sign in') : (es ? '¿Nuevo aquí? Crea una cuenta' : 'New here? Create an account')}
             </button>
             <div>
-              <Link to="/forgot-password" className="text-xs text-ink-faint hover:text-ink lowercase underline-offset-4 hover:underline">
-                forgot password?
+              <Link to="/forgot-password" className="text-xs tidy-login-text underline-offset-4 hover:underline">
+                {es ? '¿Olvidaste tu contraseña?' : 'Forgot password?'}
               </Link>
             </div>
           </div>
-
-          <div className="text-center pt-6 border-t border-hairline">
-            <Link to="/" className="text-xs text-ink-faint hover:text-ink lowercase">
-              ← back to tidy
-            </Link>
-          </div>
         </form>
+        </div>
+        <ul className="mt-6 grid grid-cols-4 gap-1 text-center tidy-login-text">
+          {trust.map(({ Icon, label }) => (
+            <li key={label} className="flex flex-col items-center gap-1.5 text-xs"><Icon className="h-6 w-6" />{label}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );

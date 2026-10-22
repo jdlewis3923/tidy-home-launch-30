@@ -1797,3 +1797,17 @@ body { color-scheme: light; }
     color: hsl(var(--foreground));
   }
 }
+
+/* Customer login — night-photo reference design */
+.tidy-login { --tl-navy: 222 47% 11%; --tl-gold: 47 91% 52%; --tl-white: 0 0% 100%; background: hsl(var(--tl-navy)); color-scheme: dark; }
+.tidy-login-shade { background: linear-gradient(180deg, hsl(var(--tl-navy) / .15) 0%, hsl(var(--tl-navy) / .55) 35%, hsl(var(--tl-navy) / .92) 62%, hsl(var(--tl-navy)) 100%); }
+.tidy-login-title { display:flex; flex-direction:column; font-weight:800; font-size:clamp(2.6rem,11vw,3.4rem); line-height:1; letter-spacing:-.03em; color:hsl(var(--tl-white)); text-shadow:0 4px 24px hsl(var(--tl-navy) / .5); }
+.tidy-login-gold { color:hsl(var(--tl-gold)); }
+.tidy-login-text { color:hsl(var(--tl-white) / .92); }
+.tidy-login-ring { border-color:hsl(var(--tl-white) / .8); }
+.tidy-login-tile { border:1px solid hsl(var(--tl-white) / .25); box-shadow:0 10px 30px -12px hsl(var(--tl-navy) / .8); }
+.tidy-login-tile-shade { background:linear-gradient(180deg, transparent 35%, hsl(var(--tl-navy) / .9) 100%); }
+.tidy-login-card { background:hsl(var(--tl-navy) / .72); border:1px solid hsl(var(--tl-white) / .14); backdrop-filter:blur(10px); }
+.tidy-login-input { background:hsl(var(--tl-white)); color:hsl(var(--tl-navy)); border-color:hsl(var(--tl-white) / .3); }
+.tidy-login-input:focus { --tw-ring-color: hsl(var(--tl-gold) / .6); }
+.tidy-login-cta { background:hsl(var(--tl-gold)); color:hsl(var(--tl-navy)); box-shadow:0 14px 34px -12px hsl(var(--tl-gold) / .7); }
