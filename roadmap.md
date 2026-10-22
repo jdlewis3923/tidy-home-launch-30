@@ -294,3 +294,11 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [ ] Spanish drafts need review (es_reviewed=false on all new templates)
 - [ ] SMS rows wait for Twilio reactivation; Brevo Zaps stay ON until one real signup proves app sender
 - [ ] Cut each Zap off one at a time after 7-day shadow comparison
+
+## Oct 22 requests
+- [x] Hire-ready invites sent (fixed blocked sender)
+- [x] Customer login screen → night-photo reference design
+- [ ] Customer "Book a Service" selection screen → reference (photo cards, gold Continue)
+- [ ] Customer "Choose a Date & Time" screen → reference
+- [ ] Applicant screens re-check against collage
+- [ ] Site speed pass (mobile + desktop)
