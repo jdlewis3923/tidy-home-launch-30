@@ -45,7 +45,7 @@ Deno.serve(async req => {
         body: JSON.stringify({ to_phone_e164: `+${digits.length === 10 ? '1' : ''}${digits}`, body: copy.text, idempotency_key: `hire-ready:${job.id}`, template_name: `hire_ready_${job.kind}`, triggered_by: 'hire-ready-dispatch', expires_at: job.archive_at }) });
       const data = await r.json().catch(() => ({}));
       smsStatus = r.ok && data.ok && data.sent ? 'sent' : r.ok && data.ok && data.queued ? 'queued' : 'failed';
-      smsSid = data.sid ?? data.twilio_sid ?? null;
+      smsSid = data.message_sid ?? data.sid ?? data.twilio_sid ?? null;
       if (smsStatus === 'failed') failures.push(`SMS: ${data.error ?? data.reason ?? `HTTP ${r.status}`}`);
     } catch (e) { failures.push(`SMS: ${String(e).slice(0, 180)}`); }
   }
