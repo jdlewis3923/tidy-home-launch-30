@@ -17,7 +17,7 @@ import '@/styles/application-reference.css';
 
 type Point={id:string;question:string};
 type Report={name?:string;service?:string;language?:string;stage?:string;skill:number;reliability:number;intent:number;phone_talking_points?:Point[];inperson_talking_points?:Point[];flags?:Point[];disqualified?:boolean;version?:number;error?:string};
-type Pipeline={apply_submitted_at:string|null;apply_started_at:string|null;apply_total_seconds:number|null;application_version:number;apply_question_ids:string[]|null;application_owner_notes:string|null;source:string|null;archived:boolean;phone_slot_id:string|null;inperson_slot_id:string|null};
+type Pipeline={service:string;apply_submitted_at:string|null;apply_started_at:string|null;apply_total_seconds:number|null;application_version:number;apply_question_ids:string[]|null;application_owner_notes:string|null;source:string|null;archived:boolean;phone_slot_id:string|null;inperson_slot_id:string|null};
 type Applicant={first_name:string;last_name:string;phone:string|null;email:string;zip:string|null;source:string|null;preferred_language:string|null;created_at:string};
 const V6={en:['About you','Your experience','Your skills','Equipment & vehicle','Your schedule','What you’re looking for','How Tidy works','Last step'],es:['Sobre ti','Tu experiencia','Tus habilidades','Equipo y vehículo','Tu horario','Lo que buscas','Cómo funciona Tidy','Último paso']};
 const ICONS=[User,Briefcase,Wrench,ShieldCheck,CalendarDays,Tag,House,FileText];
@@ -26,7 +26,7 @@ export default function HiringFitReport(){
  const [r,setR]=useState<Report|null>(null);const [a,setA]=useState<Applicant|null>(null);const [p,setP]=useState<Pipeline|null>(null);const [questions,setQuestions]=useState<ApplicationQuestion[]>([]);const [answers,setAnswers]=useState<SavedAnswer[]>([]);const [events,setEvents]=useState<{id:string;kind:string;reason:string|null;created_at:string}[]>([]);const [neighbors,setNeighbors]=useState<string[]>([]);
  const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [tab,setTab]=useState('answers');const [search,setSearch]=useState('');const [notes,setNotes]=useState('');const [saving,setSaving]=useState(false);const [messageOpen,setMessageOpen]=useState(false);const [delta,setDelta]=useState('');const [reason,setReason]=useState('');const channels=useApplicationChannels([id]);
  const load=useCallback(async()=>{if(!id)return;setLoading(true);setError('');const [pr,ar,qs,saved,ev,ids,report]=await Promise.all([
- supabase.from('contractor_pipeline').select('apply_submitted_at,apply_started_at,apply_total_seconds,application_version,apply_question_ids,application_owner_notes,source,archived,phone_slot_id,inperson_slot_id').eq('applicant_id',id).maybeSingle(),
+ supabase.from('contractor_pipeline').select('service,apply_submitted_at,apply_started_at,apply_total_seconds,application_version,apply_question_ids,application_owner_notes,source,archived,phone_slot_id,inperson_slot_id').eq('applicant_id',id).maybeSingle(),
  supabase.from('applicants').select('first_name,last_name,phone,email,zip,source,preferred_language,created_at').eq('id',id).maybeSingle(),
  supabase.from('question_bank').select('id,key,section,sort,service,active,label_en,label_es,type,options,application_version').order('section').order('sort'),
  supabase.from('application_answers').select('question_id,value,answered_at').eq('candidate_id',id),
@@ -40,8 +40,9 @@ export default function HiringFitReport(){
  const adjust=async()=>{if(!id||!Number(delta)||Number(delta)<-10||Number(delta)>10||reason.trim().length<5){toast({title:t('Use −10 to +10 and a reason of at least 5 characters.','Usa de −10 a +10 y un motivo de al menos 5 caracteres.'),variant:'destructive'});return;}const {error}=await supabase.from('intent_adjustments').insert({applicant_id:id,delta:Number(delta),reason:reason.trim()});if(error)toast({title:error.message,variant:'destructive'});else{setDelta('');setReason('');void load();}};
  if(loading)return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary"/></div>;
  if(error||!a||!p)return <main className="p-8"><p role="alert" className="text-destructive">{error}</p><Button onClick={load}>{t('Try again','Reintentar')}</Button></main>;
- const name=`${a.first_name} ${a.last_name}`.trim()||t('Unnamed applicant','Solicitante sin nombre');const initials=name.split(' ').filter(Boolean).slice(0,2).map(s=>s[0]).join('').toUpperCase();
- const service=r?.service??questions.find(q=>answers.some(x=>x.question_id===q.id)&&q.service!=='all')?.service??'cleaning';
+ const savedIdentity=(key:string)=>{const question=questions.find(q=>q.key.endsWith(`about.${key}`));const value=answers.find(answer=>answer.question_id===question?.id)?.value;return typeof value==='string'?value:'';};
+ const name=`${a.first_name || savedIdentity('first_name')} ${a.last_name || savedIdentity('last_name')}`.trim()||t('Unnamed applicant','Solicitante sin nombre');const initials=name.split(' ').filter(Boolean).slice(0,2).map(s=>s[0]).join('').toUpperCase();
+ const service=p.service??r?.service??'cleaning';
  const all=visibleQuestions(questions,answers,service);const byId=new Map(answers.map(a=>[a.question_id,a]));
  const current=p.apply_question_ids?.length?questions.filter(q=>p.apply_question_ids?.includes(q.id)):questions.filter(q=>q.application_version===p.application_version&&['all',service].includes(q.service));
  const currentIds=new Set(current.map(q=>q.id));const historical=all.filter(q=>!currentIds.has(q.id)&&hasAnswer(byId.get(q.id)?.value));const complete=current.filter(q=>questionHasAnswer(q,byId.get(q.id)?.value)).length;const percent=current.length?Math.round(complete/current.length*100):0;

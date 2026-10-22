@@ -118,6 +118,7 @@ Deno.serve(async (req) => {
   // ---- load: questions + saved answers + FAQ
   if (action === 'load') {
     const qs = await questionsFor(String(p.service), p);
+    if (!qs.length) return jsonResponse({ error: 'questions_unavailable' }, 503);
     const { data: answers } = await admin.from('application_answers').select('question_id, value').eq('candidate_id', p.applicant_id);
     const faq = await faqFor(lang);
     return jsonResponse({
