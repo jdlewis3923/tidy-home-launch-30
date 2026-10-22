@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { candidateStatusLine, visibleCandidate } from "@/lib/admin-report-rules";
+import { visibleCandidate } from "@/lib/admin-report-rules";
 import RedoTasks from "./RedoTasks";
 import ReservationTasks from "./ReservationTasks";
 import InviteLinkResults from "./InviteLinkResults";

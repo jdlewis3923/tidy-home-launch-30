@@ -86,6 +86,7 @@ export default function AdminPipelineRecord() {
   const [claimed, setClaimed] = useState<string[] | null>(null);
   const [presetReason, setPresetReason] = useState<string | undefined>(undefined);
   const [p, setP] = useState<Row | null>(null);
+  const channels = useApplicationChannels([id]);
   const [a, setA] = useState<Row | null>(null);
   const [missing, setMissing] = useState<string[]>([]);
   const [artifacts, setArtifacts] = useState<Row[]>([]);

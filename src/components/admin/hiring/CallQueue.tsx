@@ -68,6 +68,7 @@ function tierTone(tier: string | null): string {
 
 export default function CallQueue() {
   const [rows, setRows] = useState<QueueRow[]>([]);
+  const channels = useApplicationChannels(rows.map((r) => r.id));
   const [openings, setOpenings] = useState<Opening[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
