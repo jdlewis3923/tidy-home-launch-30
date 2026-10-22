@@ -113,7 +113,9 @@ Deno.serve(async (req) => {
   if (lang !== p.preferred_language) await admin.from('contractor_pipeline').update({ preferred_language: lang }).eq('applicant_id', p.applicant_id);
   const { data: campaignJob } = await admin.from('hire_ready_invite_jobs').select('id').eq('applicant_id', p.applicant_id).eq('kind', 'invite').maybeSingle();
   const hireReady = !!campaignJob;
-  const immediatePhone = hireReady || p.application_version === 6;
+  const ownerPhone = !!p.owner_phone_invite_at && !p.archived;
+  const immediatePhone = hireReady || p.application_version === 6 || ownerPhone;
+  const readyForPhone = !!p.apply_submitted_at || ownerPhone;
 
   // ---- load: questions + saved answers + FAQ
   if (action === 'load') {
