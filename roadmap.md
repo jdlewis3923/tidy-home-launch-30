@@ -1,5 +1,10 @@
 # Roadmap
 
+## Exact application designs and v6 (Oct 22)
+- [ ] Match owner applicant results and applicant phone screens to both supplied visual references; v6 document controls content.
+- [ ] Version question sets to preserve drafts, implement eight bilingual steps and server-side scoring/flags/talking points; preserve invite/proof gates.
+- [ ] Verify three complete phone applications and owner results, remove only test records, capture all steps, then publish as authorized in the attached instructions.
+
 ## Applicant results clarity (Oct 22)
 - [x] Replace score-first Fit Report with complete grouped questions and saved answers, meaningful choice labels, explicit unanswered items and submission status; retain older saved answers separately from current application count.
 - [x] Verified Orestes's real saved answers in signed-in desktop/phone results, all/answered/unanswered filters and zero phone overflow; 18 focused tests pass, build OK. No messages sent or publication.
