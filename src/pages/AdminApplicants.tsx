@@ -1,3 +1,5 @@
+import ApplicationChannels from "@/components/admin/ApplicationChannels";
+import { useApplicationChannels } from "@/hooks/useApplicationChannels";
 import ProPraiseHistory from "@/components/admin/ProPraiseHistory";
 /**
  * Admin Applicants Pipeline — /admin/applicants
@@ -51,8 +53,6 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-import ApplicationChannels from "@/components/admin/ApplicationChannels";
-import { useApplicationChannels } from "@/hooks/useApplicationChannels";
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
