@@ -298,7 +298,7 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 ## Oct 22 requests
 - [x] Hire-ready invites sent (fixed blocked sender)
 - [x] Customer login screen → night-photo reference design
-- [ ] Customer "Book a Service" selection screen → reference (photo cards, gold Continue)
-- [ ] Customer "Choose a Date & Time" screen → reference
+- [x] Customer "Book a Service" selection screen
+- [x] Customer day & time picker restyled
 - [ ] Applicant screens re-check against collage
-- [ ] Site speed pass (mobile + desktop)
+- [x] Speed: founding page photos 9MB → 0.8MB; new photos compressed

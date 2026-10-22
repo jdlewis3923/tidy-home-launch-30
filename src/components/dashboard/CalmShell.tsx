@@ -37,12 +37,12 @@ export default function CalmShell({ step, totalSteps, microcopy, children }: Pro
 
       {/* Header — oversized logo, generous padding */}
       <header className="relative">
-        <div className="mx-auto max-w-2xl px-5 pt-8 pb-2 flex flex-col items-center text-center">
+        <div className="mx-auto max-w-2xl px-5 pt-5 pb-2 flex flex-col items-center text-center">
           <a href="/" aria-label="Tidy">
             <img
               src={tidyLogo}
               alt="Tidy"
-              className="h-72 md:h-96 w-auto drop-shadow-[0_14px_36px_rgba(15,23,42,0.18)]"
+              className="h-20 md:h-24 w-auto drop-shadow-[0_8px_20px_rgba(15,23,42,0.18)]"
             />
           </a>
           {totalSteps > 0 && (

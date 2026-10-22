@@ -35,7 +35,7 @@ function readClaim(): { token: string; state: Partial<ConfigState> } | null {
 // Quiet, lowercase Apple-tone microcopy. Step 0 is the new ZIP gate.
 const STEPS = [
   { heading: 'first — where do you live?',      sub: "we'll confirm we're in your area before anything else.", cta: '',             micro: 'set it once.' },
-  { heading: 'what should we handle?',          sub: 'cleaning is open now. lawn and detailing open soon.',          cta: 'continue',     micro: 'set it once.' },
+  { heading: 'Book a Service',                  sub: 'Select one or more services. You can customize everything next.',          cta: 'continue',     micro: 'set it once.' },
   { heading: 'how often?',                      sub: 'change anytime. no lock-in.',                      cta: 'continue',     micro: 'set it once.' },
   { heading: 'tell us about your home',         sub: 'so we match the right pro and the right price.',  cta: 'continue',     micro: 'set it once.' },
   { heading: "we'll take it from here",         sub: 'name, address, how to get in.',                    cta: 'continue',     micro: 'set it once.' },
@@ -281,12 +281,12 @@ export default function DashboardPlan() {
 
         <div className="animate-calm-in" key={`heading-${step}`}>
           <h1
-            className={`text-3xl md:text-[34px] font-bold text-ink ${step === 8 ? '' : 'lowercase'}`}
+            className={`text-3xl md:text-[34px] font-bold text-ink ${step === 8 || step === 1 ? '' : 'lowercase'}`}
             style={{ letterSpacing: '-0.025em', lineHeight: 1.05 }}
           >
-            {stepInfo.heading}
+            {t(stepInfo.heading)}
           </h1>
-          {stepInfo.sub && <p className="mt-2 text-sm text-ink-faint lowercase">{reserving && step === 6 ? 'your price. reserve it — no card today.' : reserving && step === 1 ? 'cleaning, lawn and car care — all three are reservable now.' : stepInfo.sub}</p>}
+          {stepInfo.sub && <p className={`mt-2 text-ink-faint ${step === 1 ? 'text-base' : 'text-sm lowercase'}`}>{reserving && step === 6 ? 'your price. reserve it — no card today.' : t(stepInfo.sub)}</p>}
         </div>
 
         {step >= 1 && step <= 2 && <ExistingAccountInline />}
@@ -355,12 +355,12 @@ export default function DashboardPlan() {
               type="button"
               onClick={next}
               disabled={!canAdvance()}
-              style={{ backgroundColor: 'hsl(var(--ink))', color: '#ffffff', minHeight: 44 }}
-              className="ml-auto group relative overflow-hidden rounded-xl px-7 py-3.5 text-sm font-semibold shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] ring-1 ring-[hsl(var(--ink))] transition-all hover:shadow-[0_20px_44px_-10px_hsl(var(--ink)/0.7)] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 lowercase"
+              style={{ minHeight: 52 }}
+              className="plan-cta ml-auto group relative flex-1 overflow-hidden rounded-full px-7 py-3.5 text-base font-bold transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
               <span className="relative inline-flex items-center gap-1.5">
                 {customQuote && step === 6 ? 'get my plan' : reserving && step === 6 ? 'Reserve your spot' : stepInfo.cta}
-                <span className="transition-transform group-hover:translate-x-0.5">→</span>
+                <span className="transition-transform group-hover:translate-x-0.5">›</span>
               </span>
             </button>
           </div>
