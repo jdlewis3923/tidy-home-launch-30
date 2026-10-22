@@ -2074,6 +2074,7 @@ export type Database = {
           last_checkin_sent_at: string | null
           legacy_application: boolean
           one_pager_sent_at: string | null
+          owner_phone_invite_at: string | null
           owns_equipment: boolean | null
           phone_confirmed_at: string | null
           phone_reschedules: number
@@ -2172,6 +2173,7 @@ export type Database = {
           last_checkin_sent_at?: string | null
           legacy_application?: boolean
           one_pager_sent_at?: string | null
+          owner_phone_invite_at?: string | null
           owns_equipment?: boolean | null
           phone_confirmed_at?: string | null
           phone_reschedules?: number
@@ -2270,6 +2272,7 @@ export type Database = {
           last_checkin_sent_at?: string | null
           legacy_application?: boolean
           one_pager_sent_at?: string | null
+          owner_phone_invite_at?: string | null
           owns_equipment?: boolean | null
           phone_confirmed_at?: string | null
           phone_reschedules?: number
