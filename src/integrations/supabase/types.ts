@@ -2029,6 +2029,12 @@ export type Database = {
           adverse_action_notice_sent_at: string | null
           agreement_docs_sent_at: string | null
           applicant_id: string
+          application_disqualify_at: string | null
+          application_disqualify_handled_at: string | null
+          application_owner_notes: string | null
+          application_report: Json | null
+          application_version: number
+          apply_question_ids: string[] | null
           apply_resume_token: string | null
           apply_started_at: string | null
           apply_submitted_at: string | null
@@ -2121,6 +2127,12 @@ export type Database = {
           adverse_action_notice_sent_at?: string | null
           agreement_docs_sent_at?: string | null
           applicant_id: string
+          application_disqualify_at?: string | null
+          application_disqualify_handled_at?: string | null
+          application_owner_notes?: string | null
+          application_report?: Json | null
+          application_version?: number
+          apply_question_ids?: string[] | null
           apply_resume_token?: string | null
           apply_started_at?: string | null
           apply_submitted_at?: string | null
@@ -2213,6 +2225,12 @@ export type Database = {
           adverse_action_notice_sent_at?: string | null
           agreement_docs_sent_at?: string | null
           applicant_id?: string
+          application_disqualify_at?: string | null
+          application_disqualify_handled_at?: string | null
+          application_owner_notes?: string | null
+          application_report?: Json | null
+          application_version?: number
+          apply_question_ids?: string[] | null
           apply_resume_token?: string | null
           apply_started_at?: string | null
           apply_submitted_at?: string | null
@@ -6516,6 +6534,7 @@ export type Database = {
         Row: {
           active: boolean
           anchors_key: string | null
+          application_version: number
           core: boolean
           correct_answer: string | null
           created_at: string
@@ -6537,6 +6556,7 @@ export type Database = {
         Insert: {
           active?: boolean
           anchors_key?: string | null
+          application_version?: number
           core?: boolean
           correct_answer?: string | null
           created_at?: string
@@ -6558,6 +6578,7 @@ export type Database = {
         Update: {
           active?: boolean
           anchors_key?: string | null
+          application_version?: number
           core?: boolean
           correct_answer?: string | null
           created_at?: string
@@ -9529,6 +9550,11 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_application_note: {
+        Args: { _id: string; _note: string }
+        Returns: undefined
+      }
+      admin_application_report: { Args: { _id: string }; Returns: Json }
       admin_approve_car_launch: { Args: never; Returns: Json }
       admin_approve_launch_calendar: { Args: { _rows: Json }; Returns: Json }
       admin_assign_customer_pro: {
@@ -10009,6 +10035,7 @@ export type Database = {
         Args: { _id: string; _key: string }
         Returns: string
       }
+      hiring_application_v6_tick: { Args: never; Returns: number }
       hiring_fit_report: { Args: { _id: string }; Returns: Json }
       hiring_reopen: { Args: { _applicant_id: string }; Returns: undefined }
       hiring_resolve_deadline: {

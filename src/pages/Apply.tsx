@@ -1,301 +1,62 @@
-/**
- * Public Application — /apply (hiring v5)
- *
- * Short sectioned application, EN/ES, autosave + resume token.
- * Questions come from the question_bank table (admin-editable).
- * Sliders stay unset until touched. Knockouts archive on submit.
- */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Helmet } from "react-helmet-async";
-import { Link, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, CheckCircle2, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
-import TidyLogo from "@/components/TidyLogo";
-import SeoHead from "@/components/landing/SeoHead";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, House, Leaf, Car, Loader2, ShieldCheck, CalendarDays, Briefcase, MapPin, ChevronRight } from 'lucide-react';
+import TidyLogo from '@/components/TidyLogo';
+import SeoHead from '@/components/landing/SeoHead';
+import teamPhoto from '@/assets/founding-pro-step.jpg';
+import cleaningPhoto from '@/assets/lp-house-cleaning.webp';
+import lawnPhoto from '@/assets/lp-lawn-care.webp';
+import carPhoto from '@/assets/lp-car-detailing.webp';
+import '@/styles/application-reference.css';
 
-type Q = {
-  id: string; key: string; section: number; type: string; label: string; label_en?: string; label_es?: string;
-  anchors: string | null; core: boolean; weight: number; required: boolean;
-  options: { value: string; en: string; es: string }[] | null; knockout: boolean; sort: number;
-};
-type Faq = { q: string; a: string; needs_justin: boolean };
-type Answers = Record<string, unknown>;
-
-const SECTIONS_EN = ["About you", "Quick check", "Availability", "Work history", "Your skills", "How you work", "Showing up", "What would you do?", "Your equipment", "What you want", "A reference", "Review & send"];
-const SECTIONS_ES = ["Sobre ti", "Chequeo rápido", "Disponibilidad", "Historial de trabajo", "Tus habilidades", "Cómo trabajas", "Puntualidad", "¿Qué harías?", "Tu equipo", "Lo que quieres", "Una referencia", "Revisar y enviar"];
-
-const SKILL_ANCHORS = {
-  en: ["Never done it", "Done it a few times", "Comfortable", "Very good", "Could teach it"],
-  es: ["Nunca lo he hecho", "Lo he hecho algunas veces", "Me siento cómodo", "Muy bueno", "Podría enseñarlo"],
-};
-const STYLE_ANCHORS = {
-  en: ["Not me", "Rarely", "Sometimes", "Usually", "Always me"],
-  es: ["No soy yo", "Casi nunca", "A veces", "Casi siempre", "Siempre yo"],
-};
-
-export default function Apply() {
-  const [params] = useSearchParams();
-  const [token, setToken] = useState<string | null>(params.get("resume"));
-  const [service, setService] = useState<string>("");
-  const [lang, setLang] = useState<"en" | "es">("en");
-  const [questions, setQuestions] = useState<Q[]>([]);
-  const [answers, setAnswers] = useState<Answers>({});
-  const [faq, setFaq] = useState<Faq[]>([]);
-  const [section, setSection] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [starting, setStarting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [proofUrl, setProofUrl] = useState<string | null>(null);
-  const [phoneAfterSubmit, setPhoneAfterSubmit] = useState(false);
-  const [knockout, setKnockout] = useState(false);
-  const [missing, setMissing] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const saveQueue = useRef<Record<string, unknown>>({});
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const t = useCallback((en: string, es: string) => (lang === "es" ? es : en), [lang]);
-
-  const call = useCallback(async (payload: Record<string, unknown>) => {
-    const { data, error: err } = await supabase.functions.invoke("hiring-candidate", { body: payload });
-    if (err) throw err;
-    return data;
-  }, []);
-
-  // Load an in-progress application.
-  useEffect(() => {
-    if (!token) return;
-    setLoading(true);
-    call({ action: "load", token })
-      .then((d) => {
-        if (d?.error) { setError(d.error); return; }
-        setLang(d.lang === "es" ? "es" : "en");
-        setService(d.service);
-        setQuestions(d.questions ?? []);
-        setAnswers(d.answers ?? {});
-        setFaq(d.faq ?? []);
-        if (d.submitted) setSubmitted(true);
-        if (d.proof_url) setProofUrl(d.proof_url);
-        setPhoneAfterSubmit(!!d.phone_screen_after_submit);
-      })
-      .catch(() => setError("load_failed"))
-      .finally(() => setLoading(false));
-  }, [token, call]);
-
-  const start = async (svc: string) => {
-    setStarting(true);
-    try {
-      const d = await call({ action: "start", service: svc, lang });
-      if (d?.token) {
-        setToken(d.token);
-        window.history.replaceState(null, "", `/apply?resume=${d.token}`);
-      } else setError(d?.error ?? "start_failed");
-    } catch { setError("start_failed"); }
-    setStarting(false);
-  };
-
-  // Autosave: debounce 800ms per question.
-  const answer = useCallback((q: Q, value: unknown) => {
-    setAnswers((prev) => ({ ...prev, [q.id]: value }));
-    saveQueue.current[q.id] = value;
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      const batch = { ...saveQueue.current };
-      saveQueue.current = {};
-      for (const [qid, v] of Object.entries(batch)) {
-        call({ action: "answer", token, question_id: qid, value: v }).catch(() => undefined);
-      }
-    }, 800);
-  }, [call, token]);
-
-  const submit = async () => {
-    setLoading(true); setMissing([]);
-    try {
-      const d = await call({ action: "submit", token });
-      if (d?.ok) { setSubmitted(true); setKnockout(!!d.knockout); setPhoneAfterSubmit(!!d.phone_screen_after_submit); if (d.proof_url) setProofUrl(d.proof_url); }
-      else if (d?.error === "missing") { setMissing(d.keys ?? []); setSection(1); }
-      else setError(d?.error ?? "submit_failed");
-    } catch { setError("submit_failed"); }
-    setLoading(false);
-  };
-
-  const bySection = useMemo(() => {
-    const m = new Map<number, Q[]>();
-    for (const q of questions) {
-      const arr = m.get(q.section) ?? [];
-      arr.push(q);
-      m.set(q.section, arr);
-    }
-    return m;
-  }, [questions]);
-
-  const sectionNames = lang === "es" ? SECTIONS_ES : SECTIONS_EN;
-  // Steps are only the sections that still have questions.
-  const steps = Array.from(bySection.keys()).sort((a, b) => a - b);
-  const sectionNo = steps[section - 1] ?? 1;
-  const current = bySection.get(sectionNo) ?? [];
-  const totalSections = Math.max(1, steps.length);
-
-  const renderQuestion = (q: Q) => {
-    const v = answers[q.id];
-    const isMissing = missing.includes(q.key);
-    const wrap = (children: React.ReactNode) => (
-      <div key={q.id} className={`rounded-xl border p-4 ${isMissing ? "border-destructive" : "border-border"} bg-card`}>
-        <p className="font-medium text-foreground mb-3">{(lang === "es" ? q.label_es : q.label_en) ?? q.label}{q.required && q.type !== "slider" ? <span className="text-destructive"> *</span> : null}</p>
-        {children}
-      </div>
-    );
-
-    if (q.type === "slider") {
-      const anchors = q.anchors === "style" ? STYLE_ANCHORS[lang] : SKILL_ANCHORS[lang];
-      const num = typeof v === "number" ? v : null;
-      return wrap(
-        <div>
-          <div className="flex justify-between gap-1">
-            {[2, 4, 6, 8, 10].map((n, i) => (
-              <button key={n} type="button" onClick={() => answer(q, n)}
-                className={`flex-1 rounded-lg border py-3 text-sm font-semibold transition-colors ${num === n ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground"}`}>
-                {n / 2}
-              </button>
-            ))}
-          </div>
-          <div className="flex justify-between gap-1 mt-1">
-            {anchors.map((a, i) => (
-              <span key={i} className={`flex-1 text-center text-[10px] leading-tight ${num === (i + 1) * 2 ? "text-primary font-semibold" : "text-muted-foreground"}`}>{a}</span>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    if (q.type === "yesno") {
-      return wrap(
-        <div className="flex gap-2">
-          {[true, false].map((b) => (
-            <button key={String(b)} type="button" onClick={() => answer(q, b)}
-              className={`flex-1 rounded-lg border py-3 font-semibold ${v === b ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground"}`}>
-              {b ? t("Yes", "Sí") : t("No", "No")}
-            </button>
-          ))}
-        </div>
-      );
-    }
-    if (q.type === "choice" && q.options) {
-      return wrap(
-        <div className="grid gap-2">
-          {q.options.map((o) => (
-            <button key={o.value} type="button" onClick={() => answer(q, o.value)}
-              className={`rounded-lg border px-4 py-3 text-left ${v === o.value ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-foreground"}`}>
-              {lang === "es" ? o.es : o.en}
-            </button>
-          ))}
-        </div>
-      );
-    }
-    if (q.type === "number") {
-      return wrap(<Input type="number" inputMode="numeric" value={typeof v === "number" ? String(v) : ""} onChange={(e) => answer(q, e.target.value === "" ? null : Number(e.target.value))} />);
-    }
-    if (q.type === "date") {
-      return wrap(<Input type="date" value={typeof v === "string" ? v : ""} onChange={(e) => answer(q, e.target.value)} />);
-    }
-    if (q.type === "grid") {
-      // Free-form grid (work history, availability blocks) — JSON text area for now.
-      return wrap(<Textarea rows={4} value={typeof v === "string" ? v : ""} placeholder={t("One per line", "Uno por línea")} onChange={(e) => answer(q, e.target.value)} />);
-    }
-    if (q.type === "checklist") {
-      return wrap(<Textarea rows={4} value={typeof v === "string" ? v : ""} placeholder={t("Item — brand — age, one per line", "Artículo — marca — antigüedad, uno por línea")} onChange={(e) => answer(q, e.target.value)} />);
-    }
-    return wrap(q.key.includes("why") || q.type === "text" && q.key.startsWith("intent.")
-      ? <Textarea rows={3} value={typeof v === "string" ? v : ""} onChange={(e) => answer(q, e.target.value)} />
-      : <Input value={typeof v === "string" ? v : ""} onChange={(e) => answer(q, e.target.value)} />);
-  };
-
-  // ---- screens
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <div className="max-w-md text-center">
-          <CheckCircle2 className="h-14 w-14 text-primary mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-foreground mb-2">{knockout ? t("Thanks for your time", "Gracias por tu tiempo") : t("Application received", "Solicitud recibida")}</h1>
-          <p className="text-muted-foreground">{knockout
-            ? t("This role needs a few things you don't have right now. If that changes, apply again — we'd love to hear from you.", "Este puesto requiere algunas cosas que no tienes ahora. Si eso cambia, aplica de nuevo — nos encantaría saber de ti.")
-            : phoneAfterSubmit ? t("Next step: choose a time for your 30-minute phone screen, Monday–Friday. We'll call you.", "Siguiente paso: elige un horario para tu llamada de 30 minutos, de lunes a viernes. Te llamaremos nosotros.") : t("Next step: show us your equipment. About 10 minutes on your phone. You can stop and come back with this same link.", "Siguiente paso: muéstranos tu equipo. Unos 10 minutos desde tu teléfono. Puedes parar y volver con este mismo enlace.")}</p>
-          {!knockout && phoneAfterSubmit && <Button asChild size="lg" className="mt-6 w-full h-14 text-base"><Link to={`/pro/book/${token}`}>{t("Choose phone screen time", "Elegir horario de llamada")}<ArrowRight className="h-4 w-4 ml-2" /></Link></Button>}
-          {!knockout && proofUrl && (
-            <Button asChild size="lg" className="mt-6 w-full h-14 text-base"><a href={`${proofUrl.replace("https://jointidy.co", "")}?lang=${lang}`}>{t("Upload equipment photos", "Subir fotos del equipo")}<ArrowRight className="h-4 w-4 ml-2" /></a></Button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (!token) {
-    return (
-      <div className="min-h-screen bg-background">
-        <SeoHead title={t("Apply to be a Tidy Pro", "Aplica para ser un Pro de Tidy")} description={t("Join Tidy's pro team in Miami.", "Únete al equipo de Pros de Tidy en Miami.")} canonical="/apply" />
-        <header className="border-b border-border"><div className="container mx-auto px-4 py-4 flex items-center justify-between"><Link to="/"><TidyLogo /></Link>
-          <button onClick={() => setLang(lang === "en" ? "es" : "en")} className="text-sm font-semibold text-foreground">{lang === "en" ? "Español" : "English"}</button></div></header>
-        <main className="container mx-auto px-4 py-12 max-w-xl">
-          <div className="flex items-center gap-2 text-primary mb-3"><Sparkles className="h-5 w-5" /><span className="text-sm font-semibold uppercase tracking-wide">{t("Now hiring", "Estamos contratando")}</span></div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">{t("Work for yourself, with a route we build for you", "Trabaja por tu cuenta, con una ruta que construimos para ti")}</h1>
-          <p className="text-muted-foreground mb-8">{t("Pick your service to start. About 10 minutes, and you can finish later — we save as you go.", "Elige tu servicio para empezar. Unos 10 minutos, y puedes terminar después — guardamos a medida que avanzas.")}</p>
-          <div className="grid gap-3">
-            {([["cleaning", t("Home cleaning", "Limpieza de casas")], ["lawn", t("Lawn care", "Cuidado de césped")], ["car_care", t("Car care", "Cuidado de autos")]] as const).map(([svc, label]) => (
-              <Button key={svc} size="lg" variant="outline" disabled={starting} onClick={() => start(svc)} className="justify-between h-14 text-base">
-                {label}{starting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-              </Button>
-            ))}
-          </div>
-          {error ? <p className="text-destructive text-sm mt-4">{error}</p> : null}
-        </main>
-      </div>
-    );
-  }
-
-  if (loading && questions.length === 0) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  }
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Helmet><title>{t("Apply — Tidy", "Aplica — Tidy")}</title></Helmet>
-      <header className="border-b border-border sticky top-0 bg-background z-10">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <TidyLogo />
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground">{t("Saved as you go", "Se guarda a medida que avanzas")}</span>
-            <button onClick={() => setLang(lang === "en" ? "es" : "en")} className="text-sm font-semibold text-foreground">{lang === "en" ? "Español" : "English"}</button>
-          </div>
-        </div>
-        <div className="h-1 bg-muted"><div className="h-1 bg-primary transition-all" style={{ width: `${(section / totalSections) * 100}%` }} /></div>
-      </header>
-      <main className="container mx-auto px-4 py-8 max-w-xl">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-1">{t("Section", "Sección")} {section} {t("of", "de")} {totalSections}</p>
-        <h2 className="text-2xl font-bold text-foreground mb-6">{sectionNames[sectionNo - 1] ?? ""}</h2>
-        <div className="grid gap-4">{current.map(renderQuestion)}</div>
-        {missing.length > 0 ? <p className="text-destructive text-sm mt-4">{t("Some required answers are missing — they're marked in red.", "Faltan algunas respuestas obligatorias — están marcadas en rojo.")}</p> : null}
-        {error ? <p className="text-destructive text-sm mt-4">{error}</p> : null}
-        <div className="flex gap-3 mt-8">
-          <Button variant="outline" disabled={section <= 1} onClick={() => setSection((s) => s - 1)}><ArrowLeft className="h-4 w-4 mr-1" />{t("Back", "Atrás")}</Button>
-          {section < totalSections
-            ? <Button className="flex-1" onClick={() => setSection((s) => s + 1)}>{t("Next", "Siguiente")}<ArrowRight className="h-4 w-4 ml-1" /></Button>
-            : <Button className="flex-1" disabled={loading} onClick={submit}>{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("Send my application", "Enviar mi solicitud")}</Button>}
-        </div>
-        {faq.length > 0 && section === totalSections ? (
-          <div className="mt-10 border-t border-border pt-6">
-            <h3 className="font-semibold text-foreground mb-3">{t("Questions candidates ask", "Preguntas frecuentes")}</h3>
-            <div className="grid gap-3">
-              {faq.map((f, i) => (
-                <details key={i} className="rounded-lg border border-border bg-card p-3">
-                  <summary className="font-medium text-foreground cursor-pointer">{f.q}</summary>
-                  <p className="text-sm text-muted-foreground mt-2">{f.needs_justin ? t("We'll confirm this with you directly.", "Te lo confirmamos directamente.") : f.a}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </main>
-    </div>
-  );
+type Q={id:string;key:string;section:number;type:string;label:string;label_en?:string;label_es?:string;required:boolean;options:{value:string;en:string;es:string}[]|null};
+const TITLES={en:['Let’s get to know you','Your experience','Your skills','Your equipment & vehicle','Your availability','What you’re looking for','How Tidy works','A few final questions'],es:['Queremos conocerte','Tu experiencia','Tus habilidades','Tu equipo y vehículo','Tu disponibilidad','Lo que buscas','Cómo funciona Tidy','Unas últimas preguntas']};
+const SHORT={en:['You','Experience','Skills','Equipment','Schedule','Goals','Tidy','Finish'],es:['Tú','Experiencia','Habilidades','Equipo','Horario','Metas','Tidy','Final']};
+const OLD={en:['About you','Quick check','Availability','Work history','Your skills','How you work','Showing up','What would you do?','Your equipment','What you want','A reference','Review & send'],es:['Sobre ti','Chequeo rápido','Disponibilidad','Historial de trabajo','Tus habilidades','Cómo trabajas','Puntualidad','¿Qué harías?','Tu equipo','Lo que buscas','Una referencia','Revisar y enviar']};
+export default function Apply(){
+ const [params]=useSearchParams();const [token,setToken]=useState(params.get('resume'));const [service,setService]=useState('');const [selected,setSelected]=useState('cleaning');
+ const [lang,setLang]=useState<'en'|'es'>(()=>navigator.language.startsWith('es')?'es':'en');const [version,setVersion]=useState(6);const [intro,setIntro]=useState(true);
+ const [questions,setQuestions]=useState<Q[]>([]);const [answers,setAnswers]=useState<Record<string,unknown>>({});const [step,setStep]=useState(1);const [review,setReview]=useState(false);
+ const [busy,setBusy]=useState(false);const [submitted,setSubmitted]=useState(false);const [proof,setProof]=useState<string|null>(null);const [phone,setPhone]=useState(false);const [error,setError]=useState('');const [missing,setMissing]=useState<string[]>([]);const [saveState,setSaveState]=useState<'saved'|'saving'|'error'>('saved');
+ const queue=useRef<Record<string,unknown>>({});const timer=useRef<ReturnType<typeof setTimeout>|null>(null);const inFlight=useRef<Promise<void>|null>(null);
+ const t=(en:string,es:string)=>lang==='es'?es:en;
+ const call=useCallback(async(body:Record<string,unknown>)=>{const {data,error}=await supabase.functions.invoke('hiring-candidate',{body});if(error||data?.error)throw new Error(data?.error??error?.message);return data;},[]);
+ useEffect(()=>{if(!token)return;setBusy(true);call({action:'load',token}).then(d=>{setQuestions(d.questions??[]);setAnswers(d.answers??{});setService(d.service);setLang(d.lang==='es'?'es':'en');setVersion(d.version??5);setSubmitted(!!d.submitted);setProof(d.proof_url??null);setPhone(!!d.phone_screen_after_submit);}).catch(()=>setError('load')).finally(()=>setBusy(false));},[token,call]);
+ const flush=async():Promise<void>=>{
+  if(timer.current)clearTimeout(timer.current);if(inFlight.current)await inFlight.current;
+  const batch={...queue.current};if(!Object.keys(batch).length)return;queue.current={};setSaveState('saving');
+  const job=(async()=>{let failed=false;await Promise.all(Object.entries(batch).map(async([question_id,value])=>{try{await call({action:'answer',token,question_id,value});}catch{if(!(question_id in queue.current))queue.current[question_id]=value;failed=true;}}));setSaveState(failed?'error':'saved');if(failed)throw new Error('save');})();
+  inFlight.current=job;try{await job;}finally{inFlight.current=null;}if(Object.keys(queue.current).length)await flush();
+ };
+ const answer=(q:Q,value:unknown)=>{setAnswers(a=>({...a,[q.id]:value}));queue.current[q.id]=value;setSaveState('saving');setMissing(m=>m.filter(k=>k!==q.key));if(timer.current)clearTimeout(timer.current);timer.current=setTimeout(()=>{void flush().catch(()=>{});},600);};
+ const steps=[...new Set(questions.map(q=>q.section))].sort((a,b)=>a-b);const sec=steps[step-1]??1;const current=questions.filter(q=>q.section===sec);const total=steps.length||8;
+ const present=(q:Q)=>{const v=answers[q.id];if(!q.required)return true;if(q.key.endsWith('.truth')||q.key.endsWith('.sms'))return v===true;if(q.key==='v6.work.jobs')return Array.isArray(v)&&v.length>0&&v.every(j=>j&&['title','company','duration'].every(k=>typeof j[k]==='string'&&j[k].trim()));if(q.key.startsWith('v6.equipment.')&&q.key!=='v6.equipment.ready')return Array.isArray(v);return v!==undefined&&v!==null&&v!==''&&(!Array.isArray(v)||v.length>0);};
+ const go=async()=>{const m=current.filter(q=>!present(q)).map(q=>q.key);if(m.length){setMissing(m);setError('missing');return;}setBusy(true);try{await flush();setError('');if(step<total)setStep(s=>s+1);else setReview(true);window.scrollTo(0,0);}catch{setError('save');}finally{setBusy(false);}};
+ const start=async()=>{setBusy(true);try{const d=await call({action:'start',service:selected,lang});setToken(d.token);window.history.replaceState(null,'',`/apply?resume=${d.token}`);}catch{setError('start');}finally{setBusy(false);}};
+ const send=async()=>{setBusy(true);try{await flush();const d=await call({action:'submit',token,lang});setSubmitted(true);setPhone(!!d.phone_screen_after_submit);setProof(d.proof_url??null);setError('');}catch(e){setError(e instanceof Error&&e.message==='missing'?'missing':'submit');setReview(false);}finally{setBusy(false);}};
+ const label=(q:Q)=>lang==='es'?q.label_es??q.label:q.label_en??q.label;
+ const toggleLang=()=>{const next=lang==='en'?'es':'en';setLang(next);if(token)void call({action:'load',token,lang:next}).catch(()=>setError('load'));};
+ const header=<header className="apply-reference-header"><Button variant="ghost" size="icon" aria-label={t('Back','Atrás')} onClick={()=>{if(review)setReview(false);else if(step>1)setStep(s=>s-1);else if(!token)setIntro(true);else window.location.assign('/');}}><ArrowLeft/></Button><Link to="/"><TidyLogo size="sm"/></Link><Button variant="ghost" size="sm" onClick={toggleLang}>{lang==='en'?'Español':'English'}</Button></header>;
+ const message=error?<p role="alert" className="text-destructive text-sm mt-4">{error==='missing'?t('Please complete the required answers marked below.','Completa las respuestas obligatorias indicadas abajo.'):error==='save'?t('Your answers haven’t saved yet. Check your connection and try again.','Tus respuestas todavía no se han guardado. Revisa tu conexión e intenta de nuevo.'):t('We couldn’t complete that. Please try again.','No pudimos completar la acción. Intenta de nuevo.')}</p>:null;
+ const field=(q:Q)=>{
+  const v=answers[q.id];const multi=q.type==='multi';const isEquipment=q.key.startsWith('v6.equipment.')&&q.key!=='v6.equipment.ready';const isBad=missing.includes(q.key);let content;
+  if(q.key==='v6.truth'||q.key==='v6.sms')content=<label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={v===true} onChange={e=>answer(q,e.target.checked)} className="mt-1 h-5 w-5 accent-primary"/>{label(q)}</label>;
+  else if(q.type==='slider')content=<div><div className="flex justify-between text-xs mb-2"><span>{typeof v==='number'?t('Your rating','Tu calificación'):t('Choose your rating','Elige tu calificación')}</span><strong className="text-primary">{typeof v==='number'?`${v} / 10`:'— / 10'}</strong></div><input aria-label={label(q)} type="range" min="0" max="10" step="1" value={typeof v==='number'?v:0} onChange={e=>answer(q,Number(e.target.value))} onPointerDown={()=>{if(v===undefined)answer(q,0);}} className="apply-range"/><div className="flex justify-between gap-4 text-[10px] text-muted-foreground"><span>0 = {t('Never done it','Nunca lo he hecho')}</span><span className="text-center">5 = {t('I can do it with some direction','Puedo hacerlo con algo de orientación')}</span><span className="text-right">10 = {t('I could train someone','Podría capacitar a alguien')}</span></div></div>;
+  else if(q.key==='v6.work.jobs'){const jobs=Array.isArray(v)?v as Record<string,string>[]:[{title:'',company:'',duration:''}];content=<div className="space-y-3">{jobs.map((j,i)=><div key={i} className="space-y-2">{[['title',t('Job title','Puesto')],['company',t('Company','Empresa')],['duration',t('How long (months/years)','Duración (meses/años)')]].map(([k,l])=><Input key={k} aria-label={`${l} ${i+1}`} placeholder={l} value={j[k]??''} onChange={e=>answer(q,jobs.map((o,n)=>n===i?{...o,[k]:e.target.value}:o))}/>)}{i>0&&<Button variant="ghost" size="sm" onClick={()=>answer(q,jobs.slice(0,1))}>{t('Remove second job','Quitar segundo trabajo')}</Button>}</div>)}{jobs.length<2&&<Button variant="ghost" size="sm" className="text-primary" onClick={()=>answer(q,[...jobs,{title:'',company:'',duration:''}])}>+ {t('Add another','Agregar otro')}</Button>}</div>;}
+  else if(q.key==='v6.avail.grid'){const picked=Array.isArray(v)?v:[];content=<div><div className="grid grid-cols-[72px_repeat(5,minmax(0,1fr))] gap-1 text-[11px]"><span/>{['Mon','Tue','Wed','Thu','Fri'].map((d,i)=><span key={d} className="text-center">{lang==='es'?['Lun','Mar','Mié','Jue','Vie'][i]:d}</span>)}{['morning','afternoon'].map(b=><div key={b} className="contents"><span className="py-3">{b==='morning'?'8–12':'12–4'}</span>{['Mon','Tue','Wed','Thu','Fri'].map(d=>{const key=`${d}_${b}`;return <Button key={key} variant="outline" className="px-0 min-h-11" aria-label={`${d} ${b==='morning'?t('Morning 8–12','Mañana 8–12'):t('Afternoon 12–4','Tarde 12–4')}`} aria-pressed={picked.includes(key)} onClick={()=>answer(q,picked.includes(key)?picked.filter(x=>x!==key):[...picked,key])}>{picked.includes(key)?<Check className="text-primary"/>:'—'}</Button>;})}</div>)}</div><p className="text-muted-foreground mt-2">{t('Morning 8 AM–12 PM · Afternoon 12–4 PM','Mañana de 8 a. m. a 12 p. m. · Tarde de 12 a 4 p. m.')}</p></div>;}
+  else if((q.type==='choice'||multi)&&q.options){const picked=Array.isArray(v)?v:[];content=<div className="grid gap-2">{q.options.map(o=><Button key={o.value} variant="outline" className="apply-reference-choice" aria-pressed={multi?picked.includes(o.value):v===o.value} disabled={multi&&q.key==='v6.intent.priorities'&&picked.length>=2&&!picked.includes(o.value)} onClick={()=>{let next=multi?(picked.includes(o.value)?picked.filter(x=>x!==o.value):[...picked,o.value]):o.value;if(multi&&q.key.includes('work.settings'))next=o.value==='none'?['none']:(next as unknown[]).filter(x=>x!=='none');answer(q,next);}}><span className={`apply-choice-mark ${multi?'is-checkbox':''}`}>{(multi?picked.includes(o.value):v===o.value)&&<Check className="h-3 w-3"/>}</span>{lang==='es'?o.es:o.en}</Button>)}{isEquipment&&<Button variant="outline" className="apply-reference-choice" aria-pressed={Array.isArray(v)&&v.length===0} onClick={()=>answer(q,[])}><span className="apply-choice-mark is-checkbox">{Array.isArray(v)&&v.length===0&&<Check className="h-3 w-3"/>}</span>{t('None of these yet','Todavía no tengo ninguno')}</Button>}</div>;}
+  else if(q.type==='yesno')content=<div className="grid grid-cols-2 gap-2">{[true,false].map(b=><Button key={String(b)} variant="outline" className="apply-reference-choice" aria-pressed={v===b} onClick={()=>answer(q,b)}><span className="apply-choice-mark">{v===b&&<Check className="h-3 w-3"/>}</span>{b?t('Yes','Sí'):'No'}</Button>)}</div>;
+  else if(q.key==='v6.work.summary'||q.key==='v6.anything'||q.type==='grid'||q.type==='checklist')content=<Textarea aria-label={label(q)} rows={3} value={typeof v==='string'?v:''} onChange={e=>answer(q,e.target.value)}/>;
+  else content=<Input aria-label={label(q)} aria-invalid={isBad} type={q.type==='date'?'date':q.key.endsWith('.email')?'email':q.key.endsWith('.phone')?'tel':q.type==='number'?'number':'text'} inputMode={q.key.endsWith('.zip')?'numeric':undefined} maxLength={q.key.endsWith('.zip')?5:undefined} autoComplete={q.key.endsWith('first_name')?'given-name':q.key.endsWith('last_name')?'family-name':q.key.endsWith('.email')?'email':q.key.endsWith('.phone')?'tel':q.key.endsWith('.zip')?'postal-code':undefined} value={typeof v==='string'||typeof v==='number'?v:''} onChange={e=>answer(q,q.type==='number'?Number(e.target.value):e.target.value)}/>;
+  return <div key={q.id} data-question-key={q.key} className={`apply-reference-field ${q.key.startsWith('v6.requirements.')?'apply-requirement':''}`}>{q.key!=='v6.truth'&&q.key!=='v6.sms'&&<label>{label(q)}{q.required&&<span> *</span>}</label>}{content}{isBad&&<p className="text-destructive mt-2">{t('Please answer this question.','Responde esta pregunta.')}</p>}</div>;
+ };
+ const valueText=(q:Q)=>{const v=answers[q.id];if(v===undefined||v===null)return t('Not answered','Sin respuesta');if(typeof v==='boolean')return v?t('Yes','Sí'):'No';if(q.key==='v6.work.jobs'&&Array.isArray(v))return v.map(j=>Object.values(j).join(' · ')).join('\n');if(Array.isArray(v))return v.map(x=>{const o=q.options?.find(o=>o.value===x);return o?lang==='es'?o.es:o.en:String(x).replace('_',' · ');}).join(', ');const o=q.options?.find(o=>o.value===v);return o?lang==='es'?o.es:o.en:q.type==='slider'?`${v} / 10`:String(v);};
+ if(submitted){const first=questions.find(q=>q.key.endsWith('about.first_name'));const name=first?String(answers[first.id]??''):'';return <div className="application-reference apply-reference">{header}<main className="apply-success"><CheckCircle2 className="mx-auto h-16 w-16 text-primary mt-10"/><h1>{t('Application submitted!','¡Solicitud enviada!')}</h1><p className="font-semibold text-primary">{t(`Thanks, ${name}!`,`¡Gracias, ${name}!`)}</p><p className="text-muted-foreground text-sm mt-3">{version===6?t('We review every application within 1 business day. Next step: a quick 30-minute phone call. We’ll text you a link to pick a time.','Revisamos cada solicitud en 1 día hábil. El siguiente paso es una llamada de 30 minutos. Te enviaremos por mensaje un enlace para elegir el horario.'):t('Your application has been received. Your next step is below.','Recibimos tu solicitud. Tu siguiente paso aparece abajo.')}</p><div className="apply-success-panel"><h2 className="font-bold mb-4">{t('What happens next?','¿Qué sigue?')}</h2>{[t('We review your application','Revisamos tu solicitud'),t('We connect for a phone call','Conversamos por teléfono'),t('We go over the next steps together','Revisamos juntos los siguientes pasos')].map((s,i)=><p key={s} className="flex gap-3 my-3 text-sm"><span className="rounded-full bg-primary text-primary-foreground w-6 h-6 flex items-center justify-center shrink-0">{i+1}</span>{s}</p>)}</div>{phone&&<Button className="apply-gold w-full mt-6" asChild><Link to={`/pro/book/${token}`}>{t('Choose phone screen time','Elegir horario de llamada')}<ArrowRight/></Link></Button>}{proof&&<Button variant="outline" className="w-full mt-3 h-12" asChild><a href={`${proof.replace('https://jointidy.co','')}?lang=${lang}`}>{t('Upload equipment photos','Subir fotos del equipo')}</a></Button>}<Button variant="ghost" className="mt-4" asChild><Link to="/">{t('Back to Home','Volver al inicio')}</Link></Button></main></div>;}
+ if(!token&&intro)return <div className="application-reference apply-reference"><SeoHead title="Join the Tidy Team" description="Apply to join Tidy’s independent Pro team in Miami. No résumé needed." canonical="/apply"/><section className="apply-reference-intro"><img src={teamPhoto} alt={t('Tidy Pro arriving at a home','Pro de Tidy llegando a una casa')}/><header><TidyLogo size="sm"/><Button variant="ghost" onClick={toggleLang}>{lang==='en'?'Español':'English'}</Button></header><div className="apply-intro-copy"><h1>{t('Join the','Únete al')}<br/><span>{t('TIDY Team','equipo TIDY')}</span></h1><p className="text-sm">{t('Be your own boss. Great pay. Flexible schedule. Real opportunity.','Trabaja por tu cuenta. Buen pago. Horario flexible. Oportunidades reales.')}</p><div className="my-5 space-y-3">{[[Briefcase,t('Weekly pay','Pago semanal')],[CalendarDays,t('Choose your schedule','Elige tu horario')],[ShieldCheck,t('Insurance support','Apoyo con tu seguro')],[MapPin,t('Work in great neighborhoods','Trabaja en excelentes vecindarios')]].map(([Icon,s])=>{const I=Icon as typeof Briefcase;return <p key={String(s)} className="flex items-center gap-3 text-sm"><I className="bg-primary text-primary-foreground p-1 rounded-full w-6 h-6"/>{String(s)}</p>;})}</div><p className="text-xs mb-4">{t('About 8 minutes. No résumé needed. We save as you go, so you can finish later.','Unos 8 minutos. No necesitas currículum. Guardamos tus respuestas para que puedas terminar después.')}</p><Button className="apply-gold w-full" onClick={()=>setIntro(false)}>{t('Start application','Comenzar solicitud')}<ChevronRight/></Button></div></section></div>;
+ if(!token)return <div className="application-reference apply-reference">{header}<main className="apply-reference-main"><h1>{t('Which service do you work in?','¿En qué servicio trabajas?')}</h1><p className="text-muted-foreground mb-6">{t('Choose your service to get started.','Elige tu servicio para comenzar.')}</p><div className="grid gap-4">{[['cleaning',t('House Cleaning','Limpieza de casas'),cleaningPhoto,House],['lawn',t('Lawn Care','Cuidado del jardín'),lawnPhoto,Leaf],['car_care',t('Car Care','Cuidado del Auto'),carPhoto,Car]].map(([s,l,img,Icon])=>{const I=Icon as typeof House;return <Button key={String(s)} variant="outline" className="apply-service-option" aria-pressed={selected===s} onClick={()=>setSelected(String(s))}><img src={String(img)} alt={String(l)}/><span><I className="text-primary"/>{String(l)}</span>{selected===s&&<CheckCircle2/>}</Button>;})}</div>{message}</main><footer className="apply-reference-bottom"><div><Button className="apply-gold w-full" disabled={busy} onClick={start}>{busy?<Loader2 className="animate-spin"/>:t('Continue','Continuar')}<ArrowRight/></Button></div></footer></div>;
+ return <div className="application-reference apply-reference">{header}<nav className="apply-steps" aria-label={t('Application progress','Progreso de la solicitud')}><div className="apply-step-dots">{steps.map((s,i)=><div key={s} className={`apply-step-dot ${step===i+1?'is-current':step>i+1?'is-done':''}`}><span>{step>i+1?<Check className="h-3 w-3"/>:i+1}</span><small>{version===6?SHORT[lang][i]:i+1}</small></div>)}</div><p className="text-xs text-primary font-semibold">{t('Step','Paso')} {step} {t('of','de')} {total}<span className={`float-right font-normal ${saveState==='error'?'text-destructive':'text-muted-foreground'}`} role="status">{saveState==='saving'?t('Saving…','Guardando…'):saveState==='error'?t('Not saved','No se guardó'):t('Saved','Guardado')}</span></p></nav><main className="apply-reference-main">{busy&&!questions.length?<Loader2 className="animate-spin mx-auto mt-20"/>:<><h1>{review?t('Review your application','Revisa tu solicitud'):version===6?TITLES[lang][sec-1]:OLD[lang][sec-1]}</h1><p className="text-muted-foreground mb-6">{review?t('Make sure everything looks good.','Comprueba que todo esté correcto.'):sec===3&&version===6?t('Be honest. We go over these together on the phone.','Responde con sinceridad. Revisaremos tus respuestas juntos por teléfono.'):sec===1?t('This helps us match you with the right opportunities.','Esto nos ayuda a encontrar oportunidades adecuadas para ti.'):t('Tell us a little more.','Cuéntanos un poco más.')}</p>{review?steps.map((s,i)=><section key={s} className="border-b border-border py-4"><div className="flex justify-between"><h2 className="font-semibold">{version===6?TITLES[lang][s-1]:OLD[lang][s-1]}</h2><Button variant="ghost" size="sm" className="text-primary" onClick={()=>{setStep(i+1);setReview(false);}}>{t('Edit','Editar')}</Button></div>{questions.filter(q=>q.section===s).map(q=><div key={q.id} className="my-3"><p className="text-xs text-muted-foreground">{label(q)}</p><p className="text-sm whitespace-pre-wrap">{valueText(q)}</p></div>)}</section>):current.map(field)}{message}{saveState==='error'&&<Button variant="outline" onClick={()=>void flush().catch(()=>setError('save'))}>{t('Retry saving','Volver a guardar')}</Button>}</>}</main><footer className="apply-reference-bottom"><div><Button className="apply-gold w-full" disabled={busy} onClick={review?send:go}>{busy?<Loader2 className="animate-spin"/>:review?t('Submit application','Enviar solicitud'):step===total?t('Review application','Revisar solicitud'):t('Continue','Continuar')}<ArrowRight/></Button></div></footer></div>;
 }

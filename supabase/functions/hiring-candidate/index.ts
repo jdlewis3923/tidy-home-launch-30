@@ -15,6 +15,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { weekdaysOnly } from '../_shared/hire-ready-rules.ts';
+import { scoreV6, validV6Answer, type V6Question } from '../_shared/application-v6.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 const SERVICES = ['cleaning', 'lawn', 'car_care'];
@@ -30,9 +31,11 @@ async function loadByToken(token: unknown): Promise<{ p: Pipeline; a: Record<str
   return { p: p as Pipeline, a };
 }
 
-async function questionsFor(service: string) {
-  const { data } = await admin.from('question_bank').select('*').eq('active', true)
-    .in('service', ['all', service]).order('section').order('sort');
+async function questionsFor(service: string, p?: Pipeline) {
+  let query = admin.from('question_bank').select('*').in('service', ['all', service]);
+  if (Array.isArray(p?.apply_question_ids) && p.apply_question_ids.length) query = query.in('id', p.apply_question_ids);
+  else query = query.eq('application_version', p?.application_version === 6 ? 6 : 5);
+  const { data } = await query.order('section').order('sort');
   return data ?? [];
 }
 
@@ -86,7 +89,7 @@ Deno.serve(async (req) => {
     if (aErr || !a) return jsonResponse({ error: 'start_failed' }, 500);
     // A database trigger auto-creates the pipeline row at 'applied'; claim it with the resume token.
     const { error: pErr } = await admin.from('contractor_pipeline').update({
-      service, preferred_language: lang, apply_resume_token: token, apply_started_at: new Date().toISOString(),
+      service, preferred_language: lang, application_version: 6, apply_resume_token: token, apply_started_at: new Date().toISOString(),
       invited_at: new Date().toISOString(), invite_deadline_at: new Date(Date.now() + 48 * 3600e3).toISOString(),
     }).eq('applicant_id', a.id);
     if (pErr) { await admin.from('applicants').delete().eq('id', a.id); return jsonResponse({ error: 'start_failed' }, 500); }
@@ -100,19 +103,20 @@ Deno.serve(async (req) => {
   const rec = await loadByToken(body?.token);
   if (!rec) return jsonResponse({ error: 'not_found' }, 404);
   const { p, a } = rec;
-  const lang = p.preferred_language === 'es' ? 'es' : 'en';
+  const lang = body?.lang === 'es' ? 'es' : body?.lang === 'en' ? 'en' : p.preferred_language === 'es' ? 'es' : 'en';
+  if (lang !== p.preferred_language) await admin.from('contractor_pipeline').update({ preferred_language: lang }).eq('applicant_id', p.applicant_id);
   const { data: campaignJob } = await admin.from('hire_ready_invite_jobs').select('id').eq('applicant_id', p.applicant_id).eq('kind', 'invite').maybeSingle();
   const hireReady = !!campaignJob;
 
   // ---- load: questions + saved answers + FAQ
   if (action === 'load') {
-    const qs = await questionsFor(String(p.service));
+    const qs = await questionsFor(String(p.service), p);
     const { data: answers } = await admin.from('application_answers').select('question_id, value').eq('candidate_id', p.applicant_id);
     const faq = await faqFor(lang);
     return jsonResponse({
-      ok: true, lang, service: p.service, stage: p.stage, submitted: !!p.apply_submitted_at,
+      ok: true, lang, service: p.service, stage: p.stage, version: p.application_version ?? 5, submitted: !!p.apply_submitted_at,
       phone_screen_after_submit: hireReady && !!p.apply_submitted_at && !p.archived,
-      phone_duration_min: hireReady ? 30 : undefined,
+      phone_duration_min: hireReady || p.application_version === 6 ? 30 : undefined,
       proof_url: p.apply_submitted_at ? await ensureProofUrl(p) : null,
       questions: qs.map((q) => ({
         id: q.id, key: q.key, section: q.section, type: q.type,
@@ -130,8 +134,10 @@ Deno.serve(async (req) => {
   if (action === 'answer') {
     if (p.apply_submitted_at) return jsonResponse({ error: 'submitted' }, 409);
     const qid = String(body?.question_id ?? '');
-    const { data: q } = await admin.from('question_bank').select('id, service').eq('id', qid).maybeSingle();
-    if (!q || (q.service !== 'all' && q.service !== p.service)) return jsonResponse({ error: 'unknown_question' }, 400);
+    const qs = await questionsFor(String(p.service), p);
+    const q = qs.find(q => q.id === qid);
+    if (!q) return jsonResponse({ error: 'unknown_question' }, 400);
+    if (p.application_version === 6 && !validV6Answer(q as V6Question, body.value) && body.value !== null && body.value !== '' && q.type !== 'grid' && q.type !== 'text' && q.type !== 'multi') return jsonResponse({ error: 'invalid_answer' }, 400);
     const { error } = await admin.from('application_answers').upsert(
       { candidate_id: p.applicant_id, question_id: qid, value: body?.value ?? null, answered_at: new Date().toISOString() },
       { onConflict: 'candidate_id,question_id' });
@@ -142,15 +148,15 @@ Deno.serve(async (req) => {
   // ---- submit: required + knockout validation, stamp, mirror identity fields
   if (action === 'submit') {
     if (p.apply_submitted_at) return jsonResponse({ ok: true, already: true, proof_url: await ensureProofUrl(p) });
-    const qs = await questionsFor(String(p.service));
+    const qs = await questionsFor(String(p.service), p);
     const { data: answers } = await admin.from('application_answers').select('question_id, value').eq('candidate_id', p.applicant_id);
     const byId = new Map((answers ?? []).map((r) => [r.question_id, r.value]));
     const missing: string[] = [];
     for (const q of qs) {
       if (!q.required) continue;
-      if (q.type === 'slider') continue; // sliders stay unset until touched — never required
+      if (p.application_version !== 6 && q.type === 'slider') continue;
       const v = byId.get(q.id);
-      if (v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)) missing.push(q.key);
+      if (p.application_version === 6 ? !validV6Answer(q as V6Question, v) : v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)) missing.push(q.key);
     }
     if (missing.length) return jsonResponse({ error: 'missing', keys: missing }, 400);
     const byKey = new Map(qs.map((q) => [q.key, q]));
@@ -160,7 +166,7 @@ Deno.serve(async (req) => {
       'qual.equipment': true, 'qual.vehicle': true, 'qual.authorized': true, 'qual.availability': true,
       'qual.location': true, 'qual.background': true, 'qual.contractor': true, 'qual.ready': true,
     };
-    for (const [k, want] of Object.entries(KO)) {
+    for (const [k, want] of Object.entries(p.application_version === 6 ? {} : KO)) {
       if (val(k) !== undefined && val(k) !== want) {
         await admin.rpc('pipeline_archive', { _id: p.applicant_id, _reason: 'knockout_apply' }).then(() => {}, () => {});
         // Fallback if the RPC name differs: direct guarded update.
@@ -169,19 +175,28 @@ Deno.serve(async (req) => {
       }
     }
     const secs = p.apply_started_at ? Math.max(0, Math.round((Date.now() - new Date(String(p.apply_started_at)).getTime()) / 1000)) : null;
-    await admin.from('applicants').update({
-      first_name: String(val('about.first_name') ?? ''), last_name: String(val('about.last_name') ?? ''),
-      phone: String(val('about.phone') ?? ''), email: String(val('about.email') ?? a.email),
-      zip: String(val('about.zip') ?? ''), preferred_language: lang,
+    const prefix = p.application_version === 6 ? 'v6.' : '';
+    let report: ReturnType<typeof scoreV6> | null = null;
+    if (p.application_version === 6) {
+      const { data: lc } = await admin.from('launch_config').select('est_full_day_pay').eq('scope', p.service === 'car_care' ? 'car' : p.service).maybeSingle();
+      report = scoreV6(qs as V6Question[], byId, String(p.service), lang, lc?.est_full_day_pay ?? null);
+    }
+    const { error: identityError } = await admin.from('applicants').update({
+      first_name: String(val(`${prefix}about.first_name`) ?? ''), last_name: String(val(`${prefix}about.last_name`) ?? ''),
+      phone: String(val(`${prefix}about.phone`) ?? ''), email: String(val(`${prefix}about.email`) ?? a.email),
+      zip: String(val(`${prefix}about.zip`) ?? ''), preferred_language: lang,
+      ...(report ? { drive_minutes: report.drive_time_minutes } : {}),
     }).eq('id', p.applicant_id);
-    await admin.from('contractor_pipeline').update({
+    if (identityError) return jsonResponse({ error: 'submit_failed' }, 500);
+    const { error: submitError } = await admin.from('contractor_pipeline').update({
       apply_submitted_at: new Date().toISOString(), apply_total_seconds: secs,
-      ref_name: String(val('ref.name') ?? ''), ref_phone: String(val('ref.phone') ?? ''),
-      ref_relationship: String(val('ref.relationship') ?? ''),
+      ...(report ? { application_report: report, application_disqualify_at: report.disqualified ? new Date(Date.now()+24*3600e3).toISOString() : null } : { ref_name: String(val('ref.name') ?? ''), ref_phone: String(val('ref.phone') ?? ''), ref_relationship: String(val('ref.relationship') ?? '') }),
     }).eq('applicant_id', p.applicant_id);
+    if (submitError) return jsonResponse({ error: 'submit_failed' }, 500);
+    if (report?.disqualified) await admin.from('hiring_deadlines').update({ resolved_at: new Date().toISOString() }).eq('applicant_id', p.applicant_id).is('resolved_at', null);
     // Trigger pipeline_on_application_submitted advances invited → applied + sets proof deadline.
     const proof_url = await ensureProofUrl({ ...p, __submitting: true });
-    return jsonResponse({ ok: true, proof_url, phone_screen_after_submit: hireReady, phone_duration_min: hireReady ? 30 : undefined });
+    return jsonResponse({ ok: true, proof_url, phone_screen_after_submit: hireReady, phone_duration_min: hireReady || p.application_version === 6 ? 30 : undefined });
   }
 
   // ---- slots: open slots of a kind
