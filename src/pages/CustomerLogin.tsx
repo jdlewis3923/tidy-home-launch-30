@@ -148,7 +148,7 @@ export default function CustomerLogin() {
         <div className="tidy-login-card mt-5 rounded-2xl p-4">
         <form onSubmit={handleLogin} className="space-y-4" autoComplete="on">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold tidy-login-text">email</label>
+            <label className="text-xs font-semibold tidy-login-text">{es ? 'Correo' : 'Email'}</label>
             <input
               type="email"
               name="email"
@@ -163,7 +163,7 @@ export default function CustomerLogin() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold tidy-login-text">
-              {isSignUp ? 'create password' : 'password'}
+              {isSignUp ? (es ? 'Crea una contraseña' : 'Create password') : (es ? 'Contraseña' : 'Password')}
             </label>
             <div className="relative">
               <input
