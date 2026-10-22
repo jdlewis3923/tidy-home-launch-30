@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
     return jsonResponse({
       ok: true, lang, service: p.service, stage: p.stage, version: p.application_version ?? 5, submitted: !!p.apply_submitted_at,
       phone_screen_after_submit: hireReady && !!p.apply_submitted_at && !p.archived,
-      phone_duration_min: hireReady ? 30 : undefined,
+      phone_duration_min: hireReady || p.application_version === 6 ? 30 : undefined,
       proof_url: p.apply_submitted_at ? await ensureProofUrl(p) : null,
       questions: qs.map((q) => ({
         id: q.id, key: q.key, section: q.section, type: q.type,
@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
       first_name: String(val(`${prefix}about.first_name`) ?? ''), last_name: String(val(`${prefix}about.last_name`) ?? ''),
       phone: String(val(`${prefix}about.phone`) ?? ''), email: String(val(`${prefix}about.email`) ?? a.email),
       zip: String(val(`${prefix}about.zip`) ?? ''), preferred_language: lang,
-      ...(report ? { drive_time_minutes: report.drive_time_minutes } : {}),
+      ...(report ? { drive_minutes: report.drive_time_minutes } : {}),
     }).eq('id', p.applicant_id);
     if (identityError) return jsonResponse({ error: 'submit_failed' }, 500);
     const { error: submitError } = await admin.from('contractor_pipeline').update({
