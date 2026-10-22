@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Loader2, Eye, EyeOff, Home, Leaf, Car, ChevronRight, CalendarDays, CreditCard, Star, ShieldCheck } from 'lucide-react';
-import heroImg from '@/assets/login-miami-dusk.jpg';
-import cleaningImg from '@/assets/cleaning-interior.webp';
-import lawnImg from '@/assets/lawn-care.webp';
-import carImg from '@/assets/car-detailing.webp';
+import heroImg from '@/assets/login-miami-dusk-hd.webp';
+import cleaningImg from '@/assets/svc-cleaning-hd.webp';
+import lawnImg from '@/assets/svc-lawn-hd.webp';
+import carImg from '@/assets/svc-car-hd.webp';
 import { useLanguage } from '@/contexts/LanguageContext';
 import tidyLogo from '@/assets/tidy-official-logo.png';
 
@@ -119,7 +119,7 @@ export default function CustomerLogin() {
   ];
   return (
     <div className="tidy-login relative min-h-screen overflow-hidden">
-      <img src={heroImg} alt="" aria-hidden width={1088} height={1600} fetchPriority="high" decoding="async"
+      <img src={heroImg} alt="" aria-hidden width={1280} height={1920} fetchPriority="high" decoding="async"
         className="absolute inset-0 h-full w-full object-cover" />
       <div aria-hidden className="tidy-login-shade absolute inset-0" />
       <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pb-8 pt-5">
