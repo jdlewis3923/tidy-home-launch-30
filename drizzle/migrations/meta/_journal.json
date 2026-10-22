@@ -1408,6 +1408,13 @@
       "when": 1792582225800,
       "tag": "0200_shorten_pro_application_reopen_orestes",
       "breakpoints": true
+    },
+    {
+      "idx": 201,
+      "version": "7",
+      "when": 1792638675346,
+      "tag": "0201_hire_ready_invite_ledger",
+      "breakpoints": true
     }
   ]
 }
