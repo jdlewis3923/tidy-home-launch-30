@@ -1,0 +1,2 @@
+ALTER TABLE public.contractor_pipeline ADD COLUMN IF NOT EXISTS owner_phone_invite_at timestamptz;
+COMMENT ON COLUMN public.contractor_pipeline.owner_phone_invite_at IS 'Owner let this candidate book the 30-minute phone screen without finishing the application.';
