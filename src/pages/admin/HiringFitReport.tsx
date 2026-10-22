@@ -57,7 +57,9 @@ export default function HiringFitReport() {
 
   const all = visibleQuestions(questions, answers, r.service);
   const byId = new Map(answers.map(a => [a.question_id, a]));
-  const answered = all.filter(q => hasAnswer(byId.get(q.id)?.value)).length;
+  const current = all.filter(q => q.active && (q.service === r.service || q.service === "all"));
+  const answered = current.filter(q => hasAnswer(byId.get(q.id)?.value)).length;
+  const historical = all.length - current.length;
   const shown = all.filter(q => {
     const value = byId.get(q.id)?.value;
     const done = hasAnswer(value);
@@ -75,7 +77,8 @@ export default function HiringFitReport() {
     </header>
     <section className="border-y border-border py-4 mb-6 space-y-2">
       <p className={`font-semibold ${submitted ? "text-primary" : "text-destructive"}`}>{submitted ? `${t("Submitted on jointidy.co", "Enviada en jointidy.co")} · ${formatDate(submitted)}` : t("NOT submitted on jointidy.co — saved answers only", "NO enviada en jointidy.co — solo respuestas guardadas")}</p>
-      <p className="text-sm">{answered} / {all.length} {t("questions answered", "preguntas respondidas")} · {all.length - answered} {t("not answered", "sin respuesta")}</p>
+      <p className="text-sm">{answered} / {current.length} {t("current questions answered", "preguntas actuales respondidas")} · {current.length - answered} {t("not answered", "sin respuesta")}</p>
+      {historical > 0 && <p className="text-xs text-muted-foreground">{historical} {t("earlier answers preserved below — not extra required questions", "respuestas anteriores conservadas abajo — no son preguntas obligatorias adicionales")}</p>}
     </section>
     <section aria-label={t("Questions and answers", "Preguntas y respuestas")}>
       <h2 className="text-xl font-bold mb-4">{t("Questions & their answers", "Preguntas y respuestas del candidato")}</h2>

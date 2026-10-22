@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Applicant results clarity (Oct 22)
-- [ ] Replace score-first Fit Report with complete grouped questions and saved answers, meaningful choice labels, explicit unanswered items and submission status; retain older saved answers.
-- [ ] Verify a real applicant's answers in the signed-in results page and run focused answer-format tests; do not send messages or publish.
+- [x] Replace score-first Fit Report with complete grouped questions and saved answers, meaningful choice labels, explicit unanswered items and submission status; retain older saved answers separately from current application count.
+- [x] Verified Orestes's real saved answers in signed-in desktop/phone results, all/answered/unanswered filters and zero phone overflow; 18 focused tests pass, build OK. No messages sent or publication.
 
 ## Five hire-ready invites (Oct 22)
 - [x] Phone/email duplicates checked; only the five supplied records created, Susan and other records untouched.
