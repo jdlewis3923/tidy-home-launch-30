@@ -16,6 +16,7 @@ import { Home } from "lucide-react";
 
 const HIDE_ON_PREFIXES = [
   "/apply",
+  "/login",
   "/admin/hiring/fit/",
   "/founding",
   "/dashboard/plan",
