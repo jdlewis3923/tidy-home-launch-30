@@ -1422,6 +1422,13 @@
       "when": 1792638695958,
       "tag": "0202_hook_hire_ready_existing_tick",
       "breakpoints": true
+    },
+    {
+      "idx": 203,
+      "version": "7",
+      "when": 1792670348565,
+      "tag": "0203_versioned_application_v6",
+      "breakpoints": true
     }
   ]
 }
