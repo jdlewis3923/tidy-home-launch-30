@@ -254,21 +254,21 @@ export default function CustomerLogin() {
               onClick={() => { setIsSignUp(!isSignUp); setError(''); setConfirmPassword(''); }}
               className="text-xs tidy-login-text underline-offset-4 hover:underline"
             >
-              {isSignUp ? 'already a member? sign in' : "new here? create an account"}
+              {isSignUp ? (es ? '¿Ya eres miembro? Inicia sesión' : 'Already a member? Sign in') : (es ? '¿Nuevo aquí? Crea una cuenta' : 'New here? Create an account')}
             </button>
             <div>
               <Link to="/forgot-password" className="text-xs tidy-login-text underline-offset-4 hover:underline">
-                forgot password?
+                {es ? '¿Olvidaste tu contraseña?' : 'Forgot password?'}
               </Link>
             </div>
           </div>
-
-          <div className="text-center pt-6 border-t border-hairline">
-            <Link to="/" className="text-xs tidy-login-text">
-              ← back to tidy
-            </Link>
-          </div>
         </form>
+        </div>
+        <ul className="mt-6 grid grid-cols-4 gap-1 text-center tidy-login-text">
+          {trust.map(({ Icon, label }) => (
+            <li key={label} className="flex flex-col items-center gap-1.5 text-xs"><Icon className="h-6 w-6" />{label}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );
