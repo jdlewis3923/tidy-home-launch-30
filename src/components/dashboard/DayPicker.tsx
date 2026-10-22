@@ -184,7 +184,7 @@ export default function DayPicker({ service }: { service: SchedService }) {
               </div>
               <div className="flex gap-2">
                 <button type="button" disabled={busy || !entryOk} onClick={() => void book()}
-                  className="rounded-xl bg-[hsl(var(--primary))] px-5 py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-50">{L.confirm}</button>
+                  className="plan-cta w-full rounded-full px-6 py-3.5 text-base font-bold disabled:opacity-50">{L.confirm}</button>
                 {o.booking && <button type="button" className="text-sm text-ink-soft" onClick={() => { setEditing(false); setDay(null); }}>{L.cancel}</button>}
               </div>
             </div>
