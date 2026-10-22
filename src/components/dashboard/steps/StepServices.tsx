@@ -58,7 +58,7 @@ export default function StepServices({ state, onChange, allowAll = false }: Prop
               <svc.Icon className="svc-icon h-8 w-8 shrink-0" />
               <span className="min-w-0 flex-1">
                 <span className="svc-title block text-lg font-bold">{es ? svc.es : svc.en}</span>
-                <span className="svc-sub block text-sm">{note}</span>
+                <span className="svc-sub block text-sm font-normal">{note}</span>
               </span>
               <ChevronRight className="svc-sub h-5 w-5 shrink-0" />
             </span>
