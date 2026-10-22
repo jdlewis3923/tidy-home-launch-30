@@ -17,6 +17,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogD
 import DeclineDialog, { type DeclineInput } from "@/components/admin/pipeline/DeclineDialog";
 import { declineWithUndo, type BoardCard } from "@/pages/AdminPipeline";
 import { ARTIFACT_LABEL, PIPELINE_SERVICES, PIPELINE_STAGES, money, nextStage, rpcMessage, serviceLabel, stageIndex, stageLabel } from "@/lib/pipeline";
+import ApplicationChannels from "@/components/admin/ApplicationChannels";
+import { useApplicationChannels } from "@/hooks/useApplicationChannels";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Row = Record<string, any>;
@@ -170,6 +172,7 @@ export default function AdminPipelineRecord() {
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-2xl font-black tracking-tight text-foreground">{name}</h1>
+            <ApplicationChannels c={channels.get(id ?? "")} />
             <p className="text-sm text-muted-foreground">{serviceLabel(p.service)} · stage {stageIndex(p.stage) + 1} {stageLabel(p.stage)}
               {p.archived ? ` · archived (${p.state})` : p.state !== "open" ? ` · ${p.state}` : ""}</p>
           </div>

@@ -27,6 +27,8 @@ import { Button } from "@/components/ui/button";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { toast } from "@/hooks/use-toast";
 import MoneyAtRiskTile from "@/components/admin/pipeline/MoneyAtRiskTile";
+import ApplicationChannels from "@/components/admin/ApplicationChannels";
+import { useApplicationChannels } from "@/hooks/useApplicationChannels";
 
 // ── types ────────────────────────────────────────────────────────────────────
 type Metrics = Record<string, any>;
@@ -153,6 +155,7 @@ export default function AdminCommand() {
   const [workdayRange, setWorkdayRange] = useState<WorkdayRange>("today");
   const [waitingOnly, setWaitingOnly] = useState(false);
   const [candidateLines, setCandidateLines] = useState<Map<string, string>>(new Map());
+  const channels = useApplicationChannels(Array.from(candidateLines.keys()));
 
   const load = useCallback(async () => {
     setRefreshing(true);
@@ -355,8 +358,8 @@ export default function AdminCommand() {
               {visibleWorkday.length === 0 ? <div className="p-8 text-center text-sm text-slate-500"><Clock3 className="mx-auto mb-2 h-5 w-5" />No activity in this window.</div> : visibleWorkday.map((event) => <div key={event.id} className={`grid gap-2 p-4 sm:grid-cols-[72px_1fr_auto] sm:items-center ${event.status === "failed" || event.status === "bounced" ? "admin-state-critical" : ""}`}>
                 <time className="font-mono text-xs text-slate-500">{new Date(event.occurred_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</time>
                 <div><p className="text-sm font-semibold text-slate-900">{event.title}</p>
-                  {event.applicant_id && candidateLines.get(event.applicant_id)
-                    ? <p className={`mt-1 inline-block rounded px-2 py-0.5 text-xs font-semibold ${candidateLines.get(event.applicant_id)!.includes("NOT") ? "bg-accent/30 text-foreground" : "bg-primary/15 text-primary"}`}>{candidateLines.get(event.applicant_id)}</p>
+                  {event.applicant_id && channels.get(event.applicant_id)
+                    ? <ApplicationChannels c={channels.get(event.applicant_id)} />
                     : event.detail && <p className="mt-0.5 text-xs text-slate-500">{event.detail}</p>}
                 </div>
                 {event.action_url && <Button asChild size="sm" variant="outline"><Link to={event.action_url}>{event.action_label ?? "Open"}<ExternalLink className="ml-1 h-3 w-3" /></Link></Button>}

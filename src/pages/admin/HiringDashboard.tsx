@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertTriangle } from "lucide-react";
+import ApplicationChannels from "@/components/admin/ApplicationChannels";
+import { useApplicationChannels } from "@/hooks/useApplicationChannels";
 
 type Row = {
   applicant_id: string; stage: string; service: string; is_test: boolean;
@@ -34,6 +36,7 @@ export default function HiringDashboard() {
   const [dryRun, setDryRun] = useState<boolean | null>(null);
   const [sprint, setSprint] = useState<boolean | null>(null);
   const [today, setToday] = useState<TodayRow[]>([]);
+  const channels = useApplicationChannels([...rows.map((r) => r.applicant_id), ...today.map((t) => t.applicant_id)]);
   const [unmatched, setUnmatched] = useState<UnmatchedRow[]>([]);
 
   const load = useCallback(async () => {
@@ -166,7 +169,7 @@ export default function HiringDashboard() {
                   {new Date(t.starts_at).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" })}
                 </span>
                 <span className={`h-2.5 w-2.5 rounded-full ${t.confirmed ? "bg-green-500" : "bg-red-500"}`} title={t.confirmed ? "Confirmed" : "Unconfirmed"} />
-                <span className="text-sm text-foreground font-medium">{t.name}</span>
+                <span className="text-sm text-foreground font-medium">{t.name}<ApplicationChannels c={channels.get(t.applicant_id)} /></span>
                 <span className="text-xs text-muted-foreground capitalize">{t.service.replace("_", " ")} · {t.kind === "phone" ? "Phone" : "In person"}</span>
                 <span className="text-xs text-muted-foreground">Intent {t.intent ?? "—"}{t.flags > 0 ? ` · ${t.flags} flag${t.flags === 1 ? "" : "s"}` : ""}</span>
                 <span className="flex-1" />
@@ -213,7 +216,7 @@ export default function HiringDashboard() {
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.applicant_id} className="border-b border-border last:border-0">
-                    <td className="py-2 pr-4 text-foreground">{r.first_name} {r.last_name}</td>
+                    <td className="py-2 pr-4 text-foreground">{r.first_name} {r.last_name}<ApplicationChannels c={channels.get(r.applicant_id)} /></td>
                     <td className="py-2 pr-4 text-foreground capitalize">{r.service?.replace("_", " ")}</td>
                     <td className="py-2 pr-4 text-foreground">{STAGE_LABEL[r.stage] ?? r.stage}</td>
                     <td className="py-2 pr-4 font-semibold text-foreground">{r.intent ?? "—"}</td>
