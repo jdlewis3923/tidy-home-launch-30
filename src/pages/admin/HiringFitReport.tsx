@@ -40,7 +40,7 @@ export default function HiringFitReport(){
  const adjust=async()=>{if(!id||!Number(delta)||Number(delta)<-10||Number(delta)>10||reason.trim().length<5){toast({title:t('Use −10 to +10 and a reason of at least 5 characters.','Usa de −10 a +10 y un motivo de al menos 5 caracteres.'),variant:'destructive'});return;}const {error}=await supabase.from('intent_adjustments').insert({applicant_id:id,delta:Number(delta),reason:reason.trim()});if(error)toast({title:error.message,variant:'destructive'});else{setDelta('');setReason('');void load();}};
  if(loading)return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary"/></div>;
  if(error||!a||!p)return <main className="p-8"><p role="alert" className="text-destructive">{error}</p><Button onClick={load}>{t('Try again','Reintentar')}</Button></main>;
- const savedIdentity=(key:string)=>{const question=questions.find(q=>q.key.endsWith(`about.${key}`));const value=answers.find(answer=>answer.question_id===question?.id)?.value;return typeof value==='string'?value:'';};
+ const savedIdentity=(key:string)=>{const question=questions.find(q=>q.key.endsWith(`about.${key}`)&&answers.some(answer=>answer.question_id===q.id&&hasAnswer(answer.value)));const value=answers.find(answer=>answer.question_id===question?.id)?.value;return typeof value==='string'?value:'';};
  const name=`${a.first_name || savedIdentity('first_name')} ${a.last_name || savedIdentity('last_name')}`.trim()||t('Unnamed applicant','Solicitante sin nombre');const initials=name.split(' ').filter(Boolean).slice(0,2).map(s=>s[0]).join('').toUpperCase();
  const service=p.service??r?.service??'cleaning';
  const all=visibleQuestions(questions,answers,service);const byId=new Map(answers.map(a=>[a.question_id,a]));
