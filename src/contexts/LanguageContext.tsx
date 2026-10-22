@@ -534,6 +534,8 @@ const translations: Record<string, string> = {
   "By creating an account you agree to our": "Al crear una cuenta, aceptas nuestros",
   "and": "y",
   "Terms of Service": "Términos de Servicio",
+  "Book a Service": "Reserva un servicio",
+  "Select one or more services. You can customize everything next.": "Elige uno o más servicios. Luego puedes ajustar todo.",
   "Privacy Policy": "Política de Privacidad",
   "Contact Us": "Contáctanos",
   Terms: "Términos",
