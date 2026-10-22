@@ -2,6 +2,7 @@ import '../_shared/http.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { sendProEmail } from '../_shared/pro-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
 import { vendorFetch } from '../_shared/http.ts';
@@ -10,8 +11,11 @@ import { inviteCopy, type InviteLanguage } from '../_shared/hire-ready-rules.ts'
 
 Deno.serve(async req => {
   const pre = handleCors(req); if (pre) return pre;
-  const auth = await requireServiceOrAdmin(req);
-  if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
+  // Database-triggered sends present the Vault service credential; accept it like cron jobs do.
+  if (!(await isCronAuthorized(req.clone()))) {
+    const auth = await requireServiceOrAdmin(req);
+    if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
+  }
   const input = await req.json().catch(() => ({}));
   if (typeof input.job_id !== 'string' || !/^[0-9a-f-]{36}$/i.test(input.job_id)) return jsonResponse({ error: 'job_id required' }, 400);
   const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
