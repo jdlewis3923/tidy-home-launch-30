@@ -1,5 +1,9 @@
 # Roadmap
 
+## Applicant results clarity (Oct 22)
+- [ ] Replace score-first Fit Report with complete grouped questions and saved answers, meaningful choice labels, explicit unanswered items and submission status; retain older saved answers.
+- [ ] Verify a real applicant's answers in the signed-in results page and run focused answer-format tests; do not send messages or publish.
+
 ## Five hire-ready invites (Oct 22)
 - [x] Phone/email duplicates checked; only the five supplied records created, Susan and other records untouched.
 - [x] Email + four SMS invites scheduled for 8 AM ET Oct 22; language/role links, 24-hour finish deadline, zero-answer 20-hour nudge held until 8 AM, 48-hour no-submission archive; uses existing 15-minute hiring job.
