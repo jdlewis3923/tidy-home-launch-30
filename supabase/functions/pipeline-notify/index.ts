@@ -89,7 +89,8 @@ Deno.serve(async (req) => {
   if (!p || !a) return jsonResponse({ error: 'not_found' }, 404);
   const { data: hireReadyJob } = await admin.from('hire_ready_invite_jobs').select('language').eq('applicant_id', applicant_id).eq('kind', 'invite').maybeSingle();
   const hireReadyPhone = !!hireReadyJob && !!p.apply_submitted_at;
-  if (p.archived && event !== 'close_out') return jsonResponse({ ok: true, skipped: 'archived' });
+  if (p.is_test) return jsonResponse({ ok: true, skipped: 'test_candidate' });
+  if (p.archived && event !== 'close_out' && event !== 'v6_not_fit') return jsonResponse({ ok: true, skipped: 'archived' });
   const lang: Lang = p.preferred_language === 'es' ? 'es' : 'en';
   const first = (a.first_name ?? '').trim() || (lang === 'es' ? 'hola' : 'there');
   const role = ROLE[p.service ?? 'cleaning'] ?? ROLE.cleaning;
@@ -108,6 +109,7 @@ Deno.serve(async (req) => {
     slot_reminder: !p.archived && ['proof', 'screen_booked', 'phone_screened', 'referenced'].includes(p.stage),
     weekly_checkin: !p.archived && ['agreement', 'background', 'insured'].includes(p.stage),
     close_out: p.archived === true,
+    v6_not_fit: p.archived === true && p.application_version === 6 && !!p.application_disqualify_handled_at,
   };
   if (!(event in stageOk)) return jsonResponse({ error: 'unknown_event' }, 400);
   if (!stageOk[event]) {
@@ -239,6 +241,12 @@ Deno.serve(async (req) => {
       ? `Hola ${first}, soy Justin de Tidy. ¿Sigues listo para empezar? Responde SÍ o toca aquí: ${replyUrl}`
       : `Hi ${first}, it's Justin from Tidy. Still on for your start? Reply YES or tap here: ${replyUrl}`;
     subject = lang === 'es' ? '¿Sigues listo para empezar?' : 'Still on for your start?';
+    html = `<p>${esc(sms)}</p>`;
+  } else if (event === 'v6_not_fit') {
+    sms = lang === 'es'
+      ? `Hola ${first}, soy Justin de Tidy. Gracias por tu interés y por compartir tu experiencia. Por ahora, este puesto requiere un vehículo propio y autorización para trabajar en Estados Unidos. No es la opción adecuada en este momento, pero si tu situación cambia, nos encantará saber de ti. ¡Gracias de nuevo!`
+      : `Hi ${first}, it’s Justin from Tidy. Thank you for your interest and for sharing your experience. This role currently requires your own vehicle and authorization to work in the United States. It isn’t a fit right now, but if your situation changes, we’d love to hear from you. Thanks again!`;
+    subject = lang === 'es' ? 'Gracias por tu interés en Tidy' : 'Thank you for your interest in Tidy';
     html = `<p>${esc(sms)}</p>`;
   } else if (event === 'close_out') {
     sms = lang === 'es'
