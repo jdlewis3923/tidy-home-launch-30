@@ -1,7 +1,6 @@
 # Roadmap
 
 ## Five hire-ready invites (Oct 22)
-- [ ] Check phone/email duplicates; create only the five supplied candidates and preserve Susan.
 - [ ] Schedule email + four SMS invites for 8 AM ET Oct 22, role/language links, 24-hour finish deadline, zero-answer 20-hour nudge, 48-hour no-submission archive.
 - [ ] Verify saved records, scheduling, failure/digest visibility and weekday phone-screen flow; report scheduled versus sent honestly.
 
