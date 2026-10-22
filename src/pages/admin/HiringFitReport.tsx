@@ -1,141 +1,115 @@
-/**
- * Fit Report — /admin/hiring/fit/:id (hiring v5)
- * Live Skill / Reliability / Intent gauges, flags F1–F10, split talking points.
- */
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Flag, Phone, Users } from "lucide-react";
+import { Loader2, RefreshCw, ArrowLeft, Search } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { answerText, hasAnswer, visibleQuestions, applicationSections, type ApplicationQuestion, type SavedAnswer } from "@/lib/applicant-answers";
 
-type Flag = { id: string; list: string; question: string };
-type Report = {
-  name: string; service: string; language: string; stage: string; legacy_application: boolean;
-  skill: number; reliability: number; intent: number; skill_self_rated: boolean;
-  bars: { key: string; label: string; value: number | null; core: boolean; demo: boolean }[];
-  scenarios: { key: string; answer: string | null; correct: string | null; wrong: boolean }[];
-  attendance: { late_3m: number; missed_12m: number; jobs_24m: number; late_response: string };
-  flags: Flag[]; phone_talking_points: Flag[]; inperson_talking_points: Flag[];
-  intent_adjustments: number;
-};
-
-function Gauge({ label, value, note }: { label: string; value: number; note?: string }) {
-  const color = value >= 70 ? "text-green-600" : value >= 40 ? "text-amber-600" : "text-destructive";
-  return (
-    <div className="rounded-xl border border-border bg-card p-5 text-center">
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className={`text-5xl font-bold my-2 ${color}`}>{value}</p>
-      <div className="h-2 rounded-full bg-muted"><div className={`h-2 rounded-full ${value >= 70 ? "bg-green-600" : value >= 40 ? "bg-amber-500" : "bg-destructive"}`} style={{ width: `${value}%` }} /></div>
-      {note ? <p className="text-xs text-muted-foreground mt-2">{note}</p> : null}
-    </div>
-  );
-}
+type Report = { name: string; service: string; language: string; stage: string; skill: number; reliability: number; intent: number; intent_adjustments: number; phone_talking_points: { id: string; question: string }[]; inperson_talking_points: { id: string; question: string }[]; error?: string };
 
 export default function HiringFitReport() {
   const { id } = useParams<{ id: string }>();
+  const { language } = useLanguage();
+  const t = (en: string, es: string) => language === "es" ? es : en;
   const [r, setR] = useState<Report | null>(null);
+  const [questions, setQuestions] = useState<ApplicationQuestion[]>([]);
+  const [answers, setAnswers] = useState<SavedAnswer[]>([]);
+  const [submitted, setSubmitted] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
   const [delta, setDelta] = useState("");
   const [reason, setReason] = useState("");
 
   const load = useCallback(async () => {
-    setLoading(true);
-    const { data, error } = await supabase.rpc("hiring_fit_report", { _id: id });
-    if (!error) setR(data as Report);
+    if (!id) { setError("Applicant not found"); setLoading(false); return; }
+    setLoading(true); setError("");
+    const [report, qs, saved, pipeline] = await Promise.all([
+      supabase.rpc("hiring_fit_report", { _id: id }),
+      supabase.from("question_bank").select("id, key, section, sort, service, active, label_en, label_es, type, options").order("section").order("sort"),
+      supabase.from("application_answers").select("question_id, value, answered_at").eq("candidate_id", id),
+      supabase.from("contractor_pipeline").select("apply_submitted_at").eq("applicant_id", id).maybeSingle(),
+    ]);
+    const failure = report.error || qs.error || saved.error || pipeline.error;
+    const data = report.data as Report | null;
+    if (failure || !data || data.error) setError(failure?.message ?? data?.error ?? "Applicant not found");
+    else { setR(data); setQuestions(qs.data ?? []); setAnswers(saved.data ?? []); setSubmitted(pipeline.data?.apply_submitted_at ?? null); }
     setLoading(false);
   }, [id]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
   const adjust = async () => {
     const d = Number(delta);
-    if (!d || d < -10 || d > 10 || reason.trim().length < 5) {
-      toast({ title: "Adjustment needs −10..+10 and a reason (5+ chars)", variant: "destructive" }); return;
+    if (!id || !d || d < -10 || d > 10 || reason.trim().length < 5) {
+      toast({ title: t("Adjustment needs −10..+10 and a reason (5+ characters)", "El ajuste debe ser de −10 a +10 y tener un motivo (5 caracteres mínimo)"), variant: "destructive" }); return;
     }
     const { error } = await supabase.from("intent_adjustments").insert({ applicant_id: id, delta: d, reason: reason.trim() });
     if (error) toast({ title: error.message, variant: "destructive" });
-    else { setDelta(""); setReason(""); load(); }
+    else { setDelta(""); setReason(""); void load(); }
   };
 
-  if (loading || !r) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (error || !r) return <div className="container max-w-4xl py-10 space-y-4"><p role="alert" className="text-destructive">{t("Could not load applicant results", "No se pudieron cargar los resultados")}: {error}</p><Button onClick={load}>{t("Try again", "Reintentar")}</Button></div>;
 
-  return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{r.name}</h1>
-          <p className="text-muted-foreground text-sm">{r.service} · {r.language?.toUpperCase()} · {r.stage}{r.legacy_application ? " · legacy application" : ""}</p>
-        </div>
-        <Button variant="outline" onClick={load}>Refresh</Button>
-      </div>
+  const all = visibleQuestions(questions, answers, r.service);
+  const byId = new Map(answers.map(a => [a.question_id, a]));
+  const current = all.filter(q => q.active && (q.service === r.service || q.service === "all"));
+  const answered = current.filter(q => hasAnswer(byId.get(q.id)?.value)).length;
+  const historical = all.length - current.length;
+  const shown = all.filter(q => {
+    const value = byId.get(q.id)?.value;
+    const done = hasAnswer(value);
+    return (filter === "all" || (filter === "answered" ? done : !done)) && `${q.label_en} ${q.label_es} ${answerText(value, q, language)}`.toLowerCase().includes(search.toLowerCase());
+  });
+  const sections = [...new Set(shown.map(q => q.section))];
+  const formatDate = (date: string) => `${new Date(date).toLocaleString(language === "es" ? "es-US" : "en-US", { timeZone: "America/New_York", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })} ET`;
+  const service = r.service === "cleaning" ? t("Cleaning", "Limpieza") : r.service === "lawn" ? t("Lawn care", "Cuidado del jardín") : t("Car Care", "Cuidado del Auto");
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <Gauge label="Skill" value={r.skill} note={r.skill_self_rated ? "self-rated — verify live" : undefined} />
-        <Gauge label="Reliability" value={r.reliability} />
-        <Gauge label="Intent" value={r.intent} note={r.intent_adjustments ? `includes ${r.intent_adjustments > 0 ? "+" : ""}${r.intent_adjustments} manual` : undefined} />
+  return <div className="container mx-auto px-4 py-6 max-w-4xl min-w-0 text-foreground">
+    <Button variant="ghost" size="sm" asChild className="mb-4"><Link to={`/admin/pipeline/${id}`}><ArrowLeft className="h-4 w-4 mr-2" />{t("Candidate record", "Registro del candidato")}</Link></Button>
+    <header className="flex flex-wrap items-start justify-between gap-3 mb-6">
+      <div className="min-w-0"><p className="text-sm text-primary font-semibold mb-1">{t("Application results", "Resultados de la solicitud")}</p><h1 className="text-2xl font-bold break-words">{r.name}</h1><p className="text-sm text-muted-foreground mt-1">{service} · {r.language === "es" ? "Español" : "English"}</p></div>
+      <Button variant="outline" size="sm" onClick={load}><RefreshCw className="h-4 w-4 mr-2" />{t("Refresh", "Actualizar")}</Button>
+    </header>
+    <section className="border-y border-border py-4 mb-6 space-y-2">
+      <p className={`font-semibold ${submitted ? "text-primary" : "text-destructive"}`}>{submitted ? `${t("Submitted on jointidy.co", "Enviada en jointidy.co")} · ${formatDate(submitted)}` : t("NOT submitted on jointidy.co — saved answers only", "NO enviada en jointidy.co — solo respuestas guardadas")}</p>
+      <p className="text-sm">{answered} / {current.length} {t("current questions answered", "preguntas actuales respondidas")} · {current.length - answered} {t("not answered", "sin respuesta")}</p>
+      {historical > 0 && <p className="text-xs text-muted-foreground">{historical} {t("earlier answers preserved below — not extra required questions", "respuestas anteriores conservadas abajo — no son preguntas obligatorias adicionales")}</p>}
+    </section>
+    <section aria-label={t("Questions and answers", "Preguntas y respuestas")}>
+      <h2 className="text-xl font-bold mb-4">{t("Questions & their answers", "Preguntas y respuestas del candidato")}</h2>
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        <div className="relative flex-1 min-w-48"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input aria-label={t("Search questions or answers", "Buscar preguntas o respuestas")} placeholder={t("Search questions or answers", "Buscar preguntas o respuestas")} value={search} onChange={e => setSearch(e.target.value)} className="pl-9" /></div>
+        <div className="flex flex-wrap gap-1">{[["all", t("All", "Todas")], ["answered", t("Answered", "Respondidas")], ["missing", t("Unanswered", "Sin respuesta")]].map(([value, label]) => <Button key={value} size="sm" variant={filter === value ? "default" : "outline"} aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}</Button>)}</div>
       </div>
-
-      <div className="rounded-xl border border-border bg-card p-5 mb-6">
-        <h2 className="font-semibold text-foreground mb-3">Manual intent adjustment</h2>
-        <div className="flex gap-2">
-          <Input type="number" min={-10} max={10} value={delta} onChange={(e) => setDelta(e.target.value)} placeholder="−10..+10" className="w-28" />
-          <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (required)" className="flex-1" />
-          <Button onClick={adjust}>Apply</Button>
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4 mb-8">
-        <div className="rounded-xl border border-border bg-card p-5">
-          <h2 className="font-semibold text-foreground mb-3 flex items-center gap-2"><Phone className="h-4 w-4" />Phone talking points</h2>
-          {r.phone_talking_points.length === 0 ? <p className="text-sm text-muted-foreground">None.</p> : (
-            <ul className="space-y-2">{r.phone_talking_points.map((f) => (
-              <li key={f.id} className="text-sm text-foreground"><span className="font-mono text-xs text-primary mr-1">{f.id}</span>{f.question}</li>
-            ))}</ul>
-          )}
-        </div>
-        <div className="rounded-xl border border-border bg-card p-5">
-          <h2 className="font-semibold text-foreground mb-3 flex items-center gap-2"><Users className="h-4 w-4" />In-person talking points</h2>
-          {r.inperson_talking_points.length === 0 ? <p className="text-sm text-muted-foreground">None.</p> : (
-            <ul className="space-y-2">{r.inperson_talking_points.map((f) => (
-              <li key={f.id} className="text-sm text-foreground"><span className="font-mono text-xs text-primary mr-1">{f.id}</span>{f.question}</li>
-            ))}</ul>
-          )}
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-border bg-card p-5 mb-6">
-        <h2 className="font-semibold text-foreground mb-3">Skill bars</h2>
-        <div className="space-y-2">
-          {r.bars.map((b) => (
-            <div key={b.key} className="flex items-center gap-3">
-              <span className="text-sm text-foreground w-64 truncate">{b.label}{b.core ? <span className="text-xs text-primary ml-1">core</span> : null}{b.demo ? <span className="text-xs text-amber-600 ml-1">demo</span> : null}</span>
-              <div className="flex-1 h-2 rounded-full bg-muted"><div className="h-2 rounded-full bg-primary" style={{ width: `${(b.value ?? 0) * 10}%` }} /></div>
-              <span className="text-sm font-semibold text-foreground w-10 text-right">{b.value ?? "—"}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-border bg-card p-5 mb-6">
-        <h2 className="font-semibold text-foreground mb-3">Scenarios</h2>
-        <div className="space-y-1">
-          {r.scenarios.map((s) => (
-            <p key={s.key} className={`text-sm ${s.wrong ? "text-destructive font-medium" : "text-foreground"}`}>
-              {s.key}: {s.answer ?? "—"}{s.wrong ? ` (correct: ${s.correct})` : ""}
-            </p>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-border bg-card p-5">
-        <h2 className="font-semibold text-foreground mb-3 flex items-center gap-2"><Flag className="h-4 w-4" />All flags</h2>
-        {r.flags.length === 0 ? <p className="text-sm text-muted-foreground">No flags.</p> : (
-          <ul className="space-y-2">{r.flags.map((f, i) => (
-            <li key={i} className="text-sm text-foreground"><span className="font-mono text-xs text-primary mr-1">{f.id}</span>{f.question}</li>
-          ))}</ul>
-        )}
-      </div>
-    </div>
-  );
+      {sections.map(section => <section key={section} className="mb-8">
+        <h3 className="text-base font-bold bg-muted py-3 px-4 border-l-4 border-primary">{applicationSections[language][section - 1] ?? `${t("Section", "Sección")} ${section}`}</h3>
+        <dl className="divide-y divide-border">{shown.filter(q => q.section === section).map(q => {
+          const saved = byId.get(q.id);
+          const done = hasAnswer(saved?.value);
+          return <div key={q.id} className="py-5 px-1 min-w-0" data-question-id={q.id}>
+            <dt className="font-semibold text-sm leading-relaxed break-words">{all.indexOf(q) + 1}. {language === "es" ? q.label_es || q.label_en : q.label_en}</dt>
+            <dd className={`mt-2 whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-base ${done ? "text-foreground" : "text-muted-foreground italic"}`}>{answerText(saved?.value, q, language)}</dd>
+            {!q.active && <dd className="text-xs text-muted-foreground mt-2">{t("Earlier application question · saved answer retained", "Pregunta de la solicitud anterior · respuesta conservada")}</dd>}
+          </div>;
+        })}</dl>
+      </section>)}
+      {shown.length === 0 && <p className="text-muted-foreground py-6">{t("No matching questions or answers.", "No hay preguntas ni respuestas que coincidan.")}</p>}
+    </section>
+    <details className="border-t border-border py-5">
+      <summary className="font-semibold cursor-pointer">{t("Internal scores & interview follow-up", "Puntuaciones internas y seguimiento de la entrevista")}</summary>
+      <p className="text-sm text-muted-foreground mt-4">{t("Automated indicators, not verified qualifications. Some inputs were removed from the shorter application; missing answers can distort these scores.", "Son indicadores automáticos, no cualificaciones verificadas. Algunas preguntas se eliminaron de la solicitud abreviada; las respuestas faltantes pueden distorsionar estas puntuaciones.")}</p>
+      <dl className="space-y-3 mt-4 text-sm">
+        <div><dt className="font-semibold">{t("Self-rated experience", "Experiencia autoevaluada")}: {r.skill}/100</dt><dd className="text-muted-foreground">{t("Weighted average of their 0–10 skill answers. Not a practical assessment.", "Promedio ponderado de sus respuestas de habilidades de 0 a 10. No es una evaluación práctica.")}</dd></div>
+        <div><dt className="font-semibold">{t("Attendance & scenario indicator", "Indicador de asistencia y situaciones")}: {r.reliability}/100</dt><dd className="text-muted-foreground">{t("Starts at 100; deductions come from attendance history and scenario answers. Missing history is not proof of reliability.", "Comienza en 100 y descuenta puntos según la asistencia y las respuestas a situaciones. La falta de historial no demuestra fiabilidad.")}</dd></div>
+        <div><dt className="font-semibold">{t("Application follow-through", "Seguimiento de la solicitud")}: {r.intent}/100</dt><dd className="text-muted-foreground">{t("Application, photo and booking timing, availability, motivation answers and manual adjustments. Not a personality rating.", "Tiempos de solicitud, fotos y reserva, disponibilidad, respuestas de motivación y ajustes manuales. No evalúa la personalidad.")}</dd></div>
+      </dl>
+      <div className="mt-5 flex flex-wrap gap-2"><Input aria-label={t("Score adjustment", "Ajuste de puntuación")} type="number" min={-10} max={10} value={delta} onChange={e => setDelta(e.target.value)} placeholder="−10..+10" className="w-28" /><Input aria-label={t("Adjustment reason", "Motivo del ajuste")} value={reason} onChange={e => setReason(e.target.value)} placeholder={t("Reason (required)", "Motivo (obligatorio)")} className="flex-1 min-w-48" /><Button onClick={adjust}>{t("Apply adjustment", "Aplicar ajuste")}</Button></div>
+      {[{ title: t("Phone follow-up", "Seguimiento por teléfono"), points: r.phone_talking_points }, { title: t("In-person follow-up", "Seguimiento en persona"), points: r.inperson_talking_points }].map(group => <div key={group.title} className="mt-5"><h3 className="font-semibold">{group.title}</h3><ul className="list-disc pl-5 mt-2 space-y-2 text-sm">{group.points?.map(point => <li key={point.id}>{point.question}</li>)}</ul></div>)}
+    </details>
+  </div>;
 }
