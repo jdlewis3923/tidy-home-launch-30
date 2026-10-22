@@ -25,9 +25,9 @@ import foundingMobileVideo from "@/assets/homepage-mobile-hero-20261004b.mp4.ass
 import foundingMobilePoster from "@/assets/homepage-mobile-hero-poster-20261004b.jpg.asset.json";
 import foundingDesktopVideo from "@/assets/homepage-desktop-hero-20261004b.mp4.asset.json";
 import foundingDesktopPoster from "@/assets/homepage-desktop-hero-poster-20261004b.jpg.asset.json";
-import cleaningPlan from "@/assets/founding-plan-cleaning.png";
-import lawnPlan from "@/assets/founding-plan-lawn.png";
-import carPlan from "@/assets/founding-plan-car.png";
+import cleaningPlan from "@/assets/founding-plan-cleaning.webp";
+import lawnPlan from "@/assets/founding-plan-lawn.webp";
+import carPlan from "@/assets/founding-plan-car.webp";
 import scanImage from "@/assets/founding-how-scan.jpg";
 import calendarImage from "@/assets/founding-how-calendar.jpg";
 import proImage from "@/assets/founding-pro-step.jpg";
