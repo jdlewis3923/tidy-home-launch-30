@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
       first_name: String(val(`${prefix}about.first_name`) ?? ''), last_name: String(val(`${prefix}about.last_name`) ?? ''),
       phone: String(val(`${prefix}about.phone`) ?? ''), email: String(val(`${prefix}about.email`) ?? a.email),
       zip: String(val(`${prefix}about.zip`) ?? ''), preferred_language: lang,
-      ...(report ? { drive_minutes: report.drive_time_minutes, drivers_license: val('v6.licence') === 'yes' } : {}),
+      ...(report ? { drive_minutes: report.drive_time_minutes, drivers_license: String(val('v6.licence') ?? '') } : {}),
     }).eq('id', p.applicant_id);
     if (identityError) return jsonResponse({ error: 'submit_failed' }, 500);
     const { error: submitError } = await admin.from('contractor_pipeline').update({
