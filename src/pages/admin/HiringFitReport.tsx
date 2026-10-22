@@ -1,118 +1,67 @@
-import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Loader2, RefreshCw, ArrowLeft, Search } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { answerText, hasAnswer, visibleQuestions, applicationSections, type ApplicationQuestion, type SavedAnswer } from "@/lib/applicant-answers";
-import ApplicationChannels from "@/components/admin/ApplicationChannels";
-import { useApplicationChannels } from "@/hooks/useApplicationChannels";
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ArrowLeft, ChevronLeft, ChevronRight, CalendarDays, MessageSquare, Download, Search, Bell, House, Users, Briefcase, CreditCard, Megaphone, BarChart3, Settings, Globe, MapPin, Phone, Mail, Clock, FileText, Hash, Tag, CheckCircle2, XCircle, AlertCircle, ShieldCheck, Wrench, User, Loader2, RefreshCw, StickyNote } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { answerText, hasAnswer, visibleQuestions, applicationSections, type ApplicationQuestion, type SavedAnswer } from '@/lib/applicant-answers';
+import ApplicationChannels from '@/components/admin/ApplicationChannels';
+import { useApplicationChannels } from '@/hooks/useApplicationChannels';
+import CandidateTexts from '@/components/admin/pipeline/CandidateTexts';
+import TidyLogo from '@/components/TidyLogo';
+import '@/styles/application-reference.css';
 
-type Report = { name: string; service: string; language: string; stage: string; skill: number; reliability: number; intent: number; intent_adjustments: number; phone_talking_points: { id: string; question: string }[]; inperson_talking_points: { id: string; question: string }[]; error?: string };
-
-export default function HiringFitReport() {
-  const { id } = useParams<{ id: string }>();
-  const { language } = useLanguage();
-  const t = (en: string, es: string) => language === "es" ? es : en;
-  const [r, setR] = useState<Report | null>(null);
-  const [questions, setQuestions] = useState<ApplicationQuestion[]>([]);
-  const [answers, setAnswers] = useState<SavedAnswer[]>([]);
-  const [submitted, setSubmitted] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const channels = useApplicationChannels([id]);
-  const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
-  const [delta, setDelta] = useState("");
-  const [reason, setReason] = useState("");
-
-  const load = useCallback(async () => {
-    if (!id) { setError("Applicant not found"); setLoading(false); return; }
-    setLoading(true); setError("");
-    const [report, qs, saved, pipeline] = await Promise.all([
-      supabase.rpc("hiring_fit_report", { _id: id }),
-      supabase.from("question_bank").select("id, key, section, sort, service, active, label_en, label_es, type, options").order("section").order("sort"),
-      supabase.from("application_answers").select("question_id, value, answered_at").eq("candidate_id", id),
-      supabase.from("contractor_pipeline").select("apply_submitted_at").eq("applicant_id", id).maybeSingle(),
-    ]);
-    const failure = report.error || qs.error || saved.error || pipeline.error;
-    const data = report.data as Report | null;
-    if (failure || !data || data.error) setError(failure?.message ?? data?.error ?? "Applicant not found");
-    else { setR(data); setQuestions(qs.data ?? []); setAnswers(saved.data ?? []); setSubmitted(pipeline.data?.apply_submitted_at ?? null); }
-    setLoading(false);
-  }, [id]);
-  useEffect(() => { void load(); }, [load]);
-
-  const adjust = async () => {
-    const d = Number(delta);
-    if (!id || !d || d < -10 || d > 10 || reason.trim().length < 5) {
-      toast({ title: t("Adjustment needs −10..+10 and a reason (5+ characters)", "El ajuste debe ser de −10 a +10 y tener un motivo (5 caracteres mínimo)"), variant: "destructive" }); return;
-    }
-    const { error } = await supabase.from("intent_adjustments").insert({ applicant_id: id, delta: d, reason: reason.trim() });
-    if (error) toast({ title: error.message, variant: "destructive" });
-    else { setDelta(""); setReason(""); void load(); }
-  };
-
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  if (error || !r) return <div className="container max-w-4xl py-10 space-y-4"><p role="alert" className="text-destructive">{t("Could not load applicant results", "No se pudieron cargar los resultados")}: {error}</p><Button onClick={load}>{t("Try again", "Reintentar")}</Button></div>;
-
-  const all = visibleQuestions(questions, answers, r.service);
-  const byId = new Map(answers.map(a => [a.question_id, a]));
-  const current = all.filter(q => q.active && (q.service === r.service || q.service === "all"));
-  const answered = current.filter(q => hasAnswer(byId.get(q.id)?.value)).length;
-  const historical = all.length - current.length;
-  const shown = all.filter(q => {
-    const value = byId.get(q.id)?.value;
-    const done = hasAnswer(value);
-    return (filter === "all" || (filter === "answered" ? done : !done)) && `${q.label_en} ${q.label_es} ${answerText(value, q, language)}`.toLowerCase().includes(search.toLowerCase());
-  });
-  const sections = [...new Set(shown.map(q => q.section))];
-  const formatDate = (date: string) => `${new Date(date).toLocaleString(language === "es" ? "es-US" : "en-US", { timeZone: "America/New_York", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })} ET`;
-  const service = r.service === "cleaning" ? t("Cleaning", "Limpieza") : r.service === "lawn" ? t("Lawn care", "Cuidado del jardín") : t("Car Care", "Cuidado del Auto");
-
-  return <div className="container mx-auto px-4 py-6 max-w-4xl min-w-0 text-foreground">
-    <Button variant="ghost" size="sm" asChild className="mb-4"><Link to={`/admin/pipeline/${id}`}><ArrowLeft className="h-4 w-4 mr-2" />{t("Candidate record", "Registro del candidato")}</Link></Button>
-    <header className="flex flex-wrap items-start justify-between gap-3 mb-6">
-      <div className="min-w-0"><p className="text-sm text-primary font-semibold mb-1">{t("Application results", "Resultados de la solicitud")}</p><h1 className="text-2xl font-bold break-words">{r.name}</h1><ApplicationChannels c={channels.get(id ?? "")} /><p className="text-sm text-muted-foreground mt-1">{service} · {r.language === "es" ? "Español" : "English"}</p></div>
-      <Button variant="outline" size="sm" onClick={load}><RefreshCw className="h-4 w-4 mr-2" />{t("Refresh", "Actualizar")}</Button>
-    </header>
-    <section className="border-y border-border py-4 mb-6 space-y-2">
-      <p className={`font-semibold ${submitted ? "text-primary" : "text-destructive"}`}>{submitted ? `${t("Submitted on jointidy.co", "Enviada en jointidy.co")} · ${formatDate(submitted)}` : t("NOT submitted on jointidy.co — saved answers only", "NO enviada en jointidy.co — solo respuestas guardadas")}</p>
-      <p className="text-sm">{answered} / {current.length} {t("current questions answered", "preguntas actuales respondidas")} · {current.length - answered} {t("not answered", "sin respuesta")}</p>
-      {historical > 0 && <p className="text-xs text-muted-foreground">{historical} {t("earlier answers preserved below — not extra required questions", "respuestas anteriores conservadas abajo — no son preguntas obligatorias adicionales")}</p>}
-    </section>
-    <section aria-label={t("Questions and answers", "Preguntas y respuestas")}>
-      <h2 className="text-xl font-bold mb-4">{t("Questions & their answers", "Preguntas y respuestas del candidato")}</h2>
-      <div className="flex flex-wrap items-center gap-2 mb-6">
-        <div className="relative flex-1 min-w-48"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input aria-label={t("Search questions or answers", "Buscar preguntas o respuestas")} placeholder={t("Search questions or answers", "Buscar preguntas o respuestas")} value={search} onChange={e => setSearch(e.target.value)} className="pl-9" /></div>
-        <div className="flex flex-wrap gap-1">{[["all", t("All", "Todas")], ["answered", t("Answered", "Respondidas")], ["missing", t("Unanswered", "Sin respuesta")]].map(([value, label]) => <Button key={value} size="sm" variant={filter === value ? "default" : "outline"} aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}</Button>)}</div>
-      </div>
-      {sections.map(section => <section key={section} className="mb-8">
-        <h3 className="text-base font-bold bg-muted py-3 px-4 border-l-4 border-primary">{applicationSections[language][section - 1] ?? `${t("Section", "Sección")} ${section}`}</h3>
-        <dl className="divide-y divide-border">{shown.filter(q => q.section === section).map(q => {
-          const saved = byId.get(q.id);
-          const done = hasAnswer(saved?.value);
-          return <div key={q.id} className="py-5 px-1 min-w-0" data-question-id={q.id}>
-            <dt className="font-semibold text-sm leading-relaxed break-words">{all.indexOf(q) + 1}. {language === "es" ? q.label_es || q.label_en : q.label_en}</dt>
-            <dd className={`mt-2 whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-base ${done ? "text-foreground" : "text-muted-foreground italic"}`}>{answerText(saved?.value, q, language)}</dd>
-            {!q.active && <dd className="text-xs text-muted-foreground mt-2">{t("Earlier application question · saved answer retained", "Pregunta de la solicitud anterior · respuesta conservada")}</dd>}
-          </div>;
-        })}</dl>
-      </section>)}
-      {shown.length === 0 && <p className="text-muted-foreground py-6">{t("No matching questions or answers.", "No hay preguntas ni respuestas que coincidan.")}</p>}
-    </section>
-    <details className="border-t border-border py-5">
-      <summary className="font-semibold cursor-pointer">{t("Internal scores & interview follow-up", "Puntuaciones internas y seguimiento de la entrevista")}</summary>
-      <p className="text-sm text-muted-foreground mt-4">{t("Automated indicators, not verified qualifications. Some inputs were removed from the shorter application; missing answers can distort these scores.", "Son indicadores automáticos, no cualificaciones verificadas. Algunas preguntas se eliminaron de la solicitud abreviada; las respuestas faltantes pueden distorsionar estas puntuaciones.")}</p>
-      <dl className="space-y-3 mt-4 text-sm">
-        <div><dt className="font-semibold">{t("Self-rated experience", "Experiencia autoevaluada")}: {r.skill}/100</dt><dd className="text-muted-foreground">{t("Weighted average of their 0–10 skill answers. Not a practical assessment.", "Promedio ponderado de sus respuestas de habilidades de 0 a 10. No es una evaluación práctica.")}</dd></div>
-        <div><dt className="font-semibold">{t("Attendance & scenario indicator", "Indicador de asistencia y situaciones")}: {r.reliability}/100</dt><dd className="text-muted-foreground">{t("Starts at 100; deductions come from attendance history and scenario answers. Missing history is not proof of reliability.", "Comienza en 100 y descuenta puntos según la asistencia y las respuestas a situaciones. La falta de historial no demuestra fiabilidad.")}</dd></div>
-        <div><dt className="font-semibold">{t("Application follow-through", "Seguimiento de la solicitud")}: {r.intent}/100</dt><dd className="text-muted-foreground">{t("Application, photo and booking timing, availability, motivation answers and manual adjustments. Not a personality rating.", "Tiempos de solicitud, fotos y reserva, disponibilidad, respuestas de motivación y ajustes manuales. No evalúa la personalidad.")}</dd></div>
-      </dl>
-      <div className="mt-5 flex flex-wrap gap-2"><Input aria-label={t("Score adjustment", "Ajuste de puntuación")} type="number" min={-10} max={10} value={delta} onChange={e => setDelta(e.target.value)} placeholder="−10..+10" className="w-28" /><Input aria-label={t("Adjustment reason", "Motivo del ajuste")} value={reason} onChange={e => setReason(e.target.value)} placeholder={t("Reason (required)", "Motivo (obligatorio)")} className="flex-1 min-w-48" /><Button onClick={adjust}>{t("Apply adjustment", "Aplicar ajuste")}</Button></div>
-      {[{ title: t("Phone follow-up", "Seguimiento por teléfono"), points: r.phone_talking_points }, { title: t("In-person follow-up", "Seguimiento en persona"), points: r.inperson_talking_points }].map(group => <div key={group.title} className="mt-5"><h3 className="font-semibold">{group.title}</h3><ul className="list-disc pl-5 mt-2 space-y-2 text-sm">{group.points?.map(point => <li key={point.id}>{point.question}</li>)}</ul></div>)}
-    </details>
-  </div>;
+type Point={id:string;question:string};
+type Report={name?:string;service?:string;language?:string;stage?:string;skill:number;reliability:number;intent:number;phone_talking_points?:Point[];inperson_talking_points?:Point[];flags?:Point[];disqualified?:boolean;version?:number;error?:string};
+type Pipeline={apply_submitted_at:string|null;apply_started_at:string|null;apply_total_seconds:number|null;application_version:number;apply_question_ids:string[]|null;application_owner_notes:string|null;source:string|null;archived:boolean;phone_slot_id:string|null;inperson_slot_id:string|null};
+type Applicant={first_name:string;last_name:string;phone:string|null;email:string;zip:string|null;source:string|null;preferred_language:string|null;created_at:string};
+const V6={en:['About you','Your experience','Your skills','Equipment & vehicle','Your schedule','What you’re looking for','How Tidy works','Last step'],es:['Sobre ti','Tu experiencia','Tus habilidades','Equipo y vehículo','Tu horario','Lo que buscas','Cómo funciona Tidy','Último paso']};
+const ICONS=[User,Briefcase,Wrench,ShieldCheck,CalendarDays,Tag,House,FileText];
+export default function HiringFitReport(){
+ const {id}=useParams<{id:string}>();const {language}=useLanguage();const t=(en:string,es:string)=>language==='es'?es:en;
+ const [r,setR]=useState<Report|null>(null);const [a,setA]=useState<Applicant|null>(null);const [p,setP]=useState<Pipeline|null>(null);const [questions,setQuestions]=useState<ApplicationQuestion[]>([]);const [answers,setAnswers]=useState<SavedAnswer[]>([]);const [events,setEvents]=useState<{id:string;kind:string;reason:string|null;created_at:string}[]>([]);const [neighbors,setNeighbors]=useState<string[]>([]);
+ const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [tab,setTab]=useState('answers');const [search,setSearch]=useState('');const [notes,setNotes]=useState('');const [saving,setSaving]=useState(false);const [messageOpen,setMessageOpen]=useState(false);const [delta,setDelta]=useState('');const [reason,setReason]=useState('');const channels=useApplicationChannels([id]);
+ const load=useCallback(async()=>{if(!id)return;setLoading(true);setError('');const [pr,ar,qs,saved,ev,ids,report]=await Promise.all([
+ supabase.from('contractor_pipeline').select('apply_submitted_at,apply_started_at,apply_total_seconds,application_version,apply_question_ids,application_owner_notes,source,archived,phone_slot_id,inperson_slot_id').eq('applicant_id',id).maybeSingle(),
+ supabase.from('applicants').select('first_name,last_name,phone,email,zip,source,preferred_language,created_at').eq('id',id).maybeSingle(),
+ supabase.from('question_bank').select('id,key,section,sort,service,active,label_en,label_es,type,options').order('section').order('sort'),
+ supabase.from('application_answers').select('question_id,value,answered_at').eq('candidate_id',id),
+ supabase.from('contractor_stage_events').select('id,kind,reason,created_at').eq('applicant_id',id).order('created_at',{ascending:false}).limit(70),
+ supabase.from('contractor_pipeline').select('applicant_id').eq('is_test',false).order('invited_at',{ascending:false}).limit(150),
+ supabase.rpc('admin_application_report',{_id:id})]);
+ const failure=pr.error||ar.error||qs.error||saved.error||ev.error||report.error;
+ if(failure||!ar.data||!pr.data)setError(failure?.message??'Applicant not found');else{setP(pr.data);setA(ar.data);setR(report.data as Report|null);setQuestions(qs.data??[]);setAnswers(saved.data??[]);setEvents(ev.data??[]);setNotes(pr.data.application_owner_notes??'');setNeighbors((ids.data??[]).map(x=>x.applicant_id));}setLoading(false);},[id]);
+ useEffect(()=>{void load();},[load]);
+ const saveNote=async()=>{if(!id)return;setSaving(true);const {error}=await supabase.rpc('admin_application_note',{_id:id,_note:notes});setSaving(false);toast({title:error?error.message:t('Note saved','Nota guardada'),variant:error?'destructive':'default'});};
+ const adjust=async()=>{if(!id||!Number(delta)||Number(delta)<-10||Number(delta)>10||reason.trim().length<5){toast({title:t('Use −10 to +10 and a reason of at least 5 characters.','Usa de −10 a +10 y un motivo de al menos 5 caracteres.'),variant:'destructive'});return;}const {error}=await supabase.from('intent_adjustments').insert({applicant_id:id,delta:Number(delta),reason:reason.trim()});if(error)toast({title:error.message,variant:'destructive'});else{setDelta('');setReason('');void load();}};
+ if(loading)return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary"/></div>;
+ if(error||!a||!p)return <main className="p-8"><p role="alert" className="text-destructive">{error}</p><Button onClick={load}>{t('Try again','Reintentar')}</Button></main>;
+ const name=`${a.first_name} ${a.last_name}`.trim()||t('Unnamed applicant','Solicitante sin nombre');const initials=name.split(' ').filter(Boolean).slice(0,2).map(s=>s[0]).join('').toUpperCase();
+ const service=r?.service??questions.find(q=>answers.some(x=>x.question_id===q.id)&&q.service!=='all')?.service??'cleaning';
+ const all=visibleQuestions(questions,answers,service);const byId=new Map(answers.map(a=>[a.question_id,a]));
+ const current=p.apply_question_ids?.length?questions.filter(q=>p.apply_question_ids?.includes(q.id)):questions.filter(q=>q.active&&['all',service].includes(q.service));
+ const currentIds=new Set(current.map(q=>q.id));const historical=all.filter(q=>!currentIds.has(q.id)&&hasAnswer(byId.get(q.id)?.value));const complete=current.filter(q=>hasAnswer(byId.get(q.id)?.value)).length;const percent=current.length?Math.round(complete/current.length*100):0;
+ const visible=[...current,...historical].filter(q=>(tab!=='missing'||!hasAnswer(byId.get(q.id)?.value))&&`${q.label_en} ${q.label_es} ${answerText(byId.get(q.id)?.value,q,language)}`.toLowerCase().includes(search.toLowerCase()));
+ const sections=[...new Set(visible.map(q=>q.section))].sort((a,b)=>a-b);const fmt=(date:string|null|undefined)=>date?new Date(date).toLocaleString(language==='es'?'es-US':'en-US',{timeZone:'America/New_York',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})+' ET':t('Not recorded','No registrado');
+ const status=p.apply_submitted_at?t('Submitted on Tidy','Enviada en Tidy'):complete?t('Saved (incomplete)','Guardada (incompleta)'):t('Not started','Sin comenzar');const idx=neighbors.indexOf(id??'');const latest=answers.map(x=>x.answered_at).sort().at(-1);const svcLabel=service==='cleaning'?t('Cleaning','Limpieza'):service==='lawn'?t('Lawn Care','Cuidado del jardín'):t('Car Care','Cuidado del Auto');
+ const exportAnswers=()=>{const rows=[name,channels.get(id??'')?.indeedLabel??'',channels.get(id??'')?.linkLabel??'',status,...[...current,...historical].map((q,i)=>`${i+1}. ${language==='es'?q.label_es:q.label_en}\n${answerText(byId.get(q.id)?.value,q,language)}\n`)];const url=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/plain;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download=`Tidy-${name.replace(/\s+/g,'-')}-answers.txt`;link.click();URL.revokeObjectURL(url);};
+ const summary=(r?.version===6?r.flags:undefined)??[];
+ const scores=[{label:t('Experience & skills','Experiencia y habilidades'),value:r?.skill,kind:'skill'},{label:t('Transport & availability','Transporte y disponibilidad'),value:r?.reliability,kind:'reliability'},{label:t('Goals & readiness','Metas y disponibilidad para comenzar'),value:r?.intent,kind:'intent'}];
+ return <div className="application-reference applicant-reference"><header className="applicant-ref-top"><Link to="/admin/command"><TidyLogo size="sm"/></Link><strong>{t('Hiring','Contratación')}</strong><nav><Link className="is-active" to="/admin/pipeline">{t('Applicants','Solicitantes')}</Link><Link to="/admin/hiring/slots">{t('Interviews','Entrevistas')}</Link><Link to="/admin/hiring">{t('Hired','Contratados')}</Link><Link to="/admin/hiring/content">{t('Settings','Configuración')}</Link></nav><Button variant="ghost" size="icon" asChild aria-label={t('Alerts','Alertas')}><Link to="/admin/alerts"><Bell/></Link></Button><span className="rounded-full bg-secondary/20 p-2 text-xs">JL</span></header>
+ <aside className="applicant-ref-rail">{[['/admin/command',t('Dashboard','Panel'),House],['/admin/schedule',t('Bookings','Reservas'),CalendarDays],['/admin/leads',t('Customers','Clientes'),Users],['/admin/onboarding','Pros',Users],['/admin/pipeline',t('Hiring','Contratación'),Briefcase],['/admin/schedule',t('Schedule','Calendario'),CalendarDays],['/admin/costs',t('Payments','Pagos'),CreditCard],['/admin/social',t('Marketing','Marketing'),Megaphone],['/admin/kpis',t('Reports','Informes'),BarChart3],['/admin/settings/notifications',t('Settings','Configuración'),Settings]].map(([href,l,Icon])=>{const I=Icon as typeof House;return <Link key={String(l)} className={href==='/admin/pipeline'?'is-active':''} to={String(href)}><I className="w-4 h-4"/>{String(l)}</Link>;})}<p>{t('More life.','Más vida.')}<br/><span>{t('Less chores.','Menos tareas.')}</span></p></aside>
+ <main className="applicant-ref-page"><div className="applicant-ref-back"><Button variant="ghost" size="sm" asChild><Link to="/admin/pipeline"><ArrowLeft/>{t('All applicants','Todos los solicitantes')}</Link></Button><div className="flex gap-2"><Button variant="outline" size="sm" disabled={idx<=0} asChild={idx>0}>{idx>0?<Link to={`/admin/hiring/fit/${neighbors[idx-1]}`}><ChevronLeft/>{t('Previous','Anterior')}</Link>:<><ChevronLeft/>{t('Previous','Anterior')}</>}</Button><Button variant="outline" size="sm" disabled={idx<0||idx>=neighbors.length-1} asChild={idx>=0&&idx<neighbors.length-1}>{idx>=0&&idx<neighbors.length-1?<Link to={`/admin/hiring/fit/${neighbors[idx+1]}`}>{t('Next','Siguiente')}<ChevronRight/></Link>:<>{t('Next','Siguiente')}<ChevronRight/></>}</Button></div></div>
+ <section className="applicant-ref-person"><div className="applicant-ref-avatar">{initials}</div><div className="min-w-0"><h1 className="break-words">{name}</h1><p className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2"><Globe className="w-3 h-3"/>{svcLabel} · <MapPin className="w-3 h-3"/>{a.preferred_language==='es'?'Español':'English'}</p><ApplicationChannels c={channels.get(id??'')}/><div className="flex flex-wrap gap-2 mt-2 items-center"><span className="ref-saved">{status}</span><small className="text-muted-foreground">{p.apply_submitted_at?fmt(p.apply_submitted_at):t('Started','Comenzó')+': '+fmt(p.apply_started_at)}</small></div></div><div className="applicant-ref-actions"><Button asChild className="w-full"><Link to={`/admin/hiring/slots?applicant=${id}`}><CalendarDays/>{t('Schedule interview','Programar entrevista')}</Link></Button><div className="flex gap-2 mt-2"><Button variant="outline" size="sm" onClick={()=>setMessageOpen(true)}><MessageSquare/>{t('Send message','Enviar mensaje')}</Button><Button variant="outline" size="sm" onClick={exportAnswers}><Download/>{t('Download','Descargar')}</Button><Button variant="outline" size="icon" aria-label={t('Refresh','Actualizar')} onClick={load}><RefreshCw/></Button></div></div></section>
+ <div className="applicant-ref-stats"><section className="applicant-ref-card"><h2>{t('Application progress','Progreso de la solicitud')}</h2><div className="flex items-center gap-4"><div className="applicant-ref-ring"><svg viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="46"/><circle cx="55" cy="55" r="46" strokeDasharray={`${percent/100*289} 289`}/></svg><strong>{percent}%</strong></div><div><strong className="text-lg">{complete} / {current.length}</strong><p className="text-xs text-muted-foreground mt-1">{t('questions answered','preguntas respondidas')}</p><span className="applicant-ref-pill is-no inline-flex mt-3">{current.length-complete} {t('unanswered','sin respuesta')}</span></div></div></section><section className="applicant-ref-card"><h2>{t('Internal scores','Puntuaciones internas')}</h2>{scores.map(s=><div key={s.kind} className={`applicant-ref-score is-${s.kind}`}><div><span>{s.label}</span><strong>{s.value===undefined?'—':s.value}/100</strong></div><progress max="100" value={s.value??0} aria-label={s.label}/></div>)}<p className="text-[10px] text-muted-foreground">{p.application_version===6?t('Based on their answers; not a practical assessment.','Basadas en sus respuestas; no es una evaluación práctica.'):t('Legacy indicators; see Scores & Notes for limitations.','Indicadores anteriores; consulta Puntuaciones y notas para conocer sus límites.')}</p></section><section className="applicant-ref-card"><h2>{t('Quick summary','Resumen rápido')}</h2><p className="applicant-ref-summary"><CheckCircle2/>{complete} {t('saved answers available below','respuestas guardadas disponibles abajo')}</p><p className={`applicant-ref-summary ${p.apply_submitted_at?'':'is-warning'}`}>{p.apply_submitted_at?<CheckCircle2/>:<AlertCircle/>}{p.apply_submitted_at?t('Submitted through Tidy’s application','Envió la solicitud de Tidy'):t('Has NOT submitted the Tidy application','NO ha enviado la solicitud de Tidy')}</p>{summary.slice(0,3).map(f=><p key={f.id} className="applicant-ref-summary is-warning"><AlertCircle/>{f.question}</p>)}{r?.disqualified&&<p className="applicant-ref-summary is-warning"><XCircle/>{t('Admin-only: vehicle/work authorization not met','Solo para administración: no cumple con vehículo o autorización laboral')}</p>}{p.archived&&<p className="applicant-ref-summary is-warning"><AlertCircle/>{t('Archived record','Registro archivado')}</p>}</section></div>
+ <nav className="applicant-ref-tabs" role="tablist" aria-label={t('Applicant details','Detalles del solicitante')}>{[['answers',t('Application answers','Respuestas')],['missing',t('Unanswered','Sin respuesta')+` (${current.length-complete})`],['scores',t('Scores & Notes','Puntuaciones y notas')],['interviews',t('Interviews','Entrevistas')],['timeline',t('Timeline','Cronología')]].map(([key,l])=><Button key={key} variant="ghost" role="tab" aria-selected={tab===key} aria-controls={`applicant-${key}`} onClick={()=>setTab(key)}>{l}</Button>)}</nav>
+ <div className="applicant-ref-columns"><div role="tabpanel" id={`applicant-${tab}`}>
+ {(tab==='answers'||tab==='missing')&&<><div className="relative mb-4"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"/><Input aria-label={t('Search questions and answers','Buscar preguntas y respuestas')} placeholder={t('Search questions and answers','Buscar preguntas y respuestas')} value={search} onChange={e=>setSearch(e.target.value)} className="pl-9 bg-background"/></div>{sections.map(s=>{const group=visible.filter(q=>q.section===s);const count=group.filter(q=>hasAnswer(byId.get(q.id)?.value)).length;const Icon=ICONS[(s-1)%ICONS.length];return <section key={s} className="applicant-ref-section"><header><Icon/><h3>{p.application_version===6?V6[language][s-1]:applicationSections[language][s-1]??t('Earlier answers','Respuestas anteriores')}</h3><small>{count} / {group.length} {t('answered','respondidas')}</small>{count===group.length?<CheckCircle2 className="w-4 h-4 text-success"/>:<AlertCircle className="w-4 h-4 text-gold"/>}</header><dl>{group.map(q=>{const value=byId.get(q.id)?.value;const done=hasAnswer(value);const simple=typeof value==='boolean'||q.type==='slider'||!done;return <div key={q.id} data-question-id={q.id} className={`applicant-ref-answer ${simple?'':'is-text'}`}><dt>{[...current,...historical].indexOf(q)+1}. {language==='es'?q.label_es:q.label_en}{!currentIds.has(q.id)&&<small className="block text-muted-foreground">{t('Earlier saved answer','Respuesta anterior guardada')}</small>}</dt><dd className={simple?`applicant-ref-pill ${!done?'is-missing':value===false?'is-no':''}`:''}>{answerText(value,q,language)}</dd></div>;})}</dl></section>;})}{!visible.length&&<p className="p-6 text-muted-foreground">{t('No matching questions.','No hay preguntas que coincidan.')}</p>}</>}
+ {tab==='scores'&&<section className="applicant-ref-card"><h2>{t('Scores & interview talking points','Puntuaciones y temas para la entrevista')}</h2><p className="text-xs text-muted-foreground mb-5">{p.application_version===6?t('Experience: years 30%, settings 15%, skills 35%, equipment 20%. Transport and availability reflect their vehicle, licence, backup, schedule and current work. Goals and readiness reflect goals, days, start date and priorities.','Experiencia: años 30%, lugares de trabajo 15%, habilidades 35% y equipo 20%. Transporte y disponibilidad reflejan su vehículo, licencia, alternativa, horario y trabajo actual. Metas y disposición reflejan sus objetivos, días, fecha de inicio y prioridades.'):t('These legacy scores use older application inputs. Missing history is not proof of reliability. Review the actual answers first.','Estas puntuaciones usan preguntas de la solicitud anterior. La falta de historial no demuestra fiabilidad. Revisa primero las respuestas reales.')}</p>{r?.flags?.map(f=><p key={f.id} className="applicant-ref-summary is-warning"><AlertCircle/>{f.question}</p>)}{[{title:t('Phone screen talking points','Temas para la llamada'),points:r?.phone_talking_points},{title:t('In-person talking points','Temas para la entrevista en persona'),points:r?.inperson_talking_points}].map(g=><div key={g.title} className="mt-5"><h3>{g.title}</h3><ul className="list-disc pl-5 space-y-3">{g.points?.length?g.points.map(f=><li key={f.id}>{f.question}</li>):<li>{t('No generated talking points yet.','Todavía no se han generado temas.')}</li>}</ul></div>)}{p.application_version!==6&&<div className="flex flex-wrap gap-2 mt-6"><Input type="number" aria-label="Score adjustment" value={delta} onChange={e=>setDelta(e.target.value)} min={-10} max={10} placeholder="−10..+10" className="w-24"/><Input aria-label="Adjustment reason" value={reason} onChange={e=>setReason(e.target.value)} placeholder={t('Required reason','Motivo obligatorio')}/><Button onClick={adjust}>{t('Apply adjustment','Aplicar ajuste')}</Button></div>}</section>}
+ {tab==='interviews'&&<section className="applicant-ref-card"><h2>{t('Interviews','Entrevistas')}</h2><p>{p.phone_slot_id?t('Phone screen booked; see the candidate record for details.','Llamada reservada; consulta los detalles en el registro.'):t('No phone screen booked.','No hay llamada reservada.')}</p><p className="mt-3">{p.inperson_slot_id?t('In-person interview booked.','Entrevista en persona reservada.'):t('No in-person interview booked.','No hay entrevista en persona reservada.')}</p><Button className="mt-5" asChild><Link to={`/admin/pipeline/${id}`}>{t('Open candidate record','Abrir registro')}</Link></Button><Button className="mt-3 ml-2" variant="outline" asChild><Link to="/admin/hiring/slots">{t('View interview calendar','Ver calendario')}</Link></Button></section>}
+ {tab==='timeline'&&<section className="applicant-ref-card"><h2>{t('Timeline','Cronología')}</h2><div className="space-y-5">{events.map(e=><div key={e.id} className="border-l-2 border-primary pl-4"><p className="font-semibold">{e.reason??e.kind}</p><small className="text-muted-foreground">{fmt(e.created_at)}</small></div>)}{!events.length&&<p>{t('No activity recorded.','No hay actividad registrada.')}</p>}</div></section>}
+ </div><aside className="applicant-ref-side"><section className="applicant-ref-card"><h2>{t('Status','Estado')}</h2><div className="flex gap-2 items-center"><span className="h-3 w-3 rounded-full bg-gold"/><span className="ref-saved">{status}</span></div><p className="text-xs text-muted-foreground mt-3">{p.apply_submitted_at?t('Application submitted','Solicitud enviada'):t('Has not submitted application','No ha enviado la solicitud')}</p></section><section className="applicant-ref-card"><h2>{t('Contact information','Información de contacto')}</h2>{[[Phone,a.phone],[Mail,a.email.startsWith('pending-')?null:a.email],[MapPin,a.zip]].map(([Icon,value],i)=>{const I=Icon as typeof Phone;return <div key={i} className="applicant-ref-meta"><I/><span className="break-all">{value?String(value):t('Not provided','No proporcionado')}</span></div>;})}</section><section className="applicant-ref-card"><h2>{t('Application details','Detalles de la solicitud')}</h2>{[[CalendarDays,t('Started','Comenzó'),fmt(p.apply_started_at)],[FileText,t('Last activity','Última actividad'),fmt(latest)],[Clock,t('Time to complete','Tiempo para completar'),p.apply_total_seconds!==null?`${Math.round(p.apply_total_seconds/60)} ${t('minutes','minutos')}`:t('Not completed','Sin completar')],[Hash,t('Recruitment source (not link completion)','Origen de reclutamiento (no indica envío)'),a.source??p.source??t('Not recorded','No registrado')]].map(([Icon,l,value])=>{const I=Icon as typeof Phone;return <div key={String(l)} className="applicant-ref-meta"><I/><div><small>{String(l)}</small>{String(value)}</div></div>;})}</section><section className="applicant-ref-card"><h2 className="flex gap-2"><StickyNote className="w-5 h-5"/>{t('Your notes','Tus notas')}</h2><Textarea aria-label={t('Your notes','Tus notas')} placeholder={t(`Add a note about ${a.first_name}…`,`Agrega una nota sobre ${a.first_name}…`)} value={notes} onChange={e=>setNotes(e.target.value)} rows={4}/><div className="flex flex-wrap gap-1 my-3">{[t('Good attitude','Buena actitud'),t('Needs follow-up','Necesita seguimiento'),t('Check experience','Revisar experiencia'),t('Ask about insurance','Preguntar por seguro')].map(s=><Button key={s} variant="secondary" size="sm" className="text-[10px] rounded-full h-7 px-2" onClick={()=>setNotes(n=>n?`${n}\n${s}`:s)}>{s}</Button>)}</div><Button size="sm" disabled={saving} onClick={saveNote}>{saving?<Loader2 className="animate-spin"/>:t('Save note','Guardar nota')}</Button></section><section className="applicant-ref-card"><h2 className="flex gap-2"><Tag className="w-5 h-5"/>{t('Details','Detalles')}</h2><div className="flex gap-2 flex-wrap"><span className="ref-saved">{svcLabel}</span><span className="ref-saved">{a.preferred_language==='es'?'Español':'English'}</span></div><Button variant="ghost" className="mt-3 text-primary px-0" asChild><Link to={`/admin/pipeline/${id}`}>{t('Full candidate record','Registro completo')}<ChevronRight/></Link></Button></section></aside></div></main>
+ <Dialog open={messageOpen} onOpenChange={setMessageOpen}><DialogContent className="application-reference max-w-xl"><DialogHeader><DialogTitle>{t('Applicant messages','Mensajes del solicitante')}</DialogTitle></DialogHeader>{id&&<CandidateTexts id={id}/>}</DialogContent></Dialog></div>;
 }
