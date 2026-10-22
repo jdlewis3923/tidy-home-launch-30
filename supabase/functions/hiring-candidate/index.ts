@@ -15,9 +15,12 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { weekdaysOnly } from '../_shared/hire-ready-rules.ts';
-import { scoreV6, validV6Answer, type V6Question } from '../_shared/application-v6.ts';
+import { scoreV6, validV6Answer, validWorkReference, V6_DISQUALIFY_DELAY_MS, type V6Question } from '../_shared/application-v6.ts';
 
-const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
+const backendUrl = Deno.env.get('SUPABASE_URL');
+const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+if (!backendUrl || !serviceKey) throw new Error('Backend configuration missing');
+const admin = createClient(backendUrl, serviceKey, { auth: { persistSession: false } });
 const SERVICES = ['cleaning', 'lawn', 'car_care'];
 
 type Pipeline = Record<string, unknown> & { applicant_id: string };
@@ -35,7 +38,8 @@ async function questionsFor(service: string, p?: Pipeline) {
   let query = admin.from('question_bank').select('*').in('service', ['all', service]);
   if (Array.isArray(p?.apply_question_ids) && p.apply_question_ids.length) query = query.in('id', p.apply_question_ids);
   else query = query.eq('application_version', p?.application_version === 6 ? 6 : 5);
-  const { data } = await query.order('section').order('sort');
+  const { data, error } = await query.order('section').order('sort');
+  if (error) throw new Error('question_load_failed');
   return data ?? [];
 }
 
@@ -81,6 +85,8 @@ Deno.serve(async (req) => {
     const service = String(body?.service ?? '');
     const lang = body?.lang === 'es' ? 'es' : 'en';
     if (!SERVICES.includes(service)) return jsonResponse({ error: 'unknown_service' }, 400);
+    const initialQuestions = await questionsFor(service, { applicant_id: '', application_version: 6 });
+    if (!initialQuestions.length) return jsonResponse({ error: 'questions_unavailable' }, 503);
     const token = crypto.randomUUID().replaceAll('-', '') + crypto.randomUUID().replaceAll('-', '');
     const { data: a, error: aErr } = await admin.from('applicants').insert({
       first_name: '', last_name: '', phone: '', email: `pending-${token.slice(0, 12)}@apply.tidy.local`,
@@ -89,7 +95,7 @@ Deno.serve(async (req) => {
     if (aErr || !a) return jsonResponse({ error: 'start_failed' }, 500);
     // A database trigger auto-creates the pipeline row at 'applied'; claim it with the resume token.
     const { error: pErr } = await admin.from('contractor_pipeline').update({
-      service, preferred_language: lang, application_version: 6, apply_resume_token: token, apply_started_at: new Date().toISOString(),
+      service, preferred_language: lang, application_version: 6, apply_question_ids: initialQuestions.map(q => q.id), apply_resume_token: token, apply_started_at: new Date().toISOString(),
       invited_at: new Date().toISOString(), invite_deadline_at: new Date(Date.now() + 48 * 3600e3).toISOString(),
     }).eq('applicant_id', a.id);
     if (pErr) { await admin.from('applicants').delete().eq('id', a.id); return jsonResponse({ error: 'start_failed' }, 500); }
@@ -107,17 +113,20 @@ Deno.serve(async (req) => {
   if (lang !== p.preferred_language) await admin.from('contractor_pipeline').update({ preferred_language: lang }).eq('applicant_id', p.applicant_id);
   const { data: campaignJob } = await admin.from('hire_ready_invite_jobs').select('id').eq('applicant_id', p.applicant_id).eq('kind', 'invite').maybeSingle();
   const hireReady = !!campaignJob;
+  const immediatePhone = hireReady || p.application_version === 6;
 
   // ---- load: questions + saved answers + FAQ
   if (action === 'load') {
     const qs = await questionsFor(String(p.service), p);
+    if (!qs.length) return jsonResponse({ error: 'questions_unavailable' }, 503);
     const { data: answers } = await admin.from('application_answers').select('question_id, value').eq('candidate_id', p.applicant_id);
     const faq = await faqFor(lang);
     return jsonResponse({
       ok: true, lang, service: p.service, stage: p.stage, version: p.application_version ?? 5, submitted: !!p.apply_submitted_at,
-      phone_screen_after_submit: hireReady && !!p.apply_submitted_at && !p.archived,
+      phone_screen_after_submit: immediatePhone && !!p.apply_submitted_at && !p.archived,
       phone_duration_min: hireReady || p.application_version === 6 ? 30 : undefined,
       proof_url: p.apply_submitted_at ? await ensureProofUrl(p) : null,
+      reference: p.application_version === 6 && ['phone_screened', 'referenced'].includes(String(p.stage)) ? { name: p.ref_name, phone: p.ref_phone, relationship: p.ref_relationship } : undefined,
       questions: qs.map((q) => ({
         id: q.id, key: q.key, section: q.section, type: q.type,
         label: lang === 'es' ? q.label_es : q.label_en,
@@ -149,6 +158,7 @@ Deno.serve(async (req) => {
   if (action === 'submit') {
     if (p.apply_submitted_at) return jsonResponse({ ok: true, already: true, proof_url: await ensureProofUrl(p) });
     const qs = await questionsFor(String(p.service), p);
+    if (!qs.length) return jsonResponse({ error: 'questions_unavailable' }, 503);
     const { data: answers } = await admin.from('application_answers').select('question_id, value').eq('candidate_id', p.applicant_id);
     const byId = new Map((answers ?? []).map((r) => [r.question_id, r.value]));
     const missing: string[] = [];
@@ -185,24 +195,24 @@ Deno.serve(async (req) => {
       first_name: String(val(`${prefix}about.first_name`) ?? ''), last_name: String(val(`${prefix}about.last_name`) ?? ''),
       phone: String(val(`${prefix}about.phone`) ?? ''), email: String(val(`${prefix}about.email`) ?? a.email),
       zip: String(val(`${prefix}about.zip`) ?? ''), preferred_language: lang,
-      ...(report ? { drive_minutes: report.drive_time_minutes } : {}),
+      ...(report ? { drive_minutes: report.drive_time_minutes, drivers_license: String(val('v6.licence') ?? '') } : {}),
     }).eq('id', p.applicant_id);
     if (identityError) return jsonResponse({ error: 'submit_failed' }, 500);
     const { error: submitError } = await admin.from('contractor_pipeline').update({
       apply_submitted_at: new Date().toISOString(), apply_total_seconds: secs,
-      ...(report ? { application_report: report, application_disqualify_at: report.disqualified ? new Date(Date.now()+24*3600e3).toISOString() : null } : { ref_name: String(val('ref.name') ?? ''), ref_phone: String(val('ref.phone') ?? ''), ref_relationship: String(val('ref.relationship') ?? '') }),
+      ...(report ? { application_report: report, application_disqualify_at: report.disqualified ? new Date(Date.now()+V6_DISQUALIFY_DELAY_MS).toISOString() : null } : { ref_name: String(val('ref.name') ?? ''), ref_phone: String(val('ref.phone') ?? ''), ref_relationship: String(val('ref.relationship') ?? '') }),
     }).eq('applicant_id', p.applicant_id);
     if (submitError) return jsonResponse({ error: 'submit_failed' }, 500);
     if (report?.disqualified) await admin.from('hiring_deadlines').update({ resolved_at: new Date().toISOString() }).eq('applicant_id', p.applicant_id).is('resolved_at', null);
     // Trigger pipeline_on_application_submitted advances invited → applied + sets proof deadline.
     const proof_url = await ensureProofUrl({ ...p, __submitting: true });
-    return jsonResponse({ ok: true, proof_url, phone_screen_after_submit: hireReady, phone_duration_min: hireReady || p.application_version === 6 ? 30 : undefined });
+    return jsonResponse({ ok: true, proof_url, phone_screen_after_submit: immediatePhone, phone_duration_min: immediatePhone ? 30 : undefined });
   }
 
   // ---- slots: open slots of a kind
   if (action === 'slots') {
     const kind = body?.kind === 'in_person' ? 'in_person' : 'phone';
-    if (hireReady && (p.archived || !p.apply_submitted_at)) return jsonResponse({ error: 'submit_application_first' }, 409);
+    if (immediatePhone && (p.archived || !p.apply_submitted_at)) return jsonResponse({ error: 'submit_application_first' }, 409);
     if (hireReady && kind === 'in_person' && Date.now() < Date.parse('2026-10-26T04:00:00Z')) return jsonResponse({ ok: true, slots: [] });
     // In-person booking is blocked until Justin sets the private meeting location.
     if (kind === 'in_person') {
@@ -213,7 +223,7 @@ Deno.serve(async (req) => {
     const { data } = await admin.from('hiring_slots').select('id, starts_at, duration_min')
       .eq('kind', kind).eq('status', 'open').gt('starts_at', new Date().toISOString())
       .order('starts_at').limit(40);
-    const slots = hireReady && kind === 'phone' ? (data ?? []).filter(s => s.duration_min === 30 && weekdaysOnly(s.starts_at)) : data ?? [];
+    const slots = immediatePhone && kind === 'phone' ? (data ?? []).filter(s => s.duration_min === 30 && weekdaysOnly(s.starts_at)) : data ?? [];
     return jsonResponse({ ok: true, slots, current: kind === 'phone' ? p.phone_slot_id : p.inperson_slot_id });
   }
 
@@ -224,11 +234,21 @@ Deno.serve(async (req) => {
     const col = kind === 'phone' ? 'phone_slot_id' : 'inperson_slot_id';
     const reschedCol = kind === 'phone' ? 'phone_reschedules' : 'inperson_reschedules';
     if (p.archived) return jsonResponse({ error: 'archived' }, 409);
-    if (kind === 'phone' && p.stage !== 'proof' && !(hireReady && p.apply_submitted_at && ['applied', 'screen_booked'].includes(String(p.stage)))) return jsonResponse({ error: 'wrong_stage' }, 409);
+    if (immediatePhone && !p.apply_submitted_at) return jsonResponse({ error: 'submit_application_first' }, 409);
+    if (kind === 'phone' && p.stage !== 'proof' && !(immediatePhone && p.apply_submitted_at && ['applied', 'screen_booked'].includes(String(p.stage)))) return jsonResponse({ error: 'wrong_stage' }, 409);
     if (hireReady && kind === 'in_person' && Date.now() < Date.parse('2026-10-26T04:00:00Z')) return jsonResponse({ error: 'no_in_person_this_week' }, 409);
     const { data: chosen } = await admin.from('hiring_slots').select('kind,starts_at,duration_min').eq('id', slotId).maybeSingle();
-    if (!chosen || chosen.kind !== kind || (hireReady && kind === 'phone' && (chosen.duration_min !== 30 || !weekdaysOnly(chosen.starts_at)))) return jsonResponse({ error: 'invalid_slot' }, 400);
+    if (!chosen || chosen.kind !== kind || (immediatePhone && kind === 'phone' && (chosen.duration_min !== 30 || !weekdaysOnly(chosen.starts_at)))) return jsonResponse({ error: 'invalid_slot' }, 400);
     if (kind === 'in_person' && !['phone_screened', 'referenced'].includes(String(p.stage))) return jsonResponse({ error: 'wrong_stage' }, 409);
+    if (kind === 'in_person' && p.application_version === 6) {
+      const reference = body?.reference;
+      const name = String(reference?.name ?? p.ref_name ?? '').trim();
+      const phone = String(reference?.phone ?? p.ref_phone ?? '').trim();
+      const relationship = String(reference?.relationship ?? p.ref_relationship ?? '').trim();
+      if (!validWorkReference(name, phone, relationship)) return jsonResponse({ error: 'reference_required' }, 400);
+      const { error } = await admin.from('contractor_pipeline').update({ ref_name: name, ref_phone: phone, ref_relationship: relationship }).eq('applicant_id', p.applicant_id);
+      if (error) return jsonResponse({ error: 'reference_save_failed' }, 500);
+    }
     if (kind === 'in_person') {
       const { data: loc } = await admin.from('app_settings').select('value').eq('key', 'hiring_inperson_location').maybeSingle();
       const locVal = typeof loc?.value === 'string' ? loc.value : '';

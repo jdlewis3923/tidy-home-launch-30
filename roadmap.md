@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Exact application designs and v6 (Oct 22)
-- [ ] Match owner applicant results and applicant phone screens to both supplied visual references; v6 document controls content.
-- [ ] Version question sets to preserve drafts, implement eight bilingual steps and server-side scoring/flags/talking points; preserve invite/proof gates.
-- [ ] Verify three complete phone applications and owner results, remove only test records, capture all steps, then publish as authorized in the attached instructions.
+- [x] Rebuilt owner results with navy navigation, light panels, progress ring, score bars, answer tabs and sidebar; applicant screens use the eight-step white/gold reference and navy confirmation. Actual answers and explicit Indeed/text-link statuses retained; reference content is not fabricated as candidate data.
+- [x] Versioned question sets preserve drafts; eight bilingual steps and server-side scoring/flags/talking points, 24-hour admin-only close-out and post-phone work reference validation implemented; invite/proof gates retained.
+- [x] Three phone applications completed (automated entry: cleaning EN 20 seconds, lawn EN 19 seconds, cleaning ES 22 seconds); each score 93/100/100, one flag and five talking points, owner readback 36 answers, zero phone overflow, no page errors, 39 tests and build OK. Human completion time is not measured.
+- [x] Three designated temporary test candidates removed (0 remain); publication requested for jointidy.co.
 
 ## Applicant results clarity (Oct 22)
 - [x] Replace score-first Fit Report with complete grouped questions and saved answers, meaningful choice labels, explicit unanswered items and submission status; retain older saved answers separately from current application count.
@@ -14,7 +15,7 @@
 - [x] Email + four SMS invites scheduled for 8 AM ET Oct 22; language/role links, 24-hour finish deadline, zero-answer 20-hour nudge held until 8 AM, 48-hour no-submission archive; uses existing 15-minute hiring job.
 - [x] Real signed-in Daniela record and logged-out Spanish link verified; early dispatch returns skipped/200 and sends nothing; 33 tests pass, build OK. Failure alerts are digest-tier and jobs do not auto-retry claimed sends.
 - [ ] Delivery results after 8 AM ET — future scheduled send, not yet sent; carrier/email results cannot be confirmed early.
-- [ ] Publish the updated submission/30-minute booking page labels — waiting on Justin's explicit publishing approval. Deployed email booking link and server weekday/30-minute checks are active; public page wording remains the prior published version.
+- [x] Publication of updated submission/30-minute booking labels requested with the v6 release.
 
 ## Latest LinkedIn posting failure (Oct 21)
 - [x] Diagnosed photo attempt: Zap returned HTTP 200 (run 01a15bf1-5b04-799f-e3a4-06f6b6efba3a), but no photo receipt arrived; public 1200×1200 JPEG matches its locked hash, callback is reachable and rejects unauthorized writes, text receipt is confirmed.

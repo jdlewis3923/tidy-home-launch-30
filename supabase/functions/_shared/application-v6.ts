@@ -1,6 +1,10 @@
 import { ZIP_CENTROIDS } from './hiring/geo.ts';
 
 export type V6Question = { id: string; key: string; service: string; type: string; required: boolean; label_en: string; label_es: string; options?: {value: string; en: string; es: string}[] | null };
+export const V6_DISQUALIFY_DELAY_MS = 24 * 3600_000;
+export function validWorkReference(name: string, phone: string, relationship: string): boolean {
+  return name.trim().length > 0 && phone.replace(/\D/g, '').length >= 10 && ['supervisor', 'coworker', 'client'].includes(relationship);
+}
 export function validV6Answer(q: V6Question, v: unknown): boolean {
   if (v === null || v === undefined || v === '') return !q.required;
   if (q.type === 'slider') return typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 10;
@@ -46,8 +50,8 @@ export function scoreV6(questions: V6Question[], byId: Map<string,unknown>, serv
   const priorities=arr('intent.priorities');
   const intent=Math.round(({steady:35,grow:35,side:20,unsure:5}[String(get('intent.goal'))]??0)+days/5*25+(until>=-1&&until<=14?20:0)+(priorities.some(x=>x==='clients'||x==='steady')?20:0));
   const t=(en:string,es:string)=>lang==='es'?es:en;
-  const flags:{id:string;question:string}[]=[]; const points:{id:string;question:string}[]=[];
-  const flag=(id:string,en:string,es:string)=>flags.push({id,question:t(en,es)});
+  const flags:{id:string;question:string;en?:string;es?:string}[]=[]; const points:{id:string;question:string;en?:string;es?:string}[]=[];
+  const flag=(id:string,en:string,es:string)=>flags.push({id,question:t(en,es),en,es});
   const drive=nearestDriveMinutes(String(get('about.zip')??''));
   if (drive!==null&&drive>30) flag('distance',`Estimated drive to the nearest service ZIP: ${drive} minutes (over 30).`,`Traslado estimado al código postal de servicio más cercano: ${drive} minutos (más de 30).`);
   if (drive===null) flag('distance_unknown','ZIP drive estimate unavailable; confirm on the phone.','No hay una estimación para este código postal; confirma el traslado por teléfono.');
@@ -57,7 +61,8 @@ export function scoreV6(questions: V6Question[], byId: Map<string,unknown>, serv
   if(exp==='0'&&avg>=8)flag('experience','No paid experience, but skill average is 8+; discuss practical experience.','No tiene experiencia remunerada, pero su promedio de habilidades es 8 o más; conversa sobre su experiencia práctica.');
   for(const k of ['contractor','insurance','background'])if(get(`requirements.${k}`)==='question'){
     const q=questions.find(q=>q.key===`v6.requirements.${k}`);
-    const p={id:`question_${k}`,question:t('Has a question (not a failure): ','Tiene una pregunta (no es motivo de rechazo): ')+(lang==='es'?q?.label_es:q?.label_en)}; flags.push(p);points.push(p);
+    const en='Has a question (not a failure): '+(q?.label_en??''); const es='Tiene una pregunta (no es motivo de rechazo): '+(q?.label_es??'');
+    const p={id:`question_${k}`,question:t(en,es),en,es}; flags.push(p);points.push(p);
   }
   const lower:Record<string,number>={under400:0,'400-700':400,'700-1000':700,'1000+':1000};
   if(dayPay!==null && (lower[String(get('intent.earnings'))]??0)>days*dayPay)flag('earnings',`Weekly earnings goal exceeds the estimated ${days}-day pay of $${days*dayPay}.`,`La meta semanal supera el pago estimado de $${days*dayPay} por ${days} días.`);
