@@ -26,6 +26,7 @@ export default function ProBook() {
   const [confirmed, setConfirmed] = useState(false);
   const [checkinDone, setCheckinDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneMinutes, setPhoneMinutes] = useState(15);
 
   const t = useCallback((en: string, es: string) => (lang === "es" ? es : en), [lang]);
   const call = useCallback(async (payload: Record<string, unknown>) => {
@@ -41,6 +42,7 @@ export default function ProBook() {
       if (d?.error) { setError(d.error); return; }
       setLang(d.lang === "es" ? "es" : "en");
       setStage(d.stage);
+      setPhoneMinutes(d.phone_duration_min === 30 ? 30 : 15);
       const k: "phone" | "in_person" = ["phone_screened", "referenced"].includes(d.stage) ? "in_person" : "phone";
       setKind(k);
       const s = await call({ action: "slots", kind: k });
@@ -88,7 +90,7 @@ export default function ProBook() {
               <span className="text-sm font-semibold uppercase tracking-wide">{kind === "phone" ? t("Phone screen", "Llamada") : t("In-person interview", "Entrevista en persona")}</span>
             </div>
             <h1 className="text-2xl font-bold text-foreground mb-2">
-              {kind === "phone" ? t("Pick a time for your 15-minute call", "Elige la hora de tu llamada de 15 minutos") : t("Pick a time to meet in person", "Elige la hora para vernos en persona")}
+              {kind === "phone" ? t(`Pick a time for your ${phoneMinutes}-minute call`, `Elige el horario de tu llamada de ${phoneMinutes} minutos`) : t("Pick a time to meet in person", "Elige la hora para vernos en persona")}
             </h1>
             <p className="text-muted-foreground mb-6">
               {kind === "phone"

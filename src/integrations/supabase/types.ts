@@ -3103,6 +3103,71 @@ export type Database = {
         }
         Relationships: []
       }
+      hire_ready_invite_jobs: {
+        Row: {
+          applicant_id: string
+          archive_at: string
+          campaign: string
+          completed_at: string | null
+          due_at: string
+          email_status: string
+          error: string | null
+          finish_at: string
+          id: string
+          kind: string
+          language: string
+          requested_at: string | null
+          service: string
+          sms_status: string
+          status: string
+          twilio_sid: string | null
+        }
+        Insert: {
+          applicant_id: string
+          archive_at: string
+          campaign: string
+          completed_at?: string | null
+          due_at: string
+          email_status?: string
+          error?: string | null
+          finish_at: string
+          id?: string
+          kind: string
+          language: string
+          requested_at?: string | null
+          service: string
+          sms_status?: string
+          status?: string
+          twilio_sid?: string | null
+        }
+        Update: {
+          applicant_id?: string
+          archive_at?: string
+          campaign?: string
+          completed_at?: string | null
+          due_at?: string
+          email_status?: string
+          error?: string | null
+          finish_at?: string
+          id?: string
+          kind?: string
+          language?: string
+          requested_at?: string | null
+          service?: string
+          sms_status?: string
+          status?: string
+          twilio_sid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hire_ready_invite_jobs_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hire_specs: {
         Row: {
           created_at: string
@@ -9907,6 +9972,34 @@ export type Database = {
         }
         Returns: boolean
       }
+      hire_ready_claim: {
+        Args: { _job_id: string }
+        Returns: {
+          applicant_id: string
+          archive_at: string
+          campaign: string
+          completed_at: string | null
+          due_at: string
+          email_status: string
+          error: string | null
+          finish_at: string
+          id: string
+          kind: string
+          language: string
+          requested_at: string | null
+          service: string
+          sms_status: string
+          status: string
+          twilio_sid: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "hire_ready_invite_jobs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      hire_ready_tick: { Args: never; Returns: undefined }
       hiring_answer: { Args: { _id: string; _key: string }; Returns: Json }
       hiring_answer_num: {
         Args: { _id: string; _key: string }

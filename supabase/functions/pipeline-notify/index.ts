@@ -87,6 +87,8 @@ Deno.serve(async (req) => {
   const { data: p } = await admin.from('contractor_pipeline').select('*').eq('applicant_id', applicant_id).maybeSingle();
   const { data: a } = await admin.from('applicants').select('id, first_name, email, phone, contract_token').eq('id', applicant_id).maybeSingle();
   if (!p || !a) return jsonResponse({ error: 'not_found' }, 404);
+  const { data: hireReadyJob } = await admin.from('hire_ready_invite_jobs').select('language').eq('applicant_id', applicant_id).eq('kind', 'invite').maybeSingle();
+  const hireReadyPhone = !!hireReadyJob && !!p.apply_submitted_at;
   if (p.archived && event !== 'close_out') return jsonResponse({ ok: true, skipped: 'archived' });
   const lang: Lang = p.preferred_language === 'es' ? 'es' : 'en';
   const first = (a.first_name ?? '').trim() || (lang === 'es' ? 'hola' : 'there');
@@ -102,7 +104,7 @@ Deno.serve(async (req) => {
     activation: p.stage === 'active' && !!p.proof_approved_at,
     // v5 events
     nudge: !p.archived && ['invited', 'applied', 'proof'].includes(p.stage),
-    book_phone: p.stage === 'proof',
+    book_phone: p.stage === 'proof' || (hireReadyPhone && p.stage === 'applied'),
     slot_reminder: !p.archived && ['proof', 'screen_booked', 'phone_screened', 'referenced'].includes(p.stage),
     weekly_checkin: !p.archived && ['agreement', 'background', 'insured'].includes(p.stage),
     close_out: p.archived === true,
@@ -208,6 +210,12 @@ Deno.serve(async (req) => {
       ? `Hola ${first}, soy Justin de Tidy. Recibimos tu equipo. Elige la hora de tu llamada de 15 minutos (tardes entre semana): ${bookUrl}`
       : `Hi ${first}, it's Justin from Tidy. We got your equipment. Pick a time for your 15-minute call (weekday evenings): ${bookUrl}`;
     subject = lang === 'es' ? 'Elige la hora de tu llamada de 15 minutos' : 'Pick a time for your 15-minute call';
+    if (hireReadyPhone) {
+      const en = `Hi ${first}, it's Justin from Tidy. Thanks for submitting your application! Pick a time for your 30-minute phone screen, Monday-Friday: ${bookUrl}. We'll call you. No in-person interviews this week.`;
+      const es = `Hola ${first}, soy Justin de Tidy. ¡Gracias por enviar tu solicitud! Elige un horario para tu llamada de 30 minutos, de lunes a viernes: ${bookUrl}. Te llamaremos nosotros. Esta semana no habrá entrevistas en persona.`;
+      sms = hireReadyJob.language === 'bilingual' ? `${en}\n\n${es}` : lang === 'es' ? es : en;
+      subject = lang === 'es' ? 'Elige el horario de tu llamada de 30 minutos' : 'Pick a time for your 30-minute phone screen';
+    }
     html = `<p>${esc(sms)}</p>`;
   } else if (event === 'slot_reminder') {
     const { data: s } = await admin.from('hiring_slots').select('kind, starts_at').eq('id', slot ?? '').maybeSingle();
@@ -222,6 +230,7 @@ Deno.serve(async (req) => {
         ? `Hola ${first}, soy Justin de Tidy. Te llamo ${when}. Son 15 minutos. Si necesitas cambiar la hora, responde a este mensaje.`
         : `Hi ${first}, it's Justin from Tidy. I'll call you ${when}. It's 15 minutes. If you need to move it, reply to this message.`;
       subject = lang === 'es' ? 'Tu llamada con Tidy' : 'Your call with Tidy';
+      if (hireReadyPhone) sms = sms.replace('15 minutos', '30 minutos').replace('15 minutes', '30 minutes');
     }
     html = `<p>${esc(sms)}</p>`;
   } else if (event === 'weekly_checkin') {

@@ -14,6 +14,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
+import { weekdaysOnly } from '../_shared/hire-ready-rules.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 const SERVICES = ['cleaning', 'lawn', 'car_care'];
@@ -100,6 +101,8 @@ Deno.serve(async (req) => {
   if (!rec) return jsonResponse({ error: 'not_found' }, 404);
   const { p, a } = rec;
   const lang = p.preferred_language === 'es' ? 'es' : 'en';
+  const { data: campaignJob } = await admin.from('hire_ready_invite_jobs').select('id').eq('applicant_id', p.applicant_id).eq('kind', 'invite').maybeSingle();
+  const hireReady = !!campaignJob;
 
   // ---- load: questions + saved answers + FAQ
   if (action === 'load') {
@@ -108,6 +111,8 @@ Deno.serve(async (req) => {
     const faq = await faqFor(lang);
     return jsonResponse({
       ok: true, lang, service: p.service, stage: p.stage, submitted: !!p.apply_submitted_at,
+      phone_screen_after_submit: hireReady && !!p.apply_submitted_at && !p.archived,
+      phone_duration_min: hireReady ? 30 : undefined,
       proof_url: p.apply_submitted_at ? await ensureProofUrl(p) : null,
       questions: qs.map((q) => ({
         id: q.id, key: q.key, section: q.section, type: q.type,
@@ -176,12 +181,14 @@ Deno.serve(async (req) => {
     }).eq('applicant_id', p.applicant_id);
     // Trigger pipeline_on_application_submitted advances invited → applied + sets proof deadline.
     const proof_url = await ensureProofUrl({ ...p, __submitting: true });
-    return jsonResponse({ ok: true, proof_url });
+    return jsonResponse({ ok: true, proof_url, phone_screen_after_submit: hireReady, phone_duration_min: hireReady ? 30 : undefined });
   }
 
   // ---- slots: open slots of a kind
   if (action === 'slots') {
     const kind = body?.kind === 'in_person' ? 'in_person' : 'phone';
+    if (hireReady && (p.archived || !p.apply_submitted_at)) return jsonResponse({ error: 'submit_application_first' }, 409);
+    if (hireReady && kind === 'in_person' && Date.now() < Date.parse('2026-10-26T04:00:00Z')) return jsonResponse({ ok: true, slots: [] });
     // In-person booking is blocked until Justin sets the private meeting location.
     if (kind === 'in_person') {
       const { data: loc } = await admin.from('app_settings').select('value').eq('key', 'hiring_inperson_location').maybeSingle();
@@ -191,7 +198,8 @@ Deno.serve(async (req) => {
     const { data } = await admin.from('hiring_slots').select('id, starts_at, duration_min')
       .eq('kind', kind).eq('status', 'open').gt('starts_at', new Date().toISOString())
       .order('starts_at').limit(40);
-    return jsonResponse({ ok: true, slots: data ?? [], current: kind === 'phone' ? p.phone_slot_id : p.inperson_slot_id });
+    const slots = hireReady && kind === 'phone' ? (data ?? []).filter(s => s.duration_min === 30 && weekdaysOnly(s.starts_at)) : data ?? [];
+    return jsonResponse({ ok: true, slots, current: kind === 'phone' ? p.phone_slot_id : p.inperson_slot_id });
   }
 
   // ---- book: claim a slot (one reschedule per kind)
@@ -200,7 +208,11 @@ Deno.serve(async (req) => {
     const slotId = String(body?.slot_id ?? '');
     const col = kind === 'phone' ? 'phone_slot_id' : 'inperson_slot_id';
     const reschedCol = kind === 'phone' ? 'phone_reschedules' : 'inperson_reschedules';
-    if (kind === 'phone' && p.stage !== 'proof') return jsonResponse({ error: 'wrong_stage' }, 409);
+    if (p.archived) return jsonResponse({ error: 'archived' }, 409);
+    if (kind === 'phone' && p.stage !== 'proof' && !(hireReady && p.apply_submitted_at && ['applied', 'screen_booked'].includes(String(p.stage)))) return jsonResponse({ error: 'wrong_stage' }, 409);
+    if (hireReady && kind === 'in_person' && Date.now() < Date.parse('2026-10-26T04:00:00Z')) return jsonResponse({ error: 'no_in_person_this_week' }, 409);
+    const { data: chosen } = await admin.from('hiring_slots').select('kind,starts_at,duration_min').eq('id', slotId).maybeSingle();
+    if (!chosen || chosen.kind !== kind || (hireReady && kind === 'phone' && (chosen.duration_min !== 30 || !weekdaysOnly(chosen.starts_at)))) return jsonResponse({ error: 'invalid_slot' }, 400);
     if (kind === 'in_person' && !['phone_screened', 'referenced'].includes(String(p.stage))) return jsonResponse({ error: 'wrong_stage' }, 409);
     if (kind === 'in_person') {
       const { data: loc } = await admin.from('app_settings').select('value').eq('key', 'hiring_inperson_location').maybeSingle();
