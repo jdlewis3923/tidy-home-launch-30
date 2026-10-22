@@ -7,6 +7,8 @@ import { Loader2, RefreshCw, ArrowLeft, Search } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { answerText, hasAnswer, visibleQuestions, applicationSections, type ApplicationQuestion, type SavedAnswer } from "@/lib/applicant-answers";
+import ApplicationChannels from "@/components/admin/ApplicationChannels";
+import { useApplicationChannels } from "@/hooks/useApplicationChannels";
 
 type Report = { name: string; service: string; language: string; stage: string; skill: number; reliability: number; intent: number; intent_adjustments: number; phone_talking_points: { id: string; question: string }[]; inperson_talking_points: { id: string; question: string }[]; error?: string };
 
@@ -19,6 +21,7 @@ export default function HiringFitReport() {
   const [answers, setAnswers] = useState<SavedAnswer[]>([]);
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const channels = useApplicationChannels([id]);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -72,7 +75,7 @@ export default function HiringFitReport() {
   return <div className="container mx-auto px-4 py-6 max-w-4xl min-w-0 text-foreground">
     <Button variant="ghost" size="sm" asChild className="mb-4"><Link to={`/admin/pipeline/${id}`}><ArrowLeft className="h-4 w-4 mr-2" />{t("Candidate record", "Registro del candidato")}</Link></Button>
     <header className="flex flex-wrap items-start justify-between gap-3 mb-6">
-      <div className="min-w-0"><p className="text-sm text-primary font-semibold mb-1">{t("Application results", "Resultados de la solicitud")}</p><h1 className="text-2xl font-bold break-words">{r.name}</h1><p className="text-sm text-muted-foreground mt-1">{service} · {r.language === "es" ? "Español" : "English"}</p></div>
+      <div className="min-w-0"><p className="text-sm text-primary font-semibold mb-1">{t("Application results", "Resultados de la solicitud")}</p><h1 className="text-2xl font-bold break-words">{r.name}</h1><ApplicationChannels c={channels.get(id ?? "")} /><p className="text-sm text-muted-foreground mt-1">{service} · {r.language === "es" ? "Español" : "English"}</p></div>
       <Button variant="outline" size="sm" onClick={load}><RefreshCw className="h-4 w-4 mr-2" />{t("Refresh", "Actualizar")}</Button>
     </header>
     <section className="border-y border-border py-4 mb-6 space-y-2">

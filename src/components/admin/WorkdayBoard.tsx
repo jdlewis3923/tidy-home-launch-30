@@ -2,11 +2,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { candidateStatusLine, visibleCandidate } from "@/lib/admin-report-rules";
+import { visibleCandidate } from "@/lib/admin-report-rules";
 import RedoTasks from "./RedoTasks";
 import ReservationTasks from "./ReservationTasks";
 import InviteLinkResults from "./InviteLinkResults";
 import { STAGE_INFO, NEXT_ACTION, type SequenceStage } from "@/lib/onboardingSequence";
+import ApplicationChannels from "@/components/admin/ApplicationChannels";
+import { useApplicationChannels } from "@/hooks/useApplicationChannels";
 
 type Row = { id: string; first_name: string | null; last_name: string | null; sequence_stage: SequenceStage; sequence_stage_entered_at: string | null; source: string | null; apply_submitted_at: string | null };
 
@@ -14,6 +16,7 @@ const days = (iso: string | null) => (iso ? Math.floor((Date.now() - new Date(is
 
 export default function WorkdayBoard() {
   const [rows, setRows] = useState<Row[]>([]);
+  const channels = useApplicationChannels(rows.map((r) => r.id));
   useEffect(() => {
     const load = async () => {
       const { data, error } = await supabase.from("contractor_pipeline")
@@ -47,7 +50,7 @@ export default function WorkdayBoard() {
               <Link to={`/admin/pipeline/${r.id}`} className={`block rounded-md border px-3 py-2 text-sm ${stalled ? "border-accent bg-accent/15" : "border-border bg-background"}`}>
                 <span className="font-semibold text-foreground">{r.first_name} {r.last_name?.[0] ?? ""}.</span>
                 {r.sequence_stage !== "applied" && <span className="text-muted-foreground"> · {STAGE_INFO[r.sequence_stage]?.label ?? r.sequence_stage}</span>}
-                <span className={`mt-1 block rounded px-2 py-0.5 text-[11px] font-semibold ${r.apply_submitted_at ? "bg-primary/15 text-primary" : "bg-accent/30 text-foreground"}`}>{candidateStatusLine(r)}</span>
+                <ApplicationChannels c={channels.get(r.id)} />
                 {NEXT_ACTION[r.sequence_stage] && title.startsWith("Waiting on me") && <span className="block text-[11px] text-primary">Next: {NEXT_ACTION[r.sequence_stage]?.label}</span>}
                 <span className={`block text-[11px] ${stalled ? "text-accent-foreground font-semibold" : "text-muted-foreground"}`}>{d} day{d === 1 ? "" : "s"} at this stage</span>
               </Link>

@@ -15,6 +15,8 @@ import {
 import { text1, text2, smsLink, inTextingWindow, inCallWindow } from "@/lib/hiring/texts";
 import type { QueueState } from "@/lib/hiring/score";
 import type { TablesUpdate } from "@/integrations/supabase/types";
+import ApplicationChannels from "@/components/admin/ApplicationChannels";
+import { useApplicationChannels } from "@/hooks/useApplicationChannels";
 
 type Service = "cleaning" | "lawn" | "car_care" | "ops_coordinator";
 
@@ -66,6 +68,7 @@ function tierTone(tier: string | null): string {
 
 export default function CallQueue() {
   const [rows, setRows] = useState<QueueRow[]>([]);
+  const channels = useApplicationChannels(rows.map((r) => r.id));
   const [openings, setOpenings] = useState<Opening[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -230,6 +233,7 @@ export default function CallQueue() {
                           <p className="truncate text-sm font-semibold text-slate-900">
                             {index + 1}. {fullName(row)}
                           </p>
+                          <ApplicationChannels c={channels.get(row.id)} />
                           <p className="mt-0.5 text-xs text-slate-500">
                             {row.drive_minutes == null ? "drive unknown" : `${row.drive_minutes} min`}
                             {" · "}
@@ -337,7 +341,7 @@ export default function CallQueue() {
                       <ul className="divide-y divide-slate-100">
                         {out.map((r) => (
                           <li key={r.id} className="flex items-center justify-between px-3 py-2 text-xs">
-                            <span className="truncate">{fullName(r)}</span>
+                            <span className="min-w-0"><span className="truncate block">{fullName(r)}</span><ApplicationChannels c={channels.get(r.id)} /></span>
                             <span className="ml-2 shrink-0 text-slate-500">{r.queue_state.replace(/_/g, " ")}</span>
                           </li>
                         ))}

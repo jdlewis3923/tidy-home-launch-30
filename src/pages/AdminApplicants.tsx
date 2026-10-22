@@ -1,3 +1,5 @@
+import ApplicationChannels from "@/components/admin/ApplicationChannels";
+import { useApplicationChannels } from "@/hooks/useApplicationChannels";
 import ProPraiseHistory from "@/components/admin/ProPraiseHistory";
 /**
  * Admin Applicants Pipeline — /admin/applicants
@@ -299,6 +301,7 @@ export default function AdminApplicants() {
   const [confirmReturnTier1, setConfirmReturnTier1] = useState(false);
 
   const [open, setOpen] = useState<Applicant | null>(null);
+  const channels = useApplicationChannels(rows.map((r) => r.id));
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bgNotes, setBgNotes] = useState("");
   const [resendingCheckr, setResendingCheckr] = useState<string | null>(null);
@@ -841,6 +844,7 @@ export default function AdminApplicants() {
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-[#0D1117] truncate">{a.first_name} {a.last_name}{a.pro_number && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-bold text-amber-800">{a.pro_number}</span>}</div>
                     <div className="text-xs text-slate-500 truncate">{a.email}</div>
+                    <ApplicationChannels c={channels.get(a.id)} />
                   </div>
                   <div className="hidden sm:flex items-center gap-2 shrink-0">
                     <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 capitalize ${ROLE_BADGE[r]}`}>{r}</span>
@@ -923,6 +927,7 @@ export default function AdminApplicants() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <SheetTitle className="text-2xl font-bold text-[#0D1117]">{open.first_name} {open.last_name}</SheetTitle>
+                    <ApplicationChannels c={channels.get(open.id)} />
                     <div className="mt-1 space-y-1">
                       <button onClick={() => copyToClipboard(open.email, "email")} className="flex items-center gap-2 text-sm text-slate-600 hover:text-[#1FA1F0] group">
                         <Mail className="h-3.5 w-3.5" /><span className="truncate">{open.email}</span>
