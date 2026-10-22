@@ -58,6 +58,7 @@ body.admin-hud .application-reference input::placeholder,body.admin-hud .applica
 .apply-success-panel { text-align:left; border:1px solid hsl(var(--border)); background:hsl(var(--muted)); border-radius:8px; padding:20px; margin-top:25px; }
 .apply-reference:has(.apply-success) { --background:210 81% 7%; --foreground:0 0% 100%; --muted:211 72% 12%; --muted-foreground:213 40% 82%; --border:212 45% 22%; --accent:211 72% 12%; --accent-foreground:0 0% 100%; --gold-foreground:210 81% 7%; }
 .apply-success > .text-primary { color:hsl(var(--gold)); }
+.apply-reference:has(.apply-success) .apply-reference-header button { color:hsl(var(--foreground)); }
 
 body.admin-hud:has(.applicant-reference) > #root { padding:0; }
 body.admin-hud:has(.applicant-reference) > #root .admin-hud-topbar,body.admin-hud:has(.applicant-reference) > #root > .admin-hud-rail,body.admin-hud:has(.applicant-reference) .admin-hud-bg { display:none; }

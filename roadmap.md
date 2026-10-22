@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Exact application designs and v6 (Oct 22)
-- [ ] Match owner applicant results and applicant phone screens to both supplied visual references; v6 document controls content.
-- [ ] Version question sets to preserve drafts, implement eight bilingual steps and server-side scoring/flags/talking points; preserve invite/proof gates.
-- [ ] Verify three complete phone applications and owner results, remove only test records, capture all steps, then publish as authorized in the attached instructions.
+- [x] Rebuilt owner results with navy navigation, light panels, progress ring, score bars, answer tabs and sidebar; applicant screens use the eight-step white/gold reference and navy confirmation. Actual answers and explicit Indeed/text-link statuses retained; reference content is not fabricated as candidate data.
+- [x] Versioned question sets preserve drafts; eight bilingual steps and server-side scoring/flags/talking points, 24-hour admin-only close-out and post-phone work reference validation implemented; invite/proof gates retained.
+- [x] Three phone applications completed (automated entry: cleaning EN 20 seconds, lawn EN 19 seconds, cleaning ES 22 seconds); each score 93/100/100, one flag and five talking points, owner readback 36 answers, zero phone overflow, no page errors, 39 tests and build OK. Human completion time is not measured.
+- [ ] Remove only designated temporary test candidates and publish as authorized in the attached instructions.
 
 ## Applicant results clarity (Oct 22)
 - [x] Replace score-first Fit Report with complete grouped questions and saved answers, meaningful choice labels, explicit unanswered items and submission status; retain older saved answers separately from current application count.
