@@ -1,5 +1,10 @@
 # Roadmap
 
+## Candidate apology and new invitations (Oct 23)
+- [ ] Send Daniela a personal Spanish apology with a verified rebooking link.
+- [ ] Import the six uploaded candidates without duplicating existing applicants, then send application invitations.
+- [ ] Verify send receipts and existing urgent booking-alert coverage; record Andy's completed call only if supported without inventing interview results.
+
 ## Exact application designs and v6 (Oct 22)
 - [x] Rebuilt owner results with navy navigation, light panels, progress ring, score bars, answer tabs and sidebar; applicant screens use the eight-step white/gold reference and navy confirmation. Actual answers and explicit Indeed/text-link statuses retained; reference content is not fabricated as candidate data.
 - [x] Versioned question sets preserve drafts; eight bilingual steps and server-side scoring/flags/talking points, 24-hour admin-only close-out and post-phone work reference validation implemented; invite/proof gates retained.
