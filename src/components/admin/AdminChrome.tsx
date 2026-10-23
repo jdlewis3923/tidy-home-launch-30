@@ -28,6 +28,7 @@ const GROUPS: NavGroup[] = [
   ]},
   { label: "Hiring", icon: BriefcaseBusiness, items: [
     { to: "/admin/hiring", label: "Hiring dashboard", icon: BarChart3 },
+    { to: "/admin/hiring/texts", label: "Candidate texts", icon: MessageSquare },
     { to: "/admin/hiring/slots", label: "Hiring slots", icon: CalendarDays },
     { to: "/admin/hiring/outbox", label: "SMS outbox", icon: MessageSquare },
     { to: "/admin/messages", label: "Messages", icon: Mail },
