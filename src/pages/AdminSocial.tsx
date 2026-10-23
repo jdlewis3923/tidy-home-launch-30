@@ -15,6 +15,7 @@ import { useLaunchConfig } from "@/hooks/useLaunchConfig";
 import { Button } from "@/components/ui/button";
 import { renderTemplate, instagramVersion, etDate, type PlanAnchors, type PlanResult } from "@/lib/socialPlanner";
 import { socialPhotoCredit } from "@/lib/socialPhotoCredits";
+import { parseLinkedinConfirmation } from "@/lib/linkedinConfirm";
 
 type Post = {
   id: string; post_number: number | null; channel: string; scheduled_for: string | null; caption: string | null; template_copy: string | null;
