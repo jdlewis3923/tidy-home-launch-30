@@ -81,7 +81,7 @@ export default function ProBook() {
     setBooking(false);
   };
 
-  const fmt = (iso: string) => new Date(iso).toLocaleString(lang === "es" ? "es-US" : "en-US", { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const fmt = (iso: string) => `${new Date(iso).toLocaleString(lang === "es" ? "es-US" : "en-US", { timeZone: "America/New_York", weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })} ET`;
 
   return (
     <div className="min-h-screen bg-background">
