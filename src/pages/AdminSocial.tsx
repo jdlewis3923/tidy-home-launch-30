@@ -45,6 +45,8 @@ export default function AdminSocial() {
   const [receipts,setReceipts]=useState<Array<{post_id:string;webhook_status:number|null;webhook_response:string|null;post_url:string|null;state:string}>>([]);
   const [linkedinReady, setLinkedinReady] = useState<boolean | null>(null);
   const [linkedinEnabled, setLinkedinEnabled] = useState(false);
+  const [confirmLink, setConfirmLink] = useState<Record<string, string>>({});
+  const [releaseReason, setReleaseReason] = useState<Record<string, string>>({});
 
   const anchors: PlanAnchors = useMemo(() => ({
     launch: cfg?.cleaning?.first_visit_date ?? null, conversion: cfg?.cleaning?.conversion_date ?? null, carLaunch: cfg?.car?.first_visit_date ?? null,
@@ -121,13 +123,32 @@ export default function AdminSocial() {
       setDryRun(data.timeline); toast.success('Dry-run complete — nothing sent');
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   };
-  const markPosted = async (p: Post) => {
+  const confirmLinkedin = async (p: Post) => {
+    const url = (confirmLink[p.id] ?? '').trim();
+    if (!/linkedin\.com\/(feed\/update\/urn:li:|posts\/)/i.test(url)) { toast.error('Paste the full LinkedIn post link (linkedin.com/feed/update/…)'); return; }
     setBusy(true);
     try {
-      const { error } = await supabase.rpc('admin_mark_social_posted', { _id: p.id });
+      const { error } = await supabase.rpc('linkedin_manual_confirm', { _post: p.id, _url: url, _urn: null });
       if (error) throw error;
-      toast.success('Marked posted'); await load();
-    } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
+      toast.success('Confirmed — the post will not be resent'); await load();
+    } catch (e) { toast.error((e as Error).message.replace(/^.*?: /, '')); } finally { setBusy(false); }
+  };
+  const releaseLinkedin = async (p: Post) => {
+    setBusy(true);
+    try {
+      const { error } = await supabase.rpc('linkedin_manual_release', { _post: p.id, _reason: releaseReason[p.id] ?? '' });
+      if (error) throw error;
+      toast.success('Released — set a new time with Move post'); await load();
+    } catch (e) { toast.error((e as Error).message.replace(/^.*?: /, '')); } finally { setBusy(false); }
+  };
+  const enableLinkedin = async () => {
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('social-launch-publisher', { body: { action: 'linkedin_enable' } });
+      if (error) throw error;
+      if (data?.error) throw new Error(String(data.error));
+      setLinkedinEnabled(true); toast.success('LinkedIn publishing is on');
+    } catch (e) { toast.error((e as Error).message.replace(/^.*?: /, '')); } finally { setBusy(false); }
   };
   const copyCaption = async (p: Post) => {
     const day = p.scheduled_for ? etDate(p.scheduled_for) : new Date().toISOString().slice(0, 10);
