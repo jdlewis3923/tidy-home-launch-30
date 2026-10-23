@@ -12,8 +12,10 @@ describe('Owner-pasted LinkedIn confirmation link', () => {
     expect(parseLinkedinConfirmation('urn:li:share:123')).toEqual({ error: 'Paste the post link (linkedin.com/feed/update/…), not just the URN' });
   });
   it('rejects links off linkedin.com or non-https links', () => {
-    expect(parseLinkedinConfirmation('https://evil.example/posts/123')?.error).toContain('linkedin.com');
-    expect(parseLinkedinConfirmation('http://www.linkedin.com/feed/update/urn:li:share:123/')?.error).toContain('https://');
+    const off = parseLinkedinConfirmation('https://evil.example/posts/123');
+    const insecure = parseLinkedinConfirmation('http://www.linkedin.com/feed/update/urn:li:share:123/');
+    expect(off && 'error' in off && off.error).toContain('linkedin.com');
+    expect(insecure && 'error' in insecure && insecure.error).toContain('https://');
   });
   it('rejects a linkedin.com link without a post URN', () => {
     expect(parseLinkedinConfirmation('https://www.linkedin.com/company/tidy-home/')).toEqual({ error: 'Open the post on LinkedIn and copy the feed/update link (…/feed/update/urn:li:share/…)' });
