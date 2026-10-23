@@ -32,13 +32,14 @@ export function useCandidateTextOrganizer() {
         all((a,b) => supabase.from('hiring_deadlines').select('applicant_id,kind,due_at,nudge_at,nudged_at,resolved_at').eq('kind','apply').is('resolved_at',null).order('id').range(a,b)),
       ]);
       const pipe = new Map(pipes.map(p => [p.applicant_id,p]));
+      const phones = new Map(apps.map(a => [a.id, phoneKey(a.phone)]));
       const delivery = new Map<string,{at:string;status:string}>();
       for (const r of receipts) { const old=delivery.get(r.message_sid); if (!old || r.received_at>old.at) delivery.set(r.message_sid,{at:r.received_at,status:r.message_status}); }
       const result = apps.filter(a => !a.is_test_row && !pipe.get(a.id)?.is_test && !!a.first_name?.trim()).map(a => {
         const p=pipe.get(a.id); const key=phoneKey(a.phone); const messages:TextMessage[]=[];
         for (const l of logs) if (key && phoneKey(l.recipient)===key) { const payload=object(l.payload); messages.push({id:`log:${l.id}`,at:l.triggered_at,direction:'outbound',body:str(payload.body),status:l.status,manual:l.triggered_by==='candidate-text',sid:l.twilio_sid,template:l.template_name}); }
         for (const o of outbox) if (key && phoneKey(o.to_phone_e164)===key) messages.push({id:`queue:${o.id}`,at:o.sent_at ?? o.created_at,direction:'outbound',body:o.body,status:o.status,manual:o.triggered_by==='candidate-text',sid:o.twilio_sid,template:o.template_name});
-        for (const e of events) if (e.applicant_id===a.id) {const m=object(e.metadata); const text=str(m.text); const direction=m.direction==='inbound'?'inbound':'outbound'; if(text || direction==='inbound') messages.push({id:`event:${e.id}`,at:e.created_at,direction,body:text,status:direction==='inbound'?'received':m.ok===false?'failed':m.queued===true?'queued':'accepted',manual:direction==='outbound',sid:str(m.twilio_sid)});}
+        for (const e of events) if (e.applicant_id===a.id || (key && phones.get(e.applicant_id)===key)) {const m=object(e.metadata); const text=str(m.text); const direction=m.direction==='inbound'?'inbound':'outbound'; if(text || direction==='inbound') messages.push({id:`event:${e.id}`,at:e.created_at,direction,body:text,status:direction==='inbound'?'received':m.ok===false?'failed':m.queued===true?'queued':'accepted',manual:direction==='outbound',sid:str(m.twilio_sid)});}
         const merged=mergeTextMessages(messages).map(m => ({...m,status:m.sid ? delivery.get(m.sid)?.status ?? m.status : m.status}));
         const due=deadlines.filter(d=>d.applicant_id===a.id).sort((a,b)=>b.due_at.localeCompare(a.due_at))[0];
         return {...a, archived:p?.archived ?? false,submitted:p?.apply_submitted_at ?? null,started:p?.apply_started_at ?? null,deadline:due?.due_at ?? p?.invite_deadline_at ?? null,nudge:due?.nudge_at ?? null,nudged:due?.nudged_at ?? null,messages:merged};
