@@ -1,5 +1,10 @@
 # Roadmap
 
+## Candidate text organizer (Oct 23)
+- [ ] Add dashboard navigation and a candidate text organizer with searchable attention filters, exact history, application timing, existing reminder deadlines and direct replies.
+- [ ] Retain exact future outgoing message wording in existing protected logs; do not invent missing historical bodies or send messages automatically.
+- [ ] Run rule tests and verify signed-in real candidate history and attention filters.
+
 ## Candidate apology and new invitations (Oct 23)
 - [x] Sent Daniela a personal Spanish apology with a verified direct rebooking link; active record can book without repeating unfinished questions. Corrected booking labels to Eastern Time; verified Friday 6–8 PM ET and no Saturday labels. Build OK.
 - [x] Imported Lesley Knox, Julianne Hillers, Clayton Knowles, Aleksandar Ljustina, Jhon Correa and Evelyn Brown, preserving supplied details/concerns; no existing phone/name matches. All six application SMS invitations accepted Oct 23 11:53 AM ET; existing sprint 24-hour deadline retained. No email sent.
