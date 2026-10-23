@@ -24,7 +24,7 @@ export function useCandidateTextOrganizer() {
       }
       const [apps,pipes,events,logs,outbox,receipts,deadlines] = await Promise.all([
         all((a,b) => supabase.from('applicants').select('id,first_name,last_name,phone,service,source,applied_on,preferred_language,is_test_row').order('id').range(a,b)),
-        all((a,b) => supabase.from('contractor_pipeline').select('applicant_id,archived,is_test,apply_submitted_at,apply_started_at,invite_deadline_at').order('id').range(a,b)),
+        all((a,b) => supabase.from('contractor_pipeline').select('applicant_id,archived,is_test,apply_submitted_at,apply_started_at,invite_deadline_at').order('applicant_id').range(a,b)),
         all((a,b) => supabase.from('contractor_stage_events').select('id,applicant_id,metadata,reason,created_at').eq('kind','message').order('id').range(a,b)),
         all((a,b) => supabase.from('email_send_log').select('id,recipient,payload,template_name,status,twilio_sid,triggered_at,triggered_by').eq('channel','sms').order('id').range(a,b)),
         all((a,b) => supabase.from('sms_outbox').select('id,to_phone_e164,body,status,twilio_sid,created_at,sent_at,template_name,triggered_by').order('id').range(a,b)),
