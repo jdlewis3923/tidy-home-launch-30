@@ -313,3 +313,10 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Customer day & time picker restyled
 - [ ] Applicant screens re-check against collage
 - [x] Speed: founding page photos 9MB → 0.8MB; new photos compressed
+
+## Oct 23: LinkedIn publishing unblock
+- [x] /admin/social manual confirm: owner pastes the LinkedIn post link per unconfirmed post (linkedin_manual_confirm, admin-only, URN-validated); "Never posted — reschedule" releases a held post for a new time (linkedin_manual_release deletes the rejected attempt and notes it)
+- [x] "Turn LinkedIn publishing on" button wired to linkedin_enable (requires photo + text test posts confirmed)
+- [x] Tests: src/test/linkedin-manual-confirm.test.ts (5 passed); typecheck clean; UI verified signed-in as Justin
+- [ ] Justin: check the Tidy LinkedIn company page — did the Oct 20 banner, Oct 20 text and Oct 21 "Founding Homes" posts go live? Confirm live ones on /admin/social, release the rest
+- [ ] Justin: fix the Zapier photo step to POST the receipt callback (post_id, linkedin_urn, linkedin_url) to the callback_url it receives — same step the text path already has
