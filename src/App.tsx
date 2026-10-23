@@ -140,6 +140,7 @@ const HiringFitReport = lazy(() => import("./pages/admin/HiringFitReport"));
 const HiringScorecard = lazy(() => import("./pages/admin/HiringScorecard"));
 const HiringSlots = lazy(() => import("./pages/admin/HiringSlots"));
 const HiringOutbox = lazy(() => import("./pages/admin/HiringOutbox"));
+const CandidateTextOrganizer = lazy(() => import("./pages/admin/CandidateTextOrganizer"));
 const HiringInvite = lazy(() => import("./pages/admin/HiringInvite"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const LifecycleSimulator = lazy(() => import("./pages/admin/LifecycleSimulator"));
@@ -398,6 +399,7 @@ const App = () => (
 <Route path="/admin/hiring/slots" element={<HiringSlots />} />
                   <Route path="/admin/hiring/invite" element={<HiringInvite />} />
                   <Route path="/admin/hiring/outbox" element={<HiringOutbox />} />
+                  <Route path="/admin/hiring/texts" element={<CandidateTextOrganizer />} />
                   <Route path="/admin/messages" element={<AdminMessages />} />
                   <Route path="/admin/messages/simulator" element={<LifecycleSimulator />} />
                   <Route path="/admin/hiring/content" element={<HiringContent />} />

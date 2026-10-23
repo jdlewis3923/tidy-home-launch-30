@@ -136,6 +136,7 @@ export default function HiringDashboard() {
         <h1 className="text-2xl font-bold text-foreground">Hiring</h1>
         <div className="flex items-center gap-3">
           <Link to="/admin/hiring/invite" className="text-sm text-primary underline">Invite</Link>
+          <Link to="/admin/hiring/texts" className="text-sm text-primary underline">Candidate texts</Link>
           <Link to="/admin/hiring/outbox" className="text-sm text-primary underline">Outbox</Link>
           <label className="flex items-center gap-2 text-sm text-foreground">
             <input type="checkbox" checked={!!sprint} onChange={toggleSprint} className="h-4 w-4" />

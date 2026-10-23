@@ -387,7 +387,7 @@ Deno.serve(async (req) => {
       await logSmsSend(SUPABASE_URL, SERVICE_KEY, {
         template_name: tplName, recipient: to_phone_e164, triggered_by,
         twilio_sid: result.message_sid, status: 'sent',
-        payload: { has_body: !!body, has_content_sid: !!content_sid },
+        payload: { has_body: !!body, has_content_sid: !!content_sid, ...(triggered_by && ['candidate-text', 'hiring-invite', 'pipeline-notify', 'hire-ready-dispatch'].includes(triggered_by) ? { body: body ?? null } : {}) },
       });
       await finish('success');
       return jsonResponse(result, 200);
@@ -398,6 +398,7 @@ Deno.serve(async (req) => {
       await logSmsSend(SUPABASE_URL, SERVICE_KEY, {
         template_name: tplName, recipient: to_phone_e164, triggered_by,
         status: 'failed', error_message: message,
+        payload: triggered_by && ['candidate-text', 'hiring-invite', 'pipeline-notify', 'hire-ready-dispatch'].includes(triggered_by) ? { body: body ?? null } : {},
       });
       // Outbox retries raise their own alert on the final attempt; direct sends alert now.
       if (!skip_window) await alertSmsFailure(admin, { phone: to_phone_e164, template: tplName, error: message, key: idempotencyHash });
