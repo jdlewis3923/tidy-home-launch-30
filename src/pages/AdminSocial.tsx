@@ -133,11 +133,12 @@ export default function AdminSocial() {
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   };
   const confirmLinkedin = async (p: Post) => {
-    const url = (confirmLink[p.id] ?? '').trim();
-    if (!/linkedin\.com\/(feed\/update\/urn:li:|posts\/)/i.test(url)) { toast.error('Paste the full LinkedIn post link (linkedin.com/feed/update/…)'); return; }
+    const parsed = parseLinkedinConfirmation(confirmLink[p.id] ?? '');
+    if (!parsed) { toast.error('Paste the full LinkedIn post link (linkedin.com/feed/update/…)'); return; }
+    if ('error' in parsed) { toast.error(parsed.error); return; }
     setBusy(true);
     try {
-      const { error } = await supabase.rpc('linkedin_manual_confirm', { _post: p.id, _url: url, _urn: null });
+      const { error } = await supabase.rpc('linkedin_manual_confirm', { _post: p.id, _url: parsed.url, _urn: parsed.urn });
       if (error) throw error;
       toast.success('Confirmed — the post will not be resent'); await load();
     } catch (e) { toast.error((e as Error).message.replace(/^.*?: /, '')); } finally { setBusy(false); }
