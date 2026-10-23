@@ -311,6 +311,13 @@ export default function AdminSocial() {
       </div>}
       {shown.length === 0 && <p className="text-sm text-muted-foreground">No posts in this period.</p>}
       {shown.filter(p=>platformFilter==='all'||p.channel===platformFilter).flatMap(p => (p.channel === 'meta_combined' ? ['facebook', 'instagram'] : [p.channel]).map(platform => card(p, platform)))}
+      {(platformFilter === 'all' || platformFilter === 'linkedin') && posts.some(p => p.channel === 'linkedin' && p.status === 'unconfirmed') && (
+        <>
+          <h2 className="pt-4 text-xl font-bold text-foreground">LinkedIn posts waiting for confirmation</h2>
+          <p className="text-sm text-muted-foreground">These were sent to the Zapier LinkedIn flow but never confirmed with a post link. Confirm each one that is live on LinkedIn; release the ones that never posted.</p>
+          {posts.filter(p => p.channel === 'linkedin' && p.status === 'unconfirmed').sort((a, b) => (a.scheduled_for ?? '').localeCompare(b.scheduled_for ?? '')).map(p => card(p))}
+        </>
+      )}
       {waiting.length > 0 && (<>
         <h2 className="pt-4 text-xl font-bold text-foreground">Waiting</h2>
         {waiting.map(p => card(p))}
