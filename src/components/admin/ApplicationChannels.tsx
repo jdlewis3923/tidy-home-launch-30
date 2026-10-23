@@ -8,6 +8,7 @@ export default function ApplicationChannels({ c, className = "" }: { c?: Channel
     <span className={`mt-1 flex flex-wrap gap-1 ${className}`}>
       <span className={`rounded border px-1.5 py-0.5 text-[11px] font-semibold ${c.indeed ? "bg-secondary text-secondary-foreground border-border" : "bg-muted text-muted-foreground border-border"}`}>{c.indeedLabel}</span>
       <span className={`rounded border px-1.5 py-0.5 text-[11px] font-semibold ${linkTone}`}>{c.linkLabel}</span>
+      {c.callLabel && <span className={`rounded border px-1.5 py-0.5 text-[11px] font-semibold ${c.callBooked ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border"}`}>{c.callLabel}</span>}
     </span>
   );
 }
