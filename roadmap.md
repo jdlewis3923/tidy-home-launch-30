@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Candidate text organizer (Oct 23)
-- [ ] Add dashboard navigation and a candidate text organizer with searchable attention filters, exact history, application timing, existing reminder deadlines and direct replies.
-- [ ] Retain exact future outgoing message wording in existing protected logs; do not invent missing historical bodies or send messages automatically.
-- [ ] Run rule tests and verify signed-in real candidate history and attention filters.
+- [x] Added Hiring → Candidate texts: searchable candidate/message history, reply/reminder/failure/submitted/waiting filters, separate Indeed date/Tidy progress, deadline and existing reminder schedule, manual reply and reminder draft controls.
+- [x] Deployed existing SMS sender with protected exact-body logging for hiring invites, pipeline notifications, hire-ready dispatch and personal candidate texts. Older missing wording is explicitly unavailable, never reconstructed. No messages sent and no new automatic reminder process.
+- [x] 27 tests pass; signed-in real Daniela apology and reply (including archived duplicate phone history), Needs your reply filter, Spanish reminder draft without sending, Lesley send history, desktop/411px phone and zero overflow/page errors verified; build OK. Manual sending uses the existing verified candidate sender; no test text sent this turn.
 
 ## Candidate apology and new invitations (Oct 23)
 - [x] Sent Daniela a personal Spanish apology with a verified direct rebooking link; active record can book without repeating unfinished questions. Corrected booking labels to Eastern Time; verified Friday 6–8 PM ET and no Saturday labels. Build OK.
