@@ -123,6 +123,14 @@ export default function AdminSocial() {
       setDryRun(data.timeline); toast.success('Dry-run complete — nothing sent');
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   };
+  const markPosted = async (p: Post) => {
+    setBusy(true);
+    try {
+      const { error } = await supabase.rpc('admin_mark_social_posted', { _id: p.id });
+      if (error) throw error;
+      toast.success('Marked posted'); await load();
+    } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
+  };
   const confirmLinkedin = async (p: Post) => {
     const url = (confirmLink[p.id] ?? '').trim();
     if (!/linkedin\.com\/(feed\/update\/urn:li:|posts\/)/i.test(url)) { toast.error('Paste the full LinkedIn post link (linkedin.com/feed/update/…)'); return; }
