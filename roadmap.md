@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Candidate apology and new invitations (Oct 23)
-- [ ] Send Daniela a personal Spanish apology with a verified rebooking link.
-- [ ] Import the six uploaded candidates without duplicating existing applicants, then send application invitations.
-- [ ] Verify send receipts and existing urgent booking-alert coverage; record Andy's completed call only if supported without inventing interview results.
+- [x] Sent Daniela a personal Spanish apology with a verified direct rebooking link; active record can book without repeating unfinished questions. Corrected booking labels to Eastern Time; verified Friday 6–8 PM ET and no Saturday labels. Build OK.
+- [x] Imported Lesley Knox, Julianne Hillers, Clayton Knowles, Aleksandar Ljustina, Jhon Correa and Evelyn Brown, preserving supplied details/concerns; no existing phone/name matches. All six application SMS invitations accepted Oct 23 11:53 AM ET; existing sprint 24-hour deadline retained. No email sent.
+- [x] Verified seven send-log records; carrier delivery receipts not yet received. Recorded Justin's confirmation that he called Andy as a timeline note, without inventing call time or interview results.
+- [ ] Existing urgent booking-alert code is present; real rebooking-to-owner delivery remains unverified until a candidate books. No appointment created on Daniela's behalf.
 
 ## Exact application designs and v6 (Oct 22)
 - [x] Rebuilt owner results with navy navigation, light panels, progress ring, score bars, answer tabs and sidebar; applicant screens use the eight-step white/gold reference and navy confirmation. Actual answers and explicit Indeed/text-link statuses retained; reference content is not fabricated as candidate data.
