@@ -207,6 +207,20 @@ export default function AdminSocial() {
         {p.image_flag && <p className="mt-1 text-xs text-destructive">{p.image_flag}</p>}
         {receipt && <div className="mt-2 text-xs text-muted-foreground"><p>{receipt.state==='posted'?'Confirmed on LinkedIn':receipt.webhook_status!==null && receipt.webhook_status>=400?'Rejected by Zapier':'Awaiting LinkedIn confirmation'} · Zapier HTTP {receipt.webhook_status??'pending'}</p><pre className="whitespace-pre-wrap">{receipt.webhook_response}</pre>{receipt.post_url && <a href={receipt.post_url} target="_blank" rel="noreferrer" className="text-primary underline">Open LinkedIn post</a>}</div>}
         {p.publish_error && <p className="mt-1 text-xs text-destructive">{p.publish_error}</p>}
+        {p.channel === 'linkedin' && p.status === 'unconfirmed' && (
+          <div className="mt-2 rounded border border-border bg-muted/40 p-3 text-sm">
+            <p className="font-semibold text-foreground">Confirm this post on LinkedIn</p>
+            <p className="mt-1 text-xs text-muted-foreground">If the post is live on the Tidy LinkedIn page, open it, copy the link from your browser and paste it here. If it never went live, release it and set a new time instead. A confirmed post is never resent.</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <input aria-label={`LinkedIn post link ${label(p)}`} type="url" placeholder="https://www.linkedin.com/feed/update/urn:li:…" value={confirmLink[p.id] ?? ''} onChange={e => setConfirmLink({ ...confirmLink, [p.id]: e.target.value })} className="min-w-64 flex-1 rounded border border-input bg-background p-2 text-foreground" />
+              <Button size="sm" disabled={busy || !(confirmLink[p.id] ?? '').trim()} onClick={() => void confirmLinkedin(p)}>Confirm posted</Button>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <input aria-label={`Never-posted reason ${label(p)}`} type="text" placeholder="Optional: why it never posted" value={releaseReason[p.id] ?? ''} onChange={e => setReleaseReason({ ...releaseReason, [p.id]: e.target.value })} className="min-w-64 flex-1 rounded border border-input bg-background p-2 text-foreground" />
+              <Button size="sm" variant="outline" disabled={busy} onClick={() => void releaseLinkedin(p)}>Never posted — reschedule</Button>
+            </div>
+          </div>
+        )}
         <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px]">
           <div>
             <p className="mb-1 text-xs font-semibold text-muted-foreground">Template</p>
@@ -245,7 +259,7 @@ export default function AdminSocial() {
         <Link to="/admin" className="text-sm text-muted-foreground hover:underline">← Admin</Link>
         <h1 className="mt-2 text-3xl font-bold text-foreground">Social calendar</h1>
         {linkedinReady && <p className={`mt-2 border p-3 text-sm ${linkedinEnabled ? 'border-primary text-foreground' : 'border-destructive text-destructive'}`}>{linkedinEnabled ? 'LinkedIn publishing is on. Confirmed posts will not be resent.' : 'LinkedIn calendar held. Photo and text must both have confirmed post links before activation. Uncertain posts will not be resent.'}</p>}
-        <div className="mt-3 flex flex-wrap gap-2"><Button variant={range === 'fortnight' ? 'default' : 'outline'} onClick={() => setRange('fortnight')}>Next 14 days</Button><Button variant={range === 'month' ? 'default' : 'outline'} onClick={() => setRange('month')}>All months</Button><Button variant="outline" onClick={() => void runDry()} disabled={busy}>Run publishing dry-run</Button></div>
+        <div className="mt-3 flex flex-wrap gap-2"><Button variant={range === 'fortnight' ? 'default' : 'outline'} onClick={() => setRange('fortnight')}>Next 14 days</Button><Button variant={range === 'month' ? 'default' : 'outline'} onClick={() => setRange('month')}>All months</Button><Button variant="outline" onClick={() => void runDry()} disabled={busy}>Run publishing dry-run</Button>{linkedinReady && !linkedinEnabled && <Button onClick={() => void enableLinkedin()} disabled={busy}>Turn LinkedIn publishing on</Button>}</div>
         <div className="mt-3 flex gap-2"><Button variant={platformFilter==='all'?'default':'outline'} onClick={()=>setPlatformFilter('all')}>All platforms</Button><Button variant={platformFilter==='linkedin'?'default':'outline'} onClick={()=>setPlatformFilter('linkedin')}>LinkedIn</Button></div>
         <p className="mt-2 text-sm text-muted-foreground">Facebook, Instagram and LinkedIn publish automatically from here. Nextdoor is manual: copy the caption, download the image, post it, then mark it posted.</p>
         {linkedinReady === false && (
