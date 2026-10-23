@@ -10238,6 +10238,14 @@ export type Database = {
       }
       linkedin_enable_calendar: { Args: never; Returns: undefined }
       linkedin_expire_unconfirmed: { Args: never; Returns: number }
+      linkedin_manual_confirm: {
+        Args: { _post: string; _url: string; _urn?: string }
+        Returns: undefined
+      }
+      linkedin_manual_release: {
+        Args: { _post: string; _reason?: string }
+        Returns: undefined
+      }
       linkedin_prepare_live_test: {
         Args: { _kind: string }
         Returns: {

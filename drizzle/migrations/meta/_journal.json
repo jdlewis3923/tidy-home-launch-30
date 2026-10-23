@@ -1443,6 +1443,13 @@
       "when": 1792674964300,
       "tag": "0205_owner_phone_invite",
       "breakpoints": true
+    },
+    {
+      "idx": 206,
+      "version": "7",
+      "when": 1792788928071,
+      "tag": "0206_linkedin_manual_confirm_and_release",
+      "breakpoints": true
     }
   ]
 }
