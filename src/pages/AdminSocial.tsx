@@ -15,6 +15,7 @@ import { useLaunchConfig } from "@/hooks/useLaunchConfig";
 import { Button } from "@/components/ui/button";
 import { renderTemplate, instagramVersion, etDate, type PlanAnchors, type PlanResult } from "@/lib/socialPlanner";
 import { socialPhotoCredit } from "@/lib/socialPhotoCredits";
+import { parseLinkedinConfirmation } from "@/lib/linkedinConfirm";
 
 type Post = {
   id: string; post_number: number | null; channel: string; scheduled_for: string | null; caption: string | null; template_copy: string | null;
@@ -45,6 +46,8 @@ export default function AdminSocial() {
   const [receipts,setReceipts]=useState<Array<{post_id:string;webhook_status:number|null;webhook_response:string|null;post_url:string|null;state:string}>>([]);
   const [linkedinReady, setLinkedinReady] = useState<boolean | null>(null);
   const [linkedinEnabled, setLinkedinEnabled] = useState(false);
+  const [confirmLink, setConfirmLink] = useState<Record<string, string>>({});
+  const [releaseReason, setReleaseReason] = useState<Record<string, string>>({});
 
   const anchors: PlanAnchors = useMemo(() => ({
     launch: cfg?.cleaning?.first_visit_date ?? null, conversion: cfg?.cleaning?.conversion_date ?? null, carLaunch: cfg?.car?.first_visit_date ?? null,
@@ -129,6 +132,34 @@ export default function AdminSocial() {
       toast.success('Marked posted'); await load();
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   };
+  const confirmLinkedin = async (p: Post) => {
+    const parsed = parseLinkedinConfirmation(confirmLink[p.id] ?? '');
+    if (!parsed) { toast.error('Paste the full LinkedIn post link (linkedin.com/feed/update/…)'); return; }
+    if ('error' in parsed) { toast.error(parsed.error); return; }
+    setBusy(true);
+    try {
+      const { error } = await supabase.rpc('linkedin_manual_confirm', { _post: p.id, _url: parsed.url, _urn: parsed.urn });
+      if (error) throw error;
+      toast.success('Confirmed — the post will not be resent'); await load();
+    } catch (e) { toast.error((e as Error).message.replace(/^.*?: /, '')); } finally { setBusy(false); }
+  };
+  const releaseLinkedin = async (p: Post) => {
+    setBusy(true);
+    try {
+      const { error } = await supabase.rpc('linkedin_manual_release', { _post: p.id, _reason: releaseReason[p.id] ?? '' });
+      if (error) throw error;
+      toast.success('Released — set a new time with Move post'); await load();
+    } catch (e) { toast.error((e as Error).message.replace(/^.*?: /, '')); } finally { setBusy(false); }
+  };
+  const enableLinkedin = async () => {
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('social-launch-publisher', { body: { action: 'linkedin_enable' } });
+      if (error) throw error;
+      if (data?.error) throw new Error(String(data.error));
+      setLinkedinEnabled(true); toast.success('LinkedIn publishing is on');
+    } catch (e) { toast.error((e as Error).message.replace(/^.*?: /, '')); } finally { setBusy(false); }
+  };
   const copyCaption = async (p: Post) => {
     const day = p.scheduled_for ? etDate(p.scheduled_for) : new Date().toISOString().slice(0, 10);
     await navigator.clipboard.writeText(renderTemplate(edit[p.id] ?? p.template_copy ?? p.caption ?? '', anchors, day));
@@ -178,6 +209,20 @@ export default function AdminSocial() {
         {p.image_flag && <p className="mt-1 text-xs text-destructive">{p.image_flag}</p>}
         {receipt && <div className="mt-2 text-xs text-muted-foreground"><p>{receipt.state==='posted'?'Confirmed on LinkedIn':receipt.webhook_status!==null && receipt.webhook_status>=400?'Rejected by Zapier':'Awaiting LinkedIn confirmation'} · Zapier HTTP {receipt.webhook_status??'pending'}</p><pre className="whitespace-pre-wrap">{receipt.webhook_response}</pre>{receipt.post_url && <a href={receipt.post_url} target="_blank" rel="noreferrer" className="text-primary underline">Open LinkedIn post</a>}</div>}
         {p.publish_error && <p className="mt-1 text-xs text-destructive">{p.publish_error}</p>}
+        {p.channel === 'linkedin' && p.status === 'unconfirmed' && (
+          <div className="mt-2 rounded border border-border bg-muted/40 p-3 text-sm">
+            <p className="font-semibold text-foreground">Confirm this post on LinkedIn</p>
+            <p className="mt-1 text-xs text-muted-foreground">If the post is live on the Tidy LinkedIn page, open it, copy the link from your browser and paste it here. If it never went live, release it and set a new time instead. A confirmed post is never resent.</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <input aria-label={`LinkedIn post link ${label(p)}`} type="url" placeholder="https://www.linkedin.com/feed/update/urn:li:…" value={confirmLink[p.id] ?? ''} onChange={e => setConfirmLink({ ...confirmLink, [p.id]: e.target.value })} className="min-w-64 flex-1 rounded border border-input bg-background p-2 text-foreground" />
+              <Button size="sm" disabled={busy || !(confirmLink[p.id] ?? '').trim()} onClick={() => void confirmLinkedin(p)}>Confirm posted</Button>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <input aria-label={`Never-posted reason ${label(p)}`} type="text" placeholder="Optional: why it never posted" value={releaseReason[p.id] ?? ''} onChange={e => setReleaseReason({ ...releaseReason, [p.id]: e.target.value })} className="min-w-64 flex-1 rounded border border-input bg-background p-2 text-foreground" />
+              <Button size="sm" variant="outline" disabled={busy} onClick={() => void releaseLinkedin(p)}>Never posted — reschedule</Button>
+            </div>
+          </div>
+        )}
         <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px]">
           <div>
             <p className="mb-1 text-xs font-semibold text-muted-foreground">Template</p>
@@ -216,7 +261,7 @@ export default function AdminSocial() {
         <Link to="/admin" className="text-sm text-muted-foreground hover:underline">← Admin</Link>
         <h1 className="mt-2 text-3xl font-bold text-foreground">Social calendar</h1>
         {linkedinReady && <p className={`mt-2 border p-3 text-sm ${linkedinEnabled ? 'border-primary text-foreground' : 'border-destructive text-destructive'}`}>{linkedinEnabled ? 'LinkedIn publishing is on. Confirmed posts will not be resent.' : 'LinkedIn calendar held. Photo and text must both have confirmed post links before activation. Uncertain posts will not be resent.'}</p>}
-        <div className="mt-3 flex flex-wrap gap-2"><Button variant={range === 'fortnight' ? 'default' : 'outline'} onClick={() => setRange('fortnight')}>Next 14 days</Button><Button variant={range === 'month' ? 'default' : 'outline'} onClick={() => setRange('month')}>All months</Button><Button variant="outline" onClick={() => void runDry()} disabled={busy}>Run publishing dry-run</Button></div>
+        <div className="mt-3 flex flex-wrap gap-2"><Button variant={range === 'fortnight' ? 'default' : 'outline'} onClick={() => setRange('fortnight')}>Next 14 days</Button><Button variant={range === 'month' ? 'default' : 'outline'} onClick={() => setRange('month')}>All months</Button><Button variant="outline" onClick={() => void runDry()} disabled={busy}>Run publishing dry-run</Button>{linkedinReady && !linkedinEnabled && <Button onClick={() => void enableLinkedin()} disabled={busy}>Turn LinkedIn publishing on</Button>}</div>
         <div className="mt-3 flex gap-2"><Button variant={platformFilter==='all'?'default':'outline'} onClick={()=>setPlatformFilter('all')}>All platforms</Button><Button variant={platformFilter==='linkedin'?'default':'outline'} onClick={()=>setPlatformFilter('linkedin')}>LinkedIn</Button></div>
         <p className="mt-2 text-sm text-muted-foreground">Facebook, Instagram and LinkedIn publish automatically from here. Nextdoor is manual: copy the caption, download the image, post it, then mark it posted.</p>
         {linkedinReady === false && (
@@ -268,6 +313,13 @@ export default function AdminSocial() {
       </div>}
       {shown.length === 0 && <p className="text-sm text-muted-foreground">No posts in this period.</p>}
       {shown.filter(p=>platformFilter==='all'||p.channel===platformFilter).flatMap(p => (p.channel === 'meta_combined' ? ['facebook', 'instagram'] : [p.channel]).map(platform => card(p, platform)))}
+      {(platformFilter === 'all' || platformFilter === 'linkedin') && posts.some(p => p.channel === 'linkedin' && p.status === 'unconfirmed') && (
+        <>
+          <h2 className="pt-4 text-xl font-bold text-foreground">LinkedIn posts waiting for confirmation</h2>
+          <p className="text-sm text-muted-foreground">These were sent to the Zapier LinkedIn flow but never confirmed with a post link. Confirm each one that is live on LinkedIn; release the ones that never posted.</p>
+          {posts.filter(p => p.channel === 'linkedin' && p.status === 'unconfirmed').sort((a, b) => (a.scheduled_for ?? '').localeCompare(b.scheduled_for ?? '')).map(p => card(p))}
+        </>
+      )}
       {waiting.length > 0 && (<>
         <h2 className="pt-4 text-xl font-bold text-foreground">Waiting</h2>
         {waiting.map(p => card(p))}
