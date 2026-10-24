@@ -37,39 +37,55 @@ export default function WorkdayBoard() {
     .filter((r) => (who === "you" ? (r.sequence_stage === "applied" ? !!r.apply_submitted_at : STAGE_INFO[r.sequence_stage]?.waitingOn === "you") : (r.sequence_stage === "applied" ? !r.apply_submitted_at : ["them", "auto"].includes(STAGE_INFO[r.sequence_stage]?.waitingOn))))
     .sort((a, b) => days(b.sequence_stage_entered_at) - days(a.sequence_stage_entered_at));
 
-  const Col = ({ title, list }: { title: string; list: Row[] }) => (
-    <div className="flex-1 min-w-[240px]">
-      <div className="text-[11px] uppercase tracking-wide font-semibold text-muted-foreground mb-2">{title} · {list.length}</div>
-      <ul className="space-y-1.5">
-        {list.length === 0 && <li className="text-xs text-muted-foreground">Nobody.</li>}
-        {list.map((r) => {
-          const d = days(r.sequence_stage_entered_at);
-          const stalled = d >= 3;
-          return (
-            <li key={r.id}>
-              <Link to={`/admin/pipeline/${r.id}`} className={`block rounded-md border px-3 py-2 text-sm ${stalled ? "border-accent bg-accent/15" : "border-border bg-background"}`}>
-                <span className="font-semibold text-foreground">{r.first_name} {r.last_name?.[0] ?? ""}.</span>
-                {r.sequence_stage !== "applied" && <span className="text-muted-foreground"> · {STAGE_INFO[r.sequence_stage]?.label ?? r.sequence_stage}</span>}
-                <ApplicationChannels c={channels.get(r.id)} />
-                {NEXT_ACTION[r.sequence_stage] && title.startsWith("Waiting on me") && <span className="block text-[11px] text-primary">Next: {NEXT_ACTION[r.sequence_stage]?.label}</span>}
-                <span className={`block text-[11px] ${stalled ? "text-accent-foreground font-semibold" : "text-muted-foreground"}`}>{d} day{d === 1 ? "" : "s"} at this stage</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
+  const Item = ({ r, mine }: { r: Row; mine: boolean }) => {
+    const d = days(r.sequence_stage_entered_at);
+    const stalled = d >= 3;
+    return (
+      <li>
+        <Link to={`/admin/pipeline/${r.id}`} className={`block rounded-md border px-3 py-2 text-sm ${stalled ? "border-accent bg-accent/15" : "border-border bg-background"}`}>
+          <span className="font-semibold text-foreground">{r.first_name} {r.last_name?.[0] ?? ""}.</span>
+          {r.sequence_stage !== "applied" && <span className="text-muted-foreground"> · {STAGE_INFO[r.sequence_stage]?.label ?? r.sequence_stage}</span>}
+          <ApplicationChannels c={channels.get(r.id)} />
+          {NEXT_ACTION[r.sequence_stage] && mine && <span className="block text-[11px] text-primary">Next: {NEXT_ACTION[r.sequence_stage]?.label}</span>}
+          <span className={`block text-[11px] ${stalled ? "text-accent-foreground font-semibold" : "text-muted-foreground"}`}>{d} day{d === 1 ? "" : "s"} at this stage</span>
+        </Link>
+      </li>
+    );
+  };
+
+  const Col = ({ title, hint, list, mine }: { title: string; hint: string; list: Row[]; mine: boolean }) => {
+    const groups = [
+      { key: "indeed", label: "Came from INDEED", rows: list.filter((r) => channels.get(r.id)?.origin === "indeed") },
+      { key: "website", label: "Applied on TIDY WEBSITE", rows: list.filter((r) => channels.get(r.id)?.origin === "website") },
+      { key: "other", label: "Other source", rows: list.filter((r) => { const o = channels.get(r.id)?.origin; return o !== "indeed" && o !== "website"; }) },
+    ].filter((g) => g.rows.length);
+    return (
+      <div className="flex-1 min-w-[260px] rounded-lg border border-border bg-muted/30 p-3">
+        <h3 className="text-base font-bold text-foreground">{title} · {list.length}</h3>
+        <p className="text-xs text-muted-foreground mb-3">{hint}</p>
+        {list.length === 0 && <p className="text-xs text-muted-foreground">Nobody.</p>}
+        {groups.map((g) => (
+          <div key={g.key} className="mb-3">
+            <div className="text-[11px] uppercase tracking-wide font-bold text-muted-foreground mb-1">{g.label} · {g.rows.length}</div>
+            <ul className="space-y-1.5">{g.rows.map((r) => <Item key={r.id} r={r} mine={mine} />)}</ul>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <>
+    <div className="flex flex-wrap gap-4 px-5 py-4 border-b border-border">
+      <Col title="Waiting on me" hint="You need to do something next." list={col("you")} mine />
+      <Col title="Waiting on them" hint="They still need to finish or reply." list={col("them")} mine={false} />
+    </div>
     <RedoTasks />
     <ReservationTasks />
-    <InviteLinkResults />
-    <div className="flex flex-wrap gap-4 px-5 py-4 border-b border-border">
-      <Col title="Waiting on me" list={col("you")} />
-      <Col title="Waiting on them" list={col("them")} />
-    </div>
+    <details className="border-b border-border">
+      <summary className="cursor-pointer px-5 py-3 text-sm font-semibold text-foreground">Everyone we texted the application link to (tap to open)</summary>
+      <InviteLinkResults />
+    </details>
     </>
   );
 }
