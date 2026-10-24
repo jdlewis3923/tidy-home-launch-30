@@ -1,8 +1,9 @@
 # Roadmap
 
 ## Daily new-applicant reminders (Oct 24)
-- [ ] Add a consistent 8 AM ET morning review of yesterday's new invited applicants who have not finished, reusing the existing hiring reminder process without duplicates.
-- [ ] Test yesterday-only selection, submission/test/archive exclusions, repeat-run safety, and verify live reminder schedule and outcomes.
+- [x] Add a consistent 8 AM ET morning review of yesterday's new same-day invited applicants who have not finished, reusing hiring_deadlines/hiring_tick with locked claims and retained nudge history. Existing campaign/older applicant deadlines unchanged. Sunday uses existing SMS hold rules; links expire before stale texts can send.
+- [x] Four concrete SQL timing assertions passed during migration (Eastern midnight, next morning, 8 AM, DST); 26 existing hiring/message/schedule tests pass; active hiring schedule and live morning/row-lock gates verified; build OK.
+- [ ] First future morning dispatch and carrier delivery await a newly invited unfinished applicant; no duplicate texts sent to yesterday's already-nudged candidates. End-to-end delivery not verified this turn.
 - [ ] Fresh application invitations wait for Justin's supplied candidate list; no automatic sourcing or Claude integration.
 
 ## Candidate text organizer (Oct 23)
