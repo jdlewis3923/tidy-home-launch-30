@@ -1,5 +1,10 @@
 # Roadmap
 
+## Daily new-applicant reminders (Oct 24)
+- [ ] Add a consistent 8 AM ET morning review of yesterday's new invited applicants who have not finished, reusing the existing hiring reminder process without duplicates.
+- [ ] Test yesterday-only selection, submission/test/archive exclusions, repeat-run safety, and verify live reminder schedule and outcomes.
+- [ ] Fresh application invitations wait for Justin's supplied candidate list; no automatic sourcing or Claude integration.
+
 ## Candidate text organizer (Oct 23)
 - [x] Added Hiring → Candidate texts: searchable candidate/message history, reply/reminder/failure/submitted/waiting filters, separate Indeed date/Tidy progress, deadline and existing reminder schedule, manual reply and reminder draft controls.
 - [x] Deployed existing SMS sender with protected exact-body logging for hiring invites, pipeline notifications, hire-ready dispatch and personal candidate texts. Older missing wording is explicitly unavailable, never reconstructed. No messages sent and no new automatic reminder process.
