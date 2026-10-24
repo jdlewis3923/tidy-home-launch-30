@@ -3223,6 +3223,7 @@ export type Database = {
         Row: {
           applicant_id: string
           created_at: string
+          daily_new_app_reminder: boolean
           due_at: string
           id: string
           kind: string
@@ -3233,6 +3234,7 @@ export type Database = {
         Insert: {
           applicant_id: string
           created_at?: string
+          daily_new_app_reminder?: boolean
           due_at: string
           id?: string
           kind: string
@@ -3243,6 +3245,7 @@ export type Database = {
         Update: {
           applicant_id?: string
           created_at?: string
+          daily_new_app_reminder?: boolean
           due_at?: string
           id?: string
           kind?: string
@@ -10321,6 +10324,10 @@ export type Database = {
       my_pro_services: {
         Args: never
         Returns: Database["public"]["Enums"]["service_type"][]
+      }
+      new_application_reminder_at: {
+        Args: { _invited_at: string }
+        Returns: string
       }
       nextval: { Args: { seq_name: string }; Returns: number }
       notify_member: {
