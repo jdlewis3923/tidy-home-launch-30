@@ -43,7 +43,7 @@ export default function WorkdayBoard() {
     return (
       <li>
         <Link to={`/admin/pipeline/${r.id}`} className={`block rounded-md border px-3 py-2 text-sm ${stalled ? "border-accent bg-accent/15" : "border-border bg-background"}`}>
-          <span className="font-semibold text-foreground">{r.first_name} {r.last_name?.[0] ?? ""}.</span>
+          <span className="font-semibold text-foreground">{r.first_name}{r.last_name?.trim() ? ` ${r.last_name.trim()[0]}.` : ""}</span>
           {r.sequence_stage !== "applied" && <span className="text-muted-foreground"> · {STAGE_INFO[r.sequence_stage]?.label ?? r.sequence_stage}</span>}
           <ApplicationChannels c={channels.get(r.id)} />
           {NEXT_ACTION[r.sequence_stage] && mine && <span className="block text-[11px] text-primary">Next: {NEXT_ACTION[r.sequence_stage]?.label}</span>}
