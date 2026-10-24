@@ -1450,6 +1450,13 @@
       "when": 1792788928071,
       "tag": "0206_linkedin_manual_confirm_and_release",
       "breakpoints": true
+    },
+    {
+      "idx": 207,
+      "version": "7",
+      "when": 1792845340593,
+      "tag": "0207_daily_new_application_reminders",
+      "breakpoints": true
     }
   ]
 }
