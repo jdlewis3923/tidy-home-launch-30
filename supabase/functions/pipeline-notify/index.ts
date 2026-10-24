@@ -52,7 +52,7 @@ const e164 = (raw: string | null | undefined) => {
   if (d.length === 11 && d.startsWith('1')) return `+${d}`;
   return null;
 };
-const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] ?? c));
 
 async function docUrl(docKey: string, seconds = 7 * 86400): Promise<{ url: string; name: string } | null> {
   const { data } = await admin.from('company_documents').select('filename, storage_path').eq('doc_key', docKey)
@@ -85,11 +85,14 @@ Deno.serve(async (req) => {
   if (typeof applicant_id !== 'string' || typeof event !== 'string') return jsonResponse({ error: 'applicant_id and event required' }, 400);
 
   const { data: p } = await admin.from('contractor_pipeline').select('*').eq('applicant_id', applicant_id).maybeSingle();
-  const { data: a } = await admin.from('applicants').select('id, first_name, email, phone, contract_token').eq('id', applicant_id).maybeSingle();
+  const { data: a } = await admin.from('applicants').select('id, first_name, email, phone, contract_token, is_test_row').eq('id', applicant_id).maybeSingle();
   if (!p || !a) return jsonResponse({ error: 'not_found' }, 404);
   const { data: hireReadyJob } = await admin.from('hire_ready_invite_jobs').select('language').eq('applicant_id', applicant_id).eq('kind', 'invite').maybeSingle();
   const hireReadyPhone = !!hireReadyJob && !!p.apply_submitted_at;
-  if (p.is_test) return jsonResponse({ ok: true, skipped: 'test_candidate' });
+  if (p.is_test || a.is_test_row) return jsonResponse({ ok: true, skipped: 'test_candidate' });
+  if (event === 'nudge' && step === 'apply' && (p.apply_submitted_at || !p.apply_resume_token || (p.invite_deadline_at && Date.parse(p.invite_deadline_at) <= Date.now()))) {
+    return jsonResponse({ ok: true, skipped: 'application_finished_or_link_closed' });
+  }
   if (p.archived && event !== 'close_out' && event !== 'v6_not_fit') return jsonResponse({ ok: true, skipped: 'archived' });
   const lang: Lang = p.preferred_language === 'es' ? 'es' : 'en';
   const first = (a.first_name ?? '').trim() || (lang === 'es' ? 'hola' : 'there');
@@ -191,8 +194,8 @@ Deno.serve(async (req) => {
     const bookUrl = p.apply_resume_token ? `${SITE}/pro/book/${p.apply_resume_token}` : null;
     if (stepName === 'apply') {
       sms = lang === 'es'
-        ? `Hola ${first}, soy Justin de Tidy. Tu solicitud está empezada; termínala aquí cuando puedas (unos 10 minutos): ${resumeUrl}`
-        : `Hi ${first}, it's Justin from Tidy. Your application is started; finish it here when you can (about 10 minutes): ${resumeUrl}`;
+        ? `Hola ${first}, soy Justin de Tidy Home Concierge. Aún no recibimos tu solicitud completa. Si sigues interesado/a, termínala aquí: ${resumeUrl}. Tus respuestas se guardan mientras avanzas. ¿Necesitas ayuda? Responde aquí.`
+        : `Hi ${first}, it's Justin from Tidy Home Concierge. We haven't received your completed application yet. If you're still interested, please finish here: ${resumeUrl}. Your answers save as you go. Need help? Reply here.`;
       subject = lang === 'es' ? 'Termina tu solicitud' : 'Finish your application';
     } else if (stepName === 'proof') {
       sms = lang === 'es'
@@ -277,7 +280,7 @@ Deno.serve(async (req) => {
   if (to) {
     const r = await vendorFetch(`${URL_}/functions/v1/send-twilio-sms`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${KEY}` },
-      body: JSON.stringify({ to_phone_e164: to, body: sms + extraSms, idempotency_key: `pipeline:${event}:${applicant_id}:${slot ?? ''}:${new Date().toISOString().slice(0, 13)}`, template_name: `pipeline_${event}`, triggered_by: 'pipeline-notify' }),
+      body: JSON.stringify({ to_phone_e164: to, body: sms + extraSms, idempotency_key: `pipeline:${event}:${applicant_id}:${slot ?? ''}:${new Date().toISOString().slice(0, 13)}`, template_name: `pipeline_${event}`, triggered_by: 'pipeline-notify', ...(event === 'nudge' && step === 'apply' ? { expires_at: p.invite_deadline_at } : {}) }),
     }).catch((e) => ({ ok: false, status: 0, text: async () => String(e) }) as unknown as Response);
     smsResult = r.ok ? 'sent_or_queued' : `failed_${r.status}`;
   }
