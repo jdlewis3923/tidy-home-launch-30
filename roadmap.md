@@ -1,5 +1,10 @@
 # Roadmap
 
+## Indeed vs Tidy website + finish texts (Oct 24)
+- [x] Gold INDEED / blue TIDY WEBSITE badge on every applicant; ✓ FINISHED / ✗ NOT finished link status; Waiting on me / Waiting on them moved to top of Command, grouped by source; texted-link list collapsed below. 20 rule tests pass; build OK; signed-in desktop verified.
+- [x] Reopened 12 closed no-finish applicants and moved 7 open deadlines to Sun Oct 25 8 PM ET; sent 20 "you're so close" texts (Daniela in Spanish) at 8:49–8:50 AM ET, all accepted by carrier. Yurina skipped (no phone). Delivery receipts not yet confirmed.
+
+
 ## Daily new-applicant reminders (Oct 24)
 - [x] Add a consistent 8 AM ET morning review of yesterday's new same-day invited applicants who have not finished, reusing hiring_deadlines/hiring_tick with locked claims and retained nudge history. Existing campaign/older applicant deadlines unchanged. Sunday uses existing SMS hold rules; links expire before stale texts can send.
 - [x] Four concrete SQL timing assertions passed during migration (Eastern midnight, next morning, 8 AM, DST); 26 existing hiring/message/schedule tests pass; active hiring schedule and live morning/row-lock gates verified; build OK.

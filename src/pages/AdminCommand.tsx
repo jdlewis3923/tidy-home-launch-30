@@ -334,11 +334,6 @@ export default function AdminCommand() {
         </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-          <FoundingFunnelPanel />
-          <MessagingReadinessBanner />
-          <SmsQueueLine />
-          <ReservationsForecast compact />
-
           <section className="admin-page-surface rounded-lg border overflow-hidden">
             <div className="bg-primary text-primary-foreground px-5 py-4 flex flex-wrap items-center gap-3">
               <div><h2 className="text-lg font-bold">Workday</h2><p className="text-xs text-primary-foreground/75">Today’s activity, newest first.</p><ViewSequenceLink className="mt-1 text-primary-foreground" /></div>
@@ -366,6 +361,11 @@ export default function AdminCommand() {
               </div>)}
             </div>
           </section>
+
+          <FoundingFunnelPanel />
+          <MessagingReadinessBanner />
+          <SmsQueueLine />
+          <ReservationsForecast compact />
 
           {/* 1 — STATUS BAR */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm px-5 sm:px-8 py-6">

@@ -39,14 +39,17 @@ export function applicationChannels(r: ChannelInput) {
   else if (!r.hasLink) link = 'not_sent';
   else if (r.invited_at && new Date(r.invited_at).getTime() > (r.now ?? Date.now())) link = 'scheduled';
   else link = 'not_started';
-  const indeedLabel = indeed ? 'Indeed: YES, applied' : 'Indeed: NO';
+  /** Where the person first applied: Indeed, or our own website (never both). */
+  const origin: 'indeed' | 'website' | 'other' = indeed ? 'indeed' : direct ? 'website' : 'other';
+  const indeedLabel = indeed ? 'Applied on INDEED' : direct ? 'Applied on TIDY WEBSITE (not Indeed)' : 'Not from Indeed';
+  const what = direct ? 'Tidy application' : 'Our texted link';
   const linkLabel = {
-    submitted: `Our texted link: SUBMITTED ${r.apply_submitted_at ? at(r.apply_submitted_at) : ''}`.trim(),
-    direct: `Tidy website: SUBMITTED on their own ${r.apply_submitted_at ? at(r.apply_submitted_at) : ''}`.trim(),
-    started: `${direct ? 'Tidy website' : 'Our texted link'}: started, NOT submitted (${r.answers} answers)`,
-    not_started: `${direct ? 'Tidy website' : 'Our texted link'}: NOT started (0 answers)`,
+    submitted: `Our texted link: ✓ FINISHED ${r.apply_submitted_at ? at(r.apply_submitted_at) : ''}`.trim(),
+    direct: `Tidy application: ✓ FINISHED ${r.apply_submitted_at ? at(r.apply_submitted_at) : ''}`.trim(),
+    started: `${what}: ✗ NOT finished (${r.answers} answers)`,
+    not_started: `${what}: ✗ NOT started (0 answers)`,
     scheduled: `Our texted link: not sent yet (goes out ${r.invited_at ? at(r.invited_at) : ''})`.trim(),
     not_sent: 'Our texted link: never sent',
   }[link];
-  return { indeed, indeedLabel, link, linkLabel, submitted: link === 'submitted' || link === 'direct' };
+  return { indeed, origin, indeedLabel, link, linkLabel, submitted: link === 'submitted' || link === 'direct' };
 }
