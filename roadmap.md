@@ -336,3 +336,8 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Tests: src/test/linkedin-manual-confirm.test.ts (5 passed); typecheck clean; UI verified signed-in as Justin
 - [ ] Justin: check the Tidy LinkedIn company page — did the Oct 20 banner, Oct 20 text and Oct 21 "Founding Homes" posts go live? Confirm live ones on /admin/social, release the rest
 - [ ] Justin: fix the Zapier photo step to POST the receipt callback (post_id, linkedin_urn, linkedin_url) to the callback_url it receives — same step the text path already has
+
+## LinkedIn restart (Oct 25)
+- [x] Founding Homes photo marked owner-verified live; Oct 20 banner + text released (never posted); calendar turned on — 138 posts queued, next 9:30 AM ET Oct 25
+- [x] Fixed release button failing on delivery-token link
+- [ ] Optional (Justin): Zap photo step should POST the receipt callback so photo posts self-confirm

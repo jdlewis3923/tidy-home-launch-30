@@ -20,7 +20,7 @@
 - Read subdirectory `AGENTS.md` before edits; admin reporting: `supabase/functions/AGENTS.md`.
 - Admin root isolates a behind-content canvas; mobile tabs wrap — why: no covered or unreachable pages.
 - LinkedIn photo credits use a structured notes marker parsed by socialPhotoCredits — why: credit follows locked images without schema changes.
-- LinkedIn confirms only via receipt callback or owner-pasted post link (linkedin_manual_confirm); a released post (linkedin_manual_release) is never auto-claimed again until explicitly rescheduled — why: a confirmed post can never be resent.
+- LinkedIn confirms only via receipt callback, owner-pasted post link (linkedin_manual_confirm), or a logged owner-verified-live record (external_post_id 'linkedin:owner-verified:<id>'); a released post (linkedin_manual_release) is never auto-claimed again until explicitly rescheduled — why: a confirmed post can never be resent.
 - Pipeline migrations/gates never touch archived or `is_test` records; test Pros are excluded from every count and never assignable — why: preserve test and declined records.
 - Lifecycle uses transactional event-ledger dispatch; visit events preserve stages, rules default shadow, simulations require admin + is_test — why: no duplicate/test sends.
 - Growth initiatives live in roadmap_initiatives/items; customer code gates new pieces only via feature_enabled(switch_key), flipped by roadmap-tick at 8 AM ET launch day or Launch now — why: everything ships dark and unveils automatically.
