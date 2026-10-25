@@ -1,3 +1,4 @@
+import IndeedResume from '@/components/admin/IndeedResume';
 import ApplicationChannels from "@/components/admin/ApplicationChannels";
 import { useApplicationChannels } from "@/hooks/useApplicationChannels";
 import ProPraiseHistory from "@/components/admin/ProPraiseHistory";
@@ -970,6 +971,7 @@ export default function AdminApplicants() {
               </SheetHeader>
 
               <div className="flex-1 p-6 space-y-5">
+                <IndeedResume applicantId={open.id} />
                 {/* Quick info */}
                 <div className="grid grid-cols-3 gap-3">
                   <QuickInfo icon={<Briefcase className="h-4 w-4" />} label="Role" value={role} />

@@ -1467,6 +1467,32 @@ export type Database = {
         }
         Relationships: []
       }
+      candidate_indeed_resumes: {
+        Row: {
+          applicant_id: string
+          resume_text: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          resume_text?: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          resume_text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_indeed_resumes_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: true
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       capacity_crossings: {
         Row: {
           active_customers: number | null

@@ -40,6 +40,7 @@ const STATUS_TO_QUEUE: Record<string, string> = {
 
 export interface DraftApplicant {
   name: string;
+  indeed_resume_text?: string;
   email?: string | null;
   phone: string | null;
   service: string | null;
@@ -147,6 +148,11 @@ export async function saveDraft(draft: DraftApplicant): Promise<string> {
     queue_state: scored.queue_state,
   };
 
+  const saveResume = async (id: string) => {
+    if (!draft.indeed_resume_text?.trim()) return;
+    const { error } = await supabase.from('candidate_indeed_resumes').upsert({ applicant_id: id, resume_text: draft.indeed_resume_text, updated_at: new Date().toISOString() });
+    if (error) throw new Error(error.message);
+  };
   const phoneDigits = digits(draft.phone);
   if (phoneDigits.length >= 10) {
     const { data: existing } = await supabase
@@ -157,12 +163,14 @@ export async function saveDraft(draft: DraftApplicant): Promise<string> {
     if (match) {
       const { error } = await supabase.from("applicants").update(payload).eq("id", match.id);
       if (error) throw new Error(error.message);
+      await saveResume(match.id);
       return match.id;
     }
   }
 
   const { data, error } = await supabase.from("applicants").insert(payload).select("id").single();
   if (error) throw new Error(error.message);
+  await saveResume(data.id);
   return data.id as string;
 }
 
@@ -220,6 +228,7 @@ export function parseCsv(text: string): DraftApplicant[] {
       why: get("why") || null,
       watch_for: get("watch_for") || null,
       notes: get("notes") || null,
+      indeed_resume_text: get("indeed_resume_text") || get("resume_text") || undefined,
       queue_state: STATUS_TO_QUEUE[get("status").toLowerCase()] ?? "not_contacted",
       first_texted_at: lastContacted ? new Date(lastContacted).toISOString() : null,
     };
@@ -247,6 +256,7 @@ export default function AddApplicants({ onDone }: { onDone: () => void }) {
       ...EMPTY,
       ...f,
       name: String(f.name ?? ""),
+      indeed_resume_text: paste,
       service: (f.service as string) ?? service,
       bilingual: tri(f.bilingual as string),
       drivers_license: tri(f.drivers_license as string),

@@ -1,5 +1,10 @@
 # Roadmap
 
+## Candidate appointments and Indeed résumés (Oct 24 evening)
+- [x] Booking and time changes now create urgent, night-enabled owner alerts transactionally from hiring_slots; removed competing frontend-function alert producer. Rollback SQL checks passed for booking/reschedule/dedup; labeled owner test SMS + email accepted within five seconds and test alert resolved. Carrier delivery remains unconfirmed.
+- [x] Pipeline cards and candidate views show booked times in Miami time, all appointments and honest past-booking labels; original Indeed source text displays on pipeline/results/legacy records, future pasted imports retain originals. Signed-in real Daniela record and results verified; 27 tests passed, build OK.
+- [ ] Populate missing historical full Indeed résumés — original résumés were not provided; existing imported summaries remain visible and distinctly labeled. Requires original Indeed text from Justin; no direct Indeed connection available.
+
 ## Indeed vs Tidy website + finish texts (Oct 24)
 - [x] Gold INDEED / blue TIDY WEBSITE badge on every applicant; ✓ FINISHED / ✗ NOT finished link status; Waiting on me / Waiting on them moved to top of Command, grouped by source; texted-link list collapsed below. 20 rule tests pass; build OK; signed-in desktop verified.
 - [x] Reopened 12 closed no-finish applicants and moved 7 open deadlines to Sun Oct 25 8 PM ET; sent 20 "you're so close" texts (Daniela in Spanish) at 8:49–8:50 AM ET, all accepted by carrier. Yurina skipped (no phone). Delivery receipts not yet confirmed.

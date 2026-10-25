@@ -1464,6 +1464,13 @@
       "when": 1792845408521,
       "tag": "0208_verify_morning_reminder_time_rules",
       "breakpoints": true
+    },
+    {
+      "idx": 209,
+      "version": "7",
+      "when": 1792890663691,
+      "tag": "0209_candidate_booking_alerts_and_indeed_resumes",
+      "breakpoints": true
     }
   ]
 }
