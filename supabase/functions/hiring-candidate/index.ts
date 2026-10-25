@@ -15,7 +15,6 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { weekdaysOnly } from '../_shared/hire-ready-rules.ts';
-import { writeAlert } from '../_shared/alerts.ts';
 import { scoreV6, validV6Answer, validWorkReference, V6_DISQUALIFY_DELAY_MS, type V6Question } from '../_shared/application-v6.ts';
 
 const backendUrl = Deno.env.get('SUPABASE_URL');
@@ -274,25 +273,7 @@ Deno.serve(async (req) => {
       await admin.rpc('hiring_set_deadline', { _id: p.applicant_id, _kind: 'confirm_inperson', _due: new Date(Date.now() + 2 * 3600e3).toISOString(), _nudge: null });
       await admin.from('contractor_pipeline').update({ inperson_confirmed_at: null }).eq('applicant_id', p.applicant_id);
     }
-    if (!p.is_test) {
-      const { data: who } = await admin.from('applicants').select('first_name,last_name,phone,is_test_row').eq('id', p.applicant_id).maybeSingle();
-      if (!who?.is_test_row) {
-        const name = `${who?.first_name ?? ''} ${who?.last_name ?? ''}`.trim() || 'A candidate';
-        const when = new Date(slot.starts_at).toLocaleString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-        const label = kind === 'phone' ? 'phone call' : 'in-person interview';
-        await writeAlert(admin, {
-          level: 'action', category: 'hiring', tier: 'urgent', night_ok: true,
-          title: `${name} booked a ${label}: ${when} ET`,
-          body: `${name} picked ${when} ET for a ${label}. Phone: ${who?.phone ?? 'not on file'}.`,
-          what: `${name} booked a ${label} for ${when} ET.`,
-          why_today: 'They chose this time themselves.',
-          if_ignored: 'You could miss the appointment.',
-          action_label: 'Open candidate', action_url: `/admin/pipeline/${p.applicant_id}`,
-          dedupe_key: `hiring_booked:${kind}:${p.applicant_id}:${slot.id}`,
-          context: { applicant_id: p.applicant_id, slot_id: slot.id, starts_at: slot.starts_at, kind },
-        });
-      }
-    }
+    // The slot trigger writes the owner alert transactionally before booking succeeds.
     return jsonResponse({ ok: true, starts_at: slot.starts_at });
   }
 

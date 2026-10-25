@@ -11,7 +11,7 @@ export default function ApplicationChannels({ c, className = "" }: { c?: Channel
     <span className={`mt-1 flex flex-wrap gap-1 ${className}`}>
       <span className={`rounded border px-1.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wide ${originTone}`}>{c.origin === "indeed" ? "INDEED" : c.origin === "website" ? "TIDY WEBSITE" : "OTHER SOURCE"}</span>
       <span className={`rounded border px-1.5 py-0.5 text-[11px] font-semibold ${linkTone}`}>{c.linkLabel}</span>
-      {c.callLabel && <span className={`rounded border px-1.5 py-0.5 text-[11px] font-semibold ${c.callBooked ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border"}`}>{c.callLabel}</span>}
+      {(c.appointmentLabels?.length ? c.appointmentLabels : [c.callLabel]).filter(Boolean).map(label => <span key={label} className={`rounded border px-1.5 py-0.5 text-[11px] font-semibold ${c.callBooked ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border"}`}>{label}</span>)}
     </span>
   );
 }

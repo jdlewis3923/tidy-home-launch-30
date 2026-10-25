@@ -15,6 +15,9 @@ import DeclineDialog, { type DeclineInput } from "@/components/admin/pipeline/De
 import HiringDocsPanel from "@/components/admin/pipeline/HiringDocsPanel";
 import { PIPELINE_SERVICES, PIPELINE_STAGES, rpcMessage, serviceLabel, stageIndex } from "@/lib/pipeline";
 
+import ApplicationChannels from '@/components/admin/ApplicationChannels';
+import { useApplicationChannels } from '@/hooks/useApplicationChannels';
+
 export type BoardCard = {
   applicant_id: string; name: string; city: string | null; service: string | null; stage: string; state: string;
   days_in_stage: number; hold_callback_date: string | null; hold_reason: string | null; callback_overdue: boolean;
@@ -56,6 +59,7 @@ export default function AdminPipeline() {
   const fromSpend = params.get("from") === "background";
   const view = params.get("view") === "callbacks" ? "callbacks" : "board";
   const [cards, setCards] = useState<BoardCard[]>([]);
+  const channels = useApplicationChannels(cards.map(c => c.applicant_id));
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<{ stage: string; ids: Set<string> }>({ stage: "", ids: new Set() });
@@ -145,7 +149,7 @@ export default function AdminPipeline() {
                 <li key={c.applicant_id}>
                   <Link to={`/admin/pipeline/${c.applicant_id}`} className={`flex flex-wrap items-center justify-between gap-2 px-4 py-3 hover:bg-muted/50 ${c.callback_overdue ? "bg-destructive/10" : ""}`}>
                     <span>
-                      <span className={`font-semibold ${c.callback_overdue ? "text-destructive" : "text-foreground"}`}>{c.name}</span>
+                      <span className={`font-semibold ${c.callback_overdue ? "text-destructive" : "text-foreground"}`}>{c.name}</span><ApplicationChannels c={channels.get(c.applicant_id)} />
                       <span className="ml-2 text-xs text-muted-foreground">{serviceLabel(c.service)} · stage {stageIndex(c.stage) + 1}</span>
                       <span className="block text-xs text-muted-foreground">{c.hold_reason}</span>
                     </span>
@@ -188,7 +192,7 @@ export default function AdminPipeline() {
                               <Checkbox aria-label={`Select ${c.name}`} checked={selected.ids.has(c.applicant_id)} onCheckedChange={() => toggle(c)} />
                             </span>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-semibold text-foreground">{c.name || "Unnamed"}</p>
+                              <p className="truncate text-sm font-semibold text-foreground">{c.name || "Unnamed"}</p><ApplicationChannels c={channels.get(c.applicant_id)} />
                               <p className="truncate text-xs text-muted-foreground">{c.city ?? "—"} · {c.days_in_stage}d in stage</p>
                               <div className="mt-1.5 flex flex-wrap gap-1">
                                 <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-secondary-foreground">{serviceLabel(c.service)}</span>
@@ -218,7 +222,7 @@ export default function AdminPipeline() {
                   <Link key={c.applicant_id} to={`/admin/pipeline/${c.applicant_id}`}
                     className="relative rounded-md border border-border bg-background px-3 py-2 text-sm hover:border-primary">
                     {c.callback_overdue && <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-destructive" aria-label="Callback overdue" />}
-                    <span className="font-semibold">{c.name}</span>
+                    <span className="font-semibold">{c.name}</span><ApplicationChannels c={channels.get(c.applicant_id)} />
                     <span className="ml-2 text-xs text-muted-foreground">stage {stageIndex(c.stage) + 1} · call {c.hold_callback_date ? fmtDate(c.hold_callback_date) : "—"}</span>
                   </Link>
                 ))}
