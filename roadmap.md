@@ -1,5 +1,10 @@
 # Roadmap
 
+## Selected new invitations (Oct 25)
+- [x] Added only Jenifer Whitney (Cleaning), Merice Copeland (Cleaning), Brandon Brown (Lawn), retaining supplied Indeed summaries separately from original résumés; no existing phone/name matches.
+- [x] Three initial invitations queued for Mon Oct 26 8:15 AM ET (Sunday hold); link deadlines Tue Oct 27 8:15 AM ET, one unfinished reminder Tue 8 AM ET. No older candidates changed; no Indeed messages sent by the app.
+- [ ] Actual carrier acceptance and delivery — invitations remain queued until Monday's send window.
+
 ## Candidate appointments and Indeed résumés (Oct 24 evening)
 - [x] Booking and time changes now create urgent, night-enabled owner alerts transactionally from hiring_slots; removed competing frontend-function alert producer. Rollback SQL checks passed for booking/reschedule/dedup; labeled owner test SMS + email accepted within five seconds and test alert resolved. Carrier delivery remains unconfirmed.
 - [x] Pipeline cards and candidate views show booked times in Miami time, all appointments and honest past-booking labels; original Indeed source text displays on pipeline/results/legacy records, future pasted imports retain originals. Signed-in real Daniela record and results verified; 27 tests passed, build OK.
