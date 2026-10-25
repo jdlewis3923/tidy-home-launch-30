@@ -22,7 +22,7 @@ import { ownerEmail } from '../_shared/owner-email.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { renderTemplate } from '../_shared/socialPlanner.ts';
-import { visibleDigestAlerts, realCompletedApplications } from '../_shared/admin-digest-rules.ts';
+import { visibleDigestAlerts, realCompletedApplications, candidateTextActivity } from '../_shared/admin-digest-rules.ts';
 import { comingUp as roadmapComingUp, kickoffText, milestoneLine, type Initiative as RInitiative } from '../_shared/roadmap-rules.ts';
 
 const SITE = 'https://jointidy.co';
@@ -145,6 +145,33 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const anyNumbers = reservations + scans + revenue + visitsDone > 0;
 
   const sections: { title: string; red?: boolean; items: { text: string; url?: string; label?: string }[] }[] = [];
+  // Include morning text sends through this update, not just yesterday's business totals.
+  const textUntil = new Date().toISOString();
+  const senders = ['candidate-text', 'hiring-invite', 'pipeline-notify', 'hire-ready-dispatch'];
+  async function readPages<T>(query: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>) {
+    const rows: T[] = [];
+    for (let from = 0; ; from += 500) {
+      const result = await query(from, from + 499);
+      if (result.error) throw new Error(result.error.message);
+      rows.push(...(result.data ?? []));
+      if ((result.data?.length ?? 0) < 500) return rows;
+    }
+  }
+  const [smsLogs, smsQueue, smsCandidates, smsPipelines] = await Promise.all([
+    readPages((from,to) => admin.from('email_send_log').select('id,recipient,triggered_at,status,twilio_sid,template_name').eq('channel','sms').in('triggered_by',senders).gte('triggered_at',dayStart).lt('triggered_at',textUntil).order('id').range(from,to)),
+    readPages((from,to) => admin.from('sms_outbox').select('id,to_phone_e164,sent_at,created_at,updated_at,status,twilio_sid,template_name,release_after').in('triggered_by',senders).or(`status.eq.queued,sent_at.gte.${dayStart},updated_at.gte.${dayStart}`).order('id').range(from,to)),
+    readPages((from,to) => admin.from('applicants').select('id,phone,first_name,last_name,is_test_row').order('id').range(from,to)),
+    readPages((from,to) => admin.from('contractor_pipeline').select('applicant_id,archived,is_test').order('applicant_id').range(from,to)),
+  ]);
+  const textPipelines = new Map(smsPipelines.map(p => [p.applicant_id,p]));
+  const textActivity = candidateTextActivity([
+    ...smsLogs.filter(l => l.status !== 'queued').map(l => ({id:`log:${l.id}`,phone:l.recipient,at:l.triggered_at,status:l.status,sid:l.twilio_sid,template:l.template_name})),
+    ...smsQueue.map(q => ({id:`queue:${q.id}`,phone:q.to_phone_e164,at:q.sent_at ?? q.updated_at ?? q.created_at,status:q.status,sid:q.twilio_sid,template:q.template_name,releaseAt:q.release_after})),
+  ], smsCandidates.map(a => ({...a,is_test:a.is_test_row || textPipelines.get(a.id)?.is_test,archived:textPipelines.get(a.id)?.archived})),testIds,dayStart,textUntil);
+  const textTime = (iso: string) => new Date(iso).toLocaleString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const textSent = textActivity.filter(t => t.outcome === 'sent');
+  sections.push({title:'Candidate texts sent · through this update',items:textSent.length ? textSent.map(t => ({text:`${t.name} · ${textTime(t.at)} ET · ${t.template ?? 'Candidate text'} · Carrier accepted; delivery unconfirmed`,url:`${SITE}/admin/pipeline/${t.applicantId}`,label:'Review candidate'})) : [{text:'No candidate texts sent in this reporting period.'}]});
+  for (const outcome of ['queued','failed'] as const) sections.push({title:`Candidate texts ${outcome}`,red:outcome==='failed',items:textActivity.filter(t => t.outcome===outcome).map(t => ({text:`${t.name} · ${outcome==='queued' && t.releaseAt ? `Scheduled ${textTime(t.releaseAt)} ET` : `${textTime(t.at)} ET`} · ${t.template ?? 'Candidate text'} · ${outcome==='queued'?'Not sent yet':'Not confirmed sent'}`,url:`${SITE}/admin/hiring/texts`,label:'Review texts'}))});
   const { data: completed, error: completionError } = await admin.from('contractor_pipeline')
     .select('applicant_id, service, apply_submitted_at, is_test, archived').gte('apply_submitted_at', dayStart).lt('apply_submitted_at', dayEnd);
   if (completionError) throw new Error(completionError.message);
@@ -268,7 +295,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     const line2 = urgentOpen.length ? `${urgentOpen.length} unresolved urgent` : (anyNumbers ? `Yesterday: ${numbers.slice(0, 2).join(', ')}` : 'No unresolved urgent items');
     const res = await vendorFetch(`${URL_}/functions/v1/send-twilio-sms`, {
       method: 'POST', headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to_phone_e164: OWNER_PHONE, body: `Tidy Today\n${line1}\n${line2}\n${SITE}/admin/alerts`, idempotency_key: `admin-digest:${today}${force ? `:${Date.now()}` : ''}`, template_name: 'admin_digest_today', triggered_by: 'admin-alert-dispatch', skip_window: true, admin_channel: 'digest' }),
+      body: JSON.stringify({ to_phone_e164: OWNER_PHONE, body: `Tidy Today\n${line1}\n${line2}\nCandidate texts sent: ${textSent.length}${textSent.length ? ` · ${[...new Set(textSent.map(t => t.name))].join(', ')}` : ''}\nFull names and times in your email.\n${SITE}/admin/alerts`.slice(0,1600), idempotency_key: `admin-digest:${today}${force ? `:${Date.now()}` : ''}`, template_name: 'admin_digest_today', triggered_by: 'admin-alert-dispatch', skip_window: true, admin_channel: 'digest' }),
     }).catch(() => null);
     const out = res ? await res.json().catch(() => ({})) : {};
     sms = out?.sent ? 'sent' : `failed:${out?.error ?? res?.status ?? 'network'}`;
