@@ -10,11 +10,10 @@
 - [x] Reopened 12 closed no-finish applicants and moved 7 open deadlines to Sun Oct 25 8 PM ET; sent 20 "you're so close" texts (Daniela in Spanish) at 8:49–8:50 AM ET, all accepted by carrier. Yurina skipped (no phone). Delivery receipts not yet confirmed.
 
 
-## Daily new-applicant reminders (Oct 24)
-- [x] Add a consistent 8 AM ET morning review of yesterday's new same-day invited applicants who have not finished, reusing hiring_deadlines/hiring_tick with locked claims and retained nudge history. Existing campaign/older applicant deadlines unchanged. Sunday uses existing SMS hold rules; links expire before stale texts can send.
-- [x] Four concrete SQL timing assertions passed during migration (Eastern midnight, next morning, 8 AM, DST); 26 existing hiring/message/schedule tests pass; active hiring schedule and live morning/row-lock gates verified; build OK.
-- [ ] First future morning dispatch and carrier delivery await a newly invited unfinished applicant; no duplicate texts sent to yesterday's already-nudged candidates. End-to-end delivery not verified this turn.
-- [ ] Fresh application invitations wait for Justin's supplied candidate list; no automatic sourcing or Claude integration.
+## Daily new-applicant reminders (Oct 24, rule clarified by Justin Oct 25)
+- [x] Rule confirmed live in DB: only applicants whose FIRST invite text went out the previous Eastern day get one finish reminder at 8 AM ET the next morning. Verified trigger (new_application_morning_reminder) and hiring_tick gate: fires only at 8 AM ET on the exact next-morning date — never 2+ days later, never older applicants, one reminder per person ever.
+- [x] Oct 25 check: ZERO new applicants were invited on Oct 24 (only one blank nameless record), so no reminder texts go out today. All 20 Oct 24 texts were "you're so close" finish texts to older applicants sent at Justin's explicit request.
+- [ ] Fresh application invitations wait for Justin's supplied candidate list; no automatic sourcing or Claude integration. Justin messages the same new names on Indeed himself.
 
 ## Candidate text organizer (Oct 23)
 - [x] Added Hiring → Candidate texts: searchable candidate/message history, reply/reminder/failure/submitted/waiting filters, separate Indeed date/Tidy progress, deadline and existing reminder schedule, manual reply and reminder draft controls.
