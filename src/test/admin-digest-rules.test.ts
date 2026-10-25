@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { visibleDigestAlerts, realCompletedApplications } from '../../supabase/functions/_shared/admin-digest-rules';
+import { visibleDigestAlerts, realCompletedApplications, candidateTextActivity } from '../../supabase/functions/_shared/admin-digest-rules';
 describe('owner digest rules', () => {
+  const candidates = [{ id:'jenifer', first_name:'Jenifer', last_name:'Whitney', phone:'+17865872765' }];
+  const since = '2026-10-25T04:00:00Z', until = '2026-10-26T13:00:00Z';
+  it('includes Monday morning sends before the 9 AM update with recipient names', () => {
+    const rows = candidateTextActivity([{id:'send',phone:'7865872765',at:'2026-10-26T12:15:00Z',status:'sent',sid:'SM1'}],candidates,new Set(),since,until);
+    expect(rows.map(r => [r.name,r.outcome,r.at])).toEqual([['Jenifer Whitney','sent','2026-10-26T12:15:00Z']]);
+  });
+  it('keeps queued and failed texts distinct from actual sends', () => {
+    expect(candidateTextActivity([{id:'q',phone:'7865872765',at:since,status:'queued'},{id:'f',phone:'7865872765',at:since,status:'failed'}],candidates,new Set(),since,until).map(r => r.outcome)).toEqual(['queued','failed']);
+  });
+  it('excludes test candidates and deduplicates a queued-release send by SID', () => {
+    const messages=[{id:'log',phone:'7865872765',at:since,status:'sent',sid:'SM1'},{id:'outbox',phone:'7865872765',at:since,status:'sent',sid:'SM1'}];
+    expect(candidateTextActivity(messages,candidates,new Set(),since,until)).toHaveLength(1);
+    expect(candidateTextActivity(messages,candidates,new Set(['jenifer']),since,until)).toEqual([]);
+  });
   it('keeps one latest warning for the same incident', () => {
     const rows = [{ alert_type: 'cron_snapshot_failed', title: 'Watchdog', dedupe_key: 'watchdog', id: 'latest' }, { alert_type: 'cron_snapshot_failed', title: 'Watchdog', dedupe_key: 'watchdog', id: 'old' }];
     expect(visibleDigestAlerts(rows, new Set()).map((r) => r.id)).toEqual(['latest']);

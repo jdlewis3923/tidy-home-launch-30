@@ -1,5 +1,9 @@
 # Roadmap
 
+## Oct 22 reminder check + 9 AM text reporting (Oct 25)
+- [x] Check actual Oct 22 initial SMS recipients by send logs, reconcile duplicate candidates against submitted records: Alden, Daniela and Stanley submitted; Kerric received finish reminders Oct 23 and 24. No duplicate Monday reminders requested unless not already handled.
+- [x] Added named candidate text outcomes through current digest cutoff (including morning sends), separate sent/queued/failed sections and recipient summary in 9 AM SMS; deployed dispatcher and live preview verified 22 historical sends + three Monday queues with names/time. Existing hourly owner schedule and 15-minute SMS release active; 16 tests passed, build OK. No duplicate Oct 22 reminders queued because already handled.
+
 ## Selected new invitations (Oct 25)
 - [x] Added only Jenifer Whitney (Cleaning), Merice Copeland (Cleaning), Brandon Brown (Lawn), retaining supplied Indeed summaries separately from original résumés; no existing phone/name matches.
 - [x] Three initial invitations queued for Mon Oct 26 8:15 AM ET (Sunday hold); link deadlines Tue Oct 27 8:15 AM ET, one unfinished reminder Tue 8 AM ET. No older candidates changed; no Indeed messages sent by the app.
