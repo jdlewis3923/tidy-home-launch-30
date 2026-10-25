@@ -1,5 +1,9 @@
 # Roadmap
 
+## Candidate appointments and Indeed résumés (Oct 24 evening)
+- [ ] Diagnose and repair immediate owner booking notifications; verify alert dispatch.
+- [ ] Show appointments across pipeline cards and full saved Indeed résumés in candidate records; test and verify signed-in.
+
 ## Indeed vs Tidy website + finish texts (Oct 24)
 - [x] Gold INDEED / blue TIDY WEBSITE badge on every applicant; ✓ FINISHED / ✗ NOT finished link status; Waiting on me / Waiting on them moved to top of Command, grouped by source; texted-link list collapsed below. 20 rule tests pass; build OK; signed-in desktop verified.
 - [x] Reopened 12 closed no-finish applicants and moved 7 open deadlines to Sun Oct 25 8 PM ET; sent 20 "you're so close" texts (Daniela in Spanish) at 8:49–8:50 AM ET, all accepted by carrier. Yurina skipped (no phone). Delivery receipts not yet confirmed.
