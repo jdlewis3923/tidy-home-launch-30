@@ -2,7 +2,7 @@
 
 ## Oct 22 reminder check + 9 AM text reporting (Oct 25)
 - [x] Check actual Oct 22 initial SMS recipients by send logs, reconcile duplicate candidates against submitted records: Alden, Daniela and Stanley submitted; Kerric received finish reminders Oct 23 and 24. No duplicate Monday reminders requested unless not already handled.
-- [ ] Add named candidate text outcomes through the morning report cutoff; verify deployed preview and tests.
+- [x] Added named candidate text outcomes through current digest cutoff (including morning sends), separate sent/queued/failed sections and recipient summary in 9 AM SMS; deployed dispatcher and live preview verified 22 historical sends + three Monday queues with names/time. Existing hourly owner schedule and 15-minute SMS release active; 16 tests passed, build OK. No duplicate Oct 22 reminders queued because already handled.
 
 ## Selected new invitations (Oct 25)
 - [x] Added only Jenifer Whitney (Cleaning), Merice Copeland (Cleaning), Brandon Brown (Lawn), retaining supplied Indeed summaries separately from original résumés; no existing phone/name matches.
