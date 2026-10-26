@@ -1478,6 +1478,13 @@
       "when": 1792930955685,
       "tag": "0210_linkedin_owner_verified_restart",
       "breakpoints": true
+    },
+    {
+      "idx": 211,
+      "version": "7",
+      "when": 1793052504637,
+      "tag": "0211_new_invites_use_short_application",
+      "breakpoints": true
     }
   ]
 }
