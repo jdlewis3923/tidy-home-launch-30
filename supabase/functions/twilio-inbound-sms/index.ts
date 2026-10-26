@@ -156,10 +156,17 @@ async function handleConversation(supabase: any, args: {
   }
   await supabase.from("support_conversations").update(updates).eq("id", convId);
 
-  // Email admin
+  // Email admin — always name the person, not just the number.
+  const last10 = from.replace(/\D/g, "").slice(-10);
+  const { data: person } = await supabase.from("applicants").select("first_name, last_name")
+    .ilike("phone", `%${last10}`).limit(1).maybeSingle();
+  const { data: convName } = await supabase.from("support_conversations").select("customer_name").eq("id", convId).maybeSingle();
+  const aiName = /\b(?:Hi|Hola)\s+([A-Z][a-z]+)/.exec(result.reply ?? "")?.[1]
+    ?? /\bTidy,\s+([A-Z][a-z]+)\s+needs\b/.exec(body)?.[1];
+  const personName = `${person?.first_name ?? ""} ${person?.last_name ?? ""}`.trim() || convName?.customer_name || aiName || "Unknown name";
   await notifyAdminEmail({
     channel: "sms",
-    customerLabel: from,
+    customerLabel: `${personName} (${from})`,
     inboundBody: body,
     aiDraft: result.reply,
     conversationId: convId,

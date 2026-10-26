@@ -63,10 +63,30 @@ function fourLines(a: Alert) {
   };
 }
 
+/** The person an alert is about, by name, so every owner text says who. */
+async function alertPerson(admin: SupabaseClient, a: Alert): Promise<string | null> {
+  const c = a.context ?? {};
+  const named = String(c.candidate_name ?? c.customer_name ?? c.name ?? '').trim();
+  const id = String(c.applicant_id ?? c.contractor_id ?? a.action_url?.match(/\/admin\/pipeline\/([a-f0-9-]{36})/i)?.[1] ?? '');
+  const phone = String(c.phone ?? c.to_phone ?? c.from ?? '').replace(/\D/g, '').slice(-10);
+  let name = named;
+  if (!name && id) {
+    const { data } = await admin.from('applicants').select('first_name, last_name').eq('id', id).maybeSingle();
+    name = `${data?.first_name ?? ''} ${data?.last_name ?? ''}`.trim();
+  }
+  if (!name && phone.length === 10) {
+    const { data } = await admin.from('applicants').select('first_name, last_name').ilike('phone', `%${phone}`).limit(1).maybeSingle();
+    name = `${data?.first_name ?? ''} ${data?.last_name ?? ''}`.trim();
+  }
+  if (!name && !phone) return null;
+  return [name || 'Unknown name', phone.length === 10 ? `(…${phone.slice(-4)})` : ''].join(' ').trim();
+}
+
 async function sendUrgent(admin: SupabaseClient, a: Alert, reminder: boolean) {
   const f = fourLines(a);
   const prefix = reminder ? 'STILL OPEN' : 'URGENT';
-  const smsBody = `Tidy ${prefix}\nWHAT: ${f.what}\nWHY TODAY: ${f.why}\nIF IGNORED: ${f.ifIgnored}\nDO: ${f.doUrl}`;
+  const who = await alertPerson(admin, a).catch(() => null);
+  const smsBody = `Tidy ${prefix}\n${who ? `WHO: ${who}\n` : ''}WHAT: ${f.what}\nWHY TODAY: ${f.why}\nIF IGNORED: ${f.ifIgnored}\nDO: ${f.doUrl}`;
   let sms = 'not_sent';
   try {
     const res = await vendorFetch(`${URL_}/functions/v1/send-twilio-sms`, {
