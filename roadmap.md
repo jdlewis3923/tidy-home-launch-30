@@ -349,3 +349,10 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Founding Homes photo marked owner-verified live; Oct 20 banner + text released (never posted); calendar turned on — 138 posts queued, next 9:30 AM ET Oct 25
 - [x] Fixed release button failing on delivery-token link
 - [ ] Optional (Justin): Zap photo step should POST the receipt callback so photo posts self-confirm
+
+## New invites + reminders (Oct 26)
+- Sent apply invites to Aida Sosa (es), Winnie Galeano (es), Tynia Strong (en) — all cleaning, from Indeed; 24h sprint deadlines, auto-reminder Tue 8 AM ET.
+- Jenifer/Merice/Brandon invites went out 8:15 AM ET (released from Sunday hold); auto-reminder Tue 8 AM ET.
+- Sunday-held texts all released and sent this morning (3 invites + 2 support replies); nothing still queued.
+- Oct 24 cohort (20) auto-archived as no_apply after Sunday 8 PM ET deadline passed; links expired, no further reminders without Justin's say-so.
+- Verified /apply is fully bilingual: auto-detects browser language + stored preferred_language, Español/English toggle on every step.
