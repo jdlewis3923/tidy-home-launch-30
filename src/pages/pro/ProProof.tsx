@@ -144,12 +144,21 @@ export default function ProProof() {
             {s.status === "approved" && <p className="mt-1 text-sm font-semibold text-primary">✓ {t.approved}</p>}
             {s.status === "pending" && <p className="mt-1 text-sm font-semibold text-primary">✓ {t.done}</p>}
             {s.editable && (
-              <label className="mt-2 inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground">
-                {busy === s.slot ? t.uploading : s.status === "pending" ? t.retake : s.kind === "video" ? t.record : t.take}
-                <input type="file" className="sr-only" disabled={!!busy}
-                  accept={s.kind === "video" ? "video/*" : "image/*"} capture="environment"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(s, f); e.target.value = ""; }} />
-              </label>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <label className="inline-flex min-h-14 cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 text-base font-bold text-primary-foreground shadow-sm active:scale-95">
+                  <span aria-hidden className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/20 text-2xl leading-none">+</span>
+                  {busy === s.slot ? t.uploading : s.status === "pending" ? t.retake : s.kind === "video" ? t.record : t.take}
+                  <input type="file" className="sr-only" disabled={!!busy}
+                    accept={s.kind === "video" ? "video/*" : "image/*"} capture="environment"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(s, f); e.target.value = ""; }} />
+                </label>
+                <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-border px-3 text-sm font-semibold underline-offset-2 hover:underline">
+                  {lang === "es" ? "Elegir de la galería" : "Choose from gallery"}
+                  <input type="file" className="sr-only" disabled={!!busy}
+                    accept={s.kind === "video" ? "video/*" : "image/*"}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(s, f); e.target.value = ""; }} />
+                </label>
+              </div>
             )}
           </li>))}</ul>
       </section>
