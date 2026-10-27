@@ -12,6 +12,14 @@ describe('Prepaid Year rules', () => {
     expect(monthsUsed('2026-11-16T00:00:00Z', '2027-02-17T00:00:00Z')).toBe(4);
     expect(monthsUsed('2026-11-16T00:00:00Z', '2027-02-16T00:00:00Z')).toBe(3);
   });
+  it('counts a new month started after the exact billing anniversary time',()=>{
+    expect(monthsUsed('2026-11-16T12:00:00Z','2027-02-16T12:00:00Z')).toBe(3);
+    expect(monthsUsed('2026-11-16T12:00:00Z','2027-02-16T12:00:01Z')).toBe(4);
+  });
+  it('uses the final day of a shorter month for month-end starts',()=>{
+    expect(monthsUsed('2027-01-31T12:00:00Z','2027-02-28T12:00:00Z')).toBe(1);
+    expect(monthsUsed('2027-01-31T12:00:00Z','2027-02-28T12:00:01Z')).toBe(2);
+  });
   it('founding members are charged their founding monthly rate', () => {
     expect(cancelRefundCents(15900, yearlyPriceCents(15900), 3)).toEqual({ charged: 47700, refund: 124020 });
   });

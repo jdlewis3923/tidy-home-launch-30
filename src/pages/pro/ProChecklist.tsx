@@ -8,6 +8,7 @@ import ProShell from "@/components/pro/portal/ProShell";
 import { ChecklistItemRow, ErrorState, ScheduleSkeleton } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
 import { fetchChecklist, toggleChecklistItem, type ChecklistRow } from "@/lib/pro-portal";
+import CleaningStandardChecklist from '@/components/pro/CleaningStandardChecklist';
 
 export default function ProChecklist() {
   const { id } = useParams<{ id: string }>();
@@ -58,6 +59,7 @@ export default function ProChecklist() {
             {doneCount} of {rows.length} done — this is your own record of the work.
           </p>
           <div className="space-y-4 px-4">
+            {id&&visit?.service_type==='cleaning'&&<CleaningStandardChecklist visitId={id}/>}
             {sections.map(([section, items]) => (
               <section key={section}>
                 <h2 className="px-1 pb-2 text-[13px] font-extrabold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">

@@ -10,6 +10,7 @@ import { ErrorState, ProCard, ScheduleSkeleton, StatusPill } from "@/components/
 import { useProSession } from "@/hooks/useProSession";
 import { fetchBonuses, fetchPayoutWeeks, type PayoutWeek, type ProBonus } from "@/lib/pro-portal";
 import { SERVICE_LABEL, money } from "@/lib/pro-pay";
+import { supabase } from '@/integrations/supabase/client';
 
 const shortDate = (iso: string) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -22,6 +23,8 @@ export default function ProPayoutWeek() {
   const [bonuses, setBonuses] = useState<ProBonus[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [nonce, setNonce] = useState(0);
+  const [cleaningPay, setCleaningPay] = useState<Array<{id:string;visit_id:string;kind:string;amount_cents:number;created_at:string}>>([]);
+  useEffect(()=>{ if(!userId)return;void supabase.from('cleaning_pay_lines').select('id,visit_id,kind,amount_cents,created_at').eq('pro_id',userId).order('created_at',{ascending:false}).then(({data})=>setCleaningPay(data??[]));},[userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -143,6 +146,7 @@ export default function ProPayoutWeek() {
               </div>
             </section>
           )}
+          {cleaningPay.filter(p=>p.created_at.slice(0,10)>=week.week_start&&p.created_at.slice(0,10)<=week.week_end).map(p=><div key={p.id} className="flex justify-between border-t border-border py-3 text-sm"><span>Cleaning · {p.kind}</span><strong>{money(p.amount_cents)}</strong></div>)}
         </div>
       )}
     </ProShell>

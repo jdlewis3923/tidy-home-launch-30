@@ -5,6 +5,18 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { FREQUENCY_FAQ } from "@/lib/frequency-faq";
 import { Button } from "@/components/ui/button";
+import { MEMBER_GUIDE } from '@/lib/memberGuide';
+
+const POLICY_QUESTIONS: Record<string, typeof MEMBER_GUIDE[number]['id']> = {
+  'Do I need to be home?':'access',
+  'Can I reschedule or pause?':'rescheduling',
+  'What if it rains?':'weather',
+  'How does billing work?':'billing',
+  'Can I cancel anytime?':'cancelling',
+  'What if my payment fails?':'billing',
+  "What if I'm not satisfied?":'guarantee',
+  'Can I change services later?':'charges',
+};
 
 const preLaunchFAQ = [
   {
@@ -113,7 +125,7 @@ const launchFAQ = [
 
 const FAQ = () => {
   const [openItem, setOpenItem] = useState<string | null>(null);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const faqSections = CUSTOMER_DASHBOARD_ENABLED ? launchFAQ : preLaunchFAQ;
 
@@ -144,26 +156,23 @@ const FAQ = () => {
                   {section.items.map((item) => {
                     const key = `${section.title}-${item.q}`;
                     const isOpen = openItem === key;
+                    const policy=MEMBER_GUIDE.find(s=>s.id===POLICY_QUESTIONS[item.q]);
+                    const wording=policy?.[language==='es'?'es':'en'];
                     return (
                       <div key={key} className="bg-card border rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-md">
-                        <button
+                        <Button variant="ghost"
                           onClick={() => setOpenItem(isOpen ? null : key)}
-                          className="w-full flex items-center justify-between px-5 py-4 text-left"
+                          aria-expanded={isOpen}
+                          className="h-auto min-h-14 w-full flex items-center justify-between gap-3 whitespace-normal px-5 py-4 text-left"
                         >
                           <span className="text-sm font-medium text-foreground">{t(item.q)}</span>
                           <ChevronDown className={`w-4 h-4 text-text-light transition-transform duration-300 flex-shrink-0 ${isOpen ? "rotate-180" : ""}`} />
-                        </button>
-                        <div
-                          className="overflow-hidden transition-all duration-300 ease-out"
-                          style={{
-                            maxHeight: isOpen ? "200px" : "0px",
-                            opacity: isOpen ? 1 : 0,
-                          }}
-                        >
+                        </Button>
+                        {isOpen&&<div>
                           <div className="px-5 pb-4">
-                            <p className="text-sm text-text-mid">{t(item.a)}</p>
+                            {wording?<><ul className="list-disc space-y-2 pl-5 text-sm text-text-mid">{wording.items.map(i=><li key={i}>{i}</li>)}</ul><a className="mt-3 inline-block text-sm text-primary underline" href={`/member-guide#${policy?.id}${language==='es'?'-es':''}`}>{language==='es'?'Guía para miembros':'Member Guide'}</a></>:<p className="text-sm text-text-mid">{t(item.a)}</p>}
                           </div>
-                        </div>
+                        </div>}
                       </div>
                     );
                   })}

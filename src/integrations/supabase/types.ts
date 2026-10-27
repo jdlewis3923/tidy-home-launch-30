@@ -1691,6 +1691,153 @@ export type Database = {
         }
         Relationships: []
       }
+      cleaning_pay_lines: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          dedupe_key: string
+          id: string
+          kind: string
+          pro_id: string
+          visit_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          dedupe_key: string
+          id?: string
+          kind: string
+          pro_id: string
+          visit_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          dedupe_key?: string
+          id?: string
+          kind?: string
+          pro_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_pay_lines_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cleaning_team_presence: {
+        Row: {
+          check_in_at: string | null
+          check_in_lat: number | null
+          check_in_lng: number | null
+          check_out_at: string | null
+          check_out_lat: number | null
+          check_out_lng: number | null
+          pro_id: string
+          visit_id: string
+        }
+        Insert: {
+          check_in_at?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_out_at?: string | null
+          check_out_lat?: number | null
+          check_out_lng?: number | null
+          pro_id: string
+          visit_id: string
+        }
+        Update: {
+          check_in_at?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_out_at?: string | null
+          check_out_lat?: number | null
+          check_out_lng?: number | null
+          pro_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_team_presence_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cleaning_teams: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          helper_background_checked_at: string | null
+          helper_insurance_verified_at: string | null
+          helper_name: string | null
+          id: string
+          kind: string
+          lead_pro_id: string
+          partner_pro_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          helper_background_checked_at?: string | null
+          helper_insurance_verified_at?: string | null
+          helper_name?: string | null
+          id?: string
+          kind: string
+          lead_pro_id: string
+          partner_pro_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          helper_background_checked_at?: string | null
+          helper_insurance_verified_at?: string | null
+          helper_name?: string | null
+          id?: string
+          kind?: string
+          lead_pro_id?: string
+          partner_pro_id?: string | null
+        }
+        Relationships: []
+      }
+      cleaning_visit_checks: {
+        Row: {
+          checks: Json
+          pro_id: string
+          updated_at: string
+          visit_id: string
+        }
+        Insert: {
+          checks?: Json
+          pro_id: string
+          updated_at?: string
+          visit_id: string
+        }
+        Update: {
+          checks?: Json
+          pro_id?: string
+          updated_at?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_visit_checks_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cleaning_walkthrough_slots: {
         Row: {
           created_at: string
@@ -4948,6 +5095,39 @@ export type Database = {
         }
         Relationships: []
       }
+      member_guide_acceptances: {
+        Row: {
+          accepted_at: string
+          id: string
+          ip: string | null
+          language: string
+          user_agent: string | null
+          user_id: string
+          version: string
+          wording: string
+        }
+        Insert: {
+          accepted_at?: string
+          id?: string
+          ip?: string | null
+          language: string
+          user_agent?: string | null
+          user_id: string
+          version: string
+          wording: string
+        }
+        Update: {
+          accepted_at?: string
+          id?: string
+          ip?: string | null
+          language?: string
+          user_agent?: string | null
+          user_id?: string
+          version?: string
+          wording?: string
+        }
+        Relationships: []
+      }
       member_notifications: {
         Row: {
           body: string
@@ -6910,6 +7090,7 @@ export type Database = {
           cleaning_selected_range: string | null
           cleaning_selected_size: string | null
           cleaning_size_confirmation: string | null
+          cleaning_team_id: string | null
           cleaning_team_ready: boolean
           cleaning_verified_at: string | null
           cleaning_verified_bathrooms: number | null
@@ -6982,6 +7163,7 @@ export type Database = {
           cleaning_selected_range?: string | null
           cleaning_selected_size?: string | null
           cleaning_size_confirmation?: string | null
+          cleaning_team_id?: string | null
           cleaning_team_ready?: boolean
           cleaning_verified_at?: string | null
           cleaning_verified_bathrooms?: number | null
@@ -7054,6 +7236,7 @@ export type Database = {
           cleaning_selected_range?: string | null
           cleaning_selected_size?: string | null
           cleaning_size_confirmation?: string | null
+          cleaning_team_id?: string | null
           cleaning_team_ready?: boolean
           cleaning_verified_at?: string | null
           cleaning_verified_bathrooms?: number | null
@@ -7112,6 +7295,13 @@ export type Database = {
           zip?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reservations_cleaning_team_id_fkey"
+            columns: ["cleaning_team_id"]
+            isOneToOne: false
+            referencedRelation: "cleaning_teams"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reservations_cleaning_walkthrough_slot_id_fkey"
             columns: ["cleaning_walkthrough_slot_id"]
@@ -7901,6 +8091,7 @@ export type Database = {
           observed_bedrooms: number | null
           observed_plate: string | null
           observed_size: number | null
+          observed_sq_ft: number | null
           observed_vehicle_class: string | null
           old_monthly_cents: number | null
           rate_card_version: number | null
@@ -7924,6 +8115,7 @@ export type Database = {
           observed_bedrooms?: number | null
           observed_plate?: string | null
           observed_size?: number | null
+          observed_sq_ft?: number | null
           observed_vehicle_class?: string | null
           old_monthly_cents?: number | null
           rate_card_version?: number | null
@@ -7947,6 +8139,7 @@ export type Database = {
           observed_bedrooms?: number | null
           observed_plate?: string | null
           observed_size?: number | null
+          observed_sq_ft?: number | null
           observed_vehicle_class?: string | null
           old_monthly_cents?: number | null
           rate_card_version?: number | null
@@ -8650,6 +8843,7 @@ export type Database = {
           card_exp_month: number | null
           card_exp_year: number | null
           card_last4: string | null
+          cleaning_team_id: string | null
           created_at: string
           founding_free_addon_first_visit: boolean
           founding_free_addon_fulfilled_at: string | null
@@ -8703,6 +8897,7 @@ export type Database = {
           card_exp_month?: number | null
           card_exp_year?: number | null
           card_last4?: string | null
+          cleaning_team_id?: string | null
           created_at?: string
           founding_free_addon_first_visit?: boolean
           founding_free_addon_fulfilled_at?: string | null
@@ -8756,6 +8951,7 @@ export type Database = {
           card_exp_month?: number | null
           card_exp_year?: number | null
           card_last4?: string | null
+          cleaning_team_id?: string | null
           created_at?: string
           founding_free_addon_first_visit?: boolean
           founding_free_addon_fulfilled_at?: string | null
@@ -8795,6 +8991,13 @@ export type Database = {
           washing_allowed?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "subscriptions_cleaning_team_id_fkey"
+            columns: ["cleaning_team_id"]
+            isOneToOne: false
+            referencedRelation: "cleaning_teams"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subscriptions_preferred_pro_id_fkey"
             columns: ["preferred_pro_id"]
@@ -9393,6 +9596,11 @@ export type Database = {
           check_out_lat: number | null
           check_out_lng: number | null
           claim_id: string | null
+          cleaning_base_pay_cents: number | null
+          cleaning_final_inspection_at: string | null
+          cleaning_first_visit: boolean
+          cleaning_team_id: string | null
+          cleaning_zones: Json
           completed_at: string | null
           contractor_pay_cents: number | null
           created_at: string
@@ -9452,6 +9660,11 @@ export type Database = {
           check_out_lat?: number | null
           check_out_lng?: number | null
           claim_id?: string | null
+          cleaning_base_pay_cents?: number | null
+          cleaning_final_inspection_at?: string | null
+          cleaning_first_visit?: boolean
+          cleaning_team_id?: string | null
+          cleaning_zones?: Json
           completed_at?: string | null
           contractor_pay_cents?: number | null
           created_at?: string
@@ -9511,6 +9724,11 @@ export type Database = {
           check_out_lat?: number | null
           check_out_lng?: number | null
           claim_id?: string | null
+          cleaning_base_pay_cents?: number | null
+          cleaning_final_inspection_at?: string | null
+          cleaning_first_visit?: boolean
+          cleaning_team_id?: string | null
+          cleaning_zones?: Json
           completed_at?: string | null
           contractor_pay_cents?: number | null
           created_at?: string
@@ -9556,6 +9774,13 @@ export type Database = {
           zip?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "visits_cleaning_team_id_fkey"
+            columns: ["cleaning_team_id"]
+            isOneToOne: false
+            referencedRelation: "cleaning_teams"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "visits_redo_of_visit_id_fkey"
             columns: ["redo_of_visit_id"]
@@ -9692,6 +9917,28 @@ export type Database = {
         Returns: {
           moved: number
           skipped_founding: number
+        }[]
+      }
+      admin_cleaning_staff: {
+        Args: { _reservation: string; _team: string }
+        Returns: undefined
+      }
+      admin_cleaning_team: {
+        Args: {
+          _background?: boolean
+          _helper?: string
+          _insured?: boolean
+          _kind: string
+          _lead: string
+          _partner?: string
+        }
+        Returns: string
+      }
+      admin_cleaning_team_options: {
+        Args: never
+        Returns: {
+          name: string
+          pro_id: string
         }[]
       }
       admin_cleaning_verify: {
@@ -9971,6 +10218,15 @@ export type Database = {
         Args: { r: Database["public"]["Tables"]["reservations"]["Row"] }
         Returns: string
       }
+      cleaning_finish_details: {
+        Args: { _inspection: boolean; _visit: string; _zones: Json }
+        Returns: undefined
+      }
+      cleaning_pro_visit_pay: {
+        Args: { _pro: string; _visit: string }
+        Returns: number
+      }
+      cleaning_record_pay: { Args: { _visit: string }; Returns: number }
       cleaning_size_from_sqft: {
         Args: { _baths: number; _sqft: number }
         Returns: string
@@ -9980,6 +10236,17 @@ export type Database = {
         Args: { _accept: boolean; _token: string }
         Returns: Json
       }
+      cleaning_team_presence_record: {
+        Args: {
+          _action: string
+          _lat: number
+          _lng: number
+          _pro: string
+          _visit: string
+        }
+        Returns: undefined
+      }
+      cleaning_team_valid: { Args: { _team: string }; Returns: boolean }
       coi_token_load: { Args: { _token: string }; Returns: Json }
       contract_load: { Args: { _token: string }; Returns: Json }
       contractor_visit_pay_cents: {
@@ -10450,6 +10717,7 @@ export type Database = {
         }
         Returns: Json
       }
+      member_guide_accepted: { Args: { _user: string }; Returns: boolean }
       member_ops_tick: { Args: never; Returns: Json }
       member_rate_card_version: { Args: { _user: string }; Returns: number }
       member_scope_version: {
@@ -10696,6 +10964,12 @@ export type Database = {
         }
         Returns: Json
       }
+      pro_cleaning_check: {
+        Args: { _checked: boolean; _key: string; _visit: string }
+        Returns: undefined
+      }
+      pro_cleaning_checklist: { Args: { _visit: string }; Returns: Json }
+      pro_cleaning_visit_details: { Args: { _visit: string }; Returns: Json }
       pro_coi_state: {
         Args: { _pro: string }
         Returns: {
@@ -10762,6 +11036,10 @@ export type Database = {
         }[]
       }
       pro_mark_off: { Args: { _date: string; _note?: string }; Returns: Json }
+      pro_on_cleaning_team_visit: {
+        Args: { _pro: string; _visit: string }
+        Returns: boolean
+      }
       pro_orientation_state: { Args: never; Returns: Json }
       pro_orientation_touch: {
         Args: { _complete?: boolean; _section_id: string }

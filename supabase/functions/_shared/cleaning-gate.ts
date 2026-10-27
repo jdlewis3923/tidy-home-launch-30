@@ -18,10 +18,14 @@ export async function cleaningCheckoutGate(db: any, email: string | undefined, z
   if (size === null) return null;
   if (!email) return 'cleaning_requires_verification';
   let query = db.from('reservations')
-    .select('cleaning_verified_at,cleaning_verified_size,cleaning_size_confirmation,cleaning_team_ready')
+    .select('cleaning_verified_at,cleaning_verified_size,cleaning_size_confirmation,cleaning_team_ready,cleaning_team_id')
     .eq('email', email.toLowerCase()).eq('zip', zip).contains('services', ['cleaning'])
     .in('status', ['reserved', 'invited']);
   if (reservationId) query = query.eq('id', reservationId);
   const { data, error } = await query.order('created_at', { ascending: false }).limit(1).maybeSingle();
+  if (!error && size === 5) {
+    const { data: valid, error: teamError } = await db.rpc('cleaning_team_valid', { _team: data?.cleaning_team_id ?? null });
+    if (teamError || !valid) return 'cleaning_needs_team';
+  }
   return error ? 'cleaning_verification_check_failed' : cleaningVerificationError(data, size);
 }

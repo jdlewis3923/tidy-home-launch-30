@@ -240,11 +240,11 @@ export async function signedPhotoUrl(path: string): Promise<string | null> {
 /** Server-enforced visit actions. Returns the function's own {ok,error} shape. */
 export async function visitAction(
   visitId: string,
-  action: "on_my_way" | "check_in" | "complete" | "blocked" | "size_check",
+  action: "on_my_way" | "check_in" | "complete" | "blocked" | "size_check" | "team_check_out",
   extra?: Record<string, unknown>,
 ) {
   let gps: { lat: number; lng: number } | null = null;
-  if (action === "check_in" || action === "complete") {
+  if (action === "check_in" || action === "complete" || action === "team_check_out") {
     gps = await getGps();
     if (!gps) return { ok: false as const, error: "gps_unavailable" };
   }

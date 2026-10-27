@@ -18,6 +18,7 @@ import {
 import { useProSession } from "@/hooks/useProSession";
 import { VISIT_KIND_LABEL, dayLabel, timeWindow, visitAction } from "@/lib/pro-portal";
 import { SERVICE_LABEL, money } from "@/lib/pro-pay";
+import CleaningTeamInspection from '@/components/pro/CleaningTeamInspection';
 
 export default function ProVisit() {
   const { id } = useParams<{ id: string }>();
@@ -41,6 +42,7 @@ export default function ProVisit() {
   const [baths, setBaths] = useState("");
   const [vclass, setVclass] = useState("sedan");
   const [plate, setPlate] = useState("");
+  const [reportedPay, setReportedPay] = useState<number | null>(null);
 
   const GPS_MSG = "Turn on location for this site in your phone settings, then try again. Check-in and check-out need your location.";
 
@@ -59,8 +61,8 @@ export default function ProVisit() {
     const isCar = visit.service_type === "detailing";
     const body = isCar
       ? { vehicle_class: vclass, plate: plate.trim() }
-      : { bedrooms: parseInt(beds, 10), bathrooms: parseFloat(baths) };
-    if (isCar ? !plate.trim() : !(beds && baths)) { setActionError(isCar ? "Add the vehicle type and plate." : "Add bedrooms and bathrooms."); return; }
+      : { sq_ft: parseInt(beds, 10), bathrooms: parseFloat(baths) };
+    if (isCar ? !plate.trim() : !(beds && baths)) { setActionError(isCar ? "Add the vehicle type and plate." : "Add square feet and bathrooms."); return; }
     setBusy("complete");
     const res = await visitAction(visit.id, "size_check", body);
     setBusy(null);
@@ -114,6 +116,7 @@ export default function ProVisit() {
       return;
     }
     setBlockOpen(false);
+    setReportedPay(res.visit_pay_cents ?? null);
     setBlockedDone(true);
     setSuccess(true);
     setTimeout(() => {
@@ -131,6 +134,10 @@ export default function ProVisit() {
     setConfirm(false);
     if (!res.ok) {
       if (res.error === "size_check_required") { setSizeOpen(true); setActionError("First visit: record the real size before you finish."); return; }
+      if (res.error === 'both_pros_check_out_required') {setActionError('Both Pros must check in and check out before the Lead completes the visit.');return;}
+      if (res.error === 'lead_inspection_and_zones_required') {setActionError('Save room zones and the final inspection before completing the visit.');return;}
+      if (res.error === 'lead_action_required') {setActionError('The Lead completes this team visit. Record your check-out below.');return;}
+      if (res.error === 'secure_exit_checklist_required') {setActionError('Confirm the secure-exit items in the checklist before completing the visit.');return;}
       setActionError(
         res.error === "gps_unavailable"
           ? GPS_MSG
@@ -146,6 +153,7 @@ export default function ProVisit() {
       );
       return;
     }
+    setReportedPay(res.visit_pay_cents ?? null);
     setSuccess(true);
     setTimeout(() => {
       reload();
@@ -182,8 +190,8 @@ export default function ProVisit() {
           </span>
           <p className="mt-4 text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">
             {blockedDone
-              ? `Reported — you're paid in full for this visit (${money(visit.visit_pay_cents)}).`
-              : `Visit complete — ${money(visit.visit_pay_cents)} added to this week's earnings.`}
+              ? `Reported — ${money(reportedPay)} added to your earnings.`
+              : `Visit complete — ${money(reportedPay)} added to this week's earnings.`}
           </p>
         </div>
       </ProShell>
@@ -318,7 +326,7 @@ export default function ProVisit() {
                 </div>
               ) : (
                 <div className="mt-2 grid grid-cols-2 gap-2">
-                  <input inputMode="numeric" value={beds} onChange={(e) => setBeds(e.target.value.replace(/[^0-9]/g, ""))} placeholder="Bedrooms" className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
+                  <input inputMode="numeric" value={beds} onChange={(e) => setBeds(e.target.value.replace(/[^0-9]/g, ""))} placeholder="Square feet" className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
                   <input inputMode="decimal" value={baths} onChange={(e) => setBaths(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="Bathrooms" className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
                 </div>
               )}
@@ -342,6 +350,7 @@ export default function ProVisit() {
           >
             Complete visit
           </ProButton>
+          {visit.service_type==='cleaning'&&<CleaningTeamInspection visitId={visit.id}/>}
           {!photosOk && !visit.completed_at && (
             <p className="text-center text-[13px] text-[hsl(var(--pro-ink-soft))]">
               One before photo and one after photo are required.
@@ -373,7 +382,7 @@ export default function ProVisit() {
           >
             <p className="text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">Can't work this visit?</p>
             <p className="mt-1 text-[14px] text-[hsl(var(--pro-ink-soft))]">
-              You drove out, so you're paid in full. Tell us what stopped you.
+              {visit.service_type==='cleaning' ? "Lockout or unsafe exit pays half the visit rate. Tell us what stopped you." : "You drove out, so you're paid in full. Tell us what stopped you."}
             </p>
             <div className="mt-4 space-y-2">
               {([
@@ -408,7 +417,7 @@ export default function ProVisit() {
               disabled={busy === "blocked" || blockNote.trim().length < 10}
               onClick={() => void reportBlocked()}
             >
-              {busy === "blocked" ? "Sending…" : "Report and get paid in full"}
+              {busy === "blocked" ? "Sending…" : "Report visit"}
             </ProButton>
             <button
               type="button"

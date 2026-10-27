@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
             break;
           case "undo_cancel":
             stripeParams = { cancel_at_period_end: false };
-            localPatch = { cancel_at_period_end: false, canceled_at: null, paused_until: null };
+            localPatch = { cancel_at_period_end: false, canceled_at: null };
             break;
           case "pause":
             stripeParams = { pause_collection: { behavior: "void", resumes_at: resumesAtUnix } };

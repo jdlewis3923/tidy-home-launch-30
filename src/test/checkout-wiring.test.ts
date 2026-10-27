@@ -1,7 +1,7 @@
 // Checkout wiring guard — the numbers that mis-bill a customer if wrong.
 //
-// The model: 21 recurring Stripe prices, all interval=month, at the BILLED
-// monthly amount. Cadence lives in the lookup key and the price metadata, never
+// The model: legacy recurring prices plus five-band cleaning monthly/yearly.
+// Monthly amounts remain unchanged. Cadence lives in the lookup key, never
 // in the quantity — every line is quantity 1.
 //
 // The live-Stripe half of this proof is the `verify-checkout-wiring` edge
@@ -32,10 +32,17 @@ const EXPECTED_KEYS = [
   'lawn_2_monthly', 'lawn_2_biweekly', 'lawn_2_weekly',
   'lawn_3_monthly', 'lawn_3_biweekly', 'lawn_3_weekly',
   'shine_1', 'shine_2', 'shine_3',
+  'clean_1_monthly_annual', 'clean_1_biweekly_annual', 'clean_1_weekly_annual',
+  'clean_2_monthly_annual', 'clean_2_biweekly_annual', 'clean_2_weekly_annual',
+  'clean_3_monthly_annual', 'clean_3_biweekly_annual', 'clean_3_weekly_annual',
+  'clean_estate_monthly', 'clean_estate_biweekly', 'clean_estate_weekly',
+  'clean_estate_annual_monthly', 'clean_estate_annual_biweekly', 'clean_estate_annual_weekly',
+  'clean_estateplus_monthly', 'clean_estateplus_biweekly', 'clean_estateplus_weekly',
+  'clean_estateplus_annual_monthly', 'clean_estateplus_annual_biweekly', 'clean_estateplus_annual_weekly',
 ];
 
-describe('1. the 21 lookup keys', () => {
-  it('the canon publishes exactly these 21 keys', () => {
+describe('1. versioned lookup keys', () => {
+  it('the canon publishes all legacy and five-band cleaning keys', () => {
     expect([...ALL_RECURRING_LOOKUP_KEYS].sort()).toEqual([...EXPECTED_KEYS].sort());
   });
 
@@ -151,6 +158,7 @@ describe('3. the reference cart — size 2 cleaning, biweekly', () => {
     frequencies: { cleaning: 'biweekly' },
     bedrooms: '3',
     bathrooms: '2',
+    cleaningRange: 2,
   });
 
   it('translates to one clean_2_biweekly line', () => {
@@ -167,8 +175,8 @@ describe('3. the reference cart — size 2 cleaning, biweekly', () => {
   });
 });
 
-describe('4. surcharge bands ride along, oversized properties route to a quote', () => {
-  it('2,501-4,000 sq ft cleaning adds $60 a visit', () => {
+describe('4. square-foot bands replace cleaning surcharges', () => {
+  it('3,200 sq ft weekly cleaning bills $916 with no surcharge', () => {
     const state = st({
       services: ['cleaning'],
       frequencies: { cleaning: 'weekly' },
@@ -176,16 +184,17 @@ describe('4. surcharge bands ride along, oversized properties route to a quote',
       bathrooms: '2',
       homeSqFt: 3200,
     });
-    expect(Math.round(calculatePricing(state).ongoing * 100)).toBe((620 + 240) * 100);
+    expect(Math.round(calculatePricing(state).ongoing * 100)).toBe(91600);
     expect(translate(state).services[0].sq_ft).toBe(3200);
   });
 
-  it('5 bedrooms produces no checkout line', () => {
+  it('over 7,000 sq ft produces no checkout line regardless of bedrooms', () => {
     const state = st({
       services: ['cleaning'],
       frequencies: { cleaning: 'biweekly' },
       bedrooms: '5',
       bathrooms: '3',
+      homeSqFt: 7001,
     });
     expect(needsQuote(state)).toBe(true);
     expect(translate(state).services).toEqual([]);

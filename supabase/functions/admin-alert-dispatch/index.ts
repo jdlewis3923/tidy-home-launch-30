@@ -165,6 +165,16 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const anyNumbers = reservations + scans + revenue + visitsDone > 0;
 
   const sections: { title: string; red?: boolean; items: { text: string; url?: string; label?: string }[] }[] = [];
+  const {data:estateReservations,error:estateError}=await admin.from('reservations').select('id,first_name,last_name,zip,cleaning_team_id,cleaning_selected_size,cleaning_verified_size').eq('is_test_row',false).in('status',['reserved','invited']).contains('services',['cleaning']);
+  if(estateError)throw new Error(estateError.message);
+  const needsTeam=[];
+  for(const r of estateReservations??[]){
+    if((r.cleaning_verified_size??r.cleaning_selected_size)!=='5')continue;
+    const {data:valid,error}=await admin.rpc('cleaning_team_valid',{_team:r.cleaning_team_id});
+    if(error)throw new Error(error.message);
+    if(!valid)needsTeam.push(r);
+  }
+  if(needsTeam.length)sections.push({title:'Estate Plus · Needs team before conversion',red:true,items:needsTeam.map(r=>({text:`${[r.first_name,r.last_name].filter(Boolean).join(' ')} · ${r.zip} · Needs verified team`,url:`${SITE}/admin/reservations`,label:'Assign team'}))});
   // Include morning text sends through this update, not just yesterday's business totals.
   const textUntil = new Date().toISOString();
   const senders = ['candidate-text', 'hiring-invite', 'pipeline-notify', 'hire-ready-dispatch'];
@@ -296,7 +306,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   }
 
   const shown = sections.filter((s) => s.items.length);
-  const nothing = edition === 'today' && !mustDo.length;
+  const nothing = edition === 'today' && !mustDo.length && !needsTeam.length;
   const heading = edition === 'today' ? 'Today' : 'Tonight';
   const pulse = { revenue, bookings: reservations, households: conversionOpen ? new Set((members ?? []).map((s) => s.user_id)).size : 0, pros: new Set(actualVisits.map((v) => v.assigned_pro_id).filter(Boolean)).size };
   const html = ownerEmail({ date: today, edition: heading, pulse, operations, attention: [...urgentOpen, ...mustDo].map(item), unresolved: all.map(item), sections: shown.filter((s) => !['Must do today', 'Unresolved urgent', 'Still open from today', 'Yesterday in numbers', 'Today in numbers'].includes(s.title)) });
@@ -311,7 +321,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     : { sent: false, reason: 'empty' };
   let sms = 'skipped';
   if (edition === 'today') {
-    const line1 = nothing ? 'Nothing needs you today.' : `${mustDo.length} to do today`;
+    const line1 = nothing ? 'Nothing needs you today.' : `${mustDo.length} to do today${needsTeam.length?` · ${needsTeam.length} Estate Plus need teams`:''}`;
     const line2 = urgentOpen.length ? `${urgentOpen.length} unresolved urgent` : (anyNumbers ? `Yesterday: ${numbers.slice(0, 2).join(', ')}` : 'No unresolved urgent items');
     const res = await vendorFetch(`${URL_}/functions/v1/send-twilio-sms`, {
       method: 'POST', headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' },

@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadLaunchConfig } from "../_shared/launch-config.ts";
 import { CAR_OPENS_LINE, fmtLaunchDate } from "../_shared/launch.ts";
 import { vendorFetch } from '../_shared/http.ts';
+import { MEMBER_GUIDE } from '../_shared/member-guide.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,10 +32,10 @@ Deno.serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
     // Fetch knowledge base (service-role: the table is admin/backend only).
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const backendUrl = Deno.env.get('SUPABASE_URL');
+    const backendKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!backendUrl || !backendKey) throw new Error('Knowledge service unavailable');
+    const supabase = createClient(backendUrl, backendKey);
     const { data: kbRow } = await supabase
       .from("chatbot_knowledge")
       .select("content")
@@ -66,9 +67,15 @@ RULES:
 - Never claim to book, cancel, or reschedule visits yourself.
 - If asked about pricing in general terms, you may quote ranges from the knowledge but always offer the phone number for an exact quote.
 - Currency is USD. Service area is Miami (Kendall, Pinecrest area).
+- Respond in the customer's language (English or Latin American Spanish).
+- For membership policies, the exact approved MEMBER GUIDE overrides older knowledge. Quote its relevant wording, and link to https://jointidy.co/member-guide#SECTION_ID (append -es for Spanish). Never invent enforcement or claim a policy action has happened.
+- Yearly prices may be quoted but yearly payment is not available yet. Never claim a customer can pay yearly today.
 
 BUSINESS KNOWLEDGE:
-${knowledge}${launchFacts}`;
+${knowledge}${launchFacts}
+
+MEMBER GUIDE (authoritative English and Spanish):
+${JSON.stringify(MEMBER_GUIDE)}`;
 
     const aiResp = await vendorFetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

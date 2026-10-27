@@ -17,6 +17,7 @@ import {
   contractorVisitPay,
   type CanonCadence,
   type CanonSize,
+  type CleaningSize,
 } from "@/lib/pricing-canon";
 
 export type ProServiceType = "cleaning" | "lawn" | "detailing";
@@ -36,9 +37,9 @@ export function visitPayCents(
   service: ProServiceType,
   frequency: RouteFrequency,
   tier?: string | null,
-  opts?: { size?: CanonSize | null; surcharge?: boolean; shineVisit?: "maintenance_wash" | "full_detail" },
+  opts?: { size?: CleaningSize | null; surcharge?: boolean; shineVisit?: "maintenance_wash" | "full_detail" },
 ): number | null {
-  const size = (opts?.size ?? 1) as CanonSize;
+  const size = opts?.size ?? 1;
   if (!size) return null;
   const dollars = contractorVisitPay({
     service,

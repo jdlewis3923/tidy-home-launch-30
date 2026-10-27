@@ -1513,6 +1513,97 @@
       "when": 1793136051866,
       "tag": "0215_cleaning_size_approval",
       "breakpoints": true
+    },
+    {
+      "idx": 216,
+      "version": "7",
+      "when": 1793136698382,
+      "tag": "0216_member_guide_acceptance",
+      "breakpoints": true
+    },
+    {
+      "idx": 217,
+      "version": "7",
+      "when": 1793136784228,
+      "tag": "0217_estate_team_and_pay_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 218,
+      "version": "7",
+      "when": 1793136868129,
+      "tag": "0218_estate_visit_pay_snapshot",
+      "breakpoints": true
+    },
+    {
+      "idx": 219,
+      "version": "7",
+      "when": 1793136893690,
+      "tag": "0219_estate_shared_capacity",
+      "breakpoints": true
+    },
+    {
+      "idx": 220,
+      "version": "7",
+      "when": 1793136917145,
+      "tag": "0220_pro_team_visit_visibility",
+      "breakpoints": true
+    },
+    {
+      "idx": 221,
+      "version": "7",
+      "when": 1793137120172,
+      "tag": "0221_cleaning_pay_snapshot_preserves_gifts",
+      "breakpoints": true
+    },
+    {
+      "idx": 222,
+      "version": "7",
+      "when": 1793137145697,
+      "tag": "0222_cleaning_team_privacy_and_partial_pay",
+      "breakpoints": true
+    },
+    {
+      "idx": 223,
+      "version": "7",
+      "when": 1793137340326,
+      "tag": "0223_admin_cleaning_team_registration",
+      "breakpoints": true
+    },
+    {
+      "idx": 224,
+      "version": "7",
+      "when": 1793137435110,
+      "tag": "0224_cleaning_owner_policy_permission",
+      "breakpoints": true
+    },
+    {
+      "idx": 225,
+      "version": "7",
+      "when": 1793137523584,
+      "tag": "0225_estate_assignment_after_schedule_fill",
+      "breakpoints": true
+    },
+    {
+      "idx": 226,
+      "version": "7",
+      "when": 1793137556030,
+      "tag": "0226_cleaning_team_gps_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 227,
+      "version": "7",
+      "when": 1793137618873,
+      "tag": "0227_cleaning_individual_pay_display",
+      "breakpoints": true
+    },
+    {
+      "idx": 228,
+      "version": "7",
+      "when": 1793137660185,
+      "tag": "0228_cleaning_standard_and_exit_checklist",
+      "breakpoints": true
     }
   ]
 }
