@@ -32,7 +32,8 @@ Deno.serve(async (req) => {
   const { data: visits, error } = await admin
     .from('visits')
     .select(
-      'id, assigned_pro_id, scheduled_start, service_type, street, zip, access_notes, gate_code, parking_notes, pet_notes',
+      // Entry codes/access notes are visit-day only (Member Guide promise); never in the night-before text.
+      'id, assigned_pro_id, scheduled_start, service_type, street, zip, parking_notes, pet_notes',
     )
     .not('assigned_pro_id', 'is', null)
     .in('status', ['scheduled', 'on_the_way', 'in_progress'])
