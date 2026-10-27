@@ -9655,6 +9655,7 @@ export type Database = {
           access_notes_enc: string | null
           anchor_date: string | null
           assigned_pro_id: string | null
+          backup_pro_id: string | null
           base_visit_id: string | null
           booking_id: string | null
           budget_hours: number | null
@@ -9706,6 +9707,7 @@ export type Database = {
           street: string | null
           subscription_id: string | null
           surcharge_applied: boolean
+          teammate_missing_at: string | null
           time_window: string | null
           updated_at: string
           user_id: string
@@ -9721,6 +9723,7 @@ export type Database = {
           access_notes_enc?: string | null
           anchor_date?: string | null
           assigned_pro_id?: string | null
+          backup_pro_id?: string | null
           base_visit_id?: string | null
           booking_id?: string | null
           budget_hours?: number | null
@@ -9772,6 +9775,7 @@ export type Database = {
           street?: string | null
           subscription_id?: string | null
           surcharge_applied?: boolean
+          teammate_missing_at?: string | null
           time_window?: string | null
           updated_at?: string
           user_id: string
@@ -9787,6 +9791,7 @@ export type Database = {
           access_notes_enc?: string | null
           anchor_date?: string | null
           assigned_pro_id?: string | null
+          backup_pro_id?: string | null
           base_visit_id?: string | null
           booking_id?: string | null
           budget_hours?: number | null
@@ -9838,6 +9843,7 @@ export type Database = {
           street?: string | null
           subscription_id?: string | null
           surcharge_applied?: boolean
+          teammate_missing_at?: string | null
           time_window?: string | null
           updated_at?: string
           user_id?: string
@@ -10131,6 +10137,15 @@ export type Database = {
       admin_resolve_reschedule: {
         Args: { _id: string; _note: string }
         Returns: undefined
+      }
+      admin_resolve_teammate_missing: {
+        Args: {
+          _backup_pro?: string
+          _new_date?: string
+          _resolution: string
+          _visit: string
+        }
+        Returns: Json
       }
       admin_sched_state: { Args: never; Returns: Json }
       admin_set_alert_tier: {
@@ -11137,6 +11152,7 @@ export type Database = {
       pro_partner_progress: { Args: never; Returns: Json }
       pro_partner_status: { Args: { _applicant: string }; Returns: Json }
       pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
+      pro_report_teammate_missing: { Args: { _visit: string }; Returns: Json }
       pro_review_bonus_total: { Args: { _pro?: string }; Returns: number }
       pro_schedule_state: { Args: never; Returns: Json }
       pro_send_message: {

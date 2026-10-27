@@ -1632,6 +1632,13 @@
       "when": 1793140389354,
       "tag": "0232_member_credit_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 233,
+      "version": "7",
+      "when": 1793140743444,
+      "tag": "0233_teammate_missing_backup_or_move",
+      "breakpoints": true
     }
   ]
 }
