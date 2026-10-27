@@ -11,6 +11,7 @@
 - [ ] Part 4 before Nov 16: cleaning verification, customer-confirmed increases, encrypted visit-day access, first-visit/exit/photo/claim workflows, rotating standard.
   - Added saved bilingual cleaning-standard checks, member-specific five-task rotation and server-required secure exit; paired Pro check-in/out evidence and shared team photo access. Owner-page permission warning corrected. Encryption, seal delivery, member photo consent/30-day deletion and claim lifecycle remain open.
 - [ ] Part 5 before Nov 16: Stripe policy changes/credits/pauses/refunds, founding locks, isolated policy journeys and test-mode financial evidence.
+  - Annual collection remains blocked. Corrected started-month refund math at anniversary times/month ends and kept pause state intact when undoing cancellation. Refund ledger, annual renewal/45-day notice, credit/skip/weather/lockout/payment journeys and Stripe test evidence remain open.
 - [ ] Cross-surface bilingual update and complete changed-page/message/document/price inventory.
 
 ## Oct 22 reminder check + 9 AM text reporting (Oct 25)

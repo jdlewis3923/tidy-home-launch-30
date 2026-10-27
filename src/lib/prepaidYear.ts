@@ -8,10 +8,18 @@ export function yearlyPriceCents(monthlyCents: number): number {
 }
 
 export function monthsUsed(startIso: string, cancelIso: string): number {
-  const s = new Date(startIso), c = new Date(cancelIso);
-  let m = (c.getUTCFullYear() - s.getUTCFullYear()) * 12 + (c.getUTCMonth() - s.getUTCMonth());
-  if (c.getUTCDate() > s.getUTCDate() || (c.getUTCDate() === s.getUTCDate() && c.getTime() > s.getTime() && m === 0)) m += 1;
-  return Math.min(12, Math.max(1, m));
+  const start = new Date(startIso), cancel = new Date(cancelIso);
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(cancel.getTime())) throw new Error('invalid_term_date');
+  if (cancel.getTime() <= start.getTime()) return 1;
+  for (let month=1; month<=12; month++) {
+    const boundary = new Date(start);
+    boundary.setUTCDate(1);
+    boundary.setUTCMonth(start.getUTCMonth()+month);
+    const lastDay = new Date(Date.UTC(boundary.getUTCFullYear(),boundary.getUTCMonth()+1,0)).getUTCDate();
+    boundary.setUTCDate(Math.min(start.getUTCDate(),lastDay));
+    if (cancel.getTime() <= boundary.getTime()) return month;
+  }
+  return 12;
 }
 
 export function cancelRefundCents(monthlyCents: number, paidCents: number, used: number) {
