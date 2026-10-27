@@ -62,7 +62,7 @@ const SERVICE_ZIPS = new Set(["33156", "33183", "33186"]);
 
 const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
 const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
-const SizeEnum = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+const SizeEnum = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]);
 
 const CheckoutInputSchema = z.object({
   /** Ref from scope-accept: the customer's stored "I've read what's included" rows. */
@@ -83,6 +83,8 @@ const CheckoutInputSchema = z.object({
   // The UNDERLYING size inputs — the server recomputes size and rejects a
   // mismatch, so a hand-crafted POST cannot buy a size it isn't.
   bedrooms: z.number().int().min(0).max(20).nullable().optional(),
+  cleaning_range: z.union([SizeEnum, z.literal('quote')]).nullable().optional(),
+  billing_period: z.enum(['monthly','yearly']).default('monthly'),
   bathrooms: z.number().min(0).max(20).nullable().optional(),
   lawn_choice: z.enum(["small", "standard", "large", "over"]).nullable().optional(),
   vehicle_class: z
@@ -169,6 +171,8 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: "validation_failed", details: parsed.error.flatten() }, 400);
   }
   const input = parsed.data;
+  // Annual policy/refund lifecycle must be verified before accepting prepaid money.
+  if (input.billing_period === 'yearly') return jsonResponse({ ok: false, error: 'prepaid_conversion_not_ready' }, 409);
 
   if (input.add_to_existing && (input.services.length !== 1 || input.addons.length > 0 || input.car_wash)) {
     return jsonResponse({ ok: false, error: "add_service_requires_one_recurring_service" }, 400);
@@ -208,6 +212,8 @@ Deno.serve(async (req) => {
       sqFt: s.sq_ft ?? null,
       inputs: {
         bedrooms: input.bedrooms ?? null,
+        cleaning_range: input.cleaning_range ?? null,
+        home_sq_ft: s.service === 'cleaning' ? s.sq_ft ?? null : null,
         bathrooms: input.bathrooms ?? null,
         lawn_choice: input.lawn_choice ?? null,
         turf_sq_ft: s.service === "lawn" ? s.sq_ft ?? null : null,
@@ -223,6 +229,16 @@ Deno.serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  // New cleaning selections require measured size and staffing before billing.
+  // Verification also applies to legacy clients; omitting a range cannot bypass it.
+  if (input.services.some(s => s.service === 'cleaning')) {
+    const { data: reservation, error } = await supabase.from('reservations').select('cleaning_verified_at,cleaning_verified_size,cleaning_size_confirmation,cleaning_team_ready')
+      .eq('email', (user.email ?? '').toLowerCase()).neq('status', 'canceled').order('created_at', { ascending: false }).limit(1).maybeSingle();
+    const clean = input.services.find(s => s.service === 'cleaning');
+    if (error || !reservation?.cleaning_verified_at) return jsonResponse({ ok: false, error: 'cleaning_requires_verification' }, 409);
+    if (reservation.cleaning_size_confirmation === 'pending' || reservation.cleaning_size_confirmation === 'declined' || String(clean?.size) !== reservation.cleaning_verified_size) return jsonResponse({ ok: false, error: 'cleaning_size_confirmation_required' }, 409);
+    if (clean?.size === 5 && !reservation.cleaning_team_ready) return jsonResponse({ ok: false, error: 'cleaning_needs_team' }, 409);
+  }
   // Launch gate (launch_config): car care — Shine Complete or the Car Wash Add-On —
   // cannot convert to paid before its conversion date.
   if (input.car_wash || input.services.some((s) => s.service === "detailing")) {
@@ -300,8 +316,8 @@ Deno.serve(async (req) => {
         const surchargeFor = (service: string, sqFt?: number | null): number => {
           if (!sqFt) return 0;
           if (service === "cleaning") {
-            if (sqFt > CLEANING_SURCHARGE.maxSqFt) return -1;
-            return sqFt >= CLEANING_SURCHARGE.minSqFt ? CLEANING_SURCHARGE.perVisitDollars : 0;
+            if (sqFt > 7000) return -1;
+            return 0;
           }
           // Lawn: retired surcharge — the size bands (and aerial verification) replace it.
           return 0;

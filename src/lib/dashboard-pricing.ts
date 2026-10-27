@@ -29,6 +29,11 @@ import {
   perVisitPrice,
   quantityFor,
   sizeFromBedrooms,
+  sizeFromHomeSqFt,
+  cleaningSizeFromRange,
+  CLEANING_MONTHLY,
+  CLEANING_BANDS,
+  type CleaningSize,
   sizeFromTurfSqFt,
   LAWN_QUOTE_ABOVE_SQFT,
 
@@ -47,7 +52,7 @@ export const REFERRAL_DISCOUNT_CENTS = REFERRAL_BONUS_CENTS;
 // Types
 export type ServiceType = CanonService;
 export type Frequency = CanonCadence;
-export type Size = CanonSize;
+export type Size = CleaningSize;
 export type { SizeSelection, VehicleClass, WashCount };
 
 
@@ -62,6 +67,8 @@ export interface ConfigState {
   bathrooms: string | null;
   /** Interior square footage band answer — drives the cleaning surcharge. */
   homeSqFt: number | null;
+  cleaningRange?: SizeSelection | null;
+  billingPeriod?: 'monthly' | 'yearly';
   /** Mowable turf area once confirmed — drives the lawn surcharge. */
   turfSqFt: number | null;
 
@@ -129,8 +136,8 @@ export const defaultState: ConfigState = {
 // Sizes — labels and derivation from the plain answers we do ask for.
 // ---------------------------------------------------------------------------
 
-export const sizeLabels = SIZE_LABELS;
-export const sizeHelpers = SIZE_HELPERS;
+export const sizeLabels = { ...SIZE_LABELS, cleaning: Object.fromEntries(CLEANING_BANDS.map(b => [b.size, `${b.name} · ${b.range}`])) as Record<CleaningSize, string> };
+export const sizeHelpers = { ...SIZE_HELPERS, cleaning: Object.fromEntries(CLEANING_BANDS.map(b => [b.size, `max ${b.baths} baths`])) as Record<CleaningSize, string> };
 export const vehicleClassLabels = VEHICLE_CLASS_LABELS;
 export const allSizes = SIZES;
 
@@ -201,7 +208,12 @@ export function sizeForCarCare(vehicleClass: VehicleClass | null): SizeSelection
 
 /** The size in play for a service, given the current answers. */
 export function sizeFor(state: ConfigState, service: ServiceType): SizeSelection | null {
-  if (service === 'cleaning') return sizeForCleaning(state.bedrooms, state.bathrooms);
+  if (service === 'cleaning') {
+    if (!state.bathrooms) return null;
+    if (state.cleaningRange) return cleaningSizeFromRange(state.cleaningRange, bathroomsToNumber(state.bathrooms));
+    if (state.homeSqFt) return sizeFromHomeSqFt(state.homeSqFt, bathroomsToNumber(state.bathrooms));
+    return null;
+  }
   if (service === 'lawn') return sizeForLawnReconciled(state.lawnChoice, state.turfSqFt);
   return sizeForCarCare(state.vehicleClass);
 }
@@ -213,7 +225,7 @@ export function sizeFor(state: ConfigState, service: ServiceType): SizeSelection
  */
 export function needsQuote(state: ConfigState): boolean {
   if (state.services.some((svc) => sizeFor(state, svc) === 'quote')) return true;
-  if (state.services.includes('cleaning') && (state.homeSqFt ?? 0) > CLEANING_SURCHARGE.maxSqFt) return true;
+  if (state.services.includes('cleaning') && (state.homeSqFt ?? 0) > 7000) return true;
   if (state.services.includes('lawn') && (state.turfSqFt ?? 0) > LAWN_QUOTE_ABOVE_SQFT) return true;
   return false;
 }
@@ -240,7 +252,9 @@ export { lookupKeyFor, perVisitPrice, monthlyPrice, ENTRY_MONTHLY, SHINE_MONTHLY
  * Cleaning $139, lawn $45, Car Care $149 at size 1.
  */
 export function getSizePrice(service: ServiceType, size: Size): number {
-  return SIZE_PRICES[service][size];
+  if (service === 'cleaning') return CLEANING_MONTHLY[size].monthly;
+  if (size > 3) return 0;
+  return SIZE_PRICES[service][size as CanonSize];
 }
 
 /** Visits performed and billed per month at a cadence. */

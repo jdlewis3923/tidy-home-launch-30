@@ -2,6 +2,7 @@
 
 ## Cleaning expansion (Oct 27) — build in order
 - [ ] Part 1 by Thu Oct 29 8 AM Miami: square-foot/bath sizes, Estate prices, lookup-key catalog live/test, reservation persistence, website/founding/member/yearly parity, phone/desktop evidence and deleted test reservations.
+  - Completed: five-band quotes, live/test additive catalog, reservation readback, phone/desktop quote checks; 95 focused tests pass. Added admin-created walkthrough slots and verification gates. Still open: verified end-to-end conversion, yearly billing lifecycle, customer size-increase confirmation and full bilingual cross-surface review; prepaid collection is blocked rather than billed monthly.
 - [ ] Part 2 before Nov 16: Estate scheduling, checked teams/helper, lead/zones, capacity, Pro pay/statements, add-ons, Needs team digest.
 - [ ] Part 3 before Nov 16: exact EN/ES Member Guide, checkout acknowledgement, policy gates and linked messages. Blocker: guide referenced in brief but not attached.
 - [ ] Part 4 before Nov 16: cleaning verification, customer-confirmed increases, encrypted visit-day access, first-visit/exit/photo/claim workflows, rotating standard.

@@ -1,4 +1,6 @@
 import FreeAddonPicker from '@/components/dashboard/FreeAddonPicker';
+import CleaningSizePicker from '@/components/CleaningSizePicker';
+import { CLEANING_BANDS, CLEANING_MONTHLY, cleaningSizeFromRange, type CleaningSize, type SizeSelection } from '@/lib/pricing-canon';
 /**
  * Tidy — /dashboard/services
  *
@@ -141,6 +143,7 @@ export default function DashboardServices() {
   const [addScopeChecked, setAddScopeChecked] = useState<Partial<Record<ScopeGroup, boolean>>>({});
   const [addSpigot, setAddSpigot] = useState<boolean | null>(null);
   const [newBedrooms, setNewBedrooms] = useState<string>('');
+  const [newCleaningRange, setNewCleaningRange] = useState<SizeSelection | null>(null);
   const [newBathrooms, setNewBathrooms] = useState<string>('');
   const [newHomeSqFt, setNewHomeSqFt] = useState<string>('');
   const [newLawnChoice, setNewLawnChoice] = useState<LawnChoice | null>(null);
@@ -157,17 +160,17 @@ export default function DashboardServices() {
 
   const newSizeSelection =
     newService === 'cleaning'
-      ? sizeForCleaning(newBedrooms || null, newBathrooms || null)
+      ? newCleaningRange && newBathrooms ? cleaningSizeFromRange(newCleaningRange, Number(newBathrooms)) : null
       : newService === 'lawn'
         ? sizeForLawnReconciled(newLawnChoice, Number(newTurfSqFt) || null)
         : sizeForCarCare(newVehicleClass);
 
-  const newSize: CanonSize | null =
-    typeof newSizeSelection === 'number' ? (newSizeSelection as CanonSize) : null;
+  const newSize: CleaningSize | null =
+    typeof newSizeSelection === 'number' ? newSizeSelection : null;
 
   const newNeedsQuote =
     newSizeSelection === 'quote' ||
-    (newService === 'cleaning' && newSqFt > CLEANING_SURCHARGE.maxSqFt) ||
+    (newService === 'cleaning' && newSqFt > 7000) ||
     (newService === 'lawn' && newSqFt > LAWN_SURCHARGE.maxSqFt);
 
   const newReady = !!newService && !!newSize && !newNeedsQuote &&
@@ -177,6 +180,7 @@ export default function DashboardServices() {
     setNewService(s);
     setNewFrequency(SERVICE_UNIT[s] === 'per_month' ? 'monthly' : 'biweekly');
     setNewBedrooms('');
+    setNewCleaningRange(null);
     setNewBathrooms('');
     setNewHomeSqFt('');
     setNewLawnChoice(null);
@@ -403,6 +407,7 @@ export default function DashboardServices() {
         zip,
         lang: language === 'es' ? 'es' : 'en',
         bedrooms: newService === 'cleaning' ? Number(newBedrooms.replace('+', '')) || null : null,
+        cleaning_range: newService === 'cleaning' ? newCleaningRange : null,
         bathrooms: newService === 'cleaning' ? Number(newBathrooms.replace('+', '')) || null : null,
         lawn_choice: null,
         vehicle_class: newService === 'detailing' ? newVehicleClass : null,
@@ -649,21 +654,8 @@ export default function DashboardServices() {
                     <div className="mt-5 space-y-5">
                       {newService === 'cleaning' && (
                         <div className="space-y-3">
-                          <h3 className="text-sm font-semibold text-ink-soft">{t('Your home')}</h3>
+                          <CleaningSizePicker value={newCleaningRange} onChange={value => { setNewCleaningRange(value); setNewHomeSqFt(String(value === 'quote' ? 7001 : CLEANING_BANDS.find(b => b.size === value)?.maxSqFt ?? '')); }} />
                           <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="block text-xs font-medium text-ink-soft">
-                              {t('Bedrooms')} *
-                              <select
-                                value={newBedrooms}
-                                onChange={(e) => setNewBedrooms(e.target.value)}
-                                className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
-                              >
-                                <option value="">{t('Select')}</option>
-                                {['1', '2', '3', '4', '5+'].map((v) => (
-                                  <option key={v} value={v}>{v}</option>
-                                ))}
-                              </select>
-                            </label>
                             <label className="block text-xs font-medium text-ink-soft">
                               {t('Bathrooms')} *
                               <select
@@ -672,27 +664,14 @@ export default function DashboardServices() {
                                 className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
                               >
                                 <option value="">{t('Select')}</option>
-                                {['1', '1.5', '2', '2.5', '3', '3.5', '4+'].map((v) => (
+                                {['1', '1.5', '2', '2.5', '3', '3.5', '4', '5', '5.5', '6', '6.5', '7'].map((v) => (
                                   <option key={v} value={v}>{v}</option>
                                 ))}
                               </select>
                             </label>
                           </div>
-                          <label className="block text-xs font-medium text-ink-soft">
-                            {t('Home square footage')} *
-                            <input
-                              type="number"
-                              inputMode="numeric"
-                              min={0}
-                              step={50}
-                              value={newHomeSqFt}
-                              onChange={(e) => setNewHomeSqFt(e.target.value)}
-                              placeholder="e.g. 1800"
-                              className="mt-1 min-h-[44px] w-full rounded-xl border border-[hsl(var(--hairline))] bg-white px-3 text-sm text-ink"
-                            />
-                          </label>
                           <p className="text-[11px] text-ink-faint">
-                            {t('Interior living space. 2,501–4,000 sq ft adds $60 a visit. Above 4,000 we quote by hand.')}
+                            {language === 'es' ? 'Verificamos el tamaño antes de cobrar. Cualquier aumento requiere tu aprobación.' : 'We verify the size before billing. Any increase needs your approval.'}
                           </p>
                         </div>
                       )}
@@ -749,13 +728,13 @@ export default function DashboardServices() {
                       {newSize && !newNeedsQuote && (
                         <div className="rounded-xl border border-[hsl(var(--hairline))] bg-cream p-3">
                           <div className="text-sm font-semibold text-ink">
-                            {SIZE_LABELS[newService][newSize]}
+                            {newService === 'cleaning' ? CLEANING_BANDS.find(b => b.size === newSize)?.name : SIZE_LABELS[newService][newSize as CanonSize]}
                           </div>
                           <div className="text-[11px] text-ink-faint">
-                            {SIZE_HELPERS[newService][newSize]}
+                            {newService === 'cleaning' ? CLEANING_BANDS.find(b => b.size === newSize)?.range : SIZE_HELPERS[newService][newSize as CanonSize]}
                           </div>
                           <div className="mt-1 text-sm font-bold tabular-nums text-ink">
-                            ${SIZE_PRICES[newService][newSize]}
+                            ${newService === 'cleaning' ? CLEANING_MONTHLY[newSize][newFrequency] : SIZE_PRICES[newService][newSize as CanonSize]}
                             <span className="text-[11px] font-medium">
                               {SERVICE_UNIT[newService] === 'per_month' ? t('/mo') : t('/visit')}
                             </span>

@@ -3,6 +3,20 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 type Language = "en" | "es";
 
 const translations: Record<string, string> = {
+  "Cleaning uses interior square footage: up to 1,400, 2,200, 3,200, 4,800 or 7,000 sq ft, with bathroom limits. Above 7,000 needs a walkthrough. Lawn uses grass only: up to 3,000, 7,000 or 12,000 sq ft. Car Care uses your vehicle size.": "Limpieza usa los pies cuadrados interiores: hasta 1,400, 2,200, 3,200, 4,800 o 7,000, con límites de baños. Más de 7,000 requiere una visita para cotizar. Césped cuenta solo la grama: hasta 3,000, 7,000 o 12,000 pies². Cuidado del Auto usa el tamaño del vehículo.",
+  "We verify cleaning and lawn size before conversion. A larger size needs your approval before paying. A smaller size lowers the price; we tell you. Your founding rate card stays locked.": "Verificamos el tamaño de limpieza y césped antes de activar el pago. Un tamaño mayor necesita tu aprobación antes de pagar. Si es menor, bajamos el precio y te avisamos. Tu tarifa de fundador sigue fija.",
+  "What if my home is over 7,000 sq ft or lawn is over 12,000 sq ft?": "¿Y si mi casa tiene más de 7,000 pies² o mi césped más de 12,000?",
+  "Book a walkthrough for a home above 7,000 sq ft. Lawn above 12,000 sq ft needs a custom quote. Nothing is charged before you approve your price.": "Reserva una visita para cotizar casas de más de 7,000 pies². Césped de más de 12,000 requiere cotización personalizada. No se cobra nada antes de que apruebes el precio.",
+  "Your Pro requests extra time; you approve an add-on or size change before any extra work or charge.": "Tu Pro solicita tiempo extra; tú apruebas un servicio adicional o un cambio de tamaño antes de cualquier trabajo o cobro extra.",
+  "Size sets the price per visit. Every 2 weeks saves 8% per visit; weekly saves 18%. Cleaning starts at $139 a month. Prepay a year and save 10%.": "El tamaño determina el precio por visita. Cada 2 semanas ahorras 8% por visita; semanal, 18%. Limpieza desde $139 al mes. Prepaga un año y ahorra 10%.",
+  "Homes over 7,000 sq ft need a walkthrough quote. Lawns over 12,000 sq ft need a custom quote.": "Las casas de más de 7,000 pies² necesitan una visita para cotizar. Los jardines de más de 12,000 pies² necesitan una cotización personalizada.",
+  "Size 1 · up to 1,400 sq ft. Larger homes have their own price.": "Tamaño 1 · hasta 1,400 pies². Las casas más grandes tienen su propio precio.",
+  "Size 1 · up to 1,400 sq ft": "Tamaño 1 · hasta 1,400 pies²",
+  "Size 2 · 1,400–2,200 sq ft": "Tamaño 2 · 1,400–2,200 pies²",
+  "Size 3 · 2,200–3,200 sq ft": "Tamaño 3 · 2,200–3,200 pies²",
+  "max 3.5 baths": "máximo 3.5 baños",
+  "Size 1 up to 1,400 sq ft; Size 2 up to 2,200; Size 3 up to 3,200; Estate up to 4,800; Estate Plus up to 7,000. Above 7,000: walkthrough quote.": "Tamaño 1 hasta 1,400 pies²; Tamaño 2 hasta 2,200; Tamaño 3 hasta 3,200; Residencia hasta 4,800; Residencia Plus hasta 7,000. Más de 7,000: visita para cotizar.",
+  "Square footage sets your cleaning size: Size 1 $139, Size 2 $189, Size 3 $279, Estate $425, Estate Plus $595 on the monthly plan. Every 2 weeks saves 8% per visit; weekly saves 18%. Prepay a year and save 10%. More bathrooms than your band's limit moves the home up one size. Above 7,000 sq ft needs a walkthrough quote.": "Los pies cuadrados determinan el tamaño: Tamaño 1 $139, Tamaño 2 $189, Tamaño 3 $279, Residencia $425, Residencia Plus $595 en el plan mensual. Cada 2 semanas ahorras 8% por visita; semanal, 18%. Prepaga un año y ahorra 10%. Si tienes más baños de los permitidos, sube un tamaño. Más de 7,000 pies² requiere una visita para cotizar.",
   "Same Pro, rescheduled within 48 hours.": "Mismo Pro, reprogramado dentro de 48 horas.",
   "Your free add-ons": "Tus extras gratis",
   "You have 1 free add-on this month. Pick one.": "Tienes 1 extra gratis este mes. Elige uno.",

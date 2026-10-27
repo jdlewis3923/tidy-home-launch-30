@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ReservationsForecast, { useReservations, type ReservationRow } from "@/components/admin/ReservationsForecast";
 import { RESERVATION_SERVICE_LABEL, type ReservableService } from "@/lib/launch";
+import CleaningWalkthroughCalendar from '@/components/admin/CleaningWalkthroughCalendar';
+import CleaningVerification from '@/components/admin/CleaningVerification';
 
-const SIZE_WORD: Record<string, string> = { "1": "S1", "2": "S2", "3": "S3", quote: "quote" };
+const SIZE_WORD: Record<string, string> = { "1": "S1", "2": "S2", "3": "S3", "4": "Estate", "5": "Estate Plus", quote: "walkthrough" };
 const HEARD: Record<string, string> = { door_hanger: "Door hanger", nextdoor: "Nextdoor", google: "Google", referral: "Referral", other: "Other" };
 
 export default function AdminReservations() {
@@ -20,6 +22,7 @@ export default function AdminReservations() {
         <div><h1 className="text-2xl font-black tracking-tight text-foreground">Reservations</h1>
           <p className="mt-1 text-sm text-muted-foreground">Founding reservations in the order they came in — fill routes in this order.</p></div>
         <ReservationsForecast />
+        <CleaningWalkthroughCalendar />
         <div className="overflow-x-auto rounded-lg border border-border bg-card">
           <table className="w-full text-sm" data-testid="reservations-table">
             <thead className="bg-muted/50 text-xs text-muted-foreground"><tr>
@@ -32,7 +35,7 @@ export default function AdminReservations() {
                   <td className="px-3 py-2"><div className="font-semibold">{r.first_name} {r.last_name}{r.is_test_row && <span className="ml-1 text-xs text-destructive">TEST</span>}</div><div className="text-xs text-muted-foreground">{r.email} · {r.phone}</div><div className="text-xs text-muted-foreground">{r.street}</div></td>
                   <td className="px-3 py-2 text-xs">{r.services.map((s) => {
                     const l = r.lines.find((x) => x.service === s);
-                    return <div key={s}>{RESERVATION_SERVICE_LABEL[s as ReservableService] ?? s} · {l?.size != null ? SIZE_WORD[String(l.size)] ?? l.size : "—"} · {l?.cadence ?? "—"}{r.waitlist_services.includes(s) && <span className="ml-1 font-semibold text-destructive">waitlist</span>}</div>;
+                    return <div key={s}>{RESERVATION_SERVICE_LABEL[s as ReservableService] ?? s} · {l?.size != null ? SIZE_WORD[String(l.size)] ?? l.size : "—"} · {l?.cadence ?? "—"}{s === 'cleaning' && r.cleaning_selected_range && <div className="text-muted-foreground">{r.cleaning_selected_range} · {r.cleaning_bathrooms} baths · {r.cleaning_verified_at ? 'Size verified' : 'Verify size'}{l?.size === 5 && !r.cleaning_team_ready ? ' · Needs team' : ''}</div>}{r.waitlist_services.includes(s) && <span className="ml-1 font-semibold text-destructive">waitlist</span>}</div>;
                   })}</td>
                   <td className="px-3 py-2 tabular-nums">{r.zip}</td>
                   <td className="px-3 py-2 text-xs">{r.preferred_day} · {r.preferred_time}</td>
@@ -72,6 +75,7 @@ function ConvertDialog({ r, onClose }: { r: ReservationRow; onClose: () => void 
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Convert {r.first_name}'s reservation</DialogTitle></DialogHeader>
+        {r.services.includes('cleaning') && <CleaningVerification reservationId={r.id} onSaved={()=>{ setPreview(null); setResult('Measurement saved. Reopen this reservation to refresh its verification status.'); }} />}
         <div className="grid gap-3 sm:grid-cols-3">
           <label className="text-xs">Day<input className={input} value={day} onChange={(e) => setDay(e.target.value)} placeholder="Tuesday" /></label>
           <label className="text-xs">Time window<input className={input} value={win} onChange={(e) => setWin(e.target.value)} /></label>

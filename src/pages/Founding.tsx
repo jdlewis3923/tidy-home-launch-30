@@ -12,7 +12,10 @@ import { useFoundingCounts } from "@/hooks/useFoundingCounts";
 import { useGoogleListing, shortName, pickReview, formatRating } from "@/lib/googleReviews";
 import { FOUNDING_ZIPS, FOUNDING_CAP, FOUNDING_BENEFITS, startsLine } from "@/lib/launch";
 import { useLaunchConfig } from "@/hooks/useLaunchConfig";
-import { LAWN_GRASS_ONLY_NOTE, LAWN_OVER_OPTION, lookupKeyFor, sizeFromBedrooms, VISITS_PER_MONTH, BILLED_MONTHLY, SIZE_PRICES, type CanonCadence, type CanonSize, type SizeSelection } from "@/lib/pricing-canon";
+import { LAWN_GRASS_ONLY_NOTE, LAWN_OVER_OPTION, lookupKeyFor, cleaningSizeFromRange, cleaningAnnualCents, CLEANING_MONTHLY, cleaningBand, VISITS_PER_MONTH, BILLED_MONTHLY, SIZE_PRICES, type CleaningSize, type CanonCadence, type CanonSize, type SizeSelection } from "@/lib/pricing-canon";
+import CleaningSizePicker from '@/components/CleaningSizePicker';
+import CleaningWalkthroughSlots from '@/components/CleaningWalkthroughSlots';
+import { Button } from '@/components/ui/button';
 import { GIFT_ELIGIBLE_ADDONS } from "@/lib/addon-catalog";
 import { PHONE_DISPLAY, PHONE_TEL } from "@/lib/landing";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +41,8 @@ type Lawn = 1 | 2 | 3 | "quote";
 type State = {
   zip: string; src: string; step: Step; services: Svc[];
   beds: string; baths: string; lawn: Lawn | null; car: CanonSize | null;
+  cleaningRange?: SizeSelection | null; yearly?: boolean;
+  walkthroughSlot?: string;
   cadence: Record<"cleaning" | "lawn", CanonCadence>; gifts: string[];
   first: string; last: string; email: string; phone: string; street: string; sms: boolean;
   day: string; time: "morning" | "afternoon";
@@ -145,7 +150,7 @@ export default function Founding() {
   }, []);
 
   // ── quote math (each line its own Stripe price, quantity 1, no discounts) ──
-  const cleanSize: SizeSelection | null = s.beds && s.baths ? (s.beds === "5" ? "quote" : sizeFromBedrooms(Number(s.beds), Number(s.baths))) : null;
+  const cleanSize: SizeSelection | null = s.cleaningRange === 'quote' ? 'quote' : s.cleaningRange && s.baths ? cleaningSizeFromRange(s.cleaningRange, Number(s.baths)) : null;
   const sizeOf = (svc: Svc): SizeSelection | null => (svc === "cleaning" ? cleanSize : svc === "lawn" ? s.lawn : s.car);
   const lines = useMemo(() => s.services.map((svc) => {
     const size = sizeOf(svc);
@@ -154,7 +159,7 @@ export default function Founding() {
     if (size === "quote") return { service: svc, size, cadence, monthly: 0, visits: 0, quote: true };
     const key = lookupKeyFor(svc, size, cadence);
     const cents = prices?.[key];
-    const monthly = cents ? cents / 100 : BILLED_MONTHLY[svc][size][cadence];
+    const monthly = svc === 'cleaning' ? CLEANING_MONTHLY[size][cadence] : cents ? cents / 100 : BILLED_MONTHLY[svc][size as CanonSize][cadence];
     return { service: svc, size, cadence, monthly, visits: svc === "detailing" ? 3 : VISITS_PER_MONTH[cadence], quote: false, key };
   }), [s, prices, cleanSize]); // eslint-disable-line react-hooks/exhaustive-deps
   const ready = s.services.length > 0 && lines.every(Boolean);
@@ -201,7 +206,11 @@ export default function Founding() {
       heard_other: s.src || undefined, lang: language, src: s.src || undefined, session_id: sessionId(),
       gift_addons: s.gifts.slice(0, giftCount), website: honeypot.current?.value || "",
       lines: lines.flatMap((l) => l ? [{ service: l.service, size: l.size, cadence: l.service === "detailing" ? null : l.cadence, monthly: l.monthly, visits_per_month: l.visits }] : []),
-      quote: { total, visits, src: "founding", beds: s.beds, baths: s.baths },
+      quote: { total, visits, src: "founding", cleaning_range: s.cleaningRange, baths: s.baths, billing_period: s.yearly ? 'yearly' : 'monthly', frequencies: s.cadence, cleaningRange: s.cleaningRange, bathrooms: s.baths, homeSqFt: typeof s.cleaningRange === 'number' ? cleaningBand(s.cleaningRange)?.maxSqFt : null, lawnChoice: s.lawn === 1 ? 'small' : s.lawn === 2 ? 'standard' : s.lawn === 3 ? 'large' : 'over', vehicleClass: s.car === 1 ? 'sedan' : s.car === 2 ? 'suv' : 'truck' },
+      cleaning_selected_size: s.cleaningRange === 'quote' ? 'custom' : s.cleaningRange ? String(s.cleaningRange) : undefined,
+      cleaning_selected_range: typeof s.cleaningRange === 'number' ? cleaningBand(s.cleaningRange)?.range : s.cleaningRange === 'quote' ? 'Over 7,000 sq ft' : undefined,
+      cleaning_bathrooms: s.baths ? Number(s.baths) : undefined,
+      cleaning_walkthrough_slot_id: cleanSize === 'quote' ? s.walkthroughSlot || undefined : undefined,
       scope_acceptance_ref: acc.ref, spigot_at_parking: s.services.includes("detailing") ? spigot ?? undefined : undefined,
     };
     const { data, error } = await supabase.functions.invoke("reservation-submit", { body });
@@ -242,7 +251,7 @@ export default function Founding() {
   const addServiceAtPrice = (service: Svc) => {
     if (s.services.includes(service)) return;
     const additions: Partial<State> = { services: [...s.services, service] };
-    if (service === "cleaning") { additions.beds = s.beds || "2"; additions.baths = s.baths || "1"; }
+    if (service === "cleaning") { additions.cleaningRange = s.cleaningRange || 1; additions.baths = s.baths || "1"; }
     if (service === "lawn") additions.lawn = s.lawn ?? 1;
     if (service === "detailing") additions.car = s.car ?? 1;
     // Starting size is preselected so the "from" price stays truthful; the visitor confirms it on the sizes step.
@@ -368,14 +377,12 @@ export default function Founding() {
               <div className="space-y-5">
                 {s.services.includes("cleaning") && (
                   <fieldset>
-                    <legend className="text-sm font-bold">{t("House Cleaning")} — {t("bedrooms")}</legend>
-                    <div className="mt-2 grid grid-cols-4 gap-2">
-                      {[["2", "Up to 2"], ["3", "3"], ["4", "4"], ["5", "5+"]].map(([v, l]) => <button key={v} type="button" aria-pressed={s.beds === v} className={`${chip} ${s.beds === v ? on : off}`} onClick={() => set({ beds: v })}>{t(l)}</button>)}
-                    </div>
+                    <CleaningSizePicker value={s.cleaningRange ?? null} onChange={cleaningRange => set({ cleaningRange })} />
                     <p className="mt-3 text-xs font-semibold">{t("Bathrooms")}</p>
-                    <div className="mt-1 grid grid-cols-5 gap-2">
-                      {["1", "2", "2.5", "3", "4"].map((v) => <button key={v} type="button" aria-pressed={s.baths === v} className={`${chip} ${s.baths === v ? on : off}`} onClick={() => set({ baths: v })}>{v === "4" ? "4+" : v}</button>)}
+                    <div className="mt-1 grid grid-cols-4 gap-2 sm:grid-cols-6">
+                      {["1", "2", "2.5", "3", "3.5", "4", "5", "5.5", "6", "6.5", "7"].map((v) => <Button key={v} variant="outline" type="button" aria-pressed={s.baths === v} className={`${chip} ${s.baths === v ? on : off}`} onClick={() => set({ baths: v })}>{v === '7' ? '7+' : v}</Button>)}
                     </div>
+                    <p className="mt-2 text-xs text-muted-foreground">{language === 'es' ? 'Más baños de los permitidos suben tu casa un tamaño.' : 'More bathrooms than your size allows moves your home up one size.'}</p>
                     <Cadence value={s.cadence.cleaning} onChange={(c) => set({ cadence: { ...s.cadence, cleaning: c } })} t={t} chip={chip} on={on} off={off} />
                   </fieldset>
                 )}
@@ -414,22 +421,29 @@ export default function Founding() {
               <div>
                 {priced.length > 0 && (
                   <div className="founding-price-stats text-center">
-                    <Stat label={t("Monthly total")} value={`${money(total)}${per}`} big className="founding-price-total" />
+                    <Stat label={s.yearly && priced.length === 1 && priced[0]?.service === 'cleaning' ? (language === 'es' ? 'Pago anual' : 'Yearly payment') : t("Monthly total")} value={s.yearly && priced.length === 1 && priced[0]?.service === 'cleaning' ? `$${(cleaningAnnualCents(priced[0].size as CleaningSize,priced[0].cadence)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}` : `${money(total)}${per}`} big className="founding-price-total" />
                     <Stat label={t("Visits a month")} value={String(visits)} />
                     <Stat label={t("Per visit")} value={visits ? money(total / visits) : "—"} />
                   </div>
                 )}
                 <p className="founding-launch-note">{startsLine(launchCfg, lang, s.services)}.</p>
+                {priced.some(l => l.service === 'cleaning') && <div className="mt-3 space-y-2">
+                  <div className="flex gap-2" role="group" aria-label={language === 'es' ? 'Periodo de pago' : 'Payment period'}>
+                    {[false, true].map(yearly => <Button key={String(yearly)} variant={!!s.yearly === yearly ? 'default' : 'outline'} aria-pressed={!!s.yearly === yearly} onClick={() => set({ yearly })}>{yearly ? (language === 'es' ? 'Anual · ahorra 10%' : 'Yearly · save 10%') : t('Monthly')}</Button>)}
+                  </div>
+                  {s.yearly && priced.filter(l => l.service === 'cleaning').map(l => <p key={l.service} className="font-bold text-foreground">{language === 'es' ? 'Limpieza · pago anual' : 'Cleaning · yearly payment'}: ${(cleaningAnnualCents(l.size as CleaningSize, l.cadence) / 100).toLocaleString(language === 'es' ? 'es-US' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>)}
+                </div>}
                 <p className="mt-2 text-center text-sm font-semibold text-primary">{t("Not right? We come back within 48 hours, free.")}</p>
                 <ul className="mt-3 divide-y divide-border text-sm">
                   {lines.map((l) => l && (
                     <li key={l.service} className="flex justify-between py-2">
-                      <span>{t(SVC_LABEL[l.service])}{l.service !== "detailing" ? ` · ${t(CAD_LABEL[l.cadence])}` : ` · ${t("3 washes a month")}`}</span>
+                      <span>{t(SVC_LABEL[l.service])}{l.service === 'cleaning' && typeof l.size === 'number' ? ` · ${language === 'es' ? cleaningBand(l.size)?.name.replace('Size','Tamaño').replace('Estate Plus','Residencia Plus').replace('Estate','Residencia') : cleaningBand(l.size)?.name}` : ''}{l.service !== "detailing" ? ` · ${t(CAD_LABEL[l.cadence])}` : ` · ${t("3 washes a month")}`}</span>
                       <b>{l.quote ? t("Custom quote") : `${money(l.monthly)}${per}`}</b>
                     </li>
                   ))}
                 </ul>
-                {anyQuote && <p className="mt-2 rounded-lg bg-accent p-2 text-xs">{t("5+ bedrooms gets a custom quote. Reserve now and we'll send your price before anything is set.")}</p>}
+                {anyQuote && <p className="mt-2 rounded-lg bg-accent p-2 text-xs">{language === 'es' ? 'Tu hogar necesita una cotización personalizada. No se cobra nada hoy.' : 'Your home needs a custom quote. Nothing is charged today.'}</p>}
+                {cleanSize === 'quote' && <CleaningWalkthroughSlots value={s.walkthroughSlot ?? ''} onChange={walkthroughSlot => set({ walkthroughSlot })} />}
 
                 {SVCS.filter((service) => !s.services.includes(service)).map((service) => (
                   <button key={service} type="button" className="founding-bundle-offer" onClick={() => addServiceAtPrice(service)}>

@@ -15,6 +15,8 @@ import {
   LAWN_QUOTE_ABOVE_SQFT,
   VEHICLE_CLASS_SIZE,
   sizeFromBedrooms,
+  sizeFromHomeSqFt,
+  cleaningSizeFromRange,
   sizeFromTurfSqFt,
   type CanonService,
   type SizeSelection,
@@ -25,6 +27,8 @@ export type LawnChoice = "small" | "standard" | "large" | "over";
 
 export interface SizeInputs {
   bedrooms?: number | null;
+  cleaning_range?: SizeSelection | null;
+  home_sq_ft?: number | null;
   bathrooms?: number | null;
   lawn_choice?: LawnChoice | null;
   turf_sq_ft?: number | null;
@@ -45,6 +49,9 @@ export function sizeFromLawnChoice(choice: LawnChoice): SizeSelection {
  */
 export function recomputeSize(service: CanonService, inputs: SizeInputs): SizeSelection | null {
   if (service === "cleaning") {
+    if (inputs.bathrooms == null) return null;
+    if (inputs.cleaning_range) return cleaningSizeFromRange(inputs.cleaning_range, inputs.bathrooms);
+    if (inputs.home_sq_ft) return sizeFromHomeSqFt(inputs.home_sq_ft, inputs.bathrooms);
     const beds = inputs.bedrooms ?? 0;
     const baths = inputs.bathrooms ?? 0;
     if (!beds || !baths) return null;
@@ -91,10 +98,10 @@ export function checkServiceLine(args: {
   // surcharge and the pro's share. Lawn is NEVER measured by the customer —
   // the size is their best guess, verified by Tidy from aerial imagery before
   // conversion (reservations.lawn_verified_at; see lawn-verification).
-  if (service === "cleaning" && !sqFt) {
+  if (service === "cleaning" && !sqFt && !inputs.cleaning_range) {
     return { ok: false, error: "sq_ft_required", detail: service };
   }
-  const recomputed = recomputeSize(service, inputs);
+  const recomputed = recomputeSize(service, { ...inputs, home_sq_ft: service === 'cleaning' ? sqFt : inputs.home_sq_ft });
   if (recomputed === null) {
     return { ok: false, error: "size_inputs_missing", detail: service };
   }
@@ -110,7 +117,7 @@ export function checkServiceLine(args: {
     };
   }
   // Above the surcharge band nothing is purchasable — it is quoted by hand.
-  if (service === "cleaning" && sqFt && sqFt > CLEANING_SURCHARGE.maxSqFt) {
+  if (service === "cleaning" && sqFt && sqFt > 7000) {
     return { ok: false, error: "property_requires_quote", detail: "cleaning_sq_ft" };
   }
   if (service === "lawn" && sqFt && sqFt > LAWN_QUOTE_ABOVE_SQFT) {
@@ -123,9 +130,7 @@ export function checkServiceLine(args: {
 export function surchargePerVisitFor(service: CanonService, sqFt?: number | null): number {
   if (!sqFt) return 0;
   if (service === "cleaning") {
-    return sqFt >= CLEANING_SURCHARGE.minSqFt && sqFt <= CLEANING_SURCHARGE.maxSqFt
-      ? CLEANING_SURCHARGE.perVisitDollars
-      : 0;
+    return 0;
   }
   // Lawn: the old extra-large surcharge is retired — the size bands replace it.
   return 0;

@@ -23,6 +23,8 @@ import { LAWN_GUESS_NOTE, LAWN_OVER_OPTION, QUOTE_COPY, QUOTE_PHONE, type Vehicl
 import { carVariantAvailable, carWashEligible, setCarVariant } from '@/lib/dashboard-pricing';
 import { trackCarVariantSelect } from '@/lib/tracking';
 import { useLanguage } from '@/contexts/LanguageContext';
+import CleaningSizePicker from '@/components/CleaningSizePicker';
+import { CLEANING_BANDS } from '@/lib/pricing-canon';
 
 interface Props {
   state: ConfigState;
@@ -35,11 +37,12 @@ function SizeReadout({
   size,
   state,
 }: { service: ServiceType; size: SizeSelection | null; state: ConfigState }) {
+  const { language } = useLanguage();
   if (!size) return null;
   if (size === 'quote') {
     return (
       <p className="text-[11px] text-ink-soft">
-        {QUOTE_COPY.toLowerCase()} give us a ring on {QUOTE_PHONE} — no payment today.
+        {service === 'cleaning' ? (language === 'es' ? 'Programemos una visita breve. No se cobra nada hoy.' : "Let's schedule a quick walkthrough. Nothing is charged today.") : `${QUOTE_COPY.toLowerCase()} give us a ring on ${QUOTE_PHONE} — no payment today.`}
       </p>
     );
   }
@@ -179,37 +182,18 @@ export default function StepProperty({ state, onChange }: Props) {
     <div className="space-y-10">
       {hasCleaning && (
         <div className="space-y-4 animate-calm-in">
-          <h3 className="text-sm font-semibold text-ink-soft lowercase">{t('how many bedrooms and bathrooms?')}</h3>
+          <CleaningSizePicker value={state.cleaningRange ?? null} onChange={cleaningRange => onChange({ ...state, cleaningRange, homeSqFt: cleaningRange === 'quote' ? 7001 : CLEANING_BANDS.find(b => b.size === cleaningRange)?.maxSqFt ?? null })} />
           <div className="grid gap-3 md:grid-cols-2">
             <SelectField
-              label="bedrooms"
-              value={state.bedrooms}
-              options={['1','2','3','4','5+'].map(v => ({ value: v, label: v }))}
-              onSelect={v => onChange({ ...state, bedrooms: v })}
-            />
-            <SelectField
-              label="bathrooms"
+              label={t('Bathrooms')}
               value={state.bathrooms}
-              options={['1','1.5','2','2.5','3','3.5','4+'].map(v => ({ value: v, label: v }))}
+              options={['1','1.5','2','2.5','3','3.5','4','4.5','5','5.5','6','6.5','7'].map(v => ({ value: v, label: v }))}
               onSelect={v => onChange({ ...state, bathrooms: v })}
             />
           </div>
           <p className="text-[11px] text-ink-faint">
             {t('more bathrooms than your size allows moves the home up one size — bathrooms drive the length of a visit more than anything else.')}
           </p>
-          <SqFtField
-            required
-            label={t('home square footage')}
-            placeholder="e.g. 1800"
-            value={state.homeSqFt}
-            onChange={v => onChange({ ...state, homeSqFt: v })}
-            helper={t('interior living space. 2,501–4,000 sq ft adds $60 a visit. above 4,000 we quote by hand.')}
-            missingNote={t('we need this to price your visit correctly.')}
-          />
-
-          {(state.homeSqFt ?? 0) > 4000 && (
-            <QuoteNotice>{t('a home over 4,000 sq ft is quoted by hand')}</QuoteNotice>
-          )}
           <SizeReadout service="cleaning" size={sizeFor(state, 'cleaning')} state={state} />
         </div>
       )}

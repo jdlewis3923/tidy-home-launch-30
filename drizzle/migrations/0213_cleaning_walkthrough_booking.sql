@@ -1,0 +1,13 @@
+CREATE TABLE public.cleaning_walkthrough_slots (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), starts_at timestamptz NOT NULL, ends_at timestamptz NOT NULL, status text NOT NULL DEFAULT 'open', reservation_id uuid REFERENCES public.reservations(id), created_at timestamptz NOT NULL DEFAULT now(), CONSTRAINT cleaning_walkthrough_status CHECK (status IN ('open','booked','canceled')), CONSTRAINT cleaning_walkthrough_duration CHECK (ends_at > starts_at));
+GRANT SELECT ON public.cleaning_walkthrough_slots TO anon;
+GRANT SELECT,INSERT,UPDATE,DELETE ON public.cleaning_walkthrough_slots TO authenticated;
+GRANT ALL ON public.cleaning_walkthrough_slots TO service_role;
+ALTER TABLE public.cleaning_walkthrough_slots ENABLE ROW LEVEL SECURITY;
+CREATE POLICY cleaning_walkthrough_public_open ON public.cleaning_walkthrough_slots FOR SELECT TO anon,authenticated USING (status='open' AND starts_at>now());
+CREATE POLICY cleaning_walkthrough_admin ON public.cleaning_walkthrough_slots FOR ALL TO authenticated USING (public.current_user_admin()) WITH CHECK (public.current_user_admin());
+REVOKE SELECT ON public.cleaning_walkthrough_slots FROM anon;
+GRANT SELECT(id,starts_at,ends_at,status) ON public.cleaning_walkthrough_slots TO anon;
+ALTER TABLE public.reservations ADD COLUMN IF NOT EXISTS cleaning_walkthrough_slot_id uuid REFERENCES public.cleaning_walkthrough_slots(id);
+CREATE OR REPLACE FUNCTION public.reserve_cleaning_walkthrough(_slot uuid,_reservation uuid) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN IF current_user <> 'service_role' AND auth.role() <> 'service_role' AND NOT public.current_user_admin() THEN RAISE EXCEPTION 'forbidden'; END IF; IF NOT EXISTS(SELECT 1 FROM public.reservations WHERE id=_reservation AND cleaning_selected_size='custom' AND status<>'canceled') THEN RETURN false; END IF; UPDATE public.cleaning_walkthrough_slots SET status='booked',reservation_id=_reservation WHERE id=_slot AND status='open' AND starts_at>now(); IF NOT FOUND THEN RETURN false; END IF; UPDATE public.reservations SET cleaning_walkthrough_slot_id=_slot WHERE id=_reservation; RETURN true; END $$;
+REVOKE ALL ON FUNCTION public.reserve_cleaning_walkthrough(uuid,uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.reserve_cleaning_walkthrough(uuid,uuid) TO service_role;

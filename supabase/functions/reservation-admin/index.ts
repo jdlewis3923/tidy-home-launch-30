@@ -30,6 +30,10 @@ Deno.serve(async (req) => {
   const { data: r } = await admin.from('reservations').select('*').eq('id', b.id).maybeSingle();
   if (!r) return jsonResponse({ ok: false, error: 'not_found' }, 404);
   if (r.status === 'converted' || r.status === 'canceled') return jsonResponse({ ok: false, error: `already_${r.status}` }, 409);
+  if (b.action === 'convert' && (r.services ?? []).includes('cleaning')) {
+    const { data: block, error } = await admin.rpc('cleaning_conversion_block', { r });
+    if (error || block) return jsonResponse({ ok: false, error: block ?? 'cleaning_verification_check_failed' }, 409);
+  }
 
   // Conversion dates live in launch_config. A service with no date (car care) is never open.
   // Cleaning/lawn convert on their date; a car part waits for the car date (the database enforces the same).

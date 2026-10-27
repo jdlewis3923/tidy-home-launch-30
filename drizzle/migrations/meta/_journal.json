@@ -1485,6 +1485,27 @@
       "when": 1793052504637,
       "tag": "0211_new_invites_use_short_application",
       "breakpoints": true
+    },
+    {
+      "idx": 212,
+      "version": "7",
+      "when": 1793134182383,
+      "tag": "0212_cleaning_expansion_reservation_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 213,
+      "version": "7",
+      "when": 1793134592997,
+      "tag": "0213_cleaning_walkthrough_booking",
+      "breakpoints": true
+    },
+    {
+      "idx": 214,
+      "version": "7",
+      "when": 1793134688159,
+      "tag": "0214_cleaning_verification_gate",
+      "breakpoints": true
     }
   ]
 }

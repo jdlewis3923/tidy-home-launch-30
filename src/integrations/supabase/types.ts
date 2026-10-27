@@ -1691,6 +1691,41 @@ export type Database = {
         }
         Relationships: []
       }
+      cleaning_walkthrough_slots: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          reservation_id: string | null
+          starts_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          reservation_id?: string | null
+          starts_at: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          reservation_id?: string | null
+          starts_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_walkthrough_slots_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_documents: {
         Row: {
           admin_only: boolean
@@ -6866,6 +6901,21 @@ export type Database = {
           assigned_window: string | null
           car_waiting: boolean
           city: string
+          cleaning_bathrooms: number | null
+          cleaning_confirm_token: string | null
+          cleaning_confirmed_at: string | null
+          cleaning_measured_sqft: number | null
+          cleaning_new_monthly_cents: number | null
+          cleaning_old_monthly_cents: number | null
+          cleaning_selected_range: string | null
+          cleaning_selected_size: string | null
+          cleaning_size_confirmation: string | null
+          cleaning_team_ready: boolean
+          cleaning_verified_at: string | null
+          cleaning_verified_bathrooms: number | null
+          cleaning_verified_by: string | null
+          cleaning_verified_size: string | null
+          cleaning_walkthrough_slot_id: string | null
           converted_at: string | null
           created_at: string
           custom_quote: boolean
@@ -6923,6 +6973,21 @@ export type Database = {
           assigned_window?: string | null
           car_waiting?: boolean
           city?: string
+          cleaning_bathrooms?: number | null
+          cleaning_confirm_token?: string | null
+          cleaning_confirmed_at?: string | null
+          cleaning_measured_sqft?: number | null
+          cleaning_new_monthly_cents?: number | null
+          cleaning_old_monthly_cents?: number | null
+          cleaning_selected_range?: string | null
+          cleaning_selected_size?: string | null
+          cleaning_size_confirmation?: string | null
+          cleaning_team_ready?: boolean
+          cleaning_verified_at?: string | null
+          cleaning_verified_bathrooms?: number | null
+          cleaning_verified_by?: string | null
+          cleaning_verified_size?: string | null
+          cleaning_walkthrough_slot_id?: string | null
           converted_at?: string | null
           created_at?: string
           custom_quote?: boolean
@@ -6980,6 +7045,21 @@ export type Database = {
           assigned_window?: string | null
           car_waiting?: boolean
           city?: string
+          cleaning_bathrooms?: number | null
+          cleaning_confirm_token?: string | null
+          cleaning_confirmed_at?: string | null
+          cleaning_measured_sqft?: number | null
+          cleaning_new_monthly_cents?: number | null
+          cleaning_old_monthly_cents?: number | null
+          cleaning_selected_range?: string | null
+          cleaning_selected_size?: string | null
+          cleaning_size_confirmation?: string | null
+          cleaning_team_ready?: boolean
+          cleaning_verified_at?: string | null
+          cleaning_verified_bathrooms?: number | null
+          cleaning_verified_by?: string | null
+          cleaning_verified_size?: string | null
+          cleaning_walkthrough_slot_id?: string | null
           converted_at?: string | null
           created_at?: string
           custom_quote?: boolean
@@ -7031,7 +7111,15 @@ export type Database = {
           waitlist_services?: string[]
           zip?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reservations_cleaning_walkthrough_slot_id_fkey"
+            columns: ["cleaning_walkthrough_slot_id"]
+            isOneToOne: false
+            referencedRelation: "cleaning_walkthrough_slots"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_bonus_audit: {
         Row: {
@@ -8336,8 +8424,10 @@ export type Database = {
           active: boolean
           addon_name: string | null
           band: string | null
+          billing_period: string
           bundle_discount_pct: number
           canon_key: string | null
+          cleaning_size: number | null
           created_at: string
           description: string | null
           frequency:
@@ -8362,8 +8452,10 @@ export type Database = {
           active?: boolean
           addon_name?: string | null
           band?: string | null
+          billing_period?: string
           bundle_discount_pct?: number
           canon_key?: string | null
+          cleaning_size?: number | null
           created_at?: string
           description?: string | null
           frequency?:
@@ -8388,8 +8480,10 @@ export type Database = {
           active?: boolean
           addon_name?: string | null
           band?: string | null
+          billing_period?: string
           bundle_discount_pct?: number
           canon_key?: string | null
+          cleaning_size?: number | null
           created_at?: string
           description?: string | null
           frequency?:
@@ -9600,6 +9694,10 @@ export type Database = {
           skipped_founding: number
         }[]
       }
+      admin_cleaning_verify: {
+        Args: { _baths: number; _reservation: string; _sqft: number }
+        Returns: Json
+      }
       admin_cron_health: {
         Args: never
         Returns: {
@@ -9864,6 +9962,14 @@ export type Database = {
       claim_pro_notification: {
         Args: { _contractor_id: string; _kind: string; _scope: string }
         Returns: boolean
+      }
+      cleaning_conversion_block: {
+        Args: { r: Database["public"]["Tables"]["reservations"]["Row"] }
+        Returns: string
+      }
+      cleaning_size_from_sqft: {
+        Args: { _baths: number; _sqft: number }
+        Returns: string
       }
       coi_token_load: { Args: { _token: string }; Returns: Json }
       contract_load: { Args: { _token: string }; Returns: Json }
@@ -10686,6 +10792,10 @@ export type Database = {
         Returns: Json
       }
       repoint_cron_to_helper: { Args: { _job_name: string }; Returns: string }
+      reserve_cleaning_walkthrough: {
+        Args: { _reservation: string; _slot: string }
+        Returns: boolean
+      }
       review_bonus_next_friday: { Args: never; Returns: string }
       review_bonus_precheck: {
         Args: { _member: string; _pro: string; _stars: number }

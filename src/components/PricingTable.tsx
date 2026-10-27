@@ -3,7 +3,7 @@ import { HelpCircle } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
-import { BILLED_MONTHLY, SIZE_HELPERS, SIZE_LABELS, SIZES, SIZING_FAQ, VISITS_PER_MONTH, type CanonCadence } from "@/lib/pricing-canon";
+import { BILLED_MONTHLY, SIZE_HELPERS, SIZE_LABELS, SIZES, SIZING_FAQ, VISITS_PER_MONTH, CLEANING_BANDS, CLEANING_MONTHLY, CLEANING_PER_VISIT, cleaningAnnualCents, type CanonCadence } from "@/lib/pricing-canon";
 import { FREQUENCY_FAQ } from "@/lib/frequency-faq";
 import AnimatedNumber from "@/components/motion/AnimatedNumber";
 import { Button } from "@/components/ui/button";
@@ -31,8 +31,9 @@ const rows = SIZES.map((size) => ({
 }));
 
 const PricingTable = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [cadence, setCadence] = useState<CanonCadence>("biweekly");
+  const [yearly, setYearly] = useState(false);
   const visitCount = VISITS_PER_MONTH[cadence];
   const visitLabel = t(visitCount === 1 ? "1 visit a month" : `${visitCount} visits a month`);
   return (
@@ -41,11 +42,11 @@ const PricingTable = () => {
         <FadeIn>
           <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Pricing")}</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
-            {t("three sizes, one price each")}
+            {language === 'es' ? 'Un precio según el tamaño' : 'A price for your home size'}
           </h2>
           <p className="text-text-mid mt-4 max-w-xl mx-auto">
             {t(
-              "Size sets the price per visit for cleaning and lawn care. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Car Care is one flat monthly price.",
+              "Size sets the price per visit. Every 2 weeks saves 8% per visit; weekly saves 18%. Cleaning starts at $139 a month. Prepay a year and save 10%.",
             )}
           </p>
 
@@ -68,6 +69,18 @@ const PricingTable = () => {
             ))}
           </div>
           <p className="mt-3 text-sm font-medium text-foreground">{t("How often should we come?")}</p>
+          <div className="mt-4 flex justify-center gap-2" role="group" aria-label={language === 'es' ? 'Pago de limpieza' : 'Cleaning payment period'}>
+            {[false, true].map(value => <Button key={String(value)} variant={yearly === value ? 'default' : 'outline'} aria-pressed={yearly === value} onClick={() => setYearly(value)}>{value ? (language === 'es' ? 'Anual · ahorra 10%' : 'Yearly · save 10%') : t('Monthly')}</Button>)}
+          </div>
+          <div className="mt-4 grid gap-3 text-left sm:grid-cols-2 lg:grid-cols-3">
+            {CLEANING_BANDS.map(band => <div key={band.size} className="rounded-lg border bg-card p-4">
+              <h3 className="font-bold text-foreground">{language === 'es' ? band.name.replace('Size', 'Tamaño').replace('Estate Plus', 'Residencia Plus').replace('Estate', 'Residencia') : band.name}</h3>
+              <p className="text-xs text-muted-foreground">{language === 'es' ? band.range.replace('Up to', 'Hasta').replace('sq ft', 'pies²') : band.range}</p>
+              <p className="mt-3 text-xl font-bold text-foreground">${(yearly ? cleaningAnnualCents(band.size, cadence) / 100 : CLEANING_MONTHLY[band.size][cadence]).toLocaleString(language === 'es' ? 'es-US' : 'en-US', { minimumFractionDigits: yearly ? 2 : 0, maximumFractionDigits: yearly ? 2 : 0 })}<span className="text-sm font-normal">{yearly ? (language === 'es' ? '/año' : '/year') : t('/mo')}</span></p>
+              <p className="mt-1 text-xs text-muted-foreground">${CLEANING_PER_VISIT[band.size][cadence]} {language === 'es' ? 'por visita' : 'per visit'} · {visitLabel}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{language === 'es' ? `Hasta ${band.baths} baños` : `Up to ${band.baths} baths`}</p>
+            </div>)}
+          </div>
           <div className="mt-6 overflow-x-auto rounded-xl border">
             <table className="w-full text-sm">
               <thead>
@@ -111,7 +124,7 @@ const PricingTable = () => {
 
           <p className="mt-6 text-xs text-text-light">
             {t(
-              "5+ bedroom homes and lawns over 12,000 sq ft of grass are quoted by hand. Cancel anytime.",
+              "Homes over 7,000 sq ft need a walkthrough quote. Lawns over 12,000 sq ft need a custom quote.",
             )}
           </p>
           <p className="mt-2 text-xs text-text-light/80">
