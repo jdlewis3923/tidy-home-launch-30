@@ -55,6 +55,7 @@ function daysUntil(iso: string): number {
 
 export default function AddToNextVisitPanel({ userId, services, nextVisit, nextNextVisit }: Props) {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [attaches, setAttaches] = useState<AttachRow[]>([]);
   const [catalog, setCatalog] = useState<CatalogRow[]>([]);
   const [loading, setLoading] = useState(true);

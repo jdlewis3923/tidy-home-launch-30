@@ -306,8 +306,8 @@ export default function DashboardServices() {
     toast({
       title: free ? t('Free add-on redeemed') : t('Added'),
       description: free
-        ? `${addon.display_name} — ${t('on us this month.')}`
-        : `${addon.display_name} — ${t('on your next invoice.')}`,
+        ? `${t(addon.display_name)} — ${t('on us this month.')}`
+        : `${t(addon.display_name)} — ${t('on your next invoice.')}`,
     });
   };
 
@@ -516,7 +516,7 @@ export default function DashboardServices() {
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 text-[hsl(var(--primary))]">
                               <IconFor name={addon.lucide_icon} />
-                              <span className="text-sm font-semibold text-ink">{addon.display_name}</span>
+                              <span className="text-sm font-semibold text-ink">{t(addon.display_name)}</span>
                             </div>
                             <div className="mt-1 text-sm text-ink-soft">
                               ${(addon.price_cents / 100).toFixed(0)}
