@@ -1667,6 +1667,13 @@
       "when": 1793141316802,
       "tag": "0237_seal_audit_column_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 238,
+      "version": "7",
+      "when": 1793141351611,
+      "tag": "0238_home_note_fallback",
+      "breakpoints": true
     }
   ]
 }
