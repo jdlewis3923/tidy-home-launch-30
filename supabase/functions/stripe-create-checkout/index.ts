@@ -288,9 +288,12 @@ Deno.serve(async (req) => {
 
         // ---------- Resolve recurring prices by lookup key ----------
         // The cadence is part of the key; every price is monthly, quantity 1.
-        const serviceKeys = input.services.map((s) =>
-          lookupKeyFor(s.service, s.size as CanonSize, s.frequency as CanonCadence),
-        );
+        const yearly = input.billing_period === 'yearly';
+        const keyFor = (s: { service: string; size: number; frequency: string }) =>
+          yearly
+            ? cleaningLookupKey(s.size as CanonSize, s.frequency as CanonCadence, true)
+            : lookupKeyFor(s.service as never, s.size as CanonSize, s.frequency as CanonCadence);
+        const serviceKeys = input.services.map((s) => keyFor(s));
         const carWashKey = input.car_wash
           ? CAR_WASH_LOOKUP_KEYS[input.car_wash.size as CanonSize][input.car_wash.washes as WashCount]
           : null;
@@ -336,7 +339,7 @@ Deno.serve(async (req) => {
         for (const s of input.services) {
           const cadence = s.frequency as CanonCadence;
           const size = s.size as CanonSize;
-          const key = lookupKeyFor(s.service, size, cadence);
+          const key = keyFor(s);
           const row = priceRows?.find((r) => r.lookup_key === key);
           if (!row) throw new Error(`no active catalog price for lookup_key ${key}`);
 
@@ -534,6 +537,7 @@ Deno.serve(async (req) => {
           ),
           sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
           plan_lines_id: planLinesId,
+          billing_period: input.billing_period,
           size_tier: String(primary?.size_tier ?? ""),
           cadence: String(primary?.cadence ?? ""),
           surcharge_applied: planLines.some((l) => l.surcharge_applied) ? "yes" : "no",
