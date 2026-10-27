@@ -40,10 +40,30 @@
 - Photo reports: members opt in on the Account page; after each completed visit they get a notice that before/after photos are ready, and photos still auto-delete after 30 days.
 - Founding seal delivery is tracked per home (pending → shipped → delivered) on the founding registry, with each change logged.
 
+## Team add-ons, redos, reviews, routes (Oct 27, final pass continued)
+- Pros mark each visit add-on done from the job screen: "I did this" pays that Pro, "We did it together" splits the pay on paired Estate Plus visits; anything still open at visit close is credited to the Lead automatically, so no add-on is ever unpaid. The job-screen pay estimate matches the payout exactly.
+- Fixed a real pay bug found in the process: visit-close pay only counted add-ons already marked completed, and nothing ever marked them — add-ons would have paid $0. Auto-completion at close fixes every existing and future visit.
+- Redos: the owner picks whose zone was missed on team visits; the free return visit is assigned to that Pro (50% pay), and the responsible Pro is stored on the redo record.
+- Reviews: one rating per visit stays, but the team partner (or backup) is named on the rating row, and averages, tier promotion and readiness checks now count team-visit ratings for both Pros.
+- Route households: a new owner-only report counts distinct homes and visits per Pro per day, including team partners and backups.
+- Backup Pros now see the covered visit in their own job list.
+
+## Prepaid Year lifecycle (Oct 27, final pass continued)
+- Yearly checkout is unblocked for cleaning-only carts (a Stripe subscription cannot mix monthly and annual prices, so lawn, car care and add-ons stay monthly; adding to an existing plan stays monthly). Both the hosted and embedded payment paths resolve the annual lookup keys and record the billing period.
+- The webhook stores the billing period and period dates, and keeps the stored monthly total at the monthly equivalent so per-visit prices, credits and displays never see the lump sum.
+- Canceling a prepaid year refunds immediately: started months are charged at the member's monthly rate, the rest comes back, and a ledger row makes a repeat cancel refund nothing twice. The member gets a cancellation notice with the exact refund amount.
+- 45 days before renewal the daily member job sends a bilingual notice with the renewal date and amount and a link to switch to monthly or cancel — once per renewal.
+- Test-mode proof against the real catalog annual price (clean_2_biweekly_annual): $3,758.40 charged (exactly 12 × $348 × 0.90), interval confirmed yearly, cancel after one started month charged $348.00 and refunded $3,410.40, subscription canceled, throwaway customer deleted. No live charges.
+- Limitation: the member-facing cancel button path is deployed but has not been clicked end-to-end with a real signed-in member on an annual plan (none exist yet).
+
+## Routes and bilingual add-ons (Oct 27, wrap-up)
+- Homes-per-route report is live on the Capacity page: distinct homes and visits per Pro per day for the next two weeks, team partners and backups included.
+- All 21 add-on names now have Spanish translations in the language dictionary, and every member-facing picker (dashboard services, next-visit panel, free-gift picker) renders the translated name. A regression test fails if any add-on name ever ships without a Spanish entry.
+
 ## Not complete
-- Annual subscription lifecycle, refund ledger and 45-day renewal notices. Annual collection remains blocked.
-- Per-add-on assigned/together completion, responsible-zone redos, named review split/rating propagation, route household counts and full payout journey evidence.
-- Full hiring/onboarding/agreement/document copy inventory and remaining bilingual cross-surface checks (add-on names currently display in English only, same as the existing add-ons).
+- Full payout journey evidence still needs real active Pros (no eligible cleaning Pros exist yet).
+- The member-facing annual cancel button is deployed and its math/Stripe mechanics are test-proven, but it has not been clicked end-to-end with a real signed-in member on an annual plan (none exist yet).
+- Pre-existing launch-parity test failure (date literals in lifecycle simulator/tick and the exact Member Guide text) remains tracked in the roadmap — outside this work.
 
 ## Verification limitation
 No active eligible cleaning Pros exist to run a real Estate team appointment through completion. Rule tests and owner eligibility checks are not a substitute for that operational journey.

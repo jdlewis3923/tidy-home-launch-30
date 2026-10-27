@@ -23,7 +23,7 @@
 import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { resolveStripeSubscriptionId } from '../_shared/resolve-stripe-subscription-id.ts';
-import { resolveStripeCurrentPeriodEnd } from '../_shared/resolve-stripe-current-period-end.ts';
+import { resolveStripeCurrentPeriodEnd, resolveStripeCurrentPeriodStart } from '../_shared/resolve-stripe-current-period-end.ts';
 import { loadPlanLines } from '../_shared/plan-lines.ts';
 import { stripeSecretKey } from '../_shared/stripe-mode.ts';
 import { vendorFetch } from '../_shared/http.ts';
@@ -1013,10 +1013,17 @@ async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, event: S
     ? JSON.parse(sub.metadata.services_json) as Array<{ service: string; size?: number; frequency?: string }>
     : [];
   const planLines = await loadPlanLines(supabase, sub.metadata as Record<string, string>);
-  const monthlyTotalCents = sub.items.data.reduce(
-    (sum, item) => sum + (item.price.unit_amount ?? 0) * (item.quantity ?? 1),
-    0,
-  );
+  const isYearly = sub.items.data.some((item) => item.price.recurring?.interval === 'year');
+  // Annual plans charge 12 × monthly × 0.90 up front; the stored monthly
+  // total stays the plan-line monthly equivalent so per-visit math, credits
+  // and displays never see the lump sum.
+  const monthlyTotalCents = isYearly && planLines.length > 0
+    ? planLines.reduce((sum, line) => sum + Number(line.monthly_cents ?? 0), 0)
+    : sub.items.data.reduce(
+        (sum, item) => sum + (item.price.unit_amount ?? 0) * (item.quantity ?? 1),
+        0,
+      );
+  const currentPeriodStart = resolveStripeCurrentPeriodStart(sub);
 
   await supabase
     .from('subscriptions')
@@ -1024,6 +1031,9 @@ async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, event: S
       status,
       stripe_status: sub.status,
       next_billing_date: next,
+      billing_period: isYearly ? 'yearly' : 'monthly',
+      current_period_start: currentPeriodStart ? new Date(currentPeriodStart * 1000).toISOString() : null,
+      current_period_end: currentPeriodEnd ? new Date(currentPeriodEnd * 1000).toISOString() : null,
       pause_collection: sub.pause_collection?.behavior ?? null,
       cancel_at_period_end: sub.cancel_at_period_end ?? false,
       canceled_at: sub.canceled_at ? new Date(sub.canceled_at * 1000).toISOString() : null,

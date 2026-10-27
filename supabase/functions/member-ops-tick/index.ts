@@ -12,6 +12,7 @@ import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
 import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { applyMemberCredit } from '../_shared/member-credits.ts';
+import { RENEWAL_NOTICE_DAYS, yearlyPriceCents } from '../_shared/prepaid-year.ts';
 import { stripeSecretKey } from '../_shared/stripe-mode.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
@@ -37,6 +38,37 @@ Deno.serve(async (req) => {
       const { data: pt, error: ptErr } = await admin.rpc('payment_pause_tick');
       if (ptErr) throw new Error(`payment_pause_tick: ${ptErr.message}`);
       paymentTick = pt;
+
+      // Prepaid Year: 45 days before renewal, tell the member the date and
+      // amount with links to switch to monthly or cancel. One notice per
+      // renewal, tracked on the subscription row.
+      const noticeBefore = new Date(Date.now() + RENEWAL_NOTICE_DAYS * 86_400_000).toISOString();
+      const { data: renewing } = await admin.from('subscriptions')
+        .select('id, user_id, current_period_end, monthly_total_cents, annual_notice_sent_for')
+        .eq('billing_period', 'yearly')
+        .eq('status', 'active')
+        .not('current_period_end', 'is', null)
+        .lte('current_period_end', noticeBefore)
+        .gt('current_period_end', new Date().toISOString());
+      for (const s of renewing ?? []) {
+        const renewDate = String(s.current_period_end).slice(0, 10);
+        if (s.annual_notice_sent_for === renewDate) continue; // one notice per renewal
+        const amount = yearlyPriceCents(s.monthly_total_cents ?? 0);
+        const { data: prof } = await admin.from('profiles').select('language').eq('user_id', s.user_id).maybeSingle();
+        const es = String(prof?.language ?? 'en').trim() === 'es';
+        const pretty = new Date(s.current_period_end).toLocaleDateString(es ? 'es-US' : 'en-US', { timeZone: 'America/New_York', month: 'long', day: 'numeric', year: 'numeric' });
+        const { error: insErr } = await admin.from('member_notifications').insert({
+          user_id: s.user_id,
+          kind: 'annual_renewal_notice',
+          title: es ? 'Tu año prepagado se renueva pronto' : 'Your prepaid year renews soon',
+          body: es
+            ? `Tu plan anual se renueva el ${pretty} por $${(amount / 100).toFixed(2)}. ¿Quieres cambiar a mensual o cancelar? Abre tu cuenta antes de esa fecha: jointidy.co/account`
+            : `Your annual plan renews on ${pretty} for $${(amount / 100).toFixed(2)}. Want to switch to monthly or cancel instead? Open your account before that date: jointidy.co/account`,
+        });
+        if (!insErr) {
+          await admin.from('subscriptions').update({ annual_notice_sent_for: renewDate }).eq('id', s.id);
+        }
+      }
     }
 
     // Retry pending member credits (e.g. Stripe was unreachable at skip time).

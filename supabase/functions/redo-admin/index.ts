@@ -8,7 +8,7 @@ import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 
 const Body = z.discriminatedUnion('action', [
-  z.object({ action: z.literal('schedule'), redo_id: z.string().uuid(), scheduled_start: z.string().datetime({ offset: true }), duration_minutes: z.number().int().min(30).max(480).optional() }),
+  z.object({ action: z.literal('schedule'), redo_id: z.string().uuid(), scheduled_start: z.string().datetime({ offset: true }), duration_minutes: z.number().int().min(30).max(480).optional(), responsible_pro_id: z.string().uuid().optional() }),
   z.object({ action: z.literal('cancel'), redo_id: z.string().uuid(), reason: z.string().trim().max(300).optional() }),
 ]);
 
@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
   const { data: nv, error } = await admin.from('visits').insert({
     user_id: orig.user_id, subscription_id: orig.subscription_id, service: orig.service, service_type: orig.service_type,
     visit_date: visitDate, scheduled_start: start.toISOString(), scheduled_end: end.toISOString(),
-    assigned_pro_id: orig.assigned_pro_id, street: orig.street, zip: orig.zip, customer_first_name: orig.customer_first_name,
+    assigned_pro_id: b.responsible_pro_id ?? orig.assigned_pro_id, street: orig.street, zip: orig.zip, customer_first_name: orig.customer_first_name,
     access_notes_enc: orig.access_notes_enc, gate_code_enc: orig.gate_code_enc, pet_notes: orig.pet_notes, parking_notes: orig.parking_notes,
     size_tier: orig.size_tier, cadence: orig.cadence, visit_kind: orig.visit_kind, contractor_pay_cents: halfBase,
     notes: `48-hour guarantee return visit.${redo.note ? ` Member said: ${redo.note}` : ''}`,
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
   if (error) return jsonResponse({ ok: false, error: 'visit_insert_failed', details: error.message }, 500);
 
   const now = new Date().toISOString();
-  await admin.from('redo_requests').update({ status: 'scheduled', redo_visit_id: nv.id, scheduled_for: start.toISOString(), scheduled_at: now }).eq('id', redo.id);
+  await admin.from('redo_requests').update({ status: 'scheduled', redo_visit_id: nv.id, scheduled_for: start.toISOString(), scheduled_at: now, responsible_pro_id: b.responsible_pro_id ?? redo.responsible_pro_id ?? null }).eq('id', redo.id);
   const onTime = Date.parse(now) <= Date.parse(redo.due_at);
   await admin.from('admin_workday_events').insert({
     event_type: 'redo_scheduled', applicant_id: redo.applicant_id, actor_type: 'admin', actor_user_id: auth.userId,

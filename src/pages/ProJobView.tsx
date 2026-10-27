@@ -25,6 +25,7 @@ type Visit = {
 };
 
 type CatalogAddon = { id: string; addon_key: string; display_name: string; services: string[] | null };
+type AttachedAddon = { id: string; addon_name: string; status: string; split_pay: boolean; completed_by: string | null; can_split: boolean };
 
 type RequestRow = {
   id: string;
@@ -42,6 +43,8 @@ export default function ProJobView() {
   const [addons, setAddons] = useState<CatalogAddon[]>([]);
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [homeNote, setHomeNote] = useState<string | null>(null);
+  const [attached, setAttached] = useState<AttachedAddon[]>([]);
+  const [completing, setCompleting] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [uploading, setUploading] = useState(false);
@@ -97,8 +100,26 @@ export default function ProJobView() {
     // Persistent home notes from the member (server checks this Pro is assigned).
     const { data: hn } = await supabase.rpc("pro_home_note", { _visit: jobId });
     setHomeNote(typeof hn === "string" && hn.trim() ? hn : null);
+    // Add-ons attached to this visit (server checks this Pro is on the job).
+    const { data: att } = await supabase.rpc("pro_visit_addons", { _visit: jobId });
+    setAttached((att as AttachedAddon[]) ?? []);
     setLoading(false);
   }, [jobId]);
+
+  const completeAddon = async (attachId: string, mode: "self" | "together") => {
+    setCompleting(attachId);
+    const { error } = await supabase.rpc("pro_complete_addon", { _attach: attachId, _mode: mode });
+    if (!error) {
+      setAttached((rows) =>
+        rows.map((r) =>
+          r.id === attachId
+            ? { ...r, status: "completed", split_pay: mode === "together", completed_by: userId }
+            : r,
+        ),
+      );
+    }
+    setCompleting(null);
+  };
 
   useEffect(() => {
     document.title = "Job | Tidy Pro";
@@ -234,6 +255,48 @@ export default function ProJobView() {
           <section className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5">
             <h2 className="text-base font-semibold text-foreground">Notes from the customer</h2>
             <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">{homeNote}</p>
+          </section>
+        )}
+
+        {attached.length > 0 && (
+          <section className="mt-6 rounded-2xl border border-border bg-card p-5">
+            <h2 className="text-base font-semibold text-foreground">Add-ons on this visit</h2>
+            <ul className="mt-3 space-y-3">
+              {attached.map((a) => (
+                <li key={a.id} className="rounded-xl border border-border p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-foreground">{a.addon_name}</span>
+                    {a.status === "completed" && (
+                      <span className="text-xs font-medium text-primary">
+                        Done{a.split_pay ? " · together" : ""}
+                      </span>
+                    )}
+                  </div>
+                  {a.status !== "completed" && visit.status !== "complete" && (
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        type="button"
+                        disabled={completing === a.id}
+                        onClick={() => completeAddon(a.id, "self")}
+                        className="flex-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+                      >
+                        I did this
+                      </button>
+                      {a.can_split && (
+                        <button
+                          type="button"
+                          disabled={completing === a.id}
+                          onClick={() => completeAddon(a.id, "together")}
+                          className="flex-1 rounded-lg border border-primary px-3 py-2 text-sm font-semibold text-primary disabled:opacity-60"
+                        >
+                          We did it together
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 

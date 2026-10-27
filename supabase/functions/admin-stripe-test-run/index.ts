@@ -13,6 +13,8 @@ import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { cancelRefundCents, monthsUsed } from '../_shared/prepaid-year.ts';
+import { resolveStripeCurrentPeriodStart } from '../_shared/resolve-stripe-current-period-end.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -132,6 +134,34 @@ Deno.serve(async (req) => {
       credit_ok: (customerAfter as any).balance === -100,
     };
 
+    // 3c. Annual plans: prove the prepaid-year cancel refund — started months
+    // at the monthly rate, the rest refunded — against the real annual price.
+    if (lookupKey.includes('annual')) {
+      const m = lookupKey.match(/^(clean_(?:\d|estate|estateplus))_annual_(monthly|biweekly|weekly)$/) ?? lookupKey.match(/^(.+?)_annual$/);
+      const monthlyKey = m ? (m.length === 3 ? `${m[1]}_${m[2]}` : m[1]) : null;
+      const { data: monthlyRow } = monthlyKey
+        ? await supabase.from('stripe_catalog').select('price_cents').eq('canon_key', monthlyKey).eq('active', true).maybeSingle()
+        : { data: null };
+      const interval = subAfter.items?.data?.[0]?.price?.recurring?.interval ?? null;
+      const periodStart = resolveStripeCurrentPeriodStart(subAfter);
+      if (!monthlyRow || !periodStart || !chargeId || typeof chargeId !== 'string') {
+        steps.annual_refund = { refund_ok: false, reason: 'missing_monthly_twin_or_period' };
+      } else {
+        const used = monthsUsed(new Date(periodStart * 1000).toISOString(), new Date().toISOString());
+        const { refund: refundCents, charged } = cancelRefundCents(monthlyRow.price_cents, paidCents ?? 0, used);
+        const refund = await stripe.refunds.create({ charge: chargeId, amount: refundCents });
+        steps.annual_refund = {
+          interval,
+          monthly_twin: monthlyKey,
+          months_used: used,
+          charged_cents: charged,
+          refund_cents: refundCents,
+          refund_status: refund.status,
+          refund_ok: interval === 'year' && refund.status === 'succeeded' && refund.amount === refundCents && used === 1,
+        };
+      }
+    }
+
     // 4. Cancel immediately, then delete the customer.
     await stripe.subscriptions.cancel(subscription.id);
     steps.cancel = { canceled: true };
@@ -142,7 +172,8 @@ Deno.serve(async (req) => {
 
     const ok = (steps.charge as { charge_succeeded?: boolean }).charge_succeeded === true &&
       (steps.refund as { refund_ok?: boolean }).refund_ok === true &&
-      (steps.balance_credit as { credit_ok?: boolean }).credit_ok === true;
+      (steps.balance_credit as { credit_ok?: boolean }).credit_ok === true &&
+      (!steps.annual_refund || (steps.annual_refund as { refund_ok?: boolean }).refund_ok === true);
     return jsonResponse({ ok, mode: 'test', steps }, ok ? 200 : 502);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error';

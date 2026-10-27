@@ -1681,6 +1681,41 @@
       "when": 1793141426964,
       "tag": "0239_founding_registry_seal_status",
       "breakpoints": true
+    },
+    {
+      "idx": 240,
+      "version": "7",
+      "when": 1793141964038,
+      "tag": "0240_team_addon_redo_review_route",
+      "breakpoints": true
+    },
+    {
+      "idx": 241,
+      "version": "7",
+      "when": 1793141996148,
+      "tag": "0241_pro_visit_addons_reader",
+      "breakpoints": true
+    },
+    {
+      "idx": 242,
+      "version": "7",
+      "when": 1793142245988,
+      "tag": "0242_annual_billing_lifecycle",
+      "breakpoints": true
+    },
+    {
+      "idx": 243,
+      "version": "7",
+      "when": 1793142778901,
+      "tag": "0243_walkthrough_reserve_guard_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 244,
+      "version": "7",
+      "when": 1793142810814,
+      "tag": "0244_walkthrough_reserve_guard_comment_fix",
+      "breakpoints": true
     }
   ]
 }

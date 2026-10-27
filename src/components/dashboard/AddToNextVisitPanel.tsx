@@ -11,6 +11,7 @@ import { Plus, Check, X, Loader2, Sparkles } from 'lucide-react';
 import { addonIcon } from '@/lib/addonIcons';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { AddonService } from '@/lib/addon-catalog';
 import { SERVICE_LABELS } from '@/lib/addon-catalog';
 import { formatLongDate } from '@/lib/dashboard-data';
@@ -54,6 +55,7 @@ function daysUntil(iso: string): number {
 
 export default function AddToNextVisitPanel({ userId, services, nextVisit, nextNextVisit }: Props) {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [attaches, setAttaches] = useState<AttachRow[]>([]);
   const [catalog, setCatalog] = useState<CatalogRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,9 +137,9 @@ export default function AddToNextVisitPanel({ userId, services, nextVisit, nextN
       });
       return;
     }
-    toast({ title: 'Added ✓', description: `${pendingAddon.display_name} on your next invoice.` });
+    toast({ title: 'Added ✓', description: `${t(pendingAddon.display_name)} on your next invoice.` });
     setAttaches(prev => [...prev, { id: data.attach_id, addon_key: pendingAddon.addon_key, status: 'pending_visit', attached_at: new Date().toISOString() }]);
-    setCelebration({ show: true, label: pendingAddon.display_name });
+    setCelebration({ show: true, label: t(pendingAddon.display_name) });
   };
 
   const remove = async (addon: CatalogRow) => {
@@ -213,7 +215,7 @@ export default function AddToNextVisitPanel({ userId, services, nextVisit, nextN
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 text-[hsl(var(--primary))]">
                             <IconFor name={addon.lucide_icon} />
-                            <span className="text-sm font-semibold text-ink">{addon.display_name}</span>
+                            <span className="text-sm font-semibold text-ink">{t(addon.display_name)}</span>
                           </div>
                           <div className="mt-1 text-sm text-ink-soft">${(addon.price_cents / 100).toFixed(0)}</div>
                         </div>
@@ -260,7 +262,7 @@ export default function AddToNextVisitPanel({ userId, services, nextVisit, nextN
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/50 p-4">
           <div className="max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <h3 className="text-base font-bold text-ink">
-              Add {pendingAddon.display_name} to your {formatLongDate(targetVisit.visit_date)} visit?
+              Add {t(pendingAddon.display_name)} to your {formatLongDate(targetVisit.visit_date)} visit?
             </h3>
             <p className="mt-2 text-sm text-ink-soft">
               ${(pendingAddon.price_cents / 100).toFixed(0)} will be added to your next invoice. You can remove it any time before the visit.

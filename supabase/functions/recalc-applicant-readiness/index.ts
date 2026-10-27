@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
 
   const [{ data: visits }, { data: ratings0 }, { data: reviews }, { count: complaints }, { count: escalations }] = await Promise.all([
     admin.from('visits').select('id, status, completed_at').eq('assigned_pro_id', cid),
-    admin.from('visit_ratings').select('rating, stars, excluded_from_average').eq('contractor_id', cid),
+    admin.from('visit_ratings').select('rating, stars, excluded_from_average').or(`contractor_id.eq.${cid},team_partner_contractor_id.eq.${cid}`),
     admin.from('google_reviews').select('rating, posted_at').eq('contractor_id', cid).eq('is_seed', false),
     admin.from('complaints').select('id', { count: 'exact', head: true }).eq('contractor_id', cid).is('closed_at', null),
     admin.from('escalations').select('id', { count: 'exact', head: true }).eq('contractor_id', cid).is('resolved_at', null),

@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
       admin.from('visits').select('id', { count: 'exact', head: true })
         .eq('assigned_pro_id', a.contractor_id).eq('status', 'complete'),
       admin.from('visit_ratings').select('rating, stars, excluded_from_average')
-        .eq('contractor_id', a.contractor_id),
+        .or(`contractor_id.eq.${a.contractor_id},team_partner_contractor_id.eq.${a.contractor_id}`),
     ]);
     completedVisits = liveVisits ?? 0;
     const nums = (liveRatings ?? [])

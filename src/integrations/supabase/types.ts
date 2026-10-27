@@ -48,6 +48,7 @@ export type Database = {
           addon_price_cents: number
           attached_at: string
           completed_at: string | null
+          completed_by: string | null
           contractor_pay_cents: number | null
           entitlement_id: string | null
           free_period: string | null
@@ -58,6 +59,7 @@ export type Database = {
           jobber_visit_id: string | null
           removed_at: string | null
           service_type: string | null
+          split_pay: boolean
           status: string
           stripe_addon_price_id: string
           stripe_invoice_item_id: string | null
@@ -70,6 +72,7 @@ export type Database = {
           addon_price_cents: number
           attached_at?: string
           completed_at?: string | null
+          completed_by?: string | null
           contractor_pay_cents?: number | null
           entitlement_id?: string | null
           free_period?: string | null
@@ -80,6 +83,7 @@ export type Database = {
           jobber_visit_id?: string | null
           removed_at?: string | null
           service_type?: string | null
+          split_pay?: boolean
           status?: string
           stripe_addon_price_id: string
           stripe_invoice_item_id?: string | null
@@ -92,6 +96,7 @@ export type Database = {
           addon_price_cents?: number
           attached_at?: string
           completed_at?: string | null
+          completed_by?: string | null
           contractor_pay_cents?: number | null
           entitlement_id?: string | null
           free_period?: string | null
@@ -102,6 +107,7 @@ export type Database = {
           jobber_visit_id?: string | null
           removed_at?: string | null
           service_type?: string | null
+          split_pay?: boolean
           status?: string
           stripe_addon_price_id?: string
           stripe_invoice_item_id?: string | null
@@ -681,6 +687,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      annual_refunds: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          current_period_start: string | null
+          id: string
+          months_used: number
+          paid_cents: number
+          reason: string | null
+          status: string
+          stripe_refund_id: string | null
+          subscription_id: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          current_period_start?: string | null
+          id?: string
+          months_used: number
+          paid_cents: number
+          reason?: string | null
+          status?: string
+          stripe_refund_id?: string | null
+          subscription_id: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          current_period_start?: string | null
+          id?: string
+          months_used?: number
+          paid_cents?: number
+          reason?: string | null
+          status?: string
+          stripe_refund_id?: string | null
+          subscription_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "annual_refunds_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       app_crypto_keys: {
         Row: {
@@ -7002,6 +7058,7 @@ export type Database = {
           redo_visit_id: string | null
           requested_at: string
           resolved_at: string | null
+          responsible_pro_id: string | null
           scheduled_at: string | null
           scheduled_for: string | null
           source: string
@@ -7024,6 +7081,7 @@ export type Database = {
           redo_visit_id?: string | null
           requested_at?: string
           resolved_at?: string | null
+          responsible_pro_id?: string | null
           scheduled_at?: string | null
           scheduled_for?: string | null
           source?: string
@@ -7046,6 +7104,7 @@ export type Database = {
           redo_visit_id?: string | null
           requested_at?: string
           resolved_at?: string | null
+          responsible_pro_id?: string | null
           scheduled_at?: string | null
           scheduled_for?: string | null
           source?: string
@@ -8925,10 +8984,12 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          annual_notice_sent_for: string | null
           assigned_pro_id: string | null
           band: string | null
           band_source: string | null
           band_verified_at: string | null
+          billing_period: string
           bundle_discount_pct: number
           cadence: string | null
           cancel_at_period_end: boolean
@@ -8941,6 +9002,8 @@ export type Database = {
           card_last4: string | null
           cleaning_team_id: string | null
           created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
           founding_free_addon_first_visit: boolean
           founding_free_addon_fulfilled_at: string | null
           founding_grant_id: string | null
@@ -8979,10 +9042,12 @@ export type Database = {
           washing_allowed: boolean | null
         }
         Insert: {
+          annual_notice_sent_for?: string | null
           assigned_pro_id?: string | null
           band?: string | null
           band_source?: string | null
           band_verified_at?: string | null
+          billing_period?: string
           bundle_discount_pct?: number
           cadence?: string | null
           cancel_at_period_end?: boolean
@@ -8995,6 +9060,8 @@ export type Database = {
           card_last4?: string | null
           cleaning_team_id?: string | null
           created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
           founding_free_addon_first_visit?: boolean
           founding_free_addon_fulfilled_at?: string | null
           founding_grant_id?: string | null
@@ -9033,10 +9100,12 @@ export type Database = {
           washing_allowed?: boolean | null
         }
         Update: {
+          annual_notice_sent_for?: string | null
           assigned_pro_id?: string | null
           band?: string | null
           band_source?: string | null
           band_verified_at?: string | null
+          billing_period?: string
           bundle_discount_pct?: number
           cadence?: string | null
           cancel_at_period_end?: boolean
@@ -9049,6 +9118,8 @@ export type Database = {
           card_last4?: string | null
           cleaning_team_id?: string | null
           created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
           founding_free_addon_first_visit?: boolean
           founding_free_addon_fulfilled_at?: string | null
           founding_grant_id?: string | null
@@ -9570,6 +9641,7 @@ export type Database = {
           resolved_at: string | null
           source: string
           stars: number | null
+          team_partner_contractor_id: string | null
           user_agent: string | null
           user_id: string | null
           verified: boolean
@@ -9597,6 +9669,7 @@ export type Database = {
           resolved_at?: string | null
           source?: string
           stars?: number | null
+          team_partner_contractor_id?: string | null
           user_agent?: string | null
           user_id?: string | null
           verified?: boolean
@@ -9624,6 +9697,7 @@ export type Database = {
           resolved_at?: string | null
           source?: string
           stars?: number | null
+          team_partner_contractor_id?: string | null
           user_agent?: string | null
           user_id?: string | null
           verified?: boolean
@@ -10180,6 +10254,16 @@ export type Database = {
           _visit: string
         }
         Returns: Json
+      }
+      admin_route_households: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          homes: number
+          pro_id: string
+          pro_name: string
+          visit_date: string
+          visits: number
+        }[]
       }
       admin_sched_state: { Args: never; Returns: Json }
       admin_set_alert_tier: {
@@ -11121,6 +11205,10 @@ export type Database = {
           status: string
         }[]
       }
+      pro_complete_addon: {
+        Args: { _attach: string; _mode: string }
+        Returns: Json
+      }
       pro_custom_hours_state: { Args: never; Returns: Json }
       pro_dates: { Args: { _weeks?: number }; Returns: Json }
       pro_decline_first_right: { Args: { _id: string }; Returns: Json }
@@ -11208,6 +11296,17 @@ export type Database = {
       pro_update_claim_hours: {
         Args: { _claim: string; _end: string; _start: string }
         Returns: Json
+      }
+      pro_visit_addons: {
+        Args: { _visit: string }
+        Returns: {
+          addon_name: string
+          can_split: boolean
+          completed_by: string
+          id: string
+          split_pay: boolean
+          status: string
+        }[]
       }
       pro_visit_extras: { Args: { _visit: string }; Returns: Json }
       public_five_star_proof: { Args: never; Returns: Json }
