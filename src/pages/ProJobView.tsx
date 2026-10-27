@@ -42,6 +42,8 @@ export default function ProJobView() {
   const [addons, setAddons] = useState<CatalogAddon[]>([]);
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [homeNote, setHomeNote] = useState<string | null>(null);
+  const [attached, setAttached] = useState<AttachedAddon[]>([]);
+  const [completing, setCompleting] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [uploading, setUploading] = useState(false);
