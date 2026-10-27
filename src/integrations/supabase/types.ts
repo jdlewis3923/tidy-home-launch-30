@@ -3164,6 +3164,8 @@ export type Database = {
           id: string
           rate_card_version: number
           reservation_id: string | null
+          seal_status: string
+          seal_updated_at: string | null
           status: string
           user_id: string | null
         }
@@ -3178,6 +3180,8 @@ export type Database = {
           id?: string
           rate_card_version: number
           reservation_id?: string | null
+          seal_status?: string
+          seal_updated_at?: string | null
           status?: string
           user_id?: string | null
         }
@@ -3192,6 +3196,8 @@ export type Database = {
           id?: string
           rate_card_version?: number
           reservation_id?: string | null
+          seal_status?: string
+          seal_updated_at?: string | null
           status?: string
           user_id?: string | null
         }
@@ -3635,6 +3641,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      home_notes: {
+        Row: {
+          body: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       insurance_audit_log: {
         Row: {
@@ -6656,6 +6680,7 @@ export type Database = {
           parking_notes: string | null
           pets: string | null
           phone: string | null
+          photo_reports_opt_in: boolean
           preferred_day: string | null
           preferred_time: string | null
           referral_code: string | null
@@ -6686,6 +6711,7 @@ export type Database = {
           parking_notes?: string | null
           pets?: string | null
           phone?: string | null
+          photo_reports_opt_in?: boolean
           preferred_day?: string | null
           preferred_time?: string | null
           referral_code?: string | null
@@ -6716,6 +6742,7 @@ export type Database = {
           parking_notes?: string | null
           pets?: string | null
           phone?: string | null
+          photo_reports_opt_in?: boolean
           preferred_day?: string | null
           preferred_time?: string | null
           referral_code?: string | null
@@ -9964,6 +9991,8 @@ export type Database = {
           id: string
           rate_card_version: number
           reservation_id: string | null
+          seal_status: string
+          seal_updated_at: string | null
           status: string
           user_id: string | null
         }
@@ -10095,6 +10124,10 @@ export type Database = {
       admin_mark_candidate_texts_read: {
         Args: { _id: string; _through: string }
         Returns: number
+      }
+      admin_mark_seal: {
+        Args: { _grant: string; _status: string }
+        Returns: undefined
       }
       admin_mark_social_posted: {
         Args: { _external?: string; _id: string }
@@ -11132,6 +11165,7 @@ export type Database = {
           zip: string
         }[]
       }
+      pro_home_note: { Args: { _visit: string }; Returns: string }
       pro_job_card: { Args: { _visit: string }; Returns: Json }
       pro_lawn_job_info: {
         Args: { _visit: string }
