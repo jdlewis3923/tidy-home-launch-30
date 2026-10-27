@@ -46,6 +46,7 @@ const Body = z.object({
   cleaning_selected_size: z.enum(['1','2','3','4','5','custom']).optional(),
   cleaning_selected_range: z.string().max(60).optional(),
   cleaning_bathrooms: z.number().min(0).max(30).optional(),
+  cleaning_walkthrough_slot_id: z.string().uuid().optional(),
 });
 
 async function serviceCount(svc: string) {
@@ -178,6 +179,10 @@ Deno.serve(async (req) => {
     : admin.from('reservations').insert(record);
   const { data: row, error } = await q.select('*').single();
   if (error || !row) { console.error('[reservation-submit] write', error?.message); return jsonResponse({ ok: false, error: 'insert_failed' }, 500); }
+  if (b.cleaning_walkthrough_slot_id && b.cleaning_selected_size === 'custom') {
+    const { data: booked, error: bookingError } = await admin.rpc('reserve_cleaning_walkthrough', { _slot: b.cleaning_walkthrough_slot_id, _reservation: row.id });
+    if (bookingError || !booked) return jsonResponse({ ok: false, error: 'walkthrough_time_unavailable', reservation_saved: true, id: row.id }, 409);
+  }
 
   if (b.session_id && !b.is_test) {
     await admin.from('founding_events').insert({ session_id: b.session_id, event: 'reserved', src: b.src ?? null, zip: b.zip, lang: b.lang, reservation_id: row.id }).then(() => {}, () => {});

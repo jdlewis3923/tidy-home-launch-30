@@ -14,6 +14,7 @@ import { FOUNDING_ZIPS, FOUNDING_CAP, FOUNDING_BENEFITS, startsLine } from "@/li
 import { useLaunchConfig } from "@/hooks/useLaunchConfig";
 import { LAWN_GRASS_ONLY_NOTE, LAWN_OVER_OPTION, lookupKeyFor, cleaningSizeFromRange, cleaningAnnualCents, CLEANING_MONTHLY, cleaningBand, VISITS_PER_MONTH, BILLED_MONTHLY, SIZE_PRICES, type CleaningSize, type CanonCadence, type CanonSize, type SizeSelection } from "@/lib/pricing-canon";
 import CleaningSizePicker from '@/components/CleaningSizePicker';
+import CleaningWalkthroughSlots from '@/components/CleaningWalkthroughSlots';
 import { Button } from '@/components/ui/button';
 import { GIFT_ELIGIBLE_ADDONS } from "@/lib/addon-catalog";
 import { PHONE_DISPLAY, PHONE_TEL } from "@/lib/landing";
@@ -41,6 +42,7 @@ type State = {
   zip: string; src: string; step: Step; services: Svc[];
   beds: string; baths: string; lawn: Lawn | null; car: CanonSize | null;
   cleaningRange?: SizeSelection | null; yearly?: boolean;
+  walkthroughSlot?: string;
   cadence: Record<"cleaning" | "lawn", CanonCadence>; gifts: string[];
   first: string; last: string; email: string; phone: string; street: string; sms: boolean;
   day: string; time: "morning" | "afternoon";
@@ -208,6 +210,7 @@ export default function Founding() {
       cleaning_selected_size: s.cleaningRange === 'quote' ? 'custom' : s.cleaningRange ? String(s.cleaningRange) : undefined,
       cleaning_selected_range: typeof s.cleaningRange === 'number' ? cleaningBand(s.cleaningRange)?.range : s.cleaningRange === 'quote' ? 'Over 7,000 sq ft' : undefined,
       cleaning_bathrooms: s.baths ? Number(s.baths) : undefined,
+      cleaning_walkthrough_slot_id: cleanSize === 'quote' ? s.walkthroughSlot || undefined : undefined,
       scope_acceptance_ref: acc.ref, spigot_at_parking: s.services.includes("detailing") ? spigot ?? undefined : undefined,
     };
     const { data, error } = await supabase.functions.invoke("reservation-submit", { body });
@@ -440,6 +443,7 @@ export default function Founding() {
                   ))}
                 </ul>
                 {anyQuote && <p className="mt-2 rounded-lg bg-accent p-2 text-xs">{language === 'es' ? 'Tu hogar necesita una cotización personalizada. No se cobra nada hoy.' : 'Your home needs a custom quote. Nothing is charged today.'}</p>}
+                {cleanSize === 'quote' && <CleaningWalkthroughSlots value={s.walkthroughSlot ?? ''} onChange={walkthroughSlot => set({ walkthroughSlot })} />}
 
                 {SVCS.filter((service) => !s.services.includes(service)).map((service) => (
                   <button key={service} type="button" className="founding-bundle-offer" onClick={() => addServiceAtPrice(service)}>
