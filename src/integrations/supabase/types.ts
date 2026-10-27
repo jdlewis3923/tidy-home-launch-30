@@ -8021,6 +8021,7 @@ export type Database = {
           observed_bedrooms: number | null
           observed_plate: string | null
           observed_size: number | null
+          observed_sq_ft: number | null
           observed_vehicle_class: string | null
           old_monthly_cents: number | null
           rate_card_version: number | null
@@ -8044,6 +8045,7 @@ export type Database = {
           observed_bedrooms?: number | null
           observed_plate?: string | null
           observed_size?: number | null
+          observed_sq_ft?: number | null
           observed_vehicle_class?: string | null
           old_monthly_cents?: number | null
           rate_card_version?: number | null
@@ -8067,6 +8069,7 @@ export type Database = {
           observed_bedrooms?: number | null
           observed_plate?: string | null
           observed_size?: number | null
+          observed_sq_ft?: number | null
           observed_vehicle_class?: string | null
           old_monthly_cents?: number | null
           rate_card_version?: number | null
@@ -9523,6 +9526,7 @@ export type Database = {
           check_out_lat: number | null
           check_out_lng: number | null
           claim_id: string | null
+          cleaning_base_pay_cents: number | null
           cleaning_final_inspection_at: string | null
           cleaning_first_visit: boolean
           cleaning_team_id: string | null
@@ -9586,6 +9590,7 @@ export type Database = {
           check_out_lat?: number | null
           check_out_lng?: number | null
           claim_id?: string | null
+          cleaning_base_pay_cents?: number | null
           cleaning_final_inspection_at?: string | null
           cleaning_first_visit?: boolean
           cleaning_team_id?: string | null
@@ -9649,6 +9654,7 @@ export type Database = {
           check_out_lat?: number | null
           check_out_lng?: number | null
           claim_id?: string | null
+          cleaning_base_pay_cents?: number | null
           cleaning_final_inspection_at?: string | null
           cleaning_first_visit?: boolean
           cleaning_team_id?: string | null

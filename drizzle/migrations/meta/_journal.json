@@ -1548,6 +1548,13 @@
       "when": 1793136917145,
       "tag": "0220_pro_team_visit_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 221,
+      "version": "7",
+      "when": 1793137120172,
+      "tag": "0221_cleaning_pay_snapshot_preserves_gifts",
+      "breakpoints": true
     }
   ]
 }
