@@ -56,9 +56,14 @@
 - Test-mode proof against the real catalog annual price (clean_2_biweekly_annual): $3,758.40 charged (exactly 12 × $348 × 0.90), interval confirmed yearly, cancel after one started month charged $348.00 and refunded $3,410.40, subscription canceled, throwaway customer deleted. No live charges.
 - Limitation: the member-facing cancel button path is deployed but has not been clicked end-to-end with a real signed-in member on an annual plan (none exist yet).
 
+## Routes and bilingual add-ons (Oct 27, wrap-up)
+- Homes-per-route report is live on the Capacity page: distinct homes and visits per Pro per day for the next two weeks, team partners and backups included.
+- All 21 add-on names now have Spanish translations in the language dictionary, and every member-facing picker (dashboard services, next-visit panel, free-gift picker) renders the translated name. A regression test fails if any add-on name ever ships without a Spanish entry.
+
 ## Not complete
-- Route household report has no admin screen yet (data function is live); full payout journey evidence still needs real active Pros.
-- Full hiring/onboarding/agreement/document copy inventory and remaining bilingual cross-surface checks (add-on names currently display in English only, same as the existing add-ons).
+- Full payout journey evidence still needs real active Pros (no eligible cleaning Pros exist yet).
+- The member-facing annual cancel button is deployed and its math/Stripe mechanics are test-proven, but it has not been clicked end-to-end with a real signed-in member on an annual plan (none exist yet).
+- Pre-existing launch-parity test failure (date literals in lifecycle simulator/tick and the exact Member Guide text) remains tracked in the roadmap — outside this work.
 
 ## Verification limitation
 No active eligible cleaning Pros exist to run a real Estate team appointment through completion. Rule tests and owner eligibility checks are not a substitute for that operational journey.
