@@ -1625,6 +1625,13 @@
       "when": 1793140260779,
       "tag": "0231_claim_close_notice_and_photo_retention",
       "breakpoints": true
+    },
+    {
+      "idx": 232,
+      "version": "7",
+      "when": 1793140389354,
+      "tag": "0232_member_credit_ledger",
+      "breakpoints": true
     }
   ]
 }

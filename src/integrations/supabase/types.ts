@@ -5119,6 +5119,48 @@ export type Database = {
         }
         Relationships: []
       }
+      member_credits: {
+        Row: {
+          amount_cents: number
+          applied_at: string | null
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          status: string
+          stripe_balance_transaction_id: string | null
+          subscription_id: string | null
+          user_id: string
+          visit_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          status?: string
+          stripe_balance_transaction_id?: string | null
+          subscription_id?: string | null
+          user_id: string
+          visit_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          status?: string
+          stripe_balance_transaction_id?: string | null
+          subscription_id?: string | null
+          user_id?: string
+          visit_id?: string | null
+        }
+        Relationships: []
+      }
       member_guide_acceptances: {
         Row: {
           accepted_at: string
@@ -10535,6 +10577,17 @@ export type Database = {
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_service_caller: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
+      issue_member_credit: {
+        Args: {
+          _amount_cents: number
+          _kind: string
+          _note: string
+          _subscription: string
+          _user: string
+          _visit: string
+        }
+        Returns: string
+      }
       kpi_latest_snapshot_rows: {
         Args: never
         Returns: {
@@ -11475,6 +11528,7 @@ export type Database = {
           gate_code: string
         }[]
       }
+      visit_customer_price_cents: { Args: { _visit: string }; Returns: number }
     }
     Enums: {
       app_role: "customer" | "crew" | "admin" | "pro"
