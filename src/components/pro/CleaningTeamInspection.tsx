@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import { visitAction } from '@/lib/pro-portal';
 
 export default function CleaningTeamInspection({ visitId }: { visitId: string }) {
   const { language } = useLanguage();
@@ -31,6 +32,7 @@ export default function CleaningTeamInspection({ visitId }: { visitId: string })
     });
     setBusy(false); setResult(error ? (es?'No se pudo guardar la inspección.':'Could not save the inspection.') : (es?'Inspección guardada':'Inspection saved'));
   }
+  async function checkOut(){setBusy(true);const response=await visitAction(visitId,'team_check_out');setBusy(false);setResult(response.ok?(es?'Salida registrada':'Check-out recorded'):(es?'Registre su llegada y permita su ubicación antes de salir.':'Check in and allow location before checking out.'));}
   return <section className="space-y-3 border-y border-border py-4">
     <h2 className="font-semibold text-foreground">{es?'Equipo Estate Plus':'Estate Plus team'}</h2>
     {details.team&&<p className="text-sm text-muted-foreground">{details.team.lead} ({es?'Líder':'Lead'}) + {details.team.partner}</p>}
@@ -38,7 +40,7 @@ export default function CleaningTeamInspection({ visitId }: { visitId: string })
       <label className="block space-y-2 text-sm text-foreground"><span>{es?'Zonas y Pro responsable':'Room zones and responsible Pro'}</span><Textarea value={zones} onChange={e=>setZones(e.target.value)} maxLength={2000} rows={4}/></label>
       <label className="flex items-start gap-3 text-sm text-foreground"><Checkbox checked={inspected} onCheckedChange={v=>setInspected(v===true)}/><span>{es?'Inspección final realizada y reporte de fotos listo':'Final walkthrough completed and photo report ready'}</span></label>
       <Button variant="outline" disabled={busy||!zones.trim()} onClick={()=>void save()}>{es?'Guardar inspección':'Save inspection'}</Button>
-    </> : <p className="text-sm text-muted-foreground">{es?'El líder guarda las zonas y cierra la visita después de la inspección final.':'The Lead saves room zones and closes the visit after the final walkthrough.'}</p>}
+    </> : <><p className="text-sm text-muted-foreground">{es?'El líder guarda las zonas y cierra la visita después de la inspección final.':'The Lead saves room zones and closes the visit after the final walkthrough.'}</p><Button variant="outline" disabled={busy} onClick={()=>void checkOut()}>{es?'Registrar mi salida':'Record my check-out'}</Button></>}
     {result&&<p role="status" className="text-sm text-foreground">{result}</p>}
   </section>;
 }

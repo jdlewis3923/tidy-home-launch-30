@@ -34,6 +34,7 @@ const Gps = { lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(18
 const BodySchema = z.discriminatedUnion('action', [
   z.object({ visit_id: z.string().uuid(), action: z.literal('on_my_way'), eta_minutes: z.number().int().min(5).max(120).optional() }),
   z.object({ visit_id: z.string().uuid(), action: z.literal('check_in'), ...Gps }),
+  z.object({ visit_id: z.string().uuid(), action: z.literal('team_check_out'), ...Gps }),
   z.object({ visit_id: z.string().uuid(), action: z.literal('complete'), ...Gps, not_reached_note: z.string().trim().max(1000).optional() }),
   z.object({
     visit_id: z.string().uuid(),
@@ -84,9 +85,12 @@ Deno.serve(async (req) => {
       .select('id, assigned_pro_id, status, user_id, subscription_id, service_type, visit_kind, size_tier, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, check_in_at, street, customer_first_name, rate_token, is_redo, redo_request_id, cleaning_team_id')
       .eq('id', visit_id)
       .maybeSingle();
-    if (!visit || visit.assigned_pro_id !== uid) {
+    const {data:team} = visit?.cleaning_team_id ? await admin.from('cleaning_teams').select('kind,partner_pro_id,active').eq('id',visit.cleaning_team_id).maybeSingle() : {data:null};
+    const isPartner=team?.active && team.kind==='paired_pros' && team.partner_pro_id===uid;
+    if (!visit || (visit.assigned_pro_id !== uid && !isPartner)) {
       return jsonResponse({ ok: false, error: 'visit_not_assigned_to_you' });
     }
+    if(isPartner && !['check_in','team_check_out'].includes(action)) return jsonResponse({ok:false,error:'lead_action_required'});
     if (['complete', 'canceled', 'blocked', 'skipped'].includes(visit.status ?? '')) {
       return jsonResponse({ ok: false, error: 'visit_not_open', status: visit.status });
     }
@@ -152,12 +156,22 @@ Deno.serve(async (req) => {
 
     if (action === 'check_in') {
       const { lat, lng } = parsed.data;
+      if(visit.service_type==='cleaning'){
+        const {error}=await admin.rpc('cleaning_team_presence_record',{_visit:visit_id,_pro:uid,_action:'check_in',_lat:lat,_lng:lng});
+        if(error)return jsonResponse({ok:false,error:error.message});
+        if(isPartner)return jsonResponse({ok:true,action});
+      }
       const { error } = await admin.from('visits').update({
         check_in_at: visit.check_in_at ?? new Date().toISOString(), check_in_lat: lat, check_in_lng: lng,
         status: 'in_progress',
       }).eq('id', visit_id);
       if (error) return jsonResponse({ ok: false, error: error.message });
       return jsonResponse({ ok: true, action });
+    }
+    if(action==='team_check_out'){
+      const {lat,lng}=parsed.data;
+      const {error}=await admin.rpc('cleaning_team_presence_record',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng});
+      return jsonResponse(error?{ok:false,error:error.message}:{ok:true,action});
     }
 
     if (action === 'size_check') {
@@ -274,6 +288,10 @@ Deno.serve(async (req) => {
 
     const now = new Date();
     const { lat, lng, not_reached_note } = parsed.data as { lat: number; lng: number; not_reached_note?: string };
+    if(visit.service_type==='cleaning' && team?.kind==='paired_pros'){
+      const {error}=await admin.rpc('cleaning_team_presence_record',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng});
+      if(error)return jsonResponse({ok:false,error:error.message});
+    }
     const { data: closedVisit, error: closeErr } = await admin
       .from('visits')
       .update({

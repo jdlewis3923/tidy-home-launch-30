@@ -134,6 +134,9 @@ export default function ProVisit() {
     setConfirm(false);
     if (!res.ok) {
       if (res.error === "size_check_required") { setSizeOpen(true); setActionError("First visit: record the real size before you finish."); return; }
+      if (res.error === 'both_pros_check_out_required') {setActionError('Both Pros must check in and check out before the Lead completes the visit.');return;}
+      if (res.error === 'lead_inspection_and_zones_required') {setActionError('Save room zones and the final inspection before completing the visit.');return;}
+      if (res.error === 'lead_action_required') {setActionError('The Lead completes this team visit. Record your check-out below.');return;}
       setActionError(
         res.error === "gps_unavailable"
           ? GPS_MSG
