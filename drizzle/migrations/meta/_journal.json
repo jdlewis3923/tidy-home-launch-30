@@ -1702,6 +1702,13 @@
       "when": 1793142245988,
       "tag": "0242_annual_billing_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 243,
+      "version": "7",
+      "when": 1793142778901,
+      "tag": "0243_walkthrough_reserve_guard_shape",
+      "breakpoints": true
     }
   ]
 }
