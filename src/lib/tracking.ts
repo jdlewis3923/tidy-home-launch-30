@@ -23,7 +23,7 @@ export const pushEvent = (event: string, data?: Record<string, unknown>) => {
 export interface PlanEventParams {
   service: "cleaning" | "lawn" | "detailing" | "bundle";
   cadence?: string;
-  size?: 1 | 2 | 3 | "quote";
+  size?: 1 | 2 | 3 | 4 | 5 | "quote";
   price?: number;
 }
 

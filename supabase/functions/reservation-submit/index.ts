@@ -15,6 +15,7 @@ import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { groupsFor, verifyScopeAcceptance, scopeEmailHtml } from '../_shared/scope.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { esc, logEmail, reservationConfirmEmail, foundingConfirmEmail, reservationConfirmSms, svcLabel } from '../_shared/reservation-emails.ts';
+import { CLEANING_MONTHLY, cleaningSizeFromRange, cleaningBand, type CleaningSize, type CanonCadence } from '../_shared/pricing-canon.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Any day'] as const;
@@ -42,6 +43,9 @@ const Body = z.object({
   page: z.enum(['founding', 'builder']).default('builder'),
   scope_acceptance_ref: z.string().trim().max(80).optional(),
   spigot_at_parking: z.boolean().optional(),
+  cleaning_selected_size: z.enum(['1','2','3','4','5','custom']).optional(),
+  cleaning_selected_range: z.string().max(60).optional(),
+  cleaning_bathrooms: z.number().min(0).max(30).optional(),
 });
 
 async function serviceCount(svc: string) {
@@ -125,6 +129,15 @@ Deno.serve(async (req) => {
 
   const services = Array.from(new Set(b.services));
   const lines = b.lines.filter((l) => services.includes(l.service));
+  const clean = lines.find(l => l.service === 'cleaning');
+  if (clean && b.cleaning_selected_size) {
+    const selected = b.cleaning_selected_size === 'custom' ? 'quote' : Number(b.cleaning_selected_size) as CleaningSize;
+    if (selected !== 'quote' && b.cleaning_bathrooms == null) return jsonResponse({ ok: false, error: 'cleaning_bathrooms_required' }, 400);
+    const actual = cleaningSizeFromRange(selected, b.cleaning_bathrooms ?? 0);
+    if (actual !== 'quote' && !['monthly','biweekly','weekly'].includes(clean.cadence ?? '')) return jsonResponse({ ok: false, error: 'invalid_cleaning_cadence' }, 400);
+    if (clean.size !== actual || (actual !== 'quote' && clean.monthly !== CLEANING_MONTHLY[actual][clean.cadence as CanonCadence])) return jsonResponse({ ok: false, error: 'cleaning_quote_mismatch' }, 400);
+    b.cleaning_selected_range = selected === 'quote' ? 'Over 7,000 sq ft' : cleaningBand(selected)?.range;
+  }
   const customQuote = lines.some((l) => l.size === 'quote');
   const monthlyCents = Math.round(lines.filter((l) => l.size !== 'quote').reduce((n, l) => n + l.monthly, 0) * 100);
   const email = b.email.toLowerCase();
@@ -147,6 +160,7 @@ Deno.serve(async (req) => {
     lang: b.lang, is_test_row: !!b.is_test, src: b.src ?? null, session_id: b.session_id ?? null,
     gift_addons: b.gift_addons, custom_quote: customQuote,
     scope_acceptance_ref: b.scope_acceptance_ref ?? null, spigot_at_parking: services.includes('detailing') ? b.spigot_at_parking ?? null : null,
+    ...(b.cleaning_selected_size ? { cleaning_selected_size: b.cleaning_selected_size, cleaning_selected_range: b.cleaning_selected_range, cleaning_bathrooms: b.cleaning_bathrooms ?? null } : {}),
   };
   // Lawn size is the customer's best guess; Tidy verifies it from aerial imagery
   // before conversion. Larger than 12,000 sq ft arrives as size 'quote' → custom.

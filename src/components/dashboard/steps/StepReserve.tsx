@@ -10,6 +10,7 @@ import FoundingCounter from '@/components/FoundingCounter';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
 import { groupsFor, recordScopeAcceptance, type ScopeGroup } from '@/lib/serviceScope';
+import { cleaningBand } from '@/lib/pricing-canon';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Any day'];
 const HEARD = [
@@ -67,6 +68,9 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
         street: state.address.trim(), city: state.city.trim(), zip: state.zip, preferred_day: state.preferredDay,
         preferred_time: state.preferredTime, heard_from: heard, heard_other: heardOther || undefined, lang: language === 'es' ? 'es' : 'en',
         scope_acceptance_ref: acc.ref, spigot_at_parking: hasCar ? state.hasWaterSpigot : undefined,
+        cleaning_selected_size: state.cleaningRange === 'quote' ? 'custom' : state.cleaningRange ? String(state.cleaningRange) : undefined,
+        cleaning_selected_range: typeof state.cleaningRange === 'number' ? cleaningBand(state.cleaningRange)?.range : undefined,
+        cleaning_bathrooms: state.bathrooms ? Number(state.bathrooms) : undefined,
       },
     });
     setBusy(false);

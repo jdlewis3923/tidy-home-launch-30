@@ -146,7 +146,7 @@ describe('cadence is a volume curve, never a quantity', () => {
   it('surcharges scale with the cadence', () => {
     expect(CLEANING_SURCHARGE.perVisitDollars).toBe(60);
     expect(lawnSurchargePerVisit(5000)).toBe(0); // retired — bands replace it
-    expect(monthlyPrice('cleaning', 2, 'weekly', 60)).toBe(620 + 240);
+    expect(monthlyPrice('cleaning', 2, 'weekly', 60)).toBe(620); // new whole-home bands retire the cleaning surcharge
     expect(monthlyPrice('lawn', 2, 'biweekly', 30)).toBe(120 + 60);
   });
 });
@@ -224,6 +224,7 @@ describe('bundling gives one free premium add-on, never a percentage or a wash',
       services: ['cleaning', 'lawn'],
       frequencies: { cleaning: 'biweekly', lawn: 'weekly' },
       bedrooms: '3',
+      homeSqFt: 1800,
       bathrooms: '2',
       lawnChoice: 'standard',
     });
@@ -241,8 +242,8 @@ describe('bundling gives one free premium add-on, never a percentage or a wash',
 });
 
 describe('lookup keys are the only way to reach a recurring Stripe price', () => {
-  it('publishes exactly 21 cadence-specific keys', () => {
-    expect(ALL_RECURRING_LOOKUP_KEYS).toHaveLength(21);
+  it('publishes all monthly and annual cleaning keys plus unchanged lawn/car keys', () => {
+    expect(ALL_RECURRING_LOOKUP_KEYS).toHaveLength(42);
     expect(SERVICE_LOOKUP_KEYS.cleaning[2]).toEqual({
       monthly: 'clean_2_monthly',
       biweekly: 'clean_2_biweekly',
