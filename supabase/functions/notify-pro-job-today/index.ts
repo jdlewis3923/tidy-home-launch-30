@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   const { data: visits, error } = await admin
     .from('visits')
     .select(
-      'id, assigned_pro_id, scheduled_start, service_type, street, zip, access_notes, gate_code, parking_notes, pet_notes',
+      'id, assigned_pro_id, scheduled_start, service_type, street, zip, parking_notes, pet_notes',
     )
     .not('assigned_pro_id', 'is', null)
     .in('status', ['scheduled', 'on_the_way', 'in_progress'])
@@ -43,11 +43,23 @@ Deno.serve(async (req) => {
     .order('scheduled_start', { ascending: true });
   if (error) return jsonResponse({ ok: false, error: error.message }, 500);
 
+  // Entry codes live encrypted at rest; decrypt them server-side, day-of only.
+  const accessByVisit = new Map<string, { gate_code: string | null; access_notes: string | null }>();
+  for (const v of visits ?? []) {
+    const { data: access } = await admin.rpc('visit_access_details', { _visit: (v as { id: string }).id });
+    const row = Array.isArray(access) ? access[0] : access;
+    accessByVisit.set((v as { id: string }).id, {
+      gate_code: row?.gate_code ?? null,
+      access_notes: row?.access_notes ?? null,
+    });
+  }
+
   const byPro = new Map<string, DigestVisit[]>();
   for (const v of visits ?? []) {
     const pro = (v as { assigned_pro_id: string }).assigned_pro_id;
     if (!byPro.has(pro)) byPro.set(pro, []);
-    byPro.get(pro)!.push(v as unknown as DigestVisit);
+    const access = accessByVisit.get((v as { id: string }).id);
+    byPro.get(pro)!.push({ ...(v as object), ...access } as unknown as DigestVisit);
   }
 
   const results: Record<string, unknown>[] = [];
