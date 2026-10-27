@@ -82,11 +82,11 @@ Deno.serve(async (req) => {
 
     const { data: visit } = await admin
       .from('visits')
-      .select('id, assigned_pro_id, status, user_id, subscription_id, service_type, visit_kind, size_tier, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, check_in_at, street, customer_first_name, rate_token, is_redo, redo_request_id, cleaning_team_id')
+      .select('id, assigned_pro_id, status, user_id, subscription_id, service_type, visit_kind, size_tier, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, check_in_at, street, customer_first_name, rate_token, is_redo, redo_request_id, cleaning_team_id, backup_pro_id')
       .eq('id', visit_id)
       .maybeSingle();
     const {data:team} = visit?.cleaning_team_id ? await admin.from('cleaning_teams').select('kind,partner_pro_id,active').eq('id',visit.cleaning_team_id).maybeSingle() : {data:null};
-    const isPartner=team?.active && team.kind==='paired_pros' && team.partner_pro_id===uid;
+    const isPartner=visit?.backup_pro_id===uid || (team?.active && team.kind==='paired_pros' && team.partner_pro_id===uid);
     if (!visit || (visit.assigned_pro_id !== uid && !isPartner)) {
       return jsonResponse({ ok: false, error: 'visit_not_assigned_to_you' });
     }
