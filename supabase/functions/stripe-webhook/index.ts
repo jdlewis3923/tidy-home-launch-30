@@ -31,6 +31,7 @@ import { groupsFor, scopeEmailHtml } from '../_shared/scope.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
 import { writeAlert } from '../_shared/alerts.ts';
+import { MEMBER_GUIDE, MEMBER_GUIDE_INTRO } from '../_shared/member-guide.ts';
 
 const STRIPE_SECRET_KEY = stripeSecretKey();
 // Live and test endpoints have different signing secrets. Try test first, then live,
@@ -458,6 +459,12 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   }
 
   // Seed the first billing month(s) of visits per plan line. The generator is
+  const { data: memberAuth } = await supabase.auth.admin.getUserById(userId);
+  const memberEmail = memberAuth?.user?.email;
+  if (memberEmail && services.some((s: {service:string})=>s.service==='cleaning')) {
+    const {data:reservation}=await supabase.from('reservations').select('cleaning_team_id').eq('email',memberEmail.toLowerCase()).not('cleaning_team_id','is',null).order('created_at',{ascending:false}).limit(1).maybeSingle();
+    if(reservation?.cleaning_team_id) await supabase.from('subscriptions').update({cleaning_team_id:reservation.cleaning_team_id}).eq('id',subRow.id);
+  }
   // idempotent (unique on subscription + service + date) and the daily cron
   // extends the horizon from here on. Each visit snapshots size, cadence,
   // surcharge and contractor pay from plan_lines at creation.
@@ -489,7 +496,7 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
           to: { email: to, name: prof?.first_name ?? undefined }, marketing: false,
           subject: es ? 'Lo que incluye su plan Tidy' : 'What your Tidy plan includes',
           htmlContent: tidyEmailShell({ heading: es ? 'Su plan incluye' : 'Your plan includes', eyebrow: es ? 'Confirmación' : 'Confirmation',
-            bodyHtml: `<p>${es ? 'Este es exactamente lo que incluye y no incluye cada visita. También está en su cuenta.' : "Here's exactly what each visit includes and doesn't. It's on your Account page too."}</p>${scope}`,
+            bodyHtml: `<p>${es ? 'Este es exactamente lo que incluye y no incluye cada visita. También está en su cuenta.' : "Here's exactly what each visit includes and doesn't. It's on your Account page too."}</p>${scope}<h2>${es?'GUÍA PARA MIEMBROS DE TIDY':'TIDY MEMBER GUIDE'}</h2><p>${MEMBER_GUIDE_INTRO[es?'es':'en']}</p>${MEMBER_GUIDE.map(s=>`<h3>${s[es?'es':'en'].heading}</h3><ul>${s[es?'es':'en'].items.map(i=>`<li>${i}</li>`).join('')}</ul>`).join('')}`,
             ctaUrl: 'https://jointidy.co/account', ctaLabel: es ? 'Abrir mi cuenta' : 'Open my account' }),
           label: 'plan-scope-confirm', tags: ['plan-scope'],
         });

@@ -8,6 +8,7 @@ import ReservationsForecast, { useReservations, type ReservationRow } from "@/co
 import { RESERVATION_SERVICE_LABEL, type ReservableService } from "@/lib/launch";
 import CleaningWalkthroughCalendar from '@/components/admin/CleaningWalkthroughCalendar';
 import CleaningVerification from '@/components/admin/CleaningVerification';
+import CleaningTeamStaffing from '@/components/admin/CleaningTeamStaffing';
 
 const SIZE_WORD: Record<string, string> = { "1": "S1", "2": "S2", "3": "S3", "4": "Estate", "5": "Estate Plus", quote: "walkthrough" };
 const HEARD: Record<string, string> = { door_hanger: "Door hanger", nextdoor: "Nextdoor", google: "Google", referral: "Referral", other: "Other" };
@@ -76,6 +77,7 @@ function ConvertDialog({ r, onClose }: { r: ReservationRow; onClose: () => void 
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Convert {r.first_name}'s reservation</DialogTitle></DialogHeader>
         {r.services.includes('cleaning') && <CleaningVerification reservationId={r.id} onSaved={()=>{ setPreview(null); setResult('Measurement saved. Reopen this reservation to refresh its verification status.'); }} />}
+        {(r.cleaning_verified_size==='5'||r.cleaning_selected_size==='5')&&<CleaningTeamStaffing reservationId={r.id}/>} 
         <div className="grid gap-3 sm:grid-cols-3">
           <label className="text-xs">Day<input className={input} value={day} onChange={(e) => setDay(e.target.value)} placeholder="Tuesday" /></label>
           <label className="text-xs">Time window<input className={input} value={win} onChange={(e) => setWin(e.target.value)} /></label>
