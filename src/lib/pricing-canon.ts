@@ -20,13 +20,66 @@
 export type CanonService = 'cleaning' | 'lawn' | 'detailing';
 export type CanonSize = 1 | 2 | 3;
 /** `quote` is not a size — it means the property is above size 3 and must never be auto-booked. */
-export type SizeSelection = CanonSize | 'quote';
+export type CleaningSize = CanonSize | 4 | 5;
+export type SizeSelection = CleaningSize | 'quote';
 export type CanonCadence = 'monthly' | 'biweekly' | 'weekly';
 export type PriceUnit = 'per_visit' | 'per_month';
 export type QuantityRule = 'cadence' | 'always_1';
 
 export const SIZES: CanonSize[] = [1, 2, 3];
 export const CADENCES: CanonCadence[] = ['monthly', 'biweekly', 'weekly'];
+
+/** Cleaning-only expansion; lawn and vehicles retain their three existing bands. */
+export const CLEANING_SIZES: CleaningSize[] = [1, 2, 3, 4, 5];
+export const CLEANING_BANDS = [
+  { size: 1, name: 'Size 1', range: 'Up to 1,400 sq ft', maxSqFt: 1400, baths: 2, hint: 'Usually 1–2 bedrooms' },
+  { size: 2, name: 'Size 2', range: '1,400–2,200 sq ft', maxSqFt: 2200, baths: 2.5, hint: 'Usually 3 bedrooms' },
+  { size: 3, name: 'Size 3', range: '2,200–3,200 sq ft', maxSqFt: 3200, baths: 3.5, hint: 'Usually 4 bedrooms' },
+  { size: 4, name: 'Estate', range: '3,200–4,800 sq ft', maxSqFt: 4800, baths: 5, hint: '' },
+  { size: 5, name: 'Estate Plus', range: '4,800–7,000 sq ft', maxSqFt: 7000, baths: 6.5, hint: '' },
+] as const;
+export const CLEANING_WALKTHROUGH_COPY = "Let's schedule a quick walkthrough";
+export const CLEANING_MONTHLY: Record<CleaningSize, Record<CanonCadence, number>> = {
+  1: { monthly: 139, biweekly: 256, weekly: 456 },
+  2: { monthly: 189, biweekly: 348, weekly: 620 },
+  3: { monthly: 279, biweekly: 514, weekly: 916 },
+  4: { monthly: 425, biweekly: 782, weekly: 1396 },
+  5: { monthly: 595, biweekly: 1094, weekly: 1952 },
+};
+export const CLEANING_PER_VISIT: Record<CleaningSize, Record<CanonCadence, number>> = {
+  1: { monthly: 139, biweekly: 128, weekly: 114 },
+  2: { monthly: 189, biweekly: 174, weekly: 155 },
+  3: { monthly: 279, biweekly: 257, weekly: 229 },
+  4: { monthly: 425, biweekly: 391, weekly: 349 },
+  5: { monthly: 595, biweekly: 547, weekly: 488 },
+};
+export const CLEANING_BASE_PAY: Record<CleaningSize, number> = { 1: 56, 2: 76, 3: 112, 4: 170, 5: 238 };
+export const ESTATE_BUDGET_HOURS = { 4: 6.0, 5: 8.7 } as const;
+export function cleaningBand(size: CleaningSize) {
+  return CLEANING_BANDS.find((band) => band.size === size);
+}
+export function cleaningSizeFromRange(size: SizeSelection, baths: number): SizeSelection {
+  if (size === 'quote') return 'quote';
+  if (!Number.isFinite(baths) || baths < 0) throw new Error('invalid_bathrooms');
+  const band = cleaningBand(size);
+  if (!band) throw new Error('invalid_cleaning_size');
+  return baths > band.baths ? (size === 5 ? 'quote' : (size + 1) as CleaningSize) : size;
+}
+export function sizeFromHomeSqFt(sqft: number, baths: number): SizeSelection {
+  if (!Number.isFinite(sqft) || sqft <= 0) throw new Error('invalid_square_footage');
+  const band = CLEANING_BANDS.find((entry) => sqft <= entry.maxSqFt);
+  return band ? cleaningSizeFromRange(band.size, baths) : 'quote';
+}
+export function cleaningLookupKey(size: CleaningSize, cadence: CanonCadence, yearly = false): string {
+  const prefix = size === 4 ? 'clean_estate' : size === 5 ? 'clean_estateplus' : `clean_${size}`;
+  return size >= 4 && yearly ? `${prefix}_annual_${cadence}` : `${prefix}_${cadence}${yearly ? '_annual' : ''}`;
+}
+export function cleaningAnnualCents(size: CleaningSize, cadence: CanonCadence): number {
+  return Math.round(CLEANING_MONTHLY[size][cadence] * 100 * 12 * 90 / 100);
+}
+export const CLEANING_RECURRING_KEYS = CLEANING_SIZES.flatMap((size) => CADENCES.flatMap((cadence) =>
+  [cleaningLookupKey(size, cadence), cleaningLookupKey(size, cadence, true)]));
+
 
 /** Visits performed (and billed) per month at each cadence. */
 export const VISITS_PER_MONTH: Record<CanonCadence, number> = {
@@ -119,8 +172,10 @@ export const SERVICE_LOOKUP_KEYS: Record<CanonService, Record<CanonSize, Record<
   },
 };
 
-export function lookupKeyFor(service: CanonService, size: CanonSize, cadence: CanonCadence): string {
-  return SERVICE_LOOKUP_KEYS[service][size][cadenceFor(service, cadence)];
+export function lookupKeyFor(service: CanonService, size: CleaningSize, cadence: CanonCadence): string {
+  if (service === 'cleaning') return cleaningLookupKey(size, cadence);
+  if (size > 3) throw new Error('invalid_service_size');
+  return SERVICE_LOOKUP_KEYS[service][size as CanonSize][cadenceFor(service, cadence)];
 }
 
 /** Car Care is always monthly, whatever the UI last remembered. */
@@ -134,6 +189,7 @@ export const ALL_RECURRING_LOOKUP_KEYS: string[] = [
     SIZES.flatMap((size) => CADENCES.map((cadence) => SERVICE_LOOKUP_KEYS[service][size][cadence])),
   ),
   ...SIZES.map((size) => SERVICE_LOOKUP_KEYS.detailing[size].monthly),
+  ...CLEANING_RECURRING_KEYS.filter((key) => !SIZES.some((size) => CADENCES.some((cadence) => key === SERVICE_LOOKUP_KEYS.cleaning[size][cadence]))),
 ];
 
 export const SERVICE_UNIT: Record<CanonService, PriceUnit> = {
@@ -158,9 +214,9 @@ export const SERVICE_NAMES: Record<CanonService, string> = {
 /** Size labels, per service, in the customer's own words. */
 export const SIZE_LABELS: Record<CanonService, Record<CanonSize, string>> = {
   cleaning: {
-    1: 'Condo / up to 2 bedrooms',
-    2: 'House / 3 bedrooms',
-    3: 'Large house / 4 bedrooms',
+    1: 'Size 1 · up to 1,400 sq ft',
+    2: 'Size 2 · 1,400–2,200 sq ft',
+    3: 'Size 3 · 2,200–3,200 sq ft',
   },
   lawn: {
     1: 'Small yard',
@@ -179,7 +235,7 @@ export const SIZE_HELPERS: Record<CanonService, Record<CanonSize, string>> = {
   cleaning: {
     1: 'max 2 baths',
     2: 'max 2.5 baths',
-    3: 'max 3 baths',
+    3: 'max 3.5 baths',
   },
   lawn: {
     1: 'up to 3,000 sq ft of lawn',
@@ -215,10 +271,9 @@ export const LAWN_SURCHARGE = {
 } as const;
 
 /** Cleaning surcharge per visit for a home's interior square footage. */
-export function cleaningSurchargePerVisit(sqft: number | null | undefined): number {
-  if (!sqft) return 0;
-  if (sqft > CLEANING_SURCHARGE.maxSqFt) return 0; // quote path, never priced here
-  return sqft >= CLEANING_SURCHARGE.minSqFt ? CLEANING_SURCHARGE.perVisitDollars : 0;
+export function cleaningSurchargePerVisit(_sqft: number | null | undefined): number {
+  // Square-foot bands now include the whole home; never add the legacy surcharge.
+  return 0;
 }
 
 /** Lawn surcharge per visit for a yard's mowable turf area. */
@@ -229,7 +284,7 @@ export function lawnSurchargePerVisit(_sqft?: number | null): number {
 
 /** True when the property is above every purchasable band — quote by hand. */
 export function cleaningNeedsQuote(bedrooms: number, sqft?: number | null): boolean {
-  return bedrooms >= 5 || (!!sqft && sqft > CLEANING_SURCHARGE.maxSqFt);
+  return !!sqft && sqft > 7000;
 }
 
 // ---------------------------------------------------------------------------
@@ -398,7 +453,7 @@ export function withTier(dollars: number, tier: 1 | 2): number {
  */
 export function contractorVisitPay(args: {
   service: CanonService;
-  size: CanonSize;
+  size: CleaningSize;
   cadence: CanonCadence;
   tier?: 1 | 2;
   surcharge?: boolean;
@@ -406,6 +461,8 @@ export function contractorVisitPay(args: {
   shineVisit?: 'maintenance_wash' | 'full_detail';
 }): number {
   const tier = args.tier ?? 1;
+  if (args.service === 'cleaning' && args.size >= 4) return withTier(CLEANING_BASE_PAY[args.size], tier);
+  if (args.size > 3) throw new Error('invalid_service_size');
   if (args.service === 'detailing') {
     const pay = CONTRACTOR_SHINE_PAY[args.size];
     return withTier(args.shineVisit === 'full_detail' ? pay.fullDetail : pay.maintenanceWash, tier);
@@ -465,14 +522,18 @@ export function addonContractorPayCents(amountCents: number, tier: string | null
 // ---------------------------------------------------------------------------
 
 /** Per-visit price for a size at a cadence. Shine returns its monthly price. */
-export function perVisitPrice(service: CanonService, size: CanonSize, cadence: CanonCadence): number {
-  if (service === 'detailing') return SHINE_MONTHLY[size];
-  return PER_VISIT_PRICES[service][size][cadence];
+export function perVisitPrice(service: CanonService, size: CleaningSize, cadence: CanonCadence): number {
+  if (service === 'cleaning') return CLEANING_PER_VISIT[size][cadence];
+  if (size > 3) throw new Error('invalid_service_size');
+  if (service === 'detailing') return SHINE_MONTHLY[size as CanonSize];
+  return PER_VISIT_PRICES.lawn[size as CanonSize][cadence];
 }
 
 /** The headline (size-1-style) figure: monthly bill at the monthly cadence. */
-export function sizePrice(service: CanonService, size: CanonSize): number {
-  return SIZE_PRICES[service][size];
+export function sizePrice(service: CanonService, size: CleaningSize): number {
+  if (service === 'cleaning') return CLEANING_MONTHLY[size].monthly;
+  if (size > 3) throw new Error('invalid_service_size');
+  return SIZE_PRICES[service][size as CanonSize];
 }
 
 export function sizePriceCents(service: CanonService, size: CanonSize): number {
@@ -492,18 +553,20 @@ export function visitsPerMonthFor(service: CanonService, cadence: CanonCadence):
 /** Monthly billed amount for one service line, including any surcharge. */
 export function monthlyPrice(
   service: CanonService,
-  size: CanonSize,
+  size: CleaningSize,
   cadence: CanonCadence,
   surchargePerVisit = 0,
 ): number {
-  const billed = BILLED_MONTHLY[service][size][cadenceFor(service, cadence)];
+  if (service === 'cleaning') return CLEANING_MONTHLY[size][cadence];
+  if (size > 3) throw new Error('invalid_service_size');
+  const billed = BILLED_MONTHLY[service][size as CanonSize][cadenceFor(service, cadence)];
   if (service === 'detailing') return billed;
   return billed + surchargePerVisit * VISITS_PER_MONTH[cadence];
 }
 
 export function monthlyPriceCents(
   service: CanonService,
-  size: CanonSize,
+  size: CleaningSize,
   cadence: CanonCadence,
   surchargePerVisit = 0,
 ): number {
