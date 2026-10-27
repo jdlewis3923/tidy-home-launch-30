@@ -129,7 +129,7 @@ function buildState(
     bathrooms: servicesIn.includes('cleaning') ? bathrooms : null,
     lawnChoice: servicesIn.includes('lawn') ? lawnForSize[size] : null,
     vehicleClass: vehicleForSize[size],
-    homeSqFt: opts.homeSqFt ?? null,
+    homeSqFt: servicesIn.includes('cleaning') ? opts.homeSqFt ?? ({1:1400,2:2200,3:3200}[size]) : null,
     turfSqFt: opts.turfSqFt ?? null,
     carWashes: null,
     addOns: opts.addOns ?? [],

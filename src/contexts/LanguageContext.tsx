@@ -3,6 +3,14 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 type Language = "en" | "es";
 
 const translations: Record<string, string> = {
+  "Homes over 7,000 sq ft need a walkthrough quote. Lawns over 12,000 sq ft need a custom quote.": "Las casas de más de 7,000 pies² necesitan una visita para cotizar. Los jardines de más de 12,000 pies² necesitan una cotización personalizada.",
+  "Size 1 · up to 1,400 sq ft. Larger homes have their own price.": "Tamaño 1 · hasta 1,400 pies². Las casas más grandes tienen su propio precio.",
+  "Size 1 · up to 1,400 sq ft": "Tamaño 1 · hasta 1,400 pies²",
+  "Size 2 · 1,400–2,200 sq ft": "Tamaño 2 · 1,400–2,200 pies²",
+  "Size 3 · 2,200–3,200 sq ft": "Tamaño 3 · 2,200–3,200 pies²",
+  "max 3.5 baths": "máximo 3.5 baños",
+  "Size 1 up to 1,400 sq ft; Size 2 up to 2,200; Size 3 up to 3,200; Estate up to 4,800; Estate Plus up to 7,000. Above 7,000: walkthrough quote.": "Tamaño 1 hasta 1,400 pies²; Tamaño 2 hasta 2,200; Tamaño 3 hasta 3,200; Residencia hasta 4,800; Residencia Plus hasta 7,000. Más de 7,000: visita para cotizar.",
+  "Square footage sets your cleaning size: Size 1 $139, Size 2 $189, Size 3 $279, Estate $425, Estate Plus $595 on the monthly plan. Every 2 weeks saves 8% per visit; weekly saves 18%. Prepay a year and save 10%. More bathrooms than your band's limit moves the home up one size. Above 7,000 sq ft needs a walkthrough quote.": "Los pies cuadrados determinan el tamaño: Tamaño 1 $139, Tamaño 2 $189, Tamaño 3 $279, Residencia $425, Residencia Plus $595 en el plan mensual. Cada 2 semanas ahorras 8% por visita; semanal, 18%. Prepaga un año y ahorra 10%. Si tienes más baños de los permitidos, sube un tamaño. Más de 7,000 pies² requiere una visita para cotizar.",
   "Same Pro, rescheduled within 48 hours.": "Mismo Pro, reprogramado dentro de 48 horas.",
   "Your free add-ons": "Tus extras gratis",
   "You have 1 free add-on this month. Pick one.": "Tienes 1 extra gratis este mes. Elige uno.",
