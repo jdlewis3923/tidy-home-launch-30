@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ReservationsForecast, { useReservations, type ReservationRow } from "@/components/admin/ReservationsForecast";
 import { RESERVATION_SERVICE_LABEL, type ReservableService } from "@/lib/launch";
+import CleaningWalkthroughCalendar from '@/components/admin/CleaningWalkthroughCalendar';
 
 const SIZE_WORD: Record<string, string> = { "1": "S1", "2": "S2", "3": "S3", "4": "Estate", "5": "Estate Plus", quote: "walkthrough" };
 const HEARD: Record<string, string> = { door_hanger: "Door hanger", nextdoor: "Nextdoor", google: "Google", referral: "Referral", other: "Other" };
@@ -20,6 +21,7 @@ export default function AdminReservations() {
         <div><h1 className="text-2xl font-black tracking-tight text-foreground">Reservations</h1>
           <p className="mt-1 text-sm text-muted-foreground">Founding reservations in the order they came in — fill routes in this order.</p></div>
         <ReservationsForecast />
+        <CleaningWalkthroughCalendar />
         <div className="overflow-x-auto rounded-lg border border-border bg-card">
           <table className="w-full text-sm" data-testid="reservations-table">
             <thead className="bg-muted/50 text-xs text-muted-foreground"><tr>
