@@ -10135,6 +10135,10 @@ export type Database = {
         Args: { r: Database["public"]["Tables"]["reservations"]["Row"] }
         Returns: string
       }
+      cleaning_finish_details: {
+        Args: { _inspection: boolean; _visit: string; _zones: Json }
+        Returns: undefined
+      }
       cleaning_record_pay: { Args: { _visit: string }; Returns: number }
       cleaning_size_from_sqft: {
         Args: { _baths: number; _sqft: number }
