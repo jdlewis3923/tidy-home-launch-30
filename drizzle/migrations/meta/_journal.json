@@ -1639,6 +1639,13 @@
       "when": 1793140743444,
       "tag": "0233_teammate_missing_backup_or_move",
       "breakpoints": true
+    },
+    {
+      "idx": 234,
+      "version": "7",
+      "when": 1793140789130,
+      "tag": "0234_teammate_missing_resolver_fix",
+      "breakpoints": true
     }
   ]
 }
