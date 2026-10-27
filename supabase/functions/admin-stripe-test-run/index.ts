@@ -84,15 +84,22 @@ Deno.serve(async (req) => {
     subscriptionId = subscription.id;
 
     // deno-lint-ignore no-explicit-any
-    const invoice = subscription.latest_invoice as any;
-    const paymentIntent = invoice?.payment_intent;
+    let invoice = subscription.latest_invoice as any;
+    // deno-lint-ignore no-explicit-any
+    let paymentIntent = invoice?.payment_intent as any;
+    // Test-mode cards still need an explicit confirmation on the first invoice.
+    if (paymentIntent?.status === 'requires_confirmation') {
+      paymentIntent = await stripe.paymentIntents.confirm(paymentIntent.id, { payment_method: 'pm_card_visa' });
+      invoice = await stripe.invoices.retrieve(invoice.id);
+    }
     const paidCents = typeof invoice?.amount_paid === 'number' ? invoice.amount_paid : null;
+    const subAfter = await stripe.subscriptions.retrieve(subscription.id);
     steps.charge = {
-      subscription_status: subscription.status,
+      subscription_status: subAfter.status,
       invoice_status: invoice?.status ?? null,
       amount_paid_cents: paidCents,
       expected_cents: catalogRow.price_cents,
-      charge_succeeded: subscription.status === 'active' && invoice?.status === 'paid' && paidCents === catalogRow.price_cents,
+      charge_succeeded: subAfter.status === 'active' && invoice?.status === 'paid' && paidCents === catalogRow.price_cents,
       payment_intent_status: paymentIntent?.status ?? null,
     };
 
