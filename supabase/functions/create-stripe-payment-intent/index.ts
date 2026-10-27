@@ -38,6 +38,7 @@ import {
 } from "../_shared/pricing-canon.ts";
 import { checkServiceLine, surchargePerVisitFor } from "../_shared/size-validation.ts";
 import { lawnCheckoutGate } from "../_shared/lawn-gate.ts";
+import { cleaningCheckoutGate } from "../_shared/cleaning-gate.ts";
 import { groupsFor, verifyScopeAcceptance } from "../_shared/scope.ts";
 import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
 import { stripeMode, stripeModeConflict, stripeSecretKey } from "../_shared/stripe-mode.ts";
@@ -51,6 +52,7 @@ const SERVICE_ZIPS = new Set(["33156", "33183", "33186"]);
 const ServiceTypeEnum = z.enum(["cleaning", "lawn", "detailing"]);
 const FrequencyEnum = z.enum(["monthly", "biweekly", "weekly"]);
 const SizeEnum = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+const CleaningSizeEnum = z.union([SizeEnum, z.literal(4), z.literal(5)]);
 
 const VehicleClassEnum = z.enum(["sedan", "coupe", "suv", "crossover", "truck", "suv3row", "van"]);
 const LawnChoiceEnum = z.enum(["small", "standard", "large", "over"]);
@@ -58,11 +60,14 @@ const LawnChoiceEnum = z.enum(["small", "standard", "large", "over"]);
 const InputSchema = z.object({
   /** Ref from scope-accept: the customer's stored "I've read what's included" rows. */
   scope_acceptance_ref: z.string().trim().max(80).optional(),
+  reservation_id: z.string().uuid().optional(),
+  cleaning_range: z.union([CleaningSizeEnum, z.literal('quote')]).nullable().optional(),
+  billing_period: z.enum(['monthly', 'yearly']).default('monthly'),
   services: z
     .array(
       z.object({
         service: ServiceTypeEnum,
-        size: SizeEnum,
+        size: CleaningSizeEnum,
         frequency: FrequencyEnum,
         /** Interior sq ft (cleaning) or turf sq ft (lawn) — drives the surcharge. */
         sq_ft: z.number().int().min(0).max(100000).nullable().optional(),
@@ -160,6 +165,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: "validation_failed", details: parsed.error.flatten() }, 400);
   }
   const input = parsed.data;
+  if (input.billing_period === 'yearly') return jsonResponse({ ok: false, error: 'prepaid_conversion_not_ready' }, 409);
   if (!SERVICE_ZIPS.has(input.zip)) return jsonResponse({ ok: false, error: "zip_outside_service_area" }, 400);
 
   const hasHomeService = input.services.some((s) => s.service === "lawn" || s.service === "cleaning");
@@ -175,6 +181,8 @@ Deno.serve(async (req) => {
       sqFt: s.sq_ft ?? null,
       inputs: {
         bedrooms: input.bedrooms ?? null,
+        cleaning_range: input.cleaning_range ?? null,
+        home_sq_ft: s.service === 'cleaning' ? s.sq_ft ?? null : null,
         bathrooms: input.bathrooms ?? null,
         lawn_choice: input.lawn_choice ?? null,
         turf_sq_ft: s.service === "lawn" ? s.sq_ft ?? null : null,
@@ -190,6 +198,8 @@ Deno.serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  const cleaningError = await cleaningCheckoutGate(supabase, user.email, input.zip, input.services.find(s => s.service === 'cleaning')?.size ?? null, input.reservation_id);
+  if (cleaningError) return jsonResponse({ ok: false, error: cleaningError }, 409);
   // Launch gate (launch_config): car care — Shine Complete or the Car Wash Add-On —
   // cannot convert to paid before its conversion date.
   if (input.car_wash || input.services.some((s) => s.service === "detailing")) {

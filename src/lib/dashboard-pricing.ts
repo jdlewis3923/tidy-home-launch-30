@@ -69,6 +69,7 @@ export interface ConfigState {
   homeSqFt: number | null;
   cleaningRange?: SizeSelection | null;
   billingPeriod?: 'monthly' | 'yearly';
+  reservationId?: string;
   /** Mowable turf area once confirmed — drives the lawn surcharge. */
   turfSqFt: number | null;
 

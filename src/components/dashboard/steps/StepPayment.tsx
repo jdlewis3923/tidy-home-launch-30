@@ -54,6 +54,7 @@ export default function StepPayment({ state, onChange }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const customQuote = hasCustomQuote(state);
+  const prepaidPending = state.billingPeriod === 'yearly';
 
   // Access gate — car services only. Not a hard block: an unchecked box shows
   // a "we may not be able to service this" banner and captures a lead so we
@@ -113,6 +114,9 @@ export default function StepPayment({ state, onChange }: Props) {
     const attr = getUtmAttribution();
     return {
       services, addons, car_wash,
+      reservation_id: state.reservationId,
+      cleaning_range: state.cleaningRange ?? null,
+      billing_period: state.billingPeriod ?? 'monthly',
       referral_code: state.referralCode?.trim() || undefined,
       zip: state.zip,
       // Underlying size inputs — the server recomputes size and rejects a mismatch.
@@ -138,7 +142,7 @@ export default function StepPayment({ state, onChange }: Props) {
   };
 
   const handlePay = async () => {
-    if (customQuote || submitting || !scopeOk) return;
+    if (customQuote || prepaidPending || submitting || !scopeOk) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -256,7 +260,7 @@ export default function StepPayment({ state, onChange }: Props) {
                   <span className="mr-1.5">{serviceIcons[sp.service]}</span>
                   <span className="font-semibold lowercase">{serviceLabels[sp.service]}</span>
                   <span className="text-ink-faint ml-1.5 text-xs lowercase">
-                    — {!quoted ? `${sizeLabels[sp.service][size as 1 | 2 | 3].toLowerCase()} · ` : ''}
+                    — {!quoted ? `${sizeLabels[sp.service][size as 1 | 2 | 3]?.toLowerCase() ?? ''} · ` : ''}
                     {serviceUnits[sp.service] === 'per_month' ? 'monthly' : frequencyLabels[freq].toLowerCase()}
                   </span>
                 </span>
@@ -495,6 +499,7 @@ export default function StepPayment({ state, onChange }: Props) {
       )}
 
       {/* 48-hour guarantee — directly above the pay button. */}
+      {prepaidPending && <p role="status" className="text-sm text-muted-foreground">{language === 'es' ? 'El pago anual aún no está disponible. No se realizará ningún cobro.' : 'Yearly payment is not available yet. Nothing will be charged.'}</p>}
       {!customQuote && !clientSecret && <GuaranteeLine />}
 
       {/* Embedded Payment Element (mounts after we have a client_secret). */}
@@ -510,7 +515,7 @@ export default function StepPayment({ state, onChange }: Props) {
         <button
           type="button"
           onClick={handlePay}
-          disabled={submitting || customQuote || preparing || !scopeOk}
+          disabled={submitting || customQuote || prepaidPending || preparing || !scopeOk}
           className={`group relative w-full overflow-hidden rounded-xl bg-ink px-6 py-5 text-base font-semibold text-white shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all duration-300 hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${reveal(0)}`}
           style={{ transitionDelay: '340ms', letterSpacing: '-0.005em' }}
         >

@@ -73,6 +73,7 @@ const AdminKpis = lazy(() => import("./pages/AdminKpis.tsx"));
 const AdminReservations = lazy(() => import("./pages/AdminReservations.tsx"));
 const AdminLawnVerification = lazy(() => import("./pages/AdminLawnVerification.tsx"));
 const LawnSizeConfirm = lazy(() => import("./pages/LawnSizeConfirm.tsx"));
+const CleaningSizeConfirm = lazy(() => import("./pages/CleaningSizeConfirm.tsx"));
 const AdminFounding = lazy(() => import("./pages/AdminFounding.tsx"));
 const AdminPipeline = lazy(() => import("./pages/AdminPipeline.tsx"));
 const AdminPipelineRecord = lazy(() => import("./pages/AdminPipelineRecord.tsx"));
@@ -474,6 +475,7 @@ const App = () => (
                   <Route path="/reserved" element={<Reserved />} />
                   <Route path="/reserve/confirm/:token" element={<ReserveConfirm />} />
                   <Route path="/lawn-size/:token" element={<LawnSizeConfirm />} />
+                  <Route path="/cleaning-size/:token" element={<CleaningSizeConfirm />} />
                   <Route path="/go/:id" element={<GoAsk />} />
 
                   {/* Public Pro badge verification — no login, ever. */}

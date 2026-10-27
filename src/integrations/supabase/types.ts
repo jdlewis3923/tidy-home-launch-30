@@ -9963,6 +9963,10 @@ export type Database = {
         Args: { _contractor_id: string; _kind: string; _scope: string }
         Returns: boolean
       }
+      cleaning_apply_verified_quote: {
+        Args: { _reservation: string }
+        Returns: undefined
+      }
       cleaning_conversion_block: {
         Args: { r: Database["public"]["Tables"]["reservations"]["Row"] }
         Returns: string
@@ -9970,6 +9974,11 @@ export type Database = {
       cleaning_size_from_sqft: {
         Args: { _baths: number; _sqft: number }
         Returns: string
+      }
+      cleaning_size_offer: { Args: { _token: string }; Returns: Json }
+      cleaning_size_respond: {
+        Args: { _accept: boolean; _token: string }
+        Returns: Json
       }
       coi_token_load: { Args: { _token: string }; Returns: Json }
       contract_load: { Args: { _token: string }; Returns: Json }

@@ -25,6 +25,10 @@ export default function ReserveConfirm() {
       const state = {
         ...q, services, frequencies: Object.fromEntries(Object.entries(q.frequencies ?? {}).filter(([k]) => services.includes(k))),
         billingPeriod: q.billing_period === 'yearly' ? 'yearly' : q.billingPeriod ?? 'monthly',
+        reservationId: r.id,
+        cleaningRange: r.cleaning_verified_at ? null : r.cleaning_selected_size === 'custom' ? 'quote' : r.cleaning_selected_size ? Number(r.cleaning_selected_size) : q.cleaningRange,
+        homeSqFt: r.cleaning_measured_sqft ?? q.homeSqFt ?? null,
+        bathrooms: r.cleaning_verified_bathrooms != null ? String(r.cleaning_verified_bathrooms) : r.cleaning_bathrooms != null ? String(r.cleaning_bathrooms) : q.bathrooms,
         firstName: r.first_name, lastName: r.last_name, email: r.email, phone: r.phone, address: r.street, city: r.city || 'Miami', zip: r.zip,
         preferredDay: r.assigned_day ?? r.preferred_day, preferredTime: r.preferred_time, smsConsent: r.sms_consent, outOfCoverage: false,
       };

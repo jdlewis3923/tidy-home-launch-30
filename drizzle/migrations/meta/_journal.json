@@ -1506,6 +1506,13 @@
       "when": 1793134688159,
       "tag": "0214_cleaning_verification_gate",
       "breakpoints": true
+    },
+    {
+      "idx": 215,
+      "version": "7",
+      "when": 1793136051866,
+      "tag": "0215_cleaning_size_approval",
+      "breakpoints": true
     }
   ]
 }
