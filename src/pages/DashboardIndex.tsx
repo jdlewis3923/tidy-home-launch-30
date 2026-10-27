@@ -116,9 +116,12 @@ export default function DashboardIndex() {
   const [accessPets, setAccessPets] = useState<string>('');
 
   // Hydrate access fields when profile arrives or modal opens.
+  // The gate code lives encrypted at rest; the member's own code is decrypted server-side on read.
   useEffect(() => {
     if (activeModal === 'access') {
-      setAccessGate(data.profile?.gate_code ?? '');
+      supabase.rpc('my_gate_code').then(({ data: code }) => {
+        setAccessGate(typeof code === 'string' && code ? code : '');
+      });
       setAccessParking(data.profile?.parking_notes ?? '');
       setAccessPets(data.profile?.pets ?? '');
     }
