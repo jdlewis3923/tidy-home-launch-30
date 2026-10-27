@@ -10192,6 +10192,7 @@ export type Database = {
         Args: { _new_size: number; _note?: string; _review: string }
         Returns: Json
       }
+      admin_storm_day: { Args: { _date: string; _zip: string }; Returns: Json }
       admin_unassigned_visits: {
         Args: never
         Returns: {
@@ -10855,6 +10856,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      payment_pause_tick: { Args: never; Returns: Json }
       pipeline_add_artifact: {
         Args: { _id: string; _kind: string; _name: string; _path: string }
         Returns: string
