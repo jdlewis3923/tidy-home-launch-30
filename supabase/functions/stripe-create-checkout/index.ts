@@ -231,6 +231,8 @@ Deno.serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  const { data: guideAccepted, error: guideError } = await supabase.rpc('member_guide_accepted', { _user: user.id });
+  if (guideError || !guideAccepted) return jsonResponse({ ok: false, error: 'member_guide_acceptance_required' }, 409);
   // New cleaning selections require measured size and staffing before billing.
   // Verification also applies to legacy clients; omitting a range cannot bypass it.
   const cleaningError = await cleaningCheckoutGate(supabase, user.email, input.zip, input.services.find(s => s.service === 'cleaning')?.size ?? null, input.reservation_id);

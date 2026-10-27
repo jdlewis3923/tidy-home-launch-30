@@ -198,6 +198,8 @@ Deno.serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  const { data: guideAccepted, error: guideError } = await supabase.rpc('member_guide_accepted', { _user: user.id });
+  if (guideError || !guideAccepted) return jsonResponse({ ok: false, error: 'member_guide_acceptance_required' }, 409);
   const cleaningError = await cleaningCheckoutGate(supabase, user.email, input.zip, input.services.find(s => s.service === 'cleaning')?.size ?? null, input.reservation_id);
   if (cleaningError) return jsonResponse({ ok: false, error: cleaningError }, 409);
   // Launch gate (launch_config): car care — Shine Complete or the Car Wash Add-On —

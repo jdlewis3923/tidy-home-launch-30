@@ -295,6 +295,7 @@ export default function Billing() {
             >
               {t("Add a service")} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
+            <Link to="/member-guide" className="mt-3 block text-sm font-semibold text-primary underline">{t('How Tidy works')}</Link>
             <p className="mt-2 text-xs text-ink-faint">
               {t("Two services earn one free premium add-on a month. Three earn two.")}
             </p>

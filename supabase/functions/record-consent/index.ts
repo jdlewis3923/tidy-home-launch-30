@@ -8,6 +8,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { enforceRateLimit } from '../_shared/rate-limit.ts';
+import { MEMBER_GUIDE_VERSION } from '../_shared/member-guide.ts';
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 
@@ -64,6 +65,13 @@ Deno.serve(async (req) => {
     userId = data.user?.id ?? null;
   }
 
+  if (parsed.data.kind === 'member_guide') {
+    if (!userId || !parsed.data.granted || parsed.data.version !== MEMBER_GUIDE_VERSION) return jsonResponse({ ok: false, error: 'guide_acceptance_requires_session' }, 401);
+    const es = parsed.data.wording === 'He leído cómo funciona mi membresía.';
+    if (!es && parsed.data.wording !== "I've read how my membership works.") return jsonResponse({ ok: false, error: 'invalid_guide_wording' }, 400);
+    const { error } = await admin.from('member_guide_acceptances').insert({ user_id: userId, version: MEMBER_GUIDE_VERSION, wording: parsed.data.wording, language: es ? 'es' : 'en', ip: clientIp(req), user_agent: req.headers.get('user-agent') });
+    return jsonResponse({ ok: !error }, error ? 500 : 200);
+  }
   const { error } = await admin.from("user_consents").insert({
     user_id: userId,
     email: parsed.data.email ?? null,
