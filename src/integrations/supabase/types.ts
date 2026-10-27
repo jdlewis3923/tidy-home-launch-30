@@ -10947,6 +10947,10 @@ export type Database = {
         }[]
       }
       pro_mark_off: { Args: { _date: string; _note?: string }; Returns: Json }
+      pro_on_cleaning_team_visit: {
+        Args: { _pro: string; _visit: string }
+        Returns: boolean
+      }
       pro_orientation_state: { Args: never; Returns: Json }
       pro_orientation_touch: {
         Args: { _complete?: boolean; _section_id: string }
