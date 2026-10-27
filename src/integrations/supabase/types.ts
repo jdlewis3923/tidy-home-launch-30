@@ -1809,6 +1809,35 @@ export type Database = {
         }
         Relationships: []
       }
+      cleaning_visit_checks: {
+        Row: {
+          checks: Json
+          pro_id: string
+          updated_at: string
+          visit_id: string
+        }
+        Insert: {
+          checks?: Json
+          pro_id: string
+          updated_at?: string
+          visit_id: string
+        }
+        Update: {
+          checks?: Json
+          pro_id?: string
+          updated_at?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_visit_checks_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cleaning_walkthrough_slots: {
         Row: {
           created_at: string
@@ -10935,6 +10964,11 @@ export type Database = {
         }
         Returns: Json
       }
+      pro_cleaning_check: {
+        Args: { _checked: boolean; _key: string; _visit: string }
+        Returns: undefined
+      }
+      pro_cleaning_checklist: { Args: { _visit: string }; Returns: Json }
       pro_cleaning_visit_details: { Args: { _visit: string }; Returns: Json }
       pro_coi_state: {
         Args: { _pro: string }
