@@ -2,14 +2,15 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 // Tidy — verify-checkout-wiring. Proves the booking flow against LIVE Stripe.
 //
 // Checks, in order:
-//  1. All 15 recurring lookup keys resolve to an ACTIVE Stripe price at the
-//     amount the canon publishes.
-//  2. Quantity carries cadence for cleaning and lawn only (1/2/4); Shine
-//     Complete and the Car Wash Add-On are always quantity 1.
-//  3. The reference cart — clean_2 at quantity 2 plus wash_2_x1 — totals
-//     $427.00 using LIVE Stripe unit amounts, not local constants.
-//  4. Every stripe_catalog row that could be selected points at a price that is
-//     still active in Stripe (no archived price can be booked).
+//  1. Every recurring lookup key the canon publishes — five cleaning bands
+//     (monthly + annual), three lawn bands, three Shine Complete plans —
+//     resolves to an ACTIVE Stripe price at the exact canon amount.
+//  2. Quantity carries nothing: cadence lives in the lookup key, so every
+//     plan line is quantity 1.
+//  3. Reference carts priced from LIVE Stripe unit amounts, not local
+//     constants: a standard bundle and an Estate plan.
+//  4. Every stripe_catalog row that could be selected points at a price that
+//     is still active in Stripe (no archived price can be booked).
 //
 // Admin-only. Read-only: it creates nothing in Stripe.
 
@@ -17,12 +18,15 @@ import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import {
+  ALL_RECURRING_LOOKUP_KEYS,
   BILLED_MONTHLY,
   CADENCES,
-  CLEANING_SURCHARGE,
-  LAWN_SURCHARGE,
-  SERVICE_QUANTITY_RULE,
+  CLEANING_MONTHLY,
+  CLEANING_SIZES,
+  SHINE_MONTHLY,
   SIZES,
+  cleaningAnnualCents,
+  cleaningLookupKey,
   lookupKeyFor,
   quantityFor,
   type CanonCadence,
@@ -34,20 +38,22 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-// Every recurring key the site can resolve: cadence is part of the key, so it
-// must come from lookupKeyFor(service, size, cadence).
+// Every recurring key the site can resolve, with the exact amount the canon
+// publishes. Cleaning uses the five square-foot bands; lawn and Car Care keep
+// their three existing sizes. Annual keys bill 12 × monthly × 0.90 once a year.
 const EXPECTED_CENTS: Record<string, number> = {};
-for (const service of ['cleaning', 'lawn', 'detailing'] as CanonService[]) {
-  const cadences: CanonCadence[] =
-    SERVICE_QUANTITY_RULE[service] === 'always_1' ? ['monthly'] : [...CADENCES];
-  for (const size of SIZES) {
-    for (const cadence of cadences) {
-      EXPECTED_CENTS[lookupKeyFor(service, size, cadence)] = BILLED_MONTHLY[service][size][cadence] * 100;
-    }
+for (const size of CLEANING_SIZES) {
+  for (const cadence of CADENCES) {
+    EXPECTED_CENTS[cleaningLookupKey(size, cadence)] = CLEANING_MONTHLY[size][cadence] * 100;
+    EXPECTED_CENTS[cleaningLookupKey(size, cadence, true)] = cleaningAnnualCents(size, cadence);
   }
 }
-EXPECTED_CENTS['surcharge_cleaning_xl'] = CLEANING_SURCHARGE.perVisitDollars * 100;
-EXPECTED_CENTS['surcharge_lawn_xl'] = LAWN_SURCHARGE.perVisitDollars * 100;
+for (const size of SIZES) {
+  for (const cadence of CADENCES) {
+    EXPECTED_CENTS[lookupKeyFor('lawn', size, cadence)] = BILLED_MONTHLY.lawn[size][cadence] * 100;
+  }
+  EXPECTED_CENTS[lookupKeyFor('detailing', size, 'monthly')] = SHINE_MONTHLY[size] * 100;
+}
 const ALL_KEYS = Object.keys(EXPECTED_CENTS);
 
 Deno.serve(async (req) => {
@@ -112,35 +118,46 @@ Deno.serve(async (req) => {
       };
     });
     const all_keys_pass = lookup_keys.every((k) => k.pass);
+    const canon_key_count = ALL_RECURRING_LOOKUP_KEYS.length;
+    const keys_match_canon = ALL_KEYS.length === canon_key_count &&
+      ALL_RECURRING_LOOKUP_KEYS.every((key) => key in EXPECTED_CENTS);
 
     // ---------- 2. quantity rules: every plan line is quantity 1 ----------
     const quantity_rules = {
       cleaning: { monthly: quantityFor('cleaning', 'monthly'), biweekly: quantityFor('cleaning', 'biweekly'), weekly: quantityFor('cleaning', 'weekly') },
       lawn: { monthly: quantityFor('lawn', 'monthly'), biweekly: quantityFor('lawn', 'biweekly'), weekly: quantityFor('lawn', 'weekly') },
       detailing: { monthly: quantityFor('detailing', 'monthly'), biweekly: quantityFor('detailing', 'biweekly'), weekly: quantityFor('detailing', 'weekly') },
-      surcharge_quantity_is_visits_per_month: true,
     };
     const quantity_rules_pass = (['cleaning', 'lawn', 'detailing'] as CanonService[]).every((svc) =>
       CADENCES.every((cad) => quantityFor(svc, cad) === 1),
     );
 
-    // ---------- 3. the reference cart, priced from LIVE Stripe ----------
-    // Size 2 cleaning biweekly ($348) plus the extra-large surcharge at 2 visits
-    // a month ($120) = $468.00.
+    // ---------- 3. reference carts, priced from LIVE Stripe ----------
+    // Standard bundle: size 2 cleaning biweekly ($348) + size 1 lawn monthly
+    // ($45) = $393.00. Square-foot bands replaced surcharges — no extra line.
     const cleanTwoBiweekly = found.get(lookupKeyFor('cleaning', 2, 'biweekly'));
-    const cleaningSurcharge = found.get('surcharge_cleaning_xl');
-    const referenceCents =
-      cleanTwoBiweekly?.unit_amount != null && cleaningSurcharge?.unit_amount != null
-        ? cleanTwoBiweekly.unit_amount * 1 + cleaningSurcharge.unit_amount * 2
+    const lawnOneMonthly = found.get(lookupKeyFor('lawn', 1, 'monthly'));
+    const bundleCents =
+      cleanTwoBiweekly?.unit_amount != null && lawnOneMonthly?.unit_amount != null
+        ? cleanTwoBiweekly.unit_amount + lawnOneMonthly.unit_amount
         : null;
-    const reference_cart = {
-      description: 'clean_2_biweekly × 1 + surcharge_cleaning_xl × 2 (visits a month)',
-      expected_total: '$468.00',
-      actual_total: referenceCents === null ? null : `$${(referenceCents / 100).toFixed(2)}`,
-      actual_cents: referenceCents,
-      pass: referenceCents === 46800,
+    const bundle_cart = {
+      description: 'clean_2_biweekly + lawn_1_monthly',
+      expected_total: '$393.00',
+      actual_total: bundleCents === null ? null : `$${(bundleCents / 100).toFixed(2)}`,
+      actual_cents: bundleCents,
+      pass: bundleCents === 39300,
     };
 
+    // Estate: 3,200–4,800 sq ft weekly = $1,396.00 a month, no surcharge.
+    const estateWeekly = found.get(cleaningLookupKey(4, 'weekly'));
+    const estate_cart = {
+      description: 'clean_estate_weekly',
+      expected_total: '$1,396.00',
+      actual_total: estateWeekly?.unit_amount == null ? null : `$${(estateWeekly.unit_amount / 100).toFixed(2)}`,
+      actual_cents: estateWeekly?.unit_amount ?? null,
+      pass: estateWeekly?.unit_amount === 139600,
+    };
 
     // ---------- 4. no archived price is selectable ----------
     const { data: catalogRows, error: catErr } = await supabase
@@ -166,13 +183,15 @@ Deno.serve(async (req) => {
     const no_archived_selectable = archived.length === 0;
 
     return jsonResponse({
-      ok: all_keys_pass && quantity_rules_pass && reference_cart.pass && no_archived_selectable,
+      ok: all_keys_pass && keys_match_canon && quantity_rules_pass && bundle_cart.pass && estate_cart.pass && no_archived_selectable,
       checked_at: new Date().toISOString(),
       lookup_keys,
       all_keys_pass,
+      keys_match_canon,
       quantity_rules,
       quantity_rules_pass,
-      reference_cart,
+      bundle_cart,
+      estate_cart,
       active_catalog_rows: catalogRows?.length ?? 0,
       archived_but_selectable: archived,
       no_archived_selectable,
