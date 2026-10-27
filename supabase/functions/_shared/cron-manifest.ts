@@ -72,6 +72,7 @@ export const EXPECTED_CRON_JOBS: ExpectedCronJob[] = [
   { name: 'hiring-queue-transitions-hourly', schedule: '20 * * * *', kind: 'http', fn: 'hiring-queue-transitions', purpose: 'Call queue follow-up and cold transitions.' },
   { name: 'sequence-tick-hourly', schedule: '0 * * * *', kind: 'http', fn: 'sequence-tick', purpose: 'Onboarding sequence clock: held emails, interview reminders, cold, stall alerts.' },
   { name: 'member-ops-tick-daily', schedule: '30 11 * * *', kind: 'http', fn: 'member-ops-tick', purpose: 'Free add-on grants/expiry/reminders, car wash job scheduling and unassigned alerts, then member emails.' },
+  { name: 'visit-photo-retention-daily', schedule: '30 10 * * *', kind: 'http', fn: 'visit-photo-retention', purpose: 'Deletes visit photos older than 30 days (keeps open-claim photos) and purges closed-claim photos after 30 days.' },
   { name: 'pro-onboarding-reminders-daily', schedule: '15 13 * * *', kind: 'http', fn: 'pro-onboarding-reminders', purpose: 'One reminder email per Pro listing only what is still missing (9:15 AM ET).' },
   { name: 'hiring-calendar-daily', schedule: '50 11 * * *', kind: 'http', fn: 'hiring-calendar', purpose: 'Year-one calendar tasks and heads-ups (6:50 AM ET).' },
   { name: 'cron-heartbeat', schedule: '7 * * * *', kind: 'http', fn: 'cron-heartbeat', purpose: 'The watchdog itself.' },
