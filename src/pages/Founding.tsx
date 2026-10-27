@@ -421,7 +421,7 @@ export default function Founding() {
               <div>
                 {priced.length > 0 && (
                   <div className="founding-price-stats text-center">
-                    <Stat label={t("Monthly total")} value={`${money(total)}${per}`} big className="founding-price-total" />
+                    <Stat label={s.yearly && priced.length === 1 && priced[0]?.service === 'cleaning' ? (language === 'es' ? 'Pago anual' : 'Yearly payment') : t("Monthly total")} value={s.yearly && priced.length === 1 && priced[0]?.service === 'cleaning' ? `$${(cleaningAnnualCents(priced[0].size as CleaningSize,priced[0].cadence)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}` : `${money(total)}${per}`} big className="founding-price-total" />
                     <Stat label={t("Visits a month")} value={String(visits)} />
                     <Stat label={t("Per visit")} value={visits ? money(total / visits) : "—"} />
                   </div>
