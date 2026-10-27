@@ -8,7 +8,7 @@ import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 
 const Body = z.discriminatedUnion('action', [
-  z.object({ action: z.literal('schedule'), redo_id: z.string().uuid(), scheduled_start: z.string().datetime({ offset: true }), duration_minutes: z.number().int().min(30).max(480).optional() }),
+  z.object({ action: z.literal('schedule'), redo_id: z.string().uuid(), scheduled_start: z.string().datetime({ offset: true }), duration_minutes: z.number().int().min(30).max(480).optional(), responsible_pro_id: z.string().uuid().optional() }),
   z.object({ action: z.literal('cancel'), redo_id: z.string().uuid(), reason: z.string().trim().max(300).optional() }),
 ]);
 
