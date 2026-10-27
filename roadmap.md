@@ -9,6 +9,7 @@
 - [ ] Part 3 before Nov 16: exact EN/ES Member Guide, checkout acknowledgement, policy gates and linked messages. Guide supplied Oct 27; integrate verbatim.
   - Exact bilingual guide page and mirrored wording, required persisted checkout acknowledgement, dashboard/Billing links and full-guide welcome email added; guide parity passes. FAQ answers now use exact guide sections and public/support assistants prioritize the same guide with section links. Policy enforcement/messages remain open.
 - [ ] Part 4 before Nov 16: cleaning verification, customer-confirmed increases, encrypted visit-day access, first-visit/exit/photo/claim workflows, rotating standard.
+  - Added saved bilingual cleaning-standard checks, member-specific five-task rotation and server-required secure exit; paired Pro check-in/out evidence and shared team photo access. Owner-page permission warning corrected. Encryption, seal delivery, member photo consent/30-day deletion and claim lifecycle remain open.
 - [ ] Part 5 before Nov 16: Stripe policy changes/credits/pauses/refunds, founding locks, isolated policy journeys and test-mode financial evidence.
 - [ ] Cross-surface bilingual update and complete changed-page/message/document/price inventory.
 

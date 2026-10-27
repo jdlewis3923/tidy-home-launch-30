@@ -137,6 +137,7 @@ export default function ProVisit() {
       if (res.error === 'both_pros_check_out_required') {setActionError('Both Pros must check in and check out before the Lead completes the visit.');return;}
       if (res.error === 'lead_inspection_and_zones_required') {setActionError('Save room zones and the final inspection before completing the visit.');return;}
       if (res.error === 'lead_action_required') {setActionError('The Lead completes this team visit. Record your check-out below.');return;}
+      if (res.error === 'secure_exit_checklist_required') {setActionError('Confirm the secure-exit items in the checklist before completing the visit.');return;}
       setActionError(
         res.error === "gps_unavailable"
           ? GPS_MSG
