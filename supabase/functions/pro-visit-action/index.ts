@@ -40,6 +40,7 @@ const BodySchema = z.discriminatedUnion('action', [
     action: z.literal('size_check'),
     bedrooms: z.number().int().min(0).max(20).optional(),
     bathrooms: z.number().min(0).max(20).optional(),
+    sq_ft: z.number().int().min(1).max(100000).optional(),
     vehicle_class: z.enum(['sedan', 'coupe', 'suv', 'crossover', 'truck', 'suv3row', 'van']).optional(),
     plate: z.string().trim().max(15).optional(),
   }),
@@ -80,7 +81,7 @@ Deno.serve(async (req) => {
 
     const { data: visit } = await admin
       .from('visits')
-      .select('id, assigned_pro_id, status, user_id, subscription_id, service_type, visit_kind, size_tier, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, check_in_at, street, customer_first_name, rate_token, is_redo, redo_request_id')
+      .select('id, assigned_pro_id, status, user_id, subscription_id, service_type, visit_kind, size_tier, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, check_in_at, street, customer_first_name, rate_token, is_redo, redo_request_id, cleaning_team_id')
       .eq('id', visit_id)
       .maybeSingle();
     if (!visit || visit.assigned_pro_id !== uid) {
@@ -164,7 +165,7 @@ Deno.serve(async (req) => {
       const svc = visit.service_type === 'cleaning' ? 'cleaning' : visit.service_type === 'detailing' ? 'detailing' : null;
       if (!svc) return jsonResponse({ ok: false, error: 'size_check_not_needed' });
       const observed = svc === 'cleaning'
-        ? recomputeSize('cleaning', { bedrooms: d.bedrooms ?? null, bathrooms: d.bathrooms ?? null })
+        ? recomputeSize('cleaning', { home_sq_ft: d.sq_ft ?? null, bathrooms: d.bathrooms ?? null })
         : recomputeSize('detailing' as never, { vehicle_class: d.vehicle_class ?? null });
       if (observed == null || observed === 'quote' && svc === 'detailing') return jsonResponse({ ok: false, error: 'size_inputs_required' });
       if (svc === 'detailing' && !d.plate) return jsonResponse({ ok: false, error: 'plate_required' });
