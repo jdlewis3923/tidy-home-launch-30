@@ -152,6 +152,7 @@ export default function ProVisit() {
       );
       return;
     }
+    setReportedPay(res.visit_pay_cents ?? null);
     setSuccess(true);
     setTimeout(() => {
       reload();
@@ -189,7 +190,7 @@ export default function ProVisit() {
           <p className="mt-4 text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">
             {blockedDone
               ? `Reported — ${money(reportedPay)} added to your earnings.`
-              : `Visit complete — ${money(visit.visit_pay_cents)} added to this week's earnings.`}
+              : `Visit complete — ${money(reportedPay)} added to this week's earnings.`}
           </p>
         </div>
       </ProShell>

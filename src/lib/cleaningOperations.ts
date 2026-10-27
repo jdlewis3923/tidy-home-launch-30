@@ -1,6 +1,9 @@
 import { CLEANING_BASE_PAY, type CleaningSize } from './pricing-canon';
 
 export const CLEANING_ROTATION = ['baseboards', 'blinds', 'fans_fixtures', 'cabinet_fronts', 'vents'] as const;
+export function cleaningTeamCanClose(paired: boolean, leadCheckedOut: boolean, partnerCheckedOut: boolean, inspectionSaved: boolean, zonesSaved: boolean) {
+  return inspectionSaved && zonesSaved && (!paired || (leadCheckedOut && partnerCheckedOut));
+}
 export function cleaningPayBreakdown(size: CleaningSize, firstVisit: boolean, paired: boolean, outcome: 'complete' | 'redo' | 'lockout' | 'late_cancel' | 'unsafe' = 'complete', addonCents = 0, together = false) {
   const base = CLEANING_BASE_PAY[size] * 100;
   const firstPremium = size >= 4 && firstVisit && outcome === 'complete' ? base / 2 : 0;

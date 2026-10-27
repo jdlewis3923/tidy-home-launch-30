@@ -242,7 +242,8 @@ Deno.serve(async (req) => {
         });
       }
       const out = result as { visit_pay_cents?: number } | null;
-      return jsonResponse({ ok: true, action, paid_in_full_reason: reason, visit_pay_cents: out?.visit_pay_cents ?? 0 });
+      const {data:actorPay}=visit.service_type==='cleaning'?await admin.rpc('cleaning_pro_visit_pay',{_visit:visit_id,_pro:uid}):{data:out?.visit_pay_cents};
+      return jsonResponse({ ok: true, action, paid_in_full_reason: reason, visit_pay_cents: actorPay ?? 0 });
     }
 
     // action === 'complete'
@@ -306,6 +307,10 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: false, error: code ?? closeErr.message });
     }
     if (!closedVisit) return jsonResponse({ok:false,error:'visit_not_open'});
+    if(visit.service_type==='cleaning'){
+      const {data:actorPay}=await admin.rpc('cleaning_pro_visit_pay',{_visit:visit_id,_pro:uid});
+      if(typeof actorPay==='number')pay=actorPay;
+    }
 
     // Roll this Pro's payout week (Monday-Sunday, paid the following Friday).
     const { error: creditErr } = visit.service_type === 'cleaning'

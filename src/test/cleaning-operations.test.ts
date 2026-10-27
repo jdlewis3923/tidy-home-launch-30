@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { cleaningPayBreakdown, cleaningRescheduleRule, rotatingCleaningTask } from '@/lib/cleaningOperations';
+import { cleaningPayBreakdown, cleaningRescheduleRule, rotatingCleaningTask, cleaningTeamCanClose } from '@/lib/cleaningOperations';
 describe('Estate operations rules', () => {
+  it('a paired visit requires both check-outs, zones, and Lead inspection',()=>{
+    expect(cleaningTeamCanClose(true,true,false,true,true)).toBe(false);
+    expect(cleaningTeamCanClose(true,true,true,false,true)).toBe(false);
+    expect(cleaningTeamCanClose(true,true,true,true,false)).toBe(false);
+    expect(cleaningTeamCanClose(true,true,true,true,true)).toBe(true);
+  });
   it('Estate first visit pays $255 and later visits $170', () => {
     expect(cleaningPayBreakdown(4, true, false).visitPay).toBe(25500);
     expect(cleaningPayBreakdown(4, false, false).visitPay).toBe(17000);
