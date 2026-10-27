@@ -204,7 +204,7 @@ export default function Founding() {
       heard_other: s.src || undefined, lang: language, src: s.src || undefined, session_id: sessionId(),
       gift_addons: s.gifts.slice(0, giftCount), website: honeypot.current?.value || "",
       lines: lines.flatMap((l) => l ? [{ service: l.service, size: l.size, cadence: l.service === "detailing" ? null : l.cadence, monthly: l.monthly, visits_per_month: l.visits }] : []),
-      quote: { total, visits, src: "founding", cleaning_range: s.cleaningRange, baths: s.baths, billing_period: s.yearly ? 'yearly' : 'monthly' },
+      quote: { total, visits, src: "founding", cleaning_range: s.cleaningRange, baths: s.baths, billing_period: s.yearly ? 'yearly' : 'monthly', frequencies: s.cadence, cleaningRange: s.cleaningRange, bathrooms: s.baths, homeSqFt: typeof s.cleaningRange === 'number' ? cleaningBand(s.cleaningRange)?.maxSqFt : null, lawnChoice: s.lawn === 1 ? 'small' : s.lawn === 2 ? 'standard' : s.lawn === 3 ? 'large' : 'over', vehicleClass: s.car === 1 ? 'sedan' : s.car === 2 ? 'suv' : 'truck' },
       cleaning_selected_size: s.cleaningRange === 'quote' ? 'custom' : s.cleaningRange ? String(s.cleaningRange) : undefined,
       cleaning_selected_range: typeof s.cleaningRange === 'number' ? cleaningBand(s.cleaningRange)?.range : s.cleaningRange === 'quote' ? 'Over 7,000 sq ft' : undefined,
       cleaning_bathrooms: s.baths ? Number(s.baths) : undefined,
@@ -434,7 +434,7 @@ export default function Founding() {
                 <ul className="mt-3 divide-y divide-border text-sm">
                   {lines.map((l) => l && (
                     <li key={l.service} className="flex justify-between py-2">
-                      <span>{t(SVC_LABEL[l.service])}{l.service !== "detailing" ? ` · ${t(CAD_LABEL[l.cadence])}` : ` · ${t("3 washes a month")}`}</span>
+                      <span>{t(SVC_LABEL[l.service])}{l.service === 'cleaning' && typeof l.size === 'number' ? ` · ${language === 'es' ? cleaningBand(l.size)?.name.replace('Size','Tamaño').replace('Estate Plus','Residencia Plus').replace('Estate','Residencia') : cleaningBand(l.size)?.name}` : ''}{l.service !== "detailing" ? ` · ${t(CAD_LABEL[l.cadence])}` : ` · ${t("3 washes a month")}`}</span>
                       <b>{l.quote ? t("Custom quote") : `${money(l.monthly)}${per}`}</b>
                     </li>
                   ))}

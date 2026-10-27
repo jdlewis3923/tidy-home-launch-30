@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import ReservationsForecast, { useReservations, type ReservationRow } from "@/components/admin/ReservationsForecast";
 import { RESERVATION_SERVICE_LABEL, type ReservableService } from "@/lib/launch";
 
-const SIZE_WORD: Record<string, string> = { "1": "S1", "2": "S2", "3": "S3", quote: "quote" };
+const SIZE_WORD: Record<string, string> = { "1": "S1", "2": "S2", "3": "S3", "4": "Estate", "5": "Estate Plus", quote: "walkthrough" };
 const HEARD: Record<string, string> = { door_hanger: "Door hanger", nextdoor: "Nextdoor", google: "Google", referral: "Referral", other: "Other" };
 
 export default function AdminReservations() {
@@ -32,7 +32,7 @@ export default function AdminReservations() {
                   <td className="px-3 py-2"><div className="font-semibold">{r.first_name} {r.last_name}{r.is_test_row && <span className="ml-1 text-xs text-destructive">TEST</span>}</div><div className="text-xs text-muted-foreground">{r.email} · {r.phone}</div><div className="text-xs text-muted-foreground">{r.street}</div></td>
                   <td className="px-3 py-2 text-xs">{r.services.map((s) => {
                     const l = r.lines.find((x) => x.service === s);
-                    return <div key={s}>{RESERVATION_SERVICE_LABEL[s as ReservableService] ?? s} · {l?.size != null ? SIZE_WORD[String(l.size)] ?? l.size : "—"} · {l?.cadence ?? "—"}{r.waitlist_services.includes(s) && <span className="ml-1 font-semibold text-destructive">waitlist</span>}</div>;
+                    return <div key={s}>{RESERVATION_SERVICE_LABEL[s as ReservableService] ?? s} · {l?.size != null ? SIZE_WORD[String(l.size)] ?? l.size : "—"} · {l?.cadence ?? "—"}{s === 'cleaning' && r.cleaning_selected_range && <div className="text-muted-foreground">{r.cleaning_selected_range} · {r.cleaning_bathrooms} baths · {r.cleaning_verified_at ? 'Size verified' : 'Verify size'}{l?.size === 5 && !r.cleaning_team_ready ? ' · Needs team' : ''}</div>}{r.waitlist_services.includes(s) && <span className="ml-1 font-semibold text-destructive">waitlist</span>}</div>;
                   })}</td>
                   <td className="px-3 py-2 tabular-nums">{r.zip}</td>
                   <td className="px-3 py-2 text-xs">{r.preferred_day} · {r.preferred_time}</td>

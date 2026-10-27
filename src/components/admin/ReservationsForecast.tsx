@@ -10,6 +10,9 @@ export type ReservationRow = {
   services: string[]; waitlist_services: string[]; lines: { service: string; size: number | string | null; cadence: string | null; monthly: number; visits_per_month: number }[];
   monthly_cents: number; street: string; zip: string; preferred_day: string; preferred_time: string; heard_from: string; heard_other: string | null;
   invited_at: string | null; assigned_day: string | null; assigned_window: string | null; assigned_pro_first_name: string | null; converted_at: string | null; is_test_row: boolean; sms_consent: boolean; founding: boolean;
+  cleaning_selected_size?: string | null; cleaning_selected_range?: string | null; cleaning_bathrooms?: number | null;
+  cleaning_verified_at?: string | null; cleaning_verified_size?: string | null; cleaning_team_ready?: boolean;
+  cleaning_size_confirmation?: string | null;
 };
 
 export function useReservations() {
