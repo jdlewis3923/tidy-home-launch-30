@@ -260,6 +260,19 @@ function AccountCard({
   );
 }
 
+/** Gate codes live encrypted at rest; the member's own code is decrypted server-side on read. */
+function GateCodeRow() {
+  const [code, setCode] = useState<string | null>(null);
+  useEffect(() => {
+    let on = true;
+    supabase.rpc("my_gate_code").then(({ data }) => {
+      if (on) setCode(typeof data === "string" && data ? data : null);
+    });
+    return () => { on = false; };
+  }, []);
+  return <Row k="Gate code" v={code || "Not set"} />;
+}
+
 function Row({ k, v, icon }: { k: string; v: string; icon?: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 border-b border-[hsl(var(--hairline))]/60 pb-2 last:border-0 last:pb-0">
