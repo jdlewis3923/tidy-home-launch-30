@@ -8,6 +8,7 @@ import { FOUNDING_ZIPS, FOUNDING_CAP } from "@/lib/launch";
 type Row = {
   grant_id: string; founding_zip: string; founding_number: number; name: string | null; address: string | null; email: string | null;
   granted_at: string; services: string[] | null; rate_card_version: number; monthly_cents: number | null; status: string; current_zip: string | null;
+  seal_status: "pending" | "shipped" | "delivered";
 };
 const SVC: Record<string, string> = { cleaning: "Cleaning", lawn: "Lawn", detailing: "Car Care" };
 
@@ -50,10 +51,10 @@ export default function AdminFounding() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50 text-xs text-muted-foreground"><tr>
-                    {["#", "Name", "Address", "Joined", "Services", "Rate card", "Monthly", "Status"].map((h) => <th key={h} className="px-3 py-2 text-left font-medium">{h}</th>)}
+                    {["#", "Name", "Address", "Joined", "Services", "Rate card", "Monthly", "Status", "Seal"].map((h) => <th key={h} className="px-3 py-2 text-left font-medium">{h}</th>)}
                   </tr></thead>
                   <tbody>
-                    {list.length === 0 && <tr><td colSpan={8} className="px-3 py-4 text-muted-foreground">No founding homes yet.</td></tr>}
+                    {list.length === 0 && <tr><td colSpan={9} className="px-3 py-4 text-muted-foreground">No founding homes yet.</td></tr>}
                     {list.map((r) => (
                       <tr key={r.grant_id} className="border-t border-border">
                         <td className="px-3 py-2 font-bold tabular-nums">{r.founding_number}</td>
@@ -64,6 +65,7 @@ export default function AdminFounding() {
                         <td className="px-3 py-2 tabular-nums">v{r.rate_card_version}</td>
                         <td className="px-3 py-2 tabular-nums">{r.monthly_cents != null ? `$${(r.monthly_cents / 100).toFixed(2)}` : "—"}</td>
                         <td className="px-3 py-2"><span className={r.status === "active" ? "font-semibold text-primary" : "text-muted-foreground"}>{r.status}</span></td>
+                        <td className="px-3 py-2"><SealButton row={r} onDone={(s) => setRows((prev) => prev.map((x) => x.grant_id === r.grant_id ? { ...x, seal_status: s } : x))} /></td>
                       </tr>
                     ))}
                   </tbody>
