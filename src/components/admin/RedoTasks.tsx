@@ -28,10 +28,37 @@ export default function RedoTasks() {
     const list = (data ?? []) as Redo[];
     const vids = list.map((r) => r.visit_id); const aids = list.map((r) => r.applicant_id).filter(Boolean) as string[];
     const [{ data: vs }, { data: ps }] = await Promise.all([
-      vids.length ? supabase.from("visits").select("id, customer_first_name, service_type, visit_date, street").in("id", vids) : Promise.resolve({ data: [] }),
+      vids.length ? supabase.from("visits").select("id, customer_first_name, service_type, visit_date, street, assigned_pro_id, cleaning_team_id, backup_pro_id").in("id", vids) : Promise.resolve({ data: [] }),
       aids.length ? supabase.from("applicants").select("id, first_name, last_name").in("id", aids) : Promise.resolve({ data: [] }),
     ]);
-    setRows(list.map((r) => ({ ...r, visit: (vs ?? []).find((v: { id: string }) => v.id === r.visit_id) ?? null, pro: (ps ?? []).find((p: { id: string }) => p.id === r.applicant_id) ?? null })));
+    const visits = (vs ?? []) as NonNullable<Redo["visit"]> & { id: string }[];
+    const teamIds = [...new Set(visits.map((v) => v.cleaning_team_id).filter(Boolean))] as string[];
+    const { data: teams } = teamIds.length
+      ? await supabase.from("cleaning_teams").select("id, lead_pro_id, partner_pro_id").in("id", teamIds)
+      : { data: [] as { id: string; lead_pro_id: string | null; partner_pro_id: string | null }[] };
+    // Every contractor who worked each visit (lead, partner, backup) by name.
+    const contractorIds = new Set<string>();
+    for (const v of visits) {
+      if (v.assigned_pro_id) contractorIds.add(v.assigned_pro_id);
+      if (v.backup_pro_id) contractorIds.add(v.backup_pro_id);
+      const t = (teams ?? []).find((x) => x.id === v.cleaning_team_id);
+      if (t?.lead_pro_id) contractorIds.add(t.lead_pro_id);
+      if (t?.partner_pro_id) contractorIds.add(t.partner_pro_id);
+    }
+    const { data: names } = contractorIds.size
+      ? await supabase.from("applicants").select("contractor_id, first_name, last_name").in("contractor_id", [...contractorIds])
+      : { data: [] as { contractor_id: string; first_name: string | null; last_name: string | null }[] };
+    const nameOf = (cid: string | null) => {
+      const n = (names ?? []).find((x) => x.contractor_id === cid);
+      return n ? `${n.first_name ?? ""} ${n.last_name?.[0] ?? ""}.`.trim() : null;
+    };
+    setRows(list.map((r) => {
+      const v = visits.find((x) => x.id === r.visit_id) ?? null;
+      const t = (teams ?? []).find((x) => x.id === v?.cleaning_team_id);
+      const ids = [...new Set([v?.assigned_pro_id, t?.lead_pro_id, v?.backup_pro_id ?? t?.partner_pro_id].filter(Boolean))] as string[];
+      const teamPros = ids.length > 1 ? ids.map((id) => ({ id, name: nameOf(id) ?? "Pro" })) : undefined;
+      return { ...r, visit: v, pro: (ps ?? []).find((p: { id: string }) => p.id === r.applicant_id) ?? null, teamPros };
+    }));
   }, []);
   useEffect(() => { void load(); const t = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(t); }, [load]);
 
