@@ -2,21 +2,24 @@
 // /terms and next to the scope checkbox). Policy copy, not service scope.
 // Liability wording for damage claims is pending legal review: no payout or
 // dollar limit may be promised here.
+import { MEMBER_GUIDE } from './memberGuide';
+
+const guideText = (id: typeof MEMBER_GUIDE[number]['id'], lang:'en'|'es') => MEMBER_GUIDE.find(s=>s.id===id)?.[lang].items.join(' ') ?? '';
 export const VISIT_RULES: Array<{ en: [string, string]; es: [string, string] }> = [
-  { en: ["Size is checked", "At your first visit your Pro records your home's bedrooms and bathrooms, or photographs your vehicle and plate. Lawns are measured from above before you pay. If the size is bigger than your plan, your Pro still does the booked size that day. We tell you why and the new monthly price, and nothing changes until you confirm. You can cancel instead. Founding members are priced from their own locked rates."],
-    es: ["Revisamos el tamaño", "En su primera visita, su Pro anota las habitaciones y baños de su casa, o fotografía su vehículo y la placa. Los jardines se miden desde arriba antes de pagar. Si el tamaño es mayor que su plan, su Pro igual hace el tamaño reservado ese día. Le explicamos el motivo y el nuevo precio mensual, y nada cambia hasta que usted confirme. También puede cancelar. Los miembros fundadores mantienen sus tarifas fijas."] },
+  { en: ["Size is checked", "Tidy verifies cleaning square feet and bathrooms before payment. Lawn turf is measured before payment; vehicle size is recorded at the first visit. Nothing is repriced without your approval. Founding members keep their locked rates."],
+    es: ["Revisamos el tamaño", "Tidy verifica los pies cuadrados y baños de la casa antes de cobrar. Medimos el césped antes del pago; el tamaño del auto se registra en la primera visita. Ningún precio aumenta sin tu aprobación. Los miembros fundadores mantienen sus tarifas fijas."] },
   { en: ["No deals at the door", "Extra work is requested in the app as an add-on and charged only after you approve it. Pros can't add work, accept cash or promise anything free."],
     es: ["Nada de tratos en la puerta", "El trabajo extra se pide en la app como servicio adicional y solo se cobra después de que usted lo apruebe. Los Pros no pueden agregar trabajo, aceptar efectivo ni prometer nada gratis."] },
   { en: ["A first visit on a home or lawn that's been let go", "The first visit is a standard visit in your booked size. Cleaning goes in this order: kitchen, bathrooms, floors, dusting. Anything not reached is photographed and listed on your visit report, and you're offered add-ons or a size-up. It doesn't count as a missed item for a redo. A lawn over about 6 inches is cut down safely; the next visit brings it to normal height."],
     es: ["Primera visita en una casa o jardín descuidado", "La primera visita es una visita estándar del tamaño reservado. La limpieza sigue este orden: cocina, baños, pisos y polvo. Lo que no se alcance se fotografía y se anota en el reporte, y le ofrecemos servicios adicionales o un plan más grande. No cuenta como algo omitido para pedir que regresemos. Un césped de más de unas 6 pulgadas se corta con seguridad; la siguiente visita lo deja a la altura normal."] },
-  { en: ["No access = the visit counts", "Locked gate or door, wrong code, unsecured pet, car not there, or no water or power for cleaning: your Pro contacts you through Tidy, waits 15 minutes, takes timestamped GPS photos and leaves. The visit is marked \"Completed — no access\", counts as delivered, and isn't credited or rescheduled. We tell you why within the hour."],
-    es: ["Sin acceso, la visita cuenta", "Portón o puerta con llave, código incorrecto, mascota suelta, auto ausente, o sin agua o electricidad para limpiar: su Pro le escribe por Tidy, espera 15 minutos, toma fotos con hora y ubicación, y se retira. La visita queda como «Completada — sin acceso», cuenta como realizada y no se acredita ni se reprograma. Le avisamos el motivo en menos de una hora."] },
+  { en: ["If we can't get in", guideText('lockout','en')],
+    es: ["Si no podemos entrar", guideText('lockout','es')] },
   { en: ["Unsafe = your Pro may stop", "An aggressive person or animal, an active pest infestation, a biohazard, exposed wiring, flooding or lightning: your Pro stops, takes photos and leaves. It's handled the same way as no access."],
     es: ["Si no es seguro, su Pro puede detenerse", "Una persona o animal agresivo, una plaga activa, un riesgo biológico, cables expuestos, inundación o rayos: su Pro se detiene, toma fotos y se retira. Se maneja igual que una visita sin acceso."] },
-  { en: ["Weather", "Lawn and car visits rained out are moved within 48 hours on the same Pro's route. That isn't a missed visit and isn't credited."],
-    es: ["Clima", "Las visitas de césped y de auto suspendidas por lluvia se mueven dentro de 48 horas en la ruta del mismo Pro. No es una visita perdida y no se acredita."] },
-  { en: ["Skipped or cancelled visits", "You can move a visit to another open day that week with 48 hours' notice, if there's room. Visits you skip or cancel, or cancel with less than 24 hours' notice, aren't credited, refunded or rolled over."],
-    es: ["Visitas omitidas o canceladas", "Puede mover una visita a otro día disponible de esa semana con 48 horas de aviso, si hay espacio. Las visitas que usted omita o cancele, o que cancele con menos de 24 horas de aviso, no se acreditan, no se reembolsan ni se pasan al mes siguiente."] },
+  { en: ["Weather", guideText('weather','en')],
+    es: ["Clima", guideText('weather','es')] },
+  { en: ["Rescheduling, skipping and pausing", guideText('rescheduling','en')],
+    es: ["Reprogramar, saltar y pausar", guideText('rescheduling','es')] },
   { en: ["Redos cover what's included", "Tap \"Something wasn't right\" within 48 hours of the visit and pick which included items were missed. Items on the Not included list can't be picked. A photo helps. We come back within 48 hours, free."],
     es: ["El regreso cubre lo incluido", "Toque «Algo no quedó bien» dentro de las 48 horas posteriores a la visita y elija qué cosas incluidas faltaron. Lo que aparece como No incluido no se puede elegir. Una foto ayuda. Regresamos dentro de 48 horas, gratis."] },
   { en: ["Damage", "Report damage in the app within 24 hours of the visit, with photos. Pre-existing damage is whatever shows in your Pro's first-visit and before photos. Tidy isn't responsible for items you were asked to put away and didn't, for normal wear, or for damage already in the photos."],
