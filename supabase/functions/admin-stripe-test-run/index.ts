@@ -132,6 +132,34 @@ Deno.serve(async (req) => {
       credit_ok: (customerAfter as any).balance === -100,
     };
 
+    // 3c. Annual plans: prove the prepaid-year cancel refund — started months
+    // at the monthly rate, the rest refunded — against the real annual price.
+    if (lookupKey.includes('annual')) {
+      const m = lookupKey.match(/^(clean_(?:\d|estate|estateplus))_annual_(monthly|biweekly|weekly)$/) ?? lookupKey.match(/^(.+?)_annual$/);
+      const monthlyKey = m ? (m.length === 3 ? `${m[1]}_${m[2]}` : m[1]) : null;
+      const { data: monthlyRow } = monthlyKey
+        ? await supabase.from('stripe_catalog').select('price_cents').eq('canon_key', monthlyKey).eq('active', true).maybeSingle()
+        : { data: null };
+      const interval = subAfter.items?.data?.[0]?.price?.recurring?.interval ?? null;
+      const periodStart = resolveStripeCurrentPeriodStart(subAfter);
+      if (!monthlyRow || !periodStart || !chargeId || typeof chargeId !== 'string') {
+        steps.annual_refund = { refund_ok: false, reason: 'missing_monthly_twin_or_period' };
+      } else {
+        const used = monthsUsed(new Date(periodStart * 1000).toISOString(), new Date().toISOString());
+        const { refund: refundCents, charged } = cancelRefundCents(monthlyRow.price_cents, paidCents ?? 0, used);
+        const refund = await stripe.refunds.create({ charge: chargeId, amount: refundCents });
+        steps.annual_refund = {
+          interval,
+          monthly_twin: monthlyKey,
+          months_used: used,
+          charged_cents: charged,
+          refund_cents: refundCents,
+          refund_status: refund.status,
+          refund_ok: interval === 'year' && refund.status === 'succeeded' && refund.amount === refundCents && used === 1,
+        };
+      }
+    }
+
     // 4. Cancel immediately, then delete the customer.
     await stripe.subscriptions.cancel(subscription.id);
     steps.cancel = { canceled: true };
