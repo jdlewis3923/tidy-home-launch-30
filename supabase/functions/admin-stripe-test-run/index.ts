@@ -141,7 +141,8 @@ Deno.serve(async (req) => {
     customerId = null;
 
     const ok = (steps.charge as { charge_succeeded?: boolean }).charge_succeeded === true &&
-      (steps.refund as { refund_ok?: boolean }).refund_ok === true;
+      (steps.refund as { refund_ok?: boolean }).refund_ok === true &&
+      (steps.balance_credit as { credit_ok?: boolean }).credit_ok === true;
     return jsonResponse({ ok, mode: 'test', steps }, ok ? 200 : 502);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error';
