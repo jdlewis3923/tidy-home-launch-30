@@ -1520,6 +1520,13 @@
       "when": 1793136698382,
       "tag": "0216_member_guide_acceptance",
       "breakpoints": true
+    },
+    {
+      "idx": 217,
+      "version": "7",
+      "when": 1793136784228,
+      "tag": "0217_estate_team_and_pay_foundation",
+      "breakpoints": true
     }
   ]
 }
