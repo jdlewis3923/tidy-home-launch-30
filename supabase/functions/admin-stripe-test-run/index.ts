@@ -116,6 +116,22 @@ Deno.serve(async (req) => {
       steps.refund = { refund_ok: false, reason: 'no_charge_found' };
     }
 
+    // 3b. Member-credit mechanics: a negative balance transaction comes off
+    // the next invoice automatically. Prove it lands on the customer balance.
+    const creditTxn = await stripe.customers.createBalanceTransaction(customer.id, {
+      amount: -100,
+      currency: 'usd',
+      description: 'Tidy credit — lifecycle test',
+    });
+    const customerAfter = await stripe.customers.retrieve(customer.id);
+    steps.balance_credit = {
+      transaction_id: creditTxn.id,
+      // deno-lint-ignore no-explicit-any
+      customer_balance_cents: (customerAfter as any).balance ?? null,
+      // deno-lint-ignore no-explicit-any
+      credit_ok: (customerAfter as any).balance === -100,
+    };
+
     // 4. Cancel immediately, then delete the customer.
     await stripe.subscriptions.cancel(subscription.id);
     steps.cancel = { canceled: true };
