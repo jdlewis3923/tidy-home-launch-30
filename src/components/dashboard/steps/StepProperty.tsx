@@ -37,11 +37,12 @@ function SizeReadout({
   size,
   state,
 }: { service: ServiceType; size: SizeSelection | null; state: ConfigState }) {
+  const { language } = useLanguage();
   if (!size) return null;
   if (size === 'quote') {
     return (
       <p className="text-[11px] text-ink-soft">
-        {QUOTE_COPY.toLowerCase()} give us a ring on {QUOTE_PHONE} — no payment today.
+        {service === 'cleaning' ? (language === 'es' ? 'Programemos una visita breve. No se cobra nada hoy.' : "Let's schedule a quick walkthrough. Nothing is charged today.") : `${QUOTE_COPY.toLowerCase()} give us a ring on ${QUOTE_PHONE} — no payment today.`}
       </p>
     );
   }
