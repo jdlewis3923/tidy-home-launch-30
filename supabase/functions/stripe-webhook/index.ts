@@ -23,7 +23,7 @@
 import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { resolveStripeSubscriptionId } from '../_shared/resolve-stripe-subscription-id.ts';
-import { resolveStripeCurrentPeriodEnd } from '../_shared/resolve-stripe-current-period-end.ts';
+import { resolveStripeCurrentPeriodEnd, resolveStripeCurrentPeriodStart } from '../_shared/resolve-stripe-current-period-end.ts';
 import { loadPlanLines } from '../_shared/plan-lines.ts';
 import { stripeSecretKey } from '../_shared/stripe-mode.ts';
 import { vendorFetch } from '../_shared/http.ts';

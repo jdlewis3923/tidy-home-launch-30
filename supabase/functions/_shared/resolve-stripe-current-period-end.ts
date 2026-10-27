@@ -35,3 +35,33 @@ export function resolveStripeCurrentPeriodEnd(subscription: unknown): number | n
 
   return null;
 }
+
+/** Same resolver for current_period_start (earliest item start wins). */
+export function resolveStripeCurrentPeriodStart(subscription: unknown): number | null {
+  if (!subscription || typeof subscription !== "object") return null;
+  const sub = subscription as Record<string, unknown>;
+
+  const root = sub.current_period_start;
+  if (typeof root === "number" && Number.isFinite(root)) {
+    return root;
+  }
+
+  const items = sub.items;
+  if (items && typeof items === "object") {
+    const data = (items as Record<string, unknown>).data;
+    if (Array.isArray(data)) {
+      let minStart: number | null = null;
+      for (const item of data) {
+        if (item && typeof item === "object") {
+          const start = (item as Record<string, unknown>).current_period_start;
+          if (typeof start === "number" && Number.isFinite(start)) {
+            if (minStart === null || start < minStart) minStart = start;
+          }
+        }
+      }
+      return minStart;
+    }
+  }
+
+  return null;
+}
