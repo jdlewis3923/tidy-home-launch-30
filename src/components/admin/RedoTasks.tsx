@@ -5,8 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 type Redo = {
   id: string; visit_id: string; note: string | null; requested_at: string; due_at: string; status: string; is_test_row: boolean;
   user_id: string | null; applicant_id: string | null;
-  visit?: { customer_first_name: string | null; service_type: string | null; visit_date: string | null; street: string | null } | null;
+  visit?: { customer_first_name: string | null; service_type: string | null; visit_date: string | null; street: string | null; assigned_pro_id: string | null; cleaning_team_id: string | null; backup_pro_id: string | null } | null;
   pro?: { first_name: string | null; last_name: string | null } | null;
+  teamPros?: { id: string; name: string }[];
 };
 
 function hoursLeft(due: string, now: number) { return (new Date(due).getTime() - now) / 3_600_000; }
