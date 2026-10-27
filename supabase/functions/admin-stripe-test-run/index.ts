@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
     await stripe.subscriptions.cancel(subscription.id);
     steps.cancel = { canceled: true };
 
-    await stripe.customers.delete(customer.id);
+    await stripe.customers.del(customer.id);
     steps.cleanup = { customer_deleted: true };
     customerId = null;
 
@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
     const message = err instanceof Error ? err.message : 'unknown error';
     // Best-effort cleanup so no test artifacts linger.
     try { if (subscriptionId) await stripe.subscriptions.cancel(subscriptionId); } catch { /* ignore */ }
-    try { if (customerId) await stripe.customers.delete(customerId); } catch { /* ignore */ }
+    try { if (customerId) await stripe.customers.del(customerId); } catch { /* ignore */ }
     return jsonResponse({ ok: false, mode: 'test', error: message, steps }, 500);
   }
 });
