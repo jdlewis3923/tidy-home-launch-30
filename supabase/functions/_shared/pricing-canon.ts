@@ -685,23 +685,23 @@ export const SHINE_SUMMARY = '3 maintenance washes every month plus 2 full detai
 export const SIZING_FAQ: { q: string; a: string }[] = [
   {
     q: 'How do I know which size I am?',
-    a: "Bedrooms for cleaning, what you drive for car care. For lawn, size is square feet of grass only — Small up to 3,000, Standard 3,000–7,000, Large 7,000–12,000. We don't count your house, driveway or pool. Pick your best guess; we check it from above and tell you before your first visit. You never have to measure anything.",
+    a: "Cleaning uses interior square footage: up to 1,400, 2,200, 3,200, 4,800 or 7,000 sq ft, with bathroom limits. Above 7,000 needs a walkthrough. Lawn uses grass only: up to 3,000, 7,000 or 12,000 sq ft. Car Care uses your vehicle size.",
   },
   {
     q: 'What if I pick the wrong size?',
-    a: "Lawn: we check it from above before your first visit. If it's bigger, we tell you the new price and nothing is charged until you confirm. If it's smaller, we move you down. Cleaning and car care: we move you to the right price before your second visit and never bill retroactively for the first.",
+    a: "We verify cleaning and lawn size before conversion. A larger size needs your approval before paying. A smaller size lowers the price; we tell you. Your founding rate card stays locked.",
   },
   {
     q: 'What if I have more bathrooms than my size allows?',
     a: 'Your home moves up one size. Bathrooms drive the length of a visit more than anything else.',
   },
   {
-    q: 'What if I have 5+ bedrooms, or more than 12,000 sq ft of lawn?',
-    a: "Call us and we'll quote it. It isn't a worse deal, it just isn't a checkbox.",
+    q: 'What if my home is over 7,000 sq ft or lawn is over 12,000 sq ft?',
+    a: "Book a walkthrough for a home above 7,000 sq ft. Lawn above 12,000 sq ft needs a custom quote. Nothing is charged before you approve your price.",
   },
   {
     q: 'What happens if a visit takes longer than expected?',
-    a: 'Nothing. The size price is the price.',
+    a: 'Your Pro requests extra time; you approve an add-on or size change before any extra work or charge.',
   },
   {
     q: 'Can I change how often you come?',
