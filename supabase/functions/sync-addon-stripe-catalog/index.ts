@@ -86,12 +86,14 @@ Deno.serve(async (req) => {
         }
         let priceId = row.stripe_price_id as string | null;
         if (!priceId) {
-          const price = await stripeForm('prices', {
+          const priceParams: Record<string, string> = {
             product: productId!,
             unit_amount: String(row.price_cents),
             currency: 'usd',
             'metadata[addon_key]': row.addon_key,
-          });
+          };
+          if (row.lookup_key) priceParams['lookup_key'] = row.lookup_key;
+          const price = await stripeForm('prices', priceParams);
           priceId = price.id as string;
         }
         const { error: updErr } = await admin
