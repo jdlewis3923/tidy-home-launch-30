@@ -41,6 +41,7 @@ export default function ProJobView() {
   const [visit, setVisit] = useState<Visit | null>(null);
   const [addons, setAddons] = useState<CatalogAddon[]>([]);
   const [requests, setRequests] = useState<RequestRow[]>([]);
+  const [homeNote, setHomeNote] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [uploading, setUploading] = useState(false);
@@ -93,6 +94,9 @@ export default function ProJobView() {
     );
     setAddons((cat as CatalogAddon[]) ?? []);
     setRequests((reqs as RequestRow[]) ?? []);
+    // Persistent home notes from the member (server checks this Pro is assigned).
+    const { data: hn } = await supabase.rpc("pro_home_note", { _visit: jobId });
+    setHomeNote(typeof hn === "string" && hn.trim() ? hn : null);
     setLoading(false);
   }, [jobId]);
 
@@ -225,6 +229,13 @@ export default function ProJobView() {
             : "Time to be confirmed"}
           {" · "}{visit.status}
         </p>
+
+        {homeNote && (
+          <section className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5">
+            <h2 className="text-base font-semibold text-foreground">Notes from the customer</h2>
+            <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">{homeNote}</p>
+          </section>
+        )}
 
         {/* B1 — before photos gate */}
         <section className="mt-6 rounded-2xl border border-border bg-card p-5">

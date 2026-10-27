@@ -33,11 +33,16 @@
 - All seven new cleaning add-ons are live: Blinds & Shutters $55, Fans & Fixtures $45, Wall & Door Spots $45, Patio/Lanai & Furniture $55, Linen & Bed Making $25 (all gift-eligible), Garage Sweep & Tidy $65 and Pantry/Closet $75 (not gift-eligible). Stripe products/prices created with lookup keys; Pro pay is 40% of each price. They appear automatically in the member add-on picker, free-gift picker, Pro request flow and services page, which all read the catalog. Chandelier and pre-guest deep reset stay walkthrough-quote only (no price, by design).
 - Missing teammate: the Lead reports a no-show partner from the visit; the owner gets an urgent alert and resolves it with either a checked backup Pro (active, cleaning, never a test record) or a move within 48 hours. The member gets a text in their language either way, and the backup Pro can check in/out with GPS and counts as the second required person for completion.
 
+## Storm days, payments, home notes, photos, seals (Oct 27, final pass)
+- Storm warning day: one owner action blacks out all three services in the ZIP and credits every affected visit in full — never counts as a skip — with a bilingual member text for each home.
+- Failed payment: immediate bilingual text on any failure; after 7 unpaid days upcoming visits pause automatically (the plan and price stay untouched, no Pro is ever assigned unpaid work); a successful payment puts the visits back with a member text. Runs inside the daily member job.
+- Home notes: members write persistent notes on the Account page; every assigned Pro (including backups and team partners) sees them on the job screen, falling back to the existing "notes for your Pro".
+- Photo reports: members opt in on the Account page; after each completed visit they get a notice that before/after photos are ready, and photos still auto-delete after 30 days.
+- Founding seal delivery is tracked per home (pending → shipped → delivered) on the founding registry, with each change logged.
+
 ## Not complete
 - Annual subscription lifecycle, refund ledger and 45-day renewal notices. Annual collection remains blocked.
 - Per-add-on assigned/together completion, responsible-zone redos, named review split/rating propagation, route household counts and full payout journey evidence.
-- Seal delivery, opted-in photo reports, home notes.
-- Weather credits on canceled (not moved) storm visits; payment-failed pause journey verification.
 - Full hiring/onboarding/agreement/document copy inventory and remaining bilingual cross-surface checks (add-on names currently display in English only, same as the existing add-ons).
 
 ## Verification limitation

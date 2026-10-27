@@ -130,6 +130,8 @@ export default function Account() {
             <Row k="Preferred time" v={p?.preferred_time || "Any"} />
             <Row k="Notes for your Pro" v={p?.special_instructions || "None"} />
           </AccountCard>
+
+          <HomeNotesCard userId={data.profile?.user_id ?? null} photoOptIn={!!data.profile?.photo_reports_opt_in} />
         </div>
 
         {/* Security + sign out */}
@@ -271,6 +273,91 @@ function GateCodeRow() {
     return () => { on = false; };
   }, []);
   return <Row k="Gate code" v={code || "Not set"} />;
+}
+
+/** Persistent home notes every visiting Pro sees, plus the photo-report opt-in. */
+function HomeNotesCard({ userId, photoOptIn }: { userId: string | null; photoOptIn: boolean }) {
+  const [note, setNote] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  const [optIn, setOptIn] = useState(photoOptIn);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    let on = true;
+    supabase.from("home_notes").select("body").eq("user_id", userId).maybeSingle().then(({ data }) => {
+      if (!on) return;
+      setNote(data?.body ?? "");
+      setDraft(data?.body ?? "");
+    });
+    return () => { on = false; };
+  }, [userId]);
+
+  useEffect(() => setOptIn(photoOptIn), [photoOptIn]);
+
+  if (!userId) return null;
+
+  const saveNote = async () => {
+    setSaving(true);
+    await supabase.from("home_notes").upsert({ user_id: userId, body: draft.trim(), updated_at: new Date().toISOString() });
+    setNote(draft.trim());
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const togglePhotos = async (next: boolean) => {
+    setOptIn(next);
+    await supabase.from("profiles").update({ photo_reports_opt_in: next }).eq("user_id", userId);
+  };
+
+  return (
+    <div className="rounded-2xl border border-[hsl(var(--hairline))] bg-white p-6 shadow-[0_4px_20px_rgba(15,23,42,0.04)] md:col-span-2">
+      <div className="flex items-center gap-2">
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-[hsl(var(--primary))]/10">
+          <Home className="h-4 w-4 text-[hsl(var(--primary))]" />
+        </span>
+        <h2 className="text-sm font-bold text-ink">Home notes & photo reports</h2>
+      </div>
+      <p className="mt-2 text-xs text-ink-soft">
+        Anything your Pro should know about your home, every visit — where things go, what to skip, what matters to you.
+      </p>
+      <textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        rows={3}
+        maxLength={1000}
+        placeholder="e.g. Please use the side door; the study stays closed."
+        className="mt-3 w-full rounded-xl border border-[hsl(var(--hairline))] bg-cream/40 p-3 text-sm text-ink outline-none focus:border-[hsl(var(--primary))]"
+      />
+      <div className="mt-2 flex items-center justify-between">
+        <span className="text-xs text-ink-faint">{note ? "Saved notes show to your Pro on every visit." : "No notes yet."}</span>
+        <button
+          type="button"
+          onClick={saveNote}
+          disabled={saving || draft.trim() === (note ?? "")}
+          className="rounded-lg bg-[hsl(var(--primary))] px-3 py-1.5 text-xs font-semibold text-white transition disabled:opacity-40"
+        >
+          {saved ? "Saved" : saving ? "Saving…" : "Save notes"}
+        </button>
+      </div>
+      <label className="mt-4 flex cursor-pointer items-start justify-between gap-4 border-t border-[hsl(var(--hairline))]/60 pt-4">
+        <span>
+          <span className="block text-sm font-semibold text-ink">Photo reports after each visit</span>
+          <span className="mt-0.5 block text-xs text-ink-soft">
+            Get your Pro's before-and-after photos after every visit. No people or papers in frame; photos delete automatically after 30 days.
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          checked={optIn}
+          onChange={(e) => togglePhotos(e.target.checked)}
+          className="mt-1 h-4 w-4 accent-[hsl(var(--primary))]"
+        />
+      </label>
+    </div>
+  );
 }
 
 function Row({ k, v, icon }: { k: string; v: string; icon?: React.ReactNode }) {

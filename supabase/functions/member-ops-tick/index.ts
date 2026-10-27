@@ -28,10 +28,15 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
 
     let tick: unknown = null;
+    let paymentTick: unknown = null;
     if (!body?.dispatch_only) {
       const { data, error } = await admin.rpc('member_ops_tick');
       if (error) throw new Error(`member_ops_tick: ${error.message}`);
       tick = data;
+      // Day-7 unpaid visits pause / paid-again visits resume (Member Guide).
+      const { data: pt, error: ptErr } = await admin.rpc('payment_pause_tick');
+      if (ptErr) throw new Error(`payment_pause_tick: ${ptErr.message}`);
+      paymentTick = pt;
     }
 
     // Retry pending member credits (e.g. Stripe was unreachable at skip time).
@@ -97,7 +102,7 @@ Deno.serve(async (req) => {
     if (failed > 0) {
       await admin.from('integration_logs').insert({ source: 'internal', event: 'member_ops_tick.notification_email_failed', status: 'error', error_message: `${failed} member emails failed` }).then(() => {}, () => {});
     }
-    return jsonResponse({ ok: true, tick, sent, failed, credits_applied: creditsApplied });
+    return jsonResponse({ ok: true, tick, payment_tick: paymentTick, sent, failed, credits_applied: creditsApplied });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error('[member-ops-tick]', msg);
