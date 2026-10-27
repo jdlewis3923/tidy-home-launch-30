@@ -1729,6 +1729,47 @@ export type Database = {
           },
         ]
       }
+      cleaning_team_presence: {
+        Row: {
+          check_in_at: string | null
+          check_in_lat: number | null
+          check_in_lng: number | null
+          check_out_at: string | null
+          check_out_lat: number | null
+          check_out_lng: number | null
+          pro_id: string
+          visit_id: string
+        }
+        Insert: {
+          check_in_at?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_out_at?: string | null
+          check_out_lat?: number | null
+          check_out_lng?: number | null
+          pro_id: string
+          visit_id: string
+        }
+        Update: {
+          check_in_at?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_out_at?: string | null
+          check_out_lat?: number | null
+          check_out_lng?: number | null
+          pro_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_team_presence_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cleaning_teams: {
         Row: {
           active: boolean
@@ -10161,6 +10202,16 @@ export type Database = {
       cleaning_size_respond: {
         Args: { _accept: boolean; _token: string }
         Returns: Json
+      }
+      cleaning_team_presence_record: {
+        Args: {
+          _action: string
+          _lat: number
+          _lng: number
+          _pro: string
+          _visit: string
+        }
+        Returns: undefined
       }
       cleaning_team_valid: { Args: { _team: string }; Returns: boolean }
       coi_token_load: { Args: { _token: string }; Returns: Json }
