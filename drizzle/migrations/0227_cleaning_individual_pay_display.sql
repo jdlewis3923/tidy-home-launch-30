@@ -1,0 +1,17 @@
+CREATE OR REPLACE FUNCTION public.cleaning_pro_visit_pay(_visit uuid,_pro uuid) RETURNS integer LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$ DECLARE v public.visits; t public.cleaning_teams; amount integer; addon integer; share integer; BEGIN
+ IF NOT public.is_service_caller() AND auth.uid() IS DISTINCT FROM _pro AND NOT public.current_user_admin() THEN RAISE EXCEPTION 'forbidden'; END IF;
+ IF NOT public.pro_on_cleaning_team_visit(_visit,_pro) THEN RAISE EXCEPTION 'visit_not_assigned'; END IF;
+ SELECT * INTO v FROM public.visits WHERE id=_visit;
+ IF v.service::text<>'cleaning' THEN RETURN v.visit_pay_cents; END IF;
+ IF EXISTS(SELECT 1 FROM public.cleaning_pay_lines WHERE visit_id=_visit AND pro_id=_pro) THEN SELECT sum(amount_cents)::integer INTO amount FROM public.cleaning_pay_lines WHERE visit_id=_visit AND pro_id=_pro; RETURN amount; END IF;
+ SELECT * INTO t FROM public.cleaning_teams WHERE id=v.cleaning_team_id;
+ share:=CASE WHEN v.size_tier=5 AND t.kind='paired_pros' THEN 2 ELSE 1 END;
+ amount:=coalesce(v.cleaning_base_pay_cents,public.contractor_visit_pay_cents('cleaning',v.size_tier,'monthly',NULL,false,NULL));
+ IF v.cleaning_first_visit THEN amount:=amount*3/2; END IF;
+ IF coalesce(v.is_redo,false) OR v.status::text='blocked' THEN amount:=coalesce(v.cleaning_base_pay_cents,public.contractor_visit_pay_cents('cleaning',v.size_tier,'monthly',NULL,false,NULL))/2; END IF;
+ amount:=coalesce(public.pro_tier_uplift_cents(amount,_pro),amount)/share;
+ IF _pro=v.assigned_pro_id AND NOT coalesce(v.is_redo,false) AND v.status::text<>'blocked' THEN SELECT coalesce(sum(contractor_pay_cents),0)::integer INTO addon FROM public.addon_attaches WHERE visit_id=v.id AND status IN ('pending_visit','completed'); amount:=amount+addon; END IF;
+ RETURN amount;
+END $$;
+REVOKE ALL ON FUNCTION public.cleaning_pro_visit_pay(uuid,uuid) FROM PUBLIC,anon; GRANT EXECUTE ON FUNCTION public.cleaning_pro_visit_pay(uuid,uuid) TO authenticated,service_role;
+CREATE OR REPLACE FUNCTION public.pro_get_visits(_from date DEFAULT (CURRENT_DATE-60),_to date DEFAULT (CURRENT_DATE+60)) RETURNS TABLE(id uuid,scheduled_start timestamptz,scheduled_end timestamptz,service_type text,street text,zip text,customer_first_name text,access_notes text,gate_code text,pet_notes text,parking_notes text,visit_pay_cents integer,status text,on_my_way_at timestamptz,completed_at timestamptz,is_sample boolean,before_photos integer,after_photos integer,visit_kind text,paid_in_full_reason text) LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT v.id,v.scheduled_start,v.scheduled_end,v.service_type,v.street,v.zip,v.customer_first_name,CASE WHEN v.visit_date=(now() AT TIME ZONE 'America/New_York')::date THEN v.access_notes END,CASE WHEN v.visit_date=(now() AT TIME ZONE 'America/New_York')::date THEN v.gate_code END,v.pet_notes,v.parking_notes,CASE WHEN v.service::text='cleaning' THEN public.cleaning_pro_visit_pay(v.id,auth.uid()) ELSE v.visit_pay_cents END,v.status::text,v.on_my_way_at,v.completed_at,v.is_sample,(SELECT count(*)::integer FROM public.visit_photos p WHERE p.visit_id=v.id AND p.kind='before'),(SELECT count(*)::integer FROM public.visit_photos p WHERE p.visit_id=v.id AND p.kind='after'),v.visit_kind,v.paid_in_full_reason FROM public.visits v LEFT JOIN public.cleaning_teams t ON t.id=v.cleaning_team_id WHERE (v.assigned_pro_id=auth.uid() OR t.partner_pro_id=auth.uid()) AND (v.scheduled_start IS NULL OR v.scheduled_start::date BETWEEN _from AND _to) ORDER BY v.scheduled_start NULLS LAST $$;
