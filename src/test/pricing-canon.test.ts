@@ -215,7 +215,7 @@ describe('bundling gives one free premium add-on, never a percentage or a wash',
     expect(FREE_ADDON_CUSTOMER_CHOICE).toBe(true);
     expect(GIFT_ELIGIBLE_ADDONS.length).toBeGreaterThan(0);
     expect(GIFT_ELIGIBLE_ADDONS.every((a) => a.price <= 55)).toBe(true);
-    expect(GIFT_ELIGIBLE_ADDONS.map((a) => a.key).sort()).toEqual(['deep_baseboard_scrub','inside_fridge_clean','inside_kitchen_cabinets','inside_oven_clean','interior_protect_condition','interior_windows','leaf_debris_cleanup','pet_hair_removal','weed_removal']);
+    expect(GIFT_ELIGIBLE_ADDONS.map((a) => a.key).sort()).toEqual(['blinds_shutters','deep_baseboard_scrub','fans_fixtures','inside_fridge_clean','inside_kitchen_cabinets','inside_oven_clean','interior_protect_condition','interior_windows','leaf_debris_cleanup','linen_bed_making','patio_lanai_furniture','pet_hair_removal','wall_door_spots','weed_removal']);
   });
 
   it('calculatePricing applies no discount to the subtotal', () => {
