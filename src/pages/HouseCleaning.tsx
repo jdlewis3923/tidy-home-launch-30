@@ -5,7 +5,7 @@ import heroMobileAsset from "@/assets/service-cleaning-mobile.png.asset.json";
 // Every card price below is the SIZE-1 price, which is why each card says
 // "From" and carries the size qualifier. Size 2 is $189 and size 3 is $279 a
 // visit — see the FAQ and the pricing table.
-const SIZE_NOTE = "size 1 home — sizes 2 and 3 cost more, see sizes below";
+const SIZE_NOTE = "Size 1 · up to 1,400 sq ft. Larger homes have their own price.";
 
 const config: ServiceLandingConfig = {
   serviceSlug: "house-cleaning",
@@ -84,7 +84,7 @@ const config: ServiceLandingConfig = {
   ],
   addOnsNote: "Available as add-ons: inside oven, inside fridge, interior windows.",
   surchargeNote:
-    "Extra-large home (2,501–4,000 sq ft): +$60 per visit. Above that size we quote individually.",
+    "Size 1 up to 1,400 sq ft; Size 2 up to 2,200; Size 3 up to 3,200; Estate up to 4,800; Estate Plus up to 7,000. Above 7,000: walkthrough quote.",
   trustCards: [
     {
       title: "Consistent specialist",
@@ -103,7 +103,7 @@ const config: ServiceLandingConfig = {
   faqs: [
     {
       q: "What's the price and what's it based on?",
-      a: "One price per visit, set by the size of your home: $139, $189 or $279 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Homes with 5+ bedrooms are quoted by hand.",
+      a: "Square footage sets your cleaning size: Size 1 $139, Size 2 $189, Size 3 $279, Estate $425, Estate Plus $595 on the monthly plan. Every 2 weeks saves 8% per visit; weekly saves 18%. Prepay a year and save 10%. More bathrooms than your band's limit moves the home up one size. Above 7,000 sq ft needs a walkthrough quote.",
     },
     {
       q: "Can I cancel anytime?",
@@ -140,16 +140,18 @@ const config: ServiceLandingConfig = {
     description:
       "House cleaning in Pinecrest and Kendall (33156, 33183, 33186). One flat price per visit from $139. The same pro for each service, every visit. No contracts, eco-safe. Book in about 2 minutes.",
     canonical: "https://jointidy.co/house-cleaning",
-    priceRange: "$139–$279",
+    priceRange: "$139–$595",
     service: {
       name: "House Cleaning",
       serviceType: "House Cleaning",
       description:
         "Recurring house cleaning in Pinecrest and Kendall. One flat price per visit set by the size of your home.",
       offers: [
-        { name: "Size 1 home (up to 2 bedrooms)", price: 139, unit: "visit" },
-        { name: "Size 2 home (3 bedrooms)", price: 189, unit: "visit" },
-        { name: "Size 3 home (4 bedrooms)", price: 279, unit: "visit" },
+        { name: "Size 1 home (up to 1,400 sq ft)", price: 139, unit: "visit" },
+        { name: "Size 2 home (1,400–2,200 sq ft)", price: 189, unit: "visit" },
+        { name: "Size 3 home (2,200–3,200 sq ft)", price: 279, unit: "visit" },
+        { name: "Estate (3,200–4,800 sq ft)", price: 425, unit: "visit" },
+        { name: "Estate Plus (4,800–7,000 sq ft)", price: 595, unit: "visit" },
       ],
     },
   },
