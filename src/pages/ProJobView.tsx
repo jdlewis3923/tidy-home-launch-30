@@ -258,6 +258,48 @@ export default function ProJobView() {
           </section>
         )}
 
+        {attached.length > 0 && (
+          <section className="mt-6 rounded-2xl border border-border bg-card p-5">
+            <h2 className="text-base font-semibold text-foreground">Add-ons on this visit</h2>
+            <ul className="mt-3 space-y-3">
+              {attached.map((a) => (
+                <li key={a.id} className="rounded-xl border border-border p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-foreground">{a.addon_name}</span>
+                    {a.status === "completed" && (
+                      <span className="text-xs font-medium text-primary">
+                        Done{a.split_pay ? " · together" : ""}
+                      </span>
+                    )}
+                  </div>
+                  {a.status !== "completed" && visit.status !== "complete" && (
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        type="button"
+                        disabled={completing === a.id}
+                        onClick={() => completeAddon(a.id, "self")}
+                        className="flex-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+                      >
+                        I did this
+                      </button>
+                      {a.can_split && (
+                        <button
+                          type="button"
+                          disabled={completing === a.id}
+                          onClick={() => completeAddon(a.id, "together")}
+                          className="flex-1 rounded-lg border border-primary px-3 py-2 text-sm font-semibold text-primary disabled:opacity-60"
+                        >
+                          We did it together
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* B1 — before photos gate */}
         <section className="mt-6 rounded-2xl border border-border bg-card p-5">
           <h2 className="text-base font-semibold text-foreground">Before photos</h2>
