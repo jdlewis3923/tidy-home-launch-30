@@ -49,6 +49,36 @@ export const ADDON_CATALOG: Addon[] = [
 /** The pool the free monthly add-on for bundled plans is picked from. */
 export const GIFT_ELIGIBLE_ADDONS = ADDON_CATALOG.filter((a) => a.giftEligible);
 
+/** Spanish names by addon_key — used wherever a member sees an add-on name. */
+export const ADDON_NAME_ES: Record<string, string> = {
+  inside_oven_clean: 'Limpieza de horno (interior)',
+  inside_fridge_clean: 'Limpieza de nevera (interior)',
+  interior_windows: 'Ventanas interiores',
+  deep_baseboard_scrub: 'Limpieza profunda de zócalos',
+  inside_kitchen_cabinets: 'Interior de gabinetes de cocina',
+  blinds_shutters: 'Persianas y contraventanas',
+  fans_fixtures: 'Ventiladores y lámparas',
+  wall_door_spots: 'Manchas en paredes y puertas',
+  patio_lanai_furniture: 'Patio, terraza y muebles',
+  linen_bed_making: 'Sábanas y camas tendidas',
+  garage_sweep_tidy: 'Barrido y orden del garaje',
+  pantry_closet: 'Despensa o clóset (por área)',
+  weed_removal: 'Deshierbe de jardineras',
+  leaf_debris_cleanup: 'Limpieza de hojas y escombros',
+  bed_edge_reset: 'Perfilado de bordes de jardineras',
+  exterior_windows_screens: 'Ventanas y mallas exteriores',
+  driveway_pressure_wash: 'Lavado a presión de la entrada',
+  pet_hair_removal: 'Eliminación de pelo de mascotas',
+  interior_protect_condition: 'Protección y acondicionado del interior',
+  headlight_restoration: 'Restauración de faros',
+  clay_bar_ceramic_coat: 'Clay bar y recubrimiento cerámico',
+};
+
+/** Member-facing add-on name in the member's language (falls back to the given English name). */
+export function addonDisplayName(addonKey: string, fallback: string, lang: string): string {
+  return lang === 'es' ? (ADDON_NAME_ES[addonKey] ?? fallback) : fallback;
+}
+
 export const SERVICE_LABELS: Record<AddonService, string> = {
   cleaning: 'Cleaning',
   lawn: 'Lawn',
