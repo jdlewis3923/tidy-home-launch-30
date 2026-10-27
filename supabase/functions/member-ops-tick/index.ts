@@ -12,6 +12,7 @@ import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
 import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { applyMemberCredit } from '../_shared/member-credits.ts';
+import { RENEWAL_NOTICE_DAYS, yearlyPriceCents } from '../_shared/prepaid-year.ts';
 import { stripeSecretKey } from '../_shared/stripe-mode.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
@@ -43,7 +44,7 @@ Deno.serve(async (req) => {
       // renewal, tracked on the subscription row.
       const noticeBefore = new Date(Date.now() + RENEWAL_NOTICE_DAYS * 86_400_000).toISOString();
       const { data: renewing } = await admin.from('subscriptions')
-        .select('id, user_id, current_period_end, monthly_total_cents')
+        .select('id, user_id, current_period_end, monthly_total_cents, annual_notice_sent_for')
         .eq('billing_period', 'yearly')
         .eq('status', 'active')
         .not('current_period_end', 'is', null)
@@ -51,6 +52,7 @@ Deno.serve(async (req) => {
         .gt('current_period_end', new Date().toISOString());
       for (const s of renewing ?? []) {
         const renewDate = String(s.current_period_end).slice(0, 10);
+        if (s.annual_notice_sent_for === renewDate) continue; // one notice per renewal
         const amount = yearlyPriceCents(s.monthly_total_cents ?? 0);
         const { data: prof } = await admin.from('profiles').select('language').eq('user_id', s.user_id).maybeSingle();
         const es = String(prof?.language ?? 'en').trim() === 'es';
@@ -64,13 +66,9 @@ Deno.serve(async (req) => {
             : `Your annual plan renews on ${pretty} for $${(amount / 100).toFixed(2)}. Want to switch to monthly or cancel instead? Open your account before that date: jointidy.co/account`,
         });
         if (!insErr) {
-          await admin.from('subscriptions').update({ annual_notice_sent_for: renewDate }).eq('id', s.id)
-            .neq('annual_notice_sent_for', renewDate);
+          await admin.from('subscriptions').update({ annual_notice_sent_for: renewDate }).eq('id', s.id);
         }
       }
-      // Skip subs already noticed for this renewal.
-      // (annual_notice_sent_for is set above; the next tick's select still
-      // returns them, so filter here before inserting.)
     }
 
     // Retry pending member credits (e.g. Stripe was unreachable at skip time).
