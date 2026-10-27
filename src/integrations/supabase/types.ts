@@ -48,6 +48,7 @@ export type Database = {
           addon_price_cents: number
           attached_at: string
           completed_at: string | null
+          completed_by: string | null
           contractor_pay_cents: number | null
           entitlement_id: string | null
           free_period: string | null
@@ -58,6 +59,7 @@ export type Database = {
           jobber_visit_id: string | null
           removed_at: string | null
           service_type: string | null
+          split_pay: boolean
           status: string
           stripe_addon_price_id: string
           stripe_invoice_item_id: string | null
@@ -70,6 +72,7 @@ export type Database = {
           addon_price_cents: number
           attached_at?: string
           completed_at?: string | null
+          completed_by?: string | null
           contractor_pay_cents?: number | null
           entitlement_id?: string | null
           free_period?: string | null
@@ -80,6 +83,7 @@ export type Database = {
           jobber_visit_id?: string | null
           removed_at?: string | null
           service_type?: string | null
+          split_pay?: boolean
           status?: string
           stripe_addon_price_id: string
           stripe_invoice_item_id?: string | null
@@ -92,6 +96,7 @@ export type Database = {
           addon_price_cents?: number
           attached_at?: string
           completed_at?: string | null
+          completed_by?: string | null
           contractor_pay_cents?: number | null
           entitlement_id?: string | null
           free_period?: string | null
@@ -102,6 +107,7 @@ export type Database = {
           jobber_visit_id?: string | null
           removed_at?: string | null
           service_type?: string | null
+          split_pay?: boolean
           status?: string
           stripe_addon_price_id?: string
           stripe_invoice_item_id?: string | null
@@ -7002,6 +7008,7 @@ export type Database = {
           redo_visit_id: string | null
           requested_at: string
           resolved_at: string | null
+          responsible_pro_id: string | null
           scheduled_at: string | null
           scheduled_for: string | null
           source: string
@@ -7024,6 +7031,7 @@ export type Database = {
           redo_visit_id?: string | null
           requested_at?: string
           resolved_at?: string | null
+          responsible_pro_id?: string | null
           scheduled_at?: string | null
           scheduled_for?: string | null
           source?: string
@@ -7046,6 +7054,7 @@ export type Database = {
           redo_visit_id?: string | null
           requested_at?: string
           resolved_at?: string | null
+          responsible_pro_id?: string | null
           scheduled_at?: string | null
           scheduled_for?: string | null
           source?: string
@@ -9570,6 +9579,7 @@ export type Database = {
           resolved_at: string | null
           source: string
           stars: number | null
+          team_partner_contractor_id: string | null
           user_agent: string | null
           user_id: string | null
           verified: boolean
@@ -9597,6 +9607,7 @@ export type Database = {
           resolved_at?: string | null
           source?: string
           stars?: number | null
+          team_partner_contractor_id?: string | null
           user_agent?: string | null
           user_id?: string | null
           verified?: boolean
@@ -9624,6 +9635,7 @@ export type Database = {
           resolved_at?: string | null
           source?: string
           stars?: number | null
+          team_partner_contractor_id?: string | null
           user_agent?: string | null
           user_id?: string | null
           verified?: boolean
@@ -10180,6 +10192,16 @@ export type Database = {
           _visit: string
         }
         Returns: Json
+      }
+      admin_route_households: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          homes: number
+          pro_id: string
+          pro_name: string
+          visit_date: string
+          visits: number
+        }[]
       }
       admin_sched_state: { Args: never; Returns: Json }
       admin_set_alert_tier: {
@@ -11120,6 +11142,10 @@ export type Database = {
           policy_number: string
           status: string
         }[]
+      }
+      pro_complete_addon: {
+        Args: { _attach: string; _mode: string }
+        Returns: Json
       }
       pro_custom_hours_state: { Args: never; Returns: Json }
       pro_dates: { Args: { _weeks?: number }; Returns: Json }

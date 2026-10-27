@@ -1681,6 +1681,13 @@
       "when": 1793141426964,
       "tag": "0239_founding_registry_seal_status",
       "breakpoints": true
+    },
+    {
+      "idx": 240,
+      "version": "7",
+      "when": 1793141964038,
+      "tag": "0240_team_addon_redo_review_route",
+      "breakpoints": true
     }
   ]
 }
