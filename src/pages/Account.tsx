@@ -130,6 +130,8 @@ export default function Account() {
             <Row k="Preferred time" v={p?.preferred_time || "Any"} />
             <Row k="Notes for your Pro" v={p?.special_instructions || "None"} />
           </AccountCard>
+
+          <HomeNotesCard userId={data.userId} />
         </div>
 
         {/* Security + sign out */}
