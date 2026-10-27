@@ -307,6 +307,24 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: false, error: code ?? closeErr.message });
     }
     if (!closedVisit) return jsonResponse({ok:false,error:'visit_not_open'});
+
+    // Opted-in photo report: tell the member their visit photos are ready.
+    // Photos themselves auto-delete after 30 days (visit-photo-retention).
+    try {
+      const { data: prof } = await admin.from('profiles').select('photo_reports_opt_in').eq('user_id', visit.user_id).maybeSingle();
+      if (prof?.photo_reports_opt_in) {
+        await admin.from('member_notifications').insert({
+          user_id: visit.user_id,
+          kind: 'photo_report',
+          title: 'Your visit photo report is ready',
+          body: 'Your Pro\'s before-and-after photos from today\'s visit are in your Tidy dashboard. They\'re kept for 30 days, then deleted.',
+          dedupe_key: `photo-report-${visit_id}`,
+          related_visit_id: visit_id,
+        });
+      }
+    } catch (err) {
+      console.error('[pro-visit-action] photo report notice failed', err);
+    }
     if(visit.service_type==='cleaning'){
       const {data:actorPay}=await admin.rpc('cleaning_pro_visit_pay',{_visit:visit_id,_pro:uid});
       if(typeof actorPay==='number')pay=actorPay;
