@@ -1709,6 +1709,13 @@
       "when": 1793142778901,
       "tag": "0243_walkthrough_reserve_guard_shape",
       "breakpoints": true
+    },
+    {
+      "idx": 244,
+      "version": "7",
+      "when": 1793142810814,
+      "tag": "0244_walkthrough_reserve_guard_comment_fix",
+      "breakpoints": true
     }
   ]
 }
