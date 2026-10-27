@@ -6902,7 +6902,11 @@ export type Database = {
           car_waiting: boolean
           city: string
           cleaning_bathrooms: number | null
+          cleaning_confirm_token: string | null
+          cleaning_confirmed_at: string | null
           cleaning_measured_sqft: number | null
+          cleaning_new_monthly_cents: number | null
+          cleaning_old_monthly_cents: number | null
           cleaning_selected_range: string | null
           cleaning_selected_size: string | null
           cleaning_size_confirmation: string | null
@@ -6970,7 +6974,11 @@ export type Database = {
           car_waiting?: boolean
           city?: string
           cleaning_bathrooms?: number | null
+          cleaning_confirm_token?: string | null
+          cleaning_confirmed_at?: string | null
           cleaning_measured_sqft?: number | null
+          cleaning_new_monthly_cents?: number | null
+          cleaning_old_monthly_cents?: number | null
           cleaning_selected_range?: string | null
           cleaning_selected_size?: string | null
           cleaning_size_confirmation?: string | null
@@ -7038,7 +7046,11 @@ export type Database = {
           car_waiting?: boolean
           city?: string
           cleaning_bathrooms?: number | null
+          cleaning_confirm_token?: string | null
+          cleaning_confirmed_at?: string | null
           cleaning_measured_sqft?: number | null
+          cleaning_new_monthly_cents?: number | null
+          cleaning_old_monthly_cents?: number | null
           cleaning_selected_range?: string | null
           cleaning_selected_size?: string | null
           cleaning_size_confirmation?: string | null
@@ -9682,6 +9694,10 @@ export type Database = {
           skipped_founding: number
         }[]
       }
+      admin_cleaning_verify: {
+        Args: { _baths: number; _reservation: string; _sqft: number }
+        Returns: Json
+      }
       admin_cron_health: {
         Args: never
         Returns: {
@@ -9946,6 +9962,10 @@ export type Database = {
       claim_pro_notification: {
         Args: { _contractor_id: string; _kind: string; _scope: string }
         Returns: boolean
+      }
+      cleaning_conversion_block: {
+        Args: { r: Database["public"]["Tables"]["reservations"]["Row"] }
+        Returns: string
       }
       cleaning_size_from_sqft: {
         Args: { _baths: number; _sqft: number }
