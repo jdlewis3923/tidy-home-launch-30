@@ -1,5 +1,13 @@
 # Roadmap
 
+## Cleaning expansion (Oct 27) — build in order
+- [ ] Part 1 by Thu Oct 29 8 AM Miami: square-foot/bath sizes, Estate prices, lookup-key catalog live/test, reservation persistence, website/founding/member/yearly parity, phone/desktop evidence and deleted test reservations.
+- [ ] Part 2 before Nov 16: Estate scheduling, checked teams/helper, lead/zones, capacity, Pro pay/statements, add-ons, Needs team digest.
+- [ ] Part 3 before Nov 16: exact EN/ES Member Guide, checkout acknowledgement, policy gates and linked messages. Blocker: guide referenced in brief but not attached.
+- [ ] Part 4 before Nov 16: cleaning verification, customer-confirmed increases, encrypted visit-day access, first-visit/exit/photo/claim workflows, rotating standard.
+- [ ] Part 5 before Nov 16: Stripe policy changes/credits/pauses/refunds, founding locks, isolated policy journeys and test-mode financial evidence.
+- [ ] Cross-surface bilingual update and complete changed-page/message/document/price inventory.
+
 ## Oct 22 reminder check + 9 AM text reporting (Oct 25)
 - [x] Check actual Oct 22 initial SMS recipients by send logs, reconcile duplicate candidates against submitted records: Alden, Daniela and Stanley submitted; Kerric received finish reminders Oct 23 and 24. No duplicate Monday reminders requested unless not already handled.
 - [x] Added named candidate text outcomes through current digest cutoff (including morning sends), separate sent/queued/failed sections and recipient summary in 9 AM SMS; deployed dispatcher and live preview verified 22 historical sends + three Monday queues with names/time. Existing hourly owner schedule and 15-minute SMS release active; 16 tests passed, build OK. No duplicate Oct 22 reminders queued because already handled.
