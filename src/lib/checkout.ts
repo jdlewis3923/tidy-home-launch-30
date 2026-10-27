@@ -25,7 +25,7 @@ import {
   type Frequency,
   type ServiceType,
 } from '@/lib/dashboard-pricing';
-import type { CanonSize, WashCount } from '@/lib/pricing-canon';
+import type { CanonSize, CleaningSize, WashCount } from '@/lib/pricing-canon';
 
 interface CheckoutPayload {
   config: ConfigState;
@@ -37,7 +37,7 @@ interface CheckoutPayload {
 
 export interface CheckoutServiceLine {
   service: ServiceType;
-  size: CanonSize;
+  size: CleaningSize;
   frequency: Frequency;
   /** Interior sq ft (cleaning) or turf sq ft (lawn) — drives the surcharge. */
   sq_ft?: number | null;
@@ -87,6 +87,7 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     // The underlying size inputs — the server recomputes size and rejects a
     // mismatch, so a hand-crafted POST can't buy a size it isn't.
     bedrooms: config.bedrooms ? parseInt(config.bedrooms, 10) : null,
+    cleaning_range: config.cleaningRange ?? null,
     bathrooms: config.bathrooms ? parseFloat(config.bathrooms) : null,
     lawn_choice: config.lawnChoice ?? null,
     vehicle_class: config.vehicleClass ?? null,
@@ -145,6 +146,7 @@ export async function startAddServiceCheckout(args: {
   lang?: 'en' | 'es';
   bedrooms?: number | null;
   bathrooms?: number | null;
+  cleaning_range?: CleaningSize | 'quote' | null;
   lawn_choice?: 'small' | 'standard' | 'large' | 'over' | null;
   vehicle_class?: string | null;
   scopeRef?: string;
@@ -155,6 +157,7 @@ export async function startAddServiceCheckout(args: {
     addons: [],
     zip: args.zip,
     bedrooms: args.bedrooms ?? null,
+    cleaning_range: args.cleaning_range ?? null,
     bathrooms: args.bathrooms ?? null,
     lawn_choice: args.lawn_choice ?? null,
     vehicle_class: args.vehicle_class ?? null,
