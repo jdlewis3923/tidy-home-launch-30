@@ -44,15 +44,21 @@ import {
 
 const ICONS: Record<string, LucideIcon> = {
   Archive,
+  Armchair,
+  BedDouble,
+  Blinds,
   Boxes,
   Brush,
   Bug,
   Dog,
   Droplets,
+  Fan,
   Flame,
   Leaf,
   Lightbulb,
   Minus,
+  PackageOpen,
+  Paintbrush,
   PanelTop,
   PawPrint,
   RectangleVertical,
@@ -66,6 +72,7 @@ const ICONS: Record<string, LucideIcon> = {
   Sparkles,
   SprayCan,
   Sprout,
+  Warehouse,
   Wind,
 };
 

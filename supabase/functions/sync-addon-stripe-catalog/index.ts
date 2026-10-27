@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
 
     const { data: rows, error: selErr } = await admin
       .from('addon_catalog')
-      .select('id, addon_key, display_name, price_cents, stripe_product_id, stripe_price_id, is_active')
+      .select('id, addon_key, display_name, price_cents, lookup_key, stripe_product_id, stripe_price_id, is_active')
       .order('sort_order', { ascending: true });
     if (selErr) return jsonResponse({ ok: false, error: 'catalog_fetch_failed', detail: selErr.message }, 500);
 
