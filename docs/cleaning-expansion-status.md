@@ -48,8 +48,15 @@
 - Route households: a new owner-only report counts distinct homes and visits per Pro per day, including team partners and backups.
 - Backup Pros now see the covered visit in their own job list.
 
+## Prepaid Year lifecycle (Oct 27, final pass continued)
+- Yearly checkout is unblocked for cleaning-only carts (a Stripe subscription cannot mix monthly and annual prices, so lawn, car care and add-ons stay monthly; adding to an existing plan stays monthly). Both the hosted and embedded payment paths resolve the annual lookup keys and record the billing period.
+- The webhook stores the billing period and period dates, and keeps the stored monthly total at the monthly equivalent so per-visit prices, credits and displays never see the lump sum.
+- Canceling a prepaid year refunds immediately: started months are charged at the member's monthly rate, the rest comes back, and a ledger row makes a repeat cancel refund nothing twice. The member gets a cancellation notice with the exact refund amount.
+- 45 days before renewal the daily member job sends a bilingual notice with the renewal date and amount and a link to switch to monthly or cancel — once per renewal.
+- Test-mode proof against the real catalog annual price (clean_2_biweekly_annual): $3,758.40 charged (exactly 12 × $348 × 0.90), interval confirmed yearly, cancel after one started month charged $348.00 and refunded $3,410.40, subscription canceled, throwaway customer deleted. No live charges.
+- Limitation: the member-facing cancel button path is deployed but has not been clicked end-to-end with a real signed-in member on an annual plan (none exist yet).
+
 ## Not complete
-- Annual subscription lifecycle, refund ledger and 45-day renewal notices. Annual collection remains blocked.
 - Route household report has no admin screen yet (data function is live); full payout journey evidence still needs real active Pros.
 - Full hiring/onboarding/agreement/document copy inventory and remaining bilingual cross-surface checks (add-on names currently display in English only, same as the existing add-ons).
 
