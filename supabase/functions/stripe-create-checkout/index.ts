@@ -35,6 +35,7 @@ import {
   CLEANING_SURCHARGE,
   LAWN_SURCHARGE,
   freeAddonsPerMonth,
+  cleaningLookupKey,
   lookupKeyFor,
   monthlyPrice,
   perVisitPrice,
@@ -173,8 +174,15 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: "validation_failed", details: parsed.error.flatten() }, 400);
   }
   const input = parsed.data;
-  // Annual policy/refund lifecycle must be verified before accepting prepaid money.
-  if (input.billing_period === 'yearly') return jsonResponse({ ok: false, error: 'prepaid_conversion_not_ready' }, 409);
+  // Prepaid Year: cleaning plans only. One Stripe subscription cannot mix
+  // monthly and annual prices, so lawn, car care, add-ons and add-to-plan
+  // stay monthly.
+  if (input.billing_period === 'yearly') {
+    if (input.add_to_existing) return jsonResponse({ ok: false, error: 'yearly_new_plan_only' }, 409);
+    if (input.car_wash || input.addons.length > 0 || input.services.some((s) => s.service !== 'cleaning')) {
+      return jsonResponse({ ok: false, error: 'yearly_cleaning_only' }, 409);
+    }
+  }
 
   if (input.add_to_existing && (input.services.length !== 1 || input.addons.length > 0 || input.car_wash)) {
     return jsonResponse({ ok: false, error: "add_service_requires_one_recurring_service" }, 400);
