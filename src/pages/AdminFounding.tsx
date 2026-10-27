@@ -78,3 +78,33 @@ export default function AdminFounding() {
     </main>
   );
 }
+
+/** Founding seal delivery: pending → shipped → delivered, logged per home. */
+function SealButton({ row, onDone }: { row: Row; onDone: (s: Row["seal_status"]) => void }) {
+  const [busy, setBusy] = useState(false);
+  const next: Record<Row["seal_status"], Row["seal_status"]> = { pending: "shipped", shipped: "delivered", delivered: "delivered" };
+  const mark = async () => {
+    const target = next[row.seal_status];
+    if (target === row.seal_status) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_mark_seal", { _grant: row.grant_id, _status: target });
+    setBusy(false);
+    if (!error) onDone(target);
+  };
+  const styles: Record<Row["seal_status"], string> = {
+    pending: "border-border text-muted-foreground",
+    shipped: "border-primary/40 text-primary",
+    delivered: "border-emerald-500/40 text-emerald-600",
+  };
+  return (
+    <button
+      type="button"
+      onClick={mark}
+      disabled={busy || row.seal_status === "delivered"}
+      title={row.seal_status === "delivered" ? "Seal delivered" : `Mark seal ${next[row.seal_status]}`}
+      className={`rounded-full border px-2.5 py-1 text-xs font-semibold capitalize transition hover:bg-muted ${styles[row.seal_status]} disabled:opacity-60`}
+    >
+      {busy ? "…" : row.seal_status}
+    </button>
+  );
+}
