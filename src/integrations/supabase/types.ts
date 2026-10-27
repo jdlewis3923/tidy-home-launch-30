@@ -4948,6 +4948,39 @@ export type Database = {
         }
         Relationships: []
       }
+      member_guide_acceptances: {
+        Row: {
+          accepted_at: string
+          id: string
+          ip: string | null
+          language: string
+          user_agent: string | null
+          user_id: string
+          version: string
+          wording: string
+        }
+        Insert: {
+          accepted_at?: string
+          id?: string
+          ip?: string | null
+          language: string
+          user_agent?: string | null
+          user_id: string
+          version: string
+          wording: string
+        }
+        Update: {
+          accepted_at?: string
+          id?: string
+          ip?: string | null
+          language?: string
+          user_agent?: string | null
+          user_id?: string
+          version?: string
+          wording?: string
+        }
+        Relationships: []
+      }
       member_notifications: {
         Row: {
           body: string
@@ -10450,6 +10483,7 @@ export type Database = {
         }
         Returns: Json
       }
+      member_guide_accepted: { Args: { _user: string }; Returns: boolean }
       member_ops_tick: { Args: never; Returns: Json }
       member_rate_card_version: { Args: { _user: string }; Returns: number }
       member_scope_version: {
