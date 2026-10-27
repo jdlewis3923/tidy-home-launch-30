@@ -926,6 +926,26 @@ async function handleInvoicePaymentFailed(stripe: Stripe, supabase: any, event: 
     update_payment_url: invoice.hosted_invoice_url, // also a CTA target
   });
 
+  // Member Guide: immediate text on any failure (bilingual, database-first).
+  try {
+    await supabase.rpc('sched_customer_notice', {
+      _user: userId,
+      _kind: isFinal ? 'payment_failed_final' : 'payment_failed',
+      _title: 'Payment issue — action needed',
+      _body: isFinal
+        ? 'We still could not collect your payment, so your plan is paused. Update your card in your Tidy account and everything resumes automatically — same plan, same price.'
+        : 'We could not collect your latest payment. Please update your card in your Tidy account — we will try again automatically and your visits continue as normal for now.',
+      _dedupe: `payment-failed-${invoice.id}-${attemptCount}`,
+      _visit: null,
+      _sms: isFinal
+        ? 'Tidy: we still could not collect your payment, so your plan is paused. Update your card in your account and everything resumes automatically — same plan, same price.'
+        : 'Tidy: we could not collect your latest payment. Please update your card in your account — we will retry automatically and your visits continue as normal for now.',
+      _expires: null,
+    });
+  } catch (err) {
+    console.error('[stripe-webhook] payment-failed member notice failed', err);
+  }
+
   if (isFinal && stripeSubId) {
     try {
       await stripe.subscriptions.update(stripeSubId, {
