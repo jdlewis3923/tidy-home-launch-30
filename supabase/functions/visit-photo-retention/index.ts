@@ -71,19 +71,24 @@ Deno.serve(async (req) => {
       .select('id, photo_paths')
       .eq('status', 'closed')
       .lt('closed_at', cutoff)
+      .is('photos_purged_at', null)
       .limit(200);
     if (claimErr) throw new Error(`damage_claims read failed: ${claimErr.message}`);
 
     const claimPaths = (closedClaims ?? []).flatMap((c) => c.photo_paths ?? []);
     let claimPhotosDeleted = 0;
-    if (claimPaths.length > 0) {
-      const { error: claimStorageErr } = await admin.storage.from('claim-photos').remove(claimPaths);
-      if (claimStorageErr) throw new Error(`claim-photos storage delete failed: ${claimStorageErr.message}`);
-      claimPhotosDeleted = claimPaths.length;
-      // Clear the paths so the next run does not try to delete them again.
-      for (const c of closedClaims ?? []) {
-        await admin.from('damage_claims').update({ photo_paths: [] }).eq('id', c.id);
+    if (closedClaims && closedClaims.length > 0) {
+      if (claimPaths.length > 0) {
+        const { error: claimStorageErr } = await admin.storage.from('claim-photos').remove(claimPaths);
+        if (claimStorageErr) throw new Error(`claim-photos storage delete failed: ${claimStorageErr.message}`);
+        claimPhotosDeleted = claimPaths.length;
       }
+      // Mark purged so the next run does not reprocess them.
+      const { error: purgeErr } = await admin
+        .from('damage_claims')
+        .update({ photos_purged_at: new Date().toISOString() })
+        .in('id', closedClaims.map((c) => c.id));
+      if (purgeErr) throw new Error(`damage_claims purge mark failed: ${purgeErr.message}`);
     }
     result.claim_photos_deleted = claimPhotosDeleted;
 

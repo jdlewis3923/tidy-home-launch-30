@@ -2905,6 +2905,7 @@ export type Database = {
           description: string
           id: string
           photo_paths: string[]
+          photos_purged_at: string | null
           reported_at: string
           status: string
           user_id: string
@@ -2916,6 +2917,7 @@ export type Database = {
           description: string
           id?: string
           photo_paths: string[]
+          photos_purged_at?: string | null
           reported_at?: string
           status?: string
           user_id: string
@@ -2927,6 +2929,7 @@ export type Database = {
           description?: string
           id?: string
           photo_paths?: string[]
+          photos_purged_at?: string | null
           reported_at?: string
           status?: string
           user_id?: string
