@@ -1569,6 +1569,13 @@
       "when": 1793137340326,
       "tag": "0223_admin_cleaning_team_registration",
       "breakpoints": true
+    },
+    {
+      "idx": 224,
+      "version": "7",
+      "when": 1793137435110,
+      "tag": "0224_cleaning_owner_policy_permission",
+      "breakpoints": true
     }
   ]
 }
