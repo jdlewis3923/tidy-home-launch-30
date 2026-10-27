@@ -118,6 +118,7 @@ export default function StepPayment({ state, onChange }: Props) {
       services, addons, car_wash,
       reservation_id: state.reservationId,
       cleaning_range: state.cleaningRange ?? null,
+      home_sq_ft: state.cleaningSqFt ? Number(state.cleaningSqFt) : null,
       billing_period: state.billingPeriod ?? 'monthly',
       referral_code: state.referralCode?.trim() || undefined,
       zip: state.zip,
@@ -167,7 +168,7 @@ export default function StepPayment({ state, onChange }: Props) {
           await import('@/lib/consent');
         // AWAITED before the charge: this is the record we would rely on if a
         // consent claim is ever made, so it must exist before money moves.
-        const [smsOk, termsOk, guideOk] = await Promise.all([
+        const [guideOk, smsOk, termsOk] = await Promise.all([
           recordConsentWithRetry({ kind: 'member_guide', version: MEMBER_GUIDE_VERSION, wording: language === 'es' ? 'He leído cómo funciona mi membresía.' : "I've read how my membership works.", granted: true, email: state.email || undefined }),
           recordConsentWithRetry({
             kind: 'sms',
@@ -251,7 +252,7 @@ export default function StepPayment({ state, onChange }: Props) {
         <div className="mt-4 space-y-2 text-sm">
           {pricing.servicePrices.map((sp, idx) => {
             const size = sizeFor(state, sp.service);
-            const freq = state.frequencies[sp.service]!;
+            const freq = state.frequencies[sp.service] ?? 'monthly';
             const quoted = size === 'quote' || !size;
             return (
               <div

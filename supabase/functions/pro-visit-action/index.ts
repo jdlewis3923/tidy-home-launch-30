@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
       const matches = booked != null && observedNum <= booked;
       const { error } = await admin.from('size_reviews').upsert({
         visit_id, user_id: visit.user_id, subscription_id: visit.subscription_id, service: svc,
-        booked_size: booked, observed_bedrooms: d.bedrooms ?? null, observed_bathrooms: d.bathrooms ?? null,
+        booked_size: booked, observed_bedrooms: d.bedrooms ?? null, observed_bathrooms: d.bathrooms ?? null, observed_sq_ft: d.sq_ft ?? null,
         observed_vehicle_class: d.vehicle_class ?? null, observed_plate: d.plate ?? null,
         observed_size: observed === 'quote' ? null : observedNum, matches, status: matches ? 'recorded' : 'open',
       }, { onConflict: 'visit_id' });
@@ -274,19 +274,20 @@ Deno.serve(async (req) => {
 
     const now = new Date();
     const { lat, lng, not_reached_note } = parsed.data as { lat: number; lng: number; not_reached_note?: string };
-    const { error: closeErr } = await admin
+    const { data: closedVisit, error: closeErr } = await admin
       .from('visits')
       .update({
         completed_at: now.toISOString(), status: 'complete', visit_pay_cents: pay,
         check_out_at: now.toISOString(), check_out_lat: lat, check_out_lng: lng,
         not_reached_note: not_reached_note || null,
       })
-      .eq('id', visit_id);
+      .eq('id', visit_id).in('status', ['scheduled','on_the_way','in_progress']).select('id').maybeSingle();
     // The DB refuses to close without before/after photos and GPS check-in/out.
     if (closeErr) {
       const code = /(before_photos_required|after_photos_required|gps_check_in_required|gps_check_out_required)/.exec(closeErr.message)?.[1];
       return jsonResponse({ ok: false, error: code ?? closeErr.message });
     }
+    if (!closedVisit) return jsonResponse({ok:false,error:'visit_not_open'});
 
     // Roll this Pro's payout week (Monday-Sunday, paid the following Friday).
     const { error: creditErr } = visit.service_type === 'cleaning'

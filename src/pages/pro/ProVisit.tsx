@@ -18,6 +18,7 @@ import {
 import { useProSession } from "@/hooks/useProSession";
 import { VISIT_KIND_LABEL, dayLabel, timeWindow, visitAction } from "@/lib/pro-portal";
 import { SERVICE_LABEL, money } from "@/lib/pro-pay";
+import CleaningTeamInspection from '@/components/pro/CleaningTeamInspection';
 
 export default function ProVisit() {
   const { id } = useParams<{ id: string }>();
@@ -41,6 +42,7 @@ export default function ProVisit() {
   const [baths, setBaths] = useState("");
   const [vclass, setVclass] = useState("sedan");
   const [plate, setPlate] = useState("");
+  const [reportedPay, setReportedPay] = useState<number | null>(null);
 
   const GPS_MSG = "Turn on location for this site in your phone settings, then try again. Check-in and check-out need your location.";
 
@@ -114,6 +116,7 @@ export default function ProVisit() {
       return;
     }
     setBlockOpen(false);
+    setReportedPay(res.visit_pay_cents ?? null);
     setBlockedDone(true);
     setSuccess(true);
     setTimeout(() => {
@@ -182,7 +185,7 @@ export default function ProVisit() {
           </span>
           <p className="mt-4 text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">
             {blockedDone
-              ? `Reported — you're paid in full for this visit (${money(visit.visit_pay_cents)}).`
+              ? `Reported — ${money(reportedPay)} added to your earnings.`
               : `Visit complete — ${money(visit.visit_pay_cents)} added to this week's earnings.`}
           </p>
         </div>
@@ -342,6 +345,7 @@ export default function ProVisit() {
           >
             Complete visit
           </ProButton>
+          {visit.service_type==='cleaning'&&<CleaningTeamInspection visitId={visit.id}/>}
           {!photosOk && !visit.completed_at && (
             <p className="text-center text-[13px] text-[hsl(var(--pro-ink-soft))]">
               One before photo and one after photo are required.
@@ -373,7 +377,7 @@ export default function ProVisit() {
           >
             <p className="text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">Can't work this visit?</p>
             <p className="mt-1 text-[14px] text-[hsl(var(--pro-ink-soft))]">
-              You drove out, so you're paid in full. Tell us what stopped you.
+              {visit.service_type==='cleaning' ? "Lockout or unsafe exit pays half the visit rate. Tell us what stopped you." : "You drove out, so you're paid in full. Tell us what stopped you."}
             </p>
             <div className="mt-4 space-y-2">
               {([
@@ -408,7 +412,7 @@ export default function ProVisit() {
               disabled={busy === "blocked" || blockNote.trim().length < 10}
               onClick={() => void reportBlocked()}
             >
-              {busy === "blocked" ? "Sending…" : "Report and get paid in full"}
+              {busy === "blocked" ? "Sending…" : "Report visit"}
             </ProButton>
             <button
               type="button"
