@@ -24,12 +24,17 @@
 - Live catalog check rebuilt for the five cleaning bands and run against live Stripe: all 45 recurring keys (monthly + annual) resolve to active prices at exact canon amounts; standard bundle ($393.00) and Estate weekly ($1,396.00) reference carts match; no archived price is selectable.
 - Test-mode money lifecycle proven twice against real catalog test prices (clean_2_biweekly $348.00 and clean_estate_weekly $1,396.00): subscription active, first invoice paid at the exact amount, partial refund succeeded, subscription canceled, throwaway customer deleted. No live charges.
 
+## Access, photos, claims and credits (Oct 27, later)
+- Entry codes and access notes are encrypted at rest (pgcrypto; key in a table with no client access). Booking entry details move into an encrypted blob at booking time; Pros decrypt only on visit day; day-of texts decrypt server-side; members read/update only their own code through server functions. All plaintext copies cleared; round-trip verified.
+- Visit photos are deleted after 30 days by a daily 6:30 AM ET job (registered, first run is a no-op — no photos exist yet); photos on visits with open claims are kept, claim photos purge 30 days after the claim closes. Members get a notification when a claim is resolved.
+- Member credit ledger: skips (48h+ notice, max 2 per year per service) issue a real Stripe customer-balance credit that comes off the next bill; the first lockout each year is credited automatically with a member notice, later lockouts are charged with a notice. Pending credits retry daily. Test-mode proof: charge $348.00, partial refund, and a balance credit all succeeded against real catalog prices.
+
 ## Not complete
 - Annual subscription lifecycle, refund ledger and 45-day renewal notices. Annual collection remains blocked.
 - Team backup/move workflow, per-add-on assigned/together completion, responsible-zone redos, named review split/rating propagation, route household counts and full payout journey evidence.
 - New cleaning add-on Stripe/catalog provisioning and all selection surfaces.
-- Encrypted access card, seal delivery, opted-in reports and 30-day deletion, home notes and complete claim workflow.
-- Enforced first annual lockout courtesy, reschedule/skip limits and actual Stripe credits, weather/payment/pause reminder journeys and policy-trigger notices.
+- Seal delivery, opted-in photo reports, home notes.
+- Weather credits on canceled (not moved) storm visits; payment-failed pause journey verification.
 - Full hiring/onboarding/agreement/document copy inventory and remaining bilingual cross-surface checks.
 
 ## Verification limitation
