@@ -7,7 +7,7 @@
 - [ ] Part 2 before Nov 16: Estate scheduling, checked teams/helper, lead/zones, capacity, Pro pay/statements, add-ons, Needs team digest.
   - Added protected verified-team records, owner team registration/selection, reservation staffing gate, team subscription/visit linkage, both-window overlap checks, team capacity, Lead inspection/zones and private split pay statements. Corrected gift-pay preservation and atomic cleaning completion/payout. Still open: backup UI, per-Pro GPS and photo access, assigned/together add-on completion, review/redo responsibility, route home counts, Needs team digest and full real-flow evidence.
 - [ ] Part 3 before Nov 16: exact EN/ES Member Guide, checkout acknowledgement, policy gates and linked messages. Guide supplied Oct 27; integrate verbatim.
-  - Exact bilingual guide page and mirrored wording, required persisted checkout acknowledgement, dashboard/Billing links and full-guide welcome email added; guide parity passes. FAQ/chatbot and policy enforcement/messages remain open.
+  - Exact bilingual guide page and mirrored wording, required persisted checkout acknowledgement, dashboard/Billing links and full-guide welcome email added; guide parity passes. FAQ answers now use exact guide sections and public/support assistants prioritize the same guide with section links. Policy enforcement/messages remain open.
 - [ ] Part 4 before Nov 16: cleaning verification, customer-confirmed increases, encrypted visit-day access, first-visit/exit/photo/claim workflows, rotating standard.
 - [ ] Part 5 before Nov 16: Stripe policy changes/credits/pauses/refunds, founding locks, isolated policy journeys and test-mode financial evidence.
 - [ ] Cross-surface bilingual update and complete changed-page/message/document/price inventory.

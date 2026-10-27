@@ -4,6 +4,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { sendBrevoEmail as sendViaBrevo } from "./brevo-send.ts";
 import { vendorFetch } from './http.ts';
+import { MEMBER_GUIDE } from './member-guide.ts';
 
 export type SupportMsg = { role: "user" | "assistant"; content: string };
 
@@ -30,10 +31,10 @@ export async function runSupportAssistant(
     return { reply: STATIC_ACK, confidence: 0, escalate: true, knowledge_used: false };
   }
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
+  const backendUrl = Deno.env.get('SUPABASE_URL');
+  const backendKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!backendUrl || !backendKey) return {reply:STATIC_ACK,confidence:0,escalate:true,knowledge_used:false};
+  const supabase = createClient(backendUrl, backendKey);
 
   const { data: kbRow } = await supabase
     .from("chatbot_knowledge")
@@ -66,6 +67,8 @@ RULES:
 - If the user asks something not covered, asks to book/cancel/reschedule, complains, or needs a real person — set escalate=true.
 - Never claim to book, cancel, or reschedule visits yourself.
 - If you escalate, your reply should be a brief acknowledgment that a teammate will follow up.
+- For membership policies, the approved MEMBER GUIDE overrides older knowledge. Use its exact relevant English/Spanish wording and link to https://jointidy.co/member-guide#SECTION_ID (append -es for Spanish). Never claim enforcement or an action happened.
+- Yearly collection is not available yet; do not offer to take yearly payment.
 
 OUTPUT FORMAT (STRICT):
 Return ONLY a single JSON object, no prose, no markdown fences:
@@ -77,7 +80,10 @@ confidence guidance:
 - below 0.7 if you're guessing — and you should also set escalate=true.
 
 BUSINESS KNOWLEDGE:
-${knowledge}`;
+${knowledge}
+
+MEMBER GUIDE (authoritative):
+${JSON.stringify(MEMBER_GUIDE)}`;
 
   try {
     const aiResp = await vendorFetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
