@@ -1611,6 +1611,13 @@
       "when": 1793138196894,
       "tag": "0229_visit_access_visit_day_only",
       "breakpoints": true
+    },
+    {
+      "idx": 230,
+      "version": "7",
+      "when": 1793140084397,
+      "tag": "0230_access_details_encryption",
+      "breakpoints": true
     }
   ]
 }
