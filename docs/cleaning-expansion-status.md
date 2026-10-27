@@ -20,8 +20,12 @@
 - Existing 9 AM owner digest includes Estate Plus reservations needing teams.
 - Started-month annual refund math fixed for anniversary times and month-end starts; undo cancellation preserves active pause state.
 
+## Stripe evidence (Oct 27)
+- Live catalog check rebuilt for the five cleaning bands and run against live Stripe: all 45 recurring keys (monthly + annual) resolve to active prices at exact canon amounts; standard bundle ($393.00) and Estate weekly ($1,396.00) reference carts match; no archived price is selectable.
+- Test-mode money lifecycle proven twice against real catalog test prices (clean_2_biweekly $348.00 and clean_estate_weekly $1,396.00): subscription active, first invoice paid at the exact amount, partial refund succeeded, subscription canceled, throwaway customer deleted. No live charges.
+
 ## Not complete
-- Actual paid conversion and isolated Stripe invoices/credits/refunds, annual subscription lifecycle, refund ledger and 45-day renewal notices. Annual collection remains blocked.
+- Annual subscription lifecycle, refund ledger and 45-day renewal notices. Annual collection remains blocked.
 - Team backup/move workflow, per-add-on assigned/together completion, responsible-zone redos, named review split/rating propagation, route household counts and full payout journey evidence.
 - New cleaning add-on Stripe/catalog provisioning and all selection surfaces.
 - Encrypted access card, seal delivery, opted-in reports and 30-day deletion, home notes and complete claim workflow.
