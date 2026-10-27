@@ -5,7 +5,7 @@
   - Completed: five-band quotes, live/test additive catalog, reservation readback, phone/desktop quote checks; admin-created walkthrough slots, shared hosted/embedded verification gates, atomic size approval/decline page and admin copy-link control, verified quote hydration. Still open: verified end-to-end paid conversion, yearly billing lifecycle, notification delivery and full bilingual cross-surface review; prepaid collection is blocked in both payment paths rather than billed monthly.
   - Oct 27 approval checks: 70 focused tests pass; signed-in test setup and public accept/decline reload verified on desktop/phone. Accepted $189 → $425 saved at v1; decline retained $189 and billing hold. Test reservation removed; no messages, charges or publication.
 - [ ] Part 2 before Nov 16: Estate scheduling, checked teams/helper, lead/zones, capacity, Pro pay/statements, add-ons, Needs team digest.
-- [ ] Part 3 before Nov 16: exact EN/ES Member Guide, checkout acknowledgement, policy gates and linked messages. Blocker: guide referenced in brief but not attached.
+- [ ] Part 3 before Nov 16: exact EN/ES Member Guide, checkout acknowledgement, policy gates and linked messages. Guide supplied Oct 27; integrate verbatim.
 - [ ] Part 4 before Nov 16: cleaning verification, customer-confirmed increases, encrypted visit-day access, first-visit/exit/photo/claim workflows, rotating standard.
 - [ ] Part 5 before Nov 16: Stripe policy changes/credits/pauses/refunds, founding locks, isolated policy journeys and test-mode financial evidence.
 - [ ] Cross-surface bilingual update and complete changed-page/message/document/price inventory.
