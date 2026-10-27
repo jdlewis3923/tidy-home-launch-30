@@ -1492,6 +1492,13 @@
       "when": 1793134182383,
       "tag": "0212_cleaning_expansion_reservation_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 213,
+      "version": "7",
+      "when": 1793134592997,
+      "tag": "0213_cleaning_walkthrough_booking",
+      "breakpoints": true
     }
   ]
 }

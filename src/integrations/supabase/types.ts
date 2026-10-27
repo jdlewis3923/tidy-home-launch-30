@@ -1691,6 +1691,41 @@ export type Database = {
         }
         Relationships: []
       }
+      cleaning_walkthrough_slots: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          reservation_id: string | null
+          starts_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          reservation_id?: string | null
+          starts_at: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          reservation_id?: string | null
+          starts_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_walkthrough_slots_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_documents: {
         Row: {
           admin_only: boolean
@@ -6876,6 +6911,7 @@ export type Database = {
           cleaning_verified_bathrooms: number | null
           cleaning_verified_by: string | null
           cleaning_verified_size: string | null
+          cleaning_walkthrough_slot_id: string | null
           converted_at: string | null
           created_at: string
           custom_quote: boolean
@@ -6943,6 +6979,7 @@ export type Database = {
           cleaning_verified_bathrooms?: number | null
           cleaning_verified_by?: string | null
           cleaning_verified_size?: string | null
+          cleaning_walkthrough_slot_id?: string | null
           converted_at?: string | null
           created_at?: string
           custom_quote?: boolean
@@ -7010,6 +7047,7 @@ export type Database = {
           cleaning_verified_bathrooms?: number | null
           cleaning_verified_by?: string | null
           cleaning_verified_size?: string | null
+          cleaning_walkthrough_slot_id?: string | null
           converted_at?: string | null
           created_at?: string
           custom_quote?: boolean
@@ -7061,7 +7099,15 @@ export type Database = {
           waitlist_services?: string[]
           zip?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reservations_cleaning_walkthrough_slot_id_fkey"
+            columns: ["cleaning_walkthrough_slot_id"]
+            isOneToOne: false
+            referencedRelation: "cleaning_walkthrough_slots"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_bonus_audit: {
         Row: {
@@ -10726,6 +10772,10 @@ export type Database = {
         Returns: Json
       }
       repoint_cron_to_helper: { Args: { _job_name: string }; Returns: string }
+      reserve_cleaning_walkthrough: {
+        Args: { _reservation: string; _slot: string }
+        Returns: boolean
+      }
       review_bonus_next_friday: { Args: never; Returns: string }
       review_bonus_precheck: {
         Args: { _member: string; _pro: string; _stars: number }
