@@ -113,6 +113,9 @@ export default function StepPayment({ state, onChange }: Props) {
     const attr = getUtmAttribution();
     return {
       services, addons, car_wash,
+      reservation_id: state.reservationId,
+      cleaning_range: state.cleaningRange ?? null,
+      billing_period: state.billingPeriod ?? 'monthly',
       referral_code: state.referralCode?.trim() || undefined,
       zip: state.zip,
       // Underlying size inputs — the server recomputes size and rejects a mismatch.

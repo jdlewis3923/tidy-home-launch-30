@@ -46,6 +46,7 @@ import {
 } from "../_shared/pricing-canon.ts";
 import { checkServiceLine } from "../_shared/size-validation.ts";
 import { lawnCheckoutGate } from "../_shared/lawn-gate.ts";
+import { cleaningCheckoutGate } from "../_shared/cleaning-gate.ts";
 import { groupsFor, verifyScopeAcceptance } from "../_shared/scope.ts";
 import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
 import { stripeMode, stripeModeConflict, stripeSecretKey } from "../_shared/stripe-mode.ts";
@@ -67,6 +68,7 @@ const SizeEnum = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)
 const CheckoutInputSchema = z.object({
   /** Ref from scope-accept: the customer's stored "I've read what's included" rows. */
   scope_acceptance_ref: z.string().trim().max(80).optional(),
+  reservation_id: z.string().uuid().optional(),
   services: z
     .array(
       z.object({
@@ -231,14 +233,8 @@ Deno.serve(async (req) => {
   });
   // New cleaning selections require measured size and staffing before billing.
   // Verification also applies to legacy clients; omitting a range cannot bypass it.
-  if (input.services.some(s => s.service === 'cleaning')) {
-    const { data: reservation, error } = await supabase.from('reservations').select('cleaning_verified_at,cleaning_verified_size,cleaning_size_confirmation,cleaning_team_ready')
-      .eq('email', (user.email ?? '').toLowerCase()).neq('status', 'canceled').order('created_at', { ascending: false }).limit(1).maybeSingle();
-    const clean = input.services.find(s => s.service === 'cleaning');
-    if (error || !reservation?.cleaning_verified_at) return jsonResponse({ ok: false, error: 'cleaning_requires_verification' }, 409);
-    if (reservation.cleaning_size_confirmation === 'pending' || reservation.cleaning_size_confirmation === 'declined' || String(clean?.size) !== reservation.cleaning_verified_size) return jsonResponse({ ok: false, error: 'cleaning_size_confirmation_required' }, 409);
-    if (clean?.size === 5 && !reservation.cleaning_team_ready) return jsonResponse({ ok: false, error: 'cleaning_needs_team' }, 409);
-  }
+  const cleaningError = await cleaningCheckoutGate(supabase, user.email, input.zip, input.services.find(s => s.service === 'cleaning')?.size ?? null, input.reservation_id);
+  if (cleaningError) return jsonResponse({ ok: false, error: cleaningError }, 409);
   // Launch gate (launch_config): car care — Shine Complete or the Car Wash Add-On —
   // cannot convert to paid before its conversion date.
   if (input.car_wash || input.services.some((s) => s.service === "detailing")) {

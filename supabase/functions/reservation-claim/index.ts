@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
   const t = String(new URL(req.url).searchParams.get('t') ?? body.t ?? '');
   if (!/^[a-f0-9]{48}$/.test(t)) return jsonResponse({ ok: false, error: 'not_found' }, 404);
   const { data: r } = await admin.from('reservations')
-    .select('id, status, first_name, last_name, email, phone, sms_consent, services, waitlist_services, quote, street, city, zip, preferred_day, preferred_time, assigned_day, assigned_window, assigned_pro_first_name, invite_token, car_waiting')
+    .select('id, status, first_name, last_name, email, phone, sms_consent, services, waitlist_services, quote, street, city, zip, preferred_day, preferred_time, assigned_day, assigned_window, assigned_pro_first_name, invite_token, car_waiting, cleaning_selected_size, cleaning_bathrooms, cleaning_measured_sqft, cleaning_verified_bathrooms, cleaning_verified_at')
     .eq('invite_token', t).maybeSingle();
   if (!r || r.invite_token !== t) return jsonResponse({ ok: false, error: 'not_found' }, 404);
   if (r.status === 'canceled') return jsonResponse({ ok: false, error: 'canceled' }, 410);
