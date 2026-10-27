@@ -6,7 +6,7 @@
  * the dashboard so customers never feel like they're managing software.
  */
 import { Navigate, Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   User,
@@ -116,7 +116,7 @@ export default function Account() {
             label="Access & Pets"
             onEdit={() => setEditing("access")}
           >
-            <Row k="Gate code" v={p?.gate_code || "Not set"} />
+            <GateCodeRow />
             <Row k="Parking" v={p?.parking_notes || "Not set"} />
             <Row k="Pets" v={p?.pets || "None"} />
           </AccountCard>
