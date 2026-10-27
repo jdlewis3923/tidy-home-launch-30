@@ -119,9 +119,11 @@ export default function DashboardIndex() {
   // The gate code lives encrypted at rest; the member's own code is decrypted server-side on read.
   useEffect(() => {
     if (activeModal === 'access') {
-      supabase.rpc('my_gate_code').then(({ data: code }) => {
-        setAccessGate(typeof code === 'string' && code ? code : '');
-      });
+      import('@/integrations/supabase/client').then(({ supabase }) =>
+        supabase.rpc('my_gate_code').then(({ data: code }) => {
+          setAccessGate(typeof code === 'string' && code ? code : '');
+        }),
+      );
       setAccessParking(data.profile?.parking_notes ?? '');
       setAccessPets(data.profile?.pets ?? '');
     }
