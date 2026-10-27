@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
       fn: async () => {
         const { data: sub, error: subErr } = await supabase
           .from("subscriptions")
-          .select("id, stripe_subscription_id, status, cancel_at_period_end, pause_collection")
+          .select("id, stripe_subscription_id, status, cancel_at_period_end, pause_collection, billing_period, current_period_start, monthly_total_cents")
           .eq("user_id", userId)
           .order("created_at", { ascending: false })
           .limit(1)
@@ -122,6 +122,83 @@ Deno.serve(async (req) => {
         // deno-lint-ignore no-explicit-any
         let stripeParams: any;
         let localPatch: Record<string, unknown>;
+
+        // Prepaid Year cancel: started months are charged at the monthly rate,
+        // the rest is refunded at once, and the plan ends now — not at period
+        // end. The ledger row makes a replay refund nothing twice.
+        if (action === "cancel" && sub.billing_period === "yearly") {
+          const periodStart = sub.current_period_start ?? new Date().toISOString();
+          const { data: existing } = await supabase
+            .from("annual_refunds")
+            .select("id, amount_cents")
+            .eq("subscription_id", sub.id)
+            .eq("current_period_start", periodStart)
+            .maybeSingle();
+
+          let refundCents = existing?.amount_cents ?? 0;
+          if (!existing) {
+            const invoices = await stripe.invoices.list({
+              subscription: sub.stripe_subscription_id,
+              status: "paid",
+              limit: 1,
+            });
+            const invoice = invoices.data[0];
+            const paidCents = invoice?.amount_paid ?? 0;
+            const paymentIntent = typeof invoice?.payment_intent === "string"
+              ? invoice.payment_intent
+              : invoice?.payment_intent?.id ?? null;
+            const used = monthsUsed(periodStart, new Date().toISOString());
+            refundCents = cancelRefundCents(sub.monthly_total_cents ?? 0, paidCents, used).refund;
+
+            let refundId: string | null = null;
+            if (refundCents > 0 && paymentIntent) {
+              const refund = await stripe.refunds.create({
+                payment_intent: paymentIntent,
+                amount: refundCents,
+                reason: "requested_by_customer",
+              });
+              refundId = refund.id;
+            }
+            const { error: ledgerErr } = await supabase.from("annual_refunds").insert({
+              subscription_id: sub.id,
+              user_id: userId,
+              current_period_start: periodStart,
+              stripe_refund_id: refundId,
+              paid_cents: paidCents,
+              months_used: used,
+              amount_cents: refundCents,
+              reason: "member_cancel",
+            });
+            if (ledgerErr) throw new Error(ledgerErr.message);
+
+            await supabase.from("member_notifications").insert({
+              user_id: userId,
+              kind: "annual_cancel_refund",
+              title: "Your prepaid year is canceled",
+              body: `We've canceled your plan and refunded $${(refundCents / 100).toFixed(2)} — you only pay for the ${used} month${used === 1 ? "" : "s"} you used at your monthly rate.`,
+            });
+          }
+
+          await stripe.subscriptions.cancel(sub.stripe_subscription_id);
+          const { error: upErr } = await supabase
+            .from("subscriptions")
+            .update({ status: "canceled", canceled_at: new Date().toISOString(), cancel_at_period_end: false })
+            .eq("id", sub.id);
+          if (upErr) throw new Error(upErr.message);
+
+          return {
+            ok: true as const,
+            action,
+            refund_cents: refundCents,
+            subscription: {
+              id: sub.id,
+              status: "canceled",
+              cancel_at_period_end: false,
+              pause_collection: sub.pause_collection ?? null,
+              current_period_end: null,
+            },
+          };
+        }
 
         switch (action) {
           case "cancel":
