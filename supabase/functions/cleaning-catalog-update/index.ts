@@ -50,7 +50,7 @@ Deno.serve(async req => {
         if (readError) throw new Error(readError.message);
         const values = { service_type: 'cleaning', frequency: null, is_addon: false, canon_key: lookup, lookup_key: lookup,
           cleaning_size: size, size: size <= 3 ? size : null, billing_period: yearly ? 'yearly' : 'monthly', price_cents: amount,
-          rate_card_version: 1, unit: 'per_month', quantity_rule: 'always_1', per_visit: false, active: true,
+          rate_card_version: 1, unit: yearly ? 'per_month' : 'per_visit', quantity_rule: yearly ? 'always_1' : 'cadence', per_visit: !yearly, active: true,
           description: `Cleaning · ${size === 4 ? 'Estate' : size === 5 ? 'Estate Plus' : `Size ${size}`} · ${cadence}${yearly ? ' · annual' : ''}`,
           [mode === 'test' ? 'stripe_price_id_test' : 'stripe_price_id']: price.id };
         if (!existing && mode === 'test') {

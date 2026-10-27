@@ -228,7 +228,7 @@ Deno.serve(async (req) => {
   });
   // New cleaning selections require measured size and staffing before billing.
   // Legacy clients remain compatible while the verified conversion flow rolls out.
-  if (input.cleaning_range && input.services.some(s => s.service === 'cleaning')) {
+  if (input.services.some(s => s.service === 'cleaning' && (input.cleaning_range || s.size >= 4))) {
     const { data: reservation, error } = await supabase.from('reservations').select('cleaning_verified_at,cleaning_verified_size,cleaning_size_confirmation,cleaning_team_ready')
       .eq('email', (user.email ?? '').toLowerCase()).neq('status', 'canceled').order('created_at', { ascending: false }).limit(1).maybeSingle();
     const clean = input.services.find(s => s.service === 'cleaning');

@@ -46,7 +46,7 @@ const PricingTable = () => {
           </h2>
           <p className="text-text-mid mt-4 max-w-xl mx-auto">
             {t(
-              "Size sets the price per visit for cleaning and lawn care. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Car Care is one flat monthly price.",
+              "Size sets the price per visit. Every 2 weeks saves 8% per visit; weekly saves 18%. Cleaning starts at $139 a month. Prepay a year and save 10%.",
             )}
           </p>
 

@@ -3,6 +3,7 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 type Language = "en" | "es";
 
 const translations: Record<string, string> = {
+  "Size sets the price per visit. Every 2 weeks saves 8% per visit; weekly saves 18%. Cleaning starts at $139 a month. Prepay a year and save 10%.": "El tamaño determina el precio por visita. Cada 2 semanas ahorras 8% por visita; semanal, 18%. Limpieza desde $139 al mes. Prepaga un año y ahorra 10%.",
   "Homes over 7,000 sq ft need a walkthrough quote. Lawns over 12,000 sq ft need a custom quote.": "Las casas de más de 7,000 pies² necesitan una visita para cotizar. Los jardines de más de 12,000 pies² necesitan una cotización personalizada.",
   "Size 1 · up to 1,400 sq ft. Larger homes have their own price.": "Tamaño 1 · hasta 1,400 pies². Las casas más grandes tienen su propio precio.",
   "Size 1 · up to 1,400 sq ft": "Tamaño 1 · hasta 1,400 pies²",
