@@ -27,6 +27,7 @@ import {
 import {
   CAR_WASH_LOOKUP_KEYS,
   freeAddonsPerMonth,
+  cleaningLookupKey,
   lookupKeyFor,
   monthlyPrice,
   perVisitPrice,
@@ -165,7 +166,13 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: "validation_failed", details: parsed.error.flatten() }, 400);
   }
   const input = parsed.data;
-  if (input.billing_period === 'yearly') return jsonResponse({ ok: false, error: 'prepaid_conversion_not_ready' }, 409);
+  // Prepaid Year: cleaning plans only. One Stripe subscription cannot mix
+  // monthly and annual prices, so lawn, car care and add-ons stay monthly.
+  if (input.billing_period === 'yearly') {
+    if (input.car_wash || input.addons.length > 0 || input.services.some((s) => s.service !== 'cleaning')) {
+      return jsonResponse({ ok: false, error: 'yearly_cleaning_only' }, 409);
+    }
+  }
   if (!SERVICE_ZIPS.has(input.zip)) return jsonResponse({ ok: false, error: "zip_outside_service_area" }, 400);
 
   const hasHomeService = input.services.some((s) => s.service === "lawn" || s.service === "cleaning");
@@ -244,9 +251,12 @@ Deno.serve(async (req) => {
         // The cadence is PART of the key. Indexing SERVICE_LOOKUP_KEYS by size
         // alone yields the {monthly,biweekly,weekly} object, which is why this
         // path used to die on "[object Object]" before Stripe was ever called.
-        const serviceKeys = input.services.map((s) =>
-          lookupKeyFor(s.service, s.size as CanonSize, s.frequency as CanonCadence),
-        );
+        const yearly = input.billing_period === 'yearly';
+        const keyFor = (s: { service: string; size: number; frequency: string }) =>
+          yearly
+            ? cleaningLookupKey(s.size as CanonSize, s.frequency as CanonCadence, true)
+            : lookupKeyFor(s.service as never, s.size as CanonSize, s.frequency as CanonCadence);
+        const serviceKeys = input.services.map((s) => keyFor(s));
         const carWashKey = input.car_wash
           ? CAR_WASH_LOOKUP_KEYS[input.car_wash.size as CanonSize][input.car_wash.washes as WashCount]
           : null;
@@ -270,7 +280,7 @@ Deno.serve(async (req) => {
         for (const s of input.services) {
           const cadence = s.frequency as CanonCadence;
           const size = s.size as CanonSize;
-          const key = lookupKeyFor(s.service, size, cadence);
+          const key = keyFor(s);
           const row = priceRows?.find((r) => r.lookup_key === key);
           if (!row) throw new Error(`no active catalog price for lookup_key ${key}`);
           items.push({ price: priceIdOf(row), quantity: quantityFor(s.service, cadence) });
@@ -376,6 +386,7 @@ Deno.serve(async (req) => {
           services_json: JSON.stringify(input.services.map((s) => ({ service: s.service, size: s.size, frequency: s.frequency }))),
           sizes_json: JSON.stringify(Object.fromEntries(input.services.map((s) => [s.service, s.size]))),
           plan_lines_id: planLinesId,
+          billing_period: input.billing_period,
           size_tier: String(primary?.size_tier ?? ""),
           cadence: String(primary?.cadence ?? ""),
           surcharge_applied: planLines.some((l) => l.surcharge_applied) ? "yes" : "no",
