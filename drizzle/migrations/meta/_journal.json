@@ -1555,6 +1555,13 @@
       "when": 1793137120172,
       "tag": "0221_cleaning_pay_snapshot_preserves_gifts",
       "breakpoints": true
+    },
+    {
+      "idx": 222,
+      "version": "7",
+      "when": 1793137145697,
+      "tag": "0222_cleaning_team_privacy_and_partial_pay",
+      "breakpoints": true
     }
   ]
 }

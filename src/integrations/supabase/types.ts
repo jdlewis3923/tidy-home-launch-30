@@ -10873,6 +10873,7 @@ export type Database = {
         }
         Returns: Json
       }
+      pro_cleaning_visit_details: { Args: { _visit: string }; Returns: Json }
       pro_coi_state: {
         Args: { _pro: string }
         Returns: {
