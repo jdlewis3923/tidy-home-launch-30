@@ -147,6 +147,8 @@ export default function AdminCapacity() {
 
       <ProAssignments onChanged={load} />
 
+      <RouteHouseholds />
+
       <p className="mt-6 text-xs text-muted-foreground">
         {loading ? "Refreshing…" : data ? `As of ${new Date(data.as_of).toLocaleString()}` : ""}
       </p>
@@ -160,6 +162,77 @@ interface AssignmentRow {
   service: "cleaning" | "lawn" | "detailing";
   time_share: number;
   active: boolean;
+}
+
+interface RouteRow {
+  pro_id: string;
+  pro_name: string | null;
+  visit_date: string;
+  homes: number;
+  visits: number;
+}
+
+/**
+ * Homes per route per day for the next two weeks — distinct homes and visits
+ * per Pro, including team partners and backups. Server-side, owner-only.
+ */
+function RouteHouseholds() {
+  const [rows, setRows] = useState<RouteRow[]>([]);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      const today = new Date();
+      const to = new Date(today.getTime() + 13 * 86_400_000);
+      const fmt = (d: Date) => d.toISOString().slice(0, 10);
+      const { data, error } = await supabase.rpc("admin_route_households", {
+        _from: fmt(today),
+        _to: fmt(to),
+      });
+      if (error) setErr(error.message);
+      else setRows((data as RouteRow[]) ?? []);
+    })();
+  }, []);
+
+  const byDate = new Map<string, RouteRow[]>();
+  for (const r of rows) {
+    const list = byDate.get(r.visit_date) ?? [];
+    list.push(r);
+    byDate.set(r.visit_date, list);
+  }
+
+  return (
+    <section className="mt-8 rounded-xl border bg-card p-4">
+      <h2 className="font-semibold">Homes per route</h2>
+      <p className="mb-3 text-sm text-muted-foreground">
+        Distinct homes each Pro covers per day over the next two weeks. Team partners and backups
+        count on their visits too.
+      </p>
+      {err && <p className="mb-3 text-sm text-rose-700">{err}</p>}
+      {rows.length === 0 && !err && (
+        <p className="text-sm text-muted-foreground">No visits scheduled in the next two weeks.</p>
+      )}
+      <div className="space-y-4">
+        {[...byDate.entries()].map(([date, list]) => (
+          <div key={date}>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {new Date(`${date}T12:00:00`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+            </h3>
+            <ul className="mt-1 divide-y text-sm">
+              {list.map((r) => (
+                <li key={`${r.pro_id}-${r.visit_date}`} className="flex items-center justify-between py-1.5">
+                  <span className="font-medium">{r.pro_name ?? "Unnamed pro"}</span>
+                  <span className="tabular-nums text-muted-foreground">
+                    {r.homes} home{r.homes === 1 ? "" : "s"} · {r.visits} visit{r.visits === 1 ? "" : "s"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 const SERVICE_OPTIONS: Array<{ value: AssignmentRow["service"]; label: string }> = [
