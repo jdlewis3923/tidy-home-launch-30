@@ -59,8 +59,8 @@ export default function ProVisit() {
     const isCar = visit.service_type === "detailing";
     const body = isCar
       ? { vehicle_class: vclass, plate: plate.trim() }
-      : { bedrooms: parseInt(beds, 10), bathrooms: parseFloat(baths) };
-    if (isCar ? !plate.trim() : !(beds && baths)) { setActionError(isCar ? "Add the vehicle type and plate." : "Add bedrooms and bathrooms."); return; }
+      : { sq_ft: parseInt(beds, 10), bathrooms: parseFloat(baths) };
+    if (isCar ? !plate.trim() : !(beds && baths)) { setActionError(isCar ? "Add the vehicle type and plate." : "Add square feet and bathrooms."); return; }
     setBusy("complete");
     const res = await visitAction(visit.id, "size_check", body);
     setBusy(null);
@@ -318,7 +318,7 @@ export default function ProVisit() {
                 </div>
               ) : (
                 <div className="mt-2 grid grid-cols-2 gap-2">
-                  <input inputMode="numeric" value={beds} onChange={(e) => setBeds(e.target.value.replace(/[^0-9]/g, ""))} placeholder="Bedrooms" className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
+                  <input inputMode="numeric" value={beds} onChange={(e) => setBeds(e.target.value.replace(/[^0-9]/g, ""))} placeholder="Square feet" className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
                   <input inputMode="decimal" value={baths} onChange={(e) => setBaths(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="Bathrooms" className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
                 </div>
               )}

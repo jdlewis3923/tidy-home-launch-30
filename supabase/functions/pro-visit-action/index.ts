@@ -289,11 +289,9 @@ Deno.serve(async (req) => {
     }
 
     // Roll this Pro's payout week (Monday-Sunday, paid the following Friday).
-    const { error: creditErr } = await admin.rpc('credit_payout_week', {
-      _pro: uid,
-      _at: visit.scheduled_start ?? now.toISOString(),
-      _cents: pay,
-    });
+    const { error: creditErr } = visit.service_type === 'cleaning'
+      ? await admin.rpc('cleaning_record_pay', { _visit: visit_id })
+      : await admin.rpc('credit_payout_week', { _pro: uid, _at: visit.scheduled_start ?? now.toISOString(), _cents: pay });
     if (creditErr) console.error('[pro-visit-action] payout credit failed', creditErr.message);
 
     const { data: applicant } = await admin
@@ -311,7 +309,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: true, action, visit_pay_cents: pay, redo: true });
     }
 
-    if (applicant) {
+    if (applicant && visit.service_type !== 'cleaning') {
       await admin
         .from('applicants')
         .update({ completed_visits: (applicant.completed_visits ?? 0) + 1, last_visit_at: now.toISOString() })
