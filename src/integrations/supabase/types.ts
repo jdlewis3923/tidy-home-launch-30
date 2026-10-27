@@ -9864,6 +9864,13 @@ export type Database = {
         }
         Returns: string
       }
+      admin_cleaning_team_options: {
+        Args: never
+        Returns: {
+          name: string
+          pro_id: string
+        }[]
+      }
       admin_cleaning_verify: {
         Args: { _baths: number; _reservation: string; _sqft: number }
         Returns: Json

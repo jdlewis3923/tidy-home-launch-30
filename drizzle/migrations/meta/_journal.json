@@ -1562,6 +1562,13 @@
       "when": 1793137145697,
       "tag": "0222_cleaning_team_privacy_and_partial_pay",
       "breakpoints": true
+    },
+    {
+      "idx": 223,
+      "version": "7",
+      "when": 1793137340326,
+      "tag": "0223_admin_cleaning_team_registration",
+      "breakpoints": true
     }
   ]
 }
