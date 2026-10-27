@@ -32,7 +32,7 @@ export default function RedoTasks() {
       vids.length ? supabase.from("visits").select("id, customer_first_name, service_type, visit_date, street, assigned_pro_id, cleaning_team_id, backup_pro_id").in("id", vids) : Promise.resolve({ data: [] }),
       aids.length ? supabase.from("applicants").select("id, first_name, last_name").in("id", aids) : Promise.resolve({ data: [] }),
     ]);
-    const visits = (vs ?? []) as NonNullable<Redo["visit"]> & { id: string }[];
+    const visits = (vs ?? []) as (NonNullable<Redo["visit"]> & { id: string })[];
     const teamIds = [...new Set(visits.map((v) => v.cleaning_team_id).filter(Boolean))] as string[];
     const { data: teams } = teamIds.length
       ? await supabase.from("cleaning_teams").select("id, lead_pro_id, partner_pro_id").in("id", teamIds)
