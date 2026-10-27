@@ -16,7 +16,7 @@ const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY
 });
 
 const BodySchema = z.object({
-  kind: z.enum(["terms", "sms"]),
+  kind: z.enum(["terms", "sms", "member_guide"]),
   version: z.string().trim().min(1).max(40),
   wording: z.string().trim().min(10).max(4000),
   granted: z.boolean().default(true),

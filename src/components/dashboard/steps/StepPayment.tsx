@@ -31,6 +31,7 @@ import { getLandingSource, getQrPlacement, getQrRoute, getQrZip } from "@/lib/la
 import { getUtmAttribution } from '@/lib/utm';
 import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
 import { groupsFor, recordScopeAcceptance, type ScopeGroup } from '@/lib/serviceScope';
+import { MEMBER_GUIDE_VERSION } from '@/lib/memberGuide';
 
 // The exact Terms wording shown next to the pay button. It is both rendered and
 // stored with the recorded consent, so change them together.
@@ -55,6 +56,7 @@ export default function StepPayment({ state, onChange }: Props) {
   const [mounted, setMounted] = useState(false);
   const customQuote = hasCustomQuote(state);
   const prepaidPending = state.billingPeriod === 'yearly';
+  const [guideChecked, setGuideChecked] = useState(false);
 
   // Access gate — car services only. Not a hard block: an unchecked box shows
   // a "we may not be able to service this" banner and captures a lead so we
@@ -142,7 +144,7 @@ export default function StepPayment({ state, onChange }: Props) {
   };
 
   const handlePay = async () => {
-    if (customQuote || prepaidPending || submitting || !scopeOk) return;
+    if (customQuote || prepaidPending || submitting || !scopeOk || !guideChecked) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -165,7 +167,8 @@ export default function StepPayment({ state, onChange }: Props) {
           await import('@/lib/consent');
         // AWAITED before the charge: this is the record we would rely on if a
         // consent claim is ever made, so it must exist before money moves.
-        const [smsOk, termsOk] = await Promise.all([
+        const [smsOk, termsOk, guideOk] = await Promise.all([
+          recordConsentWithRetry({ kind: 'member_guide', version: MEMBER_GUIDE_VERSION, wording: language === 'es' ? 'He leído cómo funciona mi membresía.' : "I've read how my membership works.", granted: true, email: state.email || undefined }),
           recordConsentWithRetry({
             kind: 'sms',
             version: SMS_CONSENT_VERSION,
@@ -184,7 +187,7 @@ export default function StepPayment({ state, onChange }: Props) {
             email: state.email || undefined,
           }),
         ]);
-        if (!smsOk || !termsOk) {
+        if (!smsOk || !termsOk || !guideOk) {
           setError('We could not save your agreement just now. Please tap the button again.');
           setSubmitting(false);
           return;
@@ -491,6 +494,11 @@ export default function StepPayment({ state, onChange }: Props) {
       ))}
       {needsSpigot && !showAccessGate && <SpigotQuestion value={typeof state.hasWaterSpigot === 'boolean' ? state.hasWaterSpigot : null} onChange={(v) => onChange({ ...state, hasWaterSpigot: v })} />}
       <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} />
+      <section className="space-y-3 border-y border-border py-4">
+        <h2 className="font-semibold text-foreground">{language === 'es' ? 'Cómo funciona Tidy' : 'How Tidy works'}</h2>
+        <p className="text-sm text-muted-foreground">{language === 'es' ? 'El mismo horario y Pro. Guarda tus datos de acceso antes de la visita. Primer bloqueo de acceso del año: reprogramación gratis. Con 48+ horas, reprograma gratis. La limpieza se hace llueva o haga sol. Nada se agrega sin tu aprobación.' : 'Same schedule and Pro. Save entry details before your visit. First lockout of the year: free reschedule. With 48+ hours, reschedule free. Cleaning runs rain or shine. Nothing is added without your approval.'}</p>
+        <label className="flex items-start gap-3 text-sm text-foreground"><input type="checkbox" className="mt-1" checked={guideChecked} onChange={e => setGuideChecked(e.target.checked)} /><span>{language === 'es' ? 'He leído cómo funciona mi membresía.' : "I've read how my membership works."} <a href="/member-guide" target="_blank" rel="noreferrer" className="text-primary underline">{language === 'es' ? 'Guía completa' : 'Full guide'}</a></span></label>
+      </section>
 
       {error && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive animate-calm-in">
@@ -515,7 +523,7 @@ export default function StepPayment({ state, onChange }: Props) {
         <button
           type="button"
           onClick={handlePay}
-          disabled={submitting || customQuote || prepaidPending || preparing || !scopeOk}
+          disabled={submitting || customQuote || prepaidPending || preparing || !scopeOk || !guideChecked}
           className={`group relative w-full overflow-hidden rounded-xl bg-ink px-6 py-5 text-base font-semibold text-white shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all duration-300 hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${reveal(0)}`}
           style={{ transitionDelay: '340ms', letterSpacing: '-0.005em' }}
         >

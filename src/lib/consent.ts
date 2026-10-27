@@ -19,7 +19,7 @@ export const SMS_CONSENT_VERSION = '2026-08-24';
 export const SMS_CONSENT_WORDING =
   'I agree to receive recurring automated SMS messages from Tidy Home Concierge LLC at the phone number I provided. Msg & data rates may apply. Reply STOP to opt out.';
 
-type ConsentKind = 'terms' | 'sms';
+type ConsentKind = 'terms' | 'sms' | 'member_guide';
 
 /**
  * Writes a consent record and REPORTS whether it landed. This record is the
