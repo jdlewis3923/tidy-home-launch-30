@@ -17,6 +17,7 @@
 - Pro pay varies by service/size, never cadence — why: discounts come from Tidy's margin.
 - Cleaning expansion uses cleaning-specific bands and tables in the mirrored pricing canon; lawn/vehicle CanonSize stays three-tier — why: larger homes must not become invalid lawn/car sizes or alter existing member prices.
 - Cleaning quotes may display annual totals before launch, but checkout rejects prepaid collection until the annual refund/renewal lifecycle is verified — why: a displayed savings option must not collect money through monthly-only billing.
+- Both payment entrypoints share the cleaning verification gate; verified quotes hydrate conversion by reservation ID, and size approval is an atomic token RPC — why: embedded checkout cannot bypass measurement, staffing, or customer consent.
 - Cleaning walkthrough slots are admin-created and atomically claimed by the reservation sender; public clients read only open times — why: never invent owner availability or allow double booking.
 - Root uses `color-scheme: light dark`; body/Founding use explicit light tokens — why: phones ignore "only light" and darken QR pages.
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
