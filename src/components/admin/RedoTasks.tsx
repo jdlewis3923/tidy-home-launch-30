@@ -20,6 +20,7 @@ export default function RedoTasks() {
   const [rows, setRows] = useState<Redo[]>([]);
   const [now, setNow] = useState(Date.now());
   const [when, setWhen] = useState<Record<string, string>>({});
+  const [resp, setResp] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<Record<string, string>>({});
 
@@ -66,7 +67,9 @@ export default function RedoTasks() {
     if (action === "schedule" && !when[r.id]) { setMsg((m) => ({ ...m, [r.id]: "Pick a date and time first." })); return; }
     if (action === "cancel" && !confirm("Cancel this redo request?")) return;
     setBusy(r.id);
-    const body = action === "schedule" ? { action, redo_id: r.id, scheduled_start: new Date(when[r.id]).toISOString() } : { action, redo_id: r.id };
+    const body = action === "schedule"
+      ? { action, redo_id: r.id, scheduled_start: new Date(when[r.id]).toISOString(), ...(resp[r.id] ? { responsible_pro_id: resp[r.id] } : {}) }
+      : { action, redo_id: r.id };
     const { data, error } = await supabase.functions.invoke("redo-admin", { body });
     setBusy(null);
     if (error || !data?.ok) { setMsg((m) => ({ ...m, [r.id]: `Couldn't save (${data?.error ?? error?.message ?? "error"})` })); return; }
@@ -95,6 +98,13 @@ export default function RedoTasks() {
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <input type="datetime-local" value={when[r.id] ?? ""} onChange={(e) => setWhen((w) => ({ ...w, [r.id]: e.target.value }))}
                   className="rounded border border-border bg-background px-2 py-1 text-xs" aria-label="Return visit time" />
+                {r.teamPros && (
+                  <select value={resp[r.id] ?? ""} onChange={(e) => setResp((s) => ({ ...s, [r.id]: e.target.value }))}
+                    className="rounded border border-border bg-background px-2 py-1 text-xs" aria-label="Whose zone was missed">
+                    <option value="">Whose zone? (default: original Pro)</option>
+                    {r.teamPros.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                )}
                 <button disabled={busy === r.id} onClick={() => act(r, "schedule")} className="rounded bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground disabled:opacity-50">Schedule free redo</button>
                 <button disabled={busy === r.id} onClick={() => act(r, "cancel")} className="text-xs text-muted-foreground underline">Cancel</button>
               </div>
