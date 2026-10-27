@@ -1604,6 +1604,13 @@
       "when": 1793137660185,
       "tag": "0228_cleaning_standard_and_exit_checklist",
       "breakpoints": true
+    },
+    {
+      "idx": 229,
+      "version": "7",
+      "when": 1793138196894,
+      "tag": "0229_visit_access_visit_day_only",
+      "breakpoints": true
     }
   ]
 }
