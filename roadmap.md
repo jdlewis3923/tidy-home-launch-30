@@ -13,6 +13,7 @@
 - [ ] Part 5 before Nov 16: Stripe policy changes/credits/pauses/refunds, founding locks, isolated policy journeys and test-mode financial evidence.
   - Annual collection remains blocked. Corrected started-month refund math at anniversary times/month ends and kept pause state intact when undoing cancellation. Refund ledger, annual renewal/45-day notice, credit/skip/weather/lockout/payment journeys and Stripe test evidence remain open.
 - [ ] Cross-surface bilingual update and complete changed-page/message/document/price inventory.
+  - Latest Oct 27 verification: 90 focused tests pass and preview build OK. Full guide renders English/Spanish on desktop and 390px phone without overflow; signed-in Reservations walkthrough permission warning is gone, team options load and absent-team gate refuses conversion. No messages, charges or publication. Team completion/pay remains unverified end-to-end: no active eligible cleaning Pros; annual Stripe collection remains blocked until the financial lifecycle is complete.
 
 ## Oct 22 reminder check + 9 AM text reporting (Oct 25)
 - [x] Check actual Oct 22 initial SMS recipients by send logs, reconcile duplicate candidates against submitted records: Alden, Daniela and Stanley submitted; Kerric received finish reminders Oct 23 and 24. No duplicate Monday reminders requested unless not already handled.
