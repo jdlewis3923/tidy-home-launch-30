@@ -40,9 +40,17 @@
 - Photo reports: members opt in on the Account page; after each completed visit they get a notice that before/after photos are ready, and photos still auto-delete after 30 days.
 - Founding seal delivery is tracked per home (pending → shipped → delivered) on the founding registry, with each change logged.
 
+## Team add-ons, redos, reviews, routes (Oct 27, final pass continued)
+- Pros mark each visit add-on done from the job screen: "I did this" pays that Pro, "We did it together" splits the pay on paired Estate Plus visits; anything still open at visit close is credited to the Lead automatically, so no add-on is ever unpaid. The job-screen pay estimate matches the payout exactly.
+- Fixed a real pay bug found in the process: visit-close pay only counted add-ons already marked completed, and nothing ever marked them — add-ons would have paid $0. Auto-completion at close fixes every existing and future visit.
+- Redos: the owner picks whose zone was missed on team visits; the free return visit is assigned to that Pro (50% pay), and the responsible Pro is stored on the redo record.
+- Reviews: one rating per visit stays, but the team partner (or backup) is named on the rating row, and averages, tier promotion and readiness checks now count team-visit ratings for both Pros.
+- Route households: a new owner-only report counts distinct homes and visits per Pro per day, including team partners and backups.
+- Backup Pros now see the covered visit in their own job list.
+
 ## Not complete
 - Annual subscription lifecycle, refund ledger and 45-day renewal notices. Annual collection remains blocked.
-- Per-add-on assigned/together completion, responsible-zone redos, named review split/rating propagation, route household counts and full payout journey evidence.
+- Route household report has no admin screen yet (data function is live); full payout journey evidence still needs real active Pros.
 - Full hiring/onboarding/agreement/document copy inventory and remaining bilingual cross-surface checks (add-on names currently display in English only, same as the existing add-ons).
 
 ## Verification limitation
