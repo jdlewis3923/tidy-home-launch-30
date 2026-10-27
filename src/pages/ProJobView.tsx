@@ -25,6 +25,7 @@ type Visit = {
 };
 
 type CatalogAddon = { id: string; addon_key: string; display_name: string; services: string[] | null };
+type AttachedAddon = { id: string; addon_name: string; status: string; split_pay: boolean; completed_by: string | null; can_split: boolean };
 
 type RequestRow = {
   id: string;
