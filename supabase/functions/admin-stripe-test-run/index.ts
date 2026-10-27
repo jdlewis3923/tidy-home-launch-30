@@ -13,6 +13,8 @@ import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { cancelRefundCents, monthsUsed } from '../_shared/prepaid-year.ts';
+import { resolveStripeCurrentPeriodStart } from '../_shared/resolve-stripe-current-period-end.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -170,7 +172,8 @@ Deno.serve(async (req) => {
 
     const ok = (steps.charge as { charge_succeeded?: boolean }).charge_succeeded === true &&
       (steps.refund as { refund_ok?: boolean }).refund_ok === true &&
-      (steps.balance_credit as { credit_ok?: boolean }).credit_ok === true;
+      (steps.balance_credit as { credit_ok?: boolean }).credit_ok === true &&
+      (!steps.annual_refund || (steps.annual_refund as { refund_ok?: boolean }).refund_ok === true);
     return jsonResponse({ ok, mode: 'test', steps }, ok ? 200 : 502);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error';
