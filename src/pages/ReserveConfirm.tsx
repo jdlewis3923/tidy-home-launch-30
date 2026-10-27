@@ -24,6 +24,7 @@ export default function ReserveConfirm() {
       if (r.car_waiting) delete q.carWashes;
       const state = {
         ...q, services, frequencies: Object.fromEntries(Object.entries(q.frequencies ?? {}).filter(([k]) => services.includes(k))),
+        billingPeriod: q.billing_period === 'yearly' ? 'yearly' : q.billingPeriod ?? 'monthly',
         firstName: r.first_name, lastName: r.last_name, email: r.email, phone: r.phone, address: r.street, city: r.city || 'Miami', zip: r.zip,
         preferredDay: r.assigned_day ?? r.preferred_day, preferredTime: r.preferred_time, smsConsent: r.sms_consent, outOfCoverage: false,
       };

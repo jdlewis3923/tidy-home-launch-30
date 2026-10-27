@@ -12,6 +12,9 @@ import {
   serviceUnits,
   formatMonthly,
 } from '@/lib/dashboard-pricing';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Button } from '@/components/ui/button';
+import { cleaningAnnualCents, type CleaningSize } from '@/lib/pricing-canon';
 
 
 interface Props {
@@ -33,6 +36,7 @@ const popularBy: Record<ServiceType, Frequency> = {
 };
 
 export default function StepFrequency({ state, onChange }: Props) {
+  const { language } = useLanguage();
   const setFreq = (service: ServiceType, freq: Frequency) => {
     onChange({ ...state, frequencies: { ...state.frequencies, [service]: freq } });
   };
@@ -101,6 +105,10 @@ export default function StepFrequency({ state, onChange }: Props) {
       <p className="text-xs text-ink-faint">
         coming more often lowers the price per visit — biweekly is 8% less a visit than monthly, weekly is 18% less. you are always billed monthly, and you can change it anytime.
       </p>
+      {state.services.includes('cleaning') && <div className="space-y-2">
+        <div className="flex gap-2" role="group" aria-label={language==='es'?'Pago de limpieza':'Cleaning payment period'}>{(['monthly','yearly'] as const).map(period=><Button key={period} variant={(state.billingPeriod??'monthly')===period?'default':'outline'} aria-pressed={(state.billingPeriod??'monthly')===period} onClick={()=>onChange({...state,billingPeriod:period})}>{period==='yearly'?(language==='es'?'Anual · ahorra 10%':'Yearly · save 10%'):(language==='es'?'Mensual':'Monthly')}</Button>)}</div>
+        {state.billingPeriod==='yearly' && typeof sizeFor(state,'cleaning')==='number' && <p className="font-bold">${(cleaningAnnualCents(sizeFor(state,'cleaning') as CleaningSize,state.frequencies.cleaning??'monthly')/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} {language==='es'?'por año · mismas visitas':'per year · same visits'}</p>}
+      </div>}
 
     </div>
   );

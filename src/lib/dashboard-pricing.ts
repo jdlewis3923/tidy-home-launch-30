@@ -68,6 +68,7 @@ export interface ConfigState {
   /** Interior square footage band answer — drives the cleaning surcharge. */
   homeSqFt: number | null;
   cleaningRange?: SizeSelection | null;
+  billingPeriod?: 'monthly' | 'yearly';
   /** Mowable turf area once confirmed — drives the lawn surcharge. */
   turfSqFt: number | null;
 

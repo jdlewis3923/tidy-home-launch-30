@@ -84,6 +84,7 @@ const CheckoutInputSchema = z.object({
   // mismatch, so a hand-crafted POST cannot buy a size it isn't.
   bedrooms: z.number().int().min(0).max(20).nullable().optional(),
   cleaning_range: z.union([SizeEnum, z.literal('quote')]).nullable().optional(),
+  billing_period: z.enum(['monthly','yearly']).default('monthly'),
   bathrooms: z.number().min(0).max(20).nullable().optional(),
   lawn_choice: z.enum(["small", "standard", "large", "over"]).nullable().optional(),
   vehicle_class: z
@@ -170,6 +171,8 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: "validation_failed", details: parsed.error.flatten() }, 400);
   }
   const input = parsed.data;
+  // Annual policy/refund lifecycle must be verified before accepting prepaid money.
+  if (input.billing_period === 'yearly') return jsonResponse({ ok: false, error: 'prepaid_conversion_not_ready' }, 409);
 
   if (input.add_to_existing && (input.services.length !== 1 || input.addons.length > 0 || input.car_wash)) {
     return jsonResponse({ ok: false, error: "add_service_requires_one_recurring_service" }, 400);

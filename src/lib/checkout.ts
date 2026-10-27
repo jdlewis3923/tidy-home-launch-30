@@ -88,6 +88,7 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
     // mismatch, so a hand-crafted POST can't buy a size it isn't.
     bedrooms: config.bedrooms ? parseInt(config.bedrooms, 10) : null,
     cleaning_range: config.cleaningRange ?? null,
+    billing_period: config.billingPeriod ?? 'monthly',
     bathrooms: config.bathrooms ? parseFloat(config.bathrooms) : null,
     lawn_choice: config.lawnChoice ?? null,
     vehicle_class: config.vehicleClass ?? null,
