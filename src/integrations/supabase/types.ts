@@ -11235,6 +11235,17 @@ export type Database = {
         Args: { _claim: string; _end: string; _start: string }
         Returns: Json
       }
+      pro_visit_addons: {
+        Args: { _visit: string }
+        Returns: {
+          addon_name: string
+          can_split: boolean
+          completed_by: string
+          id: string
+          split_pay: boolean
+          status: string
+        }[]
+      }
       pro_visit_extras: { Args: { _visit: string }; Returns: Json }
       public_five_star_proof: { Args: never; Returns: Json }
       rate_limit_take: {
