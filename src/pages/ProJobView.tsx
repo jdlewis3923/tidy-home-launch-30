@@ -100,8 +100,26 @@ export default function ProJobView() {
     // Persistent home notes from the member (server checks this Pro is assigned).
     const { data: hn } = await supabase.rpc("pro_home_note", { _visit: jobId });
     setHomeNote(typeof hn === "string" && hn.trim() ? hn : null);
+    // Add-ons attached to this visit (server checks this Pro is on the job).
+    const { data: att } = await supabase.rpc("pro_visit_addons", { _visit: jobId });
+    setAttached((att as AttachedAddon[]) ?? []);
     setLoading(false);
   }, [jobId]);
+
+  const completeAddon = async (attachId: string, mode: "self" | "together") => {
+    setCompleting(attachId);
+    const { error } = await supabase.rpc("pro_complete_addon", { _attach: attachId, _mode: mode });
+    if (!error) {
+      setAttached((rows) =>
+        rows.map((r) =>
+          r.id === attachId
+            ? { ...r, status: "completed", split_pay: mode === "together", completed_by: userId }
+            : r,
+        ),
+      );
+    }
+    setCompleting(null);
+  };
 
   useEffect(() => {
     document.title = "Job | Tidy Pro";
