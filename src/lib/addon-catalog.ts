@@ -26,6 +26,13 @@ export const ADDON_CATALOG: Addon[] = [
   { key: 'interior_windows',    name: 'Interior Windows',    price: 55, service: 'cleaning', lookupKey: 'addon_interior_windows', icon: 'PanelTop',     giftEligible: true },
   { key: 'deep_baseboard_scrub',    name: 'Deep Baseboard Scrub',    price: 35, service: 'cleaning', lookupKey: 'addon_deep_baseboard',   icon: 'Ruler',    giftEligible: true },
   { key: 'inside_kitchen_cabinets', name: 'Inside Kitchen Cabinets', price: 50, service: 'cleaning', lookupKey: 'addon_kitchen_cabinets', icon: 'Archive',  giftEligible: true },
+  { key: 'blinds_shutters',     name: 'Blinds & Shutters',        price: 55, service: 'cleaning', lookupKey: 'addon_blinds_shutters', icon: 'Blinds',     giftEligible: true },
+  { key: 'fans_fixtures',       name: 'Fans & Fixtures',          price: 45, service: 'cleaning', lookupKey: 'addon_fans_fixtures',   icon: 'Fan',        giftEligible: true },
+  { key: 'wall_door_spots',     name: 'Wall & Door Spots',        price: 45, service: 'cleaning', lookupKey: 'addon_wall_door_spots', icon: 'Paintbrush', giftEligible: true },
+  { key: 'patio_lanai_furniture', name: 'Patio, Lanai & Furniture', price: 55, service: 'cleaning', lookupKey: 'addon_patio_lanai',   icon: 'Armchair',   giftEligible: true },
+  { key: 'linen_bed_making',    name: 'Linen & Bed Making',       price: 25, service: 'cleaning', lookupKey: 'addon_linen_bed_making', icon: 'BedDouble', giftEligible: true },
+  { key: 'garage_sweep_tidy',   name: 'Garage Sweep & Tidy',      price: 65, service: 'cleaning', lookupKey: 'addon_garage_sweep',    icon: 'Warehouse',  giftEligible: false },
+  { key: 'pantry_closet',       name: 'Pantry or Closet (per area)', price: 75, service: 'cleaning', lookupKey: 'addon_pantry_closet', icon: 'PackageOpen', giftEligible: false },
   // Lawn
   { key: 'weed_removal',        name: 'Weed Removal — Garden Beds', price: 45, service: 'lawn', lookupKey: 'addon_weed_removal',  icon: 'Sprout',   giftEligible: true },
   { key: 'leaf_debris_cleanup', name: 'Leaf & Debris Cleanup',      price: 55, service: 'lawn', lookupKey: 'addon_leaf_debris',   icon: 'Leaf',     giftEligible: true },

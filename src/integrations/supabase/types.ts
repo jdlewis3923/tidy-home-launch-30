@@ -682,6 +682,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_crypto_keys: {
+        Row: {
+          created_at: string
+          id: string
+          secret: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          secret: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          secret?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
@@ -2811,6 +2829,7 @@ export type Database = {
       }
       customer_bookings: {
         Row: {
+          access_enc: string | null
           budget_hours: number
           cadence: string
           claim_id: string
@@ -2830,6 +2849,7 @@ export type Database = {
           zip: string
         }
         Insert: {
+          access_enc?: string | null
           budget_hours: number
           cadence: string
           claim_id: string
@@ -2849,6 +2869,7 @@ export type Database = {
           zip: string
         }
         Update: {
+          access_enc?: string | null
           budget_hours?: number
           cadence?: string
           claim_id?: string
@@ -2884,6 +2905,7 @@ export type Database = {
           description: string
           id: string
           photo_paths: string[]
+          photos_purged_at: string | null
           reported_at: string
           status: string
           user_id: string
@@ -2895,6 +2917,7 @@ export type Database = {
           description: string
           id?: string
           photo_paths: string[]
+          photos_purged_at?: string | null
           reported_at?: string
           status?: string
           user_id: string
@@ -2906,6 +2929,7 @@ export type Database = {
           description?: string
           id?: string
           photo_paths?: string[]
+          photos_purged_at?: string | null
           reported_at?: string
           status?: string
           user_id?: string
@@ -5095,6 +5119,48 @@ export type Database = {
         }
         Relationships: []
       }
+      member_credits: {
+        Row: {
+          amount_cents: number
+          applied_at: string | null
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          status: string
+          stripe_balance_transaction_id: string | null
+          subscription_id: string | null
+          user_id: string
+          visit_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          status?: string
+          stripe_balance_transaction_id?: string | null
+          subscription_id?: string | null
+          user_id: string
+          visit_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          status?: string
+          stripe_balance_transaction_id?: string | null
+          subscription_id?: string | null
+          user_id?: string
+          visit_id?: string | null
+        }
+        Relationships: []
+      }
       member_guide_acceptances: {
         Row: {
           accepted_at: string
@@ -6581,6 +6647,7 @@ export type Database = {
           created_at: string
           first_name: string | null
           gate_code: string | null
+          gate_code_enc: string | null
           id: string
           language: string
           last_addon_attached_at: string | null
@@ -6610,6 +6677,7 @@ export type Database = {
           created_at?: string
           first_name?: string | null
           gate_code?: string | null
+          gate_code_enc?: string | null
           id?: string
           language?: string
           last_addon_attached_at?: string | null
@@ -6639,6 +6707,7 @@ export type Database = {
           created_at?: string
           first_name?: string | null
           gate_code?: string | null
+          gate_code_enc?: string | null
           id?: string
           language?: string
           last_addon_attached_at?: string | null
@@ -9583,8 +9652,10 @@ export type Database = {
       visits: {
         Row: {
           access_notes: string | null
+          access_notes_enc: string | null
           anchor_date: string | null
           assigned_pro_id: string | null
+          backup_pro_id: string | null
           base_visit_id: string | null
           booking_id: string | null
           budget_hours: number | null
@@ -9609,6 +9680,7 @@ export type Database = {
           customer_told_at: string | null
           different_day: boolean
           gate_code: string | null
+          gate_code_enc: string | null
           id: string
           is_redo: boolean
           is_sample: boolean
@@ -9635,6 +9707,7 @@ export type Database = {
           street: string | null
           subscription_id: string | null
           surcharge_applied: boolean
+          teammate_missing_at: string | null
           time_window: string | null
           updated_at: string
           user_id: string
@@ -9647,8 +9720,10 @@ export type Database = {
         }
         Insert: {
           access_notes?: string | null
+          access_notes_enc?: string | null
           anchor_date?: string | null
           assigned_pro_id?: string | null
+          backup_pro_id?: string | null
           base_visit_id?: string | null
           booking_id?: string | null
           budget_hours?: number | null
@@ -9673,6 +9748,7 @@ export type Database = {
           customer_told_at?: string | null
           different_day?: boolean
           gate_code?: string | null
+          gate_code_enc?: string | null
           id?: string
           is_redo?: boolean
           is_sample?: boolean
@@ -9699,6 +9775,7 @@ export type Database = {
           street?: string | null
           subscription_id?: string | null
           surcharge_applied?: boolean
+          teammate_missing_at?: string | null
           time_window?: string | null
           updated_at?: string
           user_id: string
@@ -9711,8 +9788,10 @@ export type Database = {
         }
         Update: {
           access_notes?: string | null
+          access_notes_enc?: string | null
           anchor_date?: string | null
           assigned_pro_id?: string | null
+          backup_pro_id?: string | null
           base_visit_id?: string | null
           booking_id?: string | null
           budget_hours?: number | null
@@ -9737,6 +9816,7 @@ export type Database = {
           customer_told_at?: string | null
           different_day?: boolean
           gate_code?: string | null
+          gate_code_enc?: string | null
           id?: string
           is_redo?: boolean
           is_sample?: boolean
@@ -9763,6 +9843,7 @@ export type Database = {
           street?: string | null
           subscription_id?: string | null
           surcharge_applied?: boolean
+          teammate_missing_at?: string | null
           time_window?: string | null
           updated_at?: string
           user_id?: string
@@ -9868,6 +9949,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      access_decrypt: { Args: { _cipher: string }; Returns: string }
+      access_encrypt: { Args: { _plain: string }; Returns: string }
       active_founding_grant_for: {
         Args: { _user: string }
         Returns: {
@@ -10054,6 +10137,15 @@ export type Database = {
       admin_resolve_reschedule: {
         Args: { _id: string; _note: string }
         Returns: undefined
+      }
+      admin_resolve_teammate_missing: {
+        Args: {
+          _backup_pro?: string
+          _new_date?: string
+          _resolution: string
+          _visit: string
+        }
+        Returns: Json
       }
       admin_sched_state: { Args: never; Returns: Json }
       admin_set_alert_tier: {
@@ -10500,6 +10592,17 @@ export type Database = {
       is_scheduler_paused: { Args: never; Returns: boolean }
       is_service_caller: { Args: never; Returns: boolean }
       is_site_live: { Args: never; Returns: boolean }
+      issue_member_credit: {
+        Args: {
+          _amount_cents: number
+          _kind: string
+          _note: string
+          _subscription: string
+          _user: string
+          _visit: string
+        }
+        Returns: string
+      }
       kpi_latest_snapshot_rows: {
         Args: never
         Returns: {
@@ -10729,6 +10832,7 @@ export type Database = {
         Returns: Json
       }
       my_founding: { Args: never; Returns: Json }
+      my_gate_code: { Args: never; Returns: string }
       my_language: { Args: never; Returns: string }
       my_pro_services: {
         Args: never
@@ -11048,6 +11152,7 @@ export type Database = {
       pro_partner_progress: { Args: never; Returns: Json }
       pro_partner_status: { Args: { _applicant: string }; Returns: Json }
       pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
+      pro_report_teammate_missing: { Args: { _visit: string }; Returns: Json }
       pro_review_bonus_total: { Args: { _pro?: string }; Returns: number }
       pro_schedule_state: { Args: never; Returns: Json }
       pro_send_message: {
@@ -11393,6 +11498,7 @@ export type Database = {
         Args: { _cap_per_pro_day?: number }
         Returns: number
       }
+      set_my_gate_code: { Args: { _code: string }; Returns: undefined }
       set_my_language: { Args: { _lang: string }; Returns: string }
       sms_recipient_name: { Args: { _phone: string }; Returns: string }
       social_caption_hash: { Args: { _c: string }; Returns: string }
@@ -11431,6 +11537,14 @@ export type Database = {
           services: string
         }[]
       }
+      visit_access_details: {
+        Args: { _visit: string }
+        Returns: {
+          access_notes: string
+          gate_code: string
+        }[]
+      }
+      visit_customer_price_cents: { Args: { _visit: string }; Returns: number }
     }
     Enums: {
       app_role: "customer" | "crew" | "admin" | "pro"

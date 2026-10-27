@@ -20,13 +20,25 @@
 - Existing 9 AM owner digest includes Estate Plus reservations needing teams.
 - Started-month annual refund math fixed for anniversary times and month-end starts; undo cancellation preserves active pause state.
 
+## Stripe evidence (Oct 27)
+- Live catalog check rebuilt for the five cleaning bands and run against live Stripe: all 45 recurring keys (monthly + annual) resolve to active prices at exact canon amounts; standard bundle ($393.00) and Estate weekly ($1,396.00) reference carts match; no archived price is selectable.
+- Test-mode money lifecycle proven twice against real catalog test prices (clean_2_biweekly $348.00 and clean_estate_weekly $1,396.00): subscription active, first invoice paid at the exact amount, partial refund succeeded, subscription canceled, throwaway customer deleted. No live charges.
+
+## Access, photos, claims and credits (Oct 27, later)
+- Entry codes and access notes are encrypted at rest (pgcrypto; key in a table with no client access). Booking entry details move into an encrypted blob at booking time; Pros decrypt only on visit day; day-of texts decrypt server-side; members read/update only their own code through server functions. All plaintext copies cleared; round-trip verified.
+- Visit photos are deleted after 30 days by a daily 6:30 AM ET job (registered, first run is a no-op — no photos exist yet); photos on visits with open claims are kept, claim photos purge 30 days after the claim closes. Members get a notification when a claim is resolved.
+- Member credit ledger: skips (48h+ notice, max 2 per year per service) issue a real Stripe customer-balance credit that comes off the next bill; the first lockout each year is credited automatically with a member notice, later lockouts are charged with a notice. Pending credits retry daily. Test-mode proof: charge $348.00, partial refund, and a balance credit all succeeded against real catalog prices.
+
+## Add-ons and team backup (Oct 27, later still)
+- All seven new cleaning add-ons are live: Blinds & Shutters $55, Fans & Fixtures $45, Wall & Door Spots $45, Patio/Lanai & Furniture $55, Linen & Bed Making $25 (all gift-eligible), Garage Sweep & Tidy $65 and Pantry/Closet $75 (not gift-eligible). Stripe products/prices created with lookup keys; Pro pay is 40% of each price. They appear automatically in the member add-on picker, free-gift picker, Pro request flow and services page, which all read the catalog. Chandelier and pre-guest deep reset stay walkthrough-quote only (no price, by design).
+- Missing teammate: the Lead reports a no-show partner from the visit; the owner gets an urgent alert and resolves it with either a checked backup Pro (active, cleaning, never a test record) or a move within 48 hours. The member gets a text in their language either way, and the backup Pro can check in/out with GPS and counts as the second required person for completion.
+
 ## Not complete
-- Actual paid conversion and isolated Stripe invoices/credits/refunds, annual subscription lifecycle, refund ledger and 45-day renewal notices. Annual collection remains blocked.
-- Team backup/move workflow, per-add-on assigned/together completion, responsible-zone redos, named review split/rating propagation, route household counts and full payout journey evidence.
-- New cleaning add-on Stripe/catalog provisioning and all selection surfaces.
-- Encrypted access card, seal delivery, opted-in reports and 30-day deletion, home notes and complete claim workflow.
-- Enforced first annual lockout courtesy, reschedule/skip limits and actual Stripe credits, weather/payment/pause reminder journeys and policy-trigger notices.
-- Full hiring/onboarding/agreement/document copy inventory and remaining bilingual cross-surface checks.
+- Annual subscription lifecycle, refund ledger and 45-day renewal notices. Annual collection remains blocked.
+- Per-add-on assigned/together completion, responsible-zone redos, named review split/rating propagation, route household counts and full payout journey evidence.
+- Seal delivery, opted-in photo reports, home notes.
+- Weather credits on canceled (not moved) storm visits; payment-failed pause journey verification.
+- Full hiring/onboarding/agreement/document copy inventory and remaining bilingual cross-surface checks (add-on names currently display in English only, same as the existing add-ons).
 
 ## Verification limitation
 No active eligible cleaning Pros exist to run a real Estate team appointment through completion. Rule tests and owner eligibility checks are not a substitute for that operational journey.

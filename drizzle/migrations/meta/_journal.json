@@ -1611,6 +1611,41 @@
       "when": 1793138196894,
       "tag": "0229_visit_access_visit_day_only",
       "breakpoints": true
+    },
+    {
+      "idx": 230,
+      "version": "7",
+      "when": 1793140084397,
+      "tag": "0230_access_details_encryption",
+      "breakpoints": true
+    },
+    {
+      "idx": 231,
+      "version": "7",
+      "when": 1793140260779,
+      "tag": "0231_claim_close_notice_and_photo_retention",
+      "breakpoints": true
+    },
+    {
+      "idx": 232,
+      "version": "7",
+      "when": 1793140389354,
+      "tag": "0232_member_credit_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 233,
+      "version": "7",
+      "when": 1793140743444,
+      "tag": "0233_teammate_missing_backup_or_move",
+      "breakpoints": true
+    },
+    {
+      "idx": 234,
+      "version": "7",
+      "when": 1793140789130,
+      "tag": "0234_teammate_missing_resolver_fix",
+      "breakpoints": true
     }
   ]
 }

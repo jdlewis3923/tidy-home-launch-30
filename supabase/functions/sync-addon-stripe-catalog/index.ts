@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
 
     const { data: rows, error: selErr } = await admin
       .from('addon_catalog')
-      .select('id, addon_key, display_name, price_cents, stripe_product_id, stripe_price_id, is_active')
+      .select('id, addon_key, display_name, price_cents, lookup_key, stripe_product_id, stripe_price_id, is_active')
       .order('sort_order', { ascending: true });
     if (selErr) return jsonResponse({ ok: false, error: 'catalog_fetch_failed', detail: selErr.message }, 500);
 
@@ -86,12 +86,14 @@ Deno.serve(async (req) => {
         }
         let priceId = row.stripe_price_id as string | null;
         if (!priceId) {
-          const price = await stripeForm('prices', {
+          const priceParams: Record<string, string> = {
             product: productId!,
             unit_amount: String(row.price_cents),
             currency: 'usd',
             'metadata[addon_key]': row.addon_key,
-          });
+          };
+          if (row.lookup_key) priceParams['lookup_key'] = row.lookup_key;
+          const price = await stripeForm('prices', priceParams);
           priceId = price.id as string;
         }
         const { error: updErr } = await admin

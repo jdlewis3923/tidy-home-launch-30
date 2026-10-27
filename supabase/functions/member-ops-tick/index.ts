@@ -10,6 +10,9 @@ import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
+import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
+import { applyMemberCredit } from '../_shared/member-credits.ts';
+import { stripeSecretKey } from '../_shared/stripe-mode.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -29,6 +32,24 @@ Deno.serve(async (req) => {
       const { data, error } = await admin.rpc('member_ops_tick');
       if (error) throw new Error(`member_ops_tick: ${error.message}`);
       tick = data;
+    }
+
+    // Retry pending member credits (e.g. Stripe was unreachable at skip time).
+    let creditsApplied = 0;
+    const stripeKey = stripeSecretKey();
+    if (stripeKey) {
+      const stripe = new Stripe(stripeKey, {
+        apiVersion: '2024-12-18.acacia',
+        httpClient: Stripe.createFetchHttpClient(),
+      });
+      const { data: pendingCredits } = await admin.from('member_credits')
+        .select('id, user_id, amount_cents, kind, note')
+        .eq('status', 'pending')
+        .order('created_at').limit(100);
+      for (const c of pendingCredits ?? []) {
+        const r = await applyMemberCredit(stripe, admin, c);
+        if (r.applied) creditsApplied++;
+      }
     }
 
     const { data: pending } = await admin.from('member_notifications')
@@ -76,7 +97,7 @@ Deno.serve(async (req) => {
     if (failed > 0) {
       await admin.from('integration_logs').insert({ source: 'internal', event: 'member_ops_tick.notification_email_failed', status: 'error', error_message: `${failed} member emails failed` }).then(() => {}, () => {});
     }
-    return jsonResponse({ ok: true, tick, sent, failed });
+    return jsonResponse({ ok: true, tick, sent, failed, credits_applied: creditsApplied });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error('[member-ops-tick]', msg);

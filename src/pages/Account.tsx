@@ -6,7 +6,7 @@
  * the dashboard so customers never feel like they're managing software.
  */
 import { Navigate, Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   User,
@@ -116,7 +116,7 @@ export default function Account() {
             label="Access & Pets"
             onEdit={() => setEditing("access")}
           >
-            <Row k="Gate code" v={p?.gate_code || "Not set"} />
+            <GateCodeRow />
             <Row k="Parking" v={p?.parking_notes || "Not set"} />
             <Row k="Pets" v={p?.pets || "None"} />
           </AccountCard>
@@ -258,6 +258,19 @@ function AccountCard({
       <dl className="mt-4 space-y-3">{children}</dl>
     </div>
   );
+}
+
+/** Gate codes live encrypted at rest; the member's own code is decrypted server-side on read. */
+function GateCodeRow() {
+  const [code, setCode] = useState<string | null>(null);
+  useEffect(() => {
+    let on = true;
+    supabase.rpc("my_gate_code").then(({ data }) => {
+      if (on) setCode(typeof data === "string" && data ? data : null);
+    });
+    return () => { on = false; };
+  }, []);
+  return <Row k="Gate code" v={code || "Not set"} />;
 }
 
 function Row({ k, v, icon }: { k: string; v: string; icon?: React.ReactNode }) {
