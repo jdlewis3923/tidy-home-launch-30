@@ -118,7 +118,7 @@ export default function StepPayment({ state, onChange }: Props) {
       services, addons, car_wash,
       reservation_id: state.reservationId,
       cleaning_range: state.cleaningRange ?? null,
-      home_sq_ft: state.cleaningSqFt ? Number(state.cleaningSqFt) : null,
+      home_sq_ft: state.homeSqFt,
       billing_period: state.billingPeriod ?? 'monthly',
       referral_code: state.referralCode?.trim() || undefined,
       zip: state.zip,
