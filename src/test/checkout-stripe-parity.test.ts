@@ -145,7 +145,10 @@ describe('checkout ↔ Stripe parity', () => {
   it('the server resolves prices by lookup key and bills one monthly price', () => {
     const src = read('supabase/functions/stripe-create-checkout/index.ts');
     expect(src).toContain('lookup_key');
-    expect(src).toContain('lookupKeyFor(s.service, size, cadence)');
+    // Monthly carts resolve via lookupKeyFor; prepaid-year carts via the
+    // annual cleaning key — both behind the shared keyFor helper.
+    expect(src).toContain('keyFor(s)');
+    expect(src).toContain('cleaningLookupKey(s.size as CanonSize, s.frequency as CanonCadence, true)');
     expect(src).toContain('quantityFor(s.service, cadence)');
   });
 
