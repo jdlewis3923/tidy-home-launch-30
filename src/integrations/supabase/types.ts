@@ -10094,6 +10094,7 @@ export type Database = {
           monthly_cents: number
           name: string
           rate_card_version: number
+          seal_status: string
           services: string[]
           status: string
         }[]

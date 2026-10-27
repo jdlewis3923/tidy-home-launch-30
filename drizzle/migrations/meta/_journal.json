@@ -1674,6 +1674,13 @@
       "when": 1793141351611,
       "tag": "0238_home_note_fallback",
       "breakpoints": true
+    },
+    {
+      "idx": 239,
+      "version": "7",
+      "when": 1793141426964,
+      "tag": "0239_founding_registry_seal_status",
+      "breakpoints": true
     }
   ]
 }
