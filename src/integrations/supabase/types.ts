@@ -6866,6 +6866,16 @@ export type Database = {
           assigned_window: string | null
           car_waiting: boolean
           city: string
+          cleaning_bathrooms: number | null
+          cleaning_measured_sqft: number | null
+          cleaning_selected_range: string | null
+          cleaning_selected_size: string | null
+          cleaning_size_confirmation: string | null
+          cleaning_team_ready: boolean
+          cleaning_verified_at: string | null
+          cleaning_verified_bathrooms: number | null
+          cleaning_verified_by: string | null
+          cleaning_verified_size: string | null
           converted_at: string | null
           created_at: string
           custom_quote: boolean
@@ -6923,6 +6933,16 @@ export type Database = {
           assigned_window?: string | null
           car_waiting?: boolean
           city?: string
+          cleaning_bathrooms?: number | null
+          cleaning_measured_sqft?: number | null
+          cleaning_selected_range?: string | null
+          cleaning_selected_size?: string | null
+          cleaning_size_confirmation?: string | null
+          cleaning_team_ready?: boolean
+          cleaning_verified_at?: string | null
+          cleaning_verified_bathrooms?: number | null
+          cleaning_verified_by?: string | null
+          cleaning_verified_size?: string | null
           converted_at?: string | null
           created_at?: string
           custom_quote?: boolean
@@ -6980,6 +7000,16 @@ export type Database = {
           assigned_window?: string | null
           car_waiting?: boolean
           city?: string
+          cleaning_bathrooms?: number | null
+          cleaning_measured_sqft?: number | null
+          cleaning_selected_range?: string | null
+          cleaning_selected_size?: string | null
+          cleaning_size_confirmation?: string | null
+          cleaning_team_ready?: boolean
+          cleaning_verified_at?: string | null
+          cleaning_verified_bathrooms?: number | null
+          cleaning_verified_by?: string | null
+          cleaning_verified_size?: string | null
           converted_at?: string | null
           created_at?: string
           custom_quote?: boolean
@@ -8336,8 +8366,10 @@ export type Database = {
           active: boolean
           addon_name: string | null
           band: string | null
+          billing_period: string
           bundle_discount_pct: number
           canon_key: string | null
+          cleaning_size: number | null
           created_at: string
           description: string | null
           frequency:
@@ -8362,8 +8394,10 @@ export type Database = {
           active?: boolean
           addon_name?: string | null
           band?: string | null
+          billing_period?: string
           bundle_discount_pct?: number
           canon_key?: string | null
+          cleaning_size?: number | null
           created_at?: string
           description?: string | null
           frequency?:
@@ -8388,8 +8422,10 @@ export type Database = {
           active?: boolean
           addon_name?: string | null
           band?: string | null
+          billing_period?: string
           bundle_discount_pct?: number
           canon_key?: string | null
+          cleaning_size?: number | null
           created_at?: string
           description?: string | null
           frequency?:
@@ -9864,6 +9900,10 @@ export type Database = {
       claim_pro_notification: {
         Args: { _contractor_id: string; _kind: string; _scope: string }
         Returns: boolean
+      }
+      cleaning_size_from_sqft: {
+        Args: { _baths: number; _sqft: number }
+        Returns: string
       }
       coi_token_load: { Args: { _token: string }; Returns: Json }
       contract_load: { Args: { _token: string }; Returns: Json }

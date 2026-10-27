@@ -1485,6 +1485,13 @@
       "when": 1793052504637,
       "tag": "0211_new_invites_use_short_application",
       "breakpoints": true
+    },
+    {
+      "idx": 212,
+      "version": "7",
+      "when": 1793134182383,
+      "tag": "0212_cleaning_expansion_reservation_fields",
+      "breakpoints": true
     }
   ]
 }
