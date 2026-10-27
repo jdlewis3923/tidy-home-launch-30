@@ -688,6 +688,56 @@ export type Database = {
         }
         Relationships: []
       }
+      annual_refunds: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          current_period_start: string | null
+          id: string
+          months_used: number
+          paid_cents: number
+          reason: string | null
+          status: string
+          stripe_refund_id: string | null
+          subscription_id: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          current_period_start?: string | null
+          id?: string
+          months_used: number
+          paid_cents: number
+          reason?: string | null
+          status?: string
+          stripe_refund_id?: string | null
+          subscription_id: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          current_period_start?: string | null
+          id?: string
+          months_used?: number
+          paid_cents?: number
+          reason?: string | null
+          status?: string
+          stripe_refund_id?: string | null
+          subscription_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "annual_refunds_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_crypto_keys: {
         Row: {
           created_at: string
@@ -8934,10 +8984,12 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          annual_notice_sent_for: string | null
           assigned_pro_id: string | null
           band: string | null
           band_source: string | null
           band_verified_at: string | null
+          billing_period: string
           bundle_discount_pct: number
           cadence: string | null
           cancel_at_period_end: boolean
@@ -8950,6 +9002,8 @@ export type Database = {
           card_last4: string | null
           cleaning_team_id: string | null
           created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
           founding_free_addon_first_visit: boolean
           founding_free_addon_fulfilled_at: string | null
           founding_grant_id: string | null
@@ -8988,10 +9042,12 @@ export type Database = {
           washing_allowed: boolean | null
         }
         Insert: {
+          annual_notice_sent_for?: string | null
           assigned_pro_id?: string | null
           band?: string | null
           band_source?: string | null
           band_verified_at?: string | null
+          billing_period?: string
           bundle_discount_pct?: number
           cadence?: string | null
           cancel_at_period_end?: boolean
@@ -9004,6 +9060,8 @@ export type Database = {
           card_last4?: string | null
           cleaning_team_id?: string | null
           created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
           founding_free_addon_first_visit?: boolean
           founding_free_addon_fulfilled_at?: string | null
           founding_grant_id?: string | null
@@ -9042,10 +9100,12 @@ export type Database = {
           washing_allowed?: boolean | null
         }
         Update: {
+          annual_notice_sent_for?: string | null
           assigned_pro_id?: string | null
           band?: string | null
           band_source?: string | null
           band_verified_at?: string | null
+          billing_period?: string
           bundle_discount_pct?: number
           cadence?: string | null
           cancel_at_period_end?: boolean
@@ -9058,6 +9118,8 @@ export type Database = {
           card_last4?: string | null
           cleaning_team_id?: string | null
           created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
           founding_free_addon_first_visit?: boolean
           founding_free_addon_fulfilled_at?: string | null
           founding_grant_id?: string | null
