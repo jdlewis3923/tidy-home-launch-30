@@ -226,7 +226,7 @@ export default function ProIntake() {
   }, [token]);
 
   const set = (name: string, v: string | string[]) => {
-    setValues((p) => ({ ...p, [name]: v }));
+    setValues((p) => ({ ...p, [name]: v, ...(name === "shirt_size" && lawnPro(p) && typeof v === "string" ? { vest_size: SIZES[Math.min(SIZES.indexOf(v)+1,SIZES.length-1)] } : {}) }));
     setErrors((e) => (e[name] ? { ...e, [name]: "" } : e));
   };
 

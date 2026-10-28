@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Copy, Loader2, Send, PackageCheck } from "lucide-react";
 import ProKitEditor, { KIT_STATUS_LABEL, type ProKitRow } from "./ProKitEditor";
+import SigningDayPanel from "./SigningDayPanel";
 
 const STATUS_PILL: Record<string, string> = {
   sent: "bg-slate-100 text-slate-700 ring-slate-200",
@@ -54,6 +55,7 @@ export default function ProKitPanel({ applicantId }: { applicantId: string }) {
 
   return (
     <div className="mt-6 rounded-xl border border-border bg-card p-4">
+      <SigningDayPanel applicantId={applicantId} />
       <div className="flex items-center justify-between gap-3">
         <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">
           <PackageCheck className="h-4 w-4" /> Pro Intake &amp; Kit Order

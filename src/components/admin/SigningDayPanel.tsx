@@ -39,7 +39,7 @@ export default function SigningDayPanel({ applicantId }: { applicantId: string }
     <div className="flex flex-wrap gap-2">
       <Button disabled={busy} onClick={()=>void run("open")}><FilePenLine className="mr-2 h-4 w-4"/>{es?"Abrir formulario Pro":"Open Pro Intake"}</Button>
       <Button variant="outline" disabled={busy} onClick={()=>void run("send")}><Send className="mr-2 h-4 w-4"/>{es?"Enviar enlace":"Send link"}</Button>
-      <Button variant="outline" disabled={busy} onClick={()=>setConfirm(true)}>{es?"Marcar firmado":"Mark Signed"}</Button>
+      <Button variant="outline" disabled={busy} onClick={()=>setConfirm(true)}>{state?.signed_at?(es?"Reintentar acceso Pro":"Retry Pro access"):es?"Marcar firmado":"Mark Signed"}</Button>
       {!state?.background&&<Button variant="outline" disabled={busy} onClick={()=>void run("background")}>{es?"Antecedentes aprobados":"Mark background clear"}</Button>}
       <Button asChild variant="ghost"><Link to="/admin/coi-review">{es?"Revisar seguro":"Review insurance"}</Link></Button>
     </div>
