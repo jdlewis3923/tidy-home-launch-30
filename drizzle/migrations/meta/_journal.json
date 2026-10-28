@@ -1821,6 +1821,13 @@
       "when": 1793211050440,
       "tag": "0259_signing_intake_saved_response",
       "breakpoints": true
+    },
+    {
+      "idx": 260,
+      "version": "7",
+      "when": 1793211136208,
+      "tag": "0260_signing_day_activation_variable_scope",
+      "breakpoints": true
     }
   ]
 }
