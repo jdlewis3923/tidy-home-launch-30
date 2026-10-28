@@ -1723,6 +1723,13 @@
       "when": 1793148670936,
       "tag": "0245_application_remaining_only_resume",
       "breakpoints": true
+    },
+    {
+      "idx": 246,
+      "version": "7",
+      "when": 1793150670964,
+      "tag": "0246_pro_timed_access_and_route_details",
+      "breakpoints": true
     }
   ]
 }

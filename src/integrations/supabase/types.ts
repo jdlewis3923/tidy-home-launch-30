@@ -11171,6 +11171,10 @@ export type Database = {
         Args: { _id: string; _note: string }
         Returns: undefined
       }
+      pro_access_window_open: {
+        Args: { _pro: string; _visit: string }
+        Returns: boolean
+      }
       pro_all_five: { Args: { _applicant_id: string }; Returns: boolean }
       pro_capacity_stats_internal: {
         Args: never
@@ -11282,6 +11286,18 @@ export type Database = {
       pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
       pro_report_teammate_missing: { Args: { _visit: string }; Returns: Json }
       pro_review_bonus_total: { Args: { _pro?: string }; Returns: number }
+      pro_route_details: {
+        Args: never
+        Returns: {
+          checked_in: boolean
+          checked_out: boolean
+          first_visit: boolean
+          is_lead: boolean
+          is_team: boolean
+          size_tier: number
+          visit_id: string
+        }[]
+      }
       pro_schedule_state: { Args: never; Returns: Json }
       pro_send_message: {
         Args: { _body: string; _visit_id?: string }
