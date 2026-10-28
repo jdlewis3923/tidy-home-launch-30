@@ -1758,6 +1758,13 @@
       "when": 1793150979684,
       "tag": "0250_pro_loop_compatibility_boundary",
       "breakpoints": true
+    },
+    {
+      "idx": 251,
+      "version": "7",
+      "when": 1793151554853,
+      "tag": "0251_pro_assigned_team_card_and_context",
+      "breakpoints": true
     }
   ]
 }
