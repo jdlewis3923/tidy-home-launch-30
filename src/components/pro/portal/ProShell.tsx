@@ -76,8 +76,9 @@ export function ProBottomNav() {
             <li key={to} className="flex-1">
               <Link to={to} aria-current={active ? "page" : undefined}
                 className={`relative flex min-h-[62px] flex-col items-center justify-center gap-1 text-[10.5px] font-medium transition-colors duration-150 ${active ? "text-[hsl(var(--pro-blue))]" : "text-[hsl(var(--pro-ink-soft))]"}`}>
-                <span aria-hidden className={`absolute top-0 h-[2.5px] w-9 rounded-b-full bg-[hsl(var(--pro-blue))] transition-opacity duration-200 ${active ? "opacity-100" : "opacity-0"}`} />
-                <Icon className="h-[21px] w-[21px]" aria-hidden strokeWidth={active ? 2.2 : 1.7} />
+                <span aria-hidden className={`grid h-8 w-14 place-items-center rounded-full transition-colors duration-200 ${active ? "bg-[hsl(var(--pro-blue))] text-primary-foreground" : ""}`}>
+                  <Icon className="h-[20px] w-[20px]" aria-hidden strokeWidth={active ? 2.2 : 1.7} />
+                </span>
                 {language === "es" ? es : label}
               </Link>
             </li>
