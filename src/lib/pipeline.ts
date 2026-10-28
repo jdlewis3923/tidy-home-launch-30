@@ -44,7 +44,6 @@ export const DECLINE_REASONS = [
 
 export const ARTIFACT_LABEL: Record<string, string> = {
   ica_signed: "Signed ICA",
-  w9: "W-9",
   insurance_quote: "Insurance quote",
   checkr_report: "Checkr report",
   coi: "Certificate of insurance",

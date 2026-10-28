@@ -163,16 +163,12 @@ Deno.serve(async (req) => {
   } else if (event === 'agreement_docs') {
     const token = await ensureContractToken(admin, a);
     const link = `${SITE}/contract/${token}`;
-    let ica = lang === 'es' ? await docUrl('ica:es') : null;
-    if (lang === 'es' && !ica) await dashboardWarning('Spanish ICA not on file. Spanish-speaking candidates are signing the English version.', 'ica_es_missing', applicant_id);
-    if (!ica) ica = await legacyDoc('%IndependentContractorAgreement%');
-    const w9 = await legacyDoc('%W-9%') ?? await legacyDoc('%W9%');
-    if (ica) attachment.push({ url: ica.url, name: ica.name });
-    if (w9) attachment.push({ url: w9.url, name: w9.name });
+    const {data:agreement,error:agreementError}=await admin.functions.invoke('contract-sign',{body:{action:'document',token}});
+    if(agreementError||!agreement?.ok)return jsonResponse({error:'agreement_unavailable'},409);
     sms = lang === 'es'
-      ? `Tu equipo está aprobado. Aquí está tu contrato de contratista y el W-9 para firmar: ${link}.`
-      : `Your equipment is approved. Here is your contractor agreement and W-9 to sign: ${link}.`;
-    subject = lang === 'es' ? 'Tu equipo está aprobado: contrato y W-9' : 'Your equipment is approved: agreement and W-9';
+      ? `Tu equipo está aprobado. Aquí está tu contrato de contratista para firmar: ${link}.`
+      : `Your equipment is approved. Here is your contractor agreement to sign: ${link}.`;
+    subject = lang === 'es' ? 'Tu equipo está aprobado: contrato' : 'Your equipment is approved: agreement';
     html = `<p>${esc(sms)}</p>`;
   } else if (event === 'insurance_instructions') {
     sms = lang === 'es'

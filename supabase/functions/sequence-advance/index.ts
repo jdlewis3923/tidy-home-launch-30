@@ -67,6 +67,8 @@ Deno.serve(async (req) => {
     const { data: pipeline } = await admin.from('contractor_pipeline').select('archived,state,is_test,stage').eq('applicant_id', applicant_id).single();
     if (!pipeline || pipeline.archived || pipeline.state !== 'open') return jsonResponse({ error: 'candidate_not_open' }, 409);
     if (action === 'signing_day_signed') {
+      const {data:proof}=await admin.from('contractor_pipeline').select('proof_approved_at').eq('applicant_id',applicant_id).single();
+      if(!proof?.proof_approved_at)return jsonResponse({error:'Equipment approval required'},409);
       if (!['interviewed','agreement','background','insured','active'].includes(pipeline.stage)) return jsonResponse({ error: 'Complete the interview stage before signing.' }, 409);
       if (!a.signing_day_signed_at) {
         const { error } = await admin.from('applicants').update({ contracts_signed: true, contracts_signed_at: new Date().toISOString(), signing_day_signed_at: new Date().toISOString(), signing_day_signed_by: actor, sequence_stage: 'signed' }).eq('id', applicant_id);

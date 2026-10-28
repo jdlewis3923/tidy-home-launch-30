@@ -65,7 +65,7 @@ const STEPS: Step[] = [
     titleEs: "Identidad y contacto",
     short: "Identity",
     fields: [
-      { name: "legal_name", label: "Full legal name", labelEs: "Nombre legal completo", type: "text", required: true, help: "As it appears on the ICA and W-9.", helpEs: "Como aparece en el contrato (ICA) y el W-9." },
+      { name: "legal_name", label: "Full legal name", labelEs: "Nombre legal completo", type: "text", required: true, help: "As it appears on your ID", helpEs: "Como aparece en su identificación" },
       { name: "badge_name", label: "Name for the badge", labelEs: "Nombre para la credencial", type: "text", required: true, help: "First name + last initial, exactly as it should print — confirm accents.", helpEs: "Nombre + inicial del apellido, exactamente como debe imprimirse; confirme los acentos." },
       { name: "mobile", label: "Mobile", labelEs: "Celular", type: "tel", required: true, placeholder: "(786) 555-1234" },
       { name: "email", label: "Email", labelEs: "Correo electrónico", type: "email", required: true },
@@ -451,7 +451,7 @@ export default function ProIntake() {
           </div>
         )}
 
-        {signingDay && current.short === "Compliance" && <dl className="mt-4 space-y-2 text-sm">{[["agreement", "Agreement signed / Acuerdo firmado"], ["w9", "W-9 received / W-9 recibido"], ["background", "Background check / Antecedentes"], ["insurance", "Insurance / Seguro"], ["payouts", "Payouts / Pagos"]].map(([key, label]) => <div key={key} className="flex justify-between gap-3"><dt>{label}</dt><dd>{compliance[key] ? "✓" : "Pending / Pendiente"}</dd></div>)}</dl>}
+        {signingDay && current.short === "Compliance" && <dl className="mt-4 space-y-2 text-sm">{[["agreement", "Agreement signed / Acuerdo firmado"], ["background", "Background check / Antecedentes"], ["insurance", "Insurance / Seguro"], ["payouts", "Payouts / Pagos"]].map(([key, label]) => <div key={key} className="flex justify-between gap-3"><dt>{label}</dt><dd>{compliance[key] ? "✓" : "Pending / Pendiente"}</dd></div>)}</dl>}
         {saveError && <p role="alert" className="mt-3 text-destructive">{saveError}</p>}
         <div className="mt-8 flex items-center gap-3">
           {step > 0 && (

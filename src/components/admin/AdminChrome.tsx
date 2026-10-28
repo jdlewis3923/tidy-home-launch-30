@@ -145,6 +145,7 @@ export default function AdminChrome() {
   const rail = (
     <nav className="admin-hud-rail" aria-label="Admin navigation">
       <div className="admin-hud-rail__brand"><span className="admin-hud-dot" /><span>TIDY</span></div>
+      {time < new Date("2026-12-01T05:00:00Z") && <Link to="/admin/signing-day" className={`admin-hud-rail__item ${pathname === "/admin/signing-day" ? "is-active" : ""}`}><FileText className="h-4 w-4"/><span>Signing day</span></Link>}
       {GROUPS.map((group) => {
         const open = openGroups.includes(group.label);
         const badge = group.items.reduce((sum, item) => sum + (item.badge === "alerts" ? openAlerts : 0), 0);

@@ -6,7 +6,7 @@ import { requireServiceOrAdmin, bearerToken } from '../_shared/admin-auth.ts';
 const url = Deno.env.get('SUPABASE_URL') ?? '';
 const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const db = createClient(url,key,{auth:{persistSession:false}});
-const bodySchema = z.object({action:z.enum(['intake_equipment','send_intake','provision','payouts','background_clear']),applicant_id:z.string().uuid().optional(),token:z.string().min(20).max(100).optional()});
+const bodySchema = z.object({action:z.enum(['intake_equipment','send_intake','provision','payouts','background_clear','send_agreement']),applicant_id:z.string().uuid().optional(),token:z.string().min(20).max(100).optional()});
 const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
 async function sms(id:string, text:string, idempotency:string) {
   const {data:a}=await db.from('applicants').select('phone,is_test_row').eq('id',id).single();
@@ -33,7 +33,7 @@ Deno.serve(async req=>{
       const {data:state}=await db.rpc('signing_day_state',{_id:k.applicant_id});
       const {data:pipeline}=await db.from('contractor_pipeline').select('service').eq('applicant_id',k.applicant_id).single();
       const {data:items}=await db.from('pipeline_equipment_items').select('label_en,label_es').eq('service',pipeline?.service).eq('active',true).order('sort');
-      return reply({items:items??[],compliance:{agreement:state?.agreement,w9:state?.w9,background:state?.background,insurance:state?.insurance,payouts:state?.payouts}});
+      return reply({items:items??[],compliance:{agreement:state?.agreement,background:state?.background,insurance:state?.insurance,payouts:state?.payouts}});
     }
     if(b.action==='payouts') {
       const {data:u,error}=await db.auth.getUser(bearerToken(req));
@@ -54,6 +54,18 @@ Deno.serve(async req=>{
       const {error}=await db.from('applicants').update({bg_check_status:'clear',bg_check_completed_at:new Date().toISOString()}).eq('id',id);
       if(error) throw error;
       return reply({ok:true});
+    }
+    if(b.action==='send_agreement') {
+      const {data:a,error}=await db.from('applicants').select('contract_token,contracts_signed').eq('id',id).single();
+      if(error)throw error;
+      const {data:p}=await db.from('contractor_pipeline').select('proof_approved_at,archived,state,preferred_language').eq('applicant_id',id).single();
+      if(!p?.proof_approved_at||p.archived||p.state!=='open')return reply({error:'Approved equipment proof is required.'},409);
+      const token=a?.contract_token??crypto.randomUUID().replace(/-/g,'')+crypto.randomUUID().replace(/-/g,'');
+      const {error:save}=await db.from('applicants').update({contract_token:token}).eq('id',id);if(save)throw save;
+      const {data:document,error:docError}=await db.functions.invoke('contract-sign',{body:{action:'document',token}});
+      if(docError||!document?.ok)return reply({error:'This link is no longer active'},409);
+      const link=`https://jointidy.co/contract/${token}`;
+      return reply({ok:true,link,sms:await sms(id,p.preferred_language==='es'?`Su equipo está aprobado. Lea y firme su contrato de Tidy aquí: ${link}`:`Your equipment is approved. Read and sign your Tidy contractor agreement here: ${link}`,`signing-agreement:${id}:${token}`)});
     }
     if(b.action==='send_intake') {
       const {data:t,error}=await db.rpc('admin_signing_day_intake',{_id:id});
