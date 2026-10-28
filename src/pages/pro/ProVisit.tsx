@@ -294,11 +294,11 @@ export default function ProVisit() {
           const addr = [visit.street, visit.zip].filter(Boolean).join(', ');
           return (
             <div className="space-y-2" aria-label={es ? 'Navegar' : 'Navigate'}>
-              <ProButton className="w-full" asChild>
+              <Button className="min-h-[52px] w-full text-[16px] font-bold" asChild>
                 <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`} target="_blank" rel="noopener noreferrer">
                   {es ? 'Ir ahora' : 'Go now'}
                 </a>
-              </ProButton>
+              </Button>
               <div className="grid grid-cols-3 gap-2">
                 {Object.entries(navigationLinks(addr)).map(([provider, url]) => <Button key={provider} variant="outline" size="sm" asChild><a href={url} target="_blank" rel="noopener noreferrer">{provider === 'google' ? 'Google Maps' : provider === 'apple' ? 'Apple Maps' : 'Waze'}</a></Button>)}
               </div>
