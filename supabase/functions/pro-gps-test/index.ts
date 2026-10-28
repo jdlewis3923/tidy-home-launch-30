@@ -58,6 +58,7 @@ Deno.serve(async (req) => {
           + encodeURIComponent(address) + '&key=' + mapsKey;
         const res = await fetch(url);
         const geo = await res.json();
+        console.log('[pro-gps-test] geocode status:', geo?.status, geo?.error_message ?? '');
         const loc = geo?.results?.[0]?.geometry?.location;
         if (typeof loc?.lat === 'number' && typeof loc?.lng === 'number') {
           targetLat = loc.lat;
