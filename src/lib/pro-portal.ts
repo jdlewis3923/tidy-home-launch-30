@@ -33,6 +33,12 @@ export type ProVisit = {
   /** standard · maintenance_wash · full_detail · quarterly_deep_clean */
   visit_kind?: string | null;
   paid_in_full_reason?: string | null;
+  size_tier?: number | null;
+  is_lead?: boolean;
+  is_team?: boolean;
+  first_visit?: boolean;
+  checked_in?: boolean;
+  checked_out?: boolean;
 };
 
 export const VISIT_KIND_LABEL: Record<string, string> = {
@@ -111,9 +117,13 @@ export async function fetchMe(): Promise<ProMe | null> {
 }
 
 export async function fetchVisits(): Promise<ProVisit[]> {
-  const { data, error } = await supabase.rpc("pro_get_visits");
-  if (error) throw error;
-  return (data as ProVisit[]) ?? [];
+  const [visits, details] = await Promise.all([
+    supabase.rpc("pro_get_visits"), supabase.rpc("pro_route_details"),
+  ]);
+  if (visits.error) throw visits.error;
+  if (details.error) throw details.error;
+  const metadata = new Map((details.data ?? []).map(row => [row.visit_id, row]));
+  return ((visits.data as ProVisit[]) ?? []).map(visit => ({ ...visit, ...metadata.get(visit.id) }));
 }
 
 export async function fetchCoi(proUserId: string): Promise<CoiState | null> {

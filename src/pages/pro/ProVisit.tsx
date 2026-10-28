@@ -19,10 +19,15 @@ import { useProSession } from "@/hooks/useProSession";
 import { VISIT_KIND_LABEL, dayLabel, timeWindow, visitAction } from "@/lib/pro-portal";
 import { SERVICE_LABEL, money } from "@/lib/pro-pay";
 import CleaningTeamInspection from '@/components/pro/CleaningTeamInspection';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { navigationLinks, accessWindowOpen } from '@/lib/pro-visit-rules';
+import { Button } from '@/components/ui/button';
 
 export default function ProVisit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const es = language === 'es';
   const { visits, coi, loading, error, reload } = useProSession();
   const visit = useMemo(() => visits.find((v) => v.id === id) ?? null, [visits, id]);
 
@@ -74,7 +79,18 @@ export default function ProVisit() {
 
   useEffect(() => {
     if (visit?.on_my_way_at) setOmwSent(true);
-  }, [visit?.on_my_way_at]);
+    setCheckedIn(visit?.checked_in === true);
+  }, [visit?.on_my_way_at, visit?.checked_in]);
+
+  const [clock, setClock] = useState(Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => { setClock(Date.now()); }, 15_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    const timer = window.setInterval(() => reload(), 60_000);
+    return () => window.clearInterval(timer);
+  }, [reload]);
 
   const photosOk = (visit?.before_photos ?? 0) > 0 && (visit?.after_photos ?? 0) > 0;
   const blocked = !coi?.can_work;
@@ -230,6 +246,17 @@ export default function ProVisit() {
       </div>
 
       <MapPreview street={visit.street} zip={visit.zip} />
+      <section className="space-y-3 px-4 py-4">
+        <div className="flex flex-wrap gap-2 text-sm text-foreground">
+          {visit.size_tier && <span>{visit.size_tier === 5 ? 'Estate Plus' : visit.size_tier === 4 ? 'Estate' : `${es ? 'Tamaño' : 'Size'} ${visit.size_tier}`}</span>}
+          {visit.is_team && <StatusPill tone="gold">{visit.is_lead ? (es ? 'Líder' : 'Lead') : (es ? 'Equipo' : 'Team')}</StatusPill>}
+          {visit.first_visit && <StatusPill tone="blue">{es ? 'Primera visita' : 'First visit'}</StatusPill>}
+        </div>
+        {visit.first_visit && <p className="text-sm text-muted-foreground">{es ? 'Recorrido inicial y entrega del sello de ventana.' : 'Initial walkthrough and window seal handover.'}{(visit.size_tier ?? 0) >= 4 ? (es ? ' Pago de primera visita: 1.5×.' : ' First-visit pay: 1.5×.') : ''}</p>}
+        {visit.street && <div className="grid grid-cols-3 gap-2" aria-label={es ? 'Navegar' : 'Navigate'}>
+          {Object.entries(navigationLinks([visit.street, visit.zip].filter(Boolean).join(', '))).map(([provider, url]) => <Button key={provider} variant="outline" size="sm" asChild><a href={url} target="_blank" rel="noopener noreferrer">{provider === 'google' ? 'Google Maps' : provider === 'apple' ? 'Apple Maps' : 'Waze'}</a></Button>)}
+        </div>}
+      </section>
 
       <div className="px-4 pt-4"><ProJobCard visitId={visit.id} serviceType={visit.service_type} /></div>
 
@@ -249,8 +276,9 @@ export default function ProVisit() {
           <p className="pb-1 text-[12px] font-bold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
             Access details
           </p>
-          {visit.access_notes && <InfoRow kind="access" label="Access" value={visit.access_notes} />}
-          {visit.gate_code && <InfoRow kind="gate" label="Gate code" value={visit.gate_code} />}
+          {accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock) && visit.access_notes && <InfoRow kind="access" label={es ? 'Acceso' : 'Access'} value={visit.access_notes} />}
+          {accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock) && visit.gate_code && <InfoRow kind="gate" label={es ? 'Código de puerta' : 'Gate code'} value={visit.gate_code} />}
+          {!accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock) && <p className="py-2 text-sm text-muted-foreground">{es ? 'Los códigos se muestran desde 30 minutos antes de su ventana hasta registrar la salida.' : 'Codes appear 30 minutes before your window and hide at check-out.'}</p>}
           {visit.pet_notes && <InfoRow kind="pet" label="Pets" value={visit.pet_notes} />}
           {visit.parking_notes && <InfoRow kind="parking" label="Parking" value={visit.parking_notes} />}
           {!visit.access_notes && !visit.gate_code && !visit.pet_notes && !visit.parking_notes && (
