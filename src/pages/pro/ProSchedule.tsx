@@ -1,238 +1,189 @@
 /**
- * Schedule (home) — /pro/schedule
- * Metric tiles, this week / next week, visits grouped by day.
- * COI blocking banner sits at the top: upcoming visits stay visible, starting
- * one does not (enforced server-side in pro-visit-action).
+ * Schedule — /pro/schedule. "My Week" month calendar (mockup screen 3):
+ * dots on days with assigned visits, tap a day for its jobs, swipe/chevrons
+ * to change month. Weekly route, availability and GPS test stay below.
+ * COI banner: visits stay visible; starting one is blocked server-side.
  */
-import { useEffect, useMemo, useState } from "react";
-import ProLaunchLine from "@/components/pro/ProLaunchLine";
-import { Navigate } from "react-router-dom";
-import { CalendarDays, ListChecks } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Car, ChevronLeft, ChevronRight, Home as HomeIcon, Leaf, Plus } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import InstallPrompt from "@/components/pro/portal/InstallPrompt";
-
-import ProPartnerStrip from "@/components/pro/ProPartnerStrip";
-import {
-  EmptyState, ErrorState, Eyebrow, HeroPanel, ScheduleSkeleton, VisitRow, WarningBanner, ProButton,
-} from "@/components/pro/portal/kit";
-import { useProSession } from "@/hooks/useProSession";
-import { dayLabel, fetchNotifications, mondayOf, timeWindow } from "@/lib/pro-portal";
-import { money } from "@/lib/pro-pay";
+import ProLaunchLine from "@/components/pro/ProLaunchLine";
+import { ErrorState, ScheduleSkeleton, WarningBanner, ProButton } from "@/components/pro/portal/kit";
 import WeeklyRoute from "@/components/pro/schedule/WeeklyRoute";
 import MyDates from "@/components/pro/schedule/MyDates";
 import GpsTestCard from "@/components/pro/schedule/GpsTestCard";
+import { useProSession } from "@/hooks/useProSession";
+import { fetchNotifications, timeWindow, type ProVisit } from "@/lib/pro-portal";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 
-const COI_LABEL: Record<string, [string,string]> = { none: ["Insurance","Seguro"], under_review: ["Under review","En revisión"], active: ["Active","Activo"], expiring: ["Expiring","Por vencer"], expired: ["Expired","Vencido"] };
+const TZ = "America/New_York";
+const keyOf = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d);
+const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
 
-
+function meta(v: ProVisit, es: boolean) {
+  if (v.service_type === "lawn") return { label: es ? "Césped" : "Lawn Care", Icon: Leaf, tone: "--pro-green" };
+  if (v.service_type === "cleaning") return { label: es ? "Limpieza del hogar" : "Home Cleaning", Icon: HomeIcon, tone: "--pro-blue" };
+  return { label: v.visit_kind === "car_wash" ? (es ? "Lavado adicional" : "Car Wash Add-On") : (es ? "Cuidado del Auto" : "Car Care"), Icon: Car, tone: "--pro-car" };
+}
 
 export default function ProSchedule() {
   const { me, coi, visits, loading, error, reload, userId } = useProSession();
   const { language } = useLanguage();
-  const es = language === 'es';
-  const [routeRange,setRouteRange] = useState<'today'|'week'>('today');
-  const [week, setWeek] = useState<"this" | "next">("this");
-  const [tab, setTab] = useState<"jobs" | "route" | "dates">("jobs");
+  const es = language === "es";
+  const reduce = useReducedMotion();
   const [unread, setUnread] = useState(0);
+  const todayKey = keyOf(new Date());
+  const [selected, setSelected] = useState(todayKey);
+  const [month, setMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
+  const [dir, setDir] = useState(1);
+  const datesRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!userId) return;
-    void fetchNotifications()
-      .then((n) => setUnread(n.filter((x) => !x.read_at).length))
-      .catch(() => setUnread(0));
+    void fetchNotifications().then((n) => setUnread(n.filter((x) => !x.read_at).length)).catch(() => setUnread(0));
   }, [userId]);
 
-  const bounds = useMemo(() => {
-    const start = mondayOf(new Date());
-    if (week === "next") start.setDate(start.getDate() + 7);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 7);
-    return { start, end };
-  }, [week]);
+  const live = useMemo(() => visits.filter((v) => v.scheduled_start && !["canceled", "skipped", "blocked"].includes(v.status ?? "")), [visits]);
+  const byDay = useMemo(() => {
+    const m = new Map<string, ProVisit[]>();
+    for (const v of live) { const k = keyOf(new Date(v.scheduled_start!)); m.set(k, [...(m.get(k) ?? []), v]); }
+    for (const arr of m.values()) arr.sort((a, b) => (a.scheduled_start ?? "").localeCompare(b.scheduled_start ?? ""));
+    return m;
+  }, [live]);
 
-  const inWeek = useMemo(
-    () =>
-      visits.filter((v) => {
-        if (!v.scheduled_start) return false;
-        const d = new Date(v.scheduled_start);
-        return d >= bounds.start && d < bounds.end;
-      }),
-    [visits, bounds],
-  );
+  const cells = useMemo(() => {
+    const start = new Date(month); start.setDate(1 - start.getDay());
+    return Array.from({ length: 42 }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
+  }, [month]);
+  const rows = cells.slice(35).every((d) => d.getMonth() !== month.getMonth()) ? cells.slice(0, 35) : cells;
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, typeof inWeek>();
-    for (const v of inWeek) {
-      const key = dayLabel(v.scheduled_start, language);
-      map.set(key, [...(map.get(key) ?? []), v]);
-    }
-    return [...map.entries()];
-  }, [inWeek, language]);
-
-  const thisWeekStart = mondayOf(new Date());
-  const completedThisWeek = visits.filter(
-    (v) => v.completed_at && new Date(v.completed_at) >= thisWeekStart,
-  );
-  const earnedCents = completedThisWeek.reduce((s, v) => s + (v.visit_pay_cents ?? 0), 0);
-  const nextPayoutFriday = useMemo(() => {
-    const d = new Date(thisWeekStart);
-    d.setDate(d.getDate() + 11);
-    return d.toLocaleDateString(es ? "es-US" : "en-US", { month: "short", day: "numeric" });
-  }, [thisWeekStart.getTime(), es]);
-
-  const nextVisitId = useMemo(() => {
-    const upcoming = visits
-      .filter((v) => v.scheduled_start && !v.completed_at && new Date(v.scheduled_start) >= new Date())
-      .sort((a, b) => (a.scheduled_start ?? '').localeCompare(b.scheduled_start ?? ''));
-    return upcoming[0]?.id ?? null;
-  }, [visits]);
+  const shift = (n: number) => { setDir(n); setMonth((m) => new Date(m.getFullYear(), m.getMonth() + n, 1)); };
 
   if (!loading && !userId) return <Navigate to="/pro/welcome" replace />;
 
-  const greeting = me?.first_name ? `${es ? 'Hola' : 'Hi'}, ${me.first_name}` : (es ? 'Su agenda' : 'Your schedule');
-  const todayKey = new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York'}).format(new Date());
-  const routeVisits = visits.filter(v => {
-    if (!v.scheduled_start || ['canceled','skipped','blocked'].includes(v.status ?? '')) return false;
-    const key = new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York'}).format(new Date(v.scheduled_start));
-    return routeRange === 'today' ? key === todayKey : new Date(v.scheduled_start) >= thisWeekStart && new Date(v.scheduled_start) < new Date(thisWeekStart.getTime()+7*86400000);
-  }).sort((a,b)=>(a.scheduled_start??'').localeCompare(b.scheduled_start??''));
+  const greeting = me?.first_name ? `${es ? "Hola" : "Hi"}, ${me.first_name}` : (es ? "Su agenda" : "Your schedule");
+  const loc = es ? "es-US" : "en-US";
+  const monthLabel = month.toLocaleDateString(loc, { month: "short", year: "numeric" });
+  const days = es ? ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"] : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dayJobs = byDay.get(selected) ?? [];
+  const selDate = new Date(`${selected}T12:00:00`);
 
   return (
-    <ProShell title={greeting} showBell unread={unread}>
-      <div className="sticky top-[72px] z-20 flex gap-1 border-b border-border bg-background px-[18px] py-3" role="tablist" aria-label={es ? 'Agenda del Pro' : 'Pro schedule'}>
-        {([["jobs", es ? "Trabajos de hoy" : "Today’s jobs", ListChecks], ["route", es ? "Mi ruta semanal" : "My weekly route", CalendarDays], ["dates", es ? "Calendario" : "Calendar", CalendarDays]] as const).map(([key, label, Icon]) => (
-          <Button key={key} role="tab" aria-selected={tab === key} variant={tab === key ? 'default' : 'ghost'} onClick={() => { setTab(key); if (key === 'jobs') setRouteRange('today'); }} className="h-auto min-h-12 min-w-0 flex-1 flex-col gap-1 whitespace-normal px-1 py-2 text-center text-xs leading-tight">
-            <Icon className="h-4 w-4" aria-hidden />{label}
-          </Button>
-        ))}
-      </div>
+    <ProShell title={greeting} showBell unread={unread} dark>
       {coi && (coi.status === "expired" || coi.status === "none") && (
-        <WarningBanner
-          pulse
-          title={coi.status === "expired" ? (es ? "Su certificado de seguro ha vencido" : "Your certificate of insurance has expired") : (es ? "No hay certificado de seguro registrado" : "No certificate of insurance on file")}
-          body={es ? "Puede ver sus próximas visitas, pero no comenzar hasta tener un certificado de seguro válido." :
-            coi.status === "expired" && coi.expires_at
-              ? `Your COI expired ${new Date(coi.expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}. You can view upcoming visits, but you can't start one until a valid certificate is on file.`
-              : "You can view upcoming visits, but you can't start one until a valid certificate is on file."
-          }
-          action={
-            <ProButton variant="secondary" onClick={() => (window.location.href = "/pro/profile")}>
-              {es ? "Subir certificado" : "Upload certificate"}
-            </ProButton>
-          }
-        />
+        <div className="px-2.5 pt-2.5">
+          <WarningBanner
+            title={coi.status === "expired" ? (es ? "Su certificado de seguro ha vencido" : "Your certificate of insurance has expired") : (es ? "No hay certificado de seguro registrado" : "No certificate of insurance on file")}
+            body={es ? "Puede ver sus visitas, pero no comenzar hasta tener un certificado válido." : "You can view visits, but you can't start one until a valid certificate is on file."}
+            action={<ProButton variant="secondary" onClick={() => (window.location.href = "/pro/profile")}>{es ? "Subir certificado" : "Upload certificate"}</ProButton>}
+          />
+        </div>
       )}
+      <ProLaunchLine className="px-4 pt-2 text-primary-foreground" />
 
-      <ProLaunchLine className="px-[18px] pt-3" />
-      {loading && <ScheduleSkeleton />}
-
-      {!loading && error && <ErrorState title={es ? "No se pudo cargar su agenda" : "Couldn't load your schedule"} onRetry={reload} />}
-
-      {!loading && !error && (
-        <>
-          {tab === 'jobs' && <section className="space-y-3 px-[18px] pt-4">
-            <div className="flex items-center justify-between gap-2">
-              <h1 className="text-xl font-bold text-foreground">{routeRange === 'today' ? (es ? 'Trabajos de hoy' : 'Today’s jobs') : (es ? 'Trabajos de esta semana' : 'This week’s jobs')}</h1>
-              <span className="text-sm text-muted-foreground">{new Date().toLocaleDateString(es ? 'es-US' : 'en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric' })}</span>
+      <div className="px-2.5 pt-2.5">
+        <section className="overflow-hidden rounded-[16px] bg-white px-3 pb-3 pt-3.5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[20px] font-semibold tracking-[-0.01em] text-[hsl(var(--pro-ink))]">{es ? "Mi semana" : "My Week"}</h2>
+            <div className="flex items-center rounded-[10px] border border-[hsl(var(--pro-line))]">
+              <button type="button" onClick={() => shift(-1)} aria-label={es ? "Mes anterior" : "Previous month"} className="grid h-8 w-7 place-items-center text-[hsl(var(--pro-ink-soft))]"><ChevronLeft className="h-4 w-4" aria-hidden /></button>
+              <span className="min-w-[72px] text-center text-[12.5px] font-medium capitalize text-[hsl(var(--pro-ink))]">{monthLabel}</span>
+              <button type="button" onClick={() => shift(1)} aria-label={es ? "Mes siguiente" : "Next month"} className="grid h-8 w-7 place-items-center text-[hsl(var(--pro-ink))]"><ChevronRight className="h-4 w-4" aria-hidden /></button>
             </div>
-            <div className="flex gap-2" role="group" aria-label={es?'Visitas':'Visits'}>
-              <Button variant={routeRange==='today'?'default':'outline'} onClick={()=>setRouteRange('today')}>{es?'Hoy':'Today'}</Button>
-              <Button variant={routeRange==='week'?'default':'outline'} onClick={()=>setRouteRange('week')}>{es?'Esta semana':'This week'}</Button>
-            </div>
-            {routeVisits.length===0&&<p className="py-4 text-sm text-muted-foreground">{routeRange === 'today' ? (es ? 'No tiene trabajos asignados para hoy.' : 'No jobs assigned to you today.') : (es ? 'No tiene trabajos asignados esta semana.' : 'No jobs assigned to you this week.')}</p>}
-            {routeVisits.length===0&&<GpsTestCard />}
-            {routeVisits.map((v,index)=><Link key={v.id} to={`/pro/visit/${v.id}`} className="flex min-h-24 items-start gap-3 rounded-lg border border-border bg-background p-4 text-foreground">
-              <span className="pt-1 text-sm text-muted-foreground">{index+1}</span><div className="min-w-0 flex-1 space-y-1"><p className="font-semibold">{v.customer_first_name??(es?'Miembro':'Member')}</p><p className="text-sm">{v.service_type==='cleaning'?(es?'Limpieza':'Cleaning'):v.service_type==='lawn'?(es?'Césped':'Lawn'):v.visit_kind==='car_wash'?(es?'Lavado adicional':'Car Wash Add-On'):(es?'Cuidado del Auto':'Car Care')} · {v.size_tier===5?'Estate Plus':v.size_tier===4?'Estate':`${es?'Tamaño':'Size'} ${v.size_tier??'—'}`}</p><p className="text-xs text-muted-foreground">{timeWindow(v.scheduled_start,v.scheduled_end,language)} · {v.zip}</p>{v.is_team&&<p className="text-xs text-primary">{v.is_lead?(es?'Líder de equipo':'Team Lead'):(es?'Equipo':'Team')}</p>}</div><span className="text-sm font-semibold">{money(v.visit_pay_cents)}</span>
-            </Link>)}
-          </section>}
-          <ProPartnerStrip />
-          <p className="px-[18px] pt-4 text-sm font-semibold text-foreground">
-            {es ? "Usted elige sus días y su zona. Una vez que haya miembros reservados, los cambios requieren 14 días de aviso." : "You choose your days and your area. Once customers are booked on a day, changes need 14 days' notice."}
-          </p>
-          <section className="px-[18px] pt-4">
-            <HeroPanel className="pro-rise">
-              <Eyebrow className="text-[hsl(var(--pro-sky))]">{es ? "Esta semana" : "This week"}</Eyebrow>
-              <p className="pro-num pro-display mt-2 text-[34px] font-extrabold">{money(earnedCents)}</p>
-              <p className="mt-1 text-[14px] text-white/70">
-                {completedThisWeek.length} {es ? (completedThisWeek.length === 1 ? "visita completa" : "visitas completas") : (completedThisWeek.length === 1 ? "visit completed" : "visits completed")} · {es ? "pago" : "pays"}{" "}
-                {nextPayoutFriday}
-              </p>
-              <div className="mt-4 flex gap-6 border-t border-white/12 pt-3.5">
-                <div>
-                  <Eyebrow className="text-white/55">{es ? "Visitas totales" : "Visits all time"}</Eyebrow>
-                  <p className="pro-num mt-1 text-[18px] font-bold">{me?.completed_visits ?? 0}</p>
-                </div>
-                <div>
-                  <Eyebrow className="text-white/55">{es ? "Seguro" : "Insurance"}</Eyebrow>
-                  <p className="mt-1 text-[18px] font-bold">{COI_LABEL[coi?.status ?? "none"]?.[es ? 1 : 0]}</p>
-                </div>
-              </div>
-            </HeroPanel>
-          </section>
-
-          {tab === "route" && <WeeklyRoute />}
-          {tab === "dates" && <MyDates />}
-          {tab === "dates" && (<>
-          <div className="mx-[18px] mt-5 flex rounded-xl border border-[hsl(var(--pro-navy)/0.07)] bg-white p-1 pro-card">
-            {(["this", "next"] as const).map((w) => (
-              <button
-                key={w}
-                type="button"
-                onClick={() => setWeek(w)}
-                className={`min-h-[44px] flex-1 rounded-[10px] text-[14px] font-bold transition-colors ${
-                  week === w
-                    ? "bg-[hsl(var(--pro-blue))] text-white shadow-[0_4px_12px_hsl(var(--pro-blue)/0.25)]"
-                    : "text-[hsl(var(--pro-ink-soft))]"
-                }`}
-              >
-                {w === "this" ? (es ? "Esta semana" : "This week") : (es ? "Próxima semana" : "Next week")}
-              </button>
-            ))}
           </div>
 
-          {grouped.length === 0 ? (
-            <EmptyState
-              icon={CalendarDays}
-              title={week === "this" ? (es ? "Sin visitas esta semana" : "Nothing scheduled this week") : (es ? "Sin visitas la próxima semana" : "Nothing scheduled next week")}
-              body={es ? "Las nuevas visitas aparecen cuando Tidy se las asigna." : "New visits appear here as soon as Tidy assigns them to you."}
-            />
-          ) : (
-            <div className="space-y-6 px-[18px] pt-5">
-              {grouped.map(([day, rows]) => (
-                <section key={day}>
-                  <div className="flex items-center gap-3 pb-2.5">
-                    <h2 className="pro-eyebrow text-[hsl(var(--pro-ink))]">{day}</h2>
-                    <span aria-hidden className="h-px flex-1 bg-[hsl(var(--pro-navy)/0.08)]" />
-                    <span className="pro-num text-[12px] font-semibold text-[hsl(var(--pro-ink-soft))]">
-                      {rows.length} {es ? (rows.length === 1 ? "visita" : "visitas") : (rows.length === 1 ? "visit" : "visits")}
-                    </span>
-                  </div>
-                  <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white pro-card">
-                    {rows.map((v) => (
-                      <VisitRow
-                        key={v.id}
-                        to={`/pro/visit/${v.id}`}
-                        service={v.service_type}
-                        street={v.customer_first_name}
-                        zip={v.zip}
-                        window={timeWindow(v.scheduled_start, v.scheduled_end, language)}
-                        payCents={v.visit_pay_cents}
-                        isNext={v.id === nextVisitId}
-                        completed={!!v.completed_at}
-                        sample={v.is_sample}
-                      />
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          )}
-          </>)}
-        </>
-      )}
+          <div className="mt-3 grid grid-cols-7 text-center text-[11.5px] text-[hsl(var(--pro-ink-soft))]">
+            {days.map((d) => <span key={d}>{d}</span>)}
+          </div>
+          <div className="relative mt-1 overflow-hidden">
+            <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+              <motion.div
+                key={month.toISOString()}
+                custom={dir}
+                initial={reduce ? { opacity: 0 } : { x: dir * 60, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={reduce ? { opacity: 0 } : { x: -dir * 60, opacity: 0 }}
+                transition={{ duration: 0.22, ease: EASE }}
+                drag={reduce ? false : "x"}
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.25}
+                onDragEnd={(_, info) => { if (info.offset.x < -50) shift(1); else if (info.offset.x > 50) shift(-1); }}
+                className="grid touch-pan-y grid-cols-7 gap-y-1"
+              >
+                {rows.map((d) => {
+                  const k = keyOf(d);
+                  const inMonth = d.getMonth() === month.getMonth();
+                  const isToday = k === todayKey;
+                  const isSel = k === selected;
+                  const has = byDay.has(k);
+                  return (
+                    <button key={k} type="button" onClick={() => setSelected(k)} aria-pressed={isSel}
+                      aria-label={`${d.toLocaleDateString(loc, { weekday: "long", month: "long", day: "numeric" })}${has ? (es ? ", con visitas" : ", has visits") : ""}`}
+                      className="flex h-[44px] flex-col items-center justify-center">
+                      <span className={`grid h-[30px] w-[30px] place-items-center rounded-full text-[14px] transition-colors duration-150 ${isToday ? "bg-[hsl(var(--pro-blue))] font-semibold text-primary-foreground" : isSel ? "ring-1 ring-[hsl(var(--pro-blue))] text-[hsl(var(--pro-ink))]" : inMonth ? "text-[hsl(var(--pro-ink))]" : "text-[hsl(var(--pro-ink-soft)/0.55)]"}`}>{d.getDate()}</span>
+                      <span aria-hidden className={`mt-0.5 h-[5px] w-[5px] rounded-full ${has ? "bg-[hsl(var(--pro-blue))]" : "bg-transparent"}`} />
+                    </button>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-[11.5px] text-[hsl(var(--pro-ink-soft))]">
+            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--pro-blue))]" />{es ? "Reservado" : "Booked"}</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full border-2 border-dashed border-[hsl(var(--pro-blue))]" />{es ? "Recuperación" : "Catch-up"}</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--pro-red))]" />{es ? "Libre" : "Off"}</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--pro-navy))]" />{es ? "Feriado" : "Holiday"}</span>
+          </div>
+        </section>
+
+        <section className="relative mt-2.5 rounded-[16px] bg-white p-3.5">
+          <h3 className="text-[18px] font-semibold capitalize text-[hsl(var(--pro-ink))]">{selDate.toLocaleDateString(loc, { weekday: "short", month: "short", day: "numeric" })}</h3>
+          {loading && <ScheduleSkeleton />}
+          {!loading && error && <ErrorState title={es ? "No se pudo cargar su agenda" : "Couldn't load your schedule"} onRetry={reload} />}
+          {!loading && !error && (
+            <AnimatePresence mode="wait">
+              <motion.div key={selected} initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.22, ease: EASE }} className="mt-2.5 space-y-2.5 pb-10">
+                {dayJobs.length === 0 && <p className="rounded-[12px] border border-[hsl(var(--pro-line))] p-4 text-[13.5px] text-[hsl(var(--pro-ink-soft))]">{es ? "No tiene trabajos asignados este día." : "No jobs assigned this day."}</p>}
+                {dayJobs.map((v, i) => {
+                  const m = meta(v, es);
+                  return (
+                    <motion.div key={v.id} initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: 0.05 * i }}>
+                      <Link to={`/pro/visit/${v.id}`} className="flex items-center gap-3 rounded-[12px] border border-l-[3px] bg-white py-3 pl-3 pr-2" style={{ borderColor: "hsl(var(--pro-line))", borderLeftColor: `hsl(var(${m.tone}))` }}>
+                        <m.Icon className="h-7 w-7 shrink-0" style={{ color: `hsl(var(${m.tone}))` }} fill={m.tone === "--pro-car" ? "none" : `hsl(var(${m.tone}))`} aria-hidden />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[13px] text-[hsl(var(--pro-ink))]">{timeWindow(v.scheduled_start, v.scheduled_end, language)}</p>
+                          <p className="text-[13.5px] font-semibold text-[hsl(var(--pro-ink))]">{m.label}</p>
+                          <p className="truncate text-[12px] text-[hsl(var(--pro-ink-soft))]">{v.street ?? v.zip ?? "—"}</p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--pro-blue))]" aria-hidden />
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
+          )}
+          <button type="button" aria-label={es ? "Mi disponibilidad" : "My availability"} onClick={() => datesRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" })}
+            className="absolute bottom-3 right-3 grid h-11 w-11 place-items-center rounded-full bg-[hsl(var(--pro-blue))] text-primary-foreground shadow-lg active:scale-95">
+            <Plus className="h-5 w-5" aria-hidden />
+          </button>
+        </section>
+
+        {!loading && dayJobs.length === 0 && selected === todayKey && <div className="mt-2.5"><GpsTestCard /></div>}
+
+        <section className="mt-2.5 overflow-hidden rounded-[16px] bg-white">
+          <h3 className="px-3.5 pt-3.5 text-[16px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Mi ruta semanal" : "My weekly route"}</h3>
+          <WeeklyRoute />
+        </section>
+        <section ref={datesRef} className="mt-2.5 scroll-mt-20 overflow-hidden rounded-[16px] bg-white">
+          <h3 className="px-3.5 pt-3.5 text-[16px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Mi disponibilidad" : "My availability"}</h3>
+          <MyDates />
+        </section>
+      </div>
       <InstallPrompt />
     </ProShell>
   );
