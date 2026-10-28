@@ -1,5 +1,12 @@
 # Roadmap
 
+## Full system audit → autonomous operations (Oct 28)
+- [ ] Part A: evidence-backed PASS / FAIL / NOT BUILT inventory for hiring, website, Stripe, messaging, social, roadmap and entire Pro loop; fix verified failures before Part B.
+  - Initial audit in docs/tidy-ops-part-a-audit.md: 440 existing tests pass; three new SMS boundary tests pass. Fixed dynamic launch-date test tokens and false all-agents-running claim; authenticated owner + three phone ZIP links verified. Remaining: Spanish approvals (85 templates), four unconfirmed LinkedIn posts, full operational billing/Pro coverage and real-device GPS. Required 6 PM/urgent Pro texts conflict with universal courtesy-window wording; needs owner decision.
+- [ ] Physical-device GPS acceptance: requires Justin's confirmed test address and actual iPhone Safari/Android Chrome measurements; simulated coordinates are not real-device proof.
+- [ ] Part B, gated on Part A: thirteen autonomous agents reuse existing protected senders, gates and ledgers; /admin/agents controls, logged runs/exceptions, held-pay approval and combined 9 AM/9 PM digests.
+- [ ] Isolated is_test execution of every agent with a retained run log and sample exception; no production charges, publishing or unapproved test messages.
+
 ## Pro closed loop (Oct 28)
 - [x] Audited and listed existing Pro screens, assignments, notifications, visit actions, access and pay in docs/pro-closed-loop-audit.md.
 - [x] Complete requested schedule/visit-card gaps: Today/week, bilingual scope/details, maps, rotation/team zones, timed access and 6 PM SMS+app reminder; retain existing home-screen support and check-in/pay flows.

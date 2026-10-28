@@ -18,6 +18,7 @@ import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { renderLifecycleEmail } from '../_shared/lifecycle-email.ts';
 import { lifecycleCanSend, lifecycleTemplatePair } from '../_shared/lifecycle-policy.ts';
+import { fmtLaunchDate } from '../_shared/launch.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -70,11 +71,13 @@ Deno.serve(async (req) => {
   // Test mode: send every active email template to the owner inbox with sample tokens.
   const reqBody = await req.clone().json().catch(() => ({}));
   if (reqBody?.test === 'all_emails') {
+    const { data: launch, error: launchError } = await admin.from('launch_config').select('first_visit_date,conversion_date,pro_ready_by').eq('scope', 'cleaning').single();
+    if (launchError) return new Response(JSON.stringify({ error: 'Launch dates could not be loaded' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     const sample: Record<string, string> = {
       first: 'Justin', plan: 'Cleaning + Lawn', pay_link: 'https://jointidy.co', link: 'https://jointidy.co',
-      deadline: 'Fri 20 Nov', founding_number: '7', zip_name: 'Pinecrest', zip: '33156', wait_position: '3',
-      spots_left: '5', review_link: 'https://jointidy.co', price_month: '$129', convert_date: 'Mon 16 Nov',
-      launch: 'Mon 23 Nov', service: 'cleaning', size: 'Standard', sqft: '4,200',
+      deadline: fmtLaunchDate(launch?.pro_ready_by, 'en', 'short'), founding_number: '7', zip_name: 'Pinecrest', zip: '33156', wait_position: '3',
+      spots_left: '5', review_link: 'https://jointidy.co', price_month: 'Sample price', convert_date: fmtLaunchDate(launch?.conversion_date, 'en', 'short'),
+      launch: fmtLaunchDate(launch?.first_visit_date, 'en', 'short'), service: 'cleaning', size: 'Standard', sqft: '4,200',
     };
     const { data: tpls } = await admin.from('lifecycle_templates').select('*').eq('channel', 'email').eq('active', true).order('key');
     const out: Array<{ key: string; sent: boolean; reason?: string }> = [];
