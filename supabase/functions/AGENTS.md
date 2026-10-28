@@ -10,3 +10,5 @@
 - LinkedIn sends only caption, optional image_url, callback_url and calendar post_id; a per-attempt token inside callback_url authenticates atomic URN/link receipts, and a minute SQL watchdog marks ten-minute missing receipts unconfirmed — why: Zap acceptance is not publication and uncertain sends never retry.
 
 - Admin analytics use app_settings.reporting_reset_at without deleting business records; launch_config gates operating actuals, modeled profit is labeled estimated, and Workday completion requires contractor_pipeline.apply_submitted_at — why: imports, tests and prelaunch assumptions are not live business activity.
+
+- Ops agents: one consolidated `ops-agents` tick runs all 13 agents, writes runs/exceptions to ops_agent_* tables and owner alerts to admin_alerts; it never sends member/Pro texts itself — why: one auditable door; existing senders keep quiet-hours and approval rules.
