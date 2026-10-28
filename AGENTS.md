@@ -3,6 +3,7 @@
 - Reservations never touch Stripe; the paid subscription marks a reservation converted by email match (DB trigger) — why: Stripe products stay frozen.
 - Pricing and homepage FAQ share `src/lib/frequency-faq.ts` — why: identical bilingual answers.
 - Hero media: portrait below 768px, widescreen otherwise, including desktop-site mode — why: viewport sets composition.
+- Founding quote presentation reuses its existing wizard state, catalog math and gates; photographic overview controls only change that state — why: reference styling cannot create a second pricing or reservation path.
 - Public page reachability is master switch OR per-page row in page_visibility (via get_page_visibility); /founding fails open unless explicitly off — why: printed hangers must never dead-end.
 - Founding status lives in `founding_grants` (numbers per ZIP, never reused; cap counts homes ever granted) and is decided only by the reservations insert trigger — why: the founding promise must survive cancellations and edits automatically.
 - Prices resolve by `stripe_catalog.canon_key` + the member's `member_rate_card_version()`; founding subscriptions cannot change `rate_card_version` without a logged `price_migration_overrides` row — why: price rises publish a new rate card and never touch locked members.
