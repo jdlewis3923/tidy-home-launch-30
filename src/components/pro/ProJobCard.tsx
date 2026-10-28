@@ -1,4 +1,5 @@
 /** Pro job card — the booked scope for this visit, read from service_scope at the member's version. */
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProCard } from "@/components/pro/portal/kit";
@@ -7,6 +8,8 @@ import { SCOPE_TITLE, txt, useScopeAtVersions, visitScopes, type ScopeService } 
 type Card = { versions: Partial<Record<ScopeService, number>>; spigot: boolean | null; addons: { name: string; key: string; free: boolean }[]; monthly_lawn: boolean; weekly: boolean; visit_kind: string | null };
 
 export default function ProJobCard({ visitId, serviceType }: { visitId: string; serviceType: string | null }) {
+  const { language } = useLanguage();
+  const es = language === "es";
   const [card, setCard] = useState<Card | null>(null);
   const [err, setErr] = useState(false);
   useEffect(() => {
@@ -24,23 +27,23 @@ export default function ProJobCard({ visitId, serviceType }: { visitId: string; 
   const growth = rows.find((r) => r.section === "notice" && r.notice_key?.includes("growth"));
   return (
     <ProCard>
-      <p className="text-[15px] font-extrabold text-[hsl(var(--pro-ink))]">What this visit includes</p>
+      <p className="text-[15px] font-extrabold text-[hsl(var(--pro-ink))]">{es ? "Qué incluye esta visita" : "What this visit includes"}</p>
       <p className="mt-1 rounded-lg bg-[hsl(var(--pro-navy))] px-3 py-2 text-[13px] font-bold text-white">
-        Do only what's on this card. Anything else: message Tidy, don't agree at the door.
+        {es ? "Haga solo lo indicado aquí. Para cualquier trabajo adicional, contacte a Tidy; no lo acuerde en la puerta." : "Do only what's on this card. Anything else: message Tidy, don't agree at the door."}
       </p>
       {scopes.map((svc) => (
         <div key={svc} className="mt-3 space-y-2">
-          <p className="text-[13px] font-bold text-[hsl(var(--pro-ink))]">{SCOPE_TITLE[svc][0]}</p>
-          <List title="Included" items={sec(svc, "included").map((r) => txt(r, "en"))} />
-          <List title="Not included" items={sec(svc, "not_included").map((r) => txt(r, "en"))} />
-          <List title="The customer needs to" items={sec(svc, "customer_must").map((r) => txt(r, "en"))} />
+          <p className="text-[13px] font-bold text-[hsl(var(--pro-ink))]">{SCOPE_TITLE[svc][es ? 1 : 0]}</p>
+          <List title={es ? "Incluido" : "Included"} items={sec(svc, "included").map((r) => txt(r, language))} />
+          <List title={es ? "No incluido" : "Not included"} items={sec(svc, "not_included").map((r) => txt(r, language))} />
+          <List title={es ? "El miembro debe" : "The customer needs to"} items={sec(svc, "customer_must").map((r) => txt(r, language))} />
         </div>
       ))}
-      {card.monthly_lawn && growth && <p className="mt-2 text-[13px] text-[hsl(var(--pro-ink-soft))]">{txt(growth, "en")}</p>}
-      <List title="Approved add-ons" items={card.addons.length ? card.addons.map((a) => a.name + (a.free ? " (free gift)" : "")) : ["None"]} />
+      {card.monthly_lawn && growth && <p className="mt-2 text-[13px] text-[hsl(var(--pro-ink-soft))]">{txt(growth, language)}</p>}
+      <List title={es ? "Extras aprobados" : "Approved add-ons"} items={card.addons.length ? card.addons.map((a) => a.name + (a.free ? (es ? " (regalo)" : " (free gift)") : "")) : [es ? "Ninguno" : "None"]} />
       {isCar && (
         <p className="mt-2 text-[13px] font-semibold text-[hsl(var(--pro-ink))]">
-          Water at the parking spot: {card.spigot === true ? "Yes — customer has an outdoor spigot" : card.spigot === false ? "No — bring your own water" : "Not answered — bring your own water"}
+          {es ? "Agua en el estacionamiento" : "Water at the parking spot"}: {card.spigot === true ? (es ? "Sí — el miembro tiene grifo exterior" : "Yes — customer has an outdoor spigot") : card.spigot === false ? (es ? "No — traiga su propia agua" : "No — bring your own water") : (es ? "Sin respuesta — traiga su propia agua" : "Not answered — bring your own water")}
         </p>
       )}
     </ProCard>
