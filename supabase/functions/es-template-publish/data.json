@@ -1,0 +1,512 @@
+[
+ {
+  "key": "cancel_pause_email",
+  "subject_es": "Antes de irte — ¿prefieres pausar?",
+  "body_es": "Entendemos por completo si necesitas un descanso. En vez de cancelar, podemos pausar tu plan — tu precio y tu Pro se quedan exactamente como están. ¿Prefieres eso? Solo responde.",
+  "ph_ok": true
+ },
+ {
+  "key": "cancelled_email0",
+  "subject_es": "Lamentamos que te vayas, {first}",
+  "body_es": "Tu plan de Tidy está cancelado como lo pediste — sin rencores, nunca. Si algo cambia, aquí estaremos.",
+  "ph_ok": true
+ },
+ {
+  "key": "card_expiring_email",
+  "subject_es": "Tu tarjeta vence pronto",
+  "body_es": "Aviso: la tarjeta de tu plan Tidy vence pronto. Actualízala ahora y ya no tendrás que pensar en eso: {pay_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "checkout_email24h",
+  "subject_es": "Tu plan te espera",
+  "body_es": "<h1>Tu plan está guardado y te espera</h1><p>Hola {first}. Tu {plan} está justo donde lo dejaste. Un toque y listo.</p><p><a href=\"{pay_link}\">Terminar el pago</a></p>",
+  "ph_ok": true
+ },
+ {
+  "key": "checkout_sms1h",
+  "subject_es": null,
+  "body_es": "Parece que no terminaste tu pago en Tidy. Continúa donde te quedaste: {pay_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "checkout_sms72h",
+  "subject_es": null,
+  "body_es": "Último recordatorio — tu {plan} sigue guardado: {pay_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "cold_email45d",
+  "subject_es": "Seguimos aquí si nos necesitas, {first}",
+  "body_es": "Hola {first} — sin presiones, solo un saludo. Si las tareas de la casa se están acumulando, nos encantaría encargarnos. Tu lugar en {zip_name} está a una respuesta de distancia.",
+  "ph_ok": true
+ },
+ {
+  "key": "cold_email90d",
+  "subject_es": "Un saludo de Tidy",
+  "body_es": "Hola {first} — ¿sigues pensando en una casa más limpia y tranquila? Estamos por aquí cuando quieras. Responde y retomamos justo donde nos quedamos.",
+  "ph_ok": true
+ },
+ {
+  "key": "converting_email0",
+  "subject_es": "Tu Founding Home está lista 🎉",
+  "body_es": "<h1>Llegó el momento, {first}.</h1><p>Tu Founding Home está lista. Confirma tu plan y nosotros nos encargamos del resto.</p><p><a href=\"{pay_link}\">Confirma tu plan</a></p>",
+  "ph_ok": true
+ },
+ {
+  "key": "converting_email48h",
+  "subject_es": "¿Preguntas sobre precio, contratos o confianza?",
+  "body_es": "Preguntas válidas, respuestas directas: sin contratos — cancela cuando quieras. Cada visita está respaldada por nuestra garantía de 48 horas para dejar todo bien. Y el precio que ves es el precio que pagas. Listos cuando quieras: {link}",
+  "ph_ok": true
+ },
+ {
+  "key": "converting_email72h",
+  "subject_es": "Último día para mantener tu tarifa Founding",
+  "body_es": "<h1>No dejes pasar tu tarifa Founding</h1><p>Hoy ({deadline}) es el último día para mantenerla. Nos encantaría tenerte con nosotros.</p><p><a href=\"{pay_link}\">Confirma tu plan</a></p>",
+  "ph_ok": true
+ },
+ {
+  "key": "converting_sms0",
+  "subject_es": null,
+  "body_es": "Tu Founding Home está lista — confirma tu plan aquí: {pay_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "converting_sms24h",
+  "subject_es": null,
+  "body_es": "Recordatorio: confirma tu plan de Tidy para mantener Founding Home #{founding_number}: {pay_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "converting_sms72h",
+  "subject_es": null,
+  "body_es": "Último día para mantener tu tarifa Founding: {deadline}. {pay_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "custom_quote_email_sent",
+  "subject_es": "Tu cotización de Tidy está lista",
+  "body_es": "<h1>Tu cotización está lista, {first}.</h1><p>La preparamos especialmente para tu casa.</p><p><a href=\"{link}\">Ver tu cotización</a></p>",
+  "ph_ok": true
+ },
+ {
+  "key": "custom_quote_email0",
+  "subject_es": "Tu cotización personalizada está en camino",
+  "body_es": "<h1>Gracias, {first} — ya estamos en eso.</h1><p>Tu cotización personalizada llega dentro de 24 horas (horas laborales).</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "custom_quote_email7d",
+  "subject_es": "¿Aún te interesa?",
+  "body_es": "<h1>¿Aún lo estás pensando?</h1><p>Sin prisa, {first}. Tu cotización personalizada está lista cuando quieras.</p><p><a href=\"{link}\">Mírala aquí</a></p>",
+  "ph_ok": true
+ },
+ {
+  "key": "custom_quote_sms_sent",
+  "subject_es": null,
+  "body_es": "Tu cotización de Tidy está lista: {link}",
+  "ph_ok": true
+ },
+ {
+  "key": "custom_quote_sms0",
+  "subject_es": null,
+  "body_es": "Listo — tu cotización personalizada llega dentro de 24 horas (horario laboral).",
+  "ph_ok": true
+ },
+ {
+  "key": "custom_quote_sms48h",
+  "subject_es": null,
+  "body_es": "¿Tienes preguntas sobre tu cotización de Tidy? Llama al (786) 829-1141 o responde aquí.",
+  "ph_ok": true
+ },
+ {
+  "key": "founding_full_email0",
+  "subject_es": "Estás en la lista de espera de {zip_name}",
+  "body_es": "<h1>¡{zip_name} se llenó rápido!</h1><p>Los 25 cupos de Founding Home ya están ocupados, pero estás en el puesto #{wait_position} de la lista de espera. Los planes regulares ya están disponibles.</p><p><a href=\"{link}\">Ver planes</a></p>",
+  "ph_ok": true
+ },
+ {
+  "key": "founding_full_offer_email",
+  "subject_es": "Se abrió un lugar Founding en {zip_name}",
+  "body_es": "<h1>Buenas noticias, {first} — se abrió un lugar.</h1><p>Un lugar Founding Home en {zip_name} es tuyo para reclamar durante las próximas 48 horas.</p><p><a href=\"{link}\">Reclama tu lugar</a></p>",
+  "ph_ok": true
+ },
+ {
+  "key": "founding_full_offer_sms",
+  "subject_es": null,
+  "body_es": "Se abrió un cupo Founding Home en {zip_name} — tienes 48 horas para reclamarlo: {link}",
+  "ph_ok": true
+ },
+ {
+  "key": "founding_full_sms0",
+  "subject_es": null,
+  "body_es": "Los 25 cupos de Founding Home en {zip_name} ya están ocupados. Estás en el puesto #{wait_position} de la lista de espera. Los planes regulares ya están disponibles: {link}",
+  "ph_ok": true
+ },
+ {
+  "key": "out_of_area_email0",
+  "subject_es": "Estás en la lista para {zip}",
+  "body_es": "<h1>¡Estás en la lista!</h1><p>Gracias por querer Tidy en {zip}. Te avisamos el día que abramos ahí.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "out_of_area_email90d",
+  "subject_es": "Tidy está creciendo",
+  "body_es": "<h1>Tidy está creciendo 🌴</h1><p>Aquí tienes una actualización rápida de dónde abriremos pronto. Sigues en nuestra lista.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "out_of_area_open_email",
+  "subject_es": "Tidy ya está en {zip}",
+  "body_es": "<h1>Llegamos a {zip}</h1><p>Los cupos de Founding Home están abiertos y te enteras primero.</p><p><a href=\"{link}\">Reserva el tuyo</a></p>",
+  "ph_ok": true
+ },
+ {
+  "key": "out_of_area_open_sms",
+  "subject_es": null,
+  "body_es": "Tidy ya está en {zip} — los cupos de Founding Home están abiertos: {link}",
+  "ph_ok": true
+ },
+ {
+  "key": "out_of_area_sms0",
+  "subject_es": null,
+  "body_es": "Estás en la lista para {zip}. Te avisamos por texto el día que Tidy abra allí.",
+  "ph_ok": true
+ },
+ {
+  "key": "overflow_email",
+  "subject_es": "Necesitamos mover tu visita — escoge un nuevo horario",
+  "body_es": "Se llenó nuestra agenda el {service_date}, así que no podemos hacer tu {service} ese día. Escoge cualquier horario dentro de las próximas 48 horas y ahí estaremos: {booking_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "overflow_sms",
+  "subject_es": null,
+  "body_es": "Hola {first}, no podremos cubrir tu {service} el {service_date} como estaba planeado. Escoge un nuevo horario dentro de 48 h aquí: {booking_link} — disculpa el cambio.",
+  "ph_ok": true
+ },
+ {
+  "key": "pause_60d_email",
+  "subject_es": "¿Listo para reiniciar, {first}?",
+  "body_es": "Tu plan ha estado en pausa un par de meses. Cuando estés listo, una sola respuesta reinicia todo — el mismo Pro, el mismo precio, el mismo día.",
+  "ph_ok": true
+ },
+ {
+  "key": "pause_60d_sms",
+  "subject_es": null,
+  "body_es": "Hola {first}. Tu plan de Tidy sigue pausado. Responde RESTART en cualquier momento y retomamos justo donde lo dejamos.",
+  "ph_ok": true
+ },
+ {
+  "key": "payment_failed_email0",
+  "subject_es": "Aviso rápido sobre tu pago",
+  "body_es": "Hola {first} — tu último pago no pasó (a veces los bancos hacen esto). Actualiza tu tarjeta aquí y todo sigue en marcha: {pay_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "payment_failed_email3",
+  "subject_es": "Seguimos con problemas con el pago",
+  "body_es": "Intentamos de nuevo y el pago todavía no pasa. Una actualización rápida de tu tarjeta lo resuelve en un minuto: {pay_link} — y tus visitas siguen exactamente como están.",
+  "ph_ok": true
+ },
+ {
+  "key": "payment_failed_email7",
+  "subject_es": "Último aviso antes de pausar",
+  "body_es": "No queremos pausar tus visitas, pero el pago sigue pendiente. Actualiza tu tarjeta antes de {deadline} para que todo siga funcionando: {pay_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "payment_failed_sms0",
+  "subject_es": null,
+  "body_es": "Hola {first}, tu pago de Tidy no pasó. Actualiza tu tarjeta aquí: {pay_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "payment_failed_sms3",
+  "subject_es": null,
+  "body_es": "Recordatorio: tu pago de Tidy sigue pendiente. Actualiza tu tarjeta: {pay_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "payment_recovered_email",
+  "subject_es": "Todo listo — gracias.",
+  "body_es": "Tu pago pasó y tu plan vuelve a estar activo. Gracias por solucionarlo rápido, {first}.",
+  "ph_ok": true
+ },
+ {
+  "key": "payment_recovered_sms",
+  "subject_es": null,
+  "body_es": "Todo listo — tu pago pasó. Gracias, {first}.",
+  "ph_ok": true
+ },
+ {
+  "key": "popup_email0",
+  "subject_es": "Bienvenido a Tidy",
+  "body_es": "<h1>Bienvenido a Tidy, {first}!</h1><p>Limpieza de la casa, cuidado del jardín y cuidado del auto en un solo horario y una sola factura. Planes desde $45 al mes, y las Founding Homes aseguran su tarifa de por vida.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "popup_email14d",
+  "subject_es": "Cupos Founding en {zip_name}: quedan {spots_left}",
+  "body_es": "<h1>Solo quedan {spots_left} cupos Founding en {zip_name}</h1><p>Tus vecinos los están reservando. ¿Quieres uno?</p><p><a href=\"{link}\">Reserva el tuyo</a></p>",
+  "ph_ok": true
+ },
+ {
+  "key": "popup_email21d",
+  "subject_es": "¿Todavía lo estás pensando?",
+  "body_es": "<h1>¿Todavía lo estás pensando?</h1><p>Con gusto te ayudamos. Llama al (786) 829-1141 o solo responde a este correo.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "popup_email3d",
+  "subject_es": "Un horario. Una factura.",
+  "body_es": "<h1>Un horario. Una factura. Más tiempo libre.</h1><p>Cada visita está respaldada por nuestra garantía de solución en 48 horas.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "popup_email7d",
+  "subject_es": "Lo que dicen tus vecinos",
+  "body_es": "<h1>Escúchalo de tus vecinos</h1><p>Mira nuestras reseñas en Google: {review_link}</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "popup_sms14d",
+  "subject_es": null,
+  "body_es": "Quedan {spots_left} cupos de Founding Home en {zip_name}. Asegura tu tarifa de por vida: {link}",
+  "ph_ok": true
+ },
+ {
+  "key": "price_seen_email0",
+  "subject_es": "Tu precio de Tidy",
+  "body_es": "<h1>Aquí tienes tu precio de Tidy, {first}.</h1><p>Tu plan: {plan} a {price_month}/mes.</p><p>Lo que incluye, nuestra garantía de solución en 48 horas y tus beneficios Founding están en tu cotización.</p><p><a href=\"{link}\">Reserva tu lugar</a> — no necesitas tarjeta.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "price_seen_email10d",
+  "subject_es": "Lo que dicen tus vecinos",
+  "body_es": "<h1>Escúchalo de tus vecinos</h1><p>Mira nuestras reseñas en Google: {review_link}</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "price_seen_email21d",
+  "subject_es": "Último aviso para las tarifas Founding en {zip_name}",
+  "body_es": "<h1>¡Último aviso, {first}!</h1><p>Las tarifas de Founding Home en {zip_name} cierran pronto.</p><p><a href=\"{link}\">Reserva ahora</a></p>",
+  "ph_ok": true
+ },
+ {
+  "key": "price_seen_email2d",
+  "subject_es": "Cómo funciona Tidy",
+  "body_es": "<h1>Así funciona Tidy</h1><p>Un horario, una factura y el mismo Pro amable en cada visita. Cada Pro pasa por verificación de antecedentes y tiene seguro.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "price_seen_sms0",
+  "subject_es": null,
+  "body_es": "Tu precio de Tidy: {plan}, {price_month}/mes. Como Founding Home, tu tarifa nunca sube — quedan {spots_left} de 25 cupos en {zip_name}. Reserva, no necesitas tarjeta: {link}",
+  "ph_ok": true
+ },
+ {
+  "key": "price_seen_sms5d",
+  "subject_es": null,
+  "body_es": "Quedan {spots_left} cupos de Founding Home en {zip_name}. Asegura tu tarifa de por vida: {link}",
+  "ph_ok": true
+ },
+ {
+  "key": "receipt_email",
+  "subject_es": "Tu recibo de Tidy",
+  "body_es": "Gracias, {first} — aquí tienes tu recibo por {amount} del {date}. Tu plan sigue activo; no tienes que hacer nada.",
+  "ph_ok": true
+ },
+ {
+  "key": "referral_credit_email",
+  "subject_es": "Tu crédito de $50 por referir ya está listo",
+  "body_es": "Ya es oficial: la primera visita de tu referido se completó, así que descontamos $50 de tu próxima factura. Gracias por recomendarnos, {first}.",
+  "ph_ok": true
+ },
+ {
+  "key": "referral_email",
+  "subject_es": "¿Conoces a un vecino al que le encantaría Tidy?",
+  "body_es": "Lo bueno es mejor cuando se comparte. Envía tu enlace a un vecino — ellos reciben una cálida bienvenida y tú recibes $50 de descuento cuando termine su primera visita. {referral_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "res_started_email24h",
+  "subject_es": "¡Ya casi eres un Founding Home!",
+  "body_es": "<h1>¡Estás muy cerca, {first}!</h1><p>Tus selecciones quedaron guardadas. <a href=\"{link}\">Termina en 1 minuto</a> — no necesitas tarjeta.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "res_started_sms1h",
+  "subject_es": null,
+  "body_es": "Tu reservación de Tidy está casi lista — 1 minuto para terminar, no necesitas tarjeta: {link}",
+  "ph_ok": true
+ },
+ {
+  "key": "res_started_sms3d",
+  "subject_es": null,
+  "body_es": "Solo quedan {spots_left} cupos Founding en {zip_name}. Termina aquí: {link}",
+  "ph_ok": true
+ },
+ {
+  "key": "reserved_email_convert3",
+  "subject_es": "El pago abre el {convert_date}",
+  "body_es": "<h1>¡Ya casi empezamos!</h1><p>El pago abre el {convert_date} y tu primera visita es la semana del {launch}.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "reserved_email_perks",
+  "subject_es": "Tus beneficios Founding",
+  "body_es": "<h1>Tus beneficios Founding 🎁</h1><p>Una tarifa fija de por vida, un add-on premium gratis en tu primera visita y tu primera visita perfecta o gratis.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "reserved_email_team",
+  "subject_es": "Conoce al equipo",
+  "body_es": "<h1>Conoce a las personas detrás de Tidy</h1><p>Cada Tidy Pro pasa por una verificación de antecedentes, tiene seguro, viste uniforme y lleva una identificación con foto.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "reserved_email0",
+  "subject_es": "¡Eres el Founding Home #{founding_number}! 🎉",
+  "body_es": "<h1>¡Bienvenido, Founding Home #{founding_number}!</h1><p>Ya eres oficialmente parte de las primeras casas Tidy de {zip_name}. Tu tarifa queda fija de por vida. El pago abre {convert_date}; las primeras visitas empiezan {launch}.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "reserved_email7d",
+  "subject_es": "Qué esperar en tu primera visita",
+  "body_es": "<h1>Tu primera visita, paso a paso</h1><p>Así será tu primera visita de {service} — sin sorpresas.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "reserved_lawn_down_email",
+  "subject_es": "Buenas noticias sobre tu jardín",
+  "body_es": "<h1>¡Buenas noticias, {first}!</h1><p>Nuestra revisión aérea muestra que tu jardín es {size} ({sqft} sq ft de césped), así que tu plan baja a {price_month}/mo.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "reserved_lawn_up_email",
+  "subject_es": "Revisión del tamaño de tu jardín",
+  "body_es": "<h1>Revisión del tamaño de tu jardín</h1><p>Nuestra revisión aérea muestra que tu jardín es {size} ({sqft} sq ft de césped), así que tu plan es de {price_month}/mes. Responde SÍ para confirmar o llama al (786) 829-1141 — con gusto lo hablamos.</p>",
+  "ph_ok": true
+ },
+ {
+  "key": "reserved_lawn_up_sms",
+  "subject_es": null,
+  "body_es": "Nuestra revisión aérea muestra que tu jardín es {size} ({sqft} pies cuadrados de césped), así que tu plan es de {price_month}/mes. Responde YES para confirmar o llama al (786) 829-1141.",
+  "ph_ok": true
+ },
+ {
+  "key": "reserved_sms_convert3",
+  "subject_es": null,
+  "body_es": "Un aviso: el pago de tu Founding Home se abre el {convert_date}. Tu primera visita es la semana del {launch}.",
+  "ph_ok": true
+ },
+ {
+  "key": "reserved_sms0",
+  "subject_es": null,
+  "body_es": "Eres Founding Home #{founding_number} en {zip_name}. Tu tarifa queda fija de por vida. Te enviamos un texto cuando se abra el pago el {convert_date}. Las primeras visitas empiezan {launch}.",
+  "ph_ok": true
+ },
+ {
+  "key": "retention_3m_email",
+  "subject_es": "¿Cómo va Tidy, {first}?",
+  "body_es": "¡Ya van tres meses! Con un toque dinos cómo vamos: {rating_link} — y si algo no está bien, responde y lo resolvemos personalmente.",
+  "ph_ok": true
+ },
+ {
+  "key": "retention_6m_email",
+  "subject_es": "Seis meses juntos — gracias",
+  "body_es": "Medio año de casas limpias y fines de semana libres. {founding_line}¿Conoces a alguien a quien también le encantaría? Tu enlace de referidos: {referral_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "review_request_email",
+  "subject_es": "¿Disfrutas de Tidy, {first}?",
+  "body_es": "Si sientes tu casa más ligera últimamente, una reseña rápida de 5 estrellas ayuda a que los vecinos nos encuentren — y significa muchísimo para tu Pro. {review_link}",
+  "ph_ok": true
+ },
+ {
+  "key": "skip_pattern_email",
+  "subject_es": "¿Necesitas otro horario?",
+  "body_es": "Notamos que saltaste un par de visitas últimamente; no te preocupes. Si te queda mejor otro día u otra frecuencia, responde y lo cambiamos en un minuto.",
+  "ph_ok": true
+ },
+ {
+  "key": "visit_arrived_sms",
+  "subject_es": null,
+  "body_es": "{pro_name} ya llegó y está comenzando. Te mandamos fotos cuando terminemos.",
+  "ph_ok": true
+ },
+ {
+  "key": "visit_done_email",
+  "subject_es": "Visita de hoy — todo listo",
+  "body_es": "Tu {service} está listo. Las fotos y notas están en tu panel. ¿Se nos pasó algo? Responde dentro de 48 horas y volvemos para dejarlo bien — esa es nuestra garantía.",
+  "ph_ok": true
+ },
+ {
+  "key": "visit_done_sms",
+  "subject_es": null,
+  "body_es": "¡Todo listo, {first}! {pro_name} acaba de terminar tu {service}. Las fotos están en tu panel.",
+  "ph_ok": true
+ },
+ {
+  "key": "visit_otw_sms",
+  "subject_es": null,
+  "body_es": "{pro_name} va en camino. Llegada estimada: {eta}. — Tidy",
+  "ph_ok": true
+ },
+ {
+  "key": "visit_rating_email",
+  "subject_es": "¿Cómo estuvo la visita de hoy?",
+  "body_es": "Un toque nos dice todo: ¿cómo estuvo tu {service} hoy? {rating_link} — toma cinco segundos y nos ayuda a mantener tus visitas excelentes.",
+  "ph_ok": true
+ },
+ {
+  "key": "visit_rating_sms",
+  "subject_es": null,
+  "body_es": "¿Cómo nos fue hoy, {first}? Responde 1–5 (5 = increíble).",
+  "ph_ok": true
+ },
+ {
+  "key": "visit_reminder_email",
+  "subject_es": "Tu visita de Tidy es mañana",
+  "body_es": "Hola {first} — te avisamos que tu {service} es mañana, {time_window}. ¿Necesitas moverla? Responde y buscamos un mejor horario.",
+  "ph_ok": true
+ },
+ {
+  "key": "visit_reminder_sms",
+  "subject_es": null,
+  "body_es": "Hola {first}. Recordatorio: tu {service} de Tidy es mañana {time_window}. ¿Necesitas moverlo? Responde aquí.",
+  "ph_ok": true
+ },
+ {
+  "key": "welcome_email0",
+  "subject_es": "Bienvenido a Tidy, {first}.",
+  "body_es": "Todo listo. Tu plan {plan} está confirmado y tu primera visita está programada para {launch}. Nosotros nos encargamos del resto; tú solo disfruta del tiempo libre.",
+  "ph_ok": true
+ },
+ {
+  "key": "welcome_email1d",
+  "subject_es": "Preparándote para tu primera visita",
+  "body_es": "Se acerca tu primera visita. Esto es lo que puedes esperar: tu Pro llega en tu ventana de tiempo, envía fotos del antes y después, y deja todo impecable. No tienes que preparar nada — solo indícanos tus prioridades.",
+  "ph_ok": true
+ },
+ {
+  "key": "welcome_sms0",
+  "subject_es": null,
+  "body_es": "Te damos la bienvenida a Tidy, {first}. Tu plan {plan} ya está listo — primera visita {launch}. ¿Preguntas? Solo responde a este mensaje. — Team Tidy",
+  "ph_ok": true
+ },
+ {
+  "key": "winback_email30",
+  "subject_es": "Te extrañamos, {first}",
+  "body_es": "Ha pasado un mes. Si las tareas de la casa están volviendo, podemos reactivar tu plan con una sola respuesta — la misma cara amable en tu puerta.",
+  "ph_ok": true
+ },
+ {
+  "key": "winback_email90",
+  "subject_es": "Un último saludo de Tidy",
+  "body_es": "No te escribiremos más después de esto — pero si alguna vez quieres recuperar tus fines de semana, ya sabes dónde encontrarnos. Gracias por ser parte de Tidy, {first}.",
+  "ph_ok": true
+ }
+]
