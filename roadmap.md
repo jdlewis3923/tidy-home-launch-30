@@ -1,5 +1,8 @@
 # Roadmap
 
+## Pro schedule visibility (Oct 28)
+- [x] Today’s jobs opens first with persistent jobs/route/calendar tabs; every month shows its year. Signed-in 411px phone navigation verified in EN/ES, no overflow/page errors, eight focused tests pass and build OK. Published site remains unchanged until publication is authorized; assigned-job completion remains separately unverified.
+
 ## Full system audit → autonomous operations (Oct 28)
 - [x] Applied approved route timing: 5:45 PM Monday–Saturday, Monday route on Saturday; owner alerts 8 AM–9 PM separately. Central sender rechecks non-owner windows, outbox closure retains queued state. Existing schedule readback confirmed and affected functions deployed; 448 tests pass. No live test messages sent.
 - [ ] Part A: evidence-backed PASS / FAIL / NOT BUILT inventory for hiring, website, Stripe, messaging, social, roadmap and entire Pro loop; fix verified failures before Part B.

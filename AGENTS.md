@@ -21,7 +21,8 @@
 - Both payment entrypoints share the cleaning verification gate; verified quotes hydrate conversion by reservation ID, and size approval is an atomic token RPC — why: embedded checkout cannot bypass measurement, staffing, or customer consent.
 - Cleaning walkthrough slots are admin-created and atomically claimed by the reservation sender; public clients read only open times — why: never invent owner availability or allow double booking.
 - Estate teams are validated before conversion/assignment; Lead inspection and secure-exit checks gate completion, paired Pros record individual GPS, and private pay lines credit transactionally — why: two-person jobs cannot become solo work or lose payouts on failed requests.
-- Root uses `color-scheme: light dark`; body/Founding use explicit light tokens — why: phones ignore "only light" and darken QR pages.
+- Root uses `color-scheme: light dark`; body/Founding use light tokens — why: phones darken QR pages otherwise.
+- Pro schedule defaults to daily jobs with persistent jobs/route/calendar tabs and month-labelled dates — why: dispatch and dates stay clear.
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
 - Pro access is guarded by `pro_access_window_open` across visit and vehicle readers; per-Pro `pro_service_check` records and the completion trigger enforce service/exit/add-on checks — why: portal presentation cannot bypass privacy or required work.
 - Pro context uses assigned/team guards; routes use server-clock dates, `user_lang`, and exclude tests/archives. Central SMS rechecks destination windows even on retries — why: no private leaks, Sunday Pro texts or caller bypasses.
