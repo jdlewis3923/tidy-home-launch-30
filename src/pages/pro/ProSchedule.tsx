@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ProLaunchLine from "@/components/pro/ProLaunchLine";
 import { Navigate } from "react-router-dom";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, ListChecks } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import InstallPrompt from "@/components/pro/portal/InstallPrompt";
 
@@ -35,7 +35,7 @@ export default function ProSchedule() {
   const es = language === 'es';
   const [routeRange,setRouteRange] = useState<'today'|'week'>('today');
   const [week, setWeek] = useState<"this" | "next">("this");
-  const [tab, setTab] = useState<"route" | "dates">("dates");
+  const [tab, setTab] = useState<"jobs" | "route" | "dates">("jobs");
   const [unread, setUnread] = useState(0);
   useEffect(() => {
     if (!userId) return;
@@ -101,6 +101,13 @@ export default function ProSchedule() {
 
   return (
     <ProShell title={greeting} showBell unread={unread}>
+      <div className="sticky top-[72px] z-20 flex gap-1 border-b border-border bg-background px-[18px] py-3" role="tablist" aria-label={es ? 'Agenda del Pro' : 'Pro schedule'}>
+        {([["jobs", es ? "Trabajos de hoy" : "Today’s jobs", ListChecks], ["route", es ? "Mi ruta semanal" : "My weekly route", CalendarDays], ["dates", es ? "Calendario" : "Calendar", CalendarDays]] as const).map(([key, label, Icon]) => (
+          <Button key={key} role="tab" aria-selected={tab === key} variant={tab === key ? 'default' : 'ghost'} onClick={() => { setTab(key); if (key === 'jobs') setRouteRange('today'); }} className="h-auto min-h-12 min-w-0 flex-1 flex-col gap-1 whitespace-normal px-1 py-2 text-center text-xs leading-tight">
+            <Icon className="h-4 w-4" aria-hidden />{label}
+          </Button>
+        ))}
+      </div>
       <ProPartnerStrip />
       <p className="px-[18px] pt-4 text-[14px] font-semibold text-[hsl(var(--pro-ink))]">
         {es ? "Usted elige sus días y su zona. Una vez que haya miembros reservados, los cambios requieren 14 días de aviso." : "You choose your days and your area. Once customers are booked on a day, changes need 14 days' notice."}
@@ -129,17 +136,21 @@ export default function ProSchedule() {
 
       {!loading && !error && (
         <>
-          <section className="space-y-3 px-[18px] pt-4">
+          {tab === 'jobs' && <section className="space-y-3 px-[18px] pt-4">
+            <div className="flex items-center justify-between gap-2">
+              <h1 className="text-xl font-bold text-foreground">{routeRange === 'today' ? (es ? 'Trabajos de hoy' : 'Today’s jobs') : (es ? 'Trabajos de esta semana' : 'This week’s jobs')}</h1>
+              <span className="text-sm text-muted-foreground">{new Date().toLocaleDateString(es ? 'es-US' : 'en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric' })}</span>
+            </div>
             <div className="flex gap-2" role="group" aria-label={es?'Visitas':'Visits'}>
               <Button variant={routeRange==='today'?'default':'outline'} onClick={()=>setRouteRange('today')}>{es?'Hoy':'Today'}</Button>
               <Button variant={routeRange==='week'?'default':'outline'} onClick={()=>setRouteRange('week')}>{es?'Esta semana':'This week'}</Button>
             </div>
-            {routeVisits.length===0&&<p className="py-4 text-sm text-muted-foreground">{es?'Sin visitas programadas.':'No visits scheduled.'}</p>}
+            {routeVisits.length===0&&<p className="py-4 text-sm text-muted-foreground">{routeRange === 'today' ? (es ? 'No tiene trabajos asignados para hoy.' : 'No jobs assigned to you today.') : (es ? 'No tiene trabajos asignados esta semana.' : 'No jobs assigned to you this week.')}</p>}
             {routeVisits.length===0&&<GpsTestCard />}
             {routeVisits.map((v,index)=><Link key={v.id} to={`/pro/visit/${v.id}`} className="flex min-h-24 items-start gap-3 rounded-lg border border-border bg-background p-4 text-foreground">
               <span className="pt-1 text-sm text-muted-foreground">{index+1}</span><div className="min-w-0 flex-1 space-y-1"><p className="font-semibold">{v.customer_first_name??(es?'Miembro':'Member')}</p><p className="text-sm">{v.service_type==='cleaning'?(es?'Limpieza':'Cleaning'):v.service_type==='lawn'?(es?'Césped':'Lawn'):v.visit_kind==='car_wash'?(es?'Lavado adicional':'Car Wash Add-On'):(es?'Cuidado del Auto':'Car Care')} · {v.size_tier===5?'Estate Plus':v.size_tier===4?'Estate':`${es?'Tamaño':'Size'} ${v.size_tier??'—'}`}</p><p className="text-xs text-muted-foreground">{timeWindow(v.scheduled_start,v.scheduled_end,language)} · {v.zip}</p>{v.is_team&&<p className="text-xs text-primary">{v.is_lead?(es?'Líder de equipo':'Team Lead'):(es?'Equipo':'Team')}</p>}</div><span className="text-sm font-semibold">{money(v.visit_pay_cents)}</span>
             </Link>)}
-          </section>
+          </section>}
           <section className="px-[18px] pt-4">
             <HeroPanel className="pro-rise">
               <Eyebrow className="text-[hsl(var(--pro-sky))]">{es ? "Esta semana" : "This week"}</Eyebrow>
@@ -160,15 +171,6 @@ export default function ProSchedule() {
               </div>
             </HeroPanel>
           </section>
-
-          <div className="mx-[18px] mt-5 flex rounded-xl border border-[hsl(var(--pro-navy)/0.07)] bg-white p-1 pro-card" role="tablist">
-            {([["route", es ? "Mi ruta semanal" : "My weekly route"], ["dates", es ? "Mis fechas" : "My dates"]] as const).map(([k, label]) => (
-              <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-                className={`min-h-[44px] flex-1 rounded-[10px] text-[14px] font-bold ${tab === k ? "bg-[hsl(var(--pro-navy))] text-white" : "text-[hsl(var(--pro-ink-soft))]"}`}>
-                {label}
-              </button>
-            ))}
-          </div>
 
           {tab === "route" && <WeeklyRoute />}
           {tab === "dates" && <MyDates />}
