@@ -24,7 +24,7 @@ import { navigationLinks, accessWindowOpen } from '@/lib/pro-visit-rules';
 import { Button } from '@/components/ui/button';
 
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight as ArrowR, CalendarDays as CalIcon, Camera as CamIcon, ClipboardList, MapPin as PinIcon, StickyNote as NoteIcon, CheckCircle2 } from "lucide-react";
+import { ArrowRight as ArrowR, CalendarDays as CalIcon, Camera as CamIcon, ClipboardList, MapPin as PinIcon, StickyNote as NoteIcon, CheckCircle2, ChevronRight } from "lucide-react";
 import imgCleaning from "@/assets/cleaning-interior.webp";
 import imgLawn from "@/assets/founding-plan-lawn.webp";
 import imgCar from "@/assets/car-detailing.webp";
