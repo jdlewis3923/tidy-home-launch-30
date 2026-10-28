@@ -5,6 +5,7 @@ import {
   Bell, Power, Bot, BookOpen, Zap, Mail, CalendarDays, Award, ShieldCheck,
   ClipboardList, Gauge, Star, SlidersHorizontal, GraduationCap, PackageCheck,
   Shield, Menu, X, ChevronDown, BriefcaseBusiness, Landmark, Settings, MessageSquare,
+  MapPin,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import CapacityBanner from "@/components/admin/CapacityBanner";
@@ -25,6 +26,7 @@ const GROUPS: NavGroup[] = [
     { to: "/admin/entitlements", label: "Free add-ons", icon: ClipboardList },
     { to: "/admin/alerts", label: "Alerts", icon: Bell, badge: "alerts" },
     { to: "/admin/schedule", label: "Schedule", icon: CalendarDays },
+    { to: "/admin/pro-tracker", label: "Pro tracker", icon: MapPin },
   ]},
   { label: "Hiring", icon: BriefcaseBusiness, items: [
     { to: "/admin/hiring", label: "Hiring dashboard", icon: BarChart3 },
