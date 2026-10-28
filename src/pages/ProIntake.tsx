@@ -209,6 +209,7 @@ export default function ProIntake() {
       setSigningDay(row.signing_day_mode === true);
       setCompliance((res as unknown as { compliance?: Record<string, unknown> }).compliance ?? {});
       const { data: equipment } = await supabase.functions.invoke("signing-day", { body: { action: "intake_equipment", token } });
+      if (!cancelled) setCompliance(equipment?.compliance ?? {});
       if (!cancelled) setEquipmentOptions((equipment?.items ?? []).map((item: { label_en: string; label_es: string }) => `${item.label_en} / ${item.label_es}`));
       const seeded: Values = {};
       for (const [k, v] of Object.entries(row)) {

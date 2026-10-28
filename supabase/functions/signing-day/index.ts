@@ -6,7 +6,7 @@ import { requireServiceOrAdmin, bearerToken } from '../_shared/admin-auth.ts';
 const url = Deno.env.get('SUPABASE_URL') ?? '';
 const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const db = createClient(url,key,{auth:{persistSession:false}});
-const bodySchema = z.object({action:z.enum(['intake_equipment','send_intake','provision','payouts']),applicant_id:z.string().uuid().optional(),token:z.string().min(20).max(100).optional()});
+const bodySchema = z.object({action:z.enum(['intake_equipment','send_intake','provision','payouts','background_clear']),applicant_id:z.string().uuid().optional(),token:z.string().min(20).max(100).optional()});
 const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
 async function sms(id:string, text:string, idempotency:string) {
   const {data:a}=await db.from('applicants').select('phone,is_test_row').eq('id',id).single();
@@ -31,8 +31,9 @@ Deno.serve(async req=>{
       const {data:k}=await db.from('pro_kit').select('applicant_id,token_expires_at').eq('token',b.token).maybeSingle();
       if(!k || (k.token_expires_at && Date.parse(k.token_expires_at)<Date.now())) return reply({error:'invalid_link'},404);
       const {data:state}=await db.rpc('signing_day_state',{_id:k.applicant_id});
-      const {data:items}=await db.from('pipeline_equipment_items').select('label_en,label_es').eq('service',state?.service==='detailing'?'car':state?.service).eq('active',true).order('sort');
-      return reply({items:items??[]});
+      const {data:pipeline}=await db.from('contractor_pipeline').select('service').eq('applicant_id',k.applicant_id).single();
+      const {data:items}=await db.from('pipeline_equipment_items').select('label_en,label_es').eq('service',pipeline?.service).eq('active',true).order('sort');
+      return reply({items:items??[],compliance:{agreement:state?.agreement,w9:state?.w9,background:state?.background,insurance:state?.insurance,payouts:state?.payouts}});
     }
     if(b.action==='payouts') {
       const {data:u,error}=await db.auth.getUser(bearerToken(req));
@@ -47,6 +48,13 @@ Deno.serve(async req=>{
     if(!auth.ok) return reply({error:auth.error},auth.status);
     if(!b.applicant_id) return reply({error:'applicant_id_required'},400);
     const id=b.applicant_id;
+    if(b.action==='background_clear') {
+      const {data:p}=await db.from('contractor_pipeline').select('proof_approved_at,archived,state').eq('applicant_id',id).single();
+      if(!p?.proof_approved_at||p.archived||p.state!=='open') return reply({error:'Approved equipment proof is required before background clearance.'},409);
+      const {error}=await db.from('applicants').update({bg_check_status:'clear',bg_check_completed_at:new Date().toISOString()}).eq('id',id);
+      if(error) throw error;
+      return reply({ok:true});
+    }
     if(b.action==='send_intake') {
       const {data:t,error}=await db.rpc('admin_signing_day_intake',{_id:id});
       if(error) throw error;
@@ -67,7 +75,7 @@ Deno.serve(async req=>{
       const {error}=await db.auth.admin.updateUserById(uid,{phone,phone_confirm:false});
       if(error) throw error;
     } else {
-      const {data:created,error}=await db.auth.admin.createUser({phone,phone_confirm:false,user_metadata:{first_name:undefined}});
+      const {data:created,error}=await db.auth.admin.createUser({phone,phone_confirm:false});
       if(error||!created.user) return reply({error:error?.message??'account_failed'},409);
       uid=created.user.id;
     }

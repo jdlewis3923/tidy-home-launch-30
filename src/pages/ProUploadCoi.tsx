@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ShieldCheck, Upload, FileCheck2, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { insurancePdf } from "@/lib/insurance-photo";
 
 export default function ProUploadCoi() {
   const {language}=useLanguage(); const es=language==="es";
@@ -61,11 +62,11 @@ export default function ProUploadCoi() {
     }
     setSubmitting(true);
     try {
-      const ext=file.type==="application/pdf"?"pdf":file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
-      const path = `${userId}/coi-${Date.now()}.${ext}`;
+      const uploadFile=await insurancePdf(file);
+      const path = `${userId}/coi-${Date.now()}.pdf`;
       const { error: upErr } = await supabase.storage
         .from("contractor-coi-pdfs")
-        .upload(path, file, { contentType: file.type, upsert: false });
+        .upload(path, uploadFile, { contentType: "application/pdf", upsert: false });
       if (upErr) throw upErr;
 
       const { error: updErr } = await supabase
