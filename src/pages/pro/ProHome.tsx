@@ -1,21 +1,24 @@
 /**
  * Pro Home — /pro/home. Daily command center: today's assigned visits,
- * estimated pay, readiness (insurance, GPS) and one primary action.
- * Reads only Pro-scoped data via useProSession; no new backend.
+ * one primary action, shortcuts. Reads only Pro-scoped data via useProSession.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, CalendarDays, Car, ChevronRight, DollarSign, Home as HomeIcon, Leaf, MapPin, ShieldCheck, BadgeCheck } from "lucide-react";
-import ProShell from "@/components/pro/portal/ProShell";
+import { ArrowRight, BadgeCheck, Bell, CalendarDays, Camera, Car, ChevronDown, ChevronRight, DollarSign, FileText, Globe, Home as HomeIcon, Leaf, MapPin, Megaphone, MessageCircle, Play, ShieldCheck, Sparkles, X } from "lucide-react";
+import ProHead from "@/components/pro/portal/ProHead";
+import { ProBottomNav } from "@/components/pro/portal/ProShell";
+import LanguageSheet from "@/components/pro/portal/LanguageSheet";
 import InstallPrompt from "@/components/pro/portal/InstallPrompt";
 import { useProSession } from "@/hooks/useProSession";
-import { fetchNotifications, mondayOf, timeWindow, type ProVisit } from "@/lib/pro-portal";
+import { fetchNotifications, timeWindow, mondayOf, type ProVisit } from "@/lib/pro-portal";
 import { money } from "@/lib/pro-pay";
 import { useLanguage } from "@/contexts/LanguageContext";
+import palms from "@/assets/pro-home-palms.jpg";
 
 const TZ = "America/New_York";
 const dayKey = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d);
+const NOTIF_KEY = "tidy-pro-stay-ready-dismissed";
 
 function serviceMeta(v: ProVisit, es: boolean) {
   if (v.service_type === "lawn") return { label: es ? "Césped" : "Lawn Care", Icon: Leaf, tone: "--pro-green" };
@@ -23,39 +26,49 @@ function serviceMeta(v: ProVisit, es: boolean) {
   return { label: v.visit_kind === "car_wash" ? (es ? "Lavado adicional" : "Car Wash Add-On") : (es ? "Cuidado del Auto" : "Car Care"), Icon: Car, tone: "--pro-car" };
 }
 
+function weatherIcon(w: number) {
+  return w === 0 ? "☀️" : w <= 3 ? "⛅" : w <= 48 ? "🌫️" : w <= 67 || (w >= 80 && w <= 82) ? "🌧️" : w >= 95 ? "⛈️" : "☁️";
+}
+
 export default function ProHome() {
   const { me, coi, isOwner, gettingStarted, visits, loading, userId } = useProSession();
   const { language } = useLanguage();
   const es = language === "es";
   const reduce = useReducedMotion();
+  const [sheet, setSheet] = useState(false);
   const [unread, setUnread] = useState(0);
   useEffect(() => {
     if (!userId) return;
     void fetchNotifications().then((n) => setUnread(n.filter((x) => !x.read_at).length)).catch(() => setUnread(0));
   }, [userId]);
 
-  const [weather, setWeather] = useState<{ temp: number; icon: string } | null>(null);
+  const [weather, setWeather] = useState<{ temp: number; hi: number; lo: number; icon: string } | null>(null);
   useEffect(() => {
-    // Live conditions for Pinecrest, FL (Open-Meteo, no key). Hidden if unavailable — never a guessed value.
-    fetch("https://api.open-meteo.com/v1/forecast?latitude=25.667&longitude=-80.308&current=temperature_2m,weather_code&temperature_unit=fahrenheit")
+    // Live Pinecrest, FL conditions (Open-Meteo). Hidden if unavailable — never a guessed value.
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=25.667&longitude=-80.308&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=America%2FNew_York&forecast_days=1")
       .then((r) => r.json()).then((j) => {
         const c = j?.current; if (typeof c?.temperature_2m !== "number") return;
-        const w = c.weather_code as number;
-        const icon = w === 0 ? "☀️" : w <= 3 ? "⛅" : w <= 48 ? "🌫️" : w <= 67 || (w >= 80 && w <= 82) ? "🌧️" : w >= 95 ? "⛈️" : "☁️";
-        setWeather({ temp: Math.round(c.temperature_2m), icon });
+        setWeather({ temp: Math.round(c.temperature_2m), hi: Math.round(j.daily?.temperature_2m_max?.[0] ?? c.temperature_2m), lo: Math.round(j.daily?.temperature_2m_min?.[0] ?? c.temperature_2m), icon: weatherIcon(c.weather_code) });
       }).catch(() => setWeather(null));
   }, []);
+
+  const [showReady, setShowReady] = useState(() => {
+    if (typeof window === "undefined") return false;
+    if (localStorage.getItem(NOTIF_KEY)) return false;
+    return !("Notification" in window) || Notification.permission !== "granted";
+  });
+  const dismissReady = () => { localStorage.setItem(NOTIF_KEY, "1"); setShowReady(false); };
+  const enableNotifs = async () => {
+    try { if ("Notification" in window) { const p = await Notification.requestPermission(); if (p === "granted") dismissReady(); } } catch { /* unsupported */ }
+  };
+
   const today = dayKey(new Date());
   const todays = useMemo(() => visits
     .filter((v) => v.scheduled_start && !["canceled", "skipped", "blocked"].includes(v.status ?? "") && dayKey(new Date(v.scheduled_start)) === today)
     .sort((a, b) => (a.scheduled_start ?? "").localeCompare(b.scheduled_start ?? "")), [visits, today]);
   const open = todays.filter((v) => !v.completed_at);
   const next = open[0] ?? null;
-  const todayPay = todays.reduce((s, v) => s + (v.visit_pay_cents ?? 0), 0);
-
   const weekStart = mondayOf(new Date());
-  const weekEnd = new Date(weekStart.getTime() + 7 * 86400000);
-  const weekCount = visits.filter((v) => v.scheduled_start && new Date(v.scheduled_start) >= weekStart && new Date(v.scheduled_start) < weekEnd).length;
   const weekEarned = visits.filter((v) => v.completed_at && new Date(v.completed_at) >= weekStart).reduce((s, v) => s + (v.visit_pay_cents ?? 0), 0);
   const tier2 = me?.tier === "tier_2_pro" || me?.tier === "tier_2";
 
@@ -71,96 +84,155 @@ export default function ProHome() {
     return `https://www.google.com/maps/dir/?api=1&destination=${dest}${way ? `&waypoints=${way}` : ""}&travelmode=driving`;
   })();
 
-  const dateLabel = new Date().toLocaleDateString(es ? "es-US" : "en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" });
-  const greeting = me?.first_name ? `${es ? "Hola" : "Hi"}, ${me.first_name}` : (es ? "Hola" : "Hi");
-  const rise = (i: number) => reduce ? {} : { initial: { opacity: 0, y: -10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.24, delay: 0.05 * i, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } };
+  const now = new Date();
+  const weekday = now.toLocaleDateString(es ? "es-US" : "en-US", { timeZone: TZ, weekday: "long" });
+  const monthDay = now.toLocaleDateString(es ? "es-US" : "en-US", { timeZone: TZ, month: "short", day: "numeric" });
+  const name = (me as { first_name?: string | null; last_name?: string | null } | null);
+  const initials = `${name?.first_name?.[0] ?? ""}${name?.last_name?.[0] ?? ""}`.toUpperCase() || "T";
+  const rise = (i: number) => reduce ? {} : { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.28, delay: 0.06 * i, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } };
+  const card = "rounded-[22px] bg-white shadow-[0_8px_24px_-14px_hsl(var(--pro-navy)/0.25)]";
 
-  const coiLabel = coi?.status === "active" ? (es ? "Seguro activo" : "Insurance active")
-    : coi?.status === "expiring" ? (es ? "Seguro por vencer" : "Insurance expiring")
-    : coi?.status === "under_review" ? (es ? "Seguro en revisión" : "Insurance under review")
-    : coi?.status === "expired" ? (es ? "Seguro vencido" : "Insurance expired") : (es ? "Sin seguro" : "No insurance");
+  const primaryCls = "flex min-h-[52px] w-full items-center rounded-[16px] bg-[hsl(var(--pro-blue))] px-5 text-[17px] font-semibold text-primary-foreground shadow-[0_12px_22px_-12px_hsl(var(--pro-blue)/0.9)] transition-transform active:scale-[0.98]";
+  const primaryInner = (label: string) => (<><Play className="h-6 w-6" fill="currentColor" aria-hidden /><span className="flex-1 text-center">{label}</span><ArrowRight className="h-5 w-5" aria-hidden /></>);
+  const startLabel = es ? "Iniciar ruta" : "Start Route";
 
   return (
-    <ProShell title={greeting} showBell unread={unread} dark>
-      <div className="mx-2.5 flex items-center justify-between rounded-t-[14px] bg-[linear-gradient(180deg,hsl(var(--pro-deep-2)),hsl(var(--pro-deep)))] px-4 pb-6 pt-3.5">
-        <p className="text-[17px] font-semibold tracking-[-0.01em] text-primary-foreground">{dateLabel}</p>
-        {weather && (
-          <div className="flex items-center gap-1.5 text-primary-foreground">
-            <span aria-hidden className="text-[26px] leading-none">{weather.icon}</span>
-            <div className="text-right leading-none">
-              <p className="text-[19px] font-semibold">{weather.temp}°</p>
-              <p className="mt-0.5 text-[9px] text-primary-foreground/80">Pinecrest, FL</p>
-            </div>
+    <div className="min-h-screen bg-[hsl(var(--pro-ground))] font-sans">
+      <ProHead title={`${es ? "Inicio" : "Home"} · Tidy Pro Portal`} />
+      <main className="mx-auto max-w-md px-3 pb-28 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <header className="flex items-center gap-2 px-1 pb-3">
+          <div className="flex flex-1 items-end gap-1">
+            <span className="relative text-[30px] font-black italic leading-none tracking-[-0.04em] text-[hsl(var(--pro-blue))]">
+              TIDY<Sparkles className="absolute -right-4 -top-2 h-4 w-4 text-[hsl(var(--pro-blue))]" aria-hidden />
+            </span>
+            <span className="mb-0.5 ml-1 rounded-full bg-[hsl(var(--pro-gold,45_92%_52%))] px-2 py-0.5 text-[10px] font-bold text-[hsl(var(--pro-ink))]">PRO</span>
           </div>
-        )}
-      </div>
-
-      <motion.section {...rise(0)} className="-mt-3 min-h-[calc(100vh-150px)] rounded-t-[18px] bg-[hsl(var(--pro-ground))] px-3.5 pb-6 pt-4">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h2 className="text-[21px] font-bold tracking-[-0.015em] text-[hsl(var(--pro-ink))]">{es ? "Trabajos de hoy" : "Today’s jobs"}</h2>
-            <p className="text-[13px] text-[hsl(var(--pro-ink-soft))]"><span className="font-semibold text-[hsl(var(--pro-blue))]">{todays.length}</span> {es ? (todays.length === 1 ? "programado" : "programados") : "scheduled"}</p>
-          </div>
-          <Link to="/pro/schedule" className="flex min-h-[36px] items-center gap-3 rounded-[10px] bg-[linear-gradient(180deg,hsl(var(--pro-sky)),hsl(var(--pro-blue)))] px-3.5 text-[13.5px] font-medium text-primary-foreground shadow-[0_6px_14px_-6px_hsl(var(--pro-blue)/0.7)]">
-            {es ? "Ver todo" : "View all"} <ArrowRight className="h-4 w-4" aria-hidden />
+          <button type="button" onClick={() => setSheet(true)} aria-haspopup="dialog" aria-label={es ? "Idioma" : "Language"}
+            className="flex h-10 items-center gap-1.5 rounded-full bg-[hsl(var(--pro-blue-soft))] px-3 text-[13px] font-semibold text-[hsl(var(--pro-ink))]">
+            <Globe className="h-4 w-4" aria-hidden />{es ? "EN" : "ES"}<ChevronDown className="h-3.5 w-3.5" aria-hidden />
+          </button>
+          <Link to="/pro/notifications" aria-label={es ? "Notificaciones" : "Notifications"} className="relative grid h-10 w-10 place-items-center text-[hsl(var(--pro-ink))]">
+            <Bell className="h-[22px] w-[22px]" aria-hidden strokeWidth={1.9} />
+            {unread > 0 && <span className="absolute right-2 top-1.5 h-2.5 w-2.5 rounded-full bg-[hsl(var(--pro-blue))] ring-2 ring-[hsl(var(--pro-ground))]" />}
           </Link>
-        </div>
+          <Link to="/pro/profile" aria-label={es ? "Perfil" : "Profile"} className="grid h-10 w-10 place-items-center rounded-full bg-[hsl(var(--pro-line))] text-[13px] font-semibold text-[hsl(var(--pro-ink))]">{initials}</Link>
+        </header>
 
-        <div className="mt-3.5 space-y-2.5">
-          {loading && [0, 1].map((i) => <div key={i} className="h-[92px] animate-pulse rounded-[14px] bg-white" />)}
-          {!loading && todays.length === 0 && (
-            <div className="rounded-[14px] border border-[hsl(var(--pro-line))] bg-white p-4 text-[13.5px] text-[hsl(var(--pro-ink-soft))] shadow-[0_4px_14px_-10px_hsl(var(--pro-navy)/0.35)]">
-              {es ? "No tiene trabajos asignados hoy. Las visitas aparecen aquí cuando Tidy se las asigna." : "No jobs assigned today. Visits appear here as soon as Tidy assigns them."}
+        <motion.section {...rise(0)} className="relative h-[100px] overflow-hidden rounded-[20px] text-primary-foreground">
+          <img src={palms} alt="" width={1536} height={640} className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,hsl(var(--pro-navy)/0.55),transparent_70%)]" />
+          <div className="relative flex h-full items-center justify-between px-4">
+            <div className="leading-tight">
+              <p className="text-[13px] capitalize">{weekday}</p>
+              <p className="text-[26px] font-extrabold capitalize tracking-[-0.02em]">{monthDay}</p>
+              <p className="flex items-center gap-1 text-[11.5px]"><MapPin className="h-3.5 w-3.5" aria-hidden />Pinecrest, FL</p>
             </div>
-          )}
-          {todays.map((v, i) => {
-            const m = serviceMeta(v, es);
-            return (
-              <motion.div key={v.id} {...rise(i + 1)}>
-                <Link to={`/pro/visit/${v.id}`}
-                  className={`flex items-center gap-4 rounded-[14px] border border-l-[3px] bg-white py-3.5 pl-4 pr-3 shadow-[0_4px_14px_-10px_hsl(var(--pro-navy)/0.35)] ${v.completed_at ? "opacity-60" : ""}`}
-                  style={{ borderColor: "hsl(var(--pro-line))", borderLeftColor: `hsl(var(${m.tone}))` }}>
-                  <m.Icon className="h-9 w-9 shrink-0" style={{ color: `hsl(var(${m.tone}))` }} aria-hidden strokeWidth={1.6} fill={m.tone === "--pro-car" ? "none" : `hsl(var(${m.tone}))`} />
-                  <div className="min-w-0 flex-1 leading-snug">
-                    <p className="text-[14.5px] font-semibold text-[hsl(var(--pro-ink))]">{timeWindow(v.scheduled_start, v.scheduled_end, language)}</p>
-                    <p className="text-[14px] font-semibold text-[hsl(var(--pro-ink))]">{m.label}{v.is_team && <span className="ml-1.5 text-[11px] text-[hsl(var(--pro-blue))]">{v.is_lead ? (es ? "Líder" : "Lead") : (es ? "Equipo" : "Team")}</span>}</p>
-                    <p className="truncate text-[12.5px] text-[hsl(var(--pro-ink-soft))]">{v.street ?? v.customer_first_name ?? "—"}</p>
-                    <p className="text-[12.5px] text-[hsl(var(--pro-ink-soft))]">{v.zip}{v.completed_at && <span className="ml-1.5 font-semibold text-[hsl(var(--pro-green))]">· {es ? "Hecho" : "Done"}</span>}</p>
-                  </div>
-                  <ChevronRight className="h-6 w-6 shrink-0 text-[hsl(var(--pro-blue))]" aria-hidden />
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
+            {weather && (
+              <div className="text-right drop-shadow">
+                <p className="flex items-center justify-end gap-1 text-[28px] font-extrabold leading-none"><span aria-hidden className="text-[24px]">{weather.icon}</span>{weather.temp}°</p>
+                <p className="mt-1 text-[11.5px] font-medium">H {weather.hi}°&nbsp; L {weather.lo}°</p>
+              </div>
+            )}
+          </div>
+        </motion.section>
 
-        <div className="mt-4 flex gap-2.5">
-          {(() => {
-            const cls = "flex min-h-[54px] flex-1 items-center justify-between rounded-[14px] bg-[linear-gradient(180deg,hsl(var(--pro-sky)),hsl(var(--pro-blue)))] pl-[30%] pr-5 text-[16px] font-semibold text-primary-foreground shadow-[0_10px_20px_-10px_hsl(var(--pro-blue)/0.8)] active:scale-[0.99]";
-            if (coiBlocked) return <Link to="/pro/profile" className={cls.replace("pl-[30%]", "pl-5")}>{es ? "Subir certificado de seguro" : "Upload insurance certificate"} <ArrowRight className="h-5 w-5" aria-hidden /></Link>;
-            if (routeUrl) return <a href={routeUrl} target="_blank" rel="noreferrer" className={cls}>{es ? "Iniciar ruta" : "Start Route"} <ArrowRight className="h-5 w-5" aria-hidden /></a>;
-            return <Link to="/pro/schedule" className={cls}>{es ? "Iniciar ruta" : "Start Route"} <ArrowRight className="h-5 w-5" aria-hidden /></Link>;
-          })()}
-          <Link to="/pro/status" aria-label={es ? "Mi insignia" : "My badge"} className="grid h-[54px] w-[54px] place-items-center rounded-[14px] bg-[hsl(var(--pro-blue-soft))] text-[hsl(var(--pro-blue))]">
-            <ShieldCheck className="h-6 w-6" aria-hidden />
-          </Link>
-        </div>
+        <motion.section {...rise(1)} className={`mt-3 p-4 ${card}`}>
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-[21px] font-extrabold tracking-[-0.02em] text-[hsl(var(--pro-ink))]">{es ? "Trabajos de hoy" : "Today’s Jobs"}</h2>
+              <p className="text-[13px] text-[hsl(var(--pro-ink-soft))]"><span className="mr-1 text-[15px] font-bold text-[hsl(var(--pro-blue))]">{todays.length}</span>{es ? (todays.length === 1 ? "programado" : "programados") : "scheduled"}</p>
+            </div>
+            <Link to="/pro/schedule" className="flex h-9 items-center gap-2 rounded-[12px] bg-[hsl(var(--pro-blue-soft))] px-3 text-[13.5px] font-semibold text-[hsl(var(--pro-blue))]">
+              {es ? "Ver todo" : "View All"}<ChevronRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
 
-        <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="mt-3 space-y-2.5">
+            {loading && [0, 1].map((i) => <div key={i} className="h-[76px] animate-pulse rounded-[14px] bg-[hsl(var(--pro-ground))]" />)}
+            {!loading && todays.length === 0 && (
+              <div className="flex flex-col items-center py-5 text-center">
+                <span className="relative text-[hsl(var(--pro-ink-soft))]">
+                  <CalendarDays className="h-12 w-12" strokeWidth={1.6} aria-hidden />
+                  <Sparkles className="absolute -bottom-1 -right-2 h-5 w-5 text-[hsl(var(--pro-blue))]" fill="currentColor" aria-hidden />
+                </span>
+                <p className="mt-3 text-[15px] font-bold text-[hsl(var(--pro-ink))]">{es ? "No hay trabajos asignados hoy" : "No jobs assigned today"}</p>
+                <p className="mt-1 max-w-[230px] text-[12.5px] text-[hsl(var(--pro-ink-soft))]">{es ? "Las visitas aparecerán aquí en cuanto Tidy las asigne." : "Visits will appear here as soon as Tidy assigns them."}</p>
+              </div>
+            )}
+            {todays.map((v, i) => {
+              const m = serviceMeta(v, es);
+              return (
+                <motion.div key={v.id} {...rise(i + 2)}>
+                  <Link to={`/pro/visit/${v.id}`} className={`flex items-center gap-3 rounded-[14px] border border-[hsl(var(--pro-line))] bg-white p-3 ${v.completed_at ? "opacity-60" : ""}`}>
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full" style={{ background: `hsl(var(${m.tone}) / 0.12)`, color: `hsl(var(${m.tone}))` }}><m.Icon className="h-5 w-5" aria-hidden /></span>
+                    <div className="min-w-0 flex-1 leading-snug">
+                      <p className="text-[14px] font-semibold text-[hsl(var(--pro-ink))]">{timeWindow(v.scheduled_start, v.scheduled_end, language)} · {m.label}{v.is_team && <span className="ml-1.5 text-[11px] text-[hsl(var(--pro-blue))]">{v.is_lead ? (es ? "Líder" : "Lead") : (es ? "Equipo" : "Team")}</span>}</p>
+                      <p className="truncate text-[12.5px] text-[hsl(var(--pro-ink-soft))]">{[v.street ?? v.customer_first_name, v.zip].filter(Boolean).join(" · ")}{v.completed_at && <span className="ml-1.5 font-semibold text-[hsl(var(--pro-green))]">· {es ? "Hecho" : "Done"}</span>}</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-[hsl(var(--pro-blue))]" aria-hidden />
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <div className="mt-3">
+            {coiBlocked ? <Link to="/pro/upload-coi" className={primaryCls}>{primaryInner(es ? "Subir certificado de seguro" : "Upload insurance certificate")}</Link>
+              : routeUrl ? <a href={routeUrl} target="_blank" rel="noreferrer" className={primaryCls}>{primaryInner(startLabel)}</a>
+              : <Link to="/pro/schedule" className={primaryCls}>{primaryInner(startLabel)}</Link>}
+          </div>
+        </motion.section>
+
+        <motion.div {...rise(2)} className="mt-3 grid grid-cols-3 gap-2">
           {[
-            { to: "/pro/schedule", Icon: CalendarDays, t: es ? "Agenda" : "Schedule", s: es ? "Esta semana" : "This week", fill: true },
-            { to: "/pro/earnings", Icon: DollarSign, t: es ? "Pagos" : "Earnings", s: `${money(weekEarned)} ${es ? "esta semana" : "this week"}`, fill: false },
-            { to: "/pro/status", Icon: BadgeCheck, t: es ? "Estado" : "Status", s: tier2 ? (es ? "Nivel 2" : "Tier 2") : (es ? "Nivel 1" : "Tier 1"), fill: true },
-          ].map(({ to, Icon, t, s, fill }) => (
-            <Link key={to} to={to} className="flex min-h-[92px] flex-col items-center justify-center rounded-[14px] border border-[hsl(var(--pro-line))] bg-white px-1 text-center shadow-[0_4px_14px_-10px_hsl(var(--pro-navy)/0.35)]">
-              <Icon className={`h-6 w-6 ${fill ? "text-[hsl(var(--pro-blue))]" : "text-[hsl(var(--pro-ink))]"}`} aria-hidden fill={fill ? "hsl(var(--pro-blue))" : "none"} stroke={fill ? "hsl(var(--pro-ground))" : "currentColor"} />
-              <span className="mt-2 text-[14px] font-semibold text-[hsl(var(--pro-ink))]">{t}</span>
-              <span className="text-[12px] text-[hsl(var(--pro-ink-soft))]">{s}</span>
+            { to: "/pro/schedule", Icon: CalendarDays, t: es ? "Agenda" : "Schedule", s: es ? "Esta semana" : "This week", tone: "--pro-blue" },
+            { to: "/pro/earnings", Icon: DollarSign, t: es ? "Pagos" : "Earnings", s: `${money(weekEarned)} ${es ? "esta semana" : "this week"}`, tone: "--pro-green" },
+            { to: "/pro/status", Icon: BadgeCheck, t: es ? "Estado" : "Status", s: tier2 ? (es ? "Nivel 2" : "Tier 2") : (es ? "Nivel 1" : "Tier 1"), tone: "--pro-purple" },
+          ].map(({ to, Icon, t, s, tone }) => (
+            <Link key={to} to={to} className={`flex min-h-[100px] flex-col p-3 ${card}`}>
+              <span className="grid h-10 w-10 place-items-center rounded-full" style={{ background: `hsl(var(${tone}, 262 83% 58%) / 0.12)`, color: `hsl(var(${tone}, 262 83% 58%))` }}><Icon className="h-5 w-5" aria-hidden /></span>
+              <span className="mt-2 flex items-end justify-between gap-1">
+                <span className="min-w-0 leading-tight">
+                  <span className="block text-[14px] font-bold text-[hsl(var(--pro-ink))]">{t}</span>
+                  <span className="block truncate text-[11.5px] text-[hsl(var(--pro-ink-soft))]">{s}</span>
+                </span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-[hsl(var(--pro-ink-soft))]" aria-hidden />
+              </span>
             </Link>
           ))}
-        </div>
-      </motion.section>
+        </motion.div>
+
+        {showReady && (
+          <motion.section {...rise(3)} className="relative mt-3 rounded-[22px] bg-[hsl(var(--pro-blue-soft))] p-4">
+            <button type="button" onClick={dismissReady} aria-label={es ? "Cerrar" : "Dismiss"} className="absolute right-3 top-3 grid h-8 w-8 place-items-center text-[hsl(var(--pro-ink-soft))]"><X className="h-5 w-5" aria-hidden /></button>
+            <div className="flex gap-3 pr-6">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white/70 text-[hsl(var(--pro-blue))]"><Megaphone className="h-6 w-6" fill="currentColor" aria-hidden /></span>
+              <div>
+                <p className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">{es ? "Manténgase listo" : "Stay ready"}</p>
+                <p className="text-[12.5px] text-[hsl(var(--pro-ink-soft))]">{es ? "Active las notificaciones para no perderse ningún trabajo ni aviso." : "Turn on notifications so you never miss a new job or update."}</p>
+              </div>
+            </div>
+            <button type="button" onClick={enableNotifs} className="mt-3 h-10 w-full rounded-[14px] bg-white text-[14px] font-semibold text-[hsl(var(--pro-blue))]">{es ? "Activar notificaciones" : "Enable Notifications"}</button>
+          </motion.section>
+        )}
+
+        <motion.div {...rise(4)} className="mt-3 grid grid-cols-4 gap-2">
+          {[
+            { to: next ? `/pro/visit/${next.id}` : "/pro/schedule", Icon: FileText, t: es ? "Detalles" : "Job Details" },
+            { to: next ? `/pro/visit/${next.id}/photos` : "/pro/schedule", Icon: Camera, t: es ? "Fotos" : "Upload Photos" },
+            { to: "/pro/messages", Icon: MessageCircle, t: es ? "Soporte" : "Support" },
+            { to: "/pro/profile", Icon: ShieldCheck, t: es ? "Seguridad" : "Safety & Docs" },
+          ].map(({ to, Icon, t }) => (
+            <Link key={t} to={to} className={`flex min-h-[78px] flex-col items-center justify-center gap-1.5 px-1 text-center ${card}`}>
+              <Icon className="h-6 w-6 text-[hsl(var(--pro-ink))]" strokeWidth={1.7} aria-hidden />
+              <span className="text-[10.5px] leading-tight text-[hsl(var(--pro-ink))]">{t}</span>
+            </Link>
+          ))}
+        </motion.div>
+      </main>
+      <ProBottomNav />
+      <LanguageSheet open={sheet} onClose={() => setSheet(false)} />
       <InstallPrompt />
-    </ProShell>
+    </div>
   );
 }
