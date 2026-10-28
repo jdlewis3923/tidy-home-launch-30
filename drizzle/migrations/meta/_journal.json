@@ -1751,6 +1751,13 @@
       "when": 1793150924217,
       "tag": "0249_pro_individual_location_evidence",
       "breakpoints": true
+    },
+    {
+      "idx": 250,
+      "version": "7",
+      "when": 1793150979684,
+      "tag": "0250_pro_loop_compatibility_boundary",
+      "breakpoints": true
     }
   ]
 }

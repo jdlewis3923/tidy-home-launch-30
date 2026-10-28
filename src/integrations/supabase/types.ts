@@ -9838,6 +9838,7 @@ export type Database = {
           paid_in_full_reason: string | null
           parking_notes: string | null
           pet_notes: string | null
+          pro_loop_enabled: boolean
           rate_token: string | null
           redo_of_visit_id: string | null
           redo_request_id: string | null
@@ -9910,6 +9911,7 @@ export type Database = {
           paid_in_full_reason?: string | null
           parking_notes?: string | null
           pet_notes?: string | null
+          pro_loop_enabled?: boolean
           rate_token?: string | null
           redo_of_visit_id?: string | null
           redo_request_id?: string | null
@@ -9982,6 +9984,7 @@ export type Database = {
           paid_in_full_reason?: string | null
           parking_notes?: string | null
           pet_notes?: string | null
+          pro_loop_enabled?: boolean
           rate_token?: string | null
           redo_of_visit_id?: string | null
           redo_request_id?: string | null
