@@ -125,6 +125,7 @@ Deno.serve(async (req) => {
     const faq = await faqFor(lang);
     return jsonResponse({
       ok: true, lang, service: p.service, stage: p.stage, version: p.application_version ?? 5, submitted: !!p.apply_submitted_at,
+      remaining_only: p.apply_remaining_only === true,
       phone_screen_after_submit: immediatePhone && readyForPhone && !p.archived,
       phone_duration_min: hireReady || p.application_version === 6 ? 30 : undefined,
       proof_url: p.apply_submitted_at ? await ensureProofUrl(p) : null,

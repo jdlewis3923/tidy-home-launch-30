@@ -1,5 +1,9 @@
 # Roadmap
 
+## Rebecca’s remaining application (Oct 28 UTC)
+- [x] Rebecca Ramirez (phone ending 2616) saved 11 answers in v6’s shorter eight-step form, last saved Oct 27 10:33 AM Miami; incomplete employer/work history prevented moving beyond section 2. Rebecca Paz is a separate archived, submitted v5 record and was untouched.
+- [x] Configured only Ramirez’s existing record for remaining-required-only presentation, retained all 36 validation/scoring questions and 11 saved answers; optional blank second job hidden without deleting data. Phone/computer verified, missing employer still blocks progression, 25 focused tests pass. No submission or candidate messages; document progression remains gated. Frontend is preview-only until publication is explicitly approved.
+
 ## Cleaning expansion (Oct 27) — build in order
 - [ ] Part 1 by Thu Oct 29 8 AM Miami: square-foot/bath sizes, Estate prices, lookup-key catalog live/test, reservation persistence, website/founding/member/yearly parity, phone/desktop evidence and deleted test reservations.
   - Completed: five-band quotes, live/test additive catalog, reservation readback, phone/desktop quote checks; admin-created walkthrough slots, shared hosted/embedded verification gates, atomic size approval/decline page and admin copy-link control, verified quote hydration. Oct 27: live catalog check rebuilt for five bands (45/45 keys pass, $393 bundle and $1,396 Estate carts exact, no archived prices) and test-mode charge/refund/cancel proven on clean_2_biweekly ($348) and clean_estate_weekly ($1,396) with cleanup. Still open: yearly billing lifecycle, notification delivery and full bilingual cross-surface review; prepaid collection is blocked in both payment paths rather than billed monthly.
