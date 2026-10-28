@@ -12,6 +12,6 @@ export function contractBlocks(body:string):ContractBlock[] {
       if(rows.length)blocks.push({kind:'table',rows});
     } else blocks.push({kind:/^\d+\. [A-Z]|^SCHEDULE|^SIGNATURES|^INDEPENDENT CONTRACTOR AGREEMENT/.test(part)?'heading':'paragraph',text:part});
   }
-  return blocks;
+  return blocks.reduce<ContractBlock[]>((result,block)=>{const last=result[result.length-1];if(block.kind==='table'&&last?.kind==='table')last.rows.push(...block.rows);else result.push(block);return result;},[]);
 }
 export const fillContract = (text:string,values:Record<string,string>)=>text.replace(/\{(\w+)\}/g,(m,k)=>values[k]??m);
