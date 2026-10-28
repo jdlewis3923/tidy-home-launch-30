@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ShieldCheck, Upload, FileCheck2, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ProUploadCoi() {
+  const {language}=useLanguage(); const es=language==="es";
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ export default function ProUploadCoi() {
     (async () => {
       const { data } = await supabase.auth.getUser();
       if (!data.user) {
-        navigate("/login?next=/pro/upload-coi");
+        navigate("/pro/login");
         return;
       }
       setUserId(data.user.id);
@@ -50,19 +52,20 @@ export default function ProUploadCoi() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !userId) {
-      toast.error("Select a PDF first");
+      toast.error(es?"Seleccione una foto o PDF":"Select a photo or PDF first");
       return;
     }
-    if (file.type !== "application/pdf") {
-      toast.error("Only PDF files accepted");
+    if (!["application/pdf","image/jpeg","image/png","image/webp"].includes(file.type) || file.size>10*1024*1024) {
+      toast.error(es?"Foto o PDF, máximo 10 MB":"Photo or PDF, maximum 10 MB");
       return;
     }
     setSubmitting(true);
     try {
-      const path = `${userId}/coi-${Date.now()}.pdf`;
+      const ext=file.type==="application/pdf"?"pdf":file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+      const path = `${userId}/coi-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("contractor-coi-pdfs")
-        .upload(path, file, { contentType: "application/pdf", upsert: false });
+        .upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) throw upErr;
 
       const { error: updErr } = await supabase
@@ -111,8 +114,8 @@ export default function ProUploadCoi() {
             <ShieldCheck className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Upload Certificate of Insurance</h1>
-            <p className="text-sm text-slate-600">PDF only · Reviewed within 24h</p>
+            <h1 className="text-2xl font-bold text-slate-900">{es?"Subir certificado de seguro":"Upload Certificate of Insurance"}</h1>
+            <p className="text-sm text-slate-600">{es?"Foto o PDF · Revisión dentro de 1 día":"Photo or PDF · Reviewed within 1 day"}</p>
           </div>
         </div>
 
@@ -126,10 +129,10 @@ export default function ProUploadCoi() {
           <CardContent>
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
-                <Label>COI PDF</Label>
+                <Label>{es?"Foto o PDF":"Photo or PDF"}</Label>
                 <Input
                   type="file"
-                  accept="application/pdf"
+                  accept="application/pdf,image/jpeg,image/png,image/webp"
                   onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                   required={!currentUrl}
                 />
@@ -164,7 +167,7 @@ export default function ProUploadCoi() {
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
-                    <Upload className="h-4 w-4 mr-2" /> Submit for Review
+                    <Upload className="h-4 w-4 mr-2" /> {es?"Enviar para revisión":"Submit for Review"}
                   </>
                 )}
               </Button>
