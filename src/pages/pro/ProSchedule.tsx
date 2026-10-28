@@ -114,7 +114,7 @@ export default function ProSchedule() {
                 className="grid touch-pan-y grid-cols-7 gap-y-1"
               >
                 {rows.map((d) => {
-                  const k = keyOf(d);
+                  const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
                   const inMonth = d.getMonth() === month.getMonth();
                   const isToday = k === todayKey;
                   const isSel = k === selected;

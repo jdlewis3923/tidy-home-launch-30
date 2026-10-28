@@ -97,7 +97,7 @@ export default function ProStatus() {
           <section className="rounded-[14px] bg-white p-3.5">
             <div className="flex items-center justify-between">
               <p className="text-[14px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Seguro" : "Insurance"}</p>
-              <StatusPill tone={coi?.can_work ? "green" : "amber"}>{coi?.status ?? "none"}</StatusPill>
+              <StatusPill tone={coi?.can_work ? "green" : "amber"}>{({ none: ["Missing", "Falta"], under_review: ["Under review", "En revisión"], active: ["Active", "Activo"], expiring: ["Expiring", "Por vencer"], expired: ["Expired", "Vencido"] } as Record<string, [string, string]>)[coi?.status ?? "none"]?.[es ? 1 : 0]}</StatusPill>
             </div>
             <p className="mt-1 text-[12.5px] text-[hsl(var(--pro-ink-soft))]">
               {coi?.expires_at ? `${es ? "El certificado vence el" : "Certificate on file expires"} ${new Date(coi.expires_at).toLocaleDateString(es ? "es-US" : "en-US", { month: "long", day: "numeric", year: "numeric" })}.` : (es ? "Aún no hay certificado registrado." : "No certificate on file yet.")}
