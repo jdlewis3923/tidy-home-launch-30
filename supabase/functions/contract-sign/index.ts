@@ -12,7 +12,7 @@ const schema=z.object({action:z.enum(['document','sign','countersign','templates
 const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
 function b64(bytes:Uint8Array){let s='';for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(s);}
 async function check<T>(r:{data:T;error:unknown}){if(r.error)throw r.error;return r.data;}
-async function missing(id:string,reason:string){await db.from('admin_alerts').upsert({key:`contract-template:${id}`,type:'contract_template_missing',level:'action',title:'Agreement link unavailable',message:reason,details:{applicant_id:id},target_url:`/admin/pipeline/${id}`,tier:'urgent'},{onConflict:'key'});}
+async function missing(id:string,reason:string){await check(await db.from('admin_alerts').upsert({dedupe_key:`contract-template:${id}`,alert_type:'contract_template_missing',level:'action',title:'Agreement link unavailable',body:reason,context:{applicant_id:id},action_url:`/admin/pipeline/${id}`,tier:'urgent'},{onConflict:'dedupe_key'}));}
 async function mail(a:any,bytes:Uint8Array,path:string,version:string,typed:string,when:string,final=false){
  const link=await check(await db.storage.from('company-docs').createSignedUrl(path,2592000));
  const built=contractSignedEmail(a.first_name??'',typed,when,version,link?.signedUrl??null,await proLang(db,a.id));
