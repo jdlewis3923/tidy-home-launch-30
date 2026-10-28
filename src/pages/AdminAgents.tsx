@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, AlertCircle, Clock, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import OpsAgentsPanel from "@/components/admin/OpsAgentsPanel";
 
 type Agent = {
   key: string;
@@ -165,9 +166,9 @@ export default function AdminAgents() {
             <p className="text-[10px] sm:text-xs uppercase tracking-widest text-[#f5c518] font-semibold">
               Tidy · Operating System
             </p>
-            <h1 className="text-xl sm:text-3xl font-semibold mt-1">{es ? 'Monitoreo de indicadores' : 'KPI monitoring'}</h1>
+            <h1 className="text-xl sm:text-3xl font-semibold mt-1">{es ? 'Agentes' : 'Agents'}</h1>
             <p className="text-slate-300 text-xs sm:text-sm mt-1">
-              {es ? `${defs.length} indicadores · agentes operativos pendientes de la auditoría` : `${defs.length} indicators · operations agents await audit clearance`}
+              {es ? `13 agentes de operaciones · ${defs.length} indicadores` : `13 ops agents · ${defs.length} indicators`}
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -179,6 +180,7 @@ export default function AdminAgents() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+        <OpsAgentsPanel />
         {loading ? (
           <div className="py-20 flex items-center justify-center text-slate-500">
             <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading agents…
