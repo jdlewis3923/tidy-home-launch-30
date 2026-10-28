@@ -10902,6 +10902,13 @@ export type Database = {
           preferred_by_count: number
         }[]
       }
+      get_service_gates_public: {
+        Args: never
+        Returns: {
+          is_live: boolean
+          service: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
