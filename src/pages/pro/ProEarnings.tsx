@@ -1,26 +1,40 @@
 /**
- * Earnings — /pro/earnings
- * Weekly pay ledger. Every figure is the flat per-visit amount, never an
- * hourly rate and never a projection.
+ * Earnings — /pro/earnings (mockup screen 4).
+ * Flat per-visit pay only; never hourly, never projected.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { ChevronRight, Download, Wallet } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { CheckCircle2, ChevronRight, Circle, Download } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import { proPartnerCountLine, useProPartner } from "@/components/pro/ProPartnerStrip";
-import {
-  EmptyState, ErrorState, Eyebrow, HeroPanel, MetricTile, ProCard, ScheduleSkeleton, SectionHeader, StatusPill,
-} from "@/components/pro/portal/kit";
+import { ErrorState, ScheduleSkeleton, StatusPill } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
-import { downloadCsv, fetchBonuses, fetchPayoutWeeks, mondayOf, type PayoutWeek, type ProBonus } from "@/lib/pro-portal";
-import { money } from "@/lib/pro-pay";
+import { downloadCsv, fetchBonuses, fetchPayoutWeeks, mondayOf, type PayoutWeek, type ProBonus } from "@/lib/pro-pay-shim";
+import { money, TIER_2_GATES } from "@/lib/pro-pay";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const shortDate = (iso: string) =>
-  new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
+type Range = "week" | "month" | "all";
+
+export function Bar({ pct, tone = "--pro-blue" }: { pct: number; tone?: string }) {
+  const reduce = useReducedMotion();
+  return (
+    <div className="h-[9px] overflow-hidden rounded-full bg-[hsl(var(--pro-line))]">
+      <motion.div className="h-full rounded-full" style={{ background: `hsl(var(${tone}))` }}
+        initial={{ width: reduce ? `${pct}%` : 0 }} animate={{ width: `${pct}%` }} transition={{ duration: reduce ? 0 : 0.6, ease: EASE, delay: 0.15 }} />
+    </div>
+  );
+}
 
 export default function ProEarnings() {
   const partner = useProPartner();
   const { me, visits, userId, loading } = useProSession();
+  const { language } = useLanguage();
+  const es = language === "es";
+  const loc = es ? "es-US" : "en-US";
+  const reduce = useReducedMotion();
+  const [range, setRange] = useState<Range>("week");
   const [weeks, setWeeks] = useState<PayoutWeek[] | null>(null);
   const [bonuses, setBonuses] = useState<ProBonus[]>([]);
   const [error, setError] = useState(false);
@@ -31,135 +45,108 @@ export default function ProEarnings() {
     let cancelled = false;
     setError(false);
     Promise.all([fetchPayoutWeeks(), me?.pro_id ? fetchBonuses(me.pro_id) : Promise.resolve([])])
-      .then(([w, b]) => {
-        if (cancelled) return;
-        setWeeks(w);
-        setBonuses(b);
-      })
+      .then(([w, b]) => { if (!cancelled) { setWeeks(w); setBonuses(b); } })
       .catch(() => !cancelled && setError(true));
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [userId, me?.pro_id, nonce]);
 
-  const thisWeekStart = mondayOf(new Date());
-  const thisWeek = visits.filter((v) => v.completed_at && new Date(v.completed_at) >= thisWeekStart);
-  const thisWeekCents = thisWeek.reduce((s, v) => s + (v.visit_pay_cents ?? 0), 0);
-  const lifetimeCents = visits
-    .filter((v) => v.completed_at)
-    .reduce((s, v) => s + (v.visit_pay_cents ?? 0), 0);
-  const pendingBonusCents = bonuses
-    .filter((b) => b.status !== "paid")
-    .reduce((s, b) => s + (b.amount_cents ?? 0), 0);
+  const weekStart = mondayOf(new Date());
+  const now = new Date();
+  const from = range === "week" ? weekStart : range === "month" ? new Date(now.getFullYear(), now.getMonth(), 1) : new Date(0);
+  const done = visits.filter((v) => v.completed_at && new Date(v.completed_at) >= from);
+  const rangeCents = done.reduce((s, v) => s + (v.visit_pay_cents ?? 0), 0);
+  const lifetimeCents = visits.filter((v) => v.completed_at).reduce((s, v) => s + (v.visit_pay_cents ?? 0), 0);
+  const pendingBonusCents = bonuses.filter((b) => b.status !== "paid").reduce((s, b) => s + (b.amount_cents ?? 0), 0);
+  const payDay = useMemo(() => { const d = new Date(weekStart); d.setDate(d.getDate() + 11); return d.toLocaleDateString(loc, { month: "short", day: "numeric" }); }, [weekStart.getTime(), loc]);
 
-  const nextFriday = useMemo(() => {
-    const d = new Date(thisWeekStart);
-    d.setDate(d.getDate() + 11);
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  }, [thisWeekStart.getTime()]);
+  const visitsDone = me?.completed_visits ?? 0;
+  const rating = me?.avg_rating ?? 0;
+  const days = me?.active_since ? Math.max(0, Math.floor((Date.now() - new Date(me.active_since).getTime()) / 86_400_000)) : 0;
+  const left = Math.max(0, TIER_2_GATES.visits - visitsDone);
 
-  const exportCsv = () => {
-    downloadCsv("tidy-earnings.csv", [
-      ["Week start", "Week end", "Payout date", "Status", "Visit pay", "Bonuses"],
-      ...(weeks ?? []).map((w) => [
-        w.week_start,
-        w.week_end,
-        w.payout_date,
-        w.status,
-        (w.visit_pay_cents / 100).toFixed(2),
-        (w.bonus_cents / 100).toFixed(2),
-      ]),
-    ]);
-  };
+  const shortDate = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString(loc, { month: "short", day: "numeric" });
+  const exportCsv = () => downloadCsv("tidy-earnings.csv", [
+    ["Week start", "Week end", "Payout date", "Status", "Visit pay", "Bonuses"],
+    ...(weeks ?? []).map((w) => [w.week_start, w.week_end, w.payout_date, w.status, (w.visit_pay_cents / 100).toFixed(2), (w.bonus_cents / 100).toFixed(2)]),
+  ]);
 
   if (!loading && !userId) return <Navigate to="/pro/welcome" replace />;
-
+  const up = (i: number) => reduce ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.26, delay: 0.06 * i, ease: EASE } };
   const partnerLine = proPartnerCountLine(partner);
+  const rangeLabel = range === "week" ? (es ? "Ganado esta semana" : "Earned This Week") : range === "month" ? (es ? "Ganado este mes" : "Earned This Month") : (es ? "Ganado en total" : "Earned All Time");
+
   return (
-    <ProShell title="Earnings">
-      {partnerLine && <p className="px-[18px] pt-3 text-[13px] font-semibold text-foreground" data-testid="pro-partner-count">{partnerLine}</p>}
-      <section className="px-[18px] pt-4">
-        <HeroPanel className="pro-rise">
-          <Eyebrow className="text-[hsl(var(--pro-sky))]">Earned this week</Eyebrow>
-          <p className="pro-num pro-display mt-2 text-[34px] font-extrabold">{money(thisWeekCents)}</p>
-          <p className="mt-1 text-[14px] text-white/70">
-            {thisWeek.length} {thisWeek.length === 1 ? "visit" : "visits"} completed · pays {nextFriday}
-          </p>
-        </HeroPanel>
-      </section>
-
-      <div className="grid grid-cols-2 gap-3 px-[18px] pt-4">
-        <MetricTile label="Lifetime pay" value={money(lifetimeCents)} />
-        <MetricTile
-          label="Bonuses pending"
-          value={money(pendingBonusCents)}
-          tone={pendingBonusCents > 0 ? "amber" : "tint"}
-        />
-      </div>
-
-      {!weeks && !error && <ScheduleSkeleton />}
-      {error && <ErrorState title="Couldn't load your earnings" onRetry={() => setNonce((n) => n + 1)} />}
-
-      {weeks && !error && (
-        <div className="px-[18px] pt-6">
-          <SectionHeader
-            title="Weekly pay"
-            action={
-              weeks.length > 0 ? (
-                <button
-                  type="button"
-                  onClick={exportCsv}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 text-[14px] font-bold text-[hsl(var(--pro-blue))]"
-                >
-                  <Download className="h-4 w-4" aria-hidden strokeWidth={1.9} /> Export
-                </button>
-              ) : undefined
-            }
-          />
-
-          {weeks.length === 0 ? (
-            <EmptyState
-              icon={Wallet}
-              title="No pay weeks yet"
-              body="Your first week appears here after your first completed visit."
-            />
-          ) : (
-            <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white pro-card">
-              {weeks.map((w) => (
-                <Link
-                  key={w.id}
-                  to={`/pro/earnings/${w.id}`}
-                  className="flex min-h-[66px] items-center gap-3 border-b border-[hsl(var(--pro-navy)/0.07)] bg-white px-4 last:border-0 active:bg-[hsl(var(--pro-tint))]"
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[15px] font-bold text-[hsl(var(--pro-ink))]">
-                      {shortDate(w.week_start)} – {shortDate(w.week_end)}
-                    </span>
-                    <span className="text-[13px] text-[hsl(var(--pro-ink-soft))]">
-                      Pays {shortDate(w.payout_date)}
-                    </span>
-                  </span>
-                  <StatusPill tone={w.status === "paid" ? "green" : w.status === "processing" ? "blue" : "neutral"}>
-                    {w.status}
-                  </StatusPill>
-                  <span className="pro-num text-[17px] font-extrabold text-[hsl(var(--pro-ink))]">
-                    {money(w.visit_pay_cents + w.bonus_cents)}
-                  </span>
-                  <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--pro-ink-soft))]" aria-hidden />
-                </Link>
-              ))}
-            </div>
-          )}
-
-          <ProCard className="my-5" tone="tint">
-            <p className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">How pay works</p>
-            <p className="mt-1 text-[14px] text-[hsl(var(--pro-ink-soft))]">
-              You're paid a flat amount for each completed visit. Weeks run Monday to Sunday and pay
-              out the following Friday.
-            </p>
-          </ProCard>
+    <ProShell title={es ? "Pagos" : "Earnings"} showBell dark>
+      <div className="space-y-2.5 px-2.5 pt-2">
+        <div className="flex rounded-[12px] bg-[hsl(var(--pro-deep-2))] p-1" role="tablist">
+          {([["week", es ? "Esta semana" : "This Week"], ["month", es ? "Este mes" : "This Month"], ["all", es ? "Todo" : "All Time"]] as const).map(([k, l]) => (
+            <button key={k} role="tab" aria-selected={range === k} type="button" onClick={() => setRange(k)}
+              className={`min-h-[34px] flex-1 rounded-[9px] text-[12.5px] font-medium transition-colors duration-200 ${range === k ? "bg-white text-[hsl(var(--pro-ink))]" : "text-primary-foreground/85"}`}>{l}</button>
+          ))}
         </div>
-      )}
+        {partnerLine && <p className="px-1 text-[13px] text-primary-foreground/80" data-testid="pro-partner-count">{partnerLine}</p>}
+
+        <motion.div {...up(0)} className="flex items-center rounded-[14px] border border-[hsl(var(--pro-blue)/0.7)] bg-[hsl(var(--pro-deep-2))] p-4 text-primary-foreground">
+          <div className="flex-1">
+            <p className="text-[13px] text-[hsl(var(--pro-sky))]">{rangeLabel}</p>
+            <p className="mt-1 text-[32px] font-bold leading-none">{money(rangeCents)}</p>
+            <p className="mt-2 text-[12px] text-primary-foreground/75">{done.length} {es ? (done.length === 1 ? "visita completada" : "visitas completadas") : (done.length === 1 ? "visit completed" : "visits completed")} · {es ? "paga" : "pays"} {payDay}</p>
+          </div>
+          <ChevronRight className="h-5 w-5 text-[hsl(var(--pro-sky))]" aria-hidden />
+        </motion.div>
+
+        <div className="grid grid-cols-2 gap-2.5">
+          {[[es ? "Pago total" : "Lifetime Pay", lifetimeCents], [es ? "Bonos pendientes" : "Bonuses Pending", pendingBonusCents]].map(([l, c], i) => (
+            <motion.div key={String(l)} {...up(i + 1)} className="rounded-[14px] bg-white p-3.5">
+              <p className="text-[12px] text-[hsl(var(--pro-ink-soft))]">{l}</p>
+              <p className="mt-1 text-[22px] font-bold text-[hsl(var(--pro-ink))]">{money(c as number)}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.section {...up(3)} className="rounded-[14px] bg-white p-3.5">
+          <h2 className="text-[16px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Progreso de pago" : "Pay Progress"}</h2>
+          <div className="mt-2.5 space-y-2">
+            <div className="rounded-[10px] border border-[hsl(var(--pro-line))] p-3">
+              <div className="mb-2 flex justify-between text-[12.5px] text-[hsl(var(--pro-ink))]">
+                <span>{es ? `${left} visitas para su aumento del 10%` : `${left} visits to your 10% raise`}</span>
+                <span>{visitsDone} / {TIER_2_GATES.visits}</span>
+              </div>
+              <Bar pct={Math.min(100, (visitsDone / TIER_2_GATES.visits) * 100)} />
+            </div>
+            {[
+              [days >= TIER_2_GATES.days, `${Math.min(days, TIER_2_GATES.days)} / ${TIER_2_GATES.days} ${es ? "días activo" : "days active"}`, ""],
+              [rating >= TIER_2_GATES.rating, es ? "Calificación promedio" : "Average rating", `${rating ? rating.toFixed(1) : "—"} / ${TIER_2_GATES.rating}`],
+            ].map(([ok, l, r]) => (
+              <div key={String(l)} className="flex items-center gap-2.5 rounded-[10px] border border-[hsl(var(--pro-line))] px-3 py-2.5 text-[12.5px] text-[hsl(var(--pro-ink))]">
+                {ok ? <CheckCircle2 className="h-5 w-5 text-[hsl(var(--pro-green))]" aria-hidden /> : <Circle className="h-5 w-5 text-[hsl(var(--pro-ink-soft)/0.6)]" aria-hidden />}
+                <span className="flex-1">{l}</span><span>{r}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2.5 text-[11.5px] text-[hsl(var(--pro-ink-soft))]">{es ? "Cuando cumpla las tres, el aumento se aplica automáticamente desde su próxima visita." : "When all three are met, the raise applies automatically from your next visit."}</p>
+        </motion.section>
+
+        {!weeks && !error && <ScheduleSkeleton />}
+        {error && <ErrorState title={es ? "No se pudieron cargar sus pagos" : "Couldn't load your earnings"} onRetry={() => setNonce((n) => n + 1)} />}
+        {weeks && !error && (
+          <section className="overflow-hidden rounded-[14px] bg-white">
+            <div className="flex items-center justify-between px-3.5 pt-3">
+              <h2 className="text-[15px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Pago semanal" : "Weekly pay"}</h2>
+              {weeks.length > 0 && <button type="button" onClick={exportCsv} className="inline-flex min-h-[40px] items-center gap-1.5 text-[13px] font-medium text-[hsl(var(--pro-blue))]"><Download className="h-4 w-4" aria-hidden />{es ? "Exportar" : "Export"}</button>}
+            </div>
+            {weeks.length === 0 ? <p className="px-3.5 py-3 text-[13px] text-[hsl(var(--pro-ink-soft))]">{es ? "Su primera semana aparece después de su primera visita completada." : "Your first week appears here after your first completed visit."}</p> : weeks.map((w) => (
+              <Link key={w.id} to={`/pro/earnings/${w.id}`} className="flex min-h-[60px] items-center gap-3 border-t border-[hsl(var(--pro-line))] px-3.5">
+                <span className="min-w-0 flex-1"><span className="block text-[14px] font-semibold text-[hsl(var(--pro-ink))]">{shortDate(w.week_start)} – {shortDate(w.week_end)}</span><span className="text-[12px] text-[hsl(var(--pro-ink-soft))]">{es ? "Paga" : "Pays"} {shortDate(w.payout_date)}</span></span>
+                <StatusPill tone={w.status === "paid" ? "green" : w.status === "processing" ? "blue" : "neutral"}>{w.status}</StatusPill>
+                <span className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">{money(w.visit_pay_cents + w.bonus_cents)}</span>
+                <ChevronRight className="h-4 w-4 text-[hsl(var(--pro-ink-soft))]" aria-hidden />
+              </Link>
+            ))}
+            <p className="border-t border-[hsl(var(--pro-line))] px-3.5 py-3 text-[12px] text-[hsl(var(--pro-ink-soft))]">{es ? "Se le paga un monto fijo por cada visita completada. Las semanas van de lunes a domingo y se pagan el viernes siguiente." : "You're paid a flat amount for each completed visit. Weeks run Monday to Sunday and pay out the following Friday."}</p>
+          </section>
+        )}
+      </div>
     </ProShell>
   );
 }
