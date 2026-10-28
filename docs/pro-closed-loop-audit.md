@@ -28,7 +28,7 @@ Preserve frozen customer prices/historical settled pay and the existing scheduli
 - Server-gated code access starts 30 minutes before window and ends at visit/individual checkout; vehicle extras exclude gate/access data and gate interior access.
 - Per-Pro service/exit checklist and explicit attached add-on completion, with server completion enforcement for designated closed-loop visits. Legacy visits retain their existing rules until rollout, avoiding a live-site/preview mismatch.
 - 150 m GPS validation and recorded exception reasons, individual team evidence; missing verified address coordinates require a reason, never fabricate a location.
-- Existing tomorrow reminder checks hourly and sends only at 6 PM Miami time with SMS plus app feed, Spanish copy, active-team recipients and test-Pro exclusion. Route text contains no street/code/home details.
+- Existing route reminder checks minute 45 and sends only at 5:45 PM Miami Monday–Saturday; Saturday includes Monday. SMS plus app feed, Spanish copy, active-team recipients and test-Pro exclusion. Route text contains no street/code/home details. Central sender never bypasses Pro hours.
 
 ## Remaining before closed-loop release
 The visible request specifies schedule and visit card; masked relay, new all-service pay rules and weather/damage workflows are not added under this scope. Existing check-in/pay flows remain unchanged. No Pro-role accounts exist: an operational assigned-Pro schedule-to-payday acceptance test requires an isolated test environment or eligible Pro account and assigned work; no live fixtures, customer messages or payouts were created to bypass that boundary. New work/GPS guards remain staged (`pro_loop_enabled=false`).

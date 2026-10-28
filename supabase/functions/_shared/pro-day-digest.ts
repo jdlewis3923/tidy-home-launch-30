@@ -60,17 +60,17 @@ function visitLine(v: DigestVisit, es: boolean): string {
 
 export function digestText(
   visits: DigestVisit[],
-  when: 'today' | 'tomorrow',
+  when: 'today' | 'tomorrow' | 'monday',
   language: 'en' | 'es' = 'en',
 ): { title: string; body: string } {
   const route = [...visits].sort((a,b)=>(a.scheduled_start ?? '').localeCompare(b.scheduled_start ?? ''));
   const count = route.length;
   const first = route[0];
   const es = language === 'es';
+  const dayWord = when === 'today' ? (es ? 'hoy' : 'today') : when === 'monday' ? (es ? 'el lunes' : 'Monday') : (es ? 'mañana' : 'tomorrow');
   const title =
-    es ? `${count} visita${count === 1 ? '' : 's'} ${when === 'today' ? 'hoy' : 'mañana'} — primera a las ${etTime(first?.scheduled_start ?? null)}` : when === 'today'
-      ? `${count} job${count === 1 ? '' : 's'} today — first at ${etTime(first?.scheduled_start ?? null)}`
-      : `${count} job${count === 1 ? '' : 's'} tomorrow — first at ${etTime(first?.scheduled_start ?? null)}`;
+    es ? `${count} visita${count === 1 ? '' : 's'} ${dayWord} — primera a las ${etTime(first?.scheduled_start ?? null)}`
+      : `${count} job${count === 1 ? '' : 's'} ${dayWord} — first at ${etTime(first?.scheduled_start ?? null)}`;
   const body = route.slice(0, 5).map(v=>visitLine(v,es)).join('\n');
   return { title, body: `${body}${count > 5 ? `\n+${count - 5} ${es ? 'más en la app' : 'more in the app'}` : ''}\n${es ? 'Ruta y direcciones: jointidy.co/pro/schedule' : 'Route and addresses: jointidy.co/pro/schedule'}` };
 }

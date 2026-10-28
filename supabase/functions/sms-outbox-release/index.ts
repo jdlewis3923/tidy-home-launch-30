@@ -16,9 +16,10 @@ import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { isWindowOpen, nextOpenWindow } from '../_shared/sms-window.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { alertSmsFailure } from '../_shared/sms-failure.ts';
+import { proSmsAccepted } from '../_shared/pro-sms-result.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 const MAX_ATTEMPTS = 3;
 const BATCH = 50;
 
@@ -30,6 +31,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
   }
 
+  if (!SUPABASE_URL || !SERVICE_KEY) return jsonResponse({ok:false,error:'not_configured'},503);
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -129,8 +131,17 @@ Deno.serve(async (req) => {
       });
       httpStatus = res.status;
       payload = await res.json().catch(() => ({}));
+      if (res.status === 202 && payload.queued === true) {
+        // The batch may have crossed 6 PM: retain the original row, no false
+        // carrier success or consumed attempt, and resume at the next window.
+        await admin.from('sms_outbox').update({release_after: payload.release_after ?? nextOpenWindow().toISOString(), updated_at:new Date().toISOString()}).eq('id',row.id).eq('status','queued');
+        results.push({id:row.id,status:'queued'});
+        continue;
+      }
       if (!res.ok || payload.ok !== true) {
         errMessage = `send-twilio-sms ${res.status}: ${String(payload.error ?? '').slice(0, 300)}`;
+      } else if (!proSmsAccepted(payload) && payload.reason !== 'duplicate_idempotency_key') {
+        errMessage = 'SMS not accepted: no carrier identifier or confirmed duplicate';
       }
     } catch (e) {
       errMessage = (e as Error).message;

@@ -34,6 +34,7 @@ import { readEnv, missingEnvError } from '../_shared/handlerEnv.ts';
 import { closedReason, isQuietHours, isSundayET, nextOpenWindow, queueSms } from '../_shared/sms-window.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { holdForDigest } from '../_shared/brevo-send.ts';
+import { ownerAlertWindowOpen } from '../_shared/owner-alert-window.ts';
 
 const REQUIRED_ENV = [
   'SUPABASE_URL',
@@ -298,7 +299,14 @@ Deno.serve(async (req) => {
     }
 
     // ---- Send window: queue instead of destroy ----
-    const blocked = skip_window ? null : closedReason();
+    const ownerChannel = to_phone_e164 === ownerPhone && !!admin_channel;
+    if (ownerChannel && !ownerAlertWindowOpen()) {
+      await finish('success', 'held_for_owner_hours');
+      return jsonResponse({ok:true,sent:false,held_for_owner_hours:true});
+    }
+    // A caller cannot bypass customer/Pro hours by setting skip_window or an
+    // owner-channel label for a different destination. Recheck on every send.
+    const blocked = ownerChannel ? null : closedReason();
     if (blocked) {
       const releaseAfter = nextOpenWindow();
       // Already stale before it is even parked: park nothing, say so plainly.

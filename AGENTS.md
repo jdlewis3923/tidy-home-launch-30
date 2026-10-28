@@ -24,7 +24,7 @@
 - Root uses `color-scheme: light dark`; body/Founding use explicit light tokens — why: phones ignore "only light" and darken QR pages.
 - Scheduling lives in our own tables (service_days → pro_day_claims → customer_bookings → visits), rules enforced in `sched_*` SQL; visit hours come only from Stripe price metadata via `sync-budget-hours`; scheduling/Pro messages are written in `user_lang()` (Spanish via `sched_es`) — why: one source of truth, nothing bypassed client-side.
 - Pro access is guarded by `pro_access_window_open` across visit and vehicle readers; per-Pro `pro_service_check` records and the completion trigger enforce service/exit/add-on checks — why: portal presentation cannot bypass privacy or required work.
-- Pro job context and scope readers share the assigned/team predicate; tomorrow reminders use `user_lang` and exclude both test flags and archived pipelines — why: paired Pros need the same booked instructions without broadening customer visibility or sending test work.
+- Pro context uses assigned/team guards; routes use server-clock dates, `user_lang`, and exclude tests/archives. Central SMS rechecks destination windows even on retries — why: no private leaks, Sunday Pro texts or caller bypasses.
 - Read subdirectory `AGENTS.md` before edits; admin reporting: `supabase/functions/AGENTS.md`.
 - Admin root isolates a behind-content canvas; mobile tabs wrap — why: no covered or unreachable pages.
 - LinkedIn photo credits use a structured notes marker parsed by socialPhotoCredits — why: credit follows locked images without schema changes.

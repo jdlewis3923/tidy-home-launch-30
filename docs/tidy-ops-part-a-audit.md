@@ -12,6 +12,7 @@ Audit: October 28, 2026, approximately 02:00 UTC. This is an initial evidence-ba
 ## Evidence collected
 
 - Full existing suite: **52 files / 440 tests passed** after correcting the launch-date regression. Output: `/tmp/tidy-full-audit-tests.log`.
+- After approved timing changes: **54 files / 448 tests passed**, including five route/owner boundary tests. Output: `/tmp/tidy-route-full-tests.log`. Existing route schedule verified active at minute 45; changed notification functions deployed. No send invoked.
 - New courtesy-hours suite: **3 tests passed**, covering 8 AM opening, 6 PM closure, Saturday/Sunday and daylight saving time. With launch/lifecycle checks: **16 passed**. Output: `/tmp/tidy-audit-final-tests.log`.
 - Preview reported **build OK** after edits. Owner `/admin/agents` opened with authenticated owner session; corrected claim visible; no page errors.
 - Three founding ZIP links returned HTTP 200 in a 390×844 Chromium phone viewport; English and Spanish headings rendered without horizontal overflow or page errors. First-contentful-paint measurements: **1,348 / 968 / 496 ms** locally. This is not a throttled production-phone performance measurement.
@@ -68,7 +69,7 @@ Audit: October 28, 2026, approximately 02:00 UTC. This is an initial evidence-ba
 | Check | Status | Evidence / remaining work |
 |---|---|---|
 | Lifecycle sequences and cutover | PASS — shadow safety; UNVERIFIED live replacement | Tests pass; live settings remain shadow, 42 shadow cutovers and 8 retired. No cutover enabled. |
-| 8 AM–6 PM Mon–Sat, never Sunday | PASS — shared courtesy helper; FAIL — exceptional Pro path | Three new boundary tests pass. Existing urgent Pro notifications and required 6 PM route texts deliberately bypass the window, conflicting with the new universal text restriction. Requires timing decision before changing that path. |
+| 8 AM–6 PM Mon–Sat, never Sunday | PASS — timing helpers and sender guard; UNVERIFIED carrier boundary | Approved change implemented: route texts 5:45 PM, Saturday includes Monday; central sender ignores bypass flags for non-owner destinations, including urgent Pro/retry callers. Owner window separately 8 AM–9 PM, including 9 PM digest minute. Outbox crossing closure stays queued, not falsely sent. No live boundary text sent. |
 | Spanish messaging | FAIL — unreviewed inventory | 85 active templates lack Spanish approval; sender may fall back to English. No blanket review approval assigned without reviewing copy. |
 | Twilio delivery rate this week | UNVERIFIED | Six accepted IDs in inspected logs, all without matched final receipts. No invented delivery rate. |
 
@@ -82,13 +83,13 @@ Audit: October 28, 2026, approximately 02:00 UTC. This is an initial evidence-ba
 | Whole Pro closed loop | UNVERIFIED / incomplete | Existing portal, scoped visits, checklists, GPS reasons, reminders, pay screens; Pro/cron/digest tests passed. Masked relay, all-service exception/pay integration and authenticated assigned-Pro-to-payday acceptance remain open. New visit enforcement is staged off by default. |
 | iPhone Safari GPS | UNVERIFIED — physical-device blocker | No physical phone available; permission/150 m/reason/denial/checkout/accuracy not measured. |
 | Android Chrome GPS | UNVERIFIED — physical-device blocker | Same; Chromium emulation is not Android location evidence. |
-| Test visit at owner's address | NOT CREATED | Need confirmed test address, isolated authenticated test Pro/member and clear test-message destination. Never infer the owner's address or put test work into live capacity/payout. |
+| Test visit at owner's address | NOT CREATED | Address now confirmed and saved in private project memory; still need isolated authenticated test Pro/member and physical devices. Never put test work into live capacity/payout. |
 
 ## Failures corrected in this pass
 
 1. Launch-date literals in lifecycle simulator and email test tokens: replaced with configured dates; regression rerun passed. Deployed the changed lifecycle function without invoking it or sending anything.
 2. `/admin/agents` falsely claimed “6 agents … all running” based on KPI snapshots: now accurately says KPI monitoring, reports current indicator count, recent/stale data and last calculation rather than autonomous agent action. Authenticated owner browser proof captured.
-3. Added concrete SMS courtesy-hour tests; found the existing urgent/required-Pro bypass conflict, which remains explicitly unresolved rather than silently changing a promised 6 PM route reminder.
+3. Resolved the SMS courtesy-hour conflict using Justin's approved 5:45 PM timing; Monday route sent Saturday. Central sender rechecks all non-owner destinations despite bypass flags; owner channels remain separate. Existing schedule updated and verified, affected functions deployed, 448 tests pass.
 
 ## Part B — gated, not started
 
@@ -114,7 +115,7 @@ Per the brief, fix Part A failures before enabling/building the autonomous suite
 ## Next acceptance work and blockers
 
 - Fix/validate Spanish templates, LinkedIn confirmation and missing operational test coverage before Part B.
-- Clarify whether 6 PM next-route texts and same-day Pro exceptions are authorized exceptions to “texts before 6 PM, never Sunday”; current implementation treats them as exceptions.
-- Obtain confirmed test address and real iPhone/Android participation; report per-device accuracy, not fabricated values.
+- Timing decision resolved: 5:45 PM routes Monday–Saturday, Saturday Monday notice; customer/Pro texts never Sunday, owner alerts separately 8 AM–9 PM. Real carrier boundary behavior remains untested.
+- Test address confirmed; obtain real iPhone/Android participation and isolated test identities; report per-device accuracy, not fabricated values.
 - Establish isolated authenticated Pro/member test data excluded from live capacity, assignments, messages and payouts; tests must not masquerade as real delivered texts or settled payouts.
 - Preserve fixed old candidate campaigns and consent/price/payout gates. No app publication, candidate/member messages, social posts or charges were triggered in this audit.
