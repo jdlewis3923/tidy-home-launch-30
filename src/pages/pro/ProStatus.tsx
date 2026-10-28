@@ -15,7 +15,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
 const daysActive = (since: string | null) => since ? Math.max(0, Math.floor((Date.now() - new Date(since).getTime()) / 86_400_000)) : 0;
-const DOTS = [[8, 18, "--pro-gold", 12], [88, 12, "--pro-gold", 10], [20, 70, "--pro-green", 6], [80, 62, "--pro-gold", 8], [70, 8, "--pro-green", 6], [30, 6, "--pro-gold", 7]] as const;
+const DOTS = [[8, 18, "--pro-gold", 12], [88, 12, "--pro-gold", 10], [20, 8, "--pro-green", 6], [80, 5, "--pro-gold", 13], [8, 44, "--pro-gold", 16]] as const;
 
 export default function ProStatus() {
   const { me, coi, isOwner, loading, error, reload, userId } = useProSession();
@@ -75,7 +75,7 @@ export default function ProStatus() {
           </motion.section>
 
           <motion.div {...up(2)} className="pro-status-badge-wrap">
-            <motion.div animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: reduce ? 0 : 0.3, ease: EASE }} className="pro-status-badge-button">
+            <motion.div animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: reduce ? 0 : 0.3, ease: EASE }} className="pro-status-flipper">
             <ProButton variant="outlined" type="button" disabled={!verifyUrl} onClick={() => setFlipped((f) => !f)} aria-pressed={flipped} aria-label={es ? "Voltear insignia para ver el código QR" : "Flip badge to show QR code"} className="pro-status-badge-button">
               <div className="pro-status-badge-face" aria-hidden={flipped}>
                 <div className="flex items-start gap-3">

@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Pro mockup screen-by-screen (Oct 28)
-- [ ] Match Status (screen 5): tier panel, overlapping badge, milestone fills and badge-to-QR flip; verify signed-in EN/ES, reduced motion and owner exemption without changing criteria.
+- [x] Status (screen 5): outlined tier panel, overlapping badge, milestone fills and 300ms badge-to-QR flip. Signed-in owner EN/ES, QR flip and reduced motion verified; no overflow, page errors or owner insurance; five existing visit-rule tests pass. Real criteria/data retained, not published; visual styling aligned but pixel-identical reproduction is not established.
 - [ ] Continue remaining respective mockup screens after Status; preserve real assignments and contractor workflows.
 
 ## Pro schedule visibility (Oct 28)

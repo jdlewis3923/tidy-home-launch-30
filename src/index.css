@@ -1472,28 +1472,30 @@ body.admin-hud h1 {
   --pro-status-blue: 211 100% 50%;
   --pro-status-green: 151 59% 44%;
   --pro-status-shadow: 0 3px 12px hsl(var(--pro-navy) / .18);
-  padding: 14px 10px 16px;
+  padding: 10px 10px 16px;
   letter-spacing: 0;
 }
 .pro-status-hero { position: relative; padding-top: 68px; margin-bottom: 18px; text-align: center; color: hsl(var(--primary-foreground)); }
 .pro-status-emblem { position: absolute; z-index: 2; top: 0; left: calc(50% - 45px); width: 90px; height: 90px; }
 .pro-status-emblem svg { width: 100%; height: 100%; fill: hsl(var(--pro-status-blue)); stroke: hsl(var(--pro-sky)); stroke-width: 1.4; filter: drop-shadow(0 0 5px hsl(var(--pro-status-blue) / .4)); }
-.pro-status-emblem svg polyline { stroke: hsl(var(--primary-foreground)); stroke-width: 3; }
-.pro-status-tier { position: relative; border: 1.5px solid hsl(var(--pro-status-blue) / .7); border-radius: 20px; padding: 43px 14px 24px; box-shadow: inset 0 0 0 3px hsl(var(--pro-deep)), 0 0 0 1px hsl(var(--pro-status-blue) / .2); }
+.pro-status-emblem svg path:last-child { stroke: hsl(var(--primary-foreground)); stroke-width: 3; }
+.pro-status-tier { position: relative; border: 1.5px solid hsl(var(--pro-status-blue) / .7); border-radius: 20px; padding: 36px 14px 20px; box-shadow: inset 0 0 0 3px hsl(var(--pro-deep)), 0 0 0 1px hsl(var(--pro-status-blue) / .2); }
 .pro-status-tier h2 { font-size: 29px; font-weight: 700; line-height: 1.2; }
 .pro-status-tier p { max-width: 330px; margin: 12px auto 0; font-size: 14px; line-height: 1.5; }
-.pro-status-progress { border: 1px solid hsl(var(--pro-line)); border-radius: 20px; background: hsl(var(--pro-status-surface)); padding: 23px 24px; box-shadow: var(--pro-status-shadow); }
-.pro-status-milestone + .pro-status-milestone { margin-top: 25px; padding-top: 20px; border-top: 1px solid hsl(var(--pro-ground)); }
+.pro-status-progress { border: 1px solid hsl(var(--pro-line)); border-radius: 20px; background: hsl(var(--pro-status-surface)); padding: 20px 24px; box-shadow: var(--pro-status-shadow); }
+.pro-status-milestone + .pro-status-milestone { margin-top: 20px; padding-top: 14px; border-top: 1px solid hsl(var(--pro-ground)); }
 .pro-status-label { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; color: hsl(var(--pro-ink)); font-size: 14px; font-weight: 600; }
 .pro-status-label span:last-child { flex-shrink: 0; color: hsl(var(--pro-ink-soft)); font-variant-numeric: tabular-nums; }
 .pro-status-track { height: 15px; overflow: hidden; border-radius: 999px; background: hsl(var(--pro-line)); }
 .pro-status-fill { height: 100%; border-radius: inherit; background: hsl(var(--pro-status-blue)); box-shadow: inset 0 0 0 2px hsl(var(--pro-sky) / .4); }
 .pro-status-fill-green { background: hsl(var(--pro-status-green)); box-shadow: inset 0 0 0 2px hsl(var(--pro-green) / .25); }
 .pro-status-badge-wrap { margin-top: 18px; perspective: 900px; }
+.pro-status-flipper { transform-style: preserve-3d; }
 .pro-status-badge-button { position: relative; display: block; min-height: 184px; width: 100%; padding: 0; border: 1px solid hsl(var(--pro-line)); border-radius: 20px; background: hsl(var(--pro-status-surface)); text-align: left; font-weight: 400; box-shadow: var(--pro-status-shadow); transform-style: preserve-3d; }
 .pro-status-badge-button:hover { background: hsl(var(--pro-status-surface)); }
 .pro-status-badge-button:disabled { opacity: 1; }
-.pro-status-badge-face { padding: 23px 24px; backface-visibility: hidden; }
+.pro-status-badge-face { padding: 20px 24px; backface-visibility: hidden; }
+.pro-status-badge-face .pro-eyebrow { letter-spacing: 0; font-size: 11px; font-weight: 600; }
 .pro-status-badge-icon { width: 45px; height: 45px; flex-shrink: 0; margin-top: 13px; color: hsl(var(--primary-foreground)); fill: hsl(var(--pro-status-blue)); }
 .pro-status-badge-title { font-size: 16px; font-weight: 600; color: hsl(var(--pro-ink)); }
 .pro-status-badge-number-label { margin-top: 5px; font-size: 14px; color: hsl(var(--pro-ink-soft)); }
