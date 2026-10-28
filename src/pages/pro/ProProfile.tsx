@@ -21,7 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function ProProfile() {
   const navigate = useNavigate();
-  const { me, coi, userId, loading, reload } = useProSession();
+  const { me, coi, isOwner, userId, loading, reload } = useProSession();
   const [carrier, setCarrier] = useState("");
   const [policy, setPolicy] = useState("");
   const [expires, setExpires] = useState("");
@@ -89,12 +89,13 @@ export default function ProProfile() {
     { key: "notifications", label: es ? "Notificaciones" : "Notifications", Icon: Bell },
     { key: "help", label: es ? "Ayuda y soporte" : "Help & Support", Icon: CircleHelp },
   ];
+  const visibleRows = isOwner ? rows.filter((r) => r.key !== "insurance") : rows;
   const title = rows.find((r) => r.key === panel)?.label ?? "";
 
   const panelBody = () => {
     switch (panel) {
       case "personal": return (<div className="space-y-1 text-[14px] text-[hsl(var(--pro-ink))]"><p className="font-semibold">{me?.first_name ?? "Tidy Pro"}</p><p className="text-[hsl(var(--pro-ink-soft))]">{me?.pro_number ?? "—"}</p><p className="pt-2 text-[12.5px] text-[hsl(var(--pro-ink-soft))]">{es ? "Para cambiar sus datos, envíe un mensaje a Tidy." : "To change your details, message Tidy."}</p><Link to="/pro/messages" className="inline-block pt-2 font-medium text-[hsl(var(--pro-blue))]">{es ? "Mensaje a Tidy" : "Message Tidy"}</Link></div>);
-      case "vehicle": return (<div className="overflow-hidden rounded-[12px] border border-[hsl(var(--pro-line))]"><SettingRow to="/pro/equipment" label={es ? "Equipo" : "Equipment"} /><SettingRow to="/pro/orientation" label={es ? "Orientación Pro" : "Pro orientation"} /><SettingRow to="/pro/upload-coi" label={es ? "Certificado de seguro" : "Insurance certificate"} /></div>);
+      case "vehicle": return (<div className="overflow-hidden rounded-[12px] border border-[hsl(var(--pro-line))]"><SettingRow to="/pro/equipment" label={es ? "Equipo" : "Equipment"} /><SettingRow to="/pro/orientation" label={es ? "Orientación Pro" : "Pro orientation"} />{!isOwner && <SettingRow to="/pro/upload-coi" label={es ? "Certificado de seguro" : "Insurance certificate"} />}</div>);
       case "payment": return (<p className="text-[13.5px] text-[hsl(var(--pro-ink-soft))]">{es ? "Sus pagos se configuran con Tidy. Para cambiar su método de pago, envíe un mensaje a Tidy." : "Your payouts are set up with Tidy. To change your payout method, message Tidy."} <Link to="/pro/messages" className="font-medium text-[hsl(var(--pro-blue))]">{es ? "Mensaje a Tidy" : "Message Tidy"}</Link></p>);
       case "notifications": return (<div className="space-y-3"><PushOptIn /><div className="overflow-hidden rounded-[12px] border border-[hsl(var(--pro-line))]"><SettingRow to="/pro/notifications" label={es ? "Ver notificaciones" : "View notifications"} /></div></div>);
       case "help": return (<div className="space-y-3"><div className="overflow-hidden rounded-[12px] border border-[hsl(var(--pro-line))]"><SettingRow to="/pro/messages" label={es ? "Mensaje a Tidy" : "Message Tidy"} /><SettingRow to="/pro/orientation" label={es ? "Orientación Pro" : "Pro orientation"} /><SettingRow label={es ? "Contactar soporte" : "Contact support"} onClick={() => { window.location.href = "mailto:hello@jointidy.co"; }} /></div><p className="text-[12px] font-semibold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">{es ? "Guía de fotos" : "Photo guide"}</p>{Object.values(SHOT_LIST).map((s) => <ShotList key={s.label} label={s.label} shots={s.shots} />)}<LanguagePreference /></div>);
@@ -131,7 +132,7 @@ export default function ProProfile() {
               <span className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${me?.badge_status === "active" ? "bg-[hsl(var(--pro-green))] text-primary-foreground" : "bg-[hsl(var(--pro-line))] text-[hsl(var(--pro-ink-soft))]"}`}>{me?.badge_status === "active" && <Check className="h-3 w-3" aria-hidden />}{me?.badge_status === "active" ? (es ? "Activo" : "Active") : (es ? "Pendiente" : "Pending")}</span>
             </div>
             <ul>
-              {rows.map(({ key, label, Icon, trail }) => (
+              {visibleRows.map(({ key, label, Icon, trail }) => (
                 <li key={key}>
                   <button type="button" onClick={() => key === "language" ? setLangOpen(true) : setPanel(key)} className="flex min-h-[46px] w-full items-center gap-3 border-t border-[hsl(var(--pro-line))] px-4 text-left active:bg-[hsl(var(--pro-ground))]">
                     <Icon className="h-[18px] w-[18px] text-[hsl(var(--pro-ink-soft))]" aria-hidden />

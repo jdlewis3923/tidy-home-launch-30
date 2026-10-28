@@ -12,6 +12,8 @@ export type ProSession = {
   userId: string | null;
   me: ProMe | null;
   coi: CoiState | null;
+  /** Owner/admin viewing the portal: 1099 requirements (insurance) don't apply. */
+  isOwner: boolean;
   visits: ProVisit[];
   loading: boolean;
   error: string | null;
@@ -26,6 +28,7 @@ export function useProSession(): ProSession {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
+  const [isOwner, setIsOwner] = useState(false);
 
   const reload = useCallback(() => setNonce((n) => n + 1), []);
 
@@ -43,15 +46,17 @@ export function useProSession(): ProSession {
           setLoading(false);
           return;
         }
-        const [meRow, coiRow, visitRows] = await Promise.all([
+        const [meRow, coiRow, visitRows, roleRes] = await Promise.all([
           fetchMe(),
           fetchCoi(uid),
           fetchVisits(),
+          supabase.rpc("has_role", { _user_id: uid, _role: "admin" }),
         ]);
         if (cancelled) return;
         setMe(meRow);
         setCoi(coiRow);
         setVisits(visitRows);
+        setIsOwner(roleRes?.data === true);
       } catch (e) {
         if (!cancelled) setError((e as Error).message);
       } finally {
@@ -63,5 +68,5 @@ export function useProSession(): ProSession {
     };
   }, [nonce]);
 
-  return { userId, me, coi, visits, loading, error, reload };
+  return { userId, me, coi, isOwner, visits, loading, error, reload };
 }

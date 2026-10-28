@@ -24,7 +24,7 @@ function serviceMeta(v: ProVisit, es: boolean) {
 }
 
 export default function ProHome() {
-  const { me, coi, visits, loading, userId } = useProSession();
+  const { me, coi, isOwner, visits, loading, userId } = useProSession();
   const { language } = useLanguage();
   const es = language === "es";
   const reduce = useReducedMotion();
@@ -50,7 +50,7 @@ export default function ProHome() {
 
   if (!loading && !userId) return <Navigate to="/pro/welcome" replace />;
 
-  const coiBlocked = !!coi && !coi.can_work;
+  const coiBlocked = !isOwner && !!coi && !coi.can_work;
   const routeUrl = (() => {
     const stops = open.map((v) => [v.street, v.zip].filter(Boolean).join(", ")).filter(Boolean);
     if (!stops.length) return null;
@@ -117,9 +117,9 @@ export default function ProHome() {
 
           {/* Readiness */}
           <div className="mt-3 flex flex-wrap gap-1.5 text-[11.5px] font-medium">
-            <Link to="/pro/profile" className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 ${coiBlocked ? "bg-[hsl(var(--pro-red-soft))] text-[hsl(var(--pro-red))]" : "bg-[hsl(var(--pro-green-soft))] text-[hsl(var(--pro-green))]"}`}>
+            {!isOwner && <Link to="/pro/profile" className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 ${coiBlocked ? "bg-[hsl(var(--pro-red-soft))] text-[hsl(var(--pro-red))]" : "bg-[hsl(var(--pro-green-soft))] text-[hsl(var(--pro-green))]"}`}>
               {coiBlocked ? <ShieldAlert className="h-3.5 w-3.5" aria-hidden /> : <ShieldCheck className="h-3.5 w-3.5" aria-hidden />}{coiLabel}
-            </Link>
+            </Link>}
             <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--pro-blue-soft))] px-2.5 py-1 text-[hsl(var(--pro-blue))]">
               <MapPin className="h-3.5 w-3.5" aria-hidden />{es ? "GPS al llegar (150 m)" : "GPS check-in on arrival (150 m)"}
             </span>

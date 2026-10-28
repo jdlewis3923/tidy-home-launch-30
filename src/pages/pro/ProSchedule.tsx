@@ -30,7 +30,7 @@ function meta(v: ProVisit, es: boolean) {
 }
 
 export default function ProSchedule() {
-  const { me, coi, visits, loading, error, reload, userId } = useProSession();
+  const { me, coi, isOwner, visits, loading, error, reload, userId } = useProSession();
   const { language } = useLanguage();
   const es = language === "es";
   const reduce = useReducedMotion();
@@ -73,7 +73,7 @@ export default function ProSchedule() {
 
   return (
     <ProShell title={greeting} showBell unread={unread} dark>
-      {coi && (coi.status === "expired" || coi.status === "none") && (
+      {!isOwner && coi && (coi.status === "expired" || coi.status === "none") && (
         <div className="px-2.5 pt-2.5">
           <WarningBanner
             title={coi.status === "expired" ? (es ? "Su certificado de seguro ha vencido" : "Your certificate of insurance has expired") : (es ? "No hay certificado de seguro registrado" : "No certificate of insurance on file")}
