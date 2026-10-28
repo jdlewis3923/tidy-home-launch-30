@@ -9,7 +9,7 @@ export const etTime = (date: Date) => date.toLocaleString('en-US',{timeZone:'Ame
 export async function agreementPdf(body: string, values: Record<string,string>, evidence?: Record<string,string>, original?: Uint8Array) {
   const pdf = original ? await PDFDocument.load(original) : await PDFDocument.create();
   pdf.registerFontkit(fontkit);
-  const font=await pdf.embedFont(Uint8Array.from(atob(CONTRACT_FONT_BASE64),c=>c.charCodeAt(0)));
+  const font=await pdf.embedFont(Uint8Array.from(atob(CONTRACT_FONT_BASE64),c=>c.charCodeAt(0)),{features:{liga:false,clig:false}});
   const logoResponse=await vendorFetch(TIDY_LOGO);
   if(!logoResponse.ok) throw new Error('Tidy logo unavailable');
   const logo=await pdf.embedPng(await logoResponse.arrayBuffer());
@@ -27,7 +27,7 @@ export async function agreementPdf(body: string, values: Record<string,string>, 
       y-=6;
     }
   };
-  if(!original)write(fillContract(body,values));
+  if(!original)write(fillContract(body,values).replace(/\s+(?=\d+\.\d+\s|\d+\. [A-Z]|SCHEDULE [AB] —|SIGNATURES)/g,'\n\n'));
   if(evidence){newPage();write('Signature page',17);write(Object.entries(evidence).map(([k,v])=>`${k}: ${v}`).join('\n'),10);}
   return await pdf.save();
 }
