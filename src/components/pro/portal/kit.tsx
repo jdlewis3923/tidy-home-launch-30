@@ -330,15 +330,16 @@ export function EmptyState({
 }
 
 export function ErrorState({ title, onRetry }: { title: string; onRetry: () => void }) {
+  const { language } = useLanguage();
   return (
     <div className="flex flex-col items-center px-8 py-10 text-center">
       <AlertTriangle className="h-6 w-6 text-[hsl(var(--pro-red))]" aria-hidden />
       <p className="mt-3 text-[15px] font-bold text-[hsl(var(--pro-ink))]">{title}</p>
       <p className="mt-1 text-[14px] text-[hsl(var(--pro-ink-soft))]">
-        Check your signal and try again.
+        {language === 'es' ? 'Revise su conexión y vuelva a intentar.' : 'Check your signal and try again.'}
       </p>
       <ProButton variant="outlined" className="mt-4" onClick={onRetry}>
-        Try again
+        {language === 'es' ? 'Volver a intentar' : 'Try again'}
       </ProButton>
     </div>
   );
