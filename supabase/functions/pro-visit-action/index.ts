@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
     if (action === 'check_in') {
       const { lat, lng } = parsed.data;
       if(visit.service_type==='cleaning'){
-        const {error}=await admin.rpc('cleaning_team_presence_record',{_visit:visit_id,_pro:uid,_action:'check_in',_lat:lat,_lng:lng});
+        const {error}=await admin.rpc('pro_record_team_location',{_visit:visit_id,_pro:uid,_action:'check_in',_lat:lat,_lng:lng,_reason:parsed.data.location_reason??null});
         if(error)return jsonResponse({ok:false,error:error.message});
         if(isPartner)return jsonResponse({ok:true,action});
       }
@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
     }
     if(action==='team_check_out'){
       const {lat,lng}=parsed.data;
-      const {error}=await admin.rpc('cleaning_team_presence_record',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng});
+      const {error}=await admin.rpc('pro_record_team_location',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng,_reason:parsed.data.location_reason??null});
       return jsonResponse(error?{ok:false,error:error.message}:{ok:true,action});
     }
 
@@ -299,7 +299,7 @@ Deno.serve(async (req) => {
     const now = new Date();
     const { lat, lng, not_reached_note } = parsed.data as { lat: number; lng: number; not_reached_note?: string };
     if(visit.service_type==='cleaning' && team?.kind==='paired_pros'){
-      const {error}=await admin.rpc('cleaning_team_presence_record',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng});
+      const {error}=await admin.rpc('pro_record_team_location',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng,_reason:'location_reason' in parsed.data?parsed.data.location_reason??null:null});
       if(error)return jsonResponse({ok:false,error:error.message});
     }
     const { data: closedVisit, error: closeErr } = await admin

@@ -48,6 +48,7 @@ export default function ProVisit() {
   const [vclass, setVclass] = useState("sedan");
   const [plate, setPlate] = useState("");
   const [reportedPay, setReportedPay] = useState<number | null>(null);
+  const [locationReason,setLocationReason] = useState('');
 
   const GPS_MSG = "Turn on location for this site in your phone settings, then try again. Check-in and check-out need your location.";
 
@@ -55,9 +56,9 @@ export default function ProVisit() {
     if (!visit) return;
     setBusy("omw");
     setActionError(null);
-    const res = await visitAction(visit.id, "check_in");
+    const res = await visitAction(visit.id, "check_in", {location_reason:locationReason.trim()||undefined});
     setBusy(null);
-    if (!res.ok) { setActionError(res.error === "gps_unavailable" ? GPS_MSG : "Couldn't check you in."); return; }
+    if (!res.ok) { setActionError(res.error === "gps_unavailable" ? GPS_MSG : res.error?.includes('reason_required') ? (es?'Está fuera de 150 m o la ubicación de la dirección no está verificada. Escriba el motivo y vuelva a intentar.':'Outside 150 m or the address location is unverified. Add a reason and try again.') : (es?'No se pudo registrar la llegada.':"Couldn't check you in.")); return; }
     setCheckedIn(true);
   };
 
@@ -145,10 +146,12 @@ export default function ProVisit() {
     if (!visit) return;
     setBusy("complete");
     setActionError(null);
-    const res = await visitAction(visit.id, "complete");
+    const res = await visitAction(visit.id, "complete", {location_reason:locationReason.trim()||undefined});
     setBusy(null);
     setConfirm(false);
     if (!res.ok) {
+      if(res.error?.includes('reason_required')) {setActionError(es?'Agregue el motivo de ubicación antes de registrar la salida.':'Add a location reason before checking out.');return;}
+      if(res.error?.includes('service_checklist_required')||res.error==='booked_addons_incomplete') {setActionError(es?'Complete cada tarea, extra reservado y punto de salida.':'Complete every work item, booked add-on and exit check.');return;}
       if (res.error === "size_check_required") { setSizeOpen(true); setActionError("First visit: record the real size before you finish."); return; }
       if (res.error === 'both_pros_check_out_required') {setActionError('Both Pros must check in and check out before the Lead completes the visit.');return;}
       if (res.error === 'lead_inspection_and_zones_required') {setActionError('Save room zones and the final inspection before completing the visit.');return;}
@@ -294,7 +297,7 @@ export default function ProVisit() {
           className="mt-3 flex min-h-[52px] items-center gap-3 rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white px-4"
         >
           <ListChecks className="h-5 w-5 text-[hsl(var(--pro-blue))]" aria-hidden />
-          <span className="flex-1 text-[15px] font-bold text-[hsl(var(--pro-ink))]">View checklist</span>
+            <span className="flex-1 text-[15px] font-bold text-[hsl(var(--pro-ink))]">{es?'Ver lista de trabajo':'View checklist'}</span>
         </Link>
 
         {actionError && (
@@ -328,10 +331,12 @@ export default function ProVisit() {
               </>
             ) : (
               <>
-                <Send className={`h-4 w-4 ${busy === "omw" ? "pro-plane" : ""}`} aria-hidden /> On my way
+                <Send className={`h-4 w-4 ${busy === "omw" ? "pro-plane" : ""}`} aria-hidden /> {es?'Voy en camino':'On my way'}
               </>
             )}
           </ProButton>
+
+          <label className="block space-y-2 text-sm text-foreground"><span>{es?'Motivo de ubicación (solo fuera de 150 m o dirección sin verificar)':'Location reason (only outside 150 m or unverified address)'}</span><textarea value={locationReason} onChange={e=>setLocationReason(e.target.value)} rows={2} maxLength={500} className="w-full rounded-lg border border-input bg-background p-3"/></label>
 
           <ProButton
             full
@@ -339,7 +344,7 @@ export default function ProVisit() {
             disabled={busy !== null || checkedIn || blocked || !!visit.completed_at}
             onClick={() => void checkIn()}
           >
-            {checkedIn ? <><Check className="h-4 w-4" aria-hidden /> Checked in</> : "I've arrived — check in"}
+            {checkedIn ? <><Check className="h-4 w-4" aria-hidden /> {es?'Llegada registrada':'Checked in'}</> : (es?'Llegué — registrar llegada':"I've arrived — check in")}
           </ProButton>
 
           {sizeOpen && (
@@ -376,7 +381,7 @@ export default function ProVisit() {
             disabled={!photosOk || blocked || busy !== null || !!visit.completed_at}
             onClick={() => setConfirm(true)}
           >
-            Complete visit
+            {es?'Registrar salida y completar':'Check out and complete'}
           </ProButton>
           {visit.service_type==='cleaning'&&<CleaningTeamInspection visitId={visit.id}/>}
           {!photosOk && !visit.completed_at && (
