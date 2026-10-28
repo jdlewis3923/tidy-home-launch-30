@@ -21,7 +21,7 @@ export function Bar({ pct, tone = "--pro-blue" }: { pct: number; tone?: string }
   const reduce = useReducedMotion();
   return (
     <div className="h-[9px] overflow-hidden rounded-full bg-[hsl(var(--pro-line))]">
-      <motion.div className="h-full rounded-full" style={{ background: `hsl(var(${tone}))` }}
+      <motion.div className="h-full rounded-full" style={{ background: `linear-gradient(90deg, hsl(var(${tone})), hsl(var(--pro-sky)))`, boxShadow: `0 0 8px hsl(var(${tone}) / 0.45)` }}
         initial={{ width: reduce ? `${pct}%` : 0 }} animate={{ width: `${pct}%` }} transition={{ duration: reduce ? 0 : 0.6, ease: EASE, delay: 0.15 }} />
     </div>
   );
@@ -81,34 +81,35 @@ export default function ProEarnings() {
         <div className="flex rounded-[12px] bg-[hsl(var(--pro-deep-2))] p-1" role="tablist">
           {([["week", es ? "Esta semana" : "This Week"], ["month", es ? "Este mes" : "This Month"], ["all", es ? "Todo" : "All Time"]] as const).map(([k, l]) => (
             <button key={k} role="tab" aria-selected={range === k} type="button" onClick={() => setRange(k)}
-              className={`min-h-[34px] flex-1 rounded-[9px] text-[12.5px] font-medium transition-colors duration-200 ${range === k ? "bg-white text-[hsl(var(--pro-ink))]" : "text-primary-foreground/85"}`}>{l}</button>
+              className={`relative min-h-[38px] flex-1 rounded-[10px] text-[13px] font-medium transition-colors duration-200 ${range === k ? "text-[hsl(var(--pro-ink))]" : "text-primary-foreground/85"}`}>
+              {range === k && <motion.span layoutId="earn-tab" transition={{ duration: reduce ? 0 : 0.22, ease: EASE }} className="absolute inset-0 rounded-[10px] bg-white shadow-[0_4px_10px_-6px_hsl(var(--pro-navy)/0.6)]" />}
+              <span className="relative">{l}</span></button>
           ))}
         </div>
-        {partnerLine && <p className="px-1 text-[13px] text-primary-foreground/80" data-testid="pro-partner-count">{partnerLine}</p>}
 
-        <motion.div {...up(0)} className="flex items-center rounded-[14px] border border-[hsl(var(--pro-blue)/0.7)] bg-[hsl(var(--pro-deep-2))] p-4 text-primary-foreground">
+        <motion.div {...up(0)} className="flex items-center rounded-[16px] border-[1.5px] border-[hsl(var(--pro-sky)/0.8)] bg-[radial-gradient(120%_140%_at_0%_0%,hsl(var(--pro-blue)/0.35),hsl(var(--pro-deep-2))_60%)] p-4 text-primary-foreground shadow-[0_0_22px_-6px_hsl(var(--pro-sky)/0.55)]">
           <div className="flex-1">
-            <p className="text-[13px] text-[hsl(var(--pro-sky))]">{rangeLabel}</p>
-            <p className="mt-1 text-[32px] font-bold leading-none">{money(rangeCents)}</p>
+            <p className="text-[14px] font-semibold text-[hsl(var(--pro-sky))]">{rangeLabel}</p>
+            <p className="mt-1.5 text-[36px] font-bold leading-none">{money(rangeCents)}</p>
             <p className="mt-2 text-[12px] text-primary-foreground/75">{done.length} {es ? (done.length === 1 ? "visita completada" : "visitas completadas") : (done.length === 1 ? "visit completed" : "visits completed")} · {es ? "paga" : "pays"} {payDay}</p>
           </div>
-          <ChevronRight className="h-5 w-5 text-[hsl(var(--pro-sky))]" aria-hidden />
+          <ChevronRight className="h-6 w-6 text-[hsl(var(--pro-sky))]" aria-hidden />
         </motion.div>
 
         <div className="grid grid-cols-2 gap-2.5">
           {[[es ? "Pago total" : "Lifetime Pay", lifetimeCents], [es ? "Bonos pendientes" : "Bonuses Pending", pendingBonusCents]].map(([l, c], i) => (
-            <motion.div key={String(l)} {...up(i + 1)} className="rounded-[14px] bg-white p-3.5">
+            <motion.div key={String(l)} {...up(i + 1)} className="rounded-[16px] bg-white p-4 shadow-[0_6px_16px_-10px_hsl(var(--pro-navy)/0.5)]">
               <p className="text-[12px] text-[hsl(var(--pro-ink-soft))]">{l}</p>
-              <p className="mt-1 text-[22px] font-bold text-[hsl(var(--pro-ink))]">{money(c as number)}</p>
+              <p className="mt-1.5 text-[26px] font-bold text-[hsl(var(--pro-ink))]">{money(c as number)}</p>
             </motion.div>
           ))}
         </div>
 
         <motion.section {...up(3)} className="rounded-[14px] bg-white p-3.5">
-          <h2 className="text-[16px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Progreso de pago" : "Pay Progress"}</h2>
+          <h2 className="text-[18px] font-bold text-[hsl(var(--pro-ink))]">{es ? "Progreso de pago" : "Pay Progress"}</h2>
           <div className="mt-2.5 space-y-2">
             <div className="rounded-[10px] border border-[hsl(var(--pro-line))] p-3">
-              <div className="mb-2 flex justify-between text-[12.5px] text-[hsl(var(--pro-ink))]">
+              <div className="mb-2.5 flex justify-between text-[13.5px] font-semibold text-[hsl(var(--pro-ink))]">
                 <span>{es ? `${left} visitas para su aumento del 10%` : `${left} visits to your 10% raise`}</span>
                 <span>{visitsDone} / {TIER_2_GATES.visits}</span>
               </div>
@@ -118,8 +119,8 @@ export default function ProEarnings() {
               [days >= TIER_2_GATES.days, `${Math.min(days, TIER_2_GATES.days)} / ${TIER_2_GATES.days} ${es ? "días activo" : "days active"}`, ""],
               [rating >= TIER_2_GATES.rating, es ? "Calificación promedio" : "Average rating", `${rating ? rating.toFixed(1) : "—"} / ${TIER_2_GATES.rating}`],
             ].map(([ok, l, r]) => (
-              <div key={String(l)} className="flex items-center gap-2.5 rounded-[10px] border border-[hsl(var(--pro-line))] px-3 py-2.5 text-[12.5px] text-[hsl(var(--pro-ink))]">
-                {ok ? <CheckCircle2 className="h-5 w-5 text-[hsl(var(--pro-green))]" aria-hidden /> : <Circle className="h-5 w-5 text-[hsl(var(--pro-ink-soft)/0.6)]" aria-hidden />}
+              <div key={String(l)} className="flex items-center gap-2.5 rounded-[10px] border border-[hsl(var(--pro-line))] px-3 py-3 text-[13.5px] text-[hsl(var(--pro-ink))]">
+                {ok ? <motion.span initial={reduce ? false : { scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.25, delay: 0.35 }}><CheckCircle2 className="h-6 w-6 text-primary-foreground" fill="hsl(var(--pro-green))" aria-hidden /></motion.span> : <Circle className="h-6 w-6 text-[hsl(var(--pro-ink-soft)/0.6)]" aria-hidden />}
                 <span className="flex-1">{l}</span><span>{r}</span>
               </div>
             ))}
@@ -127,6 +128,7 @@ export default function ProEarnings() {
           <p className="mt-2.5 text-[11.5px] text-[hsl(var(--pro-ink-soft))]">{es ? "Cuando cumpla las tres, el aumento se aplica automáticamente desde su próxima visita." : "When all three are met, the raise applies automatically from your next visit."}</p>
         </motion.section>
 
+        {partnerLine && <p className="px-1 text-[13px] text-primary-foreground/80" data-testid="pro-partner-count">{partnerLine}</p>}
         {!weeks && !error && <ScheduleSkeleton />}
         {error && <ErrorState title={es ? "No se pudieron cargar sus pagos" : "Couldn't load your earnings"} onRetry={() => setNonce((n) => n + 1)} />}
         {weeks && !error && (
