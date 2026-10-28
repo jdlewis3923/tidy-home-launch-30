@@ -982,6 +982,11 @@ export type Database = {
           sequence_stage: string | null
           sequence_stage_entered_at: string | null
           service: string | null
+          signing_day_active_at: string | null
+          signing_day_active_sms_at: string | null
+          signing_day_app_sms_at: string | null
+          signing_day_signed_at: string | null
+          signing_day_signed_by: string | null
           source: string | null
           stage_entered_at: string | null
           start_date: string | null
@@ -1128,6 +1133,11 @@ export type Database = {
           sequence_stage?: string | null
           sequence_stage_entered_at?: string | null
           service?: string | null
+          signing_day_active_at?: string | null
+          signing_day_active_sms_at?: string | null
+          signing_day_app_sms_at?: string | null
+          signing_day_signed_at?: string | null
+          signing_day_signed_by?: string | null
           source?: string | null
           stage_entered_at?: string | null
           start_date?: string | null
@@ -1274,6 +1284,11 @@ export type Database = {
           sequence_stage?: string | null
           sequence_stage_entered_at?: string | null
           service?: string | null
+          signing_day_active_at?: string | null
+          signing_day_active_sms_at?: string | null
+          signing_day_app_sms_at?: string | null
+          signing_day_signed_at?: string | null
+          signing_day_signed_by?: string | null
           source?: string | null
           stage_entered_at?: string | null
           start_date?: string | null
@@ -6347,6 +6362,7 @@ export type Database = {
         Row: {
           applicant_id: string | null
           auto_insurance: string | null
+          availability_zips: Json
           badge_back: string | null
           badge_name: string | null
           badge_photo_path: string | null
@@ -6367,8 +6383,12 @@ export type Database = {
           dl_number: string | null
           door_material: string | null
           email: string | null
+          emergency_name: string | null
+          emergency_phone: string | null
+          emergency_relationship: string | null
           equip_confirmed: boolean | null
           equip_gap: string | null
+          equipment_checked: Json
           expected_delivery_date: string | null
           first_available: string | null
           home_zip: string | null
@@ -6378,6 +6398,7 @@ export type Database = {
           ins_carrier: string | null
           ins_expiry: string | null
           ins_policy: string | null
+          intake_updated_at: string | null
           issued_by: string | null
           issued_date: string | null
           kit_done: Json
@@ -6397,6 +6418,7 @@ export type Database = {
           service_line: string | null
           shirt_cut: string | null
           shirt_size: string | null
+          signing_day_mode: boolean
           status: string
           submitted_at: string | null
           tee_cut: string | null
@@ -6417,6 +6439,7 @@ export type Database = {
         Insert: {
           applicant_id?: string | null
           auto_insurance?: string | null
+          availability_zips?: Json
           badge_back?: string | null
           badge_name?: string | null
           badge_photo_path?: string | null
@@ -6437,8 +6460,12 @@ export type Database = {
           dl_number?: string | null
           door_material?: string | null
           email?: string | null
+          emergency_name?: string | null
+          emergency_phone?: string | null
+          emergency_relationship?: string | null
           equip_confirmed?: boolean | null
           equip_gap?: string | null
+          equipment_checked?: Json
           expected_delivery_date?: string | null
           first_available?: string | null
           home_zip?: string | null
@@ -6448,6 +6475,7 @@ export type Database = {
           ins_carrier?: string | null
           ins_expiry?: string | null
           ins_policy?: string | null
+          intake_updated_at?: string | null
           issued_by?: string | null
           issued_date?: string | null
           kit_done?: Json
@@ -6467,6 +6495,7 @@ export type Database = {
           service_line?: string | null
           shirt_cut?: string | null
           shirt_size?: string | null
+          signing_day_mode?: boolean
           status?: string
           submitted_at?: string | null
           tee_cut?: string | null
@@ -6487,6 +6516,7 @@ export type Database = {
         Update: {
           applicant_id?: string | null
           auto_insurance?: string | null
+          availability_zips?: Json
           badge_back?: string | null
           badge_name?: string | null
           badge_photo_path?: string | null
@@ -6507,8 +6537,12 @@ export type Database = {
           dl_number?: string | null
           door_material?: string | null
           email?: string | null
+          emergency_name?: string | null
+          emergency_phone?: string | null
+          emergency_relationship?: string | null
           equip_confirmed?: boolean | null
           equip_gap?: string | null
+          equipment_checked?: Json
           expected_delivery_date?: string | null
           first_available?: string | null
           home_zip?: string | null
@@ -6518,6 +6552,7 @@ export type Database = {
           ins_carrier?: string | null
           ins_expiry?: string | null
           ins_policy?: string | null
+          intake_updated_at?: string | null
           issued_by?: string | null
           issued_date?: string | null
           kit_done?: Json
@@ -6537,6 +6572,7 @@ export type Database = {
           service_line?: string | null
           shirt_cut?: string | null
           shirt_size?: string | null
+          signing_day_mode?: boolean
           status?: string
           submitted_at?: string | null
           tee_cut?: string | null
@@ -10592,6 +10628,7 @@ export type Database = {
         Args: { _applicant_id: string; _visit_id: string }
         Returns: undefined
       }
+      admin_signing_day_intake: { Args: { _id: string }; Returns: Json }
       admin_size_review_notify: {
         Args: { _new_size: number; _note?: string; _review: string }
         Returns: Json
@@ -11995,6 +12032,23 @@ export type Database = {
       }
       set_my_gate_code: { Args: { _code: string }; Returns: undefined }
       set_my_language: { Args: { _lang: string }; Returns: string }
+      signing_day_activate_ready: { Args: { _id: string }; Returns: boolean }
+      signing_day_allocate_number: { Args: { _id: string }; Returns: string }
+      signing_day_state: { Args: { _id?: string }; Returns: Json }
+      signing_day_upload_certificate: {
+        Args: {
+          _carrier: string
+          _effective: string
+          _expires: string
+          _path: string
+          _policy: string
+        }
+        Returns: undefined
+      }
+      signing_intake_save: {
+        Args: { _patch: Json; _submit?: boolean; _token: string }
+        Returns: Json
+      }
       sms_recipient_name: { Args: { _phone: string }; Returns: string }
       social_caption_hash: { Args: { _c: string }; Returns: string }
       social_confirm_publish: {

@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchCoi, fetchMe, fetchVisits, type CoiState, type ProMe, type ProVisit } from "@/lib/pro-portal";
+import type { SigningState } from "@/lib/signing-day";
 
 export type ProSession = {
   userId: string | null;
@@ -14,6 +15,7 @@ export type ProSession = {
   coi: CoiState | null;
   /** Owner/admin viewing the portal: 1099 requirements (insurance) don't apply. */
   isOwner: boolean;
+  gettingStarted: boolean;
   visits: ProVisit[];
   loading: boolean;
   error: string | null;
@@ -29,6 +31,7 @@ export function useProSession(): ProSession {
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
   const [isOwner, setIsOwner] = useState(false);
+  const [gettingStarted,setGettingStarted] = useState(false);
 
   const reload = useCallback(() => setNonce((n) => n + 1), []);
 
@@ -46,17 +49,22 @@ export function useProSession(): ProSession {
           setLoading(false);
           return;
         }
-        const [meRow, coiRow, visitRows, roleRes] = await Promise.all([
+        const [meRow, coiRow, roleRes, readyRes] = await Promise.all([
           fetchMe(),
           fetchCoi(uid),
-          fetchVisits(),
           supabase.rpc("has_role", { _user_id: uid, _role: "admin" }),
+          supabase.rpc("signing_day_state", {}),
         ]);
+        if (readyRes.error) throw readyRes.error;
+        const ready=readyRes.data as unknown as SigningState | null;
+        const inactive=roleRes.data!==true && !!ready?.mode && !ready.active;
+        const visitRows=inactive?[]:await fetchVisits();
         if (cancelled) return;
         setMe(meRow);
         setCoi(coiRow);
         setVisits(visitRows);
         setIsOwner(roleRes?.data === true);
+        setGettingStarted(inactive);
       } catch (e) {
         if (!cancelled) setError((e as Error).message);
       } finally {
@@ -68,5 +76,5 @@ export function useProSession(): ProSession {
     };
   }, [nonce]);
 
-  return { userId, me, coi, isOwner, visits, loading, error, reload };
+  return { userId, me, coi, isOwner, gettingStarted, visits, loading, error, reload };
 }

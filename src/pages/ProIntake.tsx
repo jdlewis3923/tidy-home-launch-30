@@ -19,6 +19,7 @@ import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Loader2, CheckCircle2, AlertTriangle, ArrowLeft, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import TidyLogo from "@/components/TidyLogo";
 import { kitContentsLine, kitIncludesVest, MAGNET_CREDIT_MONTHLY_USD } from "@/lib/proKit";
 import {
@@ -50,7 +51,7 @@ type Step = { title: string; titleEs?: string; short: string; note?: string; not
 
 type Values = Record<string, string | string[] | null | undefined>;
 
-const SIZES = ["S", "M", "L", "XL", "2XL", "3XL"];
+const SIZES = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
 const CUTS = ["Men's", "Women's"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const SERVICES = ["House Cleaning", "Lawn Care", "Car Care"];
@@ -73,6 +74,11 @@ const STEPS: Step[] = [
       { name: "badge_back", label: "Badge back language", labelEs: "Idioma en el reverso de la credencial", type: "select", options: ["Spanish primary", "English primary", "No preference"] },
     ],
   },
+  { title: "Emergency contact", titleEs: "Contacto de emergencia", short: "Emergency", fields: [
+    { name: "emergency_name", label: "Contact name", labelEs: "Nombre del contacto", type: "text", required: true },
+    { name: "emergency_phone", label: "Contact phone", labelEs: "Teléfono del contacto", type: "tel", required: true },
+    { name: "emergency_relationship", label: "Relationship", labelEs: "Relación", type: "text", required: true },
+  ] },
   {
     title: "Service line and equipment",
     titleEs: "Línea de servicio y equipo",
@@ -81,6 +87,7 @@ const STEPS: Step[] = [
       { name: "service_line", label: "Hired for", labelEs: "Contratado para", type: "select", required: true, options: SERVICES },
       { name: "cross_trained", label: "Willing to cover a second line", labelEs: "Dispuesto a cubrir una segunda línea", type: "bool" },
       { name: "cross_which", label: "Which second line", labelEs: "¿Cuál segunda línea?", type: "select", options: SERVICES, showIf: (v) => v.cross_trained === "yes" },
+      { name: "equipment_checked", label: "Equipment present", labelEs: "Equipo disponible", type: "multi", required: true, options: [] },
       { name: "equip_gap", label: "Anything missing from your equipment, and the date you will have it", labelEs: "Algo que falte en su equipo y la fecha en que lo tendrá", type: "textarea" },
     ],
   },
@@ -99,7 +106,7 @@ const STEPS: Step[] = [
         labelEs: "Chaleco de alta visibilidad",
         type: "select",
         required: true,
-        options: ["S/M", "L/XL", "2X/3X"],
+        options: SIZES,
         help: "The vest is worn over a shirt, so it is sized up — not your shirt size.",
         helpEs: "El chaleco se usa sobre la camisa, por eso se pide una talla más grande, no su talla de camisa.",
         showIf: lawnPro,
@@ -162,6 +169,7 @@ const STEPS: Step[] = [
     titleEs: "Disponibilidad",
     short: "Availability",
     fields: [
+      { name: "availability_zips", label: "Service ZIPs", labelEs: "Códigos postales de servicio", type: "multi", required: true, options: ["33156", "33183", "33186"] },
       { name: "days", label: "Days you can work", labelEs: "Días que puede trabajar", type: "multi", required: true, options: DAYS },
       { name: "hours", label: "Earliest start / latest finish", labelEs: "Hora más temprana / más tarde", type: "text", required: true, placeholder: "8:00am / 6:00pm" },
       { name: "visits_per_week", label: "Visits per week you want", labelEs: "Visitas por semana que quiere", type: "number", required: true },
@@ -182,6 +190,11 @@ export default function ProIntake() {
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [signingDay, setSigningDay] = useState(false);
+  const [equipmentOptions, setEquipmentOptions] = useState<string[]>([]);
+  const [compliance, setCompliance] = useState<Record<string, unknown>>({});
+  const lastSaved = useRef("");
   const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -193,6 +206,11 @@ export default function ProIntake() {
       if (error || !res.state || res.state === "not_found") return setState("not_found");
       if (res.state === "closed" || res.state === "expired") return setState("closed");
       const row = res.row ?? {};
+      setSigningDay(row.signing_day_mode === true);
+      setCompliance((res as unknown as { compliance?: Record<string, unknown> }).compliance ?? {});
+      const { data: equipment } = await supabase.functions.invoke("signing-day", { body: { action: "intake_equipment", token } });
+      if (!cancelled) setCompliance(equipment?.compliance ?? {});
+      if (!cancelled) setEquipmentOptions((equipment?.items ?? []).map((item: { label_en: string; label_es: string }) => `${item.label_en} / ${item.label_es}`));
       const seeded: Values = {};
       for (const [k, v] of Object.entries(row)) {
         if (v === null || v === undefined) continue;
@@ -200,6 +218,7 @@ export default function ProIntake() {
         else if (typeof v === "boolean") seeded[k] = v ? "yes" : "no";
         else seeded[k] = String(v);
       }
+      lastSaved.current = JSON.stringify(seeded);
       setValues(seeded);
       setState("open");
     })();
@@ -222,9 +241,23 @@ export default function ProIntake() {
     return patch;
   }, [values]);
 
+  const visibleFields = useCallback((fields: Field[]) => fields.filter(f => signingDay || !["emergency_name", "emergency_phone", "emergency_relationship", "equipment_checked", "availability_zips"].includes(f.name)).map(f => ({ ...f, required: signingDay && ["ins_carrier", "ins_policy", "ins_expiry", "auto_insurance"].includes(f.name) ? false : f.required, options: f.name === "equipment_checked" ? equipmentOptions : f.options })), [signingDay, equipmentOptions]);
+
+  useEffect(() => {
+    if (state !== "open" || JSON.stringify(values) === lastSaved.current) return;
+    const timer = setTimeout(async () => {
+      setSaving(true);
+      const { error } = await supabase.rpc("signing_intake_save", { _token: token, _patch: patchFor(visibleFields(STEPS.flatMap(s => s.fields))) as never, _submit: false });
+      setSaving(false);
+      if (error) setSaveError(error.message);
+      else { lastSaved.current = JSON.stringify(values); setSaveError(""); }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [state, values, token, patchFor, visibleFields]);
+
   const validate = (fields: Field[]) => {
     const next: Record<string, string> = {};
-    for (const f of fields) {
+    for (const f of visibleFields(fields)) {
       if (!f.required) continue;
       if (f.showIf && !f.showIf(values)) continue;
       if (isEmpty(values[f.name])) next[f.name] = "This one is required. / Este campo es obligatorio.";
@@ -240,27 +273,29 @@ export default function ProIntake() {
 
   const advance = async (to: number) => {
     const current = STEPS[step];
-    if (to > step && !validate(current.fields)) return;
+    if (to > step && !validate(visibleFields(current.fields))) return;
     if (current.fields.length) {
       setSaving(true);
-      await supabase.rpc("intake_save", { _token: token, _patch: patchFor(current.fields) as never, _submit: false });
+      const { error } = await supabase.rpc("signing_intake_save", { _token: token, _patch: patchFor(visibleFields(current.fields)) as never, _submit: false });
       setSaving(false);
+      if (error) { setSaveError(error.message); return; }
     }
     setStep(to);
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const submit = async () => {
-    const allFields = STEPS.flatMap((s) => s.fields);
+    const allFields = visibleFields(STEPS.flatMap((s) => s.fields));
     for (let i = 0; i < STEPS.length - 1; i++) {
-      const bad = STEPS[i].fields.some((f) => f.required && (!f.showIf || f.showIf(values)) && isEmpty(values[f.name]));
+      const bad = visibleFields(STEPS[i].fields).some((f) => f.required && (!f.showIf || f.showIf(values)) && isEmpty(values[f.name]));
       if (bad) { setStep(i); setTimeout(() => validate(STEPS[i].fields), 50); return; }
     }
     setSaving(true);
-    const { data } = await supabase.rpc("intake_save", { _token: token, _patch: patchFor(allFields) as never, _submit: true });
+    const { data, error } = await supabase.rpc("signing_intake_save", { _token: token, _patch: patchFor(allFields) as never, _submit: true });
+    if (error) { setSaveError(error.message); setSaving(false); return; }
     const res = (data ?? {}) as { state?: string };
     if (res.state !== "submitted") { setSaving(false); setState(res.state === "closed" ? "closed" : "not_found"); return; }
-    await supabase.functions.invoke("intake-submitted", { body: { token } }).catch(() => null);
+    if (!signingDay) await supabase.functions.invoke("intake-submitted", { body: { token } }).catch(() => null);
     setSaving(false);
     setState("done");
   };
@@ -316,8 +351,8 @@ export default function ProIntake() {
             {magnets ? ", más los imanes para su vehículo" : ""}.
           </p>
           <ul className="mt-5 space-y-2 text-left text-sm text-slate-700">
-            <li>· Your kit is ordered and typically arrives in <strong>7 to 10 days</strong>. / Su kit llega en 7 a 10 días.</li>
-            <li>· A confirmation email is on its way with a link to send your badge photo. / Le llega un correo con un enlace para enviar su foto de credencial.</li>
+            <li>· Your kit waits for verified insurance before ordering. Typical delivery after ordering: <strong>7 to 10 days</strong>. / Su kit llega en 7 a 10 días.</li>
+            <li>· Intake saved to your record. / Formulario guardado en su registro.</li>
             <li>· We confirm your first paid visit once your badge is in hand. / Confirmamos su primera visita pagada cuando tenga su credencial.</li>
           </ul>
           <p className="mt-6 text-sm text-slate-500">
@@ -367,12 +402,12 @@ export default function ProIntake() {
               <div key={s.title} className="rounded-xl border border-slate-200 p-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-bold" style={{ color: NAVY }}>{i + 1} · {s.title}</h2>
-                  <button type="button" onClick={() => setStep(i)} className="text-xs font-semibold underline" style={{ color: NAVY }}>
+                  <Button type="button" onClick={() => setStep(i)} className="text-xs font-semibold underline" style={{ color: NAVY }}>
                     Edit / Editar
-                  </button>
+                  </Button>
                 </div>
                 <dl className="mt-3 space-y-1.5">
-                  {s.fields.filter((f) => !f.showIf || f.showIf(values)).map((f) => {
+                  {visibleFields(s.fields).filter((f) => !f.showIf || f.showIf(values)).map((f) => {
                     const v = values[f.name];
                     return (
                       <div key={f.name} className="flex gap-3 text-sm">
@@ -389,7 +424,7 @@ export default function ProIntake() {
           </div>
         ) : (
           <div className="mt-6 space-y-5">
-            {current.fields.filter((f) => !f.showIf || f.showIf(values)).map((f) => (
+            {visibleFields(current.fields).filter((f) => !f.showIf || f.showIf(values)).map((f) => (
               <div key={f.name}>
                 {f.name === "vehicle_ad_signed_name" && <AgreementPanel />}
                 <FieldRow field={f} value={values[f.name]} error={errors[f.name]} onChange={set} />
@@ -416,17 +451,19 @@ export default function ProIntake() {
           </div>
         )}
 
+        {signingDay && current.short === "Compliance" && <dl className="mt-4 space-y-2 text-sm">{[["agreement", "Agreement signed / Acuerdo firmado"], ["w9", "W-9 received / W-9 recibido"], ["background", "Background check / Antecedentes"], ["insurance", "Insurance / Seguro"], ["payouts", "Payouts / Pagos"]].map(([key, label]) => <div key={key} className="flex justify-between gap-3"><dt>{label}</dt><dd>{compliance[key] ? "✓" : "Pending / Pendiente"}</dd></div>)}</dl>}
+        {saveError && <p role="alert" className="mt-3 text-destructive">{saveError}</p>}
         <div className="mt-8 flex items-center gap-3">
           {step > 0 && (
-            <button
+            <Button
               type="button"
               onClick={() => advance(step - 1)}
               className="inline-flex h-12 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-bold text-slate-700"
             >
               <ArrowLeft className="h-4 w-4" /> Back
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             type="button"
             disabled={saving}
             onClick={() => (isReview ? submit() : advance(step + 1))}
@@ -436,10 +473,10 @@ export default function ProIntake() {
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {isReview ? "Submit / Enviar" : "Save and continue / Guardar y seguir"}
             {!isReview && !saving ? <ArrowRight className="h-4 w-4" /> : null}
-          </button>
+          </Button>
         </div>
         <p className="mt-3 text-center text-xs text-slate-500">
-          Your answers save as you go. / Sus respuestas se guardan solas.
+          {saving ? "Saving… / Guardando…" : "Your answers save as you go. / Sus respuestas se guardan solas."}
         </p>
       </div>
     </Shell>
@@ -532,7 +569,7 @@ function FieldRow({
             {(field.options ?? []).map((o) => {
               const on = selected.includes(o);
               return (
-                <button
+                <Button
                   key={o}
                   type="button"
                   onClick={() => onChange(field.name, on ? selected.filter((x) => x !== o) : [...selected, o])}
@@ -540,7 +577,7 @@ function FieldRow({
                   style={on ? { background: NAVY, color: "#fff", borderColor: NAVY } : { borderColor: "#cbd5e1", color: NAVY }}
                 >
                   {o}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -574,7 +611,7 @@ function FieldRow({
                 ? "postal-code"
                 : undefined
             }
-            maxLength={field.type === "zip" ? 5 : undefined}
+            maxLength={field.type === "zip" ? 5 : 2000}
             pattern={field.type === "zip" ? "[0-9]{5}" : undefined}
             autoCapitalize={field.type === "email" ? "none" : undefined}
             spellCheck={field.type === "email" ? false : undefined}

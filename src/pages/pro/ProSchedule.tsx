@@ -30,7 +30,7 @@ function meta(v: ProVisit, es: boolean) {
 }
 
 export default function ProSchedule() {
-  const { me, coi, isOwner, visits, loading, error, reload, userId } = useProSession();
+  const { me, coi, isOwner, gettingStarted, visits, loading, error, reload, userId } = useProSession();
   const { language } = useLanguage();
   const es = language === "es";
   const reduce = useReducedMotion();
@@ -63,6 +63,7 @@ export default function ProSchedule() {
   const shift = (n: number) => { setDir(n); setMonth((m) => new Date(m.getFullYear(), m.getMonth() + n, 1)); };
 
   if (!loading && !userId) return <Navigate to="/pro/welcome" replace />;
+  if (!loading && gettingStarted) return <Navigate to="/pro/onboarding" replace />;
 
   const greeting = me?.first_name ? `${es ? "Hola" : "Hi"}, ${me.first_name}` : (es ? "Su agenda" : "Your schedule");
   const loc = es ? "es-US" : "en-US";

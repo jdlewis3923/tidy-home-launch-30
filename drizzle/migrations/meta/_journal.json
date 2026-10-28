@@ -1800,6 +1800,20 @@
       "when": 1793205656396,
       "tag": "0256_service_gates_admin_full_read",
       "breakpoints": true
+    },
+    {
+      "idx": 257,
+      "version": "7",
+      "when": 1793210079342,
+      "tag": "0257_signing_day_intake_and_readiness",
+      "breakpoints": true
+    },
+    {
+      "idx": 258,
+      "version": "7",
+      "when": 1793210361897,
+      "tag": "0258_signing_day_atomic_activation_and_private_upload",
+      "breakpoints": true
     }
   ]
 }

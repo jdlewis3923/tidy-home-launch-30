@@ -24,7 +24,7 @@ function serviceMeta(v: ProVisit, es: boolean) {
 }
 
 export default function ProHome() {
-  const { me, coi, isOwner, visits, loading, userId } = useProSession();
+  const { me, coi, isOwner, gettingStarted, visits, loading, userId } = useProSession();
   const { language } = useLanguage();
   const es = language === "es";
   const reduce = useReducedMotion();
@@ -60,6 +60,7 @@ export default function ProHome() {
   const tier2 = me?.tier === "tier_2_pro" || me?.tier === "tier_2";
 
   if (!loading && !userId) return <Navigate to="/pro/welcome" replace />;
+  if (!loading && gettingStarted) return <Navigate to="/pro/onboarding" replace />;
 
   const coiBlocked = !isOwner && !!coi && !coi.can_work;
   const routeUrl = (() => {

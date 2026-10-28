@@ -62,6 +62,39 @@ Deno.serve(async (req) => {
   const stage = (a.sequence_stage ?? 'applied') as SequenceStage;
   const name = a.first_name ?? 'Pro';
 
+  // Signing-day readiness is separate from dispatch; existing proof/training gates remain required.
+  if (action === 'signing_day_signed' || action === 'signing_day_activate') {
+    const { data: pipeline } = await admin.from('contractor_pipeline').select('archived,state,is_test,stage').eq('applicant_id', applicant_id).single();
+    if (!pipeline || pipeline.archived || pipeline.state !== 'open') return jsonResponse({ error: 'candidate_not_open' }, 409);
+    if (action === 'signing_day_signed') {
+      if (!['interviewed','agreement','background','insured','active'].includes(pipeline.stage)) return jsonResponse({ error: 'Complete the interview stage before signing.' }, 409);
+      if (!a.signing_day_signed_at) {
+        const { error } = await admin.from('applicants').update({ contracts_signed: true, contracts_signed_at: new Date().toISOString(), signing_day_signed_at: new Date().toISOString(), signing_day_signed_by: actor, sequence_stage: 'signed' }).eq('id', applicant_id);
+        if (error) return jsonResponse({error:error.message},409);
+      }
+      const { error: numberError } = await admin.rpc('signing_day_allocate_number', { _id: applicant_id });
+      if (numberError) return jsonResponse({error:numberError.message},409);
+      const { data, error } = await admin.functions.invoke('signing-day', { body: { action: 'provision', applicant_id } });
+      if (error || data?.error) return jsonResponse({error:data?.error ?? error?.message, signed:true},409);
+      return jsonResponse({ok:true,...data});
+    }
+    const { data: readiness, error } = await admin.rpc('signing_day_state', { _id: applicant_id });
+    if (error) return jsonResponse({error:error.message},409);
+    if (!readiness?.ready) return jsonResponse({ok:true,skipped:'readiness_pending',readiness});
+    if (!a.signing_day_active_at) {
+      const { data: changed, error: update } = await admin.from('applicants').update({ signing_day_active_at: new Date().toISOString(), current_stage: 'active', sequence_stage: 'active' }).eq('id', applicant_id).is('signing_day_active_at',null).select('id');
+      if (update) return jsonResponse({error:update.message},409);
+      if (changed?.length) await workday(applicant_id,'signing_day_active',`${name}: Getting Started complete`,'Existing dispatch and equipment safeguards retained.','info',actor);
+    }
+    if (!a.signing_day_active_sms_at && !a.is_test_row && !pipeline.is_test && a.phone) {
+      const digits = a.phone.replace(/\D/g,'');
+      const { data: language } = await admin.from('contractor_pipeline').select('preferred_language').eq('applicant_id',applicant_id).single();
+      const { data: sent, error: smsError } = await admin.functions.invoke('send-twilio-sms', { body: { to_phone_e164:digits.length===10?`+1${digits}`:`+${digits}`,body:language?.preferred_language==='es'?'¡Todo listo! Su primera ruta aparecerá aquí antes del 23 de noviembre. https://jointidy.co/pro':'You’re all set! Your first route shows up here before Nov 23. https://jointidy.co/pro',idempotency_key:`signing-active:${applicant_id}`,template_name:'pro-signing-active',triggered_by:'sequence-advance' } });
+      if (!smsError && (sent?.sid || sent?.queued)) await admin.from('applicants').update({signing_day_active_sms_at:new Date().toISOString()}).eq('id',applicant_id);
+    }
+    return jsonResponse({ok:true,active:true});
+  }
+
   // Ticks (facts the system can't observe) and exits are allowed at any stage.
   if (action === 'confirm') {
     const key = String(body.key ?? '');

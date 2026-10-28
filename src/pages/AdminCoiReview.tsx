@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ShieldCheck, ExternalLink, Loader2, Check, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Row {
   id: string;
@@ -28,6 +29,7 @@ export default function AdminCoiReview() {
   const [loading, setLoading] = useState(true);
   const [signed, setSigned] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [limits,setLimits]=useState<Record<string,boolean>>({});
 
   const load = async () => {
     setLoading(true);
@@ -59,7 +61,7 @@ export default function AdminCoiReview() {
 
   const decide = async (id: string, status: "approved" | "rejected") => {
     const { data, error } = await supabase.functions.invoke("coi-decision", {
-      body: { applicant_id: id, decision: status, notes: notes[id] ?? undefined },
+      body: { applicant_id: id, decision: status, notes: notes[id] ?? undefined, limits_verified: limits[id]===true },
     });
     if (error || (data && (data as any).error)) {
       toast.error(error?.message ?? (data as any)?.error ?? "Failed");
@@ -67,7 +69,7 @@ export default function AdminCoiReview() {
     }
     toast.success(
       status === "approved"
-        ? "COI approved · Pro promoted to Tier 2 · T2-CONFIRMED sent"
+         ? "Insurance approved · signing readiness updated"
         : "COI rejected · Notice email sent",
     );
     load();
@@ -142,9 +144,11 @@ export default function AdminCoiReview() {
                       onChange={(e) => setNotes((p) => ({ ...p, [r.id]: e.target.value }))}
                     />
                     <div className="flex gap-2 pt-1">
+                      <label className="flex items-center gap-2 text-sm"><Checkbox checked={limits[r.id]===true} onCheckedChange={v=>setLimits(p=>({...p,[r.id]:v===true}))}/>$1M / $2M limits and Tidy additional insured verified</label>
                       <Button
                         size="sm"
                         onClick={() => decide(r.id, "approved")}
+                        disabled={!limits[r.id]}
                         className="bg-emerald-600 hover:bg-emerald-700"
                       >
                         <Check className="h-4 w-4 mr-1" /> Approve

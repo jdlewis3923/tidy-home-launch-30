@@ -21,6 +21,7 @@ const Body = z.object({
   decision: z.enum(['approved', 'rejected']),
   notes: z.string().max(2000).optional(),
   stripe_account_id: z.string().optional(),
+  limits_verified: z.boolean().optional(),
 });
 
 async function fireBrevoTemplate(templateId: number, to: { email: string; name: string }, params: Record<string, unknown>) {
@@ -59,16 +60,19 @@ Deno.serve(async (req) => {
 
   const { data: a, error } = await admin
     .from('applicants')
-    .select('id, first_name, last_name, email, tier')
+    .select('id, first_name, last_name, email, tier,coi_pdf_url,coi_effective_date,coi_expires_at,coi_carrier_name,coi_policy_number,gate_confirmations,signing_day_signed_at')
     .eq('id', parsed.data.applicant_id)
     .single();
   if (error || !a) return jsonResponse({ error: 'not_found' }, 404);
+
+  if (parsed.data.decision==='approved' && a.signing_day_signed_at && (!parsed.data.limits_verified || !a.coi_pdf_url || !a.coi_carrier_name || !a.coi_policy_number || !a.coi_effective_date || !a.coi_expires_at || Date.parse(a.coi_effective_date)>Date.now() || Date.parse(a.coi_expires_at)<=Date.now())) return jsonResponse({error:'Verify the certificate, dates, $1M/$2M limits and additional insured before approval.'},400);
 
   await admin
     .from('applicants')
     .update({
       coi_review_status: parsed.data.decision,
       coi_review_notes: parsed.data.notes ?? null,
+      ...(parsed.data.limits_verified ? {gate_confirmations:{...(a.gate_confirmations??{}),coi_limits_ok:true}} : {}),
     })
     .eq('id', a.id);
 
