@@ -224,7 +224,7 @@ Deno.serve(async (req) => {
   let authorized = await isCronAuthorized(req);
   if (!authorized) {
     const jwt = (req.headers.get('Authorization') ?? '').replace('Bearer ', '');
-    const { data: u } = must(await db.auth.getUser(jwt));
+    const { data: u } = await db.auth.getUser(jwt);
     if (u?.user) { const { data: ok } = await db.rpc('has_role', { _user_id: u.user.id, _role: 'admin' }); authorized = !!ok; }
   }
   if (!authorized) return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: corsHeaders });
