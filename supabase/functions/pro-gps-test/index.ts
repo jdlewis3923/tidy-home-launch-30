@@ -79,6 +79,7 @@ Deno.serve(async (req) => {
           { headers: { 'User-Agent': 'TidyProGpsTest/1.0 (jointidy.co)' } },
         );
         const hits = await res.json();
+        console.log('[pro-gps-test] nominatim hits:', Array.isArray(hits) ? hits.length : 'non-array');
         const hit = hits?.[0];
         if (hit && typeof hit.lat === 'string' && typeof hit.lon === 'string') {
           targetLat = parseFloat(hit.lat);
