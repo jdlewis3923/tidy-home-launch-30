@@ -10,7 +10,7 @@ import ProShell from "@/components/pro/portal/ProShell";
 import { proPartnerCountLine, useProPartner } from "@/components/pro/ProPartnerStrip";
 import { ErrorState, ScheduleSkeleton, StatusPill } from "@/components/pro/portal/kit";
 import { useProSession } from "@/hooks/useProSession";
-import { downloadCsv, fetchBonuses, fetchPayoutWeeks, mondayOf, type PayoutWeek, type ProBonus } from "@/lib/pro-pay-shim";
+import { downloadCsv, fetchBonuses, fetchPayoutWeeks, mondayOf, type PayoutWeek, type ProBonus } from "@/lib/pro-portal";
 import { money, TIER_2_GATES } from "@/lib/pro-pay";
 import { useLanguage } from "@/contexts/LanguageContext";
 
