@@ -2317,6 +2317,7 @@ export type Database = {
           application_report: Json | null
           application_version: number
           apply_question_ids: string[] | null
+          apply_remaining_only: boolean
           apply_resume_token: string | null
           apply_started_at: string | null
           apply_submitted_at: string | null
@@ -2416,6 +2417,7 @@ export type Database = {
           application_report?: Json | null
           application_version?: number
           apply_question_ids?: string[] | null
+          apply_remaining_only?: boolean
           apply_resume_token?: string | null
           apply_started_at?: string | null
           apply_submitted_at?: string | null
@@ -2515,6 +2517,7 @@ export type Database = {
           application_report?: Json | null
           application_version?: number
           apply_question_ids?: string[] | null
+          apply_remaining_only?: boolean
           apply_resume_token?: string | null
           apply_started_at?: string | null
           apply_submitted_at?: string | null

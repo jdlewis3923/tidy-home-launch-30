@@ -1,0 +1,2 @@
+ALTER TABLE public.contractor_pipeline ADD COLUMN IF NOT EXISTS apply_remaining_only boolean NOT NULL DEFAULT false;
+COMMENT ON COLUMN public.contractor_pipeline.apply_remaining_only IS 'Owner-configured remaining-required-only presentation; full pinned question set still validates and scores submission.';
