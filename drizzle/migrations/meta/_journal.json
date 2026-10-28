@@ -1835,6 +1835,13 @@
       "when": 1793211214828,
       "tag": "0261_signing_day_insurance_kit_order_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 262,
+      "version": "7",
+      "when": 1793225485208,
+      "tag": "0262_service_contract_templates_and_signing_audit",
+      "breakpoints": true
     }
   ]
 }

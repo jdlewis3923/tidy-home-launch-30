@@ -914,6 +914,7 @@ export type Database = {
           contract_signed_name: string | null
           contract_signed_pdf_path: string | null
           contract_signed_ua: string | null
+          contract_template_id: string | null
           contract_token: string | null
           contractor_cancel_count: number
           contractor_cancel_rate: number | null
@@ -1065,6 +1066,7 @@ export type Database = {
           contract_signed_name?: string | null
           contract_signed_pdf_path?: string | null
           contract_signed_ua?: string | null
+          contract_template_id?: string | null
           contract_token?: string | null
           contractor_cancel_count?: number
           contractor_cancel_rate?: number | null
@@ -1216,6 +1218,7 @@ export type Database = {
           contract_signed_name?: string | null
           contract_signed_pdf_path?: string | null
           contract_signed_ua?: string | null
+          contract_template_id?: string | null
           contract_token?: string | null
           contractor_cancel_count?: number
           contractor_cancel_rate?: number | null
@@ -1316,7 +1319,15 @@ export type Database = {
           years_in_service?: number | null
           zip?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "applicants_contract_template_id_fkey"
+            columns: ["contract_template_id"]
+            isOneToOne: false
+            referencedRelation: "contract_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       application_answers: {
         Row: {
@@ -2148,34 +2159,67 @@ export type Database = {
       contract_signatures: {
         Row: {
           applicant_id: string
+          business_name: string
+          countersigned_at: string | null
+          countersigned_by: string | null
+          countersigned_ip: string | null
+          countersigner_name: string | null
           document_id: string | null
           document_version: string
+          final_pdf_path: string | null
           id: string
           ip_address: string | null
+          placeholder_values: Json
+          pro_number: string | null
           signed_at: string
           signed_pdf_path: string | null
+          template_body: string | null
+          template_id: string | null
+          template_service: string | null
           typed_name: string
           user_agent: string | null
         }
         Insert: {
           applicant_id: string
+          business_name?: string
+          countersigned_at?: string | null
+          countersigned_by?: string | null
+          countersigned_ip?: string | null
+          countersigner_name?: string | null
           document_id?: string | null
           document_version: string
+          final_pdf_path?: string | null
           id?: string
           ip_address?: string | null
+          placeholder_values?: Json
+          pro_number?: string | null
           signed_at?: string
           signed_pdf_path?: string | null
+          template_body?: string | null
+          template_id?: string | null
+          template_service?: string | null
           typed_name: string
           user_agent?: string | null
         }
         Update: {
           applicant_id?: string
+          business_name?: string
+          countersigned_at?: string | null
+          countersigned_by?: string | null
+          countersigned_ip?: string | null
+          countersigner_name?: string | null
           document_id?: string | null
           document_version?: string
+          final_pdf_path?: string | null
           id?: string
           ip_address?: string | null
+          placeholder_values?: Json
+          pro_number?: string | null
           signed_at?: string
           signed_pdf_path?: string | null
+          template_body?: string | null
+          template_id?: string | null
+          template_service?: string | null
           typed_name?: string
           user_agent?: string | null
         }
@@ -2187,7 +2231,47 @@ export type Database = {
             referencedRelation: "applicants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contract_signatures_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "contract_templates"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      contract_templates: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_current: boolean
+          lang: string
+          service: string
+          title: string
+          version: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          lang?: string
+          service: string
+          title: string
+          version: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          lang?: string
+          service?: string
+          title?: string
+          version?: string
+        }
+        Relationships: []
       }
       contractor_artifacts: {
         Row: {
@@ -10782,6 +10866,33 @@ export type Database = {
       }
       cleaning_team_valid: { Args: { _team: string }; Returns: boolean }
       coi_token_load: { Args: { _token: string }; Returns: Json }
+      contract_commit_countersign: {
+        Args: {
+          _actor: string
+          _at: string
+          _ip: string
+          _path: string
+          _signature: string
+        }
+        Returns: Json
+      }
+      contract_commit_signature: {
+        Args: {
+          _applicant: string
+          _body: string
+          _business: string
+          _document: string
+          _ip: string
+          _path: string
+          _signed_at: string
+          _template: string
+          _typed: string
+          _ua: string
+          _values: Json
+          _version: string
+        }
+        Returns: Json
+      }
       contract_load: { Args: { _token: string }; Returns: Json }
       contractor_visit_pay_cents: {
         Args: {
