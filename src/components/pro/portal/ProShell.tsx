@@ -44,7 +44,7 @@ export function ProTopBar({
             <ArrowLeft className="h-5 w-5" aria-hidden strokeWidth={2} />
           </button>
         ) : <ProMark size={36} className="ml-0.5 mr-1" />}
-        <h1 className={`flex-1 truncate ${hideTitle ? "sr-only" : ""}`} >{title}</h1>
+        <h1 className={`flex-1 truncate text-[19px] font-semibold tracking-[-0.01em] ${hideTitle ? "sr-only" : ""}`}>{title}</h1>{hideTitle && <span className="flex-1" />}
         <button type="button" onClick={() => setSheet(true)} aria-haspopup="dialog"
           aria-label={es ? "Idioma: Español" : "Language: English"}
           className="grid h-11 min-w-[44px] place-items-center rounded-full px-2 text-[14px] font-medium active:bg-primary-foreground/10">
