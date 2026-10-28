@@ -12032,8 +12032,19 @@ export type Database = {
       }
       set_my_gate_code: { Args: { _code: string }; Returns: undefined }
       set_my_language: { Args: { _lang: string }; Returns: string }
+      signing_day_activate_ready: { Args: { _id: string }; Returns: boolean }
       signing_day_allocate_number: { Args: { _id: string }; Returns: string }
       signing_day_state: { Args: { _id?: string }; Returns: Json }
+      signing_day_upload_certificate: {
+        Args: {
+          _carrier: string
+          _effective: string
+          _expires: string
+          _path: string
+          _policy: string
+        }
+        Returns: undefined
+      }
       signing_intake_save: {
         Args: { _patch: Json; _submit?: boolean; _token: string }
         Returns: Json
