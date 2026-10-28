@@ -573,7 +573,8 @@ function FieldRow({
                   key={o}
                   type="button"
                   onClick={() => onChange(field.name, on ? selected.filter((x) => x !== o) : [...selected, o])}
-                  className="min-h-[44px] rounded-xl border px-3.5 text-sm font-semibold"
+                  aria-pressed={on}
+                  className="h-auto min-h-[44px] max-w-full whitespace-normal rounded-xl border px-3.5 py-2 text-left text-sm font-semibold"
                   style={on ? { background: NAVY, color: "#fff", borderColor: NAVY } : { borderColor: "#cbd5e1", color: NAVY }}
                 >
                   {o}

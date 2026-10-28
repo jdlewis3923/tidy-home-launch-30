@@ -1,16 +1,15 @@
-import { PDFDocument, StandardFonts } from 'https://esm.sh/pdf-lib@1.17.1';
+import { PDFDocument } from 'https://esm.sh/pdf-lib@1.17.1';
 import fontkit from 'https://esm.sh/@pdf-lib/fontkit@1.1.1';
 import { TIDY_LOGO } from './email-brand.ts';
 import { vendorFetch } from './http.ts';
+import { CONTRACT_FONT_BASE64 } from './contract-font.ts';
 
 export const fillContract = (text: string, values: Record<string,string>) => text.replace(/\{(\w+)\}/g, (match,key) => values[key] ?? match);
 export const etTime = (date: Date) => date.toLocaleString('en-US',{timeZone:'America/New_York',dateStyle:'long',timeStyle:'short'})+' ET';
 export async function agreementPdf(body: string, values: Record<string,string>, evidence?: Record<string,string>, original?: Uint8Array) {
   const pdf = original ? await PDFDocument.load(original) : await PDFDocument.create();
   pdf.registerFontkit(fontkit);
-  const fontResponse = await vendorFetch('https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/NotoSans%5Bwdth,wght%5D.ttf');
-  if(!fontResponse.ok) throw new Error('Agreement font unavailable');
-  const font=await pdf.embedFont(await fontResponse.arrayBuffer(),{subset:true});
+  const font=await pdf.embedFont(Uint8Array.from(atob(CONTRACT_FONT_BASE64),c=>c.charCodeAt(0)));
   const logoResponse=await vendorFetch(TIDY_LOGO);
   if(!logoResponse.ok) throw new Error('Tidy logo unavailable');
   const logo=await pdf.embedPng(await logoResponse.arrayBuffer());
