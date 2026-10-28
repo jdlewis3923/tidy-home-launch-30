@@ -1786,6 +1786,13 @@
       "when": 1793199820092,
       "tag": "0254_pro_location_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 255,
+      "version": "7",
+      "when": 1793205629078,
+      "tag": "0255_tighten_reference_table_reads",
+      "breakpoints": true
     }
   ]
 }
