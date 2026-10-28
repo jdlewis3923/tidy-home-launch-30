@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Rebecca’s remaining application (Oct 28 UTC)
-- [ ] Confirm Rebecca Ramirez’s saved answers and long/short version; prepare a remaining-required-only resume without resetting answers or bypassing document gates.
-- [ ] Verify her personalized page on a phone and keep candidate messages unsent until exact wording is approved.
+- [x] Rebecca Ramirez (phone ending 2616) saved 11 answers in v6’s shorter eight-step form, last saved Oct 27 10:33 AM Miami; incomplete employer/work history prevented moving beyond section 2. Rebecca Paz is a separate archived, submitted v5 record and was untouched.
+- [x] Configured only Ramirez’s existing record for remaining-required-only presentation, retained all 36 validation/scoring questions and 11 saved answers; optional blank second job hidden without deleting data. Phone/computer verified, missing employer still blocks progression, 25 focused tests pass. No submission or candidate messages; document progression remains gated. Frontend is preview-only until publication is explicitly approved.
 
 ## Cleaning expansion (Oct 27) — build in order
 - [ ] Part 1 by Thu Oct 29 8 AM Miami: square-foot/bath sizes, Estate prices, lookup-key catalog live/test, reservation persistence, website/founding/member/yearly parity, phone/desktop evidence and deleted test reservations.
