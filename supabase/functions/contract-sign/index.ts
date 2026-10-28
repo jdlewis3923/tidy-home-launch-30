@@ -6,6 +6,7 @@ import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { sendProEmail, proLang } from '../_shared/pro-send.ts';
 import { contractSignedEmail } from '../_shared/pro-emails.ts';
 import { agreementPdf,etTime } from '../_shared/contract-pdf.ts';
+import { vendorFetch } from '../_shared/http.ts';
 import { CONTRACT_TEMPLATE_SEED } from '../_shared/contract-template-seed.ts';
 const db=createClient(Deno.env.get('SUPABASE_URL')??'',Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'',{auth:{persistSession:false}});
 const schema=z.object({action:z.enum(['document','sign','countersign','templates','template_pdf','seed']),token:z.string().min(20).max(200).optional(),applicant_id:z.string().uuid().optional(),template_id:z.string().uuid().optional(),typed_name:z.string().trim().min(3).max(120).optional(),business_name:z.string().trim().max(200).optional(),agreed:z.boolean().optional(),version:z.string().max(300).optional()});
@@ -13,6 +14,10 @@ const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status
 function b64(bytes:Uint8Array){let s='';for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(s);}
 async function check<T>(r:{data:T;error:unknown}){if(r.error)throw r.error;return r.data;}
 async function missing(id:string,reason:string){await check(await db.from('admin_alerts').upsert({dedupe_key:`contract-template:${id}`,alert_type:'contract_template_missing',level:'action',title:'Agreement link unavailable',body:reason,context:{applicant_id:id},action_url:`/admin/pipeline/${id}`,tier:'urgent'},{onConflict:'dedupe_key'}));}
+async function provision(id:string){
+ const r=await vendorFetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/sequence-advance`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`},body:JSON.stringify({action:'signing_day_signed',applicant_id:id})});
+ const data=await r.json().catch(()=>({}));return {data,error:r.ok?null:data.error??`access_${r.status}`};
+}
 async function mail(a:any,bytes:Uint8Array,path:string,version:string,typed:string,when:string,final=false){
  const link=await check(await db.storage.from('company-docs').createSignedUrl(path,2592000));
  const built=contractSignedEmail(a.first_name??'',typed,when,version,link?.signedUrl??null,await proLang(db,a.id));
@@ -64,7 +69,7 @@ Deno.serve(async req=>{
  const values={legal_name:'{legal_name}',business_name:'—',phone:a.phone??'—',email:a.email??'—',pro_number:a.pro_number??'Assigned at signing',signed_date:new Date().toLocaleDateString('en-US',{timeZone:'America/New_York',dateStyle:'long'})};
  if(b.action==='document'){const url=doc?(await check(await db.storage.from('company-docs').createSignedUrl(doc.storage_path,3600)))?.signedUrl:null;return reply({ok:true,body:t?.body??null,title:t?.title??'Independent Contractor Agreement',version,values,url,signed:a.contracts_signed,first_name:a.first_name});}
  if(b.action!=='sign')return reply({error:'unknown_action'},400);
- if(a.contracts_signed){const access=await db.functions.invoke('sequence-advance',{body:{action:'signing_day_signed',applicant_id:a.id}});return reply({ok:true,already:true,access:access.data});}
+ if(a.contracts_signed){const access=await provision(a.id);return reply({ok:true,already:true,access:access.data});}
  if(!b.typed_name||!/\S+\s+\S+/.test(b.typed_name)||b.agreed!==true)return reply({error:'full_name_and_agreement_required'},400);
  if(b.version!==version)return reply({error:'version_changed'},409);
  const proNumber=await check(await db.rpc('signing_day_allocate_number',{_id:a.id}));
@@ -74,8 +79,8 @@ Deno.serve(async req=>{
  const bytes=await agreementPdf(t?.body??'',filled,{'Contractor typed signature':b.typed_name,'Business name':filled.business_name,'Pro number':proNumber,'Signed':etTime(at),'IP':ip,'Browser':ua,'Template service':t?.service??'Spanish ICA','Template version':version},original);
  const path=`contracts/signed/${a.id}/signed-${crypto.randomUUID()}.pdf`;await check(await db.storage.from('company-docs').upload(path,bytes,{contentType:'application/pdf'}));
  const committed=await check(await db.rpc('contract_commit_signature',{_applicant:a.id,_template:t?.id??null,_document:doc?.id??null,_version:version,_body:t?.body??null,_typed:b.typed_name,_business:filled.business_name,_ip:ip,_ua:ua,_path:path,_values:filled,_signed_at:at.toISOString()}));
- const access=await db.functions.invoke('sequence-advance',{body:{action:'signing_day_signed',applicant_id:a.id}});
+ const access=await provision(a.id);
  const email=committed.already?undefined:await mail(a,bytes,path,version,b.typed_name,etTime(at));
- return reply({ok:true,signed_at:at.toISOString(),email,access:access.data,access_error:access.error?.message});
+ return reply({ok:true,signed_at:at.toISOString(),email,access:access.data,access_error:access.error});
  }catch(e){return reply({error:e instanceof Error?e.message:String((e as any)?.message??e)},500);}
 });

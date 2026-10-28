@@ -76,7 +76,8 @@ Deno.serve(async (req) => {
       }
       const { error: numberError } = await admin.rpc('signing_day_allocate_number', { _id: applicant_id });
       if (numberError) return jsonResponse({error:numberError.message},409);
-      const { data, error } = await admin.functions.invoke('signing-day', { body: { action: 'provision', applicant_id } });
+      const response=await vendorFetch(`${URL_}/functions/v1/signing-day`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${SERVICE}`},body:JSON.stringify({action:'provision',applicant_id})});
+      const data=await response.json().catch(()=>({}));const error=response.ok?null:{message:data.error??'provision_failed'};
       if (error || data?.error) return jsonResponse({error:data?.error ?? error?.message, signed:true},409);
       return jsonResponse({ok:true,...data});
     }
