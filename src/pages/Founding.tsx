@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import LanguageToggle from "@/components/LanguageToggle";
 import TidyLogo from "@/components/TidyLogo";
 import Reveal from "@/components/motion/Reveal";
+import { useFoundingMotion, useCountUp } from "@/hooks/useFoundingMotion";
 import SparkleField from "@/components/landing/SparkleField";
 import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
 import foundingMobileVideo from "@/assets/homepage-mobile-hero-20261004b.mp4.asset.json";
@@ -122,6 +123,8 @@ export default function Founding() {
   const launchCfg = useLaunchConfig();
   const lang = language === "es" ? "es" : "en";
   const quoteCardRef = useRef<HTMLElement>(null);
+  const motionRoot = useRef<HTMLDivElement>(null);
+  useFoundingMotion(motionRoot);
   // Every step change requests a scroll; the effect below runs after React has rendered the new step.
   const [scrollRequest, setScrollRequest] = useState(0);
   const scrollQuoteIntoView = () => quoteCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -259,7 +262,8 @@ export default function Founding() {
   };
 
   return (
-    <div className="founding-landing min-h-screen bg-background text-ink">
+    <div ref={motionRoot} className="founding-landing min-h-screen bg-background text-ink">
+      <div className="founding-scroll-progress" aria-hidden="true" />
       <Helmet>
         <html lang={language} />
         <meta name="color-scheme" content="light dark" />
@@ -295,7 +299,11 @@ export default function Founding() {
             <div className="founding-language"><LanguageToggle /></div>
           </div>
           <div className="founding-hero-copy">
-            <h1><span className="founding-hero-title-line">{t("More life.")}</span><span className="founding-hero-title-line founding-hero-title-accent">{t("Less chores.")}</span></h1>
+            <h1>{[t("More life."), t("Less chores.")].map((line, li) => (
+              <span key={li} className={`founding-hero-title-line${li ? " founding-hero-title-accent" : ""}`}>
+                {line.split(" ").map((w, wi, ws) => <span key={wi}><span className="founding-word" style={{ ["--w" as string]: li * 2 + wi }}>{w}</span>{wi < ws.length - 1 ? " " : ""}</span>)}
+              </span>
+            ))}</h1>
             <p>{t("Three services. One subscription.")}<br />{t("More life for you.")}</p>
             {listing && <a className="founding-rating-line" href={listing.maps_uri} target="_blank" rel="noreferrer"><span>★★★★★</span> {formatRating(listing.rating)} · {listing.total_count} {t("Google reviews")}</a>}
             <div data-testid="founding-left" className="founding-cap-pill">
@@ -311,8 +319,16 @@ export default function Founding() {
 
       <main className="founding-landing-main">
         <div className="founding-quote-wrap">
-          <section ref={quoteCardRef} data-testid="founding-quote-card" aria-label={t("Your price")} className="founding-quote-card">
-            {s.step !== "done" && <p className="mb-3 text-center text-xs font-medium text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
+          <section ref={quoteCardRef} data-testid="founding-quote-card" aria-label={t("Your price")} className="founding-quote-card" data-fx-spot>
+            {s.step !== "done" && (
+              <ol className="founding-steps" aria-hidden="true">
+                {(["zip", "services", "sizes", "price", "reserve"] as Step[]).map((st, i, all) => {
+                  const cur = all.indexOf(s.step);
+                  return <li key={st} className={i < cur ? "is-done" : i === cur ? "is-current" : ""} />;
+                })}
+              </ol>
+            )}
+            {s.step !== "done" && <p className="founding-fine mb-3 text-center text-xs text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
             {isZip(s.zip) && left !== null && (
               <div data-testid="founding-live-count" className="founding-live-count" aria-live="polite">
                 <span aria-hidden="true" />
@@ -421,7 +437,7 @@ export default function Founding() {
               <div>
                 {priced.length > 0 && (
                   <div className="founding-price-stats text-center">
-                    <Stat label={s.yearly && priced.length === 1 && priced[0]?.service === 'cleaning' ? (language === 'es' ? 'Pago anual' : 'Yearly payment') : t("Monthly total")} value={s.yearly && priced.length === 1 && priced[0]?.service === 'cleaning' ? `$${(cleaningAnnualCents(priced[0].size as CleaningSize,priced[0].cadence)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}` : `${money(total)}${per}`} big className="founding-price-total" />
+                    <Stat label={s.yearly && priced.length === 1 && priced[0]?.service === 'cleaning' ? (language === 'es' ? 'Pago anual' : 'Yearly payment') : t("Monthly total")} value={s.yearly && priced.length === 1 && priced[0]?.service === 'cleaning' ? `$${(cleaningAnnualCents(priced[0].size as CleaningSize,priced[0].cadence)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}` : <Ticker n={total} suffix={per} />} big className="founding-price-total" />
                     <Stat label={t("Visits a month")} value={String(visits)} />
                     <Stat label={t("Per visit")} value={visits ? money(total / visits) : "—"} />
                   </div>
@@ -552,7 +568,7 @@ export default function Founding() {
             <ul className="founding-benefits-grid">
               {FOUNDING_BENEFITS.map((b, index) => {
                 const Icon = [LockKeyhole, Star, Gift, UserRoundCheck][index];
-                return <li key={b} style={{ animationDelay: `${index * 110}ms` }}><span><Icon aria-hidden="true" /></span><strong>{t(b)}</strong></li>;
+                return <li key={b} data-fx-tilt style={{ animationDelay: `${index * 110}ms` }}><span><Icon aria-hidden="true" /></span><strong>{t(b)}</strong></li>;
               })}
             </ul></>
           )}
@@ -569,8 +585,8 @@ export default function Founding() {
                 { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnPlan, Icon: Leaf, tone: "green" },
                 { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carPlan, Icon: CarFront, tone: "blue" },
               ].map(({ svc, label, price, image, Icon, tone }, index) => (
-                <li key={label} className="founding-plan-card" style={{ animationDelay: `${index * 120}ms` }}>
-                  <picture><img src={image} alt="" width={1365} height={768} loading="lazy" /></picture>
+                <li key={label} className="founding-plan-card" data-fx-tilt style={{ animationDelay: `${index * 120}ms` }}>
+                  <picture data-fx-progress><img src={image} alt="" width={1365} height={768} loading="lazy" /></picture>
                   <div><Icon className={`founding-plan-icon is-${tone}`} aria-hidden="true" /><span><strong>{t(label)}</strong><small>{t("from")} ${price} {t("a month")}</small></span><button type="button" aria-label={`${t("Add")} ${t(label)}`} onClick={() => isZip(s.zip) ? go("sizes", { services: s.services.includes(svc) ? s.services : [...s.services, svc] }) : go("zip", { services: s.services.includes(svc) ? s.services : [...s.services, svc] })}>+</button></div>
                 </li>
               ))}
@@ -582,26 +598,27 @@ export default function Founding() {
           <div className="founding-section-shell">
             <p className="founding-eyebrow">{t("Get started in minutes")}</p>
             <h2>{t("How it works")}</h2>
-            <ol className="founding-how-grid">
+            <ol className="founding-how-grid" data-fx-progress>
+              <span className="founding-how-rail" aria-hidden="true"><span /></span>
               {[
                 { h: "Scan", d: "See your price in 60 seconds. No account, no call.", image: scanImage },
                 { h: "Pick your day", d: "Any weekday or Saturday, mornings or afternoons.", image: calendarImage },
                 { h: "Meet your Pro", d: "The same background-checked pro for each service, every visit.", image: proImage },
               ].map(({ h, d, image }, i) => (
-                <li key={h} style={{ animationDelay: `${i * 130}ms` }}><div className="founding-step-image"><img src={image} alt="" width={1200} height={900} loading="lazy" /><span>{i + 1}</span></div><strong>{t(h)}</strong><p>{t(d)}</p></li>
+                <li key={h} style={{ animationDelay: `${i * 130}ms`, ["--i" as string]: i }}><div className="founding-step-image" data-fx-tilt><img src={image} alt="" width={1200} height={900} loading="lazy" /><span>{i + 1}</span></div><strong>{t(h)}</strong><p>{t(d)}</p></li>
               ))}
           </ol>
           </div>
         </Reveal>
 
-        <Reveal as="section" className="founding-trust-section">
+        <section className="founding-trust-section" data-fx-in>
           <ul>
             {[
               { label: "Licensed & Insured", Icon: ShieldCheck }, { label: "Background-Checked Pros", Icon: UserRoundCheck },
               { label: "Photo-Verified Every Visit", Icon: Camera }, { label: "48-hour fix guarantee", Icon: Clock3 }, { label: "Cancel Anytime", Icon: CalendarDays },
-            ].map(({ label, Icon }) => <li key={label}><Icon aria-hidden="true" /><strong>{t(label)}</strong></li>)}
+            ].map(({ label, Icon }, i) => <li key={label} style={{ ["--i" as string]: i }}><Icon aria-hidden="true" /><strong>{t(label)}</strong></li>)}
           </ul>
-        </Reveal>
+        </section>
 
         <Reveal as="section" className="founding-footer-section">
           <Link to={`/refer${language === "es" ? "?lang=es" : ""}`} className="founding-refer-card">
@@ -633,8 +650,13 @@ function Cadence({ value, onChange, t, chip, on, off }: { value: CanonCadence; o
     </div>
   );
 }
-function Stat({ label, value, big, className = "" }: { label: string; value: string; big?: boolean; className?: string }) {
-  return <div className={`founding-price-stat rounded-xl bg-accent p-2 ${className}`}><p className={`${big ? "text-xl" : "text-lg"} whitespace-nowrap font-extrabold`}>{value}</p><p className="text-[11px] text-ink-faint">{label}</p></div>;
+function Stat({ label, value, big, className = "" }: { label: string; value: React.ReactNode; big?: boolean; className?: string }) {
+  return <div className={`founding-price-stat rounded-xl bg-accent p-2 ${className}`}><p className={`${big ? "text-xl" : "text-lg"} whitespace-nowrap font-extrabold`}>{value}</p><p className="founding-fine text-[11px] text-ink-faint">{label}</p></div>;
+}
+/** Price that rolls to its new value whenever the quote changes. */
+function Ticker({ n, suffix = "" }: { n: number; suffix?: string }) {
+  const v = useCountUp(n);
+  return <span className="founding-ticker" aria-label={`$${Math.round(n).toLocaleString()}${suffix}`}><span aria-hidden="true">${Math.round(v).toLocaleString()}{suffix}</span></span>;
 }
 function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: React.ReactNode }) {
   return <div><label htmlFor={id} className="text-xs font-semibold">{label}</label>{children}{error && <p className="mt-1 text-xs text-destructive">{error}</p>}</div>;
