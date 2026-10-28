@@ -19,7 +19,7 @@ const daysActive = (since: string | null) => since ? Math.max(0, Math.floor((Dat
 const DOTS = [[8, 18, "--pro-gold", 12], [88, 12, "--pro-gold", 10], [20, 70, "--pro-green", 6], [80, 62, "--pro-gold", 8], [70, 8, "--pro-green", 6], [30, 6, "--pro-gold", 7]] as const;
 
 export default function ProStatus() {
-  const { me, coi, loading, error, reload, userId } = useProSession();
+  const { me, coi, isOwner, loading, error, reload, userId } = useProSession();
   const { language } = useLanguage();
   const es = language === "es";
   const reduce = useReducedMotion();
@@ -94,7 +94,7 @@ export default function ProStatus() {
           </motion.div>
           {verifyUrl && <div className="rounded-[14px] bg-white p-3"><CopyLink value={verifyUrl} label={es ? "Copiar" : "Copy"} /></div>}
 
-          <section className="rounded-[14px] bg-white p-3.5">
+          {!isOwner && <section className="rounded-[14px] bg-white p-3.5">
             <div className="flex items-center justify-between">
               <p className="text-[14px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Seguro" : "Insurance"}</p>
               <StatusPill tone={coi?.can_work ? "green" : "amber"}>{({ none: ["Missing", "Falta"], under_review: ["Under review", "En revisión"], active: ["Active", "Activo"], expiring: ["Expiring", "Por vencer"], expired: ["Expired", "Vencido"] } as Record<string, [string, string]>)[coi?.status ?? "none"]?.[es ? 1 : 0]}</StatusPill>
@@ -102,7 +102,7 @@ export default function ProStatus() {
             <p className="mt-1 text-[12.5px] text-[hsl(var(--pro-ink-soft))]">
               {coi?.expires_at ? `${es ? "El certificado vence el" : "Certificate on file expires"} ${new Date(coi.expires_at).toLocaleDateString(es ? "es-US" : "en-US", { month: "long", day: "numeric", year: "numeric" })}.` : (es ? "Aún no hay certificado registrado." : "No certificate on file yet.")}
             </p>
-          </section>
+          </section>}
 
           {me?.referral_code && (
             <section className="rounded-[14px] bg-white p-3.5">
