@@ -23,12 +23,43 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { navigationLinks, accessWindowOpen } from '@/lib/pro-visit-rules';
 import { Button } from '@/components/ui/button';
 
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight as ArrowR, CalendarDays as CalIcon, Camera as CamIcon, ClipboardList, MapPin as PinIcon, StickyNote as NoteIcon, CheckCircle2, ChevronRight } from "lucide-react";
+import imgCleaning from "@/assets/cleaning-interior.webp";
+import imgLawn from "@/assets/founding-plan-lawn.webp";
+import imgCar from "@/assets/car-detailing.webp";
+
+const EASE_V = [0.22, 1, 0.36, 1] as [number, number, number, number];
+const CONFETTI = Array.from({ length: 22 }, (_, i) => ({ x: (i * 37) % 100, d: (i % 5) * 0.03, r: (i * 47) % 360, c: i % 3 === 0 ? "--pro-blue" : "--pro-gold", s: 8 + (i % 4) * 3 }));
+
+function ElapsedRing({ since, es }: { since: number | null; es: boolean }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { const t = window.setInterval(() => setNow(Date.now()), 1000); return () => window.clearInterval(t); }, []);
+  const secs = since ? Math.max(0, Math.floor((now - since) / 1000)) : 0;
+  const hh = Math.floor(secs / 3600), mm = Math.floor((secs % 3600) / 60), ss = secs % 60;
+  const label = since ? `${hh}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}` : "—";
+  const frac = (secs % 3600) / 3600;
+  const C = 2 * Math.PI * 70;
+  return (
+    <div className="relative mx-auto h-[170px] w-[170px]">
+      <svg viewBox="0 0 160 160" className="h-full w-full -rotate-90" aria-hidden>
+        <circle cx="80" cy="80" r="70" fill="none" stroke="hsl(var(--primary-foreground) / 0.12)" strokeWidth="9" />
+        <circle cx="80" cy="80" r="70" fill="none" stroke="hsl(var(--pro-blue))" strokeWidth="9" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - frac)} style={{ transition: "stroke-dashoffset 1s linear" }} />
+      </svg>
+      <div className="absolute inset-0 grid place-items-center text-center text-primary-foreground">
+        <div><p className="text-[32px] font-bold tabular-nums leading-none" aria-live="off">{label}</p><p className="mt-1 text-[12px] text-primary-foreground/75">{es ? "Transcurrido" : "Elapsed"}</p></div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProVisit() {
+  const reduceMotion = useReducedMotion();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
   const es = language === 'es';
-  const { visits, coi, loading, error, reload } = useProSession();
+  const { me, visits, coi, loading, error, reload } = useProSession();
   const visit = useMemo(() => visits.find((v) => v.id === id) ?? null, [visits, id]);
 
   const [busy, setBusy] = useState<null | "omw" | "complete" | "blocked">(null);
@@ -95,6 +126,7 @@ export default function ProVisit() {
     setBusy(null);
     if (!res.ok) { setActionError(res.error === "gps_unavailable" ? GPS_MSG : res.error?.includes('reason_required') ? (es?'Está fuera de 150 m o la ubicación de la dirección no está verificada. Escriba el motivo y vuelva a intentar.':'Outside 150 m or the address location is unverified. Add a reason and try again.') : (es?'No se pudo registrar la llegada.':"Couldn't check you in.")); return; }
     setCheckedIn(true);
+    try { localStorage.setItem(`tidy-checkin-${visit.id}`, String(Date.now())); } catch { /* ignore */ }
   };
 
   const saveSize = async () => {
@@ -209,10 +241,7 @@ export default function ProVisit() {
     }
     setReportedPay(res.visit_pay_cents ?? null);
     setSuccess(true);
-    setTimeout(() => {
-      reload();
-      navigate("/pro/schedule");
-    }, 1200);
+    try { localStorage.removeItem(`tidy-checkin-${visit.id}`); } catch { /* ignore */ }
   };
 
   if (loading) {
@@ -235,26 +264,78 @@ export default function ProVisit() {
     );
   }
 
-  if (success) {
+  if (success && blockedDone) {
     return (
-      <ProShell title={es ? "Visita completa" : "Visit complete"} back="/pro/schedule" nav={false}>
+      <ProShell title={es ? "Visita reportada" : "Visit reported"} back="/pro/schedule" nav={false}>
         <div className="flex flex-col items-center px-8 py-20 text-center">
-          <span className="grid h-16 w-16 place-items-center rounded-full bg-[hsl(var(--pro-green-soft))]">
-            <Check className="h-8 w-8 text-[hsl(var(--pro-green))]" aria-hidden />
-          </span>
-          <p className="mt-4 text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">
-            {blockedDone
-              ? `Reported — ${money(reportedPay)} added to your earnings.`
-              : `Visit complete — ${money(reportedPay)} added to this week's earnings.`}
-          </p>
+          <span className="grid h-16 w-16 place-items-center rounded-full bg-[hsl(var(--pro-green-soft))]"><Check className="h-8 w-8 text-[hsl(var(--pro-green))]" aria-hidden /></span>
+          <p className="mt-4 text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">{es ? `Reportada: ${money(reportedPay)} agregado a sus ganancias.` : `Reported — ${money(reportedPay)} added to your earnings.`}</p>
         </div>
       </ProShell>
     );
   }
 
+  if (success) {
+    const nextJob = visits.filter((v) => v.id !== visit.id && !v.completed_at && v.scheduled_start && new Date(v.scheduled_start) >= new Date(new Date().setHours(0, 0, 0, 0))).sort((x, y) => (x.scheduled_start ?? "").localeCompare(y.scheduled_start ?? ""))[0];
+    const items: [boolean, string][] = [
+      [(visit.before_photos ?? 0) > 0, es ? "Fotos de antes subidas" : "Before photos uploaded"],
+      [(visit.after_photos ?? 0) > 0, es ? "Fotos de después subidas" : "After photos uploaded"],
+      [true, es ? "Lista de tareas completada" : "Checklist completed"],
+      [true, es ? "Visita registrada con Tidy" : "Visit recorded with Tidy"],
+    ];
+    const img = visit.service_type === "lawn" ? imgLawn : visit.service_type === "cleaning" ? imgCleaning : imgCar;
+    return (
+      <div className="relative min-h-screen overflow-hidden bg-[hsl(var(--pro-deep))] px-4 pb-10 pt-[max(2.5rem,env(safe-area-inset-top))] font-sans">
+        {!reduceMotion && CONFETTI.map((c, i) => (
+          <motion.span key={i} aria-hidden className="absolute top-0 rounded-[2px]" style={{ left: `${c.x}%`, width: c.s, height: c.s * 0.6, background: `hsl(var(${c.c}))` }}
+            initial={{ y: -20, opacity: 0, rotate: 0 }} animate={{ y: [0, 160 + (i % 6) * 40], opacity: [0, 1, 1, 0], rotate: c.r }} transition={{ duration: 1.6, delay: c.d, ease: "easeOut" }} />
+        ))}
+        <div className="relative mx-auto max-w-md text-center text-primary-foreground">
+          <motion.div initial={reduceMotion ? false : { scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 260, damping: 18 }}
+            className="mx-auto mt-6 grid h-[96px] w-[96px] place-items-center rounded-full bg-[hsl(var(--pro-blue))] ring-[6px] ring-[hsl(var(--pro-gold))]">
+            <Check className="h-12 w-12" strokeWidth={3} aria-hidden />
+          </motion.div>
+          <h1 className="mt-5 text-[26px] font-bold">{es ? "¡Trabajo completo!" : "Job Complete!"}</h1>
+          <p className="text-[14px] text-primary-foreground/85">{es ? "Buen trabajo" : "Great work"}{me?.first_name ? `, ${me.first_name}` : ""}.</p>
+          <p className="mt-1 text-[13px] text-[hsl(var(--pro-gold))]">{money(reportedPay)} {es ? "agregado a esta semana" : "added to this week"}</p>
+          <motion.div initial={reduceMotion ? false : { opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.25, ease: EASE_V }} className="mt-5 rounded-[14px] bg-white p-3.5 text-left">
+            <div className="flex items-center gap-3 border-b border-[hsl(var(--pro-line))] pb-3">
+              <img src={img} alt="" className="h-11 w-14 rounded-[8px] object-cover" />
+              <div><p className="text-[13.5px] font-semibold text-[hsl(var(--pro-ink))]">{es ? (visit.service_type === "cleaning" ? "Limpieza del hogar" : visit.service_type === "lawn" ? "Césped" : "Cuidado del Auto") : (visit.service_type === "cleaning" ? "Home Cleaning" : visit.service_type === "lawn" ? "Lawn Care" : "Car Care")}</p><p className="text-[12px] text-[hsl(var(--pro-ink-soft))]">{dayLabel(visit.scheduled_start, language)} · {timeWindow(visit.scheduled_start, visit.scheduled_end, language)}</p></div>
+            </div>
+            <ul className="mt-2 space-y-2">{items.map(([ok, l]) => <li key={l} className="flex items-center gap-2.5 text-[13px] text-[hsl(var(--pro-ink))]">{ok ? <CheckCircle2 className="h-5 w-5 text-[hsl(var(--pro-green))]" aria-hidden /> : <span className="h-5 w-5 rounded-full border-2 border-[hsl(var(--pro-line))]" />}{l}</li>)}</ul>
+          </motion.div>
+          <Link to={nextJob ? `/pro/visit/${nextJob.id}` : "/pro/home"} onClick={() => { setSuccess(false); reload(); }} className="mt-5 flex min-h-[50px] items-center justify-center gap-10 rounded-full bg-[hsl(var(--pro-gold))] text-[15px] font-semibold text-[hsl(var(--pro-navy))]">{nextJob ? (es ? "Ver siguiente trabajo" : "View Next Job") : (es ? "Ir al inicio" : "Go to Home")} <ArrowR className="h-5 w-5" aria-hidden /></Link>
+          <Link to="/pro/schedule" onClick={() => reload()} className="mt-3 flex min-h-[50px] items-center justify-center rounded-full border border-primary-foreground/80 text-[14px] font-medium">{es ? "Volver a la agenda" : "Back to Schedule"}</Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <ProShell title={es ? (visit.service_type === "cleaning" ? "Limpieza" : visit.service_type === "lawn" ? "Césped" : "Cuidado del Auto") : SERVICE_LABEL[visit.service_type ?? ""] ?? "Visit"} back="/pro/schedule">
-      <div className="bg-white px-4 pb-4 pt-4">
+    <ProShell title={es ? (visit.service_type === "cleaning" ? "Limpieza" : visit.service_type === "lawn" ? "Césped" : "Cuidado del Auto") : SERVICE_LABEL[visit.service_type ?? ""] ?? "Visit"} back="/pro/schedule" dark>
+      {checkedIn && !visit.completed_at ? (
+        <section className="px-4 pb-4 pt-1 text-center text-primary-foreground">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--pro-green)/0.2)] px-3 py-1 text-[12px] font-medium text-[hsl(var(--pro-green-soft))]"><span className="h-2 w-2 rounded-full bg-[hsl(var(--pro-green))]" />{es ? "En el sitio" : "On Site"}</span>
+          <p className="mt-2 inline-flex items-center gap-1.5 text-[13px]"><PinIcon className="h-4 w-4 text-[hsl(var(--pro-green))]" aria-hidden />{es ? "Llegada registrada" : "Checked in"}</p>
+          <div className="mt-3"><ElapsedRing since={(() => { try { const v = localStorage.getItem(`tidy-checkin-${visit.id}`); return v ? Number(v) : null; } catch { return null; } })()} es={es} /></div>
+          <button type="button" disabled={blocked || busy !== null} onClick={() => { setFinishOpen(true); window.setTimeout(() => document.getElementById("finish-job")?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" }), 50); }}
+            className="mx-auto mt-4 flex min-h-[46px] w-full max-w-[260px] items-center justify-center gap-6 rounded-[12px] bg-[hsl(var(--pro-blue))] text-[15px] font-semibold disabled:opacity-50">{es ? "Completar trabajo" : "Complete Job"} <ArrowR className="h-4 w-4" aria-hidden /></button>
+          <div className="mt-4 rounded-[14px] bg-white text-left">
+            <p className="px-3.5 pt-3 text-[14px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Acciones" : "Job Actions"}</p>
+            {[[`/pro/visit/${visit.id}/photos`, CamIcon, es ? "Tomar fotos" : "Take Photos"], [`/pro/visit/${visit.id}/checklist`, ClipboardList, es ? "Ver lista" : "View Checklist"], ["#visit-notes", NoteIcon, es ? "Notas del cliente" : "Customer Notes"]].map(([to, Icon, l]) => {
+              const I = Icon as typeof CamIcon;
+              const cls = "flex min-h-[46px] items-center gap-3 border-t border-[hsl(var(--pro-line))] px-3.5 text-[13.5px] text-[hsl(var(--pro-ink))] first-of-type:border-t-0";
+              return String(to).startsWith("#") ? <a key={String(l)} href={String(to)} className={cls}><I className="h-[18px] w-[18px]" aria-hidden /><span className="flex-1">{String(l)}</span><ChevronRight className="h-4 w-4 text-[hsl(var(--pro-ink-soft))]" aria-hidden /></a>
+                : <Link key={String(l)} to={String(to)} className={cls}><I className="h-[18px] w-[18px]" aria-hidden /><span className="flex-1">{String(l)}</span><ChevronRight className="h-4 w-4 text-[hsl(var(--pro-ink-soft))]" aria-hidden /></Link>;
+            })}
+          </div>
+        </section>
+      ) : (
+        <img src={visit.service_type === "lawn" ? imgLawn : visit.service_type === "cleaning" ? imgCleaning : imgCar} alt="" className="h-[150px] w-full object-cover" />
+      )}
+      <motion.div initial={reduceMotion ? false : { y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.28, ease: EASE_V }} className={`relative overflow-hidden rounded-t-[20px] bg-[hsl(var(--pro-ground))] ${checkedIn && !visit.completed_at ? "" : "-mt-5"}`}>
+      <div id="visit-notes" className="bg-white px-4 pb-4 pt-4">
         <p className="text-[14px] font-semibold text-[hsl(var(--pro-ink-soft))]">
           {dayLabel(visit.scheduled_start, language)}
         </p>
@@ -437,7 +518,8 @@ export default function ProVisit() {
             {es ? 'Terminar trabajo' : 'Finish job'}
           </ProButton>
           {finishOpen && !visit.completed_at && (
-            <ProCard>
+            <ProCard className="scroll-mt-24">
+              <span id="finish-job" />
               <p className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">{es ? 'Antes de terminar' : 'Before you finish'}</p>
               <Link to={`/pro/visit/${visit.id}/photos`} className="mt-3 flex min-h-[48px] items-center gap-3 rounded-xl border border-[hsl(var(--pro-navy)/0.12)] px-3">
                 <span className={`flex h-6 w-6 items-center justify-center rounded-full ${photosOk ? 'bg-[hsl(var(--pro-green))]' : 'border-2 border-[hsl(var(--pro-navy)/0.25)]'}`}>{photosOk && <Check className="h-4 w-4 text-white" aria-hidden />}</span>
@@ -560,6 +642,7 @@ export default function ProVisit() {
           </div>
         </div>
       )}
+      </motion.div>
     </ProShell>
   );
 }
