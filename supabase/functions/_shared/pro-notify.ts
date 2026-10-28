@@ -203,6 +203,9 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<ProNoti
 
   if (n.sms_required) {
     const sms = await smsFallback(admin, n, key, true);
+    if(sms.outcome!=='sent') {
+      await admin.from('admin_alerts').insert({alert_type:'pro_notification_undeliverable',title:'Required Pro route text was not sent',body:`${n.kind}: ${sms.outcome}${sms.detail?` — ${sms.detail}`:''}`,context:{contractor_id:n.contractor_id,kind:n.kind}});
+    }
     return { ok: sms.outcome === 'sent', recorded: true, urgent: true, push: 'no_subscription', sms: sms.outcome, detail: sms.detail };
   }
 
