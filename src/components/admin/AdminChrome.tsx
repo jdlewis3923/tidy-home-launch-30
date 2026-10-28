@@ -29,6 +29,7 @@ const GROUPS: NavGroup[] = [
     { to: "/admin/pro-tracker", label: "Pro tracker", icon: MapPin },
   ]},
   { label: "Hiring", icon: BriefcaseBusiness, items: [
+    { to: "/admin/signing-day", label: "Signing day", icon: FileText },
     { to: "/admin/hiring", label: "Hiring dashboard", icon: BarChart3 },
     { to: "/admin/hiring/texts", label: "Candidate texts", icon: MessageSquare },
     { to: "/admin/hiring/slots", label: "Hiring slots", icon: CalendarDays },

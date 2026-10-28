@@ -88,6 +88,7 @@ const AdminAlerts = lazy(() => import("./pages/AdminAlerts.tsx"));
 const AdminOnboarding = lazy(() => import("./pages/AdminOnboarding.tsx"));
 const AdminAgents = lazy(() => import("./pages/AdminAgents.tsx"));
 const AdminProTracker = lazy(() => import("./pages/AdminProTracker.tsx"));
+const SigningDay = lazy(() => import("./pages/admin/SigningDay"));
 const AdminNotificationSettings = lazy(() => import("./pages/AdminNotificationSettings.tsx"));
 const AdminCosts = lazy(() => import("./pages/AdminCosts.tsx"));
 const AdminSiteStatus = lazy(() => import("./pages/AdminSiteStatus.tsx"));
@@ -419,6 +420,7 @@ const App = () => (
                   <Route path="/admin/pro-assignments" element={<AdminProAssignments />} />
                   <Route path="/admin/agents" element={<AdminAgents />} />
                   <Route path="/admin/pro-tracker" element={<AdminProTracker />} />
+                  <Route path="/admin/signing-day" element={<SigningDay />} />
                   <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
                   <Route path="/admin/costs" element={<AdminCosts />} />
                   <Route path="/admin/site-status" element={<AdminSiteStatus />} />

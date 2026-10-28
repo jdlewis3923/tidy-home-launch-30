@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import IndeedResume from '@/components/admin/IndeedResume';
 import ProofPanel from "@/components/admin/pipeline/ProofPanel";
 import CandidateTexts from "@/components/admin/pipeline/CandidateTexts";
+import SigningDayPanel from "@/components/admin/SigningDayPanel";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -209,6 +210,7 @@ export default function AdminPipelineRecord() {
         {p.archived && p.decline_reason && <p className="rounded-md border border-border bg-muted p-3 text-sm">Declined: {p.decline_reason}{p.decline_note ? ` — ${p.decline_note}` : ""}</p>}
 
         <IndeedResume applicantId={id} />
+        {!p.archived && <SigningDayPanel applicantId={id} />}
         <SimulateReply applicantId={id} />
 
 
