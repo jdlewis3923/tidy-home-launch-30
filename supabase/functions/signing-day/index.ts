@@ -3,18 +3,20 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'npm:zod@3';
 import { requireServiceOrAdmin, bearerToken } from '../_shared/admin-auth.ts';
+import { vendorFetch } from '../_shared/http.ts';
 const url = Deno.env.get('SUPABASE_URL') ?? '';
 const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const db = createClient(url,key,{auth:{persistSession:false}});
 const bodySchema = z.object({action:z.enum(['intake_equipment','send_intake','provision','payouts','background_clear','send_agreement']),applicant_id:z.string().uuid().optional(),token:z.string().min(20).max(100).optional()});
 const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
+async function invoke(name:string,body:unknown){const r=await vendorFetch(`${url}/functions/v1/${name}`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${key}`},body:JSON.stringify(body)});const data=await r.json().catch(()=>({}));return {data,error:r.ok?null:new Error(data.error??`Request failed (${r.status})`)};}
 async function sms(id:string, text:string, idempotency:string) {
   const {data:a}=await db.from('applicants').select('phone,is_test_row').eq('id',id).single();
   const {data:p}=await db.from('contractor_pipeline').select('is_test').eq('applicant_id',id).single();
   if(a?.is_test_row || p?.is_test) return {skipped:'is_test'};
   const digits=String(a?.phone??'').replace(/\D/g,'');
   if(digits.length<10) throw new Error('Candidate phone is missing');
-  const {data,error}=await db.functions.invoke('send-twilio-sms',{body:{to_phone_e164:digits.length===10?`+1${digits}`:`+${digits}`,body:text,idempotency_key:idempotency,template_name:'pro-signing-day',triggered_by:'signing-day'}});
+  const {data,error}=await invoke('send-twilio-sms',{to_phone_e164:digits.length===10?`+1${digits}`:`+${digits}`,body:text,idempotency_key:idempotency,template_name:'pro-signing-day',triggered_by:'signing-day'});
   if(error) throw error;
   if(data?.error || data?.ok===false) throw new Error(data.error??'Text was not accepted');
   return data;
@@ -40,7 +42,7 @@ Deno.serve(async req=>{
       if(error||!u.user) return reply({error:'unauthorized'},401);
       const {data:a}=await db.from('applicants').select('id,signing_day_signed_at').eq('contractor_id',u.user.id).single();
       if(!a?.signing_day_signed_at) return reply({error:'not_signed'},403);
-      const {data,error:err}=await db.functions.invoke('stripe-connect-create',{body:{applicant_id:a.id,refresh_url:'https://jointidy.co/pro/onboarding',return_url:'https://jointidy.co/pro/onboarding'}});
+      const {data,error:err}=await invoke('stripe-connect-create',{applicant_id:a.id,refresh_url:'https://jointidy.co/pro/onboarding',return_url:'https://jointidy.co/pro/onboarding'});
       if(err) throw err;
       return reply(data);
     }
