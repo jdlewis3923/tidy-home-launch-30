@@ -11350,6 +11350,17 @@ export type Database = {
       pro_partner_progress: { Args: never; Returns: Json }
       pro_partner_status: { Args: { _applicant: string }; Returns: Json }
       pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
+      pro_record_team_location: {
+        Args: {
+          _action: string
+          _lat: number
+          _lng: number
+          _pro: string
+          _reason?: string
+          _visit: string
+        }
+        Returns: undefined
+      }
       pro_report_teammate_missing: { Args: { _visit: string }; Returns: Json }
       pro_required_check_keys: {
         Args: { _kind: string; _service: string }

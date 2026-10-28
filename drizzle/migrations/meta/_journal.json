@@ -1744,6 +1744,13 @@
       "when": 1793150891467,
       "tag": "0248_pro_gps_radius_and_evidence",
       "breakpoints": true
+    },
+    {
+      "idx": 249,
+      "version": "7",
+      "when": 1793150924217,
+      "tag": "0249_pro_individual_location_evidence",
+      "breakpoints": true
     }
   ]
 }
