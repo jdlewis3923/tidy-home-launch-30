@@ -1737,6 +1737,13 @@
       "when": 1793150722734,
       "tag": "0247_pro_required_service_checklists",
       "breakpoints": true
+    },
+    {
+      "idx": 248,
+      "version": "7",
+      "when": 1793150891467,
+      "tag": "0248_pro_gps_radius_and_evidence",
+      "breakpoints": true
     }
   ]
 }

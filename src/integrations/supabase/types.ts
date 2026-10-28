@@ -1808,9 +1808,11 @@ export type Database = {
           check_in_at: string | null
           check_in_lat: number | null
           check_in_lng: number | null
+          check_in_location_reason: string | null
           check_out_at: string | null
           check_out_lat: number | null
           check_out_lng: number | null
+          check_out_location_reason: string | null
           pro_id: string
           visit_id: string
         }
@@ -1818,9 +1820,11 @@ export type Database = {
           check_in_at?: string | null
           check_in_lat?: number | null
           check_in_lng?: number | null
+          check_in_location_reason?: string | null
           check_out_at?: string | null
           check_out_lat?: number | null
           check_out_lng?: number | null
+          check_out_location_reason?: string | null
           pro_id: string
           visit_id: string
         }
@@ -1828,9 +1832,11 @@ export type Database = {
           check_in_at?: string | null
           check_in_lat?: number | null
           check_in_lng?: number | null
+          check_in_location_reason?: string | null
           check_out_at?: string | null
           check_out_lat?: number | null
           check_out_lng?: number | null
+          check_out_location_reason?: string | null
           pro_id?: string
           visit_id?: string
         }
@@ -9786,6 +9792,8 @@ export type Database = {
         Row: {
           access_notes: string | null
           access_notes_enc: string | null
+          address_lat: number | null
+          address_lng: number | null
           anchor_date: string | null
           assigned_pro_id: string | null
           backup_pro_id: string | null
@@ -9796,9 +9804,11 @@ export type Database = {
           check_in_at: string | null
           check_in_lat: number | null
           check_in_lng: number | null
+          check_in_location_reason: string | null
           check_out_at: string | null
           check_out_lat: number | null
           check_out_lng: number | null
+          check_out_location_reason: string | null
           claim_id: string | null
           cleaning_base_pay_cents: number | null
           cleaning_final_inspection_at: string | null
@@ -9854,6 +9864,8 @@ export type Database = {
         Insert: {
           access_notes?: string | null
           access_notes_enc?: string | null
+          address_lat?: number | null
+          address_lng?: number | null
           anchor_date?: string | null
           assigned_pro_id?: string | null
           backup_pro_id?: string | null
@@ -9864,9 +9876,11 @@ export type Database = {
           check_in_at?: string | null
           check_in_lat?: number | null
           check_in_lng?: number | null
+          check_in_location_reason?: string | null
           check_out_at?: string | null
           check_out_lat?: number | null
           check_out_lng?: number | null
+          check_out_location_reason?: string | null
           claim_id?: string | null
           cleaning_base_pay_cents?: number | null
           cleaning_final_inspection_at?: string | null
@@ -9922,6 +9936,8 @@ export type Database = {
         Update: {
           access_notes?: string | null
           access_notes_enc?: string | null
+          address_lat?: number | null
+          address_lng?: number | null
           anchor_date?: string | null
           assigned_pro_id?: string | null
           backup_pro_id?: string | null
@@ -9932,9 +9948,11 @@ export type Database = {
           check_in_at?: string | null
           check_in_lat?: number | null
           check_in_lng?: number | null
+          check_in_location_reason?: string | null
           check_out_at?: string | null
           check_out_lat?: number | null
           check_out_lng?: number | null
+          check_out_location_reason?: string | null
           claim_id?: string | null
           cleaning_base_pay_cents?: number | null
           cleaning_final_inspection_at?: string | null
@@ -11289,6 +11307,25 @@ export type Database = {
           visit_pay_cents: number
           zip: string
         }[]
+      }
+      pro_gps_distance: {
+        Args: {
+          _lat: number
+          _lng: number
+          _target_lat: number
+          _target_lng: number
+        }
+        Returns: number
+      }
+      pro_gps_validate: {
+        Args: {
+          _lat: number
+          _lng: number
+          _pro: string
+          _reason?: string
+          _visit: string
+        }
+        Returns: Json
       }
       pro_home_note: { Args: { _visit: string }; Returns: string }
       pro_job_card: { Args: { _visit: string }; Returns: Json }
