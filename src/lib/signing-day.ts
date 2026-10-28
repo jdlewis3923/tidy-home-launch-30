@@ -8,9 +8,9 @@ export type SigningState = {
   applicant_id: string; first_name: string; service: string; pro_number: string | null;
   signed_at: string | null; active_at: string | null; mode: boolean; active: boolean; ready: boolean;
   intake_complete: boolean; intake_token: string | null; background: boolean; insurance: boolean;
-  payouts: boolean; availability: boolean; sizes: boolean; agreement: boolean; w9: boolean;
+  payouts: boolean; availability: boolean; sizes: boolean; agreement: boolean;
   equipment: boolean; training: boolean; kit_order_ready: boolean; insurance_review: string;
-  insurance_uploaded_at: string | null;
+  insurance_uploaded_at: string | null; contract_token: string | null; countersigned_at: string | null; app_logged_in: boolean;
 };
 export const signingChecks = [
   ["background", "Background check", "Antecedentes"],
@@ -18,7 +18,4 @@ export const signingChecks = [
   ["payouts", "Set up pay", "Configurar pagos"],
   ["availability", "Confirm availability", "Confirmar disponibilidad"],
   ["sizes", "Kit sizes", "Tallas del kit"],
-  ["w9", "W-9 received", "W-9 recibido"],
-  ["equipment", "Equipment approved", "Equipo aprobado"],
-  ["training", "Training completed", "Capacitación completada"],
 ] as const;

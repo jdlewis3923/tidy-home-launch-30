@@ -67,6 +67,8 @@ Deno.serve(async (req) => {
     const { data: pipeline } = await admin.from('contractor_pipeline').select('archived,state,is_test,stage').eq('applicant_id', applicant_id).single();
     if (!pipeline || pipeline.archived || pipeline.state !== 'open') return jsonResponse({ error: 'candidate_not_open' }, 409);
     if (action === 'signing_day_signed') {
+      const {data:proof}=await admin.from('contractor_pipeline').select('proof_approved_at').eq('applicant_id',applicant_id).single();
+      if(!proof?.proof_approved_at)return jsonResponse({error:'Equipment approval required'},409);
       if (!['interviewed','agreement','background','insured','active'].includes(pipeline.stage)) return jsonResponse({ error: 'Complete the interview stage before signing.' }, 409);
       if (!a.signing_day_signed_at) {
         const { error } = await admin.from('applicants').update({ contracts_signed: true, contracts_signed_at: new Date().toISOString(), signing_day_signed_at: new Date().toISOString(), signing_day_signed_by: actor, sequence_stage: 'signed' }).eq('id', applicant_id);
@@ -74,7 +76,12 @@ Deno.serve(async (req) => {
       }
       const { error: numberError } = await admin.rpc('signing_day_allocate_number', { _id: applicant_id });
       if (numberError) return jsonResponse({error:numberError.message},409);
-      const { data, error } = await admin.functions.invoke('signing-day', { body: { action: 'provision', applicant_id } });
+      if(pipeline.stage==='interviewed') {
+        const {error:moveError}=await admin.rpc('pipeline_advance',{_id:applicant_id,_expected_to:'agreement'});
+        if(moveError)return jsonResponse({error:moveError.message,signed:true},409);
+      }
+      const response=await vendorFetch(`${URL_}/functions/v1/signing-day`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${SERVICE}`},body:JSON.stringify({action:'provision',applicant_id})});
+      const data=await response.json().catch(()=>({}));const error=response.ok?null:{message:data.error??'provision_failed'};
       if (error || data?.error) return jsonResponse({error:data?.error ?? error?.message, signed:true},409);
       return jsonResponse({ok:true,...data});
     }

@@ -43,7 +43,7 @@ const FIELDS: Record<string, Field[]> = {
     { key: "screening_call_completed_at", label: "Phone screen completed", type: "datetime" },
     { key: "call_notes", label: "Call notes (20+ characters)", type: "textarea" },
   ],
-  agreement: [{ key: "ica_countersigned_at", label: "ICA countersigned (sends WELCOME-T1)", type: "datetime" }],
+  agreement: [],
   background: [{ key: "checkr_result", label: "Checkr result", type: "select", options: ["clear", "consider", "suspended"] }],
   insured: [
     { key: "coi_effective_date", label: "COI effective", type: "date" },
@@ -62,7 +62,7 @@ const FIELDS: Record<string, Field[]> = {
     { key: "reimbursement_m3_paid_at", label: "Reimbursement month 3 paid", type: "datetime" },
   ],
 };
-const ARTIFACTS_FOR: Record<string, string[]> = { agreement: ["ica_signed", "w9"], background: ["checkr_report"], insured: ["coi"] };
+const ARTIFACTS_FOR: Record<string, string[]> = { agreement: ["ica_signed"], background: ["checkr_report"], insured: ["coi"] };
 
 const toInput = (f: Field, v: any) => {
   if (v == null) return "";
@@ -114,7 +114,7 @@ export default function AdminPipelineRecord() {
       db.from("pro_orientation_progress").select("section_id,started_at,completed_at").eq("applicant_id", id),
     ]);
     if (pr.error) setErr(rpcMessage(pr.error));
-    setP(pr.data); setA(ar.data); setMissing(ms.error ? [`Could not check requirements: ${rpcMessage(ms.error)}`] : (ms.data ?? [])); setArtifacts(art.data ?? []); setSpend(sp.data ?? []); setEvents(ev.data ?? []); setOrientationProgress(op.data ?? []);
+    setP(pr.data); setA(ar.data); setMissing(ms.error ? [`Could not check requirements: ${rpcMessage(ms.error)}`] : (ms.data ?? [])); setArtifacts((art.data ?? []).filter((r: Row) => r.kind !== "w9")); setSpend(sp.data ?? []); setEvents(ev.data ?? []); setOrientationProgress(op.data ?? []);
     setDraft({}); setClaimed(null);
     if (pr.data?.service) { const { data: eq } = await db.from("pipeline_equipment_items").select("*").eq("service", pr.data.service).eq("active", true).order("sort"); setEquip(eq ?? []); }
   }, [id]);

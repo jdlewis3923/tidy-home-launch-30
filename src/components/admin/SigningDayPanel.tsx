@@ -1,49 +1,33 @@
-import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { signingChecks, type SigningState } from "@/lib/signing-day";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { CheckCircle2, Circle, FilePenLine, Send, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-export default function SigningDayPanel({ applicantId }: { applicantId: string }) {
-  const [state, setState] = useState<SigningState | null>(null);
-  const [busy,setBusy] = useState(false);
-  const [confirm,setConfirm] = useState(false);
-  const { language } = useLanguage(); const es = language === "es";
-  const load = useCallback(async () => { const {data,error}=await supabase.rpc("signing_day_state",{_id:applicantId}); if(error) toast.error(error.message); else setState(data as unknown as SigningState); },[applicantId]);
-  useEffect(()=>{void load();const timer=setInterval(()=>void load(),15000);return()=>clearInterval(timer);},[load]);
-  const run = async (action: "open" | "send" | "signed" | "background") => {
-    setBusy(true);
-    try {
-      if(action==="open") {
-        const {data,error}=await supabase.rpc("admin_signing_day_intake",{_id:applicantId});
-        if(error) throw error;
-        const token=(data as {intake_token?:string})?.intake_token;
-        if(token) window.location.assign(`/intake/${token}`);
-      } else {
-        const {data,error}=await supabase.functions.invoke(action==="signed"?"sequence-advance":"signing-day",{body:action==="signed"?{action:"signing_day_signed",applicant_id:applicantId}:{action:action==="send"?"send_intake":"background_clear",applicant_id:applicantId}});
-        if(error) { const details = error.context instanceof Response ? await error.context.json().catch(()=>null) : null; throw new Error(details?.error??error.message); }
-        if(data?.error) throw new Error(data.error);
-        toast.success(es?"Guardado":"Saved",{description:data?.sms?.skipped==="is_test"?(es?"Registro de prueba: no se envió texto.":"Test record: no text sent."):data?.sms?.queued?(es?"Texto en cola.":"Text queued."):undefined});
-        setConfirm(false); await load();
-      }
-    } catch(error) { toast.error(error instanceof Error?error.message:String(error)); }
-    finally {setBusy(false);}
-  };
-  return <section className="border-y border-border py-5">
-    <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-bold">{es?"Día de firma":"Signing day"}</h2><span className="text-sm font-semibold">{state?.pro_number??(es?"Número pendiente":"Number pending")}</span></div>
-    <p className="mt-1 text-sm text-muted-foreground">{state?.active?(es?"Activo":"Active"):state?.signed_at?(es?"Firmado · Primeros pasos":"Signed · Getting Started"):es?"Sin firmar":"Not signed"} · {state?.intake_complete?(es?"Formulario completo":"Intake Complete"):es?"Formulario pendiente":"Intake pending"}</p>
-    <div className="my-4 grid gap-2 sm:grid-cols-2">{signingChecks.map(([key,en,sp])=><div key={key} className="flex items-center gap-2 text-sm">{state?.[key]?<CheckCircle2 className="h-4 w-4 text-primary"/>:<Circle className="h-4 w-4 text-muted-foreground"/>}{es?sp:en}</div>)}</div>
-    <div className="flex flex-wrap gap-2">
-      <Button disabled={busy} onClick={()=>void run("open")}><FilePenLine className="mr-2 h-4 w-4"/>{es?"Abrir formulario Pro":"Open Pro Intake"}</Button>
-      <Button variant="outline" disabled={busy} onClick={()=>void run("send")}><Send className="mr-2 h-4 w-4"/>{es?"Enviar enlace":"Send link"}</Button>
-      <Button variant="outline" disabled={busy} onClick={()=>setConfirm(true)}>{state?.signed_at?(es?"Reintentar acceso Pro":"Retry Pro access"):es?"Marcar firmado":"Mark Signed"}</Button>
-      {!state?.background&&<Button variant="outline" disabled={busy} onClick={()=>void run("background")}>{es?"Antecedentes aprobados":"Mark background clear"}</Button>}
-      <Button asChild variant="ghost"><Link to="/admin/coi-review">{es?"Revisar seguro":"Review insurance"}</Link></Button>
-    </div>
-    {state?.intake_complete&&<p className="mt-3 text-sm text-muted-foreground">{state.kit_order_ready?(es?"Listo para pedir · seguro verificado":"Ready to order · insurance verified"):(es?"Listo para pedir una vez verificado el seguro":"Ready to order once insurance is verified")}</p>}
-    <Dialog open={confirm} onOpenChange={setConfirm}><DialogContent><DialogHeader><DialogTitle>{es?"Confirmar firma":"Confirm signing"}</DialogTitle><DialogDescription>{es?"Confirme que el acuerdo fue firmado. Se asignará su número Pro, se creará el acceso y se enviará el enlace de la aplicación. No activa trabajos hasta completar los requisitos.":"Confirm the agreement was signed. This assigns the Pro number, creates access and texts the app link. Jobs remain locked until readiness is complete."}</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" onClick={()=>setConfirm(false)}>{es?"Cancelar":"Cancel"}</Button><Button disabled={busy} onClick={()=>void run("signed")}>{busy?<Loader2 className="h-4 w-4 animate-spin"/>:es?"Confirmar firmado":"Confirm Signed"}</Button></DialogFooter></DialogContent></Dialog>
-  </section>;
+import { useCallback,useEffect,useState } from 'react';
+import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription,DialogFooter } from '@/components/ui/dialog';
+import { signingChecks,type SigningState } from '@/lib/signing-day';
+import { useLanguage } from '@/contexts/LanguageContext';
+import ProofPanel from '@/components/admin/pipeline/ProofPanel';
+import { CheckCircle2,Circle,Copy,Send,FilePenLine } from 'lucide-react';
+import { toast } from 'sonner';
+export default function SigningDayPanel({applicantId}:{applicantId:string}){
+ const [state,setState]=useState<SigningState|null>(null),[busy,setBusy]=useState(false),[confirm,setConfirm]=useState(false),[equipment,setEquipment]=useState(false),[pipeline,setPipeline]=useState<Record<string,any>|null>(null);
+ const {language}=useLanguage();const es=language==='es';
+ const load=useCallback(async()=>{const {data,error}=await supabase.rpc('signing_day_state',{_id:applicantId});if(error)toast.error(error.message);else setState(data as unknown as SigningState);},[applicantId]);
+ useEffect(()=>{void load();const timer=setInterval(()=>void load(),15000);return()=>clearInterval(timer);},[load]);
+ const run=async(action:string)=>{setBusy(true);try{if(action==='open'){const {data,error}=await supabase.rpc('admin_signing_day_intake',{_id:applicantId});if(error)throw error;const token=(data as {intake_token?:string})?.intake_token;if(token)window.location.assign(`/intake/${token}`);}
+ else if(action==='equipment'){const {data,error}=await supabase.from('contractor_pipeline').select('*').eq('applicant_id',applicantId).single();if(error)throw error;setPipeline(data);setEquipment(true);}
+ else {const fn=action==='signed'?'sequence-advance':action==='countersign'?'contract-sign':'signing-day';const body=action==='signed'?{action:'signing_day_signed',applicant_id:applicantId}:{action:action==='send'?'send_intake':action==='agreement'?'send_agreement':action==='background'?'background_clear':action,applicant_id:applicantId};const {data,error}=await supabase.functions.invoke(fn,{body});if(error){const detail=error.context instanceof Response?await error.context.json().catch(()=>null):null;throw new Error(detail?.error??error.message);}if(data?.error)throw new Error(data.error);toast.success(es?'Guardado':'Saved',{description:data?.sms?.skipped==='is_test'?'Test record: no text sent.':data?.email?.pro?.sent===false?'Signed copy saved; email requires attention.':undefined});setConfirm(false);await load();}}
+ catch(e){toast.error(e instanceof Error?e.message:String(e));}finally{setBusy(false);}};
+ const status=(done:unknown)=><span className="flex items-center gap-2 text-sm font-medium">{done?<CheckCircle2 className="h-5 w-5 text-primary"/>:<Circle className="h-5 w-5 text-muted-foreground"/>}{done?'✓':es?'Pendiente':'Pending'}</span>;
+ const link=state?.contract_token?`https://jointidy.co/contract/${state.contract_token}`:null;
+ const steps=[
+  {title:es?'Equipo aprobado':'Equipment approved',done:state?.equipment,content:!state?.equipment&&<Button variant="outline" disabled={busy} onClick={()=>void run('equipment')}>{es?'Aprobar equipo':'Approve equipment'}</Button>},
+  {title:'Pro Intake',done:state?.intake_complete,content:<><Button disabled={busy} onClick={()=>void run('open')}><FilePenLine className="mr-2 h-4 w-4"/>{es?'Abrir formulario Pro':'Open Pro Intake'}</Button><Button variant="outline" disabled={busy} onClick={()=>void run('send')}><Send className="mr-2 h-4 w-4"/>{es?'Enviar enlace':'Send link'}</Button></>},
+  {title:state?.agreement?(es?'Acuerdo firmado ✓':'Agreement signed ✓'):es?'Acuerdo':'Agreement',done:state?.agreement,content:<><Button disabled={busy||!state?.equipment||state?.agreement} onClick={()=>void run('agreement')}><Send className="mr-2 h-4 w-4"/>{es?'Enviar acuerdo':'Send agreement'}</Button>{link&&<div className="flex w-full items-center gap-2"><a href={link.replace('https://jointidy.co','')} target="_blank" rel="noreferrer" className="min-w-0 break-all text-sm text-primary underline">{link}</a><Button variant="ghost" size="icon" aria-label="Copy agreement link" onClick={()=>void navigator.clipboard.writeText(link).then(()=>toast.success(es?'Copiado':'Copied'))}><Copy className="h-4 w-4"/></Button></div>}<Button size="sm" variant="ghost" disabled={busy} onClick={()=>setConfirm(true)}>{es?'Firma en papel: marcar firmado':'Paper fallback: Mark Signed'}</Button></>},
+  {title:es?'Contrafirma':'Countersign',done:state?.countersigned_at,content:state?.agreement&&!state?.countersigned_at?<Button disabled={busy} onClick={()=>void run('countersign')}>{es?'Contrafirmar':'Countersign'}</Button>:null},
+  {title:es?'Aplicación Pro':'Pro app',done:state?.app_logged_in,content:<p className="text-sm">{state?.pro_number??(es?'Número pendiente':'Number pending')} · {state?.app_logged_in?(es?'Ya inició sesión':'Logged in'):es?'Aún no inició sesión':'Not logged in yet'}</p>},
+  {title:es?'Primeros pasos':'Getting started',done:state?.ready||state?.active,content:<><div className="grid w-full gap-3 sm:grid-cols-2">{signingChecks.map(([key,en,sp])=><div key={key} className="flex items-center gap-2 text-sm">{state?.[key]?<CheckCircle2 className="h-4 w-4 text-primary"/>:<Circle className="h-4 w-4 text-muted-foreground"/>}{es?sp:en}</div>)}</div>{!state?.background&&<Button variant="outline" disabled={busy} onClick={()=>void run('background')}>{es?'Antecedentes aprobados':'Mark background clear'}</Button>}<Button asChild variant="outline"><Link to="/admin/coi-review">{es?'Revisar seguro':'Review insurance'}</Link></Button></>}
+ ];
+ return <section className="border-y border-border py-5"><div className="mb-4 flex justify-between gap-3"><h2 className="text-lg font-bold">{es?'Día de firma':'Signing day'}</h2><span className="text-sm">{state?.active?'Active':state?.signed_at?'Getting Started':'Not signed'}</span></div><ol className="divide-y divide-border">{steps.map((step,i)=><li key={i} className="py-4"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h3 className="font-semibold">{es?'Paso':'Step'} {i+1} · {step.title}</h3>{status(step.done)}</div><div className="flex flex-wrap items-center gap-2">{step.content}</div></li>)}</ol>{state?.intake_complete&&<p className="text-sm text-muted-foreground">{state.kit_order_ready?(es?'Listo para pedir · seguro verificado':'Ready to order · insurance verified'):(es?'Listo para pedir una vez verificado el seguro':'Ready to order once insurance is verified')}</p>}
+ <Dialog open={confirm} onOpenChange={setConfirm}><DialogContent><DialogHeader><DialogTitle>Paper signature fallback</DialogTitle><DialogDescription>Confirm a paper agreement was signed. This does not create a digital signed copy.</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" onClick={()=>setConfirm(false)}>Cancel</Button><Button disabled={busy} onClick={()=>void run('signed')}>Mark Signed</Button></DialogFooter></DialogContent></Dialog>
+ <Dialog open={equipment} onOpenChange={setEquipment}><DialogContent className="max-h-[85vh] max-w-4xl overflow-y-auto"><DialogHeader><DialogTitle>{es?'Aprobar equipo':'Approve equipment'}</DialogTitle></DialogHeader>{pipeline&&<ProofPanel id={applicantId} p={pipeline} onChange={()=>void load()}/>}</DialogContent></Dialog></section>;
 }

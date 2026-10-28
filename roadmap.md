@@ -1,10 +1,19 @@
 # Roadmap
 
+## Digital agreements by service (Oct 28)
+- [x] Exact cleaning/lawn English templates v2026-10-29, preserved Spanish ICA, admin read/download; both generated PDFs match every source word after whitespace normalization.
+- [x] Phone HTML signing, placeholders, full PDFs, owner countersigning and 24-hour digest section. Both signature flows passed; eight signed/final copy emails accepted, inbox delivery receipts unavailable.
+- [x] Removed W-9 from signing/readiness/messages/documents and old artifact upload action. No taxpayer identifiers stored.
+- [x] Six ordered Signing day steps, inline equipment approval, send/copy agreement, automatic Pro account/number handoff, agreement-stage advance without W-9, menu priority through Nov 30; 18 focused tests pass.
+- [x] Cleaning/lawn isolated approval → intake → phone signature → countersign → account/readiness checks; screenshots retained and both test applicants/accounts/PDFs deleted. No frontend publication.
+- [ ] Stripe payout/1099 acceptance: live Connect creation rejected until owner completes Stripe platform profile; onboarding requests taxpayer-reporting capability and eventual/future requirements, but connected-account tax collection and 1099 filing settings remain unverified.
+- [ ] Physical-phone OTP → insurance → payout → Active acceptance: hosted phone provider limitation and Stripe platform profile block the full activation journey; no compliant facts fabricated.
+
 ## Pro signing day (Oct 29)
 - [x] Reused intake with emergency contact, equipment/ZIP availability, autosave and insurance-gated kit readiness. Authenticated phone test: autosave reload and submission readback pass; orders server-blocked pending verified insurance.
 - [x] Added /admin/signing-day and candidate open/send-link/signing controls in pipeline and legacy record; retained isolated Signing Day Test (TEST-A111) with completed intake and signed phone account, no candidate messages sent.
 - [ ] Phone-code login and full Getting Started → certificate → approval → Active test: blocked by hosted Phone provider returning “Unsupported phone provider”. Justin must enable Phone in More → Users → Auth settings → Phone; test uses his approved phone. Native code UI, private upload and atomic readiness activation implemented, but not verified end-to-end.
-- [ ] Full activation/payment/device acceptance still requires real phone OTP, Stripe payout completion and existing approved proof/training/W-9; none were fabricated. Preview changes not published.
+- [ ] Full activation/payment/device acceptance still requires real phone OTP, Stripe payout completion and existing approved proof/training; none were fabricated. Preview changes not published.
 
 ## Pro mockup screen-by-screen (Oct 28)
 - [x] Status (screen 5): outlined tier panel, overlapping badge, milestone fills and 300ms badge-to-QR flip. Signed-in owner EN/ES, QR flip and reduced motion verified; no overflow, page errors or owner insurance; five existing visit-rule tests pass. Real criteria/data retained, not published; visual styling aligned but pixel-identical reproduction is not established.

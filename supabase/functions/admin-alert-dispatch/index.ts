@@ -176,6 +176,10 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     if(!valid)needsTeam.push(r);
   }
   if(needsTeam.length)sections.push({title:'Estate Plus · Needs team before conversion',red:true,items:needsTeam.map(r=>({text:`${[r.first_name,r.last_name].filter(Boolean).join(' ')} · ${r.zip} · Needs verified team`,url:`${SITE}/admin/reservations`,label:'Assign team'}))});
+  const {data:unsignedOwner,error:counterError}=await admin.from('contract_signatures').select('applicant_id,typed_name,document_version').is('countersigned_at',null).lt('signed_at',new Date(Date.now()-24*3600000).toISOString());
+  if(counterError)throw new Error(counterError.message);
+  const pendingCountersigns=(unsignedOwner??[]).filter(s=>!testIds.has(s.applicant_id));
+  if(pendingCountersigns.length)sections.push({title:'Agreements awaiting your countersignature · over 24 hours',items:pendingCountersigns.map(s=>({text:`${s.typed_name} · ${s.document_version}`,url:`${SITE}/admin/signing-day`,label:'Countersign'}))});
   // Include morning text sends through this update, not just yesterday's business totals.
   const textUntil = new Date().toISOString();
   const senders = ['candidate-text', 'hiring-invite', 'pipeline-notify', 'hire-ready-dispatch'];

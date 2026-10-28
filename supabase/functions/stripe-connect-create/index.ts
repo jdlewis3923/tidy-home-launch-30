@@ -28,6 +28,7 @@ const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 });
 
 const Body = z.object({
+  action: z.enum(['onboard','tax_status']).optional(),
   applicant_id: z.string().uuid(),
   refresh_url: z.string().url().optional(),
   return_url: z.string().url().optional(),
@@ -70,7 +71,7 @@ Deno.serve(async (req) => {
   if (!parsed.success) {
     return jsonResponse({ error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
   }
-  const { applicant_id, refresh_url, return_url } = parsed.data;
+  const { applicant_id, refresh_url, return_url, action } = parsed.data;
 
   const { data: applicant, error: aerr } = await admin
     .from('applicants')
@@ -81,12 +82,20 @@ Deno.serve(async (req) => {
   let accountId = applicant.stripe_account_id as string | null;
 
   try {
+    if(action==='tax_status') {
+      const path=accountId?`/accounts/${accountId}`:'/account';
+      const r=await vendorFetch(`https://api.stripe.com/v1${path}`,{headers:{Authorization:`Bearer ${STRIPE_CONNECT_API_KEY}`}});
+      const account=await r.json();
+      if(!r.ok)throw new Error(account?.error?.message??'Stripe account read failed');
+      return jsonResponse({ok:true,connected_account:!!accountId,account_type:account.type??null,tax_reporting_capability:account.capabilities?.tax_reporting_us_1099_misc??'not_requested',taxpayer_fields_required:[...(account.requirements?.currently_due??[]),...(account.requirements?.eventually_due??[])].filter((f:string)=>/tax_id|ssn/.test(f)),platform_1099_filing_settings:'not_exposed_by_accounts_api'});
+    }
     if (!accountId) {
       const acct = await stripePost('/accounts', {
         type: 'express',
         country: 'US',
         email: applicant.email,
         'capabilities[transfers][requested]': 'true',
+        'capabilities[tax_reporting_us_1099_misc][requested]': 'true',
         'business_type': 'individual',
         'business_profile[mcc]': '7349', // Cleaning & Maintenance Services
         'business_profile[product_description]': 'Independent contractor home services for Tidy Home Concierge.',
@@ -99,12 +108,15 @@ Deno.serve(async (req) => {
       if (uerr) console.error('[stripe-connect-create] persist stripe_account_id failed', uerr);
     }
 
-    const base = (refresh_url ?? '').replace(/\/[^/]*$/, '') || DEFAULT_BASE;
+    if(!accountId)throw new Error('Stripe account was not created');
+    await stripePost(`/accounts/${accountId}`,{'capabilities[tax_reporting_us_1099_misc][requested]':'true'});
     const link = await stripePost('/account_links', {
-      account: accountId!,
+      account: accountId ?? "",
       refresh_url: refresh_url ?? `${DEFAULT_BASE}/onboarding/payment-return?refresh=1`,
       return_url:  return_url  ?? `${DEFAULT_BASE}/onboarding/payment-return`,
       type: 'account_onboarding',
+      'collection_options[fields]': 'eventually_due',
+      'collection_options[future_requirements]': 'include',
     });
 
     await admin.from('onboarding_events').insert({
