@@ -1409,6 +1409,7 @@ body.admin-hud h1 {
   --pro-red: 0 72% 46%;
   --pro-red-soft: 0 80% 96%;
   --pro-blue-soft: 214 95% 96%;
+  --pro-purple: 262 83% 58%;
   --pro-deep: 220 62% 13%;      /* mockup header/ground navy */
   --pro-deep-2: 219 50% 19%;    /* date strip */
 }
