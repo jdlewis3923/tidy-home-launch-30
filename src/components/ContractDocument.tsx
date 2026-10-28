@@ -1,0 +1,4 @@
+import { contractBlocks,fillContract } from '@/lib/contract-document';
+export default function ContractDocument({body,values={}}:{body:string;values?:Record<string,string>}) {
+  return <article className="space-y-5 text-base leading-7 text-foreground">{contractBlocks(fillContract(body,values)).map((block,i)=>block.kind==='table'?<div key={i} className="overflow-x-auto"><table className="w-full border-collapse text-base"><thead><tr>{block.rows[0].map((cell,j)=><th key={j} className="border border-border bg-muted p-3 text-left font-semibold">{cell}</th>)}</tr></thead><tbody>{block.rows.slice(1).map((row,k)=><tr key={k}>{row.map((cell,j)=><td key={j} className="border border-border p-3 align-top">{cell}</td>)}</tr>)}</tbody></table></div>:block.kind==='heading'?<h2 key={i} className="pt-5 text-lg font-bold">{block.text}</h2>:<p key={i} className="whitespace-pre-line">{block.text}</p>)}</article>;
+}
