@@ -33,6 +33,7 @@ export default function ProVisit() {
 
   const [busy, setBusy] = useState<null | "omw" | "complete" | "blocked">(null);
   const [blockOpen, setBlockOpen] = useState(false);
+  const [finishOpen, setFinishOpen] = useState(false);
   const [blockReason, setBlockReason] = useState<"customer_no_access" | "unsafe_conditions">("customer_no_access");
   const [blockNote, setBlockNote] = useState("");
   const [blockedDone, setBlockedDone] = useState(false);
@@ -430,12 +431,27 @@ export default function ProVisit() {
 
           <ProButton
             full
-            variant="secondary"
-            disabled={!photosOk || blocked || busy !== null || !!visit.completed_at}
-            onClick={() => setConfirm(true)}
+            disabled={blocked || busy !== null || !!visit.completed_at}
+            onClick={() => setFinishOpen((o) => !o)}
           >
-            {es?'Registrar salida y completar':'Check out and complete'}
+            {es ? 'Terminar trabajo' : 'Finish job'}
           </ProButton>
+          {finishOpen && !visit.completed_at && (
+            <ProCard>
+              <p className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">{es ? 'Antes de terminar' : 'Before you finish'}</p>
+              <Link to={`/pro/visit/${visit.id}/photos`} className="mt-3 flex min-h-[48px] items-center gap-3 rounded-xl border border-[hsl(var(--pro-navy)/0.12)] px-3">
+                <span className={`flex h-6 w-6 items-center justify-center rounded-full ${photosOk ? 'bg-[hsl(var(--pro-green))]' : 'border-2 border-[hsl(var(--pro-navy)/0.25)]'}`}>{photosOk && <Check className="h-4 w-4 text-white" aria-hidden />}</span>
+                <span className="flex-1 text-[14px] font-semibold text-[hsl(var(--pro-ink))]">{es ? 'Fotos de antes y después' : 'Before and after photos'} ({visit.before_photos ?? 0}/{visit.after_photos ?? 0})</span>
+              </Link>
+              <Link to={`/pro/visit/${visit.id}/checklist`} className="mt-2 flex min-h-[48px] items-center gap-3 rounded-xl border border-[hsl(var(--pro-navy)/0.12)] px-3">
+                <ListChecks className="h-5 w-5 text-[hsl(var(--pro-blue))]" aria-hidden />
+                <span className="flex-1 text-[14px] font-semibold text-[hsl(var(--pro-ink))]">{es ? 'Marcar cada tarea, extra y salida' : 'Check off every task, add-on and exit item'}</span>
+              </Link>
+              <ProButton full variant="secondary" className="mt-3" disabled={!photosOk || busy !== null} onClick={() => setConfirm(true)}>
+                {es ? 'Registrar salida y completar' : 'Check out and complete'}
+              </ProButton>
+            </ProCard>
+          )}
           {visit.service_type==='cleaning'&&<CleaningTeamInspection visitId={visit.id}/>}
           {!photosOk && !visit.completed_at && (
             <p className="text-center text-[13px] text-[hsl(var(--pro-ink-soft))]">
