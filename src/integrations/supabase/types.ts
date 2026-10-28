@@ -6298,6 +6298,51 @@ export type Database = {
           },
         ]
       }
+      pro_gps_tests: {
+        Row: {
+          accuracy_m: number | null
+          created_at: string
+          distance_m: number | null
+          id: string
+          lat: number
+          lng: number
+          pro_user_id: string
+          result: string
+          target_address: string | null
+          target_lat: number | null
+          target_lng: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          accuracy_m?: number | null
+          created_at?: string
+          distance_m?: number | null
+          id?: string
+          lat: number
+          lng: number
+          pro_user_id: string
+          result?: string
+          target_address?: string | null
+          target_lat?: number | null
+          target_lng?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          accuracy_m?: number | null
+          created_at?: string
+          distance_m?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          pro_user_id?: string
+          result?: string
+          target_address?: string | null
+          target_lat?: number | null
+          target_lng?: number | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       pro_kit: {
         Row: {
           applicant_id: string | null
