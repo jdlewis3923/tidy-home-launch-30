@@ -82,9 +82,9 @@ Deno.serve(async (req) => {
     if (error) return jsonResponse({error:error.message},409);
     if (!readiness?.ready) return jsonResponse({ok:true,skipped:'readiness_pending',readiness});
     if (!a.signing_day_active_at) {
-      const { data: changed, error: update } = await admin.from('applicants').update({ signing_day_active_at: new Date().toISOString(), current_stage: 'active', sequence_stage: 'active' }).eq('id', applicant_id).is('signing_day_active_at',null).select('id');
+      const { data: changed, error: update } = await admin.rpc('signing_day_activate_ready', { _id: applicant_id });
       if (update) return jsonResponse({error:update.message},409);
-      if (changed?.length) await workday(applicant_id,'signing_day_active',`${name}: Getting Started complete`,'Existing dispatch and equipment safeguards retained.','info',actor);
+      if (changed) await workday(applicant_id,'signing_day_active',`${name}: Getting Started complete`,'Existing dispatch and equipment safeguards retained.','info',actor);
     }
     if (!a.signing_day_active_sms_at && !a.is_test_row && !pipeline.is_test && a.phone) {
       const digits = a.phone.replace(/\D/g,'');

@@ -69,21 +69,12 @@ export default function ProUploadCoi() {
         .upload(path, uploadFile, { contentType: "application/pdf", upsert: false });
       if (upErr) throw upErr;
 
-      const { error: updErr } = await supabase
-        .from("applicants")
-        .update({
-          coi_pdf_url: path,
-          coi_uploaded_at: new Date().toISOString(),
-          coi_carrier_name: carrier || null,
-          coi_policy_number: policy || null,
-          coi_effective_date: effective || null,
-          coi_expires_at: expires || null,
-          coi_review_status: "pending_review",
-        })
-        .eq("contractor_id", userId);
+      const { error: updErr } = await supabase.rpc("signing_day_upload_certificate", {
+        _path:path,_carrier:carrier,_policy:policy,_effective:effective,_expires:expires,
+      });
       if (updErr) throw updErr;
 
-      toast.success("COI submitted. Admin will review within 24h.");
+      toast.success(es?"Certificado recibido. Revisión dentro de 1 día.":"Certificate submitted. Review within 1 day.");
       setCurrentStatus("pending_review");
       setCurrentUrl(path);
       setFile(null);
@@ -124,7 +115,7 @@ export default function ProUploadCoi() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileCheck2 className="h-5 w-5 text-blue-600" />
-              Status: <span className="capitalize text-blue-700">{currentStatus.replace(/_/g, " ")}</span>
+              {es?"Estado":"Status"}: <span className="capitalize text-blue-700">{currentStatus.replace(/_/g, " ")}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -138,25 +129,25 @@ export default function ProUploadCoi() {
                   required={!currentUrl}
                 />
                 {currentUrl && (
-                  <p className="text-xs text-slate-500 mt-1">Current file on record. Upload to replace.</p>
+                    <p className="text-xs text-slate-500 mt-1">{es?"Certificado guardado. Suba otro para reemplazarlo.":"Current file on record. Upload to replace."}</p>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Carrier</Label>
-                  <Input value={carrier} onChange={(e) => setCarrier(e.target.value)} placeholder="State Farm" />
+                  <Label>{es?"Aseguradora":"Carrier"}</Label>
+                  <Input required maxLength={200} value={carrier} onChange={(e) => setCarrier(e.target.value)} placeholder="State Farm" />
                 </div>
                 <div>
-                  <Label>Policy #</Label>
-                  <Input value={policy} onChange={(e) => setPolicy(e.target.value)} placeholder="ABC-12345" />
+                  <Label>{es?"Póliza":"Policy #"}</Label>
+                  <Input required maxLength={200} value={policy} onChange={(e) => setPolicy(e.target.value)} placeholder="ABC-12345" />
                 </div>
                 <div>
-                  <Label>Effective</Label>
-                  <Input type="date" value={effective} onChange={(e) => setEffective(e.target.value)} />
+                  <Label>{es?"Vigencia":"Effective"}</Label>
+                  <Input required type="date" value={effective} onChange={(e) => setEffective(e.target.value)} />
                 </div>
                 <div>
-                  <Label>Expires</Label>
-                  <Input type="date" value={expires} onChange={(e) => setExpires(e.target.value)} />
+                  <Label>{es?"Vencimiento":"Expires"}</Label>
+                  <Input required type="date" value={expires} onChange={(e) => setExpires(e.target.value)} />
                 </div>
               </div>
               <Button

@@ -1,10 +1,10 @@
 # Roadmap
 
 ## Pro signing day (Oct 29)
-- [ ] Reuse intake with emergency contact, equipment/ZIP availability, autosave and insurance-gated kit readiness.
-- [ ] Admin signing-day overview and candidate open/send-link/signing actions.
-- [ ] Signed number/account and phone-code login; inactive Getting Started with server-verified readiness and activation.
-- [ ] Isolated test candidate intake → signing → access → insurance approval → activation; physical phone code/certificate test requires Justin.
+- [x] Reused intake with emergency contact, equipment/ZIP availability, autosave and insurance-gated kit readiness. Authenticated phone test: autosave reload and submission readback pass; orders server-blocked pending verified insurance.
+- [x] Added /admin/signing-day and candidate open/send-link/signing controls in pipeline and legacy record; retained isolated Signing Day Test (TEST-A111) with completed intake and signed phone account, no candidate messages sent.
+- [ ] Phone-code login and full Getting Started → certificate → approval → Active test: blocked by hosted Phone provider returning “Unsupported phone provider”. Justin must enable Phone in More → Users → Auth settings → Phone; test uses his approved phone. Native code UI, private upload and atomic readiness activation implemented, but not verified end-to-end.
+- [ ] Full activation/payment/device acceptance still requires real phone OTP, Stripe payout completion and existing approved proof/training/W-9; none were fabricated. Preview changes not published.
 
 ## Pro mockup screen-by-screen (Oct 28)
 - [x] Status (screen 5): outlined tier panel, overlapping badge, milestone fills and 300ms badge-to-QR flip. Signed-in owner EN/ES, QR flip and reduced motion verified; no overflow, page errors or owner insurance; five existing visit-rule tests pass. Real criteria/data retained, not published; visual styling aligned but pixel-identical reproduction is not established.
