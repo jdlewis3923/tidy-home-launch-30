@@ -1,5 +1,8 @@
 # Roadmap
 
+## Founding visual reference (Oct 28)
+- [x] Matched exterior-photo opening, centered quote summary, image-led service switches, two-column photographic add-ons and gold continuation using recreated photography (not exact source photos). Preserved catalog prices, gates, bilingual names, real counts and motion. Phone/computer quote-to-reservation verified without submitting, no overflow or runtime errors; 77 pricing/add-on tests passed. Not published.
+
 ## Rebecca’s remaining application (Oct 28 UTC)
 - [x] Rebecca Ramirez (phone ending 2616) saved 11 answers in v6’s shorter eight-step form, last saved Oct 27 10:33 AM Miami; incomplete employer/work history prevented moving beyond section 2. Rebecca Paz is a separate archived, submitted v5 record and was untouched.
 - [x] Configured only Ramirez’s existing record for remaining-required-only presentation, retained all 36 validation/scoring questions and 11 saved answers; optional blank second job hidden without deleting data. Phone/computer verified, missing employer still blocks progression, 25 focused tests pass. No submission or candidate messages; document progression remains gated. Frontend is preview-only until publication is explicitly approved.

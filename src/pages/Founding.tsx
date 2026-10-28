@@ -23,15 +23,13 @@ import LanguageToggle from "@/components/LanguageToggle";
 import TidyLogo from "@/components/TidyLogo";
 import Reveal from "@/components/motion/Reveal";
 import { useFoundingMotion, useCountUp } from "@/hooks/useFoundingMotion";
-import SparkleField from "@/components/landing/SparkleField";
-import { ArrowRight, CalendarDays, Camera, CarFront, Clock3, Gift, Leaf, LockKeyhole, ShieldCheck, Sparkles, Star, UserRoundCheck } from "lucide-react";
-import foundingMobileVideo from "@/assets/homepage-mobile-hero-20261004b.mp4.asset.json";
-import foundingMobilePoster from "@/assets/homepage-mobile-hero-poster-20261004b.jpg.asset.json";
-import foundingDesktopVideo from "@/assets/homepage-desktop-hero-20261004b.mp4.asset.json";
-import foundingDesktopPoster from "@/assets/homepage-desktop-hero-poster-20261004b.jpg.asset.json";
-import cleaningPlan from "@/assets/founding-plan-cleaning.webp";
-import lawnPlan from "@/assets/founding-plan-lawn.webp";
-import carPlan from "@/assets/founding-plan-car.webp";
+import { Switch } from "@/components/ui/switch";
+import exteriorPhoto from "@/assets/founding-exterior-reference.jpg";
+import livingRoom from "@/assets/founding-living-room.jpg";
+import tropicalLawn from "@/assets/founding-tropical-lawn.jpg";
+import suvThumb from "@/assets/founding-suv-thumb.jpg";
+const addonPhotos = import.meta.glob<string>("/src/assets/founding-addons/*.jpg", { eager: true, import: "default" });
+import { ArrowRight, CalendarDays, Camera, CarFront, Check, ChevronRight, Clock3, Gift, Leaf, LockKeyhole, Menu, ShieldCheck, Sparkles, Star, UserRoundCheck, Users } from "lucide-react";
 import scanImage from "@/assets/founding-how-scan.jpg";
 import calendarImage from "@/assets/founding-how-calendar.jpg";
 import proImage from "@/assets/founding-pro-step.jpg";
@@ -104,10 +102,8 @@ export default function Founding() {
     return blank("", urlSrc);
   });
   const set = (p: Partial<State>) => setS((o) => ({ ...o, ...p }));
-  const [motionOk, setMotionOk] = useState(false);
   const [quoteVisible, setQuoteVisible] = useState(true);
   useEffect(() => { try { sessionStorage.setItem(KEY, JSON.stringify(s)); } catch { /* ok */ } }, [s]);
-  useEffect(() => { setMotionOk(!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches); }, []);
 
   const logged = useRef(false);
   useEffect(() => { if (!logged.current) { logged.current = true; logEvent("page_view", s, language); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -280,23 +276,12 @@ export default function Founding() {
       </Helmet>
 
       <header className="founding-landing-hero text-primary-foreground">
-        {motionOk ? (
-          <>
-            <video src={foundingMobileVideo.url} poster={foundingMobilePoster.url} autoPlay loop muted playsInline preload="auto" aria-hidden="true" className="founding-hero-photo md:hidden" />
-            <video src={foundingDesktopVideo.url} poster={foundingDesktopPoster.url} autoPlay loop muted playsInline preload="metadata" aria-hidden="true" className="founding-hero-photo hidden md:block" />
-          </>
-        ) : (
-          <picture>
-            <source media="(max-width: 767px)" srcSet={foundingMobilePoster.url} />
-            <img src={foundingDesktopPoster.url} alt={t("Open Miami home interior looking toward the water")} width={1920} height={1080} loading="eager" fetchPriority="high" className="founding-hero-photo" />
-          </picture>
-        )}
+        <img src={exteriorPhoto} alt={t("Miami home with tropical landscaping and a parked car")} width={1536} height={1024} loading="eager" fetchPriority="high" className="founding-hero-photo" />
         <div className="founding-hero-shade" />
-        <SparkleField />
         <div className="founding-hero-shell">
           <div className="founding-topbar">
             <TidyLogo size="md" priority />
-            <div className="founding-language"><LanguageToggle /></div>
+            <div className="founding-header-actions"><div className="founding-language"><LanguageToggle /></div><details className="founding-nav"><summary aria-label={language === 'es' ? 'Menú' : 'Menu'}><Menu /></summary><nav><Link to="/">{t("Home")}</Link><Link to="/member-guide">{language === 'es' ? 'Guía del miembro' : 'Member Guide'}</Link><Link to="/login">{t("Login")}</Link></nav></details></div>
           </div>
           <div className="founding-hero-copy">
             <h1>{[t("More life."), t("Less chores.")].map((line, li) => (
@@ -306,20 +291,20 @@ export default function Founding() {
             ))}</h1>
             <p>{t("Three services. One subscription.")}<br />{t("More life for you.")}</p>
             {listing && <a className="founding-rating-line" href={listing.maps_uri} target="_blank" rel="noreferrer"><span>★★★★★</span> {formatRating(listing.rating)} · {listing.total_count} {t("Google reviews")}</a>}
-            <div data-testid="founding-left" className="founding-cap-pill">
+            <div data-testid="founding-left" className="founding-cap-pill"><Users aria-hidden="true" /><div>
               {!isZip(s.zip) || left === null
                 ? <>{FOUNDING_CAP} {t("founding homes per ZIP")} · {FOUNDING_ZIPS.join(" · ")}</>
                 : left > 0
                   ? <><strong>{left} {t("of")} {FOUNDING_CAP}</strong> {t("founding homes left in")} {s.zip}{left === FOUNDING_CAP ? <> · {t("Founding pricing is open now.")}</> : null}</>
                   : <>{t("Founding homes are fully reserved in")} {s.zip}</>}
-            </div>
+            </div></div>
           </div>
         </div>
       </header>
 
       <main className="founding-landing-main">
         <div className="founding-quote-wrap">
-          <section ref={quoteCardRef} data-testid="founding-quote-card" aria-label={t("Your price")} className="founding-quote-card" data-fx-spot>
+          <section ref={quoteCardRef} data-testid="founding-quote-card" aria-label={t("Your price")} className={`founding-quote-card ${s.step === "price" ? "founding-quote-overview" : ""}`} data-fx-spot>
             {s.step !== "done" && (
               <ol className="founding-steps" aria-hidden="true">
                 {(["zip", "services", "sizes", "price", "reserve"] as Step[]).map((st, i, all) => {
@@ -328,8 +313,8 @@ export default function Founding() {
                 })}
               </ol>
             )}
-            {s.step !== "done" && <p className="founding-fine mb-3 text-center text-xs text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
-            {isZip(s.zip) && left !== null && (
+            {s.step !== "done" && s.step !== "price" && <p className="founding-fine mb-3 text-center text-xs text-ink-faint">{t("See your price in 60 seconds. No card. No account.")}</p>}
+            {s.step !== "price" && isZip(s.zip) && left !== null && (
               <div data-testid="founding-live-count" className="founding-live-count" aria-live="polite">
                 <span aria-hidden="true" />
                 {left > 0
@@ -364,28 +349,16 @@ export default function Founding() {
 
             {s.step === "services" && (
               <div>
-                <button type="button" className="mb-3 text-xs font-semibold text-primary underline" onClick={() => go("zip")}>{s.zip} · {t("Change ZIP")}</button>
-                <p className="text-sm font-bold">{t("Pick your services")}</p>
-                <div className="mt-2 grid gap-2">
-                  {SVCS.map((svc) => {
-                    const picked = s.services.includes(svc);
-                    const Icon = svc === "cleaning" ? Sparkles : svc === "lawn" ? Leaf : CarFront;
-                    return (
-                      <button key={svc} type="button" aria-pressed={picked} className={`${chip} ${picked ? on : off} flex items-center justify-between text-left`}
-                        onClick={() => set({ services: picked ? s.services.filter((x) => x !== svc) : [...s.services, svc] })}>
-                        <span className="flex items-center gap-2"><Icon className={`h-5 w-5 founding-service-icon founding-service-icon-${svc}`} aria-hidden="true" />{t(SVC_LABEL[svc])}</span>
-                        <span className="text-xs font-medium text-ink-faint">{t("from")} {money(SIZE_PRICES[svc][1])}{per}</span>
-                      </button>
-                    );
-                  })}
+                <Button variant="link" className="p-0" onClick={() => go("zip")}>{s.zip} · {t("Change ZIP")}</Button>
+                <h2 className="founding-services-heading">{t("Pick your services")}</h2>
+                <div className="founding-service-list">
+                  {SVCS.map(svc => <div key={svc} className="founding-service-row">
+                    <img src={svc === 'cleaning' ? livingRoom : svc === 'lawn' ? tropicalLawn : suvThumb} alt="" width={160} height={100} />
+                    <Switch aria-label={t(SVC_LABEL[svc])} checked={s.services.includes(svc)} onCheckedChange={picked => set({ services: picked ? [...s.services, svc] : s.services.filter(x => x !== svc) })} />
+                    <span className="founding-service-copy"><strong>{t(SVC_LABEL[svc])}</strong><small>{t("from")} {money(SIZE_PRICES[svc][1])}{per}</small></span>
+                  </div>)}
                 </div>
-                {s.services.map((svc) => (
-                  <div key={svc} className="mt-3 rounded-xl border border-border bg-card p-3">
-                    <p className="text-sm font-bold">{t(SVC_LABEL[svc])}</p>
-                    <ScopeSummary compact group={groupsFor([svc])[0]} monthlyLawn={svc === "lawn" && s.cadence.lawn === "monthly"} weekly={svc === "cleaning" ? s.cadence.cleaning === "weekly" : undefined} />
-                  </div>
-                ))}
-                <button className={`${primaryBtn} mt-4`} disabled={!s.services.length} onClick={() => go("sizes")}>{t("Next")} →</button>
+                <Button className={`${primaryBtn} mt-4`} disabled={!s.services.length} onClick={() => go("sizes")}>{t("Next")} <ChevronRight /></Button>
               </div>
             )}
 
@@ -435,6 +408,7 @@ export default function Founding() {
 
             {s.step === "price" && (
               <div>
+                <div className="founding-summary-panel">
                 {priced.length > 0 && (
                   <div className="founding-price-stats text-center">
                     <Stat label={s.yearly && priced.length === 1 && priced[0]?.service === 'cleaning' ? (language === 'es' ? 'Pago anual' : 'Yearly payment') : t("Monthly total")} value={s.yearly && priced.length === 1 && priced[0]?.service === 'cleaning' ? `$${(cleaningAnnualCents(priced[0].size as CleaningSize,priced[0].cadence)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}` : <Ticker n={total} suffix={per} />} big className="founding-price-total" />
@@ -442,56 +416,52 @@ export default function Founding() {
                     <Stat label={t("Per visit")} value={visits ? money(total / visits) : "—"} />
                   </div>
                 )}
-                <p className="founding-launch-note">{startsLine(launchCfg, lang, s.services)}.</p>
+
                 {priced.some(l => l.service === 'cleaning') && <div className="mt-3 space-y-2">
-                  <div className="flex gap-2" role="group" aria-label={language === 'es' ? 'Periodo de pago' : 'Payment period'}>
+                  <div className="founding-billing-toggle" role="group" aria-label={language === 'es' ? 'Periodo de pago' : 'Payment period'}>
                     {[false, true].map(yearly => <Button key={String(yearly)} variant={!!s.yearly === yearly ? 'default' : 'outline'} aria-pressed={!!s.yearly === yearly} onClick={() => set({ yearly })}>{yearly ? (language === 'es' ? 'Anual · ahorra 10%' : 'Yearly · save 10%') : t('Monthly')}</Button>)}
                   </div>
                   {s.yearly && priced.filter(l => l.service === 'cleaning').map(l => <p key={l.service} className="font-bold text-foreground">{language === 'es' ? 'Limpieza · pago anual' : 'Cleaning · yearly payment'}: ${(cleaningAnnualCents(l.size as CleaningSize, l.cadence) / 100).toLocaleString(language === 'es' ? 'es-US' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>)}
                 </div>}
-                <p className="mt-2 text-center text-sm font-semibold text-primary">{t("Not right? We come back within 48 hours, free.")}</p>
-                <ul className="mt-3 divide-y divide-border text-sm">
-                  {lines.map((l) => l && (
-                    <li key={l.service} className="flex justify-between py-2">
-                      <span>{t(SVC_LABEL[l.service])}{l.service === 'cleaning' && typeof l.size === 'number' ? ` · ${language === 'es' ? cleaningBand(l.size)?.name.replace('Size','Tamaño').replace('Estate Plus','Residencia Plus').replace('Estate','Residencia') : cleaningBand(l.size)?.name}` : ''}{l.service !== "detailing" ? ` · ${t(CAD_LABEL[l.cadence])}` : ` · ${t("3 washes a month")}`}</span>
-                      <b>{l.quote ? t("Custom quote") : `${money(l.monthly)}${per}`}</b>
-                    </li>
-                  ))}
-                </ul>
+                <p className="founding-launch-note"><CalendarDays aria-hidden="true" />{startsLine(launchCfg, lang, s.services)}.</p>
+                <p className="founding-guarantee"><ShieldCheck aria-hidden="true" />{t("Not right? We come back within 48 hours, free.")}</p>
+                </div>
+                <div className="founding-services-title"><h2>{language === 'es' ? 'Tus servicios' : 'Your Services'}</h2><Button variant="link" onClick={() => go('services')}>{language === 'es' ? 'Cambiar servicios' : 'Change services'}</Button></div>
+                <div className="founding-service-list">
+                  {SVCS.map(svc => {
+                    const line = lines.find(l => l?.service === svc);
+                    const selected = s.services.includes(svc);
+                    return <div key={svc} className="founding-service-row">
+                      <img src={svc === 'cleaning' ? livingRoom : svc === 'lawn' ? tropicalLawn : suvThumb} alt="" width={160} height={100} />
+                      <Switch aria-label={t(SVC_LABEL[svc])} checked={selected} onCheckedChange={picked => picked ? addServiceAtPrice(svc) : set({ services: s.services.filter(x => x !== svc) })} />
+                      <Button variant="ghost" className="founding-service-detail" onClick={() => selected ? go('sizes') : addServiceAtPrice(svc)}>
+                        <span className="founding-service-copy"><strong>{t(SVC_LABEL[svc])}</strong><small>{line?.service === 'cleaning' && typeof line.size === 'number' ? `${language === 'es' ? cleaningBand(line.size)?.name.replace('Size','Tamaño').replace('Estate','Residencia') : cleaningBand(line.size)?.name} · ` : ''}{svc === 'detailing' ? t('3 washes a month') : t(CAD_LABEL[s.cadence[svc]])}</small></span>
+                        <b>{line?.quote ? t('Custom quote') : `${!selected ? t('from') + ' ' : ''}${money(line?.monthly ?? SIZE_PRICES[svc][1])}${per}`}</b><ChevronRight aria-hidden="true" />
+                      </Button>
+                    </div>;
+                  })}
+                </div>
                 {anyQuote && <p className="mt-2 rounded-lg bg-accent p-2 text-xs">{language === 'es' ? 'Tu hogar necesita una cotización personalizada. No se cobra nada hoy.' : 'Your home needs a custom quote. Nothing is charged today.'}</p>}
                 {cleanSize === 'quote' && <CleaningWalkthroughSlots value={s.walkthroughSlot ?? ''} onChange={walkthroughSlot => set({ walkthroughSlot })} />}
 
-                {SVCS.filter((service) => !s.services.includes(service)).map((service) => (
-                  <button key={service} type="button" className="founding-bundle-offer" onClick={() => addServiceAtPrice(service)}>
-                    <span><strong>{t("Add")} {t(SVC_LABEL[service])} {t("from")} {money(SIZE_PRICES[service][1])}{per}</strong> — {t(s.services.length >= 2 ? "and get two free premium add-ons every month." : "and your first premium add-on is free every month.")}</span><span aria-hidden="true">+</span>
-                  </button>
-                ))}
-
                 {giftCount > 0 && (
-                  <fieldset className="mt-4 rounded-xl border-2 border-gold/60 p-3">
-                    <legend className="px-1 text-sm font-bold">{giftCount === 1 ? t("You've unlocked one free premium add-on every month") : t("You've unlocked two free premium add-ons every month")}</legend>
-                    <div className="mt-1 grid gap-2">
-                      {giftPool.map((a) => {
+                  <fieldset className="founding-gift-panel">
+                    <legend className="sr-only">{t("Free add-on")}</legend>
+                    <div className="founding-gift-heading"><Gift aria-hidden="true" /><div><h3>{language === 'es' ? 'Tu complemento premium gratis' : 'Your Free Premium Add-On'}</h3><p>{giftCount === 1 ? t("You've unlocked one free premium add-on every month") : t("You've unlocked two free premium add-ons every month")}</p></div></div>
+                    <div className="founding-addon-grid">
+                      {giftPool.map(a => {
                         const picked = s.gifts.includes(a.key);
-                        return <button key={a.key} type="button" aria-pressed={picked} className={`${chip} ${picked ? on : off} flex justify-between text-left`}
-                          onClick={() => set({ gifts: picked ? s.gifts.filter((g) => g !== a.key) : [...s.gifts, a.key].slice(-giftCount) })}>
-                          <span>{t(a.name)}</span><span className="text-xs text-ink-faint">{money(a.price)} {t("value")}</span></button>;
+                        return <Button key={a.key} variant="outline" type="button" aria-pressed={picked} className={`founding-addon-choice ${picked ? 'is-selected' : ''}`} onClick={() => set({ gifts: picked ? s.gifts.filter(g => g !== a.key) : [...s.gifts, a.key].slice(-giftCount) })}>
+                          <img src={addonPhotos[`/src/assets/founding-addons/${a.key}.jpg`]} alt="" width={88} height={66} loading="lazy" />
+                          <span><strong>{t(a.name)}</strong><small>{money(a.price)} {t("value")}</small></span><span className="founding-choice-check">{picked && <Check aria-hidden="true" />}</span>
+                        </Button>;
                       })}
                     </div>
                   </fieldset>
                 )}
 
-                {listing && (
-                  <div className="mt-4 rounded-xl bg-navy p-3 text-primary-foreground">
-                    <p className="text-sm font-bold"><span className="text-gold">★★★★★</span> {formatRating(listing.rating)} · {listing.total_count} {t("Google reviews")}</p>
-                    {featuredReview && <p className="mt-2 text-sm">“{featuredReview.text}” <span className="text-primary-foreground/70">— {reviewName}</span></p>}
-                    <a href={listing.maps_uri} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-gold underline">{t("Read them on Google")} →</a>
-                  </div>
-                )}
-                <div className="mt-4 flex gap-2">
-                  <button type="button" className={`${chip} ${off}`} onClick={() => go("sizes")}>← {t("Back")}</button>
-                  <button className={primaryBtn} onClick={() => go("reserve")}>{t("Reserve my spot")} →</button>
-                </div>
+                <Button className={`${primaryBtn} founding-continue`} disabled={!ready} onClick={() => go("reserve")}>{language === 'es' ? 'Continuar a fecha y hora' : 'Continue to Date & Time'} <ChevronRight /></Button>
+                <Button variant="link" className="founding-back" onClick={() => go("sizes")}>← {t("Back")}</Button>
               </div>
             )}
 
@@ -581,9 +551,9 @@ export default function Founding() {
             <p className="founding-section-lead">{t("Bundle the services you want. One simple bill. No hidden fees.")}</p>
             <ul className="founding-plan-grid">
               {[
-                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: cleaningPlan, Icon: Sparkles, tone: "gold" },
-                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: lawnPlan, Icon: Leaf, tone: "green" },
-                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: carPlan, Icon: CarFront, tone: "blue" },
+                { svc: "cleaning" as Svc, label: "House Cleaning", price: 139, image: livingRoom, Icon: Sparkles, tone: "gold" },
+                { svc: "lawn" as Svc, label: "Lawn Care", price: 45, image: tropicalLawn, Icon: Leaf, tone: "green" },
+                { svc: "detailing" as Svc, label: "Car Care", price: 149, image: exteriorPhoto, Icon: CarFront, tone: "blue" },
               ].map(({ svc, label, price, image, Icon, tone }, index) => (
                 <li key={label} className="founding-plan-card" data-fx-tilt style={{ animationDelay: `${index * 120}ms` }}>
                   <picture data-fx-progress><img src={image} alt="" width={1365} height={768} loading="lazy" /></picture>
@@ -656,7 +626,7 @@ function Stat({ label, value, big, className = "" }: { label: string; value: Rea
 /** Price that rolls to its new value whenever the quote changes. */
 function Ticker({ n, suffix = "" }: { n: number; suffix?: string }) {
   const v = useCountUp(n);
-  return <span className="founding-ticker" aria-label={`$${Math.round(n).toLocaleString()}${suffix}`}><span aria-hidden="true">${Math.round(v).toLocaleString()}{suffix}</span></span>;
+  return <span className="founding-ticker" aria-label={`$${Math.round(n).toLocaleString()}${suffix}`}><span aria-hidden="true">${Math.round(v).toLocaleString()}<span className="founding-price-suffix">{suffix}</span></span></span>;
 }
 function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: React.ReactNode }) {
   return <div><label htmlFor={id} className="text-xs font-semibold">{label}</label>{children}{error && <p className="mt-1 text-xs text-destructive">{error}</p>}</div>;
