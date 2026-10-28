@@ -1,5 +1,9 @@
 # Roadmap
 
+## Rebecca’s remaining application (Oct 28 UTC)
+- [ ] Confirm Rebecca Ramirez’s saved answers and long/short version; prepare a remaining-required-only resume without resetting answers or bypassing document gates.
+- [ ] Verify her personalized page on a phone and keep candidate messages unsent until exact wording is approved.
+
 ## Cleaning expansion (Oct 27) — build in order
 - [ ] Part 1 by Thu Oct 29 8 AM Miami: square-foot/bath sizes, Estate prices, lookup-key catalog live/test, reservation persistence, website/founding/member/yearly parity, phone/desktop evidence and deleted test reservations.
   - Completed: five-band quotes, live/test additive catalog, reservation readback, phone/desktop quote checks; admin-created walkthrough slots, shared hosted/embedded verification gates, atomic size approval/decline page and admin copy-link control, verified quote hydration. Oct 27: live catalog check rebuilt for five bands (45/45 keys pass, $393 bundle and $1,396 Estate carts exact, no archived prices) and test-mode charge/refund/cancel proven on clean_2_biweekly ($348) and clean_estate_weekly ($1,396) with cleanup. Still open: yearly billing lifecycle, notification delivery and full bilingual cross-surface review; prepaid collection is blocked in both payment paths rather than billed monthly.
