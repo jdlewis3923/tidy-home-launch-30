@@ -393,3 +393,7 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - Sunday-held texts all released and sent this morning (3 invites + 2 support replies); nothing still queued.
 - Oct 24 cohort (20) auto-archived as no_apply after Sunday 8 PM ET deadline passed; links expired, no further reminders without Justin's say-so.
 - Verified /apply is fully bilingual: auto-detects browser language + stored preferred_language, Español/English toggle on every step.
+
+## Pro dispatch + owner tracker (Oct 28)
+- [x] Pro side: "Today" tab is the default daily jobs list; each visit card now has a full-width "Go now" button opening Google Maps directions (Apple/Waze kept as alternates). While a visit is on the way or in progress, the phone pings its location every 3 minutes (pro-location-ping → pro_location_pings; server refuses unassigned/inactive visits).
+- [x] Owner side: /admin/pro-tracker (Today menu) shows per visit: Pro → customer, window, late flag (15 min past start, not checked in), on-the-way time, arrival time + GPS distance at check-in, live time on site, finish time + total duration, and latest live ping distance/age. Auto-refreshes every 60 s. Verified: build OK, RPC returns rows as admin, page renders signed in. Live pings verified only with simulated location — real-device evidence pending Justin's phone tests.

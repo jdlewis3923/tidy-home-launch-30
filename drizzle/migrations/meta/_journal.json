@@ -1779,6 +1779,13 @@
       "when": 1793197735126,
       "tag": "0253_pro_gps_self_test",
       "breakpoints": true
+    },
+    {
+      "idx": 254,
+      "version": "7",
+      "when": 1793199820092,
+      "tag": "0254_pro_location_tracking",
+      "breakpoints": true
     }
   ]
 }

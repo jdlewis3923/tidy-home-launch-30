@@ -13,3 +13,4 @@
 
 - Ops agents: one consolidated `ops-agents` tick runs all 13 agents, writes runs/exceptions to ops_agent_* tables and owner alerts to admin_alerts; it never sends member/Pro texts itself — why: one auditable door; existing senders keep quiet-hours and approval rules.
 - `pro-gps-test` records self-serve phone GPS checks in `pro_gps_tests` with no visit required; the browser resolves the typed address (server-side geocoders are blocked from this runtime) and a missing/unresolved target stores `no_target` (GPS unverified) without blocking — why: real-device evidence before launch, and unverified GPS never stops pay.
+- Live Pro location pings go through `pro-location-ping` → `pro_record_ping` (assigned + active visit only) into `pro_location_pings`; the owner reads them via `admin_pro_tracker` at /admin/pro-tracker — why: pings are visibility only and never affect pay or the 150 m rules.
