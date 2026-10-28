@@ -1,177 +1,81 @@
-import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
-/**
- * Tidy — typed-signature contract flow for /contract/:token (public, token only).
- *
- * POST { token, action: 'document' }                       → { url, version, filename }
- * POST { token, action: 'sign', typed_name, agreed, version } → signs
- *
- * On sign: stores typed name, time, IP, browser and exact document version;
- * appends a signature page to the agreement PDF; saves it; emails a copy to the
- * Pro and to hello@jointidy.co; moves the stage to contract_signed (which
- * assigns the Pro number). Listed for lawyer review with the ICA items.
- */
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
-import { REVIEW_BONUS_LINE, REVIEW_BONUS_LINE_ES } from '../_shared/review-bonus.ts';
-import { PDFDocument, StandardFonts, rgb } from 'https://esm.sh/pdf-lib@1.17.1';
-import { handleCors, jsonResponse } from '../_shared/cors.ts';
-import { vendorFetch } from '../_shared/http.ts';
-import { contractSignedEmail } from '../_shared/pro-emails.ts';
+import '../_shared/http.ts';
+import { createClient } from 'npm:@supabase/supabase-js@2';
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { z } from 'npm:zod@3';
+import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { sendProEmail, proLang } from '../_shared/pro-send.ts';
-import { TIDY_OWNER_EMAIL } from '../_shared/email-brand.ts';
-import { pipelineAllows } from '../_shared/pipeline-gate.ts';
-
-const URL_ = Deno.env.get('SUPABASE_URL')!;
-const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const admin = createClient(URL_, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
-const BUCKET = 'company-docs';
-
-async function currentIca(lang: 'en' | 'es' = 'en') {
-  // Spanish ICA is a lawyer-supplied upload (doc_key ica:es); never machine-translated.
-  if (lang === 'es') {
-    const { data: es } = await admin.from('company_documents').select('id, filename, storage_path, uploaded_at')
-      .eq('doc_key', 'ica:es').eq('current_version', true).is('archived_at', null)
-      .order('uploaded_at', { ascending: false }).limit(1).maybeSingle();
-    if (es) return { ...es, version: `${es.filename} · ${String(es.uploaded_at).slice(0, 10)} · ${String(es.id).slice(0, 8)}` };
-  }
-  const { data } = await admin.from('company_documents')
-    .select('id, filename, storage_path, uploaded_at')
-    .eq('category', 'Contracts').ilike('filename', '%IndependentContractorAgreement%')
-    .not('filename', 'ilike', 'ICA-signed%').not('tags', 'cs', '{signed}')
-    .or('doc_key.is.null,doc_key.neq.ica:es')
-    .eq('current_version', true).is('archived_at', null)
-    .order('uploaded_at', { ascending: false }).limit(1).maybeSingle();
-  if (!data) return null;
-  const version = `${data.filename} · ${String(data.uploaded_at).slice(0, 10)} · ${String(data.id).slice(0, 8)}`;
-  return { ...data, version };
+import { contractSignedEmail } from '../_shared/pro-emails.ts';
+import { agreementPdf,etTime } from '../_shared/contract-pdf.ts';
+import { CONTRACT_TEMPLATE_SEED } from '../_shared/contract-template-seed.ts';
+const db=createClient(Deno.env.get('SUPABASE_URL')??'',Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'',{auth:{persistSession:false}});
+const schema=z.object({action:z.enum(['document','sign','countersign','templates','template_pdf','seed']),token:z.string().min(20).max(200).optional(),applicant_id:z.string().uuid().optional(),template_id:z.string().uuid().optional(),typed_name:z.string().trim().min(3).max(120).optional(),business_name:z.string().trim().max(200).optional(),agreed:z.boolean().optional(),version:z.string().max(300).optional()});
+const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
+function b64(bytes:Uint8Array){let s='';for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(s);}
+async function check<T>(r:{data:T;error:unknown}){if(r.error)throw r.error;return r.data;}
+async function missing(id:string,reason:string){await db.from('admin_alerts').upsert({key:`contract-template:${id}`,type:'contract_template_missing',level:'action',title:'Agreement link unavailable',message:reason,details:{applicant_id:id},target_url:`/admin/pipeline/${id}`,tier:'urgent'},{onConflict:'key'});}
+async function mail(a:any,bytes:Uint8Array,path:string,version:string,typed:string,when:string,final=false){
+ const link=await check(await db.storage.from('company-docs').createSignedUrl(path,2592000));
+ const built=contractSignedEmail(a.first_name??'',typed,when,version,link?.signedUrl??null,await proLang(db,a.id));
+ if(final)built.subject=`Final countersigned agreement — ${typed}`;
+ const attachment=[{name:final?'Tidy-Agreement-final.pdf':'Tidy-Agreement-signed.pdf',content:b64(bytes)}];
+ const pro=a.email?await sendProEmail(db,{applicantId:a.id,key:final?'contract_final':'contract_signed',to:a.email,built,triggeredBy:'contract-sign',attachment}):{sent:false,reason:'missing_email'};
+ const owner=await sendProEmail(db,{applicantId:null,key:final?'contract_final_owner':'contract_signed_owner',to:'hello@jointidy.co',built:{...built,subject:`${final?'Countersigned':'Signed'}: ${typed}`},triggeredBy:'contract-sign',attachment});
+ return {pro,owner};
 }
-
-function toB64(bytes: Uint8Array): string {
-  let s = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return btoa(s);
-}
-
-Deno.serve(async (req) => {
-  const pre = handleCors(req);
-  if (pre) return pre;
-  if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
-  const body = await req.json().catch(() => ({}));
-  const token = typeof body?.token === 'string' ? body.token : '';
-  if (token.length < 20) return jsonResponse({ error: 'invalid_request' }, 400);
-
-  const { data: a } = await admin.from('applicants')
-    .select('id, first_name, last_name, email, contracts_signed, current_stage, sequence_stage')
-    .eq('contract_token', token).maybeSingle();
-  if (!a) return jsonResponse({ error: 'not_found' }, 404);
-
-  // 8-stage pipeline: the agreement opens only after equipment proof is approved (stage 4+).
-  const gate = await pipelineAllows(admin, a.id, 'ica');
-  if (!gate.ok) return jsonResponse({ error: 'not_yet', reason: gate.reason }, 403);
-
-  const doc = await currentIca(await proLang(admin, a.id));
-  if (!doc) return jsonResponse({ error: 'no_agreement_on_file' }, 500);
-
-  if (body.action === 'document') {
-    const { data: s } = await admin.storage.from(BUCKET).createSignedUrl(doc.storage_path, 3600);
-    return jsonResponse({ ok: true, url: s?.signedUrl ?? null, version: doc.version, filename: doc.filename, signed: a.contracts_signed === true });
+Deno.serve(async req=>{
+ if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
+ if(req.method!=='POST')return reply({error:'method_not_allowed'},405);
+ try{
+ const p=schema.safeParse(await req.json());if(!p.success)return reply({error:'invalid_request'},400);const b=p.data;
+ if(['templates','template_pdf','seed','countersign'].includes(b.action)){
+  const auth=await requireServiceOrAdmin(req);if(!auth.ok)return reply({error:auth.error},auth.status);
+  if(b.action==='seed'){await check(await db.from('contract_templates').upsert(CONTRACT_TEMPLATE_SEED.map(r=>({...r})),{onConflict:'service,lang,version',ignoreDuplicates:true}));return reply({ok:true});}
+  if(b.action==='templates')return reply({ok:true,templates:await check(await db.from('contract_templates').select('*').eq('is_current',true).order('service'))});
+  if(b.action==='template_pdf'){
+   const t=await check(await db.from('contract_templates').select('*').eq('id',b.template_id??'').single());const bytes=await agreementPdf(t.body,{});return reply({ok:true,pdf:b64(bytes),filename:`Tidy-${t.service}-${t.version}.pdf`});
   }
-
-  if (body.action !== 'sign') return jsonResponse({ error: 'unknown_action' }, 400);
-  if (a.contracts_signed) return jsonResponse({ ok: true, already: true });
-  const typed = typeof body.typed_name === 'string' ? body.typed_name.trim().replace(/\s+/g, ' ') : '';
-  if (typed.length < 3 || typed.length > 120 || !/\s/.test(typed)) return jsonResponse({ error: 'full_name_required' }, 400);
-  if (body.agreed !== true) return jsonResponse({ error: 'must_agree' }, 400);
-  if (body.version !== doc.version) return jsonResponse({ error: 'version_changed', version: doc.version }, 409);
-
-  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || req.headers.get('cf-connecting-ip') || 'unknown';
-  const ua = (req.headers.get('user-agent') ?? 'unknown').slice(0, 400);
-  const signedAt = new Date();
-  const whenEt = signedAt.toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'long', timeStyle: 'short' }) + ' ET';
-
-  // Signed PDF: original agreement + one signature page.
-  const dl = await admin.storage.from(BUCKET).download(doc.storage_path);
-  if (dl.error || !dl.data) return jsonResponse({ error: 'agreement_unavailable' }, 500);
-  const pdf = await PDFDocument.load(new Uint8Array(await dl.data.arrayBuffer()));
-  // Compensation clause addendum — Review bonus (on the lawyer list as a new clause).
-  const comp = pdf.addPage([612, 792]);
-  {
-    const f = await pdf.embedFont(StandardFonts.Helvetica); const fb = await pdf.embedFont(StandardFonts.HelveticaBold);
-    let cy = 720;
-    const wrap = (t: string, ff = f, size = 11) => {
-      const words = t.replace(/[^\x20-\x7E\u00A0-\u00FF]/g, (ch) => (ch === '\u2014' ? '-' : ch === '\u2019' ? "'" : '')).split(' ');
-      let ln = '';
-      for (const w of words) { const n = ln ? `${ln} ${w}` : w; if (ff.widthOfTextAtSize(n, size) > 490) { comp.drawText(ln, { x: 60, y: cy, size, font: ff }); cy -= size + 6; ln = w; } else ln = n; }
-      if (ln) { comp.drawText(ln, { x: 60, y: cy, size, font: ff }); cy -= size + 12; }
-    };
-    wrap('Compensation - Review bonus / Compensacion - Bono por resena', fb, 14);
-    wrap(REVIEW_BONUS_LINE);
-    wrap(REVIEW_BONUS_LINE_ES);
-    wrap('A review qualifies only when it is from a member with at least one completed visit served by the Contractor, is rated five stars, and names the Contractor. Each member can generate one review bonus in total. There is no monthly or annual cap.', f, 10);
-  }
-  const page = pdf.addPage([612, 792]);
-  const font = await pdf.embedFont(StandardFonts.Helvetica);
-  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
-  const ink = rgb(0.06, 0.09, 0.16);
-  let y = 720;
-  const line = (t: string, f = font, size = 11) => { page.drawText(t.replace(/[^\x20-\x7E\u00A0-\u00FF]/g, ''), { x: 60, y, size, font: f, color: ink }); y -= size + 10; };
-  line('Signature page / Página de firma', bold, 18); y -= 8;
-  line('Independent Contractor Agreement — Tidy Home Concierge LLC', bold, 12); y -= 6;
-  line(`Signed by / Firmado por: ${typed}`);
-  line(`Date and time / Fecha y hora: ${whenEt} (${signedAt.toISOString()})`);
-  line(`IP address / Dirección IP: ${ip}`);
-  line(`Document version / Versión: ${doc.version}`);
-  line(`Browser / Navegador: ${ua.slice(0, 90)}`, font, 9);
-  y -= 10;
-  line('The signer typed their full legal name and ticked "I have read and agree to this agreement."', font, 10);
-  line('El firmante escribió su nombre legal completo y marcó "He leído y acepto este contrato."', font, 10);
-  const bytes = await pdf.save();
-
-  const path = `contracts/signed/${a.id}/ica-signed-${signedAt.getTime()}.pdf`;
-  const up = await admin.storage.from(BUCKET).upload(path, bytes, { contentType: 'application/pdf', upsert: false });
-  if (up.error) return jsonResponse({ error: 'save_failed' }, 500);
-
-  await admin.from('contract_signatures').insert({
-    applicant_id: a.id, typed_name: typed, signed_at: signedAt.toISOString(), ip_address: ip,
-    user_agent: ua, document_id: doc.id, document_version: doc.version, signed_pdf_path: path,
-  });
-  await admin.from('company_documents').insert({
-    filename: `ICA-signed-${(a.first_name ?? '').trim()}-${(a.last_name ?? '').trim()}.pdf`,
-    category: 'Contracts', tags: ['signed', 'ica', a.id], storage_path: path, mime_type: 'application/pdf',
-    file_size_bytes: bytes.byteLength, current_version: true,
-  });
-  const advance = !['oriented', 'active'].includes(a.current_stage ?? '');
-  const { error: upErr } = await admin.from('applicants').update({
-    contracts_signed: true, contracts_signed_at: signedAt.toISOString(), contract_signed_name: typed,
-    contract_signed_ip: ip, contract_signed_ua: ua, contract_doc_version: doc.version,
-    contract_signed_pdf_path: path, ...(advance ? { current_stage: 'contract_signed' } : {}),
-    ...(['applied', 'screening', 'interview_booked', 'waiting', 'contract_sent'].includes(a.sequence_stage ?? 'contract_sent') ? { sequence_stage: 'signed' } : {}),
-  }).eq('id', a.id);
-  if (upErr) {
-    console.error('[contract-sign] record update failed', upErr.message);
-    return jsonResponse({ error: 'record_update_failed' }, 500);
-  }
-  await admin.from('onboarding_events').insert({ applicant_id: a.id, event: 'contract_signed', metadata: { version: doc.version, ip } });
-
-  const { data: link } = await admin.storage.from(BUCKET).createSignedUrl(path, 60 * 60 * 24 * 30);
-  const first = a.first_name ?? 'there';
-  const built = contractSignedEmail(first, typed, whenEt, doc.version, link?.signedUrl ?? null, await proLang(admin, a.id));
-  const attachment = [{ name: 'Tidy-Contractor-Agreement-signed.pdf', content: toB64(bytes) }];
-  if (a.email) await sendProEmail(admin, { applicantId: a.id, key: 'contract_signed', to: a.email, name: first, built, triggeredBy: 'contract-sign', attachment });
-  await sendProEmail(admin, {
-    applicantId: null, key: 'contract_signed_owner', to: TIDY_OWNER_EMAIL,
-    built: { ...built, subject: `Signed: ${typed} — contractor agreement` }, triggeredBy: 'contract-sign', attachment,
-  });
-
-  // Stage 7 is automatic: the badge-photo email (#5) goes through the send door as an automated email.
-  await vendorFetch(`${URL_}/functions/v1/pro-email`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE}` },
-    body: JSON.stringify({ applicant_id: a.id, email: 'badge_photo', mode: 'send', sequence: 'auto' }),
-  }).catch(() => null);
-
-  await vendorFetch(`${URL_}/functions/v1/pro-all-set`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE}` },
-    body: JSON.stringify({ applicant_id: a.id }),
-  }).catch(() => null);
-
-  return jsonResponse({ ok: true, signed_at: signedAt.toISOString() });
+  if(auth.kind!=='admin')return reply({error:'admin_required'},403);
+  const s=await check(await db.from('contract_signatures').select('*').eq('applicant_id',b.applicant_id??'').order('signed_at',{ascending:false}).limit(1).single());
+  if(s.countersigned_at)return reply({ok:true,already:true});
+  const a=await check(await db.from('applicants').select('id,first_name,email').eq('id',s.applicant_id).single());const at=new Date();const ip=(req.headers.get('x-forwarded-for')??'unknown').split(',')[0];
+  let original:Uint8Array|undefined;
+  if(!s.template_body){const dl=await check(await db.storage.from('company-docs').download(s.signed_pdf_path));original=new Uint8Array(await dl.arrayBuffer());}
+  const bytes=await agreementPdf(s.template_body??'',s.placeholder_values??{},{'Contractor':s.typed_name,'Business name':s.business_name,'Pro number':s.pro_number??'—','Contractor signed':etTime(new Date(s.signed_at)),'Contractor IP':s.ip_address??'unknown','Browser':s.user_agent??'unknown','Template service':s.template_service??'Spanish ICA','Template version':s.document_version,'Tidy countersignature':'Justin Lewis, Founder — Tidy Home Concierge LLC','Countersigned':etTime(at),'Countersign IP':ip},original);
+  const path=`contracts/signed/${a.id}/final-${crypto.randomUUID()}.pdf`;await check(await db.storage.from('company-docs').upload(path,bytes,{contentType:'application/pdf'}));
+  const committed=await check(await db.rpc('contract_commit_countersign',{_signature:s.id,_actor:auth.userId,_ip:ip,_path:path,_at:at.toISOString()}));
+  return reply({ok:true,...committed,email:committed.already?undefined:await mail(a,bytes,path,s.document_version,s.typed_name,etTime(at),true)});
+ }
+ if(!b.token)return reply({error:'invalid_request'},400);
+ const a=await check(await db.from('applicants').select('*').eq('contract_token',b.token).maybeSingle());if(!a)return reply({error:'not_found'},404);
+ const pipeline=await check(await db.from('contractor_pipeline').select('service,stage,archived,state,proof_approved_at').eq('applicant_id',a.id).maybeSingle());
+ if(!pipeline?.proof_approved_at||pipeline.archived||pipeline.state!=='open')return reply({error:'not_yet'},403);
+ const lang=await proLang(db,a.id);let t:any=null;let doc:any=null;
+ if(lang==='es'){
+  doc=await check(await db.from('company_documents').select('id,filename,storage_path,uploaded_at').eq('doc_key','ica:es').eq('current_version',true).is('archived_at',null).order('uploaded_at',{ascending:false}).limit(1).maybeSingle());
+ }
+ if(!doc){
+  const raw=String(pipeline.service??a.service??'').toLowerCase();const service=raw==='cleaning'||raw==='house cleaning'?'cleaning':raw==='lawn'||raw==='lawn care'?'lawn':null;
+  if(!service){await missing(a.id,'Applicant has no supported agreement service.');return reply({error:'not_found'},404);}
+  t=a.contract_template_id?await check(await db.from('contract_templates').select('*').eq('id',a.contract_template_id).eq('service',service).maybeSingle()):await check(await db.from('contract_templates').select('*').eq('service',service).eq('lang','en').eq('is_current',true).maybeSingle());
+  if(!t){await missing(a.id,`No ${service} agreement template exists.`);return reply({error:'not_found'},404);}
+  if(!a.contract_template_id)await check(await db.from('applicants').update({contract_template_id:t.id}).eq('id',a.id).is('contract_template_id',null));
+ }
+ const version=t?.version??`${doc.filename} · ${String(doc.uploaded_at).slice(0,10)} · ${String(doc.id).slice(0,8)}`;
+ const values={legal_name:'{legal_name}',business_name:'—',phone:a.phone??'—',email:a.email??'—',pro_number:a.pro_number??'Assigned at signing',signed_date:new Date().toLocaleDateString('en-US',{timeZone:'America/New_York',dateStyle:'long'})};
+ if(b.action==='document'){const url=doc?(await check(await db.storage.from('company-docs').createSignedUrl(doc.storage_path,3600)))?.signedUrl:null;return reply({ok:true,body:t?.body??null,title:t?.title??'Independent Contractor Agreement',version,values,url,signed:a.contracts_signed,first_name:a.first_name});}
+ if(b.action!=='sign')return reply({error:'unknown_action'},400);
+ if(a.contracts_signed){const access=await db.functions.invoke('sequence-advance',{body:{action:'signing_day_signed',applicant_id:a.id}});return reply({ok:true,already:true,access:access.data});}
+ if(!b.typed_name||!/\S+\s+\S+/.test(b.typed_name)||b.agreed!==true)return reply({error:'full_name_and_agreement_required'},400);
+ if(b.version!==version)return reply({error:'version_changed'},409);
+ const proNumber=await check(await db.rpc('signing_day_allocate_number',{_id:a.id}));
+ const at=new Date(),ip=(req.headers.get('x-forwarded-for')??req.headers.get('cf-connecting-ip')??'unknown').split(',')[0].trim(),ua=(req.headers.get('user-agent')??'unknown').slice(0,400);
+ const filled={...values,legal_name:b.typed_name,business_name:b.business_name||'—',pro_number:proNumber};let original:Uint8Array|undefined;
+ if(doc){const dl=await check(await db.storage.from('company-docs').download(doc.storage_path));original=new Uint8Array(await dl.arrayBuffer());}
+ const bytes=await agreementPdf(t?.body??'',filled,{'Contractor typed signature':b.typed_name,'Business name':filled.business_name,'Pro number':proNumber,'Signed':etTime(at),'IP':ip,'Browser':ua,'Template service':t?.service??'Spanish ICA','Template version':version},original);
+ const path=`contracts/signed/${a.id}/signed-${crypto.randomUUID()}.pdf`;await check(await db.storage.from('company-docs').upload(path,bytes,{contentType:'application/pdf'}));
+ const committed=await check(await db.rpc('contract_commit_signature',{_applicant:a.id,_template:t?.id??null,_document:doc?.id??null,_version:version,_body:t?.body??null,_typed:b.typed_name,_business:filled.business_name,_ip:ip,_ua:ua,_path:path,_values:filled,_signed_at:at.toISOString()}));
+ const access=await db.functions.invoke('sequence-advance',{body:{action:'signing_day_signed',applicant_id:a.id}});
+ const email=committed.already?undefined:await mail(a,bytes,path,version,b.typed_name,etTime(at));
+ return reply({ok:true,signed_at:at.toISOString(),email,access:access.data,access_error:access.error?.message});
+ }catch(e){return reply({error:e instanceof Error?e.message:String((e as any)?.message??e)},500);}
 });
