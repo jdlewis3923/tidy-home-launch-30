@@ -6564,6 +6564,47 @@ export type Database = {
           },
         ]
       }
+      pro_location_pings: {
+        Row: {
+          accuracy_m: number | null
+          created_at: string
+          distance_m: number | null
+          id: string
+          lat: number
+          lng: number
+          pro_user_id: string
+          visit_id: string
+        }
+        Insert: {
+          accuracy_m?: number | null
+          created_at?: string
+          distance_m?: number | null
+          id?: string
+          lat: number
+          lng: number
+          pro_user_id: string
+          visit_id: string
+        }
+        Update: {
+          accuracy_m?: number | null
+          created_at?: string
+          distance_m?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          pro_user_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_location_pings_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pro_notification_claims: {
         Row: {
           contractor_id: string
@@ -10480,6 +10521,7 @@ export type Database = {
           reachable: boolean
         }[]
       }
+      admin_pro_tracker: { Args: { _date?: string }; Returns: Json }
       admin_publish_scope: {
         Args: { _note?: string; _rows: Json; _service: string }
         Returns: number
@@ -11544,6 +11586,16 @@ export type Database = {
       pro_partner_progress: { Args: never; Returns: Json }
       pro_partner_status: { Args: { _applicant: string }; Returns: Json }
       pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
+      pro_record_ping: {
+        Args: {
+          _accuracy?: number
+          _lat: number
+          _lng: number
+          _pro: string
+          _visit: string
+        }
+        Returns: Json
+      }
       pro_record_team_location: {
         Args: {
           _action: string
