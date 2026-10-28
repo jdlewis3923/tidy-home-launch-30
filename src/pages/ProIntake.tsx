@@ -382,7 +382,7 @@ export default function ProIntake() {
         </div>
 
         <h1 className="text-2xl font-black tracking-tight" style={{ color: NAVY }}>
-          {step + 1} · {current.title}
+            {step + 1} · {current.title}
         </h1>
         {current.titleEs && <p className="mt-0.5 text-sm text-slate-500">{current.titleEs}</p>}
         <p className="mt-1 text-xs font-semibold text-slate-500">
