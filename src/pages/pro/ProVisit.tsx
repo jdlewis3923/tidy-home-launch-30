@@ -56,6 +56,34 @@ export default function ProVisit() {
     return()=>{canceled=true;};
   },[id]);
 
+  // Live location pings while en route or on site, so the owner tracker can
+  // see distance to the job. Visibility only — pings never affect pay or
+  // the 150 m check-in rules. Stops when the visit is no longer active.
+  useEffect(() => {
+    if (!visit || !['on_the_way', 'in_progress'].includes(visit.status ?? '')) return;
+    const ping = () => {
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => {
+          void import('@/integrations/supabase/client').then(({ supabase }) =>
+            supabase.functions.invoke('pro-location-ping', {
+              body: {
+                visit_id: visit.id,
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                accuracy_m: Math.round(pos.coords.accuracy ?? 0),
+              },
+            }),
+          );
+        },
+        () => undefined,
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+      );
+    };
+    ping();
+    const timer = window.setInterval(ping, 3 * 60 * 1000);
+    return () => window.clearInterval(timer);
+  }, [visit?.id, visit?.status]);
+
   const GPS_MSG = es ? "Active la ubicación para este sitio en su teléfono y vuelva a intentar. La llegada y la salida requieren su ubicación." : "Turn on location for this site in your phone settings, then try again. Check-in and check-out need your location.";
 
   const checkIn = async () => {
@@ -262,9 +290,21 @@ export default function ProVisit() {
           {visit.first_visit && <StatusPill tone="blue">{es ? 'Primera visita' : 'First visit'}</StatusPill>}
         </div>
         {visit.first_visit && <p className="text-sm text-muted-foreground">{es ? 'Recorrido inicial y entrega del sello de ventana.' : 'Initial walkthrough and window seal handover.'}{(visit.size_tier ?? 0) >= 4 ? (es ? ' Pago de primera visita: 1.5×.' : ' First-visit pay: 1.5×.') : ''}</p>}
-        {visit.street && <div className="grid grid-cols-3 gap-2" aria-label={es ? 'Navegar' : 'Navigate'}>
-          {Object.entries(navigationLinks([visit.street, visit.zip].filter(Boolean).join(', '))).map(([provider, url]) => <Button key={provider} variant="outline" size="sm" asChild><a href={url} target="_blank" rel="noopener noreferrer">{provider === 'google' ? 'Google Maps' : provider === 'apple' ? 'Apple Maps' : 'Waze'}</a></Button>)}
-        </div>}
+        {visit.street && (() => {
+          const addr = [visit.street, visit.zip].filter(Boolean).join(', ');
+          return (
+            <div className="space-y-2" aria-label={es ? 'Navegar' : 'Navigate'}>
+              <ProButton className="w-full" asChild>
+                <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`} target="_blank" rel="noopener noreferrer">
+                  {es ? 'Ir ahora' : 'Go now'}
+                </a>
+              </ProButton>
+              <div className="grid grid-cols-3 gap-2">
+                {Object.entries(navigationLinks(addr)).map(([provider, url]) => <Button key={provider} variant="outline" size="sm" asChild><a href={url} target="_blank" rel="noopener noreferrer">{provider === 'google' ? 'Google Maps' : provider === 'apple' ? 'Apple Maps' : 'Waze'}</a></Button>)}
+              </div>
+            </div>
+          );
+        })()}
       </section>
 
       <div className="px-4 pt-4"><ProJobCard visitId={visit.id} serviceType={visit.service_type} /></div>
