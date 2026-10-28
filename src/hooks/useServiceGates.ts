@@ -19,7 +19,7 @@ export function useServiceGates(): { live: Record<GateService, boolean>; loading
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase.from("service_gates").select("service, is_live");
+      const { data, error } = await supabase.rpc("get_service_gates_public");
       if (cancelled) return;
       if (!error && data) {
         const next = { cleaning: true, lawn: true, car_care: true } as Record<GateService, boolean>;
