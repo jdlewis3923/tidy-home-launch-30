@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check } from "lucide-react";
+import { createPortal } from "react-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function LanguageSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -14,7 +15,7 @@ export default function LanguageSheet({ open, onClose }: { open: boolean; onClos
     { key: "en", label: "English", flag: "🇺🇸" },
     { key: "es", label: "Español", flag: "🇪🇸" },
   ];
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div className="fixed inset-0 z-50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
@@ -49,6 +50,7 @@ export default function LanguageSheet({ open, onClose }: { open: boolean; onClos
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
