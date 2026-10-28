@@ -1986,7 +1986,7 @@ body { color-scheme: light; }
 .is-selected .founding-choice-check { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-color: hsl(var(--primary)); }
 .founding-choice-check svg { width: 14px; }
 .founding-continue { display: flex; margin-top: 18px; min-height: 68px; border-radius: 999px; font-family: Inter, sans-serif; font-size: 23px; font-weight: 700; }
-.founding-back { display: flex; margin: 6px auto 0; }
+.founding-back { display: flex; margin: 6px auto 0; box-shadow: none !important; }
 @media (max-width: 767px) {
   .founding-landing-hero { min-height: 390px; }
   .founding-hero-shell { width: calc(100% - 36px); }

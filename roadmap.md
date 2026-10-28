@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Founding visual reference (Oct 28)
-- [ ] Match supplied exterior-photo opening, centered quote summary, image-led service rows, two-column photographic add-ons and gold continuation; preserve prices, gates, translations and motion. Verify phone/computer quote-to-reservation controls; do not publish.
+- [x] Matched exterior-photo opening, centered quote summary, image-led service switches, two-column photographic add-ons and gold continuation using recreated photography (not exact source photos). Preserved catalog prices, gates, bilingual names, real counts and motion. Phone/computer quote-to-reservation verified without submitting, no overflow or runtime errors; 77 pricing/add-on tests passed. Not published.
 
 ## Rebecca’s remaining application (Oct 28 UTC)
 - [x] Rebecca Ramirez (phone ending 2616) saved 11 answers in v6’s shorter eight-step form, last saved Oct 27 10:33 AM Miami; incomplete employer/work history prevented moving beyond section 2. Rebecca Paz is a separate archived, submitted v5 record and was untouched.

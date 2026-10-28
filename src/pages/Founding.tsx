@@ -27,6 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import exteriorPhoto from "@/assets/founding-exterior-reference.jpg";
 import livingRoom from "@/assets/founding-living-room.jpg";
 import tropicalLawn from "@/assets/founding-tropical-lawn.jpg";
+import suvThumb from "@/assets/founding-suv-thumb.jpg";
 const addonPhotos = import.meta.glob<string>("/src/assets/founding-addons/*.jpg", { eager: true, import: "default" });
 import { ArrowRight, CalendarDays, Camera, CarFront, Check, ChevronRight, Clock3, Gift, Leaf, LockKeyhole, Menu, ShieldCheck, Sparkles, Star, UserRoundCheck, Users } from "lucide-react";
 import scanImage from "@/assets/founding-how-scan.jpg";
@@ -352,7 +353,7 @@ export default function Founding() {
                 <h2 className="founding-services-heading">{t("Pick your services")}</h2>
                 <div className="founding-service-list">
                   {SVCS.map(svc => <div key={svc} className="founding-service-row">
-                    <img src={svc === 'cleaning' ? livingRoom : svc === 'lawn' ? tropicalLawn : exteriorPhoto} alt="" width={160} height={100} className={svc === 'detailing' ? 'founding-car-thumb' : ''} />
+                    <img src={svc === 'cleaning' ? livingRoom : svc === 'lawn' ? tropicalLawn : suvThumb} alt="" width={160} height={100} />
                     <Switch aria-label={t(SVC_LABEL[svc])} checked={s.services.includes(svc)} onCheckedChange={picked => set({ services: picked ? [...s.services, svc] : s.services.filter(x => x !== svc) })} />
                     <span className="founding-service-copy"><strong>{t(SVC_LABEL[svc])}</strong><small>{t("from")} {money(SIZE_PRICES[svc][1])}{per}</small></span>
                   </div>)}
@@ -431,7 +432,7 @@ export default function Founding() {
                     const line = lines.find(l => l?.service === svc);
                     const selected = s.services.includes(svc);
                     return <div key={svc} className="founding-service-row">
-                      <img src={svc === 'cleaning' ? livingRoom : svc === 'lawn' ? tropicalLawn : exteriorPhoto} alt="" width={160} height={100} className={svc === 'detailing' ? 'founding-car-thumb' : ''} />
+                      <img src={svc === 'cleaning' ? livingRoom : svc === 'lawn' ? tropicalLawn : suvThumb} alt="" width={160} height={100} />
                       <Switch aria-label={t(SVC_LABEL[svc])} checked={selected} onCheckedChange={picked => picked ? addServiceAtPrice(svc) : set({ services: s.services.filter(x => x !== svc) })} />
                       <Button variant="ghost" className="founding-service-detail" onClick={() => selected ? go('sizes') : addServiceAtPrice(svc)}>
                         <span className="founding-service-copy"><strong>{t(SVC_LABEL[svc])}</strong><small>{line?.service === 'cleaning' && typeof line.size === 'number' ? `${language === 'es' ? cleaningBand(line.size)?.name.replace('Size','Tamaño').replace('Estate','Residencia') : cleaningBand(line.size)?.name} · ` : ''}{svc === 'detailing' ? t('3 washes a month') : t(CAD_LABEL[s.cadence[svc]])}</small></span>
