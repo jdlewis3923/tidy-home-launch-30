@@ -5578,6 +5578,152 @@ export type Database = {
         }
         Relationships: []
       }
+      ops_agent_exceptions: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          agent_key: string
+          created_at: string
+          dedupe_key: string | null
+          detail: string | null
+          id: string
+          is_test: boolean
+          resolution: string | null
+          resolved_at: string | null
+          run_id: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          agent_key: string
+          created_at?: string
+          dedupe_key?: string | null
+          detail?: string | null
+          id?: string
+          is_test?: boolean
+          resolution?: string | null
+          resolved_at?: string | null
+          run_id?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          agent_key?: string
+          created_at?: string
+          dedupe_key?: string | null
+          detail?: string | null
+          id?: string
+          is_test?: boolean
+          resolution?: string | null
+          resolved_at?: string | null
+          run_id?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_agent_exceptions_agent_key_fkey"
+            columns: ["agent_key"]
+            isOneToOne: false
+            referencedRelation: "ops_agents"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "ops_agent_exceptions_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "ops_agent_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_agent_runs: {
+        Row: {
+          agent_key: string
+          checked: number
+          error: string | null
+          exceptions: number
+          finished_at: string | null
+          id: string
+          is_test: boolean
+          log: Json
+          started_at: string
+          status: string
+        }
+        Insert: {
+          agent_key: string
+          checked?: number
+          error?: string | null
+          exceptions?: number
+          finished_at?: string | null
+          id?: string
+          is_test?: boolean
+          log?: Json
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          agent_key?: string
+          checked?: number
+          error?: string | null
+          exceptions?: number
+          finished_at?: string | null
+          id?: string
+          is_test?: boolean
+          log?: Json
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_agent_runs_agent_key_fkey"
+            columns: ["agent_key"]
+            isOneToOne: false
+            referencedRelation: "ops_agents"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      ops_agents: {
+        Row: {
+          cadence: string
+          enabled: boolean
+          key: string
+          last_run_at: string | null
+          last_status: string | null
+          last_summary: string | null
+          name: string
+          sort: number
+          updated_at: string
+        }
+        Insert: {
+          cadence: string
+          enabled?: boolean
+          key: string
+          last_run_at?: string | null
+          last_status?: string | null
+          last_summary?: string | null
+          name: string
+          sort?: number
+          updated_at?: string
+        }
+        Update: {
+          cadence?: string
+          enabled?: boolean
+          key?: string
+          last_run_at?: string | null
+          last_status?: string | null
+          last_summary?: string | null
+          name?: string
+          sort?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orientation_attendees: {
         Row: {
           applicant_id: string
