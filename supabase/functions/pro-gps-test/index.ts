@@ -74,6 +74,7 @@ Deno.serve(async (req) => {
     // Geocoding API isn't enabled on the project key.
     if (address && targetLat === null) {
       try {
+        console.log('[pro-gps-test] trying nominatim fallback');
         const res = await fetch(
           'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(address),
           { headers: { 'User-Agent': 'TidyProGpsTest/1.0 (jointidy.co)' } },
@@ -86,8 +87,8 @@ Deno.serve(async (req) => {
           targetLng = parseFloat(hit.lon);
           geocodeFailed = false;
         }
-      } catch {
-        // keep geocodeFailed as-is
+      } catch (nomErr) {
+        console.log('[pro-gps-test] nominatim error:', String(nomErr).slice(0, 200));
       }
     } else if (address && !mapsKey) {
       geocodeFailed = true;
