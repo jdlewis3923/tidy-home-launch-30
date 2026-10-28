@@ -72,7 +72,7 @@ export default function ProSchedule() {
   const selDate = new Date(`${selected}T12:00:00`);
 
   return (
-    <ProShell title={greeting} showBell unread={unread} dark>
+    <ProShell title={greeting} showBell unread={unread} dark hideTitle>
       {!isOwner && coi && (coi.status === "expired" || coi.status === "none") && (
         <div className="px-2.5 pt-2.5">
           <WarningBanner
@@ -82,20 +82,19 @@ export default function ProSchedule() {
           />
         </div>
       )}
-      <ProLaunchLine className="px-4 pt-2 text-primary-foreground" />
 
-      <div className="px-2.5 pt-2.5">
-        <section className="overflow-hidden rounded-[16px] bg-white px-3 pb-3 pt-3.5">
+      <div className="mx-2.5 mt-1.5 min-h-[calc(100vh-110px)] rounded-t-[18px] bg-[hsl(var(--pro-ground))] px-1 pb-6">
+        <section className="overflow-hidden px-2.5 pb-3 pt-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-[20px] font-semibold tracking-[-0.01em] text-[hsl(var(--pro-ink))]">{es ? "Mi semana" : "My Week"}</h2>
-            <div className="flex items-center rounded-[10px] border border-[hsl(var(--pro-line))]">
-              <button type="button" onClick={() => shift(-1)} aria-label={es ? "Mes anterior" : "Previous month"} className="grid h-8 w-7 place-items-center text-[hsl(var(--pro-ink-soft))]"><ChevronLeft className="h-4 w-4" aria-hidden /></button>
-              <span className="min-w-[72px] text-center text-[12.5px] font-medium capitalize text-[hsl(var(--pro-ink))]">{monthLabel}</span>
-              <button type="button" onClick={() => shift(1)} aria-label={es ? "Mes siguiente" : "Next month"} className="grid h-8 w-7 place-items-center text-[hsl(var(--pro-ink))]"><ChevronRight className="h-4 w-4" aria-hidden /></button>
+            <h2 className="text-[24px] font-bold tracking-[-0.015em] text-[hsl(var(--pro-ink))]">{es ? "Mi semana" : "My Week"}</h2>
+            <div className="flex h-[40px] items-center gap-3 rounded-[12px] border border-[hsl(var(--pro-line))] bg-white pl-4 pr-1 shadow-[0_4px_12px_-8px_hsl(var(--pro-navy)/0.3)]">
+              <button type="button" onClick={() => shift(-1)} aria-label={es ? "Mes anterior" : "Previous month"} className="sr-only focus:not-sr-only"><ChevronLeft className="h-4 w-4" aria-hidden /></button>
+              <span className="text-[14px] font-medium capitalize text-[hsl(var(--pro-ink))]">{monthLabel}</span>
+              <button type="button" onClick={() => shift(1)} aria-label={es ? "Mes siguiente" : "Next month"} className="grid h-9 w-9 place-items-center text-[hsl(var(--pro-ink))]"><ChevronRight className="h-[18px] w-[18px]" aria-hidden /></button>
             </div>
           </div>
 
-          <div className="mt-3 grid grid-cols-7 text-center text-[11.5px] text-[hsl(var(--pro-ink-soft))]">
+          <div className="mt-4 grid grid-cols-7 text-center text-[13px] text-[hsl(var(--pro-ink))]">
             {days.map((d) => <span key={d}>{d}</span>)}
           </div>
           <div className="relative mt-1 overflow-hidden">
@@ -111,7 +110,7 @@ export default function ProSchedule() {
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.25}
                 onDragEnd={(_, info) => { if (info.offset.x < -50) shift(1); else if (info.offset.x > 50) shift(-1); }}
-                className="grid touch-pan-y grid-cols-7 gap-y-1"
+                className="mt-2 grid touch-pan-y grid-cols-7 gap-1"
               >
                 {rows.map((d) => {
                   const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -122,9 +121,9 @@ export default function ProSchedule() {
                   return (
                     <button key={k} type="button" onClick={() => setSelected(k)} aria-pressed={isSel}
                       aria-label={`${d.toLocaleDateString(loc, { weekday: "long", month: "long", day: "numeric" })}${has ? (es ? ", con visitas" : ", has visits") : ""}`}
-                      className="flex h-[44px] flex-col items-center justify-center">
-                      <span className={`grid h-[30px] w-[30px] place-items-center rounded-full text-[14px] transition-colors duration-150 ${isToday ? "bg-[hsl(var(--pro-blue))] font-semibold text-primary-foreground" : isSel ? "ring-1 ring-[hsl(var(--pro-blue))] text-[hsl(var(--pro-ink))]" : inMonth ? "text-[hsl(var(--pro-ink))]" : "text-[hsl(var(--pro-ink-soft)/0.55)]"}`}>{d.getDate()}</span>
-                      <span aria-hidden className={`mt-0.5 h-[5px] w-[5px] rounded-full ${has ? "bg-[hsl(var(--pro-blue))]" : "bg-transparent"}`} />
+                      className={`relative flex h-[50px] flex-col items-center justify-center rounded-[12px] transition-colors duration-150 ${inMonth ? "bg-white" : "bg-[hsl(var(--pro-line)/0.5)]"} ${isSel && !isToday ? "ring-[1.5px] ring-[hsl(var(--pro-blue))]" : ""}`}>
+                      <motion.span layout={!reduce} className={`grid h-[38px] w-[38px] place-items-center rounded-full text-[15px] font-semibold ${isToday ? "bg-[linear-gradient(180deg,hsl(var(--pro-sky)),hsl(var(--pro-blue)))] text-primary-foreground shadow-[0_6px_12px_-6px_hsl(var(--pro-blue)/0.8)]" : inMonth ? "text-[hsl(var(--pro-ink))]" : "text-[hsl(var(--pro-ink-soft)/0.6)]"}`}>{d.getDate()}</motion.span>
+                      <span aria-hidden className={`absolute bottom-[4px] h-[6px] w-[6px] rounded-full ${has ? "bg-[hsl(var(--pro-blue))]" : "bg-transparent"}`} />
                     </button>
                   );
                 })}
@@ -132,31 +131,31 @@ export default function ProSchedule() {
             </AnimatePresence>
           </div>
 
-          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-[11.5px] text-[hsl(var(--pro-ink-soft))]">
-            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--pro-blue))]" />{es ? "Reservado" : "Booked"}</span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full border-2 border-dashed border-[hsl(var(--pro-blue))]" />{es ? "Recuperación" : "Catch-up"}</span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--pro-red))]" />{es ? "Libre" : "Off"}</span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--pro-navy))]" />{es ? "Feriado" : "Holiday"}</span>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-y-1 border-b border-[hsl(var(--pro-line))] px-1 pb-4 text-[13px] text-[hsl(var(--pro-ink))]">
+            <span className="inline-flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded-full bg-[hsl(var(--pro-blue))]" />{es ? "Reservado" : "Booked"}</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded-full border-2 border-dashed border-[hsl(var(--pro-blue))]" />{es ? "Recuperación" : "Catch-up"}</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded-full bg-[hsl(var(--pro-red))]" />{es ? "Libre" : "Off"}</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-3.5 w-3.5 rounded-full bg-[hsl(var(--pro-navy))]" />{es ? "Feriado" : "Holiday"}</span>
           </div>
         </section>
 
-        <section className="relative mt-2.5 rounded-[16px] bg-white p-3.5">
-          <h3 className="text-[18px] font-semibold capitalize text-[hsl(var(--pro-ink))]">{selDate.toLocaleDateString(loc, { weekday: "short", month: "short", day: "numeric" })}</h3>
+        <section className="relative px-2.5 pt-1">
+          <h3 className="text-[20px] font-bold capitalize text-[hsl(var(--pro-ink))]">{selDate.toLocaleDateString(loc, { weekday: "short", month: "short", day: "numeric" })}</h3>
           {loading && <ScheduleSkeleton />}
           {!loading && error && <ErrorState title={es ? "No se pudo cargar su agenda" : "Couldn't load your schedule"} onRetry={reload} />}
           {!loading && !error && (
             <AnimatePresence mode="wait">
               <motion.div key={selected} initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.22, ease: EASE }} className="mt-2.5 space-y-2.5 pb-10">
-                {dayJobs.length === 0 && <p className="rounded-[12px] border border-[hsl(var(--pro-line))] p-4 text-[13.5px] text-[hsl(var(--pro-ink-soft))]">{es ? "No tiene trabajos asignados este día." : "No jobs assigned this day."}</p>}
+                {dayJobs.length === 0 && <p className="rounded-[14px] border border-[hsl(var(--pro-line))] bg-white p-4 text-[13.5px] text-[hsl(var(--pro-ink-soft))]">{es ? "No tiene trabajos asignados este día." : "No jobs assigned this day."}</p>}
                 {dayJobs.map((v, i) => {
                   const m = meta(v, es);
                   return (
                     <motion.div key={v.id} initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: 0.05 * i }}>
-                      <Link to={`/pro/visit/${v.id}`} className="flex items-center gap-3 rounded-[12px] border border-l-[3px] bg-white py-3 pl-3 pr-2" style={{ borderColor: "hsl(var(--pro-line))", borderLeftColor: `hsl(var(${m.tone}))` }}>
-                        <m.Icon className="h-7 w-7 shrink-0" style={{ color: `hsl(var(${m.tone}))` }} fill={m.tone === "--pro-car" ? "none" : `hsl(var(${m.tone}))`} aria-hidden />
+                      <Link to={`/pro/visit/${v.id}`} className="flex items-center gap-4 rounded-[14px] border border-l-[3px] bg-white py-3.5 pl-4 pr-3 shadow-[0_4px_14px_-10px_hsl(var(--pro-navy)/0.35)]" style={{ borderColor: "hsl(var(--pro-line))", borderLeftColor: `hsl(var(${m.tone}))` }}>
+                        <m.Icon className="h-9 w-9 shrink-0" style={{ color: `hsl(var(${m.tone}))` }} fill={m.tone === "--pro-car" ? "none" : `hsl(var(${m.tone}))`} aria-hidden />
                         <div className="min-w-0 flex-1">
-                          <p className="text-[13px] text-[hsl(var(--pro-ink))]">{timeWindow(v.scheduled_start, v.scheduled_end, language)}</p>
-                          <p className="text-[13.5px] font-semibold text-[hsl(var(--pro-ink))]">{m.label}</p>
+                          <p className="text-[14px] text-[hsl(var(--pro-ink))]">{timeWindow(v.scheduled_start, v.scheduled_end, language)}</p>
+                          <p className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">{m.label}</p>
                           <p className="truncate text-[12px] text-[hsl(var(--pro-ink-soft))]">{v.street ?? v.zip ?? "—"}</p>
                         </div>
                         <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--pro-blue))]" aria-hidden />
@@ -168,18 +167,19 @@ export default function ProSchedule() {
             </AnimatePresence>
           )}
           <button type="button" aria-label={es ? "Mi disponibilidad" : "My availability"} onClick={() => datesRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" })}
-            className="absolute bottom-3 right-3 grid h-11 w-11 place-items-center rounded-full bg-[hsl(var(--pro-blue))] text-primary-foreground shadow-lg active:scale-95">
-            <Plus className="h-5 w-5" aria-hidden />
+            className="fixed bottom-[78px] right-[max(1rem,calc(50%-14rem+1rem))] z-20 grid h-14 w-14 place-items-center rounded-full bg-[linear-gradient(180deg,hsl(var(--pro-sky)),hsl(var(--pro-blue)))] text-primary-foreground shadow-[0_10px_22px_-8px_hsl(var(--pro-blue)/0.85)] transition-transform active:scale-95">
+            <Plus className="h-7 w-7" aria-hidden />
           </button>
         </section>
 
-        {!loading && dayJobs.length === 0 && selected === todayKey && <div className="mt-2.5"><GpsTestCard /></div>}
+        {!loading && dayJobs.length === 0 && selected === todayKey && <div className="mx-2.5 mt-2.5"><GpsTestCard /></div>}
 
-        <section className="mt-2.5 overflow-hidden rounded-[16px] bg-white">
+        <ProLaunchLine className="mx-2.5 mt-4 text-[12.5px] text-[hsl(var(--pro-ink-soft))]" />
+        <section className="mx-2.5 mt-2.5 overflow-hidden rounded-[16px] bg-white">
           <h3 className="px-3.5 pt-3.5 text-[16px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Mi ruta semanal" : "My weekly route"}</h3>
           <WeeklyRoute />
         </section>
-        <section ref={datesRef} className="mt-2.5 scroll-mt-20 overflow-hidden rounded-[16px] bg-white">
+        <section ref={datesRef} className="mx-2.5 mt-2.5 scroll-mt-20 overflow-hidden rounded-[16px] bg-white">
           <h3 className="px-3.5 pt-3.5 text-[16px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Mi disponibilidad" : "My availability"}</h3>
           <MyDates />
         </section>

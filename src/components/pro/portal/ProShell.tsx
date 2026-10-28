@@ -23,8 +23,10 @@ export function ProTopBar({
   back,
   showBell = false,
   unread = 0,
+  hideTitle = false,
 }: {
   title: string;
+  hideTitle?: boolean;
   back?: string;
   showBell?: boolean;
   unread?: number;
@@ -42,7 +44,7 @@ export function ProTopBar({
             <ArrowLeft className="h-5 w-5" aria-hidden strokeWidth={2} />
           </button>
         ) : <ProMark size={36} className="ml-0.5 mr-1" />}
-        <h1 className="flex-1 truncate text-[19px] font-semibold tracking-[-0.01em]">{title}</h1>
+        <h1 className={`flex-1 truncate text-[19px] font-semibold tracking-[-0.01em] ${hideTitle ? "sr-only" : ""}`}>{title}</h1>{hideTitle && <span className="flex-1" />}
         <button type="button" onClick={() => setSheet(true)} aria-haspopup="dialog"
           aria-label={es ? "Idioma: Español" : "Language: English"}
           className="grid h-11 min-w-[44px] place-items-center rounded-full px-2 text-[14px] font-medium active:bg-primary-foreground/10">
@@ -94,7 +96,9 @@ export default function ProShell({
   children,
   nav = true,
   dark = false,
+  hideTitle = false,
 }: {
+  hideTitle?: boolean;
   title: string;
   back?: string;
   showBell?: boolean;
@@ -107,7 +111,7 @@ export default function ProShell({
   return (
     <div className={`min-h-screen font-sans ${dark ? "bg-[hsl(var(--pro-deep))]" : "bg-[hsl(var(--pro-ground))]"}`}>
       <ProHead title={`${title} · Tidy Pro Portal`} />
-      <ProTopBar title={title} back={back} showBell={showBell} unread={unread} />
+      <ProTopBar title={title} back={back} showBell={showBell} unread={unread} hideTitle={hideTitle} />
       <main className={`mx-auto max-w-md ${nav ? "pb-24" : "pb-10"}`}>{children}</main>
       {nav && <ProBottomNav />}
     </div>
