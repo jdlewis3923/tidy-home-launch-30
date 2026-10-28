@@ -1,5 +1,11 @@
 # Roadmap
 
+## Pro signing day (Oct 29)
+- [ ] Reuse intake with emergency contact, equipment/ZIP availability, autosave and insurance-gated kit readiness.
+- [ ] Admin signing-day overview and candidate open/send-link/signing actions.
+- [ ] Signed number/account and phone-code login; inactive Getting Started with server-verified readiness and activation.
+- [ ] Isolated test candidate intake → signing → access → insurance approval → activation; physical phone code/certificate test requires Justin.
+
 ## Pro mockup screen-by-screen (Oct 28)
 - [x] Status (screen 5): outlined tier panel, overlapping badge, milestone fills and 300ms badge-to-QR flip. Signed-in owner EN/ES, QR flip and reduced motion verified; no overflow, page errors or owner insurance; five existing visit-rule tests pass. Real criteria/data retained, not published; visual styling aligned but pixel-identical reproduction is not established.
 - [ ] Continue remaining respective mockup screens after Status; preserve real assignments and contractor workflows.
