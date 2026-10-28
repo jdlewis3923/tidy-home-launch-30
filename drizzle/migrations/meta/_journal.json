@@ -1793,6 +1793,13 @@
       "when": 1793205629078,
       "tag": "0255_tighten_reference_table_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 256,
+      "version": "7",
+      "when": 1793205656396,
+      "tag": "0256_service_gates_admin_full_read",
+      "breakpoints": true
     }
   ]
 }
