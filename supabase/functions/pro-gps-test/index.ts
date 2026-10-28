@@ -57,13 +57,12 @@ Deno.serve(async (req) => {
     let targetLng: number | null = parsed.data.target_lng ?? null;
     let geocodeFailed = false;
     const mapsKey = Deno.env.get('GOOGLE_PLACES_API_KEY') ?? '';
-    if (address && mapsKey) {
+    if (address && targetLat === null && mapsKey) {
       try {
         const url = 'https://maps.googleapis.com/maps/api/geocode/json?address='
           + encodeURIComponent(address) + '&key=' + mapsKey;
         const res = await fetch(url);
         const geo = await res.json();
-        console.log('[pro-gps-test] geocode status:', geo?.status, geo?.error_message ?? '');
         const loc = geo?.results?.[0]?.geometry?.location;
         if (typeof loc?.lat === 'number' && typeof loc?.lng === 'number') {
           targetLat = loc.lat;
@@ -74,28 +73,7 @@ Deno.serve(async (req) => {
       } catch {
         geocodeFailed = true;
       }
-    }
-    // Fallback: OpenStreetMap Nominatim (no key needed) when the Google
-    // Geocoding API isn't enabled on the project key.
-    if (address && targetLat === null) {
-      try {
-        console.log('[pro-gps-test] trying nominatim fallback');
-        const res = await fetch(
-          'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(address),
-          { headers: { 'User-Agent': 'TidyProGpsTest/1.0 (jointidy.co)' } },
-        );
-        const hits = await res.json();
-        console.log('[pro-gps-test] nominatim hits:', Array.isArray(hits) ? hits.length : 'non-array');
-        const hit = hits?.[0];
-        if (hit && typeof hit.lat === 'string' && typeof hit.lon === 'string') {
-          targetLat = parseFloat(hit.lat);
-          targetLng = parseFloat(hit.lon);
-          geocodeFailed = false;
-        }
-      } catch (nomErr) {
-        console.log('[pro-gps-test] nominatim error:', String(nomErr).slice(0, 200));
-      }
-    } else if (address && !mapsKey) {
+    } else if (address && targetLat === null) {
       geocodeFailed = true;
     }
 

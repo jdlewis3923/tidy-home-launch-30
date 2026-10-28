@@ -39,12 +39,31 @@ export default function GpsTestCard() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
+          // Resolve the typed address in the browser (server-side geocoders
+          // are blocked from the backend runtime).
+          let target: { target_lat: number; target_lng: number } | undefined;
+          const addr = address.trim();
+          if (addr) {
+            try {
+              const res = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(addr)}`,
+              );
+              const hits = await res.json();
+              const hit = hits?.[0];
+              if (hit?.lat && hit?.lon) {
+                target = { target_lat: parseFloat(hit.lat), target_lng: parseFloat(hit.lon) };
+              }
+            } catch {
+              target = undefined;
+            }
+          }
           const { data, error: fnErr } = await supabase.functions.invoke("pro-gps-test", {
             body: {
               lat: pos.coords.latitude,
               lng: pos.coords.longitude,
               accuracy_m: Math.round(pos.coords.accuracy ?? 0),
-              address: address.trim() || undefined,
+              address: addr || undefined,
+              ...target,
             },
           });
           if (fnErr || !data?.ok) {
