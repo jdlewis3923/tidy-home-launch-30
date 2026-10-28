@@ -158,11 +158,8 @@ async function smsFallback(
         idempotency_key: `sms-fallback:${key}`,
         template_name: `pro-${n.kind}`,
         triggered_by: 'pro-notify-fallback',
-        // Urgent means urgent: the courtesy window does not apply to a Pro who
-        // is standing in a customer's house waiting on an answer. Without this
-        // the 18:05 add-on approval was parked until 08:00 and still reported
-        // as delivered.
-        skip_window: urgent,
+        // Pro texts never bypass customer/Pro hours, even for urgent work.
+        skip_window: false,
         expires_at: urgent
           ? new Date(Date.now() + (URGENT_SMS_TTL_MINUTES[n.kind] ?? 60) * 60_000).toISOString()
           : undefined,
@@ -208,11 +205,11 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<ProNoti
   }
 
   if (n.sms_required) {
-    const sms = await smsFallback(admin, n, key, true);
+    const sms = await smsFallback(admin, n, key, urgent);
     if(sms.outcome!=='sent') {
       await admin.from('admin_alerts').insert({alert_type:'pro_notification_undeliverable',title:'Required Pro route text was not sent',body:`${n.kind}: ${sms.outcome}${sms.detail?` — ${sms.detail}`:''}`,context:{contractor_id:n.contractor_id,kind:n.kind}});
     }
-    return { ok: sms.outcome === 'sent', recorded: true, urgent: true, push: 'no_subscription', sms: sms.outcome, detail: sms.detail };
+    return { ok: sms.outcome === 'sent', recorded: true, urgent, push: 'no_subscription', sms: sms.outcome, detail: sms.detail };
   }
 
   // Non-urgent, outside the courtesy window: hold the push, don't drop it.

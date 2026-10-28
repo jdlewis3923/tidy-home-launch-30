@@ -1,7 +1,7 @@
 import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — producer: "you have work tomorrow".
 //
-// Runs at 18:00 ET, the evening before. One
+// Runs at 17:45 ET Monday–Saturday. Saturday also sends Monday. One
 // notification per PRO per day (not per visit), claimed in the database so a
 // re-run produces zero duplicates. Pros with nothing tomorrow are skipped.
 //
@@ -11,7 +11,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { notifyPro } from '../_shared/pro-notify.ts';
-import { addDays, digestText, etDate, etDayRange, type DigestVisit } from '../_shared/pro-day-digest.ts';
+import { digestText, etDayRange, type DigestVisit } from '../_shared/pro-day-digest.ts';
+import { routeReminderDays } from '../_shared/pro-route-timing.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -21,16 +22,17 @@ Deno.serve(async (req) => {
   if (pre) return pre;
   if (!(await isCronAuthorized(req))) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return jsonResponse({ok:false,error:'not_configured'},503);
-  const hour = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',hourCycle:'h23'}).format(new Date());
-  if (hour !== '18') return jsonResponse({ok:true,skipped:'not_6pm_miami'});
+  const days = routeReminderDays();
+  if (!days.length) return jsonResponse({ok:true,skipped:'not_545pm_miami_send_day'});
 
   console.log('[notify-pro-visit-tomorrow] entry');
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const body = await req.json().catch(() => ({} as Record<string, unknown>));
-  const day = typeof body.day === 'string' ? body.day : addDays(etDate(new Date()), 1);
+  // Target dates come only from the server clock, never a caller override.
+  const dayResults: Record<string, unknown>[] = [];
+  for (const day of days) {
 
   const { data: visits, error } = await admin
     .from('visits')
@@ -79,7 +81,7 @@ Deno.serve(async (req) => {
       results.push({ contractor_id: contractorId, skipped: 'already_sent' });
       continue;
     }
-    const { title, body: text } = digestText(list, 'tomorrow', language === 'es' ? 'es' : 'en');
+    const { title, body: text } = digestText(list, days.indexOf(day) === 1 ? 'monday' : 'tomorrow', language === 'es' ? 'es' : 'en');
     const r = await notifyPro(admin, {
       contractor_id: contractorId,
       kind: 'visit_tomorrow',
@@ -89,9 +91,12 @@ Deno.serve(async (req) => {
       idempotency_key: `visit_tomorrow:${contractorId}:${day}`,
       context: { day, visit_ids: list.map((v) => v.id) },
       sms_required: true,
+      urgent: false,
     });
     results.push({ contractor_id: contractorId, visits: list.length, ...r });
   }
 
-  return jsonResponse({ ok: true, day, pros: byPro.size, results });
+    dayResults.push({day, pros: byPro.size, results});
+  }
+  return jsonResponse({ ok: true, days: dayResults });
 });

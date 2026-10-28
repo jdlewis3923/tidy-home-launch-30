@@ -24,6 +24,7 @@ import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { renderTemplate } from '../_shared/socialPlanner.ts';
 import { visibleDigestAlerts, realCompletedApplications, candidateTextActivity } from '../_shared/admin-digest-rules.ts';
 import { comingUp as roadmapComingUp, kickoffText, milestoneLine, type Initiative as RInitiative } from '../_shared/roadmap-rules.ts';
+import { ownerAlertWindowOpen } from '../_shared/owner-alert-window.ts';
 
 const SITE = 'https://jointidy.co';
 const OWNER_EMAIL = 'hello@jointidy.co';
@@ -47,7 +48,7 @@ function et(d = new Date()) {
   const hour = Number(p.hour) % 24;
   return { hour, date: `${p.year}-${p.month}-${p.day}` };
 }
-export const isDaytime = (d = new Date()) => { const h = et(d).hour; return h >= 9 && h < 21; };
+export const isDaytime = ownerAlertWindowOpen;
 const addDays = (iso: string, n: number) => new Date(Date.parse(`${iso}T12:00:00Z`) + n * 864e5).toISOString().slice(0, 10);
 /** UTC instant of 00:00 ET on an ET date (good enough at hour precision). */
 const etMidnightUtc = (iso: string) => { const probe = new Date(`${iso}T12:00:00Z`); const off = 12 - et(probe).hour; return new Date(Date.parse(`${iso}T00:00:00Z`) + off * 3_600_000).toISOString(); };
@@ -112,7 +113,7 @@ async function sendUrgent(admin: SupabaseClient, a: Alert, reminder: boolean) {
   return result;
 }
 
-const canSendNow = (a: Alert) => isDaytime() || a.night_ok;
+const canSendNow = (_a: Alert) => isDaytime();
 const open = (a: Alert) => !a.resolved_at && !(a.snoozed_until && Date.parse(a.snoozed_until) > Date.now());
 
 async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force = false, preview = false) {

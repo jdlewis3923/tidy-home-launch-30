@@ -1,7 +1,7 @@
 {
   "notify-pro-visit-tomorrow": {
     "jobId": 91,
-    "schedule": "0 * * * *",
-    "reason": "Existing callback checks hourly and releases only at 18:00 America/New_York, preserving DST without embedding project credentials in migrations."
+    "schedule": "45 * * * *",
+    "reason": "Existing callback checks at minute 45 and releases only at 17:45 America/New_York Monday–Saturday; Saturday includes Monday, preserving DST without embedding credentials in migrations."
   }
 }

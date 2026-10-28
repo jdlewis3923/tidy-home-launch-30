@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Full system audit → autonomous operations (Oct 28)
+- [ ] Apply approved route timing: 5:45 PM Monday–Saturday, Monday route on Saturday; owner alerts 8 AM–9 PM separately. Test boundaries and update the existing schedule without sending test messages.
 - [ ] Part A: evidence-backed PASS / FAIL / NOT BUILT inventory for hiring, website, Stripe, messaging, social, roadmap and entire Pro loop; fix verified failures before Part B.
   - Initial audit in docs/tidy-ops-part-a-audit.md: 440 existing tests pass; three new SMS boundary tests pass. Fixed dynamic launch-date test tokens and false all-agents-running claim; authenticated owner + three phone ZIP links verified. Remaining: Spanish approvals (85 templates), four unconfirmed LinkedIn posts, full operational billing/Pro coverage and real-device GPS. Required 6 PM/urgent Pro texts conflict with universal courtesy-window wording; needs owner decision.
-- [ ] Physical-device GPS acceptance: requires Justin's confirmed test address and actual iPhone Safari/Android Chrome measurements; simulated coordinates are not real-device proof.
+- [ ] Physical-device GPS acceptance: address confirmed by Justin and saved privately; still requires isolated Pro/member setup and actual iPhone Safari/Android Chrome measurements. Simulated coordinates are not real-device proof.
 - [ ] Part B, gated on Part A: thirteen autonomous agents reuse existing protected senders, gates and ledgers; /admin/agents controls, logged runs/exceptions, held-pay approval and combined 9 AM/9 PM digests.
 - [ ] Isolated is_test execution of every agent with a retained run log and sample exception; no production charges, publishing or unapproved test messages.
 
