@@ -1,5 +1,9 @@
 # Roadmap
 
+## Pro mockup screen-by-screen (Oct 28)
+- [ ] Match Status (screen 5): tier panel, overlapping badge, milestone fills and badge-to-QR flip; verify signed-in EN/ES, reduced motion and owner exemption without changing criteria.
+- [ ] Continue remaining respective mockup screens after Status; preserve real assignments and contractor workflows.
+
 ## Pro schedule visibility (Oct 28)
 - [x] Today’s jobs opens first with persistent jobs/route/calendar tabs; every month shows its year. Signed-in 411px phone navigation verified in EN/ES, no overflow/page errors, eight focused tests pass and build OK. Published site remains unchanged until publication is authorized; assigned-job completion remains separately unverified.
 
