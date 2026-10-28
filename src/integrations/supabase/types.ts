@@ -6647,6 +6647,35 @@ export type Database = {
           },
         ]
       }
+      pro_visit_checks: {
+        Row: {
+          checks: Json
+          pro_id: string
+          updated_at: string
+          visit_id: string
+        }
+        Insert: {
+          checks?: Json
+          pro_id: string
+          updated_at?: string
+          visit_id: string
+        }
+        Update: {
+          checks?: Json
+          pro_id?: string
+          updated_at?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_visit_checks_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pro_visits: {
         Row: {
           addon_pay_cents: number
@@ -11285,6 +11314,10 @@ export type Database = {
       pro_partner_status: { Args: { _applicant: string }; Returns: Json }
       pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
       pro_report_teammate_missing: { Args: { _visit: string }; Returns: Json }
+      pro_required_check_keys: {
+        Args: { _kind: string; _service: string }
+        Returns: string[]
+      }
       pro_review_bonus_total: { Args: { _pro?: string }; Returns: number }
       pro_route_details: {
         Args: never
@@ -11303,6 +11336,11 @@ export type Database = {
         Args: { _body: string; _visit_id?: string }
         Returns: string
       }
+      pro_service_check: {
+        Args: { _checked: boolean; _key: string; _visit: string }
+        Returns: undefined
+      }
+      pro_service_checklist: { Args: { _visit: string }; Returns: Json }
       pro_set_catchup: { Args: { _weekday: number }; Returns: Json }
       pro_set_catchup_busy: {
         Args: { _busy: boolean; _date: string }

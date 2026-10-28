@@ -1730,6 +1730,13 @@
       "when": 1793150670964,
       "tag": "0246_pro_timed_access_and_route_details",
       "breakpoints": true
+    },
+    {
+      "idx": 247,
+      "version": "7",
+      "when": 1793150722734,
+      "tag": "0247_pro_required_service_checklists",
+      "breakpoints": true
     }
   ]
 }
