@@ -301,7 +301,7 @@ export default function Founding() {
           <div className="founding-hero-copy">
             <h1>{[t("More life."), t("Less chores.")].map((line, li) => (
               <span key={li} className={`founding-hero-title-line${li ? " founding-hero-title-accent" : ""}`}>
-                {line.split(" ").map((w, wi) => <span key={wi} className="founding-word" style={{ ["--w" as string]: li * 2 + wi }}>{w}{" "}</span>)}
+                {line.split(" ").map((w, wi, ws) => <span key={wi}><span className="founding-word" style={{ ["--w" as string]: li * 2 + wi }}>{w}</span>{wi < ws.length - 1 ? " " : ""}</span>)}
               </span>
             ))}</h1>
             <p>{t("Three services. One subscription.")}<br />{t("More life for you.")}</p>
