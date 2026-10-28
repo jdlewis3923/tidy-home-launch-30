@@ -1828,6 +1828,13 @@
       "when": 1793211136208,
       "tag": "0260_signing_day_activation_variable_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 261,
+      "version": "7",
+      "when": 1793211214828,
+      "tag": "0261_signing_day_insurance_kit_order_guard",
+      "breakpoints": true
     }
   ]
 }
