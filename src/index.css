@@ -1824,3 +1824,100 @@ body { color-scheme: light; }
 .plan-cta { background: hsl(47 91% 52%); color: hsl(222 47% 11%); box-shadow: 0 12px 30px -12px hsl(47 91% 52% / .7); }
 .day-chip-on { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
 .day-chip-on p { color: inherit !important; }
+
+/* ── Founding: typographic hierarchy ──
+   Poppins carries display/headline weight; Inter carries reading text and fine print
+   at lighter weights so small copy never competes with headlines. */
+.founding-landing p, .founding-landing small, .founding-landing label, .founding-landing li, .founding-landing input, .founding-landing select, .founding-landing summary { font-family: "Inter", system-ui, sans-serif; }
+.founding-landing h1, .founding-landing h2, .founding-landing legend, .founding-landing strong, .founding-landing b, .founding-price-stat p:first-child, .founding-zip-choice strong, .founding-step-image span { font-family: "Poppins", system-ui, sans-serif; }
+.founding-landing .text-xs, .founding-landing .text-\[11px\], .founding-fine { font-weight: 400; letter-spacing: .005em; }
+.founding-landing .text-xs.font-semibold, .founding-landing label.text-xs { font-weight: 500; }
+.founding-hero-copy > p { font-weight: 300; letter-spacing: .005em; }
+.founding-hero-copy h1 { font-weight: 800; letter-spacing: -.02em; }
+.founding-section-lead, .founding-how-grid p, .founding-plan-card small, .founding-refer-card small, .founding-serving, .founding-legal, .founding-cancel, .founding-question { font-weight: 300; }
+.founding-plans-section h2, .founding-how-section h2 { font-weight: 800; letter-spacing: -.02em; }
+.founding-eyebrow, .founding-benefits-section h2 { font-family: "Inter", system-ui, sans-serif; font-weight: 600; letter-spacing: .2em; }
+.founding-benefits-grid strong, .founding-trust-section strong, .founding-how-grid strong, .founding-plan-card strong { font-weight: 600; }
+.founding-trust-section strong { font-family: "Inter", system-ui, sans-serif; font-weight: 500; letter-spacing: .02em; }
+.founding-live-count { font-family: "Inter", system-ui, sans-serif; font-weight: 400; }
+.founding-bundle-offer span:first-child { font-weight: 400; }
+.founding-bundle-offer strong { font-weight: 600; }
+.founding-ticker { font-variant-numeric: tabular-nums; }
+
+/* ── Founding: step progress in the quote card ── */
+.founding-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: -4px 0 14px; }
+.founding-steps li { height: 3px; border-radius: 99px; background: hsl(var(--border)); overflow: hidden; position: relative; }
+.founding-steps li::after { content: ""; position: absolute; inset: 0; background: hsl(var(--gold)); transform: scaleX(0); transform-origin: left; transition: transform 520ms cubic-bezier(.22,1,.36,1); }
+.founding-steps li.is-done::after, .founding-steps li.is-current::after { transform: scaleX(1); }
+.founding-steps li.is-current::after { background: linear-gradient(90deg, hsl(var(--gold)), hsl(var(--primary))); }
+
+/* Everything below only runs when motion is allowed (class set by useFoundingMotion). */
+.founding-scroll-progress { display: none; }
+.fx-on .founding-scroll-progress { display: block; position: fixed; top: 0; left: 0; right: 0; z-index: 70; height: 3px; background: linear-gradient(90deg, hsl(var(--gold)), hsl(var(--primary))); transform: scaleX(var(--fx-page, 0)); transform-origin: left; pointer-events: none; }
+
+/* Hero: words rise in sequence, then the copy drifts and fades on scroll. */
+.fx-on .founding-word { display: inline-block; animation: founding-word-in 900ms cubic-bezier(.16,1,.3,1) both; animation-delay: calc(140ms + var(--w) * 110ms); }
+.fx-on .founding-hero-copy { transform: translate3d(0, calc(var(--fx-hero, 0) * -60px), 0); opacity: calc(1 - var(--fx-hero, 0) * .9); }
+.fx-on .founding-hero-photo { transform: scale(calc(1.04 + var(--fx-hero, 0) * .06)) translate3d(0, calc(var(--fx-hero, 0) * 40px), 0); }
+.fx-on .founding-hero-title-accent { background: linear-gradient(100deg, hsl(var(--gold)) 0%, hsl(var(--gold)) 40%, hsl(48 100% 85%) 50%, hsl(var(--gold)) 60%, hsl(var(--gold)) 100%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent !important; animation: founding-gold-sheen 6s ease-in-out 1.6s infinite; }
+.fx-on .founding-hero-title-accent .founding-word { color: transparent; }
+@keyframes founding-word-in { from { opacity: 0; transform: translateY(.55em) rotate(2deg); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes founding-gold-sheen { 0%, 70% { background-position: 100% 0; } 100% { background-position: -50% 0; } }
+
+/* Quote card: cursor spotlight and step transitions. */
+.fx-on .founding-quote-card { position: relative; }
+.fx-on .founding-quote-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(260px circle at var(--sx, 50%) var(--sy, -40%), hsl(var(--primary) / .07), transparent 70%); }
+.fx-on .founding-quote-card > fieldset, .fx-on .founding-quote-card > div:not(.founding-live-count), .fx-on .founding-quote-card > form { animation: founding-step-in 460ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes founding-step-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+.fx-on .founding-quote-card button { transition: transform 180ms cubic-bezier(.22,1,.36,1), background-color 200ms, border-color 200ms, box-shadow 200ms; }
+.fx-on .founding-quote-card button:active:not(:disabled) { transform: scale(.97); }
+.fx-on .founding-quote-card button[aria-pressed="true"], .fx-on .founding-quote-card button[aria-checked="true"] { animation: founding-pop 320ms cubic-bezier(.34,1.56,.64,1); }
+@keyframes founding-pop { 50% { transform: scale(1.035); } }
+.fx-on .founding-quote-card .bg-gold:not(:disabled) { position: relative; overflow: hidden; }
+.fx-on .founding-quote-card .bg-gold:not(:disabled)::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, hsl(0 0% 100% / .45) 50%, transparent 70%); transform: translateX(-120%); animation: founding-cta-sheen 3.8s ease-in-out 1.2s infinite; pointer-events: none; }
+@keyframes founding-cta-sheen { 0%, 65% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+.fx-on .founding-price-total { animation: founding-total-glow 1.4s ease-out both; }
+@keyframes founding-total-glow { 0% { box-shadow: 0 0 0 0 hsl(var(--gold) / .55); } 100% { box-shadow: 0 0 0 14px hsl(var(--gold) / 0); } }
+.fx-on .founding-live-count > span { animation: founding-live-ring 2.4s ease-out infinite; }
+@keyframes founding-live-ring { 0% { box-shadow: 0 0 0 0 hsl(var(--success) / .5); } 80%, 100% { box-shadow: 0 0 0 9px hsl(var(--success) / 0); } }
+
+/* Tilt cards with a light glare that follows the pointer. */
+.fx-on [data-fx-tilt] { transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)); transition: transform 380ms cubic-bezier(.22,1,.36,1), box-shadow 280ms; transform-style: preserve-3d; position: relative; }
+.fx-on [data-fx-tilt]:hover { transition-duration: 120ms; }
+.fx-on [data-fx-tilt]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 300ms; background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), hsl(0 0% 100% / .35), transparent 60%); }
+.fx-on [data-fx-tilt]:hover::after { opacity: 1; }
+.fx-on .founding-benefits-grid li:hover > span { transform: translateZ(24px) rotate(-8deg) scale(1.08); }
+.fx-on .founding-benefits-grid li > span { transition: transform 420ms cubic-bezier(.34,1.56,.64,1); }
+
+/* Plan photos drift inside their frames as they cross the viewport. */
+.fx-on .founding-plan-card > picture { overflow: hidden; }
+.fx-on .founding-plan-card > picture img { transform: scale(1.14) translate3d(0, calc((var(--fx-p, .5) - .5) * -26px), 0); transition: transform 120ms linear; }
+.fx-on .founding-plan-card:hover > picture img { transform: scale(1.2) translate3d(0, calc((var(--fx-p, .5) - .5) * -26px), 0); transition-duration: 700ms; }
+.fx-on .founding-plan-card button { transition: transform 300ms cubic-bezier(.34,1.56,.64,1), background-color 200ms, color 200ms; }
+.fx-on .founding-plan-card:hover button { transform: rotate(90deg); background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+
+/* How it works: a rail draws between the three steps as you scroll; badges light up in turn. */
+.founding-how-grid { position: relative; }
+.founding-how-rail { display: none; }
+.fx-on .founding-how-rail { display: block; position: absolute; left: 12px; right: 12px; top: calc(100% - 4.8rem); height: 2px; background: hsl(var(--border)); pointer-events: none; }
+.fx-on .founding-how-rail > span { display: block; height: 100%; background: linear-gradient(90deg, hsl(var(--gold)), hsl(var(--primary))); transform: scaleX(var(--fx-p, 0)); transform-origin: left; }
+.fx-on .founding-how-grid li { position: relative; z-index: 1; }
+.fx-on .founding-step-image span { transition: transform 500ms cubic-bezier(.34,1.56,.64,1), box-shadow 500ms; transform: scale(calc(.8 + clamp(0, (var(--fx-p, 0) * 3 - var(--i)) , 1) * .2)); box-shadow: 0 0 0 calc(clamp(0, (var(--fx-p, 0) * 3 - var(--i)), 1) * 6px) hsl(var(--gold) / .25); }
+.fx-on .founding-step-image img { transition: filter 600ms; filter: saturate(calc(.55 + clamp(0, (var(--fx-p, 0) * 3 - var(--i)), 1) * .45)); }
+@media (max-width: 767px) { .fx-on .founding-how-rail { display: none; } }
+
+/* Trust strip: icons arrive one by one, then breathe on hover. */
+.fx-on .founding-trust-section li { opacity: 0; transform: translateY(16px); transition: opacity 600ms, transform 700ms cubic-bezier(.22,1,.36,1); transition-delay: calc(var(--i) * 90ms); }
+.fx-on .founding-trust-section.fx-in li { opacity: 1; transform: none; }
+.fx-on .founding-trust-section svg { transition: transform 450ms cubic-bezier(.34,1.56,.64,1); }
+.fx-on .founding-trust-section li:hover svg { transform: translateY(-4px) scale(1.12); }
+.fx-on .founding-trust-section { background-image: radial-gradient(600px 200px at calc(var(--fx-page, 0) * 140% - 20%) 50%, hsl(var(--primary) / .28), transparent 70%); }
+
+/* Refer card: a slow gold sweep and an arrow that leans in. */
+.fx-on .founding-refer-card { position: relative; overflow: hidden; transition: transform 300ms cubic-bezier(.22,1,.36,1), box-shadow 300ms; }
+.fx-on .founding-refer-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 35%, hsl(var(--gold) / .25) 50%, transparent 65%); transform: translateX(-110%); animation: founding-cta-sheen 5s ease-in-out 2s infinite; pointer-events: none; }
+.fx-on .founding-refer-card:hover { transform: translateY(-3px); box-shadow: 0 16px 30px hsl(var(--gold) / .25); }
+.fx-on .founding-refer-card > svg:last-child { transition: transform 300ms cubic-bezier(.34,1.56,.64,1); }
+.fx-on .founding-refer-card:hover > svg:last-child { transform: translateX(6px); }
+.fx-on .founding-refer-card > svg:first-child { animation: founding-gift-bob 3.2s ease-in-out infinite; }
+@keyframes founding-gift-bob { 0%, 100% { transform: rotate(0); } 8% { transform: rotate(-10deg); } 16% { transform: rotate(8deg); } 24% { transform: rotate(0); } }
