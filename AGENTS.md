@@ -42,3 +42,5 @@
 - Owner digests include candidate SMS outcomes through their current cutoff, matched by normalized phone to real candidates and deduplicated by carrier SID, with pending queues separate — why: morning sends and recipient names must appear at 9 AM without claiming delivery.
 
 - Candidate appointments create urgent owner alerts transactionally from hiring_slots changes; admin displays read all booked slots in Miami time, and original Indeed résumés live in an admin-only source-text table — why: no sender path can omit a booking alert or replace original résumé content with scoring summaries.
+
+- Ops agents: one consolidated `ops-agents` tick runs all 13 agents, writes runs/exceptions to ops_agent_* tables and owner alerts to admin_alerts; it never sends member/Pro texts itself — why: one auditable door; existing senders keep quiet-hours and approval rules.
