@@ -227,10 +227,10 @@ export default function ProVisit() {
     <ProShell title={es ? (visit.service_type === "cleaning" ? "Limpieza" : visit.service_type === "lawn" ? "Césped" : "Cuidado del Auto") : SERVICE_LABEL[visit.service_type ?? ""] ?? "Visit"} back="/pro/schedule">
       <div className="bg-white px-4 pb-4 pt-4">
         <p className="text-[14px] font-semibold text-[hsl(var(--pro-ink-soft))]">
-          {dayLabel(visit.scheduled_start)}
+          {dayLabel(visit.scheduled_start, language)}
         </p>
         <p className="text-[16px] font-bold text-[hsl(var(--pro-ink))]">
-          {timeWindow(visit.scheduled_start, visit.scheduled_end)}
+          {timeWindow(visit.scheduled_start, visit.scheduled_end, language)}
         </p>
         <div className="mt-3 flex items-end justify-between">
           <p className="text-[34px] font-extrabold leading-none text-[hsl(var(--pro-ink))]">
