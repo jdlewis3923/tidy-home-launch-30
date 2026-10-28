@@ -10,7 +10,7 @@ import { Navigate } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
 import ProShell from "@/components/pro/portal/ProShell";
 import InstallPrompt from "@/components/pro/portal/InstallPrompt";
-import PushOptIn from "@/components/pro/portal/PushOptIn";
+
 import ProPartnerStrip from "@/components/pro/ProPartnerStrip";
 import {
   EmptyState, ErrorState, Eyebrow, HeroPanel, ScheduleSkeleton, VisitRow, WarningBanner, ProButton,
@@ -24,15 +24,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-const COI_LABEL: Record<string, string> = {
-  none: "Insurance",
-  under_review: "Under review",
-  active: "Active",
-  expiring: "Expiring",
-  expired: "Expired",
-};
+const COI_LABEL: Record<string, [string,string]> = { none: ["Insurance","Seguro"], under_review: ["Under review","En revisión"], active: ["Active","Activo"], expiring: ["Expiring","Por vencer"], expired: ["Expired","Vencido"] };
 
-const PUSH_CARD_KEY = "tidy_pro_push_card_dismissed";
+
 
 export default function ProSchedule() {
   const { me, coi, visits, loading, error, reload, userId } = useProSession();
@@ -42,11 +36,6 @@ export default function ProSchedule() {
   const [week, setWeek] = useState<"this" | "next">("this");
   const [tab, setTab] = useState<"route" | "dates">("dates");
   const [unread, setUnread] = useState(0);
-  const [showPushCard, setShowPushCard] = useState(
-    () => typeof window !== "undefined" && !localStorage.getItem(PUSH_CARD_KEY),
-  );
-
-
   useEffect(() => {
     if (!userId) return;
     void fetchNotifications()
@@ -89,8 +78,8 @@ export default function ProSchedule() {
   const nextPayoutFriday = useMemo(() => {
     const d = new Date(thisWeekStart);
     d.setDate(d.getDate() + 11);
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  }, [thisWeekStart.getTime()]);
+    return d.toLocaleDateString(es ? "es-US" : "en-US", { month: "short", day: "numeric" });
+  }, [thisWeekStart.getTime(), es]);
 
   const nextVisitId = useMemo(() => {
     const upcoming = visits
@@ -103,26 +92,30 @@ export default function ProSchedule() {
 
   const greeting = me?.first_name ? `${es ? 'Hola' : 'Hi'}, ${me.first_name}` : (es ? 'Su agenda' : 'Your schedule');
   const todayKey = new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York'}).format(new Date());
-  const routeVisits = inWeek.filter(v => routeRange === 'week' || (v.scheduled_start && new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York'}).format(new Date(v.scheduled_start)) === todayKey)).sort((a,b)=>(a.scheduled_start??'').localeCompare(b.scheduled_start??''));
+  const routeVisits = visits.filter(v => {
+    if (!v.scheduled_start || ['canceled','skipped','blocked'].includes(v.status ?? '')) return false;
+    const key = new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York'}).format(new Date(v.scheduled_start));
+    return routeRange === 'today' ? key === todayKey : new Date(v.scheduled_start) >= thisWeekStart && new Date(v.scheduled_start) < new Date(thisWeekStart.getTime()+7*86400000);
+  }).sort((a,b)=>(a.scheduled_start??'').localeCompare(b.scheduled_start??''));
 
   return (
     <ProShell title={greeting} showBell unread={unread}>
       <ProPartnerStrip />
       <p className="px-[18px] pt-4 text-[14px] font-semibold text-[hsl(var(--pro-ink))]">
-        You choose your days and your area. Once customers are booked on a day, changes need 14 days' notice.
+        {es ? "Usted elige sus días y su zona. Una vez que haya miembros reservados, los cambios requieren 14 días de aviso." : "You choose your days and your area. Once customers are booked on a day, changes need 14 days' notice."}
       </p>
       {coi && (coi.status === "expired" || coi.status === "none") && (
         <WarningBanner
           pulse
-          title={coi.status === "expired" ? "Your certificate of insurance has expired" : "No certificate of insurance on file"}
-          body={
+          title={coi.status === "expired" ? (es ? "Su certificado de seguro ha vencido" : "Your certificate of insurance has expired") : (es ? "No hay certificado de seguro registrado" : "No certificate of insurance on file")}
+          body={es ? "Puede ver sus próximas visitas, pero no comenzar hasta tener un certificado de seguro válido." :
             coi.status === "expired" && coi.expires_at
               ? `Your COI expired ${new Date(coi.expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}. You can view upcoming visits, but you can't start one until a valid certificate is on file.`
               : "You can view upcoming visits, but you can't start one until a valid certificate is on file."
           }
           action={
             <ProButton variant="secondary" onClick={() => (window.location.href = "/pro/profile")}>
-              Upload certificate
+              {es ? "Subir certificado" : "Upload certificate"}
             </ProButton>
           }
         />
@@ -131,7 +124,7 @@ export default function ProSchedule() {
       <ProLaunchLine className="px-[18px] pt-3" />
       {loading && <ScheduleSkeleton />}
 
-      {!loading && error && <ErrorState title="Couldn't load your schedule" onRetry={reload} />}
+      {!loading && error && <ErrorState title={es ? "No se pudo cargar su agenda" : "Couldn't load your schedule"} onRetry={reload} />}
 
       {!loading && !error && (
         <>
@@ -147,27 +140,27 @@ export default function ProSchedule() {
           </section>
           <section className="px-[18px] pt-4">
             <HeroPanel className="pro-rise">
-              <Eyebrow className="text-[hsl(var(--pro-sky))]">This week</Eyebrow>
+              <Eyebrow className="text-[hsl(var(--pro-sky))]">{es ? "Esta semana" : "This week"}</Eyebrow>
               <p className="pro-num pro-display mt-2 text-[34px] font-extrabold">{money(earnedCents)}</p>
               <p className="mt-1 text-[14px] text-white/70">
-                {completedThisWeek.length} {completedThisWeek.length === 1 ? "visit" : "visits"} completed · pays{" "}
+                {completedThisWeek.length} {es ? (completedThisWeek.length === 1 ? "visita completa" : "visitas completas") : (completedThisWeek.length === 1 ? "visit completed" : "visits completed")} · {es ? "pago" : "pays"}{" "}
                 {nextPayoutFriday}
               </p>
               <div className="mt-4 flex gap-6 border-t border-white/12 pt-3.5">
                 <div>
-                  <Eyebrow className="text-white/55">Visits all time</Eyebrow>
+                  <Eyebrow className="text-white/55">{es ? "Visitas totales" : "Visits all time"}</Eyebrow>
                   <p className="pro-num mt-1 text-[18px] font-bold">{me?.completed_visits ?? 0}</p>
                 </div>
                 <div>
-                  <Eyebrow className="text-white/55">Insurance</Eyebrow>
-                  <p className="mt-1 text-[18px] font-bold">{COI_LABEL[coi?.status ?? "none"]}</p>
+                  <Eyebrow className="text-white/55">{es ? "Seguro" : "Insurance"}</Eyebrow>
+                  <p className="mt-1 text-[18px] font-bold">{COI_LABEL[coi?.status ?? "none"]?.[es ? 1 : 0]}</p>
                 </div>
               </div>
             </HeroPanel>
           </section>
 
           <div className="mx-[18px] mt-5 flex rounded-xl border border-[hsl(var(--pro-navy)/0.07)] bg-white p-1 pro-card" role="tablist">
-            {([["route", "My weekly route"], ["dates", "My dates"]] as const).map(([k, label]) => (
+            {([["route", es ? "Mi ruta semanal" : "My weekly route"], ["dates", es ? "Mis fechas" : "My dates"]] as const).map(([k, label]) => (
               <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
                 className={`min-h-[44px] flex-1 rounded-[10px] text-[14px] font-bold ${tab === k ? "bg-[hsl(var(--pro-navy))] text-white" : "text-[hsl(var(--pro-ink-soft))]"}`}>
                 {label}
@@ -190,7 +183,7 @@ export default function ProSchedule() {
                     : "text-[hsl(var(--pro-ink-soft))]"
                 }`}
               >
-                {w === "this" ? "This week" : "Next week"}
+                {w === "this" ? (es ? "Esta semana" : "This week") : (es ? "Próxima semana" : "Next week")}
               </button>
             ))}
           </div>
@@ -198,8 +191,8 @@ export default function ProSchedule() {
           {grouped.length === 0 ? (
             <EmptyState
               icon={CalendarDays}
-              title={week === "this" ? "Nothing scheduled this week" : "Nothing scheduled next week"}
-              body="New visits appear here as soon as Tidy assigns them to you."
+              title={week === "this" ? (es ? "Sin visitas esta semana" : "Nothing scheduled this week") : (es ? "Sin visitas la próxima semana" : "Nothing scheduled next week")}
+              body={es ? "Las nuevas visitas aparecen cuando Tidy se las asigna." : "New visits appear here as soon as Tidy assigns them to you."}
             />
           ) : (
             <div className="space-y-6 px-[18px] pt-5">
@@ -209,7 +202,7 @@ export default function ProSchedule() {
                     <h2 className="pro-eyebrow text-[hsl(var(--pro-ink))]">{day}</h2>
                     <span aria-hidden className="h-px flex-1 bg-[hsl(var(--pro-navy)/0.08)]" />
                     <span className="pro-num text-[12px] font-semibold text-[hsl(var(--pro-ink-soft))]">
-                      {rows.length} {rows.length === 1 ? "visit" : "visits"}
+                      {rows.length} {es ? (rows.length === 1 ? "visita" : "visitas") : (rows.length === 1 ? "visit" : "visits")}
                     </span>
                   </div>
                   <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white pro-card">
@@ -234,22 +227,6 @@ export default function ProSchedule() {
           )}
           </>)}
         </>
-      )}
-
-      {!loading && !error && showPushCard && (
-        <section className="px-[18px] pt-6">
-          <PushOptIn compact />
-          <button
-            type="button"
-            onClick={() => {
-              localStorage.setItem(PUSH_CARD_KEY, "1");
-              setShowPushCard(false);
-            }}
-            className="mt-2 min-h-[44px] w-full text-[13px] font-semibold text-[hsl(var(--pro-ink-soft))]"
-          >
-            Not now
-          </button>
-        </section>
       )}
 
       <InstallPrompt />
