@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
 
     const { data: visit } = await admin
       .from('visits')
-      .select('id, assigned_pro_id, status, user_id, subscription_id, service_type, visit_kind, size_tier, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, check_in_at, street, customer_first_name, rate_token, is_redo, redo_request_id, cleaning_team_id, backup_pro_id')
+      .select('id, assigned_pro_id, status, user_id, subscription_id, service_type, visit_kind, size_tier, visit_pay_cents, contractor_pay_cents, scheduled_start, on_my_way_at, check_in_at, street, customer_first_name, rate_token, is_redo, redo_request_id, cleaning_team_id, backup_pro_id, pro_loop_enabled')
       .eq('id', visit_id)
       .maybeSingle();
     const {data:team} = visit?.cleaning_team_id ? await admin.from('cleaning_teams').select('kind,partner_pro_id,active').eq('id',visit.cleaning_team_id).maybeSingle() : {data:null};
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: false, error: 'coi_blocked', coi_status: coiRow?.status ?? 'none' });
     }
 
-    if (parsed.data.action === 'check_in' || parsed.data.action === 'team_check_out' || parsed.data.action === 'complete') {
+    if (visit.pro_loop_enabled && (parsed.data.action === 'check_in' || parsed.data.action === 'team_check_out' || parsed.data.action === 'complete')) {
       const {data:location,error:locationError}=await admin.rpc('pro_gps_validate',{_visit:visit_id,_pro:uid,_lat:parsed.data.lat,_lng:parsed.data.lng,_reason:parsed.data.location_reason??null});
       if(locationError || !location?.ok) return jsonResponse({ok:false,error:locationError?.message??location?.error??'invalid_location'});
       if(parsed.data.location_reason) {
@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
     if (action === 'check_in') {
       const { lat, lng } = parsed.data;
       if(visit.service_type==='cleaning'){
-        const {error}=await admin.rpc('pro_record_team_location',{_visit:visit_id,_pro:uid,_action:'check_in',_lat:lat,_lng:lng,_reason:parsed.data.location_reason??null});
+        const {error}= visit.pro_loop_enabled ? await admin.rpc('pro_record_team_location',{_visit:visit_id,_pro:uid,_action:'check_in',_lat:lat,_lng:lng,_reason:parsed.data.location_reason??null}) : await admin.rpc('cleaning_team_presence_record',{_visit:visit_id,_pro:uid,_action:'check_in',_lat:lat,_lng:lng});
         if(error)return jsonResponse({ok:false,error:error.message});
         if(isPartner)return jsonResponse({ok:true,action});
       }
@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
     }
     if(action==='team_check_out'){
       const {lat,lng}=parsed.data;
-      const {error}=await admin.rpc('pro_record_team_location',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng,_reason:parsed.data.location_reason??null});
+      const {error}=visit.pro_loop_enabled ? await admin.rpc('pro_record_team_location',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng,_reason:parsed.data.location_reason??null}) : await admin.rpc('cleaning_team_presence_record',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng});
       return jsonResponse(error?{ok:false,error:error.message}:{ok:true,action});
     }
 
@@ -299,7 +299,7 @@ Deno.serve(async (req) => {
     const now = new Date();
     const { lat, lng, not_reached_note } = parsed.data as { lat: number; lng: number; not_reached_note?: string };
     if(visit.service_type==='cleaning' && team?.kind==='paired_pros'){
-      const {error}=await admin.rpc('pro_record_team_location',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng,_reason:'location_reason' in parsed.data?parsed.data.location_reason??null:null});
+      const {error}=visit.pro_loop_enabled ? await admin.rpc('pro_record_team_location',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng,_reason:'location_reason' in parsed.data?parsed.data.location_reason??null:null}) : await admin.rpc('cleaning_team_presence_record',{_visit:visit_id,_pro:uid,_action:'check_out',_lat:lat,_lng:lng});
       if(error)return jsonResponse({ok:false,error:error.message});
     }
     const { data: closedVisit, error: closeErr } = await admin
