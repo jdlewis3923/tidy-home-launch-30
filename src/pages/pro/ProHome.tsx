@@ -15,6 +15,7 @@ import { fetchNotifications, timeWindow, mondayOf, type ProVisit } from "@/lib/p
 import { money } from "@/lib/pro-pay";
 import { useLanguage } from "@/contexts/LanguageContext";
 import palms from "@/assets/pro-home-palms.jpg";
+import tidyLogo from "@/assets/tidy-official-logo.png";
 
 const TZ = "America/New_York";
 const dayKey = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d);
@@ -101,11 +102,10 @@ export default function ProHome() {
       <ProHead title={`${es ? "Inicio" : "Home"} · Tidy Pro Portal`} />
       <main className="mx-auto max-w-md px-3 pb-28 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <header className="flex items-center gap-2 px-1 pb-3">
-          <div className="flex flex-1 items-end gap-1">
-            <span className="relative text-[30px] font-black italic leading-none tracking-[-0.04em] text-[hsl(var(--pro-blue))]">
-              TIDY<Sparkles className="absolute -right-4 -top-2 h-4 w-4 text-[hsl(var(--pro-blue))]" aria-hidden />
-            </span>
-            <span className="mb-0.5 ml-1 rounded-full bg-[hsl(var(--pro-gold,45_92%_52%))] px-2 py-0.5 text-[10px] font-bold text-[hsl(var(--pro-ink))]">PRO</span>
+          <div className="flex flex-1 items-center gap-1.5">
+            <img src={tidyLogo} alt="Tidy Home Concierge" width={212} height={177} loading="eager" decoding="async"
+              className="h-11 w-auto max-w-none shrink-0 object-contain" />
+            <span className="rounded-full bg-[hsl(var(--pro-gold,45_92%_52%))] px-2 py-0.5 text-[10px] font-bold text-[hsl(var(--pro-ink))]">PRO</span>
           </div>
           <button type="button" onClick={() => setSheet(true)} aria-haspopup="dialog" aria-label={es ? "Idioma" : "Language"}
             className="flex h-10 items-center gap-1.5 rounded-full bg-[hsl(var(--pro-blue-soft))] px-3 text-[13px] font-semibold text-[hsl(var(--pro-ink))]">
