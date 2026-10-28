@@ -3,9 +3,8 @@ import '../_shared/http.ts';
  * admin-alert-dispatch — the only thing that contacts the owner.
  *
  *  mode 'urgent'  (fired by a database trigger the moment an urgent alert is
- *                  written): text + email now if it is 9 AM–9 PM ET, or if the
- *                  alert may wake the owner at night. Otherwise it waits for
- *                  the top of the 9 AM digest.
+ *                  written): text + email within 8 AM–9 PM ET. Otherwise it
+ *                  remains pending until owner hours open; never wakes the owner.
  *  mode 'hourly'  (cron, top of every hour): one reminder for urgent alerts
  *                  still open after 4 hours; any urgent alert the trigger
  *                  missed; and at 9 AM / 9 PM ET the "Today" / "Tonight" digest.
@@ -117,6 +116,7 @@ const canSendNow = (_a: Alert) => isDaytime();
 const open = (a: Alert) => !a.resolved_at && !(a.snoozed_until && Date.parse(a.snoozed_until) > Date.now());
 
 async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force = false, preview = false) {
+  if (!preview && !ownerAlertWindowOpen()) return {skipped: 'outside_owner_hours'};
   const { date: today } = et();
   if (!force && !preview) {
     const { error } = await admin.from('admin_digest_runs').insert({ edition, run_date: today });
