@@ -28,7 +28,7 @@ export default function ProFirstRun() {
   const done = async () => {
     const { data } = await supabase.auth.getUser();
     if (data.user?.id) localStorage.setItem(`tidy_pro_first_run_${data.user.id}`, "1");
-    navigate("/pro/schedule", { replace: true });
+    navigate("/pro/home", { replace: true });
   };
 
   return (

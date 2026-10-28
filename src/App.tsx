@@ -150,6 +150,7 @@ const LifecycleSimulator = lazy(() => import("./pages/admin/LifecycleSimulator")
 const HiringContent = lazy(() => import("./pages/admin/HiringContent"));
 const ProLogin = lazy(() => import("./pages/pro/ProLogin.tsx"));
 const ProFirstRun = lazy(() => import("./pages/pro/ProFirstRun.tsx"));
+const ProHome = lazy(() => import("./pages/pro/ProHome.tsx"));
 const ProSchedule = lazy(() => import("./pages/pro/ProSchedule.tsx"));
 const ProVisit = lazy(() => import("./pages/pro/ProVisit.tsx"));
 const ProChecklist = lazy(() => import("./pages/pro/ProChecklist.tsx"));
@@ -445,7 +446,8 @@ const App = () => (
                   {/* Capacity & hiring — fill %, ceiling dates, when to post the job. */}
                   <Route path="/admin/capacity" element={<AdminCapacity />} />
                   <Route path="/apply" element={<Apply />} />
-                  <Route path="/pro" element={<Navigate to="/pro/schedule" replace />} />
+                  <Route path="/pro" element={<Navigate to="/pro/home" replace />} />
+                  <Route path="/pro/home" element={<ProHome />} />
                   <Route path="/pro/tier-progression" element={<ProTierProgression />} />
                   <Route path="/pro/review-bonus" element={<ProReviewBonuses />} />
                   <Route path="/pro/upload-coi" element={<ProUploadCoi />} />

@@ -47,7 +47,7 @@ export default function ProLogin() {
       return;
     }
     const firstRun = !localStorage.getItem(`tidy_pro_first_run_${data.user?.id}`);
-    navigate(firstRun ? "/pro/first-run" : "/pro/schedule", { replace: true });
+    navigate(firstRun ? "/pro/first-run" : "/pro/home", { replace: true });
   };
 
   const sendReset = async () => {
