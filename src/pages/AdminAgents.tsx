@@ -15,6 +15,7 @@ import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, AlertCircle, Clock, ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Agent = {
   key: string;
@@ -87,6 +88,8 @@ interface SnapRow {
 }
 
 export default function AdminAgents() {
+  const { language } = useLanguage();
+  const es = language === 'es';
   const [authed, setAuthed] = useState<null | boolean>(null);
   const [forbidden, setForbidden] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -162,9 +165,9 @@ export default function AdminAgents() {
             <p className="text-[10px] sm:text-xs uppercase tracking-widest text-[#f5c518] font-semibold">
               Tidy · Operating System
             </p>
-            <h1 className="text-xl sm:text-3xl font-semibold mt-1">Agents</h1>
+            <h1 className="text-xl sm:text-3xl font-semibold mt-1">{es ? 'Monitoreo de indicadores' : 'KPI monitoring'}</h1>
             <p className="text-slate-300 text-xs sm:text-sm mt-1">
-              6 agents monitoring 38 KPIs · all running
+              {es ? `${defs.length} indicadores · agentes operativos pendientes de la auditoría` : `${defs.length} indicators · operations agents await audit clearance`}
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -210,11 +213,11 @@ export default function AdminAgents() {
                         </h2>
                         {isActive ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <CheckCircle2 className="h-3 w-3" /> Active
+                            <CheckCircle2 className="h-3 w-3" /> {es ? 'Datos recientes' : 'Recent data'}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
-                            <AlertCircle className="h-3 w-3" /> Idle
+                            <AlertCircle className="h-3 w-3" /> {es ? 'Datos desactualizados' : 'Stale data'}
                           </span>
                         )}
                       </div>
@@ -240,7 +243,7 @@ export default function AdminAgents() {
                   <div className="mt-3 text-xs text-slate-600 space-y-1">
                     <div className="flex items-center gap-1.5">
                       <Clock className="h-3 w-3 text-slate-400" />
-                      <span>Last action: {lastRunDate ? lastRunDate.toLocaleString() : "—"}</span>
+                      <span>{es ? 'Último cálculo' : 'Last KPI calculation'}: {lastRunDate ? lastRunDate.toLocaleString(es ? 'es-US' : 'en-US', { timeZone: 'America/New_York' }) : "—"}</span>
                     </div>
                     <div className="text-slate-500">Schedule: {agent.cadence}</div>
                   </div>
