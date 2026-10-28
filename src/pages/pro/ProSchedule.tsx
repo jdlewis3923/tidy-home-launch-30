@@ -82,7 +82,6 @@ export default function ProSchedule() {
           />
         </div>
       )}
-      <ProLaunchLine className="px-4 pt-2 text-primary-foreground" />
 
       <div className="mx-2.5 mt-1.5 min-h-[calc(100vh-110px)] rounded-t-[18px] bg-[hsl(var(--pro-ground))] px-1 pb-6">
         <section className="overflow-hidden px-2.5 pb-3 pt-4">
@@ -175,6 +174,7 @@ export default function ProSchedule() {
 
         {!loading && dayJobs.length === 0 && selected === todayKey && <div className="mx-2.5 mt-2.5"><GpsTestCard /></div>}
 
+        <ProLaunchLine className="mx-2.5 mt-4 text-[12.5px] text-[hsl(var(--pro-ink-soft))]" />
         <section className="mx-2.5 mt-2.5 overflow-hidden rounded-[16px] bg-white">
           <h3 className="px-3.5 pt-3.5 text-[16px] font-semibold text-[hsl(var(--pro-ink))]">{es ? "Mi ruta semanal" : "My weekly route"}</h3>
           <WeeklyRoute />
