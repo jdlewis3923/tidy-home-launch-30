@@ -43,7 +43,7 @@ export default function ProLanding() {
             <Link to="/pro/login" className="mt-7 flex min-h-[50px] w-full items-center justify-center gap-10 rounded-full bg-[hsl(var(--pro-gold))] text-[16px] font-semibold text-[hsl(var(--pro-navy))] active:scale-[0.98]">
               {es ? "Iniciar sesión" : "Log In"} <ArrowRight className="h-5 w-5" aria-hidden />
             </Link>
-            <Link to="/careers" className="mt-3 flex min-h-[50px] w-full items-center justify-center rounded-full border border-primary-foreground/80 text-[15px] font-medium">
+            <Link to="/apply" className="mt-3 flex min-h-[50px] w-full items-center justify-center rounded-full border border-primary-foreground/80 text-[15px] font-medium">
               {es ? "Crear cuenta" : "Create Account"}
             </Link>
             <a href="mailto:hello@jointidy.co" className="mt-3 block py-2 text-center text-[13px] text-primary-foreground/70">{es ? "¿Necesita ayuda? Contacte a soporte" : "Need help? Contact support"}</a>
