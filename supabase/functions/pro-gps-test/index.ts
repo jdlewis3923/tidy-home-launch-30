@@ -19,6 +19,10 @@ const BodySchema = z.object({
   lng: z.number().min(-180).max(180),
   accuracy_m: z.number().min(0).max(100000).optional(),
   address: z.string().trim().min(5).max(300).optional(),
+  // The tester is standing at the address; the phone browser resolves it
+  // (server-side geocoders are blocked from this runtime).
+  target_lat: z.number().min(-90).max(90).optional(),
+  target_lng: z.number().min(-180).max(180).optional(),
 });
 
 Deno.serve(async (req) => {
@@ -47,9 +51,10 @@ Deno.serve(async (req) => {
     if (!parsed.success) return jsonResponse({ ok: false, error: 'invalid_body' });
     const { lat, lng, accuracy_m, address } = parsed.data;
 
-    // Optional target: geocode the address the tester is standing at.
-    let targetLat: number | null = null;
-    let targetLng: number | null = null;
+    // Optional target: prefer the browser-resolved point; otherwise try
+    // server-side geocoding of the address the tester is standing at.
+    let targetLat: number | null = parsed.data.target_lat ?? null;
+    let targetLng: number | null = parsed.data.target_lng ?? null;
     let geocodeFailed = false;
     const mapsKey = Deno.env.get('GOOGLE_PLACES_API_KEY') ?? '';
     if (address && mapsKey) {
