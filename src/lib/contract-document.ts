@@ -1,7 +1,7 @@
 export type ContractBlock = { kind: 'paragraph'|'heading'; text:string } | {kind:'table'; rows:string[][]};
 export function contractBlocks(body:string):ContractBlock[] {
   // Add presentation boundaries only; never replace a word or punctuation mark.
-  const text=body.replace(/\s+(?=\d+\.\d+\s)/g,'\n\n').replace(/\s+(?=\d+\. [A-Z])/g,'\n\n').replace(/\s+(?=SCHEDULE [AB] —|SIGNATURES|Contractor:|Effective date:|Tidy and Contractor agree)/g,'\n\n');
+  const text=body.replace(/\s+(?=\d+\.\d+\s)/g,'\n\n').replace(/\s+(?=\d+\. [A-Z])/g,'\n\n').replace(/\s+(?=SCHEDULE [AB] —|SIGNATURES|Contractor:|Effective date:|Tidy and Contractor agree|Tidy Home Concierge LLC, a Florida)/g,'\n\n').replace(/(SCHEDULE A — PAY)\s+/g,'$1\n\n').replace(/(SCHEDULE B — THE TIDY STANDARD: LAWN CARE)\s+/g,'$1\n\n').replace(/(SIGNATURES)\s+/g,'$1\n\n');
   const blocks:ContractBlock[]=[];
   for(const part of text.split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean)) {
     if(part.includes('|')) {

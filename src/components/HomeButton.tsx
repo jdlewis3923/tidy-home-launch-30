@@ -24,6 +24,7 @@ const HIDE_ON_PREFIXES = [
   "/checkout",
   "/coming-soon",
   "/intake/",
+  "/contract/",
   // The Pro Portal is its own installable app shell with in-app navigation.
   "/pro/",
 
