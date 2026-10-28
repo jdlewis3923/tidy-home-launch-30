@@ -24,6 +24,7 @@ function meters(a: number, b: number, c: number, d: number) {
   const x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(x));
 }
+function must<T extends { error: any }>(r: T): T { if (r.error) throw new Error(r.error.message ?? String(r.error)); return r; }
 const testFilter = (q: any, col: string, test: boolean) => q.eq(col, test);
 
 // Due rules in Eastern time; the tick runs every 15 minutes.
@@ -46,7 +47,7 @@ const DUE: Record<string, (e: Ctx['et']) => boolean> = {
 const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
   async pay_reconciler({ db, test, et }) {
     const weekStart = addDays(et.date, -((et.dow + 6) % 7));
-    const { data } = await testFilter(db.from('visits').select('id,visit_date,status,check_in_at,check_out_at,check_in_lat,check_in_lng,address_lat,address_lng,check_in_location_reason,budget_hours,contractor_pay_cents,customer_first_name').gte('visit_date', weekStart).lte('visit_date', et.date).eq('status', 'complete'), 'is_sample', test);
+    const { data } = must(await testFilter(db.from('visits').select('id,visit_date,status,check_in_at,check_out_at,check_in_lat,check_in_lng,address_lat,address_lng,check_in_location_reason,budget_hours,contractor_pay_cents,customer_first_name').gte('visit_date', weekStart).lte('visit_date', et.date).eq('status', 'complete'), 'is_sample', test));
     const ex: Exc[] = []; const log: string[] = [];
     for (const v of data ?? []) {
       const issues: string[] = [];
@@ -70,7 +71,7 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
 
   async size_verifier({ db, test, now }) {
     const cutoff = new Date(now.getTime() - 48 * 3.6e6).toISOString();
-    const { data } = await testFilter(db.from('reservations').select('id,first_name,street,zip,created_at,services,cleaning_selected_size,cleaning_verified_at,lawn_selected_size,lawn_verified_at,converted_at').is('converted_at', null), 'is_test_row', test);
+    const { data } = must(await testFilter(db.from('reservations').select('id,first_name,street,zip,created_at,services,cleaning_selected_size,cleaning_verified_at,lawn_selected_size,lawn_verified_at,converted_at').is('converted_at', null), 'is_test_row', test));
     const ex: Exc[] = [];
     for (const r of data ?? []) {
       const needClean = r.cleaning_selected_size && !r.cleaning_verified_at;
@@ -85,14 +86,14 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
 
   async plan_corrector({ db, now }) {
     const cutoff = new Date(now.getTime() - 48 * 3.6e6).toISOString();
-    const { data } = await db.from('size_reviews').select('id,service,booked_size,observed_size,status,created_at,customer_responded_at').is('customer_responded_at', null).not('status', 'in', '(resolved,approved,declined,closed)');
+    const { data } = must(await db.from('size_reviews').select('id,service,booked_size,observed_size,status,created_at,customer_responded_at').is('customer_responded_at', null).not('status', 'in', '(resolved,approved,declined,closed)'));
     const ex = (data ?? []).filter((s: any) => s.created_at < cutoff).map((s: any) => ({ severity: 'normal' as const, title: `Member hasn't answered size change (${s.service})`, detail: `${s.booked_size} → ${s.observed_size}. Never charged without approval.`, action_label: 'Review', action_url: '/admin/size-reviews', dedupe_key: `plan:${s.id}` }));
     return { checked: (data ?? []).length, log: [`${(data ?? []).length} open size reports`], exceptions: ex };
   },
 
   async tomorrow_guard({ db, test, et }) {
     const tmr = addDays(et.date, 1);
-    const { data } = await testFilter(db.from('visits').select('id,service,assigned_pro_id,subscription_id,customer_first_name,status').eq('visit_date', tmr).eq('status', 'scheduled'), 'is_sample', test);
+    const { data } = must(await testFilter(db.from('visits').select('id,service,assigned_pro_id,subscription_id,customer_first_name,status').eq('visit_date', tmr).eq('status', 'scheduled'), 'is_sample', test));
     const ex: Exc[] = [];
     for (const v of data ?? []) {
       if (!v.assigned_pro_id) ex.push({ severity: 'urgent', title: `No Pro for tomorrow: ${v.customer_first_name ?? ''} (${v.service})`, action_label: 'Assign Pro', action_url: '/admin/schedule', dedupe_key: `tmr:${v.id}` });
@@ -101,7 +102,7 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
   },
 
   async late_watcher({ db, test, now, et }) {
-    const { data } = await testFilter(db.from('visits').select('id,scheduled_start,check_in_at,customer_first_name,assigned_pro_id').eq('visit_date', et.date).eq('status', 'scheduled').is('check_in_at', null).not('scheduled_start', 'is', null), 'is_sample', test);
+    const { data } = must(await testFilter(db.from('visits').select('id,scheduled_start,check_in_at,customer_first_name,assigned_pro_id').eq('visit_date', et.date).eq('status', 'scheduled').is('check_in_at', null).not('scheduled_start', 'is', null), 'is_sample', test));
     const ex: Exc[] = [];
     for (const v of data ?? []) {
       const late = (now.getTime() - new Date(v.scheduled_start).getTime()) / 60000;
@@ -113,7 +114,7 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
 
   async quality_watcher({ db, now }) {
     const since = new Date(now.getTime() - 7 * 864e5).toISOString();
-    const { data } = await db.from('visit_ratings').select('id,rating,stars,visit_id,created_at').gte('created_at', since);
+    const { data } = must(await db.from('visit_ratings').select('id,rating,stars,visit_id,created_at').gte('created_at', since));
     const low = (data ?? []).filter((r: any) => (r.rating ?? r.stars ?? 5) <= 3);
     const ex: Exc[] = [];
     for (const r of low) {
@@ -124,13 +125,13 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
   },
 
   async billing_agent({ db }) {
-    const { data } = await db.from('subscriptions').select('id,status,stripe_status,latest_invoice_attempt_count,paused_until').in('stripe_status', ['past_due', 'unpaid', 'incomplete']);
+    const { data } = must(await db.from('subscriptions').select('id,status,stripe_status,latest_invoice_attempt_count,paused_until').in('stripe_status', ['past_due', 'unpaid', 'incomplete']));
     const ex = (data ?? []).map((s: any) => ({ severity: 'normal' as const, title: `Payment failing (${s.stripe_status}, attempt ${s.latest_invoice_attempt_count ?? 0})`, detail: 'Day-7 pause and auto-unpause run in the member billing tick.', action_label: 'Open billing', action_url: '/admin/billing', dedupe_key: `bill:${s.id}:${s.latest_invoice_attempt_count ?? 0}` }));
     return { checked: (data ?? []).length, log: [`${(data ?? []).length} subscriptions with failed payments`], exceptions: ex };
   },
 
   async pro_compliance({ db, et }) {
-    const { data } = await db.from('contractor_insurance').select('id,applicant_id,expiration_date,verification_status').not('expiration_date', 'is', null).lte('expiration_date', addDays(et.date, 30));
+    const { data } = must(await db.from('contractor_insurance').select('id,applicant_id,expiration_date,verification_status').not('expiration_date', 'is', null).lte('expiration_date', addDays(et.date, 30)));
     const ex = (data ?? []).map((c: any) => {
       const expired = c.expiration_date < et.date; const d7 = c.expiration_date <= addDays(et.date, 7);
       return { severity: expired ? 'urgent' as const : d7 ? 'high' as const : 'normal' as const, title: expired ? 'Pro insurance expired — no new visits' : `Pro insurance expires ${c.expiration_date}`, action_label: 'Open Pro', action_url: `/admin/applicants/${c.applicant_id}`, dedupe_key: `coi:${c.id}:${expired ? 'x' : d7 ? '7' : '30'}` };
@@ -139,7 +140,7 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
   },
 
   async capacity_hire({ db, test }) {
-    const { data } = await testFilter(db.from('reservations').select('services').is('converted_at', null), 'is_test_row', test);
+    const { data } = must(await testFilter(db.from('reservations').select('services').is('converted_at', null), 'is_test_row', test));
     const counts: Record<string, number> = {};
     for (const r of data ?? []) for (const s of (Array.isArray(r.services) ? r.services : [])) counts[String(s)] = (counts[String(s)] ?? 0) + 1;
     const ex = Object.entries(counts).filter(([, n]) => n >= 10).map(([s, n]) => ({ severity: 'normal' as const, title: `${n} reservations for ${s} — advance that service's Pro`, action_label: 'Open pipeline', action_url: '/admin/pipeline', dedupe_key: `cap:${s}:${Math.floor(n / 10)}` }));
@@ -148,14 +149,14 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
 
   async hiring_agent({ db, now }) {
     const since = new Date(now.getTime() - 24 * 3.6e6).toISOString();
-    const { data } = await db.from('applicants').select('id,first_name,last_name,service,created_at,first_texted_at,is_test_row').gte('created_at', since).eq('is_test_row', false);
+    const { data } = must(await db.from('applicants').select('id,first_name,last_name,service,created_at,first_texted_at,is_test_row').gte('created_at', since).eq('is_test_row', false));
     const ex = (data ?? []).filter((a: any) => !a.first_texted_at && now.getTime() - new Date(a.created_at).getTime() > 5 * 60000)
       .map((a: any) => ({ severity: 'normal' as const, title: `New applicant not texted yet: ${a.first_name ?? ''} ${a.last_name ?? ''}`, detail: `${a.service ?? ''}. Texts wait for your approved list and quiet hours.`, action_label: 'Open applicant', action_url: `/admin/applicants/${a.id}`, dedupe_key: `hire:${a.id}` }));
     return { checked: (data ?? []).length, log: [`${(data ?? []).length} new applicants in last 24h`], exceptions: ex };
   },
 
   async seal_first_visit({ db, test, et }) {
-    const { data } = await testFilter(db.from('visits').select('id,visit_date,assigned_pro_id,customer_first_name,size_tier').eq('cleaning_first_visit', true).gte('visit_date', et.date).lte('visit_date', addDays(et.date, 7)), 'is_sample', test);
+    const { data } = must(await testFilter(db.from('visits').select('id,visit_date,assigned_pro_id,customer_first_name,size_tier').eq('cleaning_first_visit', true).gte('visit_date', et.date).lte('visit_date', addDays(et.date, 7)), 'is_sample', test));
     const ex = (data ?? []).filter((v: any) => !v.assigned_pro_id).map((v: any) => ({ severity: 'normal' as const, title: `First visit ${v.visit_date} has no Pro to carry the window seal`, detail: String(v.size_tier ?? '').includes('estate') ? 'Estate home: 1.5× first-visit pay.' : undefined, action_label: 'Assign Pro', action_url: '/admin/schedule', dedupe_key: `seal:${v.id}` }));
     return { checked: (data ?? []).length, log: [`${(data ?? []).length} first visits in next 7 days`], exceptions: ex };
   },
@@ -170,7 +171,7 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
     log.push(`Active prices missing lookup key: ${noKey ?? 0}`);
     if (noKey) ex.push({ severity: 'urgent', title: `${noKey} active prices missing lookup keys`, dedupe_key: 'stripe:lookup' });
     const since = new Date(now.getTime() - 7 * 864e5).toISOString();
-    const { data: ev } = await db.from('sms_delivery_events').select('message_status').gte('created_at', since);
+    const { data: ev } = must(await db.from('sms_delivery_events').select('message_status').gte('created_at', since));
     const total = (ev ?? []).length; const failed = (ev ?? []).filter((e: any) => ['failed', 'undelivered'].includes(e.message_status)).length;
     log.push(`Text receipts 7d: ${total}, failed ${failed}`);
     if (total >= 20 && failed / total > 0.05) ex.push({ severity: 'urgent', title: `Text failures ${Math.round(failed / total * 100)}% this week`, dedupe_key: 'sms:fail' });
@@ -185,7 +186,7 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
   },
 
   async digests({ db, test, et }) {
-    const { data } = await db.from('ops_agent_exceptions').select('severity,title,action_url').is('resolved_at', null).eq('is_test', test);
+    const { data } = must(await db.from('ops_agent_exceptions').select('severity,title,action_url').is('resolved_at', null).eq('is_test', test));
     const order = { urgent: 0, high: 1, normal: 2, info: 3 } as Record<string, number>;
     const list = (data ?? []).sort((a: any, b: any) => order[a.severity] - order[b.severity]);
     if (!test && list.length) {
@@ -196,7 +197,7 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
 };
 
 async function runAgent(c: Ctx, key: string) {
-  const { data: run } = await c.db.from('ops_agent_runs').insert({ agent_key: key, is_test: c.test }).select('id').single();
+  const { data: run } = must(await c.db.from('ops_agent_runs').insert({ agent_key: key, is_test: c.test }).select('id').single());
   let status = 'ok', error: string | null = null, res: Result = { checked: 0, log: [], exceptions: [] };
   try { res = await AGENTS[key](c); } catch (e) { status = 'error'; error = String(e); }
   if (c.test && status === 'ok' && res.exceptions.length === 0) {
@@ -223,13 +224,13 @@ Deno.serve(async (req) => {
   let authorized = await isCronAuthorized(req);
   if (!authorized) {
     const jwt = (req.headers.get('Authorization') ?? '').replace('Bearer ', '');
-    const { data: u } = await db.auth.getUser(jwt);
+    const { data: u } = must(await db.auth.getUser(jwt));
     if (u?.user) { const { data: ok } = await db.rpc('has_role', { _user_id: u.user.id, _role: 'admin' }); authorized = !!ok; }
   }
   if (!authorized) return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: corsHeaders });
   const now = new Date();
   const ctx: Ctx = { db, test: mode === 'test', now, et: etParts(now) };
-  const { data: agents } = await db.from('ops_agents').select('key,enabled').order('sort');
+  const { data: agents } = must(await db.from('ops_agents').select('key,enabled').order('sort'));
   const only = typeof body?.agent === 'string' ? body.agent : null;
   const results = [];
   for (const a of agents ?? []) {
