@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
         country: 'US',
         email: applicant.email,
         'capabilities[transfers][requested]': 'true',
+        'capabilities[tax_reporting_us_1099_misc][requested]': 'true',
         'business_type': 'individual',
         'business_profile[mcc]': '7349', // Cleaning & Maintenance Services
         'business_profile[product_description]': 'Independent contractor home services for Tidy Home Concierge.',
@@ -101,10 +102,12 @@ Deno.serve(async (req) => {
 
     const base = (refresh_url ?? '').replace(/\/[^/]*$/, '') || DEFAULT_BASE;
     const link = await stripePost('/account_links', {
-      account: accountId!,
+      account: accountId ?? "",
       refresh_url: refresh_url ?? `${DEFAULT_BASE}/onboarding/payment-return?refresh=1`,
       return_url:  return_url  ?? `${DEFAULT_BASE}/onboarding/payment-return`,
       type: 'account_onboarding',
+      'collection_options[fields]': 'eventually_due',
+      'collection_options[future_requirements]': 'include',
     });
 
     await admin.from('onboarding_events').insert({
