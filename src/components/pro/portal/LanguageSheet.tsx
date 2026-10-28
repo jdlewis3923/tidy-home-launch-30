@@ -23,7 +23,7 @@ export default function LanguageSheet({ open, onClose }: { open: boolean; onClos
           <motion.div
             role="dialog" aria-modal="true" aria-label={es ? "Elegir idioma" : "Choose Language"}
             initial={reduce ? { opacity: 0 } : { y: "100%" }} animate={reduce ? { opacity: 1 } : { y: 0 }} exit={reduce ? { opacity: 0 } : { y: "100%" }}
-            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
             className="absolute inset-x-0 bottom-0 mx-auto max-w-md rounded-t-[22px] bg-white px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-2.5"
           >
             <div aria-hidden className="mx-auto mb-4 h-1 w-10 rounded-full bg-[hsl(var(--pro-line))]" />

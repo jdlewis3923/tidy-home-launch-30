@@ -61,7 +61,7 @@ export default function ProHome() {
 
   const dateLabel = new Date().toLocaleDateString(es ? "es-US" : "en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" });
   const greeting = me?.first_name ? `${es ? "Hola" : "Hi"}, ${me.first_name}` : (es ? "Hola" : "Hi");
-  const rise = (i: number) => reduce ? {} : { initial: { opacity: 0, y: -10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.24, delay: 0.05 * i, ease: [0.22, 1, 0.36, 1] } };
+  const rise = (i: number) => reduce ? {} : { initial: { opacity: 0, y: -10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.24, delay: 0.05 * i, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } };
 
   const coiLabel = coi?.status === "active" ? (es ? "Seguro activo" : "Insurance active")
     : coi?.status === "expiring" ? (es ? "Seguro por vencer" : "Insurance expiring")
