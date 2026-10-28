@@ -69,7 +69,26 @@ Deno.serve(async (req) => {
       } catch {
         geocodeFailed = true;
       }
-    } else if (address) {
+    }
+    // Fallback: OpenStreetMap Nominatim (no key needed) when the Google
+    // Geocoding API isn't enabled on the project key.
+    if (address && targetLat === null) {
+      try {
+        const res = await fetch(
+          'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(address),
+          { headers: { 'User-Agent': 'TidyProGpsTest/1.0 (jointidy.co)' } },
+        );
+        const hits = await res.json();
+        const hit = hits?.[0];
+        if (hit && typeof hit.lat === 'string' && typeof hit.lon === 'string') {
+          targetLat = parseFloat(hit.lat);
+          targetLng = parseFloat(hit.lon);
+          geocodeFailed = false;
+        }
+      } catch {
+        // keep geocodeFailed as-is
+      }
+    } else if (address && !mapsKey) {
       geocodeFailed = true;
     }
 
