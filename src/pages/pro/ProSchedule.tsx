@@ -20,6 +20,7 @@ import { dayLabel, fetchNotifications, mondayOf, timeWindow } from "@/lib/pro-po
 import { money } from "@/lib/pro-pay";
 import WeeklyRoute from "@/components/pro/schedule/WeeklyRoute";
 import MyDates from "@/components/pro/schedule/MyDates";
+import GpsTestCard from "@/components/pro/schedule/GpsTestCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -134,6 +135,7 @@ export default function ProSchedule() {
               <Button variant={routeRange==='week'?'default':'outline'} onClick={()=>setRouteRange('week')}>{es?'Esta semana':'This week'}</Button>
             </div>
             {routeVisits.length===0&&<p className="py-4 text-sm text-muted-foreground">{es?'Sin visitas programadas.':'No visits scheduled.'}</p>}
+            {routeVisits.length===0&&<GpsTestCard />}
             {routeVisits.map((v,index)=><Link key={v.id} to={`/pro/visit/${v.id}`} className="flex min-h-24 items-start gap-3 rounded-lg border border-border bg-background p-4 text-foreground">
               <span className="pt-1 text-sm text-muted-foreground">{index+1}</span><div className="min-w-0 flex-1 space-y-1"><p className="font-semibold">{v.customer_first_name??(es?'Miembro':'Member')}</p><p className="text-sm">{v.service_type==='cleaning'?(es?'Limpieza':'Cleaning'):v.service_type==='lawn'?(es?'Césped':'Lawn'):v.visit_kind==='car_wash'?(es?'Lavado adicional':'Car Wash Add-On'):(es?'Cuidado del Auto':'Car Care')} · {v.size_tier===5?'Estate Plus':v.size_tier===4?'Estate':`${es?'Tamaño':'Size'} ${v.size_tier??'—'}`}</p><p className="text-xs text-muted-foreground">{timeWindow(v.scheduled_start,v.scheduled_end,language)} · {v.zip}</p>{v.is_team&&<p className="text-xs text-primary">{v.is_lead?(es?'Líder de equipo':'Team Lead'):(es?'Equipo':'Team')}</p>}</div><span className="text-sm font-semibold">{money(v.visit_pay_cents)}</span>
             </Link>)}

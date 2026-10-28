@@ -1772,6 +1772,13 @@
       "when": 1793154538048,
       "tag": "0252_ops_agents",
       "breakpoints": true
+    },
+    {
+      "idx": 253,
+      "version": "7",
+      "when": 1793197735126,
+      "tag": "0253_pro_gps_self_test",
+      "breakpoints": true
     }
   ]
 }
