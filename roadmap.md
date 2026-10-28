@@ -1,5 +1,11 @@
 # Roadmap
 
+## Pro closed loop (Oct 28)
+- [ ] Audit and list existing Pro screens, assignments, notifications, visit actions, access and pay.
+- [ ] Build gaps only: Today/week route, bilingual job/navigation, timed access, GPS/reason, masked contact/15-minute lockout, service checklists and operational requests.
+- [ ] Complete statement/stats/COI/night-before reminder gaps, preserving existing scheduling/pay and home-screen installation.
+- [ ] Test isolated is_test cleaning, paired Estate Plus, lawn and car journeys on a phone; capture every requested step and message/pay readback. No real member messages or payouts during tests.
+
 ## Founding visual reference (Oct 28)
 - [x] Matched exterior-photo opening, centered quote summary, image-led service switches, two-column photographic add-ons and gold continuation using recreated photography (not exact source photos). Preserved catalog prices, gates, bilingual names, real counts and motion. Phone/computer quote-to-reservation verified without submitting, no overflow or runtime errors; 77 pricing/add-on tests passed. Not published.
 
