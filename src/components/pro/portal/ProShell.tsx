@@ -40,7 +40,7 @@ export function ProTopBar({
         {back !== undefined && (
           <button
             type="button"
-            aria-label="Back"
+            aria-label={language === 'es' ? 'Atrás' : 'Back'}
             onClick={() => (back ? navigate(back) : navigate(-1))}
             className="grid h-11 w-11 shrink-0 place-items-center rounded-full active:bg-white/10"
           >
@@ -59,7 +59,7 @@ export function ProTopBar({
         {showBell && (
           <Link
             to="/pro/notifications"
-            aria-label={unread ? `${unread} unread notifications` : "Notifications"}
+            aria-label={language === 'es' ? (unread ? `${unread} notificaciones sin leer` : 'Notificaciones') : (unread ? `${unread} unread notifications` : "Notifications")}
             className="relative grid h-11 w-11 place-items-center rounded-full active:bg-white/10"
           >
             <Bell className="h-5 w-5" aria-hidden strokeWidth={1.9} />

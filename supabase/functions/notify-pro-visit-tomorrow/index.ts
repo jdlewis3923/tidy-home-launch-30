@@ -5,7 +5,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 // notification per PRO per day (not per visit), claimed in the database so a
 // re-run produces zero duplicates. Pros with nothing tomorrow are skipped.
 //
-// visit_tomorrow is time-critical: push first, SMS fallback, window ignored.
+// visit_tomorrow requires SMS plus an app record, regardless of push support.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     .from('visits')
     .select(
       // Entry codes/access notes are visit-day only (Member Guide promise); never in the night-before text.
-      'id, assigned_pro_id, backup_pro_id, cleaning_team_id, scheduled_start, service_type, zip, is_sample',
+      'id, assigned_pro_id, backup_pro_id, cleaning_team_id, scheduled_start, scheduled_end, service_type, zip, is_sample',
     )
     .not('assigned_pro_id', 'is', null)
     .in('status', ['scheduled', 'on_the_way', 'in_progress'])
@@ -60,8 +60,11 @@ Deno.serve(async (req) => {
 
   const results: Record<string, unknown>[] = [];
   for (const [contractorId, list] of byPro) {
-    const {data:candidate} = await admin.from('applicants').select('is_test_row,preferred_language').eq('contractor_id',contractorId).maybeSingle();
-    if (!candidate || candidate.is_test_row) { results.push({contractor_id:contractorId,skipped:'test_or_missing_pro'}); continue; }
+    const {data:candidate} = await admin.from('applicants').select('id,is_test_row').eq('contractor_id',contractorId).maybeSingle();
+    const {data:pipeline,error:pipelineError} = candidate ? await admin.from('contractor_pipeline').select('is_test,archived').eq('applicant_id',candidate.id).maybeSingle() : {data:null,error:null};
+    if (!candidate || candidate.is_test_row || pipelineError || !pipeline || pipeline.is_test || pipeline.archived) { results.push({contractor_id:contractorId,skipped:'test_archived_or_missing_pro'}); continue; }
+    const {data:language,error:languageError} = await admin.rpc('user_lang',{_uid:contractorId});
+    if (languageError) {results.push({contractor_id:contractorId,skipped:'language_unavailable'});continue;}
     const { data: claimed, error: claimErr } = await admin.rpc('claim_pro_notification', {
       _contractor_id: contractorId,
       _kind: 'visit_tomorrow',
@@ -76,7 +79,7 @@ Deno.serve(async (req) => {
       results.push({ contractor_id: contractorId, skipped: 'already_sent' });
       continue;
     }
-    const { title, body: text } = digestText(list, 'tomorrow', candidate.preferred_language === 'es' ? 'es' : 'en');
+    const { title, body: text } = digestText(list, 'tomorrow', language === 'es' ? 'es' : 'en');
     const r = await notifyPro(admin, {
       contractor_id: contractorId,
       kind: 'visit_tomorrow',

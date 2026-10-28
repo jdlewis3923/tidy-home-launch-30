@@ -286,15 +286,15 @@ export function mondayOf(d: Date): Date {
   return x;
 }
 
-export function dayLabel(iso: string | null): string {
-  if (!iso) return "Unscheduled";
-  return new Date(iso).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+export function dayLabel(iso: string | null, language = 'en'): string {
+  if (!iso) return language === 'es' ? 'Sin programar' : 'Unscheduled';
+  return new Date(iso).toLocaleDateString(language === 'es' ? 'es-US' : 'en-US', { timeZone: 'America/New_York', weekday: "long", month: "short", day: "numeric" });
 }
 
-export function timeWindow(start: string | null, end: string | null): string {
-  if (!start) return "Time to be confirmed";
+export function timeWindow(start: string | null, end: string | null, language = 'en'): string {
+  if (!start) return language === 'es' ? 'Horario por confirmar' : 'Time to be confirmed';
   const f = (s: string) =>
-    new Date(s).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    new Date(s).toLocaleTimeString(language === 'es' ? 'es-US' : 'en-US', { timeZone: 'America/New_York', hour: "numeric", minute: "2-digit" });
   return end ? `${f(start)} – ${f(end)}` : f(start);
 }
 

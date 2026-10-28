@@ -49,14 +49,14 @@ export default function ProVisit() {
   const [plate, setPlate] = useState("");
   const [reportedPay, setReportedPay] = useState<number | null>(null);
   const [locationReason,setLocationReason] = useState('');
-  const [homeNote,setHomeNote] = useState<string|null>(null);
+  const [homeContext,setHomeContext] = useState<{home_notes?:string;rotation?:string;zones?:unknown[];team?:{lead?:string;partner?:string};access_open?:boolean}|null>(null);
   useEffect(()=>{
     let canceled=false;
-    if(id) void import('@/integrations/supabase/client').then(({supabase})=>supabase.rpc('pro_home_note',{_visit:id})).then(({data})=>{if(!canceled)setHomeNote(typeof data==='string'?data:null);});
+    if(id) void import('@/integrations/supabase/client').then(({supabase})=>supabase.rpc('pro_visit_context',{_visit:id})).then(({data})=>{if(!canceled)setHomeContext(data as typeof homeContext);});
     return()=>{canceled=true;};
   },[id]);
 
-  const GPS_MSG = "Turn on location for this site in your phone settings, then try again. Check-in and check-out need your location.";
+  const GPS_MSG = es ? "Active la ubicación para este sitio en su teléfono y vuelva a intentar. La llegada y la salida requieren su ubicación." : "Turn on location for this site in your phone settings, then try again. Check-in and check-out need your location.";
 
   const checkIn = async () => {
     if (!visit) return;
@@ -74,11 +74,11 @@ export default function ProVisit() {
     const body = isCar
       ? { vehicle_class: vclass, plate: plate.trim() }
       : { sq_ft: parseInt(beds, 10), bathrooms: parseFloat(baths) };
-    if (isCar ? !plate.trim() : !(beds && baths)) { setActionError(isCar ? "Add the vehicle type and plate." : "Add square feet and bathrooms."); return; }
+    if (isCar ? !plate.trim() : !(beds && baths)) { setActionError(isCar ? (es ? "Agregue el tipo de vehículo y la placa." : "Add the vehicle type and plate.") : (es ? "Agregue pies cuadrados y baños." : "Add square feet and bathrooms.")); return; }
     setBusy("complete");
     const res = await visitAction(visit.id, "size_check", body);
     setBusy(null);
-    if (!res.ok) { setActionError("Couldn't save the size. Try again."); return; }
+    if (!res.ok) { setActionError((es ? "No se pudo guardar el tamaño. Vuelva a intentar." : "Couldn't save the size. Try again.")); return; }
     setSizeOpen(false);
     setActionError(null);
     void complete();
@@ -111,8 +111,8 @@ export default function ProVisit() {
     if (!res.ok) {
       setActionError(
         res.error === "coi_blocked"
-          ? "Your insurance certificate must be valid before you start a visit."
-          : "Couldn't send your on-my-way message.",
+          ? (es ? "Su certificado de seguro debe estar vigente antes de iniciar una visita." : "Your insurance certificate must be valid before you start a visit.")
+          : (es ? "No se pudo enviar su aviso de llegada." : "Couldn't send your on-my-way message."),
       );
       return;
     }
@@ -131,10 +131,10 @@ export default function ProVisit() {
     if (!res.ok) {
       setActionError(
         res.error === "on_my_way_required"
-          ? "Send your on-my-way message first, then report this."
+          ? (es ? "Envíe primero el aviso de que va en camino." : "Send your on-my-way message first, then report this.")
           : res.error === "invalid_body"
-            ? "Add a little more detail (at least 10 characters)."
-            : "Couldn't report this visit.",
+            ? (es ? "Agregue más detalle (al menos 10 caracteres)." : "Add a little more detail (at least 10 characters).")
+            : (es ? "No se pudo reportar esta visita." : "Couldn't report this visit."),
       );
       return;
     }
@@ -158,23 +158,23 @@ export default function ProVisit() {
     if (!res.ok) {
       if(res.error?.includes('reason_required')) {setActionError(es?'Agregue el motivo de ubicación antes de registrar la salida.':'Add a location reason before checking out.');return;}
       if(res.error?.includes('service_checklist_required')||res.error==='booked_addons_incomplete') {setActionError(es?'Complete cada tarea, extra reservado y punto de salida.':'Complete every work item, booked add-on and exit check.');return;}
-      if (res.error === "size_check_required") { setSizeOpen(true); setActionError("First visit: record the real size before you finish."); return; }
-      if (res.error === 'both_pros_check_out_required') {setActionError('Both Pros must check in and check out before the Lead completes the visit.');return;}
-      if (res.error === 'lead_inspection_and_zones_required') {setActionError('Save room zones and the final inspection before completing the visit.');return;}
-      if (res.error === 'lead_action_required') {setActionError('The Lead completes this team visit. Record your check-out below.');return;}
-      if (res.error === 'secure_exit_checklist_required') {setActionError('Confirm the secure-exit items in the checklist before completing the visit.');return;}
+      if (res.error === "size_check_required") { setSizeOpen(true); setActionError((es ? "Primera visita: registre el tamaño real antes de terminar." : "First visit: record the real size before you finish.")); return; }
+      if (res.error === 'both_pros_check_out_required') {setActionError((es ? "Ambos Pros deben registrar llegada y salida antes de que el Líder complete la visita." : "Both Pros must check in and check out before the Lead completes the visit."));return;}
+      if (res.error === 'lead_inspection_and_zones_required') {setActionError((es ? "Guarde las zonas y la inspección final antes de completar la visita." : "Save room zones and the final inspection before completing the visit."));return;}
+      if (res.error === 'lead_action_required') {setActionError((es ? "El Líder completa esta visita. Registre su salida abajo." : "The Lead completes this team visit. Record your check-out below."));return;}
+      if (res.error === 'secure_exit_checklist_required') {setActionError((es ? "Confirme la lista de salida segura antes de completar la visita." : "Confirm the secure-exit items in the checklist before completing the visit."));return;}
       setActionError(
         res.error === "gps_unavailable"
           ? GPS_MSG
           : res.error === "gps_check_in_required"
-          ? "Tap \"I've arrived\" when you get there, then finish the visit."
+          ? (es ? "Registre su llegada antes de completar la visita." : "Tap \\\"I've arrived\\\" when you get there, then finish the visit.")
           : res.error === "before_photos_required" || res.error === "after_photos_required"
-          ? (visit.service_type === "detailing" ? "Car visits need 6 before photos and after photos from the same angles." : "Add the before and after photos from the checklist first.")
+          ? (visit.service_type === "detailing" ? (es ? "Las visitas de auto requieren 6 fotos previas y posteriores desde los mismos ángulos." : "Car visits need 6 before photos and after photos from the same angles.") : (es ? "Agregue primero las fotos de antes y después." : "Add the before and after photos from the checklist first."))
           : res.error === "photos_required"
-          ? "Add at least one before photo and one after photo first."
+          ? (es ? "Agregue al menos una foto de antes y una de después." : "Add at least one before photo and one after photo first.")
           : res.error === "coi_blocked"
-            ? "Your insurance certificate must be valid before you complete a visit."
-            : "Couldn't complete this visit.",
+            ? (es ? "Su certificado de seguro debe estar vigente antes de completar una visita." : "Your insurance certificate must be valid before you complete a visit.")
+            : (es ? "No se pudo completar esta visita." : "Couldn't complete this visit."),
       );
       return;
     }
@@ -188,7 +188,7 @@ export default function ProVisit() {
 
   if (loading) {
     return (
-      <ProShell title="Visit" back="/pro/schedule">
+      <ProShell title={es ? "Visita" : "Visit"} back="/pro/schedule">
         <div className="space-y-5 px-[18px] py-4">
           <Skeleton className="h-24" />
           <Skeleton className="h-40" />
@@ -200,15 +200,15 @@ export default function ProVisit() {
 
   if (error || !visit) {
     return (
-      <ProShell title="Visit" back="/pro/schedule">
-        <ErrorState title="Couldn't load this visit" onRetry={reload} />
+      <ProShell title={es ? "Visita" : "Visit"} back="/pro/schedule">
+        <ErrorState title={es ? "No se pudo cargar esta visita" : "Couldn't load this visit"} onRetry={reload} />
       </ProShell>
     );
   }
 
   if (success) {
     return (
-      <ProShell title="Visit complete" back="/pro/schedule" nav={false}>
+      <ProShell title={es ? "Visita completa" : "Visit complete"} back="/pro/schedule" nav={false}>
         <div className="flex flex-col items-center px-8 py-20 text-center">
           <span className="grid h-16 w-16 place-items-center rounded-full bg-[hsl(var(--pro-green-soft))]">
             <Check className="h-8 w-8 text-[hsl(var(--pro-green))]" aria-hidden />
@@ -224,13 +224,13 @@ export default function ProVisit() {
   }
 
   return (
-    <ProShell title={SERVICE_LABEL[visit.service_type ?? ""] ?? "Visit"} back="/pro/schedule">
+    <ProShell title={es ? (visit.service_type === "cleaning" ? "Limpieza" : visit.service_type === "lawn" ? "Césped" : "Cuidado del Auto") : SERVICE_LABEL[visit.service_type ?? ""] ?? "Visit"} back="/pro/schedule">
       <div className="bg-white px-4 pb-4 pt-4">
         <p className="text-[14px] font-semibold text-[hsl(var(--pro-ink-soft))]">
-          {dayLabel(visit.scheduled_start)}
+          {dayLabel(visit.scheduled_start, language)}
         </p>
         <p className="text-[16px] font-bold text-[hsl(var(--pro-ink))]">
-          {timeWindow(visit.scheduled_start, visit.scheduled_end)}
+          {timeWindow(visit.scheduled_start, visit.scheduled_end, language)}
         </p>
         <div className="mt-3 flex items-end justify-between">
           <p className="text-[34px] font-extrabold leading-none text-[hsl(var(--pro-ink))]">
@@ -238,20 +238,20 @@ export default function ProVisit() {
           </p>
           <div className="flex gap-2">
             {visit.visit_kind && VISIT_KIND_LABEL[visit.visit_kind] && (
-              <StatusPill tone="blue">{VISIT_KIND_LABEL[visit.visit_kind]}</StatusPill>
+              <StatusPill tone="blue">{es ? ({full_detail:"Detalle completo",maintenance_wash:"Lavado de mantenimiento",quarterly_deep_clean:"Limpieza profunda trimestral"}[visit.visit_kind] ?? visit.visit_kind) : VISIT_KIND_LABEL[visit.visit_kind]}</StatusPill>
             )}
-            {visit.is_sample && <StatusPill tone="neutral">Sample</StatusPill>}
+            {visit.is_sample && <StatusPill tone="neutral">{es ? "Muestra" : "Sample"}</StatusPill>}
             {visit.completed_at ? (
-              <StatusPill tone="green">Completed</StatusPill>
+              <StatusPill tone="green">{es ? "Completa" : "Completed"}</StatusPill>
             ) : omwSent ? (
-              <StatusPill tone="blue">On my way</StatusPill>
+              <StatusPill tone="blue">{es ? "Voy en camino" : "On my way"}</StatusPill>
             ) : (
-              <StatusPill tone="neutral">Scheduled</StatusPill>
+              <StatusPill tone="neutral">{es ? "Programada" : "Scheduled"}</StatusPill>
             )}
           </div>
         </div>
         {visit.service_type === "lawn" && <LawnJobSize visitId={visit.id} fallbackPayCents={visit.visit_pay_cents} />}
-        <p className="mt-1 text-[13px] text-[hsl(var(--pro-ink-soft))]">Flat pay for this completed visit</p>
+        <p className="mt-1 text-[13px] text-[hsl(var(--pro-ink-soft))]">{es ? "Pago fijo por esta visita completada" : "Flat pay for this completed visit"}</p>
       </div>
 
       <MapPreview street={visit.street} zip={visit.zip} />
@@ -272,7 +272,7 @@ export default function ProVisit() {
       <div className="p-4">
         <ProCard>
           <p className="text-[12px] font-bold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
-            Customer
+            {es ? "Miembro" : "Customer"}
           </p>
           <p className="text-[18px] font-bold text-[hsl(var(--pro-ink))]">
             {visit.customer_first_name ?? "—"}
@@ -283,21 +283,26 @@ export default function ProVisit() {
 
         <ProCard className="mt-3">
           <p className="pb-1 text-[12px] font-bold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
-            Access details
+            {es ? "Detalles de acceso" : "Access details"}
           </p>
           {accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock) && visit.access_notes && <InfoRow kind="access" label={es ? 'Acceso' : 'Access'} value={visit.access_notes} />}
           {accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock) && visit.gate_code && <InfoRow kind="gate" label={es ? 'Código de puerta' : 'Gate code'} value={visit.gate_code} />}
           {!accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock) && <p className="py-2 text-sm text-muted-foreground">{es ? 'Los códigos se muestran desde 30 minutos antes de su ventana hasta registrar la salida.' : 'Codes appear 30 minutes before your window and hide at check-out.'}</p>}
-          {visit.pet_notes && <InfoRow kind="pet" label="Pets" value={visit.pet_notes} />}
-          {visit.parking_notes && <InfoRow kind="parking" label="Parking" value={visit.parking_notes} />}
+          {visit.pet_notes && <InfoRow kind="pet" label={es ? "Mascotas" : "Pets"} value={visit.pet_notes} />}
+          {visit.parking_notes && <InfoRow kind="parking" label={es ? "Estacionamiento" : "Parking"} value={visit.parking_notes} />}
           {!visit.access_notes && !visit.gate_code && !visit.pet_notes && !visit.parking_notes && (
             <p className="py-2 text-[14px] text-[hsl(var(--pro-ink-soft))]">
-              No access notes on this visit.
+              {es ? "Sin notas de acceso para esta visita." : "No access notes on this visit."}
             </p>
           )}
         </ProCard>
-        <ProVisitExtras visitId={visit.id} />
-        {homeNote&&<section className="mt-4 border-y border-border py-4"><h2 className="font-semibold text-foreground">{es?'Notas del hogar':'Home notes'}</h2><p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{homeNote}</p></section>}
+        <ProVisitExtras visitId={visit.id} accessOpen={accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock)} />
+        {homeContext && <section className="mt-4 space-y-3 border-y border-border py-4">
+          {homeContext.home_notes && <div><h2 className="font-semibold text-foreground">{es?'Notas del hogar':'Home notes'}</h2><p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{homeContext.home_notes}</p></div>}
+          {homeContext.rotation && <p className="text-sm text-foreground">{es?'Tarea rotativa':'Rotation task'}: {({baseboards:es?'Zócalos':'Baseboards',blinds:es?'Persianas':'Blinds',fans_fixtures:es?'Ventiladores y lámparas':'Fans and fixtures',cabinet_fronts:es?'Frentes de gabinetes':'Cabinet fronts',vents:es?'Rejillas':'Vents'} as Record<string,string>)[homeContext.rotation] ?? homeContext.rotation}</p>}
+          {homeContext.team && <p className="text-sm text-foreground">{es?'Equipo':'Team'}: {[homeContext.team.lead,homeContext.team.partner].filter(Boolean).join(' · ')}</p>}
+          {(homeContext.zones?.length ?? 0)>0 && <div><h2 className="font-semibold text-foreground">{es?'Zonas':'Zones'}</h2><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{homeContext.zones?.map((zone,i)=><li key={i}>{typeof zone==='string' ? zone : JSON.stringify(zone)}</li>)}</ul></div>}
+        </section>}
         {!visit.completed_at&&<Button variant="outline" asChild className="mt-4 w-full"><Link to={`/pro/job/${visit.id}`}>{es?'Necesita más tiempo — solicitar un extra':'Needs extra time — request an add-on'}</Link></Button>}
 
         <Link
@@ -317,8 +322,8 @@ export default function ProVisit() {
         <div className="mt-5 space-y-3">
           {!omwSent && !visit.completed_at && (
             <div>
-              <p className="text-[13px] font-bold text-[hsl(var(--pro-ink))]">About how many minutes away?</p>
-              <div className="mt-2 grid grid-cols-4 gap-1.5" role="radiogroup" aria-label="Minutes away">
+              <p className="text-[13px] font-bold text-[hsl(var(--pro-ink))]">{es ? "¿A cuántos minutos está?" : "About how many minutes away?"}</p>
+              <div className="mt-2 grid grid-cols-4 gap-1.5" role="radiogroup" aria-label={es ? "Minutos de distancia" : "Minutes away"}>
                 {[10, 20, 30, 45].map((m) => (
                   <button key={m} type="button" role="radio" aria-checked={eta === m} onClick={() => setEta(m)}
                     className={`min-h-[44px] rounded-lg text-[14px] font-bold ${eta === m ? "bg-[hsl(var(--pro-navy))] text-white" : "border border-[hsl(var(--pro-navy)/0.12)] text-[hsl(var(--pro-ink))]"}`}>
@@ -335,7 +340,7 @@ export default function ProVisit() {
           >
             {omwSent ? (
               <>
-                <Check className="h-4 w-4" aria-hidden /> Customer notified
+                <Check className="h-4 w-4" aria-hidden /> {es ? "Miembro notificado" : "Customer notified"}
               </>
             ) : (
               <>
@@ -357,22 +362,22 @@ export default function ProVisit() {
 
           {sizeOpen && (
             <ProCard>
-              <p className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">First visit — real size</p>
+              <p className="text-[15px] font-bold text-[hsl(var(--pro-ink))]">{es ? "Primera visita — tamaño real" : "First visit \u2014 real size"}</p>
               {visit.service_type === "detailing" ? (
                 <div className="mt-2 space-y-2">
                   <select value={vclass} onChange={(e) => setVclass(e.target.value)} className="min-h-[44px] w-full rounded-xl border px-3 text-[15px]">
                     {[["sedan","Sedan"],["coupe","Coupe"],["suv","SUV"],["crossover","Crossover"],["truck","Truck"],["suv3row","3-row SUV"],["van","Van"]].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
                   </select>
-                  <input value={plate} onChange={(e) => setPlate(e.target.value.toUpperCase())} maxLength={15} placeholder="Plate" className="min-h-[44px] w-full rounded-xl border px-3 text-[15px]" />
+                  <input value={plate} onChange={(e) => setPlate(e.target.value.toUpperCase())} maxLength={15} placeholder={es ? "Placa" : "Plate"} className="min-h-[44px] w-full rounded-xl border px-3 text-[15px]" />
                 </div>
               ) : (
                 <div className="mt-2 grid grid-cols-2 gap-2">
-                  <input inputMode="numeric" value={beds} onChange={(e) => setBeds(e.target.value.replace(/[^0-9]/g, ""))} placeholder="Square feet" className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
-                  <input inputMode="decimal" value={baths} onChange={(e) => setBaths(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="Bathrooms" className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
+                  <input inputMode="numeric" value={beds} onChange={(e) => setBeds(e.target.value.replace(/[^0-9]/g, ""))} placeholder={es ? "Pies cuadrados" : "Square feet"} className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
+                  <input inputMode="decimal" value={baths} onChange={(e) => setBaths(e.target.value.replace(/[^0-9.]/g, ""))} placeholder={es ? "Baños" : "Bathrooms"} className="min-h-[44px] rounded-xl border px-3 text-[15px]" />
                 </div>
               )}
-              <p className="mt-2 text-[13px] text-[hsl(var(--pro-ink-soft))]">If it doesn't match the plan, do the visit as booked. Tidy talks to the customer — never you.</p>
-              <ProButton full className="mt-3" disabled={busy !== null} onClick={() => void saveSize()}>Save size and finish</ProButton>
+              <p className="mt-2 text-[13px] text-[hsl(var(--pro-ink-soft))]">{es ? "Si no coincide con el plan, haga lo reservado. Tidy habla con el miembro." : "If it doesn't match the plan, do the visit as booked. Tidy talks to the customer \u2014 never you."}</p>
+              <ProButton full className="mt-3" disabled={busy !== null} onClick={() => void saveSize()}>{es ? "Guardar tamaño y terminar" : "Save size and finish"}</ProButton>
             </ProCard>
           )}
 
@@ -380,7 +385,7 @@ export default function ProVisit() {
             to={`/pro/visit/${visit.id}/photos`}
             className="flex min-h-[48px] w-full items-center justify-center rounded-xl border-2 border-[hsl(var(--pro-blue))] bg-white text-[15px] font-semibold text-[hsl(var(--pro-blue))]"
           >
-            Upload photos ({visit.before_photos ?? 0} before · {visit.after_photos ?? 0} after)
+            {es ? "Subir fotos" : "Upload photos"} ({visit.before_photos ?? 0} {es ? "antes" : "before"} · {visit.after_photos ?? 0} {es ? "después" : "after"})
           </Link>
 
           <ProButton
@@ -394,7 +399,7 @@ export default function ProVisit() {
           {visit.service_type==='cleaning'&&<CleaningTeamInspection visitId={visit.id}/>}
           {!photosOk && !visit.completed_at && (
             <p className="text-center text-[13px] text-[hsl(var(--pro-ink-soft))]">
-              One before photo and one after photo are required.
+              {es ? "Se requiere una foto de antes y una de después." : "One before photo and one after photo are required."}
             </p>
           )}
           <button
@@ -404,12 +409,12 @@ export default function ProVisit() {
             className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-[hsl(var(--pro-navy)/0.12)] bg-white text-[15px] font-bold text-[hsl(var(--pro-ink-soft))] disabled:opacity-50"
           >
             <AlertTriangle className="h-4 w-4 text-[hsl(var(--pro-amber))]" aria-hidden />
-            Can't work this visit
+            {es ? "No puedo realizar esta visita" : "Can't work this visit"}
           </button>
 
           {blocked && (
             <p className="text-center text-[13px] font-semibold text-[hsl(var(--pro-amber))]">
-              Visit actions are paused until a valid certificate of insurance is on file.
+              {es ? "Las acciones están pausadas hasta tener un certificado de seguro vigente." : "Visit actions are paused until a valid certificate of insurance is on file."}
             </p>
           )}
         </div>
@@ -421,9 +426,9 @@ export default function ProVisit() {
             className="mx-auto w-full max-w-md rounded-t-3xl bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">Can't work this visit?</p>
+            <p className="text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">{es ? "¿No puede realizar esta visita?" : "Can't work this visit?"}</p>
             <p className="mt-1 text-[14px] text-[hsl(var(--pro-ink-soft))]">
-              {visit.service_type==='cleaning' ? "Lockout or unsafe exit pays half the visit rate. Tell us what stopped you." : "You drove out, so you're paid in full. Tell us what stopped you."}
+              {visit.service_type==='cleaning' ? (es ? 'Sin acceso o salida por peligro: se paga la mitad. Cuéntenos qué pasó.' : 'Lockout or unsafe exit pays half the visit rate. Tell us what stopped you.') : (es ? 'Fue al lugar: se paga la visita completa. Cuéntenos qué pasó.' : "You drove out, so you're paid in full. Tell us what stopped you.")}
             </p>
             <div className="mt-4 space-y-2">
               {([
@@ -440,7 +445,7 @@ export default function ProVisit() {
                       : "border-[hsl(var(--pro-navy)/0.1)] bg-white text-[hsl(var(--pro-ink-soft))]"
                   }`}
                 >
-                  {label}
+                  {es ? (value === "customer_no_access" ? "No pude entrar — puerta cerrada o sin acceso" : "No es seguro — clima, animal o peligro") : label}
                 </button>
               ))}
             </div>
@@ -449,7 +454,7 @@ export default function ProVisit() {
               onChange={(e) => setBlockNote(e.target.value)}
               rows={3}
               maxLength={500}
-              placeholder="What happened? (required)"
+              placeholder={es ? "¿Qué pasó? (obligatorio)" : "What happened? (required)"}
               className="mt-3 w-full rounded-2xl border border-[hsl(var(--pro-navy)/0.12)] p-3 text-[15px] text-[hsl(var(--pro-ink))]"
             />
             <ProButton
@@ -458,14 +463,14 @@ export default function ProVisit() {
               disabled={busy === "blocked" || blockNote.trim().length < 10}
               onClick={() => void reportBlocked()}
             >
-              {busy === "blocked" ? "Sending…" : "Report visit"}
+              {busy === "blocked" ? (es ? "Enviando…" : "Sending…") : (es ? "Reportar visita" : "Report visit")}
             </ProButton>
             <button
               type="button"
               onClick={() => setBlockOpen(false)}
               className="mt-2 min-h-[44px] w-full text-[14px] font-bold text-[hsl(var(--pro-ink-soft))]"
             >
-              Cancel
+              {es ? "Cancelar" : "Cancel"}
             </button>
           </div>
         </div>
@@ -477,24 +482,24 @@ export default function ProVisit() {
             className="mx-auto w-full max-w-md rounded-t-3xl bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">Complete this visit?</p>
+            <p className="text-[18px] font-extrabold text-[hsl(var(--pro-ink))]">{es ? "¿Completar esta visita?" : "Complete this visit?"}</p>
             <ul className="mt-3 space-y-2 text-[15px] text-[hsl(var(--pro-ink))]">
               <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-[hsl(var(--pro-green))]" aria-hidden /> Photos added
+                <Check className="h-4 w-4 text-[hsl(var(--pro-green))]" aria-hidden /> {es ? "Fotos agregadas" : "Photos added"}
               </li>
               <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-[hsl(var(--pro-green))]" aria-hidden /> Checklist reviewed
+                <Check className="h-4 w-4 text-[hsl(var(--pro-green))]" aria-hidden /> {es ? "Lista revisada" : "Checklist reviewed"}
               </li>
             </ul>
             <ProButton full className="mt-5" disabled={busy === "complete"} onClick={() => void complete()}>
-              {busy === "complete" ? "Completing…" : "Yes, complete visit"}
+              {busy === "complete" ? (es ? "Completando…" : "Completing…") : (es ? "Sí, completar visita" : "Yes, complete visit")}
             </ProButton>
             <button
               type="button"
               onClick={() => setConfirm(false)}
               className="mt-2 min-h-[44px] w-full text-[14px] font-bold text-[hsl(var(--pro-ink-soft))]"
             >
-              Not yet
+              {es ? "Todavía no" : "Not yet"}
             </button>
           </div>
         </div>

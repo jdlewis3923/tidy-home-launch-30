@@ -1,13 +1,14 @@
 // Tidy — shared builder for the two Pro day digests.
 //
 // One notification per pro per day, never one per visit. The text carries what
-// a contractor needs to walk up to the door: time, address, access notes.
+// a contractor needs to plan tomorrow: time, service and ZIP, never private access.
 // It NEVER carries the customer's price — that is not their business and it is
 // not what they are paid.
 
 export type DigestVisit = {
   id: string;
   scheduled_start: string | null;
+  scheduled_end?: string | null;
   service_type: string | null;
   street: string | null;
   zip: string | null;
@@ -54,7 +55,7 @@ export function addDays(day: string, n: number): string {
 function visitLine(v: DigestVisit, es: boolean): string {
   const labels: Record<string,string> = es ? {cleaning:'Limpieza',lawn:'Césped',detail:'Cuidado del Auto',detailing:'Cuidado del Auto'} : SERVICE_LABEL;
   const service = labels[(v.service_type ?? '').toLowerCase()] ?? (es ? 'Visita' : 'Visit');
-  return `${etTime(v.scheduled_start)} — ${service}${v.zip ? ` · ${v.zip}` : ''}`;
+  return `${etTime(v.scheduled_start)}${v.scheduled_end ? ` – ${etTime(v.scheduled_end)}` : ''} — ${service}${v.zip ? ` · ${v.zip}` : ''}`;
 }
 
 export function digestText(
@@ -62,14 +63,15 @@ export function digestText(
   when: 'today' | 'tomorrow',
   language: 'en' | 'es' = 'en',
 ): { title: string; body: string } {
-  const count = visits.length;
-  const first = visits[0];
+  const route = [...visits].sort((a,b)=>(a.scheduled_start ?? '').localeCompare(b.scheduled_start ?? ''));
+  const count = route.length;
+  const first = route[0];
   const es = language === 'es';
   const title =
     es ? `${count} visita${count === 1 ? '' : 's'} ${when === 'today' ? 'hoy' : 'mañana'} — primera a las ${etTime(first?.scheduled_start ?? null)}` : when === 'today'
       ? `${count} job${count === 1 ? '' : 's'} today — first at ${etTime(first?.scheduled_start ?? null)}`
       : `${count} job${count === 1 ? '' : 's'} tomorrow — first at ${etTime(first?.scheduled_start ?? null)}`;
-  const body = visits.slice(0, 5).map(v=>visitLine(v,es)).join('\n');
+  const body = route.slice(0, 5).map(v=>visitLine(v,es)).join('\n');
   return { title, body: `${body}${count > 5 ? `\n+${count - 5} ${es ? 'más en la app' : 'more in the app'}` : ''}\n${es ? 'Ruta y direcciones: jointidy.co/pro/schedule' : 'Route and addresses: jointidy.co/pro/schedule'}` };
 }
 

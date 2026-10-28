@@ -11416,6 +11416,7 @@ export type Database = {
           status: string
         }[]
       }
+      pro_visit_context: { Args: { _visit: string }; Returns: Json }
       pro_visit_extras: { Args: { _visit: string }; Returns: Json }
       public_five_star_proof: { Args: never; Returns: Json }
       rate_limit_take: {

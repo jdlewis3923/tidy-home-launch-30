@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { REVIEW_BONUS_LINE } from "@/lib/reviewBonus";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { REVIEW_BONUS_LINE_ES, REVIEW_BONUS_LINE } from "@/lib/reviewBonus";
 
 /** Running review-bonus total for the signed-in Pro (cents). */
 export function useReviewBonusTotal() {
@@ -14,10 +15,12 @@ export function useReviewBonusTotal() {
 
 function ReviewBonusLine() {
   const c = useReviewBonusTotal();
+  const { language } = useLanguage();
+  const es = language === "es";
   return (
     <div className="mt-2 rounded-2xl border border-border bg-card px-4 py-2.5" data-testid="review-bonus-total">
-      <p className="text-[14px] font-bold text-foreground">Review bonuses earned: ${((c ?? 0) / 100).toFixed(0)}</p>
-      <p className="mt-0.5 text-[12px] text-muted-foreground">{REVIEW_BONUS_LINE}</p>
+      <p className="text-[14px] font-bold text-foreground">{es ? "Bonos por reseñas ganados" : "Review bonuses earned"}: ${((c ?? 0) / 100).toFixed(0)}</p>
+      <p className="mt-0.5 text-[12px] text-muted-foreground">{es ? REVIEW_BONUS_LINE_ES : REVIEW_BONUS_LINE}</p>
     </div>
   );
 }
@@ -45,23 +48,25 @@ export function proPartnerCountLine(s: ProPartnerStatus | null): string | null {
 /** First thing a Pro sees: progress to the 10% raise. Applies automatically. */
 export default function ProPartnerStrip() {
   const s = useProPartner();
+  const { language } = useLanguage();
+  const es = language === "es";
   if (!s) return null;
   if (s.tier === "tier_2_pro_partner") {
     return (
       <section className="px-[18px] pt-4" data-testid="pro-partner-strip">
         <div className="rounded-2xl border border-border bg-card px-4 py-3">
-          <p className="text-[15px] font-bold text-foreground">Pro Partner · your 10% raise is live</p>
+          <p className="text-[15px] font-bold text-foreground">{es ? "Pro Partner · su aumento del 10% está activo" : "Pro Partner · your 10% raise is live"}</p>
         </div>
         <ReviewBonusLine />
       </section>
     );
   }
   const left = Math.max(0, 50 - s.visits);
-  const headline = left > 0 ? `${left} visit${left === 1 ? "" : "s"} to your 10% raise.` : "Visits done — your 10% raise is close.";
+  const headline = es ? (left > 0 ? `Faltan ${left} visitas para su aumento del 10%.` : "Visitas completas — su aumento del 10% está cerca.") : left > 0 ? `${left} visit${left === 1 ? "" : "s"} to your 10% raise.` : "Visits done — your 10% raise is close.";
   const items = [
-    { label: `${Math.min(s.visits, 50)}/50 completed visits`, met: s.visits_met },
-    { label: `${s.rating != null ? Number(s.rating).toFixed(1) : "—"} / 4.8 average rating`, met: s.rating_met },
-    { label: `${Math.min(s.days_active, 60)}/60 days active`, met: s.days_met },
+    { label: `${Math.min(s.visits, 50)}/50 ${es ? "visitas completas" : "completed visits"}`, met: s.visits_met },
+    { label: `${s.rating != null ? Number(s.rating).toFixed(1) : "—"} / 4.8 ${es ? "calificación promedio" : "average rating"}`, met: s.rating_met },
+    { label: `${Math.min(s.days_active, 60)}/60 ${es ? "días activo" : "days active"}`, met: s.days_met },
   ];
   return (
     <section className="px-[18px] pt-4" data-testid="pro-partner-strip">
@@ -81,8 +86,8 @@ export default function ProPartnerStrip() {
           ))}
         </ul>
         <p className="mt-2 text-[12px] text-muted-foreground">
-          When all three are met, the raise applies automatically from your next visit.
-          {s.redo_hold && " On hold while you have more than 2 redos in the last 60 days."}
+          {es ? "Al cumplir los tres requisitos, el aumento se aplica automáticamente desde su próxima visita." : "When all three are met, the raise applies automatically from your next visit."}
+          {s.redo_hold && (es ? " En espera mientras tenga más de 2 repeticiones en los últimos 60 días." : " On hold while you have more than 2 redos in the last 60 days.")}
         </p>
       </div>
       <ReviewBonusLine />
