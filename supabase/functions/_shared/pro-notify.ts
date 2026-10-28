@@ -20,8 +20,8 @@
 import { isWindowOpen, nextOpenWindow, closedReason } from './sms-window.ts';
 import { vendorFetch } from './http.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 /**
  * Time-critical: the contractor is standing in someone's house, or the work
@@ -81,6 +81,7 @@ function defaultKey(n: ProNotification): string {
 
 // deno-lint-ignore no-explicit-any
 async function sendPush(n: ProNotification): Promise<{ outcome: PushOutcome; detail?: string }> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return {outcome:'not_configured'};
   try {
     const res = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-pwa-push`, {
       method: 'POST',
@@ -133,6 +134,7 @@ async function smsFallback(
   key: string,
   urgent: boolean,
 ): Promise<{ outcome: SmsOutcome; detail?: string }> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return {outcome:'failed',detail:'SMS delivery is not configured'};
   const { data: pro } = await admin
     .from('applicants')
     .select('phone')
