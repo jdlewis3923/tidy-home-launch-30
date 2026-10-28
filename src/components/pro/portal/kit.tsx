@@ -11,6 +11,7 @@ import {
   MapPin, ShieldAlert, Sparkles, Leaf, StickyNote, Trash2, Upload,
 } from "lucide-react";
 import { money } from "@/lib/pro-pay";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 /* ---------------- surfaces ---------------- */
 
@@ -388,6 +389,7 @@ export function InfoRow({
 
 /** Static, informational map image. No live tracking, no Pro dot, no geofence. */
 export function MapPreview({ street, zip }: { street?: string | null; zip?: string | null }) {
+  const { language } = useLanguage();
   const query = encodeURIComponent(`${street ?? ""} ${zip ?? ""} FL`.trim());
   return (
     <div className="relative h-40 w-full overflow-hidden bg-[hsl(var(--pro-blue-soft))]">
@@ -409,7 +411,7 @@ export function MapPreview({ street, zip }: { street?: string | null; zip?: stri
         rel="noopener noreferrer"
         className="absolute bottom-3 right-3 min-h-[44px] rounded-xl bg-white px-4 py-2 text-[14px] font-bold text-[hsl(var(--pro-blue))] shadow-sm"
       >
-        Open in Maps
+        {language === 'es' ? 'Abrir en Maps' : 'Open in Maps'}
       </a>
     </div>
   );

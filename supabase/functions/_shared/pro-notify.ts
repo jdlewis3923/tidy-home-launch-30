@@ -19,6 +19,7 @@
 
 import { isWindowOpen, nextOpenWindow, closedReason } from './sms-window.ts';
 import { vendorFetch } from './http.ts';
+import { proSmsAccepted } from './pro-sms-result.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -177,7 +178,10 @@ async function smsFallback(
           : 'outside send window — parked in the outbox',
       };
     }
-    if (res.ok) return { outcome: 'sent' };
+    if (res.ok) {
+      const payload = await res.json().catch(() => null);
+      return proSmsAccepted(payload) ? {outcome:'sent'} : {outcome:'failed',detail:'SMS was skipped or not confirmed by a carrier message identifier'};
+    }
     const detail = (await res.text().catch(() => '')).slice(0, 200);
     return { outcome: 'failed', detail: `HTTP ${res.status} ${detail}` };
   } catch (e) {
