@@ -1,5 +1,12 @@
 # Roadmap
 
+## Digital agreements by service (Oct 28)
+- [ ] Store exact cleaning/lawn English templates v2026-10-29; preserve Spanish ICA; admin read/download.
+- [ ] Phone HTML signing, filled placeholders, full signed PDFs/email, owner countersigning and 24-hour digest.
+- [ ] Remove W-9 from signing/readiness/messages/documents; verify Stripe taxpayer and 1099 configuration.
+- [ ] Signing day six ordered steps, inline equipment approval, agreement link/send/copy, signed-access handoff and menu priority.
+- [ ] Cleaning + lawn isolated end-to-end tests, screenshots, cleanup; no unrelated publication.
+
 ## Pro signing day (Oct 29)
 - [x] Reused intake with emergency contact, equipment/ZIP availability, autosave and insurance-gated kit readiness. Authenticated phone test: autosave reload and submission readback pass; orders server-blocked pending verified insurance.
 - [x] Added /admin/signing-day and candidate open/send-link/signing controls in pipeline and legacy record; retained isolated Signing Day Test (TEST-A111) with completed intake and signed phone account, no candidate messages sent.
