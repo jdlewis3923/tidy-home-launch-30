@@ -626,7 +626,7 @@ function Stat({ label, value, big, className = "" }: { label: string; value: Rea
 /** Price that rolls to its new value whenever the quote changes. */
 function Ticker({ n, suffix = "" }: { n: number; suffix?: string }) {
   const v = useCountUp(n);
-  return <span className="founding-ticker" aria-label={`$${Math.round(n).toLocaleString()}${suffix}`}><span aria-hidden="true">${Math.round(v).toLocaleString()}{suffix}</span></span>;
+  return <span className="founding-ticker" aria-label={`$${Math.round(n).toLocaleString()}${suffix}`}><span aria-hidden="true">${Math.round(v).toLocaleString()}<span className="founding-price-suffix">{suffix}</span></span></span>;
 }
 function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: React.ReactNode }) {
   return <div><label htmlFor={id} className="text-xs font-semibold">{label}</label>{children}{error && <p className="mt-1 text-xs text-destructive">{error}</p>}</div>;

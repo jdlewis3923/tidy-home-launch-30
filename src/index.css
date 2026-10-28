@@ -1950,6 +1950,7 @@ body { color-scheme: light; }
 .founding-price-stat + .founding-price-stat { border-left: 1px solid hsl(var(--border)); }
 .founding-price-stat p:first-child, .founding-price-total p:first-child { font-size: 34px; line-height: 1.2; }
 .founding-price-stat p:last-child { margin-top: 5px; font-size: 14px; }
+.founding-price-suffix { font-size: .67em; }
 .founding-billing-toggle { display: flex; width: min(100%, 540px); margin: 22px auto 0; padding: 3px; gap: 3px; border: 1px solid hsl(var(--border)); border-radius: 12px; }
 .founding-billing-toggle button { flex: 1; font-family: Inter, sans-serif; font-size: 16px; border: 0; border-radius: 9px; }
 .founding-launch-note { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 16px 0; font-family: Inter, sans-serif; font-size: 14px; font-weight: 400; line-height: 1.5; }
