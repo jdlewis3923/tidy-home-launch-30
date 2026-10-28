@@ -20,6 +20,7 @@ import { dayLabel, fetchNotifications, mondayOf, timeWindow } from "@/lib/pro-po
 import { money } from "@/lib/pro-pay";
 import WeeklyRoute from "@/components/pro/schedule/WeeklyRoute";
 import MyDates from "@/components/pro/schedule/MyDates";
+import GpsTestCard from "@/components/pro/schedule/GpsTestCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
