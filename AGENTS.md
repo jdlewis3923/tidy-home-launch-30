@@ -44,4 +44,3 @@
 
 - Candidate appointments create urgent owner alerts transactionally from hiring_slots changes; admin displays read all booked slots in Miami time, and original Indeed résumés live in an admin-only source-text table — why: no sender path can omit a booking alert or replace original résumé content with scoring summaries.
 
-- Digital agreements pin service/version on issued links; signed PDFs and countersignatures retain immutable text and evidence through service-only commit RPCs, with signed access delegated to sequence-advance — why: wrong-service substitution and browser-trusted signatures are forbidden.
