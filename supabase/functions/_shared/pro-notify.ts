@@ -59,6 +59,8 @@ export type ProNotification = {
   sms_body?: string;
   /** Stable key so a retried caller cannot double-deliver. */
   idempotency_key?: string;
+  /** Operational portal reminders explicitly require SMS plus the app feed. */
+  sms_required?: boolean;
   /** Clock override — used only by the proof harness to test the window. */
   now?: string;
 };
@@ -197,6 +199,11 @@ export async function notifyPro(admin: any, n: ProNotification): Promise<ProNoti
   if (error) {
     console.error('[pro-notify] insert failed', error.message);
     return { ok: false, recorded: false, urgent, push: 'failed', sms: 'not_needed', detail: error.message };
+  }
+
+  if (n.sms_required) {
+    const sms = await smsFallback(admin, n, key, true);
+    return { ok: sms.outcome === 'sent', recorded: true, urgent: true, push: 'no_subscription', sms: sms.outcome, detail: sms.detail };
   }
 
   // Non-urgent, outside the courtesy window: hold the push, don't drop it.

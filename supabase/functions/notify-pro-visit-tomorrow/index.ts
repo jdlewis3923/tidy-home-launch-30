@@ -1,7 +1,7 @@
 import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 // Tidy — producer: "you have work tomorrow".
 //
-// Runs at 17:00 ET, the evening before, inside the courtesy window. One
+// Runs at 18:00 ET, the evening before. One
 // notification per PRO per day (not per visit), claimed in the database so a
 // re-run produces zero duplicates. Pros with nothing tomorrow are skipped.
 //
@@ -13,13 +13,16 @@ import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { notifyPro } from '../_shared/pro-notify.ts';
 import { addDays, digestText, etDate, etDayRange, type DigestVisit } from '../_shared/pro-day-digest.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
   if (!(await isCronAuthorized(req))) return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return jsonResponse({ok:false,error:'not_configured'},503);
+  const hour = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',hourCycle:'h23'}).format(new Date());
+  if (hour !== '18') return jsonResponse({ok:true,skipped:'not_6pm_miami'});
 
   console.log('[notify-pro-visit-tomorrow] entry');
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -33,7 +36,7 @@ Deno.serve(async (req) => {
     .from('visits')
     .select(
       // Entry codes/access notes are visit-day only (Member Guide promise); never in the night-before text.
-      'id, assigned_pro_id, scheduled_start, service_type, street, zip, parking_notes, pet_notes',
+      'id, assigned_pro_id, backup_pro_id, cleaning_team_id, scheduled_start, service_type, zip, is_sample',
     )
     .not('assigned_pro_id', 'is', null)
     .in('status', ['scheduled', 'on_the_way', 'in_progress'])
@@ -43,14 +46,22 @@ Deno.serve(async (req) => {
   if (error) return jsonResponse({ ok: false, error: error.message }, 500);
 
   const byPro = new Map<string, DigestVisit[]>();
+  const { data: teams } = await admin.from('cleaning_teams').select('id,partner_pro_id').eq('kind','paired_pros').eq('active',true);
+  const partners = new Map((teams ?? []).map(t=>[t.id,t.partner_pro_id]));
   for (const v of visits ?? []) {
-    const pro = (v as { assigned_pro_id: string }).assigned_pro_id;
-    if (!byPro.has(pro)) byPro.set(pro, []);
-    byPro.get(pro)!.push(v as unknown as DigestVisit);
+    if (v.is_sample) continue;
+    for (const pro of new Set([v.assigned_pro_id,v.backup_pro_id ?? partners.get(v.cleaning_team_id ?? '')])) {
+      if (!pro) continue;
+      const list = byPro.get(pro) ?? [];
+      list.push(v as unknown as DigestVisit);
+      byPro.set(pro,list);
+    }
   }
 
   const results: Record<string, unknown>[] = [];
   for (const [contractorId, list] of byPro) {
+    const {data:candidate} = await admin.from('applicants').select('is_test_row,preferred_language').eq('contractor_id',contractorId).maybeSingle();
+    if (!candidate || candidate.is_test_row) { results.push({contractor_id:contractorId,skipped:'test_or_missing_pro'}); continue; }
     const { data: claimed, error: claimErr } = await admin.rpc('claim_pro_notification', {
       _contractor_id: contractorId,
       _kind: 'visit_tomorrow',
@@ -65,7 +76,7 @@ Deno.serve(async (req) => {
       results.push({ contractor_id: contractorId, skipped: 'already_sent' });
       continue;
     }
-    const { title, body: text } = digestText(list, 'tomorrow');
+    const { title, body: text } = digestText(list, 'tomorrow', candidate.preferred_language === 'es' ? 'es' : 'en');
     const r = await notifyPro(admin, {
       contractor_id: contractorId,
       kind: 'visit_tomorrow',
@@ -74,6 +85,7 @@ Deno.serve(async (req) => {
       url: '/pro/schedule',
       idempotency_key: `visit_tomorrow:${contractorId}:${day}`,
       context: { day, visit_ids: list.map((v) => v.id) },
+      sms_required: true,
     });
     results.push({ contractor_id: contractorId, visits: list.length, ...r });
   }

@@ -51,32 +51,26 @@ export function addDays(day: string, n: number): string {
   return dt.toISOString().slice(0, 10);
 }
 
-function visitLine(v: DigestVisit): string {
-  const service = SERVICE_LABEL[(v.service_type ?? '').toLowerCase()] ?? 'Visit';
-  const where = [v.street, v.zip].filter(Boolean).join(', ') || 'address in the app';
-  const access = [
-    v.gate_code ? `gate ${v.gate_code}` : null,
-    v.access_notes,
-    v.parking_notes,
-    v.pet_notes,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-  return `${etTime(v.scheduled_start)} — ${service}, ${where}${access ? ` (${access})` : ''}`;
+function visitLine(v: DigestVisit, es: boolean): string {
+  const labels: Record<string,string> = es ? {cleaning:'Limpieza',lawn:'Césped',detail:'Cuidado del Auto',detailing:'Cuidado del Auto'} : SERVICE_LABEL;
+  const service = labels[(v.service_type ?? '').toLowerCase()] ?? (es ? 'Visita' : 'Visit');
+  return `${etTime(v.scheduled_start)} — ${service}${v.zip ? ` · ${v.zip}` : ''}`;
 }
 
 export function digestText(
   visits: DigestVisit[],
   when: 'today' | 'tomorrow',
+  language: 'en' | 'es' = 'en',
 ): { title: string; body: string } {
   const count = visits.length;
   const first = visits[0];
+  const es = language === 'es';
   const title =
-    when === 'today'
+    es ? `${count} visita${count === 1 ? '' : 's'} ${when === 'today' ? 'hoy' : 'mañana'} — primera a las ${etTime(first?.scheduled_start ?? null)}` : when === 'today'
       ? `${count} job${count === 1 ? '' : 's'} today — first at ${etTime(first?.scheduled_start ?? null)}`
       : `${count} job${count === 1 ? '' : 's'} tomorrow — first at ${etTime(first?.scheduled_start ?? null)}`;
-  const body = visits.slice(0, 5).map(visitLine).join('\n');
-  return { title, body: count > 5 ? `${body}\n+${count - 5} more in the app` : body };
+  const body = visits.slice(0, 5).map(v=>visitLine(v,es)).join('\n');
+  return { title, body: `${body}${count > 5 ? `\n+${count - 5} ${es ? 'más en la app' : 'more in the app'}` : ''}\n${es ? 'Ruta y direcciones: jointidy.co/pro/schedule' : 'Route and addresses: jointidy.co/pro/schedule'}` };
 }
 
 /**
