@@ -19,10 +19,15 @@ import { useProSession } from "@/hooks/useProSession";
 import { VISIT_KIND_LABEL, dayLabel, timeWindow, visitAction } from "@/lib/pro-portal";
 import { SERVICE_LABEL, money } from "@/lib/pro-pay";
 import CleaningTeamInspection from '@/components/pro/CleaningTeamInspection';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { navigationLinks, accessWindowOpen } from '@/lib/pro-visit-rules';
+import { Button } from '@/components/ui/button';
 
 export default function ProVisit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const es = language === 'es';
   const { visits, coi, loading, error, reload } = useProSession();
   const visit = useMemo(() => visits.find((v) => v.id === id) ?? null, [visits, id]);
 
@@ -43,6 +48,13 @@ export default function ProVisit() {
   const [vclass, setVclass] = useState("sedan");
   const [plate, setPlate] = useState("");
   const [reportedPay, setReportedPay] = useState<number | null>(null);
+  const [locationReason,setLocationReason] = useState('');
+  const [homeNote,setHomeNote] = useState<string|null>(null);
+  useEffect(()=>{
+    let canceled=false;
+    if(id) void import('@/integrations/supabase/client').then(({supabase})=>supabase.rpc('pro_home_note',{_visit:id})).then(({data})=>{if(!canceled)setHomeNote(typeof data==='string'?data:null);});
+    return()=>{canceled=true;};
+  },[id]);
 
   const GPS_MSG = "Turn on location for this site in your phone settings, then try again. Check-in and check-out need your location.";
 
@@ -50,9 +62,9 @@ export default function ProVisit() {
     if (!visit) return;
     setBusy("omw");
     setActionError(null);
-    const res = await visitAction(visit.id, "check_in");
+    const res = await visitAction(visit.id, "check_in", {location_reason:locationReason.trim()||undefined});
     setBusy(null);
-    if (!res.ok) { setActionError(res.error === "gps_unavailable" ? GPS_MSG : "Couldn't check you in."); return; }
+    if (!res.ok) { setActionError(res.error === "gps_unavailable" ? GPS_MSG : res.error?.includes('reason_required') ? (es?'Está fuera de 150 m o la ubicación de la dirección no está verificada. Escriba el motivo y vuelva a intentar.':'Outside 150 m or the address location is unverified. Add a reason and try again.') : (es?'No se pudo registrar la llegada.':"Couldn't check you in.")); return; }
     setCheckedIn(true);
   };
 
@@ -74,7 +86,18 @@ export default function ProVisit() {
 
   useEffect(() => {
     if (visit?.on_my_way_at) setOmwSent(true);
-  }, [visit?.on_my_way_at]);
+    setCheckedIn(visit?.checked_in === true);
+  }, [visit?.on_my_way_at, visit?.checked_in]);
+
+  const [clock, setClock] = useState(Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => { setClock(Date.now()); }, 15_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    const timer = window.setInterval(() => reload(), 60_000);
+    return () => window.clearInterval(timer);
+  }, [reload]);
 
   const photosOk = (visit?.before_photos ?? 0) > 0 && (visit?.after_photos ?? 0) > 0;
   const blocked = !coi?.can_work;
@@ -129,10 +152,12 @@ export default function ProVisit() {
     if (!visit) return;
     setBusy("complete");
     setActionError(null);
-    const res = await visitAction(visit.id, "complete");
+    const res = await visitAction(visit.id, "complete", {location_reason:locationReason.trim()||undefined});
     setBusy(null);
     setConfirm(false);
     if (!res.ok) {
+      if(res.error?.includes('reason_required')) {setActionError(es?'Agregue el motivo de ubicación antes de registrar la salida.':'Add a location reason before checking out.');return;}
+      if(res.error?.includes('service_checklist_required')||res.error==='booked_addons_incomplete') {setActionError(es?'Complete cada tarea, extra reservado y punto de salida.':'Complete every work item, booked add-on and exit check.');return;}
       if (res.error === "size_check_required") { setSizeOpen(true); setActionError("First visit: record the real size before you finish."); return; }
       if (res.error === 'both_pros_check_out_required') {setActionError('Both Pros must check in and check out before the Lead completes the visit.');return;}
       if (res.error === 'lead_inspection_and_zones_required') {setActionError('Save room zones and the final inspection before completing the visit.');return;}
@@ -230,6 +255,17 @@ export default function ProVisit() {
       </div>
 
       <MapPreview street={visit.street} zip={visit.zip} />
+      <section className="space-y-3 px-4 py-4">
+        <div className="flex flex-wrap gap-2 text-sm text-foreground">
+          {visit.size_tier && <span>{visit.size_tier === 5 ? 'Estate Plus' : visit.size_tier === 4 ? 'Estate' : `${es ? 'Tamaño' : 'Size'} ${visit.size_tier}`}</span>}
+          {visit.is_team && <StatusPill tone="gold">{visit.is_lead ? (es ? 'Líder' : 'Lead') : (es ? 'Equipo' : 'Team')}</StatusPill>}
+          {visit.first_visit && <StatusPill tone="blue">{es ? 'Primera visita' : 'First visit'}</StatusPill>}
+        </div>
+        {visit.first_visit && <p className="text-sm text-muted-foreground">{es ? 'Recorrido inicial y entrega del sello de ventana.' : 'Initial walkthrough and window seal handover.'}{(visit.size_tier ?? 0) >= 4 ? (es ? ' Pago de primera visita: 1.5×.' : ' First-visit pay: 1.5×.') : ''}</p>}
+        {visit.street && <div className="grid grid-cols-3 gap-2" aria-label={es ? 'Navegar' : 'Navigate'}>
+          {Object.entries(navigationLinks([visit.street, visit.zip].filter(Boolean).join(', '))).map(([provider, url]) => <Button key={provider} variant="outline" size="sm" asChild><a href={url} target="_blank" rel="noopener noreferrer">{provider === 'google' ? 'Google Maps' : provider === 'apple' ? 'Apple Maps' : 'Waze'}</a></Button>)}
+        </div>}
+      </section>
 
       <div className="px-4 pt-4"><ProJobCard visitId={visit.id} serviceType={visit.service_type} /></div>
 
@@ -249,8 +285,9 @@ export default function ProVisit() {
           <p className="pb-1 text-[12px] font-bold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
             Access details
           </p>
-          {visit.access_notes && <InfoRow kind="access" label="Access" value={visit.access_notes} />}
-          {visit.gate_code && <InfoRow kind="gate" label="Gate code" value={visit.gate_code} />}
+          {accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock) && visit.access_notes && <InfoRow kind="access" label={es ? 'Acceso' : 'Access'} value={visit.access_notes} />}
+          {accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock) && visit.gate_code && <InfoRow kind="gate" label={es ? 'Código de puerta' : 'Gate code'} value={visit.gate_code} />}
+          {!accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock) && <p className="py-2 text-sm text-muted-foreground">{es ? 'Los códigos se muestran desde 30 minutos antes de su ventana hasta registrar la salida.' : 'Codes appear 30 minutes before your window and hide at check-out.'}</p>}
           {visit.pet_notes && <InfoRow kind="pet" label="Pets" value={visit.pet_notes} />}
           {visit.parking_notes && <InfoRow kind="parking" label="Parking" value={visit.parking_notes} />}
           {!visit.access_notes && !visit.gate_code && !visit.pet_notes && !visit.parking_notes && (
@@ -260,13 +297,15 @@ export default function ProVisit() {
           )}
         </ProCard>
         <ProVisitExtras visitId={visit.id} />
+        {homeNote&&<section className="mt-4 border-y border-border py-4"><h2 className="font-semibold text-foreground">{es?'Notas del hogar':'Home notes'}</h2><p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{homeNote}</p></section>}
+        {!visit.completed_at&&<Button variant="outline" asChild className="mt-4 w-full"><Link to={`/pro/job/${visit.id}`}>{es?'Necesita más tiempo — solicitar un extra':'Needs extra time — request an add-on'}</Link></Button>}
 
         <Link
           to={`/pro/visit/${visit.id}/checklist`}
           className="mt-3 flex min-h-[52px] items-center gap-3 rounded-[18px] border border-[hsl(var(--pro-navy)/0.07)] bg-white px-4"
         >
           <ListChecks className="h-5 w-5 text-[hsl(var(--pro-blue))]" aria-hidden />
-          <span className="flex-1 text-[15px] font-bold text-[hsl(var(--pro-ink))]">View checklist</span>
+            <span className="flex-1 text-[15px] font-bold text-[hsl(var(--pro-ink))]">{es?'Ver lista de trabajo':'View checklist'}</span>
         </Link>
 
         {actionError && (
@@ -300,10 +339,12 @@ export default function ProVisit() {
               </>
             ) : (
               <>
-                <Send className={`h-4 w-4 ${busy === "omw" ? "pro-plane" : ""}`} aria-hidden /> On my way
+                <Send className={`h-4 w-4 ${busy === "omw" ? "pro-plane" : ""}`} aria-hidden /> {es?'Voy en camino':'On my way'}
               </>
             )}
           </ProButton>
+
+          <label className="block space-y-2 text-sm text-foreground"><span>{es?'Motivo de ubicación (solo fuera de 150 m o dirección sin verificar)':'Location reason (only outside 150 m or unverified address)'}</span><textarea value={locationReason} onChange={e=>setLocationReason(e.target.value)} rows={2} maxLength={500} className="w-full rounded-lg border border-input bg-background p-3"/></label>
 
           <ProButton
             full
@@ -311,7 +352,7 @@ export default function ProVisit() {
             disabled={busy !== null || checkedIn || blocked || !!visit.completed_at}
             onClick={() => void checkIn()}
           >
-            {checkedIn ? <><Check className="h-4 w-4" aria-hidden /> Checked in</> : "I've arrived — check in"}
+            {checkedIn ? <><Check className="h-4 w-4" aria-hidden /> {es?'Llegada registrada':'Checked in'}</> : (es?'Llegué — registrar llegada':"I've arrived — check in")}
           </ProButton>
 
           {sizeOpen && (
@@ -348,7 +389,7 @@ export default function ProVisit() {
             disabled={!photosOk || blocked || busy !== null || !!visit.completed_at}
             onClick={() => setConfirm(true)}
           >
-            Complete visit
+            {es?'Registrar salida y completar':'Check out and complete'}
           </ProButton>
           {visit.service_type==='cleaning'&&<CleaningTeamInspection visitId={visit.id}/>}
           {!photosOk && !visit.completed_at && (

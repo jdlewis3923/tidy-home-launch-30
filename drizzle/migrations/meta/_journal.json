@@ -1723,6 +1723,41 @@
       "when": 1793148670936,
       "tag": "0245_application_remaining_only_resume",
       "breakpoints": true
+    },
+    {
+      "idx": 246,
+      "version": "7",
+      "when": 1793150670964,
+      "tag": "0246_pro_timed_access_and_route_details",
+      "breakpoints": true
+    },
+    {
+      "idx": 247,
+      "version": "7",
+      "when": 1793150722734,
+      "tag": "0247_pro_required_service_checklists",
+      "breakpoints": true
+    },
+    {
+      "idx": 248,
+      "version": "7",
+      "when": 1793150891467,
+      "tag": "0248_pro_gps_radius_and_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 249,
+      "version": "7",
+      "when": 1793150924217,
+      "tag": "0249_pro_individual_location_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 250,
+      "version": "7",
+      "when": 1793150979684,
+      "tag": "0250_pro_loop_compatibility_boundary",
+      "breakpoints": true
     }
   ]
 }

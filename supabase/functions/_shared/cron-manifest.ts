@@ -42,7 +42,7 @@ export const EXPECTED_CRON_JOBS: ExpectedCronJob[] = [
   { name: 'sms-outbox-release', schedule: '*/15 * * * *', kind: 'http', fn: 'sms-outbox-release', purpose: 'Releases parked texts once the send window opens.' },
   { name: 'expire-addon-requests', schedule: '* * * * *', kind: 'http', fn: 'expire-addon-requests', purpose: 'Expires unanswered add-on requests so nobody is charged late.' },
   { name: 'notify-pro-job-today', schedule: '0 12 * * *', kind: 'http', fn: 'notify-pro-job-today', purpose: "Tells each Pro about today's visits." },
-  { name: 'notify-pro-visit-tomorrow', schedule: '0 21 * * *', kind: 'http', fn: 'notify-pro-visit-tomorrow', purpose: "Tells each Pro about tomorrow's visits." },
+  { name: 'notify-pro-visit-tomorrow', schedule: '0 * * * *', kind: 'http', fn: 'notify-pro-visit-tomorrow', purpose: "Checks hourly; sends tomorrow's route only at 6 PM Miami." },
   { name: 'pro-demand-report', schedule: '15 13 * * 1', kind: 'http', fn: 'pro-demand-report', purpose: 'Weekly demand/capacity report for the Pro fleet.' },
 
   // --- applicants / compliance ---

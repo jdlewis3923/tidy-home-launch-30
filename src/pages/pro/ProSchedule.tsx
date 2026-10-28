@@ -20,6 +20,9 @@ import { dayLabel, fetchNotifications, mondayOf, timeWindow } from "@/lib/pro-po
 import { money } from "@/lib/pro-pay";
 import WeeklyRoute from "@/components/pro/schedule/WeeklyRoute";
 import MyDates from "@/components/pro/schedule/MyDates";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const COI_LABEL: Record<string, string> = {
   none: "Insurance",
@@ -33,8 +36,11 @@ const PUSH_CARD_KEY = "tidy_pro_push_card_dismissed";
 
 export default function ProSchedule() {
   const { me, coi, visits, loading, error, reload, userId } = useProSession();
+  const { language } = useLanguage();
+  const es = language === 'es';
+  const [routeRange,setRouteRange] = useState<'today'|'week'>('today');
   const [week, setWeek] = useState<"this" | "next">("this");
-  const [tab, setTab] = useState<"route" | "dates">("route");
+  const [tab, setTab] = useState<"route" | "dates">("dates");
   const [unread, setUnread] = useState(0);
   const [showPushCard, setShowPushCard] = useState(
     () => typeof window !== "undefined" && !localStorage.getItem(PUSH_CARD_KEY),
@@ -89,13 +95,15 @@ export default function ProSchedule() {
   const nextVisitId = useMemo(() => {
     const upcoming = visits
       .filter((v) => v.scheduled_start && !v.completed_at && new Date(v.scheduled_start) >= new Date())
-      .sort((a, b) => (a.scheduled_start! < b.scheduled_start! ? -1 : 1));
+      .sort((a, b) => (a.scheduled_start ?? '').localeCompare(b.scheduled_start ?? ''));
     return upcoming[0]?.id ?? null;
   }, [visits]);
 
   if (!loading && !userId) return <Navigate to="/pro/welcome" replace />;
 
-  const greeting = me?.first_name ? `Hi, ${me.first_name}` : "Your schedule";
+  const greeting = me?.first_name ? `${es ? 'Hola' : 'Hi'}, ${me.first_name}` : (es ? 'Su agenda' : 'Your schedule');
+  const todayKey = new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York'}).format(new Date());
+  const routeVisits = inWeek.filter(v => routeRange === 'week' || (v.scheduled_start && new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York'}).format(new Date(v.scheduled_start)) === todayKey)).sort((a,b)=>(a.scheduled_start??'').localeCompare(b.scheduled_start??''));
 
   return (
     <ProShell title={greeting} showBell unread={unread}>
@@ -127,6 +135,16 @@ export default function ProSchedule() {
 
       {!loading && !error && (
         <>
+          <section className="space-y-3 px-[18px] pt-4">
+            <div className="flex gap-2" role="group" aria-label={es?'Visitas':'Visits'}>
+              <Button variant={routeRange==='today'?'default':'outline'} onClick={()=>setRouteRange('today')}>{es?'Hoy':'Today'}</Button>
+              <Button variant={routeRange==='week'?'default':'outline'} onClick={()=>setRouteRange('week')}>{es?'Esta semana':'This week'}</Button>
+            </div>
+            {routeVisits.length===0&&<p className="py-4 text-sm text-muted-foreground">{es?'Sin visitas programadas.':'No visits scheduled.'}</p>}
+            {routeVisits.map((v,index)=><Link key={v.id} to={`/pro/visit/${v.id}`} className="flex min-h-24 items-start gap-3 rounded-lg border border-border bg-background p-4 text-foreground">
+              <span className="pt-1 text-sm text-muted-foreground">{index+1}</span><div className="min-w-0 flex-1 space-y-1"><p className="font-semibold">{v.customer_first_name??(es?'Miembro':'Member')}</p><p className="text-sm">{v.service_type==='cleaning'?(es?'Limpieza':'Cleaning'):v.service_type==='lawn'?(es?'Césped':'Lawn'):v.visit_kind==='car_wash'?(es?'Lavado adicional':'Car Wash Add-On'):(es?'Cuidado del Auto':'Car Care')} · {v.size_tier===5?'Estate Plus':v.size_tier===4?'Estate':`${es?'Tamaño':'Size'} ${v.size_tier??'—'}`}</p><p className="text-xs text-muted-foreground">{timeWindow(v.scheduled_start,v.scheduled_end)} · {v.zip}</p>{v.is_team&&<p className="text-xs text-primary">{v.is_lead?(es?'Líder de equipo':'Team Lead'):(es?'Equipo':'Team')}</p>}</div><span className="text-sm font-semibold">{money(v.visit_pay_cents)}</span>
+            </Link>)}
+          </section>
           <section className="px-[18px] pt-4">
             <HeroPanel className="pro-rise">
               <Eyebrow className="text-[hsl(var(--pro-sky))]">This week</Eyebrow>
@@ -200,7 +218,7 @@ export default function ProSchedule() {
                         key={v.id}
                         to={`/pro/visit/${v.id}`}
                         service={v.service_type}
-                        street={v.street}
+                        street={v.customer_first_name}
                         zip={v.zip}
                         window={timeWindow(v.scheduled_start, v.scheduled_end)}
                         payCents={v.visit_pay_cents}

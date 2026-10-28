@@ -1808,9 +1808,11 @@ export type Database = {
           check_in_at: string | null
           check_in_lat: number | null
           check_in_lng: number | null
+          check_in_location_reason: string | null
           check_out_at: string | null
           check_out_lat: number | null
           check_out_lng: number | null
+          check_out_location_reason: string | null
           pro_id: string
           visit_id: string
         }
@@ -1818,9 +1820,11 @@ export type Database = {
           check_in_at?: string | null
           check_in_lat?: number | null
           check_in_lng?: number | null
+          check_in_location_reason?: string | null
           check_out_at?: string | null
           check_out_lat?: number | null
           check_out_lng?: number | null
+          check_out_location_reason?: string | null
           pro_id: string
           visit_id: string
         }
@@ -1828,9 +1832,11 @@ export type Database = {
           check_in_at?: string | null
           check_in_lat?: number | null
           check_in_lng?: number | null
+          check_in_location_reason?: string | null
           check_out_at?: string | null
           check_out_lat?: number | null
           check_out_lng?: number | null
+          check_out_location_reason?: string | null
           pro_id?: string
           visit_id?: string
         }
@@ -6647,6 +6653,35 @@ export type Database = {
           },
         ]
       }
+      pro_visit_checks: {
+        Row: {
+          checks: Json
+          pro_id: string
+          updated_at: string
+          visit_id: string
+        }
+        Insert: {
+          checks?: Json
+          pro_id: string
+          updated_at?: string
+          visit_id: string
+        }
+        Update: {
+          checks?: Json
+          pro_id?: string
+          updated_at?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_visit_checks_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pro_visits: {
         Row: {
           addon_pay_cents: number
@@ -9757,6 +9792,8 @@ export type Database = {
         Row: {
           access_notes: string | null
           access_notes_enc: string | null
+          address_lat: number | null
+          address_lng: number | null
           anchor_date: string | null
           assigned_pro_id: string | null
           backup_pro_id: string | null
@@ -9767,9 +9804,11 @@ export type Database = {
           check_in_at: string | null
           check_in_lat: number | null
           check_in_lng: number | null
+          check_in_location_reason: string | null
           check_out_at: string | null
           check_out_lat: number | null
           check_out_lng: number | null
+          check_out_location_reason: string | null
           claim_id: string | null
           cleaning_base_pay_cents: number | null
           cleaning_final_inspection_at: string | null
@@ -9799,6 +9838,7 @@ export type Database = {
           paid_in_full_reason: string | null
           parking_notes: string | null
           pet_notes: string | null
+          pro_loop_enabled: boolean
           rate_token: string | null
           redo_of_visit_id: string | null
           redo_request_id: string | null
@@ -9825,6 +9865,8 @@ export type Database = {
         Insert: {
           access_notes?: string | null
           access_notes_enc?: string | null
+          address_lat?: number | null
+          address_lng?: number | null
           anchor_date?: string | null
           assigned_pro_id?: string | null
           backup_pro_id?: string | null
@@ -9835,9 +9877,11 @@ export type Database = {
           check_in_at?: string | null
           check_in_lat?: number | null
           check_in_lng?: number | null
+          check_in_location_reason?: string | null
           check_out_at?: string | null
           check_out_lat?: number | null
           check_out_lng?: number | null
+          check_out_location_reason?: string | null
           claim_id?: string | null
           cleaning_base_pay_cents?: number | null
           cleaning_final_inspection_at?: string | null
@@ -9867,6 +9911,7 @@ export type Database = {
           paid_in_full_reason?: string | null
           parking_notes?: string | null
           pet_notes?: string | null
+          pro_loop_enabled?: boolean
           rate_token?: string | null
           redo_of_visit_id?: string | null
           redo_request_id?: string | null
@@ -9893,6 +9938,8 @@ export type Database = {
         Update: {
           access_notes?: string | null
           access_notes_enc?: string | null
+          address_lat?: number | null
+          address_lng?: number | null
           anchor_date?: string | null
           assigned_pro_id?: string | null
           backup_pro_id?: string | null
@@ -9903,9 +9950,11 @@ export type Database = {
           check_in_at?: string | null
           check_in_lat?: number | null
           check_in_lng?: number | null
+          check_in_location_reason?: string | null
           check_out_at?: string | null
           check_out_lat?: number | null
           check_out_lng?: number | null
+          check_out_location_reason?: string | null
           claim_id?: string | null
           cleaning_base_pay_cents?: number | null
           cleaning_final_inspection_at?: string | null
@@ -9935,6 +9984,7 @@ export type Database = {
           paid_in_full_reason?: string | null
           parking_notes?: string | null
           pet_notes?: string | null
+          pro_loop_enabled?: boolean
           rate_token?: string | null
           redo_of_visit_id?: string | null
           redo_request_id?: string | null
@@ -11171,6 +11221,10 @@ export type Database = {
         Args: { _id: string; _note: string }
         Returns: undefined
       }
+      pro_access_window_open: {
+        Args: { _pro: string; _visit: string }
+        Returns: boolean
+      }
       pro_all_five: { Args: { _applicant_id: string }; Returns: boolean }
       pro_capacity_stats_internal: {
         Args: never
@@ -11257,6 +11311,25 @@ export type Database = {
           zip: string
         }[]
       }
+      pro_gps_distance: {
+        Args: {
+          _lat: number
+          _lng: number
+          _target_lat: number
+          _target_lng: number
+        }
+        Returns: number
+      }
+      pro_gps_validate: {
+        Args: {
+          _lat: number
+          _lng: number
+          _pro: string
+          _reason?: string
+          _visit: string
+        }
+        Returns: Json
+      }
       pro_home_note: { Args: { _visit: string }; Returns: string }
       pro_job_card: { Args: { _visit: string }; Returns: Json }
       pro_lawn_job_info: {
@@ -11280,13 +11353,45 @@ export type Database = {
       pro_partner_progress: { Args: never; Returns: Json }
       pro_partner_status: { Args: { _applicant: string }; Returns: Json }
       pro_partner_try_promote: { Args: { _applicant: string }; Returns: Json }
+      pro_record_team_location: {
+        Args: {
+          _action: string
+          _lat: number
+          _lng: number
+          _pro: string
+          _reason?: string
+          _visit: string
+        }
+        Returns: undefined
+      }
       pro_report_teammate_missing: { Args: { _visit: string }; Returns: Json }
+      pro_required_check_keys: {
+        Args: { _kind: string; _service: string }
+        Returns: string[]
+      }
       pro_review_bonus_total: { Args: { _pro?: string }; Returns: number }
+      pro_route_details: {
+        Args: never
+        Returns: {
+          checked_in: boolean
+          checked_out: boolean
+          first_visit: boolean
+          is_lead: boolean
+          is_team: boolean
+          size_tier: number
+          visit_id: string
+        }[]
+      }
       pro_schedule_state: { Args: never; Returns: Json }
       pro_send_message: {
         Args: { _body: string; _visit_id?: string }
         Returns: string
       }
+      pro_service_check: {
+        Args: { _checked: boolean; _key: string; _visit: string }
+        Returns: undefined
+      }
+      pro_service_checklist: { Args: { _visit: string }; Returns: Json }
       pro_set_catchup: { Args: { _weekday: number }; Returns: Json }
       pro_set_catchup_busy: {
         Args: { _busy: boolean; _date: string }

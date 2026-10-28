@@ -1,5 +1,13 @@
 # Roadmap
 
+## Pro closed loop (Oct 28)
+- [x] Audited and listed existing Pro screens, assignments, notifications, visit actions, access and pay in docs/pro-closed-loop-audit.md.
+- [ ] Build gaps only: Today/week route, bilingual job/navigation, timed access, GPS/reason, masked contact/15-minute lockout, service checklists and operational requests.
+- [ ] Complete statement/stats/COI/night-before reminder gaps, preserving existing scheduling/pay and home-screen installation.
+- [ ] Test isolated is_test cleaning, paired Estate Plus, lawn and car journeys on a phone; capture every requested step and message/pay readback. No real member messages or payouts during tests.
+  - Completed in this pass: Today/week summaries without street addresses, sizes/Lead badges, Google/Apple/Waze links, home notes/existing add-on request link, global language/nav/install controls, timed server access including vehicle privacy, required per-Pro service/exit/add-on checks, 150 m GPS exception evidence, individual team locations, 6 PM Miami SMS+app route producer including partners. New work/GPS enforcement is visit-gated off by default to preserve the published legacy flow until rollout.
+  - Verified: 34 focused tests, SQL distance/checklist reader checks, healthy preview and signed-in owner phone Today/Spanish toggle with no overflow/errors; screenshots under /tmp/browser/pro-loop. This is NOT the requested is_test Pro acceptance loop: no Pro-role accounts found, no visit submitted, no member SMS or pay settlement verified. Still open: masked calls/texts, lockout loop/all-service half pay, damage/unsafe/weather actions, structured zones, complete translation, statement/stats/COI audit and isolated setup/all requested screenshots.
+
 ## Founding visual reference (Oct 28)
 - [x] Matched exterior-photo opening, centered quote summary, image-led service switches, two-column photographic add-ons and gold continuation using recreated photography (not exact source photos). Preserved catalog prices, gates, bilingual names, real counts and motion. Phone/computer quote-to-reservation verified without submitting, no overflow or runtime errors; 77 pricing/add-on tests passed. Not published.
 

@@ -8,6 +8,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProHead, { ProMark } from "./ProHead";
 import { ArrowLeft, Bell, CalendarDays, CircleUser, DollarSign, Trophy } from "lucide-react";
 import barBackdrop from "@/assets/miami-waterfront.webp";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
 
 const NAV = [
   { to: "/pro/schedule", label: "Schedule", icon: CalendarDays },
@@ -28,6 +30,7 @@ export function ProTopBar({
   unread?: number;
 }) {
   const navigate = useNavigate();
+  const { language, setLanguage } = useLanguage();
   return (
     <header className="sticky top-0 z-30 overflow-hidden bg-[hsl(var(--pro-navy))] px-2 pb-2.5 pt-[max(0.6rem,env(safe-area-inset-top))] text-white">
       <img src={barBackdrop} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.22]" />
@@ -50,6 +53,9 @@ export function ProTopBar({
         >
           {title}
         </h1>
+        <Button variant="ghost" size="sm" className="shrink-0 text-primary-foreground" aria-label={language === 'en' ? 'Cambiar a español' : 'Switch to English'} onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}>
+          {language === 'en' ? 'ES' : 'EN'}
+        </Button>
         {showBell && (
           <Link
             to="/pro/notifications"
@@ -69,6 +75,8 @@ export function ProTopBar({
 
 export function ProBottomNav() {
   const { pathname } = useLocation();
+  const { language } = useLanguage();
+  const labels: Record<string,string> = { Schedule:'Agenda', Earnings:'Pagos', Status:'Estado', Profile:'Perfil' };
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-[hsl(var(--pro-navy)/0.08)] bg-white/92 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
       <ul className="mx-auto flex max-w-md">
@@ -90,7 +98,7 @@ export function ProBottomNav() {
                   }`}
                 />
                 <Icon className="h-[22px] w-[22px]" aria-hidden strokeWidth={active ? 2.3 : 1.8} />
-                {label}
+                {language === 'es' ? labels[label] : label}
               </Link>
             </li>
           );

@@ -14,6 +14,7 @@ export default function CleaningTeamInspection({ visitId }: { visitId: string })
   const [inspected, setInspected] = useState(false);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState('');
+  const [locationReason,setLocationReason] = useState('');
   useEffect(() => {
     let canceled = false;
     void supabase.rpc('pro_cleaning_visit_details', {_visit:visitId}).then(({data,error}) => {
@@ -32,7 +33,7 @@ export default function CleaningTeamInspection({ visitId }: { visitId: string })
     });
     setBusy(false); setResult(error ? (es?'No se pudo guardar la inspección.':'Could not save the inspection.') : (es?'Inspección guardada':'Inspection saved'));
   }
-  async function checkOut(){setBusy(true);const response=await visitAction(visitId,'team_check_out');setBusy(false);setResult(response.ok?(es?'Salida registrada':'Check-out recorded'):(es?'Registre su llegada y permita su ubicación antes de salir.':'Check in and allow location before checking out.'));}
+  async function checkOut(){setBusy(true);const response=await visitAction(visitId,'team_check_out',{location_reason:locationReason.trim()||undefined});setBusy(false);setResult(response.ok?(es?'Salida registrada':'Check-out recorded'):(response.error?.includes('reason_required')?(es?'Fuera de 150 m o dirección sin verificar: agregue un motivo.':'Outside 150 m or unverified address: add a reason.'):(es?'Registre su llegada y permita su ubicación antes de salir.':'Check in and allow location before checking out.')));}
   return <section className="space-y-3 border-y border-border py-4">
     <h2 className="font-semibold text-foreground">{es?'Equipo Estate Plus':'Estate Plus team'}</h2>
     {details.team&&<p className="text-sm text-muted-foreground">{details.team.lead} ({es?'Líder':'Lead'}) + {details.team.partner}</p>}
@@ -41,6 +42,7 @@ export default function CleaningTeamInspection({ visitId }: { visitId: string })
       <label className="flex items-start gap-3 text-sm text-foreground"><Checkbox checked={inspected} onCheckedChange={v=>setInspected(v===true)}/><span>{es?'Inspección final realizada y reporte de fotos listo':'Final walkthrough completed and photo report ready'}</span></label>
       <Button variant="outline" disabled={busy||!zones.trim()} onClick={()=>void save()}>{es?'Guardar inspección':'Save inspection'}</Button>
     </> : <><p className="text-sm text-muted-foreground">{es?'El líder guarda las zonas y cierra la visita después de la inspección final.':'The Lead saves room zones and closes the visit after the final walkthrough.'}</p><Button variant="outline" disabled={busy} onClick={()=>void checkOut()}>{es?'Registrar mi salida':'Record my check-out'}</Button></>}
+    {!details.is_lead&&<label className="block space-y-2 text-sm text-foreground"><span>{es?'Motivo de ubicación, si está fuera de 150 m':'Location reason, if outside 150 m'}</span><Textarea maxLength={500} rows={2} value={locationReason} onChange={e=>setLocationReason(e.target.value)}/></label>}
     {result&&<p role="status" className="text-sm text-foreground">{result}</p>}
   </section>;
 }

@@ -9,9 +9,13 @@ import { ChecklistItemRow, ErrorState, ScheduleSkeleton } from "@/components/pro
 import { useProSession } from "@/hooks/useProSession";
 import { fetchChecklist, toggleChecklistItem, type ChecklistRow } from "@/lib/pro-portal";
 import CleaningStandardChecklist from '@/components/pro/CleaningStandardChecklist';
+import ServiceVisitChecklist from '@/components/pro/ServiceVisitChecklist';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ProChecklist() {
   const { id } = useParams<{ id: string }>();
+  const { language } = useLanguage();
+  const es = language === 'es';
   const { visits, me, loading: sessionLoading } = useProSession();
   const visit = visits.find((v) => v.id === id) ?? null;
 
@@ -50,13 +54,14 @@ export default function ProChecklist() {
   const doneCount = (rows ?? []).filter((r) => r.checked).length;
 
   return (
-    <ProShell title="Checklist" back={`/pro/visit/${id}`}>
+    <ProShell title={es ? 'Lista de trabajo' : 'Checklist'} back={`/pro/visit/${id}`}>
+      {id && visit && <div className="px-4"><ServiceVisitChecklist visitId={id}/></div>}
       {(sessionLoading || (!rows && !error)) && <ScheduleSkeleton />}
       {error && <ErrorState title="Couldn't load the checklist" onRetry={() => setNonce((n) => n + 1)} />}
       {rows && !error && (
         <>
           <p className="px-4 py-3 text-[14px] font-semibold text-[hsl(var(--pro-ink-soft))]">
-            {doneCount} of {rows.length} done — this is your own record of the work.
+            {es ? 'Lista adicional del servicio' : 'Additional service reference'} · {doneCount}/{rows.length}
           </p>
           <div className="space-y-4 px-4">
             {id&&visit?.service_type==='cleaning'&&<CleaningStandardChecklist visitId={id}/>}
