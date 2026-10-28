@@ -21,3 +21,14 @@
 
 ## Safety boundaries
 Preserve frozen customer prices/historical settled pay and the existing scheduling/payment pipeline. Do not enable shadow lifecycle campaigns or publish the website. Test data must not contact real members or enter real assignment/capacity/payout processes. A simulated text or statement is not provider delivery or bank settlement. Phone screenshots cannot be prevented by a website; minimize address/code exposure and never advertise screenshot prevention.
+
+## Implemented in this pass
+- Today/week route summary without street addresses; sizes/team Lead labels, restored check-in state, Google/Apple/Waze navigation and links to existing approved add-on workflow/home notes.
+- Global language switch, Spanish bottom navigation and installation guidance. Full legacy page translation remains open.
+- Server-gated code access starts 30 minutes before window and ends at visit/individual checkout; vehicle extras exclude gate/access data and gate interior access.
+- Per-Pro service/exit checklist and explicit attached add-on completion, with server completion enforcement for designated closed-loop visits. Legacy visits retain their existing rules until rollout, avoiding a live-site/preview mismatch.
+- 150 m GPS validation and recorded exception reasons, individual team evidence; missing verified address coordinates require a reason, never fabricate a location.
+- Existing tomorrow reminder checks hourly and sends only at 6 PM Miami time with SMS plus app feed, Spanish copy, active-team recipients and test-Pro exclusion. Route text contains no street/code/home details.
+
+## Remaining before closed-loop release
+Masked Twilio call/text relay and callback authentication; lockout timer plus actual call/text and all-service half-pay; same-day damage contact; unsafe departure and weather moves; structured per-Pro zones; opt-in/evidence-photo policy reconciliation; all-service payout ledger and statistics; complete portal translation; verified COI/assignment gate inventory; admin-only isolated is_test setup and all requested phone screenshots. No Pro-role accounts were found in the database, so the signed-in owner portal check is not an operational Pro acceptance test. New work/GPS guards are staged per visit (`pro_loop_enabled=false` by default) until full loop verification and rollout.

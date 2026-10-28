@@ -49,6 +49,12 @@ export default function ProVisit() {
   const [plate, setPlate] = useState("");
   const [reportedPay, setReportedPay] = useState<number | null>(null);
   const [locationReason,setLocationReason] = useState('');
+  const [homeNote,setHomeNote] = useState<string|null>(null);
+  useEffect(()=>{
+    let canceled=false;
+    if(id) void import('@/integrations/supabase/client').then(({supabase})=>supabase.rpc('pro_home_note',{_visit:id})).then(({data})=>{if(!canceled)setHomeNote(typeof data==='string'?data:null);});
+    return()=>{canceled=true;};
+  },[id]);
 
   const GPS_MSG = "Turn on location for this site in your phone settings, then try again. Check-in and check-out need your location.";
 
@@ -291,6 +297,8 @@ export default function ProVisit() {
           )}
         </ProCard>
         <ProVisitExtras visitId={visit.id} />
+        {homeNote&&<section className="mt-4 border-y border-border py-4"><h2 className="font-semibold text-foreground">{es?'Notas del hogar':'Home notes'}</h2><p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{homeNote}</p></section>}
+        {!visit.completed_at&&<Button variant="outline" asChild className="mt-4 w-full"><Link to={`/pro/job/${visit.id}`}>{es?'Necesita más tiempo — solicitar un extra':'Needs extra time — request an add-on'}</Link></Button>}
 
         <Link
           to={`/pro/visit/${visit.id}/checklist`}

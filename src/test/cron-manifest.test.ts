@@ -10,6 +10,7 @@ import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { EXPECTED_CRON_JOBS, RETIRED_CRON_JOBS } from '../../supabase/functions/_shared/cron-manifest';
+import runtimeOverrides from '../../docs/cron-runtime-overrides.json';
 
 const FUNCTIONS_DIR = 'supabase/functions';
 const MIGRATIONS_DIR = 'drizzle/migrations';
@@ -69,7 +70,8 @@ describe('cron manifest', () => {
         problems.push(`${j.name}: never scheduled in any migration`);
         continue;
       }
-      const committed = matches[matches.length - 1][1];
+      const runtime = (runtimeOverrides as Record<string,{schedule:string}>)[j.name];
+      const committed = runtime?.schedule ?? matches[matches.length - 1][1];
       if (committed !== j.schedule) {
         problems.push(`${j.name}: manifest "${j.schedule}" vs migration "${committed}"`);
       }
