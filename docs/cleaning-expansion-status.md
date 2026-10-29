@@ -43,7 +43,7 @@
 ## Team add-ons, redos, reviews, routes (Oct 27, final pass continued)
 - Pros mark each visit add-on done from the job screen: "I did this" pays that Pro, "We did it together" splits the pay on paired Estate Plus visits; anything still open at visit close is credited to the Lead automatically, so no add-on is ever unpaid. The job-screen pay estimate matches the payout exactly.
 - Fixed a real pay bug found in the process: visit-close pay only counted add-ons already marked completed, and nothing ever marked them — add-ons would have paid $0. Auto-completion at close fixes every existing and future visit.
-- Redos: the owner picks whose zone was missed on team visits; the free return visit is assigned to that Pro (50% pay), and the responsible Pro is stored on the redo record.
+- Redos: the owner picks whose zone was missed on team visits; the free return visit is assigned to that Pro, and the responsible Pro is stored on the redo record. As of Oct 29, completion pays 50% of the original Pro rate only when this member has no paid redo in the last 60 days; further required redos pay $0 and alert the owner.
 - Reviews: one rating per visit stays, but the team partner (or backup) is named on the rating row, and averages, tier promotion and readiness checks now count team-visit ratings for both Pros.
 - Route households: a new owner-only report counts distinct homes and visits per Pro per day, including team partners and backups.
 - Backup Pros now see the covered visit in their own job list.
