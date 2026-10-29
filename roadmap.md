@@ -425,4 +425,7 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Waiting-screen photo re-shot as the same house from the FRONT with driveway + parked SUV: src/assets/coming-soon-frontyard.jpg
 - [x] Gentle breeze added: top canopy layer masked and swayed (7.5 s loop), house/car static, off under reduced motion
 - [x] Told Susan Zoom works and the link is coming (Twilio SMd1516cedff9266163ee26acf0e4e579a, sent)
-- [ ] Forward Justin's Zoom link to Susan when he pastes it
+- [x] Forward Justin's Zoom link to Susan when he pastes it (Twilio SM... sent, logged on her record)
+
+## Rebecca Zoom invite (Oct 29)
+- [ ] Text Rebecca Ramirez (7869212616, applicant 21f2c982-8619-490a-8429-9c80cc22be25): 3:30 PM today, Zoom https://us05web.zoom.us/j/83249943584?pwd=5okfQ7Xpf5NHXDbwZ62Ykmpaf8jaVi.1 (Justin's link for her, Oct 29). BLOCKED: preview session signed out and owner-session mint declined, so candidate-text returned 401; needs Justin signed in on the preview, then send immediately.
