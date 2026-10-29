@@ -61,6 +61,10 @@ export async function handleHiringInbound(admin: any, fromRaw: string, body: str
   const lang = p.preferred_language === 'es' ? 'es' : 'en';
   const first = applicant.first_name || (lang === 'es' ? 'Hola' : 'there');
   const kw = normalizeKeyword(body);
+  if(p.archived && !['STOP','START','UNSTOP','HELP'].includes(kw)) {
+    const {error}=await admin.rpc('restore_responsive_candidate',{_id:applicant.id,_event:'replied by text'});
+    if(error) throw new Error(error.message);
+  }
 
   const t = (en: string, es: string) => (lang === 'es' ? es : en);
 
