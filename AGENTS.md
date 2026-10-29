@@ -1,7 +1,7 @@
 - Onboarding sequence: stages/gates/email inventory live in `_shared/onboarding-sequence.ts` (mirrored to `src/lib/onboardingSequence.ts`, parity-tested); stage moves only via `sequence-advance`, and every Pro email passes `sendProEmail`'s guard — why: one definition, one door, auditable order.
 - Launch dates live only in `launch_config` (edited at /admin/launch-dates, logged); `src/lib/launch.ts` (mirrored to `_shared/launch.ts`, parity-tested) only formats them. An empty car date means closed (SQL-enforced); car dates are set only by `admin_approve_car_launch` after demand + an Active car Pro — why: one place to move a date; car opens only when a route fills.
 - Reservations never touch Stripe; the paid subscription marks a reservation converted by email match (DB trigger) — why: Stripe products stay frozen.
-- Pricing and homepage FAQ share `src/lib/frequency-faq.ts` — why: identical bilingual answers.
+- Pricing/homepage FAQ share `src/lib/frequency-faq.ts` — why: identical EN/ES answers.
 - Hero media: portrait below 768px, widescreen otherwise, including desktop-site mode — why: viewport sets composition.
 - Founding photo controls reuse wizard state, catalog math and gates — why: styling must not create a second pricing/reservation path.
 - Public page reachability is master switch OR per-page row in page_visibility (via get_page_visibility); /founding fails open unless explicitly off — why: printed hangers must never dead-end.
