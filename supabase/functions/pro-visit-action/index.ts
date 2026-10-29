@@ -310,13 +310,14 @@ Deno.serve(async (req) => {
         check_out_location_reason: 'location_reason' in parsed.data ? parsed.data.location_reason ?? null : null,
         not_reached_note: not_reached_note || null,
       })
-      .eq('id', visit_id).in('status', ['scheduled','on_the_way','in_progress']).select('id').maybeSingle();
+      .eq('id', visit_id).in('status', ['scheduled','on_the_way','in_progress']).select('id,visit_pay_cents').maybeSingle();
     // The DB refuses to close without before/after photos and GPS check-in/out.
     if (closeErr) {
       const code = /(before_photos_required|after_photos_required|gps_check_in_required|gps_check_out_required)/.exec(closeErr.message)?.[1];
       return jsonResponse({ ok: false, error: code ?? closeErr.message });
     }
     if (!closedVisit) return jsonResponse({ok:false,error:'visit_not_open'});
+    if(visit.is_redo)pay=closedVisit.visit_pay_cents??0;
 
     // Opted-in photo report: tell the member their visit photos are ready.
     // Photos themselves auto-delete after 30 days (visit-photo-retention).
@@ -341,7 +342,7 @@ Deno.serve(async (req) => {
     }
 
     // Roll this Pro's payout week (Monday-Sunday, paid the following Friday).
-    const { error: creditErr } = visit.service_type === 'cleaning'
+    const { error: creditErr } = visit.is_redo ? {error:null} : visit.service_type === 'cleaning'
       ? await admin.rpc('cleaning_record_pay', { _visit: visit_id })
       : await admin.rpc('credit_payout_week', { _pro: uid, _at: visit.scheduled_start ?? now.toISOString(), _cents: pay });
     if (creditErr) console.error('[pro-visit-action] payout credit failed', creditErr.message);
