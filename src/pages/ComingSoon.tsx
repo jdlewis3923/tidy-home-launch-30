@@ -3,7 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Home, Sprout, Car, ChevronRight, CalendarDays, Mail, ArrowRight, Globe, Sparkles } from "lucide-react";
 import tidyLogo from "@/assets/tidy-official-logo.png";
-import villa from "@/assets/coming-soon-pinecrest.jpg";
+import villa from "@/assets/coming-soon-frontyard.jpg";
 import SparkleField from "@/components/landing/SparkleField";
 import SeoHead from "@/components/landing/SeoHead";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -90,20 +90,29 @@ const ComingSoon = () => {
         @keyframes csGlow { 0%,100% { box-shadow: 0 0 18px rgba(59,130,246,.35), inset 0 0 12px rgba(59,130,246,.12);} 50% { box-shadow: 0 0 38px rgba(59,130,246,.75), inset 0 0 22px rgba(59,130,246,.25);} }
         @keyframes csShine { 0% { background-position: -200% 0;} 100% { background-position: 200% 0;} }
         @keyframes csDrift { 0%,100% { transform: scale(1.06) translateY(0);} 50% { transform: scale(1.1) translateY(-10px);} }
+        @keyframes csSway { 0%,100% { transform: translateX(0) skewX(0deg);} 18% { transform: translateX(6px) skewX(1.6deg);} 42% { transform: translateX(-5px) skewX(-1.4deg);} 63% { transform: translateX(4px) skewX(1.1deg);} 82% { transform: translateX(-2px) skewX(-0.5deg);} }
         @keyframes csTwinkle { 0%,100% { opacity:.3; transform: scale(.8) rotate(0);} 50% { opacity:1; transform: scale(1.15) rotate(20deg);} }
         @keyframes csWave { 0%,100% { transform: translateX(0);} 50% { transform: translateX(-30px);} }
         .cs-glow-border { animation: csGlow 3s ease-in-out infinite; }
         .cs-shine { background: linear-gradient(90deg,#2563eb 0%,#60a5fa 40%,#bfdbfe 50%,#60a5fa 60%,#2563eb 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: csShine 4s linear infinite; }
         .cs-drift { animation: csDrift 18s ease-in-out infinite; }
+        .cs-sway { transform-origin: 50% 48%; animation: csSway 7.5s ease-in-out infinite; will-change: transform; }
+        .cs-canopy { -webkit-mask-image: linear-gradient(to bottom,#000 0%,#000 45%,transparent 51%); mask-image: linear-gradient(to bottom,#000 0%,#000 45%,transparent 51%); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; }
+        .cs-ground { -webkit-mask-image: linear-gradient(to bottom,transparent 0%,transparent 45%,#000 51%); mask-image: linear-gradient(to bottom,transparent 0%,transparent 45%,#000 51%); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; }
         .cs-twinkle { animation: csTwinkle 2.2s ease-in-out infinite; }
         .cs-wave { animation: csWave 9s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) { .cs-glow-border,.cs-shine,.cs-drift,.cs-twinkle,.cs-wave { animation: none !important; } }
+        @media (prefers-reduced-motion: reduce) { .cs-glow-border,.cs-shine,.cs-drift,.cs-sway,.cs-canopy,.cs-ground,.cs-twinkle,.cs-wave { animation: none !important; } }
       `}</style>
 
       <main className="relative min-h-screen overflow-hidden bg-[#0a1226] text-white font-poppins">
         {/* Photo background */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[900px] overflow-hidden">
-          <img src={villa} alt="" width={1024} height={1536} className="cs-drift h-full w-full object-cover object-[70%_center] opacity-90" />
+          <div className="cs-drift absolute inset-0 opacity-90">
+            <img src={villa} alt="" width={1024} height={1536} className="cs-ground h-full w-full object-cover object-[100%_center] sm:object-[70%_center]" />
+            <div className="cs-canopy absolute inset-0">
+              <img src={villa} alt="" aria-hidden width={1024} height={1536} className="cs-sway h-full w-full object-cover object-[100%_center] sm:object-[70%_center]" />
+            </div>
+          </div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a1226] via-[#0a1226]/70 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a1226]/40 via-transparent to-[#0a1226]" />
         </div>
