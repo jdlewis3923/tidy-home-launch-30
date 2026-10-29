@@ -3,7 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Home, Sprout, Car, ChevronRight, CalendarDays, Mail, ArrowRight, Globe, Sparkles } from "lucide-react";
 import tidyLogo from "@/assets/tidy-official-logo.png";
-import villa from "@/assets/coming-soon-pinecrest.jpg";
+import villa from "@/assets/coming-soon-frontyard.jpg";
 import SparkleField from "@/components/landing/SparkleField";
 import SeoHead from "@/components/landing/SeoHead";
 import { useLanguage } from "@/contexts/LanguageContext";
