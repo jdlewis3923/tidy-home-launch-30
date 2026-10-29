@@ -1324,7 +1324,6 @@ const translations: Record<string, string> = {
   "ready.": "estamos.",
   "Subscription home care in Kendall & Pinecrest — house cleaning, lawn care and mobile car care.": "Cuidado del hogar por suscripción en Kendall y Pinecrest: limpieza, jardín y cuidado del auto a domicilio.",
   "Hiring our founding crew now.": "Contratando a nuestro equipo fundador.",
-  "First visits begin": "Las primeras visitas comienzan el",
   "November 23": "23 de noviembre",
   "Home Cleaning": "Limpieza del hogar",
   "Mobile Car Care": "Cuidado del Auto",
