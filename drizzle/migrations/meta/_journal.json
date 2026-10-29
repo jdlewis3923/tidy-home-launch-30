@@ -1863,6 +1863,13 @@
       "when": 1793302964885,
       "tag": "0265_onboarding_pack_audit_and_candidate_restore",
       "breakpoints": true
+    },
+    {
+      "idx": 266,
+      "version": "7",
+      "when": 1793303086233,
+      "tag": "0266_member_redo_60_day_pay_guardrail",
+      "breakpoints": true
     }
   ]
 }

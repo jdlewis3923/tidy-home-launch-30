@@ -7486,6 +7486,69 @@ export type Database = {
         }
         Relationships: []
       }
+      redo_pay_decisions: {
+        Row: {
+          amount_cents: number
+          credited_at: string | null
+          decided_at: string
+          is_test: boolean
+          label: string
+          last_paid_redo_at: string | null
+          member_id: string
+          original_rate_cents: number
+          paid: boolean
+          pro_id: string
+          reason: string
+          redo_id: string
+          visit_id: string
+        }
+        Insert: {
+          amount_cents: number
+          credited_at?: string | null
+          decided_at: string
+          is_test?: boolean
+          label: string
+          last_paid_redo_at?: string | null
+          member_id: string
+          original_rate_cents: number
+          paid: boolean
+          pro_id: string
+          reason: string
+          redo_id: string
+          visit_id: string
+        }
+        Update: {
+          amount_cents?: number
+          credited_at?: string | null
+          decided_at?: string
+          is_test?: boolean
+          label?: string
+          last_paid_redo_at?: string | null
+          member_id?: string
+          original_rate_cents?: number
+          paid?: boolean
+          pro_id?: string
+          reason?: string
+          redo_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redo_pay_decisions_redo_id_fkey"
+            columns: ["redo_id"]
+            isOneToOne: true
+            referencedRelation: "redo_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redo_pay_decisions_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: true
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       redo_requests: {
         Row: {
           admin_notes: string | null
@@ -11878,6 +11941,10 @@ export type Database = {
           _window_seconds: number
         }
         Returns: Json
+      }
+      redo_pay_eligible: {
+        Args: { _at: string; _member: string; _test?: boolean }
+        Returns: boolean
       }
       repoint_cron_to_helper: { Args: { _job_name: string }; Returns: string }
       reserve_cleaning_walkthrough: {
