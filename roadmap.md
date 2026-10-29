@@ -1,5 +1,14 @@
 # Roadmap
 
+## Onboarding pack and redo guardrail (Oct 29)
+- [x] Send Susan approved tomorrow 3:30 PM link-coming confirmation; provider accepted.
+- [x] Signing day pack, item copy/resend, immediate email, dated status, Checkr invite checkbox and 8 AM–6 PM Mon–Sat SMS window.
+- [x] Public bilingual noindex insurance guide; restoration hook for responsive/completed unresponsive archives and owner alert.
+- [x] Completion-time member redo pay guardrail and current immutable agreement version 2026-10-29b; shared bilingual copy and reconciliation checks.
+- [x] Test pack accepted; two isolated redo decisions $13/$0, unpaid alert verified, both current contract clauses checked, 45 regression tests passed; redo fixtures removed. No publication.
+- [ ] Carrier delivery of the owner test SMS remains unverified (no delivery callback); sent-message audit history retained.
+- [ ] Live Friday transfer acceptance remains unavailable without an operational connected payout account; test decisions intentionally did not transfer money.
+
 ## Digital agreements by service (Oct 28)
 - [x] Exact cleaning/lawn English templates v2026-10-29, preserved Spanish ICA, admin read/download; both generated PDFs match every source word after whitespace normalization.
 - [x] Phone HTML signing, placeholders, full PDFs, owner countersigning and 24-hour digest section. Both signature flows passed; eight signed/final copy emails accepted, inbox delivery receipts unavailable.

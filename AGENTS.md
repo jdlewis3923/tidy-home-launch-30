@@ -1,9 +1,9 @@
 - Onboarding sequence: stages/gates/email inventory live in `_shared/onboarding-sequence.ts` (mirrored to `src/lib/onboardingSequence.ts`, parity-tested); stage moves only via `sequence-advance`, and every Pro email passes `sendProEmail`'s guard — why: one definition, one door, auditable order.
 - Launch dates live only in `launch_config` (edited at /admin/launch-dates, logged); `src/lib/launch.ts` (mirrored to `_shared/launch.ts`, parity-tested) only formats them. An empty car date means closed (SQL-enforced); car dates are set only by `admin_approve_car_launch` after demand + an Active car Pro — why: one place to move a date; car opens only when a route fills.
 - Reservations never touch Stripe; the paid subscription marks a reservation converted by email match (DB trigger) — why: Stripe products stay frozen.
-- Pricing and homepage FAQ share `src/lib/frequency-faq.ts` — why: identical bilingual answers.
+- Pricing/homepage FAQ share `src/lib/frequency-faq.ts` — why: identical EN/ES answers.
 - Hero media: portrait below 768px, widescreen otherwise, including desktop-site mode — why: viewport sets composition.
-- Founding quote presentation reuses its existing wizard state, catalog math and gates; photographic overview controls only change that state — why: reference styling cannot create a second pricing or reservation path.
+- Founding photo controls reuse wizard state, catalog math and gates — why: styling must not create a second pricing/reservation path.
 - Public page reachability is master switch OR per-page row in page_visibility (via get_page_visibility); /founding fails open unless explicitly off — why: printed hangers must never dead-end.
 - Founding status lives in `founding_grants` (numbers per ZIP, never reused; cap counts homes ever granted) and is decided only by the reservations insert trigger — why: the founding promise must survive cancellations and edits automatically.
 - Prices resolve by `stripe_catalog.canon_key` + the member's `member_rate_card_version()`; founding subscriptions cannot change `rate_card_version` without a logged `price_migration_overrides` row — why: price rises publish a new rate card and never touch locked members.
@@ -16,7 +16,7 @@
 - Lawn size is turf-only sq ft, banded in `LAWN_BANDS`/`sizeFromTurfSqFt` (mirrored in `public.lawn_size_from_sqft`); customers only guess, admins measure at `/admin/lawn-verification` via `admin_lawn_verify`, and DB triggers refuse conversion while `lawn_conversion_block()` is non-null — why: no silent repricing and no Pro absorbing an oversized yard.
 - Paid-plan lawn adds/corrections go only through `lawn-plan-change` (DB trigger refuses unverified lawn), swapping Stripe by lookup_key — why: nothing billed before verification; size-ups wait for the customer.
 - Pro pay varies by service/size, never cadence — why: discounts come from Tidy's margin.
-- Cleaning expansion uses cleaning-specific bands and tables in the mirrored pricing canon; lawn/vehicle CanonSize stays three-tier — why: larger homes must not become invalid lawn/car sizes or alter existing member prices.
+- Cleaning uses its own bands/tables in the mirrored pricing canon; lawn/vehicle CanonSize stays three-tier — why: larger homes must not alter lawn/car sizes or member prices.
 - Cleaning quotes may display annual totals before launch, but checkout rejects prepaid collection until the annual refund/renewal lifecycle is verified — why: a displayed savings option must not collect money through monthly-only billing.
 - Both payment entrypoints share the cleaning verification gate; verified quotes hydrate conversion by reservation ID, and size approval is an atomic token RPC — why: embedded checkout cannot bypass measurement, staffing, or customer consent.
 - Cleaning walkthrough slots are admin-created and atomically claimed by the reservation sender; public clients read only open times — why: never invent owner availability or allow double booking.
@@ -37,10 +37,13 @@
 - New-applicant morning reminders reuse hiring_deadlines and hiring_tick with a server-side next-Eastern-day time, row locks and retained nudge history; pipeline-notify rechecks submission/link expiry — why: one sender, no duplicate chase or stale application links, scoped campaigns stay unchanged.
 - Admin applicant results read question_bank plus application_answers through existing admin access; use applicant-answers helpers to retain inactive saved answers and resolve choice labels — why: actual responses stay visible without altering scoring or hiring gates.
 - Applications pin their question IDs/version; v6 scoring and validation run in shared server helpers, and owner notes use admin-checked RPCs — why: new questions never rewrite drafts or trust browser scoring.
-- Owner-configured remaining-only applications filter required unfinished questions for display using shared validation, while retaining the full question set for server submission/scoring — why: shortened resumes must not erase identity or bypass hiring gates.
+- Remaining-only applications display unfinished required questions via shared validation; server submission/scoring retains all questions — why: shortening cannot erase identity or bypass gates.
 - Every admin place that shows an applicant name renders `ApplicationChannels` (via `useApplicationChannels` + `applicationChannels` rule); never show a bare stage word like "Applied" as the application status — why: Indeed application and our texted-link application are separate facts the owner must see at a glance.
-- Candidate text organization merges existing protected send logs, outbox, delivery receipts and applicant timeline events by normalized phone/Twilio SID; attention uses real reminder deadlines and manual replies, never marks automated replies as owner responses — why: one auditable history without competing sends or invented historical text.
+- Candidate texts merge protected logs, outbox, receipts and timeline by normalized phone/Twilio SID; attention uses real deadlines/manual replies, never automated owner responses — why: auditable history without competing sends or invented texts.
 - Owner digests include candidate SMS outcomes through their current cutoff, matched by normalized phone to real candidates and deduplicated by carrier SID, with pending queues separate — why: morning sends and recipient names must appear at 9 AM without claiming delivery.
 
 - Candidate appointments create urgent owner alerts transactionally from hiring_slots changes; admin displays read all booked slots in Miami time, and original Indeed résumés live in an admin-only source-text table — why: no sender path can omit a booking alert or replace original résumé content with scoring summaries.
 
+
+- Onboarding packs use signing-day, admin-only audits and guarded Pro email/SMS; unsigned links resolve current service templates — why: sends retain gates and cannot sign retired wording.
+- Redo completion locks member history and records a private decision before the visit trigger credits payout; UI/email wording mirrors redo-pay — why: concurrent redos cannot both earn pay or double-credit.

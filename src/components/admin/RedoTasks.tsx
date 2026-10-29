@@ -1,6 +1,8 @@
 /** Open 48-hour-guarantee redos — top of Workday "Waiting on me", with a live clock. */
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from '@/contexts/LanguageContext';
+import { REDO_PAY_EN, REDO_PAY_ES } from '@/lib/redo-pay';
 
 type Redo = {
   id: string; visit_id: string; note: string | null; requested_at: string; due_at: string; status: string; is_test_row: boolean;
@@ -17,6 +19,7 @@ function fmt(h: number) {
 }
 
 export default function RedoTasks() {
+  const {language}=useLanguage();const es=language==='es';
   const [rows, setRows] = useState<Redo[]>([]);
   const [now, setNow] = useState(Date.now());
   const [when, setWhen] = useState<Record<string, string>>({});
@@ -108,7 +111,7 @@ export default function RedoTasks() {
                 <button disabled={busy === r.id} onClick={() => act(r, "schedule")} className="rounded bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground disabled:opacity-50">Schedule free redo</button>
                 <button disabled={busy === r.id} onClick={() => act(r, "cancel")} className="text-xs text-muted-foreground underline">Cancel</button>
               </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">Free to the member · Pro paid 50% of the visit rate</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">{es?REDO_PAY_ES:REDO_PAY_EN}</p>
               {msg[r.id] && <p className="mt-1 text-[11px] text-destructive">{msg[r.id]}</p>}
             </li>
           );

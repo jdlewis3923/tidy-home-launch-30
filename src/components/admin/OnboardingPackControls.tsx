@@ -1,0 +1,22 @@
+import { useCallback, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Copy, Send, ExternalLink } from 'lucide-react';
+import { toast } from 'sonner';
+type Item='intake'|'agreement'|'app'|'insurance'|'background';
+type History={id:string;item:string;body:string;created_at:string;sms_status:string;email_status:string;release_after:string|null};
+type PackState={links:Record<Item,string|null>;history:History[];checkr_invite_sent_at:string|null};
+export default function OnboardingPackControls({applicantId,es}:{applicantId:string;es:boolean}){
+ const [state,setState]=useState<PackState|null>(null),[busy,setBusy]=useState(false);
+ const call=useCallback(async(body:Record<string,unknown>)=>{const {data,error}=await supabase.functions.invoke('signing-day',{body:{...body,applicant_id:applicantId}});if(error){const detail=error.context instanceof Response?await error.context.json().catch(()=>null):null;throw new Error(detail?.error??error.message);}if(data?.error)throw new Error(data.error);return data;},[applicantId]);
+ const load=useCallback(async()=>{try{setState(await call({action:'pack_state'}));}catch(e){toast.error(e instanceof Error?e.message:String(e));}},[call]);
+ useEffect(()=>{void load();const t=setInterval(()=>void load(),15000);return()=>clearInterval(t);},[load]);
+ const run=async(action:string,extra:Record<string,unknown>={})=>{setBusy(true);try{const d=await call({action,request_id:crypto.randomUUID(),...extra});if(d.ok===false)toast.error(es?'Revise el estado de envío':'Check sending status');else toast.success(d.sms?.queued?(es?'En cola para las 8:00 AM':'Queued for 8:00 AM'):es?'Guardado':'Saved');await load();}catch(e){toast.error(e instanceof Error?e.message:String(e));}finally{setBusy(false);}};
+ const titles:Record<Item,string>={intake:'Pro Intake',agreement:es?'Acuerdo de contratista':'Contractor agreement',app:es?'Aplicación Pro':'Pro app login',insurance:es?'Guía de seguro':'Insurance guide',background:es?'Invitación de Checkr':'Checkr invite'};
+ const date=(v:string)=>new Date(v).toLocaleString(es?'es-US':'en-US',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+ return <div className="mb-5 border-y border-border py-4"><Button disabled={busy||!state} onClick={()=>void run('send_pack')}><Send className="mr-2 h-4 w-4"/>{es?'Enviar paquete de incorporación':'Send onboarding pack'}</Button>
+ <ol className="mt-3 divide-y divide-border">{(['intake','agreement','app','insurance','background'] as Item[]).map((item,i)=><li key={item} className="flex flex-wrap items-center gap-2 py-3"><span className="mr-auto text-sm font-medium">{i+1}. {titles[item]}</span><Button variant="ghost" size="sm" disabled={!state?.links[item]} onClick={()=>void navigator.clipboard.writeText(state?.links[item]??'').then(()=>toast.success(es?'Copiado':'Copied'))}><Copy className="mr-1 h-4 w-4"/>{es?'Copiar enlace':'Copy link'}</Button><Button variant="outline" size="sm" disabled={busy||!state||((item==='agreement'||item==='app')&&!state.links[item])} onClick={()=>void run('resend_item',{item})}><Send className="mr-1 h-4 w-4"/>{es?'Reenviar':'Resend'}</Button></li>)}</ol>
+ <div className="flex flex-wrap items-center gap-3 border-t border-border py-3"><label className="flex items-center gap-2 text-sm"><Checkbox checked={!!state?.checkr_invite_sent_at} disabled={busy} onCheckedChange={v=>void run('checkr_invite',{checked:v===true})}/>{es?'Invitación de Checkr enviada':'Checkr invite sent'}</label>{state?.checkr_invite_sent_at&&<span className="text-xs text-muted-foreground">{date(state.checkr_invite_sent_at)} ET</span>}<Button asChild variant="outline" size="sm"><a href="https://dashboard.checkr.com" target="_blank" rel="noreferrer"><ExternalLink className="mr-1 h-4 w-4"/>{es?'Abrir Checkr':'Open Checkr'}</a></Button></div>
+ {state?.history.map(h=><details key={h.id} className="border-t border-border py-2 text-sm"><summary className="cursor-pointer">{date(h.created_at)} ET · {h.item==='pack'?(es?'Paquete':'Pack'):titles[h.item as Item]} · SMS: {h.sms_status==='queued'?(es?'En cola para las 8:00 AM':'Queued for 8:00 AM'):h.sms_status} · Email: {h.email_status}</summary><p className="mt-2 whitespace-pre-wrap break-words text-muted-foreground">{h.body}</p></details>)}</div>;
+}

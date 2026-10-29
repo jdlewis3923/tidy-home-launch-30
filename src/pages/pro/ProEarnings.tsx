@@ -13,6 +13,7 @@ import { useProSession } from "@/hooks/useProSession";
 import { downloadCsv, fetchBonuses, fetchPayoutWeeks, mondayOf, type PayoutWeek, type ProBonus } from "@/lib/pro-portal";
 import { money, TIER_2_GATES } from "@/lib/pro-pay";
 import { useLanguage } from "@/contexts/LanguageContext";
+import RedoPayLines from '@/components/pro/RedoPayLines';
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
 type Range = "week" | "month" | "all";
@@ -129,6 +130,7 @@ export default function ProEarnings() {
         </motion.section>
 
         {partnerLine && <p className="px-1 text-[13px] text-primary-foreground/80" data-testid="pro-partner-count">{partnerLine}</p>}
+        <RedoPayLines proId={userId} from={from.toISOString()}/>
         {!weeks && !error && <ScheduleSkeleton />}
         {error && <ErrorState title={es ? "No se pudieron cargar sus pagos" : "Couldn't load your earnings"} onRetry={() => setNonce((n) => n + 1)} />}
         {weeks && !error && (

@@ -1856,6 +1856,41 @@
       "when": 1793226581028,
       "tag": "0264_retire_w9_artifact_uploads",
       "breakpoints": true
+    },
+    {
+      "idx": 265,
+      "version": "7",
+      "when": 1793302964885,
+      "tag": "0265_onboarding_pack_audit_and_candidate_restore",
+      "breakpoints": true
+    },
+    {
+      "idx": 266,
+      "version": "7",
+      "when": 1793303086233,
+      "tag": "0266_member_redo_60_day_pay_guardrail",
+      "breakpoints": true
+    },
+    {
+      "idx": 267,
+      "version": "7",
+      "when": 1793303155084,
+      "tag": "0267_redo_notification_columns_and_safe_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 268,
+      "version": "7",
+      "when": 1793303464799,
+      "tag": "0268_isolated_sample_assignment_test_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 269,
+      "version": "7",
+      "when": 1793303619279,
+      "tag": "0269_test_only_agreement_fixture",
+      "breakpoints": true
     }
   ]
 }

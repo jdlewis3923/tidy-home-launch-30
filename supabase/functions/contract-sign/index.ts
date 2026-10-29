@@ -61,9 +61,9 @@ Deno.serve(async req=>{
  if(!doc){
   const raw=String(pipeline.service??a.service??'').toLowerCase();const service=raw==='cleaning'||raw==='house cleaning'?'cleaning':raw==='lawn'||raw==='lawn care'?'lawn':null;
   if(!service){await missing(a.id,'Applicant has no supported agreement service.');return reply({error:'not_found'},404);}
-  t=a.contract_template_id?await check(await db.from('contract_templates').select('*').eq('id',a.contract_template_id).eq('service',service).maybeSingle()):await check(await db.from('contract_templates').select('*').eq('service',service).eq('lang','en').eq('is_current',true).maybeSingle());
+  t=a.contracts_signed&&a.contract_template_id?await check(await db.from('contract_templates').select('*').eq('id',a.contract_template_id).eq('service',service).maybeSingle()):await check(await db.from('contract_templates').select('*').eq('service',service).eq('lang','en').eq('is_current',true).maybeSingle());
   if(!t){await missing(a.id,`No ${service} agreement template exists.`);return reply({error:'not_found'},404);}
-  if(!a.contract_template_id)await check(await db.from('applicants').update({contract_template_id:t.id}).eq('id',a.id).is('contract_template_id',null));
+  if(!a.contracts_signed&&a.contract_template_id!==t.id)await check(await db.from('applicants').update({contract_template_id:t.id}).eq('id',a.id).eq('contracts_signed',false));
  }
  const version=t?.version??`${doc.filename} · ${String(doc.uploaded_at).slice(0,10)} · ${String(doc.id).slice(0,8)}`;
  const values={legal_name:'{legal_name}',business_name:'—',phone:a.phone??'—',email:a.email??'—',pro_number:a.pro_number??'Assigned at signing',signed_date:new Date().toLocaleDateString('en-US',{timeZone:'America/New_York',dateStyle:'long'})};

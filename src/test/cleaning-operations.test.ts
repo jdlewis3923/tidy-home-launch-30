@@ -19,9 +19,10 @@ describe('Estate operations rules', () => {
     expect(cleaningPayBreakdown(5, true, true).visitPay).toBe(17850);
     expect(cleaningPayBreakdown(5, false, true).visitPay).toBe(11900);
   });
-  it.each(['redo','lockout','late_cancel','unsafe'] as const)('%s pays half the normal rate', outcome => {
+  it.each(['redo','lockout','late_cancel','unsafe'] as const)('first %s pays half the normal rate', outcome => {
     expect(cleaningPayBreakdown(5, true, true, outcome).visitPay).toBe(5950);
   });
+  it('repeat cleaning redo within 60 days pays zero',()=>expect(cleaningPayBreakdown(5,true,true,'redo',0,false,new Date('2026-10-29'),new Date('2026-11-01')).visitPay).toBe(0));
   it('add-ons pay 40 percent or split that pay equally when completed together', () => {
     expect(cleaningPayBreakdown(5, false, true, 'complete', 5500).addonPay).toBe(2200);
     expect(cleaningPayBreakdown(5, false, true, 'complete', 5500, true).addonPay).toBe(1100);

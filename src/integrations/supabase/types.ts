@@ -2433,6 +2433,7 @@ export type Database = {
           archived_from_stage: string | null
           call_notes: string | null
           checkin_missed_count: number
+          checkr_invite_sent_at: string | null
           checkr_result: string | null
           cleared_notice_sent_at: string | null
           close_out_sent_at: string | null
@@ -2533,6 +2534,7 @@ export type Database = {
           archived_from_stage?: string | null
           call_notes?: string | null
           checkin_missed_count?: number
+          checkr_invite_sent_at?: string | null
           checkr_result?: string | null
           cleared_notice_sent_at?: string | null
           close_out_sent_at?: string | null
@@ -2633,6 +2635,7 @@ export type Database = {
           archived_from_stage?: string | null
           call_notes?: string | null
           checkin_missed_count?: number
+          checkr_invite_sent_at?: string | null
           checkr_result?: string | null
           cleared_notice_sent_at?: string | null
           close_out_sent_at?: string | null
@@ -5656,6 +5659,56 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_pack_sends: {
+        Row: {
+          applicant_id: string
+          body: string
+          created_at: string
+          email_result: Json | null
+          email_status: string
+          id: string
+          item: string
+          links: Json
+          release_after: string | null
+          sms_result: Json | null
+          sms_status: string
+        }
+        Insert: {
+          applicant_id: string
+          body: string
+          created_at?: string
+          email_result?: Json | null
+          email_status?: string
+          id?: string
+          item: string
+          links?: Json
+          release_after?: string | null
+          sms_result?: Json | null
+          sms_status?: string
+        }
+        Update: {
+          applicant_id?: string
+          body?: string
+          created_at?: string
+          email_result?: Json | null
+          email_status?: string
+          id?: string
+          item?: string
+          links?: Json
+          release_after?: string | null
+          sms_result?: Json | null
+          sms_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_pack_sends_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_progress: {
         Row: {
           completed_at: string
@@ -7432,6 +7485,69 @@ export type Database = {
           identifier?: string
         }
         Relationships: []
+      }
+      redo_pay_decisions: {
+        Row: {
+          amount_cents: number
+          credited_at: string | null
+          decided_at: string
+          is_test: boolean
+          label: string
+          last_paid_redo_at: string | null
+          member_id: string
+          original_rate_cents: number
+          paid: boolean
+          pro_id: string
+          reason: string
+          redo_id: string
+          visit_id: string
+        }
+        Insert: {
+          amount_cents: number
+          credited_at?: string | null
+          decided_at: string
+          is_test?: boolean
+          label: string
+          last_paid_redo_at?: string | null
+          member_id: string
+          original_rate_cents: number
+          paid: boolean
+          pro_id: string
+          reason: string
+          redo_id: string
+          visit_id: string
+        }
+        Update: {
+          amount_cents?: number
+          credited_at?: string | null
+          decided_at?: string
+          is_test?: boolean
+          label?: string
+          last_paid_redo_at?: string | null
+          member_id?: string
+          original_rate_cents?: number
+          paid?: boolean
+          pro_id?: string
+          reason?: string
+          redo_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redo_pay_decisions_redo_id_fkey"
+            columns: ["redo_id"]
+            isOneToOne: true
+            referencedRelation: "redo_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redo_pay_decisions_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: true
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       redo_requests: {
         Row: {
@@ -11826,9 +11942,17 @@ export type Database = {
         }
         Returns: Json
       }
+      redo_pay_eligible: {
+        Args: { _at: string; _member: string; _test?: boolean }
+        Returns: boolean
+      }
       repoint_cron_to_helper: { Args: { _job_name: string }; Returns: string }
       reserve_cleaning_walkthrough: {
         Args: { _reservation: string; _slot: string }
+        Returns: boolean
+      }
+      restore_responsive_candidate: {
+        Args: { _event: string; _id: string }
         Returns: boolean
       }
       review_bonus_next_friday: { Args: never; Returns: string }
@@ -12146,6 +12270,10 @@ export type Database = {
       signing_day_activate_ready: { Args: { _id: string }; Returns: boolean }
       signing_day_allocate_number: { Args: { _id: string }; Returns: string }
       signing_day_state: { Args: { _id?: string }; Returns: Json }
+      signing_day_test_agreement: {
+        Args: { _id: string; _service: string }
+        Returns: undefined
+      }
       signing_day_upload_certificate: {
         Args: {
           _carrier: string

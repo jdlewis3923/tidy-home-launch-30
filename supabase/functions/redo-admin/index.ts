@@ -1,5 +1,5 @@
 // Tidy — admin actions on a Redo task: schedule (creates the free return
-// visit, Pro paid 50% of the original visit rate) or cancel.
+// visit, completion-time member/60-day pay decision) or cancel.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
@@ -36,8 +36,10 @@ Deno.serve(async (req) => {
   const start = new Date(b.scheduled_start);
   const end = new Date(start.getTime() + (b.duration_minutes ?? 120) * 60_000);
   const visitDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(start);
-  // Return visit: free to the member (no charge is created anywhere), Pro paid 50% of the original rate.
-  const halfBase = orig.contractor_pay_cents != null ? Math.round(orig.contractor_pay_cents / 2) : null;
+  // Estimate only; the atomic completion trigger decides eligibility and final pay.
+  const {data:eligible,error:eligibilityError}=await admin.rpc('redo_pay_eligible',{_member:orig.user_id,_at:new Date().toISOString(),_test:!!orig.is_sample});
+  if(eligibilityError)return jsonResponse({ok:false,error:eligibilityError.message},500);
+  const halfBase = eligible ? Math.round((orig.visit_pay_cents??orig.contractor_pay_cents??0)/2) : 0;
 
   const { data: nv, error } = await admin.from('visits').insert({
     user_id: orig.user_id, subscription_id: orig.subscription_id, service: orig.service, service_type: orig.service_type,
@@ -57,7 +59,7 @@ Deno.serve(async (req) => {
   await admin.from('admin_workday_events').insert({
     event_type: 'redo_scheduled', applicant_id: redo.applicant_id, actor_type: 'admin', actor_user_id: auth.userId,
     title: `Redo scheduled ${onTime ? 'within' : 'AFTER'} the 48-hour window`,
-    detail: `Return visit ${start.toLocaleString('en-US', { timeZone: 'America/New_York' })} · free to member · Pro paid ${nv.visit_pay_cents != null ? `$${(nv.visit_pay_cents / 100).toFixed(2)}` : '50% of rate'}`,
+    detail: `Return visit ${start.toLocaleString('en-US', { timeZone: 'America/New_York' })} · free to member · one paid redo/member/60 days; final 50% or $0 determined at completion`,
     status: onTime ? 'ok' : 'late', metadata: { redo_id: redo.id, redo_visit_id: nv.id },
   });
   return jsonResponse({ ok: true, status: 'scheduled', redo_visit_id: nv.id, visit_pay_cents: nv.visit_pay_cents, on_time: onTime });

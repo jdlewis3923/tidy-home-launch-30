@@ -49,6 +49,14 @@ const AGENTS: Record<string, (c: Ctx) => Promise<Result>> = {
     const weekStart = addDays(et.date, -((et.dow + 6) % 7));
     const { data } = must(await testFilter(db.from('visits').select('id,visit_date,status,check_in_at,check_out_at,check_in_lat,check_in_lng,address_lat,address_lng,check_in_location_reason,budget_hours,contractor_pay_cents,customer_first_name').gte('visit_date', weekStart).lte('visit_date', et.date).eq('status', 'complete'), 'is_sample', test));
     const ex: Exc[] = []; const log: string[] = [];
+    const {data:redos}=must(await db.from('redo_pay_decisions').select('*').eq('is_test',test).gte('decided_at',`${weekStart}T00:00:00Z`));
+    for(const redo of redos??[]){
+      const expected=redo.paid?Math.round(redo.original_rate_cents/2):0;
+      const {data:actual,error}=await db.from('visits').select('visit_pay_cents').eq('id',redo.visit_id).single();if(error)throw error;
+      const {data:prior, error:priorError}=await db.from('redo_pay_decisions').select('redo_id').eq('member_id',redo.member_id).eq('is_test',test).eq('paid',true).neq('redo_id',redo.redo_id).gt('decided_at',new Date(Date.parse(redo.decided_at)-60*86400000).toISOString()).lt('decided_at',redo.decided_at);if(priorError)throw priorError;
+      if(redo.amount_cents!==expected||actual.visit_pay_cents!==expected||redo.paid===(!!prior?.length)||!redo.credited_at)ex.push({severity:'high',title:'Redo pay guardrail mismatch',detail:`${redo.redo_id}: expected ${expected} cents; one paid redo/member/60 days.`,action_url:'/admin/command#redos',dedupe_key:`redo-pay:${redo.redo_id}`});
+      log.push(`${redo.redo_id}: ${redo.label}, ${redo.amount_cents} cents`);
+    }
     for (const v of data ?? []) {
       const issues: string[] = [];
       if (!v.check_in_at || !v.check_out_at) issues.push('missing check-in or check-out');
