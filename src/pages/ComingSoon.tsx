@@ -79,7 +79,8 @@ const ComingSoon = () => {
     window.location.href = `mailto:hello@jointidy.co?subject=${subject}&body=${body}`;
   };
 
-  const rise = (d: number) =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rise = (d: number): any =>
     reduce ? {} : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: d, ease: [0.22, 1, 0.36, 1] } };
 
   return (
