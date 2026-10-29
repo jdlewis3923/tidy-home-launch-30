@@ -12270,6 +12270,10 @@ export type Database = {
       signing_day_activate_ready: { Args: { _id: string }; Returns: boolean }
       signing_day_allocate_number: { Args: { _id: string }; Returns: string }
       signing_day_state: { Args: { _id?: string }; Returns: Json }
+      signing_day_test_agreement: {
+        Args: { _id: string; _service: string }
+        Returns: undefined
+      }
       signing_day_upload_certificate: {
         Args: {
           _carrier: string

@@ -1884,6 +1884,13 @@
       "when": 1793303464799,
       "tag": "0268_isolated_sample_assignment_test_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 269,
+      "version": "7",
+      "when": 1793303619279,
+      "tag": "0269_test_only_agreement_fixture",
+      "breakpoints": true
     }
   ]
 }
