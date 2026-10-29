@@ -419,3 +419,7 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 ## Pro dispatch + owner tracker (Oct 28)
 - [x] Pro side: "Today" tab is the default daily jobs list; each visit card now has a full-width "Go now" button opening Google Maps directions (Apple/Waze kept as alternates). While a visit is on the way or in progress, the phone pings its location every 3 minutes (pro-location-ping → pro_location_pings; server refuses unassigned/inactive visits).
 - [x] Owner side: /admin/pro-tracker (Today menu) shows per visit: Pro → customer, window, late flag (15 min past start, not checked in), on-the-way time, arrival time + GPS distance at check-in, live time on site, finish time + total duration, and latest live ping distance/age. Auto-refreshes every 60 s. Verified: build OK, RPC returns rows as admin, page renders signed in. Live pings verified only with simulated location — real-device evidence pending Justin's phone tests.
+
+## Waiting screen photo + Susan Zoom (Oct 29)
+- [x] Waiting-screen photo swapped to a Pinecrest backyard (no skyline/water view): src/assets/coming-soon-pinecrest.jpg
+- [ ] Send Justin the Zoom link when he pastes it, then forward to Susan
