@@ -460,7 +460,7 @@ export function UploadTile({
   disabled?: boolean;
 }) {
   const es = typeof document !== "undefined" && document.documentElement.lang?.startsWith("es");
-  const handle = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handle = (e: { target: HTMLInputElement }) => {
     if (e.target.files?.length) onPick(e.target.files);
     e.target.value = "";
   };
