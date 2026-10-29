@@ -8,7 +8,7 @@ import { forwardRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle, Check, ChevronRight, Clock, Copy, Dog, Car, KeyRound,
-  MapPin, ShieldAlert, Sparkles, Leaf, StickyNote, Trash2, Upload,
+  Camera, MapPin, ShieldAlert, Sparkles, Leaf, StickyNote, Trash2, Upload,
 } from "lucide-react";
 import { money } from "@/lib/pro-pay";
 import { useLanguage } from "@/contexts/LanguageContext";

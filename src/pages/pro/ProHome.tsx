@@ -37,6 +37,7 @@ export default function ProHome() {
   const es = language === "es";
   const reduce = useReducedMotion();
   const [sheet, setSheet] = useState(false);
+  const [noJob, setNoJob] = useState(false);
   const [unread, setUnread] = useState(0);
   useEffect(() => {
     if (!userId) return;
@@ -218,17 +219,24 @@ export default function ProHome() {
 
         <motion.div {...rise(4)} className="mt-3 grid grid-cols-4 gap-2">
           {[
-            { to: next ? `/pro/visit/${next.id}` : "/pro/schedule", Icon: FileText, t: es ? "Detalles" : "Job Details" },
-            { to: next ? `/pro/visit/${next.id}/photos` : "/pro/schedule", Icon: Camera, t: es ? "Fotos" : "Upload Photos" },
+            { to: next ? `/pro/visit/${next.id}` : null, Icon: FileText, t: es ? "Detalles" : "Job Details" },
+            { to: next ? `/pro/visit/${next.id}/photos` : null, Icon: Camera, t: es ? "Fotos" : "Upload Photos" },
             { to: "/pro/messages", Icon: MessageCircle, t: es ? "Soporte" : "Support" },
-            { to: "/pro/profile", Icon: ShieldCheck, t: es ? "Seguridad" : "Safety & Docs" },
-          ].map(({ to, Icon, t }) => (
-            <Link key={t} to={to} className={`flex min-h-[78px] flex-col items-center justify-center gap-1.5 px-1 text-center ${card}`}>
-              <Icon className="h-6 w-6 text-[hsl(var(--pro-ink))]" strokeWidth={1.7} aria-hidden />
-              <span className="text-[10.5px] leading-tight text-[hsl(var(--pro-ink))]">{t}</span>
-            </Link>
-          ))}
+            { to: "/pro/profile#vehicle", Icon: ShieldCheck, t: es ? "Seguridad" : "Safety & Docs" },
+          ].map(({ to, Icon, t }) => {
+            const inner = (<><Icon className="h-6 w-6 text-[hsl(var(--pro-ink))]" strokeWidth={1.7} aria-hidden /><span className="text-[10.5px] leading-tight text-[hsl(var(--pro-ink))]">{t}</span></>);
+            const cls = `flex min-h-[78px] flex-col items-center justify-center gap-1.5 px-1 text-center active:scale-[0.97] ${card}`;
+            return to ? <Link key={t} to={to} className={cls}>{inner}</Link>
+              : <button key={t} type="button" onClick={() => setNoJob(true)} className={cls}>{inner}</button>;
+          })}
         </motion.div>
+        {noJob && (
+          <div role="status" className="mt-3 flex items-start gap-3 rounded-[16px] bg-white p-3 text-[13px] text-[hsl(var(--pro-ink))] shadow-sm">
+            <span className="flex-1">{es ? "No tiene trabajos pendientes hoy. Los detalles y las fotos se abren desde un trabajo asignado." : "No open jobs today. Job details and photos open from an assigned job."}{" "}
+              <Link to="/pro/schedule" className="font-semibold text-[hsl(var(--pro-blue))]">{es ? "Ver agenda" : "View schedule"}</Link></span>
+            <button type="button" onClick={() => setNoJob(false)} aria-label={es ? "Cerrar" : "Dismiss"} className="text-[hsl(var(--pro-ink-soft))]"><X className="h-4 w-4" aria-hidden /></button>
+          </div>
+        )}
       </main>
       <ProBottomNav />
       <LanguageSheet open={sheet} onClose={() => setSheet(false)} />
