@@ -1,5 +1,12 @@
 # Roadmap
 
+## Onboarding pack and redo guardrail (Oct 29)
+- [ ] Send Susan approved tomorrow 3:30 PM link-coming confirmation.
+- [ ] Signing day pack, item copy/resend, immediate email, dated status, Checkr invite checkbox and 8 AM–6 PM Mon–Sat SMS window.
+- [ ] Public bilingual noindex insurance guide; restore responsive/completed unresponsive archives and alert owner, including Rebecca.
+- [ ] Atomic completion-time member redo pay guardrail, immutable agreement version 2026-10-29b and bilingual whole-code/database coverage.
+- [ ] Test-only pack and two-redo journeys, agreement clause checks, screenshots, changed-file/record inventory and cleanup; no publication or other rate/policy changes.
+
 ## Digital agreements by service (Oct 28)
 - [x] Exact cleaning/lawn English templates v2026-10-29, preserved Spanish ICA, admin read/download; both generated PDFs match every source word after whitespace normalization.
 - [x] Phone HTML signing, placeholders, full PDFs, owner countersigning and 24-hour digest section. Both signature flows passed; eight signed/final copy emails accepted, inbox delivery receipts unavailable.
