@@ -90,15 +90,15 @@ const ComingSoon = () => {
         @keyframes csGlow { 0%,100% { box-shadow: 0 0 18px rgba(59,130,246,.35), inset 0 0 12px rgba(59,130,246,.12);} 50% { box-shadow: 0 0 38px rgba(59,130,246,.75), inset 0 0 22px rgba(59,130,246,.25);} }
         @keyframes csShine { 0% { background-position: -200% 0;} 100% { background-position: 200% 0;} }
         @keyframes csDrift { 0%,100% { transform: scale(1.06) translateY(0);} 50% { transform: scale(1.1) translateY(-10px);} }
-        @keyframes csSway { 0%,100% { transform: skewX(0deg);} 18% { transform: skewX(1.15deg);} 42% { transform: skewX(-0.7deg);} 63% { transform: skewX(0.85deg);} 82% { transform: skewX(-0.35deg);} }
+        @keyframes csSway { 0%,100% { transform: translateX(0) skewX(0deg);} 18% { transform: translateX(5px) skewX(1deg);} 42% { transform: translateX(-3px) skewX(-0.6deg);} 63% { transform: translateX(4px) skewX(0.75deg);} 82% { transform: translateX(-1.5px) skewX(-0.3deg);} }
         @keyframes csTwinkle { 0%,100% { opacity:.3; transform: scale(.8) rotate(0);} 50% { opacity:1; transform: scale(1.15) rotate(20deg);} }
         @keyframes csWave { 0%,100% { transform: translateX(0);} 50% { transform: translateX(-30px);} }
         .cs-glow-border { animation: csGlow 3s ease-in-out infinite; }
         .cs-shine { background: linear-gradient(90deg,#2563eb 0%,#60a5fa 40%,#bfdbfe 50%,#60a5fa 60%,#2563eb 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: csShine 4s linear infinite; }
         .cs-drift { animation: csDrift 18s ease-in-out infinite; }
         .cs-sway { transform-origin: 50% 48%; animation: csSway 7.5s ease-in-out infinite; will-change: transform; }
-        .cs-canopy { -webkit-mask-image: linear-gradient(to bottom,#000 0%,#000 44%,transparent 52%); mask-image: linear-gradient(to bottom,#000 0%,#000 44%,transparent 52%); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; }
-        .cs-ground { -webkit-mask-image: linear-gradient(to bottom,transparent 0%,transparent 44%,#000 52%); mask-image: linear-gradient(to bottom,transparent 0%,transparent 44%,#000 52%); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; }
+        .cs-canopy { -webkit-mask-image: linear-gradient(to bottom,#000 0%,#000 45%,transparent 51%); mask-image: linear-gradient(to bottom,#000 0%,#000 45%,transparent 51%); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; }
+        .cs-ground { -webkit-mask-image: linear-gradient(to bottom,transparent 0%,transparent 45%,#000 51%); mask-image: linear-gradient(to bottom,transparent 0%,transparent 45%,#000 51%); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; }
         .cs-twinkle { animation: csTwinkle 2.2s ease-in-out infinite; }
         .cs-wave { animation: csWave 9s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) { .cs-glow-border,.cs-shine,.cs-drift,.cs-sway,.cs-canopy,.cs-ground,.cs-twinkle,.cs-wave { animation: none !important; } }
