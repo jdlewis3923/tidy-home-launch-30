@@ -1870,6 +1870,13 @@
       "when": 1793303086233,
       "tag": "0266_member_redo_60_day_pay_guardrail",
       "breakpoints": true
+    },
+    {
+      "idx": 267,
+      "version": "7",
+      "when": 1793303155084,
+      "tag": "0267_redo_notification_columns_and_safe_history",
+      "breakpoints": true
     }
   ]
 }
