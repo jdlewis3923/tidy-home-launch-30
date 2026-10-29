@@ -8,7 +8,7 @@ import { forwardRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle, Check, ChevronRight, Clock, Copy, Dog, Car, KeyRound,
-  MapPin, ShieldAlert, Sparkles, Leaf, StickyNote, Trash2, Upload,
+  Camera, MapPin, ShieldAlert, Sparkles, Leaf, StickyNote, Trash2, Upload,
 } from "lucide-react";
 import { money } from "@/lib/pro-pay";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -459,23 +459,25 @@ export function UploadTile({
   onPick: (files: FileList) => void;
   disabled?: boolean;
 }) {
+  const es = typeof document !== "undefined" && document.documentElement.lang?.startsWith("es");
+  const handle = (e: { target: HTMLInputElement }) => {
+    if (e.target.files?.length) onPick(e.target.files);
+    e.target.value = "";
+  };
   return (
-    <label
-      className={`flex min-h-[112px] cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[hsl(var(--pro-sky)/0.7)] bg-[hsl(var(--pro-blue-soft))] px-4 text-center ${
-        disabled ? "opacity-50" : ""
-      }`}
-    >
-      <Upload className="h-6 w-6 text-[hsl(var(--pro-blue))]" aria-hidden />
-      <span className="text-[14px] font-bold text-[hsl(var(--pro-blue))]">{label}</span>
-      <input
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        disabled={disabled}
-        onChange={(e) => e.target.files && onPick(e.target.files)}
-      />
-    </label>
+    <div className={`space-y-2 ${disabled ? "opacity-50" : ""}`}>
+      <label className="flex min-h-[112px] cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[hsl(var(--pro-sky)/0.7)] bg-[hsl(var(--pro-blue-soft))] px-4 text-center active:scale-[0.98]">
+        <Camera className="h-7 w-7 text-[hsl(var(--pro-blue))]" aria-hidden />
+        <span className="text-[14px] font-bold text-[hsl(var(--pro-blue))]">{label}</span>
+        <span className="text-[12px] text-[hsl(var(--pro-ink-soft))]">{es ? "Abre la cámara" : "Opens your camera"}</span>
+        <input type="file" accept="image/*" capture="environment" className="hidden" disabled={disabled} onChange={handle} />
+      </label>
+      <label className="flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-xl border border-[hsl(var(--pro-line))] bg-white text-[13.5px] font-semibold text-[hsl(var(--pro-blue))]">
+        <Upload className="h-4 w-4" aria-hidden />
+        {es ? "Elegir de la galería" : "Choose from gallery"}
+        <input type="file" accept="image/*" multiple className="hidden" disabled={disabled} onChange={handle} />
+      </label>
+    </div>
   );
 }
 

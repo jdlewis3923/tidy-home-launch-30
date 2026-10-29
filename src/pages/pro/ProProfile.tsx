@@ -30,7 +30,7 @@ export default function ProProfile() {
   const { language } = useLanguage();
   const es = language === "es";
   const reduce = useReducedMotion();
-  const [panel, setPanel] = useState<string | null>(null);
+  const [panel, setPanel] = useState<string | null>(() => (typeof window !== "undefined" && window.location.hash === "#vehicle" ? "vehicle" : null));
   const [langOpen, setLangOpen] = useState(false);
   const [msg, setMsg] = useState<{ tone: "ok" | "bad"; text: string } | null>(null);
 
