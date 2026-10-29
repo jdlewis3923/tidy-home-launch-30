@@ -9,16 +9,17 @@ import { sendProEmail } from '../_shared/pro-send.ts';
 const url = Deno.env.get('SUPABASE_URL') ?? '';
 const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const db = createClient(url,key,{auth:{persistSession:false}});
-const bodySchema = z.object({action:z.enum(['intake_equipment','send_intake','provision','payouts','background_clear','send_agreement','pack_state','send_pack','resend_item','checkr_invite']),applicant_id:z.string().uuid().optional(),token:z.string().min(20).max(100).optional(),item:z.enum(['intake','agreement','app','insurance','background']).optional(),checked:z.boolean().optional(),request_id:z.string().uuid().optional()});
+const bodySchema = z.object({action:z.enum(['intake_equipment','send_intake','provision','payouts','background_clear','send_agreement','pack_state','send_pack','resend_item','checkr_invite']),applicant_id:z.string().uuid().optional(),token:z.string().min(20).max(100).optional(),item:z.enum(['intake','agreement','app','insurance','background']).optional(),checked:z.boolean().optional(),request_id:z.string().uuid().optional(),test_delivery:z.boolean().optional()});
 const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
 async function invoke(name:string,body:unknown){const r=await vendorFetch(`${url}/functions/v1/${name}`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${key}`},body:JSON.stringify(body)});const data=await r.json().catch(()=>({}));return {data,error:r.ok?null:new Error(data.error??`Request failed (${r.status})`)};}
-async function sms(id:string, text:string, idempotency:string) {
+async function sms(id:string, text:string, idempotency:string, testDelivery=false) {
   const {data:a}=await db.from('applicants').select('phone,is_test_row').eq('id',id).single();
   const {data:p}=await db.from('contractor_pipeline').select('is_test').eq('applicant_id',id).single();
-  if(a?.is_test_row || p?.is_test) return {skipped:'is_test'};
+  if((a?.is_test_row || p?.is_test)&&!testDelivery) return {skipped:'is_test'};
+  if(testDelivery&&(!a?.is_test_row||!p?.is_test||String(a.phone??'').replace(/\D/g,'')!=='13052404465'))throw new Error('Test delivery requires the Signing Day Test owner destination');
   const digits=String(a?.phone??'').replace(/\D/g,'');
   if(digits.length<10) throw new Error('Candidate phone is missing');
-  const {data,error}=await invoke('send-twilio-sms',{to_phone_e164:digits.length===10?`+1${digits}`:`+${digits}`,body:text,idempotency_key:idempotency,template_name:'pro-signing-day',triggered_by:'signing-day'});
+  const {data,error}=await invoke('send-twilio-sms',{to_phone_e164:digits.length===10?`+1${digits}`:`+${digits}`,body:text,idempotency_key:idempotency,template_name:'pro-signing-day',triggered_by:'signing-day',...(testDelivery?{admin_channel:'test'}:{})});
   if(error) throw error;
   if(data?.error || data?.ok===false) throw new Error(data.error??'Text was not accepted');
   return data;
@@ -53,8 +54,8 @@ Deno.serve(async req=>{
     if(!b.applicant_id) return reply({error:'applicant_id_required'},400);
     const id=b.applicant_id;
     if(['pack_state','send_pack','resend_item','checkr_invite'].includes(b.action)) {
-      const {data:a,error:ae}=await db.from('applicants').select('first_name,email,contract_token,contracts_signed,signing_day_signed_at').eq('id',id).single();
-      const {data:p,error:pe}=await db.from('contractor_pipeline').select('proof_approved_at,archived,state,preferred_language,checkr_invite_sent_at').eq('applicant_id',id).single();
+      const {data:a,error:ae}=await db.from('applicants').select('first_name,email,contract_token,contracts_signed,signing_day_signed_at,is_test_row').eq('id',id).single();
+      const {data:p,error:pe}=await db.from('contractor_pipeline').select('proof_approved_at,archived,state,preferred_language,checkr_invite_sent_at,is_test').eq('applicant_id',id).single();
       if(ae||pe||!a||!p) return reply({error:'candidate_not_found'},404);
       if(b.action==='checkr_invite') {
         const {error}=await db.from('contractor_pipeline').update({checkr_invite_sent_at:b.checked?new Date().toISOString():null}).eq('applicant_id',id);if(error)throw error;
@@ -77,12 +78,14 @@ Deno.serve(async req=>{
       if(b.item==='agreement'&&!agreement)return reply({error:'Agreement requires approved equipment and an unsigned candidate.'},409);
       if(b.item==='app'&&!links.app)return reply({error:'signed_required'},409);
       const text=onboardingPack(links,es,b.action==='resend_item'?b.item:undefined);
+      if(b.test_delivery&&(auth.kind!=='admin'||!a.is_test_row||!p.is_test))return reply({error:'test_admin_required'},403);
       const requestId=b.request_id??crypto.randomUUID();
       const {data:log,error:le}=await db.from('onboarding_pack_sends').insert({id:requestId,applicant_id:id,item:b.action==='send_pack'?'pack':b.item,body:text,links,sms_status:'pending',email_status:'pending'}).select('id').single();
       if(le?.code==='23505')return reply({ok:true,duplicate:true});if(le||!log)throw le??new Error('Log failed');
       const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>');
-      const email=a.email?await sendProEmail(db,{applicantId:id,key:'signing_day_pack',to:a.email,name:a.first_name,built:{subject:es?'Sus enlaces de incorporación de Tidy':'Your Tidy onboarding links',html:`<p>${escaped}</p>`,text},triggeredBy:'signing-day',mode:'manual'}):{sent:false,reason:'No email address'};
-      let result:Record<string,unknown>;try{result=await sms(id,text,`onboarding-pack:${requestId}`);}catch(e){result={sent:false,error:e instanceof Error?e.message:'Text failed'};}
+      const emailTo=b.test_delivery?'jdlewis3923@gmail.com':a.email;
+      const email=emailTo?await sendProEmail(db,{applicantId:id,key:'signing_day_pack',to:emailTo,name:a.first_name,built:{subject:es?'Sus enlaces de incorporación de Tidy':'Your Tidy onboarding links',html:`<p>${escaped}</p>`,text},triggeredBy:'signing-day',mode:'manual'}):{sent:false,reason:'No email address'};
+      let result:Record<string,unknown>;try{result=await sms(id,text,`onboarding-pack:${requestId}`,!!b.test_delivery);}catch(e){result={sent:false,error:e instanceof Error?e.message:'Text failed'};}
       const smsStatus=result.skipped?'test_skipped':result.queued?'queued':result.sent?'accepted':'failed';
       const {error:save}=await db.from('onboarding_pack_sends').update({sms_status:smsStatus,sms_result:result,email_status:email.sent?'accepted':'failed',email_result:email,release_after:result.release_after??null}).eq('id',requestId);if(save)throw save;
       return reply({ok:smsStatus!=='failed'&&email.sent,text,sms:result,email});
