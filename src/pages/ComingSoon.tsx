@@ -90,7 +90,7 @@ const ComingSoon = () => {
         @keyframes csGlow { 0%,100% { box-shadow: 0 0 18px rgba(59,130,246,.35), inset 0 0 12px rgba(59,130,246,.12);} 50% { box-shadow: 0 0 38px rgba(59,130,246,.75), inset 0 0 22px rgba(59,130,246,.25);} }
         @keyframes csShine { 0% { background-position: -200% 0;} 100% { background-position: 200% 0;} }
         @keyframes csDrift { 0%,100% { transform: scale(1.06) translateY(0);} 50% { transform: scale(1.1) translateY(-10px);} }
-        @keyframes csSway { 0%,100% { transform: translateX(0) skewX(0deg);} 18% { transform: translateX(5px) skewX(1deg);} 42% { transform: translateX(-3px) skewX(-0.6deg);} 63% { transform: translateX(4px) skewX(0.75deg);} 82% { transform: translateX(-1.5px) skewX(-0.3deg);} }
+        @keyframes csSway { 0%,100% { transform: translateX(0) skewX(0deg);} 18% { transform: translateX(6px) skewX(1.6deg);} 42% { transform: translateX(-5px) skewX(-1.4deg);} 63% { transform: translateX(4px) skewX(1.1deg);} 82% { transform: translateX(-2px) skewX(-0.5deg);} }
         @keyframes csTwinkle { 0%,100% { opacity:.3; transform: scale(.8) rotate(0);} 50% { opacity:1; transform: scale(1.15) rotate(20deg);} }
         @keyframes csWave { 0%,100% { transform: translateX(0);} 50% { transform: translateX(-30px);} }
         .cs-glow-border { animation: csGlow 3s ease-in-out infinite; }
