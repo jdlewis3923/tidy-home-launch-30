@@ -22,7 +22,8 @@ const compositions: Record<string, string> = {
   "Lawn scope": "scope-reverse", "Car care scope": "scope-banner", "Your photo record": "photo-story",
   "Escalation": "steps", "The 48-hour standard": "stat", "Boundaries": "boundary", "Communication": "purpose",
   "Scenario: no access": "scenario", "Scenario: extra request": "scenario-graphic", "Scenario: damage or safety concern": "alert",
-  "Your first assignment": "finale",
+  "Your first assignment": "finale", "Lawn and car care pay": "pay", "More ways you're paid": "steps", "Getting your insurance": "steps",
+  "Scheduling": "steps", "Estate Plus team visits": "steps", "Cleaning add-on pay": "pay", "Lawn add-on pay": "pay",
 };
 export function orientationVisual(block: OrientationBlock, sectionId: string, index: number) {
   const sectionIndex = ORIENTATION_SECTIONS.findIndex(s => s.id === sectionId);
@@ -36,4 +37,4 @@ export function orientationVisual(block: OrientationBlock, sectionId: string, in
   const tone = block.pair || ["Independent contractor relationship","Your kit","Insurance wording","Screening and privacy"].includes(block.title) ? "white" : ["Welcome to TIDY","Our standard","Five readiness gates"].includes(block.title) ? "charcoal" : ["Insurance","Communication","Your first assignment"].includes(block.title) ? "blue" : ORIENTATION_TONES[number % 4];
   return { tone, layout, stat, image, references, number };
 }
-export const orientationSegments = (text: string) => text.match(/[^.!?]+[.!?]+[”"]?|[^.!?]+$/g)?.map(s => s.trim()).filter(Boolean) ?? [text];
+export const orientationSegments = (text: string) => text.match(/(?:[^.!?]|[.!?](?=\S))+(?:[.!?]+[”"]?|$)/g)?.map(s => s.trim()).filter(Boolean) ?? [text];
