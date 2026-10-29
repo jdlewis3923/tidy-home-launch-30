@@ -19,7 +19,7 @@ describe("orientation preview preserves content and stage gates", () => {
   });
   it("uses the exact bilingual source blocks without changing content", () => {
     const slides = orientationSlides(ORIENTATION_SECTIONS);
-    expect(slides).toHaveLength(48);
+    expect(slides).toHaveLength(51);
     for (const slide of slides) {
       expect(slide.block).toBe(ORIENTATION_COPY[slide.section.id][slide.index]);
       expect(slide.block.title && slide.block.body && slide.block.esTitle && slide.block.es).toBeTruthy();

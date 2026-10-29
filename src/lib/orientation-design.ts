@@ -23,7 +23,7 @@ const compositions: Record<string, string> = {
   "Escalation": "steps", "The 48-hour standard": "stat", "Boundaries": "boundary", "Communication": "purpose",
   "Scenario: no access": "scenario", "Scenario: extra request": "scenario-graphic", "Scenario: damage or safety concern": "alert",
   "Your first assignment": "finale", "Lawn and car care pay": "pay", "More ways you're paid": "steps", "Getting your insurance": "steps",
-  "Scheduling": "steps", "Estate Plus team visits": "steps", "Cleaning add-on pay": "pay", "Lawn add-on pay": "pay",
+  "Scheduling": "steps", "Rain days and commitments": "steps", "Estate Plus and larger homes": "pay", "Home bigger than booked": "editorial", "Estate Plus team visits": "steps", "Cleaning add-on pay": "pay", "Lawn add-on pay": "pay",
 };
 export function orientationVisual(block: OrientationBlock, sectionId: string, index: number) {
   const sectionIndex = ORIENTATION_SECTIONS.findIndex(s => s.id === sectionId);
