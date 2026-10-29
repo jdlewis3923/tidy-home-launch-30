@@ -5,7 +5,7 @@ import { signingChecks } from '@/lib/signing-day';
 import fs from 'node:fs';
 describe('Service-specific exact contractor agreements',()=>{
  for(const service of ['cleaning','lawn']) {
-  it(`${service} uses version 2026-10-29 and the entire supplied text`,()=>{const t=CONTRACT_TEMPLATE_SEED.find(t=>t.service===service);expect(t?.version).toBe('2026-10-29');expect(t?.body).toBe(fs.readFileSync(`supabase/functions/_shared/contracts/${service}-2026-10-29.txt`,'utf8'));expect(t?.body).toContain('Contractor — Signature · Printed name · Date');});
+  it(`${service} uses version 2026-10-29b and changes only section 4.9`,()=>{const t=CONTRACT_TEMPLATE_SEED.find(t=>t.service===service);expect(t?.version).toBe('2026-10-29b');const original=fs.readFileSync(`supabase/functions/_shared/contracts/${service}-2026-10-29.txt`,'utf8');expect(t?.body).toBe(original.replace('50% of the visit rate for the return trip.','50% of the visit rate for the return trip. Tidy pays for one redo per Member every 60 days; any further redo for the same Member within those 60 days is unpaid.'));});
  }
  it('cleaning retains Estate Plus team pay of $238 and first visit $357',()=>{const t=CONTRACT_TEMPLATE_SEED.find(t=>t.service==='cleaning');expect(t?.body).toContain('$238 per team visit');expect(t?.body).toContain('$357 for Estate Plus');});
  it('lawn retains flat pay $18, $26, $40',()=>{const t=CONTRACT_TEMPLATE_SEED.find(t=>t.service==='lawn');const tables=contractBlocks(t?.body??'').filter(b=>b.kind==='table');expect(tables[0]?.rows.slice(1).map(r=>r[3])).toEqual(['$18','$26','$40']);});

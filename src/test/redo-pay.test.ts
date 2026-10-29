@@ -2,7 +2,9 @@ import {describe,it,expect} from 'vitest';
 import {redoPayCents} from '@/lib/redo-pay';
 import {onboardingPack} from '../../supabase/functions/_shared/onboarding-pack';
 import {isWindowOpen,nextOpenWindow} from '../../supabase/functions/_shared/sms-window';
+import fs from 'node:fs';
 describe('Redo member rolling guardrail',()=>{
+ it('frontend and sender math stay identical',()=>expect(fs.readFileSync('src/lib/redo-pay.ts','utf8')).toBe(fs.readFileSync('supabase/functions/_shared/redo-pay.ts','utf8')));
  it('first redo pays 50% of original $76 rate',()=>expect(redoPayCents(7600,null,new Date('2026-10-29T16:00Z'))).toBe(3800));
  it('second redo within 60 days is unpaid',()=>expect(redoPayCents(7600,new Date('2026-10-29T16:00Z'),new Date('2026-11-29T16:00Z'))).toBe(0));
  it('60 days after last paid redo pays 50% again',()=>expect(redoPayCents(7600,new Date('2026-10-29T16:00Z'),new Date('2026-12-28T16:00Z'))).toBe(3800));
