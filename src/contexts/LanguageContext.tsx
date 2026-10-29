@@ -1318,6 +1318,12 @@ const translations: Record<string, string> = {
   "Tidy Home Concierge is a Miami subscription home-services company hiring our founding crew. Cleaning, lawn, Car Care. Opening soon.":
     "Tidy Home Concierge es una empresa de servicios del hogar por suscripción en Miami que está contratando a su equipo fundador. Limpieza, jardín y Cuidado del Auto. Abrimos muy pronto.",
   "Opening soon in Miami": "Abrimos muy pronto en Miami",
+  "First visits begin November 23": "Las primeras visitas comienzan el 23 de noviembre",
+  "Days": "Días",
+  "Hours": "Horas",
+  "Minutes": "Minutos",
+  "Seconds": "Segundos",
+  "Countdown to November 23": "Cuenta regresiva para el 23 de noviembre",
   "Questions?": "¿Preguntas?",
   "Tidy Home Concierge LLC · Miami, FL": "Tidy Home Concierge LLC · Miami, FL",
   Admin: "Admin",
