@@ -1,4 +1,36 @@
 import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+// Nov 23, 2026, midnight Miami time (EST, UTC-5)
+const LAUNCH = Date.parse("2026-11-23T00:00:00-05:00");
+
+const Countdown = () => {
+  const { t } = useLanguage();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const ms = Math.max(0, LAUNCH - now);
+  const parts = [
+    { v: Math.floor(ms / 86400000), l: t("Days") },
+    { v: Math.floor(ms / 3600000) % 24, l: t("Hours") },
+    { v: Math.floor(ms / 60000) % 60, l: t("Minutes") },
+    { v: Math.floor(ms / 1000) % 60, l: t("Seconds") },
+  ];
+  return (
+    <div className="mt-10 grid grid-cols-4 gap-2 sm:gap-4" role="timer" aria-label={t("Countdown to November 23")}>
+      {parts.map((p) => (
+        <div key={p.l} className="min-w-[68px] sm:min-w-[96px] rounded-2xl border border-[#f5c518]/30 bg-white/5 px-2 py-3 sm:py-4 backdrop-blur">
+          <div className="font-poppins text-3xl sm:text-5xl font-semibold tabular-nums text-[#f5c518]">
+            {String(p.v).padStart(2, "0")}
+          </div>
+          <div className="mt-1 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/60">{p.l}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
 import tidyLogo from "@/assets/tidy-official-logo.png";
 import SparkleField from "@/components/landing/SparkleField";
 import SeoHead from "@/components/landing/SeoHead";
@@ -82,12 +114,8 @@ const ComingSoon = () => {
             )}
           </p>
 
-          <div className="mt-10">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#f5c518]/40 bg-[#f5c518]/10 px-5 py-2 text-xs sm:text-sm font-semibold text-[#f5c518] tracking-wide">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#f5c518]" />
-              {t("Opening soon in Miami")}
-            </span>
-          </div>
+          <Countdown />
+          <p className="mt-3 text-xs sm:text-sm text-white/60">{t("First visits begin November 23")}</p>
 
           <div className="mt-12 text-xs sm:text-sm text-white/50">
             {t("Questions?")}{" "}
