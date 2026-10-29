@@ -422,4 +422,5 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 
 ## Waiting screen photo + Susan Zoom (Oct 29)
 - [x] Waiting-screen photo swapped to a Pinecrest backyard (no skyline/water view): src/assets/coming-soon-pinecrest.jpg
-- [ ] Send Justin the Zoom link when he pastes it, then forward to Susan
+- [x] Told Susan Zoom works and the link is coming (Twilio SMd1516cedff9266163ee26acf0e4e579a, sent)
+- [ ] Forward Justin's Zoom link to Susan when he pastes it
