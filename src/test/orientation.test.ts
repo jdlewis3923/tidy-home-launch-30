@@ -19,7 +19,7 @@ describe("orientation preview preserves content and stage gates", () => {
   });
   it("uses the exact bilingual source blocks without changing content", () => {
     const slides = orientationSlides(ORIENTATION_SECTIONS);
-    expect(slides).toHaveLength(41);
+    expect(slides).toHaveLength(51);
     for (const slide of slides) {
       expect(slide.block).toBe(ORIENTATION_COPY[slide.section.id][slide.index]);
       expect(slide.block.title && slide.block.body && slide.block.esTitle && slide.block.es).toBeTruthy();
@@ -55,5 +55,12 @@ describe("orientation preview preserves content and stage gates", () => {
       expect(orientationImage(`${block.pair}-W`)).toContain("/hd/");
     }
     for (let i = 1; i <= 6; i++) expect(orientationImage(`PRO-${i}`)).toContain("/hd/");
+  });
+});
+describe("orientation policy copy", () => {
+  const all = Object.values(ORIENTATION_COPY).flat().map(b => `${b.body} ${b.es}`).join(" ");
+  it("uses square-foot cleaning pay and current rules", () => {
+    for (const v of ["$56", "$76", "$112", "$170", "$238", "$119", "$255 / $357", "(786) 829-1141", "2121 Biscayne Blvd #1562"]) expect(all).toContain(v);
+    expect(all).not.toMatch(/bedroom|dormitorio/i);
   });
 });

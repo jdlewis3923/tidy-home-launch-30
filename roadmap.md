@@ -438,3 +438,6 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 
 ## Rebecca Zoom invite (Oct 29)
 - [x] Sent Rebecca Ramirez the approved Zoom link for 3:30 PM today (Oct 29); candidate-text returned ok:true, queued:false, SID SM42659699f2cf97d065056cf6e9903dda; saved on her candidate timeline.
+
+- [x] Pro orientation content update (Oct 29) — copy only, 10 slides added
+- [x] Susan Zoom link for 3:30 PM Oct 30 sent
