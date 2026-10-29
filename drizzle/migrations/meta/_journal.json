@@ -1856,6 +1856,13 @@
       "when": 1793226581028,
       "tag": "0264_retire_w9_artifact_uploads",
       "breakpoints": true
+    },
+    {
+      "idx": 265,
+      "version": "7",
+      "when": 1793302964885,
+      "tag": "0265_onboarding_pack_audit_and_candidate_restore",
+      "breakpoints": true
     }
   ]
 }

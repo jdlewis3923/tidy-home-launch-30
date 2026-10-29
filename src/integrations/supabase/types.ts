@@ -2433,6 +2433,7 @@ export type Database = {
           archived_from_stage: string | null
           call_notes: string | null
           checkin_missed_count: number
+          checkr_invite_sent_at: string | null
           checkr_result: string | null
           cleared_notice_sent_at: string | null
           close_out_sent_at: string | null
@@ -2533,6 +2534,7 @@ export type Database = {
           archived_from_stage?: string | null
           call_notes?: string | null
           checkin_missed_count?: number
+          checkr_invite_sent_at?: string | null
           checkr_result?: string | null
           cleared_notice_sent_at?: string | null
           close_out_sent_at?: string | null
@@ -2633,6 +2635,7 @@ export type Database = {
           archived_from_stage?: string | null
           call_notes?: string | null
           checkin_missed_count?: number
+          checkr_invite_sent_at?: string | null
           checkr_result?: string | null
           cleared_notice_sent_at?: string | null
           close_out_sent_at?: string | null
@@ -5655,6 +5658,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      onboarding_pack_sends: {
+        Row: {
+          applicant_id: string
+          body: string
+          created_at: string
+          email_result: Json | null
+          email_status: string
+          id: string
+          item: string
+          links: Json
+          release_after: string | null
+          sms_result: Json | null
+          sms_status: string
+        }
+        Insert: {
+          applicant_id: string
+          body: string
+          created_at?: string
+          email_result?: Json | null
+          email_status?: string
+          id?: string
+          item: string
+          links?: Json
+          release_after?: string | null
+          sms_result?: Json | null
+          sms_status?: string
+        }
+        Update: {
+          applicant_id?: string
+          body?: string
+          created_at?: string
+          email_result?: Json | null
+          email_status?: string
+          id?: string
+          item?: string
+          links?: Json
+          release_after?: string | null
+          sms_result?: Json | null
+          sms_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_pack_sends_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "applicants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       onboarding_progress: {
         Row: {
@@ -11829,6 +11882,10 @@ export type Database = {
       repoint_cron_to_helper: { Args: { _job_name: string }; Returns: string }
       reserve_cleaning_walkthrough: {
         Args: { _reservation: string; _slot: string }
+        Returns: boolean
+      }
+      restore_responsive_candidate: {
+        Args: { _event: string; _id: string }
         Returns: boolean
       }
       review_bonus_next_friday: { Args: never; Returns: string }
