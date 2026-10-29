@@ -96,7 +96,8 @@ const ComingSoon = () => {
         .cs-glow-border { animation: csGlow 3s ease-in-out infinite; }
         .cs-shine { background: linear-gradient(90deg,#2563eb 0%,#60a5fa 40%,#bfdbfe 50%,#60a5fa 60%,#2563eb 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: csShine 4s linear infinite; }
         .cs-drift { animation: csDrift 18s ease-in-out infinite; }
-        .cs-sway { transform-origin: 50% 48%; animation: csSway 7.5s ease-in-out infinite; will-change: transform; }
+        .cs-sway { filter: url(#cs-leaf-flutter); }
+        @media (prefers-reduced-motion: reduce) { .cs-sway { filter: none; } }
         .cs-canopy { -webkit-mask-image: linear-gradient(to bottom,#000 0%,#000 45%,transparent 51%); mask-image: linear-gradient(to bottom,#000 0%,#000 45%,transparent 51%); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; }
         .cs-ground { -webkit-mask-image: linear-gradient(to bottom,transparent 0%,transparent 45%,#000 51%); mask-image: linear-gradient(to bottom,transparent 0%,transparent 45%,#000 51%); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; }
         .cs-twinkle { animation: csTwinkle 2.2s ease-in-out infinite; }
@@ -106,6 +107,14 @@ const ComingSoon = () => {
 
       <main className="relative min-h-screen overflow-hidden bg-[#0a1226] text-white font-poppins">
         {/* Photo background */}
+        <svg width="0" height="0" className="absolute" aria-hidden>
+          <filter id="cs-leaf-flutter" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.035 0.05" numOctaves="2" seed="3" result="n">
+              <animate attributeName="baseFrequency" dur="9s" values="0.035 0.05;0.04 0.056;0.035 0.05" repeatCount="indefinite" />
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </svg>
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[900px] overflow-hidden">
           <div className="cs-drift absolute inset-0 opacity-90">
             <img src={villa} alt="" width={1024} height={1536} className="cs-ground h-full w-full object-cover object-[100%_center] sm:object-[70%_center]" />
