@@ -116,6 +116,7 @@ const AddonApproval = lazy(() => import("./pages/AddonApproval.tsx"));
 const ProTierProgression = lazy(() => import("./pages/ProTierProgression.tsx"));
 const ProReviewBonuses = lazy(() => import("./pages/ProReviewBonuses.tsx"));
 const ProUploadCoi = lazy(() => import("./pages/ProUploadCoi.tsx"));
+const ProInsuranceGuide = lazy(() => import("./pages/pro/ProInsuranceGuide.tsx"));
 const ProOnboarding = lazy(() => import("./pages/ProOnboarding.tsx"));
 const ProTraining = lazy(() => import("./pages/ProTraining.tsx"));
 const ProOrientation = lazy(() => import("./pages/pro/ProOrientation.tsx"));
@@ -453,6 +454,7 @@ const App = () => (
                   <Route path="/pro/tier-progression" element={<ProTierProgression />} />
                   <Route path="/pro/review-bonus" element={<ProReviewBonuses />} />
                   <Route path="/pro/upload-coi" element={<ProUploadCoi />} />
+                  <Route path="/pro/insurance" element={<ProInsuranceGuide />} />
                   <Route path="/pro/onboarding" element={<ProOnboarding />} />
                   <Route path="/pro/training" element={<ProTraining />} />
                   <Route path="/pro/orientation" element={<ProOrientation />} />
