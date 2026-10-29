@@ -44,3 +44,6 @@
 
 - Candidate appointments create urgent owner alerts transactionally from hiring_slots changes; admin displays read all booked slots in Miami time, and original Indeed résumés live in an admin-only source-text table — why: no sender path can omit a booking alert or replace original résumé content with scoring summaries.
 
+
+- Onboarding packs use signing-day with an admin-only delivery audit and existing guarded Pro email/central SMS doors; unsigned links resolve current service templates — why: one-click sends retain gates and cannot sign retired wording.
+- Redo completion locks member history and records a private decision before the visit trigger credits payout; UI/email wording mirrors redo-pay — why: concurrent redos cannot both earn pay or double-credit.

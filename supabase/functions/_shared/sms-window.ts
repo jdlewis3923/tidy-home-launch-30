@@ -66,7 +66,7 @@ export function nextOpenWindow(now = new Date()): Date {
     cursor = new Date(cursor.getTime() + 30 * 60 * 1000);
     if (isWindowOpen(cursor)) {
       // Snap to the top of the ET hour so releases cluster predictably.
-      return new Date(Math.ceil(cursor.getTime() / (15 * 60 * 1000)) * 15 * 60 * 1000);
+      return new Date(Math.floor(cursor.getTime() / (60 * 60 * 1000)) * 60 * 60 * 1000);
     }
   }
   return new Date(now.getTime() + 12 * 60 * 60 * 1000);
