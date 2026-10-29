@@ -44,7 +44,7 @@ const INTERVIEW_QS = [
   ["I4", "Re-asked wrong scenarios — answered correctly in person"],
   ["I5", "Talking points from the Fit Report addressed"],
   ["I6", "Understands the route build (lighter first weeks)"],
-  ["I7", "Understands pay per visit, add-ons at 40%, redo at 50%"],
+  ["I7", "Understands pay per visit, add-ons at 40%, one paid redo per member every 60 days at 50%; further required redos are unpaid"],
   ["I8", "Understands insurance requirement and reimbursement"],
   ["I9", "Wants the seat — energy, questions, commitment"],
   ["I10", "Overall: hire this person?"],

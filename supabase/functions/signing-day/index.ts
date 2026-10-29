@@ -81,7 +81,7 @@ Deno.serve(async req=>{
       const {data:log,error:le}=await db.from('onboarding_pack_sends').insert({id:requestId,applicant_id:id,item:b.action==='send_pack'?'pack':b.item,body:text,links,sms_status:'pending',email_status:'pending'}).select('id').single();
       if(le?.code==='23505')return reply({ok:true,duplicate:true});if(le||!log)throw le??new Error('Log failed');
       const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>');
-      const email=a.email?await sendProEmail(db,{applicantId:id,key:'signing_day_pack',to:a.email,name:a.first_name,built:{subject:es?'Sus enlaces de incorporación de Tidy':'Your Tidy onboarding links',html:`<p>${escaped}</p>`},triggeredBy:'signing-day',mode:'manual'}):{sent:false,reason:'No email address'};
+      const email=a.email?await sendProEmail(db,{applicantId:id,key:'signing_day_pack',to:a.email,name:a.first_name,built:{subject:es?'Sus enlaces de incorporación de Tidy':'Your Tidy onboarding links',html:`<p>${escaped}</p>`,text},triggeredBy:'signing-day',mode:'manual'}):{sent:false,reason:'No email address'};
       let result:Record<string,unknown>;try{result=await sms(id,text,`onboarding-pack:${requestId}`);}catch(e){result={sent:false,error:e instanceof Error?e.message:'Text failed'};}
       const smsStatus=result.skipped?'test_skipped':result.queued?'queued':result.sent?'accepted':'failed';
       const {error:save}=await db.from('onboarding_pack_sends').update({sms_status:smsStatus,sms_result:result,email_status:email.sent?'accepted':'failed',email_result:email,release_after:result.release_after??null}).eq('id',requestId);if(save)throw save;

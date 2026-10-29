@@ -11,6 +11,7 @@ import { useProSession } from "@/hooks/useProSession";
 import { fetchBonuses, fetchPayoutWeeks, type PayoutWeek, type ProBonus } from "@/lib/pro-portal";
 import { SERVICE_LABEL, money } from "@/lib/pro-pay";
 import { supabase } from '@/integrations/supabase/client';
+import RedoPayLines from '@/components/pro/RedoPayLines';
 
 const shortDate = (iso: string) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -147,6 +148,7 @@ export default function ProPayoutWeek() {
             </section>
           )}
           {cleaningPay.filter(p=>p.created_at.slice(0,10)>=week.week_start&&p.created_at.slice(0,10)<=week.week_end).map(p=><div key={p.id} className="flex justify-between border-t border-border py-3 text-sm"><span>Cleaning · {p.kind}</span><strong>{money(p.amount_cents)}</strong></div>)}
+          <RedoPayLines proId={userId} from={`${week.week_start}T00:00:00Z`} to={`${week.week_end}T23:59:59Z`}/>
         </div>
       )}
     </ProShell>

@@ -22,6 +22,7 @@ import CleaningTeamInspection from '@/components/pro/CleaningTeamInspection';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { navigationLinks, accessWindowOpen } from '@/lib/pro-visit-rules';
 import { Button } from '@/components/ui/button';
+import RedoPayLines from '@/components/pro/RedoPayLines';
 
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight as ArrowR, CalendarDays as CalIcon, Camera as CamIcon, ClipboardList, MapPin as PinIcon, StickyNote as NoteIcon, CheckCircle2, ChevronRight } from "lucide-react";
@@ -314,6 +315,7 @@ export default function ProVisit() {
 
   return (
     <ProShell title={es ? (visit.service_type === "cleaning" ? "Limpieza" : visit.service_type === "lawn" ? "Césped" : "Cuidado del Auto") : SERVICE_LABEL[visit.service_type ?? ""] ?? "Visit"} back="/pro/schedule" dark>
+      <RedoPayLines proId={me?.pro_id} visitId={visit.id}/>
       {checkedIn && !visit.completed_at ? (
         <section className="px-4 pb-4 pt-1 text-center text-primary-foreground">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--pro-green)/0.2)] px-3 py-1 text-[12px] font-medium text-[hsl(var(--pro-green-soft))]"><span className="h-2 w-2 rounded-full bg-[hsl(var(--pro-green))]" />{es ? "En el sitio" : "On Site"}</span>
