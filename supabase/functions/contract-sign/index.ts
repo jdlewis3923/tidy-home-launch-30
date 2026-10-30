@@ -65,6 +65,7 @@ Deno.serve(async req=>{
   if(!t){await missing(a.id,`No ${service} agreement template exists.`);return reply({error:'not_found'},404);}
   if(!a.contracts_signed&&a.contract_template_id!==t.id)await check(await db.from('applicants').update({contract_template_id:t.id}).eq('id',a.id).eq('contracts_signed',false));
  }
+ if (t && !a.contracts_signed) t.body=await check(await db.rpc('contract_scope_body',{_template:t.id}));
  const version=t?.version??`${doc.filename} · ${String(doc.uploaded_at).slice(0,10)} · ${String(doc.id).slice(0,8)}`;
  const values={legal_name:'{legal_name}',business_name:'—',phone:a.phone??'—',email:a.email??'—',pro_number:a.pro_number??'Assigned at signing',signed_date:new Date().toLocaleDateString('en-US',{timeZone:'America/New_York',dateStyle:'long'})};
  if(b.action==='document'){const url=doc?(await check(await db.storage.from('company-docs').createSignedUrl(doc.storage_path,3600)))?.signedUrl:null;return reply({ok:true,body:t?.body??null,title:t?.title??'Independent Contractor Agreement',version,values,url,signed:a.contracts_signed,first_name:a.first_name});}
