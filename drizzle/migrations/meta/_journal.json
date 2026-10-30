@@ -1891,6 +1891,13 @@
       "when": 1793303619279,
       "tag": "0269_test_only_agreement_fixture",
       "breakpoints": true
+    },
+    {
+      "idx": 270,
+      "version": "7",
+      "when": 1793333586100,
+      "tag": "0270_vest_only_intake_readiness",
+      "breakpoints": true
     }
   ]
 }
