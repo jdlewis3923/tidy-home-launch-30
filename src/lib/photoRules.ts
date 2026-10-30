@@ -1,6 +1,6 @@
 /** Badge photo rules — mirrors supabase/functions/_shared/pro-emails.ts. English then Spanish. */
 export const PHOTO_DO: [string, string][] = [
-  ["Wear your Tidy polo, or a plain solid shirt", "Use su polo de Tidy, o una camisa lisa de un solo color"],
+  ["Wear your Tidy vest, or a plain solid top", "Use su chaleco de Tidy, o una blusa o camisa lisa"],
   ["Stand in front of a plain light wall, about two feet back", "Párese frente a una pared clara y lisa, a unos dos pies de distancia"],
   ["Face the camera straight on, shoulders square", "Mire de frente a la cámara, con los hombros derechos"],
   ["Head and shoulders, centered", "Cabeza y hombros, centrados"],

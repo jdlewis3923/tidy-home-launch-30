@@ -9,10 +9,9 @@
  * appearance, and no wording implies they work for Tidy as staff.
  *
  * Kit per service, provided at no cost to the Pro:
- *  · House cleaning — 2 embroidered polos + photo ID badge (no vest: the vest
- *    was a road-safety item for lawn work and does nothing indoors)
- *  · Lawn care     — 2 tees + 2 hi-vis vests + photo ID badge
- *  · Car care      — 2 tees + photo ID badge
+ *  · House cleaning — 2 navy vests + photo ID badge
+ *  · Lawn care     — 2 hi-vis vests + photo ID badge
+ *  · Car care      — 2 navy vests + photo ID badge
  *
  * Vehicle magnets are offered on all three services, always opt-in, with a
  * $15/month vehicle advertising credit paid with the Friday deposit under a
@@ -22,9 +21,10 @@
 export type KitServiceKey = "cleaning" | "lawn" | "car";
 
 export const MAGNET_CREDIT_MONTHLY_USD = 15;
+export const VEST_SIZES = ["S", "M", "L", "XL", "2XL", "3XL"] as const;
 
 export type KitItem = {
-  /** Vendor-order line, e.g. "Embroidered polo". */
+  /** Vendor-order line, e.g. "Navy vest". */
   en: string;
   es: string;
   /** How many to order. */
@@ -33,7 +33,7 @@ export type KitItem = {
   enPlural?: string;
   esPlural?: string;
   /** True when the line is sized from the Pro's answers. */
-  sized?: "shirt" | "vest";
+  sized?: "vest";
 };
 
 export const KIT_SERVICE_LABEL: Record<KitServiceKey, { en: string; es: string }> = {
@@ -46,16 +46,15 @@ const BADGE: KitItem = { en: "Photo ID badge", es: "Credencial con foto", qty: 1
 
 export const KIT_BY_SERVICE: Record<KitServiceKey, KitItem[]> = {
   cleaning: [
-    { en: "Embroidered polo", es: "Polo bordado", enPlural: "embroidered polos", esPlural: "polos bordados", qty: 2, sized: "shirt" },
+    { en: "Navy vest", es: "Chaleco azul marino", enPlural: "navy vests", esPlural: "chalecos azul marino", qty: 2, sized: "vest" },
     BADGE,
   ],
   lawn: [
-    { en: "Tee", es: "Camiseta", enPlural: "tees", esPlural: "camisetas", qty: 2, sized: "shirt" },
     { en: "Hi-vis vest", es: "Chaleco de alta visibilidad", enPlural: "hi-vis vests", esPlural: "chalecos de alta visibilidad", qty: 2, sized: "vest" },
     BADGE,
   ],
   car: [
-    { en: "Tee", es: "Camiseta", enPlural: "tees", esPlural: "camisetas", qty: 2, sized: "shirt" },
+    { en: "Navy vest", es: "Chaleco azul marino", enPlural: "navy vests", esPlural: "chalecos azul marino", qty: 2, sized: "vest" },
     BADGE,
   ],
 };
@@ -72,12 +71,12 @@ export function kitItemsFor(service: string | null | undefined): KitItem[] {
   return KIT_BY_SERVICE[kitServiceKey(service)];
 }
 
-/** True only for lawn: the vest is a road-safety item. */
+/** Every service receives optional vests. */
 export function kitIncludesVest(service: string | null | undefined): boolean {
-  return kitServiceKey(service) === "lawn";
+  return kitItemsFor(service).some(item => item.sized === "vest");
 }
 
-/** Short human list, e.g. "2 embroidered polos + photo ID badge". */
+/** Short human list, e.g. "2 navy vests + photo ID badge". */
 export function kitContentsLine(service: string | null | undefined, lang: "en" | "es" = "en"): string {
   return kitItemsFor(service)
     .map((i) => (i.qty > 1 ? `${i.qty} ${i[lang === "en" ? "enPlural" : "esPlural"] ?? plural(i[lang], lang)}` : lcFirst(i[lang])))
@@ -135,8 +134,7 @@ export function kitOrderSummary(k: KitOrderSource): string {
   lines.push("");
   for (const item of kitItemsFor(key)) {
     let size = "";
-    if (item.sized === "shirt") size = ` — size ${k.shirt_size || "?"}${k.shirt_cut ? `, ${k.shirt_cut} cut` : ""}`;
-    if (item.sized === "vest") size = ` — size ${k.vest_size || "?"} (worn over a shirt, sized up)`;
+    if (item.sized === "vest") size = ` — size ${k.vest_size || "?"} (optional, over own clothes; no names)`;
     lines.push(`${item.qty} × ${item.en}${size}`);
   }
   if (k.cap && !/declin/i.test(k.cap)) lines.push(`1 × Cap — ${k.cap}`);

@@ -1,30 +1,32 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { KIT_BY_SERVICE, kitContentsLine, kitIncludesVest, kitOrderSummary } from "@/lib/proKit";
+import { VEST_SIZES, KIT_BY_SERVICE, kitContentsLine, kitIncludesVest, kitOrderSummary } from "@/lib/proKit";
 
 const MARKER = "// ---- SHARED KIT STANDARD ----\n";
 
 describe("pro kit standard", () => {
+  it("offers only S through 3XL vest sizes", () => { expect(VEST_SIZES).toEqual(["S", "M", "L", "XL", "2XL", "3XL"]); });
+  it("orders the selected vest size instead of legacy apparel", () => { const order = kitOrderSummary({service_line: "cleaning", vest_size: "XL", shirt_size: "S"}); expect(order).toContain("2 × Navy vest — size XL"); expect(order).not.toContain("size S"); });
   it("keeps the edge-function copy byte-identical to src/lib/proKit.ts", () => {
     const src = readFileSync("src/lib/proKit.ts", "utf8");
     const deno = readFileSync("supabase/functions/_shared/pro-kit.ts", "utf8");
     expect(deno.slice(deno.indexOf(MARKER) + MARKER.length)).toBe(src);
   });
 
-  it("gives house cleaning two polos and a badge, and no vest", () => {
-    expect(kitContentsLine("House Cleaning")).toBe("2 embroidered polos + photo ID badge");
-    expect(kitIncludesVest("House Cleaning")).toBe(false);
-    expect(JSON.stringify(KIT_BY_SERVICE.cleaning)).not.toMatch(/vest/i);
+  it("gives house cleaning two navy vests and a badge", () => {
+    expect(kitContentsLine("House Cleaning")).toBe("2 navy vests + photo ID badge");
+    expect(kitIncludesVest("House Cleaning")).toBe(true);
+    expect(KIT_BY_SERVICE.cleaning.map(i => i.qty)).toEqual([2, 1]);
   });
 
-  it("gives lawn two tees, two hi-vis vests and a badge", () => {
-    expect(kitContentsLine("Lawn Care")).toBe("2 tees + 2 hi-vis vests + photo ID badge");
+  it("gives lawn two hi-vis vests and a badge", () => {
+    expect(kitContentsLine("Lawn Care")).toBe("2 hi-vis vests + photo ID badge");
     expect(kitIncludesVest("Lawn Care")).toBe(true);
   });
 
-  it("gives car care two tees and a badge, no vest", () => {
-    expect(kitContentsLine("Car Care")).toBe("2 tees + photo ID badge");
-    expect(kitIncludesVest("Car Care")).toBe(false);
+  it("gives car care two navy vests and a badge", () => {
+    expect(kitContentsLine("Car Care")).toBe("2 navy vests + photo ID badge");
+    expect(kitIncludesVest("Car Care")).toBe(true);
   });
 
   it("offers magnets on cleaning too, and holds the order when the door will not hold", () => {
