@@ -45,6 +45,6 @@
 - Candidate appointments create urgent owner alerts transactionally from hiring_slots changes; admin displays read all booked slots in Miami time, and original Indeed résumés live in an admin-only source-text table — why: no sender path can omit a booking alert or replace original résumé content with scoring summaries.
 
 
-- Onboarding packs use signing-day audits and guarded sends, including email-only; unsigned links resolve current templates. Equipment reviews refresh items and pipeline — why: retain gates and show saved approvals.
+- Packs use signing-day audits/guarded sends; unsigned links use current templates, equipment reviews refresh — why: gates/readback.
 - Redo locks history; replies lock phone/SID; profile reads guard assignment — why: privacy.
-- Deep Clean uses catalog size quotes and shared scope review — why: no bypass.
+- Deep Clean uses catalog quotes, one-time invoices, unique capacity/photo/team-pay guarded attachments and server-checked review — why: no duplicate billing or bypass.
