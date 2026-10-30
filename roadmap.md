@@ -1,5 +1,13 @@
 # Roadmap
 
+## Deep Clean and Before you book (Oct 30)
+- [ ] Catalog/scope, size prices/pay/minutes, Estate/quarterly/gift/discount/capacity rules and Stripe test prices.
+- [ ] Mandatory bilingual live-scope review in both checkout paths and service adds, server acknowledgments, account/admin history and nonblocking change notice.
+- [ ] Customer cleaning/pricing/FAQ/add-on/account/Walkaround and excluded-item redo offers.
+- [ ] Booking/welcome/previsit/reminder messages, Pro checklist/photos/pay/help/orientation/onboarding and new cleaning agreement version.
+- [ ] Admin editable Deep Clean scope/minutes/history and KPI/Monday metrics.
+- [ ] Eight requested test cases, EN/ES desktop/phone evidence, Stripe test-only invoice and payout evidence; report failures honestly, no publication.
+
 ## Susan equipment approval and emails (Oct 30)
 - [x] Repair equipment approval readback, expose missing evidence/errors and retain required evidence gates.
 - [x] Susan intake and insurance emails accepted; email-only sends recorded without new texts. Fifteen focused tests pass, build OK; no publication.
