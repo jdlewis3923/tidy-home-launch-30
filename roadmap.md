@@ -1,5 +1,10 @@
 # Roadmap
 
+## Susan equipment approval and emails (Oct 30)
+- [x] Repair equipment approval readback, expose missing evidence/errors and retain required evidence gates.
+- [x] Susan intake and insurance emails accepted; email-only sends recorded without new texts. Fifteen focused tests pass, build OK; no publication.
+- [ ] Susan’s agreement and Checkr notice: no submitted proof photos/videos/reference or saved approval exists; Checkr invitation date is also absent. Requires proof evidence and actual Checkr invitation, not fabricated approval.
+
 ## Final six-part alignment (Oct 30)
 - [ ] Verify onboarding packs, quiet hours, restoration and isolated send tests.
 - [ ] Verify redo guardrail, all bilingual copy, one combined 2026-10-29b agreement version and test cleanup.

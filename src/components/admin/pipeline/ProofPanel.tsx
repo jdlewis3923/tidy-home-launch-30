@@ -5,11 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { PROOF_REJECT_REASONS, rpcMessage } from "@/lib/pipeline";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const db = supabase as any;
 
 export default function ProofPanel({ id, p, onChange }: { id: string; p: Record<string, any>; onChange: () => void }) {
+  const {language}=useLanguage(); const es=language==='es';
+  const [missing,setMissing]=useState<string[]>([]);
+  const [loadError,setLoadError]=useState<string|null>(null);
   const [slots, setSlots] = useState<any[]>([]);
   const [items, setItems] = useState<Record<string, any>>({});
   const [urls, setUrls] = useState<Record<string, string>>({});
@@ -18,10 +22,14 @@ export default function ProofPanel({ id, p, onChange }: { id: string; p: Record<
   const [refNotes, setRefNotes] = useState<string>(p.ref_notes ?? "");
 
   const load = useCallback(async () => {
-    const [s, i] = await Promise.all([
+    const [s, i, m] = await Promise.all([
       db.rpc("pipeline_proof_slots", { _service: p.service }),
       db.from("pipeline_proof_items").select("*").eq("applicant_id", id),
+      db.rpc("pipeline_proof_missing", { _id:id }),
     ]);
+    const error=s.error??i.error??m.error;
+    if(error){setLoadError(rpcMessage(error));return;}
+    setLoadError(null);setMissing(m.data??[]);
     const all = [...(s.data ?? []).sort((a: any, b: any) => a.sort - b.sort),
       ...[1, 2, 3].map((n) => ({ slot: `work:${n}`, kind: "work", label_en: `Job photo ${n}` }))];
     setSlots(all);
@@ -29,7 +37,8 @@ export default function ProofPanel({ id, p, onChange }: { id: string; p: Record<
     setItems(map);
     const paths = (i.data ?? []).map((r: any) => r.storage_path);
     if (paths.length) {
-      const { data } = await supabase.storage.from("pipeline-proof").createSignedUrls(paths, 3600);
+      const { data,error } = await supabase.storage.from("pipeline-proof").createSignedUrls(paths, 3600);
+      if(error)setLoadError(rpcMessage(error));
       const byPath = new Map((data ?? []).map((d) => [d.path, d.signedUrl]));
       setUrls(Object.fromEntries((i.data ?? []).map((r: any) => [r.slot, byPath.get(r.storage_path) ?? ""])));
     }
@@ -56,6 +65,8 @@ export default function ProofPanel({ id, p, onChange }: { id: string; p: Record<
           {p.experience_level ? ` · experience: ${p.experience_level}` : ""}
         </span>
       </div>
+      {loadError&&<p role="alert" className="mb-3 text-sm text-destructive">{loadError}</p>}
+      {!p.proof_approved_at&&missing.length>0&&<div className="mb-3 border-l-2 border-primary pl-3 text-sm"><p className="font-semibold">{es?'Aprobación pendiente':'Approval pending'}</p><p className="text-muted-foreground">{es?'Aún faltan fotos, videos o la referencia requeridos. Aprobar un elemento no aprueba todo el equipo.':'Required photos, videos or reference confirmation are still missing. Approving one item does not approve all equipment.'}</p></div>}
       <ul className="grid gap-3 sm:grid-cols-2">
         {slots.map((s) => {
           const it = items[s.slot]; const url = urls[s.slot];
