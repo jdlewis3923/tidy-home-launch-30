@@ -475,6 +475,20 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
   if (genErr) console.error('[stripe-webhook] visit generation failed', genErr.message);
   else console.log('[stripe-webhook] visits generated', JSON.stringify(generated));
 
+  // Paid first-visit Deep Clean is fulfilled from the paid checkout metadata.
+  const bookedAddons = (() => { try { return JSON.parse(meta.addons_json ?? '[]'); } catch { return []; } })();
+  if (Array.isArray(bookedAddons) && bookedAddons.some((a: {addon_name?:string}) => a.addon_name === 'deep_clean')) {
+    const {data:first} = await supabase.from('visits').select('id,size_tier').eq('subscription_id',subRow.id).eq('service','cleaning').eq('status','scheduled').order('visit_date').limit(1).maybeSingle();
+    if(first) {
+      const {data:already} = await supabase.from('addon_attaches').select('id').eq('visit_id',first.id).eq('addon_key','deep_clean').limit(1).maybeSingle();
+      if(!already) {
+        const {data:q,error:quoteError} = await supabase.rpc('deep_clean_catalog_quote',{_addon_key:'deep_clean',_size:first.size_tier,_quarterly:false});
+        const result = q && !quoteError ? await supabase.from('addon_attaches').insert({user_id:userId,visit_id:first.id,addon_key:'deep_clean',addon_name:q.display_name,addon_price_cents:q.price_cents,contractor_pay_cents:Math.round(q.price_cents*0.4),service_type:'cleaning',status:'pending_visit',is_free:false,stripe_addon_price_id:q.lookup_key}) : {error:quoteError};
+        if(result.error) await supabase.from('admin_alerts').insert({alert_type:'deep_clean_fulfillment',title:'Paid first-visit Deep Clean needs scheduling',body:'Deep Clean was paid but could not be attached within the assigned day. Confirm an available date with the member.',context:{subscription_id:subRow.id,visit_id:first.id,error:result.error.message}});
+      }
+    } else await supabase.from('admin_alerts').insert({alert_type:'deep_clean_fulfillment',title:'Paid Deep Clean needs a first cleaning visit',body:'No scheduled cleaning visit was generated. Arrange the paid Deep Clean before dispatch.',context:{subscription_id:subRow.id}});
+  }
+
   // "Your plan includes" — the same scope rows the customer accepted, in their language.
   // Best effort: a failed send is logged and never blocks the subscription.
   try {
@@ -496,7 +510,7 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
           to: { email: to, name: prof?.first_name ?? undefined }, marketing: false,
           subject: es ? 'Lo que incluye su plan Tidy' : 'What your Tidy plan includes',
           htmlContent: tidyEmailShell({ heading: es ? 'Su plan incluye' : 'Your plan includes', eyebrow: es ? 'Confirmación' : 'Confirmation',
-            bodyHtml: `<p>${es ? 'Este es exactamente lo que incluye y no incluye cada visita. También está en su cuenta.' : "Here's exactly what each visit includes and doesn't. It's on your Account page too."}</p>${scope}<h2>${es?'GUÍA PARA MIEMBROS DE TIDY':'TIDY MEMBER GUIDE'}</h2><p>${MEMBER_GUIDE_INTRO[es?'es':'en']}</p>${MEMBER_GUIDE.map(s=>`<h3>${s[es?'es':'en'].heading}</h3><ul>${s[es?'es':'en'].items.map(i=>`<li>${i}</li>`).join('')}</ul>`).join('')}`,
+            bodyHtml: `<p>${es ? 'Este es exactamente lo que incluye y no incluye cada visita. También está en su cuenta.' : "Here's exactly what each visit includes and doesn't. It's on your Account page too."}</p><p><a href="https://jointidy.co/account">${es?'Lo que incluye tu plan':'What’s included in your plan'}</a></p>${services.some((s:{service:string})=>s.service==='cleaning')?`<p>${es?'Puedes añadir una Limpieza profunda a cualquier visita regular, con precio según el tamaño de tu hogar.':'Add a Deep Clean to any regular visit, priced for your home size.'}</p>`:''}${scope}<h2>${es?'GUÍA PARA MIEMBROS DE TIDY':'TIDY MEMBER GUIDE'}</h2><p>${MEMBER_GUIDE_INTRO[es?'es':'en']}</p>${MEMBER_GUIDE.map(s=>`<h3>${s[es?'es':'en'].heading}</h3><ul>${s[es?'es':'en'].items.map(i=>`<li>${i}</li>`).join('')}</ul>`).join('')}`,
             ctaUrl: 'https://jointidy.co/account', ctaLabel: es ? 'Abrir mi cuenta' : 'Open my account' }),
           label: 'plan-scope-confirm', tags: ['plan-scope'],
         });
