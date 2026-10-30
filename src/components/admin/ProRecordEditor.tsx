@@ -44,8 +44,7 @@ const GROUPS: { title: string; fields: Field[] }[] = [
     { key: "flags", label: "Flags (comma separated)", kind: "list" }, { key: "notes", label: "Notes", kind: "longtext" },
   ] },
   { title: "Kit and vehicle", fields: [
-    { key: "shirt_size", label: "Shirt size", kind: "select", options: ["XS", "S", "M", "L", "XL", "2XL", "3XL"], table: "kit" },
-    { key: "vest_size", label: "Vest size", kind: "text", table: "kit" },
+    { key: "vest_size", label: "Vest size / Talla de chaleco", kind: "select", options: ["S", "M", "L", "XL", "2XL", "3XL"], table: "kit" },
     { key: "magnets_opt_in", label: "Magnet opt-in", kind: "bool", table: "kit" },
     { key: "vehicle_year", label: "Vehicle year", kind: "text", table: "kit" }, { key: "vehicle_make", label: "Vehicle make", kind: "text", table: "kit" },
     { key: "vehicle_model", label: "Vehicle model", kind: "text", table: "kit" }, { key: "vehicle_color", label: "Vehicle color", kind: "text", table: "kit" },

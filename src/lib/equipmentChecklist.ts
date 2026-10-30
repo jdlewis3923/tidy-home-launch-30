@@ -21,8 +21,8 @@ export const HOUSE_CLEANING_ITEMS: EquipmentItem[] = [
     description: 'Show both together. String, flat, or microfiber spin mop accepted.' },
   { key: 'supply_kit', label: 'Supply caddy / kit',
     description: 'Must include: all-purpose cleaner, glass cleaner, bathroom cleaner, disinfectant wipes, 5+ microfiber cloths, gloves, scrub brush, sponges, toilet brush.' },
-  { key: 'uniform_or_attire', label: 'Uniform / job attire',
-    description: 'Clean professional attire with closed-toe shoes. Tidy shirt optional at Tier 1.' },
+  { key: 'uniform_or_attire', label: 'Optional Tidy vest / Chaleco Tidy opcional', optional: true,
+    description: 'Tidy provides vests and a photo ID badge. You may wear the vest over your own clothes. / Tidy entrega chalecos y una credencial con foto. Puedes usar el chaleco sobre tu ropa.' },
 ];
 
 export const LAWN_ITEMS: EquipmentItem[] = [
