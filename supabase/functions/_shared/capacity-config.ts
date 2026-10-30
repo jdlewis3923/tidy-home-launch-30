@@ -70,6 +70,8 @@ export interface CapacityInput {
   assignedPros: number;
   /** Net new customers in this service over the trailing 60 days. */
   netNewCustomers: number;
+  /** Exact monthly hours from price metadata × service cadence. */
+  demandHours?: number;
 }
 
 export interface CapacityResult {
@@ -101,8 +103,8 @@ export interface CapacityResult {
 
 /** Pure capacity + hiring math. No I/O — every consumer shares this. */
 export function computeCapacity(input: CapacityInput): CapacityResult {
-  const hoursPerCustomer = HOURS_PER_CUSTOMER_PER_MONTH[input.service];
-  const demandHours = input.activeCustomers * hoursPerCustomer;
+  const demandHours = input.demandHours ?? input.activeCustomers * HOURS_PER_CUSTOMER_PER_MONTH[input.service];
+  const hoursPerCustomer = input.activeCustomers > 0 && input.demandHours !== undefined ? demandHours / input.activeCustomers : HOURS_PER_CUSTOMER_PER_MONTH[input.service];
   const capacityHours = input.assignedPros * BILLABLE_HOURS_PER_PRO_PER_MONTH;
 
   const fillPct = capacityHours > 0 ? demandHours / capacityHours : null;
