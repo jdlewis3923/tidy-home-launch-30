@@ -29,7 +29,7 @@ export const PHOTO_RETAKE_REASONS = {
 export type RetakeReason = keyof typeof PHOTO_RETAKE_REASONS;
 
 export const PHOTO_DO = [
-  ['Wear your Tidy polo, or a plain solid shirt', 'Use su polo de Tidy, o una camisa lisa de un solo color'],
+  ['Wear your Tidy vest, or a plain solid top', 'Use su chaleco de Tidy, o una blusa o camisa lisa'],
   ['Stand in front of a plain light wall, about two feet back', 'Párese frente a una pared clara y lisa, a unos dos pies de distancia'],
   ['Face the camera straight on, shoulders square', 'Mire de frente a la cámara, con los hombros derechos'],
   ['Head and shoulders, centered', 'Cabeza y hombros, centrados'],
@@ -129,8 +129,8 @@ export function badgePhotoEmail(first: string, url: string, lang: Lang = 'both',
     : pick(lang, `${first}, your Tidy badge photo`, `${first}, su foto para la credencial de Tidy`);
   const intro = r
     ? para(lang, `Thanks for the photo. We need one more: <strong>${r.en}</strong>`, `Gracias por la foto. Necesitamos otra: <strong>${r.es}</strong>`)
-    : para(lang, 'Take one photo with your phone using the list below, then upload it. If your Tidy polo has not arrived yet, a plain solid shirt works.',
-      'Tome una foto con su teléfono siguiendo la lista, y súbala. Si su polo de Tidy aún no ha llegado, una camisa lisa sirve.');
+    : para(lang, 'Take one photo with your phone using the list below, then upload it. Wear your Tidy vest, or a plain solid top.',
+      'Tome una foto con su teléfono siguiendo la lista, y súbala. Use su chaleco de Tidy, o una blusa o camisa lisa.');
   const html = shell(lang, subject, intro + photoRulesHtml(lang) + help(lang), 'badge photo camera',
     { url, label: pick(lang, 'Upload your photo', 'Subir su foto') });
   const reasonText = r ? `${txt(lang, r.en, r.es)}\n\n` : '';
@@ -222,7 +222,7 @@ export function allSetEmail(a: { first: string; pro_number: string | null; servi
     para(lang, `<strong>What's arriving:</strong> ${kitEn}, shipped to your address. Expected: ${when}.`, `<strong>Lo que llega:</strong> ${kitEs}, enviado a su dirección. Fecha estimada: ${when}.`) +
     para(lang, '<strong>Your first route:</strong> Justin sends the schedule with addresses, day and time windows. The same homes every visit. A walkaround before you start and a check before you leave.',
       '<strong>Su primera ruta:</strong> Justin le envía el horario con direcciones, día y franja horaria. Las mismas casas cada visita. Un recorrido antes de empezar y una revisión antes de irse.') +
-    para(lang, '<strong>Pay:</strong> per job, sized by the home, paid every Friday for every job finished that week.', '<strong>Pago:</strong> por trabajo, según el tamaño de la casa, cada viernes por cada trabajo terminado esa semana.') +
+    para(lang, '<strong>Pay:</strong> per job, sized by the home, paid every Friday for last week’s completed visits.', '<strong>Pago:</strong> por trabajo, según el tamaño de la casa, cada viernes por las visitas completadas la semana anterior.') +
     pay.html +
     para(lang,REDO_PAY_EN,REDO_PAY_ES) +
     para(lang, `<strong>${REVIEW_BONUS_LINE.split('. ')[0]}.</strong> ${REVIEW_BONUS_LINE.split('. ').slice(1).join('. ')}`, `<strong>${REVIEW_BONUS_LINE_ES.split('. ')[0]}.</strong> ${REVIEW_BONUS_LINE_ES.split('. ').slice(1).join('. ')}`) +

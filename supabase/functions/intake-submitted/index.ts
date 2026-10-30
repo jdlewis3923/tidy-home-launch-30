@@ -52,12 +52,9 @@ const SECTIONS: { title: string; fields: [string, string][] }[] = [
     ],
   },
   {
-    title: 'Apparel sizing',
+    title: 'Vest size / Talla de chaleco',
     fields: [
-      ['shirt_size', 'Shirt size'],
-      ['shirt_cut', 'Shirt cut'],
-      ['vest_size', 'Hi-vis vest (lawn only)'],
-      ['cap', 'Cap'],
+      ['vest_size', 'Vest size / Talla de chaleco'],
     ],
   },
   {
@@ -163,7 +160,7 @@ Deno.serve(async (req) => {
       applicant_id: kit.applicant_id,
       event: 'intake_submitted',
       metadata: {
-        shirt_size: kit.shirt_size ?? null,
+        vest_size: kit.vest_size ?? null,
         service_line: kit.service_line ?? null,
         magnets_opt_in: kit.magnets_opt_in ?? null,
       },
@@ -218,8 +215,8 @@ Deno.serve(async (req) => {
     </p>`}
     <p style="margin:0 0 6px;font:15px Arial,sans-serif;color:#0f172a"><strong>One thing left: your badge photo.</strong></p>
     <p style="margin:0 0 10px;font:14px Arial,sans-serif;color:#334155">
-      Head and shoulders, in your Tidy shirt, plain background. If your shirts have not arrived yet, send the photo once they do.<br/>
-      <span style="color:#64748b">Cabeza y hombros, con su camisa de Tidy, fondo sencillo. Si sus camisas aún no llegan, envíe la foto cuando lleguen.</span>
+      Head and shoulders, wearing your Tidy vest, plain background.<br/>
+      <span style="color:#64748b">Cabeza y hombros, con su chaleco de Tidy, fondo sencillo.</span>
     </p>
     ${badgeUrl ? `<p style="margin:12px 0 0"><a href="${badgeUrl}" style="display:inline-block;background:#f5c518;color:#0f172a;font:700 15px Arial,sans-serif;padding:13px 22px;border-radius:10px;text-decoration:none">Send your badge photo / Enviar su foto</a></p>` : ''}
     <p style="margin:22px 0 0;font:14px Arial,sans-serif;color:#475569">
