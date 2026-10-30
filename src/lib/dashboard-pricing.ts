@@ -472,7 +472,7 @@ export function calculatePricing(state: ConfigState) {
     taxPercentage: taxTriggered ? FLORIDA_TAX.percentage : 0,
     taxAmount,
     firstMonth: total,
-    ongoing: total - addOnsSubtotal,
+    ongoing: total,
   };
 }
 

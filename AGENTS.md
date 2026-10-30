@@ -46,4 +46,5 @@
 
 
 - Onboarding packs use signing-day audits and guarded sends, including email-only; unsigned links resolve current templates. Equipment reviews refresh items and pipeline — why: retain gates and show saved approvals.
-- Redo decisions lock history before payout; check-in replies lock phone/SID and profiles use timed assignment guards — why: private data and pay never duplicate or leak.
+- Redo locks history; replies lock phone/SID; profile reads guard assignment — why: privacy.
+- Deep Clean uses catalog size quotes and shared scope review — why: no bypass.
