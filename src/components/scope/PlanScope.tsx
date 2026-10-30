@@ -26,12 +26,18 @@ export function PlanScope({ services, carWash, monthlyLawn, weekly }: { services
     return () => { off = true; };
   }, [scopes.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
   const { data: rows = [] } = useScopeAtVersions(versions);
+  const acknowledgments = useQuery({ queryKey: ['service_acknowledgments', 'mine'], queryFn: async () => {
+    const { data, error } = await supabase.from('service_acknowledgments').select('service,checked_at').order('checked_at', { ascending: false });
+    if (error) throw error; return data ?? [];
+  }});
   if (!scopes.length) return null;
   return (
     <div className="rounded-2xl border border-[hsl(var(--hairline))] bg-white p-6 shadow-[0_4px_20px_rgba(15,23,42,0.04)]" data-testid="plan-scope">
       <h2 className="text-lg font-black text-ink">{es ? "Su plan incluye" : "Your plan includes"}</h2>
       <div className="mt-4 space-y-8">
-        {scopes.map((s) => <ScopeBlock key={s} service={s} rows={rows} lang={language} opts={{ monthlyLawn, weekly }} />)}
+        {scopes.map((s) => <section key={s}><ScopeBlock service={s} rows={rows} lang={language} opts={{ monthlyLawn, weekly }} />
+          {acknowledgments.data?.find(a => a.service === s) && <p className="mt-3 text-xs text-muted-foreground">{es ? 'Detalles del plan aceptados' : 'Plan details acknowledged'} {new Date(acknowledgments.data.find(a => a.service === s)?.checked_at ?? '').toLocaleDateString(es ? 'es-US' : 'en-US')}</p>}
+        </section>)}
       </div>
       <details className="mt-6 rounded-xl border border-[hsl(var(--hairline))] p-4">
         <summary className="cursor-pointer text-sm font-bold text-ink">{es ? "Así funcionan las visitas" : "How visits work"}</summary>

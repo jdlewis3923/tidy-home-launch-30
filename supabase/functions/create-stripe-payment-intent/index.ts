@@ -320,6 +320,9 @@ Deno.serve(async (req) => {
         }
 
 
+        // Deep Clean is resolved from the member's validated home size.
+        const { resolveDeepCleanLines } = await import('../_shared/deep-clean-checkout.ts');
+        items.push(...await resolveDeepCleanLines(supabase, stripe, input.addons, input.services));
         // Resolve one-time add-ons
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase

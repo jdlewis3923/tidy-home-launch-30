@@ -52,6 +52,7 @@ import { groupsFor, verifyScopeAcceptance } from "../_shared/scope.ts";
 import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
 import { stripeMode, stripeModeConflict, stripeSecretKey } from "../_shared/stripe-mode.ts";
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
+import { resolveDeepCleanLines } from '../_shared/deep-clean-checkout.ts';
 
 
 const STRIPE_SECRET_KEY = stripeSecretKey();
@@ -385,6 +386,7 @@ Deno.serve(async (req) => {
         }
 
         // ---------- Resolve one-time add-on prices ----------
+        line_items.push(...await resolveDeepCleanLines(supabase, stripe, input.addons, input.services));
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
             .from("stripe_catalog")
