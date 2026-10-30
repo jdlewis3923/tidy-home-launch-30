@@ -1961,6 +1961,13 @@
       "when": 1793402388203,
       "tag": "0279_deep_clean_team_pay_and_redo_rate",
       "breakpoints": true
+    },
+    {
+      "idx": 280,
+      "version": "7",
+      "when": 1793402443314,
+      "tag": "0280_deep_clean_unique_booking_and_capacity_lock",
+      "breakpoints": true
     }
   ]
 }
