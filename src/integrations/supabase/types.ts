@@ -3136,6 +3136,52 @@ export type Database = {
           },
         ]
       }
+      deep_clean_item_checks: {
+        Row: {
+          attach_id: string
+          checked_at: string
+          photo_id: string
+          pro_id: string
+          scope_row_id: string
+        }
+        Insert: {
+          attach_id: string
+          checked_at?: string
+          photo_id: string
+          pro_id: string
+          scope_row_id: string
+        }
+        Update: {
+          attach_id?: string
+          checked_at?: string
+          photo_id?: string
+          pro_id?: string
+          scope_row_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deep_clean_item_checks_attach_id_fkey"
+            columns: ["attach_id"]
+            isOneToOne: false
+            referencedRelation: "addon_attaches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deep_clean_item_checks_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "visit_photos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deep_clean_item_checks_scope_row_id_fkey"
+            columns: ["scope_row_id"]
+            isOneToOne: false
+            referencedRelation: "service_scope"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documenso_templates: {
         Row: {
           doc_type: string
@@ -11213,6 +11259,10 @@ export type Database = {
       deep_clean_catalog_quote: {
         Args: { _addon_key: string; _quarterly?: boolean; _size: number }
         Returns: Json
+      }
+      deep_clean_photo_check: {
+        Args: { _attach: string; _photo: string; _scope: string }
+        Returns: undefined
       }
       dispatch_due_social_posts: { Args: never; Returns: number }
       ensure_referral_code: { Args: never; Returns: string }

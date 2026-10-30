@@ -1940,6 +1940,13 @@
       "when": 1793401828555,
       "tag": "0276_deep_clean_capacity_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 277,
+      "version": "7",
+      "when": 1793401859230,
+      "tag": "0277_deep_clean_item_photo_completion",
+      "breakpoints": true
     }
   ]
 }
