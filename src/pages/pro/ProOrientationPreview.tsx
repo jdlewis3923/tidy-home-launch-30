@@ -8,6 +8,7 @@ import { OrientationSlide, orientationSlides } from "@/components/pro/orientatio
 import { orientationPdf } from "@/lib/orientation-pdf";
 import { useServiceScope } from '@/lib/serviceScope';
 import { orientationCopyWithScope } from '@/lib/orientation-scope';
+import { useAddonCatalog } from '@/hooks/useAddonCatalog';
 import "@/styles/orientation.css";
 
 export default function ProOrientationPreview() {
@@ -15,7 +16,8 @@ export default function ProOrientationPreview() {
   const access = useOrientationAccess(admin);
   const [params, setParams] = useSearchParams();
   const scope = useServiceScope();
-  const slides = orientationSlides(access.sections, orientationCopyWithScope(scope.data ?? []));
+  const catalog = useAddonCatalog();
+  const slides = orientationSlides(access.sections, orientationCopyWithScope(scope.data ?? [], catalog.data ?? []));
   const current = Math.max(0, Math.min(slides.length - 1, Number(params.get("slide") || 1) - 1 || 0));
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -42,7 +44,7 @@ export default function ProOrientationPreview() {
     } catch { setMessage("PDF could not be prepared. Please try again. / No se pudo preparar el PDF. Intenta otra vez."); }
     finally { setBusy(false); }
   };
-  if (access.loading || scope.isLoading) return <main className="orientation-app p-8">Loading… / Cargando…</main>;
+  if (access.loading || scope.isLoading || catalog.isLoading) return <main className="orientation-app p-8">Loading… / Cargando…</main>;
   if (scope.isError) return <main className="orientation-app p-8" role="alert">Service scope unavailable. Please retry. / No se pudo cargar el alcance. Intenta de nuevo.</main>;
   if (!access.userId) return <Navigate to="/pro/login" replace />;
   if (admin && !access.isAdmin) return <Navigate to="/pro/orientation" replace />;

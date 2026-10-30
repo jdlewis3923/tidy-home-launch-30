@@ -1,4 +1,5 @@
 import FreeAddonPicker from '@/components/dashboard/FreeAddonPicker';
+import { addonQuote, type CatalogAddon } from '@/lib/deep-clean';
 import CleaningSizePicker from '@/components/CleaningSizePicker';
 import { CLEANING_BANDS, CLEANING_MONTHLY, cleaningSizeFromRange, type CleaningSize, type SizeSelection } from '@/lib/pricing-canon';
 /**
@@ -65,6 +66,8 @@ type CatalogRow = {
   sort_order: number;
   is_specialist: boolean;
   gift_eligible: boolean;
+  display_name_es: string | null; description_en: string | null; description_es: string | null;
+  estate_bundle_only: boolean; size_prices: unknown; added_minutes: unknown; pro_pay_pct: number; lookup_key: string | null;
 };
 
 type ProOption = {
@@ -231,7 +234,7 @@ export default function DashboardServices() {
       const [catalogRes, attachRes] = await Promise.all([
         supabase
           .from('addon_catalog')
-          .select('addon_key, display_name, price_cents, services, lucide_icon, sort_order, is_specialist, gift_eligible')
+          .select('addon_key, display_name, display_name_es, description_en, description_es, price_cents, services, lucide_icon, sort_order, is_specialist, gift_eligible, estate_bundle_only, size_prices, added_minutes, pro_pay_pct, lookup_key')
           .eq('is_active', true)
           .order('sort_order', { ascending: true }),
         supabase
@@ -266,8 +269,12 @@ export default function DashboardServices() {
   const visibleAddons = useMemo(() => {
     if (!activeService) return [];
     const dbKey = SERVICE_DB_KEY[activeService];
-    return catalog.filter((a) => a.services.includes(dbKey));
-  }, [catalog, activeService]);
+    const size = Number(targetVisit?.size_tier ?? sub?.size_tier ?? sub?.size ?? 0);
+    return catalog.filter((a) => a.services.includes(dbKey)).flatMap(a => {
+      const q = addonQuote(a as CatalogAddon, size || null, targetVisit?.visit_kind === 'quarterly_deep_clean');
+      return q ? [{...a,price_cents:q.cents,display_name:language === 'es' ? a.display_name_es ?? a.display_name : a.display_name}] : [];
+    });
+  }, [catalog, activeService, targetVisit, sub, language]);
 
   const giftPool = visibleAddons.filter((a) => a.gift_eligible);
 
@@ -276,6 +283,7 @@ export default function DashboardServices() {
     const { data: res, error } = await supabase.functions.invoke('attach-addon-to-visit', {
       body: {
         addon_key: addon.addon_key,
+        visit_id: targetVisit?.id,
         jobber_visit_id: targetVisit?.jobber_visit_id ?? undefined,
         visit_date: targetVisit?.visit_date ?? undefined,
         redeem_free: free || undefined,
@@ -777,7 +785,7 @@ export default function DashboardServices() {
                         </div>
                       ))}
                       {newService === 'detailing' && <SpigotQuestion value={addSpigot} onChange={setAddSpigot} />}
-                      <ScopeAcceptChecks groups={addScopeGroups} checked={addScopeChecked} onChange={setAddScopeChecked} />
+                      <ScopeAcceptChecks groups={addScopeGroups} checked={addScopeChecked} onChange={setAddScopeChecked} cleaningSize={newSize} />
                       <button
                         type="button"
                         disabled={startingCheckout || !newReady || !addScopeOk}

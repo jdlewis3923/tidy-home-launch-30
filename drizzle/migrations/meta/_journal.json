@@ -1933,6 +1933,41 @@
       "when": 1793401327749,
       "tag": "0275_deep_clean_catalog_and_service_acknowledgments",
       "breakpoints": true
+    },
+    {
+      "idx": 276,
+      "version": "7",
+      "when": 1793401828555,
+      "tag": "0276_deep_clean_capacity_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 277,
+      "version": "7",
+      "when": 1793401859230,
+      "tag": "0277_deep_clean_item_photo_completion",
+      "breakpoints": true
+    },
+    {
+      "idx": 278,
+      "version": "7",
+      "when": 1793401990320,
+      "tag": "0278_deep_clean_booked_time_and_admin_metrics",
+      "breakpoints": true
+    },
+    {
+      "idx": 279,
+      "version": "7",
+      "when": 1793402388203,
+      "tag": "0279_deep_clean_team_pay_and_redo_rate",
+      "breakpoints": true
+    },
+    {
+      "idx": 280,
+      "version": "7",
+      "when": 1793402443314,
+      "tag": "0280_deep_clean_unique_booking_and_capacity_lock",
+      "breakpoints": true
     }
   ]
 }

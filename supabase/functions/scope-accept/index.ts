@@ -52,5 +52,17 @@ Deno.serve(async (req) => {
   });
   const { error } = await admin.from('scope_acceptances').insert(rows);
   if (error) { console.error('[scope-accept] insert', error.message); return jsonResponse({ ok: false, error: 'insert_failed' }, 500); }
+  if (uid) {
+    const services = [...new Set(rows.map(r => r.service))];
+    const { data: shown, error: shownError } = await admin.from('service_scope').select('id,service,section,text_en,text_es,updated_at').eq('active', true).in('service', services);
+    if (shownError || !shown?.length) return jsonResponse({ ok: false, error: 'scope_read_failed' }, 500);
+    const records = services.map(service => {
+      const snapshot = shown.filter(r => r.service === service);
+      return { member_id: uid, service, acceptance_ref: b.ref, terms_version: '2026-08-24', ip, user_agent: ua,
+        scope_version: snapshot.reduce((latest, r) => r.updated_at > latest ? r.updated_at : latest, '1970-01-01T00:00:00Z'), scope_snapshot: snapshot };
+    });
+    const { error: ackError } = await admin.from('service_acknowledgments').insert(records);
+    if (ackError) return jsonResponse({ ok: false, error: 'acknowledgment_save_failed' }, 500);
+  }
   return jsonResponse({ ok: true, ref: b.ref, accepted: rows.map((r) => ({ service: r.service, scope_version: r.scope_version })) });
 });

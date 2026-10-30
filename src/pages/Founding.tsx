@@ -501,7 +501,7 @@ export default function Founding() {
                     {spigot === false && <p className="mt-1 text-xs text-ink-soft">{language === "es" ? "No hay problema: su Pro trae su propia agua. Nunca hay cargo extra." : "No problem — your Pro brings their own water. Never a fee."}</p>}
                   </fieldset>
                 )}
-                <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} />
+                <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} cleaningSize={typeof cleanSize === 'number' ? cleanSize : null} />
                 {err && <p role="alert" className="text-sm font-semibold text-destructive">{err}</p>}
                 <p className="founding-reserve-launch">{startsLine(launchCfg, lang, s.services)}. {t("No charge today — we'll confirm your day and your Pro the week before, and set up payment then.")}</p>
                 <button className={primaryBtn} disabled={!formOk || !scopeOk || busy}>{busy ? t("Saving…") : t("Reserve my spot — no charge")}</button>

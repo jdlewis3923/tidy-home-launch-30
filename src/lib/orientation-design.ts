@@ -15,6 +15,7 @@ const photoAssignments: Record<string, number[]> = {
   "Cleaning scope":[9], "Lawn scope":[10], "Car care scope":[11], "Communication":[0,42], "Your first assignment":[43],
 };
 const compositions: Record<string, string> = {
+  "Deep Clean add-on":"steps", "Deep Clean pay and time":"pay", "Deep Clean work rules":"steps",
   "Welcome to TIDY": "opener", "Our standard": "pillars", "Independent contractor relationship": "relationship",
   "Five readiness gates": "gates", "Insurance": "coverage", "Insurance wording": "quote", "Screening and privacy": "philosophy",
   "Your kit": "kit", "Your badge": "badge", "Your territory": "territory", "Pay per completed visit": "pay",

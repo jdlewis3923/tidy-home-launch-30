@@ -13,6 +13,7 @@ import { bearerToken } from '../_shared/admin-auth.ts';
 import { writeAlert } from '../_shared/alerts.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { memberScopeRows, visitScopes } from '../_shared/scope.ts';
+import { visitRedoScope } from '../_shared/visit-redo-scope.ts';
 import { tidyEmailShell, TIDY_OWNER_EMAIL, TIDY_SITE } from '../_shared/email-brand.ts';
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
@@ -61,8 +62,10 @@ Deno.serve(async (req) => {
       if (!v) return jsonResponse({ ok: false, error: 'not_found' }, 404);
       const { data: existing } = await admin.from('redo_requests').select('id, status, requested_at').eq('visit_id', v.id).neq('status', 'canceled').maybeSingle();
       const open = !!v.completed_at && Date.now() - new Date(v.completed_at).getTime() <= WINDOW_MS;
-      const items = (await memberScopeRows(admin, v.user_id, visitScopes(v.service_type, v.visit_kind))).filter((r) => r.section === 'included');
+      const scopeRows = await visitRedoScope(admin,v);
+      const items = scopeRows.filter((r) => r.section === 'included');
       return jsonResponse({ ok: true, first_name: v.customer_first_name, service: v.service_type, completed_at: v.completed_at, window_open: open, existing,
+        excluded_items: scopeRows.filter(r=>r.section==='not_included').map(r=>({en:r.text_en,es:r.text_es})),
         included_items: items.map((r) => ({ en: r.text_en, es: r.text_es, group_en: r.group_en, group_es: r.group_es })) });
     }
     if (req.method !== 'POST') return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
@@ -102,12 +105,12 @@ Deno.serve(async (req) => {
     if (!fromInbox) {
       const picked = parsed.data.missed_items ?? [];
       if (!picked.length) return jsonResponse({ ok: false, error: 'missed_items_required' }, 400);
-      const included = (await memberScopeRows(admin, v.user_id, visitScopes(v.service_type, v.visit_kind))).filter((r) => r.section === 'included');
+      const included = (await visitRedoScope(admin,v)).filter((r) => r.section === 'included');
       const allowed = new Map<string, string>();
       for (const r of included) { allowed.set(r.text_en, r.text_en); allowed.set(r.text_es, r.text_en); }
       const bad = picked.filter((p) => !allowed.has(p));
       if (bad.length) return jsonResponse({ ok: false, error: 'item_not_in_scope', items: bad }, 400);
-      missed = [...new Set(picked.map((p) => allowed.get(p)!))];
+      missed = [...new Set(picked.flatMap(p=>{const label=allowed.get(p);return label?[label]:[];}))];
     }
     const photoPath = parsed.data.photo_path && v.user_id && parsed.data.photo_path.startsWith(`${v.user_id}/`) ? parsed.data.photo_path : null;
 

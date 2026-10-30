@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
 import { toast } from "@/hooks/use-toast";
 import { SCOPE_TITLE, type ScopeRow, type ScopeService } from "@/lib/serviceScope";
+import { useAddonCatalog } from '@/hooks/useAddonCatalog';
+import { Button } from '@/components/ui/button';
 
 const SERVICES: ScopeService[] = ["cleaning", "cleaning_deep_clean", "lawn", "car_wash", "car_detail"];
 const SECTIONS = ["included", "not_included", "add_on", "customer_must", "notice"] as const;
@@ -17,6 +19,10 @@ type Draft = Pick<ScopeRow, "section" | "text_en" | "text_es" | "addon_key" | "g
 export default function AdminServiceScope() {
   const { hasRole, isLoading } = useHasRoleState("admin");
   const qc = useQueryClient();
+  const catalog = useAddonCatalog();
+  const deep = catalog.data?.find(a => a.addon_key === 'deep_clean');
+  const [minutes, setMinutes] = useState<Record<string, number>>({});
+  useEffect(() => { if (deep?.added_minutes && typeof deep.added_minutes === 'object') setMinutes(deep.added_minutes as Record<string, number>); }, [deep]);
   const [svc, setSvc] = useState<ScopeService>("cleaning");
   const [draft, setDraft] = useState<Draft[]>([]);
   const [note, setNote] = useState("");
@@ -57,6 +63,11 @@ export default function AdminServiceScope() {
         <p className="mt-1 text-sm text-muted-foreground">What each visit includes, in English and Spanish. Every page, email, the terms and the Pro job card read this.</p>
       </header>
       <div className="flex flex-wrap gap-2">
+        {svc === 'cleaning' && deep && <section className="w-full space-y-3 border-y border-border py-4">
+          <h2 className="font-bold text-foreground">Deep Clean · added minutes by size</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">{[1,2,3,4,5].map(size => <label key={size} className="text-sm text-foreground">{size < 4 ? `Size ${size}` : size === 4 ? 'Estate' : 'Estate Plus'}<input type="number" min={1} max={600} value={minutes[size] ?? ''} onChange={e => setMinutes({...minutes,[size]:Number(e.target.value)})} className="mt-1 w-full rounded border border-input bg-background p-2" /></label>)}</div>
+          <Button onClick={async () => { const {error} = await supabase.rpc('admin_deep_clean_minutes',{_minutes:minutes}); toast({title:error?'Not saved':'Minutes saved',description:error?.message,variant:error?'destructive':'default'}); if(!error) void catalog.refetch(); }}>Save Deep Clean minutes</Button>
+        </section>}
         {SERVICES.map((s) => (
           <button key={s} type="button" onClick={() => setSvc(s)}
             className={`rounded-full border px-4 py-2 text-sm font-semibold ${svc === s ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground"}`}>

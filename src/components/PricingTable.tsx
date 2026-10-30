@@ -7,6 +7,7 @@ import { BILLED_MONTHLY, SIZE_HELPERS, SIZE_LABELS, SIZES, SIZING_FAQ, VISITS_PE
 import { FREQUENCY_FAQ } from "@/lib/frequency-faq";
 import AnimatedNumber from "@/components/motion/AnimatedNumber";
 import { Button } from "@/components/ui/button";
+import DeepCleanCard from '@/components/DeepCleanCard';
 
 const cadenceOptions: { value: CanonCadence; label: string }[] = [
   { value: "monthly", label: "Once a month" },
@@ -39,6 +40,7 @@ const PricingTable = () => {
   return (
     <section id="pricing" className="bg-background py-20 px-4">
       <div className="max-w-4xl mx-auto text-center">
+        <DeepCleanCard />
         <FadeIn>
           <span className="text-xs uppercase tracking-widest text-primary font-semibold">{t("Pricing")}</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">

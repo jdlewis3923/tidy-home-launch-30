@@ -173,6 +173,9 @@ Deno.serve(async (req) => {
   }
 
   // ----------------------------- APPROVE ----------------------------------
+  // Deep Clean must enter the shared attachment/checklist/capacity ledger.
+  // Do not charge through the older walkaround pay-only path.
+  if(reqRow.addon_key==='deep_clean') return jsonResponse({ok:false,error:'book_deep_clean_from_upcoming_visit'},409);
   if (!STRIPE_SECRET_KEY) return jsonResponse({ ok: false, error: 'missing_stripe_key' }, 500);
   if (!reqRow.customer_id) return jsonResponse({ ok: false, error: 'no_customer_on_request' }, 409);
   if (!reqRow.amount_cents || reqRow.amount_cents <= 0) {

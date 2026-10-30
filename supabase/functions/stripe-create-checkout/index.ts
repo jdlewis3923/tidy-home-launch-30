@@ -52,6 +52,7 @@ import { groupsFor, verifyScopeAcceptance } from "../_shared/scope.ts";
 import { savePlanLines, type PlanLine } from "../_shared/plan-lines.ts";
 import { stripeMode, stripeModeConflict, stripeSecretKey } from "../_shared/stripe-mode.ts";
 import { FLORIDA_TAX, cartTriggersFloridaTax, getFloridaTaxRateId } from "../_shared/florida-tax.ts";
+import { resolveDeepCleanLines } from '../_shared/deep-clean-checkout.ts';
 
 
 const STRIPE_SECRET_KEY = stripeSecretKey();
@@ -385,6 +386,7 @@ Deno.serve(async (req) => {
         }
 
         // ---------- Resolve one-time add-on prices ----------
+        line_items.push(...await resolveDeepCleanLines(supabase, stripe, input.addons, input.services));
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
             .from("stripe_catalog")
@@ -432,6 +434,7 @@ Deno.serve(async (req) => {
         // monthly charge is created. The new line begins on the next combined
         // renewal; proration is deliberately disabled.
         if (input.add_to_existing) {
+          if(input.addons.some(a=>a.addon_name==='deep_clean'))throw new Error('book_deep_clean_after_service_visit_is_scheduled');
           const { data: localSub, error: localErr } = await supabase
             .from("subscriptions")
             .select("id, stripe_subscription_id, services, plan_lines, sizes_json")

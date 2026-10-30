@@ -7,6 +7,8 @@
 - [ ] Booking/welcome/previsit/reminder messages, Pro checklist/photos/pay/help/orientation/onboarding and new cleaning agreement version.
 - [ ] Admin editable Deep Clean scope/minutes/history and KPI/Monday metrics.
 - [ ] Eight requested test cases, EN/ES desktop/phone evidence, Stripe test-only invoice and payout evidence; report failures honestly, no publication.
+  - Verified Oct 30: all five Stripe test prices; paid Size 2 test invoice $179; 94 focused tests; EN/ES review scroll gate and phone fit; catalog/photo/team-pay/capacity/duplicate guards applied. No live prices or publication.
+  - Still incomplete: operational first-visit booking/payment/dispatch/pay readback, durable paid-order retry, full admin acknowledgment history, three-day/Monday messaging, Spanish agreement and all orientation screenshots. Walkaround Deep Clean approval is safely held until it uses the shared booking ledger; existing member visit attachment is available.
 
 ## Susan equipment approval and emails (Oct 30)
 - [x] Repair equipment approval readback, expose missing evidence/errors and retain required evidence gates.

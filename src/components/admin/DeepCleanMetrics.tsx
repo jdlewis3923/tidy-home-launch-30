@@ -1,0 +1,9 @@
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
+type Metrics={bookings:number;revenue_cents:number;first_visit_bookings:number;by_size_zip:Array<{size_tier:number;zip:string;bookings:number;revenue_cents:number}>};
+export default function DeepCleanMetrics(){
+ const {language}=useLanguage();const es=language==='es';
+ const q=useQuery({queryKey:['admin_deep_clean_metrics'],queryFn:async()=>{const {data,error}=await supabase.rpc('admin_deep_clean_metrics');if(error)throw error;return data as unknown as Metrics;}});
+ return <section className="mx-auto max-w-7xl border-y border-border px-6 py-5"><h2 className="font-bold text-foreground">{es?'Limpieza profunda':'Deep Clean'}</h2><dl className="mt-3 grid gap-4 sm:grid-cols-3"><div><dt className="text-sm text-muted-foreground">{es?'Reservas':'Bookings'}</dt><dd className="text-2xl font-bold">{q.data?.bookings??'—'}</dd></div><div><dt className="text-sm text-muted-foreground">{es?'Ingresos reservados':'Booked revenue'}</dt><dd className="text-2xl font-bold">{q.data?`$${(q.data.revenue_cents/100).toFixed(2)}`:'—'}</dd></div><div><dt className="text-sm text-muted-foreground">{es?'En primera visita':'On first visit'}</dt><dd className="text-2xl font-bold">{q.data?.first_visit_bookings??'—'}</dd></div></dl>{q.data?.by_size_zip.map(row=><p key={`${row.size_tier}:${row.zip}`} className="mt-3 text-sm">{row.zip} · {es?'Tamaño':'Size'} {row.size_tier} · {row.bookings} · ${(row.revenue_cents/100).toFixed(2)}</p>)}{q.isError&&<p role="alert" className="text-sm text-destructive">{es?'No se pudieron cargar los datos.':'Could not load metrics.'}</p>}</section>;
+}

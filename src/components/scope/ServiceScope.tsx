@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { VISIT_RULES } from "@/lib/visitRules";
+import BeforeYouBook, { type ReviewProps } from './BeforeYouBook';
 import {
   GROUP_NAME, GROUP_SCOPES, SCOPE_TITLE, grp, isCarGroup, txt, useServiceScope,
   type ScopeGroup, type ScopeRow, type ScopeService,
@@ -129,7 +130,11 @@ export function checkboxText(group: ScopeGroup, lang: string) {
 }
 
 /** One required checkbox per selected service, plus the short "How visits work" link. */
-export function ScopeAcceptChecks({ groups, checked, onChange }: { groups: ScopeGroup[]; checked: Partial<Record<ScopeGroup, boolean>>; onChange: (next: Partial<Record<ScopeGroup, boolean>>) => void }) {
+export function ScopeAcceptChecks(props: ReviewProps) {
+  return <BeforeYouBook {...props} />;
+}
+
+function LegacyScopeAcceptChecks({ groups, checked, onChange }: ReviewProps) {
   const { language } = useLanguage();
   const [rulesOpen, setRulesOpen] = useState(false);
   const isMobile = useIsMobile();

@@ -11,12 +11,14 @@ import "@/styles/orientation.css";
 import { OrientationSlide } from "@/components/pro/orientation/OrientationSlide";
 import { useServiceScope } from '@/lib/serviceScope';
 import { orientationCopyWithScope } from '@/lib/orientation-scope';
+import { useAddonCatalog } from '@/hooks/useAddonCatalog';
 
 export default function ProOrientationSection() {
   const { sectionId = "" } = useParams(); const nav = useNavigate();
   const access = useOrientationAccess();
   const scope = useServiceScope();
-  const copy = orientationCopyWithScope(scope.data ?? []);
+  const catalog = useAddonCatalog();
+  const copy = orientationCopyWithScope(scope.data ?? [], catalog.data ?? []);
   const section = ORIENTATION_SECTIONS.find(s => s.id === sectionId);
   const unlocked = Boolean(section && access.state && stageNumber(access.state.stage) >= section.min);
   const [busy, setBusy] = useState(false); const [error, setError] = useState(false);

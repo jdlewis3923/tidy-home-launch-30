@@ -125,9 +125,9 @@ const config: ServiceLandingConfig = {
     targetServices: "cleaning,lawn",
   },
   seo: {
-    title: "House Cleaning in Pinecrest + Kendall | Tidy Home Concierge",
+    title: "House Cleaning + Deep Clean Add-On | Pinecrest & Kendall | Tidy",
     description:
-      "House cleaning in Pinecrest and Kendall (33156, 33183, 33186). One flat price per visit from $139. The same pro for each service, every visit. No contracts. Surface-safe on stone and hardwood. Book in about 2 minutes.",
+      "Recurring house cleaning in Pinecrest and Kendall with a size-priced deep clean add-on for members. Weekly plans include a quarterly deep clean. No one-time cleans without a plan.",
     canonical: "https://jointidy.co/house-cleaning",
     priceRange: "$139–$595",
     service: {
