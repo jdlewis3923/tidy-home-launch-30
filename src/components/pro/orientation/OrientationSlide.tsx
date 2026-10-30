@@ -5,8 +5,8 @@ import { ORIENTATION_COPY, ORIENTATION_SECTIONS, type OrientationBlock } from "@
 import { orientationVisual } from "@/lib/orientation-design";
 
 export type OrientationSlideData = { section: typeof ORIENTATION_SECTIONS[number]; block: OrientationBlock; index: number };
-export function orientationSlides(sections: readonly typeof ORIENTATION_SECTIONS[number][]): OrientationSlideData[] {
-  return sections.flatMap(section => ORIENTATION_COPY[section.id].map((block, index) => ({ section, block, index })));
+export function orientationSlides(sections: readonly typeof ORIENTATION_SECTIONS[number][], copy = ORIENTATION_COPY): OrientationSlideData[] {
+  return sections.flatMap(section => copy[section.id].map((block, index) => ({ section, block, index })));
 }
 export function OrientationSlide({ slide, page, total, exporting = false }: { slide: OrientationSlideData; page: number; total: number; exporting?: boolean }) {
   const parent = useRef<HTMLDivElement>(null);

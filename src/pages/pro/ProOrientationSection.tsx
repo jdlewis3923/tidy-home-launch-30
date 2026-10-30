@@ -9,17 +9,22 @@ import { ORIENTATION_COPY, ORIENTATION_SECTIONS, stageNumber } from "@/lib/orien
 import { OrientationFooter } from "@/components/pro/orientation/OrientationContent";
 import "@/styles/orientation.css";
 import { OrientationSlide } from "@/components/pro/orientation/OrientationSlide";
+import { useServiceScope } from '@/lib/serviceScope';
+import { orientationCopyWithScope } from '@/lib/orientation-scope';
 
 export default function ProOrientationSection() {
   const { sectionId = "" } = useParams(); const nav = useNavigate();
   const access = useOrientationAccess();
+  const scope = useServiceScope();
+  const copy = orientationCopyWithScope(scope.data ?? []);
   const section = ORIENTATION_SECTIONS.find(s => s.id === sectionId);
   const unlocked = Boolean(section && access.state && stageNumber(access.state.stage) >= section.min);
   const [busy, setBusy] = useState(false); const [error, setError] = useState(false);
   useEffect(() => {
     if (access.userId && section && unlocked) void supabase.rpc("pro_orientation_touch" as never, { _section_id: section.id, _complete: false } as never);
   }, [access.userId, section?.id, unlocked]);
-  if (access.loading) return <main className="orientation-app p-6">Loading… / Cargando…</main>;
+  if (access.loading || scope.isLoading) return <main className="orientation-app p-6">Loading… / Cargando…</main>;
+  if (scope.isError) return <main className="orientation-app p-6" role="alert">Service scope unavailable. / Alcance no disponible.</main>;
   if (!access.userId) return <Navigate to="/pro/login" replace />;
   if (!section || !unlocked) return <Navigate to="/pro/orientation" replace />;
   const complete = async () => {
