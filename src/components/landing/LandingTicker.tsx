@@ -13,7 +13,7 @@ const ITEMS = [
   "Locked Monthly Price",
   "Cancel Anytime",
   "Photo Verified Visits",
-  "Eco-Safe Products",
+  "Surface-safe on stone and hardwood",
 ];
 
 /**

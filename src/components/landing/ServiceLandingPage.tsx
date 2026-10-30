@@ -1,5 +1,5 @@
 import { ScopeSummary } from "@/components/scope/ServiceScope";
-import { groupsFor } from "@/lib/serviceScope";
+import { groupsFor, GROUP_SCOPES, useServiceScope, txt } from "@/lib/serviceScope";
 import { Link } from "react-router-dom";
 import { Check, MapPin, Sparkles, ShieldCheck, BadgeCheck, Camera, Clock3, LockKeyhole, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -134,6 +134,12 @@ const ServiceLandingPageInner = ({ config }: Props) => {
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
   const { t, language } = useLanguage();
   const launchCfg = useLaunchConfig();
+  const scope = useServiceScope();
+  const services = GROUP_SCOPES[groupsFor([config.signupServiceParam])[0]];
+  const includedRows = (scope.data ?? []).filter(row => services.includes(row.service) && row.section === "included" && row.service !== "cleaning_deep_clean");
+  const addonRows = (scope.data ?? []).filter(row => services.includes(row.service) && row.section === "add_on");
+  const includedText = includedRows.map(row => txt(row, language)).join(" ");
+  const faqs = config.faqs.map(item => ({q: t(item.q), a: item.q.startsWith("What's actually included") ? includedText : t(item.a)}));
   // Fires view_pricing once per pageview when the plan cards scroll into view.
   const pricingRef = useViewPricingObserver({ service: config.signupServiceParam });
 
@@ -200,7 +206,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
         description={t(config.seo.description)}
         ogImage={config.heroImage}
         /* Built from the same array the FAQ section renders — cannot drift. */
-        faqs={config.faqs.map((f) => ({ q: t(f.q), a: t(f.a) }))}
+        faqs={faqs}
         breadcrumb={[
           { name: "Home", url: "https://jointidy.co/" },
           { name: t(config.eyebrow), url: config.seo.canonical },
@@ -419,18 +425,17 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
           <Reveal>
             <ul className="grid sm:grid-cols-2 gap-3 bg-card border rounded-xl p-6">
-              {config.included.map((item) => (
-                <li key={item} className="flex items-start gap-2 text-sm text-foreground/85">
+              {includedRows.map((row) => (
+                <li key={row.id} className="flex items-start gap-2 text-sm text-foreground/85">
                   <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
-                  {t(item)}
+                  {txt(row, language)}
                 </li>
               ))}
             </ul>
           </Reveal>
 
-          {config.addOnsNote && (
-            <p className="mt-4 text-xs text-text-light/90">{t(config.addOnsNote)}</p>
-          )}
+          {scope.isError && <p role="alert" className="mt-4 text-sm text-destructive">{language === "es" ? "No se pudo cargar el alcance. Intenta de nuevo." : "Service scope could not load. Please try again."}</p>}
+          {addonRows.length > 0 && <p className="mt-4 text-xs text-text-light/90">{language === "es" ? "Servicios adicionales: " : "Available as add-ons: "}{addonRows.map(row => txt(row, language)).join(" · ")}</p>}
 
           {/* Per-service surcharge only — a cleaning page never mentions lawn
               or vehicle sizes. */}
@@ -502,7 +507,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">{t("Questions, answered.")}</h2>
           </Reveal>
           <Reveal>
-            <LandingFaq items={config.faqs.map((f) => ({ q: t(f.q), a: t(f.a) }))} />
+            <LandingFaq items={faqs} />
           </Reveal>
         </div>
       </section>

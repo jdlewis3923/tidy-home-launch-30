@@ -63,12 +63,9 @@ const SECTIONS: { title: string; fields: [string, string, KitFieldType][] }[] = 
     ],
   },
   {
-    title: "Apparel",
+    title: "Vest / Chaleco",
     fields: [
-      ["shirt_size", "Shirt size", "text"],
-      ["shirt_cut", "Shirt cut", "text"],
-      ["vest_size", "Hi-vis vest (lawn only)", "text"],
-      ["cap", "Cap", "text"],
+      ["vest_size", "Vest size / Talla de chaleco (S–3XL)", "text"],
     ],
   },
   {

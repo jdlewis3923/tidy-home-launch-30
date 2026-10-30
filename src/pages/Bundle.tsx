@@ -171,7 +171,7 @@ const BundleInner = () => {
           <div><ShieldCheck /><strong>{t("Background-Checked Pros")}</strong></div>
           <div><Users /><strong>{t("The same pro for each service, every visit")}</strong></div>
           <div><LockKeyhole /><strong>{t("Locked monthly price")}</strong></div>
-          <div><Leaf /><strong>{t("Eco-Safe Products")}</strong></div>
+          <div><Leaf /><strong>{t("Surface-safe on stone and hardwood")}</strong></div>
         </div>
       </section>
 

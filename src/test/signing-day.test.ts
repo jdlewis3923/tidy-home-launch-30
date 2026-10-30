@@ -10,7 +10,7 @@ describe("Signing day rules", () => {
     expect(signingCode.safeParse("123456").success).toBe(true);
     expect(signingCode.safeParse("abc123").success).toBe(false);
   });
-  it("provides two cleaning polos", () => expect(kitItemsFor("cleaning")[0].qty).toBe(2));
-  it("provides two lawn tees and two vests", () => expect(kitItemsFor("lawn").slice(0,2).map(i => i.qty)).toEqual([2,2]));
-  it("provides two car tees", () => expect(kitItemsFor("car")[0].qty).toBe(2));
+  it("provides two cleaning vests", () => expect(kitItemsFor("cleaning")[0].qty).toBe(2));
+  it("provides two lawn vests and one badge", () => expect(kitItemsFor("lawn").slice(0,2).map(i => i.qty)).toEqual([2,1]));
+  it("provides two car vests", () => expect(kitItemsFor("car")[0].qty).toBe(2));
 });

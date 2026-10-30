@@ -72,17 +72,7 @@ const config: ServiceLandingConfig = {
     },
   ],
 
-  included: [
-    "Mow to precise height",
-    "Edge all borders",
-    "Blow hardscapes clean",
-    "Weed-whack fence lines",
-    "Bag or mulch clippings",
-    "The same pro for each service, every visit",
-    "Background-checked pros",
-    "Locked price — never surprise-priced",
-  ],
-  addOnsNote: "Available as add-ons: weed removal, leaf & debris cleanup, bed edge reset.",
+  included: [], // Active service_scope supplies included rows and add-ons.
   surchargeNote:
     "Larger than 12,000 sq ft of grass? We quote it by hand — no price online.",
 
@@ -116,7 +106,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's actually included in a visit?",
-      a: "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and mulching clippings back into the lawn. A bed edge reset is available as an add-on.",
+      a: "", // Filled from active service_scope in the shared page.
     },
     {
       q: "Who does the work?",
