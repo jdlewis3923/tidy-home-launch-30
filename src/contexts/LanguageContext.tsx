@@ -3,6 +3,8 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 type Language = "en" | "es";
 
 const translations: Record<string, string> = {
+  "House Cleaning + Deep Clean Add-On | Pinecrest & Kendall | Tidy": "Limpieza del hogar + Limpieza profunda adicional | Pinecrest y Kendall | Tidy",
+  "Recurring house cleaning in Pinecrest and Kendall with a size-priced deep clean add-on for members. Weekly plans include a quarterly deep clean. No one-time cleans without a plan.": "Limpieza recurrente en Pinecrest y Kendall con limpieza profunda adicional para miembros, según el tamaño del hogar. Los planes semanales incluyen limpieza profunda trimestral. No ofrecemos limpiezas únicas sin plan.",
   "Surface-safe on stone and hardwood": "Seguro para piedra y madera",
   "Tidy is built for ongoing upkeep. Weekly cleaning plans include a deeper clean every 13th week. Extra detail work, like inside the oven or fridge, interior windows and baseboards, can be added to any visit. One-time deep cleans, move-in or move-out, and post-construction cleaning aren't offered.": "Tidy está pensado para el mantenimiento continuo. Los planes semanales de limpieza incluyen una limpieza más profunda cada 13 semanas. Puedes añadir detalles como el interior del horno o refrigerador, ventanas interiores y zócalos a cualquier visita. No ofrecemos limpiezas profundas únicas, de mudanza ni después de obras.",
   "Yes. Extras like inside the oven or fridge, bed edge reset and interior conditioning can be added through your dashboard.": "Sí. Puedes añadir el interior del horno o refrigerador, redefinición de bordes de jardín y acondicionamiento interior desde tu panel.",

@@ -22,7 +22,7 @@ function ReviewCard({ group, checked, onCheck, cleaningSize, selectedAddons = []
   const scope = useServiceScope(); const catalog = useAddonCatalog();
   const ref = useRef<HTMLDivElement>(null); const [unlocked, setUnlocked] = useState(false);
   const scopes = GROUP_SCOPES[group].filter(s => s !== 'cleaning_deep_clean');
-  const rows = (scope.data ?? []).filter(r => scopes.includes(r.service));
+  const rows = (scope.data ?? []).filter(r => scopes.some(s => s === r.service));
   const name = GROUP_NAME[group][es ? 1 : 0];
   useEffect(() => {
     setUnlocked(false);
