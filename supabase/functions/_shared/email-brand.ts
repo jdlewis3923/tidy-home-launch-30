@@ -46,7 +46,7 @@ const ART: Array<{ match: RegExp; art: TidyEmailArt }> = [
   { match: /(badge photo|badge_photo|photo retake|photo_retake|retake|foto de (?:perfil|identificación))/i, art: photo('photo', 'Badge photo', 'A portrait being taken against a plain wall') },
   { match: /(background check|checkr|screening)/i, art: photo('verify', 'Background check', 'A checklist being reviewed in a bright entryway') },
   { match: /(insurance|coi|certificate|liability)/i, art: photo('verify', 'Insurance', 'A checklist being reviewed in a bright entryway') },
-  { match: /(kit|uniform|polo|badge|magnet|shirt)/i, art: photo('kit', 'Your Tidy kit', 'Folded polos, a badge and a vest on a table') },
+  { match: /(kit|vest|badge|magnet|chaleco)/i, art: photo('kit', 'Your Tidy kit', 'Vests and a photo ID badge on a table') },
   { match: /(all set|you're set|ready to start|welcome|onboard|getting started|next step|bienvenid)/i, art: photo('welcome', 'Welcome to Tidy', 'A Tidy Pro arriving at a bright Miami home') },
   { match: /(visit|appointment|schedule|booking|arriv|reschedul)/i, art: photo('visit', 'Your visit', 'A phone and calendar on a sunny desk') },
   { match: /(lawn|yard|mow)/i, art: photo('lawn', 'Lawn', 'A manicured lawn in front of a Miami home') },

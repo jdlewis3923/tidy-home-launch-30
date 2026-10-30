@@ -1898,6 +1898,34 @@
       "when": 1793333586100,
       "tag": "0270_vest_only_intake_readiness",
       "breakpoints": true
+    },
+    {
+      "idx": 271,
+      "version": "7",
+      "when": 1793334636196,
+      "tag": "0271_member_home_profile",
+      "breakpoints": true
+    },
+    {
+      "idx": 272,
+      "version": "7",
+      "when": 1793334711183,
+      "tag": "0272_first_three_visit_checkins_and_estate_metrics",
+      "breakpoints": true
+    },
+    {
+      "idx": 273,
+      "version": "7",
+      "when": 1793335216487,
+      "tag": "0273_checkin_reply_idempotency_and_profile_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 274,
+      "version": "7",
+      "when": 1793335480543,
+      "tag": "0274_agreement_scope_snapshot_at_signing",
+      "breakpoints": true
     }
   ]
 }

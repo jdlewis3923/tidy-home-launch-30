@@ -7,7 +7,7 @@ const config: ServiceLandingConfig = {
   serviceSlug: "car-detailing",
   signupServiceParam: "detailing",
   eyebrow: "Car Care",
-  h1: "Mobile Car Detailing in Pinecrest & Kendall",
+  h1: "Car Care in Pinecrest & Kendall",
   subhead: "Shine Complete — 3 maintenance washes a month plus 2 full details a year.",
   intentConfirm: "The same pro for each service, every visit. Locked monthly price. Cancel anytime.",
   systemBridge: "Tidy isn't just detailing — it's a system for your entire home.",

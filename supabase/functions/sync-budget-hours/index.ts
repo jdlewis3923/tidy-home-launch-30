@@ -9,7 +9,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
 import { stripeSecretKey } from '../_shared/stripe-mode.ts';
-import { CAR_WASH_LOOKUP_KEYS, SERVICE_LOOKUP_KEYS, type CanonSize } from '../_shared/pricing-canon.ts';
+import { CAR_WASH_LOOKUP_KEYS, SERVICE_LOOKUP_KEYS, cleaningLookupKey, ESTATE_BUDGET_HOURS, type CanonSize } from '../_shared/pricing-canon.ts';
 
 const SIZES: CanonSize[] = [1, 2, 3];
 const HOURS = {
@@ -23,6 +23,13 @@ type Want = { meta: Record<string, string>; rows: { service: string; visit_kind:
 
 function wanted(): Record<string, Want> {
   const w: Record<string, Want> = {};
+  for (const size of [4,5] as const) {
+    for (const cadence of ['monthly','biweekly','weekly'] as const) {
+      for (const yearly of [false,true]) {
+        w[cleaningLookupKey(size,cadence,yearly)] = {meta:{budget_hours:String(ESTATE_BUDGET_HOURS[size])},rows:[{service:'cleaning',visit_kind:'standard',size_tier:size,field:'budget_hours'}]};
+      }
+    }
+  }
   for (const service of ['cleaning', 'lawn'] as const) {
     for (const size of SIZES) {
       for (const cadence of ['monthly', 'biweekly', 'weekly'] as const) {

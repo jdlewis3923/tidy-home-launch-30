@@ -3812,16 +3812,19 @@ export type Database = {
       home_notes: {
         Row: {
           body: string
+          profile: Json
           updated_at: string
           user_id: string
         }
         Insert: {
           body?: string
+          profile?: Json
           updated_at?: string
           user_id: string
         }
         Update: {
           body?: string
+          profile?: Json
           updated_at?: string
           user_id?: string
         }
@@ -5432,6 +5435,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      member_visit_checkins: {
+        Row: {
+          is_test: boolean
+          pro_id: string | null
+          release_at: string
+          score: number | null
+          scored_at: string | null
+          service: Database["public"]["Enums"]["service_type"]
+          user_id: string
+          visit_id: string
+          visit_number: number
+        }
+        Insert: {
+          is_test?: boolean
+          pro_id?: string | null
+          release_at: string
+          score?: number | null
+          scored_at?: string | null
+          service: Database["public"]["Enums"]["service_type"]
+          user_id: string
+          visit_id: string
+          visit_number: number
+        }
+        Update: {
+          is_test?: boolean
+          pro_id?: string | null
+          release_at?: string
+          score?: number | null
+          scored_at?: string | null
+          service?: Database["public"]["Enums"]["service_type"]
+          user_id?: string
+          visit_id?: string
+          visit_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_visit_checkins_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: true
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message_queue: {
         Row: {
@@ -10668,6 +10715,7 @@ export type Database = {
         }[]
       }
       admin_demand_report: { Args: never; Returns: Json }
+      admin_estate_metrics: { Args: never; Returns: Json }
       admin_evidence_pack: {
         Args: { _email: string; _from: string; _to: string }
         Returns: Json
@@ -11010,6 +11058,7 @@ export type Database = {
         Returns: Json
       }
       contract_load: { Args: { _token: string }; Returns: Json }
+      contract_scope_body: { Args: { _template: string }; Returns: string }
       contractor_visit_pay_cents: {
         Args: {
           _cadence: string
@@ -11093,6 +11142,10 @@ export type Database = {
       dispatch_due_social_posts: { Args: never; Returns: number }
       ensure_referral_code: { Args: never; Returns: string }
       feature_enabled: { Args: { _key: string }; Returns: boolean }
+      first_three_checkin_reply: {
+        Args: { _body: string; _phone: string; _sid: string }
+        Returns: Json
+      }
       founding_address_key: {
         Args: { _street: string; _zip: string }
         Returns: string
@@ -11496,6 +11549,7 @@ export type Database = {
         }
         Returns: Json
       }
+      member_checkin_send_time: { Args: { _at: string }; Returns: string }
       member_guide_accepted: { Args: { _user: string }; Returns: boolean }
       member_ops_tick: { Args: never; Returns: Json }
       member_rate_card_version: { Args: { _user: string }; Returns: number }
@@ -11835,6 +11889,7 @@ export type Database = {
         Returns: Json
       }
       pro_home_note: { Args: { _visit: string }; Returns: string }
+      pro_home_profile: { Args: { _visit: string }; Returns: Json }
       pro_job_card: { Args: { _visit: string }; Returns: Json }
       pro_lawn_job_info: {
         Args: { _visit: string }

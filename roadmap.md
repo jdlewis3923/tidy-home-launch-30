@@ -7,7 +7,8 @@
 - [ ] Live service-scope orientation, additions and unchanged-design bilingual fit checks/screenshots.
 - [ ] Public service lists/add-ons from scope and removal of unsupported claims; phone EN/ES checks.
 - [ ] Optional vest-only kits/intake/vendor orders/contracts/messages and legacy preservation.
-- [ ] Produce requested test evidence, changed inventory and remaining limitations; no publishing.
+- [x] Focused regression tests: 86 pass; 78 named bilingual slide screenshots and phone public-page captures created; no frontend publication.
+- [ ] Remaining verification: insurance slide overflow; Spanish agreement still uses the legacy uploaded ICA rather than combined template; full signing/check-in/home-profile save-readback and payout acceptance not yet verified.
 
 ## Onboarding pack and redo guardrail (Oct 29)
 - [x] Send Susan approved tomorrow 3:30 PM link-coming confirmation; provider accepted.
@@ -284,7 +285,7 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Run browser acceptance checks, capture requested screenshots and measurements, then delete test records
 
 ## Pro kit standard (new, 2026-09)
-- Cleaning: 2 embroidered polos + photo ID badge (no vest). Lawn: 2 tees + 2 hi-vis vests + badge. Car care: 2 tees + badge.
+- Cleaning/car: 2 navy vests + photo ID badge. Lawn: 2 hi-vis vests + badge. Vests optional over own clothing; S–3XL; legacy apparel records retained.
 - Magnets optional on all three services, $15/month advertising credit with the Friday deposit, signed vehicle advertising agreement first, household magnet test before ordering.
 - Intake submission now auto-builds the vendor order, emails the owner and the Pro (badge photo link). No manual send step.
 - Open: legal review of the vehicle advertising agreement + ICA before the 10th signed Pro (tracked in /admin/documents).

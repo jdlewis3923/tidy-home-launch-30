@@ -16,7 +16,7 @@ export const QUESTIONS: Question[] = [
     prompt: 'A customer is not home when you arrive on time. What do you do first?',
     options: [
       'Leave immediately and mark the visit canceled',
-      'Wait 5 minutes, then contact Tidy support before doing anything else',
+      'Wait 15 minutes, contact the member and Tidy, photograph the door and record a lockout',
       'Walk in if a side door is unlocked',
       'Reschedule yourself directly with the customer',
     ],
@@ -52,12 +52,12 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 'q5_uniform',
-    prompt: 'Which of these is acceptable jobsite attire?',
+    prompt: 'How does your Tidy vest work?',
     options: [
-      'Tank top and flip-flops',
-      'Clean closed-toe shoes, clean pants/shorts, clean shirt — no offensive graphics',
-      'Whatever is most comfortable for that day',
-      'Pajamas if you are tired',
+      'Tidy dictates all my clothing',
+      'The vest is optional over my own clothes; identity is on my photo ID badge',
+      'The vest must have my full name printed on it',
+      'I must change clothes at every home',
     ],
     correctIndex: 1,
   },

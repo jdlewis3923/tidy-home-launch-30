@@ -46,4 +46,4 @@
 
 
 - Onboarding packs use signing-day, admin-only audits and guarded Pro email/SMS; unsigned links resolve current service templates — why: sends retain gates and cannot sign retired wording.
-- Redo completion locks member history and records a private decision before the visit trigger credits payout; UI/email wording mirrors redo-pay — why: concurrent redos cannot both earn pay or double-credit.
+- Redo decisions lock history before payout; check-in replies lock phone/SID and profiles use timed assignment guards — why: private data and pay never duplicate or leak.
