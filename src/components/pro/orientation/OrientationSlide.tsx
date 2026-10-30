@@ -14,6 +14,21 @@ export function OrientationSlide({ slide, page, total, exporting = false }: { sl
   const [entered, setEntered] = useState(exporting);
   const [ready, setReady] = useState(exporting);
   useEffect(() => {
+    const root = parent.current;
+    if (!root) return;
+    const fit = () => {
+      if (window.innerWidth < 900 && !exporting) return;
+      const body = root.querySelector<HTMLElement>('.orientation-slide-body');
+      if (!body) return;
+      const children = Array.from(body.children).filter((e): e is HTMLElement => e instanceof HTMLElement);
+      children.forEach(e => { e.style.zoom = '1'; });
+      const ratio = Math.min(1, body.clientHeight / body.scrollHeight, body.clientWidth / body.scrollWidth);
+      if (ratio < 1) children.forEach(e => { e.style.zoom = String(ratio * .97); });
+    };
+    const timer = window.setTimeout(fit, 100);
+    return () => window.clearTimeout(timer);
+  }, [slide.block, ready, exporting]);
+  useEffect(() => {
     if (exporting || !parent.current) return;
     let cancelled = false;
     // Reveal after the photographs load, not while the viewer is still waiting for them.
