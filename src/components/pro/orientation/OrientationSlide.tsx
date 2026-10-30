@@ -22,7 +22,7 @@ export function OrientationSlide({ slide, page, total, exporting = false }: { sl
       if (!body) return;
       const children = Array.from(body.children).filter((e): e is HTMLElement => e instanceof HTMLElement);
       children.forEach(e => { e.style.zoom = '1'; });
-      const ratio = Math.min(1, body.clientHeight / body.scrollHeight, body.clientWidth / body.scrollWidth);
+      const ratio = slide.block.title === 'Insurance' ? .8 : Math.min(1, body.clientHeight / body.scrollHeight, body.clientWidth / body.scrollWidth);
       if (ratio < 1) children.forEach(e => { e.style.zoom = String(ratio * .97); });
     };
     const timer = window.setTimeout(fit, 100);

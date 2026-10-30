@@ -16,7 +16,11 @@ async function compress(file: File): Promise<string> {
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Photo unavailable');
   ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close();
-  return canvas.toDataURL('image/jpeg', .65);
+  let quality = .65;
+  let photo = canvas.toDataURL('image/jpeg', quality);
+  while (photo.length > 220000 && quality > .2) { quality -= .1; photo = canvas.toDataURL('image/jpeg', quality); }
+  if (photo.length > 220000) throw new Error('Photo too large');
+  return photo;
 }
 export default function HomeProfile({ beforeFirstVisit = false }: { beforeFirstVisit?: boolean }) {
   const { language } = useLanguage(); const es = language === 'es';

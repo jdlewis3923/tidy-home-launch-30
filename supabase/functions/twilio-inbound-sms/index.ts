@@ -307,6 +307,9 @@ Deno.serve(async (req) => {
     if (hiringHandled) return twiml();
     const { data: earlyScore, error: earlyError } = await supabase.rpc('first_three_checkin_reply', { _phone: from, _body: body, _sid: messageSid ?? crypto.randomUUID() });
     if (earlyError) console.error('[twilio-inbound-sms] early score failed', earlyError.message);
+    if (earlyScore?.ambiguous) {
+      return twiml("Please rate the visit in your Tidy account so we match your score correctly: https://jointidy.co/dashboard/history / Califica la visita en tu cuenta Tidy para identificarla correctamente.");
+    }
     if (earlyScore?.handled) return twiml();
     const { data: lifecycleReply, error: lifecycleError } = await supabase.rpc('lifecycle_inbound_reply', {
       _phone: from, _body: body, _sid: messageSid ?? crypto.randomUUID(),

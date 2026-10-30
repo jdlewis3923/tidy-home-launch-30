@@ -620,7 +620,6 @@ const translations: Record<string, string> = {
   "Photo Verified Visits": "Fotos Tras Cada Visita",
   "Serving 33156 · 33183 · 33186": "Sirviendo 33156 · 33183 · 33186",
   "Pinecrest & Kendall — Miami-Dade": "Pinecrest y Kendall — Miami-Dade",
-"Eco-Safe Products": "Productos Ecológicos",
 
   // Neighborhood trust
   "Built for Pinecrest + Kendall.": "Hecho para Pinecrest + Kendall.",
@@ -705,7 +704,6 @@ const translations: Record<string, string> = {
 "Edge all borders": "Bordeado de todas las orillas",
   "Blow hardscapes clean": "Soplado de aceras y entradas",
   "Weed-whack fence lines": "Recorte a lo largo de las cercas",
-  "Bag or mulch clippings": "Recoger o triturar la grama cortada",
   "Bush trim (weekly)": "Poda de arbustos (semanal)",
     "Locked $45 a month — never surprise-priced": "$45 al mes, precio fijo — nunca con precios sorpresa",
   // Lawn Care testimonials
