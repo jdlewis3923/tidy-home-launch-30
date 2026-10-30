@@ -161,7 +161,10 @@ const FAQ = () => {
                     const policy=MEMBER_GUIDE.find(s=>s.id===POLICY_QUESTIONS[item.q]);
                     const wording=policy?.[language==='es'?'es':'en'];
                     const group = item.q === 'What does house cleaning include?' ? 'cleaning' : item.q === 'What does lawn care include?' ? 'lawn' : item.q === 'What does Car Care include?' ? 'car_care' : undefined;
-                    const scopeText = group ? (scope.data ?? []).filter(row => GROUP_SCOPES[group].includes(row.service) && row.section === 'included' && row.service !== 'cleaning_deep_clean').map(row => txt(row, language)).join(' ') : null;
+                    const deepItems = (scope.data ?? []).filter(row => row.addon_key === 'deep_clean').map(row => txt(row, language)).join(', ');
+                    const scopeText = item.q === 'Are deep cleaning or restoration services included?'
+                      ? language === 'es' ? `Tus visitas regulares mantienen tu hogar limpio. Cuando quieras más, añade una Limpieza profunda a cualquier visita: ${deepItems}, con precio según el tamaño del hogar. Los planes semanales incluyen una limpieza profunda trimestral cada 13 semanas. No ofrecemos limpiezas únicas sin plan, de mudanza (entrada o salida), ni después de obras.` : `Your regular visits keep your home clean. When you want more, add a Deep Clean to any visit: ${deepItems}, priced by home size. Weekly plans include a quarterly deep clean every 13th week. We don't offer one-time cleans without a plan, move-in or move-out, or post-construction cleaning.`
+                      : group ? (scope.data ?? []).filter(row => GROUP_SCOPES[group].includes(row.service) && row.section === 'included' && row.service !== 'cleaning_deep_clean').map(row => txt(row, language)).join(' ') : null;
                     const guarantee = item.q === 'What if something goes wrong during a visit?' ? (language === 'es' ? "Toca 'Algo no quedó bien' en tu panel y volvemos en 48 horas. Gratis." : item.a) : null;
                     return (
                       <div key={key} className="bg-card border rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-md">

@@ -1,5 +1,6 @@
 import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
-import { createClient, corsHeaders } from 'npm:@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2';
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), {status,headers:{...corsHeaders,'Content-Type':'application/json'}});
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok',{headers:corsHeaders});
