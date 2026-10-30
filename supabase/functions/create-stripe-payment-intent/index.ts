@@ -336,6 +336,7 @@ Deno.serve(async (req) => {
             );
           if (addonErr) throw new Error(`addon catalog read failed: ${addonErr.message}`);
           for (const a of input.addons) {
+            if(a.addon_name==='deep_clean')continue;
             const row = addonRows?.find((r) => r.addon_name === a.addon_name);
             if (!row) continue;
             items.push({ price: priceIdOf(row), quantity: a.qty });

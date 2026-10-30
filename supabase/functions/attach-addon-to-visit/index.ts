@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     const {data:q,error:qError} = await admin.rpc('deep_clean_catalog_quote',{_addon_key:addon_key,_size:visit.size_tier,_quarterly:visit.visit_kind === 'quarterly_deep_clean'});
     if (qError || !q) return jsonResponse({ok:false,error:qError?.message ?? 'quote_unavailable'},409);
     addonName=q.display_name; addonPriceDollars=q.price_cents/100; addon.price_cents=q.price_cents; addon.lookup_key=q.lookup_key;
-    payCents=Math.round(q.price_cents*0.4); resolvedVisitId=visit.id;
+    payCents=q.pro_pay_cents; resolvedVisitId=visit.id;
     if(addon_key==='deep_clean') {
       const {error:fitError} = await admin.rpc('deep_clean_capacity_check',{_visit:visit.id,_minutes:q.added_minutes});
       if(fitError) return jsonResponse({ok:false,error:fitError.message},409);
@@ -159,6 +159,7 @@ Deno.serve(async (req) => {
         headers: {
           'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
           'Content-Type': 'application/x-www-form-urlencoded',
+          ...(addon_key==='deep_clean' ? {'Idempotency-Key':`deep-clean:${userId}:${resolvedVisitId}:${addon.lookup_key}`} : {}),
         },
         body: form.toString(),
       });
@@ -194,6 +195,12 @@ Deno.serve(async (req) => {
   }).select('id').single();
 
   if (insErr) {
+    if(addon_key==='deep_clean' && stripeInvoiceItemId && STRIPE_SECRET_KEY) {
+      const {data:existing}=await admin.from('addon_attaches').select('id').eq('stripe_invoice_item_id',stripeInvoiceItemId).maybeSingle();
+      if(existing)return jsonResponse({ok:true,attach_id:existing.id,status:'pending_visit'});
+      const reversal=await vendorFetch(`https://api.stripe.com/v1/invoiceitems/${stripeInvoiceItemId}`,{method:'DELETE',headers:{Authorization:`Bearer ${STRIPE_SECRET_KEY}`}});
+      if(!reversal.ok)await admin.from('admin_alerts').insert({alert_type:'deep_clean_billing_reconcile',level:'critical',category:'operations',title:'Deep Clean billing needs reconciliation',body:'The booking could not be saved and its invoice item could not be removed.',context:{user_id:userId,visit_id:resolvedVisitId,stripe_invoice_item_id:stripeInvoiceItemId}});
+    }
     return jsonResponse({ ok: false, error: 'insert_failed', detail: insErr.message }, 500);
   }
 
