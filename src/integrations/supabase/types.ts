@@ -10826,6 +10826,7 @@ export type Database = {
           stale: boolean
         }[]
       }
+      admin_deep_clean_metrics: { Args: never; Returns: Json }
       admin_deep_clean_minutes: { Args: { _minutes: Json }; Returns: undefined }
       admin_demand_report: { Args: never; Returns: Json }
       admin_estate_metrics: { Args: never; Returns: Json }
