@@ -15,16 +15,18 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { sendBrevoEmail as sendViaBrevo } from '../_shared/brevo-send.ts';
 import { vendorFetch } from '../_shared/http.ts';
+import { stripeSecretKey, stripeModeConflict } from '../_shared/stripe-mode.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
-const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
+const STRIPE_SECRET_KEY = stripeSecretKey();
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY');
 const ADDON_CONFIRMED_TEMPLATE_ID = 60;
 
 const BodySchema = z.object({
   addon_key: z.string().min(1),
+  visit_id: z.string().uuid().optional(),
   jobber_visit_id: z.string().optional(),
   visit_date: z.string().optional(),
   /** Redeem the bundle gift: one free premium add-on per month. Never a discount. */
@@ -58,7 +60,8 @@ Deno.serve(async (req) => {
   if (!parsed.success) {
     return jsonResponse({ ok: false, error: 'validation_failed', details: parsed.error.flatten().fieldErrors }, 400);
   }
-  const { addon_key, jobber_visit_id, visit_date, redeem_free } = parsed.data;
+  const { addon_key, visit_id, jobber_visit_id, visit_date, redeem_free } = parsed.data;
+  if (stripeModeConflict()) return jsonResponse({ok:false,error:'stripe_mode_mismatch'},409);
 
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -67,7 +70,7 @@ Deno.serve(async (req) => {
   // Look up addon from catalog (single source of truth)
   const { data: addon, error: addonErr } = await admin
     .from('addon_catalog')
-    .select('addon_key, display_name, price_cents, services, lookup_key, is_active, is_specialist, gift_eligible')
+    .select('addon_key, display_name, price_cents, services, lookup_key, is_active, is_specialist, gift_eligible, estate_bundle_only')
     .eq('addon_key', addon_key)
     .maybeSingle();
   if (addonErr) return jsonResponse({ ok: false, error: 'catalog_fetch_failed', detail: addonErr.message }, 500);
@@ -75,8 +78,23 @@ Deno.serve(async (req) => {
   if (!addon.lookup_key) {
     return jsonResponse({ ok: false, error: 'addon_missing_lookup_key', detail: 'Run reconcile-addon-catalog' }, 409);
   }
-  const addonName = addon.display_name as string;
-  const addonPriceDollars = (addon.price_cents as number) / 100;
+  let addonName = addon.display_name as string;
+  let addonPriceDollars = (addon.price_cents as number) / 100;
+  let payCents = Math.round(addon.price_cents * 0.4);
+  let resolvedVisitId: string | null = null;
+  if (addon_key === 'deep_clean' || addon.estate_bundle_only) {
+    if (!visit_id) return jsonResponse({ok:false,error:'choose_upcoming_cleaning_visit'},400);
+    const {data:visit} = await admin.from('visits').select('id,user_id,service,size_tier,visit_kind,status').eq('id',visit_id).maybeSingle();
+    if (!visit || visit.user_id !== userId || visit.service !== 'cleaning' || !['scheduled','on_the_way'].includes(visit.status)) return jsonResponse({ok:false,error:'not_your_upcoming_cleaning_visit'},403);
+    const {data:q,error:qError} = await admin.rpc('deep_clean_catalog_quote',{_addon_key:addon_key,_size:visit.size_tier,_quarterly:visit.visit_kind === 'quarterly_deep_clean'});
+    if (qError || !q) return jsonResponse({ok:false,error:qError?.message ?? 'quote_unavailable'},409);
+    addonName=q.display_name; addonPriceDollars=q.price_cents/100; addon.price_cents=q.price_cents; addon.lookup_key=q.lookup_key;
+    payCents=Math.round(q.price_cents*0.4); resolvedVisitId=visit.id;
+    if(addon_key==='deep_clean') {
+      const {error:fitError} = await admin.rpc('deep_clean_capacity_check',{_visit:visit.id,_minutes:q.added_minutes});
+      if(fitError) return jsonResponse({ok:false,error:fitError.message},409);
+    }
+  }
   const addonService = (addon.services?.[0] as string | undefined) ?? null;
 
   // Look up subscription for stripe_customer_id + the monthly gift allowance.
@@ -161,6 +179,8 @@ Deno.serve(async (req) => {
   const status = isFree || stripeInvoiceItemId ? 'pending_visit' : 'failed';
   const { data: attachRow, error: insErr } = await admin.from('addon_attaches').insert({
     user_id: userId,
+    visit_id: resolvedVisitId ?? visit_id ?? null,
+    contractor_pay_cents: payCents,
     jobber_visit_id: jobber_visit_id ?? null,
     stripe_invoice_item_id: stripeInvoiceItemId,
     stripe_addon_price_id: addon.lookup_key,
