@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ScopeBlock, VisitRulesList } from "@/components/scope/ServiceScope";
 import { GROUP_SCOPES, groupsFor, useScopeAtVersions, type ScopeService } from "@/lib/serviceScope";
+import ScopeChangeNotice from './ScopeChangeNotice';
 
 /** Account page: "Your plan includes" at the version each member is held to, plus "How visits work". */
 export function PlanScope({ services, carWash, monthlyLawn, weekly }: { services: string[]; carWash?: boolean; monthlyLawn?: boolean; weekly?: boolean }) {
@@ -34,6 +35,7 @@ export function PlanScope({ services, carWash, monthlyLawn, weekly }: { services
   return (
     <div className="rounded-2xl border border-[hsl(var(--hairline))] bg-white p-6 shadow-[0_4px_20px_rgba(15,23,42,0.04)]" data-testid="plan-scope">
       <h2 className="text-lg font-black text-ink">{es ? "Su plan incluye" : "Your plan includes"}</h2>
+      <ScopeChangeNotice />
       <div className="mt-4 space-y-8">
         {scopes.map((s) => <section key={s}><ScopeBlock service={s} rows={rows} lang={language} opts={{ monthlyLawn, weekly }} />
           {acknowledgments.data?.find(a => a.service === s) && <p className="mt-3 text-xs text-muted-foreground">{es ? 'Detalles del plan aceptados' : 'Plan details acknowledged'} {new Date(acknowledgments.data.find(a => a.service === s)?.checked_at ?? '').toLocaleDateString(es ? 'es-US' : 'en-US')}</p>}

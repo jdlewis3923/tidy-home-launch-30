@@ -57,6 +57,11 @@ export async function verifyScopeAcceptance(
       (!needsWater || r.water_consent === true));
     if (!hit) missing.push(svc);
   }
+  if(opts.userId && missing.length===0) {
+    const {data:acks,error:ackError}=await admin.from('service_acknowledgments').select('service').eq('member_id',opts.userId).eq('acceptance_ref',opts.ref);
+    if(ackError)return {ok:false,missing:[...needed.keys()]};
+    for(const svc of needed.keys())if(!(acks??[]).some((a:any)=>a.service===svc))missing.push(svc);
+  }
   return missing.length ? { ok: false, missing } : { ok: true };
 }
 
