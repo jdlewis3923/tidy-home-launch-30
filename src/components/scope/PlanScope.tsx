@@ -28,7 +28,8 @@ export function PlanScope({ services, carWash, monthlyLawn, weekly }: { services
   }, [scopes.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
   const { data: rows = [] } = useScopeAtVersions(versions);
   const acknowledgments = useQuery({ queryKey: ['service_acknowledgments', 'mine'], queryFn: async () => {
-    const { data, error } = await supabase.from('service_acknowledgments').select('service,checked_at').order('checked_at', { ascending: false });
+    const {data:auth}=await supabase.auth.getUser();if(!auth.user)return [];
+    const { data, error } = await supabase.from('service_acknowledgments').select('service,checked_at').eq('member_id',auth.user.id).order('checked_at', { ascending: false });
     if (error) throw error; return data ?? [];
   }});
   if (!scopes.length) return null;

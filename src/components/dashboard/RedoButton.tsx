@@ -101,7 +101,7 @@ export default function RedoButton({ visitId, token, completedAt, className = ""
             </ul>
           )}
           <p className="text-[11px] text-ink-faint">{es ? "Solo se pueden elegir cosas incluidas en su visita." : "Only items included in your visit can be picked."}</p>
-          {excluded.length>0&&<details className="text-sm text-foreground"><summary>{es?'¿Buscas trabajo no incluido?':'Looking for work not included?'}</summary><ul className="my-3 space-y-2">{excluded.map(row=><li key={row.en}>{es?row.es:row.en}</li>)}</ul><a href="/account/services" className="text-primary underline">{es?'Ver servicios adicionales de pago para tu próxima visita':'View paid add-ons for your next visit'}</a></details>}
+          {excluded.length>0&&<details className="text-sm text-foreground"><summary>{es?'¿Buscas trabajo no incluido?':'Looking for work not included?'}</summary><ul className="my-3 space-y-2">{excluded.map(row=><li key={row.en}>{es?row.es:row.en}</li>)}</ul><a href="/dashboard/services" className="text-primary underline">{es?'Ver servicios adicionales de pago para tu próxima visita':'View paid add-ons for your next visit'}</a></details>}
           <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={500}
             placeholder={t("What wasn't right? (optional)")} aria-label={t("What wasn't right? (optional)")}
             className="w-full rounded-lg border border-[hsl(var(--hairline))] bg-background px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-primary/40" />
