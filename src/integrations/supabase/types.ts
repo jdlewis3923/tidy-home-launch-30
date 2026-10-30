@@ -118,10 +118,16 @@ export type Database = {
       }
       addon_catalog: {
         Row: {
+          added_minutes: Json
           addon_key: string
           contractor_pay_cents: number | null
           created_at: string
+          description_en: string | null
+          description_es: string | null
+          discount_eligible: boolean
           display_name: string
+          display_name_es: string | null
+          estate_bundle_only: boolean
           gift_eligible: boolean
           id: string
           is_active: boolean
@@ -129,18 +135,26 @@ export type Database = {
           lookup_key: string | null
           lucide_icon: string | null
           price_cents: number
+          pro_pay_pct: number
           rate_card_version: number
           services: string[]
+          size_prices: Json
           sort_order: number
           stripe_price_id: string | null
           stripe_product_id: string | null
           updated_at: string
         }
         Insert: {
+          added_minutes?: Json
           addon_key: string
           contractor_pay_cents?: number | null
           created_at?: string
+          description_en?: string | null
+          description_es?: string | null
+          discount_eligible?: boolean
           display_name: string
+          display_name_es?: string | null
+          estate_bundle_only?: boolean
           gift_eligible?: boolean
           id?: string
           is_active?: boolean
@@ -148,18 +162,26 @@ export type Database = {
           lookup_key?: string | null
           lucide_icon?: string | null
           price_cents: number
+          pro_pay_pct?: number
           rate_card_version?: number
           services?: string[]
+          size_prices?: Json
           sort_order?: number
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
         }
         Update: {
+          added_minutes?: Json
           addon_key?: string
           contractor_pay_cents?: number | null
           created_at?: string
+          description_en?: string | null
+          description_es?: string | null
+          discount_eligible?: boolean
           display_name?: string
+          display_name_es?: string | null
+          estate_bundle_only?: boolean
           gift_eligible?: boolean
           id?: string
           is_active?: boolean
@@ -167,8 +189,10 @@ export type Database = {
           lookup_key?: string | null
           lucide_icon?: string | null
           price_cents?: number
+          pro_pay_pct?: number
           rate_card_version?: number
           services?: string[]
+          size_prices?: Json
           sort_order?: number
           stripe_price_id?: string | null
           stripe_product_id?: string | null
@@ -8615,6 +8639,45 @@ export type Database = {
           },
         ]
       }
+      service_acknowledgments: {
+        Row: {
+          acceptance_ref: string
+          checked_at: string
+          id: string
+          ip: string | null
+          member_id: string
+          scope_snapshot: Json
+          scope_version: string
+          service: string
+          terms_version: string
+          user_agent: string | null
+        }
+        Insert: {
+          acceptance_ref: string
+          checked_at?: string
+          id?: string
+          ip?: string | null
+          member_id: string
+          scope_snapshot?: Json
+          scope_version: string
+          service: string
+          terms_version: string
+          user_agent?: string | null
+        }
+        Update: {
+          acceptance_ref?: string
+          checked_at?: string
+          id?: string
+          ip?: string | null
+          member_id?: string
+          scope_snapshot?: Json
+          scope_version?: string
+          service?: string
+          terms_version?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       service_days: {
         Row: {
           active: boolean
@@ -8708,6 +8771,7 @@ export type Database = {
           sort_order: number
           text_en: string
           text_es: string
+          updated_at: string
         }
         Insert: {
           active?: boolean
@@ -8723,6 +8787,7 @@ export type Database = {
           sort_order?: number
           text_en: string
           text_es: string
+          updated_at?: string
         }
         Update: {
           active?: boolean
@@ -8738,6 +8803,7 @@ export type Database = {
           sort_order?: number
           text_en?: string
           text_es?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -10714,6 +10780,7 @@ export type Database = {
           stale: boolean
         }[]
       }
+      admin_deep_clean_minutes: { Args: { _minutes: Json }; Returns: undefined }
       admin_demand_report: { Args: never; Returns: Json }
       admin_estate_metrics: { Args: never; Returns: Json }
       admin_evidence_pack: {
@@ -11138,6 +11205,10 @@ export type Database = {
           subscription_id: string
           user_id: string
         }[]
+      }
+      deep_clean_catalog_quote: {
+        Args: { _addon_key: string; _quarterly?: boolean; _size: number }
+        Returns: Json
       }
       dispatch_due_social_posts: { Args: never; Returns: number }
       ensure_referral_code: { Args: never; Returns: string }

@@ -1926,6 +1926,13 @@
       "when": 1793335480543,
       "tag": "0274_agreement_scope_snapshot_at_signing",
       "breakpoints": true
+    },
+    {
+      "idx": 275,
+      "version": "7",
+      "when": 1793401327749,
+      "tag": "0275_deep_clean_catalog_and_service_acknowledgments",
+      "breakpoints": true
     }
   ]
 }
