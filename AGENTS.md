@@ -45,5 +45,5 @@
 - Candidate appointments create urgent owner alerts transactionally from hiring_slots changes; admin displays read all booked slots in Miami time, and original Indeed résumés live in an admin-only source-text table — why: no sender path can omit a booking alert or replace original résumé content with scoring summaries.
 
 
-- Onboarding packs use signing-day, admin-only audits and guarded Pro email/SMS; unsigned links resolve current service templates — why: sends retain gates and cannot sign retired wording.
+- Onboarding packs use signing-day audits and guarded sends, including email-only; unsigned links resolve current templates. Equipment reviews refresh items and pipeline — why: retain gates and show saved approvals.
 - Redo decisions lock history before payout; check-in replies lock phone/SID and profiles use timed assignment guards — why: private data and pay never duplicate or leak.
