@@ -322,7 +322,7 @@ Deno.serve(async (req) => {
 
         // Deep Clean is resolved from the member's validated home size.
         const { resolveDeepCleanLines } = await import('../_shared/deep-clean-checkout.ts');
-        items.push(...await resolveDeepCleanLines(supabase, stripe, input.addons, input.services));
+        const deepCleanInvoiceItems = await resolveDeepCleanLines(supabase, stripe, input.addons, input.services);
         // Resolve one-time add-ons
         if (input.addons.length > 0) {
           const { data: addonRows, error: addonErr } = await supabase
@@ -440,6 +440,7 @@ Deno.serve(async (req) => {
         const subParams: any = {
           customer: customerId!,
           items,
+          ...(deepCleanInvoiceItems.length ? { add_invoice_items: deepCleanInvoiceItems } : {}),
           payment_behavior: "default_incomplete",
           payment_settings: {
             payment_method_types: ["card"],

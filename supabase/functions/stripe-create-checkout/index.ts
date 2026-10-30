@@ -434,6 +434,7 @@ Deno.serve(async (req) => {
         // monthly charge is created. The new line begins on the next combined
         // renewal; proration is deliberately disabled.
         if (input.add_to_existing) {
+          if(input.addons.some(a=>a.addon_name==='deep_clean'))throw new Error('book_deep_clean_after_service_visit_is_scheduled');
           const { data: localSub, error: localErr } = await supabase
             .from("subscriptions")
             .select("id, stripe_subscription_id, services, plan_lines, sizes_json")
