@@ -1,0 +1,15 @@
+import { describe, expect, it } from 'vitest';
+import { addonQuote, reviewComplete, reviewUnlock, type CatalogAddon } from '@/lib/deep-clean';
+const addon: CatalogAddon = { addon_key:'deep_clean',display_name:'Deep Clean',display_name_es:'Limpieza profunda',description_en:null,description_es:null,price_cents:14900,services:['cleaning'],gift_eligible:false,estate_bundle_only:false,size_prices:{1:14900,2:17900,3:21900,4:28900,5:38900},added_minutes:{1:90,2:120,3:150,4:180,5:180},pro_pay_pct:40,lookup_key:null };
+describe('Deep Clean rules', () => {
+  it.each([[1,14900,5960,90],[2,17900,7160,120],[3,21900,8760,150],[4,28900,11560,180],[5,38900,15560,180]])('size %i price/pay/time from catalog', (size,cents,payCents,minutes) => expect(addonQuote(addon,size)).toEqual({cents,payCents,minutes}));
+  it('Estate Plus paired pay is 77.80 each', () => expect((addonQuote(addon,5)?.payCents ?? 0)/2).toBe(7780));
+  it('quarterly weekly visit hides paid Deep Clean', () => expect(addonQuote(addon,2,true)).toBeNull());
+  it('over 7000 requires a written quote', () => expect(addonQuote(addon,6)).toBeNull());
+  it('Estate excludes standalone detail work', () => expect(addonQuote({...addon,addon_key:'blinds_shutters',estate_bundle_only:true},4)).toBeNull());
+  it('standard sizes retain standalone items', () => expect(addonQuote({...addon,addon_key:'blinds_shutters',estate_bundle_only:true,price_cents:5500},3)?.cents).toBe(5500));
+  it('Deep Clean is not gift eligible', () => expect(addon.gift_eligible).toBe(false));
+  it('all selected services and terms are required', () => {expect(reviewComplete(['cleaning','lawn'],{cleaning:true,lawn:false},true)).toBe(false);expect(reviewComplete(['cleaning'],{cleaning:true},false)).toBe(false);expect(reviewComplete(['cleaning'],{cleaning:true},true)).toBe(true);});
+  it('fitting card unlocks only after six visible seconds', () => {expect(reviewUnlock(false,true,5999)).toBe(false);expect(reviewUnlock(false,true,6000)).toBe(true);expect(reviewUnlock(false,false,6000)).toBe(false);});
+  it('scrolling to card bottom unlocks it', () => expect(reviewUnlock(true,false,0)).toBe(true));
+});
