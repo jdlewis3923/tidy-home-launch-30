@@ -23,6 +23,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { navigationLinks, accessWindowOpen } from '@/lib/pro-visit-rules';
 import { Button } from '@/components/ui/button';
 import RedoPayLines from '@/components/pro/RedoPayLines';
+import ProHomeProfile from '@/components/pro/ProHomeProfile';
 
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight as ArrowR, CalendarDays as CalIcon, Camera as CamIcon, ClipboardList, MapPin as PinIcon, StickyNote as NoteIcon, CheckCircle2, ChevronRight } from "lucide-react";
@@ -405,6 +406,7 @@ export default function ProVisit() {
           <p className="text-[15px] text-[hsl(var(--pro-ink-soft))]">{visit.zip ?? ""}</p>
         </ProCard>
 
+        <ProHomeProfile visitId={visit.id} />
         <ProCard className="mt-3">
           <p className="pb-1 text-[12px] font-bold uppercase tracking-wide text-[hsl(var(--pro-ink-soft))]">
             {es ? "Detalles de acceso" : "Access details"}

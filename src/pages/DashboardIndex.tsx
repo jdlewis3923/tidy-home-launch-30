@@ -67,6 +67,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import heroWash from '@/assets/hero-miami-home.jpg';
 import RedoButton from '@/components/dashboard/RedoButton';
+import HomeProfile from '@/components/dashboard/HomeProfile';
 
 const SERVICE_ICON: Record<string, string> = {
   lawn: '🌿',
@@ -634,6 +635,7 @@ export default function DashboardIndex() {
             </Card>
           </section>
 
+          <HomeProfile beforeFirstVisit={!data.lastCompleted && !!data.nextVisit} />
           {/* Quick actions */}
           <section className="relative mx-auto mt-4 max-w-[1280px] px-6 pb-16">
             <Card>
