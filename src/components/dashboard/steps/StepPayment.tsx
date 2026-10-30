@@ -32,6 +32,8 @@ import { getUtmAttribution } from '@/lib/utm';
 import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
 import { groupsFor, recordScopeAcceptance, type ScopeGroup } from '@/lib/serviceScope';
 import { MEMBER_GUIDE_VERSION } from '@/lib/memberGuide';
+import { useAddonCatalog } from '@/hooks/useAddonCatalog';
+import { addonQuote } from '@/lib/deep-clean';
 
 // The exact Terms wording shown next to the pay button. It is both rendered and
 // stored with the recorded consent, so change them together.
@@ -50,6 +52,9 @@ interface Props {
  */
 export default function StepPayment({ state, onChange }: Props) {
   const { language, t } = useLanguage();
+  const catalog = useAddonCatalog();
+  const cleaningSize = sizeFor(state, 'cleaning');
+  const liveQuotes = Object.fromEntries((catalog.data ?? []).map(a => [a.addon_key, addonQuote(a, typeof cleaningSize === 'number' ? cleaningSize : null)]));
   const pricing = calculatePricing(state);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -299,12 +304,13 @@ export default function StepPayment({ state, onChange }: Props) {
           )}
 
           {state.addOns.map(id => {
-            const addon = addOnData[id];
-            if (!addon) return null;
+            const addon = catalog.data?.find(a => a.addon_key === id);
+            const legacy = addOnData[id];
+            if (!addon && !legacy) return null;
             return (
               <div key={id} className="flex justify-between items-baseline gap-3 text-ink-soft text-xs">
-                <span>+ {addon.name}</span>
-                <span className="tabular-nums">${addon.price.toFixed(2)}</span>
+                <span>+ {addon ? language === 'es' ? addon.display_name_es ?? addon.display_name : addon.display_name : legacy?.name}</span>
+                <span className="tabular-nums">${((liveQuotes[id]?.cents ?? 0) / 100 || legacy?.price || 0).toFixed(2)}</span>
               </div>
             );
           })}
@@ -494,7 +500,9 @@ export default function StepPayment({ state, onChange }: Props) {
         </div>
       ))}
       {needsSpigot && !showAccessGate && <SpigotQuestion value={typeof state.hasWaterSpigot === 'boolean' ? state.hasWaterSpigot : null} onChange={(v) => onChange({ ...state, hasWaterSpigot: v })} />}
-      <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} />
+      <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked}
+        cleaningSize={typeof cleaningSize === 'number' ? cleaningSize : null} selectedAddons={state.addOns}
+        onAddonsChange={keys => onChange({ ...state, addOns: keys, addonPrices: Object.fromEntries(Object.entries(liveQuotes).filter(([, q]) => q).map(([key, q]) => [key, (q?.cents ?? 0) / 100])) })} />
       <section className="space-y-3 border-y border-border py-4">
         <h2 className="font-semibold text-foreground">{language === 'es' ? 'Cómo funciona Tidy' : 'How Tidy works'}</h2>
         <p className="text-sm text-muted-foreground">{language === 'es' ? 'El mismo horario y Pro. Guarda tus datos de acceso antes de la visita. Primer bloqueo de acceso del año: reprogramación gratis. Con 48+ horas, reprograma gratis. La limpieza se hace llueva o haga sol. Nada se agrega sin tu aprobación.' : 'Same schedule and Pro. Save entry details before your visit. First lockout of the year: free reschedule. With 48+ hours, reschedule free. Cleaning runs rain or shine. Nothing is added without your approval.'}</p>

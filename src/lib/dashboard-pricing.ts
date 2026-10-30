@@ -92,6 +92,8 @@ export interface ConfigState {
   preferredTime: string;
   referralCode: string;
   addOns: string[];
+  /** Live catalog quotes for selected add-ons; never a billing authority. */
+  addonPrices?: Record<string, number>;
   smsConsent: boolean;
   outOfCoverage: boolean;
   /** Car step: wash and detail are mutually exclusive. */
@@ -440,7 +442,7 @@ export function calculatePricing(state: ConfigState) {
 
   const addOnsSubtotal = state.addOns.reduce((sum, id) => {
     const addon = addOnData[id];
-    return addon ? sum + addon.price : sum;
+    return sum + (state.addonPrices?.[id] ?? addon?.price ?? 0);
   }, 0);
 
   // No percentage discounts exist. Bundling earns one free premium add-on a month.
@@ -470,7 +472,7 @@ export function calculatePricing(state: ConfigState) {
     taxPercentage: taxTriggered ? FLORIDA_TAX.percentage : 0,
     taxAmount,
     firstMonth: total,
-    ongoing: total,
+    ongoing: total - addOnsSubtotal,
   };
 }
 

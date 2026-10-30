@@ -21,6 +21,7 @@ export interface ScopeRow {
   sort_order: number;
   scope_version: number;
   active: boolean;
+  updated_at?: string;
 }
 
 export const GROUP_SCOPES: Record<ScopeGroup, ScopeService[]> = {
@@ -72,7 +73,7 @@ export function useServiceScope() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_scope")
-        .select("id, service, section, text_en, text_es, group_en, group_es, notice_key, addon_key, sort_order, scope_version, active")
+        .select("id, service, section, text_en, text_es, group_en, group_es, notice_key, addon_key, sort_order, scope_version, active, updated_at")
         .eq("active", true)
         .order("sort_order");
       if (error) throw error;

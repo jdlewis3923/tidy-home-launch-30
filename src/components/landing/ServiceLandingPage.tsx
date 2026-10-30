@@ -23,6 +23,7 @@ import { track } from "@/lib/track";
 import { PrimaryCtaProvider, usePrimaryCta } from "@/hooks/usePrimaryCta";
 import { useLanguage } from "@/contexts/LanguageContext";
 import CleaningPriceMenu from '@/components/CleaningPriceMenu';
+import DeepCleanCard from '@/components/DeepCleanCard';
 
 export interface PlanTier {
   name: string;
@@ -397,6 +398,7 @@ const ServiceLandingPageInner = ({ config }: Props) => {
 
           {/* Trust signal row directly under pricing — one claim per slot. */}
           {config.serviceSlug === 'house-cleaning' && <CleaningPriceMenu />}
+          {config.serviceSlug === 'house-cleaning' && <DeepCleanCard />}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-text-mid">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-primary" />
