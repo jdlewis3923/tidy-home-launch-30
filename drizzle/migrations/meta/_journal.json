@@ -1954,6 +1954,13 @@
       "when": 1793401990320,
       "tag": "0278_deep_clean_booked_time_and_admin_metrics",
       "breakpoints": true
+    },
+    {
+      "idx": 279,
+      "version": "7",
+      "when": 1793402388203,
+      "tag": "0279_deep_clean_team_pay_and_redo_rate",
+      "breakpoints": true
     }
   ]
 }
