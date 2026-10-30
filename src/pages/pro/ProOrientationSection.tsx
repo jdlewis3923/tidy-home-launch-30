@@ -9,17 +9,22 @@ import { ORIENTATION_COPY, ORIENTATION_SECTIONS, stageNumber } from "@/lib/orien
 import { OrientationFooter } from "@/components/pro/orientation/OrientationContent";
 import "@/styles/orientation.css";
 import { OrientationSlide } from "@/components/pro/orientation/OrientationSlide";
+import { useServiceScope } from '@/lib/serviceScope';
+import { orientationCopyWithScope } from '@/lib/orientation-scope';
 
 export default function ProOrientationSection() {
   const { sectionId = "" } = useParams(); const nav = useNavigate();
   const access = useOrientationAccess();
+  const scope = useServiceScope();
+  const copy = orientationCopyWithScope(scope.data ?? []);
   const section = ORIENTATION_SECTIONS.find(s => s.id === sectionId);
   const unlocked = Boolean(section && access.state && stageNumber(access.state.stage) >= section.min);
   const [busy, setBusy] = useState(false); const [error, setError] = useState(false);
   useEffect(() => {
     if (access.userId && section && unlocked) void supabase.rpc("pro_orientation_touch" as never, { _section_id: section.id, _complete: false } as never);
   }, [access.userId, section?.id, unlocked]);
-  if (access.loading) return <main className="orientation-app p-6">Loading… / Cargando…</main>;
+  if (access.loading || scope.isLoading) return <main className="orientation-app p-6">Loading… / Cargando…</main>;
+  if (scope.isError) return <main className="orientation-app p-6" role="alert">Service scope unavailable. / Alcance no disponible.</main>;
   if (!access.userId) return <Navigate to="/pro/login" replace />;
   if (!section || !unlocked) return <Navigate to="/pro/orientation" replace />;
   const complete = async () => {
@@ -28,5 +33,5 @@ export default function ProOrientationSection() {
     setBusy(false);
     if (result.error) setError(true); else nav("/pro/orientation");
   };
-  return <main className="orientation-app"><Helmet><title>{`${section.title} | TIDY`}</title><meta name="robots" content="noindex,nofollow" /></Helmet><article className="orientation-reading"><nav className="flex flex-wrap justify-between gap-3"><Button asChild variant="ghost"><Link to="/pro/orientation"><ArrowLeft /> All sections / Todas las secciones</Link></Button><Button asChild variant="outline"><Link to="/pro/orientation/preview"><Play /> Preview / Vista previa</Link></Button></nav><header><p className="text-sm font-extrabold text-primary">SECTION {ORIENTATION_SECTIONS.indexOf(section) + 1} / SECCIÓN {ORIENTATION_SECTIONS.indexOf(section) + 1}</p><h1>{section.title}</h1><p className="text-lg text-muted-foreground" lang="es">{section.es}</p></header>{ORIENTATION_COPY[section.id].map((block, i) => <section className="orientation-reading-slide" key={i}><OrientationSlide slide={{block, section, index:i}} page={i + 1} total={ORIENTATION_COPY[section.id].length} /></section>)}<div className="border-t border-border pt-8"><Button className="orientation-gold-button min-h-14 w-full text-base" onClick={complete} disabled={busy}>{busy ? <Loader2 className="animate-spin" /> : <Check />} I've read this / He leído esto</Button>{error && <p role="alert" className="mt-3 text-destructive">Could not save. Please try again. / No se pudo guardar. Intenta otra vez.</p>}</div><OrientationFooter /></article></main>;
+  return <main className="orientation-app"><Helmet><title>{`${section.title} | TIDY`}</title><meta name="robots" content="noindex,nofollow" /></Helmet><article className="orientation-reading"><nav className="flex flex-wrap justify-between gap-3"><Button asChild variant="ghost"><Link to="/pro/orientation"><ArrowLeft /> All sections / Todas las secciones</Link></Button><Button asChild variant="outline"><Link to="/pro/orientation/preview"><Play /> Preview / Vista previa</Link></Button></nav><header><p className="text-sm font-extrabold text-primary">SECTION {ORIENTATION_SECTIONS.indexOf(section) + 1} / SECCIÓN {ORIENTATION_SECTIONS.indexOf(section) + 1}</p><h1>{section.title}</h1><p className="text-lg text-muted-foreground" lang="es">{section.es}</p></header>{copy[section.id].map((block, i) => <section className="orientation-reading-slide" key={i}><OrientationSlide slide={{block, section, index:i}} page={i + 1} total={copy[section.id].length} /></section>)}<div className="border-t border-border pt-8"><Button className="orientation-gold-button min-h-14 w-full text-base" onClick={complete} disabled={busy}>{busy ? <Loader2 className="animate-spin" /> : <Check />} I've read this / He leído esto</Button>{error && <p role="alert" className="mt-3 text-destructive">Could not save. Please try again. / No se pudo guardar. Intenta otra vez.</p>}</div><OrientationFooter /></article></main>;
 }

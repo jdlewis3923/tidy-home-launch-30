@@ -71,18 +71,7 @@ const config: ServiceLandingConfig = {
       cadenceKey: "weekly",
     },
   ],
-  included: [
-    "Dust all surfaces",
-    "Vacuum + mop all floors",
-    "Kitchen deep-clean",
-    "Bathroom disinfect",
-    "Bedroom tidy + linen change",
-    "Trash out",
-    "Eco-safe products",
-    "The same pro for each service, every visit",
-    "Photo-verified after every visit",
-  ],
-  addOnsNote: "Available as add-ons: inside oven, inside fridge, interior windows.",
+  included: [], // Active service_scope supplies included rows and add-ons.
   surchargeNote:
     "Size 1 up to 1,400 sq ft; Size 2 up to 2,200; Size 3 up to 3,200; Estate up to 4,800; Estate Plus up to 7,000. Above 7,000: walkthrough quote.",
   trustCards: [
@@ -115,7 +104,7 @@ const config: ServiceLandingConfig = {
     },
     {
       q: "What's actually included in a visit?",
-      a: "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, bedroom tidy, linen change, and trash out — using eco-safe products.",
+      a: "", // Filled from active service_scope in the shared page.
     },
     {
       q: "Who does the cleaning?",
@@ -138,7 +127,7 @@ const config: ServiceLandingConfig = {
   seo: {
     title: "House Cleaning in Pinecrest + Kendall | Tidy Home Concierge",
     description:
-      "House cleaning in Pinecrest and Kendall (33156, 33183, 33186). One flat price per visit from $139. The same pro for each service, every visit. No contracts, eco-safe. Book in about 2 minutes.",
+      "House cleaning in Pinecrest and Kendall (33156, 33183, 33186). One flat price per visit from $139. The same pro for each service, every visit. No contracts. Surface-safe on stone and hardwood. Book in about 2 minutes.",
     canonical: "https://jointidy.co/house-cleaning",
     priceRange: "$139–$595",
     service: {

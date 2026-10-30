@@ -3,6 +3,12 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 type Language = "en" | "es";
 
 const translations: Record<string, string> = {
+  "Surface-safe on stone and hardwood": "Seguro para piedra y madera",
+  "Tidy is built for ongoing upkeep. Weekly cleaning plans include a deeper clean every 13th week. Extra detail work, like inside the oven or fridge, interior windows and baseboards, can be added to any visit. One-time deep cleans, move-in or move-out, and post-construction cleaning aren't offered.": "Tidy está pensado para el mantenimiento continuo. Los planes semanales de limpieza incluyen una limpieza más profunda cada 13 semanas. Puedes añadir detalles como el interior del horno o refrigerador, ventanas interiores y zócalos a cualquier visita. No ofrecemos limpiezas profundas únicas, de mudanza ni después de obras.",
+  "Yes. Extras like inside the oven or fridge, bed edge reset and interior conditioning can be added through your dashboard.": "Sí. Puedes añadir el interior del horno o refrigerador, redefinición de bordes de jardín y acondicionamiento interior desde tu panel.",
+  "Tap 'Something wasn't right' in your dashboard and we come back within 48 hours. Free.": "Toca 'Algo no quedó bien' en tu panel y volvemos en 48 horas. Gratis.",
+  "House cleaning in Pinecrest and Kendall (33156, 33183, 33186). One flat price per visit from $139. The same pro for each service, every visit. No contracts. Surface-safe on stone and hardwood. Book in about 2 minutes.": "Limpieza del hogar en Pinecrest y Kendall (33156, 33183, 33186). Precio por visita desde $139. El mismo Pro por servicio. Sin contratos. Seguro para piedra y madera. Reserva en unos 2 minutos.",
+
   "Cleaning uses interior square footage: up to 1,400, 2,200, 3,200, 4,800 or 7,000 sq ft, with bathroom limits. Above 7,000 needs a walkthrough. Lawn uses grass only: up to 3,000, 7,000 or 12,000 sq ft. Car Care uses your vehicle size.": "Limpieza usa los pies cuadrados interiores: hasta 1,400, 2,200, 3,200, 4,800 o 7,000, con límites de baños. Más de 7,000 requiere una visita para cotizar. Césped cuenta solo la grama: hasta 3,000, 7,000 o 12,000 pies². Cuidado del Auto usa el tamaño del vehículo.",
   "We verify cleaning and lawn size before conversion. A larger size needs your approval before paying. A smaller size lowers the price; we tell you. Your founding rate card stays locked.": "Verificamos el tamaño de limpieza y césped antes de activar el pago. Un tamaño mayor necesita tu aprobación antes de pagar. Si es menor, bajamos el precio y te avisamos. Tu tarifa de fundador sigue fija.",
   "What if my home is over 7,000 sq ft or lawn is over 12,000 sq ft?": "¿Y si mi casa tiene más de 7,000 pies² o mi césped más de 12,000?",
@@ -108,7 +114,6 @@ const translations: Record<string, string> = {
   "Not right? We come back within 48 hours, free.": "¿Algo no quedó bien? Regresamos en 48 horas, gratis.",
   "3 washes a month": "3 lavados al mes",
   "Custom quote": "Cotización personalizada",
-  "5+ bedrooms gets a custom quote. Reserve now and we'll send your price before anything is set.": "Con 5 o más habitaciones hacemos una cotización personalizada. Reserva ahora y te enviaremos tu precio antes de confirmar nada.",
   "You've unlocked one free premium add-on every month": "Desbloqueaste un servicio adicional premium gratis cada mes",
   "You've unlocked two free premium add-ons every month": "Desbloqueaste dos servicios adicionales premium gratis cada mes",
   "value": "de valor",
@@ -463,8 +468,6 @@ const translations: Record<string, string> = {
   "Your ride deserves love too! We do a full exterior hand wash with wheel cleaning, thorough interior vacuum, and a complete interior surface wipe-down. Your car will look showroom-ready right in your driveway.":
     "¡Tu carro también merece cariño! Hacemos lavado exterior completo a mano con limpieza de ruedas, aspirado interior profundo y limpieza completa de superficies interiores. Tu carro va a lucir como nuevo en tu propio garaje.",
   "Are deep cleaning or restoration services included?": "¿Se incluyen limpiezas profundas o restauración?",
-  "Tidy is designed for consistent, ongoing maintenance — the kind that keeps everything looking great week after week. If you need a one-time deep clean or restoration work, we offer those as add-ons. Just ask!":
-    "Tidy está diseñado para mantenimiento constante — del que mantiene todo luciendo bien semana tras semana. Si necesitas una limpieza profunda única o trabajo de restauración, los ofrecemos como extras. ¡Solo pregunta!",
   "How does billing work?": "¿Cómo funciona la facturación?",
   "Simple and transparent! You're billed monthly via Stripe — everything is automatic, fully secure, and you'll get a receipt every time. No surprise charges, ever.":
     "¡Simple y transparente! Te cobramos mensualmente vía Stripe — todo es automático, totalmente seguro, y recibes un recibo cada vez. Sin cargos sorpresa, nunca.",
@@ -657,12 +660,8 @@ const translations: Record<string, string> = {
   // House Cleaning included
   "Dust all surfaces": "Sacudir todas las superficies",
   "Vacuum + mop all floors": "Aspirar + trapear todos los pisos",
-  "Kitchen deep-clean": "Limpieza profunda de cocina",
-  "Bathroom disinfect": "Desinfección de baños",
-  "Bedroom tidy + linen change": "Orden de habitaciones + cambio de sábanas",
   "Interior windows": "Ventanas interiores",
   "Trash out": "Sacar la basura",
-  "Eco-safe products": "Productos ecológicos",
   "Same Pro every visit": "El mismo Pro cada visita",
 
   // House Cleaning testimonials
@@ -674,20 +673,14 @@ const translations: Record<string, string> = {
     "Reservé en menos de un minuto. El profesional es puntual, amable y minucioso.",
   // House Cleaning FAQs
   "What's the price and what's it based on?": "¿Cuál es el precio y de qué depende?",
-  "One price per visit, set by the size of your home: $139, $189 or $279 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Homes with 5+ bedrooms are quoted by hand.":
-    "Un precio por visita, según el tamaño de tu casa: $139, $189 o $279 en el plan mensual. Venir más seguido baja el precio por visita — quincenal es 8% menos por visita que mensual y semanal 18% menos. Siempre se cobra al mes. Las casas de 5+ recámaras las cotizamos a mano.",
   "Yes. No contracts, no cancellation fees. Pause, skip, or cancel from your dashboard anytime.":
     "Sí. Sin contratos, sin cargos por cancelación. Pausa, omite o cancela desde tu panel cuando quieras.",
   "What's your service area?": "¿Cuál es el área de servicio?",
   "We serve Pinecrest and Kendall — ZIP codes 33156, 33183, and 33186. We're not currently serving other areas.":
     "Servimos Pinecrest y Kendall — códigos postales 33156, 33183 y 33186. Por ahora no servimos otras áreas.",
   "What's actually included in a visit?": "¿Qué incluye realmente una visita?",
-  "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, bedroom tidy, linen change, and trash out — using eco-safe products.":
-    "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
 "Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and mulching clippings back into the lawn. A bed edge reset is available as an add-on.":
     "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y triturar la grama cortada para dejarla en el jardín. El reajuste del borde de jardineras está disponible como servicio adicional.",
-  "Kitchen deep-clean, bathroom disinfect, dusting all surfaces, vacuum and mop all floors, interior windows, bedroom tidy, linen change, and trash out — using eco-safe products.":
-    "Limpieza profunda de cocina, desinfección de baños, sacudir todas las superficies, aspirar y trapear todos los pisos, ventanas interiores, orden de habitaciones, cambio de sábanas y sacar la basura — con productos ecológicos.",
   "Who does the cleaning?": "¿Quién hace la limpieza?",
   "How is scheduling handled?": "¿Cómo se maneja el horario?",
   "After signup, we lock in a recurring day and time window. You'll get an ETA reminder before every visit. Reschedule anytime from your dashboard.":
@@ -1052,10 +1045,6 @@ const translations: Record<string, string> = {
   "Full exterior hand wash with wheel cleaning, interior vacuum with floor mats, and dashboard and surface wipe-down — right in your driveway.":
     "Lavado exterior completo a mano con limpieza de ruedas, aspirado interior con tapetes, y limpieza del tablero y superficies — en tu propia entrada.",
   "Can I add extra services or upgrades?": "¿Puedo agregar servicios adicionales o mejoras?",
-  "Yes. Add-ons like deep cleaning, bed edge reset, leather conditioning, and more are available as one-time or recurring extras. You can add them anytime through your dashboard.":
-    "Sí. Los servicios adicionales como limpieza profunda, poda de setos, acondicionamiento de cuero y más están disponibles como extras únicos o recurrentes. Puedes agregarlos cuando quieras desde tu panel.",
-  "Tidy is designed for consistent ongoing maintenance. Deep cleans and restoration work are available as add-ons — just ask.":
-    "Tidy está diseñado para mantenimiento continuo y constante. Las limpiezas profundas y los trabajos de restauración están disponibles como servicios adicionales — solo pídelos.",
   "Billing & Account": "Facturación y Cuenta",
   "You're billed monthly via Stripe — automatic, fully secure, with a receipt every time. No surprise charges.":
     "Se te cobra mensualmente vía Stripe — automático, totalmente seguro y con recibo cada vez. Sin cargos sorpresa.",
@@ -1072,8 +1061,6 @@ const translations: Record<string, string> = {
   "Every professional is screened through Checkr and required to submit photo documentation after each service.":
     "Cada profesional pasa por una revisión a través de Checkr y debe enviar documentación con fotos después de cada servicio.",
   "What if something goes wrong during a visit?": "¿Qué pasa si algo sale mal durante una visita?",
-  "Contact us immediately and we'll make it right — a redo at no charge, or a credit if you prefer.":
-    "Contáctanos de inmediato y lo resolveremos — repetimos el servicio sin costo o te damos un crédito si lo prefieres.",
   "Email hello@jointidy.co and we'll respond within 1 hour during business hours. Real people, real answers.":
     "Escríbenos a hello@jointidy.co y responderemos dentro de 1 hora en horario laboral. Personas reales, respuestas reales.",
   "Your Dashboard": "Tu Panel",
@@ -1195,8 +1182,6 @@ const translations: Record<string, string> = {
   "Tidy isn't just cleaning — it's a system for your entire home.":
     "Tidy no es solo limpieza — es un sistema para todo tu hogar.",
   "Book your cleaning": "Reserva tu limpieza",
-  "House cleaning in Pinecrest and Kendall (33156, 33183, 33186). One flat price per visit from $139. Same Pro, no contracts, eco-safe. Book in about 2 minutes.":
-    "Limpieza del hogar en Pinecrest y Kendall (33156, 33183, 33186). Un precio fijo por visita desde $139. El mismo profesional, sin contratos, productos ecológicos. Reserva en unos 2 minutos.",
   "Professional Car Care at your home. Ceramic-safe, monthly.":
     "Detallado profesional de carros en tu casa. Seguro para cerámica, mensual.",
   "Same detailer every visit. Locked monthly price. Cancel anytime.":
@@ -1573,13 +1558,8 @@ const translations: Record<string, string> = {
   Size: "Tamaño",
   "monthly plan · per visit": "plan mensual · por visita",
   "per month": "al mes",
-  "5+ bedroom homes and yards over 10,000 sq ft are quoted by hand. Cancel anytime.":
-    "Las casas de 5+ recámaras y los jardines de más de 10,000 pies² se cotizan a mano. Cancela cuando quieras.",
   "Add a 2nd service and you pick one free premium add-on every month. Add-ons — ovens, bed edges, pet hair and the like — are priced separately.":
     "Agrega un segundo servicio y eliges un servicio adicional premium gratis cada mes. Los adicionales — hornos, bordes de jardineras, pelo de mascotas y similares — se cobran por separado.",
-  "Condo / up to 2 bedrooms": "Condominio / hasta 2 recámaras",
-  "House / 3 bedrooms": "Casa / 3 recámaras",
-  "Large house / 4 bedrooms": "Casa grande / 4 recámaras",
   "max 2 baths": "máx. 2 baños",
   "max 2.5 baths": "máx. 2.5 baños",
   "max 3 baths": "máx. 3 baños",
@@ -1588,9 +1568,7 @@ const translations: Record<string, string> = {
   "Large yard": "Jardín grande",
   "up to 3,000 sq ft of turf": "hasta 3,000 pies² de césped",
   "3,001–6,000 sq ft of turf": "3,001–6,000 pies² de césped",
-  "Bedrooms for cleaning, what you drive for car care. For lawn, size is square feet of grass only — Small up to 3,000, Standard 3,000–7,000, Large 7,000–12,000. We don't count your house, driveway or pool. Pick your best guess; we check it from above and tell you before your first visit. You never have to measure anything.": "Recámaras para limpieza, lo que manejas para cuidado del auto. Para césped, el tamaño son los pies² de césped solamente — Pequeño hasta 3,000, Estándar 3,000–7,000, Grande 7,000–12,000. No contamos tu casa, entrada ni piscina. Elige tu mejor estimado; lo revisamos desde arriba y te avisamos antes de tu primera visita. Nunca tienes que medir nada.",
   "Lawn: we check it from above before your first visit. If it's bigger, we tell you the new price and nothing is charged until you confirm. If it's smaller, we move you down. Cleaning and car care: we move you to the right price before your second visit and never bill retroactively for the first.": "Césped: lo revisamos desde arriba antes de tu primera visita. Si es más grande, te decimos el nuevo precio y no se cobra nada hasta que confirmes. Si es más pequeño, te bajamos de tamaño. Limpieza y auto: te pasamos al precio correcto antes de tu segunda visita y nunca cobramos retroactivamente la primera.",
-  "What if I have 5+ bedrooms, or more than 12,000 sq ft of lawn?": "¿Y si tengo 5+ recámaras o más de 12,000 pies² de césped?",
   "One price per visit, set by square feet of grass only — Small up to 3,000 sq ft ($45), Standard 3,000–7,000 ($65), Large 7,000–12,000 ($99) at the monthly plan. We don't count your house, driveway or pool; larger than 12,000 sq ft is a custom quote. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess — we check it from above and tell you before your first visit.": "Un precio por visita, según los pies² de césped solamente — Pequeño hasta 3,000 pies² ($45), Estándar 3,000–7,000 ($65), Grande 7,000–12,000 ($99) en el plan mensual. No contamos tu casa, entrada ni piscina; más de 12,000 pies² es una cotización a medida. Venir más seguido baja el precio por visita — quincenal es 8% menos por visita que mensual, semanal 18% menos. Siempre se factura mensualmente. Elige tu mejor estimado — lo revisamos desde arriba y te avisamos antes de tu primera visita.",
   "up to 3,000 sq ft of lawn": "hasta 3,000 pies² de césped",
   "3,000 – 7,000 sq ft of lawn": "3,000 – 7,000 pies² de césped",
@@ -1621,7 +1599,6 @@ const translations: Record<string, string> = {
   "Your reservation is cancelled. Nothing was charged.": "Tu reservación está cancelada. No se cobró nada.",
   "This link isn't active. Call us at (786) 829-1141.": "Este enlace no está activo. Llámanos al (786) 829-1141.",
   "Larger than 12,000 sq ft of grass? We quote it by hand — no price online.": "¿Más de 12,000 pies² de césped? Lo cotizamos a mano — sin precio en línea.",
-  "5+ bedroom homes and lawns over 12,000 sq ft of grass are quoted by hand. Cancel anytime.": "Las casas de 5+ recámaras y los céspedes de más de 12,000 pies² se cotizan a mano. Cancela cuando quieras.",
   "6,001–10,000 sq ft of turf": "6,001–10,000 pies² de césped",
   "Sedan / coupe": "Sedán / coupé",
   "SUV / crossover": "SUV / crossover",

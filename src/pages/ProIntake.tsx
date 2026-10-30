@@ -21,7 +21,7 @@ import { Loader2, CheckCircle2, AlertTriangle, ArrowLeft, ArrowRight } from "luc
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import TidyLogo from "@/components/TidyLogo";
-import { kitContentsLine, kitIncludesVest, MAGNET_CREDIT_MONTHLY_USD } from "@/lib/proKit";
+import { kitContentsLine, VEST_SIZES, MAGNET_CREDIT_MONTHLY_USD } from "@/lib/proKit";
 import {
   VEHICLE_AD_AGREEMENT_CLAUSES,
   VEHICLE_AD_AGREEMENT_TITLE,
@@ -51,13 +51,11 @@ type Step = { title: string; titleEs?: string; short: string; note?: string; not
 
 type Values = Record<string, string | string[] | null | undefined>;
 
-const SIZES = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
-const CUTS = ["Men's", "Women's"];
+const SIZES = [...VEST_SIZES];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const SERVICES = ["House Cleaning", "Lawn Care", "Car Care"];
 
 const wantsMagnets = (v: Values) => v.magnets_opt_in === "yes";
-const lawnPro = (v: Values) => kitIncludesVest(String(v.service_line ?? ""));
 
 const STEPS: Step[] = [
   {
@@ -92,26 +90,15 @@ const STEPS: Step[] = [
     ],
   },
   {
-    title: "Apparel sizing",
-    titleEs: "Tallas de ropa",
-    short: "Apparel",
-    note: "Tidy provides your shirts and your photo ID badge at no cost to you.",
-    noteEs: "Tidy le entrega sus camisas y su credencial con foto sin ningún costo para usted.",
+    title: "Vest size",
+    titleEs: "Talla de chaleco",
+    short: "Kit",
+    note: "Tidy provides two vests and a photo ID badge at no cost. The vest is optional over your own clothes; no names on vests. Clip your badge to the vest.",
+    noteEs: "Tidy le entrega dos chalecos y una credencial con foto sin costo. El chaleco es opcional sobre su propia ropa; no lleva nombres. Sujete la credencial al chaleco.",
     fields: [
-      { name: "shirt_size", label: "Shirt size", labelEs: "Talla de camisa", type: "select", required: true, options: SIZES },
-      { name: "shirt_cut", label: "Shirt cut", labelEs: "Corte de la camisa", type: "select", required: true, options: CUTS },
-      {
-        name: "vest_size",
-        label: "Hi-vis vest",
-        labelEs: "Chaleco de alta visibilidad",
-        type: "select",
-        required: true,
-        options: SIZES,
-        help: "The vest is worn over a shirt, so it is sized up — not your shirt size.",
-        helpEs: "El chaleco se usa sobre la camisa, por eso se pide una talla más grande, no su talla de camisa.",
-        showIf: lawnPro,
-      },
-      { name: "cap", label: "Cap", labelEs: "Gorra", type: "select", options: ["Adjustable — standard", "Needs larger fit", "Declines cap"] },
+      { name: "vest_size", label: "Vest size", labelEs: "Talla de chaleco", type: "select", required: true, options: SIZES,
+        help: "Size chart (chest): S 34–36 in · M 38–40 · L 42–44 · XL 46–48 · 2XL 50–52 · 3XL 54–56. Confirm fit over your clothes before ordering.",
+        helpEs: "Guía de tallas (pecho): S 86–91 cm · M 97–102 · L 107–112 · XL 117–122 · 2XL 127–132 · 3XL 137–142. Confirme el ajuste sobre su ropa antes de pedir." },
     ],
   },
   {
@@ -226,7 +213,7 @@ export default function ProIntake() {
   }, [token]);
 
   const set = (name: string, v: string | string[]) => {
-    setValues((p) => ({ ...p, [name]: v, ...(name === "shirt_size" && lawnPro(p) && typeof v === "string" ? { vest_size: SIZES[Math.min(SIZES.indexOf(v)+1,SIZES.length-1)] } : {}) }));
+    setValues((p) => ({ ...p, [name]: v }));
     setErrors((e) => (e[name] ? { ...e, [name]: "" } : e));
   };
 

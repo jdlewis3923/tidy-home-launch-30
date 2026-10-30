@@ -1,5 +1,14 @@
 # Roadmap
 
+## Final six-part alignment (Oct 30)
+- [ ] Verify onboarding packs, quiet hours, restoration and isolated send tests.
+- [ ] Verify redo guardrail, all bilingual copy, one combined 2026-10-29b agreement version and test cleanup.
+- [ ] Estate regular-price checkout, optional home profiles, three visit check-ins, capacity and KPI costs/counts; deferred roadmap notes.
+- [ ] Live service-scope orientation, additions and unchanged-design bilingual fit checks/screenshots.
+- [ ] Public service lists/add-ons from scope and removal of unsupported claims; phone EN/ES checks.
+- [ ] Optional vest-only kits/intake/vendor orders/contracts/messages and legacy preservation.
+- [ ] Produce requested test evidence, changed inventory and remaining limitations; no publishing.
+
 ## Onboarding pack and redo guardrail (Oct 29)
 - [x] Send Susan approved tomorrow 3:30 PM link-coming confirmation; provider accepted.
 - [x] Signing day pack, item copy/resend, immediate email, dated status, Checkr invite checkbox and 8 AM–6 PM Mon–Sat SMS window.

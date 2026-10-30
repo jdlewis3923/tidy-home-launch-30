@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { FREQUENCY_FAQ } from "@/lib/frequency-faq";
 import { Button } from "@/components/ui/button";
+import { GROUP_SCOPES, useServiceScope, txt } from '@/lib/serviceScope';
 import { MEMBER_GUIDE } from '@/lib/memberGuide';
 
 const POLICY_QUESTIONS: Record<string, typeof MEMBER_GUIDE[number]['id']> = {
@@ -43,7 +44,7 @@ const preLaunchFAQ = [
       { q: "What does house cleaning include?", a: "We cover all the essentials to keep your home feeling fresh — kitchen surfaces and countertops, full bathroom cleaning, dusting throughout, vacuuming and mopping all floors, and trash removal. Your home will look and feel amazing after every visit." },
       { q: "What does lawn care include?", a: "We keep your curb appeal on point! Every visit includes professional mowing, clean edging along walkways and beds, and blowing all debris off your walkways and driveways. Your neighbors will notice the difference." },
       { q: "What does Car Care include?", a: "Your ride deserves love too! We do a full exterior hand wash with wheel cleaning, thorough interior vacuum, and a complete interior surface wipe-down. Your car will look showroom-ready right in your driveway." },
-      { q: "Are deep cleaning or restoration services included?", a: "Tidy is designed for consistent, ongoing maintenance — the kind that keeps everything looking great week after week. If you need a one-time deep clean or restoration work, we offer those as add-ons. Just ask!" },
+      { q: "Are deep cleaning or restoration services included?", a: "Tidy is built for ongoing upkeep. Weekly cleaning plans include a deeper clean every 13th week. Extra detail work, like inside the oven or fridge, interior windows and baseboards, can be added to any visit. One-time deep cleans, move-in or move-out, and post-construction cleaning aren't offered." },
     ],
   },
   {
@@ -91,8 +92,8 @@ const launchFAQ = [
       { q: "What does house cleaning include?", a: "Kitchen surfaces, full bathroom cleaning, dusting throughout, vacuuming and mopping all floors, and trash removal with fresh liners." },
       { q: "What does lawn care include?", a: "Professional mowing to standard height, clean edging along walkways and beds, and debris blowing off walkways and driveways." },
       { q: "What does Car Care include?", a: "Full exterior hand wash with wheel cleaning, interior vacuum with floor mats, and dashboard and surface wipe-down — right in your driveway." },
-      { q: "Can I add extra services or upgrades?", a: "Yes. Add-ons like deep cleaning, bed edge reset, leather conditioning, and more are available as one-time or recurring extras. You can add them anytime through your dashboard." },
-      { q: "Are deep cleaning or restoration services included?", a: "Tidy is designed for consistent ongoing maintenance. Deep cleans and restoration work are available as add-ons — just ask." },
+      { q: "Can I add extra services or upgrades?", a: "Yes. Extras like inside the oven or fridge, bed edge reset and interior conditioning can be added through your dashboard." },
+      { q: "Are deep cleaning or restoration services included?", a: "Tidy is built for ongoing upkeep. Weekly cleaning plans include a deeper clean every 13th week. Extra detail work, like inside the oven or fridge, interior windows and baseboards, can be added to any visit. One-time deep cleans, move-in or move-out, and post-construction cleaning aren't offered." },
     ],
   },
   {
@@ -110,7 +111,7 @@ const launchFAQ = [
     items: [
       { q: "Are professionals background-checked?", a: "Every professional is screened through Checkr and required to submit photo documentation after each service." },
       { q: "What if I'm not satisfied?", a: "If anything about your visit isn't right, tell us within 48 hours and we'll send your pro back to fix it at no charge. No forms, no argument." },
-      { q: "What if something goes wrong during a visit?", a: "Contact us immediately and we'll make it right — a redo at no charge, or a credit if you prefer." },
+      { q: "What if something goes wrong during a visit?", a: "Tap 'Something wasn't right' in your dashboard and we come back within 48 hours. Free." },
       { q: "How do I contact support?", a: "Email hello@jointidy.co and we'll respond within 1 hour during business hours. Real people, real answers." },
     ],
   },
@@ -127,6 +128,7 @@ const FAQ = () => {
   const [openItem, setOpenItem] = useState<string | null>(null);
   const { t, language } = useLanguage();
 
+  const scope = useServiceScope();
   const faqSections = CUSTOMER_DASHBOARD_ENABLED ? launchFAQ : preLaunchFAQ;
 
   return (
@@ -158,6 +160,9 @@ const FAQ = () => {
                     const isOpen = openItem === key;
                     const policy=MEMBER_GUIDE.find(s=>s.id===POLICY_QUESTIONS[item.q]);
                     const wording=policy?.[language==='es'?'es':'en'];
+                    const group = item.q === 'What does house cleaning include?' ? 'cleaning' : item.q === 'What does lawn care include?' ? 'lawn' : item.q === 'What does Car Care include?' ? 'car_care' : undefined;
+                    const scopeText = group ? (scope.data ?? []).filter(row => GROUP_SCOPES[group].includes(row.service) && row.section === 'included' && row.service !== 'cleaning_deep_clean').map(row => txt(row, language)).join(' ') : null;
+                    const guarantee = item.q === 'What if something goes wrong during a visit?' ? (language === 'es' ? "Toca 'Algo no quedó bien' en tu panel y volvemos en 48 horas. Gratis." : item.a) : null;
                     return (
                       <div key={key} className="bg-card border rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-md">
                         <Button variant="ghost"
@@ -170,7 +175,7 @@ const FAQ = () => {
                         </Button>
                         {isOpen&&<div>
                           <div className="px-5 pb-4">
-                            {wording?<><ul className="list-disc space-y-2 pl-5 text-sm text-text-mid">{wording.items.map(i=><li key={i}>{i}</li>)}</ul><a className="mt-3 inline-block text-sm text-primary underline" href={`/member-guide#${policy?.id}${language==='es'?'-es':''}`}>{language==='es'?'Guía para miembros':'Member Guide'}</a></>:<p className="text-sm text-text-mid">{t(item.a)}</p>}
+                            {scopeText !== null ? <p className="text-sm text-text-mid">{scopeText}</p> : guarantee ? <p className="text-sm text-text-mid">{guarantee}</p> : wording?<><ul className="list-disc space-y-2 pl-5 text-sm text-text-mid">{wording.items.map(i=><li key={i}>{i}</li>)}</ul><a className="mt-3 inline-block text-sm text-primary underline" href={`/member-guide#${policy?.id}${language==='es'?'-es':''}`}>{language==='es'?'Guía para miembros':'Member Guide'}</a></>:<p className="text-sm text-text-mid">{t(item.a)}</p>}
                           </div>
                         </div>}
                       </div>

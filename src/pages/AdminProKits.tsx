@@ -97,7 +97,7 @@ export default function AdminProKits() {
                     <p className="truncate text-xs text-muted-foreground">
                       Ready to order: {kitContentsLine(r.service_line)}
                       {r.magnets_opt_in === true ? " + vehicle magnets" : ""}
-                      {r.shirt_size ? ` · shirt ${String(r.shirt_size)}` : ""}
+                      {r.vest_size ? ` · vest / chaleco ${String(r.vest_size)}` : ""}
                     </p>
                   )}
                 </div>
