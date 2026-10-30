@@ -1,5 +1,6 @@
 import RedoRateCard from "@/components/admin/RedoRateCard";
 import EstateMetrics from '@/components/admin/EstateMetrics';
+import DeepCleanMetrics from '@/components/admin/DeepCleanMetrics';
 import ReviewKpiStrip from "@/components/admin/ReviewKpiStrip";
 import ReservationConversionCard from "@/components/admin/ReservationConversionCard";
 /**
@@ -726,6 +727,7 @@ export default function AdminKpis() {
           })
         )}
         <EstateMetrics />
+        <DeepCleanMetrics />
         <ReviewKpiStrip />
       </div>
 

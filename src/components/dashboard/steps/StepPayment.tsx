@@ -154,18 +154,14 @@ export default function StepPayment({ state, onChange }: Props) {
     setSubmitting(true);
     setError(null);
     try {
+      const result = await provisionAccount(state);
+      if (result.ok === false) { setError(result.message); setSubmitting(false); return; }
       const acc = await recordScopeAcceptance({
         groups: scopeGroups, email: state.email || undefined, language: language === 'es' ? 'es' : 'en', surface: 'checkout',
         checkboxText: Object.fromEntries(scopeGroups.map((g) => [g, checkboxText(g, language)])),
       });
       if (acc.ok === false) { setError('We could not save your agreement just now. Please tap the button again.'); setSubmitting(false); return; }
       scopeRefRef = acc.ref;
-      const result = await provisionAccount(state);
-      if (result.ok === false) {
-        setError(result.message);
-        setSubmitting(false);
-        return;
-      }
       // TCPA: store the exact SMS wording the customer saw, plus whether they
       // opted in. Recorded for both outcomes so a "no" is provable too.
       {
