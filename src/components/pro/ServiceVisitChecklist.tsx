@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import DeepCleanChecklist from './DeepCleanChecklist';
 
 const LABELS: Record<string,[string,string]> = {
   shoe_covers:['Shoe covers on','Cubrezapatos puestos'],top_bottom:['Top to bottom; floors last','De arriba hacia abajo; pisos al final'],
@@ -26,6 +27,7 @@ export default function ServiceVisitChecklist({visitId}:{visitId:string}) {
   async function finishAddon(id:string,together:boolean){setBusy(id);const {error}=await supabase.rpc('pro_complete_addon',{_attach:id,_mode:together?'together':'self'});setBusy(null);if(error){setError(es?'No se pudo guardar el extra.':'Could not save the add-on.');return;}setAddons(old=>old.map(a=>a.id===id?{...a,status:'completed'}:a));}
   const exit=new Set(['locked','alarm','lights_ac','keys_returned']);
   return <section className="space-y-4 border-y border-border py-4">
+    {addons.filter(a=>a.addon_name.startsWith('Deep Clean')).map(a=><DeepCleanChecklist key={a.id} attachId={a.id} visitId={visitId}/>)}
     {state&&<p className="text-sm text-muted-foreground">{state.keys.filter(k=>state.checks[k]).length}/{state.keys.length}</p>}
     {[false,true].map(isExit=><section key={String(isExit)} className="space-y-2"><h2 className="font-semibold text-foreground">{isExit?(es?'Salida segura':'Secure exit'):(es?'Trabajo de hoy':'Today’s work')}</h2>{state?.keys.filter(k=>exit.has(k)===isExit).map(key=><label key={key} className="flex min-h-11 items-start gap-3 py-2 text-sm text-foreground"><Checkbox checked={state.checks[key]===true} disabled={busy!==null||state.closed} onCheckedChange={v=>void toggle(key,v===true)}/><span>{LABELS[key]?.[es?1:0]??key}</span></label>)}</section>)}
     {addons.length>0&&<section className="space-y-3"><h2 className="font-semibold text-foreground">{es?'Extras reservados':'Booked add-ons'}</h2>{addons.map(a=><div key={a.id} className="space-y-2 border-b border-border pb-3"><p className="text-sm text-foreground">{a.addon_name}{a.status==='completed'?' ✓':''}</p>{a.status!=='completed'&&<div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy!==null||state?.closed} onClick={()=>void finishAddon(a.id,false)}>{es?'Lo completé':'I completed it'}</Button>{a.can_split&&<Button variant="outline" disabled={busy!==null||state?.closed} onClick={()=>void finishAddon(a.id,true)}>{es?'Hecho juntos':'Done together'}</Button>}</div>}</div>)}</section>}
