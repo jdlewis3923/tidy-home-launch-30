@@ -1898,6 +1898,13 @@
       "when": 1793333586100,
       "tag": "0270_vest_only_intake_readiness",
       "breakpoints": true
+    },
+    {
+      "idx": 271,
+      "version": "7",
+      "when": 1793334636196,
+      "tag": "0271_member_home_profile",
+      "breakpoints": true
     }
   ]
 }

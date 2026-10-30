@@ -3812,16 +3812,19 @@ export type Database = {
       home_notes: {
         Row: {
           body: string
+          profile: Json
           updated_at: string
           user_id: string
         }
         Insert: {
           body?: string
+          profile?: Json
           updated_at?: string
           user_id: string
         }
         Update: {
           body?: string
+          profile?: Json
           updated_at?: string
           user_id?: string
         }
@@ -11835,6 +11838,7 @@ export type Database = {
         Returns: Json
       }
       pro_home_note: { Args: { _visit: string }; Returns: string }
+      pro_home_profile: { Args: { _visit: string }; Returns: Json }
       pro_job_card: { Args: { _visit: string }; Returns: Json }
       pro_lawn_job_info: {
         Args: { _visit: string }
