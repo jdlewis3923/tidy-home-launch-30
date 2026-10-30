@@ -30,6 +30,13 @@ describe('capacity config', () => {
 });
 
 describe('capacity math', () => {
+  it('counts Estate and Estate Plus actual monthly visit hours', () => {
+    const estate = computeCapacity({service:'cleaning',activeCustomers:1,assignedPros:1,netNewCustomers:0,demandHours:6});
+    const plus = computeCapacity({service:'cleaning',activeCustomers:1,assignedPros:2,netNewCustomers:0,demandHours:8.7 * 4});
+    expect(estate.demandHours).toBe(6);
+    expect(plus.demandHours).toBe(34.8);
+    expect(plus.fillPct).toBeCloseTo(34.8 / 322);
+  });
   it('one pro serves 25 cleaning customers and 82 lawn customers', () => {
     const cleaning = computeCapacity({ service: 'cleaning', activeCustomers: 0, assignedPros: 1, netNewCustomers: 0 });
     const lawn = computeCapacity({ service: 'lawn', activeCustomers: 0, assignedPros: 1, netNewCustomers: 0 });
