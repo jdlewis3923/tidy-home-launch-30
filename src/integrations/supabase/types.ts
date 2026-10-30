@@ -11206,6 +11206,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      deep_clean_capacity_check: {
+        Args: { _minutes: number; _visit: string }
+        Returns: undefined
+      }
       deep_clean_catalog_quote: {
         Args: { _addon_key: string; _quarterly?: boolean; _size: number }
         Returns: Json

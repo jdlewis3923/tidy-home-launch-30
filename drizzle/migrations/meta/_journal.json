@@ -1933,6 +1933,13 @@
       "when": 1793401327749,
       "tag": "0275_deep_clean_catalog_and_service_acknowledgments",
       "breakpoints": true
+    },
+    {
+      "idx": 276,
+      "version": "7",
+      "when": 1793401828555,
+      "tag": "0276_deep_clean_capacity_guard",
+      "breakpoints": true
     }
   ]
 }
