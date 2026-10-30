@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const visitQuery = admin
     .from('visits')
-    .select('id, assigned_pro_id, status, service_type')
+    .select('id, assigned_pro_id, status, service_type, size_tier, visit_kind')
     .limit(1);
   const { data: visitRows } = UUID_RE.test(job_id)
     ? await visitQuery.eq('id', job_id)
@@ -186,12 +186,19 @@ Deno.serve(async (req) => {
   // ---- catalog is the only source of price -------------------------------
   const { data: addon } = await admin
     .from('addon_catalog')
-    .select('id, addon_key, display_name, price_cents, is_active, services')
+    .select('id, addon_key, display_name, price_cents, is_active, services, estate_bundle_only')
     .eq('addon_key', addon_key)
     .maybeSingle();
   if (!addon) return jsonResponse({ ok: false, error: 'addon_not_in_catalog' }, 404);
   if (!addon.is_active || !addon.price_cents) {
     return jsonResponse({ ok: false, error: 'addon_not_bookable' }, 409);
+  }
+  let addedMinutes = MINUTES[addon.addon_key] ?? 20;
+  if(addon_key==='deep_clean' || addon.estate_bundle_only) {
+    const {data:q,error:qError}=await admin.rpc('deep_clean_catalog_quote',{_addon_key:addon_key,_size:visit.size_tier,_quarterly:visit.visit_kind==='quarterly_deep_clean'});
+    if(qError || !q)return jsonResponse({ok:false,error:qError?.message??'quote_unavailable'},409);
+    addon.price_cents=q.price_cents;addon.display_name=q.display_name;addedMinutes=q.added_minutes;
+    if(addon_key==='deep_clean') {const {error:fit}=await admin.rpc('deep_clean_capacity_check',{_visit:visit.id,_minutes:addedMinutes});if(fit)return jsonResponse({ok:false,error:fit.message},409);}
   }
 
   // ---- who is the customer? ---------------------------------------------
@@ -220,7 +227,7 @@ Deno.serve(async (req) => {
       photo_url: photo_path,
       status: 'pending',
       amount_cents: addon.price_cents,
-      minutes_estimate: MINUTES[addon.addon_key] ?? 20,
+      minutes_estimate: addedMinutes,
     })
     .select('id, token, amount_cents, minutes_estimate')
     .maybeSingle();

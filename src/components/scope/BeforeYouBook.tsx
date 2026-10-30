@@ -71,7 +71,7 @@ function ReviewCard({ group, checked, onCheck, cleaningSize, selectedAddons = []
       </>}
     </div>
     {!unlocked && <p className="mt-3 text-xs text-muted-foreground">{es ? 'Desplázate para leer todo y continuar.' : 'Scroll to read everything to continue.'}</p>}
-    <label className="mt-4 flex min-h-11 items-start gap-3 text-sm text-foreground"><Checkbox disabled={!unlocked || scope.isError} checked={checked} onCheckedChange={v => onCheck(v === true)} /><span>{es ? `He leído lo que incluye y no incluye mi plan de ${name}.` : `I've read what my ${name} plan includes and doesn't include.`}</span></label>
+    <label className="mt-4 flex min-h-11 items-start gap-3 text-sm text-foreground"><Checkbox className="mt-1 shrink-0" disabled={!unlocked || scope.isError} checked={checked} onCheckedChange={v => onCheck(v === true)} /><span>{es ? `He leído lo que incluye y no incluye mi plan de ${name}.` : `I've read what my ${name} plan includes and doesn't include.`}</span></label>
   </article>;
 }
 export default function BeforeYouBook({ groups, checked, onChange, ...props }: ReviewProps) {
@@ -83,6 +83,6 @@ export default function BeforeYouBook({ groups, checked, onChange, ...props }: R
   return <section className="space-y-4" data-before-you-book>
     <h2 className="text-xl font-bold text-foreground">{es ? 'Antes de reservar' : 'Before you book'}</h2>
     {groups.map(g => <ReviewCard key={g} group={g} checked={serviceChecks[g] === true} onCheck={v => { const next = { ...serviceChecks, [g]: v }; setServiceChecks(next); commit(next, terms); }} {...props} />)}
-    <label className="flex min-h-11 items-start gap-3 text-sm text-foreground"><Checkbox checked={terms} onCheckedChange={v => { setTerms(v === true); commit(serviceChecks, v === true); }} /><span>{es ? 'Acepto los ' : 'I agree to the '}<a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">{es ? 'Términos de Servicio de Tidy.' : 'Tidy Terms of Service.'}</a></span></label>
+    <label className="flex min-h-11 items-start gap-3 text-sm text-foreground"><Checkbox className="mt-1 shrink-0" checked={terms} onCheckedChange={v => { setTerms(v === true); commit(serviceChecks, v === true); }} /><span>{es ? 'Acepto los ' : 'I agree to the '}<a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">{es ? 'Términos de Servicio de Tidy.' : 'Tidy Terms of Service.'}</a></span></label>
   </section>;
 }
