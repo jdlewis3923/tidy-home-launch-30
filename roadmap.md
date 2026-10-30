@@ -1,5 +1,10 @@
 # Roadmap
 
+## Susan equipment approval and emails (Oct 30)
+- [ ] Repair equipment approval controls without bypassing required evidence.
+- [ ] Record Justin’s approval for Susan through the guarded review flow and send available onboarding emails only.
+- [ ] Verify approval readback, email acceptance and regression checks; no publication.
+
 ## Final six-part alignment (Oct 30)
 - [ ] Verify onboarding packs, quiet hours, restoration and isolated send tests.
 - [ ] Verify redo guardrail, all bilingual copy, one combined 2026-10-29b agreement version and test cleanup.
