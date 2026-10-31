@@ -26,6 +26,7 @@ import {
   Loader2,
 } from "lucide-react";
 import ContractTemplates from "@/components/admin/ContractTemplates";
+import LivingDocumentsPanel from "@/components/admin/LivingDocumentsPanel";
 import LegalReviewPanel from "@/components/admin/LegalReviewPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -164,6 +165,7 @@ const AdminDocuments = () => {
   }, [grouped]);
 
   const handleView = useCallback(async (doc: Doc) => {
+    if (doc.storage_path.startsWith("living/")) { window.location.assign(`/admin/documents/${doc.storage_path.slice(7)}`); return; }
     const { data, error } = await supabase.storage
       .from("company-docs")
       .createSignedUrl(doc.storage_path, 60 * 10);
@@ -308,6 +310,7 @@ const AdminDocuments = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        <LivingDocumentsPanel onSynced={() => void fetchDocs()} />
         <ContractTemplates />
         <LegalReviewPanel />
         <div className="flex items-center gap-3 flex-wrap no-print">

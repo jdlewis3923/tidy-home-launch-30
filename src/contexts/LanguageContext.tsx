@@ -700,13 +700,12 @@ const translations: Record<string, string> = {
   // Lawn Care plans
   "One visit per month.": "Una visita al mes.",
   "Two visits per month.": "Dos visitas al mes.",
-  "Four visits per month, bush trim included.": "Cuatro visitas al mes, poda de arbustos incluida.",
   // Lawn Care included
   "Mow to precise height": "Corte a altura precisa",
 "Edge all borders": "Bordeado de todas las orillas",
   "Blow hardscapes clean": "Soplado de aceras y entradas",
   "Weed-whack fence lines": "Recorte a lo largo de las cercas",
-  "Bush trim (weekly)": "Poda de arbustos (semanal)",
+  "Clippings mulched back into the lawn": "La grama cortada se tritura y queda en el césped",
     "Locked $45 a month — never surprise-priced": "$45 al mes, precio fijo — nunca con precios sorpresa",
   // Lawn Care testimonials
   "Lawn looks sharp every week without me lifting a finger. Best money I spend monthly.":
@@ -718,8 +717,8 @@ const translations: Record<string, string> = {
   // Lawn Care FAQs
   "One price per visit, set by the size of your lawn: $45, $65 or $99 at the monthly plan. Coming more often lowers the price per visit — biweekly is 8% less per visit than monthly, weekly is 18% less. You are always billed monthly. Pick your best guess and we confirm the size from satellite imagery before your first visit.":
     "Un precio por visita, según el tamaño de tu jardín: $45, $65 o $99 en el plan mensual. Venir más seguido baja el precio por visita — quincenal es 8% menos por visita que mensual y semanal 18% menos. Siempre se cobra al mes. Elige tu mejor estimación y confirmamos el tamaño con imágenes satelitales antes de la primera visita.",
-"Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and bagging or mulching clippings. Weekly plans include bush trim.":
-    "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y recoger o triturar la grama. Los planes semanales incluyen poda de arbustos.",
+"Mowing to precise height, edging all borders, blowing all hardscapes, weed-whacking fence lines, and mulching clippings back into the lawn. Hedges, trees, fertilizer, irrigation and hauling are not included.":
+    "Corte a altura precisa, bordeado de todas las orillas, soplado de aceras y entradas, recorte a lo largo de las cercas y la grama cortada se tritura y queda en el césped. No incluye setos, árboles, fertilizante, riego ni acarreo.",
   "Who does the work?": "¿Quién hace el trabajo?",
   "We automatically reschedule to the next available day. Your subscription stays active and your price doesn't change.":
     "Reprogramamos automáticamente para el siguiente día disponible. Tu suscripción sigue activa y tu precio no cambia.",

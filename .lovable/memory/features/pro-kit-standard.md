@@ -5,9 +5,10 @@ type: feature
 ---
 
 Kit Tidy provides at no cost to the Pro (never phrased as a requirement — Pros are 1099 contractors, "Tidy provides, you choose"):
-- House cleaning: 2 embroidered polos + photo ID badge. No vest (it was a lawn road-safety item).
-- Lawn care: 2 tees + 2 hi-vis vests + photo ID badge.
-- Car care: 2 tees + photo ID badge.
+- Vests only (S–3XL), optional, worn over the Pro's own clothes; no name or clothing mandate.
+- House cleaning and car care: 2 navy Tidy vests + photo ID badge.
+- Lawn care: 2 hi-vis vests + photo ID badge.
+- Polos and tees are retired; legacy apparel data is kept, never deleted.
 
 Vehicle magnets: offered on all three services, always opt-in. The Pro tests the driver's door with a household magnet first (aluminium/composite will not hold; nothing is ever taped or adhered). Opting in earns a $15/month vehicle advertising credit paid with the Friday deposit under a short bilingual vehicle advertising agreement signed in the intake form. Opting out changes nothing else.
 

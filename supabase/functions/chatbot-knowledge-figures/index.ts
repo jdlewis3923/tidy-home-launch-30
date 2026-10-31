@@ -42,20 +42,47 @@ Deno.serve(async (req) => {
     const content: string = data.content ?? "";
     const figures = [...content.matchAll(/\$\s?([0-9][0-9,]*)/g)].map((m) => m[1]);
     const distinct = [...new Set(figures)];
+    // Sentences touching drift-prone topics, so canon-docs.test.ts can check wording.
+    // The chatbot already says these to anyone, so returning them is not sensitive.
+    const watch = /(polo|\btees?\b|camiseta|hedge|eco-|disinfect|desinfect|\bbag|credit|deep clean|bundle|one-time|uniform)/i;
+    const sentences = content.split(/(?<=[.!?])\s+|\n+/).filter((x) => watch.test(x)).slice(0, 200);
+
+    // Onboarding modules are Pro-only, so only drift hits (slug + term) are returned, never prose.
+    const { data: mods } = await supabase.from("onboarding_module").select("slug, body_md, title");
+    const drift: [string, RegExp][] = [["polo", /\bpolos?\b/i], ["tee", /\btees?\b|t-shirt|camiseta/i], ["hedge trim", /hedge trim|poda de arbustos/i],
+      ["eco-safe", /eco-?safe|eco-friendly|ecológic/i], ["disinfect", /disinfect|desinfect/i], ["bagged clippings", /(bag(ged|ging)?|embols)[^.]{0,40}(clipping|grama)|clippings?[^.]{0,40}\bbag/i],
+      ["bundle discount", /bundle discount/i], ["redo credit", /credit instead of|crédito en lugar/i]];
+    const negated = (x: string) => /\b(never|no|not|nunca|sin|ni)\b/i.test(x);
+    const onboarding_hits = (mods ?? []).flatMap((m) => `${m.title}. ${m.body_md}`.split(/(?<=[.!?])\s+|\n+/)
+      .flatMap((x) => drift.filter(([, re]) => re.test(x) && !negated(x)).map(([term]) => ({ slug: m.slug, term }))));
 
     return new Response(
       JSON.stringify({
+        onboarding_hits,
+        onboarding_count: mods?.length ?? 0,
         id: data.id,
         updated_at: data.updated_at,
         length: content.length,
         figures: distinct,
+        sentences,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
     console.error("[chatbot-knowledge-figures] error", e);
+    // Onboarding modules are Pro-only, so only drift hits (slug + term) are returned, never prose.
+    const { data: mods } = await supabase.from("onboarding_module").select("slug, body_md, title");
+    const drift: [string, RegExp][] = [["polo", /\bpolos?\b/i], ["tee", /\btees?\b|t-shirt|camiseta/i], ["hedge trim", /hedge trim|poda de arbustos/i],
+      ["eco-safe", /eco-?safe|eco-friendly|ecológic/i], ["disinfect", /disinfect|desinfect/i], ["bagged clippings", /(bag(ged|ging)?|embols)[^.]{0,40}(clipping|grama)|clippings?[^.]{0,40}\bbag/i],
+      ["bundle discount", /bundle discount/i], ["redo credit", /credit instead of|crédito en lugar/i]];
+    const negated = (x: string) => /\b(never|no|not|nunca|sin|ni)\b/i.test(x);
+    const onboarding_hits = (mods ?? []).flatMap((m) => `${m.title}. ${m.body_md}`.split(/(?<=[.!?])\s+|\n+/)
+      .flatMap((x) => drift.filter(([, re]) => re.test(x) && !negated(x)).map(([term]) => ({ slug: m.slug, term }))));
+
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "unknown" }),
+      JSON.stringify({
+        onboarding_hits,
+        onboarding_count: mods?.length ?? 0, error: e instanceof Error ? e.message : "unknown" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }

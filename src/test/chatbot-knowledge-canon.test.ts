@@ -14,6 +14,10 @@ import {
   CAR_WASH_PRICES,
   CADENCES,
   CLEANING_SURCHARGE,
+  CLEANING_MONTHLY,
+  CLEANING_PER_VISIT,
+  CLEANING_SIZES,
+  DEEP_CLEAN_PRICE,
   LAWN_SURCHARGE,
   PER_VISIT_PRICES,
   REFERRAL_BONUS_CENTS,
@@ -33,6 +37,13 @@ function canonFigures(): Set<number> {
       allowed.add(BILLED_MONTHLY.lawn[size][cadence]);
     }
     allowed.add(SHINE_MONTHLY[size]);
+  }
+  for (const size of CLEANING_SIZES) {
+    for (const cadence of CADENCES) {
+      allowed.add(CLEANING_PER_VISIT[size][cadence]);
+      allowed.add(CLEANING_MONTHLY[size][cadence]);
+    }
+    allowed.add(DEEP_CLEAN_PRICE[size]);
   }
   allowed.add(CLEANING_SURCHARGE.perVisitDollars);
   allowed.add(LAWN_SURCHARGE.perVisitDollars);

@@ -232,6 +232,16 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
       ...roadmapComingUp(inits, today).map((r) => ({ text: `${r.due} · ${r.i.name}: ${r.x.task} (${r.x.owner})`, url: `${SITE}/admin/roadmap`, label: 'Open' })),
     ] });
     sections.push({ title: 'Must do today', items: mustDo.map(item) });
+    // Canon changed in the last day → the living documents already show it; say so.
+    const [{ count: sc }, { count: ac }, { count: cc }] = await Promise.all([
+      admin.from('service_scope').select('id', { count: 'exact', head: true }).gte('updated_at', since),
+      admin.from('addon_catalog').select('id', { count: 'exact', head: true }).gte('updated_at', since),
+      admin.from('contract_templates').select('id', { count: 'exact', head: true }).gte('created_at', since),
+    ]);
+    if ((sc ?? 0) + (ac ?? 0) + (cc ?? 0) > 0) sections.push({ title: 'Documents updated', items: [{
+      text: `Prices, scope or the contract changed yesterday${[sc ? ' (scope)' : '', ac ? ' (add-ons)' : '', cc ? ' (contract)' : ''].join('')}. Every living document now shows the new version.`,
+      url: `${SITE}/admin/documents`, label: 'Open documents',
+    }] });
     sections.push({ title: 'Unresolved urgent', red: true, items: urgentOpen.map(item) });
     // Nextdoor can't be auto-posted: today's post, with its copy, image and a Mark posted button.
     const { data: nd } = await admin.from('social_launch_posts').select('id, caption, template_copy, image_url, scheduled_for, status')

@@ -46,7 +46,11 @@ const DOCS: Seed[] = [
   { filename: '21_ProIntakeKitOrder_Print.pdf',    category: 'Onboarding', description: 'Pro Intake & Kit Order (print) — printable contractor onboarding intake and kit order.' },
 ];
 
+// RETIRED 2026-10-30: company documents are living pages at /admin/documents/<slug>
+// rendered from source files. Static copies are never seeded again.
+const RETIRED = true;
 Deno.serve(async (req) => {
+  if (RETIRED) return handleCors(req) ?? jsonResponse({ ok: true, skipped: true, reason: 'retired_living_documents' });
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
 

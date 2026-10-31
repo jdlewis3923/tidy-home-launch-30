@@ -1,5 +1,6 @@
-// Exact guide approved by Justin, October 27, 2026.
-export const MEMBER_GUIDE_VERSION = "2026-10-27";
+// Guide approved by Justin, October 27, 2026; "What's included" section added October 30, 2026.
+// The included / not-included list itself is rendered live from service_scope wherever the guide shows.
+export const MEMBER_GUIDE_VERSION = "2026-10-30";
 export const MEMBER_GUIDE = [
   {
     "id": "schedule",
@@ -175,6 +176,27 @@ export const MEMBER_GUIDE = [
         "Cancela cuando quieras desde tu panel. Tu plan sigue activo hasta el final del mes que ya pagaste.",
         "Planes anuales: los meses usados se cobran al precio mensual regular, y el resto se reembolsa.",
         "El estatus de fundador y tu número de fundador terminan al cancelar y no se pueden recuperar."
+      ]
+    }
+  },
+  {
+    "id": "included",
+    "en": {
+      "heading": "WHAT'S INCLUDED",
+      "items": [
+        "Every visit follows the standard list for your service: Kitchen, Bathrooms, Every room, Finish, and what's not included. That list is in your account under your plan.",
+        "Before you book, you check a box for each service to confirm what's included and not included. We keep that record with the date.",
+        "Deep Clean add-on: everything in the visit plus deep baseboards, blinds, fans and fixtures, walls and doors, inside the oven and inside the fridge. Priced by your home's size. Weekly cleaning plans also get a quarterly deep clean every 13th week.",
+        "Something wasn't right? Tap \"Something wasn't right\" and we come back within 48 hours, free."
+      ]
+    },
+    "es": {
+      "heading": "QUÉ INCLUYE",
+      "items": [
+        "Cada visita sigue la lista estándar de tu servicio: Cocina, Baños, Cada habitación, Toque final y lo que no incluye. Esa lista está en tu cuenta, en tu plan.",
+        "Antes de reservar, marcas una casilla por cada servicio para confirmar lo que incluye y lo que no. Guardamos ese registro con la fecha.",
+        "Limpieza profunda adicional: todo lo de la visita más zócalos a fondo, persianas, ventiladores y lámparas, paredes y puertas, dentro del horno y dentro del refrigerador. El precio depende del tamaño de tu casa. Los planes semanales de limpieza también incluyen una limpieza profunda trimestral cada 13.ª semana.",
+        "¿Algo no quedó bien? Toca \"Algo no quedó bien\" y volvemos en 48 horas, gratis."
       ]
     }
   },
