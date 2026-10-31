@@ -36,7 +36,7 @@ const SVC_NAME: Record<Svc, [string, string]> = {
   cleaning: ["House Cleaning", "Limpieza del hogar"], lawn: ["Lawn Care", "Cuidado del césped"], car: ["Car Care", "Cuidado del Auto"],
 };
 const ADDON_SVC: Record<Svc, AddonService> = { cleaning: "cleaning", lawn: "lawn", car: "detailing" };
-const SCOPE_SVC: Record<Svc, ScopeService[]> = { cleaning: ["cleaning", "cleaning_deep_clean"], lawn: ["lawn"], car: ["car_wash", "car_detail"] };
+const SCOPE_SVC: Record<Svc, ScopeService[]> = { cleaning: ["cleaning"], lawn: ["lawn"], car: ["car_wash", "car_detail"] };
 const KIT_SVC: Record<Svc, KitServiceKey> = { cleaning: "cleaning", lawn: "lawn", car: "car" };
 
 const $ = (n: number) => `$${Number.isInteger(n) ? n.toLocaleString("en-US") : n.toFixed(2)}`;
@@ -65,7 +65,7 @@ function scopeSections(src: DocSources, svc: Svc, l: Lang): DocSection[] {
 }
 
 function deepCleanRows(src: DocSources, l: Lang): string[] {
-  return src.scope.filter((r) => r.active && r.addon_key === "deep_clean" && r.section === "included")
+  return src.scope.filter((r) => r.active && r.service === "cleaning_deep_clean" && r.section === "included" && !/^everything in/i.test(r.text_en))
     .sort((a, b) => a.sort_order - b.sort_order).map((r) => (l === "en" ? r.text_en : r.text_es));
 }
 
