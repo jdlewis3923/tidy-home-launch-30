@@ -25,7 +25,7 @@ const DRIFT: [string, RegExp][] = [
   ['old detail pay', /detail[^.]{0,60}\$(51|61|82)\b|\$(51|61|82)\b[^.]{0,60}detail/i],
   ['bundle discount', /bundle discount|descuento por paquete/i],
 ];
-const NEGATION = /\b(never|no|not|nor|nunca|sin|ni|retired|withdrawn)\b/i;
+const NEGATION = /\b(never|no|not|nor|nunca|sin|ni|retired|withdrawn)\b|n't\b/i;
 
 function hits(label: string, text: string): string[] {
   return text.split(/(?<=[.!?])\s+|\n+/).flatMap((s) =>
