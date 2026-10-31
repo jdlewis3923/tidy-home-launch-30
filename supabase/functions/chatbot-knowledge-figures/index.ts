@@ -42,6 +42,10 @@ Deno.serve(async (req) => {
     const content: string = data.content ?? "";
     const figures = [...content.matchAll(/\$\s?([0-9][0-9,]*)/g)].map((m) => m[1]);
     const distinct = [...new Set(figures)];
+    // Sentences touching drift-prone topics, so canon-docs.test.ts can check wording.
+    // The chatbot already says these to anyone, so returning them is not sensitive.
+    const watch = /(polo|\btees?\b|camiseta|hedge|eco-|disinfect|desinfect|\bbag|credit|deep clean|bundle|one-time|uniform)/i;
+    const sentences = content.split(/(?<=[.!?])\s+|\n+/).filter((x) => watch.test(x)).slice(0, 200);
 
     return new Response(
       JSON.stringify({
@@ -49,6 +53,7 @@ Deno.serve(async (req) => {
         updated_at: data.updated_at,
         length: content.length,
         figures: distinct,
+        sentences,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
