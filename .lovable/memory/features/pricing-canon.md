@@ -1,6 +1,6 @@
 ---
 name: Pricing canon
-description: Single source of truth for all prices, bundle discounts, and the referral bonus
+description: Single source of truth for all prices, bundle gifts, Deep Clean and the referral bonus
 type: feature
 ---
 All prices and discounts come from `src/lib/pricing-canon.ts`, mirrored for edge
@@ -20,7 +20,7 @@ price or percentage anywhere else.
   quantity = visits_per_month: cleaning XL 6000 (`surcharge_cleaning_xl`),
   lawn XL 3000 (`surcharge_lawn_xl`). Never separate cadence variants.
 - Contractor pay = 40% of the visit price, never customer-visible.
-  Lawn pay: $18/$16/$15 · $26/$24/$21 · $40/$36/$32. Tier 2 +10%, rounded.
+  Lawn pay is flat across cadence: $18 / $26 / $40 (Small/Standard/Large). Cleaning flat: $56/$76/$112/$170/$238; first Estate/Estate Plus visit 1.5x ($255/$357). Tier 2 +10%, rounded. (Older $16/$15 cadence pay is WRONG.)
 
 - Bundling is NEVER a discount and NEVER a car wash. It is ONE free premium
   add-on per month whenever the customer holds 2+ distinct services. The
@@ -31,11 +31,8 @@ price or percentage anywhere else.
 - Florida sales tax is NOT collected: `FL_SALES_TAX_COLLECTION_ENABLED = false`
   in `supabase/functions/_shared/florida-tax.ts` plus `app_settings.fl_sales_tax_enabled`.
 
-One-time add-on catalog (Stripe one-time prices, 15 total): interior windows $55,
-oven $45, fridge $35, baseboards $35, cabinets $50, pet hair $45, exterior
-windows + screens $85, bed edge reset $65, weed removal $45, leaf & debris $55,
-hedge trim $65, driveway pressure wash $150, clay bar & ceramic $95, headlight
-restoration $79, interior protect & condition $55.
+Add-ons: the live catalog (addon_catalog / src/lib/addon-catalog.ts) is the only source; hedge trim, pressure wash, headlight, baseboards and cabinets as standalone add-ons are retired. Pro gets 40% of every add-on.
+Deep Clean add-on (members only, never a gift): $149/$179/$219/$289/$389 by cleaning size, Pro pay 40%. Weekly plans include a quarterly deep clean every 13th week. Cleaning is sized by sq ft (≤1,400 / 1,400–2,200 / 2,200–3,200 / Estate 3,200–4,800 / Estate Plus 4,800–7,000; >7,000 walkthrough). Bundling is a monthly gift add-on, never a discount.
 
 Guards: `src/test/pricing-canon.test.ts` and
 `src/test/checkout-stripe-parity.test.ts` fail on any drift between canon,
