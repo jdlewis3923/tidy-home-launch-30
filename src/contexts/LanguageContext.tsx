@@ -700,7 +700,6 @@ const translations: Record<string, string> = {
   // Lawn Care plans
   "One visit per month.": "Una visita al mes.",
   "Two visits per month.": "Dos visitas al mes.",
-  "Four visits per month.": "Cuatro visitas al mes.",
   // Lawn Care included
   "Mow to precise height": "Corte a altura precisa",
 "Edge all borders": "Bordeado de todas las orillas",
