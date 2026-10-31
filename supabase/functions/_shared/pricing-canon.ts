@@ -735,3 +735,12 @@ export const CAR_SERVICE_NAMES: Record<CarServiceCode, string> = {
   car_wash: 'Car Wash',
   car_detail: 'Car Detail',
 };
+
+// ---------------------------------------------------------------------------
+// DEEP CLEAN add-on (mirror of public.addon_catalog 'deep_clean'). Member price
+// by cleaning size; Pro gets 40%; never a free gift; never sold without a plan.
+// ---------------------------------------------------------------------------
+export const DEEP_CLEAN_PRICE: Record<CleaningSize, number> = { 1: 149, 2: 179, 3: 219, 4: 289, 5: 389 };
+export const DEEP_CLEAN_PRO_PAY_PCT = 40;
+/** Estate / Estate Plus first visit pays the Pro 1.5×; the member pays no reset fee. */
+export const ESTATE_FIRST_VISIT_MULTIPLIER = 1.5;
