@@ -50,7 +50,7 @@ const DOCS: Seed[] = [
 // rendered from source files. Static copies are never seeded again.
 const RETIRED = true;
 Deno.serve(async (req) => {
-  if (RETIRED) return new Response(JSON.stringify({ ok: true, skipped: true, reason: 'retired_living_documents' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  if (RETIRED) return handleCors(req) ?? jsonResponse({ ok: true, skipped: true, reason: 'retired_living_documents' });
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
 
