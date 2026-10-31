@@ -36,7 +36,7 @@ const SVC_NAME: Record<Svc, [string, string]> = {
   cleaning: ["House Cleaning", "Limpieza del hogar"], lawn: ["Lawn Care", "Cuidado del césped"], car: ["Car Care", "Cuidado del Auto"],
 };
 const ADDON_SVC: Record<Svc, AddonService> = { cleaning: "cleaning", lawn: "lawn", car: "detailing" };
-const SCOPE_SVC: Record<Svc, ScopeService[]> = { cleaning: ["cleaning", "cleaning_deep_clean"], lawn: ["lawn"], car: ["car_wash", "car_detail"] };
+const SCOPE_SVC: Record<Svc, ScopeService[]> = { cleaning: ["cleaning"], lawn: ["lawn"], car: ["car_wash", "car_detail"] };
 const KIT_SVC: Record<Svc, KitServiceKey> = { cleaning: "cleaning", lawn: "lawn", car: "car" };
 
 const $ = (n: number) => `$${Number.isInteger(n) ? n.toLocaleString("en-US") : n.toFixed(2)}`;
@@ -65,7 +65,7 @@ function scopeSections(src: DocSources, svc: Svc, l: Lang): DocSection[] {
 }
 
 function deepCleanRows(src: DocSources, l: Lang): string[] {
-  return src.scope.filter((r) => r.active && r.addon_key === "deep_clean" && r.section === "included")
+  return src.scope.filter((r) => r.active && r.service === "cleaning_deep_clean" && r.section === "included" && !/^everything in/i.test(r.text_en))
     .sort((a, b) => a.sort_order - b.sort_order).map((r) => (l === "en" ? r.text_en : r.text_es));
 }
 
@@ -190,7 +190,7 @@ function deepCleanSection(src: DocSources, l: Lang): DocSection {
     p(t("Everything in the visit, plus:", "Todo lo de la visita, más:")),
     list(deepCleanRows(src, l)),
     list([
-      t("Adds time to the visit. One after-photo for each of the 6 items is required to finish.", "Agrega tiempo a la visita. Se requiere una foto final por cada uno de los 6 puntos para terminar."),
+      t("Adds time to the visit. One after-photo for each item above is required to finish.", "Agrega tiempo a la visita. Se requiere una foto final por cada punto de arriba para terminar."),
       t("Never a free gift. In Estate homes, baseboards, blinds, fans and walls are sold only inside Deep Clean.", "Nunca es un regalo. En casas Estate, zócalos, persianas, ventiladores y paredes solo se venden dentro de la Limpieza profunda."),
       t("Weekly cleaning plans get a quarterly deep clean every 13th week.", "Los planes semanales incluyen una limpieza profunda trimestral cada 13.ª semana."),
       t("Never offered: a one-time clean without a plan, move-in or move-out, post-construction.", "Nunca se ofrece: limpieza única sin plan, mudanza de entrada o salida, ni post-construcción."),
@@ -378,7 +378,7 @@ export const LIVING_DOCS: DocDef[] = [
     slug: "deep-clean-sop", category: "Operations", title: ["Deep Clean SOP (Pro)", "Procedimiento de Limpieza profunda (Pro)"],
     build: (src, l) => { const t = T(l); return [
       sec(t("Order of work", "Orden de trabajo"), list([t("Finish the standard visit list first, then the Deep Clean items top to bottom: fans and fixtures, blinds, walls and doors, baseboards, inside oven, inside fridge.", "Termina la lista estándar primero y luego los puntos de Limpieza profunda de arriba hacia abajo: ventiladores y lámparas, persianas, paredes y puertas, zócalos, dentro del horno, dentro del refrigerador.")])),
-      sec(t("The 6 items", "Los 6 puntos"), list(deepCleanRows(src, l))),
+      sec(t("The items", "Los puntos"), list(deepCleanRows(src, l))),
       sec(t("Photos", "Fotos"), p(t("One after-photo per item. The job can't be finished without all 6.", "Una foto final por punto. El trabajo no se puede terminar sin las 6."))),
       sec(t("Price and Pro pay by size", "Precio y pago por tamaño"), addonTable("cleaning", l)),
       sec(t("More than Deep Clean covers", "Más de lo que cubre"), p(t("Photo it and tap \"Suggest an add-on\". Never promise extra work at the door.", "Tómale foto y toca \"Sugerir un adicional\". Nunca prometas trabajo extra en la puerta."))),
