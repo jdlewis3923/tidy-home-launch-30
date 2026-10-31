@@ -19,7 +19,7 @@ price or percentage anywhere else.
 - Surcharges are per visit, attached as their own Stripe line with
   quantity = visits_per_month: cleaning XL 6000 (`surcharge_cleaning_xl`),
   lawn XL 3000 (`surcharge_lawn_xl`). Never separate cadence variants.
-- Contractor pay = 40% of the visit price, never customer-visible.
+- Contractor visit pay is a flat amount by service and size (never cadence), never customer-visible.
   Lawn pay is flat across cadence: $18 / $26 / $40 (Small/Standard/Large). Cleaning flat: $56/$76/$112/$170/$238; first Estate/Estate Plus visit 1.5x ($255/$357). Tier 2 +10%, rounded. (Older $16/$15 cadence pay is WRONG.)
 
 - Bundling is NEVER a discount and NEVER a car wash. It is ONE free premium
