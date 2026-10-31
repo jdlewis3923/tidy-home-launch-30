@@ -95,5 +95,5 @@ const PRINT_CSS = `
   body *{visibility:hidden}.living-doc,.living-doc *{visibility:visible}.living-doc{position:absolute;inset:0;background:hsl(0 0% 100%)}
   .no-print{display:none!important}.ld-page{box-shadow:none;max-width:none;font-size:13pt}
   .ld-mast,.ld-bar,.ld-body th,.ld-foot{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .ld-foot{position:fixed;bottom:0;left:0;right:0}
+  .ld-foot{display:none}
 }`;

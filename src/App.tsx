@@ -100,6 +100,7 @@ const AdminEvidencePack = lazy(() => import("./pages/AdminEvidencePack.tsx"));
 const AdminSocial = lazy(() => import("./pages/AdminSocial.tsx"));
 const AdminDemand = lazy(() => import("./pages/AdminDemand.tsx"));
 const AdminDocuments = lazy(() => import("./pages/AdminDocuments.tsx"));
+const AdminLivingDocument = lazy(() => import("./pages/AdminLivingDocument.tsx"));
 const AdminApplicants = lazy(() => import("./pages/AdminApplicants.tsx"));
 const AdminEmailHealth = lazy(() => import("./pages/AdminEmailHealth.tsx"));
 const AdminSetupCheck = lazy(() => import("./pages/AdminSetupCheck.tsx"));
@@ -431,6 +432,7 @@ const App = () => (
                   <Route path="/admin/size-review" element={<AdminSizeReview />} />
                   <Route path="/admin/evidence-pack" element={<AdminEvidencePack />} />
                   <Route path="/admin/documents" element={<AdminDocuments />} />
+                  <Route path="/admin/documents/:slug" element={<AdminLivingDocument />} />
                   <Route path="/admin/applicants" element={<AdminApplicants />} />
                   <Route path="/admin/orientations" element={<AdminOrientations />} />
                   <Route path="/admin/orientations/preview" element={<ProOrientationPreview />} />
