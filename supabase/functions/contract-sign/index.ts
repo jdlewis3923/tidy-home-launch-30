@@ -52,7 +52,7 @@ Deno.serve(async req=>{
  }
  if(!b.token)return reply({error:'invalid_request'},400);
  const a=await check(await db.from('applicants').select('*').eq('contract_token',b.token).maybeSingle());if(!a)return reply({error:'not_found'},404);
- const pipeline=await check(await db.from('contractor_pipeline').select('service,stage,archived,state,proof_approved_at').eq('applicant_id',a.id).maybeSingle());
+ const pipeline=await check(await db.from('contractor_pipeline').select('service,stage,archived,state,proof_approved_at,is_test').eq('applicant_id',a.id).maybeSingle());
  if(!pipeline?.proof_approved_at||pipeline.archived||pipeline.state!=='open')return reply({error:'not_yet'},403);
  const lang=await proLang(db,a.id);let t:any=null;let doc:any=null;
  if(lang==='es'){
@@ -72,7 +72,7 @@ Deno.serve(async req=>{
  if(b.action!=='sign')return reply({error:'unknown_action'},400);
  if(a.contracts_signed){const access=await provision(a.id);return reply({ok:true,already:true,access:access.data});}
  if(!b.typed_name||!/\S+\s+\S+/.test(b.typed_name)||b.agreed!==true)return reply({error:'full_name_and_agreement_required'},400);
- if(b.version!==version)return reply({error:'version_changed'},409);
+ if(b.version!==version){console.warn('[contract-sign] version_changed',a.id);return reply({error:'version_changed'},409);}
  const proNumber=await check(await db.rpc('signing_day_allocate_number',{_id:a.id}));
  const at=new Date(),ip=(req.headers.get('x-forwarded-for')??req.headers.get('cf-connecting-ip')??'unknown').split(',')[0].trim(),ua=(req.headers.get('user-agent')??'unknown').slice(0,400);
  const filled={...values,legal_name:b.typed_name,business_name:b.business_name||'—',pro_number:proNumber};let original:Uint8Array|undefined;
@@ -81,7 +81,8 @@ Deno.serve(async req=>{
  const path=`contracts/signed/${a.id}/signed-${crypto.randomUUID()}.pdf`;await check(await db.storage.from('company-docs').upload(path,bytes,{contentType:'application/pdf'}));
  const committed=await check(await db.rpc('contract_commit_signature',{_applicant:a.id,_template:t?.id??null,_document:doc?.id??null,_version:version,_body:t?.body??null,_typed:b.typed_name,_business:filled.business_name,_ip:ip,_ua:ua,_path:path,_values:filled,_signed_at:at.toISOString()}));
  const access=await provision(a.id);
- const email=committed.already?undefined:await mail(a,bytes,path,version,b.typed_name,etTime(at));
+ const isTest=Boolean(a.is_test_row||pipeline.is_test);
+ const email=committed.already||isTest?undefined:await mail(a,bytes,path,version,b.typed_name,etTime(at));
  return reply({ok:true,signed_at:at.toISOString(),email,access:access.data,access_error:access.error});
- }catch(e){return reply({error:e instanceof Error?e.message:String((e as any)?.message??e)},500);}
+ }catch(e){console.error('[contract-sign] failed',e instanceof Error?e.message:e);return reply({error:e instanceof Error?e.message:String((e as any)?.message??e)},500);}
 });
