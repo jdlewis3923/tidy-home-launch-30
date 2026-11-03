@@ -10,12 +10,12 @@ export async function agreementPdf(body: string, values: Record<string,string>, 
   const pdf = original ? await PDFDocument.load(original) : await PDFDocument.create();
   pdf.registerFontkit(fontkit);
   const font=await pdf.embedFont(Uint8Array.from(atob(CONTRACT_FONT_BASE64),c=>c.charCodeAt(0)),{features:{liga:false,clig:false}});
-  const logoResponse=await vendorFetch(TIDY_LOGO);
-  if(!logoResponse.ok) throw new Error('Tidy logo unavailable');
-  const logo=await pdf.embedPng(await logoResponse.arrayBuffer());
+  // A missing logo must never block a Pro from signing.
+  let logo:Awaited<ReturnType<typeof pdf.embedPng>>|null=null;
+  try{const logoResponse=await vendorFetch(TIDY_LOGO);if(logoResponse.ok)logo=await pdf.embedPng(await logoResponse.arrayBuffer());else console.warn('[contract-pdf] logo unavailable',logoResponse.status);}catch(e){console.warn('[contract-pdf] logo fetch failed',e instanceof Error?e.message:e);}
   let page=pdf.addPage([612,792]);let y=680;
   const newPage=()=>{page=pdf.addPage([612,792]);y=740;};
-  page.drawImage(logo,{x:48,y:695,width:78,height:65});
+  if(logo)page.drawImage(logo,{x:48,y:695,width:78,height:65});
   const write=(text:string,size=10)=>{
     for(const paragraph of text.split(/\n/)){
       let line='';
