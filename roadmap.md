@@ -1,5 +1,16 @@
 # Roadmap
 
+## System-wide reliability pass (Nov 3) — test records only, no real texts/emails
+- [ ] 1 Signing via Documenso (secrets present) + in-app fallback alert + nightly signing self-test (cleaning/lawn/Spanish)
+- [ ] 2 Owner-sent agreement satisfies interview gate; fix Susan
+- [ ] 3 Every candidate-facing failure → logged + urgent named alert
+- [ ] 4 Inbound reply urgency rules + 24h escalation; list unread (do not resolve)
+- [ ] 5 Applicant dedup on email/phone, E.164, merge existing dupes
+- [ ] 6 Auto-decline/nudge protections; review 21f2c982; 30-day protected report
+- [ ] 7 SMS status write-back, Twilio backfill, missing-SID audit, urgent on failure
+- [ ] 8 /admin/health shows all of the above and turns red
+
+
 ## Deep Clean and Before you book (Oct 30)
 - [ ] Catalog/scope, size prices/pay/minutes, Estate/quarterly/gift/discount/capacity rules and Stripe test prices.
 - [ ] Mandatory bilingual live-scope review in both checkout paths and service adds, server acknowledgments, account/admin history and nonblocking change notice.
