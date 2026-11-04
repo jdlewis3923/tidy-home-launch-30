@@ -11268,6 +11268,7 @@ export type Database = {
       }
       dispatch_due_social_posts: { Args: never; Returns: number }
       ensure_referral_code: { Args: never; Returns: string }
+      escalate_stale_unread_replies: { Args: never; Returns: number }
       feature_enabled: { Args: { _key: string }; Returns: boolean }
       first_three_checkin_reply: {
         Args: { _body: string; _phone: string; _sid: string }
@@ -11676,6 +11677,7 @@ export type Database = {
         }
         Returns: Json
       }
+      match_applicant_by_phone: { Args: { _phone: string }; Returns: string }
       member_checkin_send_time: { Args: { _at: string }; Returns: string }
       member_guide_accepted: { Args: { _user: string }; Returns: boolean }
       member_ops_tick: { Args: never; Returns: Json }
