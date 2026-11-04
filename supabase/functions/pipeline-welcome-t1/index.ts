@@ -25,13 +25,12 @@ Deno.serve(async (req) => {
   if (!p || (!p.ica_countersigned_at && !a?.contracts_signed)) return jsonResponse({ ok: false, error: "not_signed" }, 409);
   if (p.welcome_t1_sent_at) return jsonResponse({ ok: true, skipped: "already_sent" });
   if (p.is_test || a?.is_test_row) {
-    await admin.from("email_send_log").insert({ template_name: "WELCOME-T1", channel: "brevo", recipient: a?.email ?? null, triggered_by: "pipeline-welcome-t1", status: "skipped", error_message: "test_candidate", payload: { applicant_id } });
     await admin.from("onboarding_events").insert({ applicant_id, event: "welcome_t1_test_skip", metadata: { would_send: ["WELCOME-T1 email", "insurance_instructions sms+email"] } });
     return jsonResponse({ ok: true, skipped: "test_candidate" });
   }
 
   const fail = async (msg: string) => {
-    await admin.from("email_send_log").insert({ template_name: "WELCOME-T1", channel: "brevo", recipient: a?.email ?? null, triggered_by: "pipeline-welcome-t1", status: "failed", error_message: msg, payload: { applicant_id } });
+    await admin.from("email_send_log").insert({ template_name: "WELCOME-T1", channel: "email", recipient: a?.email ?? null, triggered_by: "pipeline-welcome-t1", status: "failed", error_message: msg, payload: { applicant_id } });
     await admin.from("admin_alerts").insert({ level: "action", category: "hiring", title: "WELCOME-T1 did not send", detail: `${a?.first_name ?? "Candidate"}: ${msg}`, dedupe_key: `welcome-t1:${applicant_id}` }).then(() => {}, () => {});
     return jsonResponse({ ok: false, error: msg }, 502);
   };
@@ -41,7 +40,7 @@ Deno.serve(async (req) => {
   if (missing.length) return fail(`missing params: ${missing.join(", ")}`);
   const res = await sendBrevoEmail({ templateId: EMAIL.CONTRACTOR_WELCOME_T1, to: [{ email: a.email, name: a.first_name ?? undefined }], params, tags: ["WELCOME-T1"], marketing: false, label: "pipeline-welcome-t1" });
   if (!res.sent) return fail(res.reason ?? "send failed");
-  await admin.from("email_send_log").insert({ template_name: "WELCOME-T1", channel: "brevo", recipient: a.email, triggered_by: "pipeline-welcome-t1", status: "sent", payload: { applicant_id } });
+  await admin.from("email_send_log").insert({ template_name: "WELCOME-T1", channel: "email", recipient: a.email, triggered_by: "pipeline-welcome-t1", status: "sent", payload: { applicant_id } });
   const { error } = await admin.rpc("pipeline_mark_welcome_sent", { _id: applicant_id });
   if (error) return jsonResponse({ ok: false, error: error.message }, 500);
   // On signature: WELCOME-T1 (above, unchanged) plus the insurance quote instructions.
