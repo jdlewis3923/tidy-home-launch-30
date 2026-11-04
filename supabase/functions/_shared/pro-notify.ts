@@ -177,6 +177,7 @@ async function smsFallback(
     }
     if (res.ok) {
       const payload = await res.json().catch(() => null);
+      if (payload?.skipped === 'candidate_sms_off') return { outcome: 'no_phone', detail: 'skipped: candidate_sms_off' };
       return proSmsAccepted(payload) ? {outcome:'sent'} : {outcome:'failed',detail:'SMS was skipped or not confirmed by a carrier message identifier'};
     }
     const detail = (await res.text().catch(() => '')).slice(0, 200);
