@@ -11172,6 +11172,7 @@ export type Database = {
         Returns: Json
       }
       contract_load: { Args: { _token: string }; Returns: Json }
+      contract_post_sign: { Args: { _applicant: string }; Returns: Json }
       contract_scope_body: { Args: { _template: string }; Returns: string }
       contractor_visit_pay_cents: {
         Args: {

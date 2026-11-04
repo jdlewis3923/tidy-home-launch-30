@@ -8,6 +8,7 @@ import { contractSignedEmail } from '../_shared/pro-emails.ts';
 import { agreementPdf,etTime } from '../_shared/contract-pdf.ts';
 import { vendorFetch } from '../_shared/http.ts';
 import { CONTRACT_TEMPLATE_SEED } from '../_shared/contract-template-seed.ts';
+import { reportCandidateFailure } from '../_shared/candidate-failure.ts';
 const db=createClient(Deno.env.get('SUPABASE_URL')??'',Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'',{auth:{persistSession:false}});
 const schema=z.object({action:z.enum(['document','sign','countersign','templates','template_pdf','seed']),token:z.string().min(20).max(200).optional(),applicant_id:z.string().uuid().optional(),template_id:z.string().uuid().optional(),typed_name:z.string().trim().min(3).max(120).optional(),business_name:z.string().trim().max(200).optional(),agreed:z.boolean().optional(),version:z.string().max(300).optional()});
 const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
@@ -27,7 +28,7 @@ async function mail(a:any,bytes:Uint8Array,path:string,version:string,typed:stri
  const owner=await sendProEmail(db,{applicantId:null,key:final?'contract_final_owner':'contract_signed_owner',to:'hello@jointidy.co',built:{...built,subject:`${final?'Countersigned':'Signed'}: ${typed}`},triggeredBy:'contract-sign',attachment});
  return {pro,owner};
 }
-Deno.serve(async req=>{
+async function handle(req:Request):Promise<Response>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
  if(req.method!=='POST')return reply({error:'method_not_allowed'},405);
  try{
@@ -83,6 +84,17 @@ Deno.serve(async req=>{
  const access=await provision(a.id);
  const isTest=Boolean(a.is_test_row||pipeline.is_test);
  const email=committed.already||isTest?undefined:await mail(a,bytes,path,version,b.typed_name,etTime(at));
+ if(access.error)await reportCandidateFailure(db,{surface:'contract-sign',reason:`post_sign_access:${access.error}`,applicantId:a.id});
  return reply({ok:true,signed_at:at.toISOString(),email,access:access.data,access_error:access.error});
  }catch(e){console.error('[contract-sign] failed',e instanceof Error?e.message:e);return reply({error:e instanceof Error?e.message:String((e as any)?.message??e)},500);}
+}
+Deno.serve(async req=>{
+ const copy=req.method==='POST'?await req.clone().json().catch(()=>({})):{};
+ const res=await handle(req);
+ // Candidate-facing actions only (token present): any non-ok → log + urgent named alert.
+ if(res.status>=400&&copy?.token&&['document','sign'].includes(copy?.action)){
+  const body=await res.clone().json().catch(()=>({}));
+  await reportCandidateFailure(db,{surface:'contract-sign',reason:String(body?.error??`http_${res.status}`),status:res.status,token:String(copy.token),detail:{action:copy.action,ua:(req.headers.get('user-agent')??'').slice(0,200)}});
+ }
+ return res;
 });
