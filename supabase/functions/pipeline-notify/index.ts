@@ -90,6 +90,14 @@ Deno.serve(async (req) => {
   const { data: hireReadyJob } = await admin.from('hire_ready_invite_jobs').select('language').eq('applicant_id', applicant_id).eq('kind', 'invite').maybeSingle();
   const hireReadyPhone = !!hireReadyJob && !!p.apply_submitted_at;
   if (p.is_test || a.is_test_row) return jsonResponse({ ok: true, skipped: 'test_candidate' });
+  // Never auto-nudge someone mid-conversation with the owner or with a booked call.
+  if (event === 'nudge') {
+    const { data: why } = await admin.rpc('candidate_protection_reason', { _id: applicant_id });
+    if (why && why !== 'owner messaged them in the last 7 days') {
+      await admin.from('integration_logs').insert({ source: 'internal', event: 'pipeline-notify:nudge_skipped_protected', status: 'success', detail: { applicant_id, why, step } });
+      return jsonResponse({ ok: true, skipped: 'protected', why });
+    }
+  }
   if (event === 'nudge' && step === 'apply' && (p.apply_submitted_at || !p.apply_resume_token || (p.invite_deadline_at && Date.parse(p.invite_deadline_at) <= Date.now()))) {
     return jsonResponse({ ok: true, skipped: 'application_finished_or_link_closed' });
   }
