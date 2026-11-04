@@ -1982,6 +1982,13 @@
       "when": 1793758462962,
       "tag": "0282_post_sign_chain",
       "breakpoints": true
+    },
+    {
+      "idx": 283,
+      "version": "7",
+      "when": 1793758485562,
+      "tag": "0283_post_sign_chain_on_applicant",
+      "breakpoints": true
     }
   ]
 }
