@@ -39,7 +39,7 @@ async function runCase(c: Case, keep: boolean) {
   try {
     const ins = await db.from('applicants').insert({
       id, first_name: 'Selftest', last_name: `${c.key} Pro`, email: `selftest+${id.slice(0, 8)}@example.invalid`,
-      phone: `+1305555${String(100 + Math.floor(Math.random() * 100)).padStart(4, '0')}`, // fictional 555-01xx range service: c.service, preferred_language: c.lang, is_test_row: true, contract_token: token,
+      phone: `+1305555${String(100 + Math.floor(Math.random() * 100)).padStart(4, '0')}`, /* fictional 555-01xx */ service: c.service, preferred_language: c.lang, is_test_row: true, contract_token: token,
     });
     if (ins.error) throw new Error(`fixture_applicant:${ins.error.message}`);
     const pip = await db.rpc('signing_selftest_fixture', { _id: id, _service: c.service });
