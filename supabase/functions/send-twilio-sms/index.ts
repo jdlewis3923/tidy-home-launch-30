@@ -275,6 +275,24 @@ Deno.serve(async (req) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
+    // ---- Global candidate/Pro SMS switch (Justin, 4 Nov 2026): default OFF.
+    // Any recipient who is an applicant/candidate/Pro is skipped here — the one
+    // door every text (direct or outbox release) passes through. Not a failure.
+    {
+      const ownerPh = Deno.env.get('JUSTIN_ALERT_PHONE') ?? '+17868291141';
+      if (to_phone_e164 !== ownerPh) {
+        const { data: sw } = await admin.from('app_settings').select('value').eq('key', 'candidate_sms_enabled').maybeSingle();
+        const on = sw?.value === 'on' || sw?.value === '"on"' || sw?.value === true;
+        if (!on) {
+          const { data: isCand } = await admin.rpc('is_candidate_phone', { _phone: to_phone_e164 });
+          if (isCand === true) {
+            await finish('success', 'skipped: candidate_sms_off');
+            return jsonResponse({ ok: true, sent: false, skipped: 'candidate_sms_off' }, 200);
+          }
+        }
+      }
+    }
+
     // ---- SMS dry-run (hiring v5): nothing goes to Twilio; every text is
     // parked in sms_outbox with status 'dry_run' so the Outbox page shows
     // exactly what would have been sent. ----

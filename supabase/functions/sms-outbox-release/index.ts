@@ -138,6 +138,12 @@ Deno.serve(async (req) => {
         results.push({id:row.id,status:'queued'});
         continue;
       }
+      if (payload.skipped === 'candidate_sms_off') {
+        // Candidate texts switched off: cancel quietly, never a failure alert.
+        await admin.from('sms_outbox').update({status:'canceled', last_error:'skipped: candidate_sms_off', updated_at:new Date().toISOString()}).eq('id',row.id).eq('status','queued');
+        results.push({id:row.id,status:'skipped_candidate_sms_off'});
+        continue;
+      }
       if (!res.ok || payload.ok !== true) {
         errMessage = `send-twilio-sms ${res.status}: ${String(payload.error ?? '').slice(0, 300)}`;
       } else if (!proSmsAccepted(payload) && payload.reason !== 'duplicate_idempotency_key') {
