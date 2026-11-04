@@ -1996,6 +1996,13 @@
       "when": 1793759448308,
       "tag": "0284_signing_selftest_fixture",
       "breakpoints": true
+    },
+    {
+      "idx": 285,
+      "version": "7",
+      "when": 1793759514037,
+      "tag": "0285_post_sign_chain_never_blocks",
+      "breakpoints": true
     }
   ]
 }
