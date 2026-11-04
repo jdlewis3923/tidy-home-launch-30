@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
 
   const fail = async (msg: string) => {
     await admin.from("email_send_log").insert({ template_name: "WELCOME-T1", channel: "email", recipient: a?.email ?? null, triggered_by: "pipeline-welcome-t1", status: "failed", error_message: msg, payload: { applicant_id } });
-    await admin.from("admin_alerts").insert({ level: "action", category: "hiring", title: "WELCOME-T1 did not send", detail: `${a?.first_name ?? "Candidate"}: ${msg}`, dedupe_key: `welcome-t1:${applicant_id}` }).then(() => {}, () => {});
+    await admin.from("admin_alerts").insert({ level: "action", category: "hiring", tier: "urgent", alert_type: "candidate_failure", title: "WELCOME-T1 did not send", body: `${a?.first_name ?? "Candidate"}: ${msg}`, dedupe_key: `welcome-t1:${applicant_id}` }).then(() => {}, () => {});
     return jsonResponse({ ok: false, error: msg }, 502);
   };
   if (!a?.email) return fail("no email on file");
