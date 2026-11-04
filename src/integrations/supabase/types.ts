@@ -11471,6 +11471,7 @@ export type Database = {
         Args: { _patch: Json; _submit?: boolean; _token: string }
         Returns: Json
       }
+      is_candidate_phone: { Args: { _phone: string }; Returns: boolean }
       is_contractor_job_eligible: {
         Args: { _contractor_id: string }
         Returns: boolean

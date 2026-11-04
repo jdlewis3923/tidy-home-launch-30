@@ -2052,6 +2052,13 @@
       "when": 1793761237956,
       "tag": "0292_admin_reliability_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 293,
+      "version": "7",
+      "when": 1793801346348,
+      "tag": "0293_candidate_sms_switch",
+      "breakpoints": true
     }
   ]
 }
