@@ -10948,6 +10948,7 @@ export type Database = {
         Args: { _note?: string; _rows: Json; _service: string }
         Returns: number
       }
+      admin_reliability_checks: { Args: never; Returns: Json }
       admin_remove_blackout: { Args: { _id: string }; Returns: undefined }
       admin_reschedule_list: { Args: never; Returns: Json }
       admin_resolve_reschedule: {
