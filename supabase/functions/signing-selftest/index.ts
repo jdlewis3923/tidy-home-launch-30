@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
   const only = Array.isArray(body?.cases) ? body.cases : null;
   // One-time sweep of the fixture login left by the first run (fictional number only).
   const { data: ul } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  for (const u of ul?.users ?? []) if (u.phone === '15555550100' || /^1305555010\d|^1305555011\d|^130555501\d\d$/.test(u.phone ?? '') && !u.email) await db.auth.admin.deleteUser(u.id).catch(() => {});
+  for (const u of ul?.users ?? []) if (u.phone === '15555550100' || /^130555501\d\d$/.test(u.phone ?? '') && !u.email) await db.auth.admin.deleteUser(u.id).catch(() => {});
   const results = [];
   for (const c of [...CASES, ...EXTRA].filter((x) => only ? only.includes(x.key) : !x.via)) results.push(await runCase(c, keep));
   const ok = results.every((r) => r.ok);
