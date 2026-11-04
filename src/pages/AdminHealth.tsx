@@ -12,6 +12,7 @@ import ReviewsThisWeekCard from "@/components/admin/ReviewsThisWeekCard";
 import JobberStubCallers from "@/components/admin/JobberStubCallers";
 import OpenAlertsPanel from "@/components/admin/OpenAlertsPanel";
 import CheckrReadinessCard from "@/components/admin/CheckrReadiness";
+import ReliabilityChecks from "@/components/admin/ReliabilityChecks";
 
 
 type Source =
@@ -342,6 +343,10 @@ export default function AdminHealth() {
             <p className="mt-1">{error}</p>
           </div>
         )}
+
+        <div className="mt-6">
+          <ReliabilityChecks />
+        </div>
 
         {/* Anything that failed and is still unresolved, read from admin_alerts. */}
         <div className="mt-6">
