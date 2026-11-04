@@ -12470,6 +12470,10 @@ export type Database = {
         Args: { _patch: Json; _submit?: boolean; _token: string }
         Returns: Json
       }
+      signing_selftest_fixture: {
+        Args: { _id: string; _service: string }
+        Returns: undefined
+      }
       sms_recipient_name: { Args: { _phone: string }; Returns: string }
       social_caption_hash: { Args: { _c: string }; Returns: string }
       social_confirm_publish: {

@@ -1989,6 +1989,13 @@
       "when": 1793758485562,
       "tag": "0283_post_sign_chain_on_applicant",
       "breakpoints": true
+    },
+    {
+      "idx": 284,
+      "version": "7",
+      "when": 1793759448308,
+      "tag": "0284_signing_selftest_fixture",
+      "breakpoints": true
     }
   ]
 }
