@@ -24,6 +24,8 @@ async function sms(id:string, text:string, idempotency:string, testDelivery=fals
   if(data?.error || data?.ok===false) throw new Error(data.error??'Text was not accepted');
   return data;
 }
+import { reportCandidateSurface } from '../_shared/candidate-surface.ts';
+reportCandidateSurface('intake');
 Deno.serve(async req=>{
   if(req.method==='OPTIONS') return new Response('ok',{headers:corsHeaders});
   if(req.method!=='POST') return reply({error:'method_not_allowed'},405);

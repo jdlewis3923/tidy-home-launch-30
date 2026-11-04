@@ -65,6 +65,8 @@ Deno.serve(async (req) => {
   const candidates = [
     `${proto}://${host}${incoming.pathname}${incoming.search}`,
     req.url,
+    `${Deno.env.get("SUPABASE_URL")}/functions/v1/twilio-status-callback`,
+    `${proto}://${host}/functions/v1/twilio-status-callback`,
   ];
 
   let valid = false;

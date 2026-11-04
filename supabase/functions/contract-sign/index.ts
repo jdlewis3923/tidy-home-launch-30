@@ -19,6 +19,25 @@ async function provision(id:string){
  const r=await vendorFetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/sequence-advance`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`},body:JSON.stringify({action:'signing_day_signed',applicant_id:id})});
  const data=await r.json().catch(()=>({}));return {data,error:r.ok?null:data.error??`access_${r.status}`};
 }
+// Direct, env-authenticated welcome dispatch: the database's own hop can be rejected when its stored key is stale. Idempotent downstream.
+export async function welcome(id:string){try{const r=await vendorFetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/pipeline-welcome-t1`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`},body:JSON.stringify({applicant_id:id})});if(!r.ok)await reportCandidateFailure(db,{surface:'contract-sign',reason:`welcome_${r.status}`,applicantId:id});}catch(e){await reportCandidateFailure(db,{surface:'contract-sign',reason:`welcome_error:${e instanceof Error?e.message:e}`,applicantId:id});}}
+// Documenso routing. OFF unless app_settings.documenso_signing = {"enabled":true,"versions":{"cleaning":"<current version>","lawn":"<current version>"}}
+// and the Documenso template for that service was rebuilt from that exact version. Any failure → in-app signer + urgent alert.
+async function documensoRoute(a:any,t:any,pipeline:any):Promise<{url?:string}>{
+ try{
+  const {data:cfg}=await db.from('app_settings').select('value').eq('key','documenso_signing').maybeSingle();const c=(cfg?.value??{}) as any;
+  if(c.enabled!==true||c.versions?.[t.service]!==t.version)return {};
+  if(a.is_test_row||pipeline.is_test)return {}; // never spend Documenso quota on test records
+  const ids=(a.documenso_document_ids??{}) as Record<string,string>;if(ids.contract_url)return {url:ids.contract_url};
+  const {data:tpl}=await db.from('documenso_templates').select('template_id').eq('doc_type',t.service).maybeSingle();
+  const key=Deno.env.get('DOCUMENSO_API_KEY');if(!tpl?.template_id||!key)throw new Error('documenso_not_configured');
+  const r=await vendorFetch(`https://app.documenso.com/api/v1/templates/${encodeURIComponent(tpl.template_id)}/generate-document`,{method:'POST',headers:{Authorization:key,'Content-Type':'application/json'},body:JSON.stringify({title:`${t.title} — ${a.first_name??''} ${a.last_name??''}`.trim(),recipients:[{id:0,name:`${a.first_name??''} ${a.last_name??''}`.trim(),email:a.email,role:'SIGNER'}],meta:{redirectUrl:'https://jointidy.co/contract/'+a.contract_token}})});
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(`documenso_${r.status}`);
+  const url=d?.recipients?.[0]?.signingUrl??null;const docId=String(d?.documentId??d?.id??'');
+  await db.from('applicants').update({documenso_document_ids:{...ids,contract:docId,contract_url:url,contract_version:t.version}}).eq('id',a.id);
+  return url?{url}:{};
+ }catch(e){await reportCandidateFailure(db,{surface:'documenso',reason:`fallback_in_app:${e instanceof Error?e.message:e}`,applicantId:a.id});return {};}
+}
 async function mail(a:any,bytes:Uint8Array,path:string,version:string,typed:string,when:string,final=false){
  const link=await check(await db.storage.from('company-docs').createSignedUrl(path,2592000));
  const built=contractSignedEmail(a.first_name??'',typed,when,version,link?.signedUrl??null,await proLang(db,a.id));
@@ -69,6 +88,7 @@ async function handle(req:Request):Promise<Response>{
  if (t && !a.contracts_signed) t.body=await check(await db.rpc('contract_scope_body',{_template:t.id}));
  const version=t?.version??`${doc.filename} · ${String(doc.uploaded_at).slice(0,10)} · ${String(doc.id).slice(0,8)}`;
  const values={legal_name:'{legal_name}',business_name:'—',phone:a.phone??'—',email:a.email??'—',pro_number:a.pro_number??'Assigned at signing',signed_date:new Date().toLocaleDateString('en-US',{timeZone:'America/New_York',dateStyle:'long'})};
+ if(b.action==='document'&&t&&!a.contracts_signed){const ds=await documensoRoute(a,t,pipeline);if(ds.url)return reply({ok:true,mode:'documenso',documenso_url:ds.url,title:t.title,version,signed:false,first_name:a.first_name});}
  if(b.action==='document'){const url=doc?(await check(await db.storage.from('company-docs').createSignedUrl(doc.storage_path,3600)))?.signedUrl:null;return reply({ok:true,body:t?.body??null,title:t?.title??'Independent Contractor Agreement',version,values,url,signed:a.contracts_signed,first_name:a.first_name});}
  if(b.action!=='sign')return reply({error:'unknown_action'},400);
  if(a.contracts_signed){const access=await provision(a.id);return reply({ok:true,already:true,access:access.data});}
@@ -82,6 +102,7 @@ async function handle(req:Request):Promise<Response>{
  const path=`contracts/signed/${a.id}/signed-${crypto.randomUUID()}.pdf`;await check(await db.storage.from('company-docs').upload(path,bytes,{contentType:'application/pdf'}));
  const committed=await check(await db.rpc('contract_commit_signature',{_applicant:a.id,_template:t?.id??null,_document:doc?.id??null,_version:version,_body:t?.body??null,_typed:b.typed_name,_business:filled.business_name,_ip:ip,_ua:ua,_path:path,_values:filled,_signed_at:at.toISOString()}));
  const access=await provision(a.id);
+ await welcome(a.id);
  const isTest=Boolean(a.is_test_row||pipeline.is_test);
  const email=committed.already||isTest?undefined:await mail(a,bytes,path,version,b.typed_name,etTime(at));
  if(access.error)await reportCandidateFailure(db,{surface:'contract-sign',reason:`post_sign_access:${access.error}`,applicantId:a.id});

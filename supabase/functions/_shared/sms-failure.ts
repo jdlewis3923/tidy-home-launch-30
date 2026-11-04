@@ -17,7 +17,7 @@ export async function alertSmsFailure(
     const name = (typeof who === 'string' && who.trim()) ? who.trim() : `unknown recipient (${opts.phone.slice(0, -4)}••••)`;
     const what = LABELS[opts.template ?? ''] ?? (opts.template ?? 'text');
     await writeAlert(admin, {
-      level: 'warning', category: 'site',
+      level: 'warning', category: 'site', tier: 'urgent',
       title: `Text not delivered · ${name} · ${what}`,
       body: `${opts.status === 'canceled' ? 'Expired before it could send' : 'Failed to send'}: ${opts.error.slice(0, 220)}`,
       action_label: 'Open Command', action_url: '/admin/command',

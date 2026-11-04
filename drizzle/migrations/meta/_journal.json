@@ -1989,6 +1989,69 @@
       "when": 1793758485562,
       "tag": "0283_post_sign_chain_on_applicant",
       "breakpoints": true
+    },
+    {
+      "idx": 284,
+      "version": "7",
+      "when": 1793759448308,
+      "tag": "0284_signing_selftest_fixture",
+      "breakpoints": true
+    },
+    {
+      "idx": 285,
+      "version": "7",
+      "when": 1793759514037,
+      "tag": "0285_post_sign_chain_never_blocks",
+      "breakpoints": true
+    },
+    {
+      "idx": 286,
+      "version": "7",
+      "when": 1793759820432,
+      "tag": "0286_post_sign_welcome_dispatched_by_signer",
+      "breakpoints": true
+    },
+    {
+      "idx": 287,
+      "version": "7",
+      "when": 1793760304648,
+      "tag": "0287_inbound_match_and_reply_escalation",
+      "breakpoints": true
+    },
+    {
+      "idx": 288,
+      "version": "7",
+      "when": 1793760500742,
+      "tag": "0288_applicant_dedupe_and_e164",
+      "breakpoints": true
+    },
+    {
+      "idx": 289,
+      "version": "7",
+      "when": 1793760541346,
+      "tag": "0289_applicant_dedupe_fix_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 290,
+      "version": "7",
+      "when": 1793760674382,
+      "tag": "0290_auto_decline_protection",
+      "breakpoints": true
+    },
+    {
+      "idx": 291,
+      "version": "7",
+      "when": 1793760719678,
+      "tag": "0291_auto_decline_protection_tests_too",
+      "breakpoints": true
+    },
+    {
+      "idx": 292,
+      "version": "7",
+      "when": 1793761237956,
+      "tag": "0292_admin_reliability_checks",
+      "breakpoints": true
     }
   ]
 }

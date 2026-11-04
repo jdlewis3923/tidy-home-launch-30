@@ -40,6 +40,8 @@ const Body = z.object({
   description: z.string().max(500).optional(),
 });
 
+import { reportCandidateSurface } from '../_shared/candidate-surface.ts';
+reportCandidateSurface('apply');
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
 

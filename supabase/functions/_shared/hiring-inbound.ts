@@ -39,12 +39,11 @@ export async function handleHiringInbound(admin: any, fromRaw: string, body: str
   const from = normalizePhone(fromRaw);
 
   // Match sender to a candidate (live or archived).
-  const { data: applicant } = await admin
-    .from('applicants')
-    .select('id, first_name, preferred_language')
-    .or(`phone.eq.${from},phone.eq.${from.replace('+1', '')},phone.eq.${from.slice(1)}`)
-    .limit(1)
-    .maybeSingle();
+  // Master record wins over merged duplicates; matching uses the last 10 digits.
+  const { data: matchId } = await admin.rpc('match_applicant_by_phone', { _phone: from });
+  const { data: applicant } = matchId
+    ? await admin.from('applicants').select('id, first_name, preferred_language, is_test_row').eq('id', matchId).maybeSingle()
+    : { data: null };
 
   if (!applicant) {
     await admin.from('unmatched_texts').insert({ from_phone: from, body, twilio_sid: messageSid });
@@ -181,12 +180,21 @@ export async function handleHiringInbound(admin: any, fromRaw: string, body: str
 
   // ---- Anything else: timeline + 9 AM digest "Unread reply" ----
   await logTimeline(admin, applicant.id, `Unread reply: ${body.slice(0, 300)}`, { twilio_sid: messageSid, text: body });
+  const urgent = isUrgentReply(body) && !applicant.is_test_row && !p.is_test;
   await admin.from('admin_alerts').insert({
     alert_type: 'hiring_unread_reply', level: 'action', category: 'hiring',
-    title: `Unread reply from ${first}`,
+    tier: urgent ? 'urgent' : 'digest',
+    title: `${urgent ? 'Needs you now: ' : 'Unread reply from '}${first}`,
     body: body.slice(0, 300),
     action_label: 'Open candidate', action_url: `/admin/pipeline/${applicant.id}`,
-    context: { applicant_id: applicant.id, twilio_sid: messageSid },
+    context: { applicant_id: applicant.id, twilio_sid: messageSid, is_test: Boolean(applicant.is_test_row || p.is_test), urgent_rule: urgent },
   }).then(() => {}, () => {});
   return true;
+}
+
+// Urgency rule: anything blocking, asking a question, asking for a call/time/link, or about paperwork/insurance/signing.
+export function isUrgentReply(body: string): boolean {
+  const t = (body ?? '').toLowerCase();
+  if (/^\s*(?:\S+\s+to\s+[“"]|liked|loved|emphasized)/.test(body ?? '')) return false; // tapbacks/reactions
+  return /\?|\b(sign|signing|can'?t|cannot|won'?t|not (letting|working|able|loading)|error|problem|issue|stuck|help|call me|please call|link|paperwork|documents?|insurance|contract|agreement|today|tomorrow|asap|urgent|late|running|cancel|reschedul|interview|zoom|available|what time)\b/.test(t);
 }

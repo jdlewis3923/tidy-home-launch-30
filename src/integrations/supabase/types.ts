@@ -1389,6 +1389,30 @@ export type Database = {
           },
         ]
       }
+      auto_decline_blocks: {
+        Row: {
+          applicant_id: string
+          attempted_reason: string | null
+          created_at: string
+          id: string
+          protection: string
+        }
+        Insert: {
+          applicant_id: string
+          attempted_reason?: string | null
+          created_at?: string
+          id?: string
+          protection: string
+        }
+        Update: {
+          applicant_id?: string
+          attempted_reason?: string | null
+          created_at?: string
+          id?: string
+          protection?: string
+        }
+        Relationships: []
+      }
       badge_status_log: {
         Row: {
           applicant_id: string
@@ -10924,6 +10948,7 @@ export type Database = {
         Args: { _note?: string; _rows: Json; _service: string }
         Returns: number
       }
+      admin_reliability_checks: { Args: never; Returns: Json }
       admin_remove_blackout: { Args: { _id: string }; Returns: undefined }
       admin_reschedule_list: { Args: never; Returns: Json }
       admin_resolve_reschedule: {
@@ -11016,6 +11041,10 @@ export type Database = {
         }
         Returns: Json
       }
+      applicant_merge_duplicate: {
+        Args: { _dup: string; _master: string }
+        Returns: Json
+      }
       approve_review_bonus: {
         Args: {
           _member: string
@@ -11031,6 +11060,7 @@ export type Database = {
         Args: { _fn: string; _payload: Json }
         Returns: undefined
       }
+      candidate_protection_reason: { Args: { _id: string }; Returns: string }
       capture_cron_health: { Args: never; Returns: number }
       car_launch_check: { Args: never; Returns: undefined }
       car_launch_propose_date: { Args: { _from: string }; Returns: string }
@@ -11268,6 +11298,7 @@ export type Database = {
       }
       dispatch_due_social_posts: { Args: never; Returns: number }
       ensure_referral_code: { Args: never; Returns: string }
+      escalate_stale_unread_replies: { Args: never; Returns: number }
       feature_enabled: { Args: { _key: string }; Returns: boolean }
       first_three_checkin_reply: {
         Args: { _body: string; _phone: string; _sid: string }
@@ -11676,6 +11707,7 @@ export type Database = {
         }
         Returns: Json
       }
+      match_applicant_by_phone: { Args: { _phone: string }; Returns: string }
       member_checkin_send_time: { Args: { _at: string }; Returns: string }
       member_guide_accepted: { Args: { _user: string }; Returns: boolean }
       member_ops_tick: { Args: never; Returns: Json }
@@ -12469,6 +12501,10 @@ export type Database = {
       signing_intake_save: {
         Args: { _patch: Json; _submit?: boolean; _token: string }
         Returns: Json
+      }
+      signing_selftest_fixture: {
+        Args: { _id: string; _service: string }
+        Returns: undefined
       }
       sms_recipient_name: { Args: { _phone: string }; Returns: string }
       social_caption_hash: { Args: { _c: string }; Returns: string }
