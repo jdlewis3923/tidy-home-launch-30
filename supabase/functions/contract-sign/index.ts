@@ -84,6 +84,7 @@ async function handle(req:Request):Promise<Response>{
  const access=await provision(a.id);
  const isTest=Boolean(a.is_test_row||pipeline.is_test);
  const email=committed.already||isTest?undefined:await mail(a,bytes,path,version,b.typed_name,etTime(at));
+ if(access.error)await reportCandidateFailure(db,{surface:'contract-sign',reason:`post_sign_access:${access.error}`,applicantId:a.id});
  return reply({ok:true,signed_at:at.toISOString(),email,access:access.data,access_error:access.error});
  }catch(e){console.error('[contract-sign] failed',e instanceof Error?e.message:e);return reply({error:e instanceof Error?e.message:String((e as any)?.message??e)},500);}
 }
