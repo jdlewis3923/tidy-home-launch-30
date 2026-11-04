@@ -5,6 +5,7 @@ import '../_shared/http.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 
 const URL_ = Deno.env.get('SUPABASE_URL') ?? '';
 const KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -38,7 +39,7 @@ async function runCase(c: Case, keep: boolean) {
   try {
     const ins = await db.from('applicants').insert({
       id, first_name: 'Selftest', last_name: `${c.key} Pro`, email: `selftest+${id.slice(0, 8)}@example.invalid`,
-      phone: '+15555550100', service: c.service, preferred_language: c.lang, is_test_row: true, contract_token: token,
+      phone: `+1305555${String(100 + Math.floor(Math.random() * 100)).padStart(4, '0')}`, // fictional 555-01xx range service: c.service, preferred_language: c.lang, is_test_row: true, contract_token: token,
     });
     if (ins.error) throw new Error(`fixture_applicant:${ins.error.message}`);
     const pip = await db.rpc('signing_selftest_fixture', { _id: id, _service: c.service });
@@ -100,6 +101,8 @@ async function runCase(c: Case, keep: boolean) {
     return { case: c.key, applicant_id: id, ok: false, failed: [e instanceof Error ? e.message : String(e)], checks };
   } finally {
     if (!keep) {
+      const { data: link } = await db.from('applicants').select('contractor_id').eq('id', id).maybeSingle();
+      if (link?.contractor_id) await db.auth.admin.deleteUser(link.contractor_id).catch(() => {});
       const { data: sig } = await db.from('contract_signatures').select('id,signed_pdf_path').eq('applicant_id', id);
       const paths = (sig ?? []).map((x: any) => x.signed_pdf_path).filter(Boolean);
       if (paths.length) {
@@ -114,11 +117,16 @@ async function runCase(c: Case, keep: boolean) {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  const auth = await requireServiceOrAdmin(req);
-  if (!auth.ok) return reply({ error: auth.error }, auth.status);
+  if (!(await isCronAuthorized(req))) {
+    const auth = await requireServiceOrAdmin(req);
+    if (!auth.ok) return reply({ error: auth.error }, auth.status);
+  }
   const body = await req.json().catch(() => ({}));
   const keep = body?.keep === true;
   const only = Array.isArray(body?.cases) ? body.cases : null;
+  // One-time sweep of the fixture login left by the first run (fictional number only).
+  const { data: ul } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  for (const u of ul?.users ?? []) if (u.phone === '15555550100' || /^1305555010\d|^1305555011\d|^130555501\d\d$/.test(u.phone ?? '') && !u.email) await db.auth.admin.deleteUser(u.id).catch(() => {});
   const results = [];
   for (const c of [...CASES, ...EXTRA].filter((x) => only ? only.includes(x.key) : !x.via)) results.push(await runCase(c, keep));
   const ok = results.every((r) => r.ok);
