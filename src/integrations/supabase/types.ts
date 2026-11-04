@@ -11016,6 +11016,10 @@ export type Database = {
         }
         Returns: Json
       }
+      applicant_merge_duplicate: {
+        Args: { _dup: string; _master: string }
+        Returns: Json
+      }
       approve_review_bonus: {
         Args: {
           _member: string
