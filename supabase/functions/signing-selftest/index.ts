@@ -38,10 +38,7 @@ async function runCase(c: Case, keep: boolean) {
       phone: null, service: c.service, preferred_language: c.lang, is_test_row: true, contract_token: token,
     });
     if (ins.error) throw new Error(`fixture_applicant:${ins.error.message}`);
-    const pip = await db.from('contractor_pipeline').upsert({
-      applicant_id: id, service: c.service, stage: 'applied', state: 'open', archived: false, is_test: true,
-      proof_approved_at: new Date().toISOString(),
-    }, { onConflict: 'applicant_id' });
+    const pip = await db.rpc('signing_selftest_fixture', { _id: id, _service: c.service });
     if (pip.error) throw new Error(`fixture_pipeline:${pip.error.message}`);
 
     const doc = await sign(token, { action: 'document' });
