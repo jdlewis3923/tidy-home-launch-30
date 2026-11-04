@@ -29,9 +29,11 @@ Deno.serve(async (req) => {
   // 1. Every text with a carrier id in the window (outbox + direct-send log).
   const { data: ob } = await db.from('sms_outbox').select('id,to_phone_e164,twilio_sid,template_name,status,body,sent_at').gte('created_at', since).not('twilio_sid', 'is', null);
   const { data: lg } = await db.from('sms_log').select('twilio_message_id,context,sent_at').gte('created_at', since).not('twilio_message_id', 'is', null);
+  const { data: el } = await db.from('email_send_log').select('id,recipient,twilio_sid,template_name,status,triggered_at,triggered_by').eq('channel', 'sms').gte('triggered_at', since);
   const sids = new Map<string, { phone?: string; template?: string | null }>();
   for (const o of ob ?? []) sids.set(o.twilio_sid, { phone: o.to_phone_e164, template: o.template_name });
   for (const l of lg ?? []) if (!sids.has(l.twilio_message_id)) sids.set(l.twilio_message_id, { phone: (l.context as any)?.to ?? undefined, template: (l.context as any)?.template_name ?? null });
+  for (const e of el ?? []) if (e.twilio_sid && !sids.has(e.twilio_sid)) sids.set(e.twilio_sid, { phone: e.recipient, template: e.template_name });
   const { data: known } = await db.from('sms_delivery_events').select('message_sid,message_status').in('message_sid', [...sids.keys()].slice(0, 1000));
   const final = new Set((known ?? []).filter((k: any) => FINAL.has(k.message_status)).map((k: any) => k.message_sid));
 
@@ -60,6 +62,12 @@ Deno.serve(async (req) => {
   for (const o of nosid ?? []) {
     problems.push({ outbox: o.id, status: 'sent_without_sid' });
     await alertSmsFailure(db, { phone: o.to_phone_e164, template: o.template_name, error: 'Marked sent, but the texting service returned no message id, so delivery cannot be confirmed.', key: `nosid:${o.id}` });
+  }
+
+  const sidless = (el ?? []).filter((e: any) => e.status === 'sent' && !e.twilio_sid && Date.parse(e.triggered_at) < Date.now() - 6e5);
+  for (const e of sidless) {
+    problems.push({ log: e.id, template: e.template_name, by: e.triggered_by, at: e.triggered_at, status: 'sent_without_sid' });
+    await alertSmsFailure(db, { phone: e.recipient ?? '', template: e.template_name, error: 'Logged as sent, but no carrier message id was recorded, so delivery cannot be confirmed.', key: `nosid-log:${e.id}` });
   }
 
   // 3. Write real status back onto onboarding pack rows still showing "queued".
