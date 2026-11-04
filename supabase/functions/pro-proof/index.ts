@@ -27,6 +27,8 @@ async function loadByToken(token: string) {
   return { p, first: (a?.first_name ?? '').trim() };
 }
 
+import { reportCandidateSurface } from '../_shared/candidate-surface.ts';
+reportCandidateSurface('proof-upload');
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);

@@ -67,6 +67,8 @@ function nextFixed(rule: string, today: Date): string | null {
   return next ? isoDate(next) : null;
 }
 
+import { reportCandidateSurface } from '../_shared/candidate-surface.ts';
+reportCandidateSurface('booking');
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
