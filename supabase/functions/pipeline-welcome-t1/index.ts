@@ -1,7 +1,7 @@
 import '../_shared/http.ts'; // bounds every outbound call in this invocation (timeouts)
 /**
- * pipeline-welcome-t1 — fired by the database the moment ica_countersigned_at
- * is written (stage 4). Sends the existing WELCOME-T1 template once and stamps
+ * pipeline-welcome-t1 — fired by the database the moment the Pro signs
+ * (contracts_signed). Sends the existing WELCOME-T1 template once and stamps
  * welcome_t1_sent_at. Service-role only; no other contractor message is sent.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
@@ -19,10 +19,16 @@ Deno.serve(async (req) => {
   const { applicant_id } = await req.json().catch(() => ({}));
   if (typeof applicant_id !== "string") return jsonResponse({ error: "applicant_id required" }, 400);
 
-  const { data: p } = await admin.from("contractor_pipeline").select("welcome_t1_sent_at, ica_countersigned_at").eq("applicant_id", applicant_id).maybeSingle();
-  if (!p?.ica_countersigned_at) return jsonResponse({ ok: false, error: "not_countersigned" }, 409);
+  const { data: p } = await admin.from("contractor_pipeline").select("welcome_t1_sent_at, ica_countersigned_at, is_test").eq("applicant_id", applicant_id).maybeSingle();
+  const { data: a } = await admin.from("applicants").select("email, first_name, contracts_signed, is_test_row").eq("id", applicant_id).maybeSingle();
+  // Fires the moment the Pro signs (countersign no longer required for the welcome).
+  if (!p || (!p.ica_countersigned_at && !a?.contracts_signed)) return jsonResponse({ ok: false, error: "not_signed" }, 409);
   if (p.welcome_t1_sent_at) return jsonResponse({ ok: true, skipped: "already_sent" });
-  const { data: a } = await admin.from("applicants").select("email, first_name").eq("id", applicant_id).maybeSingle();
+  if (p.is_test || a?.is_test_row) {
+    await admin.from("email_send_log").insert({ template_name: "WELCOME-T1", channel: "brevo", recipient: a?.email ?? null, triggered_by: "pipeline-welcome-t1", status: "skipped", error_message: "test_candidate", payload: { applicant_id } });
+    await admin.from("onboarding_events").insert({ applicant_id, event: "welcome_t1_test_skip", metadata: { would_send: ["WELCOME-T1 email", "insurance_instructions sms+email"] } });
+    return jsonResponse({ ok: true, skipped: "test_candidate" });
+  }
 
   const fail = async (msg: string) => {
     await admin.from("email_send_log").insert({ template_name: "WELCOME-T1", channel: "brevo", recipient: a?.email ?? null, triggered_by: "pipeline-welcome-t1", status: "failed", error_message: msg, payload: { applicant_id } });
