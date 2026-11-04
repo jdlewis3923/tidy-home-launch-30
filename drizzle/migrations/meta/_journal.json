@@ -2031,6 +2031,13 @@
       "when": 1793760541346,
       "tag": "0289_applicant_dedupe_fix_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 290,
+      "version": "7",
+      "when": 1793760674382,
+      "tag": "0290_auto_decline_protection",
+      "breakpoints": true
     }
   ]
 }
