@@ -198,3 +198,9 @@ verify_jwt = false
 # The handler validates that token and the actual LinkedIn ID/URL before any write.
 [functions.linkedin-delivery]
 verify_jwt = false
+
+[functions.twilio-status-callback]
+verify_jwt = false
+
+[functions.documenso-webhook]
+verify_jwt = false
