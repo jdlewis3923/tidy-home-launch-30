@@ -81,9 +81,6 @@ verify_jwt = false
 # We don't currently verify HMAC (Documenso free tier doesn't sign by default);
 # the handler only flips contracts_signed when the document_id matches an
 # applicant's stored documenso_document_ids, so a forged ping can't escalate state.
-[functions.documenso-webhook]
-verify_jwt = false
-
 # Stripe Connect platform webhook — Stripe sends events without an
 # Authorization header. Authenticity is verified inside the handler via
 # the Stripe-Signature HMAC using STRIPE_CONNECT_WEBHOOK_SECRET.
