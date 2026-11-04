@@ -19,6 +19,8 @@ async function provision(id:string){
  const r=await vendorFetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/sequence-advance`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`},body:JSON.stringify({action:'signing_day_signed',applicant_id:id})});
  const data=await r.json().catch(()=>({}));return {data,error:r.ok?null:data.error??`access_${r.status}`};
 }
+// Direct, env-authenticated welcome dispatch: the database's own hop can be rejected when its stored key is stale. Idempotent downstream.
+export async function welcome(id:string){try{const r=await vendorFetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/pipeline-welcome-t1`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`},body:JSON.stringify({applicant_id:id})});if(!r.ok)await reportCandidateFailure(db,{surface:'contract-sign',reason:`welcome_${r.status}`,applicantId:id});}catch(e){await reportCandidateFailure(db,{surface:'contract-sign',reason:`welcome_error:${e instanceof Error?e.message:e}`,applicantId:id});}}
 async function mail(a:any,bytes:Uint8Array,path:string,version:string,typed:string,when:string,final=false){
  const link=await check(await db.storage.from('company-docs').createSignedUrl(path,2592000));
  const built=contractSignedEmail(a.first_name??'',typed,when,version,link?.signedUrl??null,await proLang(db,a.id));
@@ -82,6 +84,7 @@ async function handle(req:Request):Promise<Response>{
  const path=`contracts/signed/${a.id}/signed-${crypto.randomUUID()}.pdf`;await check(await db.storage.from('company-docs').upload(path,bytes,{contentType:'application/pdf'}));
  const committed=await check(await db.rpc('contract_commit_signature',{_applicant:a.id,_template:t?.id??null,_document:doc?.id??null,_version:version,_body:t?.body??null,_typed:b.typed_name,_business:filled.business_name,_ip:ip,_ua:ua,_path:path,_values:filled,_signed_at:at.toISOString()}));
  const access=await provision(a.id);
+ await welcome(a.id);
  const isTest=Boolean(a.is_test_row||pipeline.is_test);
  const email=committed.already||isTest?undefined:await mail(a,bytes,path,version,b.typed_name,etTime(at));
  if(access.error)await reportCandidateFailure(db,{surface:'contract-sign',reason:`post_sign_access:${access.error}`,applicantId:a.id});
