@@ -22,6 +22,8 @@ import { handleCors, jsonResponse } from "../_shared/cors.ts";
 import { sendBrevoEmail as sendViaBrevo } from "../_shared/brevo-send.ts";
 import { EMAIL, missingRequiredParams } from "../_shared/emailTemplates.ts";
 import { readEnv } from "../_shared/handlerEnv.ts";
+import { reportCandidateFailure } from "../_shared/candidate-failure.ts";
+import { agreementPdf, etTime } from "../_shared/contract-pdf.ts";
 
 
 
@@ -169,98 +171,61 @@ Deno.serve(async (req) => {
 
   const match = (applicants ?? []).find((a) => {
     const ids = (a.documenso_document_ids ?? {}) as Record<string, string>;
-    return Object.values(ids).some((v) => String(v) === docIdStr);
+    return Object.entries(ids).some(([k, v]) => !k.endsWith("_url") && !k.endsWith("_version") && String(v) === docIdStr);
   });
 
   if (!match) {
     return jsonResponse({ ok: true, no_match: true, document_id: docIdStr });
   }
 
-  await sb.from("admin_alerts").insert({
-    alert_type: "documenso_envelope_signed",
-    title: `Contractor envelope signed by applicant ${match.id}`,
-    body: null,
-    context: { applicant_id: match.id, document_id: docIdStr },
-  });
-
-  const wasFirstSign = !match.contracts_signed;
-  if (wasFirstSign) {
-    await sb
-      .from("applicants")
-      .update({
-        contracts_signed: true,
-        contracts_signed_at: new Date().toISOString(),
-        current_stage: "CONTRACTS_DONE",
-        stage_entered_at: new Date().toISOString(),
-      })
-      .eq("id", match.id);
-
-    // Fire WELCOME-T1 (Tier 1 — Tidy Verified Pro welcome) via Brevo.
-    // Congratulates the new Pro on joining at Tier 1, teases Tier 2,
-    // and links to /pro/tier-progression for the full explainer.
-    const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
-    const TIER_PROGRESSION_URL = "https://jointidy.co/pro/tier-progression";
-    // Single source of truth: the email template registry. No env var, no
-    // app_settings lookup, no inline HTML fallback — that dual path is exactly
-    // how the welcome mail drifted and template 64 never sent.
-    const welcomeTemplateId = EMAIL.CONTRACTOR_WELCOME_T1;
-    if (BREVO_API_KEY && match.email) {
-      try {
-        const params = {
-          first_name: match.first_name ?? "there",
-          tier_name: "Tidy Verified Pro",
-          tier_label: "Tier 1 — Tidy Verified Pro",
-          tier_progression_url: TIER_PROGRESSION_URL,
-        };
-        const missingParams = missingRequiredParams(welcomeTemplateId, params);
-        if (missingParams.length > 0) {
-          const err = `MISSING_PARAMS: CONTRACTOR_WELCOME_T1 requires ${missingParams.join(", ")}`;
-          console.error(`[documenso-webhook] ${err}`);
-          await sb.from("integration_logs").insert({
-            source: "internal",
-            event: "brevo.missing_params:CONTRACTOR_WELCOME_T1",
-            status: "error",
-            error_message: err,
-          }).then(() => {}, () => {});
-          throw new Error(err);
-        }
-        // Contractor onboarding welcome — relationship mail, marketing: false.
-        const res = await sendViaBrevo({
-            templateId: welcomeTemplateId,
-            to: [{ email: match.email, name: match.first_name ?? undefined }],
-            params,
-            tags: ["WELCOME-T1"],
-            marketing: false,
-            label: "documenso-webhook",
-        });
-
-        await sb.from("email_send_log").insert({
-          template_name: "WELCOME-T1",
-          channel: "brevo",
-          recipient: match.email,
-          triggered_by: "documenso-webhook",
-          status: res.sent ? "sent" : "failed",
-          error_message: res.sent ? null : (res.reason ?? "send failed"),
-
-          payload: { applicant_id: match.id },
-        });
-      } catch (e) {
-        await sb.from("email_send_log").insert({
-          template_name: "WELCOME-T1",
-          channel: "brevo",
-          recipient: match.email,
-          triggered_by: "documenso-webhook",
-          status: "failed",
-          error_message: e instanceof Error ? e.message : String(e),
-          payload: { applicant_id: match.id },
-        });
-      }
-    }
-  }
-
-  return jsonResponse({
-    ok: true,
-    applicant_id: match.id,
-    contracts_signed: true,
-  });
+  return jsonResponse(await commitDocumensoSignature(sb, match, docIdStr, payload));
 });
+
+// Commits a completed Documenso document through the SAME immutable path as the in-app signer
+// (contract_commit_signature → post-sign chain), then provisions access and dispatches the welcome step.
+async function commitDocumensoSignature(sb: any, match: any, docId: string, payload: Record<string, any>) {
+  const fail = async (reason: string) => {
+    await reportCandidateFailure(sb, { surface: "documenso", reason, applicantId: match.id, detail: { document_id: docId } });
+    return { ok: false, error: reason, applicant_id: match.id };
+  };
+  try {
+    const { data: a } = await sb.from("applicants").select("*").eq("id", match.id).single();
+    if (a.contracts_signed) return { ok: true, already: true, applicant_id: a.id };
+    const { data: p } = await sb.from("contractor_pipeline").select("service,proof_approved_at,archived,state").eq("applicant_id", a.id).maybeSingle();
+    const raw = String(p?.service ?? a.service ?? "").toLowerCase();
+    const service = raw.includes("clean") ? "cleaning" : raw.includes("lawn") ? "lawn" : null;
+    if (!service) return await fail("no_supported_service");
+    const { data: t } = await sb.from("contract_templates").select("*").eq("service", service).eq("lang", "en").eq("is_current", true).maybeSingle();
+    if (!t) return await fail("no_current_template");
+    if (a.contract_template_id !== t.id) await sb.from("applicants").update({ contract_template_id: t.id }).eq("id", a.id).eq("contracts_signed", false);
+    const { data: body, error: be } = await sb.rpc("contract_scope_body", { _template: t.id });
+    if (be) return await fail(`scope_body:${be.message}`);
+    const rec = (payload.payload?.recipients ?? payload.data?.recipients ?? [])[0] ?? {};
+    const typed = String(rec.name || `${a.first_name ?? ""} ${a.last_name ?? ""}`).trim();
+    const signedAt = new Date(rec.signedAt ?? payload.payload?.completedAt ?? Date.now());
+    let bytes: Uint8Array | null = null;
+    const key = Deno.env.get("DOCUMENSO_API_KEY");
+    if (key && !docId.startsWith("selftest-")) {
+      try {
+        const r = await fetch(`https://app.documenso.com/api/v1/documents/${encodeURIComponent(docId)}/download`, { headers: { Authorization: key } });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && j.downloadUrl) { const f = await fetch(j.downloadUrl); if (f.ok) bytes = new Uint8Array(await f.arrayBuffer()); }
+      } catch { /* fall through to our own audit PDF */ }
+    }
+    const values = { legal_name: typed, business_name: "—", phone: a.phone ?? "—", email: a.email ?? "—", pro_number: a.pro_number ?? "Assigned at signing", signed_date: signedAt.toLocaleDateString("en-US", { timeZone: "America/New_York", dateStyle: "long" }) };
+    if (!bytes) bytes = await agreementPdf(body, values, { "Contractor signature": typed, "Signed": etTime(signedAt), "Signed via": `Documenso document ${docId}`, "Template service": service, "Template version": t.version });
+    const path = `contracts/signed/${a.id}/documenso-${crypto.randomUUID()}.pdf`;
+    const up = await sb.storage.from("company-docs").upload(path, bytes, { contentType: "application/pdf" });
+    if (up.error) return await fail(`pdf_upload:${up.error.message}`);
+    const { error: ce } = await sb.rpc("contract_commit_signature", { _applicant: a.id, _template: t.id, _document: null, _version: t.version, _body: body, _typed: typed, _business: "—", _ip: "documenso", _ua: "documenso-webhook", _path: path, _values: { ...values, documenso_document_id: docId }, _signed_at: signedAt.toISOString() });
+    if (ce) return await fail(`commit:${ce.message}`);
+    const call = (fn: string, b: unknown) => fetch(`${SUPABASE_URL}/functions/v1/${fn}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` }, body: JSON.stringify(b) });
+    const acc = await call("sequence-advance", { action: "signing_day_signed", applicant_id: a.id });
+    if (!acc.ok) await reportCandidateFailure(sb, { surface: "documenso", reason: `post_sign_access:${(await acc.json().catch(() => ({})))?.error ?? acc.status}`, applicantId: a.id });
+    const w = await call("pipeline-welcome-t1", { applicant_id: a.id });
+    if (!w.ok) await reportCandidateFailure(sb, { surface: "documenso", reason: `welcome_${w.status}`, applicantId: a.id });
+    return { ok: true, applicant_id: a.id, contracts_signed: true, via: "documenso" };
+  } catch (e) {
+    return await fail(`exception:${e instanceof Error ? e.message : String(e)}`);
+  }
+}
