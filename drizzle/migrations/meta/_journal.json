@@ -2003,6 +2003,13 @@
       "when": 1793759514037,
       "tag": "0285_post_sign_chain_never_blocks",
       "breakpoints": true
+    },
+    {
+      "idx": 286,
+      "version": "7",
+      "when": 1793759820432,
+      "tag": "0286_post_sign_welcome_dispatched_by_signer",
+      "breakpoints": true
     }
   ]
 }
