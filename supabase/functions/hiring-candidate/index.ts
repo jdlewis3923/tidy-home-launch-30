@@ -74,6 +74,8 @@ async function ensureProofUrl(p: Record<string, unknown>): Promise<string | null
   return `https://jointidy.co/pro/proof/${tok}`;
 }
 
+import { reportCandidateSurface } from '../_shared/candidate-surface.ts';
+reportCandidateSurface('booking');
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
