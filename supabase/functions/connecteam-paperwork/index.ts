@@ -36,7 +36,7 @@ Deno.serve(async req=>{
   return reply({ok:result.sent,recipient:'jdlewis3923@gmail.com',result});
  }
  const {data:flag}=await db.from('app_settings').select('value').eq('key','checkr_live').maybeSingle();const checkrLive=flag?.value===true||flag?.value==='on';
- if(body.data.action==='mail'){if(!body.data.user_id)return reply({error:'user_id_required'},400);const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',body.data.user_id).single();const user=(await ct('GET',`/users/v1/users?userIds=${body.data.user_id}`)).data?.users?.[0];if(!profile||!user)return reply({error:'not_found'},404);const position=(user.customFields??[]).find((f:any)=>f.name==='Position')?.value?.[0]?.value;if(position!==POSITIONS[profile.service_line])return reply({ok:false,error:'position_not_ready'},409);await checkGroup(user,profile.service_line);await processPaperworkEmails(db,user,profile,checkrLive);return reply({ok:true});}
+ if(body.data.action==='mail'){if(!body.data.user_id)return reply({error:'user_id_required'},400);const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',body.data.user_id).single();const user=(await ct('GET',`/users/v1/users?userIds=${body.data.user_id}`)).data?.users?.[0];if(!profile||!user)return reply({error:'not_found'},404);const position=(user.customFields??[]).find((f:any)=>f.name==='Position')?.value?.[0]?.value;if(position!==POSITIONS[profile.service_line])return reply({ok:false,error:'position_not_ready'},409);await checkGroup(user,profile.service_line);await processPaperworkEmails(db,user,profile,checkrLive,sendProEmail);return reply({ok:true});}
  const fields=(await ct('GET','/users/v1/custom-fields')).data?.customFields??[];
  const users=await all('/users/v1/users','users');
  const ensurePosition=async(user:any,service:string)=>{const current=(user.customFields??[]).find((f:any)=>f.name==='Position')?.value?.[0]?.value;if(current!==POSITIONS[service])await setPosition(user.userId,service,fields);};
@@ -51,7 +51,7 @@ Deno.serve(async req=>{
   if(!u?.userId)throw new Error('Connecteam returned no user');await setPosition(u.userId,service,fields);
   const saved=await db.from('pro_pay_profiles').upsert({connecteam_user_id:u.userId,applicant_id:a.id,service_line:service,name:`${a.first_name} ${a.last_name}`,email:a.email,is_test:a.is_test_row},{onConflict:'connecteam_user_id'});if(saved.error)throw saved.error;
   const fresh=(await ct('GET',`/users/v1/users?userIds=${u.userId}`)).data?.users?.[0]??u;await checkGroup(fresh,service);
-  const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',u.userId).single();await processPaperworkEmails(db,fresh,profile,checkrLive);
+  const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',u.userId).single();await processPaperworkEmails(db,fresh,profile,checkrLive,sendProEmail);
   return reply({ok:true,user_id:u.userId,sendActivation:false});
  }
  const {data:pool,error}=await db.from('jobber_service_pro_pool').select('*').eq('active',true);if(error)throw error;
@@ -70,7 +70,7 @@ Deno.serve(async req=>{
   const rows=await all('/documents/v1/user-documents','documents',[['userIds',String(p.connecteam_user_id)]]);
   const state=paperworkState(rows,{w9:w9.documentId,coi:coi.documentId,agreement:agreement.documentId});
   const r=await db.rpc('connecteam_commit_paperwork',{_user:p.connecteam_user_id,_status:state.status,_complete:state.complete,_signed_at:state.signedAt,_expiry:state.expiry,_coi_approved:state.coiApproved});if(r.error)throw r.error;synced++;
-  const user=users.find(u=>u.userId===Number(p.connecteam_user_id));if(user){await checkGroup(user,p.service_line);const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',p.connecteam_user_id).single();await processPaperworkEmails(db,user,profile,checkrLive);}
+  const user=users.find(u=>u.userId===Number(p.connecteam_user_id));if(user){await checkGroup(user,p.service_line);const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',p.connecteam_user_id).single();await processPaperworkEmails(db,user,profile,checkrLive,sendProEmail);}
  }
  return reply({ok:true,synced});
  }catch(e){const error=e instanceof Error?e.message:String(e);await db.from('admin_alerts').upsert({dedupe_key:'connecteam-paperwork-sync',alert_type:'integration_error',level:'warning',tier:'digest',title:'Connecteam paperwork sync needs attention',body:error},{onConflict:'dedupe_key',ignoreDuplicates:true});return reply({ok:false,error},502);}

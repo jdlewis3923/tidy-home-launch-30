@@ -1,6 +1,5 @@
-import {sendProEmail} from './pro-send.ts';
 import {buildPaperworkEmail,dueKinds,reminderWindow} from './paperwork-email.ts';
-export async function processPaperworkEmails(db:any,user:any,profile:any,checkrLive=false){
+export async function processPaperworkEmails(db:any,user:any,profile:any,checkrLive=false,sendProEmail: (db:any,args:any)=>Promise<{sent:boolean;reason?:string}>){
  if(profile.applicant_id){const {data:p}=await db.from('contractor_pipeline').select('checkr_result').eq('applicant_id',profile.applicant_id).maybeSingle();if(['clear','passed'].includes(p?.checkr_result))profile={...profile,paperwork_status:{...profile.paperwork_status,checkr:'complete'}};}
  const {data:history,error}=await db.from('pro_paperwork_emails').select('*').eq('connecteam_user_id',profile.connecteam_user_id);if(error)throw error;
  const sent=(history??[]).filter((r:any)=>r.status==='sent');const welcome=sent.find((r:any)=>r.kind==='welcome');
