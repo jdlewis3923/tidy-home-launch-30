@@ -13,6 +13,7 @@ import SmsQueueLine from "@/components/admin/SmsQueueLine";
 import WorkdayBoard from "@/components/admin/WorkdayBoard";
 import { candidateStatusLine, visibleCandidate } from "@/lib/admin-report-rules";
 import RescheduleBanner from "@/components/admin/RescheduleBanner";
+import JobberConnecteamPanel from "@/components/admin/JobberConnecteamPanel";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";
@@ -327,6 +328,8 @@ export default function AdminCommand() {
           </nav>
         </div>
       </header>
+
+      <JobberConnecteamPanel />
 
       {loading ? (
         <div className="py-24 flex items-center justify-center text-slate-500">
