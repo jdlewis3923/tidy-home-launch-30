@@ -61,6 +61,8 @@ const CheckoutCanceled = lazy(() => import("./pages/CheckoutCanceled.tsx"));
 const Welcome = lazy(() => import("./pages/Welcome.tsx"));
 const AdminSetupCatalog = lazy(() => import("./pages/AdminSetupCatalog.tsx"));
 const AdminTestZapier = lazy(() => import("./pages/AdminTestZapier.tsx"));
+const ProRetired = lazy(() => import("./pages/ProRetired.tsx"));
+const AdminProPay = lazy(() => import("./pages/AdminProPay.tsx"));
 const AdminHealth = lazy(() => import("./pages/AdminHealth.tsx"));
 const AdminChatbotKnowledge = lazy(() => import("./pages/AdminChatbotKnowledge.tsx"));
 const AdminInbox = lazy(() => import("./pages/AdminInbox.tsx"));
@@ -381,6 +383,7 @@ const App = () => (
                   <Route path="/admin/test-zapier" element={<AdminTestZapier />} />
                   {/* Phase 8 integration health dashboard. */}
                   <Route path="/admin/health" element={<AdminHealth />} />
+                  <Route path="/admin/pro-pay" element={<AdminProPay />} />
                   {/* Chatbot knowledge editor (admins only). */}
                   <Route path="/admin/chatbot-knowledge" element={<AdminChatbotKnowledge />} />
                   {/* Unified support inbox (SMS + web), admins only. */}
@@ -453,20 +456,8 @@ const App = () => (
                   <Route path="/apply" element={<Apply />} />
                   <Route path="/apply/:service/*" element={<Apply />} />
                   <Route path="/careers" element={<Navigate to="/apply" replace />} />
-                  <Route path="/pro" element={<Navigate to="/pro/home" replace />} />
-                  <Route path="/pro/home" element={<ProHome />} />
-                  <Route path="/pro/tier-progression" element={<ProTierProgression />} />
-                  <Route path="/pro/review-bonus" element={<ProReviewBonuses />} />
-                  <Route path="/pro/upload-coi" element={<ProUploadCoi />} />
                   <Route path="/pro/insurance" element={<ProInsuranceGuide />} />
-                  <Route path="/pro/onboarding" element={<ProOnboarding />} />
-                  <Route path="/pro/training" element={<ProTraining />} />
-                  <Route path="/pro/orientation" element={<ProOrientation />} />
-                  <Route path="/pro/orientation/preview" element={<ProOrientationPreview />} />
-                  <Route path="/pro/orientation/:sectionId" element={<ProOrientationSection />} />
-                  <Route path="/pro/equipment" element={<ProEquipment />} />
                   {/* On-site job view: before-photo gate + walkaround add-on request. */}
-                  <Route path="/pro/job/:jobId" element={<ProJobView />} />
                   {/* Public, token-authenticated add-on approval from the SMS link. */}
                   <Route path="/addon/:token" element={<AddonApproval />} />
                   <Route path="/admin/coi-review" element={<AdminCoiReview />} />
@@ -501,27 +492,14 @@ const App = () => (
                   <Route path="/photo/:token" element={<BadgePhoto />} />
                   <Route path="/contract/:token" element={<ContractSign />} />
                   {/* Insurance certificate upload from the onboarding email — token only. */}
-                  <Route path="/coi/:token" element={<CoiTokenUpload />} />
 
                   {/* Tidy Pro Portal — its own app shell, no site chrome. */}
-                  <Route path="/pro/proof/:token" element={<ProProof />} />
-                  <Route path="/pro/book/:token" element={<ProBook />} />
-                  <Route path="/pro/welcome" element={<ProLanding />} />
-                  <Route path="/pro/login" element={<ProLogin />} />
-                  <Route path="/pro/first-run" element={<ProFirstRun />} />
-                  <Route path="/pro/schedule" element={<ProSchedule />} />
-                  <Route path="/pro/visit/:id" element={<ProVisit />} />
-                  <Route path="/pro/visit/:id/checklist" element={<ProChecklist />} />
-                  <Route path="/pro/visit/:id/photos" element={<ProPhotos />} />
-                  <Route path="/pro/earnings" element={<ProEarnings />} />
-                  <Route path="/pro/earnings/:weekId" element={<ProPayoutWeek />} />
-                  <Route path="/pro/status" element={<ProStatus />} />
-                  <Route path="/pro/profile" element={<ProProfile />} />
-                  <Route path="/pro/notifications" element={<ProNotifications />} />
-                  <Route path="/pro/messages" element={<ProMessages />} />
 
 
 
+                  <Route path="/pro/*" element={<ProRetired />} />
+                  <Route path="/pro" element={<ProRetired />} />
+                  <Route path="/coi/:token" element={<ProRetired />} />
                   <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

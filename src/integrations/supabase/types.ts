@@ -3548,8 +3548,13 @@ export type Database = {
           contractor_id: string | null
           contractor_name_matched: string | null
           created_at: string
+          decided_at: string | null
           id: string
           is_seed: boolean
+          match_note: string | null
+          match_status: string | null
+          matched_ct_user_id: number | null
+          member_user_id: string | null
           posted_at: string | null
           rating: number
           raw_payload: Json
@@ -3562,8 +3567,13 @@ export type Database = {
           contractor_id?: string | null
           contractor_name_matched?: string | null
           created_at?: string
+          decided_at?: string | null
           id?: string
           is_seed?: boolean
+          match_note?: string | null
+          match_status?: string | null
+          matched_ct_user_id?: number | null
+          member_user_id?: string | null
           posted_at?: string | null
           rating: number
           raw_payload?: Json
@@ -3576,8 +3586,13 @@ export type Database = {
           contractor_id?: string | null
           contractor_name_matched?: string | null
           created_at?: string
+          decided_at?: string | null
           id?: string
           is_seed?: boolean
+          match_note?: string | null
+          match_status?: string | null
+          matched_ct_user_id?: number | null
+          member_user_id?: string | null
           posted_at?: string | null
           rating?: number
           raw_payload?: Json
@@ -4261,7 +4276,9 @@ export type Database = {
           jobber_visit_id: string
           locked_up: boolean | null
           no_report_alerted_at: string | null
+          pay_outcome: string | null
           pro_pay_cents: number | null
+          rating: number | null
           raw: Json | null
           report_submission_id: string | null
           service_line: string | null
@@ -4269,6 +4286,7 @@ export type Database = {
           start_at: string | null
           status: string
           subscription_id: string | null
+          team_user_ids: number[] | null
           title: string | null
           updated_at: string
           user_id: string | null
@@ -4294,7 +4312,9 @@ export type Database = {
           jobber_visit_id: string
           locked_up?: boolean | null
           no_report_alerted_at?: string | null
+          pay_outcome?: string | null
           pro_pay_cents?: number | null
+          rating?: number | null
           raw?: Json | null
           report_submission_id?: string | null
           service_line?: string | null
@@ -4302,6 +4322,7 @@ export type Database = {
           start_at?: string | null
           status?: string
           subscription_id?: string | null
+          team_user_ids?: number[] | null
           title?: string | null
           updated_at?: string
           user_id?: string | null
@@ -4327,7 +4348,9 @@ export type Database = {
           jobber_visit_id?: string
           locked_up?: boolean | null
           no_report_alerted_at?: string | null
+          pay_outcome?: string | null
           pro_pay_cents?: number | null
+          rating?: number | null
           raw?: Json | null
           report_submission_id?: string | null
           service_line?: string | null
@@ -4335,6 +4358,7 @@ export type Database = {
           start_at?: string | null
           status?: string
           subscription_id?: string | null
+          team_user_ids?: number[] | null
           title?: string | null
           updated_at?: string
           user_id?: string | null
@@ -7133,6 +7157,93 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pro_pay_lines: {
+        Row: {
+          base_cents: number
+          connecteam_user_id: number
+          created_at: string
+          description: string
+          id: string
+          is_test: boolean
+          jobber_visit_id: string | null
+          kind: string
+          line_key: string
+          member_user_id: string | null
+          pay_cents: number
+          payout_friday: string
+          status: string
+          week_start: string
+        }
+        Insert: {
+          base_cents?: number
+          connecteam_user_id: number
+          created_at?: string
+          description: string
+          id?: string
+          is_test?: boolean
+          jobber_visit_id?: string | null
+          kind: string
+          line_key: string
+          member_user_id?: string | null
+          pay_cents: number
+          payout_friday: string
+          status?: string
+          week_start: string
+        }
+        Update: {
+          base_cents?: number
+          connecteam_user_id?: number
+          created_at?: string
+          description?: string
+          id?: string
+          is_test?: boolean
+          jobber_visit_id?: string | null
+          kind?: string
+          line_key?: string
+          member_user_id?: string | null
+          pay_cents?: number
+          payout_friday?: string
+          status?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
+      pro_pay_profiles: {
+        Row: {
+          coi_verified_at: string | null
+          connecteam_user_id: number
+          created_at: string
+          email: string | null
+          is_test: boolean
+          language: string
+          name: string
+          started_on: string
+          tier2_since: string | null
+        }
+        Insert: {
+          coi_verified_at?: string | null
+          connecteam_user_id: number
+          created_at?: string
+          email?: string | null
+          is_test?: boolean
+          language?: string
+          name: string
+          started_on?: string
+          tier2_since?: string | null
+        }
+        Update: {
+          coi_verified_at?: string | null
+          connecteam_user_id?: number
+          created_at?: string
+          email?: string | null
+          is_test?: boolean
+          language?: string
+          name?: string
+          started_on?: string
+          tier2_since?: string | null
+        }
+        Relationships: []
       }
       pro_payout_lines: {
         Row: {
