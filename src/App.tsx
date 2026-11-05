@@ -451,6 +451,8 @@ const App = () => (
                   {/* Capacity & hiring — fill %, ceiling dates, when to post the job. */}
                   <Route path="/admin/capacity" element={<AdminCapacity />} />
                   <Route path="/apply" element={<Apply />} />
+                  <Route path="/apply/:service/*" element={<Apply />} />
+                  <Route path="/careers" element={<Navigate to="/apply" replace />} />
                   <Route path="/pro" element={<Navigate to="/pro/home" replace />} />
                   <Route path="/pro/home" element={<ProHome />} />
                   <Route path="/pro/tier-progression" element={<ProTierProgression />} />
