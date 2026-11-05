@@ -520,7 +520,7 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [ ] Full test-member save → Jobber → Connecteam readback and under-one-minute timing remain unverified: provider test timed out at 150 seconds. Cleaning Jobber job 162301554 notes read back; job closed/client 158550258 archived, no test mirror/shift rows remain. No real member modified or emails/texts sent.
 
 ## Admin cleanup (Nov 5, 19:59 UTC)
-- [ ] Larger six-group menu, external quick launches and redirected duplicate tools, no data deletion.
-- [ ] Real integration health, permanent Jobber reconnect, plain-English command center.
-- [ ] Removed Jobber visit webhook handling; tests and menu/browser checks.
-- [ ] Security check and publish; report moved tools and external blockers.
+- [x] Six-group menu: 16px items/13px labels, roomier icons/rows and external launchers; duplicate URLs show branded handoffs, no data/functions/crons deleted.
+- [x] Today reads non-test mirror visits/open shifts, paperwork/pay and alerts; connection probes plus permanent Jobber reconnect. Jobber/Stripe/Brevo verified; Connecteam rate-limited (429); QuickBooks absent, settings link shown.
+- [x] Removed visit returns HTTP 200 with removed:true for archived test; 11 tests pass. All 27 unique menu destinations and 4 handoffs render; Reviews hook error fixed; browser reports zero errors and phone width 390.
+- [x] Basic security scan found no issues (not deep analysis); latest preview build OK; publish requested in closing step.
