@@ -1,6 +1,7 @@
 import {sendProEmail} from './pro-send.ts';
 import {buildPaperworkEmail,dueKinds,reminderWindow} from './paperwork-email.ts';
 export async function processPaperworkEmails(db:any,user:any,profile:any,checkrLive=false){
+ if(profile.applicant_id){const {data:p}=await db.from('contractor_pipeline').select('checkr_result').eq('applicant_id',profile.applicant_id).maybeSingle();if(['clear','passed'].includes(p?.checkr_result))profile={...profile,paperwork_status:{...profile.paperwork_status,checkr:'complete'}};}
  const {data:history,error}=await db.from('pro_paperwork_emails').select('*').eq('connecteam_user_id',profile.connecteam_user_id);if(error)throw error;
  const sent=(history??[]).filter((r:any)=>r.status==='sent');const welcome=sent.find((r:any)=>r.kind==='welcome');
  const complete=profile.paperwork_complete&&(!checkrLive||profile.paperwork_status?.checkr==='complete');
@@ -8,6 +9,8 @@ export async function processPaperworkEmails(db:any,user:any,profile:any,checkrL
  for(const kind of kinds){const r=await db.from('pro_paperwork_emails').upsert({connecteam_user_id:profile.connecteam_user_id,kind,status:profile.paperwork_email_held?'held':'queued'},{onConflict:'connecteam_user_id,kind',ignoreDuplicates:true});if(r.error)throw r.error;}
  if(complete){await db.from('pro_paperwork_emails').update({status:'cancelled'}).eq('connecteam_user_id',profile.connecteam_user_id).in('kind',['reminder48','reminder5d']).eq('status','queued');}
  if(profile.paperwork_email_held||profile.is_test)return;
+ if(!profile.email)return;
+ if(checkrLive&&!profile.checkr_invite_url){await db.from('admin_alerts').upsert({dedupe_key:`paperwork-checkr:${profile.connecteam_user_id}`,alert_type:'integration_error',level:'warning',tier:'digest',title:`Add Checkr invitation for ${profile.name}`,body:'Checkr is live, but this Pro has no invitation link. Paperwork email is held until the link is available.'},{onConflict:'dedupe_key',ignoreDuplicates:true});return;}
  const {data:pending}=await db.from('pro_paperwork_emails').select('*').eq('connecteam_user_id',profile.connecteam_user_id).eq('status','queued').lte('due_at',new Date().toISOString());
  for(const row of pending??[]){if(row.kind.startsWith('reminder')&&!reminderWindow(new Date()))continue;
   const {data:claimed,error:ce}=await db.rpc('claim_paperwork_email',{_id:row.id});if(ce)throw ce;if(!claimed)continue;
