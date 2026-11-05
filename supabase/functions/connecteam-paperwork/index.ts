@@ -43,7 +43,7 @@ Deno.serve(async req=>{
  if(!w9||!coi)throw new Error('Required W-9/COI document missing');
  const {data:profiles}=await db.from('pro_pay_profiles').select('*');
  const tracked=new Map((profiles??[]).map(p=>[Number(p.connecteam_user_id),p]));
- for(const p of pool??[]){const u=users.find(u=>u.userId===Number(p.connecteam_user_id));if(!u)continue;await setPosition(u.userId,p.service_line,fields);let profile=tracked.get(u.userId);if(!profile){const {data:app}=await db.from('applicants').select('id').ilike('email',u.email??'missing').limit(1).maybeSingle();profile={connecteam_user_id:u.userId,name:p.pro_name??`${u.firstName} ${u.lastName}`,service_line:p.service_line,applicant_id:app?.id??null,email:u.email??null,is_test:false};await db.from('pro_pay_profiles').upsert(profile,{onConflict:'connecteam_user_id'});tracked.set(u.userId,profile);}}
+ for(const p of pool??[]){const u=users.find(u=>u.userId===Number(p.connecteam_user_id));if(!u)continue;await setPosition(u.userId,p.service_line,fields);const old=tracked.get(u.userId);const {data:app}=await db.from('applicants').select('id').ilike('email',u.email??'missing').limit(1).maybeSingle();const profile={...old,connecteam_user_id:u.userId,name:p.pro_name??`${u.firstName} ${u.lastName}`,service_line:p.service_line,applicant_id:old?.applicant_id??app?.id??null,email:u.email??old?.email??null,is_test:old?.is_test??false};const saved=await db.from('pro_pay_profiles').upsert(profile,{onConflict:'connecteam_user_id'});if(saved.error)throw saved.error;tracked.set(u.userId,profile);}
  let synced=0;
  for(const p of tracked.values()){
   if(p.is_test||!POSITIONS[p.service_line??''])continue;
