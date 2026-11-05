@@ -200,7 +200,7 @@ async function syncSubscription(db: SupabaseClient, subId: string, opts: { allow
 // ---------- Jobber visits → mirror → Connecteam ----------
 const VISIT_FIELDS = `id title startAt endAt isComplete visitStatus instructions
   client{id firstName lastName emails{address}} property{address{street1 street2 city postalCode}}
-  job{id title} lineItems(first:20){nodes{name}}`;
+  job{id title} lineItems(first:20){nodes{name unitPrice totalPrice quantity}}`;
 
 function serviceOf(names: string[]): { service: string; size: number; kind: string } {
   const n = names.join(' | ');
@@ -352,12 +352,7 @@ async function pollReports(db: SupabaseClient) {
     let jobberErr = '';
     try { await gql(db, `mutation($v:EncodedId!,$i:VisitCompleteInput){visitComplete(visitId:$v,input:$i){visit{id isComplete} userErrors{message path}}}`, { v: v.jobber_visit_id, i: { completedAt } }); }
     catch (e) { jobberErr = (e as Error).message; await alert(db, `jobber_complete_fail:${v.jobber_visit_id}`, 'Could not mark Jobber visit complete', `${v.title}: ${jobberErr}`, 'digest'); }
-    if (pay != null) {
-      const w = fridayAfter(new Date(completedAt));
-      const pro = [...pros.values()].find((p: any) => Number(p.connecteam_user_id) === Number(s.submittingUserId));
-      await db.from('pro_payout_lines').upsert({ jobber_visit_id: v.jobber_visit_id, connecteam_user_id: s.submittingUserId ?? null, pro_name: pro?.pro_name ?? null,
-        service_line: v.service_line, completed_on: completedAt.slice(0, 10), ...w, pay_cents: pay, is_test: v.is_test } as any, { onConflict: 'jobber_visit_id', ignoreDuplicates: true });
-    }
+    // Pay lines are built by pro-pay from completed visits (Friday statement).
     if (checklist === false || locked === false || issues) {
       await alert(db, `visit_report_problem:${v.jobber_visit_id}`, `Visit problem reported: ${v.title}`,
         [checklist === false ? 'Checklist NOT done.' : '', locked === false ? 'Home/car NOT locked up.' : '', issues ? `Issues: ${issues}` : '', issuePhotos.length ? `Photos: ${issuePhotos.join(' ')}` : ''].filter(Boolean).join('\n'),
