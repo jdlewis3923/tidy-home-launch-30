@@ -480,3 +480,6 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Canon sync: living /admin/documents pages (EN/ES, print-to-PDF), static docs archived, new chatbot knowledge row, drift test (canon-docs.test.ts), morning "Documents updated" line, memory notes corrected.
 - [ ] Spanish 2026-10-29b agreement (needs approved Spanish text).
 - [ ] Living-doc PDF is the browser's Save-as-PDF, not a generated file.
+
+## Jobber schedule of record + Connecteam (Nov 5)
+- [x] Member → Jobber recurring jobs; website engine stops; visits → Connecteam shifts; Visit Report loop; payout lines; ZZ Sync Test passed; webhooks registered
