@@ -1,0 +1,10 @@
+CREATE TABLE public.pro_paperwork_emails (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), connecteam_user_id bigint NOT NULL, kind text NOT NULL CHECK(kind IN ('welcome','reminder48','reminder5d','complete','test')), due_at timestamptz NOT NULL DEFAULT now(), status text NOT NULL DEFAULT 'queued' CHECK(status IN ('held','queued','sending','sent','failed','cancelled')), claimed_at timestamptz, sent_at timestamptz, message_id text, error text, UNIQUE(connecteam_user_id,kind));
+GRANT SELECT ON public.pro_paperwork_emails TO authenticated;
+GRANT ALL ON public.pro_paperwork_emails TO service_role;
+ALTER TABLE public.pro_paperwork_emails ENABLE ROW LEVEL SECURITY;
+CREATE POLICY admin_read ON public.pro_paperwork_emails FOR SELECT TO authenticated USING(public.has_role(auth.uid(),'admin'));
+ALTER TABLE public.pro_pay_profiles ADD COLUMN IF NOT EXISTS paperwork_email_held boolean NOT NULL DEFAULT false;
+UPDATE public.pro_pay_profiles SET paperwork_email_held=true WHERE connecteam_user_id IN (31157941,31157945);
+CREATE OR REPLACE FUNCTION public.claim_paperwork_email(_id uuid) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN UPDATE public.pro_paperwork_emails SET status='sending',claimed_at=now() WHERE id=_id AND status='queued' AND due_at<=now(); RETURN FOUND; END; $$;
+REVOKE ALL ON FUNCTION public.claim_paperwork_email(uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.claim_paperwork_email(uuid) TO service_role;

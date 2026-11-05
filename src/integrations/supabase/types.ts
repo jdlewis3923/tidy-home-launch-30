@@ -7191,6 +7191,42 @@ export type Database = {
           },
         ]
       }
+      pro_paperwork_emails: {
+        Row: {
+          claimed_at: string | null
+          connecteam_user_id: number
+          due_at: string
+          error: string | null
+          id: string
+          kind: string
+          message_id: string | null
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          connecteam_user_id: number
+          due_at?: string
+          error?: string | null
+          id?: string
+          kind: string
+          message_id?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          claimed_at?: string | null
+          connecteam_user_id?: number
+          due_at?: string
+          error?: string | null
+          id?: string
+          kind?: string
+          message_id?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       pro_pay_lines: {
         Row: {
           base_cents: number
@@ -7255,6 +7291,7 @@ export type Database = {
           language: string
           name: string
           paperwork_complete: boolean
+          paperwork_email_held: boolean
           paperwork_status: Json
           paperwork_synced_at: string | null
           pay_setup_unblocked: boolean
@@ -7274,6 +7311,7 @@ export type Database = {
           language?: string
           name: string
           paperwork_complete?: boolean
+          paperwork_email_held?: boolean
           paperwork_status?: Json
           paperwork_synced_at?: string | null
           pay_setup_unblocked?: boolean
@@ -7293,6 +7331,7 @@ export type Database = {
           language?: string
           name?: string
           paperwork_complete?: boolean
+          paperwork_email_held?: boolean
           paperwork_status?: Json
           paperwork_synced_at?: string | null
           pay_setup_unblocked?: boolean
@@ -11482,6 +11521,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_paperwork_email: { Args: { _id: string }; Returns: boolean }
       claim_pro_notification: {
         Args: { _contractor_id: string; _kind: string; _scope: string }
         Returns: boolean
