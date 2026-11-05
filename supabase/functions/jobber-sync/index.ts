@@ -291,6 +291,8 @@ async function reconcile(db: SupabaseClient, days = 21) {
       { f: { startAt: { after: from.toISOString(), before: to.toISOString() } }, a: after });
     for (const v of d.visits.nodes) {
       seen.add(v.id);
+      // Test runners own their test shifts; webhooks/reconcile must not race them.
+      if (/^ZZ Sync/i.test(v.client?.firstName ?? '')) continue;
       try { await upsertVisit(db, v, pros); synced++; } catch (e) { errors.push(`${v.id}: ${(e as Error).message}`); if (e instanceof ConnecteamMissingKey) break; }
     }
     if (!d.visits.pageInfo.hasNextPage) break; after = d.visits.pageInfo.endCursor;
@@ -305,8 +307,9 @@ async function reconcile(db: SupabaseClient, days = 21) {
 }
 
 async function syncVisit(db: SupabaseClient, id: string) {
-  const d = await gql(db, `query($id:EncodedId!){visit(id:$id){${VISIT_FIELDS}}}`, { id }).catch(() => ({ visit: null }));
+  const d = await gql(db, `query($id:EncodedId!){visit(id:$id){${VISIT_FIELDS}}}`, { id });
   if (!d.visit) return { removed: await removeVisit(db, id) };
+  if (/^ZZ Sync/i.test(d.visit.client?.firstName ?? '')) return { skipped: 'test_runner_owned' };
   return await upsertVisit(db, d.visit, await proMap(db));
 }
 
@@ -486,6 +489,19 @@ async function withTestClient<T>(db: SupabaseClient, label: string, fn: (propert
   const out: any = { client_id: clientId };
   try { out.result = await fn(propertyId, clientId); } catch (e) { out.error = (e as Error).message; }
   finally {
+    // Close every test job and remove every associated shift even when a test fails.
+    try {
+      const jobs = await gql(db, `query($id:EncodedId!){client(id:$id){jobs(first:100){nodes{id}}}}`, { id: clientId });
+      for (const j of jobs.client.jobs.nodes) {
+        const { data: mirrors } = await db.from('jobber_visits').select('id,connecteam_shift_id').eq('jobber_job_id', j.id).eq('is_test', true);
+        for (const m of mirrors ?? []) {
+          if (m.connecteam_shift_id) await deleteShift(m.connecteam_shift_id);
+          await db.from('jobber_visits').update({ deleted_at: new Date().toISOString(), connecteam_shift_id: null }).eq('id', m.id);
+        }
+        await closeJob(db, j.id);
+      }
+      out.cleanup_verified = true;
+    } catch (e) { out.cleanup_error = (e as Error).message; }
     try { await gql(db, `mutation($c:EncodedId!){clientArchive(clientId:$c){client{id isArchived} userErrors{message path}}}`, { c: clientId }); out.client_archived = true; }
     catch (e) { out.archive_error = (e as Error).message; }
   }
@@ -544,6 +560,7 @@ async function testReport(db: SupabaseClient) {
     await closeJob(db, jobId); steps.job_closed = true; steps.cleaned_up = true;
     return steps;
   });
+  if (!out.result) out.partial_steps = steps;
   await log(db, 'test_report', out.error ? 'error' : 'success', JSON.stringify(out).slice(0, 1900));
   return out;
 }
