@@ -243,7 +243,7 @@ async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, PoolPro
   const row: any = {
     jobber_visit_id: v.id, jobber_job_id: v.job?.id, subscription_id: subRow?.id ?? null, user_id: subRow?.user_id ?? null,
     service_line: svc.service, size_tier: svc.size, visit_kind: svc.kind, title, start_at: v.startAt, end_at: v.endAt ?? v.startAt,
-    address, customer_first_name: first, connecteam_user_id: ctUser, raw: v, updated_at: new Date().toISOString(), deleted_at: null,
+    address, customer_first_name: first, raw: v, updated_at: new Date().toISOString(), deleted_at: null,
     is_test: isTest || existing?.is_test || false,
   };
   if (v.isComplete && !existing?.completed_at) row.status = 'complete';
