@@ -483,3 +483,4 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 
 ## Jobber schedule of record + Connecteam (Nov 5)
 - [x] Member → Jobber recurring jobs; website engine stops; visits → Connecteam shifts; Visit Report loop; payout lines; ZZ Sync Test passed; webhooks registered
+- [x] Pro app retired to Connecteam (signing link kept for Susan); /admin/pro-pay, pay rules tested, Friday statements
