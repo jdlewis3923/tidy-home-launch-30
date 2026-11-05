@@ -82,7 +82,7 @@ function lev(a: string, b: string): number {
   for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
   return dp[m][n];
 }
-const words = (s: string) => (s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').match(/[a-z]+/g) ?? []);
+const words = (s: string) => (s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').match(/[a-z]+/g) ?? ([] as string[]));
 
 /** 'exact' when the Pro's first name appears as a word, 'fuzzy' when a word is one letter off, else 'none'. */
 export function proNameMatch(reviewText: string, proFirstName: string): 'exact' | 'fuzzy' | 'none' {
