@@ -13,7 +13,8 @@ export function pickPro(pool: PoolPro[], busy: { connecteam_user_id: number; sta
   const s = Date.parse(startAt), e = Date.parse(endAt) > s ? Date.parse(endAt) : s + 3600000;
   const free = (u: number) => !busy.some((b) => Number(b.connecteam_user_id) === u && Date.parse(b.start_at) < e && (Date.parse(b.end_at) > Date.parse(b.start_at) ? Date.parse(b.end_at) : Date.parse(b.start_at) + 3600000) > s);
   const ordered = [...pool].sort((a, b) => a.priority - b.priority);
-  if (current && ordered.some((p) => p.connecteam_user_id === current) && free(current)) return current;
+  // Priority remains authoritative when a moved visit makes the primary available again.
+  void current;
   return ordered.find((p) => free(p.connecteam_user_id))?.connecteam_user_id ?? null;
 }
 

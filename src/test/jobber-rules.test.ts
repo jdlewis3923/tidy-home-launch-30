@@ -21,6 +21,12 @@ describe("shift assignment", () => {
     const busy = pool.map((p) => ({ connecteam_user_id: p.connecteam_user_id, start_at: at(13), end_at: at(16) }));
     expect(pickPro(pool, busy, at(14), at(17))).toBeNull();
   });
+  it("returns a moved visit to Susan when the primary is free", () => {
+    expect(pickPro(pool, [], at(14), at(17), 31157945)).toBe(31157941);
+  });
+  it("includes an overlap that started the preceding day", () => {
+    expect(pickPro(pool, [{ connecteam_user_id: 31157941, start_at: '2026-11-09T22:00:00Z', end_at: at(15) }], at(14), at(17))).toBe(31157945);
+  });
 });
 
 describe("car wash add-on key", () => {

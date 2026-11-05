@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   let result: unknown = null; let err: string | null = null;
   try {
     if (String(evt.topic).startsWith('VISIT_')) result = await callSync({ action: 'sync_visit', jobber_visit_id: evt.itemId });
-    else if (evt.topic === 'JOB_UPDATE') result = await callSync({ action: 'reconcile', days: 21 });
+    else if (evt.topic === 'JOB_UPDATE') result = await callSync({ action: 'sync_job', jobber_job_id: evt.itemId });
   } catch (e) { err = (e as Error).message; }
   if (row?.id) await db.from('jobber_webhook_log').update({ processed_at: new Date().toISOString(), error_message: err ?? JSON.stringify(result)?.slice(0, 500) }).eq('id', row.id);
   return new Response(JSON.stringify({ ok: !err }), { headers: { 'Content-Type': 'application/json' } });

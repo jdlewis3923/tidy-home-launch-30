@@ -15,7 +15,7 @@ export async function ct<T = any>(method: string, path: string, body?: unknown):
   const key = Deno.env.get('CONNECTEAM_API_KEY');
   if (!key) throw new ConnecteamMissingKey();
   let last: Error | null = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 5; attempt++) {
     try {
       const res = await fetch(`${CT_BASE}${path}`, {
         method,
@@ -26,13 +26,19 @@ export async function ct<T = any>(method: string, path: string, body?: unknown):
       if (res.status === 404 && method === 'DELETE') return {} as T; // already gone
       if (!res.ok) {
         const err = new Error(`connecteam ${method} ${path} [${res.status}] ${text.slice(0, 400)}`);
+        if (res.status === 429) {
+          last = err;
+          const retryAfter = Number(res.headers.get('Retry-After'));
+          await sleep(Math.min(60000, Math.max(15000, retryAfter * 1000 || 15000 * (attempt + 1))));
+          continue;
+        }
         if (res.status >= 400 && res.status < 500 && res.status !== 429) { last = err; break; }
         throw err;
       }
       return (text ? JSON.parse(text) : {}) as T;
     } catch (e) {
       last = e as Error;
-      if (attempt < 2) await sleep(1000 * 3 ** attempt);
+      if (attempt < 4) await sleep(1000 * 3 ** attempt);
     }
   }
   throw last ?? new Error('connecteam call failed');

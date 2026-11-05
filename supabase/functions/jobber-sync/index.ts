@@ -243,12 +243,16 @@ async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, PoolPro
   const row: any = {
     jobber_visit_id: v.id, jobber_job_id: v.job?.id, subscription_id: subRow?.id ?? null, user_id: subRow?.user_id ?? null,
     service_line: svc.service, size_tier: svc.size, visit_kind: svc.kind, title, start_at: v.startAt, end_at: v.endAt ?? v.startAt,
-    address, customer_first_name: first, connecteam_user_id: ctUser, raw: v, updated_at: new Date().toISOString(), deleted_at: null,
+    address, customer_first_name: first, raw: v, updated_at: new Date().toISOString(), deleted_at: null,
     is_test: isTest || existing?.is_test || false,
   };
   if (v.isComplete && !existing?.completed_at) row.status = 'complete';
   const { data: saved, error } = await db.from('jobber_visits').upsert(row, { onConflict: 'jobber_visit_id' }).select('*').single();
   if (error) throw new Error(`mirror upsert: ${error.message}`);
+  const { data: assigned, error: assignmentError } = await db.rpc('assign_jobber_visit_pro', { _visit: saved.id, _override: overrideUser ?? null });
+  if (assignmentError) throw new Error(`Pro assignment: ${assignmentError.message}`);
+  ctUser = assigned === null ? null : Number(assigned);
+  saved.connecteam_user_id = ctUser;
   if (saved.status === 'complete' || !v.startAt) return { visit: saved, shift: 'skipped' };
   const win = windowFrom(String(v.instructions ?? '').match(/Arrival window:\s*([^\n]+)/)?.[1]);
   const shift: ShiftInput = {
@@ -291,6 +295,8 @@ async function reconcile(db: SupabaseClient, days = 21) {
       { f: { startAt: { after: from.toISOString(), before: to.toISOString() } }, a: after });
     for (const v of d.visits.nodes) {
       seen.add(v.id);
+      // Test runners own their test shifts; webhooks/reconcile must not race them.
+      if (/^ZZ Sync/i.test(v.client?.firstName ?? '')) continue;
       try { await upsertVisit(db, v, pros); synced++; } catch (e) { errors.push(`${v.id}: ${(e as Error).message}`); if (e instanceof ConnecteamMissingKey) break; }
     }
     if (!d.visits.pageInfo.hasNextPage) break; after = d.visits.pageInfo.endCursor;
@@ -305,8 +311,9 @@ async function reconcile(db: SupabaseClient, days = 21) {
 }
 
 async function syncVisit(db: SupabaseClient, id: string) {
-  const d = await gql(db, `query($id:EncodedId!){visit(id:$id){${VISIT_FIELDS}}}`, { id }).catch(() => ({ visit: null }));
+  const d = await gql(db, `query($id:EncodedId!){visit(id:$id){${VISIT_FIELDS}}}`, { id });
   if (!d.visit) return { removed: await removeVisit(db, id) };
+  if (/^ZZ Sync/i.test(d.visit.client?.firstName ?? '')) return { skipped: 'test_runner_owned' };
   return await upsertVisit(db, d.visit, await proMap(db));
 }
 
@@ -486,6 +493,19 @@ async function withTestClient<T>(db: SupabaseClient, label: string, fn: (propert
   const out: any = { client_id: clientId };
   try { out.result = await fn(propertyId, clientId); } catch (e) { out.error = (e as Error).message; }
   finally {
+    // Close every test job and remove every associated shift even when a test fails.
+    try {
+      const jobs = await gql(db, `query($id:EncodedId!){client(id:$id){jobs(first:100){nodes{id}}}}`, { id: clientId });
+      for (const j of jobs.client.jobs.nodes) {
+        const { data: mirrors } = await db.from('jobber_visits').select('id,connecteam_shift_id').eq('jobber_job_id', j.id).eq('is_test', true);
+        for (const m of mirrors ?? []) {
+          if (m.connecteam_shift_id) await deleteShift(m.connecteam_shift_id);
+          await db.from('jobber_visits').update({ deleted_at: new Date().toISOString(), connecteam_shift_id: null }).eq('id', m.id);
+        }
+        await closeJob(db, j.id);
+      }
+      out.cleanup_verified = true;
+    } catch (e) { out.cleanup_error = (e as Error).message; }
     try { await gql(db, `mutation($c:EncodedId!){clientArchive(clientId:$c){client{id isArchived} userErrors{message path}}}`, { c: clientId }); out.client_archived = true; }
     catch (e) { out.archive_error = (e as Error).message; }
   }
@@ -544,6 +564,7 @@ async function testReport(db: SupabaseClient) {
     await closeJob(db, jobId); steps.job_closed = true; steps.cleaned_up = true;
     return steps;
   });
+  if (!out.result) out.partial_steps = steps;
   await log(db, 'test_report', out.error ? 'error' : 'success', JSON.stringify(out).slice(0, 1900));
   return out;
 }
@@ -560,11 +581,14 @@ async function testCarWash(db: SupabaseClient) {
       const sp = buildSpecs({ plan_lines: [], car_wash_key: k }, new Date(`${new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10)}T12:00:00Z`)).find((x) => x.key === 'car_wash')!;
       const start = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
       const jobId = await createJob(db, propertyId, sp, start, windowFrom('9 AM - 11 AM'), 'TEST ONLY — car wash add-on mapping.');
-      const j = await gql(db, `query($id:EncodedId!){job(id:$id){id title lineItems{nodes{name quantity}} visits(first:12){nodes{startAt}}}}`, { id: jobId }).catch(async () =>
-        gql(db, `query($id:EncodedId!){job(id:$id){id title lineItems{nodes{name quantity}} visits(first:10){nodes{startAt}}}}`, { id: jobId }));
+      // Jobber generates recurring visits asynchronously after jobCreate returns.
+      await new Promise((resolve) => setTimeout(resolve, 15000));
+      const j = await gql(db, `query($id:EncodedId!,$f:VisitFilterAttributes){job(id:$id){id title startAt endAt visitSchedule{startDate endDate recurrenceSchedule{calendarRule friendly}} lineItems{nodes{name quantity}} visitsInfo{futureCount scheduledCount} visits(first:100,filter:$f){nodes{startAt} pageInfo{hasNextPage}}}}`, { id: jobId, f: { onlyRelevantToBillingPeriod: false, startAt: { after: `${start}T00:00:00Z`, before: new Date(Date.parse(`${start}T00:00:00Z`) + 366 * 86400000).toISOString() } } });
       const starts = (j.job.visits.nodes ?? []).map((v: any) => v.startAt);
       const firstMonth = starts.filter((t: string) => Date.parse(t) < Date.parse(start) + 31 * 86400000).length;
-      res.push({ key: k, job_id: jobId, title: j.job.title, line_items: j.job.lineItems.nodes, visits_in_first_31_days: firstMonth, visit_starts: starts, rrule: sp.rrule });
+      const expected = k.endsWith('x2') ? 24 : 12;
+      if (starts.length !== expected) throw new Error(`${k}: expected ${expected} yearly visits, got ${starts.length}; ${JSON.stringify(j.job)}`);
+      res.push({ key: k, job_id: jobId, title: j.job.title, line_items: j.job.lineItems.nodes, visits_in_first_31_days: firstMonth, yearly_visits: starts.length, expected_yearly_visits: expected, visit_starts: starts, rrule: sp.rrule });
       await closeJob(db, jobId);
     }
     return res;
@@ -595,6 +619,11 @@ Deno.serve(async (req) => {
       case 'backfill': return jsonResponse({ ok: true, result: await backfill(db) });
       case 'reconcile': return jsonResponse({ ok: true, result: await reconcile(db, body.days ?? 21) });
       case 'sync_visit': return jsonResponse({ ok: true, result: await syncVisit(db, body.jobber_visit_id) });
+      case 'sync_job': {
+        const job = await gql(db, `query($id:EncodedId!){job(id:$id){client{firstName}}}`, { id: body.jobber_job_id });
+        if (/^ZZ Sync/i.test(job.job?.client?.firstName ?? '')) return jsonResponse({ ok: true, skipped: 'test_runner_owned' });
+        return jsonResponse({ ok: true, result: await reconcile(db, 21) });
+      }
       case 'poll_reports': return jsonResponse({ ok: true, result: await pollReports(db) });
       case 'register_webhooks': return jsonResponse({ ok: true, result: await registerWebhooks(db) });
       case 'skip_visit': return jsonResponse({ ok: true, result: await skipVisit(db, body.mirror_id) });
