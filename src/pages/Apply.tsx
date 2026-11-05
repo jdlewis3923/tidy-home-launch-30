@@ -23,7 +23,7 @@ export default function Apply() {
 
   return (
     <div className="min-h-screen bg-navy text-primary-foreground">
-      <SeoHead title="Apply to Tidy | Pro jobs in Pinecrest & Kendall" description="Cleaning, lawn and car care Pro jobs in Pinecrest & Kendall. Paid every Friday. Habla español." path="/apply" />
+      <SeoHead title="Apply to Tidy | Pro jobs in Pinecrest & Kendall" description="Cleaning, lawn and car care Pro jobs in Pinecrest & Kendall. Paid every Friday. Habla español." canonical="https://jointidy.co/apply" />
       <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
         <Link to="/" aria-label="Tidy"><TidyLogo size="sm" /></Link>
         <button type="button" onClick={() => setLang(lang === 'en' ? 'es' : 'en')} className="rounded-full border border-primary-foreground/40 px-4 py-1.5 text-sm">
