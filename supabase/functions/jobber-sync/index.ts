@@ -118,9 +118,13 @@ async function ensureClient(db: SupabaseClient, sub: any, prof: any, email: stri
     if (pid) return { clientId: clientId, propertyId: pid };
   }
   const c = await gql(db, `query($id:EncodedId!){client(id:$id){properties{id address{street1 postalCode}}}}`, { id: clientId });
+  if(!clientId)throw new Error('Jobber client missing');
+  await gql(db,`mutation($c:EncodedId!,$i:ClientEditInput!){clientEdit(clientId:$c,input:$i){client{id} userErrors{message path}}}`,{c:clientId,i:{firstName:prof?.first_name??'',lastName:prof?.last_name??'',receivesReminders:false,receivesFollowUps:false,receivesReviewRequests:false}});
   const props = c.client?.properties ?? [];
-  const match = props.find((p: any) => (p.address?.street1 ?? '').trim().toLowerCase() === addr.street1.trim().toLowerCase()) ?? (addr.street1 ? null : props[0]);
-  if (match) return { clientId: clientId, propertyId: match.id };
+  const firstJob=Object.values(sub.jobber_job_ids??{})[0] as any;
+  const oldProperty=firstJob?.job_id?await gql(db,`query($id:EncodedId!){job(id:$id){property{id}}}`,{id:firstJob.job_id}):null;
+  const match = props.find((p:any)=>p.id===oldProperty?.job?.property?.id)??props.find((p: any) => (p.address?.street1 ?? '').trim().toLowerCase() === addr.street1.trim().toLowerCase()) ?? (props.length===1?props[0]:null);
+  if (match) {await gql(db,`mutation($p:EncodedId!,$i:PropertyEditInput!){propertyEdit(propertyId:$p,input:$i){property{id} userErrors{message path}}}`,{p:match.id,i:{address:addr}});return { clientId, propertyId: match.id };}
   if (!addr.street1) throw new Error('member has no service address');
   const p = await gql(db, `mutation($c:EncodedId!,$i:PropertyCreateInput!){propertyCreate(clientId:$c,input:$i){properties{id} userErrors{message path}}}`, { c: clientId, i: { properties: [{ address: addr }] } });
   return { clientId: clientId, propertyId: p.propertyCreate.properties[0].id };
