@@ -4219,6 +4219,129 @@ export type Database = {
         }
         Relationships: []
       }
+      jobber_service_pros: {
+        Row: {
+          connecteam_user_id: number | null
+          pro_name: string | null
+          service_line: string
+          updated_at: string
+        }
+        Insert: {
+          connecteam_user_id?: number | null
+          pro_name?: string | null
+          service_line: string
+          updated_at?: string
+        }
+        Update: {
+          connecteam_user_id?: number | null
+          pro_name?: string | null
+          service_line?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      jobber_visits: {
+        Row: {
+          address: string | null
+          after_photos: Json
+          before_photos: Json
+          checklist_done: boolean | null
+          completed_at: string | null
+          connecteam_shift_id: string | null
+          connecteam_user_id: number | null
+          created_at: string
+          customer_emailed_at: string | null
+          customer_first_name: string | null
+          deleted_at: string | null
+          end_at: string | null
+          id: string
+          is_test: boolean
+          issues: string | null
+          jobber_job_id: string | null
+          jobber_visit_id: string
+          locked_up: boolean | null
+          no_report_alerted_at: string | null
+          pro_pay_cents: number | null
+          raw: Json | null
+          report_submission_id: string | null
+          service_line: string | null
+          size_tier: number | null
+          start_at: string | null
+          status: string
+          subscription_id: string | null
+          title: string | null
+          updated_at: string
+          user_id: string | null
+          visit_kind: string | null
+        }
+        Insert: {
+          address?: string | null
+          after_photos?: Json
+          before_photos?: Json
+          checklist_done?: boolean | null
+          completed_at?: string | null
+          connecteam_shift_id?: string | null
+          connecteam_user_id?: number | null
+          created_at?: string
+          customer_emailed_at?: string | null
+          customer_first_name?: string | null
+          deleted_at?: string | null
+          end_at?: string | null
+          id?: string
+          is_test?: boolean
+          issues?: string | null
+          jobber_job_id?: string | null
+          jobber_visit_id: string
+          locked_up?: boolean | null
+          no_report_alerted_at?: string | null
+          pro_pay_cents?: number | null
+          raw?: Json | null
+          report_submission_id?: string | null
+          service_line?: string | null
+          size_tier?: number | null
+          start_at?: string | null
+          status?: string
+          subscription_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+          visit_kind?: string | null
+        }
+        Update: {
+          address?: string | null
+          after_photos?: Json
+          before_photos?: Json
+          checklist_done?: boolean | null
+          completed_at?: string | null
+          connecteam_shift_id?: string | null
+          connecteam_user_id?: number | null
+          created_at?: string
+          customer_emailed_at?: string | null
+          customer_first_name?: string | null
+          deleted_at?: string | null
+          end_at?: string | null
+          id?: string
+          is_test?: boolean
+          issues?: string | null
+          jobber_job_id?: string | null
+          jobber_visit_id?: string
+          locked_up?: boolean | null
+          no_report_alerted_at?: string | null
+          pro_pay_cents?: number | null
+          raw?: Json | null
+          report_submission_id?: string | null
+          service_line?: string | null
+          size_tier?: number | null
+          start_at?: string | null
+          status?: string
+          subscription_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+          visit_kind?: string | null
+        }
+        Relationships: []
+      }
       jobber_webhook_log: {
         Row: {
           contractor_id: string | null
@@ -7010,6 +7133,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pro_payout_lines: {
+        Row: {
+          completed_on: string
+          connecteam_user_id: number | null
+          created_at: string
+          id: string
+          is_test: boolean
+          jobber_visit_id: string
+          pay_cents: number
+          payout_friday: string
+          pro_name: string | null
+          service_line: string | null
+          status: string
+          week_start: string
+        }
+        Insert: {
+          completed_on: string
+          connecteam_user_id?: number | null
+          created_at?: string
+          id?: string
+          is_test?: boolean
+          jobber_visit_id: string
+          pay_cents: number
+          payout_friday: string
+          pro_name?: string | null
+          service_line?: string | null
+          status?: string
+          week_start: string
+        }
+        Update: {
+          completed_on?: string
+          connecteam_user_id?: number | null
+          created_at?: string
+          id?: string
+          is_test?: boolean
+          jobber_visit_id?: string
+          pay_cents?: number
+          payout_friday?: string
+          pro_name?: string | null
+          service_line?: string | null
+          status?: string
+          week_start?: string
+        }
+        Relationships: []
       }
       pro_praise: {
         Row: {

@@ -2059,6 +2059,13 @@
       "when": 1793801346348,
       "tag": "0293_candidate_sms_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 294,
+      "version": "7",
+      "when": 1793900207628,
+      "tag": "0294_jobber_connecteam_sync",
+      "breakpoints": true
     }
   ]
 }
