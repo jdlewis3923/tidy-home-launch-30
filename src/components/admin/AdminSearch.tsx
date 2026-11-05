@@ -49,7 +49,7 @@ async function loadIndex(nav: { to: string; label: string }[]): Promise<IndexIte
   const [modules, docs, templates, customers, pros, jobs, rules] = await Promise.all([
     sb.from("onboarding_module").select("slug, section_number, title, body_md").order("sort_order"),
     sb.from("company_documents").select("id, filename, category, tags, searchable_text").is("archived_at", null).limit(500),
-    sb.from("documenso_templates").select("doc_type, label, template_id").limit(200),
+    sb.from("contract_templates").select("service, title, id").eq("is_current",true).limit(200),
     sb.from("profiles").select("id, first_name, last_name, zip, city, phone").limit(1000),
     sb.from("applicants").select("id, first_name, last_name, email, service, zip, current_stage").limit(1000),
     sb.from("visits").select("id, service, visit_date, status, time_window").order("visit_date", { ascending: false }).limit(500),
@@ -78,11 +78,11 @@ async function loadIndex(nav: { to: string; label: string }[]): Promise<IndexIte
   }
   for (const t of templates.data ?? []) {
     items.push({
-      key: `tpl:${t.doc_type}`,
+      key: `tpl:${t.service}`,
       type: "Template",
-      title: oneLine(t.label || t.doc_type),
-      body: oneLine(`Template ${t.doc_type} ${t.template_id ?? ""}`),
-      to: "/admin/documenso-templates",
+      title: oneLine(t.title || t.service),
+      body: oneLine(`Template ${t.service} ${t.id ?? ""}`),
+      to: "/admin/documents",
     });
   }
   for (const c of customers.data ?? []) {

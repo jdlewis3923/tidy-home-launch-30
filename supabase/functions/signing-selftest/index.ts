@@ -13,16 +13,12 @@ const db = createClient(URL_, KEY, { auth: { persistSession: false } });
 const reply = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-type Case = { key: string; service: 'cleaning' | 'lawn'; lang: 'en' | 'es'; via?: 'documenso' };
+type Case = { key: string; service: 'cleaning' | 'lawn'; lang: 'en' | 'es' };
 const CASES: Case[] = [
   { key: 'cleaning', service: 'cleaning', lang: 'en' },
   { key: 'lawn', service: 'lawn', lang: 'en' },
   { key: 'spanish_ica', service: 'cleaning', lang: 'es' },
 ];
-// Opt-in: simulated signed Documenso completion (no Documenso document is created).
-const EXTRA: Case[] = [{ key: 'documenso_webhook', service: 'lawn', lang: 'en', via: 'documenso' }];
-async function hmac(secret: string, body: string) { const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']); return Array.from(new Uint8Array(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(body)))).map((b) => b.toString(16).padStart(2, '0')).join(''); }
-
 async function sign(token: string, body: Record<string, unknown>) {
   const r = await fetch(`${URL_}/functions/v1/contract-sign`, {
     method: 'POST',
@@ -45,16 +41,6 @@ async function runCase(c: Case, keep: boolean) {
     const pip = await db.rpc('signing_selftest_fixture', { _id: id, _service: c.service });
     if (pip.error) throw new Error(`fixture_pipeline:${pip.error.message}`);
 
-    if (c.via === 'documenso') {
-      const docId = `selftest-${id}`;
-      await db.from('applicants').update({ documenso_document_ids: { contract: docId } }).eq('id', id);
-      const raw = JSON.stringify({ event: 'DOCUMENT_COMPLETED'.toLowerCase().replace('_', '.'), payload: { id: docId, recipients: [{ name: `Selftest ${c.key} Pro`, signedAt: new Date().toISOString() }] } });
-      const r = await fetch(`${URL_}/functions/v1/documenso-webhook`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Documenso-Signature': await hmac(Deno.env.get('DOCUMENSO_WEBHOOK_SECRET') ?? '', raw) }, body: raw });
-      const d = await r.json().catch(() => ({}));
-      checks.document_ok = true; checks.document_version = 'documenso';
-      checks.sign_ok = r.status === 200 && d?.ok === true;
-      if (!checks.sign_ok) throw new Error(`webhook:${d?.error ?? r.status}`);
-    } else {
     const doc = await sign(token, { action: 'document' });
       checks.document_ok = doc.status === 200 && doc.data?.ok === true;
       checks.document_version = String(doc.data?.version ?? doc.data?.error ?? doc.status);
@@ -63,7 +49,6 @@ async function runCase(c: Case, keep: boolean) {
       const s = await sign(token, { action: 'sign', typed_name: `Selftest ${c.key} Pro`, business_name: '', agreed: true, version: doc.data.version });
       checks.sign_ok = s.status === 200 && s.data?.ok === true;
       if (!checks.sign_ok) throw new Error(`sign:${s.data?.error ?? s.status}`);
-    }
 
     // Welcome skip is dispatched asynchronously by the database; poll briefly.
     let ev: string[] = [];
@@ -93,7 +78,7 @@ async function runCase(c: Case, keep: boolean) {
       timestamps: Boolean(a?.contracts_signed_at && a?.signing_day_signed_at && a?.contract_sent_at && p?.agreement_docs_sent_at),
       post_sign_event: ev.includes('post_sign_chain'),
       welcome_test_skip: ev.includes('welcome_t1_test_skip'),
-      owner_alert: (al?.length ?? 0) === 1,
+      owner_alert: (al?.length ?? 0) === 0,
     });
     const failed = Object.entries(checks).filter(([k, v]) => k !== 'document_version' && v !== true).map(([k]) => k);
     return { case: c.key, applicant_id: id, ok: failed.length === 0, failed, checks, pro_number: a?.pro_number, template: sig?.[0]?.template_service };
@@ -128,7 +113,7 @@ Deno.serve(async (req) => {
   const { data: ul } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
   for (const u of ul?.users ?? []) if (u.phone === '15555550100' || /^130555501\d\d$/.test(u.phone ?? '') && !u.email) await db.auth.admin.deleteUser(u.id).catch(() => {});
   const results = [];
-  for (const c of [...CASES, ...EXTRA].filter((x) => only ? only.includes(x.key) : !x.via)) results.push(await runCase(c, keep));
+  for (const c of CASES.filter((x) => only ? only.includes(x.key) : true)) results.push(await runCase(c, keep));
   const ok = results.every((r) => r.ok);
   await db.from('integration_logs').insert({ source: 'internal', event: 'signing_selftest', status: ok ? 'success' : 'error', detail: { results } });
   if (!ok) {

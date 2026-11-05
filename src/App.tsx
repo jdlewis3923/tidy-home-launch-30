@@ -112,7 +112,6 @@ const AdminReviewsImport = lazy(() => import("./pages/AdminReviewsImport.tsx"));
 const AdminCapacity = lazy(() => import("./pages/AdminCapacity.tsx"));
 const AdminOrientations = lazy(() => import("./pages/AdminOrientations.tsx"));
 const AdminNextdoorVerify = lazy(() => import("./pages/AdminNextdoorVerify.tsx"));
-const AdminDocumensoTemplates = lazy(() => import("./pages/AdminDocumensoTemplates.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
 const ProJobView = lazy(() => import("./pages/ProJobView.tsx"));
 const AddonApproval = lazy(() => import("./pages/AddonApproval.tsx"));
@@ -443,7 +442,7 @@ const App = () => (
                   <Route path="/admin/demand" element={<AdminDemand />} />
                   <Route path="/admin/social-launch" element={<Navigate to="/admin/social" replace />} />
                   <Route path="/admin/nextdoor-verify" element={<AdminNextdoorVerify />} />
-                  <Route path="/admin/documenso-templates" element={<AdminDocumensoTemplates />} />
+                  <Route path="/admin/documenso-templates" element={<Navigate to="/admin/pro-pay" replace />} />
                   <Route path="/admin/email-health" element={<AdminEmailHealth />} />
                   <Route path="/admin/setup-check" element={<AdminSetupCheck />} />
                   {/* Leads & Requests — waitlist, support requests, chatbot leads. */}
