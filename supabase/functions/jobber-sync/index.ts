@@ -581,6 +581,8 @@ async function testCarWash(db: SupabaseClient) {
       const sp = buildSpecs({ plan_lines: [], car_wash_key: k }, new Date(`${new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10)}T12:00:00Z`)).find((x) => x.key === 'car_wash')!;
       const start = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
       const jobId = await createJob(db, propertyId, sp, start, windowFrom('9 AM - 11 AM'), 'TEST ONLY — car wash add-on mapping.');
+      // Jobber generates recurring visits asynchronously after jobCreate returns.
+      await new Promise((resolve) => setTimeout(resolve, 15000));
       const j = await gql(db, `query($id:EncodedId!,$f:VisitFilterAttributes){job(id:$id){id title startAt endAt visitSchedule{startDate endDate recurrenceSchedule{calendarRule friendly}} lineItems{nodes{name quantity}} visitsInfo{futureCount scheduledCount} visits(first:100,filter:$f){nodes{startAt} pageInfo{hasNextPage}}}}`, { id: jobId, f: { onlyRelevantToBillingPeriod: false, startAt: { after: `${start}T00:00:00Z`, before: new Date(Date.parse(`${start}T00:00:00Z`) + 366 * 86400000).toISOString() } } });
       const starts = (j.job.visits.nodes ?? []).map((v: any) => v.startAt);
       const firstMonth = starts.filter((t: string) => Date.parse(t) < Date.parse(start) + 31 * 86400000).length;
