@@ -491,3 +491,9 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [ ] Full-year car-wash generated visit count: Jobber token now rejected; requires Justin's Reconnect Jobber → Allow access. Both catalog mappings and saved monthly recurrence verified; all temporary clients/jobs/shifts/pay cleaned up. Owner-only report passed.
 - [ ] Publish checked changes and report test IDs and remaining blockers.
 - Verified owner-only report: Jobber job 162293908 / visit 2390627359, Connecteam shift cc7d5416-f375-43fa-87ae-b53c983be811, $76 pay; client archived, job closed, shift/pay removed. Wash catalog and saved monthly recurrence pass; full-year generated visit count awaits Jobber reconnect after refresh token rejected during testing. No real-Pro messages.
+
+## Connecteam paperwork retirement (Nov 5, 19:07 UTC)
+- [ ] Position on hire/create and Susan/Jenifer cleaning Position.
+- [ ] 15-minute document status/COI expiration sync, paperwork/pay gate, expired insurance assignment guard.
+- [ ] Retire Documenso runtime and per-signature alerts; preserve Susan token until Connecteam signed.
+- [ ] Paperwork line in both owner digests; test, deploy, publish.
