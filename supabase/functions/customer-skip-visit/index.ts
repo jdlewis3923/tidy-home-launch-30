@@ -66,12 +66,32 @@ Deno.serve(async (req) => {
       event: "customer.visit.skip",
       payload: { user_id: userId, visit_id },
       fn: async () => {
-        const { data: visit, error: vErr } = await supabase
+        const { data: siteVisit, error: vErr } = await supabase
           .from("visits")
           .select("id, user_id, visit_date, scheduled_start, status, service, subscription_id")
           .eq("id", visit_id)
           .maybeSingle();
         if (vErr) throw new Error(vErr.message);
+        // Jobber is the schedule of record: Jobber-owned plans skip their mirrored Jobber visit.
+        let visit: any = siteVisit;
+        let jobber: any = null;
+        if (siteVisit?.subscription_id) {
+          const { data: owned } = await supabase.rpc("subscription_jobber_owned", { _sub: siteVisit.subscription_id });
+          if (owned && !(siteVisit as any).jobber_visit_id) visit = null;
+        }
+        if (!siteVisit) {
+          const { data: jv } = await supabase.from("jobber_visits")
+            .select("id, user_id, subscription_id, service_line, start_at, status, deleted_at, customer_skipped_at, jobber_visit_id, raw, is_test")
+            .eq("id", visit_id).maybeSingle();
+          if (jv) {
+            jobber = jv;
+            visit = {
+              id: jv.id, user_id: jv.user_id, subscription_id: jv.subscription_id, service: jv.service_line,
+              scheduled_start: jv.start_at, visit_date: String(jv.start_at).slice(0, 10),
+              status: jv.customer_skipped_at ? "skipped" : jv.status === "complete" ? "complete" : jv.deleted_at ? "canceled" : "scheduled",
+            };
+          }
+        }
 
         if (!visit || visit.user_id !== userId) {
           return { ok: false as const, error: "We couldn't find that visit on your account." };
@@ -115,31 +135,53 @@ Deno.serve(async (req) => {
           .eq("visits.service", visit.service)
           .gte("created_at", yearStart);
         if (countErr) throw new Error(countErr.message);
-        if ((skipsThisYear ?? 0) >= 2) {
+        const { count: jobberSkips } = await supabase.from("jobber_visits").select("id", { count: "exact", head: true })
+          .eq("user_id", userId).eq("service_line", visit.service).not("customer_skipped_at", "is", null).gte("customer_skipped_at", yearStart);
+        const skipsUsed = (skipsThisYear ?? 0) + (jobberSkips ?? 0);
+        if (skipsUsed >= 2) {
           return {
             ok: false as const,
             error: "You've used your 2 skips for this service this year. We can still reschedule the visit free — tap reschedule instead.",
           };
         }
 
-        const { data: priceCents, error: priceErr } = await supabase.rpc("visit_customer_price_cents", { _visit: visit.id });
-        if (priceErr) throw new Error(priceErr.message);
+        let priceCents: number | null = null;
+        if (jobber) {
+          // Jobber catalog prices mirror the rate card; the visit's line items carry them.
+          const items = (jobber.raw?.lineItems?.nodes ?? []) as { totalPrice?: number; unitPrice?: number; quantity?: number }[];
+          priceCents = Math.round(items.reduce((t, i) => t + Number(i.totalPrice ?? (i.unitPrice ?? 0) * (i.quantity ?? 1)), 0) * 100);
+        } else {
+          const { data, error: priceErr } = await supabase.rpc("visit_customer_price_cents", { _visit: visit.id });
+          if (priceErr) throw new Error(priceErr.message);
+          priceCents = data;
+        }
         if (!priceCents || priceCents <= 0) {
           return { ok: false as const, error: "We couldn't price that visit. Please reach out and we'll help." };
         }
 
-        const { error: upErr } = await supabase
-          .from("visits")
-          .update({ status: "skipped", lifecycle_reason: "customer_skip" })
-          .eq("id", visit.id)
-          .eq("user_id", userId);
-        if (upErr) throw new Error(upErr.message);
+        if (jobber) {
+          // Remove it in Jobber (and its Connecteam shift) first; only then record the skip.
+          const r = await fetch(`${SUPABASE_URL}/functions/v1/jobber-sync`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "skip_visit", mirror_id: jobber.id }),
+          });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok || !j.ok) throw new Error(`jobber skip failed: ${j.error ?? r.status}`);
+        } else {
+          const { error: upErr } = await supabase
+            .from("visits")
+            .update({ status: "skipped", lifecycle_reason: "customer_skip" })
+            .eq("id", visit.id)
+            .eq("user_id", userId);
+          if (upErr) throw new Error(upErr.message);
+        }
 
         // The credit row is the promise; Stripe application follows.
         const { data: creditId, error: creditErr } = await supabase.rpc("issue_member_credit", {
           _user: userId,
           _subscription: visit.subscription_id,
-          _visit: visit.id,
+          _visit: jobber ? null : visit.id,
           _kind: "skip_credit",
           _amount_cents: priceCents,
           _note: "Skipped visit credited on your next bill",
@@ -166,9 +208,9 @@ Deno.serve(async (req) => {
           user_id: userId,
           kind: "skip_credit",
           title: "Visit skipped — credit on its way",
-          body: `Your visit is skipped and $${(priceCents / 100).toFixed(2)} comes off your next bill. You have ${1 - (skipsThisYear ?? 0)} skip${1 - (skipsThisYear ?? 0) === 1 ? "" : "s"} left for this service this year.`,
+          body: `Your visit is skipped and $${(priceCents / 100).toFixed(2)} comes off your next bill. You have ${1 - skipsUsed} skip${1 - skipsUsed === 1 ? "" : "s"} left for this service this year.`,
           dedupe_key: `skip-credit-${visit.id}`,
-          related_visit_id: visit.id,
+          related_visit_id: jobber ? null : visit.id,
         });
 
         return { ok: true as const, visit_id: visit.id, status: "skipped", credit_cents: priceCents, credit_status: creditStatus };
