@@ -137,7 +137,7 @@ export default function AdminProPay() {
           </table>
         </section>
 
-        <section className="bg-card rounded-xl border border-border p-5">
+        <section id="reviews" className="scroll-mt-16 bg-card rounded-xl border border-border p-5">
           <h2 className="text-base font-semibold">Review matches needing your approval</h2>
           {reviews.filter((r) => r.match_status === "pending").map((r) => (
             <div key={r.id} className="mt-3 rounded-lg border border-border p-3 text-sm">

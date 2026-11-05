@@ -13,6 +13,7 @@ import JobberStubCallers from "@/components/admin/JobberStubCallers";
 import OpenAlertsPanel from "@/components/admin/OpenAlertsPanel";
 import CheckrReadinessCard from "@/components/admin/CheckrReadiness";
 import ReliabilityChecks from "@/components/admin/ReliabilityChecks";
+import IntegrationConnections from '@/components/admin/IntegrationConnections';
 
 
 type Source =
@@ -341,6 +342,7 @@ export default function AdminHealth() {
           </div>
         )}
 
+        <IntegrationConnections />
         <div className="mt-6">
           <ReliabilityChecks />
         </div>
@@ -360,9 +362,6 @@ export default function AdminHealth() {
 
 
 
-        <div className="mt-6">
-          <JobberStubCallers />
-        </div>
 
 
         {data && (

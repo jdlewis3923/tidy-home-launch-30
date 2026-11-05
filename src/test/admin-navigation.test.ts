@@ -1,0 +1,4 @@
+import {it,expect} from 'vitest';
+import {ADMIN_GROUPS,retiredAdminDestination} from '../lib/admin-navigation';
+it('six menu groups keep Connecteam and Jobber duplicate tools out',()=>{expect(ADMIN_GROUPS).toHaveLength(6);for(const g of ADMIN_GROUPS)for(const item of g.items){if(item.to!=='/admin/members')expect(retiredAdminDestination(item.to)).toBeNull();}});
+it('legacy hiring and dispatch routes hand off without removing records',()=>{expect(retiredAdminDestination('/admin/hiring/texts')).toBe('Connecteam');expect(retiredAdminDestination('/admin/signing-day')).toBe('Connecteam');expect(retiredAdminDestination('/admin/schedule')).toBe('Jobber');expect(retiredAdminDestination('/admin/pro-pay')).toBeNull();});
