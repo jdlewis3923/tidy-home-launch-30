@@ -504,6 +504,7 @@ async function withTestClient<T>(db: SupabaseClient, label: string, fn: (propert
 const TEST_PHOTO = (n: string) => `https://jointidy.co/og-image.jpg?test=${n}`;
 async function testReport(db: SupabaseClient) {
   const steps: Record<string, unknown> = {};
+  const t0 = new Date().toISOString();
   const out = await withTestClient(db, 'Report Test', async (propertyId) => {
     const start = new Date(Date.now() - 86400000 * 0).toISOString().slice(0, 10);
     const spec = buildSpecs({ plan_lines: [{ service: 'cleaning', size_tier: 2, cadence: 'monthly' }] }, new Date(`${start}T12:00:00Z`))[0];
@@ -540,10 +541,10 @@ async function testReport(db: SupabaseClient) {
       headers: { Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'build_week_test', week_start: String(mirror?.completed_at).slice(0, 10) }) });
     steps.pay_build = pr.status;
-    const { data: lines } = await db.from('pro_pay_lines').select('id, line_key, kind, pay_cents, connecteam_user_id').eq('is_test', true).like('line_key', `%${r.visit.id}%`);
+    const { data: lines } = await db.from('pro_pay_lines').select('id, line_key, kind, pay_cents, connecteam_user_id').eq('is_test', true).like('line_key', `%${jv.id}%`);
     steps.pay_lines = lines;
     // cleanup
-    await db.from('pro_pay_lines').delete().eq('is_test', true).like('line_key', `%${r.visit.id}%`);
+    await db.from('pro_pay_lines').delete().eq('is_test', true).gte('created_at', t0);
     if (r.shift && r.shift !== 'skipped') await deleteShift(String(r.shift));
     const { data: m2 } = await db.from('jobber_visits').select('connecteam_shift_id').eq('id', r.visit.id).single();
     if (m2?.connecteam_shift_id) await deleteShift(m2.connecteam_shift_id);
