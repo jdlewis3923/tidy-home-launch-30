@@ -5,8 +5,6 @@
 // banner on /admin/applicants when any critical check fails.
 //
 // Checks:
-//   1. Documenso template — env DOCUMENSO_TEMPLATE_ID or app_settings row.
-//      Soft-warn if not configured (Documenso integration optional in dev).
 //   2. STRIPE_CONNECT_API_KEY — GET /v1/accounts?limit=1.
 //   3. CHECKR_API_KEY — warn (not error) if unset; ping /v1/account otherwise.
 //   4. BREVO_API_KEY — GET /v3/account.
@@ -28,7 +26,6 @@ const CHECKR_WEBHOOK_SECRET = Deno.env.get('CHECKR_WEBHOOK_SECRET') ?? '';
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
 const BREVO_TEMPLATE_WELCOME_T1 = Deno.env.get('BREVO_TEMPLATE_WELCOME_T1') ?? '';
 const TWILIO_FROM_NUMBER = Deno.env.get('TWILIO_FROM_NUMBER') ?? '';
-const DOCUMENSO_API_KEY = Deno.env.get('DOCUMENSO_API_KEY') ?? '';
 
 const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -179,18 +176,6 @@ async function checkDocuments(): Promise<Check> {
 }
 
 
-async function checkDocumenso(): Promise<Check> {
-  if (!DOCUMENSO_API_KEY) {
-    return { id: 'documenso', label: 'Documenso contract template', status: 'warn',
-      detail: 'DOCUMENSO_API_KEY not set — contracts will not auto-send',
-      remediation: 'Set DOCUMENSO_API_KEY and configure DOCUMENSO_TEMPLATE_ID once ready.' };
-  }
-  // We can\'t deeply probe templates without knowing the template_id. The
-  // dedicated /admin/documenso-templates page handles deep verification.
-  return { id: 'documenso', label: 'Documenso contract template', status: 'pass',
-    detail: 'API key configured — open /admin/documenso-templates to verify signature fields.' };
-}
-
 function secretCheck(id: string, label: string, value: string, remediation: string): Check {
   return value
     ? { id, label, status: 'pass', detail: 'Configured' }
@@ -259,11 +244,9 @@ Deno.serve(async (req) => {
     .from('user_roles').select('role').eq('user_id', userId).eq('role', 'admin').maybeSingle();
   if (!roleRow) return jsonResponse({ error: 'forbidden' }, 403);
 
-  const [stripe, checkr, brevo, docs, documenso] = await Promise.all([
-    checkStripe(), checkCheckr(), checkBrevo(), checkDocuments(), checkDocumenso(),
+  const [stripe, checkr, brevo, docs] = await Promise.all([
   ]);
   const checks: Check[] = [
-    documenso,
     stripe,
     checkr,
     brevo.key,

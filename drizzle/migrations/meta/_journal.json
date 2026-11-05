@@ -2094,6 +2094,13 @@
       "when": 1793905185533,
       "tag": "0298_atomic_jobber_assignment_and_customer_read_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 299,
+      "version": "7",
+      "when": 1793905779057,
+      "tag": "0299_connecteam_paperwork_status_and_gates",
+      "breakpoints": true
     }
   ]
 }

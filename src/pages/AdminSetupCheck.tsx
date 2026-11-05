@@ -2,7 +2,7 @@
  * Admin Setup Check — /admin/setup-check
  *
  * Pre-flight launch readiness probe. Calls the `admin-setup-check` edge
- * function which probes Documenso, Stripe Connect, Checkr, Brevo (key + plan),
+ * function which probes Stripe Connect, Checkr, Brevo (key + plan),
  * and verifies the required contractor PDFs are uploaded.
  *
  * Each check renders with a pass / warn / fail badge and a remediation hint.

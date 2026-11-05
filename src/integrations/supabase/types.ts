@@ -7244,6 +7244,9 @@ export type Database = {
       }
       pro_pay_profiles: {
         Row: {
+          agreement_signed_at: string | null
+          applicant_id: string | null
+          coi_expires_at: string | null
           coi_verified_at: string | null
           connecteam_user_id: number
           created_at: string
@@ -7251,10 +7254,18 @@ export type Database = {
           is_test: boolean
           language: string
           name: string
+          paperwork_complete: boolean
+          paperwork_status: Json
+          paperwork_synced_at: string | null
+          pay_setup_unblocked: boolean
+          service_line: string | null
           started_on: string
           tier2_since: string | null
         }
         Insert: {
+          agreement_signed_at?: string | null
+          applicant_id?: string | null
+          coi_expires_at?: string | null
           coi_verified_at?: string | null
           connecteam_user_id: number
           created_at?: string
@@ -7262,10 +7273,18 @@ export type Database = {
           is_test?: boolean
           language?: string
           name: string
+          paperwork_complete?: boolean
+          paperwork_status?: Json
+          paperwork_synced_at?: string | null
+          pay_setup_unblocked?: boolean
+          service_line?: string | null
           started_on?: string
           tier2_since?: string | null
         }
         Update: {
+          agreement_signed_at?: string | null
+          applicant_id?: string | null
+          coi_expires_at?: string | null
           coi_verified_at?: string | null
           connecteam_user_id?: number
           created_at?: string
@@ -7273,6 +7292,11 @@ export type Database = {
           is_test?: boolean
           language?: string
           name?: string
+          paperwork_complete?: boolean
+          paperwork_status?: Json
+          paperwork_synced_at?: string | null
+          pay_setup_unblocked?: boolean
+          service_line?: string | null
           started_on?: string
           tier2_since?: string | null
         }
@@ -11500,6 +11524,17 @@ export type Database = {
       }
       cleaning_team_valid: { Args: { _team: string }; Returns: boolean }
       coi_token_load: { Args: { _token: string }; Returns: Json }
+      connecteam_commit_paperwork: {
+        Args: {
+          _coi_approved: boolean
+          _complete: boolean
+          _expiry: string
+          _signed_at: string
+          _status: Json
+          _user: number
+        }
+        Returns: undefined
+      }
       contract_commit_countersign: {
         Args: {
           _actor: string

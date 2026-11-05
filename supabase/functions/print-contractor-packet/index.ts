@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
       JSON.stringify({
         ok: true,
         stub: true,
-        message: "Packet generation stub. Will combine signed ICA + onboarding packet + Schedule A once Documenso sync is live.",
+        message: "Pro paperwork is managed in Connecteam document packs.",
         contractor_id: (body as Record<string, unknown>)?.contractor_id ?? null,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },

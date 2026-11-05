@@ -23,6 +23,7 @@ import { loadLaunchConfig } from '../_shared/launch-config.ts';
 import { renderTemplate } from '../_shared/socialPlanner.ts';
 import { visibleDigestAlerts, realCompletedApplications, candidateTextActivity } from '../_shared/admin-digest-rules.ts';
 import { comingUp as roadmapComingUp, kickoffText, milestoneLine, type Initiative as RInitiative } from '../_shared/roadmap-rules.ts';
+import { paperworkDigest } from '../_shared/paperwork-rules.ts';
 import { ownerAlertWindowOpen } from '../_shared/owner-alert-window.ts';
 
 const SITE = 'https://jointidy.co';
@@ -320,6 +321,9 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     if (urgentToday.length > 3) sections.push({ title: `${urgentToday.length} urgent alerts today — re-tier the noisy ones?`, red: true, items: urgentToday.map((u) => ({ text: `${u.title} (${u.alert_type})`, url: `${SITE}/admin/alerts#tiers`, label: 'Change tier' })) });
   }
 
+  const {data:paperwork,error:paperworkError}=await admin.from('pro_pay_profiles').select('name,paperwork_complete,is_test');
+  if(paperworkError)throw paperworkError;
+  sections.push({title:'Paperwork',items:[{text:paperworkDigest(paperwork??[])}]});
   const shown = sections.filter((s) => s.items.length);
   const nothing = edition === 'today' && !mustDo.length && !needsTeam.length;
   const heading = edition === 'today' ? 'Today' : 'Tonight';

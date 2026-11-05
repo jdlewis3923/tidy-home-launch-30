@@ -22,7 +22,6 @@ const TRACKED_SOURCES = [
   'stripe',
   'brevo',
   'twilio',
-  'documenso',
   'checkr',
   'google',
   'zapier',

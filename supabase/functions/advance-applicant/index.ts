@@ -12,10 +12,9 @@
 //   5. Send Brevo admin alert.
 //   6. For 'activate', also enqueue a stripe_connect_pending row.
 //
-// Signing is now handled by Documenso (REST API). On 'send_offer' we
-// fire-and-forget the `send-documenso-envelope` edge function which creates
+// Paperwork is managed in Connecteam document packs.
 // the ICA, W-9, and Direct Deposit envelopes. The applicant gets signing
-// emails directly from Documenso; the Brevo email below is just a heads-up.
+// No vendor signing envelope is sent.
 // TODO(Stripe Connect): When STRIPE_CONNECT_API_KEY work begins, replace the
 // stripe_connect_pending stub with a real Stripe Accounts API call.
 
@@ -337,53 +336,7 @@ Deno.serve(async (req) => {
     if (stripeErr) console.error('[advance] stripe_connect_pending insert failed', stripeErr);
   }
 
-  // Documenso envelope dispatch on send_offer.
-  // Previously fire-and-forget with console.error only, which is exactly why
-  // this never once produced an envelope and nobody found out. Now awaited,
-  // recorded in onboarding_events + admin_alerts, and surfaced to the caller.
-  let documensoResult: { ok: boolean; status?: number; error?: string; body?: unknown } | null = null;
-  if (action === 'send_offer') {
-    try {
-      const r = await vendorFetch(`${SUPABASE_URL}/functions/v1/send-documenso-envelope`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ applicant_id: row.id }),
-      });
-      const body = await r.json().catch(() => ({}));
-      documensoResult = r.ok && (body as any)?.ok !== false
-        ? { ok: true, status: r.status, body }
-        : { ok: false, status: r.status, error: (body as any)?.error ?? `http_${r.status}`, body };
-    } catch (e) {
-      documensoResult = { ok: false, error: e instanceof Error ? e.message : String(e) };
-    }
-
-    if (!documensoResult.ok) {
-      console.error('[advance] documenso envelope FAILED', documensoResult);
-      await admin.from('admin_alerts').insert({
-        alert_type: 'documenso_envelope_failed',
-        title: `Documenso envelope failed for ${fullName}`,
-        body: documensoResult.error ?? 'unknown error',
-        context: { applicant_id: row.id, ...documensoResult },
-      }).then(() => {}, () => {});
-      await admin.from('onboarding_events').insert({
-        applicant_id: row.id,
-        event: 'send_offer_documenso_failed',
-        metadata: documensoResult as unknown as Record<string, unknown>,
-      }).then(() => {}, () => {});
-      return jsonResponse({
-        ok: false,
-        error: 'documenso_envelope_failed',
-        details: documensoResult,
-        applicant_id: row.id,
-        current_stage: row.current_stage,
-        note: 'Stage was advanced but NO signing envelope exists. Fix Documenso and re-run send_offer.',
-      }, 502);
-    }
-  }
-
+  // Paperwork is assigned in Connecteam by the Pro Position.
   // Checkr invitation dispatch on send_to_bg_check — BEFORE the onboarding
   // email, so the email can carry the live background-check button.
   //
@@ -636,7 +589,7 @@ Deno.serve(async (req) => {
     bg_check_status: row.bg_check_status,
     attachments_count: attachments.length,
     requested_filenames: filenames,
-    documenso: documensoResult,
+    paperwork_provider: "connecteam",
     admin_email_error: adminEmailError,
     sheet_sync_error: null,
     checkr_invitation_sent: action === 'send_to_bg_check' ? checkrInvitationSent : null,
