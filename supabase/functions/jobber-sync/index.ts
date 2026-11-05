@@ -231,6 +231,8 @@ async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, PoolPro
   const title = `${SERVICE_LABEL[svc.service]} — ${first} ${a.street1 ?? ''}`.trim();
   const { data: subRow } = await db.from('subscriptions').select('id, user_id').eq('jobber_client_id', v.client?.id ?? '-').limit(1).maybeSingle();
   const { data: existing } = await db.from('jobber_visits').select('*').eq('jobber_visit_id', v.id).maybeSingle();
+  // Throwaway "ZZ Sync …" clients are tests: always Justin's user, never a real Pro (webhooks race the test runner).
+  if (/^ZZ Sync/i.test(v.client?.firstName ?? '') || existing?.is_test) { isTest = true; overrideUser = overrideUser ?? CT_OWNER_USER_ID; }
   let ctUser: number | null = overrideUser ?? null;
   if (!overrideUser && v.startAt) {
     const day0 = new Date(Date.parse(v.startAt) - 86400000).toISOString(), day1 = new Date(Date.parse(v.startAt) + 86400000).toISOString();
@@ -408,6 +410,7 @@ async function emailCustomer(db: SupabaseClient, v: any, after: string[], forceT
   });
   if (res.sent) await db.from('jobber_visits').update({ customer_emailed_at: new Date().toISOString() }).eq('id', v.id);
   else if (!forceTo) await alert(db, `visit_email_fail:${v.jobber_visit_id}`, 'Visit-complete email failed', `${v.title}: ${res.reason ?? 'unknown'}`, 'digest');
+  return { sent: res.sent, to: email, reason: res.reason ?? null };
 }
 
 // ---------- webhooks ----------
