@@ -249,6 +249,10 @@ async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, PoolPro
   if (v.isComplete && !existing?.completed_at) row.status = 'complete';
   const { data: saved, error } = await db.from('jobber_visits').upsert(row, { onConflict: 'jobber_visit_id' }).select('*').single();
   if (error) throw new Error(`mirror upsert: ${error.message}`);
+  const { data: assigned, error: assignmentError } = await db.rpc('assign_jobber_visit_pro', { _visit: saved.id, _override: overrideUser ?? null });
+  if (assignmentError) throw new Error(`Pro assignment: ${assignmentError.message}`);
+  ctUser = assigned === null ? null : Number(assigned);
+  saved.connecteam_user_id = ctUser;
   if (saved.status === 'complete' || !v.startAt) return { visit: saved, shift: 'skipped' };
   const win = windowFrom(String(v.instructions ?? '').match(/Arrival window:\s*([^\n]+)/)?.[1]);
   const shift: ShiftInput = {
@@ -577,11 +581,12 @@ async function testCarWash(db: SupabaseClient) {
       const sp = buildSpecs({ plan_lines: [], car_wash_key: k }, new Date(`${new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10)}T12:00:00Z`)).find((x) => x.key === 'car_wash')!;
       const start = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
       const jobId = await createJob(db, propertyId, sp, start, windowFrom('9 AM - 11 AM'), 'TEST ONLY — car wash add-on mapping.');
-      const j = await gql(db, `query($id:EncodedId!){job(id:$id){id title lineItems{nodes{name quantity}} visits(first:12){nodes{startAt}}}}`, { id: jobId }).catch(async () =>
-        gql(db, `query($id:EncodedId!){job(id:$id){id title lineItems{nodes{name quantity}} visits(first:10){nodes{startAt}}}}`, { id: jobId }));
+      const j = await gql(db, `query($id:EncodedId!,$f:VisitFilterAttributes){job(id:$id){id title lineItems{nodes{name quantity}} visits(first:100,filter:$f){nodes{startAt} pageInfo{hasNextPage}}}}`, { id: jobId, f: { startAt: { after: `${start}T00:00:00Z`, before: new Date(Date.parse(`${start}T00:00:00Z`) + 366 * 86400000).toISOString() } } });
       const starts = (j.job.visits.nodes ?? []).map((v: any) => v.startAt);
       const firstMonth = starts.filter((t: string) => Date.parse(t) < Date.parse(start) + 31 * 86400000).length;
-      res.push({ key: k, job_id: jobId, title: j.job.title, line_items: j.job.lineItems.nodes, visits_in_first_31_days: firstMonth, visit_starts: starts, rrule: sp.rrule });
+      const expected = k.endsWith('x2') ? 24 : 12;
+      if (starts.length !== expected) throw new Error(`${k}: expected ${expected} yearly visits, got ${starts.length}`);
+      res.push({ key: k, job_id: jobId, title: j.job.title, line_items: j.job.lineItems.nodes, visits_in_first_31_days: firstMonth, yearly_visits: starts.length, expected_yearly_visits: expected, visit_starts: starts, rrule: sp.rrule });
       await closeJob(db, jobId);
     }
     return res;
