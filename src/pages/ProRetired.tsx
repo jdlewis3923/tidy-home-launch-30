@@ -7,7 +7,7 @@ export default function ProRetired() {
   const { language } = useLanguage();
   const es = language === "es";
   return (
-    <main className="min-h-screen bg-navy text-navy-foreground flex items-center justify-center px-6">
+    <main className="min-h-screen bg-navy text-primary-foreground flex items-center justify-center px-6">
       <Helmet>
         <title>Tidy Pros · Connecteam</title>
         <meta name="description" content="Tidy Pros now use the Tidy app (Connecteam)." />
