@@ -511,4 +511,4 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [ ] Automatic Checkr: existing sender refuses pipeline applicants; do not enable spending until supported hire authority and Checkr-live setup are available.
 - [x] Approved paperwork appends newly eligible Pros after existing service priority; test Pros excluded, existing Susan/Jenifer entries untouched.
 - [ ] Rejected 24-hour email, new/hired digest counts and fake Hiring applicant end-to-end test: blocked by Hiring API access/documentation. No fake user substituted for a Hiring applicant.
-- [ ] Test assignment exclusion and publish actionable approval change.
+- [x] Approved test Pro 9900000001 produced zero assignment rows; test profile removed. Approval change live; publishing requested.
