@@ -503,4 +503,4 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Branded bilingual document email with exact links; one owner-only test accepted by sender and recorded sent; phone preview uses a placeholder, real sends use Connecteam mobile number.
 - [x] Durable hire-triggered send, 48-hour/5-day remaining reminders, completion email; Susan/Jenifer held and verified unsent. Checkr hidden by default, requires checkr_live plus per-Pro invite link when enabled.
 - [ ] Live smart-group membership readback: implemented via smartGroupsIds and digest missing assignments; Connecteam calls repeatedly timed out during verification. Existing 15-minute reconciliation retries.
-- [ ] Final tests and publish.
+- [x] 28 focused tests passed; desktop/mobile email rendering and real logo verified; build OK; backend deployed and publishing requested.
