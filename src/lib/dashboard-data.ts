@@ -132,14 +132,9 @@ async function fetchDashboard(): Promise<DashboardPayload | null> {
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle(),
-        supabase
-          .from('visits')
-          // Explicit columns only. Contractor pay (visit_pay_cents,
-          // contractor_pay_cents) must never reach a customer's browser, and
-          // those columns are also revoked from the Data API role.
-          .select(CUSTOMER_VISIT_COLUMNS)
-          .eq('user_id', user.id)
-          .order('visit_date', { ascending: true }),
+        // Jobber is the schedule of record: plans with a Jobber job read the
+        // Jobber mirror; others read website visits. No pay columns returned.
+        supabase.rpc('member_visit_feed', {}),
         supabase
           .from('invoices')
           .select('*')
@@ -149,7 +144,13 @@ async function fetchDashboard(): Promise<DashboardPayload | null> {
 
       const profile = profileRes.data ?? null;
       const subscription = (subRes.data ?? null) as Subscription | null;
-      const visits = visitsRes.data ?? [];
+      const visits = ((visitsRes.data ?? []) as Array<Record<string, unknown>>)
+        .map((v) => ({
+          notes: null, service_type: v.service, zip: null, assigned_pro_id: null, crew_name: null, on_my_way_at: null,
+          is_sample: false, cadence: null, surcharge_applied: false, created_at: null, updated_at: null, booking_id: null, moved_from_date: null,
+          ...v,
+        }) as unknown as Visit)
+        .sort((x, y) => String(x.visit_date).localeCompare(String(y.visit_date)));
       const invoices = invRes.data ?? [];
 
       const todayISO = new Date().toISOString().slice(0, 10);
