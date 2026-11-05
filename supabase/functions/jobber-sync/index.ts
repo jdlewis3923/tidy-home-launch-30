@@ -68,12 +68,19 @@ export function buildSpecs(sub: any, start: Date): JobSpec[] {
     }
   }
   if (sub.car_wash_key) {
-    const two = /2/.test(String(sub.car_wash_key).split(/[_-]/)[0] ?? '') || /2_?wash|two/i.test(sub.car_wash_key);
-    const s = sizeWord('detailing', Number(sub.sizes_json?.detailing ?? String(sub.car_wash_key).match(/size_?(\d)/i)?.[1] ?? 2));
+    const cw = parseCarWashKey(sub.car_wash_key);
+    const two = cw.washes === 2;
+    const s = sizeWord('detailing', cw.size);
     const n = `Car Wash Add-On — ${two ? '2 washes' : '1 wash'} — ${s}`;
     specs.push({ key: 'car_wash', title: n, service: 'detailing', size: Number(s.slice(-1)) || 2, items: [{ name: n, qty: 1 }], rrule: two ? `FREQ=MONTHLY;BYDAY=1${wd},3${wd}` : `FREQ=MONTHLY;BYDAY=2${wd}` });
   }
   return specs;
+}
+/** car_wash_key is `wash_{size}_x{washes}` (stripe-webhook carWashKeyFromMeta). */
+export function parseCarWashKey(key: string): { size: number; washes: 1 | 2 } {
+  const m = String(key).match(/^wash_([123])_x([12])$/);
+  if (!m) throw new Error(`car_wash_key_unrecognized: "${key}"`);
+  return { size: Number(m[1]), washes: Number(m[2]) as 1 | 2 };
 }
 const sig = (s: JobSpec) => `${s.rrule}|${s.items.map((i) => i.name).join(',')}`;
 
@@ -213,12 +220,24 @@ function serviceOf(names: string[]): { service: string; size: number; kind: stri
 }
 const SERVICE_LABEL: Record<string, string> = { cleaning: 'House Cleaning', lawn: 'Lawn Care', detailing: 'Car Care', unknown: 'Visit' };
 
-async function proMap(db: SupabaseClient) {
-  const { data } = await db.from('jobber_service_pros').select('*');
-  return new Map((data ?? []).map((r: any) => [r.service_line, r]));
+type PoolPro = { connecteam_user_id: number; pro_name: string | null; priority: number };
+async function proMap(db: SupabaseClient): Promise<Map<string, PoolPro[]>> {
+  const { data } = await db.from('jobber_service_pro_pool').select('service_line, connecteam_user_id, pro_name, priority').eq('active', true).order('priority');
+  const m = new Map<string, PoolPro[]>();
+  for (const r of (data ?? []) as any[]) { const l = m.get(r.service_line) ?? []; l.push({ ...r, connecteam_user_id: Number(r.connecteam_user_id) }); m.set(r.service_line, l); }
+  return m;
 }
 
-async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, any>, overrideUser?: number, isTest = false) {
+/** Primary Pro unless she already has an overlapping shift; then the next; null = open shift. */
+export function pickPro(pool: PoolPro[], busy: { connecteam_user_id: number; start_at: string; end_at: string }[], startAt: string, endAt: string, current?: number | null): number | null {
+  const s = Date.parse(startAt), e = Date.parse(endAt) > s ? Date.parse(endAt) : s + 3600000;
+  const free = (u: number) => !busy.some((b) => Number(b.connecteam_user_id) === u && Date.parse(b.start_at) < e && (Date.parse(b.end_at) > Date.parse(b.start_at) ? Date.parse(b.end_at) : Date.parse(b.start_at) + 3600000) > s);
+  const ordered = [...pool].sort((a, b) => a.priority - b.priority);
+  if (current && ordered.some((p) => p.connecteam_user_id === current) && free(current)) return current;
+  return ordered.find((p) => free(p.connecteam_user_id))?.connecteam_user_id ?? null;
+}
+
+async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, PoolPro[]>, overrideUser?: number, isTest = false) {
   const names = (v.lineItems?.nodes ?? []).map((x: any) => x.name);
   const svc = serviceOf(names.length ? names : [v.job?.title ?? v.title ?? '']);
   const a = v.property?.address ?? {};
@@ -227,8 +246,13 @@ async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, any>, o
   const title = `${SERVICE_LABEL[svc.service]} — ${first} ${a.street1 ?? ''}`.trim();
   const { data: subRow } = await db.from('subscriptions').select('id, user_id').eq('jobber_client_id', v.client?.id ?? '-').limit(1).maybeSingle();
   const { data: existing } = await db.from('jobber_visits').select('*').eq('jobber_visit_id', v.id).maybeSingle();
-  const pro = pros.get(svc.service);
-  const ctUser: number | null = overrideUser ?? (pro?.connecteam_user_id ? Number(pro.connecteam_user_id) : null);
+  let ctUser: number | null = overrideUser ?? null;
+  if (!overrideUser && v.startAt) {
+    const day0 = new Date(Date.parse(v.startAt) - 86400000).toISOString(), day1 = new Date(Date.parse(v.startAt) + 86400000).toISOString();
+    const { data: busy } = await db.from('jobber_visits').select('connecteam_user_id, start_at, end_at').is('deleted_at', null)
+      .not('connecteam_user_id', 'is', null).neq('jobber_visit_id', v.id).gte('start_at', day0).lte('start_at', day1);
+    ctUser = pickPro(pros.get(svc.service) ?? [], (busy ?? []) as any, v.startAt, v.endAt ?? v.startAt, existing?.connecteam_user_id ? Number(existing.connecteam_user_id) : null);
+  }
   const row: any = {
     jobber_visit_id: v.id, jobber_job_id: v.job?.id, subscription_id: subRow?.id ?? null, user_id: subRow?.user_id ?? null,
     service_line: svc.service, size_tier: svc.size, visit_kind: svc.kind, title, start_at: v.startAt, end_at: v.endAt ?? v.startAt,
@@ -255,7 +279,7 @@ async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, any>, o
     await db.from('jobber_visits').update({ connecteam_shift_id: id }).eq('id', saved.id);
     saved.connecteam_shift_id = id;
   }
-  if (!ctUser && !isTest) await alert(db, `ct_open_shift:${v.id}`, `Open shift: no ${SERVICE_LABEL[svc.service]} Pro assigned`, `${title} on ${v.startAt} is an open shift in Connecteam. Set a Pro for "${svc.service}" in the service→Pro table.`, 'digest');
+  if (!ctUser && !isTest) await alert(db, `ct_open_shift:${v.id}`, `Open shift: no ${SERVICE_LABEL[svc.service]} Pro free`, `${title} on ${v.startAt} is an open shift in Connecteam — no ${svc.service} Pro in the list is free for that window. Add a Pro or move the visit.`, 'digest');
   return { visit: saved, shift: saved.connecteam_shift_id };
 }
 
@@ -343,6 +367,22 @@ async function pollReports(db: SupabaseClient) {
     const v = matchVisit(s, (open ?? []).filter((o: any) => !o.report_submission_id));
     if (!v) { unmatched.push(sid); continue; }
     v.report_submission_id = sid; matched++;
+    await processReport(db, s, sid, v);
+  }
+  // No report 2h after the window ends → digest alert.
+  const cutoff = new Date(Date.now() - 2 * 3600000).toISOString();
+  const { data: late } = await db.from('jobber_visits').select('id, jobber_visit_id, title, end_at').is('deleted_at', null).is('report_submission_id', null)
+    .is('no_report_alerted_at', null).eq('is_test', false).lt('end_at', cutoff).gte('end_at', new Date(Date.now() - 7 * 86400000).toISOString());
+  for (const l of late ?? []) {
+    await alert(db, `visit_no_report:${l.jobber_visit_id}`, `No Visit Report: ${l.title}`, `The window ended ${l.end_at} and no Tidy Visit Report has come in.`, 'digest');
+    await db.from('jobber_visits').update({ no_report_alerted_at: new Date().toISOString() }).eq('id', l.id);
+  }
+  await log(db, 'poll_reports', 'success', `submissions ${subs.length}, matched ${matched}, unmatched ${unmatched.length}, late ${late?.length ?? 0}`);
+  if (unmatched.length) await alert(db, `visit_report_unmatched:${unmatched.sort().join(',').slice(0, 150)}`, 'Visit Report did not match a visit', `Submission ids: ${unmatched.join(', ')}`, 'digest');
+  return { submissions: subs.length, matched, unmatched, late: late?.length ?? 0 };
+}
+
+async function processReport(db: SupabaseClient, s: any, sid: string, v: any, opts: { emailTo?: string } = {}) {
     const before = urlsIn(answer(s, Q.before)); const after = urlsIn(answer(s, Q.after)); const issuePhotos = urlsIn(answer(s, Q.issuePhotos));
     const checklist = yesNo(answer(s, Q.checklist)); const locked = yesNo(answer(s, Q.locked)); const issues = textOf(answer(s, Q.issues));
     const completedAt = new Date(Number(s.submissionTimestamp ?? Date.now() / 1000) * 1000).toISOString();
@@ -358,25 +398,16 @@ async function pollReports(db: SupabaseClient) {
         [checklist === false ? 'Checklist NOT done.' : '', locked === false ? 'Home/car NOT locked up.' : '', issues ? `Issues: ${issues}` : '', issuePhotos.length ? `Photos: ${issuePhotos.join(' ')}` : ''].filter(Boolean).join('\n'),
         'urgent', { jobber_visit_id: v.jobber_visit_id });
     }
-    if (!v.is_test && v.user_id && after.length) await emailCustomer(db, v, after);
-  }
-  // No report 2h after the window ends → digest alert.
-  const cutoff = new Date(Date.now() - 2 * 3600000).toISOString();
-  const { data: late } = await db.from('jobber_visits').select('id, jobber_visit_id, title, end_at').is('deleted_at', null).is('report_submission_id', null)
-    .is('no_report_alerted_at', null).eq('is_test', false).lt('end_at', cutoff).gte('end_at', new Date(Date.now() - 7 * 86400000).toISOString());
-  for (const l of late ?? []) {
-    await alert(db, `visit_no_report:${l.jobber_visit_id}`, `No Visit Report: ${l.title}`, `The window ended ${l.end_at} and no Tidy Visit Report has come in.`, 'digest');
-    await db.from('jobber_visits').update({ no_report_alerted_at: new Date().toISOString() }).eq('id', l.id);
-  }
-  await log(db, 'poll_reports', 'success', `submissions ${subs.length}, matched ${matched}, unmatched ${unmatched.length}, late ${late?.length ?? 0}`);
-  if (unmatched.length) await alert(db, `visit_report_unmatched:${unmatched.sort().join(',').slice(0, 150)}`, 'Visit Report did not match a visit', `Submission ids: ${unmatched.join(', ')}`, 'digest');
-  return { submissions: subs.length, matched, unmatched, late: late?.length ?? 0 };
+    let emailed: unknown = null;
+    if (opts.emailTo && after.length) emailed = await emailCustomer(db, v, after, opts.emailTo);
+    else if (!v.is_test && v.user_id && after.length) emailed = await emailCustomer(db, v, after);
+    return { before, after, checklist, locked, issues, completedAt, jobberErr, emailed };
 }
 
-async function emailCustomer(db: SupabaseClient, v: any, after: string[]) {
-  const { data: u } = await db.auth.admin.getUserById(v.user_id);
-  const email = u?.user?.email; if (!email || EXCLUDED_EMAIL.test(email)) return;
-  const { data: prof } = await db.from('profiles').select('language, first_name').eq('user_id', v.user_id).maybeSingle();
+async function emailCustomer(db: SupabaseClient, v: any, after: string[], forceTo?: string) {
+  let email: string | undefined = forceTo;
+  if (!email) { const { data: u } = await db.auth.admin.getUserById(v.user_id); email = u?.user?.email; if (!email || EXCLUDED_EMAIL.test(email)) return { sent: false, reason: 'excluded' }; }
+  const { data: prof } = v.user_id ? await db.from('profiles').select('language, first_name').eq('user_id', v.user_id).maybeSingle() : { data: null as any };
   const es = String(prof?.language ?? 'en').trim() === 'es';
   const svc = { cleaning: es ? 'limpieza' : 'cleaning', lawn: es ? 'césped' : 'lawn care', detailing: es ? 'cuidado del auto' : 'car care' }[v.service_line as string] ?? (es ? 'visita' : 'visit');
   const imgs = after.slice(0, 6).map((u) => `<img src="${esc(u)}" alt="" width="260" style="width:260px;max-width:48%;border-radius:10px;margin:4px;display:inline-block">`).join('');
@@ -391,7 +422,7 @@ async function emailCustomer(db: SupabaseClient, v: any, after: string[]) {
     tags: ['visit-complete'], label: 'visit-complete',
   });
   if (res.sent) await db.from('jobber_visits').update({ customer_emailed_at: new Date().toISOString() }).eq('id', v.id);
-  else await alert(db, `visit_email_fail:${v.jobber_visit_id}`, 'Visit-complete email failed', `${v.title}: ${res.reason ?? 'unknown'}`, 'digest');
+  else if (!forceTo) await alert(db, `visit_email_fail:${v.jobber_visit_id}`, 'Visit-complete email failed', `${v.title}: ${res.reason ?? 'unknown'}`, 'digest');
 }
 
 // ---------- webhooks ----------
