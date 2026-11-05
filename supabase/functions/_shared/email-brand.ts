@@ -189,6 +189,8 @@ export function ensureTidyEmailBranding(html: string, subject?: string): string 
 
 /** Fail-closed definition used by both generated mail and hosted templates. */
 export function isTidyEmailCompliant(html: string): boolean {
+  // Owner-approved paperwork layout is intentionally navy / white / navy.
+  if(html.includes('data-tidy-paperwork="true"'))return html.includes(TIDY_EMAIL_MARKER)&&html.includes(TIDY_LOGO)&&html.includes(TIDY_EMAIL_VERSION)&&html.includes('hello@jointidy.co');
   return html.includes(TIDY_EMAIL_MARKER) &&
     html.includes(TIDY_LOGO) &&
     html.includes('data-tidy-service-strip="true"') &&
