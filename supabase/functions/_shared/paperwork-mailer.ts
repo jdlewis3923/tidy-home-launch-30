@@ -9,6 +9,7 @@ export async function processPaperworkEmails(db:any,user:any,profile:any,checkrL
  for(const kind of kinds){const r=await db.from('pro_paperwork_emails').upsert({connecteam_user_id:profile.connecteam_user_id,kind,status:profile.paperwork_email_held?'held':'queued'},{onConflict:'connecteam_user_id,kind',ignoreDuplicates:true});if(r.error)throw r.error;}
  if(complete){await db.from('pro_paperwork_emails').update({status:'cancelled'}).eq('connecteam_user_id',profile.connecteam_user_id).in('kind',['reminder48','reminder5d']).eq('status','queued');}
  if(profile.paperwork_email_held||profile.is_test)return;
+ await db.from('pro_paperwork_emails').update({status:'queued'}).eq('connecteam_user_id',profile.connecteam_user_id).eq('status','held');
  if(!profile.email)return;
  if(checkrLive&&!profile.checkr_invite_url){await db.from('admin_alerts').upsert({dedupe_key:`paperwork-checkr:${profile.connecteam_user_id}`,alert_type:'integration_error',level:'warning',tier:'digest',title:`Add Checkr invitation for ${profile.name}`,body:'Checkr is live, but this Pro has no invitation link. Paperwork email is held until the link is available.'},{onConflict:'dedupe_key',ignoreDuplicates:true});return;}
  const {data:pending}=await db.from('pro_paperwork_emails').select('*').eq('connecteam_user_id',profile.connecteam_user_id).eq('status','queued').lte('due_at',new Date().toISOString());

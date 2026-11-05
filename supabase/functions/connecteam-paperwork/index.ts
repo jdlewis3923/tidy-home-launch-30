@@ -35,10 +35,10 @@ Deno.serve(async req=>{
   await db.from('pro_paperwork_emails').update({status:result.sent?'sent':'failed',sent_at:result.sent?new Date().toISOString():null,error:result.reason??null}).eq('id',row.id);
   return reply({ok:result.sent,recipient:'jdlewis3923@gmail.com',result});
  }
+ const {data:flag}=await db.from('app_settings').select('value').eq('key','checkr_live').maybeSingle();const checkrLive=flag?.value===true||flag?.value==='on';
+ if(body.data.action==='mail'){if(!body.data.user_id)return reply({error:'user_id_required'},400);const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',body.data.user_id).single();const user=(await ct('GET',`/users/v1/users?userIds=${body.data.user_id}`)).data?.users?.[0];if(!profile||!user)return reply({error:'not_found'},404);const position=(user.customFields??[]).find((f:any)=>f.name==='Position')?.value?.[0]?.value;if(position!==POSITIONS[profile.service_line])return reply({ok:false,error:'position_not_ready'},409);await checkGroup(user,profile.service_line);await processPaperworkEmails(db,user,profile,checkrLive);return reply({ok:true});}
  const fields=(await ct('GET','/users/v1/custom-fields')).data?.customFields??[];
  const users=await all('/users/v1/users','users');
- const {data:flag}=await db.from('app_settings').select('value').eq('key','checkr_live').maybeSingle();const checkrLive=flag?.value===true||flag?.value==='on';
- if(body.data.action==='mail'){if(!body.data.user_id)return reply({error:'user_id_required'},400);const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',body.data.user_id).single();const user=users.find(u=>u.userId===body.data.user_id);if(!profile||!user)return reply({error:'not_found'},404);await checkGroup(user,profile.service_line);await processPaperworkEmails(db,user,profile,checkrLive);return reply({ok:true});}
  const ensurePosition=async(user:any,service:string)=>{const current=(user.customFields??[]).find((f:any)=>f.name==='Position')?.value?.[0]?.value;if(current!==POSITIONS[service])await setPosition(user.userId,service,fields);};
  if(body.data.action==='hire'){
   if(!body.data.applicant_id)return reply({error:'applicant_id_required'},400);
