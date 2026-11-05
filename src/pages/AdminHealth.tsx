@@ -94,7 +94,6 @@ const SOURCE_ORDER: Source[] = [
   "internal",
 ];
 
-const REFRESH_MS = 60_000;
 
 // No calls in 24 hours is STALE, not healthy. A dead integration used to look
 // exactly like a quiet day.
@@ -242,9 +241,7 @@ export default function AdminHealth() {
   }, []);
 
   useEffect(() => {
-    fetchHealth();
-    const id = window.setInterval(fetchHealth, REFRESH_MS);
-    return () => window.clearInterval(id);
+    void fetchHealth();
   }, [fetchHealth]);
 
   const rows = useMemo(() => {
@@ -344,7 +341,10 @@ export default function AdminHealth() {
 
         <IntegrationConnections />
         <div className="mt-6">
-          <ReliabilityChecks />
+          <details className="rounded-xl border border-border bg-card p-4">
+            <summary className="cursor-pointer font-semibold text-foreground">Archive — old hiring &amp; texts (now in Connecteam)</summary>
+            <div className="mt-4"><ReliabilityChecks /></div>
+          </details>
         </div>
 
         {/* Anything that failed and is still unresolved, read from admin_alerts. */}
@@ -373,7 +373,7 @@ export default function AdminHealth() {
               <span>•</span>
               <span>{data.total_rows_scanned.toLocaleString()} rows scanned</span>
               <span>•</span>
-              <span>Auto-refresh every 60s</span>
+              <span>Refresh with the Refresh button</span>
               {lastFetch > 0 && (
                 <>
                   <span>•</span>

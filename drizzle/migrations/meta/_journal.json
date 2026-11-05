@@ -2129,6 +2129,13 @@
       "when": 1793907860977,
       "tag": "0303_member_details_jobber_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 304,
+      "version": "7",
+      "when": 1793912020823,
+      "tag": "0304_cron_reliability_and_shift_gating",
+      "breakpoints": true
     }
   ]
 }

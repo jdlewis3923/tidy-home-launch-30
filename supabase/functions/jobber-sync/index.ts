@@ -163,7 +163,10 @@ async function syncSubscription(db: SupabaseClient, subId: string, opts: { allow
   const { data: sub } = await db.from('subscriptions').select('*').eq('id', subId).maybeSingle();
   if (!sub) return { skipped: 'not_found' };
   const ctx = await memberContext(db, sub);
-  if (!opts.allowTest && (sub.is_test || EXCLUDED_EMAIL.test(ctx.email))) return { skipped: 'test_or_owner' };
+  if (!opts.allowTest && (sub.is_test || EXCLUDED_EMAIL.test(ctx.email))) {
+    await log(db, 'skipped_test', 'success', 'sync_subscription skipped: ' + (sub.is_test ? 'test subscription' : 'owner account'), { subscription_id: sub.id });
+    return { skipped: 'test_or_owner' };
+  }
   const jobs: Record<string, any> = (sub.jobber_job_ids && typeof sub.jobber_job_ids === 'object' && !Array.isArray(sub.jobber_job_ids)) ? { ...sub.jobber_job_ids } : {};
   const active = sub.status === 'active' && !sub.pause_collection && !(sub.paused_until && new Date(sub.paused_until) > new Date());
   const errors: string[] = [];
