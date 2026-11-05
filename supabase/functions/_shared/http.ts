@@ -44,8 +44,6 @@ const VENDOR_TIMEOUTS: Array<[string, number]> = [
   ['googleapis.com', 20_000],
   ['google.com', 15_000],
   ['hooks.zapier.com', 10_000],
-  ['app.documenso.com', 20_000],
-  ['documenso.com', 20_000],
   ['api.openai.com', 60_000],
 ];
 

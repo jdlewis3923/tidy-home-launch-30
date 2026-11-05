@@ -19,7 +19,6 @@ type Source =
   | "stripe"
   | "brevo"
   | "twilio"
-  | "documenso"
   | "checkr"
   | "google"
   | "zapier"
@@ -33,7 +32,6 @@ const SOURCE_LABEL: Record<Source, string> = {
   stripe: "Stripe — payments",
   brevo: "Brevo — email",
   twilio: "Twilio — texts",
-  documenso: "Documenso — signing",
   checkr: "Checkr — background checks",
   google: "Google — sheets & reviews",
   zapier: "Zapier — automations",
@@ -87,7 +85,6 @@ const SOURCE_ORDER: Source[] = [
   "stripe",
   "brevo",
   "twilio",
-  "documenso",
   "checkr",
   "google",
   "zapier",

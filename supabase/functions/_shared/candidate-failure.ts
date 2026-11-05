@@ -4,7 +4,7 @@
 type Db = any;
 
 export type CandidateFailure = {
-  surface: 'contract-sign' | 'intake' | 'apply' | 'proof-upload' | 'booking' | 'documenso' | 'signing-selftest';
+  surface: 'contract-sign' | 'intake' | 'apply' | 'proof-upload' | 'booking' | 'signing-selftest';
   reason: string;
   status?: number;
   applicantId?: string | null;

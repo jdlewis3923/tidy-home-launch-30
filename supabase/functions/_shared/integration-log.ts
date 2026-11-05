@@ -13,7 +13,6 @@ export type VendorSource =
   | 'stripe'
   | 'jobber'
   | 'brevo'
-  | 'documenso'
   | 'checkr'
   | 'twilio'
   | 'google'

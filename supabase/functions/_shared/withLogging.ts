@@ -21,7 +21,6 @@ export type LogSource =
   | 'stripe'
   | 'jobber'
   | 'brevo'
-  | 'documenso'
   | 'checkr'
   | 'twilio'
   | 'google'
