@@ -29,7 +29,8 @@ export async function ct<T = any>(method: string, path: string, body?: unknown):
         if (res.status === 429) {
           last = err;
           const retryAfter = Number(res.headers.get('Retry-After'));
-          await sleep(Math.min(60000, Math.max(15000, retryAfter * 1000 || 15000 * (attempt + 1))));
+          // Respect Retry-After when Connecteam sends it; otherwise back off exponentially.
+          await sleep(Math.min(60000, retryAfter > 0 ? retryAfter * 1000 : 5000 * 2 ** attempt));
           continue;
         }
         if (res.status >= 400 && res.status < 500 && res.status !== 429) { last = err; break; }
