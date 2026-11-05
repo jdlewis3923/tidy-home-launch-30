@@ -29,6 +29,23 @@ Deno.serve(async (req) => {
       return json(d);
     } catch (e) { return json({ error: String((e as Error).message) }, 502); }
   }
+  if (body.action === 'schema' && auth.kind === 'service_role') {
+    // Recursively describe input types (and enums) reachable from the roots.
+    const seen: Record<string, unknown> = {};
+    const queue: string[] = [...(body.roots ?? [])];
+    const q = `query($n:String!){ __type(name:$n){ name kind inputFields{ name type{ kind name ofType{ kind name ofType{ kind name ofType{ kind name } } } } } enumValues{ name } } }`;
+    const unwrap = (t: any): any => (t?.ofType ? unwrap(t.ofType) : t);
+    const show = (t: any): string => t.kind === 'NON_NULL' ? show(t.ofType) + '!' : t.kind === 'LIST' ? `[${show(t.ofType)}]` : t.name;
+    while (queue.length && Object.keys(seen).length < 60) {
+      const n = queue.shift()!; if (seen[n]) continue;
+      const d: any = await gql(db, q, { n });
+      const t = d.__type; if (!t) { seen[n] = null; continue; }
+      if (t.kind === 'ENUM') { seen[n] = t.enumValues.map((e: any) => e.name); continue; }
+      seen[n] = Object.fromEntries((t.inputFields ?? []).map((f: any) => [f.name, show(f.type)]));
+      for (const f of t.inputFields ?? []) { const u = unwrap(f.type); if (u && (u.kind === 'INPUT_OBJECT' || u.kind === 'ENUM') && !seen[u.name]) queue.push(u.name); }
+    }
+    return json(seen);
+  }
   if (body.action === 'gql' && auth.kind === 'service_role') {
     try { return json(await gql(db, body.query, body.variables ?? {})); }
     catch (e) { return json({ error: String((e as Error).message) }, 502); }
