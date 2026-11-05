@@ -23,7 +23,7 @@ async function setPosition(userId:number,service:string,fields:any[]) {
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
  const auth=await requireServiceOrAdmin(req);if(!auth.ok)return reply({error:auth.error},auth.status);
- const body=z.object({action:z.enum(['sync','hire','mail','test_email','hire_test_create','hire_test_position','hire_test_cleanup']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
+ const body=z.object({action:z.enum(['sync','hire','mail','test_email','hire_test_create','hire_test_find','hire_test_position','hire_test_cleanup']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
  if(!body.success)return reply({error:'invalid_request'},400);
  try{
  if(body.data.action==='test_email'){
@@ -36,6 +36,7 @@ Deno.serve(async req=>{
   return reply({ok:result.sent,recipient:'jdlewis3923@gmail.com',result});
  }
  // Owner-only hire-trigger test: a fake Connecteam user (no activation, Justin's email).
+ if(body.data.action==='hire_test_find'){const users=await all('/users/v1/users','users');const u=users.filter(x=>String(x.phoneNumber??'').replace(/\D/g,'').endsWith('3055550142'));const {data:prof}=await db.from('pro_pay_profiles').select('connecteam_user_id,name,service_line,is_test').in('connecteam_user_id',u.map(x=>x.userId));const {data:mail}=await db.from('pro_paperwork_emails').select('kind,status,sent_at').in('connecteam_user_id',u.map(x=>x.userId));const {data:al}=await db.from('admin_alerts').select('title,resolved_at').in('dedupe_key',u.map(x=>`set-position:${x.userId}`));return reply({users:u.map(x=>({userId:x.userId,isArchived:x.isArchived,email:x.email})),profiles:prof,emails:mail,alerts:al});}
  if(body.data.action==='hire_test_create'){
   const created=await ct('POST','/users/v1/users?sendActivation=false',[{firstName:'ZZ',lastName:'Hire Test',phoneNumber:'+13055550142',email:'jdlewis3923@gmail.com',userType:'user'}]);
   return reply({ok:true,created:created.data});
