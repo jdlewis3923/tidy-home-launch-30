@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 
-type Profile = { connecteam_user_id: number; name: string; email: string | null; started_on: string; coi_verified_at: string | null; tier2_since: string | null; is_test: boolean };
+type Profile = { connecteam_user_id: number; name: string; email: string | null; started_on: string; coi_verified_at: string | null; tier2_since: string | null; is_test: boolean; paperwork_status?:Record<string,string>; paperwork_complete?:boolean; pay_setup_unblocked?:boolean; coi_expires_at?:string|null };
 type Line = { id: string; connecteam_user_id: number; week_start: string; payout_friday: string; kind: string; description: string; pay_cents: number; status: string; is_test: boolean; member_user_id: string | null };
 type Review = { id: string; reviewer_name: string | null; rating: number | null; review_text: string | null; match_status: string | null; matched_ct_user_id: number | null; match_note: string | null; bonus_paid_at: string | null };
 type Visit = { connecteam_user_id: number | null; team_user_ids: number[] | null; rating: number | null; status: string };
@@ -81,6 +81,14 @@ export default function AdminProPay() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <section className="border-b border-border pb-5">
+          <h2 className="text-base font-semibold">Connecteam paperwork</h2>
+          {profiles.map(p=><div key={p.connecteam_user_id} className="py-3 border-b border-border text-sm">
+            <p className="font-semibold">{p.name} · {p.paperwork_complete?'Complete':'Waiting'}</p>
+            <p className="text-muted-foreground">W-9: {p.paperwork_status?.w9??'Not checked'} · COI: {p.paperwork_status?.coi??'Not checked'} · Agreement: {p.paperwork_status?.agreement??'Not checked'}</p>
+            <p>{p.pay_setup_unblocked?'Pay setup unblocked':'Pay setup waiting for paperwork'}{p.coi_expires_at?` · COI expires ${p.coi_expires_at.slice(0,10)}`:''}</p>
+          </div>)}
+        </section>
         <section className="bg-card rounded-xl border border-border p-5">
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-base font-semibold">Week</h2>
