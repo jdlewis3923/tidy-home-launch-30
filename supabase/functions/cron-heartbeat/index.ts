@@ -116,7 +116,11 @@ Deno.serve(async (req) => {
     }, { onConflict: 'dedupe_key' });
   } else {
     await admin.from('admin_alerts').update({ resolved_at: new Date().toISOString() }).eq('alert_type', 'cron_manifest_check_failed').is('resolved_at', null);
-    manifestProblems = (diffRows ?? []) as Diff[];
+    // Paused jobs (hiring moved to Connecteam) are expected to be switched off.
+    const pausedNames = new Set(EXPECTED_CRON_JOBS.filter((j) => j.paused).map((j) => j.name));
+    manifestProblems = ((diffRows ?? []) as Diff[]).filter(
+      (p) => !(pausedNames.has(p.job_name) && (p.problem === 'inactive' || p.problem === 'never_scheduled')),
+    );
     for (const p of manifestProblems) {
       const { data: existing } = await admin
         .from('admin_alerts')
@@ -172,6 +176,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'cron_snapshot_empty', jobs_total: 0 }, 500);
   }
 
+
+  // Digest line when a job misses 2 runs in a row (timeouts / 5xx).
+  const { data: missedTwice, error: missedErr } = await admin.rpc('cron_missed_twice_check');
+  if (missedErr) console.error('cron_missed_twice_check failed', missedErr.message);
 
   let alerted = 0;
   await admin.from('admin_alerts').update({ resolved_at: new Date().toISOString() }).eq('alert_type', 'cron_snapshot_empty').is('resolved_at', null);
@@ -231,6 +239,7 @@ Deno.serve(async (req) => {
     stale_count: stale.length,
     alerts_opened: alerted,
     alerts_resolved: resolved,
+    missed_twice_alerts: missedTwice ?? null,
     manifest_expected: EXPECTED_CRON_JOBS.length,
     manifest_problem_count: manifestProblems.length,
     manifest_problems: manifestProblems,

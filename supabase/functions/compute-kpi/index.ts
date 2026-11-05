@@ -233,12 +233,17 @@ async function kWebhookDelivery(s: SupabaseClient): Promise<ComputedKpi> {
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
   const { data } = await s
     .from('integration_logs')
-    .select('status')
+    .select('status, source, event')
     .gte('created_at', since)
+    .or('source.in.(zapier,stripe),event.ilike.%webhook%')
     .limit(2000);
-  const total = data?.length ?? 0;
+  // Root cause of the 88.9% "critical": this used to count EVERY integration
+  // log (Jobber visit syncs, Connecteam reads, test runs) as a webhook. Only
+  // real webhook deliveries count now; skipped/test rows are not failures.
+  const rows = (data ?? []).filter((r) => r.status !== 'skipped_test' && r.status !== 'skipped');
+  const total = rows.length;
   if (total === 0) return { code: 'webhook_delivery', value: null, value_text: 'No traffic (1h)' };
-  const ok = (data ?? []).filter((r) => r.status === 'success').length;
+  const ok = rows.filter((r) => r.status === 'success').length;
   const pct = Math.round((ok / total) * 1000) / 10;
   return { code: 'webhook_delivery', value: pct, context: { total, ok } };
 }

@@ -23,7 +23,7 @@ async function setPosition(userId:number,service:string,fields:any[]) {
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
  const auth=await requireServiceOrAdmin(req);if(!auth.ok)return reply({error:auth.error},auth.status);
- const body=z.object({action:z.enum(['sync','hire','mail','test_email']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
+ const body=z.object({action:z.enum(['sync','hire','mail','test_email','hire_test_create','hire_test_find','quota','hire_test_position','hire_test_cleanup']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
  if(!body.success)return reply({error:'invalid_request'},400);
  try{
  if(body.data.action==='test_email'){
@@ -34,6 +34,25 @@ Deno.serve(async req=>{
   const result=await sendProEmail(db,{applicantId:null,key:'connecteam_paperwork_test',to:'jdlewis3923@gmail.com',name:'Justin Lewis',built,triggeredBy:`paperwork-test:${row.id}`});
   await db.from('pro_paperwork_emails').update({status:result.sent?'sent':'failed',sent_at:result.sent?new Date().toISOString():null,error:result.reason??null}).eq('id',row.id);
   return reply({ok:result.sent,recipient:'jdlewis3923@gmail.com',result});
+ }
+ // Owner-only hire-trigger test: a fake Connecteam user (no activation, Justin's email).
+ if(body.data.action==='quota'){const r=await fetch('https://api.connecteam.com/me',{headers:{'X-API-KEY':Deno.env.get('CONNECTEAM_API_KEY')??''}});const h:Record<string,string>={};r.headers.forEach((v,k)=>{if(k.startsWith('x-ratelimit')||k==='retry-after')h[k]=v;});return reply({status:r.status,headers:h});}
+ if(body.data.action==='hire_test_find'){const users=await all('/users/v1/users','users');const u=users.filter(x=>String(x.phoneNumber??'').replace(/\D/g,'').endsWith('3055550142'));const {data:prof}=await db.from('pro_pay_profiles').select('connecteam_user_id,name,service_line,is_test').in('connecteam_user_id',u.map(x=>x.userId));const {data:mail}=await db.from('pro_paperwork_emails').select('kind,status,sent_at').in('connecteam_user_id',u.map(x=>x.userId));const {data:al}=await db.from('admin_alerts').select('title,resolved_at').in('dedupe_key',u.map(x=>`set-position:${x.userId}`));return reply({users:u.map(x=>({userId:x.userId,isArchived:x.isArchived,email:x.email})),profiles:prof,emails:mail,alerts:al});}
+ if(body.data.action==='hire_test_create'){
+  const created=await ct('POST','/users/v1/users?sendActivation=false',[{firstName:'ZZ',lastName:'Hire Test',phoneNumber:'+13055550142',email:'jdlewis3923@gmail.com',userType:'user'}]);
+  return reply({ok:true,created:created.data});
+ }
+ if(body.data.action==='hire_test_position'){
+  if(!body.data.user_id)return reply({error:'user_id_required'},400);
+  const fields=(await ct('GET','/users/v1/custom-fields')).data?.customFields??[];await setPosition(body.data.user_id,'cleaning',fields);return reply({ok:true});
+ }
+ if(body.data.action==='hire_test_cleanup'){
+  if(!body.data.user_id)return reply({error:'user_id_required'},400);
+  const u=body.data.user_id;const archived=await ct('PUT','/users/v1/users?sendActivation=false',[{userId:u,isArchived:true}]);
+  await db.from('pro_pay_profiles').update({is_test:true}).eq('connecteam_user_id',u);
+  await db.from('jobber_service_pro_pool').delete().eq('connecteam_user_id',u);
+  await db.from('admin_alerts').update({resolved_at:new Date().toISOString()}).in('dedupe_key',[`set-position:${u}`]).is('resolved_at',null);
+  return reply({ok:true,archived:archived.data??true});
  }
  const {data:flag}=await db.from('app_settings').select('value').eq('key','checkr_live').maybeSingle();const checkrLive=flag?.value===true||flag?.value==='on';
  if(body.data.action==='mail'){
@@ -81,7 +100,6 @@ Deno.serve(async req=>{
  // Hire trigger: "Add to team" in Connecteam creates a user. Any new, active, non-owner user not yet tracked becomes a Pro profile.
  const poolIds=new Set((pool??[]).map(p=>Number(p.connecteam_user_id)));
  for(const u of users){if(u.isArchived||tracked.has(u.userId)||u.userId===31157330||poolIds.has(u.userId)||(u.userType&&u.userType!=='user'))continue;const position=(u.customFields??[]).find((f:any)=>f.name==='Position');const value=position?.value?.[0]?.value;const service=Object.keys(POSITIONS).find(s=>POSITIONS[s]===value);const name=`${u.firstName??''} ${u.lastName??''}`.trim()||`User ${u.userId}`;
-  await db.from('admin_alerts').upsert({dedupe_key:`qbo-vendor:${u.userId}`,alert_type:'integration_error',level:'action',tier:'digest',category:'operations',title:`Add vendor ${name} in QuickBooks`,body:'QuickBooks is not connected yet, so the contractor vendor was not created automatically.'},{onConflict:'dedupe_key',ignoreDuplicates:true});
   if(!service){const {data:a}=await db.from('applicants').select('id').ilike('email',u.email??'missing').limit(1).maybeSingle();const r=await db.from('pro_pay_profiles').upsert({connecteam_user_id:u.userId,name,service_line:null,applicant_id:a?.id??null,email:u.email??null,is_test:false},{onConflict:'connecteam_user_id'});if(r.error)throw r.error;await db.from('admin_alerts').upsert({dedupe_key:`set-position:${u.userId}`,alert_type:'integration_error',level:'action',tier:'digest',category:'operations',title:`Set ${name}'s Position in Connecteam`,body:'New team member found. Set Position to House Cleaning Pro, Lawn Care Pro or Car Care Pro; the paperwork email sends automatically after that.'},{onConflict:'dedupe_key',ignoreDuplicates:true});continue;}
   const {data:a}=await db.from('applicants').select('id').ilike('email',u.email??'missing').limit(1).maybeSingle();const p={connecteam_user_id:u.userId,name:`${u.firstName} ${u.lastName}`,service_line:service,applicant_id:a?.id??null,email:u.email??null,is_test:false};const r=await db.from('pro_pay_profiles').upsert(p,{onConflict:'connecteam_user_id'});if(r.error)throw r.error;tracked.set(u.userId,p);}
  for(const p of pool??[]){const u=users.find(u=>u.userId===Number(p.connecteam_user_id));if(!u)continue;await ensurePosition(u,p.service_line);const old=tracked.get(u.userId);const {data:app}=await db.from('applicants').select('id').ilike('email',u.email??'missing').limit(1).maybeSingle();const profile={...old,connecteam_user_id:u.userId,name:p.pro_name??`${u.firstName} ${u.lastName}`,service_line:p.service_line,applicant_id:old?.applicant_id??app?.id??null,email:u.email??old?.email??null,is_test:old?.is_test??false};const saved=await db.from('pro_pay_profiles').upsert(profile,{onConflict:'connecteam_user_id'});if(saved.error)throw saved.error;tracked.set(u.userId,profile);}

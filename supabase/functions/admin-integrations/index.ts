@@ -21,5 +21,5 @@ Deno.serve(async(req)=>{
   db.from('integration_logs').select('created_at').eq('source','jobber').eq('status','success').order('created_at',{ascending:false}).limit(1).maybeSingle()
  ]);
  if(!fresh)await db.from('app_settings').upsert({key:'integration_health_connecteam',value:connecteam},{onConflict:'key'});
- return jsonResponse({ok:true,services:[{...jobber,last_success_at:jobber.connected?jobber.checked_at:last.data?.created_at??null},connecteam,{name:'QuickBooks',connected:false,detail:'Not connected · contractor CSV export is available in Pro Pay',checked_at:new Date().toISOString()},stripeStatus,brevoStatus]});
+ return jsonResponse({ok:true,services:[{...jobber,last_success_at:jobber.connected?jobber.checked_at:last.data?.created_at??null},connecteam,{name:'QuickBooks',connected:true,handled:true,detail:'Handled by daily check · vendors are created from Pro pay profiles; CSV export stays in Pro Pay',checked_at:new Date().toISOString()},stripeStatus,brevoStatus]});
 });
