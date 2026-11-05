@@ -596,6 +596,7 @@ Deno.serve(async (req) => {
       case 'skip_visit': return jsonResponse({ ok: true, result: await skipVisit(db, body.mirror_id) });
       case 'test_report': return jsonResponse({ ok: true, result: await testReport(db) });
       case 'test_carwash': return jsonResponse({ ok: true, result: await testCarWash(db) });
+      case 'list_shifts': { const { ct } = await import('../_shared/connecteam.ts'); return jsonResponse(await ct('GET', `/scheduler/v1/schedulers/20735999/shifts?startTime=${body.from}&endTime=${body.to}&limit=200`)); }
       case 'test_e2e': return jsonResponse({ ok: true, result: await testE2E(db) });
       case 'gql': return jsonResponse(await gql(db, body.query, body.variables ?? {}));
       default: return jsonResponse({ error: 'unknown action' }, 400);
