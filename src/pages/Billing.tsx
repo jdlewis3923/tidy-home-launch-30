@@ -68,7 +68,7 @@ import {
 export default function Billing() {
   const navigate = useNavigate();
   const data = useDashboardData();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [portalState, setPortalState] = useState<"idle" | "loading" | "error">("idle");
   const [subOverride, setSubOverride] = useState<Tables<"subscriptions"> | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -174,6 +174,9 @@ export default function Billing() {
   const invoices = data.invoices.slice(0, 6);
   const isPaused = sub?.status === "paused" || !!sub?.pause_collection;
   const isCanceling = !!sub?.cancel_at_period_end;
+  const paymentNeedsAttention = [sub?.status, (sub as any)?.stripe_status].some((st) => ["canceled", "past_due", "unpaid"].includes(String(st ?? "")));
+  const periodEnd = (sub as any)?.current_period_end ? new Date((sub as any).current_period_end) : null;
+  const nextChargeDate = !paymentNeedsAttention && !isCanceling && periodEnd && Number.isFinite(periodEnd.getTime()) && periodEnd.getTime() > Date.now() ? periodEnd.toISOString() : null;
   const resumeDateFor = (days: number) => {
     const d = new Date();
     d.setDate(d.getDate() + days);
@@ -213,19 +216,19 @@ export default function Billing() {
             </div>
             <div className="mt-5 flex items-end justify-between">
               <div>
-                {sub?.next_billing_date ? (
+                {nextChargeDate ? (
                   <>
                     <p className="text-3xl font-black text-ink">
-                      {formatMoney(sub.monthly_total_cents)}
+                      {formatMoney(sub?.monthly_total_cents ?? 0)}
                     </p>
                     <p className="mt-1 text-sm text-ink-soft">
-                      {`on ${formatLongDate(sub.next_billing_date)}`}
+                      {`${language === "es" ? "el" : "on"} ${formatLongDate(nextChargeDate)}`}
                     </p>
                   </>
                 ) : (
                   <>
                     <p className="text-3xl font-black text-ink">—</p>
-                    <p className="mt-1 text-sm text-ink-soft">no upcoming charge</p>
+                    <p className="mt-1 text-sm text-ink-soft">{language === "es" ? "sin próximo cobro" : "no upcoming charge"}</p>
                   </>
                 )}
                 {sub?.card_last4 && (
@@ -248,7 +251,7 @@ export default function Billing() {
                   </>
                 ) : (
                   <>
-                    Update payment method
+                    {language === "es" ? "Actualizar método de pago" : "Update payment method"}
                     <ExternalLink className="h-4 w-4" />
                   </>
                 )}

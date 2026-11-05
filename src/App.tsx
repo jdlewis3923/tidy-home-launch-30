@@ -240,6 +240,7 @@ const SiteGate = ({ children }: { children: React.ReactNode }) => {
     return () => { cancelled = true; };
   }, [previewChecked]);
   const isWhitelisted =
+    location.pathname === "/onboarding" || location.pathname.startsWith("/onboarding/") ||
     ALWAYS_OPEN_PREFIXES.some((p) => location.pathname.startsWith(p)) ||
     // Narrow carve-out: the conversion hops open for door-hanger arrivals only.
     doorhangerGateAllows(location.pathname, location.search, getLandingSource());
@@ -459,6 +460,7 @@ const App = () => (
                   <Route path="/admin/reviews/import" element={<AdminReviewsImport />} />
                   {/* Capacity & hiring — fill %, ceiling dates, when to post the job. */}
                   <Route path="/admin/capacity" element={<AdminServiceHandoff />} />
+                  <Route path="/onboarding/*" element={<Navigate to="/apply" replace />} />
                   <Route path="/apply" element={<Apply />} />
                   <Route path="/apply/:service/*" element={<Apply />} />
                   <Route path="/careers" element={<Navigate to="/apply" replace />} />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,12 @@ import { supabase } from '@/integrations/supabase/client';
  * autofill credentials.
  */
 export default function ExistingAccountInline() {
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
+    return () => sub.subscription.unsubscribe();
+  }, []);
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +44,7 @@ export default function ExistingAccountInline() {
     }
   };
 
+  if (signedIn !== false) return null;
   if (!open) {
     return (
       <div className="flex items-center justify-between rounded-xl border border-hairline bg-white/60 px-4 py-3 backdrop-blur">

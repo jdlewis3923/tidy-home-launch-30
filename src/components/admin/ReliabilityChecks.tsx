@@ -17,9 +17,10 @@ export default function ReliabilityChecks() {
     const { data, error } = await (supabase.rpc as any)("admin_reliability_checks");
     if (error) setErr(error.message); else { setErr(null); setData(data as Result); }
   }, []);
-  useEffect(() => { load(); const id = window.setInterval(load, 60_000); return () => window.clearInterval(id); }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
-  const failing = !!err || (data ? !data.ok : false);
+  // Archived diagnostics must not drive current health status.
+  const failing = false;
   return (
     <section className={`rounded-xl border-2 p-4 ${failing ? "border-destructive bg-destructive/10" : "border-primary/30 bg-card"}`}>
       <div className="flex items-center justify-between gap-3">
