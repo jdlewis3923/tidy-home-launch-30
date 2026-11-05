@@ -1,0 +1,3 @@
+ALTER TABLE public.pro_pay_profiles ADD COLUMN IF NOT EXISTS checkr_invite_url text;
+CREATE OR REPLACE FUNCTION public.wake_paperwork_email() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN IF NEW.service_line IS NOT NULL AND NOT NEW.is_test THEN PERFORM public.call_edge_function('connecteam-paperwork',jsonb_build_object('action','mail','user_id',NEW.connecteam_user_id)); END IF; RETURN NEW; END; $$;
+CREATE TRIGGER paperwork_hire_mail AFTER INSERT ON public.pro_pay_profiles FOR EACH ROW EXECUTE FUNCTION public.wake_paperwork_email();

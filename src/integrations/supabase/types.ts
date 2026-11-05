@@ -7282,6 +7282,7 @@ export type Database = {
         Row: {
           agreement_signed_at: string | null
           applicant_id: string | null
+          checkr_invite_url: string | null
           coi_expires_at: string | null
           coi_verified_at: string | null
           connecteam_user_id: number
@@ -7302,6 +7303,7 @@ export type Database = {
         Insert: {
           agreement_signed_at?: string | null
           applicant_id?: string | null
+          checkr_invite_url?: string | null
           coi_expires_at?: string | null
           coi_verified_at?: string | null
           connecteam_user_id: number
@@ -7322,6 +7324,7 @@ export type Database = {
         Update: {
           agreement_signed_at?: string | null
           applicant_id?: string | null
+          checkr_invite_url?: string | null
           coi_expires_at?: string | null
           coi_verified_at?: string | null
           connecteam_user_id?: number
