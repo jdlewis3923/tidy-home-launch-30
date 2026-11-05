@@ -501,7 +501,7 @@ async function withTestClient<T>(db: SupabaseClient, label: string, fn: (propert
 }
 
 // ---------- simulated Visit Report (real form 20738257 answer shape) ----------
-const TEST_PHOTO = (n: string) => `https://jointidy.co/og-image.jpg?test=${n}`;
+const TEST_PHOTO = (n: string) => `https://jointidy.co/og-founding.jpg?test=${n}`;
 async function testReport(db: SupabaseClient) {
   const steps: Record<string, unknown> = {};
   const t0 = new Date().toISOString();
