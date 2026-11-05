@@ -114,6 +114,6 @@ export default function AdminChrome() {
       <div className="admin-hud-topbar__right"><AdminThemeToggle active /><span className={`admin-status-chip is-${siteMode}`}><Shield className="h-3 w-3" />{siteLabel}</span><span className="admin-hud-meta">SYNC · {relativeTime(lastSync)}</span><span className="admin-hud-meta admin-hud-time">{stamp}</span></div>
     </div>
     {rail}
-    {drawerOpen && <div className="admin-mobile-drawer"><button className="admin-mobile-backdrop" onClick={() => setDrawerOpen(false)} aria-label="Close admin navigation" /><div className="admin-mobile-panel"><Button variant="ghost" size="icon" className="admin-mobile-close" onClick={() => setDrawerOpen(false)} aria-label="Close admin navigation"><X className="h-5 w-5" /></Button>{rail}</div></div>}
+    {drawerOpen && <div className="admin-mobile-drawer"><Button variant="ghost" className="admin-mobile-backdrop rounded-none" onClick={() => setDrawerOpen(false)} aria-label="Close menu backdrop" /><div className="admin-mobile-panel"><Button variant="ghost" size="icon" className="admin-mobile-close" onClick={() => setDrawerOpen(false)} aria-label="Close admin navigation"><X className="h-5 w-5" /></Button>{rail}</div></div>}
   </>;
 }
