@@ -568,11 +568,11 @@ async function testCarWash(db: SupabaseClient) {
       const sp = buildSpecs({ plan_lines: [], car_wash_key: k }, new Date(`${new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10)}T12:00:00Z`)).find((x) => x.key === 'car_wash')!;
       const start = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
       const jobId = await createJob(db, propertyId, sp, start, windowFrom('9 AM - 11 AM'), 'TEST ONLY — car wash add-on mapping.');
-      const j = await gql(db, `query($id:EncodedId!){job(id:$id){id title lineItems{nodes{name quantity}} visits(first:10, filter:{startAt:{before:"${new Date(Date.now() + 40 * 86400000).toISOString()}"}}){nodes{startAt}}}}`, { id: jobId }).catch(async () =>
+      const j = await gql(db, `query($id:EncodedId!){job(id:$id){id title lineItems{nodes{name quantity}} visits(first:12){nodes{startAt}}}}`, { id: jobId }).catch(async () =>
         gql(db, `query($id:EncodedId!){job(id:$id){id title lineItems{nodes{name quantity}} visits(first:10){nodes{startAt}}}}`, { id: jobId }));
       const starts = (j.job.visits.nodes ?? []).map((v: any) => v.startAt);
       const firstMonth = starts.filter((t: string) => Date.parse(t) < Date.parse(start) + 31 * 86400000).length;
-      res.push({ key: k, job_id: jobId, title: j.job.title, line_items: j.job.lineItems.nodes, visits_in_first_31_days: firstMonth });
+      res.push({ key: k, job_id: jobId, title: j.job.title, line_items: j.job.lineItems.nodes, visits_in_first_31_days: firstMonth, visit_starts: starts, rrule: sp.rrule });
       await closeJob(db, jobId);
     }
     return res;
