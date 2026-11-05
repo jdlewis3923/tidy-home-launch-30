@@ -2122,6 +2122,13 @@
       "when": 1793907661813,
       "tag": "0302_paperwork_approved_assignment_append",
       "breakpoints": true
+    },
+    {
+      "idx": 303,
+      "version": "7",
+      "when": 1793907860977,
+      "tag": "0303_member_details_jobber_sync",
+      "breakpoints": true
     }
   ]
 }

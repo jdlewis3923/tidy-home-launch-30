@@ -30,6 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguagePreference from "@/components/LanguagePreference";
 import { PlanScope, SizeReviewPrompt } from "@/components/scope/PlanScope";
+import {toast} from '@/hooks/use-toast';
 
 export default function Account() {
   const navigate = useNavigate();
@@ -84,13 +85,16 @@ export default function Account() {
           </p>
         </div>
 
-        <div className="mt-8 space-y-4">
+        <nav className="mt-6 flex flex-wrap gap-4 border-y border-border py-4" aria-label={t('Account')}>
+          {[['Home info','/account#home-info'],['Car','/account#car-info'],['Plan','/dashboard/plan'],['Visits','/dashboard/schedule'],['Billing','/billing']].map(([label,to])=><Link key={label} to={to} className="font-semibold text-primary hover:underline">{t(label)}</Link>)}
+        </nav>
+        <div className="mt-8 space-y-4" id="car-info">
           <FoundingBadge />
           <FreeAddonPicker />
           <CarWashDetails />
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2">
+        <div className="mt-10 grid gap-4 md:grid-cols-2 scroll-mt-24" id="home-info">
           <AccountCard
             icon={<User className="h-4 w-4 text-[hsl(var(--primary))]" />}
             label="Profile"
@@ -300,7 +304,8 @@ function HomeNotesCard({ userId, photoOptIn }: { userId: string | null; photoOpt
 
   const saveNote = async () => {
     setSaving(true);
-    await supabase.from("home_notes").upsert({ user_id: userId, body: draft.trim(), updated_at: new Date().toISOString() });
+    const {error}=await supabase.from("home_notes").upsert({ user_id: userId, body: draft.trim(), updated_at: new Date().toISOString() });
+    if(error){setSaving(false);toast({title:'Could not save',description:error.message,variant:'destructive'});return;}
     setNote(draft.trim());
     setSaving(false);
     setSaved(true);

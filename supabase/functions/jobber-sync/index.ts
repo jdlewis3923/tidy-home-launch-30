@@ -17,11 +17,12 @@ import { createShift, updateShift, deleteShift, getShift, listSubmissions, Conne
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
 import { parseCarWashKey, pickPro, type PoolPro } from '../_shared/jobber-rules.ts';
+import {memberJobNotes,shiftAccessNotes} from '../_shared/member-job-notes.ts';
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
 const SITE_FN = `${Deno.env.get('SUPABASE_URL')}/functions/v1/jobber-webhook`;
 const EXCLUDED_EMAIL = /^(qa\..*@tidytestmail\.com|jdlewis3923@gmail\.com)$/i;
-const esc = (s: string) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+const esc = (s: string) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] ?? c));
 
 // ---------- alerts ----------
 async function alert(db: SupabaseClient, key: string, title: string, body: string, tier: 'digest' | 'urgent' = 'digest', extra: Record<string, unknown> = {}) {
@@ -85,9 +86,12 @@ async function memberContext(db: SupabaseClient, sub: any) {
     db.from('profiles').select('*').eq('user_id', sub.user_id).maybeSingle(),
     db.auth.admin.getUserById(sub.user_id),
   ]);
-  const { data: firstVisit } = await db.from('visits').select('visit_date, time_window, scheduled_start')
+  const { data: legacyVisit } = await db.from('visits').select('visit_date, time_window, scheduled_start')
     .eq('subscription_id', sub.id).gte('visit_date', new Date().toISOString().slice(0, 10)).order('visit_date').limit(1).maybeSingle();
-  return { prof: prof as any, email: u?.user?.email ?? '', firstVisit: firstVisit as any };
+  const {data:mirrorVisit}=await db.from('jobber_visits').select('start_at,raw').eq('subscription_id',sub.id).is('deleted_at',null).neq('status','complete').gte('start_at',new Date().toISOString()).order('start_at').limit(1).maybeSingle();
+  const firstVisit=mirrorVisit?{visit_date:mirrorVisit.start_at.slice(0,10),time_window:(mirrorVisit.raw as any)?.instructions?.match(/Arrival window:\s*([^\n]+)/)?.[1]}:Object.keys(sub.jobber_job_ids??{}).length?null:legacyVisit;
+  const [{data:home},{data:car},{data:preferred}]=await Promise.all([db.from('home_notes').select('*').eq('user_id',sub.user_id).maybeSingle(),db.from('car_wash_profiles').select('*').eq('subscription_id',sub.id).maybeSingle(),sub.preferred_pro_id?db.from('profiles').select('first_name,last_name').eq('user_id',sub.preferred_pro_id).maybeSingle():Promise.resolve({data:null})]);
+  return { prof: prof as any, email: u?.user?.email ?? '', firstVisit: firstVisit as any,home,car,preferred:[preferred?.first_name,preferred?.last_name].filter(Boolean).join(' ') };
 }
 
 function windowFrom(text: string | null | undefined) {
@@ -113,15 +117,19 @@ async function ensureClient(db: SupabaseClient, sub: any, prof: any, email: stri
     clientId = d.clientCreate.client.id;
     await db.from('subscriptions').update({ jobber_client_id: clientId }).eq('id', sub.id);
     const pid = d.clientCreate.client.properties?.[0]?.id;
-    if (pid) return { clientId: clientId!, propertyId: pid };
+    if (pid) return { clientId: clientId, propertyId: pid };
   }
   const c = await gql(db, `query($id:EncodedId!){client(id:$id){properties{id address{street1 postalCode}}}}`, { id: clientId });
+  if(!clientId)throw new Error('Jobber client missing');
+  await gql(db,`mutation($c:EncodedId!,$i:ClientEditInput!){clientEdit(clientId:$c,input:$i){client{id} userErrors{message path}}}`,{c:clientId,i:{firstName:prof?.first_name??'',lastName:prof?.last_name??'',receivesReminders:false,receivesFollowUps:false,receivesReviewRequests:false}});
   const props = c.client?.properties ?? [];
-  const match = props.find((p: any) => (p.address?.street1 ?? '').trim().toLowerCase() === addr.street1.trim().toLowerCase()) ?? (addr.street1 ? null : props[0]);
-  if (match) return { clientId: clientId!, propertyId: match.id };
+  const firstJob=Object.values(sub.jobber_job_ids??{})[0] as any;
+  const oldProperty=firstJob?.job_id?await gql(db,`query($id:EncodedId!){job(id:$id){property{id}}}`,{id:firstJob.job_id}):null;
+  const match = props.find((p:any)=>p.id===oldProperty?.job?.property?.id)??props.find((p: any) => (p.address?.street1 ?? '').trim().toLowerCase() === addr.street1.trim().toLowerCase()) ?? (props.length===1?props[0]:null);
+  if (match) {await gql(db,`mutation($p:EncodedId!,$i:PropertyEditInput!){propertyEdit(propertyId:$p,input:$i){property{id} userErrors{message path}}}`,{p:match.id,i:{address:addr}});return { clientId, propertyId: match.id };}
   if (!addr.street1) throw new Error('member has no service address');
   const p = await gql(db, `mutation($c:EncodedId!,$i:PropertyCreateInput!){propertyCreate(clientId:$c,input:$i){properties{id} userErrors{message path}}}`, { c: clientId, i: { properties: [{ address: addr }] } });
-  return { clientId: clientId!, propertyId: p.propertyCreate.properties[0].id };
+  return { clientId: clientId, propertyId: p.propertyCreate.properties[0].id };
 }
 
 async function closeJob(db: SupabaseClient, jobId: string) {
@@ -154,7 +162,7 @@ async function syncSubscription(db: SupabaseClient, subId: string, opts: { allow
   const { data: sub } = await db.from('subscriptions').select('*').eq('id', subId).maybeSingle();
   if (!sub) return { skipped: 'not_found' };
   const ctx = await memberContext(db, sub);
-  if (!opts.allowTest && EXCLUDED_EMAIL.test(ctx.email)) return { skipped: 'test_or_owner' };
+  if (!opts.allowTest && (sub.is_test || EXCLUDED_EMAIL.test(ctx.email))) return { skipped: 'test_or_owner' };
   const jobs: Record<string, any> = (sub.jobber_job_ids && typeof sub.jobber_job_ids === 'object' && !Array.isArray(sub.jobber_job_ids)) ? { ...sub.jobber_job_ids } : {};
   const active = sub.status === 'active' && !sub.pause_collection && !(sub.paused_until && new Date(sub.paused_until) > new Date());
   const errors: string[] = [];
@@ -170,12 +178,6 @@ async function syncSubscription(db: SupabaseClient, subId: string, opts: { allow
   const { clientId, propertyId } = await ensureClient(db, sub, ctx.prof, ctx.email);
   const startDate = ctx.firstVisit?.visit_date ?? new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
   const win = windowFrom(ctx.firstVisit?.time_window ?? ctx.prof?.preferred_time);
-  const notes = [
-    `Arrival window: ${win.label}`,
-    ctx.prof?.gate_code ? `Gate code: ${ctx.prof.gate_code}` : '', ctx.prof?.parking_notes ? `Parking: ${ctx.prof.parking_notes}` : '',
-    ctx.prof?.pets ? `Pets: ${ctx.prof.pets}` : '', ctx.prof?.special_instructions ? `Access/notes: ${ctx.prof.special_instructions}` : '',
-    'Pro: fill the Tidy Visit Report in Connecteam before you leave.',
-  ].filter(Boolean).join('\n');
   const specs = buildSpecs(sub, new Date(`${startDate}T12:00:00Z`));
   const wanted = new Set(specs.map((s) => s.key));
   for (const [k, v] of Object.entries(jobs)) {
@@ -185,6 +187,7 @@ async function syncSubscription(db: SupabaseClient, subId: string, opts: { allow
     }
   }
   for (const spec of specs) {
+    const notes=memberJobNotes(spec.service,ctx.prof,sub,ctx.home,ctx.car,ctx.preferred,win.label);
     if (jobs[spec.key]) {
       try { await gql(db, `mutation($j:EncodedId!,$i:JobEditInput!){jobEdit(jobId:$j,input:$i){job{id} userErrors{message path}}}`, { j: jobs[spec.key].job_id, i: { instructions: notes } }); } catch (e) { errors.push(`edit ${spec.key}: ${(e as Error).message}`); }
       continue;
@@ -196,6 +199,9 @@ async function syncSubscription(db: SupabaseClient, subId: string, opts: { allow
   await db.from('subscriptions').update({ jobber_job_ids: jobs, jobber_client_id: clientId }).eq('id', sub.id);
   await log(db, 'create_job', errors.length ? 'error' : 'success', errors.join('; ') || `jobs: ${Object.keys(jobs).join(',')}`, { subscription_id: sub.id, jobs });
   if (errors.length) await alert(db, `jobber_sync_fail:${sub.id}:${new Date().toISOString().slice(0, 10)}`, `Jobber sync failed for a member plan`, errors.join('\n'), 'digest', { subscription_id: sub.id });
+  const {data:upcoming}=await db.from('jobber_visits').select('jobber_visit_id').eq('subscription_id',sub.id).is('deleted_at',null).neq('status','complete').gte('start_at',new Date().toISOString());
+  for(const visit of upcoming??[]){try{await syncVisit(db,visit.jobber_visit_id);}catch(e){errors.push(`shift update: ${(e as Error).message}`);}}
+  if(errors.length)await alert(db,`member_shift_sync:${sub.id}`,'Member details could not reach upcoming shifts',errors.join('\n'),'digest');
   return { client_id: clientId, property_id: propertyId, jobs, errors };
 }
 
@@ -255,12 +261,14 @@ async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, PoolPro
   saved.connecteam_user_id = ctUser;
   if (saved.status === 'complete' || !v.startAt) return { visit: saved, shift: 'skipped' };
   const win = windowFrom(String(v.instructions ?? '').match(/Arrival window:\s*([^\n]+)/)?.[1]);
+  let instructions=String(v.instructions??'').replace(/^Gate code:.*(?:\n|$)/gmi,'');let access='';let shiftAddress=address;
+  if(subRow?.id){const {data:sub}=await db.from('subscriptions').select('*').eq('id',subRow.id).single();if(sub){const ctx=await memberContext(db,sub);instructions=memberJobNotes(svc.service,ctx.prof,sub,ctx.home,ctx.car,ctx.preferred,win.label);const {data:gate,error:gateError}=await db.rpc('jobber_member_shift_access',{_user:sub.user_id});if(gateError)throw gateError;access=shiftAccessNotes(gate);shiftAddress=[ctx.prof?.address_line1,ctx.prof?.address_line2,ctx.prof?.city,'FL',ctx.prof?.zip].filter(Boolean).join(', ');}}
   const shift: ShiftInput = {
-    title, address,
+    title, address:shiftAddress,
     startTime: Math.floor(new Date(v.startAt).getTime() / 1000),
     endTime: Math.floor(new Date(v.endAt ?? v.startAt).getTime() / 1000) || Math.floor(new Date(v.startAt).getTime() / 1000) + win.minutes * 60,
     assignedUserId: ctUser,
-    notesHtml: `<p><b>Arrival window:</b> ${esc(win.label)}</p><p>${esc(v.instructions ?? '').replace(/\n/g, '<br>')}</p>`
+    notesHtml: `<p><b>Arrival window:</b> ${esc(win.label)}</p><p>${esc(instructions).replace(/\n/g, '<br>')}</p>${ctUser&&access?`<p>${esc(access)}</p>`:''}`
       + `<p><b>Services/add-ons:</b> ${esc(names.join(', '))}</p><p><b>Fill the Tidy Visit Report before you leave.</b></p>`,
   };
   if (shift.endTime <= shift.startTime) shift.endTime = shift.startTime + win.minutes * 60;
@@ -513,6 +521,29 @@ async function withTestClient<T>(db: SupabaseClient, label: string, fn: (propert
 }
 
 // ---------- simulated Visit Report (real form 20738257 answer shape) ----------
+async function testMemberNotes(db:SupabaseClient){
+ return await withTestClient(db,'Member Notes Test',async(propertyId,clientId)=>{
+  const p={parking_notes:'TEST driveway',pets:'TEST dog secured',special_instructions:'TEST close gate'};
+  const home={body:'TEST no bleach',profile:{rooms:'TEST office',products:'TEST fragrance-free'}};
+  const car={vehicle_make:'TEST Toyota',vehicle_model:'Camry',vehicle_color:'Blue',vehicle_plate:'TEST123',parking_spot:'TEST driveway',interior_access:'TEST unlocked',spigot_at_parking:true,access_note:'TEST side entry'};
+  const checks:any[]=[];const start=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+  for(const service of ['cleaning','lawn','detailing']){
+   const spec=buildSpecs({plan_lines:[{service,size_tier:2,cadence:'monthly'}]},new Date(`${start}T12:00:00Z`))[0];
+   const notes=memberJobNotes(service,p,{lawn_measured_sqft:4200},home,car,'TEST preferred Pro','9 AM – 12 PM');
+   const jobId=await createJob(db,propertyId,spec,start,windowFrom('9 AM - 12 PM'),notes);
+   const job=await gql(db,`query($id:EncodedId!){job(id:$id){instructions visits(first:1){nodes{${VISIT_FIELDS}}}}}`,{id:jobId});
+   if(job.job.instructions!==notes)throw new Error('Job notes did not read back');
+   const v=job.job.visits.nodes[0];if(!v)throw new Error('No test visit created');
+   const mirrored=await upsertVisit(db,v,await proMap(db),CT_OWNER_USER_ID,true);
+   const shift=await getShift(mirrored.visit.connecteam_shift_id);
+   if(!shift||!JSON.stringify(shift).includes('TEST preferred Pro'))throw new Error('Connecteam notes readback failed');
+   checks.push({service,job_id:jobId,visit_id:v.id,shift_id:mirrored.visit.connecteam_shift_id,job_notes_verified:true,shift_readback:shift});
+  }
+  await gql(db,`mutation($p:EncodedId!,$i:PropertyEditInput!){propertyEdit(propertyId:$p,input:$i){property{id address{street1}} userErrors{message path}}}`,{p:propertyId,i:{address:{street1:'9998 SW Test Ln',city:'Miami',province:'FL',postalCode:'33156',country:'US'}}});
+  const property=await gql(db,`query($id:EncodedId!){client(id:$id){properties{id address{street1}}}}`,{id:clientId});
+  return {checks,address_updated:property.client.properties.some((p:any)=>p.id===propertyId&&p.address.street1==='9998 SW Test Ln')};
+ });
+}
 const TEST_PHOTO = (n: string) => `https://jointidy.co/og-founding.jpg?test=${n}`;
 async function testReport(db: SupabaseClient) {
   const steps: Record<string, unknown> = {};
@@ -628,6 +659,7 @@ Deno.serve(async (req) => {
       case 'register_webhooks': return jsonResponse({ ok: true, result: await registerWebhooks(db) });
       case 'skip_visit': return jsonResponse({ ok: true, result: await skipVisit(db, body.mirror_id) });
       case 'test_report': return jsonResponse({ ok: true, result: await testReport(db) });
+      case 'test_member_notes': return jsonResponse({ok:true,result:await testMemberNotes(db)});
       case 'test_carwash': return jsonResponse({ ok: true, result: await testCarWash(db) });
       case 'list_shifts': { const { ct } = await import('../_shared/connecteam.ts'); return jsonResponse(await ct('GET', `/scheduler/v1/schedulers/20735999/shifts?startTime=${body.from}&endTime=${body.to}&limit=200`)); }
       case 'test_e2e': return jsonResponse({ ok: true, result: await testE2E(db) });

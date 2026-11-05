@@ -11895,6 +11895,7 @@ export type Database = {
         }
         Returns: string
       }
+      jobber_member_shift_access: { Args: { _user: string }; Returns: string }
       kpi_latest_snapshot_rows: {
         Args: never
         Returns: {

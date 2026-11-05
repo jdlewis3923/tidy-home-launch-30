@@ -512,3 +512,9 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Approved paperwork appends newly eligible Pros after existing service priority; test Pros excluded, existing Susan/Jenifer entries untouched.
 - [ ] Rejected 24-hour email, new/hired digest counts and fake Hiring applicant end-to-end test: blocked by Hiring API access/documentation. No fake user substituted for a Hiring applicant.
 - [x] Approved test Pro 9900000001 produced zero assignment rows; test profile removed. Approval change live; publishing requested.
+
+## Member details → Jobber and Connecteam (Nov 5, 19:42 UTC)
+- [x] Labeled cleaning/home, car, lawn and preferred-Pro notes; service-only encrypted gate reader, assigned shift only; 12 tests pass.
+- [x] Save triggers deployed for profile/home/car/plan, existing property edits and upcoming-shift refresh implemented.
+- [x] Signed-in Home/Plan/Visits/Billing reachable; phone screenshot verified; Visits uses member_visit_feed. Car fields support detailing as well as wash add-ons.
+- [ ] Full test-member save → Jobber → Connecteam readback and under-one-minute timing remain unverified: provider test timed out at 150 seconds. Cleaning Jobber job 162301554 notes read back; job closed/client 158550258 archived, no test mirror/shift rows remain. No real member modified or emails/texts sent.
