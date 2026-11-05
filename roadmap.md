@@ -506,7 +506,9 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] 28 focused tests passed; desktop/mobile email rendering and real logo verified; build OK; backend deployed and publishing requested.
 
 ## Connecteam Hired trigger (Nov 5, 19:40 UTC)
-- [ ] Verify Hiring applicant/stage API and QuickBooks vendor connection.
-- [ ] Idempotent Hired onboarding, user Position, vendor and paperwork email; no texts.
-- [ ] Checkr when live; approved paperwork appends service assignment priority.
-- [ ] Rejected 24-hour email and daily hiring counts; owner-only fake test, cleanup, publish.
+- [ ] Hiring stage polling and Hired onboarding: blocked by absence of documented Connecteam Hiring applicant/stage endpoints; workforce-user API is not a substitute.
+- [ ] QuickBooks vendor creation: blocked by missing QuickBooks connection; existing integration is CSV export only.
+- [ ] Automatic Checkr: existing sender refuses pipeline applicants; do not enable spending until supported hire authority and Checkr-live setup are available.
+- [x] Approved paperwork appends newly eligible Pros after existing service priority; test Pros excluded, existing Susan/Jenifer entries untouched.
+- [ ] Rejected 24-hour email, new/hired digest counts and fake Hiring applicant end-to-end test: blocked by Hiring API access/documentation. No fake user substituted for a Hiring applicant.
+- [ ] Test assignment exclusion and publish actionable approval change.
