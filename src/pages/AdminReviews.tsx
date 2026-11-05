@@ -46,8 +46,6 @@ export default function AdminReviews() {
 
   useEffect(() => { if (hasRole) void fetchAll(); }, [hasRole, fetchAll]);
 
-  if (isLoading) return null;
-  if (!hasRole) return <Navigate to="/" replace />;
 
   const proName = (id: string | null) => {
     const p = pros.find((x) => x.id === id);
@@ -105,6 +103,9 @@ export default function AdminReviews() {
     }
     return [...map.values()].map((e) => ({ ...e, totalCents: bonuses.filter((b) => b.pro_id === e.pro_id && b.bonus_type === "review_bonus" && b.status !== "blocked").reduce((n, b) => n + (b.amount_cents ?? 0), 0) }));
   }, [rows, bonuses, monthKey]);
+
+  if (isLoading) return null;
+  if (!hasRole) return <Navigate to="/" replace />;
 
   return (
     <div className="min-h-screen bg-background px-6 py-16">

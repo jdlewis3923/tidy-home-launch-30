@@ -81,7 +81,7 @@ export default function AdminProPay() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <section className="border-b border-border pb-5">
+        <section id="insurance" className="scroll-mt-16 border-b border-border pb-5">
           <h2 className="text-base font-semibold">Connecteam paperwork</h2>
           {profiles.map(p=><div key={p.connecteam_user_id} className="py-3 border-b border-border text-sm">
             <p className="font-semibold">{p.name} · {p.paperwork_complete?'Complete':'Waiting'}</p>
@@ -137,7 +137,7 @@ export default function AdminProPay() {
           </table>
         </section>
 
-        <section className="bg-card rounded-xl border border-border p-5">
+        <section id="reviews" className="scroll-mt-16 bg-card rounded-xl border border-border p-5">
           <h2 className="text-base font-semibold">Review matches needing your approval</h2>
           {reviews.filter((r) => r.match_status === "pending").map((r) => (
             <div key={r.id} className="mt-3 rounded-lg border border-border p-3 text-sm">

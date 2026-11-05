@@ -1,0 +1,1 @@
+export function jobberVisitRemoved(error:unknown):boolean {return error instanceof Error&&/jobber graphql:\s*Visit not found(?:\s|$)/i.test(error.message);}
