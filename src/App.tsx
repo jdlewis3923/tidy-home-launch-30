@@ -200,7 +200,7 @@ import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFou
 import { getLandingSource } from "@/lib/landing-source";
 import { usePageVisibility, pageAllowed } from "@/lib/pageVisibility";
 
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/pro", "/pro/proof", "/add/", "/addon/", "/q/", "/neighbor", "/rate", "/verify/", "/intake", "/coi", "/contract/", "/photo/", "/badge/"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/apply", "/careers", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/pro", "/pro/proof", "/add/", "/addon/", "/q/", "/neighbor", "/rate", "/verify/", "/intake", "/coi", "/contract/", "/photo/", "/badge/"];
 
 // The printed door hangers point at /dashboard/plan?src=doorhanger_en — a
 // neighbour with no account should see the founding offer first. Bounce them to
@@ -451,6 +451,8 @@ const App = () => (
                   {/* Capacity & hiring — fill %, ceiling dates, when to post the job. */}
                   <Route path="/admin/capacity" element={<AdminCapacity />} />
                   <Route path="/apply" element={<Apply />} />
+                  <Route path="/apply/:service/*" element={<Apply />} />
+                  <Route path="/careers" element={<Navigate to="/apply" replace />} />
                   <Route path="/pro" element={<Navigate to="/pro/home" replace />} />
                   <Route path="/pro/home" element={<ProHome />} />
                   <Route path="/pro/tier-progression" element={<ProTierProgression />} />
