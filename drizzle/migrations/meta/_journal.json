@@ -2101,6 +2101,20 @@
       "when": 1793905779057,
       "tag": "0299_connecteam_paperwork_status_and_gates",
       "breakpoints": true
+    },
+    {
+      "idx": 300,
+      "version": "7",
+      "when": 1793906698124,
+      "tag": "0300_connecteam_paperwork_email_queue",
+      "breakpoints": true
+    },
+    {
+      "idx": 301,
+      "version": "7",
+      "when": 1793906837238,
+      "tag": "0301_paperwork_checkr_invite_status",
+      "breakpoints": true
     }
   ]
 }

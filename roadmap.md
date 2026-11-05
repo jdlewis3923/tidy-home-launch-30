@@ -497,4 +497,10 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] 15-minute document status/COI expiration sync, paperwork/pay gate, expired insurance assignment guard; live sync reads both Pros as waiting.
 - [x] Retired vendor sending/webhook/config/secrets and per-signature alerts; Susan document loads unsigned; historical signed records retained.
 - [x] Paperwork line previewed in both owner digests; 33 tests pass; live deployment complete.
-- [ ] Publish paperwork page updates.
+- [x] Publishing requested for paperwork page updates.
+
+## Connecteam paperwork email (Nov 5, 19:23 UTC)
+- [x] Branded bilingual document email with exact links; one owner-only test accepted by sender and recorded sent; phone preview uses a placeholder, real sends use Connecteam mobile number.
+- [x] Durable hire-triggered send, 48-hour/5-day remaining reminders, completion email; Susan/Jenifer held and verified unsent. Checkr hidden by default, requires checkr_live plus per-Pro invite link when enabled.
+- [ ] Live smart-group membership readback: implemented via smartGroupsIds and digest missing assignments; Connecteam calls repeatedly timed out during verification. Existing 15-minute reconciliation retries.
+- [x] 28 focused tests passed; desktop/mobile email rendering and real logo verified; build OK; backend deployed and publishing requested.
