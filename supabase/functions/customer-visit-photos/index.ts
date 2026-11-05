@@ -38,7 +38,20 @@ Deno.serve(async (req) => {
     .eq("user_id", userId)
     .maybeSingle();
 
-  if (!visit) return jsonResponse({ ok: false, error: "visit_not_found" }, 404);
+  if (!visit) {
+    // Jobber-owned plans: photos come from the Connecteam Visit Report on the Jobber mirror.
+    const { data: jv } = await admin.from("jobber_visits")
+      .select("id, user_id, status, service_line, start_at, completed_at, before_photos, after_photos, is_test")
+      .eq("id", parsed.data.visit_id).eq("user_id", userId).maybeSingle();
+    if (!jv || jv.is_test) return jsonResponse({ ok: false, error: "visit_not_found" }, 404);
+    if (jv.status !== "complete") return jsonResponse({ ok: false, error: "visit_not_complete" }, 409);
+    const urls = (k: "before" | "after", list: unknown) => (Array.isArray(list) ? list : []).map((url, i) => ({ id: `${jv.id}-${k}-${i}`, kind: k, uploaded_at: jv.completed_at, url: String(url) }));
+    return jsonResponse({
+      ok: true,
+      visit: { id: jv.id, user_id: jv.user_id, status: "complete", service: jv.service_line, service_type: jv.service_line, visit_date: String(jv.start_at).slice(0, 10), completed_at: jv.completed_at, crew_name: null },
+      photos: [...urls("before", jv.before_photos), ...urls("after", jv.after_photos)],
+    });
+  }
   if (visit.status !== "complete") return jsonResponse({ ok: false, error: "visit_not_complete" }, 409);
 
   const { data: rows, error } = await admin
