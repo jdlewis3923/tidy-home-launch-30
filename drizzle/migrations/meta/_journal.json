@@ -2115,6 +2115,13 @@
       "when": 1793906837238,
       "tag": "0301_paperwork_checkr_invite_status",
       "breakpoints": true
+    },
+    {
+      "idx": 302,
+      "version": "7",
+      "when": 1793907661813,
+      "tag": "0302_paperwork_approved_assignment_append",
+      "breakpoints": true
     }
   ]
 }
