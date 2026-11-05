@@ -504,3 +504,9 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Durable hire-triggered send, 48-hour/5-day remaining reminders, completion email; Susan/Jenifer held and verified unsent. Checkr hidden by default, requires checkr_live plus per-Pro invite link when enabled.
 - [ ] Live smart-group membership readback: implemented via smartGroupsIds and digest missing assignments; Connecteam calls repeatedly timed out during verification. Existing 15-minute reconciliation retries.
 - [x] 28 focused tests passed; desktop/mobile email rendering and real logo verified; build OK; backend deployed and publishing requested.
+
+## Connecteam Hired trigger (Nov 5, 19:40 UTC)
+- [ ] Verify Hiring applicant/stage API and QuickBooks vendor connection.
+- [ ] Idempotent Hired onboarding, user Position, vendor and paperwork email; no texts.
+- [ ] Checkr when live; approved paperwork appends service assignment priority.
+- [ ] Rejected 24-hour email and daily hiring counts; owner-only fake test, cleanup, publish.
