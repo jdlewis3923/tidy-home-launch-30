@@ -485,3 +485,8 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Member → Jobber recurring jobs; website engine stops; visits → Connecteam shifts; Visit Report loop; payout lines; ZZ Sync Test passed; webhooks registered
 - [x] Pro app retired to Connecteam (signing link kept for Susan); /admin/pro-pay, pay rules tested, Friday statements
 - [x] Jobber gaps: customer reads from Jobber mirror, several Pros per service, simulated Visit Report passed, car-wash 1/2-wash mapping verified
+
+## Jobber four-item completion verification (Nov 5, 18:55 UTC)
+- [ ] Verify all customer reads and multi-Pro overlap assignment, repair any gaps.
+- [ ] Re-run owner-only Visit Report and 1/2-wash tests; verify cleanup.
+- [ ] Publish checked changes and report test IDs and remaining blockers.
