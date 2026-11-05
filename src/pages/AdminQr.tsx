@@ -1,0 +1,5 @@
+import {useEffect,useState} from 'react';
+import {Navigate} from 'react-router-dom';
+import {supabase} from '@/integrations/supabase/client';
+import {useHasRoleState} from '@/hooks/useHasRole';
+export default function AdminQr(){const {hasRole,isLoading}=useHasRoleState('admin');const [total,setTotal]=useState<number|null>(null);useEffect(()=>{if(hasRole)supabase.from('qr_scan').select('id',{count:'exact',head:true}).then(({count,error})=>setTotal(error?null:count??0));},[hasRole]);if(isLoading)return <main className="admin-page p-8">Loading…</main>;if(!hasRole)return <Navigate to="/login" replace/>;return <main className="admin-page p-6"><h1 className="text-3xl font-semibold">Door-hanger QR</h1><div className="mt-6 border-y border-border py-6"><p className="text-muted-foreground">Recorded QR scans</p><p className="mt-2 text-4xl font-semibold">{total??'—'}</p></div><p className="mt-5 text-muted-foreground">Printed hangers lead to the Founding page.</p><a className="mt-3 inline-block text-primary underline" href="/founding" target="_blank" rel="noopener noreferrer">Open Founding page</a></main>;}

@@ -18,6 +18,7 @@ import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
 import { parseCarWashKey, pickPro, type PoolPro } from '../_shared/jobber-rules.ts';
 import {memberJobNotes,shiftAccessNotes} from '../_shared/member-job-notes.ts';
+import {jobberVisitRemoved} from '../_shared/jobber-removed.ts';
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
 const SITE_FN = `${Deno.env.get('SUPABASE_URL')}/functions/v1/jobber-webhook`;
@@ -319,8 +320,10 @@ async function reconcile(db: SupabaseClient, days = 21) {
 }
 
 async function syncVisit(db: SupabaseClient, id: string) {
-  const d = await gql(db, `query($id:EncodedId!){visit(id:$id){${VISIT_FIELDS}}}`, { id });
-  if (!d.visit) return { removed: await removeVisit(db, id) };
+  let d:any;
+  try{d=await gql(db, `query($id:EncodedId!){visit(id:$id){${VISIT_FIELDS}}}`, { id });}
+  catch(e){if(!jobberVisitRemoved(e))throw e;const removed=await removeVisit(db,id);await log(db,'sync_visit','success','Removed visit no longer exists in Jobber',{jobber_visit_id:id});return {removed};}
+  if (!d.visit) {const removed=await removeVisit(db,id);await log(db,'sync_visit','success','Removed visit no longer exists in Jobber',{jobber_visit_id:id});return {removed};}
   if (/^ZZ Sync/i.test(d.visit.client?.firstName ?? '')) return { skipped: 'test_runner_owned' };
   return await upsertVisit(db, d.visit, await proMap(db));
 }

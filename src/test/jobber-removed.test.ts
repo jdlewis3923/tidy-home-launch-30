@@ -1,0 +1,3 @@
+import {it,expect} from 'vitest';
+import {jobberVisitRemoved} from '../../supabase/functions/_shared/jobber-removed';
+it('removed Jobber visit is a removal, not an integration failure',()=>{expect(jobberVisitRemoved(new Error('jobber graphql: Visit not found'))).toBe(true);expect(jobberVisitRemoved(new Error('jobber_not_connected: failed'))).toBe(false);expect(jobberVisitRemoved(new Error('Job not found'))).toBe(false)});
