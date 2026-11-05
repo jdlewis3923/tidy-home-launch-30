@@ -86,8 +86,10 @@ async function memberContext(db: SupabaseClient, sub: any) {
     db.from('profiles').select('*').eq('user_id', sub.user_id).maybeSingle(),
     db.auth.admin.getUserById(sub.user_id),
   ]);
-  const { data: firstVisit } = await db.from('visits').select('visit_date, time_window, scheduled_start')
+  const { data: legacyVisit } = await db.from('visits').select('visit_date, time_window, scheduled_start')
     .eq('subscription_id', sub.id).gte('visit_date', new Date().toISOString().slice(0, 10)).order('visit_date').limit(1).maybeSingle();
+  const {data:mirrorVisit}=await db.from('jobber_visits').select('start_at,raw').eq('subscription_id',sub.id).is('deleted_at',null).neq('status','complete').gte('start_at',new Date().toISOString()).order('start_at').limit(1).maybeSingle();
+  const firstVisit=mirrorVisit?{visit_date:mirrorVisit.start_at.slice(0,10),time_window:(mirrorVisit.raw as any)?.instructions?.match(/Arrival window:\s*([^\n]+)/)?.[1]}:Object.keys(sub.jobber_job_ids??{}).length?null:legacyVisit;
   const [{data:home},{data:car},{data:preferred}]=await Promise.all([db.from('home_notes').select('*').eq('user_id',sub.user_id).maybeSingle(),db.from('car_wash_profiles').select('*').eq('subscription_id',sub.id).maybeSingle(),sub.preferred_pro_id?db.from('profiles').select('first_name,last_name').eq('user_id',sub.preferred_pro_id).maybeSingle():Promise.resolve({data:null})]);
   return { prof: prof as any, email: u?.user?.email ?? '', firstVisit: firstVisit as any,home,car,preferred:[preferred?.first_name,preferred?.last_name].filter(Boolean).join(' ') };
 }
@@ -160,7 +162,7 @@ async function syncSubscription(db: SupabaseClient, subId: string, opts: { allow
   const { data: sub } = await db.from('subscriptions').select('*').eq('id', subId).maybeSingle();
   if (!sub) return { skipped: 'not_found' };
   const ctx = await memberContext(db, sub);
-  if (!opts.allowTest && EXCLUDED_EMAIL.test(ctx.email)) return { skipped: 'test_or_owner' };
+  if (!opts.allowTest && (sub.is_test || EXCLUDED_EMAIL.test(ctx.email))) return { skipped: 'test_or_owner' };
   const jobs: Record<string, any> = (sub.jobber_job_ids && typeof sub.jobber_job_ids === 'object' && !Array.isArray(sub.jobber_job_ids)) ? { ...sub.jobber_job_ids } : {};
   const active = sub.status === 'active' && !sub.pause_collection && !(sub.paused_until && new Date(sub.paused_until) > new Date());
   const errors: string[] = [];
@@ -534,6 +536,7 @@ async function testMemberNotes(db:SupabaseClient){
    const v=job.job.visits.nodes[0];if(!v)throw new Error('No test visit created');
    const mirrored=await upsertVisit(db,v,await proMap(db),CT_OWNER_USER_ID,true);
    const shift=await getShift(mirrored.visit.connecteam_shift_id);
+   if(!shift||!JSON.stringify(shift).includes('TEST preferred Pro'))throw new Error('Connecteam notes readback failed');
    checks.push({service,job_id:jobId,visit_id:v.id,shift_id:mirrored.visit.connecteam_shift_id,job_notes_verified:true,shift_readback:shift});
   }
   await gql(db,`mutation($p:EncodedId!,$i:PropertyEditInput!){propertyEdit(propertyId:$p,input:$i){property{id address{street1}} userErrors{message path}}}`,{p:propertyId,i:{address:{street1:'9998 SW Test Ln',city:'Miami',province:'FL',postalCode:'33156',country:'US'}}});
