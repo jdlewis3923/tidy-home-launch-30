@@ -185,12 +185,18 @@ function RouteHouseholds() {
       const today = new Date();
       const to = new Date(today.getTime() + 13 * 86_400_000);
       const fmt = (d: Date) => d.toISOString().slice(0, 10);
-      const { data, error } = await supabase.rpc("admin_route_households", {
-        _from: fmt(today),
-        _to: fmt(to),
-      });
+      const [site, jobber] = await Promise.all([
+        supabase.rpc("admin_route_households", { _from: fmt(today), _to: fmt(to) }),
+        // Jobber is the schedule of record; its visits are counted per Connecteam Pro.
+        supabase.rpc("admin_jobber_route_households", { _from: fmt(today), _to: fmt(to) }),
+      ]);
+      const error = site.error ?? jobber.error;
       if (error) setErr(error.message);
-      else setRows((data as RouteRow[]) ?? []);
+      else setRows([
+        ...((site.data as RouteRow[]) ?? []),
+        ...((jobber.data ?? []) as Array<{ connecteam_user_id: number | null; pro_name: string | null; visit_date: string; homes: number; visits: number }>)
+          .map((r) => ({ pro_id: `ct-${r.connecteam_user_id ?? "open"}`, pro_name: `${r.pro_name ?? "Pro"} (Jobber)`, visit_date: r.visit_date, homes: r.homes, visits: r.visits })),
+      ].sort((x, y) => x.visit_date.localeCompare(y.visit_date)));
     })();
   }, []);
 
