@@ -518,3 +518,9 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Save triggers deployed for profile/home/car/plan, existing property edits and upcoming-shift refresh implemented.
 - [x] Signed-in Home/Plan/Visits/Billing reachable; phone screenshot verified; Visits uses member_visit_feed. Car fields support detailing as well as wash add-ons.
 - [ ] Full test-member save → Jobber → Connecteam readback and under-one-minute timing remain unverified: provider test timed out at 150 seconds. Cleaning Jobber job 162301554 notes read back; job closed/client 158550258 archived, no test mirror/shift rows remain. No real member modified or emails/texts sent.
+
+## Admin cleanup (Nov 5, 19:59 UTC)
+- [ ] Larger six-group menu, external quick launches and redirected duplicate tools, no data deletion.
+- [ ] Real integration health, permanent Jobber reconnect, plain-English command center.
+- [ ] Removed Jobber visit webhook handling; tests and menu/browser checks.
+- [ ] Security check and publish; report moved tools and external blockers.
