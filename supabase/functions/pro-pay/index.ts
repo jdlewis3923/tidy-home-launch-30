@@ -67,7 +67,7 @@ async function buildWeek(db: SupabaseClient, weekStart: string, testOnly = false
     const teamPay = R.outcomeCents(teamBase, v.pay_outcome ?? null, paidRedo);
     const shares = R.splitTeam(teamPay, team.length);
     const kind = v.pay_outcome ?? 'visit';
-    const label = `${v.title}${firstEstate ? ' (first Estate visit, 1.5×)' : ''}${v.pay_outcome ? ` — ${v.pay_outcome.replace('_', ' ')} 50%` : ''}${team.length > 1 ? ` — team of ${team.length}` : ''}`;
+    const label = `${v.title}${firstEstate ? ' (first Estate visit, 1.5×)' : ''}${v.pay_outcome ? ` — ${v.pay_outcome.replace('_', ' ')} ${paidRedo ? '(2nd redo in 60 days, $0)' : '50%'}` : ''}${team.length > 1 ? ` — team of ${team.length}` : ''}`;
     for (let i = 0; i < team.length; i++) {
       await upsertLine(db, { ...common, line_key: `visit:${v.jobber_visit_id}:${team[i]}`, connecteam_user_id: team[i], kind, description: label,
         jobber_visit_id: v.jobber_visit_id, member_user_id: v.user_id, base_cents: teamBase, pay_cents: shares[i] });
