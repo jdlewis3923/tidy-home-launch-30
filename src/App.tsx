@@ -17,6 +17,10 @@ import { MetaPixel } from "@/components/marketing/MetaPixel";
 const ChatbotMount = lazy(() => import("@/components/chatbot/ChatbotMount"));
 import HomeButton from "@/components/HomeButton";
 import AppInstallHead from "@/components/AppInstallHead";
+const AdminServiceHandoff=lazy(()=>import('@/components/admin/AdminServiceHandoff'));
+const AdminToday=lazy(()=>import('@/pages/AdminToday'));
+const AdminDigest=lazy(()=>import('@/pages/AdminDigest'));
+const AdminQr=lazy(()=>import('@/pages/AdminQr'));
 const AdminChrome = lazy(() => import("@/components/admin/AdminChrome"));
 import { useSiteLive } from "@/hooks/useSiteLive";
 import { useHasRoleState } from "@/hooks/useHasRole";
@@ -377,54 +381,57 @@ const App = () => (
                   <Route path="/welcome" element={<Welcome />} />
 
                   {/* Phase 2 one-time admin bootstrap. Remove after use. */}
-                  <Route path="/admin/setup-catalog" element={<AdminSetupCatalog />} />
+                  <Route path="/admin/setup-catalog" element={<AdminServiceHandoff />} />
                   {/* Phase 6 Zapier event tester. Remove after wiring complete. */}
-                  <Route path="/admin/test-zapier" element={<AdminTestZapier />} />
+                  <Route path="/admin/test-zapier" element={<AdminServiceHandoff />} />
                   {/* Phase 8 integration health dashboard. */}
+                  <Route path="/admin/members" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/digest" element={<AdminDigest />} />
+                  <Route path="/admin/qr" element={<AdminQr />} />
                   <Route path="/admin/health" element={<AdminHealth />} />
                   <Route path="/admin/pro-pay" element={<AdminProPay />} />
                   {/* Chatbot knowledge editor (admins only). */}
                   <Route path="/admin/chatbot-knowledge" element={<AdminChatbotKnowledge />} />
                   {/* Unified support inbox (SMS + web), admins only. */}
                   <Route path="/admin/inbox" element={<AdminInbox />} />
-                  <Route path="/admin/photos" element={<AdminPhotos />} />
-                  <Route path="/admin/calendar" element={<AdminCalendar />} />
-                  <Route path="/admin/reschedules" element={<AdminReschedules />} />
+                  <Route path="/admin/photos" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/calendar" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/reschedules" element={<AdminServiceHandoff />} />
                   {/* Social media auto-poster (IG + FB), admins only. */}
-                  <Route path="/admin/schedule" element={<AdminSchedule />} />
+                  <Route path="/admin/schedule" element={<AdminServiceHandoff />} />
                   {/* Permanent KPI Command Center — admins only. */}
                   <Route path="/admin/kpis" element={<AdminKpis />} />
                   <Route path="/admin/reservations" element={<AdminReservations />} />
                   <Route path="/admin/lawn-verification" element={<AdminLawnVerification />} />
                   <Route path="/admin/founding" element={<AdminFounding />} />
-                  <Route path="/admin/pipeline" element={<AdminPipeline />} />
-                  <Route path="/admin/pipeline/archive" element={<AdminPipelineArchive />} />
-                  <Route path="/admin/pipeline/:id" element={<AdminPipelineRecord />} />
-                  <Route path="/admin/hiring" element={<HiringDashboard />} />
-                  <Route path="/admin/hiring/fit/:id" element={<HiringFitReport />} />
-                  <Route path="/admin/hiring/phone/:id" element={<HiringScorecard kind="phone" />} />
-                  <Route path="/admin/hiring/ref/:id" element={<HiringScorecard kind="reference" />} />
-                  <Route path="/admin/hiring/interview/:id" element={<HiringScorecard kind="interview" />} />
-<Route path="/admin/hiring/slots" element={<HiringSlots />} />
-                  <Route path="/admin/hiring/invite" element={<HiringInvite />} />
-                  <Route path="/admin/hiring/outbox" element={<HiringOutbox />} />
-                  <Route path="/admin/hiring/texts" element={<CandidateTextOrganizer />} />
-                  <Route path="/admin/messages" element={<AdminMessages />} />
-                  <Route path="/admin/messages/simulator" element={<LifecycleSimulator />} />
-                  <Route path="/admin/hiring/content" element={<HiringContent />} />
+                  <Route path="/admin/pipeline" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/pipeline/archive" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/pipeline/:id" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/hiring" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/hiring/fit/:id" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/hiring/phone/:id" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/hiring/ref/:id" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/hiring/interview/:id" element={<AdminServiceHandoff />} />
+<Route path="/admin/hiring/slots" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/hiring/invite" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/hiring/outbox" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/hiring/texts" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/messages" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/messages/simulator" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/hiring/content" element={<AdminServiceHandoff />} />
                   <Route path="/admin/entitlements" element={<AdminEntitlements />} />
                   {/* Command center — default admin landing view. */}
                   <Route path="/admin" element={<Navigate to="/admin/command" replace />} />
-                  <Route path="/admin/command" element={<AdminCommand />} />
+                  <Route path="/admin/command" element={<AdminToday />} />
                   <Route path="/admin/alerts" element={<AdminAlerts />} />
                   <Route path="/admin/alert-rules" element={<AdminAlertRules />} />
-                  <Route path="/admin/onboarding" element={<AdminOnboarding />} />
+                  <Route path="/admin/onboarding" element={<AdminServiceHandoff />} />
                   <Route path="/admin/pro-kits" element={<AdminProKits />} />
                   <Route path="/admin/badges" element={<AdminBadges />} />
-                  <Route path="/admin/pro-assignments" element={<AdminProAssignments />} />
+                  <Route path="/admin/pro-assignments" element={<AdminServiceHandoff />} />
                   <Route path="/admin/agents" element={<AdminAgents />} />
-                  <Route path="/admin/pro-tracker" element={<AdminProTracker />} />
-                  <Route path="/admin/signing-day" element={<SigningDay />} />
+                  <Route path="/admin/pro-tracker" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/signing-day" element={<AdminServiceHandoff />} />
                   <Route path="/admin/settings/notifications" element={<AdminNotificationSettings />} />
                   <Route path="/admin/costs" element={<AdminCosts />} />
                   <Route path="/admin/site-status" element={<AdminSiteStatus />} />
@@ -435,23 +442,23 @@ const App = () => (
                   <Route path="/admin/evidence-pack" element={<AdminEvidencePack />} />
                   <Route path="/admin/documents" element={<AdminDocuments />} />
                   <Route path="/admin/documents/:slug" element={<AdminLivingDocument />} />
-                  <Route path="/admin/applicants" element={<AdminApplicants />} />
-                  <Route path="/admin/orientations" element={<AdminOrientations />} />
-                  <Route path="/admin/orientations/preview" element={<ProOrientationPreview />} />
+                  <Route path="/admin/applicants" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/orientations" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/orientations/preview" element={<AdminServiceHandoff />} />
                   <Route path="/admin/social" element={<AdminSocial />} />
                   <Route path="/admin/demand" element={<AdminDemand />} />
                   <Route path="/admin/social-launch" element={<Navigate to="/admin/social" replace />} />
                   <Route path="/admin/nextdoor-verify" element={<AdminNextdoorVerify />} />
-                  <Route path="/admin/documenso-templates" element={<Navigate to="/admin/pro-pay" replace />} />
+                  <Route path="/admin/documenso-templates" element={<AdminServiceHandoff />} />
                   <Route path="/admin/email-health" element={<AdminEmailHealth />} />
-                  <Route path="/admin/setup-check" element={<AdminSetupCheck />} />
+                  <Route path="/admin/setup-check" element={<AdminServiceHandoff />} />
                   {/* Leads & Requests — waitlist, support requests, chatbot leads. */}
                   <Route path="/admin/leads" element={<AdminLeads />} />
                   {/* Google review → Pro bonus queue. */}
                   <Route path="/admin/reviews" element={<AdminReviews />} />
                   <Route path="/admin/reviews/import" element={<AdminReviewsImport />} />
                   {/* Capacity & hiring — fill %, ceiling dates, when to post the job. */}
-                  <Route path="/admin/capacity" element={<AdminCapacity />} />
+                  <Route path="/admin/capacity" element={<AdminServiceHandoff />} />
                   <Route path="/apply" element={<Apply />} />
                   <Route path="/apply/:service/*" element={<Apply />} />
                   <Route path="/careers" element={<Navigate to="/apply" replace />} />
@@ -459,9 +466,9 @@ const App = () => (
                   {/* On-site job view: before-photo gate + walkaround add-on request. */}
                   {/* Public, token-authenticated add-on approval from the SMS link. */}
                   <Route path="/addon/:token" element={<AddonApproval />} />
-                  <Route path="/admin/coi-review" element={<AdminCoiReview />} />
-                  <Route path="/admin/insurance" element={<AdminInsurance />} />
-                  <Route path="/admin/tier-progression" element={<AdminTierProgression />} />
+                  <Route path="/admin/coi-review" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/insurance" element={<AdminServiceHandoff />} />
+                  <Route path="/admin/tier-progression" element={<Navigate to="/admin/pro-pay" replace />} />
                   <Route path="/coming-soon" element={<ComingSoon />} />
                   <Route
                     path="/dashboard/notifications"

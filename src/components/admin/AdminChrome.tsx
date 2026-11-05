@@ -13,70 +13,7 @@ import AdminSearch from "@/components/admin/AdminSearch";
 import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
 import { Button } from "@/components/ui/button";
 
-type NavItem = { to: string; label: string; icon: typeof Activity; badge?: "alerts" };
-type NavGroup = { label: string; icon: typeof Activity; items: NavItem[] };
-
-const GROUPS: NavGroup[] = [
-  { label: "Today", icon: Activity, items: [
-    { to: "/admin/command", label: "Command", icon: Activity },
-    { to: "/admin/kpis", label: "KPIs", icon: BarChart3 },
-    { to: "/admin/reservations", label: "Reservations", icon: ClipboardList },
-    { to: "/admin/lawn-verification", label: "Lawn verification", icon: ClipboardList },
-    { to: "/admin/founding", label: "Founding homes", icon: ClipboardList },
-    { to: "/admin/entitlements", label: "Free add-ons", icon: ClipboardList },
-    { to: "/admin/alerts", label: "Alerts", icon: Bell, badge: "alerts" },
-    { to: "/admin/schedule", label: "Schedule", icon: CalendarDays },
-    { to: "/admin/pro-tracker", label: "Pro tracker", icon: MapPin },
-  ]},
-  { label: "Hiring", icon: BriefcaseBusiness, items: [
-    { to: "/admin/signing-day", label: "Signing day", icon: FileText },
-    { to: "/admin/hiring", label: "Hiring dashboard", icon: BarChart3 },
-    { to: "/admin/hiring/texts", label: "Candidate texts", icon: MessageSquare },
-    { to: "/admin/hiring/slots", label: "Hiring slots", icon: CalendarDays },
-    { to: "/admin/hiring/outbox", label: "SMS outbox", icon: MessageSquare },
-    { to: "/admin/messages", label: "Messages", icon: Mail },
-    { to: "/admin/hiring/content", label: "Hiring content", icon: FileText },
-    { to: "/admin/pipeline", label: "Pipeline", icon: Users },
-    { to: "/admin/pipeline/archive", label: "Pipeline archive", icon: FileText },
-    { to: "/admin/applicants", label: "Applicants (legacy)", icon: Users },
-    { to: "/admin/onboarding", label: "Onboarding", icon: GraduationCap },
-    { to: "/admin/pro-kits", label: "Pro Kits", icon: PackageCheck },
-    { to: "/admin/badges", label: "Badges", icon: ShieldCheck },
-    { to: "/admin/tier-progression", label: "Tier", icon: Award },
-    { to: "/admin/orientations", label: "Orientations", icon: CalendarDays },
-  ]},
-  { label: "Compliance", icon: Shield, items: [
-    { to: "/admin/coi-review", label: "COI", icon: ShieldCheck },
-    { to: "/admin/insurance", label: "Insurance", icon: ShieldCheck },
-    { to: "/admin/documents", label: "Docs", icon: FileText },
-  ]},
-  { label: "Customers", icon: Users, items: [
-    { to: "/admin/leads", label: "Leads", icon: ClipboardList },
-    { to: "/admin/inbox", label: "Inbox", icon: Inbox },
-    { to: "/admin/reviews", label: "Reviews", icon: Star },
-  ]},
-  { label: "Money", icon: Landmark, items: [
-    { to: "/admin/costs", label: "Costs", icon: DollarSign },
-    { to: "/admin/capacity", label: "Capacity", icon: Gauge },
-    { to: "/admin/alert-rules", label: "Rules", icon: SlidersHorizontal },
-  ]},
-  { label: "System", icon: Settings, items: [
-    { to: "/admin/health", label: "Health", icon: Heart },
-    { to: "/admin/email-health", label: "Email & SMS", icon: Mail },
-    { to: "/admin/site-status", label: "Site", icon: Power },
-    { to: "/admin/launch-dates", label: "Launch dates", icon: CalendarDays },
-    { to: "/admin/service-scope", label: "Service scope", icon: BookOpen },
-    { to: "/admin/size-review", label: "Size review", icon: Power },
-    { to: "/admin/evidence-pack", label: "Evidence pack", icon: Mail },
-    { to: "/admin/social", label: "Social calendar", icon: CalendarDays },
-    { to: "/admin/demand", label: "Demand", icon: CalendarDays },
-    { to: "/admin/chatbot-knowledge", label: "Chatbot", icon: BookOpen },
-    { to: "/admin/agents", label: "Agents", icon: Bot },
-    { to: "/admin/settings/notifications", label: "Notify", icon: Bell },
-    { to: "/admin/test-zapier", label: "Zapier", icon: Zap },
-  ]},
-];
-
+import {ADMIN_GROUPS as GROUPS,ADMIN_LAUNCHERS} from '@/lib/admin-navigation';
 const NAV = GROUPS.flatMap((group) => group.items);
 const OPEN_KEY = "tidy.admin.nav-groups";
 
@@ -145,19 +82,19 @@ export default function AdminChrome() {
   const rail = (
     <nav className="admin-hud-rail" aria-label="Admin navigation">
       <div className="admin-hud-rail__brand"><span className="admin-hud-dot" /><span>TIDY</span></div>
-      {time < new Date("2026-12-01T05:00:00Z") && <Link to="/admin/signing-day" className={`admin-hud-rail__item ${pathname === "/admin/signing-day" ? "is-active" : ""}`}><FileText className="h-4 w-4"/><span>Signing day</span></Link>}
+      <div className="mb-4 grid gap-2">{ADMIN_LAUNCHERS.map(l=><Button asChild key={l.label} variant="outline" className="justify-start border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-deep hover:text-primary-foreground"><a href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a></Button>)}</div>
       {GROUPS.map((group) => {
         const open = openGroups.includes(group.label);
         const badge = group.items.reduce((sum, item) => sum + (item.badge === "alerts" ? openAlerts : 0), 0);
         const GroupIcon = group.icon;
         return <div className="admin-nav-group" key={group.label}>
           <Button type="button" variant="ghost" className="admin-nav-group__trigger" onClick={() => toggleGroup(group.label)} aria-expanded={open}>
-            <GroupIcon className="h-4 w-4" /><span>{group.label}</span>{badge > 0 && <span className="admin-nav-badge">{badge}</span>}<ChevronDown className={`ml-auto h-4 w-4 ${open ? "rotate-180" : ""}`} />
+            <GroupIcon className="h-5 w-5" /><span>{group.label}</span>{badge > 0 && <span className="admin-nav-badge">{badge}</span>}<ChevronDown className={`ml-auto h-5 w-5 ${open ? "rotate-180" : ""}`} />
           </Button>
           {open && <div className="admin-nav-group__items">{group.items.map(({ to, label, icon: Icon, badge: itemBadge }) => {
-            const active = pathname === to || pathname.startsWith(`${to}/`);
+            const base=to.split('#')[0]; const active = pathname === base || pathname.startsWith(`${base}/`);
             return <Link key={to} to={to} className={`admin-hud-rail__item ${active ? "is-active" : ""}`} aria-current={active ? "page" : undefined}>
-              <Icon className="h-4 w-4" /><span>{label}</span>{itemBadge === "alerts" && openAlerts > 0 && <span className="admin-nav-badge">{openAlerts}</span>}
+              <Icon className="h-5 w-5" /><span>{label}</span>{itemBadge === "alerts" && openAlerts > 0 && <span className="admin-nav-badge">{openAlerts}</span>}
             </Link>;
           })}</div>}
         </div>;
@@ -170,7 +107,7 @@ export default function AdminChrome() {
     <CapacityBanner />
     <div className="admin-hud-topbar" role="status" aria-label="Admin status">
       <div className="admin-hud-topbar__left">
-        <Button className="admin-mobile-menu" variant="ghost" size="icon" onClick={() => setDrawerOpen(true)} aria-label="Open admin navigation"><Menu className="h-4 w-4" /></Button>
+        <Button className="admin-mobile-menu" variant="ghost" size="icon" onClick={() => setDrawerOpen(true)} aria-label="Open admin navigation"><Menu className="h-5 w-5" /></Button>
         <span className="admin-hud-dot" /><span className="admin-hud-label">TIDY · COMMAND</span><span className="admin-hud-path">{pathname.replace("/admin", "ADMIN") || "ADMIN"}</span>
       </div>
       <div className="admin-hud-topbar__center"><AdminSearch nav={NAV.map(({ to, label }) => ({ to, label }))} /></div>

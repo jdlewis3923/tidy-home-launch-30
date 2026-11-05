@@ -676,7 +676,7 @@ body.admin-hud > #root {
 }
 @media (min-width: 1024px) {
   body.admin-hud > #root {
-    padding-left: 248px;
+    padding-left: 288px;
     padding-right: 0;
     padding-top: 40px;
   }
@@ -818,7 +818,7 @@ body.admin-hud > #root {
 .admin-hud-rail {
   position: fixed;
   top: 40px; bottom: 0; left: 0;
-  width: 248px;
+  width: 288px;
   z-index: 49;
   display: none;
   flex-direction: column;
@@ -839,7 +839,7 @@ body.admin-hud > #root {
 }
 .admin-hud-rail__brand { display:flex;align-items:center;gap:10px;padding:4px 10px 16px;color:hsl(var(--primary-foreground));font:700 13px "JetBrains Mono",monospace;letter-spacing:.18em; }
 .admin-nav-group { margin-bottom: 4px; }
-.admin-nav-group__trigger { width:100%;height:38px;justify-content:flex-start;gap:9px;color:#d9e3ec;font:700 11px "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase; }
+.admin-nav-group__trigger { width:100%;height:auto;min-height:48px;justify-content:flex-start;gap:10px;color:hsl(var(--primary-foreground));font:600 13px "Poppins",sans-serif;letter-spacing:0;text-transform:none;white-space:normal;text-align:left; }
 .admin-nav-group__trigger:hover { background:hsl(var(--primary-deep));color:hsl(var(--primary-foreground)); }
 .admin-nav-group__items { margin:2px 0 8px 16px;padding-left:8px;border-left:1px solid rgb(217 227 236 / .25); }
 .admin-nav-badge { margin-left:auto;min-width:20px;border-radius:999px;background:#B42318;color:white;padding:1px 6px;text-align:center;font:700 10px "JetBrains Mono",monospace; }
@@ -848,17 +848,18 @@ body.admin-hud > #root {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: 9px;
+  justify-content: flex-start;
+  gap: 12px;
   width: 100%;
-  padding: 8px 10px;
+  min-height:48px;
+  padding: 12px 10px;
   border-radius: 6px;
   color: hsl(var(--admin-rail-text));
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-family: "Poppins",sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
   text-decoration: none;
   transition: all 180ms var(--ease-tidy);
 }
@@ -886,9 +887,9 @@ body.admin-hud > #root {
 }
 .admin-status-chip { display:flex;align-items:center;gap:4px;padding:2px 7px;border:1px solid hsl(var(--primary-foreground) / .28);border-radius:999px;color:hsl(var(--primary-foreground)); }
 .admin-status-chip.is-live { color:hsl(var(--success)); }.admin-status-chip.is-waitlist { color:hsl(var(--gold)); }.admin-status-chip.is-dark { color:hsl(var(--destructive)); }
-.admin-mobile-drawer { position:fixed;inset:0;z-index:80; }.admin-mobile-backdrop { position:absolute;inset:0;background:hsl(var(--navy) / .65); }.admin-mobile-panel { position:relative;width:min(86vw,280px);height:100%;background:hsl(var(--navy)); }.admin-mobile-panel .admin-hud-rail { display:flex;position:absolute;inset:0;width:100%;padding-top:54px; }.admin-mobile-close { position:absolute;right:10px;top:8px;z-index:2;color:hsl(var(--primary-foreground)); }
+.admin-mobile-drawer { position:fixed;inset:0;z-index:80; }.admin-mobile-backdrop { position:absolute;inset:0;background:hsl(var(--navy) / .65); }.admin-mobile-panel { position:relative;width:min(92vw,320px);height:100%;background:hsl(var(--navy)); }.admin-mobile-panel .admin-hud-rail { display:flex;position:absolute;inset:0;width:100%;padding-top:54px; }.admin-mobile-close { position:absolute;right:10px;top:8px;z-index:2;color:hsl(var(--primary-foreground)); }
 .admin-capacity-banner { position:fixed;z-index:52;top:40px;left:0;right:0; }
-@media (min-width:1024px){ .admin-capacity-banner { left:248px; } }
+@media (min-width:1024px){ .admin-capacity-banner { left:288px; } }
 
 /* ---- Re-skin common surfaces inside admin pages ---- */
 /* Soften plain white backgrounds so existing pages instantly look HUD-native
