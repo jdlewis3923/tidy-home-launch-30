@@ -265,6 +265,9 @@ async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, PoolPro
     const id = await createShift(shift);
     await db.from('jobber_visits').update({ connecteam_shift_id: id }).eq('id', saved.id);
     saved.connecteam_shift_id = id;
+    // A destroy webhook may have landed while the shift was being created.
+    const { data: now } = await db.from('jobber_visits').select('deleted_at').eq('id', saved.id).single();
+    if (now?.deleted_at) { await deleteShift(id); await db.from('jobber_visits').update({ connecteam_shift_id: null }).eq('id', saved.id); return { visit: saved, shift: 'removed' }; }
   }
   if (!ctUser && !isTest) await alert(db, `ct_open_shift:${v.id}`, `Open shift: no ${SERVICE_LABEL[svc.service]} Pro free`, `${title} on ${v.startAt} is an open shift in Connecteam — no ${svc.service} Pro in the list is free for that window. Add a Pro or move the visit.`, 'digest');
   return { visit: saved, shift: saved.connecteam_shift_id };
@@ -272,7 +275,8 @@ async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, PoolPro
 
 async function removeVisit(db: SupabaseClient, jobberVisitId: string) {
   const { data: m } = await db.from('jobber_visits').select('*').eq('jobber_visit_id', jobberVisitId).maybeSingle();
-  if (!m || m.deleted_at) return false;
+  if (!m) return false;
+  if (m.deleted_at && !m.connecteam_shift_id) return false;
   if (m.connecteam_shift_id) await deleteShift(m.connecteam_shift_id);
   await db.from('jobber_visits').update({ deleted_at: new Date().toISOString(), status: 'canceled', connecteam_shift_id: null }).eq('id', m.id);
   return true;
