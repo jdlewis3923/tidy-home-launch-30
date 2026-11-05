@@ -487,7 +487,7 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - [x] Jobber gaps: customer reads from Jobber mirror, several Pros per service, simulated Visit Report passed, car-wash 1/2-wash mapping verified
 
 ## Jobber four-item completion verification (Nov 5, 18:55 UTC)
-- [ ] Verify all customer reads and multi-Pro overlap assignment, repair any gaps.
-- [ ] Re-run owner-only Visit Report and 1/2-wash tests; verify cleanup.
+- [x] Verify customer feed/reminders/skip/photo/capacity ownership guards; atomic multi-Pro overlap assignment deployed and 19 tests pass.
+- [ ] Full-year car-wash generated visit count: Jobber token now rejected; requires Justin's Reconnect Jobber → Allow access. Both catalog mappings and saved monthly recurrence verified; all temporary clients/jobs/shifts/pay cleaned up. Owner-only report passed.
 - [ ] Publish checked changes and report test IDs and remaining blockers.
 - Verified owner-only report: Jobber job 162293908 / visit 2390627359, Connecteam shift cc7d5416-f375-43fa-87ae-b53c983be811, $76 pay; client archived, job closed, shift/pay removed. Wash catalog and saved monthly recurrence pass; full-year generated visit count awaits Jobber reconnect after refresh token rejected during testing. No real-Pro messages.
