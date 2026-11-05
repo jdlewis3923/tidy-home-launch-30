@@ -228,6 +228,7 @@ Deno.serve(async (req) => {
   const lastWeek = R.payWeek(new Date(Date.now() - 7 * 86400000)).week_start;
   try {
     switch (body.action) {
+      case 'build_week_test': return jsonResponse({ ok: true, result: await buildWeek(db, body.week_start ?? lastWeek, true) });
       case 'build_week': return jsonResponse({ ok: true, result: await buildWeek(db, body.week_start ?? lastWeek) });
       case 'match_reviews': return jsonResponse({ ok: true, result: await matchReviews(db) });
       case 'decide_review': {

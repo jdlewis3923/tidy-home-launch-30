@@ -471,6 +471,115 @@ async function testE2E(db: SupabaseClient) {
   return steps;
 }
 
+
+// ---------- customer skip (Jobber-owned plans) ----------
+async function skipVisit(db: SupabaseClient, mirrorId: string) {
+  const { data: m } = await db.from('jobber_visits').select('*').eq('id', mirrorId).maybeSingle();
+  if (!m) throw new Error('mirror visit not found');
+  if (m.customer_skipped_at) return { already: true };
+  const d = await gql(db, `mutation($ids:[EncodedId!]!){visitDelete(visitIds:$ids){visits{id} userErrors{message path}}}`, { ids: [m.jobber_visit_id] });
+  const errs = d.visitDelete?.userErrors ?? []; if (errs.length) throw new Error(errs.map((e: any) => e.message).join('; '));
+  if (m.connecteam_shift_id) await deleteShift(m.connecteam_shift_id);
+  await db.from('jobber_visits').update({ customer_skipped_at: new Date().toISOString(), deleted_at: new Date().toISOString(), status: 'canceled', connecteam_shift_id: null }).eq('id', m.id);
+  return { skipped: true, jobber_visit_id: m.jobber_visit_id };
+}
+
+// ---------- throwaway client helper ----------
+async function withTestClient<T>(db: SupabaseClient, label: string, fn: (propertyId: string, clientId: string) => Promise<T>) {
+  const c = await gql(db, `mutation($i:ClientCreateInput!){clientCreate(input:$i){client{id properties{id}} userErrors{message path}}}`, { i: {
+    firstName: 'ZZ Sync', lastName: label, receivesReminders: false, receivesFollowUps: false, receivesReviewRequests: false,
+    properties: [{ address: { street1: '9999 SW Test Ln', city: 'Miami', province: 'FL', postalCode: '33156', country: 'US' } }],
+  } });
+  const clientId = c.clientCreate.client.id; const propertyId = c.clientCreate.client.properties[0].id;
+  const out: any = { client_id: clientId };
+  try { out.result = await fn(propertyId, clientId); } catch (e) { out.error = (e as Error).message; }
+  finally {
+    try { await gql(db, `mutation($c:EncodedId!){clientArchive(clientId:$c){client{id isArchived} userErrors{message path}}}`, { c: clientId }); out.client_archived = true; }
+    catch (e) { out.archive_error = (e as Error).message; }
+  }
+  return out;
+}
+
+// ---------- simulated Visit Report (real form 20738257 answer shape) ----------
+const TEST_PHOTO = (n: string) => `https://jointidy.co/og-image.jpg?test=${n}`;
+async function testReport(db: SupabaseClient) {
+  const steps: Record<string, unknown> = {};
+  const out = await withTestClient(db, 'Report Test', async (propertyId) => {
+    const start = new Date(Date.now() - 86400000 * 0).toISOString().slice(0, 10);
+    const spec = buildSpecs({ plan_lines: [{ service: 'cleaning', size_tier: 2, cadence: 'monthly' }] }, new Date(`${start}T12:00:00Z`))[0];
+    const jobId = await createJob(db, propertyId, spec, start, windowFrom('9 AM - 12 PM'), 'Arrival window: 9 AM - 12 PM\nTEST ONLY — simulated Visit Report.');
+    steps.job_id = jobId;
+    const j = await gql(db, `query($id:EncodedId!){job(id:$id){visits(first:3){nodes{${VISIT_FIELDS}}}}}`, { id: jobId });
+    const jv = j.job.visits.nodes[0]; if (!jv) throw new Error('no visit');
+    const r = await upsertVisit(db, jv, await proMap(db), CT_OWNER_USER_ID, true);
+    steps.jobber_visit_id = jv.id; steps.mirror_id = r.visit.id; steps.shift_id = r.shift;
+    const ts = Math.floor(Date.parse(jv.startAt) / 1000) + 2 * 3600;
+    const submission = {
+      formSubmissionId: `sim-${Date.now()}`, formId: 20738257, submittingUserId: CT_OWNER_USER_ID, submissionTimestamp: ts,
+      answers: [
+        { questionId: `${Q.service}-sim`, questionType: 'multipleChoice', selectedAnswers: [{ text: 'House Cleaning' }] },
+        { questionId: `${Q.customer}-sim`, questionType: 'openEnded', value: 'ZZ Sync 9999 SW Test Ln' },
+        { questionId: `${Q.before}-sim`, questionType: 'image', images: [{ url: TEST_PHOTO('before1') }, { url: TEST_PHOTO('before2') }] },
+        { questionId: `${Q.checklist}-sim`, questionType: 'yesNo', yesNoOptionId: 0, value: 'Yes' },
+        { questionId: `${Q.after}-sim`, questionType: 'image', images: [{ url: TEST_PHOTO('after1') }, { url: TEST_PHOTO('after2') }] },
+        { questionId: `${Q.locked}-sim`, questionType: 'yesNo', yesNoOptionId: 0, value: 'Yes' },
+        { questionId: `${Q.issues}-sim`, questionType: 'openEnded', value: '' },
+      ],
+    };
+    const { data: cand } = await db.from('jobber_visits').select('*').eq('id', r.visit.id);
+    const matched = matchVisit(submission, cand ?? []);
+    steps.matched = matched?.id === r.visit.id;
+    if (!matched) throw new Error('simulated submission did not match');
+    steps.processed = await processReport(db, submission, submission.formSubmissionId, matched, { emailTo: 'jdlewis3923@gmail.com' });
+    const chk = await gql(db, `query($id:EncodedId!){visit(id:$id){id isComplete}}`, { id: jv.id });
+    steps.jobber_visit_complete = chk.visit?.isComplete;
+    const { data: mirror } = await db.from('jobber_visits').select('status, completed_at, before_photos, after_photos, checklist_done, locked_up').eq('id', r.visit.id).single();
+    steps.mirror = mirror;
+    // pay line via pro-pay (test data only)
+    const pr = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/pro-pay`, { method: 'POST',
+      headers: { Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'build_week_test', week_start: String(mirror?.completed_at).slice(0, 10) }) });
+    steps.pay_build = pr.status;
+    const { data: lines } = await db.from('pro_pay_lines').select('id, line_key, kind, pay_cents, connecteam_user_id').eq('is_test', true).like('line_key', `%${r.visit.id}%`);
+    steps.pay_lines = lines;
+    // cleanup
+    await db.from('pro_pay_lines').delete().eq('is_test', true).like('line_key', `%${r.visit.id}%`);
+    if (r.shift && r.shift !== 'skipped') await deleteShift(String(r.shift));
+    const { data: m2 } = await db.from('jobber_visits').select('connecteam_shift_id').eq('id', r.visit.id).single();
+    if (m2?.connecteam_shift_id) await deleteShift(m2.connecteam_shift_id);
+    await db.from('jobber_visits').update({ deleted_at: new Date().toISOString(), connecteam_shift_id: null }).eq('id', r.visit.id);
+    await closeJob(db, jobId); steps.job_closed = true; steps.cleaned_up = true;
+    return steps;
+  });
+  await log(db, 'test_report', out.error ? 'error' : 'success', JSON.stringify(out).slice(0, 1900));
+  return out;
+}
+
+// ---------- car-wash add-on mapping ----------
+async function testCarWash(db: SupabaseClient) {
+  const cat = await loadCatalog(db);
+  const keys = ['wash_1_x1', 'wash_1_x2', 'wash_2_x1', 'wash_2_x2', 'wash_3_x1', 'wash_3_x2'];
+  const mapping = keys.map((k) => { const sp = buildSpecs({ plan_lines: [], car_wash_key: k }, new Date('2026-11-10T12:00:00Z')).find((x) => x.key === 'car_wash')!;
+    return { key: k, item: sp.items[0].name, rrule: sp.rrule, in_jobber_catalog: cat.has(sp.items[0].name) }; });
+  const live = await withTestClient(db, 'Car Wash Test', async (propertyId) => {
+    const res: any[] = [];
+    for (const k of ['wash_2_x1', 'wash_2_x2']) {
+      const sp = buildSpecs({ plan_lines: [], car_wash_key: k }, new Date(`${new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10)}T12:00:00Z`)).find((x) => x.key === 'car_wash')!;
+      const start = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+      const jobId = await createJob(db, propertyId, sp, start, windowFrom('9 AM - 11 AM'), 'TEST ONLY — car wash add-on mapping.');
+      const j = await gql(db, `query($id:EncodedId!){job(id:$id){id title lineItems{nodes{name quantity}} visits(first:10, filter:{startAt:{before:"${new Date(Date.now() + 40 * 86400000).toISOString()}"}}){nodes{startAt}}}}`, { id: jobId }).catch(async () =>
+        gql(db, `query($id:EncodedId!){job(id:$id){id title lineItems{nodes{name quantity}} visits(first:10){nodes{startAt}}}}`, { id: jobId }));
+      const starts = (j.job.visits.nodes ?? []).map((v: any) => v.startAt);
+      const firstMonth = starts.filter((t: string) => Date.parse(t) < Date.parse(start) + 31 * 86400000).length;
+      res.push({ key: k, job_id: jobId, title: j.job.title, line_items: j.job.lineItems.nodes, visits_in_first_31_days: firstMonth });
+      await closeJob(db, jobId);
+    }
+    return res;
+  });
+  await log(db, 'test_carwash', live.error ? 'error' : 'success', JSON.stringify({ mapping, live }).slice(0, 1900));
+  return { mapping, live };
+}
+
 async function backfill(db: SupabaseClient) {
   const { data } = await db.from('subscriptions').select('id, jobber_job_ids').eq('status', 'active');
   const out: any[] = [];
@@ -495,6 +604,9 @@ Deno.serve(async (req) => {
       case 'sync_visit': return jsonResponse({ ok: true, result: await syncVisit(db, body.jobber_visit_id) });
       case 'poll_reports': return jsonResponse({ ok: true, result: await pollReports(db) });
       case 'register_webhooks': return jsonResponse({ ok: true, result: await registerWebhooks(db) });
+      case 'skip_visit': return jsonResponse({ ok: true, result: await skipVisit(db, body.mirror_id) });
+      case 'test_report': return jsonResponse({ ok: true, result: await testReport(db) });
+      case 'test_carwash': return jsonResponse({ ok: true, result: await testCarWash(db) });
       case 'test_e2e': return jsonResponse({ ok: true, result: await testE2E(db) });
       case 'gql': return jsonResponse(await gql(db, body.query, body.variables ?? {}));
       default: return jsonResponse({ error: 'unknown action' }, 400);
