@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       fn: async () => {
         const { data: siteVisit, error: vErr } = await supabase
           .from("visits")
-          .select("id, user_id, visit_date, scheduled_start, status, service, subscription_id")
+          .select("id, user_id, visit_date, scheduled_start, status, service, subscription_id, jobber_visit_id")
           .eq("id", visit_id)
           .maybeSingle();
         if (vErr) throw new Error(vErr.message);
