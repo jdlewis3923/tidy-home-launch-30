@@ -493,7 +493,8 @@ Replaces v3/v4 hiring prompts and the 13 Oct stage order. Keeps: proof page, spe
 - Verified owner-only report: Jobber job 162293908 / visit 2390627359, Connecteam shift cc7d5416-f375-43fa-87ae-b53c983be811, $76 pay; client archived, job closed, shift/pay removed. Wash catalog and saved monthly recurrence pass; full-year generated visit count awaits Jobber reconnect after refresh token rejected during testing. No real-Pro messages.
 
 ## Connecteam paperwork retirement (Nov 5, 19:07 UTC)
-- [ ] Position on hire/create and Susan/Jenifer cleaning Position.
-- [ ] 15-minute document status/COI expiration sync, paperwork/pay gate, expired insurance assignment guard.
-- [ ] Retire Documenso runtime and per-signature alerts; preserve Susan token until Connecteam signed.
-- [ ] Paperwork line in both owner digests; test, deploy, publish.
+- [x] Position on protected hire/create; Susan/Jenifer cleaning Position saved and read back.
+- [x] 15-minute document status/COI expiration sync, paperwork/pay gate, expired insurance assignment guard; live sync reads both Pros as waiting.
+- [x] Retired vendor sending/webhook/config/secrets and per-signature alerts; Susan document loads unsigned; historical signed records retained.
+- [x] Paperwork line previewed in both owner digests; 33 tests pass; live deployment complete.
+- [ ] Publish paperwork page updates.
