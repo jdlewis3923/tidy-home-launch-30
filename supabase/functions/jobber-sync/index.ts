@@ -519,6 +519,28 @@ async function withTestClient<T>(db: SupabaseClient, label: string, fn: (propert
 }
 
 // ---------- simulated Visit Report (real form 20738257 answer shape) ----------
+async function testMemberNotes(db:SupabaseClient){
+ return await withTestClient(db,'Member Notes Test',async(propertyId,clientId)=>{
+  const p={parking_notes:'TEST driveway',pets:'TEST dog secured',special_instructions:'TEST close gate'};
+  const home={body:'TEST no bleach',profile:{rooms:'TEST office',products:'TEST fragrance-free'}};
+  const car={vehicle_make:'TEST Toyota',vehicle_model:'Camry',vehicle_color:'Blue',vehicle_plate:'TEST123',parking_spot:'TEST driveway',interior_access:'TEST unlocked',spigot_at_parking:true,access_note:'TEST side entry'};
+  const checks:any[]=[];const start=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+  for(const service of ['cleaning','lawn','detailing']){
+   const spec=buildSpecs({plan_lines:[{service,size_tier:2,cadence:'monthly'}]},new Date(`${start}T12:00:00Z`))[0];
+   const notes=memberJobNotes(service,p,{lawn_measured_sqft:4200},home,car,'TEST preferred Pro','9 AM – 12 PM');
+   const jobId=await createJob(db,propertyId,spec,start,windowFrom('9 AM - 12 PM'),notes);
+   const job=await gql(db,`query($id:EncodedId!){job(id:$id){instructions visits(first:1){nodes{${VISIT_FIELDS}}}}}`,{id:jobId});
+   if(job.job.instructions!==notes)throw new Error('Job notes did not read back');
+   const v=job.job.visits.nodes[0];if(!v)throw new Error('No test visit created');
+   const mirrored=await upsertVisit(db,v,await proMap(db),CT_OWNER_USER_ID,true);
+   const shift=await getShift(mirrored.visit.connecteam_shift_id);
+   checks.push({service,job_id:jobId,visit_id:v.id,shift_id:mirrored.visit.connecteam_shift_id,job_notes_verified:true,shift_readback:shift});
+  }
+  await gql(db,`mutation($p:EncodedId!,$i:PropertyEditInput!){propertyEdit(propertyId:$p,input:$i){property{id address{street1}} userErrors{message path}}}`,{p:propertyId,i:{address:{street1:'9998 SW Test Ln',city:'Miami',province:'FL',postalCode:'33156',country:'US'}}});
+  const property=await gql(db,`query($id:EncodedId!){client(id:$id){properties{id address{street1}}}}`,{id:clientId});
+  return {checks,address_updated:property.client.properties.some((p:any)=>p.id===propertyId&&p.address.street1==='9998 SW Test Ln')};
+ });
+}
 const TEST_PHOTO = (n: string) => `https://jointidy.co/og-founding.jpg?test=${n}`;
 async function testReport(db: SupabaseClient) {
   const steps: Record<string, unknown> = {};
@@ -634,6 +656,7 @@ Deno.serve(async (req) => {
       case 'register_webhooks': return jsonResponse({ ok: true, result: await registerWebhooks(db) });
       case 'skip_visit': return jsonResponse({ ok: true, result: await skipVisit(db, body.mirror_id) });
       case 'test_report': return jsonResponse({ ok: true, result: await testReport(db) });
+      case 'test_member_notes': return jsonResponse({ok:true,result:await testMemberNotes(db)});
       case 'test_carwash': return jsonResponse({ ok: true, result: await testCarWash(db) });
       case 'list_shifts': { const { ct } = await import('../_shared/connecteam.ts'); return jsonResponse(await ct('GET', `/scheduler/v1/schedulers/20735999/shifts?startTime=${body.from}&endTime=${body.to}&limit=200`)); }
       case 'test_e2e': return jsonResponse({ ok: true, result: await testE2E(db) });
