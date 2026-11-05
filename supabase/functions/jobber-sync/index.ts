@@ -16,6 +16,7 @@ import { admin, gql, log } from '../_shared/jobber.ts';
 import { createShift, updateShift, deleteShift, getShift, listSubmissions, ConnecteamMissingKey, CT_OWNER_USER_ID, type ShiftInput } from '../_shared/connecteam.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
+import { parseCarWashKey, pickPro, type PoolPro } from '../_shared/jobber-rules.ts';
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
 const SITE_FN = `${Deno.env.get('SUPABASE_URL')}/functions/v1/jobber-webhook`;
@@ -75,12 +76,6 @@ export function buildSpecs(sub: any, start: Date): JobSpec[] {
     specs.push({ key: 'car_wash', title: n, service: 'detailing', size: Number(s.slice(-1)) || 2, items: [{ name: n, qty: 1 }], rrule: two ? `FREQ=MONTHLY;BYDAY=1${wd},3${wd}` : `FREQ=MONTHLY;BYDAY=2${wd}` });
   }
   return specs;
-}
-/** car_wash_key is `wash_{size}_x{washes}` (stripe-webhook carWashKeyFromMeta). */
-export function parseCarWashKey(key: string): { size: number; washes: 1 | 2 } {
-  const m = String(key).match(/^wash_([123])_x([12])$/);
-  if (!m) throw new Error(`car_wash_key_unrecognized: "${key}"`);
-  return { size: Number(m[1]), washes: Number(m[2]) as 1 | 2 };
 }
 const sig = (s: JobSpec) => `${s.rrule}|${s.items.map((i) => i.name).join(',')}`;
 
@@ -220,21 +215,11 @@ function serviceOf(names: string[]): { service: string; size: number; kind: stri
 }
 const SERVICE_LABEL: Record<string, string> = { cleaning: 'House Cleaning', lawn: 'Lawn Care', detailing: 'Car Care', unknown: 'Visit' };
 
-type PoolPro = { connecteam_user_id: number; pro_name: string | null; priority: number };
 async function proMap(db: SupabaseClient): Promise<Map<string, PoolPro[]>> {
   const { data } = await db.from('jobber_service_pro_pool').select('service_line, connecteam_user_id, pro_name, priority').eq('active', true).order('priority');
   const m = new Map<string, PoolPro[]>();
   for (const r of (data ?? []) as any[]) { const l = m.get(r.service_line) ?? []; l.push({ ...r, connecteam_user_id: Number(r.connecteam_user_id) }); m.set(r.service_line, l); }
   return m;
-}
-
-/** Primary Pro unless she already has an overlapping shift; then the next; null = open shift. */
-export function pickPro(pool: PoolPro[], busy: { connecteam_user_id: number; start_at: string; end_at: string }[], startAt: string, endAt: string, current?: number | null): number | null {
-  const s = Date.parse(startAt), e = Date.parse(endAt) > s ? Date.parse(endAt) : s + 3600000;
-  const free = (u: number) => !busy.some((b) => Number(b.connecteam_user_id) === u && Date.parse(b.start_at) < e && (Date.parse(b.end_at) > Date.parse(b.start_at) ? Date.parse(b.end_at) : Date.parse(b.start_at) + 3600000) > s);
-  const ordered = [...pool].sort((a, b) => a.priority - b.priority);
-  if (current && ordered.some((p) => p.connecteam_user_id === current) && free(current)) return current;
-  return ordered.find((p) => free(p.connecteam_user_id))?.connecteam_user_id ?? null;
 }
 
 async function upsertVisit(db: SupabaseClient, v: any, pros: Map<string, PoolPro[]>, overrideUser?: number, isTest = false) {
