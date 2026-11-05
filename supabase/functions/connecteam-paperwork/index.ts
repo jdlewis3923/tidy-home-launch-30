@@ -23,7 +23,7 @@ async function setPosition(userId:number,service:string,fields:any[]) {
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
  const auth=await requireServiceOrAdmin(req);if(!auth.ok)return reply({error:auth.error},auth.status);
- const body=z.object({action:z.enum(['sync','hire','mail','test_email']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
+ const body=z.object({action:z.enum(['sync','hire','mail','test_email','hire_test_create','hire_test_position','hire_test_cleanup']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
  if(!body.success)return reply({error:'invalid_request'},400);
  try{
  if(body.data.action==='test_email'){
@@ -34,6 +34,23 @@ Deno.serve(async req=>{
   const result=await sendProEmail(db,{applicantId:null,key:'connecteam_paperwork_test',to:'jdlewis3923@gmail.com',name:'Justin Lewis',built,triggeredBy:`paperwork-test:${row.id}`});
   await db.from('pro_paperwork_emails').update({status:result.sent?'sent':'failed',sent_at:result.sent?new Date().toISOString():null,error:result.reason??null}).eq('id',row.id);
   return reply({ok:result.sent,recipient:'jdlewis3923@gmail.com',result});
+ }
+ // Owner-only hire-trigger test: a fake Connecteam user (no activation, Justin's email).
+ if(body.data.action==='hire_test_create'){
+  const created=await ct('POST','/users/v1/users?sendActivation=false',[{firstName:'ZZ',lastName:'Hire Test',phoneNumber:'+13055550142',email:'jdlewis3923@gmail.com',userType:'user'}]);
+  return reply({ok:true,created:created.data});
+ }
+ if(body.data.action==='hire_test_position'){
+  if(!body.data.user_id)return reply({error:'user_id_required'},400);
+  const fields=(await ct('GET','/users/v1/custom-fields')).data?.customFields??[];await setPosition(body.data.user_id,'cleaning',fields);return reply({ok:true});
+ }
+ if(body.data.action==='hire_test_cleanup'){
+  if(!body.data.user_id)return reply({error:'user_id_required'},400);
+  const u=body.data.user_id;const archived=await ct('PUT','/users/v1/users?sendActivation=false',[{userId:u,isArchived:true}]);
+  await db.from('pro_pay_profiles').update({is_test:true}).eq('connecteam_user_id',u);
+  await db.from('jobber_service_pro_pool').delete().eq('connecteam_user_id',u);
+  await db.from('admin_alerts').update({resolved_at:new Date().toISOString()}).in('dedupe_key',[`set-position:${u}`]).is('resolved_at',null);
+  return reply({ok:true,archived:archived.data??true});
  }
  const {data:flag}=await db.from('app_settings').select('value').eq('key','checkr_live').maybeSingle();const checkrLive=flag?.value===true||flag?.value==='on';
  if(body.data.action==='mail'){
