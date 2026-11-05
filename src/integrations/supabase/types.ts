@@ -3008,35 +3008,47 @@ export type Database = {
       }
       cron_runs: {
         Row: {
+          attempt: number
           context: Json
+          fn: string | null
           http_error: string | null
           http_status: number | null
           id: string
           job_name: string
+          payload: Json | null
           request_id: number | null
           responded_at: string | null
+          retried_at: string | null
           scheduled_at: string
           timed_out: boolean | null
         }
         Insert: {
+          attempt?: number
           context?: Json
+          fn?: string | null
           http_error?: string | null
           http_status?: number | null
           id?: string
           job_name: string
+          payload?: Json | null
           request_id?: number | null
           responded_at?: string | null
+          retried_at?: string | null
           scheduled_at?: string
           timed_out?: boolean | null
         }
         Update: {
+          attempt?: number
           context?: Json
+          fn?: string | null
           http_error?: string | null
           http_status?: number | null
           id?: string
           job_name?: string
+          payload?: Json | null
           request_id?: number | null
           responded_at?: string | null
+          retried_at?: string | null
           scheduled_at?: string
           timed_out?: boolean | null
         }
@@ -11623,6 +11635,15 @@ export type Database = {
         Args: { _at: string; _cents: number; _pro: string }
         Returns: string
       }
+      cron_dispatch_raw: {
+        Args: {
+          _attempt: number
+          _fn: string
+          _job_name: string
+          _payload: Json
+        }
+        Returns: number
+      }
       cron_expected_interval_minutes: {
         Args: { _schedule: string }
         Returns: number
@@ -11639,6 +11660,8 @@ export type Database = {
           problem: string
         }[]
       }
+      cron_missed_twice_check: { Args: never; Returns: number }
+      cron_retry_critical: { Args: never; Returns: number }
       current_rate_card_version: { Args: never; Returns: number }
       current_scope_version: { Args: { _service: string }; Returns: number }
       current_user_admin: { Args: never; Returns: boolean }
@@ -12597,6 +12620,7 @@ export type Database = {
         Args: { _event: string; _id: string }
         Returns: boolean
       }
+      retire_signing_selftest_if_signed: { Args: never; Returns: boolean }
       retire_site_visits_for_jobber: { Args: { _sub: string }; Returns: number }
       review_bonus_next_friday: { Args: never; Returns: string }
       review_bonus_precheck: {
