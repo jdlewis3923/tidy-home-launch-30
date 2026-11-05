@@ -47,7 +47,7 @@ export interface ShiftInput {
   assignedUserId: number | null;
 }
 
-function shiftBody(s: ShiftInput) {
+function shiftBody(s: ShiftInput, forUpdate = false) {
   const open = !s.assignedUserId;
   return {
     title: s.title.slice(0, 120),
@@ -55,7 +55,8 @@ function shiftBody(s: ShiftInput) {
     endTime: s.endTime,
     timezone: 'America/New_York',
     isOpenShift: open,
-    ...(open ? { openSpots: 1 } : { assignedUserIds: [s.assignedUserId] }),
+    // Connecteam V1 update rejects open_spots; it is only sent on create.
+    ...(open ? (forUpdate ? { assignedUserIds: [] } : { openSpots: 1 }) : { assignedUserIds: [s.assignedUserId] }),
     isPublished: true,
     locationData: { isReferencedToJob: false, gps: { address: s.address } },
     notes: [{ type: 'html', html: s.notesHtml }],
@@ -70,7 +71,7 @@ export async function createShift(s: ShiftInput): Promise<string> {
 }
 
 export async function updateShift(id: string, s: ShiftInput): Promise<void> {
-  await ct('PUT', `/scheduler/v1/schedulers/${CT_SCHEDULER_ID}/shifts?notifyUsers=false`, [{ shiftId: id, ...shiftBody(s) }]);
+  await ct('PUT', `/scheduler/v1/schedulers/${CT_SCHEDULER_ID}/shifts?notifyUsers=false`, [{ shiftId: id, ...shiftBody(s, true) }]);
 }
 
 export async function deleteShift(id: string): Promise<void> {

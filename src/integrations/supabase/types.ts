@@ -4234,6 +4234,36 @@ export type Database = {
         }
         Relationships: []
       }
+      jobber_service_pro_pool: {
+        Row: {
+          active: boolean
+          connecteam_user_id: number
+          id: string
+          priority: number
+          pro_name: string | null
+          service_line: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          connecteam_user_id: number
+          id?: string
+          priority?: number
+          pro_name?: string | null
+          service_line: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          connecteam_user_id?: number
+          id?: string
+          priority?: number
+          pro_name?: string | null
+          service_line?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       jobber_service_pros: {
         Row: {
           connecteam_user_id: number | null
@@ -4267,6 +4297,7 @@ export type Database = {
           created_at: string
           customer_emailed_at: string | null
           customer_first_name: string | null
+          customer_skipped_at: string | null
           deleted_at: string | null
           end_at: string | null
           id: string
@@ -4303,6 +4334,7 @@ export type Database = {
           created_at?: string
           customer_emailed_at?: string | null
           customer_first_name?: string | null
+          customer_skipped_at?: string | null
           deleted_at?: string | null
           end_at?: string | null
           id?: string
@@ -4339,6 +4371,7 @@ export type Database = {
           created_at?: string
           customer_emailed_at?: string | null
           customer_first_name?: string | null
+          customer_skipped_at?: string | null
           deleted_at?: string | null
           end_at?: string | null
           id?: string
@@ -11173,6 +11206,16 @@ export type Database = {
           month: string
         }[]
       }
+      admin_jobber_route_households: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          connecteam_user_id: number
+          homes: number
+          pro_name: string
+          visit_date: string
+          visits: number
+        }[]
+      }
       admin_launch_proposal: { Args: never; Returns: Json }
       admin_lawn_plan_verify: {
         Args: { _change: string; _measured: number }
@@ -12000,6 +12043,28 @@ export type Database = {
         Args: { _confirm: boolean; _review: string }
         Returns: Json
       }
+      member_visit_feed: {
+        Args: { _user?: string }
+        Returns: {
+          after_photos: Json
+          completed_at: string
+          customer_first_name: string
+          id: string
+          jobber_visit_id: string
+          scheduled_end: string
+          scheduled_start: string
+          service: string
+          size_tier: number
+          source: string
+          status: string
+          street: string
+          subscription_id: string
+          time_window: string
+          user_id: string
+          visit_date: string
+          visit_kind: string
+        }[]
+      }
       my_founding: { Args: never; Returns: Json }
       my_gate_code: { Args: never; Returns: string }
       my_language: { Args: never; Returns: string }
@@ -12449,6 +12514,7 @@ export type Database = {
         Args: { _event: string; _id: string }
         Returns: boolean
       }
+      retire_site_visits_for_jobber: { Args: { _sub: string }; Returns: number }
       review_bonus_next_friday: { Args: never; Returns: string }
       review_bonus_precheck: {
         Args: { _member: string; _pro: string; _stars: number }
@@ -12804,6 +12870,7 @@ export type Database = {
         }
         Returns: Json
       }
+      subscription_jobber_owned: { Args: { _sub: string }; Returns: boolean }
       subscription_service_count: { Args: { _sub: string }; Returns: number }
       sync_member_entitlements: {
         Args: { _reason: string; _sub: string }

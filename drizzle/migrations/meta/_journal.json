@@ -2073,6 +2073,20 @@
       "when": 1793901425600,
       "tag": "0295_pro_pay_engine",
       "breakpoints": true
+    },
+    {
+      "idx": 296,
+      "version": "7",
+      "when": 1793902258801,
+      "tag": "0296_jobber_customer_reads_and_pro_pool",
+      "breakpoints": true
+    },
+    {
+      "idx": 297,
+      "version": "7",
+      "when": 1793902333860,
+      "tag": "0297_lifecycle_reminders_from_jobber_mirror",
+      "breakpoints": true
     }
   ]
 }
