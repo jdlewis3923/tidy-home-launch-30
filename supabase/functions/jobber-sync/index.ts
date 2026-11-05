@@ -619,6 +619,11 @@ Deno.serve(async (req) => {
       case 'backfill': return jsonResponse({ ok: true, result: await backfill(db) });
       case 'reconcile': return jsonResponse({ ok: true, result: await reconcile(db, body.days ?? 21) });
       case 'sync_visit': return jsonResponse({ ok: true, result: await syncVisit(db, body.jobber_visit_id) });
+      case 'sync_job': {
+        const job = await gql(db, `query($id:EncodedId!){job(id:$id){client{firstName}}}`, { id: body.jobber_job_id });
+        if (/^ZZ Sync/i.test(job.job?.client?.firstName ?? '')) return jsonResponse({ ok: true, skipped: 'test_runner_owned' });
+        return jsonResponse({ ok: true, result: await reconcile(db, 21) });
+      }
       case 'poll_reports': return jsonResponse({ ok: true, result: await pollReports(db) });
       case 'register_webhooks': return jsonResponse({ ok: true, result: await registerWebhooks(db) });
       case 'skip_visit': return jsonResponse({ ok: true, result: await skipVisit(db, body.mirror_id) });
