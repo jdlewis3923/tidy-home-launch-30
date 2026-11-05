@@ -11377,6 +11377,10 @@ export type Database = {
         }
         Returns: Json
       }
+      assign_jobber_visit_pro: {
+        Args: { _override?: number; _visit: string }
+        Returns: number
+      }
       badge_photo_load: { Args: { _token: string }; Returns: Json }
       call_edge_function: {
         Args: { _fn: string; _payload: Json }
