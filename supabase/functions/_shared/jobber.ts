@@ -112,6 +112,6 @@ function findUserErrors(d: unknown): string[] {
 
 export async function log(db: SupabaseClient, event: string, status: 'success' | 'error' | 'warning', message?: string, payload?: unknown) {
   try {
-    await db.from('integration_logs').insert({ source: 'jobber', event, status, error_message: message ?? null, payload: payload ?? null } as any);
+    await db.from('integration_logs').insert({ source: 'jobber', event, status, error_message: message ? message.slice(0, 2000) : null, detail: payload ?? null } as any);
   } catch { /* never throw */ }
 }
