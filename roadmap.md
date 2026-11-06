@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Two remaining audit items (Nov 6)
-- [ ] Hide every returning-member prompt with a session; verify signed-in/out desktop and mobile; publish.
-- [ ] Run one isolated Connecteam team-member test, owner email only; archive user/remove profile; check health once.
+- [x] Hide returning-member prompt with race-safe session state; signed-in/out 1280px and 390px verified, 22 focused tests pass; publication requested.
+- [x] One isolated Connecteam run: earlier user absent; created 31164833 with activation disabled; House Cleaning Pro read back; shared registration created test pay profile; welcome 43555bfc-55fd-4644-947d-54a16179c70a sent only to jdlewis3923@gmail.com (send log 27974c3d-6390-4ac8-acd7-d3b344fb9bef). User archived, profile removed, pending mail cancelled; one fresh health check and cached green tile verified. No texts or real-Pro emails.
 
 ## System-wide reliability pass (Nov 3) — test records only, no real texts/emails
 - [x] 1 (Documenso sending stays OFF until app_settings.documenso_signing is enabled with matching templates) Signing via Documenso (secrets present) + in-app fallback alert + nightly signing self-test (cleaning/lawn/Spanish)
