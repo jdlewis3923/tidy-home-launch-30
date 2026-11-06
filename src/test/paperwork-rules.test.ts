@@ -10,3 +10,17 @@ describe('Connecteam paperwork',()=>{
  it('pending review never unblocks pay',()=>{expect(paperworkState(rows.map(r=>r.documentId===2?{...r,status:'pendingApproval'}:r),ids,1793900000000).complete).toBe(false);});
  it('both digests exclude test Pros and name waiting real Pros',()=>{expect(paperworkDigest([{name:'Susan Horn',paperwork_complete:false},{name:'Jenifer Whitney',paperwork_complete:false},{name:'Test',paperwork_complete:true,is_test:true}])).toBe('Paperwork: 0 Pros complete, 2 waiting (Susan Horn, Jenifer Whitney)');});
 });
+import { paperworkState as ps2 } from '../../supabase/functions/_shared/paperwork-rules';
+describe('site signature counts as agreement', () => {
+  const ids = { w9: 1, coi: 2, agreement: 3 };
+  it('marks agreement signed but still needs W-9 and COI', () => {
+    const s = ps2([{ documentId: 3, status: 'pendingUserFilling' }], ids, Date.now(), '2026-11-05T22:53:35Z');
+    expect(s.status.agreement).toBe('completed');
+    expect(s.signedAt).toBe('2026-11-05T22:53:35.000Z');
+    expect(s.complete).toBe(false);
+  });
+  it('is complete once W-9 and COI are approved', () => {
+    const s = ps2([{ documentId: 1, status: 'approved' }, { documentId: 2, status: 'approved' }], ids, Date.now(), '2026-11-05T22:53:35Z');
+    expect(s.complete).toBe(true);
+  });
+});

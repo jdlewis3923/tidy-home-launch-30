@@ -54,6 +54,8 @@ async function handle(req:Request):Promise<Response>{
   return reply({ok:true,...committed,email:committed.already?undefined:await mail(a,bytes,path,s.document_version,s.typed_name,etTime(at),true)});
  }
  if(!b.token)return reply({error:'invalid_request'},400);
+ // Website signing is retired: paperwork lives in Connecteam. No token may load or collect a signature.
+ return reply({ok:true,retired:true});
  const a=await check(await db.from('applicants').select('*').eq('contract_token',b.token).maybeSingle());if(!a)return reply({error:'not_found'},404);
  const {data:external}=await db.from('pro_pay_profiles').select('agreement_signed_at').eq('applicant_id',a.id).maybeSingle();
  if(external?.agreement_signed_at)return reply({ok:true,retired:true,signed:true});

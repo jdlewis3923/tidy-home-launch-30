@@ -133,7 +133,10 @@ Deno.serve(async req=>{
   if(p.is_test||!POSITIONS[p.service_line??''])continue;
   const agreement=catalog.find(d=>d.name===`Independent Contractor Agreement — ${POSITIONS[p.service_line]}`);if(!agreement)throw new Error(`ICA missing for ${p.service_line}`);
   const rows=batched?batched.filter(r=>Number(r.userId)===Number(p.connecteam_user_id)):await all('/documents/v1/user-documents','documents',[['userIds',String(p.connecteam_user_id)]]);
-  const state=paperworkState(rows,{w9:w9.documentId,coi:coi.documentId,agreement:agreement.documentId});
+  // A signature on our own site counts as the signed agreement; W-9 and COI are still required.
+  const {data:site}=p.applicant_id?await db.from('contract_signatures').select('id,signed_at').eq('applicant_id',p.applicant_id).not('signed_at','is',null).order('signed_at',{ascending:false}).limit(1).maybeSingle():{data:null};
+  const state=paperworkState(rows,{w9:w9.documentId,coi:coi.documentId,agreement:agreement.documentId},Date.now(),site?.signed_at??null);
+  if(site)await noteSiteSignature(p,site);
   const r=await db.rpc('connecteam_commit_paperwork',{_user:p.connecteam_user_id,_status:state.status,_complete:state.complete,_signed_at:state.signedAt,_expiry:state.expiry,_coi_approved:state.coiApproved});if(r.error)throw r.error;synced++;
   const user=users.find(u=>u.userId===Number(p.connecteam_user_id));if(user){await checkGroup(user,p.service_line);const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',p.connecteam_user_id).single();await processPaperworkEmails(db,user,profile,checkrLive,sendProEmail);}
  }
@@ -142,3 +145,8 @@ Deno.serve(async req=>{
  }catch(e){const error=e instanceof Error?e.message:String(e);await db.from('admin_alerts').upsert({dedupe_key:'connecteam-paperwork-sync',alert_type:'integration_error',level:'warning',tier:'digest',title:'Connecteam paperwork sync needs attention',body:error},{onConflict:'dedupe_key',ignoreDuplicates:true});return reply({ok:false,error},502);}
 });
 async function checkGroup(user:any,service:string){const pack=PACKS[service];if(!pack?.group)return;const groups=user.smartGroupsIds??[];if(groups.includes(pack.group))return;const result=await db.from('admin_alerts').upsert({dedupe_key:`connecteam-pack-group:${user.userId}`,alert_type:'integration_error',level:'warning',tier:'digest',title:`assign ${user.firstName} ${user.lastName} to ${pack.name} in Connecteam`,body:`Expected smart group ${pack.group}; pack ${pack.id}. API membership does not include this group.`},{onConflict:'dedupe_key',ignoreDuplicates:true});if(result.error)throw result.error;}
+// Connecteam's agreement is an eSign document, which the API cannot fill, so the site signature is recorded once as a profile note.
+async function noteSiteSignature(p:any,site:any){const event=`connecteam.site_signature_note:${site.id}`;const {data:done}=await db.from('integration_logs').select('id').eq('source','internal').eq('event',event).limit(1).maybeSingle();if(done)return;
+ const when=new Date(site.signed_at).toLocaleString('en-US',{timeZone:'America/New_York',dateStyle:'medium',timeStyle:'short'});
+ await ct('POST',`/users/v1/users/${p.connecteam_user_id}/notes`,{title:'Contractor agreement signed on jointidy.co',text:`${p.name} signed the ${POSITIONS[p.service_line]} Independent Contractor Agreement on jointidy.co on ${when} ET (record ${site.id}). Signed PDF is stored in Tidy admin. Treat the Connecteam agreement as done; W-9 and insurance are still required.`});
+ await db.from('integration_logs').insert({source:'internal',event,status:'success',detail:JSON.stringify({connecteam_user_id:p.connecteam_user_id})}).then((r:any)=>{if(r.error)throw r.error;});}

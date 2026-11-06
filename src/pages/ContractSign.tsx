@@ -1,15 +1,31 @@
-import { useEffect,useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import TidyLogo from '@/components/TidyLogo';
-import ContractDocument from '@/components/ContractDocument';
-import { CheckCircle2,Loader2,PenLine } from 'lucide-react';
-export default function ContractSign(){
- const {token=''}=useParams();const [doc,setDoc]=useState<any>(null),[state,setState]=useState('loading'),[name,setName]=useState(''),[business,setBusiness]=useState(''),[agreed,setAgreed]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
- useEffect(()=>{let cancelled=false;void supabase.functions.invoke('contract-sign',{body:{token,action:'document'}}).then(({data,error})=>{if(cancelled)return;if(error||!data?.ok){setState('not_found');return;}if(data.retired){window.location.href='/pro';return;}setDoc(data);setState(data.signed?'signed':'open');});return()=>{cancelled=true;};},[token]);
- const sign=async()=>{if(!/\S+\s+\S+/.test(name.trim())){setError('Type your full legal name, first and last. / Escriba su nombre legal completo.');return;}if(!agreed){setError('Tick the box to agree. / Marque la casilla para aceptar.');return;}setBusy(true);setError('');const {data,error}=await supabase.functions.invoke('contract-sign',{body:{token,action:'sign',typed_name:name.trim(),business_name:business,agreed,version:doc.version}});setBusy(false);if(error||!data?.ok){let code=data?.error;try{code=code??(await (error as any)?.context?.json?.())?.error;}catch{/* ignore */}console.error('contract-sign failed:',code??error);if(code==='version_changed'||code==='template_changed'){const fresh=await supabase.functions.invoke('contract-sign',{body:{token,action:'document'}});if(fresh.data?.ok){setDoc(fresh.data);setError('The agreement was updated. Please review it and tap Sign again. / El contrato se actualizó. Revíselo y toque Firmar otra vez.');return;}}setError('Signing failed. Please try again or text Tidy. / No se pudo firmar. Intente de nuevo o escriba a Tidy.');return;}setState('signed');};
- return <main className="min-h-screen bg-background px-4 py-8 text-foreground"><Helmet><title>Contractor agreement | Tidy</title><meta name="robots" content="noindex,nofollow"/></Helmet><div className="mx-auto max-w-4xl"><div className="mb-6"><TidyLogo size="sm"/></div>{state==='loading'?<Loader2 className="animate-spin"/>:state==='not_found'?<h1 className="text-2xl font-bold">This link is no longer active</h1>:state==='signed'?<section><CheckCircle2 className="mb-4 h-10 w-10 text-primary"/><h1 className="text-2xl font-bold">Agreement signed / Contrato firmado</h1><p className="mt-3">Your signed copy is saved. / Su copia firmada está guardada.</p></section>:doc&&<><h1 className="text-2xl font-bold">{doc.title}</h1><p className="my-4 text-base text-muted-foreground">Version: {doc.version}</p>{doc.body?<ContractDocument body={doc.body} values={{...doc.values,legal_name:name||'{legal_name}',business_name:business||'—'}}/>:doc.url?<a href={doc.url} target="_blank" rel="noreferrer" className="text-primary underline">Open Spanish agreement / Abrir contrato en español</a>:null}<section className="mt-10 border-t border-border pt-6"><label htmlFor="business-name" className="block text-base font-semibold">Business name (if any) / Nombre del negocio (opcional)</label><Input id="business-name" value={business} onChange={e=>setBusiness(e.target.value)} maxLength={200} className="my-3 h-12 text-base"/><label htmlFor="legal-name" className="block text-base font-semibold">Your full legal name / Su nombre legal completo</label><Input id="legal-name" value={name} onChange={e=>setName(e.target.value)} maxLength={120} autoComplete="name" className="my-3 h-12 text-base"/><label className="my-5 flex items-start gap-3 text-base"><input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} className="mt-1 h-5 w-5"/><span>I have read and agree to this agreement.<br/>He leído y acepto este contrato.</span></label><Button onClick={()=>void sign()} disabled={busy} className="h-12 w-full bg-gold text-gold-foreground">{busy?<Loader2 className="mr-2 animate-spin"/>:<PenLine className="mr-2"/>}Sign / Firmar</Button><p className="mt-4 text-base text-muted-foreground">We record your typed name, time, IP address and browser. / Guardamos su nombre, hora, IP y navegador.</p>{error&&<p role="alert" className="mt-4 text-destructive">{error}</p>}</section></>}</div></main>;
+import { Helmet } from "react-helmet-async";
+import TidyLogo from "@/components/TidyLogo";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+/** Website signing is retired: every old agreement link lands here and never collects a signature. */
+export default function ContractSign() {
+  const { language } = useLanguage();
+  const es = language === "es";
+  return (
+    <main className="min-h-screen bg-navy text-primary-foreground flex items-center justify-center px-6">
+      <Helmet>
+        <title>Tidy Pro paperwork</title>
+        <meta name="description" content="Tidy Pro paperwork lives in the Tidy app." />
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
+      <div className="max-w-md text-center space-y-5">
+        <div className="mx-auto w-32"><TidyLogo /></div>
+        <h1 className="text-2xl font-bold">
+          {es ? "Tus documentos están en la app de Tidy" : "Your paperwork lives in the Tidy app"}
+        </h1>
+        <p className="text-base opacity-90">
+          {es ? "Revisa tu correo para ver el enlace." : "Check your email for the link."}
+        </p>
+        <p className="text-base opacity-90">
+          {es ? "¿Preguntas? " : "Questions? "}
+          <a href="tel:+17868291141" className="font-semibold text-gold underline">(786) 829-1141</a>
+        </p>
+      </div>
+    </main>
+  );
 }
