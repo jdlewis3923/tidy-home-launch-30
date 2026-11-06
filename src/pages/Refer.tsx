@@ -37,7 +37,7 @@ const ReferInner = () => {
   const [codeError, setCodeError] = useState(false);
   const [retryTick, setRetryTick] = useState(0);
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const listing = useGoogleListing();
 
   // Lazy-load Supabase only if dashboard auth is on, to avoid touching
