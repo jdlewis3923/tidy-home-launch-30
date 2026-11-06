@@ -1,5 +1,9 @@
 # Roadmap
 
+## Two remaining audit items (Nov 6)
+- [ ] Hide every returning-member prompt with a session; verify signed-in/out desktop and mobile; publish.
+- [ ] Run one isolated Connecteam team-member test, owner email only; archive user/remove profile; check health once.
+
 ## System-wide reliability pass (Nov 3) — test records only, no real texts/emails
 - [x] 1 (Documenso sending stays OFF until app_settings.documenso_signing is enabled with matching templates) Signing via Documenso (secrets present) + in-app fallback alert + nightly signing self-test (cleaning/lawn/Spanish)
 - [x] 2 Owner-sent agreement satisfies interview gate; fix Susan
