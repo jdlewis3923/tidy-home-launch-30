@@ -37,11 +37,22 @@ const ReferInner = () => {
   const [codeError, setCodeError] = useState(false);
   const [retryTick, setRetryTick] = useState(0);
   const { getCtaProps, openPopup, popupMode } = usePrimaryCta();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const listing = useGoogleListing();
 
   // Lazy-load Supabase only if dashboard auth is on, to avoid touching
   // the bundle when this page is browsed pre-launch.
+  // Scan tracking: one page_view per visit, src from the printed QR (e.g. hanger-ref).
+  useEffect(() => {
+    const src = new URLSearchParams(window.location.search).get("src")?.slice(0, 60) || null;
+    let sid = "";
+    try { sid = sessionStorage.getItem("tidy.founding.sid") || crypto.randomUUID(); sessionStorage.setItem("tidy.founding.sid", sid); } catch { sid = "nostorage-" + Math.random().toString(36).slice(2, 12); }
+    import("@/integrations/supabase/client").then(({ supabase }) =>
+      supabase.from("founding_events" as never).insert({ session_id: sid, event: "page_view", step: "refer", src, lang: language === "es" ? "es" : "en" } as never),
+    ).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     let active = true;
     if (!CUSTOMER_DASHBOARD_ENABLED) {
@@ -289,11 +300,11 @@ const ReferInner = () => {
                       {t("Log in to get your code")} <span className="arrow">→</span>
                     </Link>
                     <Link
-                      to={becomeCustomerCta.to}
-                      onClick={becomeCustomerCta.onClick}
+                      to={`/founding${location.search || "?src=refer"}`}
+                      onClick={() => pushEvent("cta_click", { cta_id: "refer_claim_reservation", cta_text: "Claim my $50" })}
                       className="cta-arrow cta-press bg-card border hover:bg-muted text-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
-                      {t("Become a customer first")} <span className="arrow">→</span>
+                      {t("Claim my $50 — reserve, no card")} <span className="arrow">→</span>
                     </Link>
                   </div>
                 </>

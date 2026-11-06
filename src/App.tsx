@@ -205,7 +205,7 @@ import { shouldRedirectToFoundingOffer, hasSeenFoundingOfferThisSession, markFou
 import { getLandingSource } from "@/lib/landing-source";
 import { usePageVisibility, pageAllowed } from "@/lib/pageVisibility";
 
-const ALWAYS_OPEN_PREFIXES = ["/admin", "/apply", "/careers", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/pro", "/pro/proof", "/add/", "/addon/", "/q/", "/neighbor", "/rate", "/verify/", "/intake", "/coi", "/contract/", "/photo/", "/badge/"];
+const ALWAYS_OPEN_PREFIXES = ["/admin", "/apply", "/careers", "/login", "/forgot-password", "/reset-password", "/coming-soon", "/pro", "/pro/proof", "/add/", "/addon/", "/q/", "/neighbor", "/refer", "/rate", "/verify/", "/intake", "/coi", "/contract/", "/photo/", "/badge/"];
 
 // The printed door hangers point at /dashboard/plan?src=doorhanger_en — a
 // neighbour with no account should see the founding offer first. Bounce them to
