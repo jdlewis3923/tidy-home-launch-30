@@ -1,5 +1,6 @@
 import {buildPaperworkEmail,dueKinds,reminderWindow} from './paperwork-email.ts';
-export async function processPaperworkEmails(db:any,user:any,profile:any,checkrLive=false,sendProEmail: (db:any,args:any)=>Promise<{sent:boolean;reason?:string}>){
+export async function processPaperworkEmails(db:any,user:any,profile:any,checkrLive=false,sendProEmail: (db:any,args:any)=>Promise<{sent:boolean;reason?:string}>,ownerTest=false){
+ if(ownerTest&&(!profile.is_test||profile.email!=='jdlewis3923@gmail.com'))throw new Error('owner_test_only');
  if(profile.applicant_id){const {data:p}=await db.from('contractor_pipeline').select('checkr_result').eq('applicant_id',profile.applicant_id).maybeSingle();if(['clear','passed'].includes(p?.checkr_result))profile={...profile,paperwork_status:{...profile.paperwork_status,checkr:'complete'}};}
  const {data:history,error}=await db.from('pro_paperwork_emails').select('*').eq('connecteam_user_id',profile.connecteam_user_id);if(error)throw error;
  const sent=(history??[]).filter((r:any)=>r.status==='sent');const welcome=sent.find((r:any)=>r.kind==='welcome');
@@ -7,7 +8,7 @@ export async function processPaperworkEmails(db:any,user:any,profile:any,checkrL
  const kinds=dueKinds(welcome?.sent_at??null,complete,sent.map((r:any)=>r.kind),Date.now());
  for(const kind of kinds){const r=await db.from('pro_paperwork_emails').upsert({connecteam_user_id:profile.connecteam_user_id,kind,status:profile.paperwork_email_held?'held':'queued'},{onConflict:'connecteam_user_id,kind',ignoreDuplicates:true});if(r.error)throw r.error;}
  if(complete){await db.from('pro_paperwork_emails').update({status:'cancelled'}).eq('connecteam_user_id',profile.connecteam_user_id).in('kind',['reminder48','reminder5d']).eq('status','queued');}
- if(profile.paperwork_email_held||profile.is_test)return;
+ if(profile.paperwork_email_held||(profile.is_test&&!ownerTest))return;
  await db.from('pro_paperwork_emails').update({status:'queued'}).eq('connecteam_user_id',profile.connecteam_user_id).eq('status','held');
  if(!profile.email)return;
  if(checkrLive&&!profile.checkr_invite_url){await db.from('admin_alerts').upsert({dedupe_key:`paperwork-checkr:${profile.connecteam_user_id}`,alert_type:'integration_error',level:'warning',tier:'digest',title:`Add Checkr invitation for ${profile.name}`,body:'Checkr is live, but this Pro has no invitation link. Paperwork email is held until the link is available.'},{onConflict:'dedupe_key',ignoreDuplicates:true});return;}
