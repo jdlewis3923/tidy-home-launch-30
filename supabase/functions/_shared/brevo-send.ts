@@ -97,13 +97,16 @@ function env(name: string): string | undefined {
   }
 }
 
-function normalizeRecipients(
+export function normalizeRecipients(
   to: SendBrevoEmailOptions['to'],
 ): BrevoRecipient[] {
   const list = Array.isArray(to) ? to : [to];
   return list
     .map((r) => (typeof r === 'string' ? { email: r } : r))
-    .filter((r) => !!r?.email);
+    .filter((r) => !!r?.email)
+    // Blank names (e.g. applicants without a first name) must be omitted —
+    // Brevo rejects `name: ''` with HTTP 400 "name is missing in to".
+    .map((r) => (r.name?.trim() ? { ...r, name: r.name.trim() } : { email: r.email }));
 }
 
 /**
