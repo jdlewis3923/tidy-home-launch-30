@@ -1162,6 +1162,7 @@ const translations: Record<string, string> = {
     "Los clientes activos reciben un enlace de referido único en su panel. Inicia sesión para obtener el tuyo y empezar a ganar.",
   "Log in to get your code": "Inicia sesión para obtener tu código",
   "Become a customer first": "Primero hazte cliente",
+  "Claim my $50 — reserve, no card": "Reclamar mis $50 — reserva sin tarjeta",
   "Not a member yet? Start with a plan.": "¿Aún no eres miembro? Empieza con un plan.",
   "Lock in your monthly price, then send your link to a neighbor.":
     "Asegura tu precio mensual y luego envía tu enlace a un vecino.",

@@ -289,11 +289,11 @@ const ReferInner = () => {
                       {t("Log in to get your code")} <span className="arrow">→</span>
                     </Link>
                     <Link
-                      to={becomeCustomerCta.to}
-                      onClick={becomeCustomerCta.onClick}
+                      to={`/founding${location.search || "?src=refer"}`}
+                      onClick={() => pushEvent("cta_click", { cta_id: "refer_claim_reservation", cta_text: "Claim my $50" })}
                       className="cta-arrow cta-press bg-card border hover:bg-muted text-foreground font-semibold px-5 py-3 rounded-lg text-sm transition-colors"
                     >
-                      {t("Become a customer first")} <span className="arrow">→</span>
+                      {t("Claim my $50 — reserve, no card")} <span className="arrow">→</span>
                     </Link>
                   </div>
                 </>
