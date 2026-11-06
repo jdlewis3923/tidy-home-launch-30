@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 // Deno-style specifier resolves fine under vitest since the helper is plain TS.
-import { sendBrevoEmail } from '../../supabase/functions/_shared/brevo-send';
+import { sendBrevoEmail, normalizeRecipients } from '../../supabase/functions/_shared/brevo-send';
 import { brandHostedTemplate, tidyEmailShell } from '../../supabase/functions/_shared/email-brand';
 import { ownerEmail } from '../../supabase/functions/_shared/owner-email';
 
@@ -44,6 +44,17 @@ const base = {
   apiKey: 'test-key',
   lovableApiKey: 'test-lovable-key',
 };
+
+describe('recipient names', () => {
+  it('omits blank names so Brevo accepts nameless applicants', () => {
+    expect(normalizeRecipients([{ email: 'a@example.com', name: '' }])).toEqual([{ email: 'a@example.com' }]);
+    expect(normalizeRecipients([{ email: 'a@example.com', name: '   ' }])).toEqual([{ email: 'a@example.com' }]);
+    expect(normalizeRecipients('a@example.com')).toEqual([{ email: 'a@example.com' }]);
+  });
+  it('keeps and trims real names', () => {
+    expect(normalizeRecipients([{ email: 'a@example.com', name: '  Jane  ' }])).toEqual([{ email: 'a@example.com', name: 'Jane' }]);
+  });
+});
 
 describe('sendBrevoEmail opt-out enforcement', () => {
   it('does not send to a blacklisted contact', async () => {
