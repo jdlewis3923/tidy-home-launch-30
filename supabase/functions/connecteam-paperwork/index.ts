@@ -149,4 +149,4 @@ async function checkGroup(user:any,service:string){const pack=PACKS[service];if(
 async function noteSiteSignature(p:any,site:any){const event=`connecteam.site_signature_note:${site.id}`;const {data:done}=await db.from('integration_logs').select('id').eq('source','internal').eq('event',event).limit(1).maybeSingle();if(done)return;
  const when=new Date(site.signed_at).toLocaleString('en-US',{timeZone:'America/New_York',dateStyle:'medium',timeStyle:'short'});
  await ct('POST',`/users/v1/users/${p.connecteam_user_id}/notes`,{title:'Contractor agreement signed on jointidy.co',text:`${p.name} signed the ${POSITIONS[p.service_line]} Independent Contractor Agreement on jointidy.co on ${when} ET (record ${site.id}). Signed PDF is stored in Tidy admin. Treat the Connecteam agreement as done; W-9 and insurance are still required.`});
- await db.from('integration_logs').insert({source:'internal',event,status:'success',payload:{connecteam_user_id:p.connecteam_user_id}});}
+ await db.from('integration_logs').insert({source:'internal',event,status:'ok',detail:JSON.stringify({connecteam_user_id:p.connecteam_user_id})});}
