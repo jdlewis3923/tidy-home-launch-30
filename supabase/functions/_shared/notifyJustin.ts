@@ -86,9 +86,7 @@ export async function sendBrevoEmail(opts: {
   // All sends go through the shared helper so marketing mail honors the Brevo
   // unsubscribe (blacklist) list. Defaults to relationship mail (marketing: false).
   const result = await sendViaBrevo({
-    // Blank names (e.g. applicants without a first name) must be omitted —
-    // Brevo rejects `name: ''` with HTTP 400 "name is missing in to".
-    to: [{ email: opts.toEmail, ...(opts.toName?.trim() ? { name: opts.toName.trim() } : {}) }],
+    to: [{ email: opts.toEmail, name: opts.toName ?? opts.toEmail }],
     subject: opts.subject,
     htmlContent: opts.htmlContent,
     sender: { name: 'Tidy Home Concierge', email: 'hello@jointidy.co' },
