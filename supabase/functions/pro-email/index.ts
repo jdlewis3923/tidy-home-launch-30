@@ -22,6 +22,7 @@ import {
   insuranceRequestEmail, missingEmail, interviewEmail, firstRouteEmail, PHOTO_RETAKE_REASONS, type Built, type Lang, type RetakeReason,
 } from '../_shared/pro-emails.ts';
 import { sendProEmail, proLang } from '../_shared/pro-send.ts';
+import { approvedApplicationEmail, approvedApplicationRecipient } from '../_shared/approved-application-email.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -31,6 +32,7 @@ export const PRO_EMAIL_KEYS = [
   'onboarding', 'background_check', 'insurance_request', 'contract', 'badge_photo',
   'photo_retake', 'all_set', 'missing', 'decline', 'tier2_offer',
   'interview_confirmed', 'interview_reminder', 'first_route',
+  'approved_connecteam_application',
 ] as const;
 
 const Body = z.object({
@@ -75,6 +77,20 @@ Deno.serve(async (req) => {
   const parsed = Body.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return jsonResponse({ error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
   const { applicant_id, email: key, mode, lang, reason, sequence } = parsed.data;
+
+  if (key === 'approved_connecteam_application') {
+    // This is one explicit owner-approved email, never an automated legacy nudge.
+    const { data: candidate } = await admin.from('applicants').select('email').eq('id', applicant_id).maybeSingle();
+    if (!candidate || !approvedApplicationRecipient(applicant_id, candidate.email ?? '')) return jsonResponse({ error: 'recipient_not_approved' }, 403);
+    const built = approvedApplicationEmail();
+    if (mode === 'preview') return jsonResponse({ ok: true, to: candidate.email, ...built });
+    if (mode !== 'send' || sequence !== 'manual') return jsonResponse({ error: 'manual_send_only' }, 400);
+    const { data: sent } = await admin.from('email_send_log').select('id').eq('recipient', candidate.email).eq('template_name', 'pro:approved_connecteam_application').eq('status', 'sent').limit(1);
+    if (sent?.length) return jsonResponse({ ok: true, skipped: 'already_sent', send_id: sent[0].id });
+    const result = await sendProEmail(admin, { applicantId: applicant_id, key, to: candidate.email, name: 'Aleksandar Ljustina', built, triggeredBy: actor, mode: 'manual' });
+    return jsonResponse({ ok: result.sent, reason: result.reason, sent_to: candidate.email }, result.sent ? 200 : 502);
+  }
+  return jsonResponse({ ok: true, skipped: 'legacy_hiring_retired' });
 
   let rec;
   try { rec = await loadFive(admin, applicant_id, { mintTokens: true }); }
