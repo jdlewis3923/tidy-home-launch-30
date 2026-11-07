@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Approved paperwork email and intake requirement (Nov 7)
-- [ ] Discover intake document, require it for completion/reminders, retain site signatures, test and deploy.
-- [ ] Send one approved branded email each to Susan and Jenifer with only outstanding document links; verify send records.
+- [x] Intake 829250 discovered; signed intake required by shared rules and database readiness gate; site signatures retained; 21 focused tests pass and function deployed.
+- [x] One approved email each sent: Susan 08fe2abc-5403-4090-8826-d1514d389943, Jenifer b2fbbf5b-4356-4c93-8bc4-d5dcffc74129; approved button order verified, no texts.
 
 ## Two remaining audit items (Nov 6)
 - [x] Hide returning-member prompt with race-safe session state; signed-in/out 1280px and 390px verified, 22 focused tests pass; publication requested.
