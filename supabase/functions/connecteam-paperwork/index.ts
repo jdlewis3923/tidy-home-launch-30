@@ -27,6 +27,18 @@ Deno.serve(async req=>{
  const body=z.object({action:z.enum(['sync','hire','mail','test_email','hire_test_create','hire_test_find','quota','hire_test_position','hire_test_run','hire_test_cleanup','approved_apology']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
  if(!body.success)return reply({error:'invalid_request'},400);
  try{
+ if(body.data.action==='approved_apology'){
+  const id=body.data.user_id;if(!id||![31157941,31157945].includes(id))return reply({error:'approved_recipient_required'},403);
+  const {data:p,error:pe}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',id).single();if(pe)throw pe;
+  if(p.is_test||p.service_line!=='cleaning'||!p.email||!p.paperwork_status?.intake)throw new Error('recipient_not_ready');
+  const {data:old}=await db.from('pro_paperwork_emails').select('id,status').eq('connecteam_user_id',id).eq('kind','apology_20261107').maybeSingle();if(old)return reply({already_attempted:true,mail:old});
+  const {data:mail,error:me}=await db.from('pro_paperwork_emails').insert({connecteam_user_id:id,kind:'apology_20261107',status:'queued'}).select('id').single();if(me)throw me;
+  const {data:claimed,error:ce}=await db.rpc('claim_paperwork_email',{_id:mail.id});if(ce)throw ce;if(!claimed)return reply({error:'not_claimed'},409);
+  const built=buildPaperworkApology({first:id===31157941?'Susan':'Jenifer',service:p.service_line,status:p.paperwork_status,signed:!!p.agreement_signed_at,coiValid:!!p.coi_verified_at&&(!p.coi_expires_at||Date.parse(p.coi_expires_at)>Date.now())});
+  const result=await sendProEmail(db,{applicantId:p.applicant_id,key:'connecteam_paperwork_apology_20261107',to:p.email,name:p.name,built,triggeredBy:`paperwork:${mail.id}`,mode:'manual'});
+  const saved=await db.from('pro_paperwork_emails').update({status:result.sent?'sent':'failed',sent_at:result.sent?new Date().toISOString():null,error:result.reason??null}).eq('id',mail.id);if(saved.error)throw saved.error;
+  return reply({ok:result.sent,recipient:p.email,mail_id:mail.id,result});
+ }
  if(body.data.action==='test_email'){
   const {data:old}=await db.from('pro_paperwork_emails').select('status').eq('connecteam_user_id',31157330).eq('kind','test').maybeSingle();if(old)return reply({ok:old.status==='sent',already_attempted:true,status:old.status});
   const {data:row,error}=await db.from('pro_paperwork_emails').insert({connecteam_user_id:31157330,kind:'test'}).select('id').single();if(error)throw error;
