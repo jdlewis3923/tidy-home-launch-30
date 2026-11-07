@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { House, Leaf, Car, ArrowRight } from 'lucide-react';
 import TidyLogo from '@/components/TidyLogo';
 import SeoHead from '@/components/landing/SeoHead';
-import { CONNECTEAM_APPLY, applyServiceFrom, type ApplyService } from '@/lib/connecteamApply';
+import { connecteamApplyUrl, type ApplyService } from '@/lib/connecteamApply';
+import { Button } from '@/components/ui/button';
 
 const CARDS: { key: ApplyService; icon: typeof House; en: string; es: string; pay: { en: string; es: string }[] }[] = [
   { key: 'cleaning', icon: House, en: 'House Cleaning', es: 'Limpieza de casas', pay: [{ en: '$56–$112 per home', es: '$56–$112 por casa' }] },
@@ -13,22 +14,17 @@ const CARDS: { key: ApplyService; icon: typeof House; en: string; es: string; pa
 
 export default function Apply() {
   const [params] = useSearchParams();
-  const { service: pathService } = useParams();
   const [lang, setLang] = useState<'en' | 'es'>(() => (navigator.language.startsWith('es') ? 'es' : 'en'));
   const t = (en: string, es: string) => (lang === 'es' ? es : en);
-
-  // Old /apply/<service> and /apply?service= links go straight to the matching form.
-  const direct = applyServiceFrom(pathService ?? params.get('service') ?? params.get('s'));
-  useEffect(() => { if (direct) window.location.replace(CONNECTEAM_APPLY[direct]); }, [direct]);
 
   return (
     <div className="min-h-screen bg-navy text-primary-foreground">
       <SeoHead title="Apply to Tidy | Pro jobs in Pinecrest & Kendall" description="Cleaning, lawn and car care Pro jobs in Pinecrest & Kendall. Paid every Friday. Habla español." canonical="https://jointidy.co/apply" />
       <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
         <Link to="/" aria-label="Tidy"><TidyLogo size="sm" /></Link>
-        <button type="button" onClick={() => setLang(lang === 'en' ? 'es' : 'en')} className="rounded-full border border-primary-foreground/40 px-4 py-1.5 text-sm">
+        <Button variant="ghost" type="button" onClick={() => setLang(lang === 'en' ? 'es' : 'en')} className="rounded-full border border-primary-foreground/40 px-4 py-1.5 text-sm">
           {lang === 'en' ? 'Español' : 'English'}
-        </button>
+        </Button>
       </header>
       <main className="mx-auto max-w-5xl px-5 pb-16 pt-6">
         <h1 className="text-center text-3xl font-bold md:text-4xl">{t('Work with Tidy', 'Trabaja con Tidy')}</h1>
@@ -44,9 +40,9 @@ export default function Apply() {
                 {pay.map((p) => <li key={p.en}>{t(p.en, p.es)}</li>)}
               </ul>
               <p className="mt-2 text-sm text-primary-foreground/60">{t('Paid every Friday', 'Pago cada viernes')}</p>
-              <a href={CONNECTEAM_APPLY[key]} className="mt-6 flex min-h-[54px] items-center justify-center gap-2 rounded-full bg-gold px-5 text-base font-semibold text-gold-foreground shadow-lg transition hover:brightness-105">
+              <Button asChild className="mt-6 min-h-[54px] rounded-full bg-gold px-5 text-base font-semibold text-gold-foreground shadow-lg hover:bg-gold hover:brightness-105"><a href={connecteamApplyUrl(key, params.get('src'))}>
                 {t('Apply in 5 minutes', 'Aplica en 5 minutos')} <ArrowRight className="h-5 w-5" aria-hidden />
-              </a>
+              </a></Button>
             </section>
           ))}
         </div>

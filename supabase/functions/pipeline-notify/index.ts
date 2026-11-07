@@ -79,6 +79,7 @@ async function dashboardWarning(title: string, key: string, applicantId: string)
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
+  return jsonResponse({ ok: true, skipped: 'legacy_hiring_retired' });
   const auth = await requireServiceOrAdmin(req);
   if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
   const { applicant_id, event, slot, step } = await req.json().catch(() => ({}));

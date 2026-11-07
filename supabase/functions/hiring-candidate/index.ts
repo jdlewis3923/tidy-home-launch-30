@@ -78,6 +78,7 @@ import { reportCandidateSurface } from '../_shared/candidate-surface.ts';
 reportCandidateSurface('booking');
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
+  return jsonResponse({ ok: false, retired: true, application_url: 'https://jointidy.co/apply' }, 410);
   if (req.method !== 'POST') return jsonResponse({ error: 'method not allowed' }, 405);
   const body = await req.json().catch(() => ({}));
   const action = String(body?.action ?? '');

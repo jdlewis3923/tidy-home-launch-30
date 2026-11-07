@@ -57,6 +57,7 @@ function inviteText(first: string, service: string, lang: Lang, link: string, de
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
+  return jsonResponse({ ok: true, skipped: 'legacy_hiring_retired', application_url: 'https://jointidy.co/apply' });
   const auth = await requireServiceOrAdmin(req);
   if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
 
