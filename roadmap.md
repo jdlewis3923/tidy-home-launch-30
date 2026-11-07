@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Connecteam-only applications and Aleksandar (Nov 7)
-- [ ] Send one approved branded email to Aleksandar; no SMS under the standing owner rule.
-- [ ] Preserve src through bilingual service selection and legacy careers links; retire old application collection and senders.
-- [ ] Verify phone/computer routing, retired endpoints and schedules; publish.
+- [x] One approved branded email sent to Aleksandar; no SMS sent or queued under the standing owner rule.
+- [x] Src preserved through bilingual service selection and careers/onboarding aliases; legacy public collection returns 410 and legacy senders return retired; Connecteam paperwork remains active.
+- [x] Thirty focused tests pass; phone/computer EN/ES routes and seven retired endpoints verified; hiring crons already paused, candidate_sms off, site_live false; publication requested.
 
 ## Approved paperwork email and intake requirement (Nov 7)
 - [x] Intake 829250 discovered; signed intake required by shared rules and database readiness gate; site signatures retained; 21 focused tests pass and function deployed.
