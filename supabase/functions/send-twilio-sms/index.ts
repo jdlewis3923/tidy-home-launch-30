@@ -283,7 +283,10 @@ Deno.serve(async (req) => {
       if (to_phone_e164 !== ownerPh) {
         const { data: sw } = await admin.from('app_settings').select('value').eq('key', 'candidate_sms_enabled').maybeSingle();
         const on = sw?.value === 'on' || sw?.value === '"on"' || sw?.value === true;
-        if (!on) {
+        // Owner-approved one-person exceptions (list of E.164 phones).
+        const { data: allow } = await admin.from('app_settings').select('value').eq('key', 'candidate_sms_allowlist').maybeSingle();
+        const allowed = Array.isArray(allow?.value) && (allow!.value as unknown[]).includes(to_phone_e164);
+        if (!on && !allowed) {
           const { data: isCand } = await admin.rpc('is_candidate_phone', { _phone: to_phone_e164 });
           if (isCand === true) {
             await finish('success', 'skipped: candidate_sms_off');
