@@ -39,6 +39,7 @@ async function alreadyNudgedToday(applicantId: string, bucket: Bucket): Promise<
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
+  return jsonResponse({ ok: true, skipped: 'legacy_hiring_retired' });
 
   const { data: rows, error } = await admin
     .from('applicants')

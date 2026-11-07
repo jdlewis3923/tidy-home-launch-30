@@ -11,6 +11,7 @@ import { inviteCopy, type InviteLanguage } from '../_shared/hire-ready-rules.ts'
 
 Deno.serve(async req => {
   const pre = handleCors(req); if (pre) return pre;
+  return jsonResponse({ ok: true, skipped: 'legacy_hiring_retired' });
   // Database-triggered sends present the Vault service credential; accept it like cron jobs do.
   if (!(await isCronAuthorized(req.clone()))) {
     const auth = await requireServiceOrAdmin(req);

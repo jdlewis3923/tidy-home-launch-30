@@ -34,6 +34,7 @@ const REMINDER_DAYS = [2, 5];
 Deno.serve(async (req) => {
   const pre = handleCors(req);
   if (pre) return pre;
+  return jsonResponse({ ok: true, skipped: 'legacy_hiring_retired' });
 
   if (!(await isCronAuthorized(req))) {
     const auth = await requireServiceOrAdmin(req);

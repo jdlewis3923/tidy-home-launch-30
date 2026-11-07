@@ -460,10 +460,10 @@ const App = () => (
                   <Route path="/admin/reviews/import" element={<AdminReviewsImport />} />
                   {/* Capacity & hiring — fill %, ceiling dates, when to post the job. */}
                   <Route path="/admin/capacity" element={<AdminServiceHandoff />} />
-                  <Route path="/onboarding/*" element={<Navigate to="/apply" replace />} />
+                  <Route path="/onboarding/*" element={<Navigate to={`/apply${window.location.search}`} replace />} />
                   <Route path="/apply" element={<Apply />} />
-                  <Route path="/apply/:service/*" element={<Apply />} />
-                  <Route path="/careers" element={<Navigate to="/apply" replace />} />
+                  <Route path="/apply/:service/*" element={<Navigate to={`/apply${window.location.search}`} replace />} />
+                  <Route path="/careers" element={<Navigate to={`/apply${window.location.search}`} replace />} />
                   <Route path="/pro/insurance" element={<ProInsuranceGuide />} />
                   {/* On-site job view: before-photo gate + walkaround add-on request. */}
                   {/* Public, token-authenticated add-on approval from the SMS link. */}

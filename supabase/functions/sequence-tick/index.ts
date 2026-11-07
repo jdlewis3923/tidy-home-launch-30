@@ -25,6 +25,7 @@ const call = (fn: string, body: unknown) => vendorFetch(`${URL_}/functions/v1/${
 
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
+  return jsonResponse({ ok: true, skipped: 'legacy_hiring_retired' });
   if (!(await isCronAuthorized(req.clone()))) {
     const auth = await requireServiceOrAdmin(req);
     if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);

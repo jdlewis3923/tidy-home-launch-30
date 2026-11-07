@@ -93,6 +93,10 @@ export async function sendProEmail(admin: SupabaseClient, args: {
   mode?: SendMode;
 }): Promise<{ sent: boolean; reason?: string; blocked?: boolean; deferred?: boolean; outOfSequence?: string | null }> {
   const mode = args.mode ?? 'transition';
+  // Connecteam paperwork has its own keys/ledger; legacy table-driven chases never resume.
+  if (args.applicantId && (mode !== 'manual' || args.key !== 'approved_connecteam_application')) {
+    return { sent: false, blocked: true, reason: 'legacy_hiring_retired' };
+  }
   let outOfSequence: string | null = null;
   if (args.applicantId && HIRING_ORDER[args.key]) {
     const h = await pipelineAllows(admin, args.applicantId, HIRING_ORDER[args.key]);
@@ -124,6 +128,7 @@ export async function sendProEmail(admin: SupabaseClient, args: {
     recipient: args.to,
     triggered_by: args.triggeredBy,
     status: res.sent ? 'sent' : 'failed',
+    brevo_message_id: res.messageId ?? null,
     error_message: res.sent ? null : (res.reason ?? 'send_failed'),
     payload: { applicant_id: args.applicantId, subject: args.built.subject, order: def?.order ?? null, mode, out_of_sequence: outOfSequence },
   });
