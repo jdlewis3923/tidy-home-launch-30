@@ -94,7 +94,7 @@ export async function sendProEmail(admin: SupabaseClient, args: {
 }): Promise<{ sent: boolean; reason?: string; blocked?: boolean; deferred?: boolean; outOfSequence?: string | null }> {
   const mode = args.mode ?? 'transition';
   // Connecteam paperwork has its own keys/ledger; legacy table-driven chases never resume.
-  if (args.applicantId && (mode !== 'manual' || args.key !== 'approved_connecteam_application')) {
+  if (args.applicantId && !args.key.startsWith('connecteam_paperwork_') && (mode !== 'manual' || args.key !== 'approved_connecteam_application')) {
     return { sent: false, blocked: true, reason: 'legacy_hiring_retired' };
   }
   let outOfSequence: string | null = null;
