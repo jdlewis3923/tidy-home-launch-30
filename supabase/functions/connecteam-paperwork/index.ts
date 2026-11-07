@@ -6,7 +6,7 @@ import {requireServiceOrAdmin} from '../_shared/admin-auth.ts';
 import {ct} from '../_shared/connecteam.ts';
 import {paperworkState,POSITIONS} from '../_shared/paperwork-rules.ts';
 import {processPaperworkEmails} from '../_shared/paperwork-mailer.ts';
-import {buildPaperworkEmail,PACKS} from '../_shared/paperwork-email.ts';
+import {buildPaperworkEmail,buildPaperworkApology,PAPERWORK_IDS,PACKS} from '../_shared/paperwork-email.ts';
 import {sendProEmail} from '../_shared/pro-send.ts';
 import {registerTeamMember,isHireTestUser} from '../_shared/connecteam-new-member.ts';
 const db=createClient(Deno.env.get('SUPABASE_URL')??'',Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'',{auth:{persistSession:false}});
@@ -24,9 +24,21 @@ async function setPosition(userId:number,service:string,fields:any[]) {
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
  const auth=await requireServiceOrAdmin(req);if(!auth.ok)return reply({error:auth.error},auth.status);
- const body=z.object({action:z.enum(['sync','hire','mail','test_email','hire_test_create','hire_test_find','quota','hire_test_position','hire_test_run','hire_test_cleanup']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
+ const body=z.object({action:z.enum(['sync','hire','mail','test_email','hire_test_create','hire_test_find','quota','hire_test_position','hire_test_run','hire_test_cleanup','approved_apology']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
  if(!body.success)return reply({error:'invalid_request'},400);
  try{
+ if(body.data.action==='approved_apology'){
+  const id=body.data.user_id;if(!id||![31157941,31157945].includes(id))return reply({error:'approved_recipient_required'},403);
+  const {data:p,error:pe}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',id).single();if(pe)throw pe;
+  if(p.is_test||p.service_line!=='cleaning'||!p.email||!p.paperwork_status?.intake)throw new Error('recipient_not_ready');
+  const {data:old}=await db.from('pro_paperwork_emails').select('id,status').eq('connecteam_user_id',id).eq('kind','apology_20261107').maybeSingle();if(old)return reply({already_attempted:true,mail:old});
+  const {data:mail,error:me}=await db.from('pro_paperwork_emails').insert({connecteam_user_id:id,kind:'apology_20261107',status:'queued'}).select('id').single();if(me)throw me;
+  const {data:claimed,error:ce}=await db.rpc('claim_paperwork_email',{_id:mail.id});if(ce)throw ce;if(!claimed)return reply({error:'not_claimed'},409);
+  const built=buildPaperworkApology({first:id===31157941?'Susan':'Jenifer',service:p.service_line,status:p.paperwork_status,signed:!!p.agreement_signed_at,coiValid:!!p.coi_verified_at&&(!p.coi_expires_at||Date.parse(p.coi_expires_at)>Date.now())});
+  const result=await sendProEmail(db,{applicantId:p.applicant_id,key:'connecteam_paperwork_apology_20261107',to:p.email,name:p.name,built,triggeredBy:`paperwork:${mail.id}`,mode:'manual'});
+  const saved=await db.from('pro_paperwork_emails').update({status:result.sent?'sent':'failed',sent_at:result.sent?new Date().toISOString():null,error:result.reason??null}).eq('id',mail.id);if(saved.error)throw saved.error;
+  return reply({ok:result.sent,recipient:p.email,mail_id:mail.id,result});
+ }
  if(body.data.action==='test_email'){
   const {data:old}=await db.from('pro_paperwork_emails').select('status').eq('connecteam_user_id',31157330).eq('kind','test').maybeSingle();if(old)return reply({ok:old.status==='sent',already_attempted:true,status:old.status});
   const {data:row,error}=await db.from('pro_paperwork_emails').insert({connecteam_user_id:31157330,kind:'test'}).select('id').single();if(error)throw error;
@@ -113,6 +125,7 @@ Deno.serve(async req=>{
  }
  const {data:pool,error}=await db.from('jobber_service_pro_pool').select('*').eq('active',true);if(error)throw error;
  const catalog=await all('/documents/v1/documents','documents');
+ const intake=catalog.find(d=>d.name==='Pro Intake & Kit Order'&&d.documentType==='eSign');if(!intake||intake.documentId!==PAPERWORK_IDS.intake)throw new Error('Required intake document missing or changed');
  const w9=catalog.find(d=>d.templateType==='w9'),coi=catalog.find(d=>d.name.startsWith('Certificate of Insurance'));
  if(!w9||!coi)throw new Error('Required W-9/COI document missing');
  const {data:profiles}=await db.from('pro_pay_profiles').select('*');
@@ -135,7 +148,7 @@ Deno.serve(async req=>{
   const rows=batched?batched.filter(r=>Number(r.userId)===Number(p.connecteam_user_id)):await all('/documents/v1/user-documents','documents',[['userIds',String(p.connecteam_user_id)]]);
   // A signature on our own site counts as the signed agreement; W-9 and COI are still required.
   const {data:site}=p.applicant_id?await db.from('contract_signatures').select('id,signed_at').eq('applicant_id',p.applicant_id).not('signed_at','is',null).order('signed_at',{ascending:false}).limit(1).maybeSingle():{data:null};
-  const state=paperworkState(rows,{w9:w9.documentId,coi:coi.documentId,agreement:agreement.documentId},Date.now(),site?.signed_at??null);
+  const state=paperworkState(rows,{w9:w9.documentId,coi:coi.documentId,agreement:agreement.documentId,intake:intake.documentId},Date.now(),site?.signed_at??null);
   if(site)await noteSiteSignature(p,site);
   const r=await db.rpc('connecteam_commit_paperwork',{_user:p.connecteam_user_id,_status:state.status,_complete:state.complete,_signed_at:state.signedAt,_expiry:state.expiry,_coi_approved:state.coiApproved});if(r.error)throw r.error;synced++;
   const user=users.find(u=>u.userId===Number(p.connecteam_user_id));if(user){await checkGroup(user,p.service_line);const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',p.connecteam_user_id).single();await processPaperworkEmails(db,user,profile,checkrLive,sendProEmail);}

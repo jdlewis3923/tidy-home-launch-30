@@ -1,5 +1,9 @@
 # Roadmap
 
+## Approved paperwork email and intake requirement (Nov 7)
+- [x] Intake 829250 discovered; signed intake required by shared rules and database readiness gate; site signatures retained; 21 focused tests pass and function deployed.
+- [x] One approved email each sent: Susan 08fe2abc-5403-4090-8826-d1514d389943, Jenifer b2fbbf5b-4356-4c93-8bc4-d5dcffc74129; approved button order verified, no texts.
+
 ## Two remaining audit items (Nov 6)
 - [x] Hide returning-member prompt with race-safe session state; signed-in/out 1280px and 390px verified, 22 focused tests pass; publication requested.
 - [x] One isolated Connecteam run: earlier user absent; created 31164833 with activation disabled; House Cleaning Pro read back; shared registration created test pay profile; welcome 43555bfc-55fd-4644-947d-54a16179c70a sent only to jdlewis3923@gmail.com (send log 27974c3d-6390-4ac8-acd7-d3b344fb9bef). User archived, profile removed, pending mail cancelled; one fresh health check and cached green tile verified. No texts or real-Pro emails.
