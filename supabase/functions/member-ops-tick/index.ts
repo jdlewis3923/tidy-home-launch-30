@@ -8,6 +8,7 @@ import '../_shared/http.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 import { handleCors, jsonResponse } from '../_shared/cors.ts';
 import { requireServiceOrAdmin } from '../_shared/admin-auth.ts';
+import { isCronAuthorized } from '../_shared/cron-auth.ts';
 import { sendBrevoEmail } from '../_shared/brevo-send.ts';
 import { tidyEmailShell } from '../_shared/email-brand.ts';
 import Stripe from 'https://esm.sh/stripe@17.5.0?target=deno';
@@ -24,7 +25,9 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 Deno.serve(async (req) => {
   const pre = handleCors(req); if (pre) return pre;
   try {
-    const auth = await requireServiceOrAdmin(req);
+    // Scheduled calls present the Vault service key (x-cron-key); accept it, else require service/admin.
+    const cronOk = await isCronAuthorized(req);
+    const auth = cronOk ? { ok: true as const, status: 200, error: '' } : await requireServiceOrAdmin(req);
     if (!auth.ok) return jsonResponse({ error: auth.error }, auth.status);
     const body = await req.json().catch(() => ({}));
 
