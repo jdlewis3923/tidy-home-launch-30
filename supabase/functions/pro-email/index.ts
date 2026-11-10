@@ -33,6 +33,7 @@ export const PRO_EMAIL_KEYS = [
   'photo_retake', 'all_set', 'missing', 'decline', 'tier2_offer',
   'interview_confirmed', 'interview_reminder', 'first_route',
   'approved_connecteam_application',
+  'approved_connecteam_reminder',
 ] as const;
 
 const Body = z.object({
@@ -78,14 +79,14 @@ Deno.serve(async (req) => {
   if (!parsed.success) return jsonResponse({ error: 'invalid_body', details: parsed.error.flatten().fieldErrors }, 400);
   const { applicant_id, email: key, mode, lang, reason, sequence } = parsed.data;
 
-  if (key === 'approved_connecteam_application') {
+  if (key === 'approved_connecteam_application' || key === 'approved_connecteam_reminder') {
     // This is one explicit owner-approved email, never an automated legacy nudge.
     const { data: candidate } = await admin.from('applicants').select('email').eq('id', applicant_id).maybeSingle();
     if (!candidate || !approvedApplicationRecipient(applicant_id, candidate.email ?? '')) return jsonResponse({ error: 'recipient_not_approved' }, 403);
-    const built = approvedApplicationEmail();
+    const built = approvedApplicationEmail(key === 'approved_connecteam_reminder');
     if (mode === 'preview') return jsonResponse({ ok: true, to: candidate.email, ...built });
     if (mode !== 'send' || sequence !== 'manual') return jsonResponse({ error: 'manual_send_only' }, 400);
-    const { data: sent } = await admin.from('email_send_log').select('id').eq('recipient', candidate.email).eq('template_name', 'pro:approved_connecteam_application').eq('status', 'sent').limit(1);
+    const { data: sent } = await admin.from('email_send_log').select('id').eq('recipient', candidate.email).eq('template_name', `pro:${key}`).eq('status', 'sent').limit(1);
     if (sent?.length) return jsonResponse({ ok: true, skipped: 'already_sent', send_id: sent[0].id });
     const result = await sendProEmail(admin, { applicantId: applicant_id, key, to: candidate.email, name: 'Aleksandar Ljustina', built, triggeredBy: actor, mode: 'manual' });
     return jsonResponse({ ok: result.sent, reason: result.reason, sent_to: candidate.email }, result.sent ? 200 : 502);
