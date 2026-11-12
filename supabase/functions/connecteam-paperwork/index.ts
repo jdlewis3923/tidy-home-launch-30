@@ -6,7 +6,7 @@ import {requireServiceOrAdmin} from '../_shared/admin-auth.ts';
 import {ct} from '../_shared/connecteam.ts';
 import {paperworkState,POSITIONS} from '../_shared/paperwork-rules.ts';
 import {processPaperworkEmails} from '../_shared/paperwork-mailer.ts';
-import {buildPaperworkEmail,buildPaperworkApology,PAPERWORK_IDS,PACKS} from '../_shared/paperwork-email.ts';
+import {buildPaperworkEmail,buildPaperworkApology,buildPaperworkNudge,PAPERWORK_IDS,PACKS} from '../_shared/paperwork-email.ts';
 import {sendProEmail} from '../_shared/pro-send.ts';
 import {registerTeamMember,isHireTestUser} from '../_shared/connecteam-new-member.ts';
 const db=createClient(Deno.env.get('SUPABASE_URL')??'',Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'',{auth:{persistSession:false}});
@@ -24,7 +24,7 @@ async function setPosition(userId:number,service:string,fields:any[]) {
 Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
  const auth=await requireServiceOrAdmin(req);if(!auth.ok)return reply({error:auth.error},auth.status);
- const body=z.object({action:z.enum(['sync','hire','mail','test_email','hire_test_create','hire_test_find','quota','hire_test_position','hire_test_run','hire_test_cleanup','approved_apology']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
+ const body=z.object({action:z.enum(['sync','hire','mail','test_email','hire_test_create','hire_test_find','quota','hire_test_position','hire_test_run','hire_test_cleanup','approved_apology','nudge_20261112']).default('sync'),applicant_id:z.string().uuid().optional(),user_id:z.number().int().positive().optional()}).safeParse(await req.json().catch(()=>({})));
  if(!body.success)return reply({error:'invalid_request'},400);
  try{
  if(body.data.action==='approved_apology'){
@@ -38,6 +38,21 @@ Deno.serve(async req=>{
   const result=await sendProEmail(db,{applicantId:p.applicant_id,key:'connecteam_paperwork_apology_20261107',to:p.email,name:p.name,built,triggeredBy:`paperwork:${mail.id}`,mode:'manual'});
   const saved=await db.from('pro_paperwork_emails').update({status:result.sent?'sent':'failed',sent_at:result.sent?new Date().toISOString():null,error:result.reason??null}).eq('id',mail.id);if(saved.error)throw saved.error;
   return reply({ok:result.sent,recipient:p.email,mail_id:mail.id,result});
+ }
+ if(body.data.action==='nudge_20261112'){
+  const id=31157941;if(body.data.user_id!==id)return reply({error:'approved_recipient_required'},403);
+  const {data:p,error:pe}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',id).single();if(pe)throw pe;
+  if(p.is_test||p.active===false||!p.email)throw new Error('recipient_not_ready');
+  const {data:old}=await db.from('pro_paperwork_emails').select('id,status').eq('connecteam_user_id',id).eq('kind','nudge_20261112').maybeSingle();if(old)return reply({already_attempted:true,mail:old});
+  const catalog=await all('/documents/v1/documents','documents');const photo=findPhotoDoc(catalog);if(!photo)throw new Error('Photo ID + Badge Photo document not found');PAPERWORK_IDS.photo_id=photo.documentId;
+  const rows=await all('/documents/v1/user-documents','documents',[['userIds',String(id)]]);
+  const status:Record<string,string>={...p.paperwork_status};for(const [k,d] of [['w9',PAPERWORK_IDS.w9],['coi',PAPERWORK_IDS.coi],['intake',PAPERWORK_IDS.intake],['photo_id',photo.documentId]] as [string,number][]){const r=rows.find((x:any)=>x.documentId===d);if(r)status[k]=r.status;else if(k==='photo_id')status[k]='notAssigned';}
+  const {data:mail,error:me}=await db.from('pro_paperwork_emails').insert({connecteam_user_id:id,kind:'nudge_20261112',status:'queued'}).select('id').single();if(me)throw me;
+  const {data:claimed,error:ce}=await db.rpc('claim_paperwork_email',{_id:mail.id});if(ce)throw ce;if(!claimed)return reply({error:'not_claimed'},409);
+  const built=buildPaperworkNudge({first:'Susan',service:p.service_line,status,signed:!!p.agreement_signed_at,coiValid:!!p.coi_verified_at&&(!p.coi_expires_at||Date.parse(p.coi_expires_at)>Date.now())});
+  const result=await sendProEmail(db,{applicantId:p.applicant_id,key:'connecteam_paperwork_nudge_20261112',to:p.email,name:p.name,built,triggeredBy:`paperwork:${mail.id}`,mode:'manual'});
+  const saved=await db.from('pro_paperwork_emails').update({status:result.sent?'sent':'failed',sent_at:result.sent?new Date().toISOString():null,error:result.reason??null}).eq('id',mail.id);if(saved.error)throw saved.error;
+  return reply({ok:result.sent,mail_id:mail.id,photo_document_id:photo.documentId,photo_title:photo.name,buttons:built.keys,status,result});
  }
  if(body.data.action==='test_email'){
   const {data:old}=await db.from('pro_paperwork_emails').select('status').eq('connecteam_user_id',31157330).eq('kind','test').maybeSingle();if(old)return reply({ok:old.status==='sent',already_attempted:true,status:old.status});
@@ -128,6 +143,7 @@ Deno.serve(async req=>{
  const intake=catalog.find(d=>d.name==='Pro Intake & Kit Order'&&d.documentType==='eSign');if(!intake||intake.documentId!==PAPERWORK_IDS.intake)throw new Error('Required intake document missing or changed');
  const w9=catalog.find(d=>d.templateType==='w9'),coi=catalog.find(d=>d.name.startsWith('Certificate of Insurance'));
  if(!w9||!coi)throw new Error('Required W-9/COI document missing');
+ const photo=findPhotoDoc(catalog);if(!photo||photo.documentId!==PAPERWORK_IDS.photo_id)throw new Error('Required Photo ID + Badge Photo document missing or changed');
  const {data:profiles}=await db.from('pro_pay_profiles').select('*');
  const tracked=new Map((profiles??[]).map(p=>[Number(p.connecteam_user_id),p]));
  // New hires created in Connecteam are discovered from their service Position.
@@ -138,17 +154,19 @@ Deno.serve(async req=>{
  for(const p of pool??[]){const u=users.find(u=>u.userId===Number(p.connecteam_user_id));if(!u)continue;await ensurePosition(u,p.service_line);const old=tracked.get(u.userId);const {data:app}=await db.from('applicants').select('id').ilike('email',u.email??'missing').limit(1).maybeSingle();const profile={...old,connecteam_user_id:u.userId,name:p.pro_name??`${u.firstName} ${u.lastName}`,service_line:p.service_line,applicant_id:old?.applicant_id??app?.id??null,email:u.email??old?.email??null,is_test:old?.is_test??false};const saved=await db.from('pro_pay_profiles').upsert(profile,{onConflict:'connecteam_user_id'});if(saved.error)throw saved.error;tracked.set(u.userId,profile);}
  for(const p of tracked.values()){if(p.service_line)continue;const u=users.find(x=>x.userId===Number(p.connecteam_user_id));const value=(u?.customFields??[]).find((f:any)=>f.name==='Position')?.value?.[0]?.value;const service=Object.keys(POSITIONS).find(s=>POSITIONS[s]===value);if(!service)continue;const r=await db.from('pro_pay_profiles').update({service_line:service}).eq('connecteam_user_id',p.connecteam_user_id);if(r.error)throw r.error;p.service_line=service;await db.from('admin_alerts').update({resolved_at:new Date().toISOString()}).eq('dedupe_key',`set-position:${p.connecteam_user_id}`).is('resolved_at',null);}
  // One batched read of everyone's documents instead of one call per Pro.
- const ids=[...tracked.values()].filter(p=>!p.is_test&&POSITIONS[p.service_line??'']).map(p=>String(p.connecteam_user_id));
+ // Archived Connecteam users (or Pros marked inactive) are retired: no reads, no reminders.
+ for(const p of tracked.values()){const u=users.find(x=>x.userId===Number(p.connecteam_user_id));if(p.active!==false&&!(u?.isArchived))continue;if(p.active!==false||!p.paperwork_email_held){await db.from('pro_pay_profiles').update({active:false,paperwork_email_held:true}).eq('connecteam_user_id',p.connecteam_user_id);await db.from('jobber_service_pro_pool').update({active:false}).eq('connecteam_user_id',p.connecteam_user_id);}await db.from('pro_paperwork_emails').update({status:'cancelled'}).eq('connecteam_user_id',p.connecteam_user_id).in('status',['queued','held']);p.active=false;}
+ const ids=[...tracked.values()].filter(p=>p.active!==false&&!p.is_test&&POSITIONS[p.service_line??'']).map(p=>String(p.connecteam_user_id));
  let batched:any[]|null=null;
  if(ids.length){try{batched=await all('/documents/v1/user-documents','documents',ids.map(id=>['userIds',id] as [string,string]));if(batched.length&&batched.some(r=>r.userId===undefined))batched=null;}catch{batched=null;}}
  let synced=0;
  for(const p of tracked.values()){
-  if(p.is_test||!POSITIONS[p.service_line??''])continue;
+  if(p.active===false||p.is_test||!POSITIONS[p.service_line??''])continue;
   const agreement=catalog.find(d=>d.name===`Independent Contractor Agreement — ${POSITIONS[p.service_line]}`);if(!agreement)throw new Error(`ICA missing for ${p.service_line}`);
   const rows=batched?batched.filter(r=>Number(r.userId)===Number(p.connecteam_user_id)):await all('/documents/v1/user-documents','documents',[['userIds',String(p.connecteam_user_id)]]);
   // A signature on our own site counts as the signed agreement; W-9 and COI are still required.
   const {data:site}=p.applicant_id?await db.from('contract_signatures').select('id,signed_at').eq('applicant_id',p.applicant_id).not('signed_at','is',null).order('signed_at',{ascending:false}).limit(1).maybeSingle():{data:null};
-  const state=paperworkState(rows,{w9:w9.documentId,coi:coi.documentId,agreement:agreement.documentId,intake:intake.documentId},Date.now(),site?.signed_at??null);
+  const state=paperworkState(rows,{w9:w9.documentId,coi:coi.documentId,agreement:agreement.documentId,intake:intake.documentId,photo_id:photo.documentId},Date.now(),site?.signed_at??null);
   if(site)await noteSiteSignature(p,site);
   const r=await db.rpc('connecteam_commit_paperwork',{_user:p.connecteam_user_id,_status:state.status,_complete:state.complete,_signed_at:state.signedAt,_expiry:state.expiry,_coi_approved:state.coiApproved});if(r.error)throw r.error;synced++;
   const user=users.find(u=>u.userId===Number(p.connecteam_user_id));if(user){await checkGroup(user,p.service_line);const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',p.connecteam_user_id).single();await processPaperworkEmails(db,user,profile,checkrLive,sendProEmail);}
@@ -163,3 +181,5 @@ async function noteSiteSignature(p:any,site:any){const event=`connecteam.site_si
  const when=new Date(site.signed_at).toLocaleString('en-US',{timeZone:'America/New_York',dateStyle:'medium',timeStyle:'short'});
  await ct('POST',`/users/v1/users/${p.connecteam_user_id}/notes`,{title:'Contractor agreement signed on jointidy.co',text:`${p.name} signed the ${POSITIONS[p.service_line]} Independent Contractor Agreement on jointidy.co on ${when} ET (record ${site.id}). Signed PDF is stored in Tidy admin. Treat the Connecteam agreement as done; W-9 and insurance are still required.`});
  await db.from('integration_logs').insert({source:'internal',event,status:'success',detail:JSON.stringify({connecteam_user_id:p.connecteam_user_id})}).then((r:any)=>{if(r.error)throw r.error;});}
+
+function findPhotoDoc(catalog:any[]){return catalog.find(d=>/^photo id\s*\+\s*badge photo/i.test(String(d.name??'').trim()));}

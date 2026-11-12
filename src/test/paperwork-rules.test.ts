@@ -26,3 +26,12 @@ describe('site signature counts as agreement', () => {
 });
 
 it('requires a signed intake even with a site-signed agreement',()=>{const site='2026-11-05T22:53:35Z';const base=[{documentId:1,status:'approved'},{documentId:2,status:'approved'}];expect(paperworkState(base,ids,1793900000000,site).complete).toBe(false);expect(paperworkState([...base,{documentId:4,status:'approved'}],ids,1793900000000,site).complete).toBe(false);expect(paperworkState([...base,{documentId:4,status:'approved',signedAt:1793900000}],ids,1793900000000,site).complete).toBe(true);});
+
+describe('photo ID + badge photo requirement', () => {
+  const ids = { w9: 1, coi: 2, agreement: 3, intake: 4, photo_id: 5 };
+  const done = (id: number) => ({ documentId: id, status: 'approved', signedAt: 1 });
+  it('is incomplete until the photo ID is approved', () => {
+    expect(paperworkState([done(1), done(2), done(3), done(4)], ids).complete).toBe(false);
+    expect(paperworkState([done(1), done(2), done(3), done(4), done(5)], ids).complete).toBe(true);
+  });
+});
