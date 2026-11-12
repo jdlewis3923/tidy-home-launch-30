@@ -117,6 +117,9 @@ const AdminCapacity = lazy(() => import("./pages/AdminCapacity.tsx"));
 const AdminOrientations = lazy(() => import("./pages/AdminOrientations.tsx"));
 const AdminNextdoorVerify = lazy(() => import("./pages/AdminNextdoorVerify.tsx"));
 const Apply = lazy(() => import("./pages/Apply.tsx"));
+const ApplyForm = lazy(() => import("./pages/apply/ApplyForm.tsx"));
+const AdminApplications = lazy(() => import("./pages/AdminApplications.tsx"));
+const AdminApplication = lazy(() => import("./pages/AdminApplication.tsx"));
 const ProJobView = lazy(() => import("./pages/ProJobView.tsx"));
 const AddonApproval = lazy(() => import("./pages/AddonApproval.tsx"));
 const ProTierProgression = lazy(() => import("./pages/ProTierProgression.tsx"));
@@ -391,6 +394,8 @@ const App = () => (
                   <Route path="/admin/qr" element={<AdminQr />} />
                   <Route path="/admin/health" element={<AdminHealth />} />
                   <Route path="/admin/pro-pay" element={<AdminProPay />} />
+                  <Route path="/admin/applications" element={<AdminApplications />} />
+                  <Route path="/admin/applications/:id" element={<AdminApplication />} />
                   {/* Chatbot knowledge editor (admins only). */}
                   <Route path="/admin/chatbot-knowledge" element={<AdminChatbotKnowledge />} />
                   {/* Unified support inbox (SMS + web), admins only. */}
@@ -462,7 +467,8 @@ const App = () => (
                   <Route path="/admin/capacity" element={<AdminServiceHandoff />} />
                   <Route path="/onboarding/*" element={<Navigate to={`/apply${window.location.search}`} replace />} />
                   <Route path="/apply" element={<Apply />} />
-                  <Route path="/apply/:service/*" element={<Navigate to={`/apply${window.location.search}`} replace />} />
+                  <Route path="/apply/finish" element={<ApplyForm finish />} />
+                  <Route path="/apply/:service/*" element={<ApplyForm />} />
                   <Route path="/careers" element={<Navigate to={`/apply${window.location.search}`} replace />} />
                   <Route path="/pro/insurance" element={<ProInsuranceGuide />} />
                   {/* On-site job view: before-photo gate + walkaround add-on request. */}

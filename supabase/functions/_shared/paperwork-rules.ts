@@ -1,13 +1,14 @@
 export const POSITIONS: Record<string,string> = { cleaning:'House Cleaning Pro', lawn:'Lawn Care Pro', detailing:'Car Care Pro' };
 export type DocumentStatus = { documentId:number; status:string; signedAt?:number; expiresAt?:number };
-export function paperworkState(rows:DocumentStatus[], ids:{w9:number;coi:number;agreement:number;intake:number;photo_id?:number}, now=Date.now(), siteSignedAt:string|null=null) {
+/** Connecteam documents only: agreement → W-9 → COI. Kit, photo ID and badge photo come from the website form (pro_pay_profiles.kit_complete). */
+export function paperworkState(rows:DocumentStatus[], ids:{w9:number;coi:number;agreement:number}, now=Date.now(), siteSignedAt:string|null=null) {
   const find=(id:number)=>rows.find(r=>r.documentId===id);
-  const w9=find(ids.w9),coi=find(ids.coi),agreement=find(ids.agreement),intake=find(ids.intake),photo=ids.photo_id?find(ids.photo_id):undefined;
+  const w9=find(ids.w9),coi=find(ids.coi),agreement=find(ids.agreement);
   const accepted=(r:DocumentStatus|undefined)=>!!r&&['approved','completed'].includes(r.status);
   const site=!!siteSignedAt;const signed=site||(!!agreement?.signedAt&&agreement.signedAt>0);
   const expiry=coi?.expiresAt ? new Date(coi.expiresAt*1000).toISOString():null;
   const coiApproved=accepted(coi)&&(!expiry||Date.parse(expiry)>now);
-  return { status:{w9:w9?.status??'notAssigned',coi:coi?.status??'notAssigned',agreement:site?'completed':agreement?.status??'notAssigned',intake:intake?.status??'notAssigned',...(ids.photo_id?{photo_id:photo?.status??'notAssigned'}:{})},complete:accepted(intake)&&(!ids.photo_id||accepted(photo))&&!!intake?.signedAt&&accepted(w9)&&coiApproved&&(site||accepted(agreement))&&signed,signedAt:site?new Date(siteSignedAt??'').toISOString():signed?new Date(Number(agreement?.signedAt)*1000).toISOString():null,expiry,coiApproved };
+  return { status:{w9:w9?.status??'notAssigned',coi:coi?.status??'notAssigned',agreement:site?'completed':agreement?.status??'notAssigned'},complete:accepted(w9)&&coiApproved&&(site||accepted(agreement))&&signed,signedAt:site?new Date(siteSignedAt??'').toISOString():signed?new Date(Number(agreement?.signedAt)*1000).toISOString():null,expiry,coiApproved };
 }
 export function paperworkDigest(rows:{name:string;paperwork_complete:boolean;is_test?:boolean}[]) {
  const real=rows.filter(r=>!r.is_test),waiting=real.filter(r=>!r.paperwork_complete);

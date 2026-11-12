@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { House, Leaf, Car, ArrowRight } from 'lucide-react';
 import TidyLogo from '@/components/TidyLogo';
 import SeoHead from '@/components/landing/SeoHead';
-import { connecteamApplyUrl, type ApplyService } from '@/lib/connecteamApply';
+import { type ApplyService } from '@/lib/connecteamApply';
 import { Button } from '@/components/ui/button';
 
 const CARDS: { key: ApplyService; icon: typeof House; en: string; es: string; pay: { en: string; es: string }[] }[] = [
@@ -40,9 +40,9 @@ export default function Apply() {
                 {pay.map((p) => <li key={p.en}>{t(p.en, p.es)}</li>)}
               </ul>
               <p className="mt-2 text-sm text-primary-foreground/60">{t('Paid every Friday', 'Pago cada viernes')}</p>
-              <Button asChild className="mt-6 min-h-[54px] rounded-full bg-gold px-5 text-base font-semibold text-gold-foreground shadow-lg hover:bg-gold hover:brightness-105"><a href={connecteamApplyUrl(key, params.get('src'))}>
-                {t('Apply in 5 minutes', 'Aplica en 5 minutos')} <ArrowRight className="h-5 w-5" aria-hidden />
-              </a></Button>
+              <Button asChild className="mt-6 min-h-[54px] rounded-full bg-gold px-5 text-base font-semibold text-gold-foreground shadow-lg hover:bg-gold hover:brightness-105"><Link to={`/apply/${key}${params.get('src') ? `?src=${encodeURIComponent(params.get('src')!)}` : ''}`}>
+                {t('Apply now', 'Aplica ahora')} <ArrowRight className="h-5 w-5" aria-hidden />
+              </Link></Button>
             </section>
           ))}
         </div>

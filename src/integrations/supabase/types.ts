@@ -6555,6 +6555,78 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_applications: {
+        Row: {
+          answers: Json
+          connecteam_user_id: number | null
+          created_at: string
+          email: string | null
+          files: Json
+          full_name: string | null
+          hired_at: string | null
+          id: string
+          is_test: boolean
+          kind: string
+          lang: string
+          phone: string | null
+          prefill: Json
+          service: string
+          skip_sections: string[]
+          src: string | null
+          stage: string
+          stage_changed_at: string | null
+          submitted_at: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          answers?: Json
+          connecteam_user_id?: number | null
+          created_at?: string
+          email?: string | null
+          files?: Json
+          full_name?: string | null
+          hired_at?: string | null
+          id?: string
+          is_test?: boolean
+          kind?: string
+          lang?: string
+          phone?: string | null
+          prefill?: Json
+          service: string
+          skip_sections?: string[]
+          src?: string | null
+          stage?: string
+          stage_changed_at?: string | null
+          submitted_at?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json
+          connecteam_user_id?: number | null
+          created_at?: string
+          email?: string | null
+          files?: Json
+          full_name?: string | null
+          hired_at?: string | null
+          id?: string
+          is_test?: boolean
+          kind?: string
+          lang?: string
+          phone?: string | null
+          prefill?: Json
+          service?: string
+          skip_sections?: string[]
+          src?: string | null
+          stage?: string
+          stage_changed_at?: string | null
+          submitted_at?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pro_bonuses: {
         Row: {
           amount_cents: number
@@ -7302,6 +7374,7 @@ export type Database = {
           created_at: string
           email: string | null
           is_test: boolean
+          kit_complete: boolean
           language: string
           name: string
           paperwork_complete: boolean
@@ -7309,6 +7382,7 @@ export type Database = {
           paperwork_status: Json
           paperwork_synced_at: string | null
           pay_setup_unblocked: boolean
+          pro_application_id: string | null
           service_line: string | null
           started_on: string
           tier2_since: string | null
@@ -7324,6 +7398,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           is_test?: boolean
+          kit_complete?: boolean
           language?: string
           name: string
           paperwork_complete?: boolean
@@ -7331,6 +7406,7 @@ export type Database = {
           paperwork_status?: Json
           paperwork_synced_at?: string | null
           pay_setup_unblocked?: boolean
+          pro_application_id?: string | null
           service_line?: string | null
           started_on?: string
           tier2_since?: string | null
@@ -7346,6 +7422,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           is_test?: boolean
+          kit_complete?: boolean
           language?: string
           name?: string
           paperwork_complete?: boolean
@@ -7353,11 +7430,20 @@ export type Database = {
           paperwork_status?: Json
           paperwork_synced_at?: string | null
           pay_setup_unblocked?: boolean
+          pro_application_id?: string | null
           service_line?: string | null
           started_on?: string
           tier2_since?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pro_pay_profiles_pro_application_id_fkey"
+            columns: ["pro_application_id"]
+            isOneToOne: false
+            referencedRelation: "pro_applications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pro_payout_lines: {
         Row: {

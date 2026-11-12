@@ -1,11 +1,11 @@
 import {describe,it,expect} from 'vitest';
 import {documentLink,PAPERWORK_IDS,PACKS,dueKinds,reminderWindow,paperworkSteps} from '../../supabase/functions/_shared/paperwork-email';
 describe('Paperwork delivery rules',()=>{
- it('uses exact service ICA IDs',()=>{expect(PAPERWORK_IDS).toEqual({w9:827665,coi:827676,intake:829250,cleaning:827666,lawn:827714,detailing:827722});expect(new URL(documentLink(827714)).searchParams.get('l')).toBe('app/userDocuments/0/827714');});
+ it('uses exact service ICA IDs',()=>{expect(PAPERWORK_IDS).toEqual({w9:827665,coi:827676,cleaning:827666,lawn:827714,detailing:827722});expect(new URL(documentLink(827714)).searchParams.get('l')).toBe('app/userDocuments/0/827714');});
  it('uses lawn and car pack groups',()=>{expect(PACKS.lawn).toEqual({id:448892,name:'Lawn pack',group:30363251});expect(PACKS.detailing.group).toBe(30363253);expect(PACKS.cleaning.id).toBe(448852);});
  it('reminds at exactly 48 hours, not before',()=>{const t='2026-11-05T19:23:00Z',n=Date.parse(t);expect(dueKinds(t,false,['welcome'],n+48*3600000-1)).toEqual([]);expect(dueKinds(t,false,['welcome'],n+48*3600000)).toEqual(['reminder48']);});
  it('reminds at five days and not again after sent',()=>{const t='2026-11-05T19:23:00Z',n=Date.parse(t);expect(dueKinds(t,false,['welcome','reminder48'],n+5*86400000)).toEqual(['reminder5d']);expect(dueKinds(t,false,['welcome','reminder48','reminder5d'],n+6*86400000)).toEqual([]);});
  it('stops reminders when complete and sends one all-set',()=>{expect(dueKinds('2026-11-05T19:23:00Z',true,['welcome'],Date.now())).toEqual(['complete']);expect(dueKinds('2026-11-05T19:23:00Z',true,['welcome','complete'],Date.now())).toEqual([]);});
  it('allows reminders only 9 AM to before 7 PM Eastern',()=>{expect(reminderWindow(new Date('2026-11-06T13:59:00Z'))).toBe(false);expect(reminderWindow(new Date('2026-11-06T14:00:00Z'))).toBe(true);expect(reminderWindow(new Date('2026-11-07T00:00:00Z'))).toBe(false);});
- it('hides Checkr until an invite exists and preserves document order',()=>{const s=paperworkSteps('cleaning',{},false,false);expect(s.map(x=>x.key)).toEqual(['agreement','w9','intake','coi']);expect(paperworkSteps('cleaning',{},false,false,'https://candidate.checkr.com/invite/test').map(x=>x.key)).toEqual(['agreement','w9','intake','coi','checkr']);});
+ it('hides Checkr until an invite exists and preserves document order',()=>{const s=paperworkSteps('cleaning',{},false,false);expect(s.map(x=>x.key)).toEqual(['agreement','w9','coi']);expect(paperworkSteps('cleaning',{},false,false,'https://candidate.checkr.com/invite/test').map(x=>x.key)).toEqual(['agreement','w9','coi','checkr']);});
 });

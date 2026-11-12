@@ -30,7 +30,7 @@ Deno.serve(async req=>{
  if(body.data.action==='approved_apology'){
   const id=body.data.user_id;if(!id||![31157941,31157945].includes(id))return reply({error:'approved_recipient_required'},403);
   const {data:p,error:pe}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',id).single();if(pe)throw pe;
-  if(p.is_test||p.service_line!=='cleaning'||!p.email||!p.paperwork_status?.intake)throw new Error('recipient_not_ready');
+  if(p.is_test||p.service_line!=='cleaning'||!p.email)throw new Error('recipient_not_ready');
   const {data:old}=await db.from('pro_paperwork_emails').select('id,status').eq('connecteam_user_id',id).eq('kind','apology_20261107').maybeSingle();if(old)return reply({already_attempted:true,mail:old});
   const {data:mail,error:me}=await db.from('pro_paperwork_emails').insert({connecteam_user_id:id,kind:'apology_20261107',status:'queued'}).select('id').single();if(me)throw me;
   const {data:claimed,error:ce}=await db.rpc('claim_paperwork_email',{_id:mail.id});if(ce)throw ce;if(!claimed)return reply({error:'not_claimed'},409);
@@ -40,19 +40,7 @@ Deno.serve(async req=>{
   return reply({ok:result.sent,recipient:p.email,mail_id:mail.id,result});
  }
  if(body.data.action==='nudge_20261112'){
-  const id=31157941;if(body.data.user_id!==id)return reply({error:'approved_recipient_required'},403);
-  const {data:p,error:pe}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',id).single();if(pe)throw pe;
-  if(p.is_test||p.active===false||!p.email)throw new Error('recipient_not_ready');
-  const {data:old}=await db.from('pro_paperwork_emails').select('id,status').eq('connecteam_user_id',id).eq('kind','nudge_20261112').maybeSingle();if(old)return reply({already_attempted:true,mail:old});
-  const catalog=await all('/documents/v1/documents','documents');const photo=findPhotoDoc(catalog);if(!photo)throw new Error('Photo ID + Badge Photo document not found');PAPERWORK_IDS.photo_id=photo.documentId;
-  const rows=await all('/documents/v1/user-documents','documents',[['userIds',String(id)]]);
-  const status:Record<string,string>={...p.paperwork_status};for(const [k,d] of [['w9',PAPERWORK_IDS.w9],['coi',PAPERWORK_IDS.coi],['intake',PAPERWORK_IDS.intake],['photo_id',photo.documentId]] as [string,number][]){const r=rows.find((x:any)=>x.documentId===d);if(r)status[k]=r.status;else if(k==='photo_id')status[k]='notAssigned';}
-  const {data:mail,error:me}=await db.from('pro_paperwork_emails').insert({connecteam_user_id:id,kind:'nudge_20261112',status:'queued'}).select('id').single();if(me)throw me;
-  const {data:claimed,error:ce}=await db.rpc('claim_paperwork_email',{_id:mail.id});if(ce)throw ce;if(!claimed)return reply({error:'not_claimed'},409);
-  const built=buildPaperworkNudge({first:'Susan',service:p.service_line,status,signed:!!p.agreement_signed_at,coiValid:!!p.coi_verified_at&&(!p.coi_expires_at||Date.parse(p.coi_expires_at)>Date.now())});
-  const result=await sendProEmail(db,{applicantId:p.applicant_id,key:'connecteam_paperwork_nudge_20261112',to:p.email,name:p.name,built,triggeredBy:`paperwork:${mail.id}`,mode:'manual'});
-  const saved=await db.from('pro_paperwork_emails').update({status:result.sent?'sent':'failed',sent_at:result.sent?new Date().toISOString():null,error:result.reason??null}).eq('id',mail.id);if(saved.error)throw saved.error;
-  return reply({ok:result.sent,mail_id:mail.id,photo_document_id:photo.documentId,photo_title:photo.name,buttons:built.keys,status,result});
+  return reply({error:'retired',detail:'one-time Nov 12 nudge already sent'},410);
  }
  if(body.data.action==='test_email'){
   const {data:old}=await db.from('pro_paperwork_emails').select('status').eq('connecteam_user_id',31157330).eq('kind','test').maybeSingle();if(old)return reply({ok:old.status==='sent',already_attempted:true,status:old.status});
@@ -140,10 +128,8 @@ Deno.serve(async req=>{
  }
  const {data:pool,error}=await db.from('jobber_service_pro_pool').select('*').eq('active',true);if(error)throw error;
  const catalog=await all('/documents/v1/documents','documents');
- const intake=catalog.find(d=>d.name==='Pro Intake & Kit Order'&&d.documentType==='eSign');if(!intake||intake.documentId!==PAPERWORK_IDS.intake)throw new Error('Required intake document missing or changed');
  const w9=catalog.find(d=>d.templateType==='w9'),coi=catalog.find(d=>d.name.startsWith('Certificate of Insurance'));
  if(!w9||!coi)throw new Error('Required W-9/COI document missing');
- const photo=findPhotoDoc(catalog);if(!photo||photo.documentId!==PAPERWORK_IDS.photo_id)throw new Error('Required Photo ID + Badge Photo document missing or changed');
  const {data:profiles}=await db.from('pro_pay_profiles').select('*');
  const tracked=new Map((profiles??[]).map(p=>[Number(p.connecteam_user_id),p]));
  // New hires created in Connecteam are discovered from their service Position.
@@ -166,7 +152,7 @@ Deno.serve(async req=>{
   const rows=batched?batched.filter(r=>Number(r.userId)===Number(p.connecteam_user_id)):await all('/documents/v1/user-documents','documents',[['userIds',String(p.connecteam_user_id)]]);
   // A signature on our own site counts as the signed agreement; W-9 and COI are still required.
   const {data:site}=p.applicant_id?await db.from('contract_signatures').select('id,signed_at').eq('applicant_id',p.applicant_id).not('signed_at','is',null).order('signed_at',{ascending:false}).limit(1).maybeSingle():{data:null};
-  const state=paperworkState(rows,{w9:w9.documentId,coi:coi.documentId,agreement:agreement.documentId,intake:intake.documentId,photo_id:photo.documentId},Date.now(),site?.signed_at??null);
+  const state=paperworkState(rows,{w9:w9.documentId,coi:coi.documentId,agreement:agreement.documentId},Date.now(),site?.signed_at??null);
   if(site)await noteSiteSignature(p,site);
   const r=await db.rpc('connecteam_commit_paperwork',{_user:p.connecteam_user_id,_status:state.status,_complete:state.complete,_signed_at:state.signedAt,_expiry:state.expiry,_coi_approved:state.coiApproved});if(r.error)throw r.error;synced++;
   const user=users.find(u=>u.userId===Number(p.connecteam_user_id));if(user){await checkGroup(user,p.service_line);const {data:profile}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',p.connecteam_user_id).single();await processPaperworkEmails(db,user,profile,checkrLive,sendProEmail);}
