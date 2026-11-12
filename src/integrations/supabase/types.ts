@@ -7292,6 +7292,7 @@ export type Database = {
       }
       pro_pay_profiles: {
         Row: {
+          active: boolean
           agreement_signed_at: string | null
           applicant_id: string | null
           checkr_invite_url: string | null
@@ -7313,6 +7314,7 @@ export type Database = {
           tier2_since: string | null
         }
         Insert: {
+          active?: boolean
           agreement_signed_at?: string | null
           applicant_id?: string | null
           checkr_invite_url?: string | null
@@ -7334,6 +7336,7 @@ export type Database = {
           tier2_since?: string | null
         }
         Update: {
+          active?: boolean
           agreement_signed_at?: string | null
           applicant_id?: string | null
           checkr_invite_url?: string | null
