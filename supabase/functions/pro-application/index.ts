@@ -69,7 +69,7 @@ Deno.serve(async req=>{
    return reply({ok:true,stage});
   }
   return reply({error:'unknown_action'},400);
- }catch(e){const error=e instanceof Error?e.message:String(e);await db.from('integration_logs').insert({source:'internal',event:`pro-application.${b.action}`,status:'error',detail:error});return reply({error},500);}
+ }catch(e){const error=e instanceof Error?e.message:JSON.stringify(e);await db.from('integration_logs').insert({source:'internal',event:`pro-application.${b.action}`,status:'error',detail:error});return reply({error},500);}
 });
 
 async function signed(files:Record<string,any>){const out:Record<string,{url:string;name:string}>={};for(const [k,v] of Object.entries(files??{})){const {data}=await db.storage.from(BUCKET).createSignedUrl(v.path,3600);if(data)out[k]={url:data.signedUrl,name:v.name};}return out;}

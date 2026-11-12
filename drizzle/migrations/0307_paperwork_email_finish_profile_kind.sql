@@ -1,0 +1,2 @@
+ALTER TABLE public.pro_paperwork_emails DROP CONSTRAINT pro_paperwork_emails_kind_check;
+ALTER TABLE public.pro_paperwork_emails ADD CONSTRAINT pro_paperwork_emails_kind_check CHECK (kind = ANY (ARRAY['welcome','reminder48','reminder5d','complete','test','apology_20261107','nudge_20261112','finish_profile_20261112']));
