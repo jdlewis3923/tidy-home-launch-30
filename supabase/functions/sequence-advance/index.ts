@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
     if (!a.signing_day_active_sms_at && !a.is_test_row && !pipeline.is_test && a.phone) {
       const digits = a.phone.replace(/\D/g,'');
       const { data: language } = await admin.from('contractor_pipeline').select('preferred_language').eq('applicant_id',applicant_id).single();
-      const { data: sent, error: smsError } = await admin.functions.invoke('send-twilio-sms', { body: { to_phone_e164:digits.length===10?`+1${digits}`:`+${digits}`,body:language?.preferred_language==='es'?'¡Todo listo! Su primera ruta aparecerá aquí antes del 23 de noviembre. https://jointidy.co/pro':'You’re all set! Your first route shows up here before Nov 23. https://jointidy.co/pro',idempotency_key:`signing-active:${applicant_id}`,template_name:'pro-signing-active',triggered_by:'sequence-advance' } });
+      const { data: sent, error: smsError } = await admin.functions.invoke('send-twilio-sms', { body: { to_phone_e164:digits.length===10?`+1${digits}`:`+${digits}`,body:language?.preferred_language==='es'?'¡Todo listo! Su primera ruta aparecerá aquí antes de su primer día. https://jointidy.co/pro':'You’re all set! Your first route shows up here before your first day. https://jointidy.co/pro',idempotency_key:`signing-active:${applicant_id}`,template_name:'pro-signing-active',triggered_by:'sequence-advance' } });
       if (!smsError && (sent?.sid || sent?.queued)) await admin.from('applicants').update({signing_day_active_sms_at:new Date().toISOString()}).eq('id',applicant_id);
     }
     return jsonResponse({ok:true,active:true});

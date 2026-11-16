@@ -76,6 +76,7 @@ export const EXPECTED_CRON_JOBS: ExpectedCronJob[] = [
   { name: 'social-launch-publisher', schedule: '*/5 * * * *', kind: 'http', fn: 'social-launch-publisher', purpose: 'Publishes queued launch posts.' },
   { name: 'social-plan-nightly', schedule: '15 7 * * *', kind: 'http', fn: 'social-plan', purpose: 'Re-plans the social calendar from launch dates (also runs when launch dates change).' },
   // --- added Nov 2026 (scheduled at runtime; see docs/cron-runtime-overrides.json) ---
+  { name: 'pro-photos-retry-hourly', schedule: '17 * * * *', kind: 'http', fn: 'pro-application', purpose: 'Retries Pro photo ID/badge photo pushes to Connecteam.' },
   { name: 'ops-agents-tick', schedule: '*/15 * * * *', kind: 'sql', purpose: 'Autonomous operations audit.' },
   { name: 'signing-selftest-nightly', schedule: '15 8 * * *', kind: 'http', fn: 'signing-selftest', purpose: 'Nightly signing self-test; switches itself off once Susan signs in Connecteam.' },
   { name: 'escalate-stale-unread-replies', schedule: '5 * * * *', kind: 'sql', purpose: 'Escalates unread inbound replies.' },

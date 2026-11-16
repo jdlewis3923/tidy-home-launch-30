@@ -5036,6 +5036,7 @@ export type Database = {
           pro_callback_date: string | null
           pro_ready_by: string | null
           scope: string
+          soft_start_date: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -5054,6 +5055,7 @@ export type Database = {
           pro_callback_date?: string | null
           pro_ready_by?: string | null
           scope: string
+          soft_start_date?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -5072,6 +5074,7 @@ export type Database = {
           pro_callback_date?: string | null
           pro_ready_by?: string | null
           scope?: string
+          soft_start_date?: string | null
           updated_at?: string
           updated_by?: string | null
         }

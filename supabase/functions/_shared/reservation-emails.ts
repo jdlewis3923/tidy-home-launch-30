@@ -12,14 +12,14 @@ function firstDate(cfg: LaunchConfig, services: string[]): string | null {
 }
 function conversionMonth(cfg: LaunchConfig, services: string[], lang: 'en' | 'es' = 'en'): string {
   const ds = (services.length ? services : ['cleaning']).map((s) => cfg[launchScope(s)]?.conversion_date).filter(Boolean) as string[];
-  return fmtLaunchDate(ds.sort()[0], lang, 'month');
+  return fmtLaunchDate(ds.sort()[0], lang, 'short');
 }
 export function nextSteps(cfg: LaunchConfig, services: string[]) {
   const month = conversionMonth(cfg, services);
   return [
     ['Now', 'we hold your spot and your preferred day.'],
-    [month ? `Early ${month}` : 'When car care opens', 'we confirm your pro, your day and your time window, and you add a card. Nothing charges until your first visit.'],
-    [startsLine(cfg, 'en', services), 'your first visit.'],
+    [month ? `Week of ${month}` : 'When car care opens', 'we confirm your pro, your day and your time window, and you add a card. Nothing charges until your first visit.'],
+    [startsLine(cfg, 'en', services, 'long', true), 'your first visit.'],
   ] as const;
 }
 
@@ -32,7 +32,7 @@ export function reservationConfirmEmail(r: { first_name: string; services: strin
   const html = tidyEmailShell({
     heading: reserved.length ? "You're reserved." : "You're on the waitlist.",
     eyebrow: 'Founding member · visit reservation',
-    previewText: `${startsLine(cfg, 'en', r.services)}.`,
+    previewText: `${startsLine(cfg, 'en', r.services, 'long', true)}.`,
     bodyHtml: `<p>Hi ${esc(r.first_name)},</p>${reserved.length ? `<p><b>Reserved:</b> ${esc(reserved.map(svcLabel).join(', '))} · preferred ${esc(r.preferred_day)} ${r.preferred_time === 'morning' ? 'mornings' : 'afternoons'}.</p>` : ''}${wl}<p style="margin:18px 0 4px"><b style="color:#0f172a">Here's what happens next:</b></p><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font:14px/1.5 Arial,sans-serif;color:#475569">${steps}</table><p style="margin-top:18px">No card today, nothing to pay now.</p><p>Questions any time: <a href="mailto:hello@jointidy.co">hello@jointidy.co</a> or (786) 829-1141.</p>${scopeHtml}`,
     ctaUrl: TIDY_SITE, ctaLabel: 'Visit Tidy',
   });
@@ -47,8 +47,8 @@ export function reservationConfirmSms(first: string, cfg: LaunchConfig, services
       : `Tidy: ${first}, you're reserved — nothing to pay now. ${CAR_OPENS_LINE.en}. Questions: (786) 829-1141`;
   }
   return lang === 'es'
-    ? `Tidy: ${first}, tu lugar está reservado. Confirmaremos tu profesional, día y horario a principios de ${month} — nada que pagar ahora. ${startsLine(cfg, 'es', services)}. Preguntas: (786) 829-1141`
-    : `Tidy: ${first}, you're reserved. We'll confirm your pro, day and time in early ${month} — nothing to pay now. ${startsLine(cfg, 'en', services)}. Questions: (786) 829-1141`;
+    ? `Tidy: ${first}, tu lugar está reservado. Confirmaremos tu profesional, día y horario la semana del ${month} — nada que pagar ahora. ${startsLine(cfg, 'es', services, 'long', true)}. Preguntas: (786) 829-1141`
+    : `Tidy: ${first}, you're reserved. We'll confirm your pro, day and time the week of ${month} — nothing to pay now. ${startsLine(cfg, 'en', services, 'long', true)}. Questions: (786) 829-1141`;
 }
 
 /**
@@ -105,7 +105,7 @@ export function foundingConfirmEmail(r: {
   }).join('');
   const total = r.custom_quote ? '' : `<tr><td style="padding:10px 0;border-top:2px solid #0f172a"><b>${es ? 'Total mensual' : 'Monthly total'}</b></td><td align="right" style="padding:10px 0;border-top:2px solid #0f172a"><b>$${(r.monthly_cents / 100).toFixed(0)}/${es ? 'mes' : 'mo'}</b></td></tr>`;
   const day = es ? `${DAY_ES[r.preferred_day] ?? r.preferred_day}, ${r.preferred_time === 'morning' ? 'por la mañana' : 'por la tarde'}` : `${r.preferred_day} ${r.preferred_time === 'morning' ? 'mornings' : 'afternoons'}`;
-  const line = startsLine(cfg, es ? 'es' : 'en', r.lines.map((l) => l.service));
+  const line = startsLine(cfg, es ? 'es' : 'en', r.lines.map((l) => l.service), 'long', true);
   const terms = r.founding
     ? (es ? 'Reservaste con beneficios de miembro fundador.' : 'You reserved with founding-member benefits.')
     : (es ? `Los hogares fundadores en ${r.zip} ya están completos — reservaste en términos estándar.` : `Founding homes are fully reserved in ${r.zip} — you reserved at standard terms.`);

@@ -8,8 +8,8 @@ import SparkleField from "@/components/landing/SparkleField";
 import SeoHead from "@/components/landing/SeoHead";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-// Nov 23, 2026, midnight Miami time (EST, UTC-5)
-const LAUNCH = Date.parse("2026-11-23T00:00:00-05:00");
+// Dec 7, 2026 (main launch), midnight Miami time (EST, UTC-5)
+const LAUNCH = Date.parse("2026-12-07T00:00:00-05:00");
 
 const Countdown = () => {
   const { t } = useLanguage();
@@ -30,7 +30,7 @@ const Countdown = () => {
     <div
       className="cs-glow-border relative mt-7 grid grid-cols-4 rounded-2xl border border-[#3b82f6]/70 bg-[#0b1530]/70 backdrop-blur-md"
       role="timer"
-      aria-label={t("Countdown to November 23")}
+      aria-label={t("Countdown to December 7")}
     >
       {parts.map((p, i) => (
         <div key={i} className={`py-4 text-center ${i ? "border-l border-white/10" : ""}`}>
@@ -168,7 +168,7 @@ const ComingSoon = () => {
           <motion.p {...rise(0.5)} className="mt-6 flex items-center gap-3 text-sm sm:text-base text-white/90">
             <CalendarDays className="h-6 w-6 text-[#3b82f6]" />
             <span>
-              {t("First visits begin")} <strong>{t("November 23")}</strong>
+              {t("First visits begin")} <strong>{t("December 7")}</strong>
             </span>
           </motion.p>
 

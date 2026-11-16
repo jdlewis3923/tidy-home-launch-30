@@ -84,7 +84,7 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-hairline bg-white p-5 text-sm text-ink-soft space-y-2" data-testid="reserve-framing">
-        <p>{t("No card today, nothing to pay now. We'll confirm your day and time before service begins.")} {startsLine(launchCfg, language === 'es' ? 'es' : 'en', services)}.</p>
+        <p>{t("No card today, nothing to pay now. We'll confirm your day and time before service begins.")} {startsLine(launchCfg, language === 'es' ? 'es' : 'en', services, 'long', true)}.</p>
         <p className="font-semibold text-ink">{t('Founding members pick their day first — the earlier you reserve, the better your choice of day and time.')}</p>
         <div className="pt-1"><FoundingCounter zip={state.zip} /></div>
       </div>

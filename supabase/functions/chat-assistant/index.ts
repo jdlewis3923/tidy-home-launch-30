@@ -50,8 +50,8 @@ Deno.serve(async (req) => {
     try {
       const cfg = await loadLaunchConfig(supabase);
       launchFacts = `\n\nLAUNCH DATES (authoritative — always use these):
-- House cleaning: first visits begin ${fmtLaunchDate(cfg.cleaning?.first_visit_date)}.
-- Lawn care: first visits begin ${fmtLaunchDate(cfg.lawn?.first_visit_date)}.
+- House cleaning: founding/door-hanger reservations start the week of ${fmtLaunchDate(cfg.cleaning?.first_visit_date)}. Direct bookings can start ${fmtLaunchDate((cfg.cleaning as any)?.soft_start_date)} on days a Pro covers your area.
+- Lawn care: founding/door-hanger reservations start the week of ${fmtLaunchDate(cfg.lawn?.first_visit_date)}. Direct bookings can start ${fmtLaunchDate((cfg.lawn as any)?.soft_start_date)} on days a Pro covers your area.
 - Car Care (Shine Complete and the Car Wash Add-On): ${cfg.car?.first_visit_date ? `first visits begin ${fmtLaunchDate(cfg.car.first_visit_date)}.` : `no start date yet. Say exactly: "${CAR_OPENS_LINE.en}." In Spanish: "${CAR_OPENS_LINE.es}." Never give a car care date.`}
 - Reservations made now are free; we confirm the day, window and Pro and set up payment shortly before the first visit.
 - No visits on Thanksgiving Day.

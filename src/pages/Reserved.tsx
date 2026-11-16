@@ -17,8 +17,8 @@ export default function Reserved() {
   const reserved = (r.services ?? []).filter((s) => !waitlist.includes(s));
   const steps = [
     [t('Now'), t('we hold your spot and your preferred day.')],
-    [`${lang === 'es' ? 'Principios de' : 'Early'} ${fmtLaunchDate(reserved.map((s) => cfg?.[launchScope(s)]?.conversion_date).filter(Boolean).sort()[0] as string | undefined, lang, 'month')}`, t('we confirm your pro, your day and your time window, and you add a card. Nothing charges until your first visit.')],
-    [startsLine(cfg, lang, reserved), t('your first visit.')],
+    [`${lang === 'es' ? 'Semana del' : 'Week of'} ${fmtLaunchDate(reserved.map((s) => cfg?.[launchScope(s)]?.conversion_date).filter(Boolean).sort()[0] as string | undefined, lang, 'short')}`, t('we confirm your pro, your day and your time window, and you add a card. Nothing charges until your first visit.')],
+    [startsLine(cfg, lang, reserved, 'long', true), t('your first visit.')],
   ];
   return (
     <CalmShell step={0} totalSteps={0} microcopy="">

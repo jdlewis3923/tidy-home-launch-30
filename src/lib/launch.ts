@@ -58,28 +58,30 @@ export function carHasDate(cfg: LaunchConfig | undefined): boolean {
  * services (or a mix) it names both, so a car care customer never sees the
  * cleaning/lawn date alone. With no car date, car care gets the "opens as soon as" line.
  */
-export function startsLine(cfg: LaunchConfig | undefined, lang: 'en' | 'es' = 'en', services?: string[], style: 'long' | 'short' = 'long'): string {
+export function startsLine(cfg: LaunchConfig | undefined, lang: 'en' | 'es' = 'en', services?: string[], style: 'long' | 'short' = 'long', weekOf = false): string {
   if (!cfg) return '';
   const scopes = new Set((services?.length ? services : ['cleaning', 'car']).map(launchScope));
   const home = fmtLaunchDate(cfg.cleaning?.first_visit_date ?? cfg.lawn?.first_visit_date, lang, style);
   const car = fmtLaunchDate(cfg.car?.first_visit_date, lang, style);
+  // weekOf: founding/hanger copy says "the week of <date>" since members get their own weekday that week.
+  const homeP = weekOf ? `${lang === 'es' ? 'la semana del ' : 'the week of '}${home}` : `${lang === 'es' ? 'el ' : ''}${home}`;
   const hasHome = scopes.has('cleaning') || scopes.has('lawn');
   const hasCar = scopes.has('car');
   if (hasHome && hasCar) {
     if (!car) {
       return lang === 'es'
-        ? `Limpieza y jardín comienzan el ${home}. ${CAR_OPENS_LINE.es}`
-        : `Cleaning and lawn begin ${home}. ${CAR_OPENS_LINE.en}`;
+        ? `Limpieza y jardín comienzan ${homeP}. ${CAR_OPENS_LINE.es}`
+        : `Cleaning and lawn begin ${homeP}. ${CAR_OPENS_LINE.en}`;
     }
     return lang === 'es'
-      ? `Limpieza y jardín comienzan el ${home}; cuidado del auto comienza el ${car}`
-      : `Cleaning and lawn begin ${home}; car care begins ${car}`;
+      ? `Limpieza y jardín comienzan ${homeP}; cuidado del auto comienza el ${car}`
+      : `Cleaning and lawn begin ${homeP}; car care begins ${car}`;
   }
   if (hasCar) {
     if (!car) return CAR_OPENS_LINE[lang];
     return lang === 'es' ? `Cuidado del auto comienza el ${car}` : `Car care begins ${car}`;
   }
-  return lang === 'es' ? `Las primeras visitas comienzan el ${home}` : `First visits begin ${home}`;
+  return lang === 'es' ? `Las primeras visitas comienzan ${homeP}` : `First visits begin ${homeP}`;
 }
 
 /** The date a member's first visit falls on: their weekday on/after the first-visit date, skipping blackout days a week. */
