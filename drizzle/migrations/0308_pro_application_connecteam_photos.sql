@@ -1,0 +1,1 @@
+alter table public.pro_applications add column if not exists connecteam_photos jsonb, add column if not exists badge_email jsonb;

@@ -7,7 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { fieldsFor, SECTION_LABEL, SECTION_ORDER, SERVICE_LABEL, type Service } from '@/lib/proApplication';
 import { STAGES } from './AdminApplications';
 
-type App = { id: string; kind: string; service: Service; stage: string; answers: Record<string, unknown>; prefill: Record<string, unknown>; full_name: string | null; src: string | null; submitted_at: string | null; connecteam_user_id: number | null; is_test: boolean };
+type App = { id: string; kind: string; service: Service; stage: string; answers: Record<string, unknown>; prefill: Record<string, unknown>; full_name: string | null; src: string | null; submitted_at: string | null; connecteam_user_id: number | null; is_test: boolean; connecteam_photos?: { status: string; method: string | null; attempts?: number; at?: string; upload_error?: string; error?: string } | null; badge_email?: { status: string; at?: string; error?: string } | null };
 const show = (v: unknown, opts?: { v: string; en: string }[]) => Array.isArray(v) ? v.map((x) => opts?.find((o) => o.v === x)?.en ?? x).join(', ') : opts?.find((o) => o.v === v)?.en ?? (v === 'yes' ? 'Yes' : v === 'no' ? 'No' : String(v ?? '—'));
 
 export default function AdminApplication() {
@@ -34,6 +34,11 @@ export default function AdminApplication() {
           {app.is_test && <span className="rounded-full bg-muted px-3 py-1 text-sm">Test</span>}
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{a.phone as string} · {a.email as string}{app.src ? ` · src ${app.src}` : ''}{app.connecteam_user_id ? ` · Connecteam ${app.connecteam_user_id}` : ''}</p>
+        {(app.connecteam_photos || app.badge_email) && <div className="mt-3 rounded-lg border p-3 text-sm">
+          {app.connecteam_photos && <p><b>Photos in Connecteam:</b> {app.connecteam_photos.method === 'document_upload' ? 'Uploaded to "Photo ID + Badge Photo" document' : app.connecteam_photos.method === 'note_fallback' ? 'Profile note with 30-day links (upload retrying)' : 'Failed'} · {app.connecteam_photos.status} · attempt {app.connecteam_photos.attempts}{app.connecteam_photos.at ? ` · ${new Date(app.connecteam_photos.at).toLocaleString()}` : ''}{app.connecteam_photos.upload_error ? <span className="block text-muted-foreground">{app.connecteam_photos.upload_error}</span> : null}
+            {app.connecteam_photos.status !== 'done' && app.connecteam_user_id && <Button size="sm" variant="outline" className="ml-2" disabled={busy} onClick={() => act({ action: 'admin_push_photos' }, 'Retried')}>Retry now</Button>}</p>}
+          {app.badge_email && <p><b>Badge ready email:</b> {app.badge_email.status}{app.badge_email.at ? ` · ${new Date(app.badge_email.at).toLocaleString()}` : ''}{app.badge_email.error ? ` · ${app.badge_email.error}` : ''}</p>}
+        </div>}
         {!locked && app.kind === 'apply' && <div className="mt-4 flex flex-wrap gap-2">
           {(['phone_screen', 'equipment_check'] as const).map((s) => <Button key={s} variant="outline" disabled={busy || app.stage === s} onClick={() => act({ action: 'admin_stage', stage: s }, 'Moved')}>{STAGES.find((x) => x.key === s)!.label}</Button>)}
           <Button disabled={busy || app.stage === 'rejected'} onClick={() => { if (confirm(`Hire ${app.full_name}? This creates their Connecteam user and sends the paperwork email.`)) void act({ action: 'admin_hire' }, 'Hired — Connecteam user created'); }}>Hire</Button>

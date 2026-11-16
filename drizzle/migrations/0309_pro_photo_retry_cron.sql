@@ -1,0 +1,1 @@
+SELECT cron.schedule('pro-photos-retry-hourly', '17 * * * *', $job$SELECT public.cron_http_post('pro-photos-retry-hourly', 'pro-application', '{"action":"retry_photos"}'::jsonb);$job$);

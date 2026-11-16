@@ -8,12 +8,18 @@ import {hireApplication,noteKitToConnecteam} from '../_shared/pro-hire.ts';
 import {buildFinishProfileEmail} from '../_shared/finish-profile-email.ts';
 import {sendProEmail} from '../_shared/pro-send.ts';
 import {ct} from '../_shared/connecteam.ts';
+import {pushPhotosToConnecteam,sendBadgeReady,MAX_PHOTO_ATTEMPTS,retryDelayMs} from '../_shared/pro-photos.ts';
+const bg=(p:Promise<unknown>)=>{const w=(globalThis as any).EdgeRuntime?.waitUntil;const q=p.catch(e=>console.error('bg',e));if(w)w.call((globalThis as any).EdgeRuntime,q);return q;};
+/** Photos + badge email after submit/hire; never blocks the caller. */
+async function afterPhotos(id:string){const {data:a}=await db.from('pro_applications').select('*').eq('id',id).single();if(!a)return;const m={...a.prefill,...a.answers};await sendBadgeReady(db,a,m);if(a.connecteam_user_id)await pushPhotosToConnecteam(db,a,a.connecteam_user_id);}
+/** Retries failed photo pushes (max 3 apps/run, MAX attempts each) — stays well inside the Connecteam budget. */
+async function retryPhotos(){const {data}=await db.from('pro_applications').select('*').not('connecteam_user_id','is',null).in('stage',['hired','profile_complete']).limit(50);const due=(data??[]).filter(a=>a.connecteam_photos?.status!=='done'&&(a.connecteam_photos?.attempts??0)<MAX_PHOTO_ATTEMPTS&&Date.now()-Date.parse(a.connecteam_photos?.at??0)>retryDelayMs(a.connecteam_photos?.attempts??0)).slice(0,3);const out=[];for(const a of due)out.push(await pushPhotosToConnecteam(db,a,a.connecteam_user_id));const mail=(data??[]).filter(a=>a.badge_email?.status==='error'&&(a.badge_email.attempts??0)<MAX_PHOTO_ATTEMPTS).slice(0,3);for(const a of mail)await sendBadgeReady(db,a,{...a.prefill,...a.answers});return out;}
 
 const db=createClient(Deno.env.get('SUPABASE_URL')??'',Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'',{auth:{persistSession:false}});
 const BUCKET='pro-applications';
 const reply=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{...corsHeaders,'Content-Type':'application/json'}});
 const PUBLIC=['start','load','save','upload_url','attach','submit'] as const;
-const ADMIN=['admin_list','admin_get','admin_stage','admin_hire','admin_create_finish','admin_send_finish','admin_test_cleanup','admin_test_kit','admin_test_purge_files'] as const;
+const ADMIN=['admin_list','admin_get','admin_stage','admin_hire','admin_create_finish','admin_send_finish','admin_test_cleanup','admin_test_kit','admin_test_purge_files','retry_photos','admin_push_photos'] as const;
 const Body=z.object({action:z.enum([...PUBLIC,...ADMIN]),token:z.string().regex(/^[a-f0-9]{48}$/).optional(),service:z.enum(['cleaning','lawn','car']).optional(),src:z.string().max(80).optional().nullable(),lang:z.enum(['en','es']).optional(),answers:z.record(z.any()).optional(),key:z.string().regex(/^[a-z_]{2,40}$/).optional(),path:z.string().max(200).optional(),content_type:z.string().max(100).optional(),id:z.string().uuid().optional(),stage:z.enum(['applied','phone_screen','equipment_check','rejected']).optional(),connecteam_user_id:z.number().int().positive().optional(),prefill:z.record(z.any()).optional(),skip:z.array(z.string()).optional()});
 const MAX_JSON=40000;
 const publicView=(r:any)=>({token:r.token,kind:r.kind,service:r.service,stage:r.stage,lang:r.lang,answers:r.answers,prefill:r.prefill,skip:r.skip_sections,files:Object.fromEntries(Object.entries(r.files??{}).map(([k,v]:any)=>[k,{name:v.name}]))});
@@ -66,6 +72,7 @@ Deno.serve(async req=>{
    }else if(!app.is_test){
     await db.from('admin_alerts').insert({alert_type:'pro_application',level:'action',tier:'urgent',category:'operations',title:`New ${SERVICE_LABEL[app.service as Service].en} application: ${name}`,body:`${merged.phone} · ${merged.email} · ZIPs ${(merged.zips as string[]??[]).join(', ')} · ${merged.years} yrs${app.src?` · src ${app.src}`:''}`,action_url:`/admin/applications/${app.id}`,dedupe_key:`pro-application:${app.id}`});
    }
+   bg(afterPhotos(app.id));
    return reply({ok:true,stage});
   }
   return reply({error:'unknown_action'},400);
@@ -77,6 +84,7 @@ async function signed(files:Record<string,any>){const out:Record<string,{url:str
 async function admin(b:z.infer<typeof Body>){
  if(b.action==='admin_list'){const {data,error}=await db.from('pro_applications').select('id,kind,service,stage,full_name,email,phone,src,is_test,submitted_at,stage_changed_at,connecteam_user_id,updated_at').neq('stage','draft').order('submitted_at',{ascending:false}).limit(300);if(error)throw error;
   const {data:drafts}=await db.from('pro_applications').select('id,service,full_name,phone,updated_at,kind').eq('stage','draft').order('updated_at',{ascending:false}).limit(50);return reply({applications:data,drafts});}
+ if(b.action==='retry_photos')return reply({retried:await retryPhotos()});
  const app=b.id?(await db.from('pro_applications').select('*').eq('id',b.id).maybeSingle()).data:null;
  if(b.action==='admin_create_finish'){
   if(!b.connecteam_user_id||!b.service)return reply({error:'missing'},400);
@@ -89,7 +97,8 @@ async function admin(b:z.infer<typeof Body>){
  if(!app)return reply({error:'not_found'},404);
  if(b.action==='admin_get')return reply({application:app,files:await signed(app.files)});
  if(b.action==='admin_stage'){if(['hired','profile_complete'].includes(app.stage))return reply({error:'locked'},409);const {error}=await db.from('pro_applications').update({stage:b.stage,stage_changed_at:new Date().toISOString()}).eq('id',app.id);if(error)throw error;await db.from('admin_alerts').update({resolved_at:new Date().toISOString()}).eq('dedupe_key',`pro-application:${app.id}`).is('resolved_at',null);return reply({ok:true});}
- if(b.action==='admin_hire'){if(app.kind!=='apply'||['draft','rejected'].includes(app.stage))return reply({error:'not_hireable'},409);if(app.stage==='hired')return reply({ok:true,already:true,user_id:app.connecteam_user_id});const r=await hireApplication(db,app);return reply(r);}
+ if(b.action==='admin_hire'){if(app.kind!=='apply'||['draft','rejected'].includes(app.stage))return reply({error:'not_hireable'},409);if(app.stage==='hired')return reply({ok:true,already:true,user_id:app.connecteam_user_id});const r=await hireApplication(db,app);bg(afterPhotos(app.id));return reply(r);}
+ if(b.action==='admin_push_photos'){const {data:a}=await db.from('pro_applications').select('*').eq('id',app.id).single();if(!a.connecteam_user_id)return reply({error:'no_connecteam_user'},409);return reply(await pushPhotosToConnecteam(db,{...a,connecteam_photos:a.connecteam_photos?.status==='done'?a.connecteam_photos:{...a.connecteam_photos,attempts:0}},a.connecteam_user_id));}
  if(b.action==='admin_send_finish'){
   if(app.kind!=='finish_profile'||!app.connecteam_user_id)return reply({error:'not_finish'},400);
   const {data:p}=await db.from('pro_pay_profiles').select('*').eq('connecteam_user_id',app.connecteam_user_id).single();if(!p?.email||p.active===false)return reply({error:'recipient_not_ready'},409);

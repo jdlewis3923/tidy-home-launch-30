@@ -15,21 +15,21 @@ export function buildPaperworkEmail(p:{first:string;phone:string;service:string;
 /** Owner-approved, one-time correction; only outstanding documents, COI before kit. */
 export function buildPaperworkApology(p:{first:string;service:string;status:Record<string,string>;signed:boolean;coiValid:boolean}) {
  const subject="Sorry about all the paperwork emails — this one works 🙏";
- const message=`Hi ${p.first}! I'm so sorry about all the messages about your documents. We ran into an issue that made us switch systems completely, and everything should finally be working now. If you could finish all your documents today, including your intake kit, that would be the bee's knees! I need everything in so I can order your gear and get you on the schedule. Thank you so much for your patience. – Justin`;
- const order=['agreement','w9','coi','intake'];
- const labels:Record<string,string>={agreement:'Independent Contractor Agreement',w9:'W-9',coi:'Certificate of Insurance (upload)',intake:'Pro Intake & Kit Order'};
+ const message=`Hi ${p.first}! I'm so sorry about all the messages about your documents. We ran into an issue that made us switch systems completely, and everything should finally be working now. If you could finish all your documents today, that would be the bee's knees! I need everything in so I can order your gear and get you on the schedule. Thank you so much for your patience. – Justin`;
+ const order=['agreement','w9','coi'];
+ const labels:Record<string,string>={agreement:'Independent Contractor Agreement',w9:'W-9',coi:'Certificate of Insurance (upload)'};
  const steps=paperworkSteps(p.service,p.status,p.signed,p.coiValid).filter(s=>!s.done).sort((a,b)=>order.indexOf(a.key)-order.indexOf(b.key));
  const content=`<p style="font-size:16px;line-height:1.65">${esc(message)}</p>${steps.map(s=>`<p style="margin:20px 0"><a href="${esc(s.url)}" style="display:block;text-align:center;background:#f5c518;color:#0f172a;padding:18px 20px;text-decoration:none;font-weight:700;border-radius:6px">${esc(labels[s.key])}</a></p>`).join('')}`;
  const base=buildPaperworkEmail({...p,phone:''},'welcome');
  return {subject,html:base.html.replace(/<h1 style="font-size:26px">[\s\S]*?(?=<\/td>)/,content),text:`${message}\n\n${steps.map(s=>`${labels[s.key]}: ${s.url}`).join('\n')}`};
 }
 
-/** Owner-approved Nov 12 nudge: warm system voice, only open documents, W-9 → intake → photo ID → COI. */
+/** Owner-approved Nov 12 nudge: warm system voice, only open documents, agreement → W-9 → COI (kit and photos come from the website). */
 export function buildPaperworkNudge(p:{first:string;service:string;status:Record<string,string>;signed:boolean;coiValid:boolean}) {
  const subject="You're almost set — finish your Tidy paperwork today";
  const message=`Hi ${p.first}, you're almost set! Please finish these today so we can order your Tidy vests and badge and get you on the schedule.`;
- const order=['agreement','w9','intake','photo_id','coi'];
- const labels:Record<string,string>={agreement:'Independent Contractor Agreement',w9:'W-9',intake:'Pro Intake & Kit Order (vest size etc.)',photo_id:'Photo ID + Badge Photo (upload)',coi:'Certificate of Insurance (upload)'};
+ const order=['agreement','w9','coi'];
+ const labels:Record<string,string>={agreement:'Independent Contractor Agreement',w9:'W-9',coi:'Certificate of Insurance (upload)'};
  const steps=paperworkSteps(p.service,p.status,p.signed,p.coiValid).filter(s=>!s.done).sort((a,b)=>order.indexOf(a.key)-order.indexOf(b.key));
  const content=`<p style="font-size:16px;line-height:1.65">${esc(message)}</p>${steps.map(s=>`<p style="margin:20px 0"><a href="${esc(s.url)}" style="display:block;text-align:center;background:#f5c518;color:#0f172a;padding:18px 20px;text-decoration:none;font-weight:700;border-radius:6px">${esc(labels[s.key])}</a></p>`).join('')}`;
  const base=buildPaperworkEmail({...p,phone:''},'welcome');

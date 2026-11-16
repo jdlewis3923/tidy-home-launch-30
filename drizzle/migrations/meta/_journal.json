@@ -2157,6 +2157,20 @@
       "when": 1794510248836,
       "tag": "0307_paperwork_email_finish_profile_kind",
       "breakpoints": true
+    },
+    {
+      "idx": 308,
+      "version": "7",
+      "when": 1794846009971,
+      "tag": "0308_pro_application_connecteam_photos",
+      "breakpoints": true
+    },
+    {
+      "idx": 309,
+      "version": "7",
+      "when": 1794846076059,
+      "tag": "0309_pro_photo_retry_cron",
+      "breakpoints": true
     }
   ]
 }

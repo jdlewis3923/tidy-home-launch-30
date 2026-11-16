@@ -6558,6 +6558,8 @@ export type Database = {
       pro_applications: {
         Row: {
           answers: Json
+          badge_email: Json | null
+          connecteam_photos: Json | null
           connecteam_user_id: number | null
           created_at: string
           email: string | null
@@ -6581,6 +6583,8 @@ export type Database = {
         }
         Insert: {
           answers?: Json
+          badge_email?: Json | null
+          connecteam_photos?: Json | null
           connecteam_user_id?: number | null
           created_at?: string
           email?: string | null
@@ -6604,6 +6608,8 @@ export type Database = {
         }
         Update: {
           answers?: Json
+          badge_email?: Json | null
+          connecteam_photos?: Json | null
           connecteam_user_id?: number | null
           created_at?: string
           email?: string | null
