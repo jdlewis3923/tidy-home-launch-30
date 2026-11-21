@@ -69,7 +69,7 @@ Deno.serve(async req=>{
     const kit=kitComplete(app.service,merged,app.files);
     await db.from('pro_pay_profiles').update({kit_complete:kit,pro_application_id:app.id}).eq('connecteam_user_id',app.connecteam_user_id);
     if(!app.is_test)await noteKitToConnecteam(app.connecteam_user_id,merged).catch(e=>db.from('integration_logs').insert({source:'internal',event:'pro-application.kit_note',status:'error',detail:String(e)}));
-    await db.from('admin_alerts').insert({alert_type:'pro_profile_complete',level:'action',tier:'digest',category:'operations',title:`${name} finished their Tidy profile`,body:`Kit, photo ID and badge photo received. Vest ${merged.vest_size}, badge "${merged.badge_name}".`,action_url:`/admin/applications/${app.id}`,dedupe_key:`pro-profile:${app.id}`});
+    await db.from('admin_alerts').insert({alert_type:'pro_profile_complete',level:'action',tier:'digest',category:'operations',title:`${name} finished their Tidy profile`,body:`Kit, photo ID and badge photo received. Vest ${merged.vest_size}, badge "${merged.badge_name}".`,action_url:'/admin/paperwork',dedupe_key:`pro-profile:${app.id}`});
    }else if(!app.is_test){
     await db.from('admin_alerts').insert({alert_type:'pro_application',level:'action',tier:'urgent',category:'operations',title:`New ${SERVICE_LABEL[app.service as Service].en} application: ${name}`,body:`${merged.phone} · ${merged.email} · ZIPs ${(merged.zips as string[]??[]).join(', ')} · ${merged.years} yrs${app.src?` · src ${app.src}`:''}`,action_url:`/admin/applications/${app.id}`,dedupe_key:`pro-application:${app.id}`});
    }

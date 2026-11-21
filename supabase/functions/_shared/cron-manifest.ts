@@ -78,17 +78,18 @@ export const EXPECTED_CRON_JOBS: ExpectedCronJob[] = [
   // --- added Nov 2026 (scheduled at runtime; see docs/cron-runtime-overrides.json) ---
   { name: 'pro-photos-retry-hourly', schedule: '17 * * * *', kind: 'http', fn: 'pro-application', purpose: 'Retries Pro photo ID/badge photo pushes to Connecteam.' },
   { name: 'ops-agents-tick', schedule: '*/15 * * * *', kind: 'sql', purpose: 'Autonomous operations audit.' },
-  { name: 'signing-selftest-nightly', schedule: '15 8 * * *', kind: 'http', fn: 'signing-selftest', purpose: 'Nightly signing self-test; switches itself off once Susan signs in Connecteam.' },
+
   { name: 'escalate-stale-unread-replies', schedule: '5 * * * *', kind: 'sql', purpose: 'Escalates unread inbound replies.' },
   { name: 'sms-status-backfill-hourly', schedule: '35 * * * *', kind: 'http', fn: 'sms-status-backfill', purpose: 'Backfills text delivery receipts.' },
   { name: 'jobber-reconcile-nightly', schedule: '0 7 * * *', kind: 'sql', purpose: 'Nightly Jobber mirror reconcile.' },
-  { name: 'connecteam-visit-reports-10min', schedule: '*/10 * * * *', kind: 'sql', purpose: 'Reads Connecteam Visit Reports to close visits and create pay lines.' },
+  { name: 'connecteam-visit-reports-10min', schedule: '*/20 11-23,0-2 * * *', kind: 'sql', purpose: 'Reads Connecteam Visit Reports to close visits and create pay lines.' },
   { name: 'pro-pay-statements-friday', schedule: '0 12 * * 5', kind: 'sql', purpose: 'Friday 7 AM Miami Pro pay statement emails.' },
-  { name: 'connecteam-paperwork-15min', schedule: '*/15 * * * *', kind: 'http', fn: 'connecteam-paperwork', purpose: 'Connecteam paperwork status, COI expiry and new-hire discovery.' },
+  { name: 'connecteam-paperwork-15min', schedule: '5 12-23 * * *', kind: 'http', fn: 'connecteam-paperwork', purpose: 'Connecteam paperwork status, COI expiry and new-hire discovery.' },
 ];
 
 /** Jobs deliberately NOT scheduled — listed so "missing" never means "forgotten". */
 export const RETIRED_CRON_JOBS: Array<{ name: string; reason: string }> = [
+  { name: 'signing-selftest-nightly', reason: 'Susan signed; the one-time nightly self-test is no longer needed.' },
   { name: 'generate-recurring-visits-daily', reason: 'Site scheduling retired; Jobber is the schedule of record (Nov 5 audit).' },
   { name: 'pipeline-coi-tick', reason: 'Old pipeline insurance tick retired; Connecteam paperwork sync + coi-expiry-check cover it (Nov 5 audit).' },
   { name: 'notify-pro-job-today', reason: 'Lovable Pro app retired; Pros get shifts in Connecteam, never texts (Nov 5 audit).' },

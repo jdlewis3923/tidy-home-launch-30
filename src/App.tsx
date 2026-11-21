@@ -19,6 +19,7 @@ import HomeButton from "@/components/HomeButton";
 import AppInstallHead from "@/components/AppInstallHead";
 const AdminServiceHandoff=lazy(()=>import('@/components/admin/AdminServiceHandoff'));
 const AdminToday=lazy(()=>import('@/pages/AdminToday'));
+const AdminPaperwork=lazy(()=>import('@/pages/AdminPaperwork'));
 const AdminDigest=lazy(()=>import('@/pages/AdminDigest'));
 const AdminQr=lazy(()=>import('@/pages/AdminQr'));
 const AdminChrome = lazy(() => import("@/components/admin/AdminChrome"));
@@ -429,6 +430,7 @@ const App = () => (
                   {/* Command center — default admin landing view. */}
                   <Route path="/admin" element={<Navigate to="/admin/command" replace />} />
                   <Route path="/admin/command" element={<AdminToday />} />
+                  <Route path="/admin/paperwork" element={<AdminPaperwork />} />
                   <Route path="/admin/alerts" element={<AdminAlerts />} />
                   <Route path="/admin/alert-rules" element={<AdminAlertRules />} />
                   <Route path="/admin/onboarding" element={<AdminServiceHandoff />} />

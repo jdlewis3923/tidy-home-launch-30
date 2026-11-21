@@ -15,6 +15,7 @@ import { useHasRoleState } from "@/hooks/useHasRole";
 import { Button } from "@/components/ui/button";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import AlertTiers from "@/components/admin/AlertTiers";
+import { currentActionableAlerts } from "@/lib/actionableAlerts";
 
 interface AlertRow {
   id: string;
@@ -59,10 +60,7 @@ export default function AdminAlerts() {
   useEffect(() => { load(); }, [load]);
 
   const now = Date.now();
-  const open = useMemo(
-    () => rows.filter((r) => !r.resolved_at && (!r.snoozed_until || new Date(r.snoozed_until).getTime() <= now)),
-    [rows, now],
-  );
+  const open = useMemo(() => currentActionableAlerts(rows, now), [rows, now]);
   const snoozed = useMemo(
     () => rows.filter((r) => !r.resolved_at && r.snoozed_until && new Date(r.snoozed_until).getTime() > now),
     [rows, now],

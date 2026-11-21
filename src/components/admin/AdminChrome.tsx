@@ -12,6 +12,7 @@ import CapacityBanner from "@/components/admin/CapacityBanner";
 import AdminSearch from "@/components/admin/AdminSearch";
 import AdminThemeToggle from "@/components/admin/AdminThemeToggle";
 import { Button } from "@/components/ui/button";
+import { currentActionableAlerts } from "@/lib/actionableAlerts";
 
 import {ADMIN_GROUPS as GROUPS,ADMIN_LAUNCHERS} from '@/lib/admin-navigation';
 const NAV = GROUPS.flatMap((group) => group.items);
@@ -59,12 +60,12 @@ export default function AdminChrome() {
     let cancelled = false;
     const refresh = async () => {
       const [alerts, sync, site] = await Promise.all([
-        supabase.from("admin_alerts").select("id", { count: "exact", head: true }).is("resolved_at", null),
+        supabase.from("admin_alerts").select("id,created_at,alert_type,title,dedupe_key,resolved_at,snoozed_until").is("resolved_at", null).limit(500),
         supabase.from("app_settings").select("value").eq("key", "sheets_master_sync_last_at").maybeSingle(),
         supabase.from("app_settings").select("value").eq("key", "site_live").maybeSingle(),
       ]);
       if (cancelled) return;
-      setOpenAlerts(alerts.count ?? 0);
+      setOpenAlerts(currentActionableAlerts(alerts.data ?? []).length);
       const syncValue = sync.data?.value as { at?: string } | null;
       setLastSync(syncValue?.at ?? null);
       setSiteMode(site.error ? "dark" : site.data?.value === true ? "live" : "waitlist");

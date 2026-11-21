@@ -6864,6 +6864,50 @@ export type Database = {
           },
         ]
       }
+      pro_document_reviews: {
+        Row: {
+          application_id: string | null
+          approved_at: string
+          approved_by: string
+          connecteam_user_id: number
+          created_at: string
+          document_id: number | null
+          document_type: string
+          id: string
+          submitted_at: string | null
+        }
+        Insert: {
+          application_id?: string | null
+          approved_at?: string
+          approved_by: string
+          connecteam_user_id: number
+          created_at?: string
+          document_id?: number | null
+          document_type: string
+          id?: string
+          submitted_at?: string | null
+        }
+        Update: {
+          application_id?: string | null
+          approved_at?: string
+          approved_by?: string
+          connecteam_user_id?: number
+          created_at?: string
+          document_id?: number | null
+          document_type?: string
+          id?: string
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pro_document_reviews_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "pro_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pro_gps_tests: {
         Row: {
           accuracy_m: number | null
