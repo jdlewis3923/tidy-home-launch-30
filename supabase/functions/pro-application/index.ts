@@ -3,6 +3,7 @@ import {createClient} from 'npm:@supabase/supabase-js@2';
 import {corsHeaders} from 'npm:@supabase/supabase-js@2/cors';
 import {z} from 'npm:zod@3';
 import {requireServiceOrAdmin} from '../_shared/admin-auth.ts';
+import {isCronAuthorized} from '../_shared/cron-auth.ts';
 import {missingKeys,kitComplete,fieldsFor,SERVICE_LABEL,type Service} from '../_shared/pro-application.ts';
 import {hireApplication,noteKitToConnecteam} from '../_shared/pro-hire.ts';
 import {buildFinishProfileEmail} from '../_shared/finish-profile-email.ts';
@@ -32,7 +33,7 @@ Deno.serve(async req=>{
  const parsed=Body.safeParse(JSON.parse(raw||'{}'));if(!parsed.success)return reply({error:'invalid_request',detail:parsed.error.flatten().fieldErrors},400);
  const b=parsed.data;
  try{
-  if((ADMIN as readonly string[]).includes(b.action)){const auth=await requireServiceOrAdmin(req);if(!auth.ok)return reply({error:auth.error},auth.status);return await admin(b);}
+  if((ADMIN as readonly string[]).includes(b.action)){if(b.action==='retry_photos'&&await isCronAuthorized(req))return await admin(b);const auth=await requireServiceOrAdmin(req);if(!auth.ok)return reply({error:auth.error},auth.status);return await admin(b);}
   if(b.action==='start'){
    if(!b.service)return reply({error:'service_required'},400);
    const {data,error}=await db.from('pro_applications').insert({service:b.service,src:b.src??null,lang:b.lang??'en'}).select('*').single();if(error)throw error;return reply(publicView(data));
