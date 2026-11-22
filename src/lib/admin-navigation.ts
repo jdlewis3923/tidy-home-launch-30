@@ -1,4 +1,4 @@
-import {Activity,Bell,Users,Gift,Star,House,Wallet,ShieldCheck,PackageCheck,Landmark,Megaphone,Settings,Heart,Power,CalendarDays,Mail,BookOpen,Inbox,BarChart3,QrCode} from 'lucide-react';
+import {Activity,Bell,Users,Gift,Star,House,Wallet,ShieldCheck,PackageCheck,Landmark,Megaphone,Settings,Heart,Power,CalendarDays,Mail,BookOpen,Inbox,BarChart3,QrCode,FileText} from 'lucide-react';
 export const ADMIN_LAUNCHERS=[{label:'Open Jobber',url:'https://secure.getjobber.com/'},{label:'Open Connecteam',url:'https://app.connecteam.com/'},{label:'Open QuickBooks',url:'https://qbo.intuit.com/'},{label:'Open Stripe',url:'https://dashboard.stripe.com/'}];
 export const ADMIN_GROUPS=[
  {label:'Today',icon:Activity,items:[{to:'/admin/command',label:'Command center',icon:House},{to:'/admin/alerts',label:'Alerts',icon:Bell,badge:'alerts' as const},{to:'/admin/digest',label:'Daily digest',icon:Mail}]},

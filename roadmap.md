@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Phone paperwork review and alert cleanup (Nov 21)
-- [ ] Build /admin/paperwork with private photo previews, Connecteam status/timestamps, honest fallbacks and per-document Tidy approvals; link the Command card.
-- [ ] Audit the 87 open alerts, resolve duplicates/recovered/stale notices without deleting history, and make admin counts show only current actionable items.
-- [ ] Test approvals, 390px layout and real Susan/Aleksandar readback; no Pro texts or emails.
+- [x] Build /admin/paperwork with private photo previews, Connecteam status/timestamps, honest fallbacks and per-document Tidy approvals; link the Command card.
+- [x] Audit the 87 open alerts, resolve duplicates/recovered/stale notices without deleting history, and make admin counts show only current actionable items.
+- [x] Test approvals, 390px layout and real Susan/Aleksandar readback; no Pro texts or emails.
 
 ## Connecteam-only applications and Aleksandar (Nov 7)
 - [x] One approved branded email sent to Aleksandar; no SMS sent or queued under the standing owner rule.
