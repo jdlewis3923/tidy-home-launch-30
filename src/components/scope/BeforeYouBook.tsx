@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAddonCatalog } from '@/hooks/useAddonCatalog';
 import { addonQuote } from '@/lib/deep-clean';
-import { checkboxText, GROUP_NAME, GROUP_SCOPES, txt, useServiceScope, type ScopeGroup } from '@/lib/serviceScope';
+import { checkboxText, GROUP_NAME, GROUP_SCOPES, SCOPE_TITLE, txt, useServiceScope, type ScopeGroup } from '@/lib/serviceScope';
 
 export interface ReviewProps {
   groups: ScopeGroup[]; checked: Partial<Record<ScopeGroup, boolean>>;
@@ -50,9 +50,11 @@ function ReviewCard({ group, checked, onCheck, cleaningSize, selectedAddons = []
       {scope.isError ? <p role="alert" className="text-destructive">{es ? 'No se pudo cargar el alcance.' : 'Could not load what is included.'}</p> : !rows.length ? <p>{es ? 'Cargando…' : 'Loading…'}</p> : <>
         {(['included', 'not_included'] as const).map(section => <section key={section} className="space-y-2">
           <h4 className="font-semibold text-foreground">{section === 'included' ? es ? 'Cada visita incluye' : 'Every visit includes' : es ? 'No incluido' : 'Not included'}</h4>
-          <ul className="space-y-2">{rows.filter(r => r.section === section).map(r => <li key={r.id} className="flex gap-2 text-sm text-foreground">
+          {scopes.map(service => <div key={service} className="space-y-2">
+          {scopes.length > 1 && <h5 className="font-semibold">{SCOPE_TITLE[service][es ? 1 : 0]}</h5>}
+          <ul className="space-y-2">{rows.filter(r => r.section === section && r.service === service).map(r => <li key={r.id} className="flex gap-2 text-sm text-foreground">
             {section === 'included' ? <Check className="mt-1 h-4 w-4 shrink-0 text-success" /> : <X className="mt-1 h-4 w-4 shrink-0 text-destructive" />}{txt(r, language)}
-          </li>)}</ul>
+          </li>)}</ul></div>)}
         </section>)}
         {group === 'cleaning' && <aside className="space-y-3 border-l-4 border-primary bg-primary/5 p-3 text-sm text-foreground">
           <p>{es ? 'Tu plan es una limpieza de mantenimiento que mantiene tu hogar limpio, visita tras visita. No es una limpieza profunda.' : 'Your plan is a maintenance clean that keeps your home consistently clean, visit after visit. It is not a deep clean.'}</p>
