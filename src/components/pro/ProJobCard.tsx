@@ -1,4 +1,5 @@
 /** Pro job card — the booked scope for this visit, read from service_scope at the member's version. */
+import { outdoorSpigotLine } from "@/lib/utility-use";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,7 +44,7 @@ export default function ProJobCard({ visitId, serviceType }: { visitId: string; 
       <List title={es ? "Extras aprobados" : "Approved add-ons"} items={card.addons.length ? card.addons.map((a) => a.name + (a.free ? (es ? " (regalo)" : " (free gift)") : "")) : [es ? "Ninguno" : "None"]} />
       {isCar && (
         <p className="mt-2 text-[13px] font-semibold text-[hsl(var(--pro-ink))]">
-          {es ? "Agua en el estacionamiento" : "Water at the parking spot"}: {card.spigot === true ? (es ? "Sí — el miembro tiene grifo exterior" : "Yes — customer has an outdoor spigot") : card.spigot === false ? (es ? "No — traiga su propia agua" : "No — bring your own water") : (es ? "Sin respuesta — traiga su propia agua" : "Not answered — bring your own water")}
+          {outdoorSpigotLine(card.spigot, language)}
         </p>
       )}
     </ProCard>

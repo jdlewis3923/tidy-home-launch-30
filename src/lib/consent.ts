@@ -11,7 +11,7 @@
  */
 import { supabase } from '@/integrations/supabase/client';
 
-export const TERMS_VERSION = '2026-08-24';
+export const TERMS_VERSION = '2026-11-23';
 export const TERMS_CONSENT_WORDING =
   'By creating an account you agree to our Terms of Service and Privacy Policy.';
 

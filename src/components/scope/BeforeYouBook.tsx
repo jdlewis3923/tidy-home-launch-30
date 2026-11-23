@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAddonCatalog } from '@/hooks/useAddonCatalog';
 import { addonQuote } from '@/lib/deep-clean';
-import { GROUP_NAME, GROUP_SCOPES, txt, useServiceScope, type ScopeGroup } from '@/lib/serviceScope';
+import { checkboxText, GROUP_NAME, GROUP_SCOPES, txt, useServiceScope, type ScopeGroup } from '@/lib/serviceScope';
 
 export interface ReviewProps {
   groups: ScopeGroup[]; checked: Partial<Record<ScopeGroup, boolean>>;
@@ -71,7 +71,7 @@ function ReviewCard({ group, checked, onCheck, cleaningSize, selectedAddons = []
       </>}
     </div>
     {!unlocked && <p className="mt-3 text-xs text-muted-foreground">{es ? 'Desplázate para leer todo y continuar.' : 'Scroll to read everything to continue.'}</p>}
-    <label className="mt-4 flex min-h-11 items-start gap-3 text-sm text-foreground"><Checkbox className="mt-1 shrink-0" disabled={!unlocked || scope.isError} checked={checked} onCheckedChange={v => onCheck(v === true)} /><span>{es ? `He leído lo que incluye y no incluye mi plan de ${name}.` : `I've read what my ${name} plan includes and doesn't include.`}</span></label>
+    <label className="mt-4 flex min-h-11 items-start gap-3 text-sm text-foreground"><Checkbox className="mt-1 shrink-0" disabled={!unlocked || scope.isError} checked={checked} onCheckedChange={v => onCheck(v === true)} /><span>{checkboxText(group, language)}</span></label>
   </article>;
 }
 export default function BeforeYouBook({ groups, checked, onChange, ...props }: ReviewProps) {

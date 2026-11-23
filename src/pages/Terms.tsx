@@ -3,10 +3,12 @@ import { Link } from "react-router-dom";
 import SeoHead from "@/components/landing/SeoHead";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ScopeFull } from "@/components/scope/ServiceScope";
+import { MEMBER_GUIDE } from "@/lib/memberGuide";
 import { GROUP_NAME } from "@/lib/serviceScope";
 
 const Terms = () => {
   const { t, language } = useLanguage();
+  const utilities = MEMBER_GUIDE.find(s => s.id === "water-electricity")?.[language === "es" ? "es" : "en"];
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
@@ -56,6 +58,10 @@ const Terms = () => {
               )}
             </p>
           </section>
+          {utilities && <section id="water-electricity">
+            <h2 className="text-lg font-bold text-foreground">{utilities.heading}</h2>
+            {utilities.items.map(item => <p key={item}>{item}</p>)}
+          </section>}
           <section>
             <h2 className="text-lg font-bold text-foreground">{t("4. Weather Conditions")}</h2>
             <p>{t("Outdoor services may be rescheduled due to unsafe weather. Subscription remains active.")}</p>

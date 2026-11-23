@@ -12,6 +12,7 @@ import { KIT_BY_SERVICE, kitContentsLine, VEST_SIZES, MAGNET_CREDIT_MONTHLY_USD,
 import { REDO_PAY_DAYS } from "@/lib/redo-pay";
 import { REVIEW_BONUS_CENTS } from "@/lib/reviewBonus";
 import { ORIENTATION_SECTIONS } from "@/lib/orientation";
+import { UTILITY_USE } from "./utility-use";
 import type { ScopeRow, ScopeService } from "@/lib/serviceScope";
 
 export type Lang = "en" | "es";
@@ -61,6 +62,7 @@ function scopeSections(src: DocSources, svc: Svc, l: Lang): DocSection[] {
   const notInc = rows.filter((r) => r.section === "not_included").map((r) => (l === "en" ? r.text_en : r.text_es));
   if (notInc.length) out.push(sec(t("Not included", "No incluye"), list(notInc)));
   if (!out.length) out.push(sec(t("Scope", "Alcance"), p(t("No active scope rows were found.", "No se encontraron filas de alcance activas."))));
+  if (svc !== "lawn") out.push(sec(UTILITY_USE[l].heading, list([...UTILITY_USE[l].conditions])));
   return out;
 }
 

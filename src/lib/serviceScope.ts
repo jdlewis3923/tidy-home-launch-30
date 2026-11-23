@@ -1,5 +1,6 @@
 // Service scope — read-only client for public.service_scope (the one source of
 // truth). This file holds NO scope text; it only fetches and groups rows.
+import { UTILITY_USE } from "./utility-use";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -121,4 +122,12 @@ export async function recordScopeAcceptance(opts: {
   });
   if (error || !data?.ok) return { ok: false, error: data?.error ?? error?.message ?? "scope_accept_failed" };
   return { ok: true, ref };
+}
+
+export function checkboxText(group: ScopeGroup, lang: string) {
+  const L = (language: string, en: string, es: string) => language === "es" ? es : en;
+  const name = GROUP_NAME[group][lang === "es" ? 1 : 0];
+  if (isCarGroup(group)) return UTILITY_USE[lang === 'es' ? 'es' : 'en'].carAcceptance;
+  if (group === 'cleaning') return L(lang, `I've read what's included and not included in ${name}, and I understand my Pro will use my home's water and electricity during each visit.`, `Leí lo que incluye y no incluye ${name}, y entiendo que mi Pro usará el agua y la electricidad de mi casa durante cada visita.`);
+  return L(lang, `I've read what's included and not included in ${name}.`, `Leí lo que incluye y no incluye ${name}.`);
 }

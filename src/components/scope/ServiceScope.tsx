@@ -1,12 +1,14 @@
 import { useMemo, useState } from "react";
 import { Check, X, Plus, ClipboardList, Droplets, Info } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { UTILITY_USE } from "@/lib/utility-use";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { VISIT_RULES } from "@/lib/visitRules";
 import BeforeYouBook, { type ReviewProps } from './BeforeYouBook';
 import {
-  GROUP_NAME, GROUP_SCOPES, SCOPE_TITLE, grp, isCarGroup, txt, useServiceScope,
+  GROUP_NAME, GROUP_SCOPES, SCOPE_TITLE, grp, checkboxText, txt, useServiceScope,
   type ScopeGroup, type ScopeRow, type ScopeService,
 } from "@/lib/serviceScope";
 
@@ -119,15 +121,7 @@ export function ScopeSummary({ group, monthlyLawn, weekly, compact }: { group: S
   );
 }
 
-export function checkboxText(group: ScopeGroup, lang: string) {
-  const name = GROUP_NAME[group][lang === "es" ? 1 : 0];
-  if (isCarGroup(group)) {
-    return group === "car_care"
-      ? L(lang, "I've read what's included and not included in Car Care, and I agree my Pro may use my outdoor water spigot.", "Leí lo que incluye y no incluye Cuidado del Auto, y acepto que mi Pro use mi llave de agua exterior.")
-      : L(lang, "I've read what's included and not included in the Car Wash Add-On, and I agree my Pro may use my outdoor water spigot.", "Leí lo que incluye y no incluye el lavado de auto adicional, y acepto que mi Pro use mi llave de agua exterior.");
-  }
-  return L(lang, `I've read what's included and not included in ${name}.`, `Leí lo que incluye y no incluye ${name}.`);
-}
+export { checkboxText } from '@/lib/serviceScope';
 
 /** One required checkbox per selected service, plus the short "How visits work" link. */
 export function ScopeAcceptChecks(props: ReviewProps) {
@@ -175,21 +169,30 @@ export function VisitRulesList() {
 
 export const allScopeChecked = (groups: ScopeGroup[], checked: Partial<Record<ScopeGroup, boolean>>) => groups.length > 0 && groups.every((g) => checked[g]);
 
-/** "Outdoor spigot at the parking spot?" Yes / No — No is never a fee or a no-access visit. */
-export function SpigotQuestion({ value, onChange }: { value: boolean | null; onChange: (v: boolean) => void }) {
+/** Utility availability is a fact, never optional permission to use it. */
+export function UtilityQuestion({ kind, value, onChange }: { kind: 'water' | 'outlet'; value: boolean | null; onChange: (v: boolean) => void }) {
   const { language } = useLanguage();
+  const copy = UTILITY_USE[language === 'es' ? 'es' : 'en'];
+  const question = kind === 'water' ? copy.waterQuestion : copy.outletQuestion;
   return (
-    <fieldset className="rounded-xl border-2 border-border bg-card p-3">
-      <legend className="px-1 text-sm font-bold text-ink">{L(language, "Outdoor spigot at the parking spot?", "¿Hay una llave de agua exterior donde se estaciona el auto?")}</legend>
-      <div className="mt-1 grid grid-cols-2 gap-2" role="radiogroup">
+    <fieldset className="rounded-lg border-2 border-border bg-card p-3">
+      <legend className="px-1 text-sm font-bold text-ink">{question}</legend>
+      <p className="mt-1 text-xs text-ink-soft">{kind === "water" ? copy.waterHelp : copy.help}</p>
+      <div className="mt-2 grid grid-cols-2 gap-2" role="radiogroup" aria-label={question}>
         {([true, false] as const).map((v) => (
-          <button key={String(v)} type="button" role="radio" aria-checked={value === v} onClick={() => onChange(v)}
-            className={`min-h-[44px] rounded-xl border-2 px-3 text-sm font-semibold ${value === v ? "border-primary bg-primary/10 text-ink" : "border-border bg-card text-ink"}`}>
+          <Button key={String(v)} type="button" variant="outline" role="radio" aria-checked={value === v} onClick={() => onChange(v)}
+            className={`min-h-[44px] border-2 ${value === v ? "border-primary bg-primary/10 text-ink" : "border-border bg-card text-ink"}`}>
             {v ? L(language, "Yes", "Sí") : "No"}
-          </button>
+          </Button>
         ))}
       </div>
-      {value === false && <p className="mt-1 text-xs text-ink-soft">{L(language, "No problem — your Pro brings their own water. Never a fee.", "No hay problema: su Pro trae su propia agua. Nunca hay cargo extra.")}</p>}
+      {value === false && <p className="mt-1 text-xs text-ink-soft">{kind === 'water' ? copy.noWater : copy.noOutlet}</p>}
     </fieldset>
   );
+}
+export function SpigotQuestion(props: { value: boolean | null; onChange: (v: boolean) => void }) {
+  return <UtilityQuestion kind="water" {...props} />;
+}
+export function OutletQuestion(props: { value: boolean | null; onChange: (v: boolean) => void }) {
+  return <UtilityQuestion kind="outlet" {...props} />;
 }

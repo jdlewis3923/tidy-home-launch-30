@@ -29,8 +29,9 @@ import EmbeddedPaymentForm from '@/components/dashboard/EmbeddedPaymentForm';
 import GuaranteeLine from '@/components/GuaranteeLine';
 import { getLandingSource, getQrPlacement, getQrRoute, getQrZip } from "@/lib/landing-source";
 import { getUtmAttribution } from '@/lib/utm';
-import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
+import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, OutletQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
 import { groupsFor, recordScopeAcceptance, type ScopeGroup } from '@/lib/serviceScope';
+import { utilityAnswersComplete } from '@/lib/utility-use';
 import { MEMBER_GUIDE_VERSION } from '@/lib/memberGuide';
 import { useAddonCatalog } from '@/hooks/useAddonCatalog';
 import { addonQuote } from '@/lib/deep-clean';
@@ -67,7 +68,7 @@ export default function StepPayment({ state, onChange }: Props) {
   // a "we may not be able to service this" banner and captures a lead so we
   // can call ahead, rather than losing the sale outright.
   const showAccessGate = hasCarService(state);
-  // No spigot is never a failure: the Pro brings their own water (scope rule).
+  // No means the utility is genuinely absent, not withheld permission.
   const accessAnswers: Array<{ key: 'hasElectricalOutlet' | 'washingAllowed'; which: 'electrical_outlet' | 'washing_allowed' }> = [
     { key: 'hasElectricalOutlet', which: 'electrical_outlet' },
     { key: 'washingAllowed', which: 'washing_allowed' },
@@ -106,7 +107,7 @@ export default function StepPayment({ state, onChange }: Props) {
   const scopeGroups = groupsFor(pricing.servicePrices.map((sp) => sp.service as string), !!carWashLine);
   const [scopeChecked, setScopeChecked] = useState<Partial<Record<ScopeGroup, boolean>>>({});
   const needsSpigot = scopeGroups.some((g) => g === 'car_care' || g === 'car_wash_addon');
-  const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!needsSpigot || typeof state.hasWaterSpigot === 'boolean');
+  const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!needsSpigot || utilityAnswersComplete(state.hasWaterSpigot, state.hasElectricalOutlet));
 
   const embedded = isEmbeddedCheckoutAvailable();
   const stripePromise = useMemo(() => (embedded ? getStripe() : null), [embedded]);
@@ -400,17 +401,7 @@ export default function StepPayment({ state, onChange }: Props) {
 
           <SpigotQuestion value={typeof state.hasWaterSpigot === 'boolean' ? state.hasWaterSpigot : null} onChange={(v) => onChange({ ...state, hasWaterSpigot: v })} />
 
-          <label className="flex items-start gap-2.5 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={state.hasElectricalOutlet === true}
-              onChange={(e) => onChange({ ...state, hasElectricalOutlet: e.target.checked })}
-              className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
-            />
-            <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
-              {t('There\'s an outdoor electrical outlet available')}
-            </span>
-          </label>
+          <OutletQuestion value={typeof state.hasElectricalOutlet === 'boolean' ? state.hasElectricalOutlet : null} onChange={(v) => onChange({ ...state, hasElectricalOutlet: v })} />
 
           <label className="flex items-start gap-2.5 cursor-pointer group">
             <input
@@ -496,6 +487,7 @@ export default function StepPayment({ state, onChange }: Props) {
         </div>
       ))}
       {needsSpigot && !showAccessGate && <SpigotQuestion value={typeof state.hasWaterSpigot === 'boolean' ? state.hasWaterSpigot : null} onChange={(v) => onChange({ ...state, hasWaterSpigot: v })} />}
+      {needsSpigot && !showAccessGate && <OutletQuestion value={typeof state.hasElectricalOutlet === 'boolean' ? state.hasElectricalOutlet : null} onChange={(v) => onChange({ ...state, hasElectricalOutlet: v })} />}
       <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked}
         cleaningSize={typeof cleaningSize === 'number' ? cleaningSize : null} selectedAddons={state.addOns}
         onAddonsChange={keys => onChange({ ...state, addOns: keys, addonPrices: Object.fromEntries(Object.entries(liveQuotes).filter(([, q]) => q).map(([key, q]) => [key, (q?.cents ?? 0) / 100])) })} />

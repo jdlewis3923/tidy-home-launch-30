@@ -3,7 +3,7 @@
  * Mobile-first, bilingual through the shared t() layer, every load logged.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScopeSummary, ScopeAcceptChecks, allScopeChecked, checkboxText } from "@/components/scope/ServiceScope";
+import { ScopeSummary, ScopeAcceptChecks, SpigotQuestion, OutletQuestion, allScopeChecked, checkboxText } from "@/components/scope/ServiceScope";
 import { groupsFor, recordScopeAcceptance, type ScopeGroup } from "@/lib/serviceScope";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -186,8 +186,9 @@ export default function Founding() {
 
   const scopeGroups = useMemo(() => groupsFor(s.services), [s.services]);
   const [scopeChecked, setScopeChecked] = useState<Partial<Record<ScopeGroup, boolean>>>({});
+  const [outlet, setOutlet] = useState<boolean | null>(null);
   const [spigot, setSpigot] = useState<boolean | null>(null);
-  const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!s.services.includes("detailing") || spigot !== null);
+  const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!s.services.includes("detailing") || (spigot !== null && outlet !== null));
 
   async function reserve(e: React.FormEvent) {
     e.preventDefault();
@@ -205,7 +206,7 @@ export default function Founding() {
       heard_other: s.src || undefined, lang: language, src: s.src || undefined, session_id: sessionId(),
       gift_addons: s.gifts.slice(0, giftCount), website: honeypot.current?.value || "",
       lines: lines.flatMap((l) => l ? [{ service: l.service, size: l.size, cadence: l.service === "detailing" ? null : l.cadence, monthly: l.monthly, visits_per_month: l.visits }] : []),
-      quote: { total, visits, src: "founding", cleaning_range: s.cleaningRange, baths: s.baths, billing_period: s.yearly ? 'yearly' : 'monthly', frequencies: s.cadence, cleaningRange: s.cleaningRange, bathrooms: s.baths, homeSqFt: typeof s.cleaningRange === 'number' ? cleaningBand(s.cleaningRange)?.maxSqFt : null, lawnChoice: s.lawn === 1 ? 'small' : s.lawn === 2 ? 'standard' : s.lawn === 3 ? 'large' : 'over', vehicleClass: s.car === 1 ? 'sedan' : s.car === 2 ? 'suv' : 'truck' },
+      quote: { hasWaterSpigot: spigot, hasElectricalOutlet: outlet, total, visits, src: "founding", cleaning_range: s.cleaningRange, baths: s.baths, billing_period: s.yearly ? 'yearly' : 'monthly', frequencies: s.cadence, cleaningRange: s.cleaningRange, bathrooms: s.baths, homeSqFt: typeof s.cleaningRange === 'number' ? cleaningBand(s.cleaningRange)?.maxSqFt : null, lawnChoice: s.lawn === 1 ? 'small' : s.lawn === 2 ? 'standard' : s.lawn === 3 ? 'large' : 'over', vehicleClass: s.car === 1 ? 'sedan' : s.car === 2 ? 'suv' : 'truck' },
       cleaning_selected_size: s.cleaningRange === 'quote' ? 'custom' : s.cleaningRange ? String(s.cleaningRange) : undefined,
       cleaning_selected_range: typeof s.cleaningRange === 'number' ? cleaningBand(s.cleaningRange)?.range : s.cleaningRange === 'quote' ? 'Over 7,000 sq ft' : undefined,
       cleaning_bathrooms: s.baths ? Number(s.baths) : undefined,
@@ -493,13 +494,10 @@ export default function Founding() {
                   <span>{t("Text me about my reservation. Msg & data rates may apply. Reply STOP to opt out.")}</span>
                 </label>
                 {s.services.includes("detailing") && (
-                  <fieldset>
-                    <legend className="text-sm font-bold">{language === "es" ? "¿Hay una llave de agua exterior donde se estaciona el auto?" : "Outdoor spigot at the parking spot?"}</legend>
-                    <div className="mt-1 grid grid-cols-2 gap-2" role="radiogroup">
-                      {([true, false] as const).map((v) => <button key={String(v)} type="button" role="radio" aria-checked={spigot === v} className={`${chip} ${spigot === v ? on : off}`} onClick={() => setSpigot(v)}>{v ? (language === "es" ? "Sí" : "Yes") : "No"}</button>)}
-                    </div>
-                    {spigot === false && <p className="mt-1 text-xs text-ink-soft">{language === "es" ? "No hay problema: su Pro trae su propia agua. Nunca hay cargo extra." : "No problem — your Pro brings their own water. Never a fee."}</p>}
-                  </fieldset>
+                  <div className="space-y-3">
+                    <SpigotQuestion value={spigot} onChange={setSpigot} />
+                    <OutletQuestion value={outlet} onChange={setOutlet} />
+                  </div>
                 )}
                 <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} cleaningSize={typeof cleanSize === 'number' ? cleanSize : null} />
                 {err && <p role="alert" className="text-sm font-semibold text-destructive">{err}</p>}

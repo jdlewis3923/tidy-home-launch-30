@@ -4,16 +4,18 @@ import { Car, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "@/hooks/use-toast";
+import { SpigotQuestion } from '@/components/scope/ServiceScope';
+import { UTILITY_USE } from '@/lib/utility-use';
 import {Button} from '@/components/ui/button';
 
 type Profile = {
   vehicle_make: string; vehicle_model: string; vehicle_color: string; parking_spot: string;
-  interior_included: boolean; interior_access: string; gate_code: string; access_note: string; vehicle_plate:string; spigot_at_parking:boolean;
+  interior_included: boolean; interior_access: string; gate_code: string; access_note: string; vehicle_plate:string; spigot_at_parking:boolean | null;
 };
-const EMPTY: Profile = { vehicle_make: "", vehicle_model: "", vehicle_color: "", parking_spot: "", interior_included: false, interior_access: "", gate_code: "", access_note: "", vehicle_plate:'',spigot_at_parking:false };
+const EMPTY: Profile = { vehicle_make: "", vehicle_model: "", vehicle_color: "", parking_spot: "", interior_included: false, interior_access: "", gate_code: "", access_note: "", vehicle_plate:'',spigot_at_parking:null };
 
 export default function CarWashDetails() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [sub, setSub] = useState<{ id: string; user_id: string } | null>(null);
   const [p, setP] = useState<Profile>(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -38,6 +40,7 @@ export default function CarWashDetails() {
   if (!sub) return null;
 
   const save = async () => {
+    if (typeof p.spigot_at_parking !== "boolean") return;
     setSaving(true);
     const {gate_code,...details}=p;
     const {error:gateError}=await supabase.rpc('set_my_gate_code',{_code:gate_code||null});
@@ -72,8 +75,11 @@ export default function CarWashDetails() {
       </label>
       {p.interior_included && <div className="mt-3">{field("interior_access", "How the Pro gets into the car")}</div>}
       <div className="mt-3">{field("access_note", "Any other access note")}</div>
-      <label className="mt-3 flex items-center gap-2 text-sm text-ink"><input type="checkbox" checked={p.spigot_at_parking} onChange={e=>setP({...p,spigot_at_parking:e.target.checked})}/>{t('Spigot at parking')}</label>
-      <Button type="button" onClick={save} disabled={saving} className="mt-4">
+      <div className="mt-3 space-y-3">
+        <SpigotQuestion value={p.spigot_at_parking} onChange={v => setP({ ...p, spigot_at_parking: v })} />
+        <p className="text-xs text-ink-soft">{UTILITY_USE[language === 'es' ? 'es' : 'en'].conditions[0]}</p>
+      </div>
+      <Button type="button" onClick={save} disabled={saving || p.spigot_at_parking === null} className="mt-4">
         {saving && <Loader2 className="h-4 w-4 animate-spin" />} {t("Save car details")}
       </Button>
     </section>

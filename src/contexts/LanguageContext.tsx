@@ -3,7 +3,7 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 type Language = "en" | "es";
 
 const translations: Record<string, string> = {
-  'Home info':'Mi hogar', 'License plate':'Placa', 'Spigot at parking':'Grifo junto al estacionamiento',
+  'Home info':'Mi hogar', 'License plate':'Placa',
   "House Cleaning + Deep Clean Add-On | Pinecrest & Kendall | Tidy": "Limpieza del hogar + Limpieza profunda adicional | Pinecrest y Kendall | Tidy",
   "Recurring house cleaning in Pinecrest and Kendall with a size-priced deep clean add-on for members. Weekly plans include a quarterly deep clean. No one-time cleans without a plan.": "Limpieza recurrente en Pinecrest y Kendall con limpieza profunda adicional para miembros, según el tamaño del hogar. Los planes semanales incluyen limpieza profunda trimestral. No ofrecemos limpiezas únicas sin plan.",
   "Surface-safe on stone and hardwood": "Seguro para piedra y madera",
@@ -1516,10 +1516,6 @@ const translations: Record<string, string> = {
 
   // Before-payment access gate — StepPayment
   "Before we come out": "Antes de ir a tu casa",
-  "There's an outdoor water spigot I can reach from my driveway or parking spot":
-    "Hay una llave de agua exterior a la que puedo acceder desde mi entrada o estacionamiento",
-  "There's an outdoor electrical outlet available":
-    "Hay un tomacorriente exterior disponible",
   "Washing vehicles is allowed at this property (some HOAs and condo lots don't permit it)":
     "Lavar vehículos está permitido en esta propiedad (algunas HOA y condominios no lo permiten)",
   "If you're not sure about the last one, check with your HOA first — we can't wash where it isn't permitted, and we can't refund a trip we couldn't complete.":

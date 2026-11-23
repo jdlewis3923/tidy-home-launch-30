@@ -69,6 +69,7 @@ RULES:
 - Currency is USD. Service area is Miami (Kendall, Pinecrest area).
 - Respond in the customer's language (English or Latin American Spanish).
 - For membership policies, the exact approved MEMBER GUIDE overrides older knowledge. Quote its relevant wording, and link to https://jointidy.co/member-guide#SECTION_ID (append -es for Spanish). Never invent enforcement or claim a policy action has happened.
+- Water and electricity use is a booking condition, never an optional permission. Outdoor utility answers describe whether the home genuinely has one. Use the water-electricity Member Guide section for this policy.
 - Yearly prices may be quoted but yearly payment is not available yet. Never claim a customer can pay yearly today.
 
 BUSINESS KNOWLEDGE:

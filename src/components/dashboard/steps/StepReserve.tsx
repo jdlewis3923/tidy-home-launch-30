@@ -8,8 +8,9 @@ import { useLaunchConfig } from '@/hooks/useLaunchConfig';
 import { startsLine, RESERVATION_SERVICE_LABEL, RESERVABLE_SERVICES, type ReservableService } from '@/lib/launch';
 import FoundingCounter from '@/components/FoundingCounter';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
+import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, OutletQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
 import { groupsFor, recordScopeAcceptance, type ScopeGroup } from '@/lib/serviceScope';
+import { utilityAnswersComplete } from '@/lib/utility-use';
 import { cleaningBand } from '@/lib/pricing-canon';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Any day'];
@@ -45,7 +46,7 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
   const scopeGroups = groupsFor(services);
   const [scopeChecked, setScopeChecked] = useState<Partial<Record<ScopeGroup, boolean>>>({});
   const hasCar = services.includes('detailing' as ReservableService);
-  const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!hasCar || typeof state.hasWaterSpigot === 'boolean');
+  const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!hasCar || utilityAnswersComplete(state.hasWaterSpigot, state.hasElectricalOutlet));
 
   const submit = async () => {
     if (!ready || !scopeOk || busy) return;
@@ -137,6 +138,7 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
         </div>
       ))}
       {hasCar && <SpigotQuestion value={typeof state.hasWaterSpigot === 'boolean' ? state.hasWaterSpigot : null} onChange={(v) => set('hasWaterSpigot', v)} />}
+      {hasCar && <OutletQuestion value={typeof state.hasElectricalOutlet === 'boolean' ? state.hasElectricalOutlet : null} onChange={(v) => set('hasElectricalOutlet', v)} />}
       <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} />
       {err && <p className="text-sm text-destructive">{err}</p>}
       <RatingLine />

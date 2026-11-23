@@ -1,5 +1,9 @@
 # Roadmap
 
+## Water and electricity booking condition (Nov 23)
+- [x] Update shared EN/ES scope acknowledgments, factual utility questions, member details, guide/terms/FAQ/chat knowledge and Pro job notes.
+- [x] Verify EN/ES phone booking choices and guide/terms, 68 focused tests, current scope/knowledge readback; no texts, emails or publication.
+
 ## Phone paperwork review and alert cleanup (Nov 21)
 - [x] Build /admin/paperwork with private photo previews, Connecteam status/timestamps, honest fallbacks and per-document Tidy approvals; link the Command card.
 - [x] Audit the 87 open alerts, resolve duplicates/recovered/stale notices without deleting history, and make admin counts show only current actionable items.

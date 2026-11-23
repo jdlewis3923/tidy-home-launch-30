@@ -150,6 +150,18 @@ const FAQ = () => {
               {openItem === FREQUENCY_FAQ.q && <p className="px-5 pb-4 text-sm text-text-mid">{t(FREQUENCY_FAQ.a)}</p>}
             </div>
           </FadeIn>
+          <FadeIn>
+            <div className="bg-card border rounded-lg overflow-hidden">
+              <Button variant="ghost" onClick={() => setOpenItem(openItem === 'utilities' ? null : 'utilities')} aria-expanded={openItem === 'utilities'} className="w-full h-auto min-h-14 justify-between gap-3 px-5 py-4 text-left whitespace-normal">
+                <span>{language === 'es' ? '¿Mi Pro usará el agua y la electricidad de mi casa?' : "Will my Pro use my home's water and electricity?"}</span>
+                <ChevronDown className="h-4 w-4 shrink-0" />
+              </Button>
+              {openItem === 'utilities' && <div className="space-y-2 px-5 pb-4 text-sm text-text-mid">
+                {MEMBER_GUIDE.find(s => s.id === 'water-electricity')?.[language === 'es' ? 'es' : 'en'].items.map(item => <p key={item}>{item}</p>)}
+                <a className="text-primary underline" href={`/member-guide#water-electricity${language === 'es' ? '-es' : ''}`}>{language === 'es' ? 'Guía para miembros' : 'Member Guide'}</a>
+              </div>}
+            </div>
+          </FadeIn>
           {faqSections.map((section, si) => (
             <FadeIn key={section.title} delay={si * 100} direction="up">
               <div>
