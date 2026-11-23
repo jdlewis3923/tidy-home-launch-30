@@ -1,0 +1,2 @@
+- All booking agreements use ConsentCheckbox and ConsentContinue; keeping validation and accessible interaction together prevents one checkout path from bypassing consent.
+- Service content comes from useServiceScope; keep the existing read-through gate and optional SMS opt-in separate from required booking agreements.

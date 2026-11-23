@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { ConsentCheckbox } from './ConsentCheckbox';
+import { bookingTermsWording } from '@/lib/booking-consent';
 import { Switch } from '@/components/ui/switch';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAddonCatalog } from '@/hooks/useAddonCatalog';
@@ -71,7 +72,7 @@ function ReviewCard({ group, checked, onCheck, cleaningSize, selectedAddons = []
       </>}
     </div>
     {!unlocked && <p className="mt-3 text-xs text-muted-foreground">{es ? 'Desplázate para leer todo y continuar.' : 'Scroll to read everything to continue.'}</p>}
-    <label className="mt-4 flex min-h-11 items-start gap-3 text-sm text-foreground"><Checkbox className="mt-1 shrink-0" disabled={!unlocked || scope.isError} checked={checked} onCheckedChange={v => onCheck(v === true)} /><span>{checkboxText(group, language)}</span></label>
+    <div className="mt-4"><ConsentCheckbox disabled={!unlocked || scope.isError} checked={checked} onCheckedChange={onCheck}>{checkboxText(group, language)}</ConsentCheckbox></div>
   </article>;
 }
 export default function BeforeYouBook({ groups, checked, onChange, ...props }: ReviewProps) {
@@ -83,6 +84,7 @@ export default function BeforeYouBook({ groups, checked, onChange, ...props }: R
   return <section className="space-y-4" data-before-you-book>
     <h2 className="text-xl font-bold text-foreground">{es ? 'Antes de reservar' : 'Before you book'}</h2>
     {groups.map(g => <ReviewCard key={g} group={g} checked={serviceChecks[g] === true} onCheck={v => { const next = { ...serviceChecks, [g]: v }; setServiceChecks(next); commit(next, terms); }} {...props} />)}
-    <label className="flex min-h-11 items-start gap-3 text-sm text-foreground"><Checkbox className="mt-1 shrink-0" checked={terms} onCheckedChange={v => { setTerms(v === true); commit(serviceChecks, v === true); }} /><span>{es ? 'Acepto los ' : 'I agree to the '}<a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">{es ? 'Términos de Servicio de Tidy.' : 'Tidy Terms of Service.'}</a></span></label>
+    <ConsentCheckbox checked={terms} onCheckedChange={v => { setTerms(v); commit(serviceChecks, v); }}>{bookingTermsWording(language)}</ConsentCheckbox>
+    <p className="flex flex-wrap gap-4 text-sm"><a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">{es ? 'Términos de Servicio' : 'Terms of Service'}</a><a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary underline">{es ? 'Política de Privacidad' : 'Privacy Policy'}</a></p>
   </section>;
 }

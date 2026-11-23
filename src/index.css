@@ -36,6 +36,8 @@
 
     --radius: 0.5rem;
 
+    --booking-navy: 214.468 68.116% 13.529%;
+    --booking-yellow: 46.968326% 91.701245% 52.745098%;
     --navy: 222 47% 11%;
     --service-hero-overlay: 206.667 100% 17.647%;
     --service-hero-neutral-overlay: 0 0% 0%;
@@ -2072,3 +2074,16 @@ body { color-scheme: light; }
   .founding-choice-check { width: 16px; height: 16px; }
   .founding-continue { font-size: 18px; min-height: 56px; }
 }
+
+/* Booking agreement controls: shared, deliberate and independent of page themes. */
+.booking-consent-label { display:flex; gap:12px; align-items:flex-start; min-height:44px; padding:10px 0; cursor:pointer; font-size:14px; line-height:1.55; letter-spacing:0; color:hsl(var(--foreground)); }
+.booking-consent .booking-consent-box { width:28px; height:28px; flex:none; border:2px solid hsl(var(--booking-navy)); border-radius:6px; background:hsl(var(--booking-navy)); color:hsl(var(--booking-yellow)); box-shadow:none; }
+.booking-consent .booking-consent-box[data-state=checked] { background:hsl(var(--booking-navy)); color:hsl(var(--booking-yellow)); }
+.booking-consent .booking-consent-box:focus-visible { outline:3px solid hsl(var(--booking-yellow)); outline-offset:3px; }
+.booking-consent .booking-consent-box svg { width:21px; height:21px; stroke-width:3; }
+.booking-consent-error { margin:0 0 8px 40px; font-size:13px; line-height:1.5; color:hsl(var(--destructive)); }
+.booking-utility-segments { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; padding:4px; border-radius:8px; background:hsl(var(--muted)); border:1px solid hsl(var(--border)); }
+.booking-utility-segments button { min-height:48px; border:0; border-radius:6px; background:transparent; color:hsl(var(--foreground)); letter-spacing:0; }
+.booking-utility-segments button[aria-checked=true] { background:hsl(var(--booking-navy)); color:hsl(var(--booking-yellow)); }
+.booking-submit { width:100%; min-height:52px; height:auto; padding:16px 24px; border-radius:8px; background:hsl(var(--booking-navy)); color:hsl(var(--primary-foreground)); white-space:normal; letter-spacing:0; }
+.booking-submit:hover { background:hsl(var(--booking-navy)); }

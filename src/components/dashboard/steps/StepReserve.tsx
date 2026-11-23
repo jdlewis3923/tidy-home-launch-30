@@ -11,6 +11,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, OutletQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
 import { groupsFor, recordScopeAcceptance, type ScopeGroup } from '@/lib/serviceScope';
 import { utilityAnswersComplete } from '@/lib/utility-use';
+import { ConsentCheckbox, ConsentContinue } from '@/components/scope/ConsentCheckbox';
+import { Button } from '@/components/ui/button';
+import { validateBookingConsents } from '@/lib/booking-consent';
 import { cleaningBand } from '@/lib/pricing-canon';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Any day'];
@@ -49,7 +52,8 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
   const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!hasCar || utilityAnswersComplete(state.hasWaterSpigot, state.hasElectricalOutlet));
 
   const submit = async () => {
-    if (!ready || !scopeOk || busy) return;
+    if (!scopeOk) { validateBookingConsents(); return; }
+    if (!ready || busy) return;
     setBusy(true); setErr(null);
     const acc = await recordScopeAcceptance({
       groups: scopeGroups, email: state.email.trim(), language: language === 'es' ? 'es' : 'en', surface: 'quote',
@@ -127,10 +131,9 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
         {heard === 'other' && <input className={input} placeholder={t('Tell us where')} value={heardOther} onChange={(e) => setHeardOther(e.target.value)} />}
       </div>
 
-      <label className="flex items-start gap-2 text-[11px] text-ink-faint">
-        <input type="checkbox" className="mt-0.5" checked={state.smsConsent} onChange={(e) => set('smsConsent', e.target.checked)} />
-        <span>{t('Text me my reservation confirmation and schedule updates from Tidy Home Concierge. Msg & data rates may apply. Reply STOP to opt out.')}</span>
-      </label>
+      <ConsentCheckbox required={false} checked={state.smsConsent === true} onCheckedChange={v => set('smsConsent', v)}>
+        {t('Text me my reservation confirmation and schedule updates from Tidy Home Concierge. Msg & data rates may apply. Reply STOP to opt out.')}
+      </ConsentCheckbox>
 
       {scopeGroups.map((g) => (
         <div key={g} className="rounded-2xl border border-hairline bg-white p-4">
@@ -142,11 +145,11 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
       <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} />
       {err && <p className="text-sm text-destructive">{err}</p>}
       <RatingLine />
-      <button type="button" onClick={submit} disabled={!ready || !scopeOk || busy} data-testid="reserve-submit"
-        style={{ backgroundColor: 'hsl(var(--ink))', color: '#ffffff' }}
-        className="w-full rounded-xl px-7 py-4 text-sm font-semibold shadow-[0_12px_32px_-10px_hsl(var(--ink)/0.55)] disabled:opacity-40">
-        {busy ? t('Reserving…') : t('Reserve your spot')}
-      </button>
+      <ConsentContinue disabled={!scopeOk}>
+        <Button type="button" onClick={submit} disabled={!ready || !scopeOk || busy} data-testid="reserve-submit" className="booking-submit">
+          {busy ? t('Reserving…') : t('Reserve your spot')}
+        </Button>
+      </ConsentContinue>
     </div>
   );
 }

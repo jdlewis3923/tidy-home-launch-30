@@ -19,6 +19,14 @@
 
  */
 import { ZIP_NEIGHBORHOODS } from "@/lib/neighborhoods";
+import { ADDON_CATALOG, type Addon } from '@/lib/addon-catalog';
+
+/** Caption examples are filtered through the real gift cap, never a handpicked paid extra. */
+export function socialGiftExamples(catalog: Addon[] = ADDON_CATALOG) {
+  const choices = ['inside_fridge_clean', 'inside_oven_clean', 'leaf_debris_cleanup', 'pet_hair_removal'];
+  return catalog.filter(addon => choices.includes(addon.key) && addon.giftEligible && addon.price <= 55);
+}
+const giftNamesEs: Record<string, string> = { inside_fridge_clean: 'Interior del refrigerador', inside_oven_clean: 'Interior del horno', leaf_debris_cleanup: 'Limpieza de hojas y residuos', pet_hair_removal: 'Retiro de pelo de mascota' };
 
 export type SocialChannel = "nextdoor" | "meta_combined" | "instagram" | "facebook";
 
@@ -233,8 +241,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 3,
     title: "Lawn from $45 a month",
     zip: "33186",
-    en: `Lawn care from $45 a month.\n\nMow, edge, trim, blow down. Clippings gone.`,
-    es: `Cuidado de grama desde $45 al mes.\n\nCortar, bordear, recortar y soplar. Sin recortes en el piso.`,
+    en: `Lawn care from $45 a month.\n\nMow, edge, trim, blow down. Hard surfaces blown clear; clippings mulched back into the lawn.`,
+    es: `Cuidado de grama desde $45 al mes.\n\nCortar, bordear, recortar y soplar. Superficies duras despejadas; la grama cortada se tritura y queda en el césped.`,
   },
   {
     post_number: 4,
@@ -437,8 +445,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 32,
     title: "Lawn care from $45 a month",
     zip: "33186",
-    en: `Lawn care in ${N["33186"]}, from $45 a month.\n\nMow, edge, trim and blow down — clippings hauled off, gate closed behind us.\n\nAdd it to cleaning or car care and it's all one plan, one bill.`,
-    es: `Cuidado de grama en ${N["33186"]}, desde $45 al mes.\n\nCortamos, bordeamos, recortamos y soplamos — nos llevamos los recortes y cerramos el portón al salir.\n\nCombínalo con limpieza o cuidado del carro: un solo plan, una sola factura.`,
+    en: `Lawn care in ${N["33186"]}, from $45 a month.\n\nMow, edge, trim and blow down — hard surfaces blown clear, clippings mulched back into the lawn, every used gate closed and latched.\n\nAdd it to cleaning or car care and it's all one plan, one bill.`,
+    es: `Cuidado de grama en ${N["33186"]}, desde $45 al mes.\n\nCortamos, bordeamos, recortamos y soplamos — despejamos las superficies duras, trituramos la grama cortada y la dejamos en el césped, y cerramos y aseguramos cada portón usado.\n\nCombínalo con limpieza o cuidado del carro: un solo plan, una sola factura.`,
   },
   {
     post_number: 33,
@@ -451,8 +459,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 34,
     title: "One free premium add-on",
     zip: "33183",
-    en: `Founding neighbors get one free premium add-on on the first visit — you pick it.\n\nInside-the-fridge, oven, bed edge reset, clay bar. Your choice, no charge, no conditions.`,
-    es: `Los vecinos fundadores reciben un servicio premium gratis en la primera visita — tú lo eliges.\n\nInterior del refrigerador, horno, reinicio de bordes de jardineras, clay bar. Tú decides, sin costo y sin condiciones.`,
+    en: `Founding neighbors get one free premium add-on on the first visit — you pick it.\n\n${socialGiftExamples().map(addon => addon.name).join(', ')}. Your choice, no charge, no conditions.`,
+    es: `Los vecinos fundadores reciben un servicio premium gratis en la primera visita — tú lo eliges.\n\n${socialGiftExamples().map(addon => giftNamesEs[addon.key]).join(', ')}. Tú decides, sin costo y sin condiciones.`,
   },
   {
     post_number: 35,

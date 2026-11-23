@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadLaunchConfig } from "../_shared/launch-config.ts";
 import { CAR_OPENS_LINE, fmtLaunchDate } from "../_shared/launch.ts";
 import { vendorFetch } from '../_shared/http.ts';
+import { loadServiceScopeKnowledge } from '../_shared/service-scope-knowledge.ts';
 import { MEMBER_GUIDE } from '../_shared/member-guide.ts';
 
 const corsHeaders = {
@@ -43,7 +44,8 @@ Deno.serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
-    const knowledge = kbRow?.content?.trim() || FALLBACK_KNOWLEDGE;
+    const scopeKnowledge = await loadServiceScopeKnowledge(supabase);
+  const knowledge = kbRow?.content?.trim() || FALLBACK_KNOWLEDGE;
 
     // Launch dates come live from launch_config, so the chatbot can never quote a stale date.
     let launchFacts = "";
@@ -74,6 +76,8 @@ RULES:
 
 BUSINESS KNOWLEDGE:
 ${knowledge}${launchFacts}
+
+${scopeKnowledge}
 
 MEMBER GUIDE (authoritative English and Spanish):
 ${JSON.stringify(MEMBER_GUIDE)}`;

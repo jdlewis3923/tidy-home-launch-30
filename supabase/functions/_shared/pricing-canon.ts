@@ -634,46 +634,67 @@ export const VEHICLE_CLASS_LABELS: Record<VehicleClass, string> = {
 export const LAWN_GUESS_NOTE = LAWN_GRASS_ONLY_NOTE;
 
 // ---------------------------------------------------------------------------
-// What every visit includes. Published on the pricing page and in the FAQ.
+// Compatibility exports generated from active public.service_scope; live views fetch scope rows.
+// Keep these in sync with service-scope parity tests; never author a second scope here.
 // ---------------------------------------------------------------------------
 
 export const CLEANING_INCLUDED = [
-  'kitchen surfaces and appliance exteriors',
-  'all bathrooms',
-  'floors vacuumed and mopped',
-  'dusting of reachable surfaces',
-  'beds made',
-  'trash out',
+  "Kitchen: counters and backsplash wiped, sink and faucet cleaned and shined, stovetop cleaned, outside of fridge, oven, dishwasher and microwave wiped, inside of microwave wiped, cabinet fronts spot-wiped, table and chairs wiped, floor vacuumed and mopped, trash taken out.",
+  "Bathrooms: toilet inside and out, tub and shower, sink, vanity and counters, mirrors, fixtures shined, floor vacuumed and mopped, trash emptied.",
+  "Every room: dusting of surfaces you can reach standing (no ladders over two steps), light switches and door handles wiped, carpets and rugs vacuumed, hard floors vacuumed and mopped, beds made (linens changed only if a fresh set is left on the bed), trash emptied."
 ];
 
 export const CLEANING_PAID_ADDONS = [
-  'inside oven',
-  'inside fridge',
-  'interior windows',
+  "Deep baseboards (hand-scrubbed)",
+  "Blinds",
+  "Ceiling fans and light fixtures",
+  "Walls and doors (spot-cleaned)",
+  "Inside oven",
+  "Inside fridge",
+  "Inside Oven Clean $45",
+  "Inside Fridge Clean $35",
+  "Interior Windows $55",
+  "Deep Baseboard Scrub $35",
+  "Inside Kitchen Cabinets $50",
+  "Blinds $55",
+  "Fans/Fixtures $45",
+  "Wall/Door Wipe $45",
+  "Patio/Lanai $55",
+  "Linen Change $25",
+  "Garage $65",
+  "Organization $75 per area"
 ];
 
-export const LAWN_INCLUDED = ['mow', 'edge', 'line-trim', 'blow clear of hard surfaces'];
+export const LAWN_INCLUDED = [
+  "Mow all turf on the property, front and back, at a consistent height",
+  "Edge driveways, walkways and curbs",
+  "Line-trim around fences, posts, trees, beds and A/C pads",
+  "Blow clippings off every hard surface",
+  "Pick up small debris by hand before mowing (sticks, litter)",
+  "Clippings are mulched back into the lawn — not bagged or hauled",
+  "Close and latch every gate used"
+];
 
 export const SHINE_MAINTENANCE_WASH = [
-  'hand wash',
-  'wheels',
-  'tires',
-  'tire shine',
-  'spot-free dry',
-  'all glass in and out',
-  'full interior vacuum',
-  'dash',
-  'console',
-  'door panels',
+  "Hand wash and hand dry",
+  "Wheel faces and tires cleaned, tires dressed",
+  "Door jambs wiped",
+  "Exterior glass and mirrors",
+  "Floor mats taken out, shaken out and vacuumed",
+  "Seats, carpets and floors vacuumed (between and under seats where reachable)",
+  "Dashboard, steering wheel, console, cupholders and door panels wiped down",
+  "Interior glass and mirrors",
+  "Loose trash removed (wrappers, cups, receipts)",
+  "Cargo area vacuumed only if it's empty"
 ];
 
 export const SHINE_FULL_DETAIL = [
-  'clay bar decontamination',
-  'machine-applied paint sealant',
-  'interior shampoo and extraction',
-  'leather deep clean and condition',
-  'engine bay',
-  'trim restoration',
+  "Carpets and mats shampooed and extracted",
+  "Cloth seats extracted / leather seats cleaned",
+  "Vents, crevices, seams and trim cleaned",
+  "Wheel wells cleaned",
+  "Spray wax on the paint",
+  "Cargo area vacuumed if it's empty"
 ];
 
 export const SHINE_SUMMARY = '3 maintenance washes every month plus 2 full details every year';

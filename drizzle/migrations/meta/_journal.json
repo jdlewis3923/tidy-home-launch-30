@@ -2185,6 +2185,13 @@
       "when": 1795271984531,
       "tag": "0311_pro_document_reviews",
       "breakpoints": true
+    },
+    {
+      "idx": 312,
+      "version": "7",
+      "when": 1795395534761,
+      "tag": "0312_scope_derived_pro_checks_and_car_contract_draft",
+      "breakpoints": true
     }
   ]
 }

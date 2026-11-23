@@ -10,6 +10,8 @@ import FadeIn from "./FadeIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CUSTOMER_DASHBOARD_ENABLED } from "@/lib/dashboard-config";
 import { useServiceGates, type GateService } from "@/hooks/useServiceGates";
+import { ScopeSummary } from "@/components/scope/ServiceScope";
+import { useServiceScope, txt, type ScopeGroup } from "@/lib/serviceScope";
 import WaitlistCapture from "@/components/dashboard/WaitlistCapture";
 
 const services = [
@@ -24,7 +26,6 @@ const services = [
     priceMain: "From $139 a month",
     priceSub: "Biweekly from $256/mo",
     description: "Consistent interior care for a home that always feels reset. Handled on your schedule without lifting a finger.",
-    checks: ["Kitchen & bathroom deep clean", "Floors vacuumed & mopped", "Dusting all surfaces & fixtures", "Trash removal & liner replacement"],
     excludes: ["Deep carpet shampooing", "Window exterior washing", "Garage or attic cleaning"],
     addOns: "Inside oven, inside fridge, interior windows",
     accent: "border-t-primary",
@@ -40,7 +41,6 @@ const services = [
     priceMain: "From $45 a month",
     priceSub: "Biweekly from $82/mo",
     description: "Professional lawn maintenance to keep your Miami home's exterior sharp year-round. No scheduling required, ever.",
-    checks: ["Mowing to standard height", "Edging along walkways & beds", "Debris blowing & full cleanup", "Weekly or biweekly cadence"],
     excludes: ["Tree trimming or removal", "Irrigation system repair", "Landscape design or planting"],
     addOns: "Weed removal, leaf & debris cleanup, bed edge reset",
     accent: "border-t-success",
@@ -56,15 +56,15 @@ const services = [
     priceMain: "From $149/mo",
     priceSub: "3 washes a month + 2 full details a year",
     description: "Driveway-ready detailing at your door. We come to you — exterior wash, interior vacuum, surface cleaning.",
-    checks: ["Exterior hand wash & wheels", "Interior vacuum & floor mats", "Dashboard & surface wipe-down", "3 maintenance washes every month"],
-    excludes: ["Paint correction", "Paint sealant machine application"],
+    excludes: ["Paint correction", "Engine bay"],
     addOns: "Pet hair removal, interior protect & condition, clay bar & ceramic coat",
     accent: "border-t-violet-500",
   },
 ];
 
 const Services = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { data: scopeRows = [] } = useServiceScope();
   const { live } = useServiceGates();
   return (
     <section id="services" className="bg-background py-20 px-4">
@@ -111,24 +111,17 @@ const Services = () => {
                 {CUSTOMER_DASHBOARD_ENABLED ? (
                   <p className="text-xs font-semibold text-foreground/60 uppercase tracking-wide mb-2">{t("Included")}</p>
                 ) : null}
-                <ul className="space-y-1.5 mb-4">
-                  {s.checks.map((c) => (
-                    <li key={c} className="flex items-start gap-2 text-sm text-foreground/80">
-                      <Check className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
-                      {t(c)}
-                    </li>
-                  ))}
-                </ul>
+                <div className="mb-4"><ScopeSummary compact group={(s.gate === 'car_care' ? 'car_care' : s.gate) as ScopeGroup} /></div>
 
                 {/* Not Included & Add-ons - only when dashboard ON */}
                 {CUSTOMER_DASHBOARD_ENABLED && (
                   <>
                     <p className="text-xs font-semibold text-foreground/60 uppercase tracking-wide mb-2">{t("Not Included")}</p>
                     <ul className="space-y-1.5 mb-4">
-                      {s.excludes.map((c) => (
+                      {(s.gate === 'car_care' ? s.excludes.map(c => t(c)) : scopeRows.filter(row => row.service === s.gate && row.section === 'not_included').slice(0, 3).map(row => txt(row, language))).map((c) => (
                         <li key={c} className="flex items-start gap-2 text-xs text-muted-foreground">
                           <XIcon className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
-                          {t(c)}
+                          {c}
                         </li>
                       ))}
                     </ul>

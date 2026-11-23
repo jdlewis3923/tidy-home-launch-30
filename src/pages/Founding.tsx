@@ -4,6 +4,8 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScopeSummary, ScopeAcceptChecks, SpigotQuestion, OutletQuestion, allScopeChecked, checkboxText } from "@/components/scope/ServiceScope";
+import { ConsentCheckbox, ConsentContinue } from "@/components/scope/ConsentCheckbox";
+import { validateBookingConsents } from "@/lib/booking-consent";
 import { groupsFor, recordScopeAcceptance, type ScopeGroup } from "@/lib/serviceScope";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -192,7 +194,8 @@ export default function Founding() {
 
   async function reserve(e: React.FormEvent) {
     e.preventDefault();
-    if (!formOk || !scopeOk || busy) return;
+    if (!scopeOk) { validateBookingConsents(); return; }
+    if (!formOk || busy) return;
     setBusy(true); setErr("");
     const acc = await recordScopeAcceptance({
       groups: scopeGroups, email: s.email, language: language === "es" ? "es" : "en", surface: "founding",
@@ -489,10 +492,9 @@ export default function Founding() {
                   {(["morning", "afternoon"] as const).map((v) => <button key={v} type="button" role="radio" aria-checked={s.time === v} className={`${chip} ${s.time === v ? on : off}`} onClick={() => set({ time: v })}>{v === "morning" ? t("Mornings") : t("Afternoons")}</button>)}
                 </div>
                 <p className="text-xs text-ink-faint">{t("Mon–Sat, 8:00 AM – 6:00 PM ET.")}</p>
-                <label className="flex min-h-[44px] items-start gap-2 text-xs">
-                  <input type="checkbox" className="mt-1 h-5 w-5" checked={s.sms} onChange={(e) => set({ sms: e.target.checked })} />
-                  <span>{t("Text me about my reservation. Msg & data rates may apply. Reply STOP to opt out.")}</span>
-                </label>
+                <ConsentCheckbox required={false} checked={s.sms} onCheckedChange={v => set({ sms: v })}>
+                  {t("Text me about my reservation. Msg & data rates may apply. Reply STOP to opt out.")}
+                </ConsentCheckbox>
                 {s.services.includes("detailing") && (
                   <div className="space-y-3">
                     <SpigotQuestion value={spigot} onChange={setSpigot} />
@@ -502,7 +504,7 @@ export default function Founding() {
                 <ScopeAcceptChecks groups={scopeGroups} checked={scopeChecked} onChange={setScopeChecked} cleaningSize={typeof cleanSize === 'number' ? cleanSize : null} />
                 {err && <p role="alert" className="text-sm font-semibold text-destructive">{err}</p>}
                 <p className="founding-reserve-launch">{startsLine(launchCfg, lang, s.services, 'long', true)}. {t("No charge today — we'll confirm your day and your Pro the week before, and set up payment then.")}</p>
-                <button className={primaryBtn} disabled={!formOk || !scopeOk || busy}>{busy ? t("Saving…") : t("Reserve my spot — no charge")}</button>
+                <ConsentContinue disabled={!scopeOk}><Button type="submit" className="booking-submit" disabled={!formOk || !scopeOk || busy}>{busy ? t("Saving…") : t("Reserve my spot — no charge")}</Button></ConsentContinue>
                 <p className="text-center text-xs text-ink-faint">{t("By reserving you agree to our")} <Link to="/terms" className="underline">{t("Terms")}</Link> {t("and")} <Link to="/privacy" className="underline">{t("Privacy Policy")}</Link>.</p>
                 <button type="button" className={`${chip} ${off} w-full`} onClick={() => go("price")}>← {t("Back to my price")}</button>
               </form>

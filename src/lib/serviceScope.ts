@@ -131,3 +131,13 @@ export function checkboxText(group: ScopeGroup, lang: string) {
   if (group === 'cleaning') return L(lang, `I've read what's included and not included in ${name}, and I understand my Pro will use my home's water and electricity during each visit.`, `Leí lo que incluye y no incluye ${name}, y entiendo que mi Pro usará el agua y la electricidad de mi casa durante cada visita.`);
   return L(lang, `I've read what's included and not included in ${name}.`, `Leí lo que incluye y no incluye ${name}.`);
 }
+
+/** Matches the server's service_scope-derived required work; safety/exit remain separate. */
+export function scopeChecklistItems(rows: ScopeRow[], service: string, kind: string | null) {
+  const services: ScopeService[] = service === 'cleaning'
+    ? kind === 'quarterly_deep_clean' ? ['cleaning', 'cleaning_deep_clean'] : ['cleaning']
+    : service === 'lawn' ? ['lawn'] : kind === 'full_detail' ? ['car_wash', 'car_detail'] : ['car_wash'];
+  return rows.filter(row => row.active && row.section === 'included' && services.includes(row.service))
+    .sort((a, b) => a.service.localeCompare(b.service) || a.sort_order - b.sort_order)
+    .map(row => ({ key: `scope:${row.service}:${row.sort_order}`, en: row.text_en, es: row.text_es }));
+}

@@ -128,33 +128,6 @@ export function ScopeAcceptChecks(props: ReviewProps) {
   return <BeforeYouBook {...props} />;
 }
 
-function LegacyScopeAcceptChecks({ groups, checked, onChange }: ReviewProps) {
-  const { language } = useLanguage();
-  const [rulesOpen, setRulesOpen] = useState(false);
-  const isMobile = useIsMobile();
-  if (!groups.length) return null;
-  return (
-    <div className="space-y-2.5 rounded-xl border-2 border-border bg-card p-3" data-scope-accept>
-      {groups.map((g) => (
-        <label key={g} className="flex min-h-[44px] cursor-pointer items-start gap-2.5">
-          <input type="checkbox" className="mt-1 h-5 w-5 flex-shrink-0 accent-primary" checked={!!checked[g]}
-            onChange={(e) => onChange({ ...checked, [g]: e.target.checked })} aria-label={checkboxText(g, language)} />
-          <span className="text-[13px] leading-snug text-ink">{checkboxText(g, language)}</span>
-        </label>
-      ))}
-      <button type="button" onClick={() => setRulesOpen(true)} className="min-h-[44px] text-left text-[13px] font-semibold text-primary underline underline-offset-4">
-        {L(language, "How visits work: size checks, no access, redos and damage", "Así funcionan las visitas: tamaño, sin acceso, regresos y daños")}
-      </button>
-      <Sheet open={rulesOpen} onOpenChange={setRulesOpen}>
-        <SheetContent side={isMobile ? "bottom" : "right"} className={`founding-landing overflow-y-auto bg-background text-ink ${isMobile ? "max-h-[88vh] rounded-t-2xl" : "w-full sm:max-w-2xl"}`}>
-          <SheetHeader className="mb-4 text-left"><SheetTitle className="text-xl font-extrabold text-ink">{L(language, "How visits work", "Así funcionan las visitas")}</SheetTitle></SheetHeader>
-          <VisitRulesList />
-        </SheetContent>
-      </Sheet>
-    </div>
-  );
-}
-
 export function VisitRulesList() {
   const { language } = useLanguage();
   return (
@@ -178,10 +151,10 @@ export function UtilityQuestion({ kind, value, onChange }: { kind: 'water' | 'ou
     <fieldset className="rounded-lg border-2 border-border bg-card p-3">
       <legend className="px-1 text-sm font-bold text-ink">{question}</legend>
       <p className="mt-1 text-xs text-ink-soft">{kind === "water" ? copy.waterHelp : copy.help}</p>
-      <div className="mt-2 grid grid-cols-2 gap-2" role="radiogroup" aria-label={question}>
+      <div className="booking-utility-segments mt-2" role="radiogroup" aria-label={question}>
         {([true, false] as const).map((v) => (
           <Button key={String(v)} type="button" variant="outline" role="radio" aria-checked={value === v} onClick={() => onChange(v)}
-            className={`min-h-[44px] border-2 ${value === v ? "border-primary bg-primary/10 text-ink" : "border-border bg-card text-ink"}`}>
+            className="font-semibold">
             {v ? L(language, "Yes", "Sí") : "No"}
           </Button>
         ))}

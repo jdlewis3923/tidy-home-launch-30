@@ -32,14 +32,12 @@ import { getUtmAttribution } from '@/lib/utm';
 import { ScopeAcceptChecks, ScopeSummary, SpigotQuestion, OutletQuestion, allScopeChecked, checkboxText } from '@/components/scope/ServiceScope';
 import { groupsFor, recordScopeAcceptance, type ScopeGroup } from '@/lib/serviceScope';
 import { utilityAnswersComplete } from '@/lib/utility-use';
+import { Button } from '@/components/ui/button';
+import { ConsentCheckbox, ConsentContinue } from '@/components/scope/ConsentCheckbox';
+import { bookingTermsWording, requiredBookingConsentsComplete, validateBookingConsents } from '@/lib/booking-consent';
 import { MEMBER_GUIDE_VERSION } from '@/lib/memberGuide';
 import { useAddonCatalog } from '@/hooks/useAddonCatalog';
 import { addonQuote } from '@/lib/deep-clean';
-
-// The exact Terms wording shown next to the pay button. It is both rendered and
-// stored with the recorded consent, so change them together.
-const CHECKOUT_TERMS_WORDING =
-  "By subscribing, you agree to Tidy's Terms of Service and Privacy Policy.";
 
 interface Props {
   state: ConfigState;
@@ -109,6 +107,7 @@ export default function StepPayment({ state, onChange }: Props) {
   const needsSpigot = scopeGroups.some((g) => g === 'car_care' || g === 'car_wash_addon');
   const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!needsSpigot || utilityAnswersComplete(state.hasWaterSpigot, state.hasElectricalOutlet));
 
+  const bookingConfirmed = requiredBookingConsentsComplete([scopeOk, guideChecked, !showAccessGate || state.washingAllowed === true]);
   const embedded = isEmbeddedCheckoutAvailable();
   const stripePromise = useMemo(() => (embedded ? getStripe() : null), [embedded]);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -151,7 +150,8 @@ export default function StepPayment({ state, onChange }: Props) {
   };
 
   const handlePay = async () => {
-    if (customQuote || prepaidPending || submitting || !scopeOk || !guideChecked) return;
+    if (!bookingConfirmed) { validateBookingConsents(); return; }
+    if (customQuote || prepaidPending || submitting) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -185,7 +185,7 @@ export default function StepPayment({ state, onChange }: Props) {
           recordConsentWithRetry({
             kind: 'terms',
             version: TERMS_VERSION,
-            wording: CHECKOUT_TERMS_WORDING,
+            wording: bookingTermsWording(language),
             granted: true,
             email: state.email || undefined,
           }),
@@ -403,17 +403,9 @@ export default function StepPayment({ state, onChange }: Props) {
 
           <OutletQuestion value={typeof state.hasElectricalOutlet === 'boolean' ? state.hasElectricalOutlet : null} onChange={(v) => onChange({ ...state, hasElectricalOutlet: v })} />
 
-          <label className="flex items-start gap-2.5 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={state.washingAllowed === true}
-              onChange={(e) => onChange({ ...state, washingAllowed: e.target.checked })}
-              className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
-            />
-            <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
-              {t("Washing vehicles is allowed at this property (some HOAs and condo lots don't permit it)")}
-            </span>
-          </label>
+          <ConsentCheckbox checked={state.washingAllowed === true} onCheckedChange={v => onChange({ ...state, washingAllowed: v })}>
+            {t("Washing vehicles is allowed at this property (some HOAs and condo lots don't permit it)")}
+          </ConsentCheckbox>
 
           <p className="text-[10px] leading-relaxed text-ink-faint">
             {t("If you're not sure about the last one, check with your HOA first — we can't wash where it isn't permitted, and we can't refund a trip we couldn't complete.")}
@@ -440,31 +432,9 @@ export default function StepPayment({ state, onChange }: Props) {
           pause, or cancel anytime.
         </p>
 
-        <label className="flex items-start gap-2.5 cursor-pointer group">
-          <input
-            type="checkbox"
-            checked={state.smsConsent === true}
-            onChange={e => onChange({ ...state, smsConsent: e.target.checked })}
-            className="mt-0.5 h-4 w-4 rounded border-hairline text-ink accent-ink"
-          />
-          <span className="text-[11px] leading-relaxed text-ink-soft group-hover:text-ink transition-colors">
-            i agree to receive recurring automated sms messages from tidy home concierge llc at the
-            phone number i provided. msg &amp; data rates may apply. reply stop to opt out.
-          </span>
-        </label>
-
-        {/* Terms assent — this exact wording is stored via recordConsent('terms'). */}
-        <p className="text-[11px] leading-relaxed text-ink-faint">
-          by subscribing, you agree to tidy's{' '}
-          <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:underline">
-            terms of service
-          </a>{' '}
-          and{' '}
-          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:underline">
-            privacy policy
-          </a>
-          .
-        </p>
+        <ConsentCheckbox required={false} checked={state.smsConsent === true} onCheckedChange={v => onChange({ ...state, smsConsent: v })}>
+          {language === 'es' ? 'Acepto recibir mensajes de texto automatizados recurrentes de Tidy Home Concierge LLC al número proporcionado. Pueden aplicarse tarifas de mensajes y datos. Responde STOP para cancelar. Opcional.' : 'I agree to receive recurring automated SMS messages from Tidy Home Concierge LLC at the phone number I provided. Msg & data rates may apply. Reply STOP to opt out. Optional.'}
+        </ConsentCheckbox>
 
         {/* Founding-offer terms — small print, no counters or spot numbers. */}
         <div className="border-t border-hairline pt-3">
@@ -494,7 +464,7 @@ export default function StepPayment({ state, onChange }: Props) {
       <section className="space-y-3 border-y border-border py-4">
         <h2 className="font-semibold text-foreground">{language === 'es' ? 'Cómo funciona Tidy' : 'How Tidy works'}</h2>
         <p className="text-sm text-muted-foreground">{language === 'es' ? 'El mismo horario y Pro. Guarda tus datos de acceso antes de la visita. Primer bloqueo de acceso del año: reprogramación gratis. Con 48+ horas, reprograma gratis. La limpieza se hace llueva o haga sol. Nada se agrega sin tu aprobación.' : 'Same schedule and Pro. Save entry details before your visit. First lockout of the year: free reschedule. With 48+ hours, reschedule free. Cleaning runs rain or shine. Nothing is added without your approval.'}</p>
-        <label className="flex items-start gap-3 text-sm text-foreground"><input type="checkbox" className="mt-1" checked={guideChecked} onChange={e => setGuideChecked(e.target.checked)} /><span>{language === 'es' ? 'He leído cómo funciona mi membresía.' : "I've read how my membership works."} <a href="/member-guide" target="_blank" rel="noreferrer" className="text-primary underline">{language === 'es' ? 'Guía completa' : 'Full guide'}</a></span></label>
+        <ConsentCheckbox checked={guideChecked} onCheckedChange={setGuideChecked}>{language === 'es' ? 'He leído cómo funciona mi membresía.' : "I've read how my membership works."} <a href="/member-guide" target="_blank" rel="noreferrer" className="text-primary underline">{language === 'es' ? 'Guía completa' : 'Full guide'}</a></ConsentCheckbox>
       </section>
 
       {error && (
@@ -517,29 +487,12 @@ export default function StepPayment({ state, onChange }: Props) {
         />
       ) : (
         /* Calm CTA — navy ink, white text, soft lift */
-        <button
-          type="button"
-          onClick={handlePay}
-          disabled={submitting || customQuote || prepaidPending || preparing || !scopeOk || !guideChecked}
-          className={`group relative w-full overflow-hidden rounded-xl bg-ink px-6 py-5 text-base font-semibold text-white shadow-[0_14px_40px_-12px_hsl(var(--ink)/0.5)] transition-all duration-300 hover:shadow-[0_22px_48px_-12px_hsl(var(--ink)/0.6)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${reveal(0)}`}
-          style={{ transitionDelay: '340ms', letterSpacing: '-0.005em' }}
-        >
-          <span className="relative inline-flex items-center justify-center gap-2 lowercase">
-            {submitting || preparing ? (
-              <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                {embedded ? 'preparing secure payment…' : 'redirecting…'}
-              </>
-            ) : customQuote ? (
-              'custom quote required'
-            ) : (
-              <>
-                <Lock className="h-4 w-4" strokeWidth={2.25} />
-                {embedded ? 'continue to payment' : 'confirm subscription'}
-              </>
-            )}
-          </span>
-        </button>
+        <ConsentContinue disabled={!bookingConfirmed}>
+          <Button type="button" onClick={handlePay} disabled={submitting || customQuote || prepaidPending || preparing || !bookingConfirmed} className="booking-submit">
+            <Lock className="mr-2 h-4 w-4" />
+            {submitting || preparing ? (language === 'es' ? 'Preparando pago seguro…' : 'Preparing secure payment…') : customQuote ? (language === 'es' ? 'Se requiere cotización' : 'Custom quote required') : (language === 'es' ? 'Continuar al pago' : 'Continue to payment')}
+          </Button>
+        </ConsentContinue>
       )}
 
       {!customQuote && (

@@ -425,7 +425,6 @@ export default function ProVisit() {
         <ProVisitExtras visitId={visit.id} accessOpen={accessWindowOpen(visit.scheduled_start, visit.checked_out === true || !!visit.completed_at, clock)} />
         {homeContext && <section className="mt-4 space-y-3 border-y border-border py-4">
           {homeContext.home_notes && <div><h2 className="font-semibold text-foreground">{es?'Notas del hogar':'Home notes'}</h2><p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{homeContext.home_notes}</p></div>}
-          {homeContext.rotation && <p className="text-sm text-foreground">{es?'Tarea rotativa':'Rotation task'}: {({baseboards:es?'Zócalos':'Baseboards',blinds:es?'Persianas':'Blinds',fans_fixtures:es?'Ventiladores y lámparas':'Fans and fixtures',cabinet_fronts:es?'Frentes de gabinetes':'Cabinet fronts',vents:es?'Rejillas':'Vents'} as Record<string,string>)[homeContext.rotation] ?? homeContext.rotation}</p>}
           {homeContext.team && <p className="text-sm text-foreground">{es?'Equipo':'Team'}: {[homeContext.team.lead,homeContext.team.partner].filter(Boolean).join(' · ')}</p>}
           {(homeContext.zones?.length ?? 0)>0 && <div><h2 className="font-semibold text-foreground">{es?'Zonas':'Zones'}</h2><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{homeContext.zones?.map((zone,i)=><li key={i}>{typeof zone==='string' ? zone : JSON.stringify(zone)}</li>)}</ul></div>}
         </section>}

@@ -62,7 +62,7 @@ const SERVICE_CARDS: {
     service: "lawn",
     jpg: lawnJpg,
     webp: lawnWebp,
-    includes: "Mow, edge, trim and blow down — clippings hauled off.",
+    includes: "Mow, edge, line-trim and blow hard surfaces clear — clippings mulched back into the lawn.",
   },
   {
     service: "detailing",

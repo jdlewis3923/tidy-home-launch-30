@@ -1,5 +1,11 @@
 # Roadmap
 
+## Required consent design and service-scope alignment (Nov 23)
+- [x] Branded required agreements, default-off consent, 44px clickable labels, inline attempted-continue errors and accessible utility segments.
+- [x] Audit and align customer/Pro descriptions and knowledge/templates to service_scope; preserve prices and signed history.
+- [x] Save an unsent English Car Care ICA draft with confirmed pay and scope-generated Schedule B.
+- [x] Test real EN/ES phone/desktop consent flow, scope parity and saved draft; no texts, emails or publication.
+
 ## Water and electricity booking condition (Nov 23)
 - [x] Update shared EN/ES scope acknowledgments, factual utility questions, member details, guide/terms/FAQ/chat knowledge and Pro job notes.
 - [x] Verify EN/ES phone booking choices and guide/terms, 68 focused tests, current scope/knowledge readback; no texts, emails or publication.

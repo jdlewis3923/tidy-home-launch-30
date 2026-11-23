@@ -4,6 +4,7 @@ import '../_shared/http.ts'; // bounds every outbound call in this invocation (t
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { sendBrevoEmail as sendViaBrevo } from "./brevo-send.ts";
 import { vendorFetch } from './http.ts';
+import { loadServiceScopeKnowledge } from './service-scope-knowledge.ts';
 import { MEMBER_GUIDE } from './member-guide.ts';
 
 export type SupportMsg = { role: "user" | "assistant"; content: string };
@@ -43,6 +44,7 @@ export async function runSupportAssistant(
     .limit(1)
     .maybeSingle();
 
+  const scopeKnowledge = await loadServiceScopeKnowledge(supabase);
   const knowledge = kbRow?.content?.trim() || FALLBACK_KNOWLEDGE;
   const knowledge_used = !!kbRow?.content?.trim();
 
@@ -81,6 +83,8 @@ confidence guidance:
 
 BUSINESS KNOWLEDGE:
 ${knowledge}
+
+${scopeKnowledge}
 
 MEMBER GUIDE (authoritative):
 ${JSON.stringify(MEMBER_GUIDE)}`;

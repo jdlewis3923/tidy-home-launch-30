@@ -1,0 +1,3 @@
+- serviceScope owns included-work selection; customer/Pro views and assistant grounding must read active public.service_scope rather than author independent inclusion lists.
+- pricing-canon inclusion arrays are compatibility exports mirrored in the server canon and parity-checked against scope; they do not own service content.
+- Car Care ICA generation is a draft-only snapshot of both current car scopes; inactive drafts must not enter automatic contract issuance.

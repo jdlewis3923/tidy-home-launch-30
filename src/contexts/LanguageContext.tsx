@@ -954,8 +954,8 @@ const translations: Record<string, string> = {
   "Dashboard & surface wipe-down": "Limpieza del tablero y las superficies",
   "Monthly or biweekly visits": "Visitas mensuales o quincenales",
   "Paint correction or ceramic coating": "Corrección de pintura o recubrimiento cerámico",
-  "Paint sealant machine application": "Aplicación de sellador de pintura a máquina",
-  "Leather conditioning, clay bar, tire shine": "Acondicionamiento de cuero, barra de arcilla, brillo para llantas",
+  "Engine bay": "Compartimento del motor",
+
 
   // How it works (homepage 5 steps)
   "Five simple steps — then your home runs on autopilot.":
@@ -1421,8 +1421,8 @@ const translations: Record<string, string> = {
   "Three services. One plan.": "Tres servicios. Un solo plan.",
   "Kitchen, baths, floors and dusting, same Pro every visit.":
     "Cocina, baños, pisos y polvo, con el mismo profesional en cada visita.",
-  "Mow, edge, trim and blow down — clippings hauled off.":
-    "Cortamos, orillamos, recortamos y sopleteamos — nos llevamos los recortes.",
+  "Mow, edge, line-trim and blow hard surfaces clear — clippings mulched back into the lawn.":
+    "Cortamos, bordeamos, recortamos con hilo y despejamos las superficies duras — la grama cortada se tritura y queda en el césped.",
   "Hand wash, wheels, glass and interior wipe-down in your driveway.":
     "Lavado a mano, ruedas, cristales e interior limpiado en tu entrada.",
   "Claim your spot in": "Reserva tu lugar en",
