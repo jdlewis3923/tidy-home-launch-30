@@ -1,3 +1,5 @@
+import HeardFromField from '@/components/HeardFromField';
+import { validHeardFrom } from '@/lib/heard-from';
 import { useState, useEffect, useMemo } from 'react';
 import { Lock, ShieldCheck, CreditCard, BadgeCheck, Banknote, X as XIcon } from 'lucide-react';
 import {
@@ -107,7 +109,7 @@ export default function StepPayment({ state, onChange }: Props) {
   const needsSpigot = scopeGroups.some((g) => g === 'car_care' || g === 'car_wash_addon');
   const scopeOk = allScopeChecked(scopeGroups, scopeChecked) && (!needsSpigot || utilityAnswersComplete(state.hasWaterSpigot, state.hasElectricalOutlet));
 
-  const bookingConfirmed = requiredBookingConsentsComplete([scopeOk, guideChecked, !showAccessGate || state.washingAllowed === true]);
+  const bookingConfirmed = requiredBookingConsentsComplete([validHeardFrom(state.heardFrom), scopeOk, guideChecked, !showAccessGate || state.washingAllowed === true]);
   const embedded = isEmbeddedCheckoutAvailable();
   const stripePromise = useMemo(() => (embedded ? getStripe() : null), [embedded]);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -121,6 +123,7 @@ export default function StepPayment({ state, onChange }: Props) {
     const attr = getUtmAttribution();
     return {
       services, addons, car_wash,
+      heard_from: state.heardFrom,
       reservation_id: state.reservationId,
       cleaning_range: state.cleaningRange ?? null,
       home_sq_ft: state.homeSqFt,
@@ -421,6 +424,8 @@ export default function StepPayment({ state, onChange }: Props) {
           )}
         </div>
       )}
+
+      <HeardFromField value={state.heardFrom ?? ''} onChange={heardFrom => onChange({ ...state, heardFrom })} />
 
       {/* Consent block */}
       <div

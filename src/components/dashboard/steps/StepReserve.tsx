@@ -1,3 +1,5 @@
+import HeardFromField from '@/components/HeardFromField';
+import { validHeardFrom } from '@/lib/heard-from';
 import RatingLine from '@/components/reviews/RatingLine';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,9 +19,6 @@ import { validateBookingConsents } from '@/lib/booking-consent';
 import { cleaningBand } from '@/lib/pricing-canon';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Any day'];
-const HEARD = [
-  ['door_hanger', 'Door hanger'], ['nextdoor', 'Nextdoor'], ['google', 'Google'], ['referral', 'Referral'], ['other', 'Other'],
-] as const;
 
 const input = 'w-full rounded-lg border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint/60 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10';
 const label = 'text-[11px] font-medium uppercase tracking-[0.18em] text-ink-faint';
@@ -31,7 +30,8 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
   const launchCfg = useLaunchConfig();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [heard, setHeard] = useState('');
+  const heard = state.heardFrom ?? '';
+  const setHeard = (v: string) => onChange({ ...state, heardFrom: v });
   const [heardOther, setHeardOther] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
   const services = state.services.filter((s): s is ReservableService => (RESERVABLE_SERVICES as readonly string[]).includes(s));
   const zipOk = VALID_ZIPS.includes(state.zip);
   const ready = !!(state.firstName.trim() && /\S+@\S+\.\S+/.test(state.email) && state.phone.replace(/\D/g, '').length >= 10
-    && state.address.trim().length >= 3 && zipOk && state.preferredDay && state.preferredTime && heard && services.length);
+    && state.address.trim().length >= 3 && zipOk && state.preferredDay && state.preferredTime && validHeardFrom(heard) && services.length);
   const scopeGroups = groupsFor(services);
   const [scopeChecked, setScopeChecked] = useState<Partial<Record<ScopeGroup, boolean>>>({});
   const hasCar = services.includes('detailing' as ReservableService);
@@ -120,16 +120,8 @@ export default function StepReserve({ state, onChange }: { state: ConfigState; o
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <span className={label}>{t('how did you hear about us?')} *</span>
-        <div className="flex flex-wrap gap-2">
-          {HEARD.map(([v, l]) => (
-            <button key={v} type="button" onClick={() => setHeard(v)} aria-pressed={heard === v} style={heard === v ? { backgroundColor: 'hsl(var(--ink))', color: '#ffffff' } : undefined}
-              className={`rounded-full border px-3.5 py-2 text-xs font-semibold ${heard === v ? 'border-ink text-white' : 'border-hairline bg-white text-ink'}`}>{t(l)}</button>
-          ))}
-        </div>
-        {heard === 'other' && <input className={input} placeholder={t('Tell us where')} value={heardOther} onChange={(e) => setHeardOther(e.target.value)} />}
-      </div>
+      <HeardFromField value={heard} onChange={setHeard} />
+      {heard === 'other' && <input className={input} placeholder={t('Tell us where')} value={heardOther} onChange={e => setHeardOther(e.target.value)} />}
 
       <ConsentCheckbox required={false} checked={state.smsConsent === true} onCheckedChange={v => set('smsConsent', v)}>
         {t('Text me my reservation confirmation and schedule updates from Tidy Home Concierge. Msg & data rates may apply. Reply STOP to opt out.')}

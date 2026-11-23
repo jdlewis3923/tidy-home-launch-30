@@ -109,6 +109,7 @@ const CheckoutInputSchema = z.object({
   preferred_day: z.string().max(20).optional(),
   preferred_time: z.string().max(20).optional(),
   lang: z.enum(["en", "es"]).default("en"),
+  heard_from: z.enum(["door_hanger", "google", "nextdoor", "facebook_instagram", "referral", "other"]).optional(),
   // Attribution
   gclid: z.string().max(500).optional(),
   utm_source: z.string().max(500).optional(),
@@ -240,6 +241,7 @@ Deno.serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  if (!input.heard_from && !input.add_to_existing) return jsonResponse({ ok: false, error: "heard_from_required" }, 400);
   const { data: guideAccepted, error: guideError } = await supabase.rpc('member_guide_accepted', { _user: user.id });
   if (guideError || !guideAccepted) return jsonResponse({ ok: false, error: 'member_guide_acceptance_required' }, 409);
   // New cleaning selections require measured size and staffing before billing.
@@ -568,6 +570,7 @@ Deno.serve(async (req) => {
           fl_tax_pct: taxable ? String(FLORIDA_TAX.percentage) : "0",
           fl_tax_rate_id: taxRateId ?? "",
           gclid: input.gclid ?? "",
+          heard_from: input.heard_from ?? "",
           utm_source: input.utm_source ?? "",
           utm_medium: input.utm_medium ?? "",
           utm_campaign: input.utm_campaign ?? "",

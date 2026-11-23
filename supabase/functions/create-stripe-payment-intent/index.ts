@@ -98,6 +98,7 @@ const InputSchema = z.object({
   access_washing_allowed: z.boolean().optional(),
   lang: z.enum(["en", "es"]).default("en"),
   idempotency_key: z.string().min(8).max(128).optional(),
+  heard_from: z.enum(["door_hanger", "google", "nextdoor", "facebook_instagram", "referral", "other"]).optional(),
   // Attribution
   gclid: z.string().max(500).optional(),
   utm_source: z.string().max(500).optional(),
@@ -205,6 +206,7 @@ Deno.serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  if (!input.heard_from) return jsonResponse({ ok: false, error: "heard_from_required" }, 400);
   const { data: guideAccepted, error: guideError } = await supabase.rpc('member_guide_accepted', { _user: user.id });
   if (guideError || !guideAccepted) return jsonResponse({ ok: false, error: 'member_guide_acceptance_required' }, 409);
   const cleaningError = await cleaningCheckoutGate(supabase, user.email, input.zip, input.services.find(s => s.service === 'cleaning')?.size ?? null, input.reservation_id);
@@ -362,7 +364,8 @@ Deno.serve(async (req) => {
               zip: input.zip,
               lang: input.lang,
               gclid: input.gclid ?? "",
-              utm_source: input.utm_source ?? "",
+              heard_from: input.heard_from ?? "",
+          utm_source: input.utm_source ?? "",
               utm_medium: input.utm_medium ?? "",
               utm_campaign: input.utm_campaign ?? "",
             },
@@ -411,6 +414,7 @@ Deno.serve(async (req) => {
           founding_review_promised: "yes",
           signup_source: "embedded_checkout",
           gclid: input.gclid ?? "",
+          heard_from: input.heard_from ?? "",
           utm_source: input.utm_source ?? "",
           utm_medium: input.utm_medium ?? "",
           utm_campaign: input.utm_campaign ?? "",

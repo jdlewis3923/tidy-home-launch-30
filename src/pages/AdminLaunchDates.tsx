@@ -91,6 +91,7 @@ export default function AdminLaunchDates() {
 
       <section className="rounded-xl border border-border bg-card p-5">
         <h2 className="text-lg font-bold text-foreground">Door hanger drops</h2>
+        {drops.length === 0 && <p className="mt-2 text-sm text-foreground">TBC (distributor)</p>}
         <ul className="mt-2 space-y-1 text-sm text-foreground">
           {drops.map((d, i) => <li key={i}>Drop {i + 1}: {fmtLaunchDate(d.start)} – {fmtLaunchDate(d.end)}</li>)}
         </ul>

@@ -346,9 +346,11 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
     freqs.includes('weekly') ? 'weekly' : freqs.includes('biweekly') ? 'biweekly' : 'monthly';
 
   let nextBillingDate: string | null = null;
+  let isTest = false;
   let monthlyTotalCents = 0;
   if (stripeSubscriptionId) {
     const sub: any = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    isTest = sub.livemode === false;
     const currentPeriodEnd = resolveStripeCurrentPeriodEnd(sub);
     if (currentPeriodEnd) {
       nextBillingDate = new Date(currentPeriodEnd * 1000).toISOString().slice(0, 10);
@@ -396,6 +398,8 @@ async function seedSubscriptionAndVisits(stripe: Stripe, supabase: any, opts: {
       surcharge_applied: planLines.some((l) => l.surcharge_applied),
       surcharge_cents: planLines.reduce((sum, l) => sum + (l.surcharge_cents ?? 0), 0),
       free_addons_per_month: freeAddons,
+      heard_from: meta.heard_from || null,
+      is_test: isTest,
       founding_zip: meta.founding_zip ?? meta.zip ?? null,
       founding_rate_locked: meta.founding_rate_locked === 'yes',
       founding_free_addon_first_visit: meta.founding_free_addon_first_visit === 'yes',

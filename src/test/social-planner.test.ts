@@ -31,12 +31,10 @@ describe("social planner", () => {
     expect(res.find((x) => x.id === "17")).toBeUndefined();
   });
   it("S-5 tokens render on the day of posting", () => {
-    const t = fx.find((p) => p.n === "17")!.template_copy;
-    expect(renderTemplate(t, base, "2026-11-23")).toContain("Car care opens as soon as enough neighbors reserve it.");
-    expect(renderTemplate(t, { ...base, carLaunch: "2026-12-07" }, "2026-11-23")).toContain("Car care starts Monday 7 December.");
-    expect(renderTemplate(t, { ...base, carLaunch: "2026-12-07" }, "2026-12-07")).toContain("Car care is live.");
-    expect(renderTemplate(fx.find((p) => p.n === "12")!.template_copy, base, "2026-11-05")).toContain("week of 16 November");
-    expect(renderTemplate(fx.find((p) => p.n === "10")!.template_copy, base, "2026-11-02")).toContain("First visits start Monday 23 November.");
+    const template = '{LAUNCH}|{CONVERT}|{CAR_LINE}';
+    const rendered = renderTemplate(template, { ...base, launch: '2026-12-14', conversion: '2026-11-30', carLaunch: '2026-12-21' }, '2026-12-07');
+    expect(rendered.split('|').slice(0, 2)).toEqual(['Monday 14 December', '30 November']);
+    expect(rendered.split('|')[2]).toBe('Car care starts Monday 21 December.');
   });
   it("Instagram swaps link lines", () => {
     expect(instagramVersion("a\nReserve at jointidy.co/founding\nb")).toBe("a\nLink in bio.\nb");

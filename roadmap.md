@@ -1,3 +1,10 @@
+# Marketing cleanup (Nov 23)
+- [x] Meta: five evergreen reslots, Nov 24/26/28/30 and Dec 6; retained Dec 2/4/7. Refreshed actual Meta history; no matching scheduled captions/images. EN/ES sizing, monthly pricing and first-visit captions corrected.
+- [ ] LinkedIn external blocker: all 22 unconfirmed posts are photos/banners accepted by Zap HTTP 200 with no publication ID/receipt. Photo Zap must return callback receipts; no accessible Zap/LinkedIn connection to repair or verify live posts. Future unattempted photos held; 22 uncertain and four missed preserved.
+- [x] Five manual Nextdoor posts: Nov 26, Dec 10/24, Jan 7/21 at 6 PM Miami; existing 9 AM digest includes exact copy-ready captions. No digest sent during this work.
+- [x] Hanger dates cleared; admin says TBC (distributor). Legacy/main launch Dec 7; founding first visits Dec 14; direct soft start Nov 23 unchanged.
+- [x] Six required EN/ES answers in founding/reserve/checkout, subscription persistence and prefill, admin channel/QR ZIP reporting; four confirmed QA plans excluded. Fake Facebook-Instagram reservation saved/read back in admin then removed; both checkout endpoints reject missing source. Spanish phone/desktop verified; 71 focused tests pass. No texts/emails or site publication.
+
 # Roadmap
 
 ## Required consent design and service-scope alignment (Nov 23)

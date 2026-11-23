@@ -11,7 +11,7 @@ import CleaningVerification from '@/components/admin/CleaningVerification';
 import CleaningTeamStaffing from '@/components/admin/CleaningTeamStaffing';
 
 const SIZE_WORD: Record<string, string> = { "1": "S1", "2": "S2", "3": "S3", "4": "Estate", "5": "Estate Plus", quote: "walkthrough" };
-const HEARD: Record<string, string> = { door_hanger: "Door hanger", nextdoor: "Nextdoor", google: "Google", referral: "Referral", other: "Other" };
+const HEARD: Record<string, string> = { door_hanger: "Door hanger", nextdoor: "Nextdoor", google: "Google", facebook_instagram: "Facebook-Instagram", referral: "Friend or neighbor", other: "Other" };
 
 export default function AdminReservations() {
   const { rows, reload } = useReservations();

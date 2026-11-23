@@ -1,0 +1,2 @@
+ALTER TABLE public.reservations DROP CONSTRAINT reservations_heard_from_check;
+ALTER TABLE public.reservations ADD CONSTRAINT reservations_heard_from_check CHECK (heard_from IN ('door_hanger','google','nextdoor','facebook_instagram','referral','other'));

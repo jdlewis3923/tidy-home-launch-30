@@ -1,3 +1,5 @@
+import HeardFromField from '@/components/HeardFromField';
+import { validHeardFrom } from '@/lib/heard-from';
 /**
  * /founding — the door-hanger landing page. Price first, reserve second.
  * Mobile-first, bilingual through the shared t() layer, every load logged.
@@ -44,6 +46,7 @@ type State = {
   beds: string; baths: string; lawn: Lawn | null; car: CanonSize | null;
   cleaningRange?: SizeSelection | null; yearly?: boolean;
   walkthroughSlot?: string;
+  heardFrom?: string;
   cadence: Record<"cleaning" | "lawn", CanonCadence>; gifts: string[];
   first: string; last: string; email: string; phone: string; street: string; sms: boolean;
   day: string; time: "morning" | "afternoon";
@@ -184,7 +187,7 @@ export default function Founding() {
     const timer = setTimeout(() => { void supabase.functions.invoke('lifecycle-capture', { body: { event: 'RES_STARTED', email: s.email, phone: phoneOk ? s.phone : undefined, first_name: s.first, zip: s.zip, lang, sms_service: s.sms } }); }, 1200);
     return () => clearTimeout(timer);
   }, [emailOk, phoneOk, s.step, s.email, s.phone, s.first, s.zip, s.sms, lang]);
-  const formOk = s.first.trim() && s.last.trim() && emailOk && phoneOk && s.street.trim().length >= 5 && s.day && isZip(s.zip);
+  const formOk = s.first.trim() && s.last.trim() && emailOk && phoneOk && s.street.trim().length >= 5 && s.day && isZip(s.zip) && validHeardFrom(s.heardFrom);
 
   const scopeGroups = useMemo(() => groupsFor(s.services), [s.services]);
   const [scopeChecked, setScopeChecked] = useState<Partial<Record<ScopeGroup, boolean>>>({});
@@ -205,8 +208,8 @@ export default function Founding() {
     const body = {
       page: "founding", first_name: s.first, last_name: s.last, email: s.email, phone: s.phone, sms_consent: s.sms,
       services: s.services, street: s.street, city: "Miami", zip: s.zip, preferred_day: s.day, preferred_time: s.time,
-      heard_from: s.src.startsWith("hanger") || s.src.startsWith("doorhanger") ? "door_hanger" : "other",
-      heard_other: s.src || undefined, lang: language, src: s.src || undefined, session_id: sessionId(),
+      heard_from: s.heardFrom,
+       lang: language, src: s.src || undefined, session_id: sessionId(),
       gift_addons: s.gifts.slice(0, giftCount), website: honeypot.current?.value || "",
       lines: lines.flatMap((l) => l ? [{ service: l.service, size: l.size, cadence: l.service === "detailing" ? null : l.cadence, monthly: l.monthly, visits_per_month: l.visits }] : []),
       quote: { hasWaterSpigot: spigot, hasElectricalOutlet: outlet, total, visits, src: "founding", cleaning_range: s.cleaningRange, baths: s.baths, billing_period: s.yearly ? 'yearly' : 'monthly', frequencies: s.cadence, cleaningRange: s.cleaningRange, bathrooms: s.baths, homeSqFt: typeof s.cleaningRange === 'number' ? cleaningBand(s.cleaningRange)?.maxSqFt : null, lawnChoice: s.lawn === 1 ? 'small' : s.lawn === 2 ? 'standard' : s.lawn === 3 ? 'large' : 'over', vehicleClass: s.car === 1 ? 'sedan' : s.car === 2 ? 'suv' : 'truck' },
@@ -492,6 +495,7 @@ export default function Founding() {
                   {(["morning", "afternoon"] as const).map((v) => <button key={v} type="button" role="radio" aria-checked={s.time === v} className={`${chip} ${s.time === v ? on : off}`} onClick={() => set({ time: v })}>{v === "morning" ? t("Mornings") : t("Afternoons")}</button>)}
                 </div>
                 <p className="text-xs text-ink-faint">{t("Mon–Sat, 8:00 AM – 6:00 PM ET.")}</p>
+                <HeardFromField value={s.heardFrom ?? ''} onChange={heardFrom => set({ heardFrom })} />
                 <ConsentCheckbox required={false} checked={s.sms} onCheckedChange={v => set({ sms: v })}>
                   {t("Text me about my reservation. Msg & data rates may apply. Reply STOP to opt out.")}
                 </ConsentCheckbox>

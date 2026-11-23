@@ -81,6 +81,7 @@ export async function startCheckout(payload: CheckoutPayload): Promise<void> {
   const body = {
     services,
     reservation_id: config.reservationId,
+    heard_from: config.heardFrom,
     addons,
     car_wash,
     referral_code: config.referralCode?.trim() || undefined,

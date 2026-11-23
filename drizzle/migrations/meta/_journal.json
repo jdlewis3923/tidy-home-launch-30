@@ -2199,6 +2199,27 @@
       "when": 1795396608826,
       "tag": "0313_static_admin_launch_config_updates",
       "breakpoints": true
+    },
+    {
+      "idx": 314,
+      "version": "7",
+      "when": 1795398119351,
+      "tag": "0314_booking_channel_attribution",
+      "breakpoints": true
+    },
+    {
+      "idx": 315,
+      "version": "7",
+      "when": 1795398565678,
+      "tag": "0315_exclude_test_plans_from_attribution",
+      "breakpoints": true
+    },
+    {
+      "idx": 316,
+      "version": "7",
+      "when": 1795398737951,
+      "tag": "0316_reservation_facebook_instagram_channel",
+      "breakpoints": true
     }
   ]
 }

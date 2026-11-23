@@ -75,7 +75,7 @@
   "drop_if_bumped": false,
   "A": "2026-10-22",
   "B": "2026-10-22",
-  "template_copy": "Hi neighbors, I'm Justin, the founder of Tidy, a locally owned Miami company.\n\nTidy is a membership for house cleaning, lawn care and car care: one schedule, one bill, and the same Pro for each service every time.\n\nWe're starting small on purpose, with 25 founding homes each in 33156, 33183 and 33186. Founding homes lock their rate for good, get a free premium add-on on the first visit, and the first visit is perfect or it's free. Reserving takes about a minute and needs no card.\n\nHappy to answer questions here or at (786) 829-1141.\njointidy.co/founding",
+  "template_copy": "Hi neighbors, I'm Justin, founder of Tidy. Cleaning, lawn and car care: one monthly bill and the same Pro for each service. Founding rates are capped at 25 homes per ZIP. Main launch December 7; founding paid visits start the week of December 14. Reserve now with no card.\n\n— — —\n\nHola vecinos, soy Justin, fundador de Tidy. Limpieza, grama y cuidado del carro: una factura mensual y el mismo Pro para cada servicio. Las tarifas fundadoras están limitadas a 25 hogares por código postal. Lanzamiento principal el 7 de diciembre; visitas pagadas fundadoras desde la semana del 14 de diciembre. Reserva sin tarjeta.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 5
  },
@@ -107,7 +107,7 @@
   "drop_if_bumped": false,
   "A": "2026-10-26",
   "B": "2026-10-26",
-  "template_copy": "House cleaning from $139 a month.\nThe same Pro every visit, so they learn your home: where things go, what matters to you, which room needs extra time.\nEvery 2 weeks saves 8% per visit. Weekly saves 18%.\njointidy.co/founding",
+  "template_copy": "House cleaning from $139 a month on the monthly plan. Size is based on interior square feet and bathroom count. See your price before reserving.\n\n— — —\n\nLimpieza desde $139 al mes en el plan mensual. El tamaño depende de los pies cuadrados interiores y la cantidad de baños. Consulta tu precio antes de reservar.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 7
  },
@@ -139,7 +139,7 @@
   "drop_if_bumped": false,
   "A": "2026-10-30",
   "B": "2026-10-30",
-  "template_copy": "Car care from $149 a month.\nShine Complete: 3 maintenance washes a month plus 2 full details a year, right in your driveway. Your Pro brings the equipment and the power.\n{CAR_LINE}\njointidy.co/founding",
+  "template_copy": "Shine Complete from $149 a month: 3 maintenance washes a month plus 2 full details a year. Your Pro uses your outdoor water spigot and outlet when present. Car care opens when demand and a hired Pro are confirmed.\n\n— — —\n\nShine Complete desde $149 al mes: 3 lavados de mantenimiento al mes y 2 detallados completos al año. Tu Pro usa la llave de agua y el tomacorriente exterior cuando existen. El cuidado del carro abre cuando se confirman la demanda y un Pro contratado.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 9
  },
@@ -171,7 +171,7 @@
   "drop_if_bumped": false,
   "A": "2026-11-11",
   "B": "2026-11-11",
-  "template_copy": "Add a second service and get a free premium add-on every month. Add a third and get two.\nThink an inside-fridge clean, weed removal or pet hair removal, on us.\njointidy.co/founding",
+  "template_copy": "Two services: one free eligible premium add-on each month. Three services: two. Choose from inside-fridge cleaning, leaf and debris cleanup or pet hair removal.\n\n— — —\n\nDos servicios: un complemento premium elegible gratis cada mes. Tres servicios: dos. Elige limpieza interior del refrigerador, retiro de hojas y residuos o pelo de mascota.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 11
  },
@@ -187,7 +187,7 @@
   "drop_if_bumped": false,
   "A": "2026-11-05",
   "B": "2026-11-05",
-  "template_copy": "If a navy Tidy door hanger landed on your door this week, that's us, and thank you for taking a look.\n\nQuick answers to what neighbors have been asking:\n- Reserving is free and needs no card. You confirm your membership the week of {CONVERT}.\n- Cleaning and lawn care start {LAUNCH}. {CAR_LINE}\n- Every visit has a 48-hour guarantee: if something isn't right, we come back free.\n- Founding spots are capped at 25 per ZIP, and the founding rate never goes up.\n\nReserve at jointidy.co/founding or call (786) 829-1141.",
+  "template_copy": "Founding first paid visits start the week of December 14. Reserve with no card; we confirm your service day and Pro before payment. Door-hanger distribution dates are still TBC with our distributor. Every visit has our 48-hour come-back guarantee.\n\n— — —\n\nLas primeras visitas pagadas fundadoras comienzan la semana del 14 de diciembre. Reserva sin tarjeta; confirmamos tu día y Pro antes del pago. Las fechas de distribución de colgantes siguen por confirmar con el distribuidor. Cada visita tiene nuestra garantía de volver en 48 horas.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 12
  },
@@ -203,7 +203,7 @@
   "drop_if_bumped": false,
   "A": "2026-11-13",
   "B": "2026-11-13",
-  "template_copy": "10 days until first visits.\nReservations become memberships the week of {CONVERT}. That's when your founding rate locks and your service day is set.\nStill deciding? Reserve now, no card: jointidy.co/founding",
+  "template_copy": "Reserve now with no charge today. Main launch December 7; founding first paid visits the week of December 14. We confirm your day and Pro before payment.\n\n— — —\n\nReserva ahora sin pagar hoy. Lanzamiento principal el 7 de diciembre; primeras visitas pagadas fundadoras la semana del 14 de diciembre. Confirmamos tu día y Pro antes del pago.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 13
  },
@@ -251,7 +251,7 @@
   "drop_if_bumped": false,
   "A": "2026-11-20",
   "B": "2026-11-20",
-  "template_copy": "Monday, cleaning and lawn care begin.\n{CAR_LINE}\nFounding spots are open in Pinecrest, Kendall and Kendall West: jointidy.co/founding",
+  "template_copy": "Monday December 7 is our main launch. Founding first paid visits begin the week of December 14. Direct bookings can start from November 23 on days covered by a hired Pro. Car care opens on confirmed demand.\n\n— — —\n\nEl lunes 7 de diciembre es nuestro lanzamiento principal. Las primeras visitas pagadas fundadoras comienzan la semana del 14 de diciembre. Las reservas directas pueden empezar desde el 23 de noviembre en días cubiertos por un Pro contratado. El cuidado del carro abre según la demanda confirmada.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 16
  },
@@ -267,7 +267,7 @@
   "drop_if_bumped": false,
   "A": "2026-11-23",
   "B": "2026-11-23",
-  "template_copy": "Today's the day.\nCleaning and lawn care are live in Pinecrest, Kendall and Kendall West. {CAR_LINE}\nJoin as a founding home: jointidy.co/founding",
+  "template_copy": "Main launch: December 7. Founding first paid visits: the week of December 14. Reserve in Pinecrest, Kendall and Kendall West. Car care opens when demand and a hired Pro are confirmed.\n\n— — —\n\nLanzamiento principal: 7 de diciembre. Primeras visitas pagadas fundadoras: la semana del 14 de diciembre. Reserva en Pinecrest, Kendall y Kendall West. El cuidado del carro abre cuando se confirman la demanda y un Pro contratado.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 17
  },
@@ -299,7 +299,7 @@
   "drop_if_bumped": false,
   "A": "2026-12-03",
   "B": "2026-12-03",
-  "template_copy": "Tidy's cleaning and lawn visits are now running in 33156, 33183 and 33186. Thank you to every neighbor who reserved early.\n\nShine Complete car care is 3 washes a month plus 2 full details a year, in your driveway. {CAR_LINE}\n\nIf you've been waiting to see us in action, founding spots are still capped at 25 per ZIP, with a rate that never goes up and a 48-hour come-back guarantee on every visit.\n\njointidy.co/founding · (786) 829-1141",
+  "template_copy": "Cleaning is sized by interior square feet and bathroom count, lawn by mowable turf, car care by vehicle size. See your monthly price before reserving. Founding neighbors lock their rate for life.\n\n— — —\n\nLa limpieza se calcula según los pies cuadrados interiores y la cantidad de baños, la grama según el área a cortar y el carro según su tamaño. Consulta tu precio mensual antes de reservar. Los vecinos fundadores fijan su tarifa de por vida.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 19
  },
@@ -315,7 +315,7 @@
   "drop_if_bumped": false,
   "A": "2026-12-02",
   "B": "2026-12-02",
-  "template_copy": "Simple pricing, three sizes on every service:\nCleaning goes by bedrooms. Lawn goes by turf area. Car goes by vehicle: sedan, SUV, or truck/3-row/van.\nSee your price in under a minute: jointidy.co/founding",
+  "template_copy": "Cleaning is sized by interior square feet and bathroom count. Lawn by mowable turf; car care by vehicle size. Your monthly price is shown before you reserve.\n\n— — —\n\nLa limpieza se calcula según los pies cuadrados interiores y la cantidad de baños. La grama según el área a cortar; el carro según su tamaño. Ves tu precio mensual antes de reservar.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 20
  },
@@ -411,7 +411,7 @@
   "drop_if_bumped": false,
   "A": null,
   "B": "2026-12-10",
-  "template_copy": "Car care is now live with Tidy in 33156, 33183 and 33186.\n\nShine Complete is 3 maintenance washes a month plus 2 full details a year, done in your driveway by the same detailer every time. For an SUV it's $189 a month, and one full detail in Miami usually runs about $299 on its own.\n\nAlready a cleaning or lawn member? The Car Wash Add-On starts at $39 a month.\n\njointidy.co/founding · (786) 829-1141",
+  "template_copy": "Shine Complete from $149 a month: 3 maintenance washes monthly and 2 full details yearly. Car care opens after enough neighbors reserve and a hired Pro is ready. Reserve your spot; no charge today.\n\n— — —\n\nShine Complete desde $149 al mes: 3 lavados de mantenimiento mensuales y 2 detallados completos al año. El cuidado del carro abre cuando hay suficientes reservas y un Pro contratado listo. Reserva tu lugar sin pagar hoy.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 26
  },
@@ -523,7 +523,7 @@
   "drop_if_bumped": false,
   "A": "2026-12-17",
   "B": "2026-12-17",
-  "template_copy": "Happy holidays from Tidy, and thank you to the neighbors who've welcomed us this season.\n\nTwo quick notes:\n- If a friend nearby joins Tidy with your referral link, they get $50 and so do you.\n- We're adding independent Pros in cleaning, lawn care and mobile detailing. If you know someone reliable with their own equipment who wants steady routes close to home, English or Spanish, send them to jointidy.co/apply.\n\njointidy.co/refer · (786) 829-1141",
+  "template_copy": "A neighbor joins using your Tidy referral link: they get $50 and so do you. Cleaning, lawn and car care on one plan.\n\n— — —\n\nUn vecino se une con tu enlace de referido de Tidy: recibe $50 y tú también. Limpieza, grama y cuidado del carro en un solo plan.\n\njointidy.co/founding",
   "is_spare": false,
   "post_number": 33
  },
@@ -628,7 +628,7 @@
   "channel": "meta_combined",
   "image_kind": "card",
   "image_subject": "Same Pro. Every time.",
-  "template_copy": "Same Pro. Every time.\nYour Tidy Pro learns your home, your yard and your car, so you never have to explain it twice.\nReserve a founding spot: jointidy.co/founding",
+  "template_copy": "Same Pro for each service, every visit. Your specialist learns the details that matter. Reserve a founding spot, no card needed.\n\n— — —\n\nEl mismo Pro para cada servicio, en cada visita. Tu especialista conoce los detalles importantes. Reserva un lugar fundador sin tarjeta.\n\njointidy.co/founding",
   "is_spare": true,
   "post_number": 101,
   "anchor_type": null,
@@ -644,7 +644,7 @@
   "channel": "meta_combined",
   "image_kind": "card",
   "image_subject": "Reserve in a minute",
-  "template_copy": "Reserving a founding spot takes about a minute and needs no card.\nYou only confirm your membership the week before first visits, and your founding rate locks then.\njointidy.co/founding",
+  "template_copy": "Reserve a founding spot with no card and no charge today. Main launch: December 7. First paid visits for founding reservations: the week of December 14.\n\n— — —\n\nReserva un lugar fundador sin tarjeta y sin pagar hoy. Lanzamiento principal: 7 de diciembre. Primeras visitas pagadas para reservas fundadoras: la semana del 14 de diciembre.\n\njointidy.co/founding",
   "is_spare": true,
   "post_number": 102,
   "anchor_type": null,
@@ -660,7 +660,7 @@
   "channel": "meta_combined",
   "image_kind": "photo",
   "image_subject": "three-service strip",
-  "template_copy": "One bill for the whole house.\nCleaning, lawn and car care on one membership, instead of paying three companies three different ways.\nPlans from $45 a month. jointidy.co/founding",
+  "template_copy": "Cleaning, lawn and car care on one membership. One monthly bill. Plans from $45 a month; each service is priced by its size and frequency.\n\n— — —\n\nLimpieza, grama y cuidado del carro en una membresía. Una factura mensual. Planes desde $45 al mes; cada servicio se calcula según su tamaño y frecuencia.\n\njointidy.co/founding",
   "is_spare": true,
   "post_number": 103,
   "anchor_type": null,
@@ -676,7 +676,7 @@
   "channel": "meta_combined",
   "image_kind": "card",
   "image_subject": "Questions? Text us.",
-  "template_copy": "Questions about Tidy? Call or text (786) 829-1141, Monday to Saturday, 8 AM to 6 PM.\nOr see your price in under a minute at jointidy.co/founding",
+  "template_copy": "Questions about your home, yard or car? Call (786) 829-1141. See your monthly price before reserving.\n\n— — —\n\n¿Preguntas sobre tu casa, grama o carro? Llama al (786) 829-1141. Consulta tu precio mensual antes de reservar.\n\njointidy.co/founding",
   "is_spare": true,
   "post_number": 104,
   "anchor_type": null,

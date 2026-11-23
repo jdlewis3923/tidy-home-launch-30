@@ -1,3 +1,4 @@
+import BookingAttribution from '@/components/admin/BookingAttribution';
 /**
  * /admin/command — Command tab (default admin landing view).
  *
@@ -365,6 +366,7 @@ export default function AdminCommand() {
             </div>
           </section>
 
+          <BookingAttribution />
           <FoundingFunnelPanel />
           <MessagingReadinessBanner />
           <SmsQueueLine />

@@ -34,7 +34,7 @@ const Body = z.object({
   street: z.string().trim().min(3).max(200), city: z.string().trim().max(80).default(''),
   zip: z.string().trim().regex(/^\d{5}$/),
   preferred_day: z.enum(DAYS), preferred_time: z.enum(['morning', 'afternoon']),
-  heard_from: z.enum(['door_hanger', 'nextdoor', 'google', 'referral', 'other']), heard_other: z.string().trim().max(200).optional(),
+  heard_from: z.enum(['door_hanger', 'google', 'nextdoor', 'facebook_instagram', 'referral', 'other']), heard_other: z.string().trim().max(200).optional(),
   lang: z.enum(['en', 'es']).default('en'), is_test: z.boolean().optional(),
   // /founding extras
   src: z.string().trim().max(60).optional(), session_id: z.string().trim().min(8).max(64).optional(),

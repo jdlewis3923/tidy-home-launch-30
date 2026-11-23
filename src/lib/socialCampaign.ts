@@ -194,8 +194,8 @@ export const NEXTDOOR_POSTS: CampaignPost[] = [
     post_number: 3,
     title: "Flat price by size",
     zip: "33183",
-    en: `No square-footage math. No surprise line items.\n\nThree sizes per service, one flat price per visit. You see the number before you book, and founding neighbors keep that number for life.`,
-    es: `Sin cálculos de pies cuadrados. Sin cargos sorpresa.\n\nTres tamaños por servicio y un precio fijo por visita. Ves el número antes de reservar, y los vecinos fundadores conservan ese número de por vida.`,
+    en: `Cleaning is sized by interior square feet and bathroom count. Lawn by mowable turf; car care by vehicle size.\n\nYour monthly price is shown before you reserve. Founding neighbors lock their rate for life.`,
+    es: `La limpieza se calcula según los pies cuadrados interiores y la cantidad de baños. La grama según el área a cortar; el carro según su tamaño.\n\nVes tu precio mensual antes de reservar. Los vecinos fundadores fijan su tarifa de por vida.`,
   },
   {
     post_number: 4,
@@ -290,8 +290,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 10,
     title: "Flat price by size",
     zip: "33156",
-    en: `No square-footage math. Three sizes, one flat price per visit, shown before you book.`,
-    es: `Sin cálculos de pies cuadrados. Tres tamaños, un precio fijo por visita, visible antes de reservar.`,
+    en: `Cleaning is sized by interior square feet and bathroom count. Lawn by mowable turf; car care by vehicle size. Your monthly price is shown before you reserve.`,
+    es: `La limpieza se calcula según los pies cuadrados interiores y la cantidad de baños. La grama según el área a cortar; el carro según su tamaño. Ves tu precio mensual antes de reservar.`,
   },
   {
     post_number: 11,
@@ -374,8 +374,8 @@ export const META_POSTS: CampaignPost[] = [
     post_number: 22,
     title: "Bigger home, still flat",
     zip: "33156",
-    en: `Size 2 home? $189 a visit. Size 3? $279. Still flat, still shown up front.`,
-    es: `¿Hogar tamaño 2? $189 por visita. ¿Tamaño 3? $279. Igual fijo y visible desde el inicio.`,
+    en: `Monthly cleaning: Size 2 is $189 a month; Size 3 is $279 a month, with one cleaning visit each month. Size is based on interior square feet and bathroom count.`,
+    es: `Limpieza mensual: tamaño 2 por $189 al mes; tamaño 3 por $279 al mes, con una visita de limpieza cada mes. El tamaño depende de los pies cuadrados interiores y la cantidad de baños.`,
   },
   {
     post_number: 23,

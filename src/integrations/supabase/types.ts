@@ -10236,7 +10236,9 @@ export type Database = {
           frequency: Database["public"]["Enums"]["subscription_frequency"]
           has_electrical_outlet: boolean | null
           has_water_spigot: boolean | null
+          heard_from: string | null
           id: string
+          is_test: boolean
           jobber_client_id: string | null
           jobber_job_ids: Json
           latest_invoice_attempt_count: number | null
@@ -10294,7 +10296,9 @@ export type Database = {
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           has_electrical_outlet?: boolean | null
           has_water_spigot?: boolean | null
+          heard_from?: string | null
           id?: string
+          is_test?: boolean
           jobber_client_id?: string | null
           jobber_job_ids?: Json
           latest_invoice_attempt_count?: number | null
@@ -10352,7 +10356,9 @@ export type Database = {
           frequency?: Database["public"]["Enums"]["subscription_frequency"]
           has_electrical_outlet?: boolean | null
           has_water_spigot?: boolean | null
+          heard_from?: string | null
           id?: string
+          is_test?: boolean
           jobber_client_id?: string | null
           jobber_job_ids?: Json
           latest_invoice_attempt_count?: number | null
@@ -11334,6 +11340,7 @@ export type Database = {
         Args: { _applicant_id: string; _subscription_id: string }
         Returns: undefined
       }
+      admin_booking_attribution: { Args: never; Returns: Json }
       admin_bulk_rate_card_migration: {
         Args: { _reason: string; _target: number }
         Returns: {

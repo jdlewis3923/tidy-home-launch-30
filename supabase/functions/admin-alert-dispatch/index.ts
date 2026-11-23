@@ -166,7 +166,7 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
   const numbers = [`${reservations} reservations`, `${scans} QR scans`, `$${(revenue / 100).toFixed(0)} revenue`, `${visitsDone} visits done`];
   const anyNumbers = reservations + scans + revenue + visitsDone > 0;
 
-  const sections: { title: string; red?: boolean; items: { text: string; url?: string; label?: string }[] }[] = [];
+  const sections: { title: string; red?: boolean; items: { text: string; url?: string; label?: string; copyReady?: boolean }[] }[] = [];
   const {data:estateReservations,error:estateError}=await admin.from('reservations').select('id,first_name,last_name,zip,cleaning_team_id,cleaning_selected_size,cleaning_verified_size').eq('is_test_row',false).in('status',['reserved','invited']).contains('services',['cleaning']);
   if(estateError)throw new Error(estateError.message);
   const needsTeam=[];
@@ -245,16 +245,17 @@ async function digest(admin: SupabaseClient, edition: 'today' | 'tonight', force
     }] });
     sections.push({ title: 'Unresolved urgent', red: true, items: urgentOpen.map(item) });
     // Nextdoor can't be auto-posted: today's post, with its copy, image and a Mark posted button.
-    const { data: nd } = await admin.from('social_launch_posts').select('id, caption, template_copy, image_url, scheduled_for, status')
-      .eq('channel', 'nextdoor').is('archived_at', null).is('posted_at', null)
+    const { data: nd, error: ndError } = await admin.from('social_launch_posts').select('id, caption, template_copy, image_url, scheduled_for, status')
+      .eq('channel', 'nextdoor').eq('is_test', false).eq('status', 'scheduled').is('archived_at', null).is('posted_at', null)
       .gte('scheduled_for', etMidnightUtc(today)).lt('scheduled_for', etMidnightUtc(addDays(today, 1)));
+    if (ndError) throw new Error(ndError.message);
     const lc = await loadLaunchConfig(admin as never);
     const anchors = { launch: lc.cleaning?.first_visit_date ?? null, conversion: lc.cleaning?.conversion_date ?? null, carLaunch: lc.car?.first_visit_date ?? null, hangerDrop1: (lc.global?.hanger_drops ?? []).map((d) => d.start).sort()[0] ?? null };
     sections.push({ title: 'Post to Nextdoor today (6 PM)', items: (nd ?? []).map((p) => {
       const copy = renderTemplate((p.template_copy ?? p.caption ?? '').trim(), anchors, today);
       return {
       text: copy ? `${copy}${p.image_url ? `\n\nImage: ${p.image_url}` : ''}` : 'Needs a post — no copy written for this slot yet',
-      url: `${SITE}/admin/social?post=${p.id}`, label: 'Copy + Mark posted',
+      url: `${SITE}/admin/social?post=${p.id}`, label: 'Copy + Mark posted', copyReady: true,
     }; }) });
     // Car care opens on demand: running count until the threshold, then the advance line.
     const { data: car } = await admin.rpc('car_launch_status');
